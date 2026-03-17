@@ -14,6 +14,8 @@ import {
   Menu, X, ChevronRight,
 } from "lucide-react";
 
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+
 const NAV_ITEMS = [
   { label: "Home", icon: Home, path: "/", group: "Discover" },
   { label: "Explore", icon: Compass, path: "/explore", group: "Discover" },
@@ -87,11 +89,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {/* Logo */}
           <div className={`flex items-center gap-3 px-4 py-5 border-b border-white/[0.07] ${!sidebarOpen && "justify-center px-0"}`}>
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer"
-              style={{ background: "linear-gradient(135deg, #E8C547, #7C3AED)" }}
+              className="w-9 h-9 flex items-center justify-center flex-shrink-0 cursor-pointer"
               onClick={() => setSidebarOpen(o => !o)}
             >
-              <span className="text-sm font-bold text-black">LN</span>
+              <img src={LOGO_URL} alt="Living Nexus" className="w-full h-full object-contain" />
             </div>
             {sidebarOpen && (
               <span
@@ -182,7 +183,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <span className="font-display text-base gold-shimmer flex-1">Living Nexus</span>
+          <div className="flex items-center gap-2 flex-1">
+            <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
+            <span className="font-display text-base gold-shimmer">Living Nexus</span>
+          </div>
           <button
             onClick={() => setQrOpen(o => !o)}
             className="p-2 rounded-lg text-white/40 hover:text-[#E8C547] transition-all"
