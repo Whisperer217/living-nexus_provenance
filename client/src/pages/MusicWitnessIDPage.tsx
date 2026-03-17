@@ -525,7 +525,7 @@ export default function MusicWitnessIDPage() {
         <Section title="CREATOR IDENTITY" icon={<Shield size={16} />}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Creator Name / Artist Handle *" required>
-              <Input value={meta.creatorName} onChange={v => setField("creatorName", v)} placeholder="Lt. Col. Daniel O'Neill" />
+              <Input value={meta.creatorName} onChange={v => setField("creatorName", v)} placeholder="Your name or alias" />
             </Field>
             <Field label="BMI Member Number">
               <Input value={meta.bmiMemberNumber} onChange={v => setField("bmiMemberNumber", v)} placeholder="Optional" />
@@ -543,7 +543,7 @@ export default function MusicWitnessIDPage() {
         <Section title="SONG METADATA" icon={<Music size={16} />}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Song Title *" required>
-              <Input value={meta.songTitle} onChange={v => setField("songTitle", v)} placeholder="The Hidden Deployment (Theme)" />
+              <Input value={meta.songTitle} onChange={v => setField("songTitle", v)} placeholder="Your track title" />
             </Field>
             <Field label="Album / Project Name">
               <Input value={meta.albumName} onChange={v => setField("albumName", v)} placeholder="Optional" />

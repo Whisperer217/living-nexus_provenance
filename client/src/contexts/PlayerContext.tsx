@@ -30,17 +30,18 @@ export interface Track {
   tips?: number;
   comments?: Comment[];
   shareCount?: number;
+  witnessId?: string;
 }
 
 export const DEMO_TRACKS: Track[] = [
-  { id: "d1", title: "Celestial Drift", artist: "Nova Aether", genre: "Ambient", emoji: "🌌", bg: "linear-gradient(135deg,#1a0a2e,#0a1a2e)", dur: "3:42", plays: 12400 },
-  { id: "d2", title: "Golden Hour Protocol", artist: "Kai Solaris", genre: "Electronic", emoji: "✨", bg: "linear-gradient(135deg,#2e1a0a,#1a2e0a)", dur: "4:18", plays: 8700 },
-  { id: "d3", title: "Midnight Sermon", artist: "Mia Voss", genre: "Lo-fi", emoji: "🕯️", bg: "linear-gradient(135deg,#0a0a2e,#1a0a1a)", dur: "2:55", plays: 21300 },
-  { id: "d4", title: "Sacred Frequencies", artist: "Orion Black", genre: "Ambient", emoji: "🔮", bg: "linear-gradient(135deg,#1a0a2e,#2e0a1a)", dur: "5:01", plays: 6200 },
-  { id: "d5", title: "Throne of Bass", artist: "Rex Vidal", genre: "Trap", emoji: "👑", bg: "linear-gradient(135deg,#2e1a00,#1a0a00)", dur: "3:28", plays: 34100 },
-  { id: "d6", title: "Violet Prophecy", artist: "Luna Crest", genre: "R&B", emoji: "💜", bg: "linear-gradient(135deg,#1a0a2e,#0a1a2e)", dur: "4:07", plays: 9800 },
-  { id: "d7", title: "Architect of Sound", artist: "Zephyr Lux", genre: "House", emoji: "🏛️", bg: "linear-gradient(135deg,#0a2e1a,#0a1a2e)", dur: "6:22", plays: 15600 },
-  { id: "d8", title: "Divine Static", artist: "Ash Meridian", genre: "Indie", emoji: "⚡", bg: "linear-gradient(135deg,#2e2e0a,#1a0a0a)", dur: "3:14", plays: 7300 },
+  { id: "d1", title: "Celestial Drift", artist: "Living Nexus Artist", genre: "Ambient", emoji: "🌌", bg: "linear-gradient(135deg,#1a0a2e,#0a1a2e)", dur: "3:42", plays: 0 },
+  { id: "d2", title: "Golden Hour Protocol", artist: "Living Nexus Artist", genre: "Electronic", emoji: "✨", bg: "linear-gradient(135deg,#2e1a0a,#1a2e0a)", dur: "4:18", plays: 0 },
+  { id: "d3", title: "Midnight Sermon", artist: "Living Nexus Artist", genre: "Lo-fi", emoji: "🕯️", bg: "linear-gradient(135deg,#0a0a2e,#1a0a1a)", dur: "2:55", plays: 0 },
+  { id: "d4", title: "Sacred Frequencies", artist: "Living Nexus Artist", genre: "Ambient", emoji: "🔮", bg: "linear-gradient(135deg,#1a0a2e,#2e0a1a)", dur: "5:01", plays: 0 },
+  { id: "d5", title: "Throne of Bass", artist: "Living Nexus Artist", genre: "Trap", emoji: "👑", bg: "linear-gradient(135deg,#2e1a00,#1a0a00)", dur: "3:28", plays: 0 },
+  { id: "d6", title: "Violet Prophecy", artist: "Living Nexus Artist", genre: "R&B", emoji: "💜", bg: "linear-gradient(135deg,#1a0a2e,#0a1a2e)", dur: "4:07", plays: 0 },
+  { id: "d7", title: "Architect of Sound", artist: "Living Nexus Artist", genre: "House", emoji: "🏛️", bg: "linear-gradient(135deg,#0a2e1a,#0a1a2e)", dur: "6:22", plays: 0 },
+  { id: "d8", title: "Divine Static", artist: "Living Nexus Artist", genre: "Indie", emoji: "⚡", bg: "linear-gradient(135deg,#2e2e0a,#1a0a0a)", dur: "3:14", plays: 0 },
 ];
 
 export const DEMO_ROOMS = [
@@ -117,9 +118,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     duration: 0,
     liked: new Set(),
     tracks: [],
-    profileName: "Alex Rivera",
-    profileBio: "Creating divine soundscapes from the cosmos. Music is the language of the soul.",
-    profileLocation: "Los Angeles, CA",
+    profileName: "",
+    profileBio: "",
+    profileLocation: "",
     profileWebsite: "",
     profileSocials: { twitter: "", instagram: "", youtube: "", soundcloud: "" },
     profileAvatar: null,

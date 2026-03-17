@@ -11,7 +11,7 @@ import PlayerBar from "@/components/player/PlayerBar";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import {
   Home, Compass, Users, User, Upload, Heart,
-  Menu, X, ChevronRight, Shield,
+  Menu, X, ChevronRight,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -23,7 +23,6 @@ const NAV_ITEMS = [
   { label: "My Profile", icon: User, path: "/profile", group: "My Music" },
   { label: "Upload", icon: Upload, path: "/upload", group: "My Music" },
   { label: "Liked Songs", icon: Heart, path: "/liked", group: "My Music" },
-  { label: "Witness ID", icon: Shield, path: "/music-witness-id", group: "Provenance", badge: "NEW" },
 ];
 
 const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
@@ -45,15 +44,11 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
   },
   "/upload": {
     title: "Upload",
-    points: ["Audio file", "Artwork / video", "Track metadata", "Publish"],
+    points: ["Audio + artwork", "Track metadata", "Witness ID provenance", "Publish"],
   },
   "/liked": {
     title: "Liked Songs",
     points: ["Saved tracks", "Quick play", "Heart to save", "Your collection"],
-  },
-  "/music-witness-id": {
-    title: "Witness ID",
-    points: ["Cryptographic provenance", "Harmonic signature", "AI consent flag", "Download certificate"],
   },
 };
 
@@ -69,7 +64,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     setMobileMenuOpen(false);
   }, [navigate]);
 
-  const groups = ["Discover", "My Music", "Provenance"];
+  const groups = ["Discover", "My Music"];
   const pageSummary = PAGE_SUMMARIES[location] || PAGE_SUMMARIES["/"];
 
   return (
