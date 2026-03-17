@@ -9,21 +9,34 @@ import TrackCard from "@/components/TrackCard";
 import TipModal from "@/components/TipModal";
 import { Search } from "lucide-react";
 
+const GENRE_CARDS = [
+  { label: "All",        icon: null,    color: "#A78BFA" },
+  { label: "Ambient",    icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-book_038e31c9.png",      color: "#7dd3fc" },
+  { label: "Gospel",    icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-cross_39407625.png",     color: "#fbbf24" },
+  { label: "Jazz",      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-lyre_40247746.png",      color: "#c4b5fd" },
+  { label: "Electronic",icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-fire-lyre_42893087.png", color: "#f97316" },
+  { label: "Hip-Hop",   icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-eye_0e10b572.png",      color: "#fb923c" },
+  { label: "Rock",      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#f87171" },
+  { label: "R&B",       icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-feather_40dcaa6d.png",   color: "#a78bfa" },
+];
+
 const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp";
 
 export default function ExplorePage() {
   const { allTracks } = usePlayer();
   const [query, setQuery] = useState("");
+  const [activeGenre, setActiveGenre] = useState("All");
   const [tipTarget, setTipTarget] = useState<number | null>(null);
 
   const tracks = allTracks();
-  const filtered = query.trim()
-    ? tracks.filter(t =>
-        t.title.toLowerCase().includes(query.toLowerCase()) ||
-        t.artist.toLowerCase().includes(query.toLowerCase()) ||
-        t.genre.toLowerCase().includes(query.toLowerCase())
-      )
-    : tracks;
+  const filtered = tracks.filter(t => {
+    const matchesGenre = activeGenre === "All" || t.genre === activeGenre;
+    const matchesQuery = !query.trim() ||
+      t.title.toLowerCase().includes(query.toLowerCase()) ||
+      t.artist.toLowerCase().includes(query.toLowerCase()) ||
+      t.genre.toLowerCase().includes(query.toLowerCase());
+    return matchesGenre && matchesQuery;
+  });
 
   const tipTrack = tipTarget !== null ? tracks[tipTarget] : null;
 
@@ -53,6 +66,45 @@ export default function ExplorePage() {
               focus:border-[#A78BFA]/50 transition-colors placeholder:text-white/20
               max-w-[480px]"
           />
+        </div>
+
+        {/* Genre icon cards */}
+        <div className="mb-6">
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+            {GENRE_CARDS.map(g => (
+              <button
+                key={g.label}
+                onClick={() => setActiveGenre(g.label)}
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
+                  ${activeGenre === g.label
+                    ? "border-[#E8C547]/40 bg-[#E8C547]/[0.07]"
+                    : "border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.14] hover:bg-white/[0.04]"
+                  }`}
+              >
+                {g.icon ? (
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <img
+                      src={g.icon}
+                      alt={g.label}
+                      className={`w-full h-full object-contain transition-all duration-200
+                        ${activeGenre === g.label ? "scale-110" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"}`}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 flex items-center justify-center rounded-lg"
+                    style={{ background: "linear-gradient(135deg, #E8C547, #7C3AED)" }}>
+                    <span className="text-[11px] font-heading font-bold text-black">ALL</span>
+                  </div>
+                )}
+                <span
+                  className="text-[10px] font-body truncate w-full text-center transition-colors"
+                  style={{ color: activeGenre === g.label ? g.color : "rgba(255,255,255,0.4)" }}
+                >
+                  {g.label}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Results count */}

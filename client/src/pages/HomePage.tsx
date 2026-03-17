@@ -9,7 +9,18 @@ import TrackCard from "@/components/TrackCard";
 import TipModal from "@/components/TipModal";
 import { Sparkles } from "lucide-react";
 
-const GENRES = ["All", "Electronic", "Lo-fi", "Ambient", "Hip-Hop", "R&B", "House", "Trap", "Indie", "Jazz"];
+const GENRE_CARDS = [
+  { label: "All",       icon: null,    color: "#A78BFA" },
+  { label: "Ambient",   icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-book_038e31c9.png",      color: "#7dd3fc" },
+  { label: "Gospel",   icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-cross_39407625.png",     color: "#fbbf24" },
+  { label: "Jazz",     icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-lyre_40247746.png",      color: "#c4b5fd" },
+  { label: "Electronic",icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-fire-lyre_42893087.png", color: "#f97316" },
+  { label: "Hip-Hop",  icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-eye_0e10b572.png",      color: "#fb923c" },
+  { label: "Rock",     icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#f87171" },
+  { label: "R&B",      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-feather_40dcaa6d.png",   color: "#a78bfa" },
+];
+
+const GENRES = GENRE_CARDS.map(g => g.label);
 
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-hero-76TJneE6NXajYSDJWHEXPg.webp";
 
@@ -51,21 +62,44 @@ export default function HomePage() {
       </div>
 
       <div className="px-6 py-5">
-        {/* ── Genre filters ── */}
-        <div className="flex gap-2 flex-wrap mb-6">
-          {GENRES.map(g => (
-            <button
-              key={g}
-              onClick={() => setActiveGenre(g)}
-              className={`px-3.5 py-1.5 rounded-full text-[12px] font-body transition-all border
-                ${activeGenre === g
-                  ? "bg-[#A78BFA]/15 border-[#A78BFA] text-[#A78BFA]"
-                  : "bg-[oklch(0.14_0.013_280)] border-white/[0.08] text-white/40 hover:border-white/20 hover:text-white/70"
-                }`}
-            >
-              {g}
-            </button>
-          ))}
+        {/* ── Genre icon cards ── */}
+        <div className="mb-7">
+          <h2 className="font-heading text-[13px] tracking-[0.14em] uppercase text-white/30 mb-3">Browse Genres</h2>
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+            {GENRE_CARDS.map(g => (
+              <button
+                key={g.label}
+                onClick={() => setActiveGenre(g.label)}
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
+                  ${activeGenre === g.label
+                    ? "border-[#E8C547]/40 bg-[#E8C547]/[0.07]"
+                    : "border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.14] hover:bg-white/[0.04]"
+                  }`}
+              >
+                {g.icon ? (
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <img
+                      src={g.icon}
+                      alt={g.label}
+                      className={`w-full h-full object-contain transition-all duration-200
+                        ${activeGenre === g.label ? "scale-110 drop-shadow-lg" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"}`}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 flex items-center justify-center rounded-lg"
+                    style={{ background: "linear-gradient(135deg, #E8C547, #7C3AED)" }}>
+                    <span className="text-[11px] font-heading font-bold text-black">ALL</span>
+                  </div>
+                )}
+                <span
+                  className="text-[10px] font-body truncate w-full text-center transition-colors"
+                  style={{ color: activeGenre === g.label ? g.color : "rgba(255,255,255,0.4)" }}
+                >
+                  {g.label}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* ── Featured section ── */}
