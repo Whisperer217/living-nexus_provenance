@@ -89,6 +89,7 @@ interface PlayerContextValue {
   seek: (t: number) => void;
   toggleLike: (id: string) => void;
   addTrack: (t: Track) => void;
+  addAndPlay: (t: Track) => void;
   setProfileName: (n: string) => void;
   setProfileBio: (b: string) => void;
   setProfileLocation: (l: string) => void;
@@ -266,6 +267,22 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setState(s => ({ ...s, tracks: [t, ...s.tracks] }));
   }, []);
 
+  // Add a track (or replace existing) and immediately play it
+  const addAndPlay = useCallback((t: Track) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    setState(s => {
+      const filtered = s.tracks.filter(tr => tr.id !== t.id);
+      const newTracks = [t, ...filtered];
+      const newIdx = DEMO_TRACKS.length; // first user-track slot
+      if (t.audioUrl) {
+        audio.src = t.audioUrl;
+        audio.play().catch(() => {});
+      }
+      return { ...s, tracks: newTracks, currentIdx: newIdx, isPlaying: !!t.audioUrl };
+    });
+  }, []);
+
   const setProfileName = useCallback((n: string) => setState(s => ({ ...s, profileName: n })), []);
   const setProfileBio = useCallback((b: string) => setState(s => ({ ...s, profileBio: b })), []);
   const setProfileLocation = useCallback((l: string) => setState(s => ({ ...s, profileLocation: l })), []);
@@ -299,7 +316,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       state, audioRef, allTracks,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-      toggleLike, addTrack,
+      toggleLike, addTrack, addAndPlay,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
       setProfileAvatar, setProfileBanner,
       addTip, addTrackTip, addComment, incrementShare, setRoom,

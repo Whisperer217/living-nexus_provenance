@@ -7,11 +7,13 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 import PlayerBar from "@/components/player/PlayerBar";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
-  Menu, X, ChevronRight,
+  Menu, X, ChevronRight, LogIn,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -60,6 +62,7 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { state } = usePlayer();
+  const { user, loading: authLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
@@ -154,28 +157,48 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             ))}
           </nav>
 
-          {/* Profile footer */}
+          {/* Profile footer / Login CTA */}
           <div className={`p-3 border-t border-white/[0.07] ${!sidebarOpen && "flex justify-center"}`}>
-            <button
-              onClick={() => goTo("/profile")}
-              className={`flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.06] transition-all w-full ${!sidebarOpen && "justify-center w-auto"}`}
-            >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 overflow-hidden"
-                style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}
+            {!authLoading && !user ? (
+              // Unauthenticated: show login CTA
+              <a
+                href={getLoginUrl()}
+                className={`flex items-center gap-3 p-2.5 rounded-lg transition-all w-full ${!sidebarOpen ? "justify-center w-auto" : ""}`}
+                style={{ background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
               >
-                {state.profileAvatar
-                  ? <img src={state.profileAvatar} alt="avatar" className="w-full h-full object-cover rounded-full" />
-                  : state.profileName.charAt(0)
-                }
-              </div>
-              {sidebarOpen && (
-                <div className="min-w-0 flex-1 text-left">
-                  <div className="text-[13px] font-medium text-white/90 truncate">{state.profileName}</div>
-                  <div className="text-[11px] text-white/35">Artist</div>
+                <LogIn size={16} style={{ color: "oklch(0.75 0.18 85)", flexShrink: 0 }} />
+                {sidebarOpen && (
+                  <div className="min-w-0 flex-1 text-left">
+                    <div className="text-[13px] font-medium" style={{ color: "oklch(0.85 0.1 85)" }}>Sign In</div>
+                    <div className="text-[11px]" style={{ color: "oklch(0.6 0.04 280)" }}>Upload &amp; earn tips</div>
+                  </div>
+                )}
+              </a>
+            ) : (
+              // Authenticated: show profile button
+              <button
+                onClick={() => goTo("/profile")}
+                className={`flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.06] transition-all w-full ${!sidebarOpen && "justify-center w-auto"}`}
+              >
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 overflow-hidden"
+                  style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}
+                >
+                  {user?.profilePhotoUrl
+                    ? <img src={user.profilePhotoUrl} alt="avatar" className="w-full h-full object-cover rounded-full" />
+                    : state.profileAvatar
+                    ? <img src={state.profileAvatar} alt="avatar" className="w-full h-full object-cover rounded-full" />
+                    : (user?.name || state.profileName || "?").charAt(0).toUpperCase()
+                  }
                 </div>
-              )}
-            </button>
+                {sidebarOpen && (
+                  <div className="min-w-0 flex-1 text-left">
+                    <div className="text-[13px] font-medium text-white/90 truncate">{user?.name || state.profileName || "Artist"}</div>
+                    <div className="text-[11px] text-white/35">Artist</div>
+                  </div>
+                )}
+              </button>
+            )}
           </div>
         </aside>
 

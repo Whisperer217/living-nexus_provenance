@@ -8,6 +8,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -208,9 +209,28 @@ export default function SongDetailPage() {
 
   const tipsEnabled = creator?.stripeAccountStatus === "enabled";
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const pageTitle = `${song.title} — Living Nexus`;
+  const pageDesc = song.genre
+    ? `${song.genre} track by ${creator?.artistHandle || creator?.name || "Unknown Artist"}${song.witnessId ? " · Witness ID protected" : ""}`
+    : `Listen on Living Nexus`;
+  const pageImage = song.coverArtUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+  const pageUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
     <div className="min-h-screen pb-8" style={{ background: "oklch(0.08 0.01 280)" }}>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDesc} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:image" content={pageImage} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="music.song" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDesc} />
+        <meta name="twitter:image" content={pageImage} />
+      </Helmet>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
         <Link href={creator ? `/creator/${creator.id}` : "/"}>
           <button className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity mb-6" style={{ color: "oklch(0.55 0.04 280)" }}>

@@ -42,3 +42,14 @@
 - [x] Add updateSongLyrics and getRelatedSongs db helpers
 - [x] Rename sidebar "Liked Songs" to "Archive" with Library icon
 - [x] TypeScript: 0 errors | Vitest: 1/1 passing
+
+## Phase 6: Audit Fixes
+- [x] Fix SPA routing — already correctly implemented (Vite catch-all + server fallback)
+- [x] Wire audio player on Explore/Discover page — addAndPlay() from PlayerContext, global player bar activates
+- [x] Fix creator page duplicate Featured Songs / Songs sections — Featured=top 8 grid, All Songs=full compact list
+- [x] Add login/signup CTA visible to unauthenticated users — sidebar footer shows Sign In button with gold styling
+- [x] Add dynamic OG meta tags to /song/:id and /creator/:id pages (og:title, og:image, og:description, twitter:card)
+- [x] Listen Together route confirmed working — /together route registered, page fully built with rooms + chat
+- [x] CreatorProfilePage handlePlay now uses global addAndPlay() instead of local Audio object
+- [x] HelmetProvider added to main.tsx for OG meta tag support
+- [x] TypeScript: 0 errors | Vitest: 1/1 passing

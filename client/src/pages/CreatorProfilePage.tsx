@@ -6,6 +6,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -230,9 +231,8 @@ export default function CreatorProfilePage() {
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
-  const [playingId, setPlayingId] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { addTrack } = usePlayer();
+  const { addAndPlay, state: playerState } = usePlayer();
+  const playingId = playerState.isPlaying && playerState.tracks[0]?.id ? parseInt(playerState.tracks[0].id) : null;
 
   const { data, isLoading, refetch } = trpc.profile.getCreator.useQuery(
     { creatorId },
@@ -257,19 +257,7 @@ export default function CreatorProfilePage() {
   const playMutation = trpc.songs.play.useMutation();
 
   const handlePlay = (song: any) => {
-    if (playingId === song.id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
-      return;
-    }
-    audioRef.current?.pause();
-    const audio = new Audio(song.fileUrl);
-    audioRef.current = audio;
-    audio.play().catch(() => toast.error("Could not play audio"));
-    audio.onended = () => setPlayingId(null);
-    setPlayingId(song.id);
-    playMutation.mutate({ songId: song.id });
-    addTrack({
+    addAndPlay({
       id: String(song.id),
       title: song.title,
       artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
@@ -277,6 +265,7 @@ export default function CreatorProfilePage() {
       artUrl: song.coverArtUrl || undefined,
       audioUrl: song.fileUrl || undefined,
     });
+    playMutation.mutate({ songId: song.id });
   };
 
   const handleTip = () => {
@@ -314,8 +303,28 @@ export default function CreatorProfilePage() {
   const totalTips = songs.reduce((acc: number, s: any) => acc + (s.tipCount || 0), 0);
   const tipsEnabled = creator.stripeAccountStatus === "enabled";
 
+  const profileTitle = `${creator.artistHandle || creator.name || "Artist"} — Living Nexus`;
+  const profileDesc = creator.bio
+    ? creator.bio.slice(0, 160)
+    : `${songs.length} track${songs.length !== 1 ? "s" : ""} on Living Nexus`;
+  const profileImage = creator.profilePhotoUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+  const profileUrl = typeof window !== "undefined" ? window.location.href : "";
+
   return (
     <div className="min-h-screen" style={{ background: "oklch(0.08 0.01 280)" }}>
+      <Helmet>
+        <title>{profileTitle}</title>
+        <meta name="description" content={profileDesc} />
+        <meta property="og:title" content={profileTitle} />
+        <meta property="og:description" content={profileDesc} />
+        <meta property="og:image" content={profileImage} />
+        <meta property="og:url" content={profileUrl} />
+        <meta property="og:type" content="profile" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={profileTitle} />
+        <meta name="twitter:description" content={profileDesc} />
+        <meta name="twitter:image" content={profileImage} />
+      </Helmet>
       {/* ── Banner ── */}
       <div className="relative w-full" style={{ height: "240px" }}>
         {creator.bannerUrl ? (
@@ -474,11 +483,11 @@ export default function CreatorProfilePage() {
           </section>
         )}
 
-        {/* ── Full Song List ── */}
+        {/* ── Full Song List (all songs in compact row format) ── */}
         {songs.length > 0 && (
           <section className="py-4 pb-32">
             <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
-              Songs
+              All Songs
             </h2>
             <div className="space-y-0.5">
               {songs.map((song: any, idx: number) => (

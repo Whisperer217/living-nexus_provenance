@@ -5,8 +5,9 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Play, Search, Music, Users, Shield, ChevronRight } from "lucide-react";
+import { Play, Pause, Search, Music, Users, Shield, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { usePlayer } from "@/contexts/PlayerContext";
 
 const GENRE_ICONS: Record<string, string> = {
   "Gospel": "https://cdn.manus.space/icons/icon-cross.png",
@@ -21,8 +22,7 @@ const GENRE_ICONS: Record<string, string> = {
 export default function DiscoverPage() {
   const [search, setSearch] = useState("");
   const [activeGenre, setActiveGenre] = useState<string | undefined>();
-  const [playingId, setPlayingId] = useState<number | null>(null);
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const { addAndPlay, state: playerState } = usePlayer();
 
   const { data: songs, isLoading: songsLoading } = trpc.songs.discover.useQuery(
     { genre: activeGenre, search: search || undefined, limit: 24 },
@@ -33,16 +33,15 @@ export default function DiscoverPage() {
 
   const handlePlay = (song: any) => {
     if (!song.song.fileUrl) { toast.error("No audio file available"); return; }
-    if (playingId === song.song.id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
-      return;
-    }
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
-    const audio = new Audio(song.song.fileUrl);
-    audioRef.current = audio;
-    audio.play().catch(() => toast.error("Could not play audio"));
-    setPlayingId(song.song.id);
+    addAndPlay({
+      id: String(song.song.id),
+      title: song.song.title,
+      artist: song.creator?.artistHandle || song.creator?.name || "Unknown",
+      genre: song.song.genre || "",
+      audioUrl: song.song.fileUrl,
+      artUrl: song.song.coverArtUrl || undefined,
+      witnessId: song.song.witnessId || undefined,
+    });
     playMutation.mutate({ songId: song.song.id });
   };
 
@@ -159,7 +158,7 @@ export default function DiscoverPage() {
                       style={{ background: "oklch(0 0 0 / 0.5)" }}
                     >
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "oklch(0.75 0.18 85)" }}>
-                        {playingId === item.song.id ? <span style={{ color: "oklch(0.08 0.015 280)", fontWeight: 900, fontSize: 18 }}>■</span> : <Play className="w-5 h-5 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} />}
+                        {playerState.isPlaying && playerState.tracks[playerState.currentIdx - 8]?.id === String(item.song.id) ? <Pause className="w-5 h-5 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} /> : <Play className="w-5 h-5 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} />}
                       </div>
                     </button>
                     {item.song.witnessId && (
