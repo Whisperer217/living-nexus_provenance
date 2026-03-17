@@ -22,7 +22,7 @@ const GENRE_ICONS: Record<string, string> = {
 export default function DiscoverPage() {
   const [search, setSearch] = useState("");
   const [activeGenre, setActiveGenre] = useState<string | undefined>();
-  const { addAndPlay, state: playerState } = usePlayer();
+  const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
 
   const { data: songs, isLoading: songsLoading } = trpc.songs.discover.useQuery(
     { genre: activeGenre, search: search || undefined, limit: 24 },
@@ -142,8 +142,20 @@ export default function DiscoverPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {songs.map((item) => (
-                <div key={item.song.id} className="group relative rounded-xl overflow-hidden transition-transform hover:scale-[1.02]" style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+              {songs.map((item) => {
+                const isActive = currentTrackId === String(item.song.id);
+                return (
+                <div
+                  key={item.song.id}
+                  onClick={() => handlePlay(item)}
+                  className="group relative rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02]"
+                  style={{
+                    background: "oklch(0.12 0.015 280)",
+                    border: `1px solid ${isActive ? "oklch(0.75 0.18 85 / 0.8)" : "oklch(0.2 0.015 280)"}`,
+                    outline: isActive ? "2px solid oklch(0.75 0.18 85 / 0.6)" : "none",
+                    outlineOffset: "1px"
+                  }}
+                >
                   <div className="relative aspect-square" style={{ background: item.song.coverArtUrl ? undefined : "linear-gradient(135deg, oklch(0.15 0.03 280), oklch(0.20 0.05 300))" }}>
                     {item.song.coverArtUrl ? (
                       <img src={item.song.coverArtUrl} alt={item.song.title} className="w-full h-full object-cover" />
@@ -152,15 +164,32 @@ export default function DiscoverPage() {
                         <Music className="w-10 h-10 opacity-30" style={{ color: "oklch(0.75 0.18 85)" }} />
                       </div>
                     )}
-                    <button
-                      onClick={() => handlePlay(item)}
-                      className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: "oklch(0 0 0 / 0.5)" }}
-                    >
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "oklch(0.75 0.18 85)" }}>
-                        {playerState.isPlaying && playerState.tracks[playerState.currentIdx - 8]?.id === String(item.song.id) ? <Pause className="w-5 h-5 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} /> : <Play className="w-5 h-5 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} />}
-                      </div>
-                    </button>
+                    {/* Dark overlay on hover */}
+                    <div className={`absolute inset-0 transition-opacity duration-200 bg-black/50 ${
+                      isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`} />
+                    {/* Play button / animated waveform */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {isActive && playerState.isPlaying ? (
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "oklch(0.75 0.18 85)" }}>
+                          <div className="flex items-end gap-[2px] h-5">
+                            {[1,2,3,4].map(i => (
+                              <div key={i} className="w-[3px] rounded-full" style={{
+                                background: "oklch(0.08 0.015 280)",
+                                height: "40%",
+                                animation: `waveBar 0.7s ease-in-out ${i * 0.12}s infinite alternate`
+                              }} />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-opacity ${
+                          isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        }`} style={{ background: "oklch(0.75 0.18 85)" }}>
+                          <Play className="w-5 h-5 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} />
+                        </div>
+                      )}
+                    </div>
                     {item.song.witnessId && (
                       <div className="absolute top-2 right-2">
                         <Badge className="text-xs font-mono px-1 py-0" style={{ background: "oklch(0.65 0.2 300 / 0.9)", color: "white", fontSize: "9px" }}>WID</Badge>
@@ -177,7 +206,8 @@ export default function DiscoverPage() {
                     {item.song.genre && <Badge variant="outline" className="mt-1 text-xs" style={{ borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.6 0.04 280)" }}>{item.song.genre}</Badge>}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

@@ -25,7 +25,7 @@ const GENRE_CARDS = [
 const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp";
 
 export default function ExplorePage() {
-  const { addAndPlay, state: playerState } = usePlayer();
+  const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
 
@@ -148,8 +148,7 @@ export default function ExplorePage() {
             {songs.map((item: any) => {
               const song = item.song;
               const creator = item.creator;
-              const isActive = playerState.currentIdx !== -1 &&
-                playerState.tracks?.[playerState.currentIdx]?.id === String(song.id);
+              const isActive = currentTrackId === String(song.id);
               return (
                 <div
                   key={song.id}
@@ -175,13 +174,24 @@ export default function ExplorePage() {
                       bg-gradient-to-b from-transparent via-transparent to-black/70
                       ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                     />
-                    {/* Play button */}
-                    <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
-                      transition-all duration-200 z-10
-                      ${isActive ? "opacity-100 bg-[#E8C547]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
-                    >
-                      <Play size={14} fill="currentColor" className="text-black ml-0.5" />
-                    </div>
+                    {/* Play button / Active waveform */}
+                    {isActive && playerState.isPlaying ? (
+                      <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center z-10 bg-[#E8C547]">
+                        <div className="flex items-end gap-[2px] h-4">
+                          {[1,2,3,4].map(i => (
+                            <div key={i} className="w-[3px] rounded-full bg-black"
+                              style={{ height: "40%", animation: `waveBar 0.8s ease-in-out ${i * 0.15}s infinite alternate` }} />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
+                        transition-all duration-200 z-10
+                        ${isActive ? "opacity-100 bg-[#E8C547]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+                      >
+                        <Play size={14} fill="currentColor" className="text-black ml-0.5" />
+                      </div>
+                    )}
                     {/* Witness badge */}
                     {song.witnessId && (
                       <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded

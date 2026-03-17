@@ -78,6 +78,7 @@ interface PlayerContextValue {
   state: PlayerState;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   allTracks: () => Track[];
+  currentTrackId: string | null;
   playTrack: (idx: number) => void;
   togglePlay: () => void;
   nextTrack: () => void;
@@ -311,9 +312,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }), []);
   const setRoom = useCallback((r: PlayerState["room"]) => setState(s => ({ ...s, room: r })), []);
 
+  const currentTrackId = state.currentIdx >= 0 ? ([...DEMO_TRACKS, ...state.tracks][state.currentIdx]?.id ?? null) : null;
+
   return (
     <PlayerContext.Provider value={{
-      state, audioRef, allTracks,
+      state, audioRef, allTracks, currentTrackId,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
       toggleLike, addTrack, addAndPlay,

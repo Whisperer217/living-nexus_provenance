@@ -70,3 +70,9 @@
 - [x] Add songs.getTransformStatus tRPC procedure (polls DB + Sonauto API, updates status on completion)
 - [x] Replace AI Transform stub modal with full functional modal (prompt, style preset, quick tags, processing spinner, result audio player, download button)
 - [x] TypeScript: 0 errors | Vitest: 1/1 passing
+
+## Phase 9: Audio Player Fix
+- [ ] Audit PlayerContext addAndPlay, player bar metadata display, DiscoverPage/ExplorePage click handlers
+- [ ] Fix addAndPlay so clicking a track card loads it into the bottom player bar and starts playing
+- [ ] Player bar must show track title, artist name, and cover art
+- [ ] Active track card shows animated waveform instead of play button
