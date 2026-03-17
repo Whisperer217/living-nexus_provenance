@@ -1,0 +1,9 @@
+{
+  "query": "\nALTER TABLE users \n  ADD COLUMN IF NOT EXISTS artistHandle VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS bio TEXT,\n  ADD COLUMN IF NOT EXISTS profilePhotoUrl TEXT,\n  ADD COLUMN IF NOT EXISTS bmiMemberNumber VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS website TEXT,\n  ADD COLUMN IF NOT EXISTS twitterHandle VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS instagramHandle VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS youtubeHandle VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS bannerUrl TEXT,\n  ADD COLUMN IF NOT EXISTS licenseStatus ENUM('free','licensed') NOT NULL DEFAULT 'free',\n  ADD COLUMN IF NOT EXISTS songSlotsUsed INT NOT NULL DEFAULT 0,\n  ADD COLUMN IF NOT EXISTS songSlotsTotal INT NOT NULL DEFAULT 1,\n  ADD COLUMN IF NOT EXISTS stripeCustomerId VARCHAR(64);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute \nALTER TABLE users \n  ADD COLUMN IF NOT EXISTS artistHandle VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS bio TEXT,\n  ADD COLUMN IF NOT EXISTS profilePhotoUrl TEXT,\n  ADD COLUMN IF NOT EXISTS bmiMemberNumber VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS website TEXT,\n  ADD COLUMN IF NOT EXISTS twitterHandle VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS instagramHandle VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS youtubeHandle VARCHAR(64),\n  ADD COLUMN IF NOT EXISTS bannerUrl TEXT,\n  ADD COLUMN IF NOT EXISTS licenseStatus ENUM('free','licensed') NOT NULL DEFAULT 'free',\n  ADD COLUMN IF NOT EXISTS songSlotsUsed INT NOT NULL DEFAULT 0,\n  ADD COLUMN IF NOT EXISTS songSlotsTotal INT NOT NULL DEFAULT 1,\n  ADD COLUMN IF NOT EXISTS stripeCustomerId VARCHAR(64);\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2156
+}

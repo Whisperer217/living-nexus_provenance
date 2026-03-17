@@ -10,7 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import PlayerBar from "@/components/player/PlayerBar";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import {
-  Home, Compass, Users, User, Upload, Heart,
+  Home, Compass, Users, User, Upload, Heart, BarChart2,
   Menu, X, ChevronRight,
 } from "lucide-react";
 
@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { label: "My Profile", icon: User, path: "/profile", group: "My Music" },
   { label: "Upload", icon: Upload, path: "/upload", group: "My Music" },
   { label: "Liked Songs", icon: Heart, path: "/liked", group: "My Music" },
+  { label: "Dashboard", icon: BarChart2, path: "/dashboard", group: "My Music" },
 ];
 
 const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
@@ -49,6 +50,10 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
   "/liked": {
     title: "Liked Songs",
     points: ["Saved tracks", "Quick play", "Heart to save", "Your collection"],
+  },
+  "/dashboard": {
+    title: "Dashboard",
+    points: ["Song catalog", "Tips earned", "Enable tips", "License status"],
   },
 };
 

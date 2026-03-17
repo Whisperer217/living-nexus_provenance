@@ -1,9 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — App.tsx
-   Divine Noir: Art Deco × Cosmic Mysticism
-   Dark theme, Cinzel + DM Sans, Gold + Violet palette
-═══════════════════════════════════════════════════════════════════ */
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch } from "wouter";
@@ -14,24 +8,29 @@ import MainLayout from "./components/layout/MainLayout";
 import HomePage from "./pages/HomePage";
 import ExplorePage from "./pages/ExplorePage";
 import TogetherPage from "./pages/TogetherPage";
-import ProfilePage from "./pages/ProfilePage";
 import UploadPage from "./pages/UploadPage";
 import LikedPage from "./pages/LikedPage";
 import TrackPage from "./pages/TrackPage";
+import SongDetailPage from "./pages/SongDetailPage";
+import CreatorProfilePage from "./pages/CreatorProfilePage";
+import DashboardPage from "./pages/DashboardPage";
+import DiscoverPage from "./pages/DiscoverPage";
 import NotFound from "./pages/NotFound";
 
 function Router() {
   return (
     <MainLayout>
       <Switch>
-        <Route path="/" component={HomePage} />
+        <Route path="/" component={DiscoverPage} />
+        <Route path="/home" component={HomePage} />
         <Route path="/explore" component={ExplorePage} />
         <Route path="/together" component={TogetherPage} />
-        <Route path="/profile" component={ProfilePage} />
         <Route path="/upload" component={UploadPage} />
         <Route path="/liked" component={LikedPage} />
+        <Route path="/song/:id" component={SongDetailPage} />
         <Route path="/track/:id" component={TrackPage} />
-        <Route path="/artist/:name" component={ProfilePage} />
+        <Route path="/creator/:id" component={CreatorProfilePage} />
+        <Route path="/dashboard" component={DashboardPage} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

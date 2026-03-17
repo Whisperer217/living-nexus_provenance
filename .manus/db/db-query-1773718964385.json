@@ -1,0 +1,58 @@
+{
+  "query": "SHOW TABLES; DESCRIBE users;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SHOW TABLES; DESCRIBE users;",
+  "rows": [
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "comments"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "downloads"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "licenses"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "slotPurchases"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "users"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "openId\tvarchar(64)\tNO\tUNI\tNULL\t"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "name\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "email\tvarchar(320)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "loginMethod\tvarchar(64)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "role\tenum('user','admin')\tNO\t\tuser\t"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr": "lastSignedIn\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr\n__drizzle_migrations\ncomments\ndownloads\nlicenses\nslotPurchases\nusers\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nopenId\tvarchar(64)\tNO\tUNI\tNULL\t\nname\ttext\tYES\t\tNULL\t\nemail\tvarchar(320)\tYES\t\tNULL\t\nloginMethod\tvarchar(64)\tYES\t\tNULL\t\nrole\tenum('user','admin')\tNO\t\tuser\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nlastSignedIn\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\n",
+  "stderr": "",
+  "execution_time_ms": 403
+}
