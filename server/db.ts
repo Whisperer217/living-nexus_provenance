@@ -308,3 +308,65 @@ export async function getAiTransformById(id: number) {
   const result = await db.select().from(aiTransforms).where(eq(aiTransforms.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
+
+export async function getAiTransformsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: aiTransforms.id,
+      originalSongId: aiTransforms.originalSongId,
+      originalSongTitle: songs.title,
+      originalWitnessId: aiTransforms.originalWitnessId,
+      prompt: aiTransforms.prompt,
+      style: aiTransforms.style,
+      tags: aiTransforms.tags,
+      status: aiTransforms.status,
+      outputUrl: aiTransforms.outputUrl,
+      errorMessage: aiTransforms.errorMessage,
+      createdAt: aiTransforms.createdAt,
+    })
+    .from(aiTransforms)
+    .leftJoin(songs, eq(aiTransforms.originalSongId, songs.id))
+    .where(eq(aiTransforms.userId, userId))
+    .orderBy(desc(aiTransforms.createdAt))
+    .limit(50);
+}
+
+export async function getSongByWitnessId(witnessId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select({
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(eq(songs.witnessId, witnessId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getTransformsByWitnessId(witnessId: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: aiTransforms.id,
+      prompt: aiTransforms.prompt,
+      style: aiTransforms.style,
+      status: aiTransforms.status,
+      outputUrl: aiTransforms.outputUrl,
+      createdAt: aiTransforms.createdAt,
+    })
+    .from(aiTransforms)
+    .where(and(eq(aiTransforms.originalWitnessId, witnessId), eq(aiTransforms.status, "success")))
+    .orderBy(desc(aiTransforms.createdAt))
+    .limit(20);
+}

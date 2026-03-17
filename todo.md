@@ -76,3 +76,17 @@
 - [ ] Fix addAndPlay so clicking a track card loads it into the bottom player bar and starts playing
 - [ ] Player bar must show track title, artist name, and cover art
 - [ ] Active track card shows animated waveform instead of play button
+
+## Phase 10: OAuth Login Fix
+- [x] Fix redirectUri so ?code= lands on /api/oauth/callback not /?code=
+- [x] Verify server exchanges code for session token and sets cookie
+- [x] Verify redirect to / after successful auth
+
+## Phase 11: Dashboard My Transforms Tab
+- [x] Add getAiTransformsByUser DB helper (joins aiTransforms with songs for original title)
+- [x] Add songs.getMyTransforms tRPC procedure (protected, returns user's transforms)
+- [x] Add My Transforms tab to DashboardPage with status icons, prompt preview, WID link, play/download buttons
+
+## Deferred (out of credits)
+- [ ] Build /verify/:witnessId public provenance page
+- [ ] Wire Follow button on creator profiles (follows table + mutations)

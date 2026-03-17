@@ -15,7 +15,7 @@ import {
   updateSongLyrics, getRelatedSongs,
   updateUserProfile, updateUserStripeAccount,
   createAiTransform, updateAiTransform, getAiTransformById,
-  getAiTransformsBySong,
+  getAiTransformsBySong, getAiTransformsByUser,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -254,6 +254,9 @@ export const appRouter = router({
 
     getTransforms: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => {
       return getAiTransformsBySong(input.songId);
+    }),
+    getMyTransforms: protectedProcedure.query(async ({ ctx }) => {
+      return getAiTransformsByUser(ctx.user.id);
     }),
   }),
 

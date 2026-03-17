@@ -5,13 +5,21 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Music, Upload, DollarSign, Shield, Trash2, ExternalLink, BarChart2, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
+  BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
+  XCircle, Download, Play
+} from "lucide-react";
+
+type Tab = "songs" | "transforms";
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>("songs");
 
   const { data: songs, refetch: refetchSongs } = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: transforms } = trpc.songs.getMyTransforms.useQuery(undefined, { enabled: isAuthenticated && activeTab === "transforms" });
   const { data: licenseData } = trpc.licenses.myStatus.useQuery(undefined, { enabled: isAuthenticated });
   const { data: connectData } = trpc.tips.connectStatus.useQuery(undefined, { enabled: isAuthenticated });
 
@@ -46,6 +54,24 @@ export default function DashboardPage() {
   const slotsPercent = Math.min(100, Math.round((slotsUsed / slotsTotal) * 100));
   const isLicensed = licenseData?.licenseStatus === "licensed";
   const tipsEnabled = connectData?.status === "enabled";
+
+  const transformStatusIcon = (status: string) => {
+    switch (status) {
+      case "success": return <CheckCircle2 className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />;
+      case "failed": return <XCircle className="w-4 h-4" style={{ color: "oklch(0.65 0.18 25)" }} />;
+      case "processing": return <Clock className="w-4 h-4" style={{ color: "oklch(0.65 0.18 45)" }} />;
+      default: return <Clock className="w-4 h-4" style={{ color: "oklch(0.5 0.03 280)" }} />;
+    }
+  };
+
+  const transformStatusLabel = (status: string) => {
+    switch (status) {
+      case "success": return { label: "Complete", color: "oklch(0.65 0.18 145)" };
+      case "failed": return { label: "Failed", color: "oklch(0.65 0.18 25)" };
+      case "processing": return { label: "Processing", color: "oklch(0.65 0.18 45)" };
+      default: return { label: "Pending", color: "oklch(0.5 0.03 280)" };
+    }
+  };
 
   return (
     <div className="min-h-screen" style={{ background: "oklch(0.08 0.015 280)" }}>
@@ -161,64 +187,194 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Song Catalog */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>My Songs</h2>
-            <Link href="/upload">
-              <Button size="sm" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
-                <Upload className="w-3 h-3 mr-1" /> Upload New
-              </Button>
-            </Link>
-          </div>
-          {!songs?.length ? (
-            <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px dashed oklch(0.25 0.02 280)" }}>
-              <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
-              <p className="text-sm mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>No songs yet. Upload your first track to get started.</p>
+        {/* Tab Navigation */}
+        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <button
+            onClick={() => setActiveTab("songs")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "songs" ? "oklch(0.75 0.18 85)" : "transparent",
+              color: activeTab === "songs" ? "oklch(0.08 0.015 280)" : "oklch(0.6 0.04 280)",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <Music className="w-4 h-4" />
+            My Songs
+            {songs?.length ? <span className="text-xs opacity-70">({songs.length})</span> : null}
+          </button>
+          <button
+            onClick={() => setActiveTab("transforms")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "transforms" ? "oklch(0.65 0.2 300)" : "transparent",
+              color: activeTab === "transforms" ? "white" : "oklch(0.6 0.04 280)",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <Wand2 className="w-4 h-4" />
+            My Transforms
+            {transforms?.length ? <span className="text-xs opacity-70">({transforms.length})</span> : null}
+          </button>
+        </div>
+
+        {/* My Songs Tab */}
+        {activeTab === "songs" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>My Songs</h2>
               <Link href="/upload">
-                <Button style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>Upload Your First Track</Button>
+                <Button size="sm" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                  <Upload className="w-3 h-3 mr-1" /> Upload New
+                </Button>
               </Link>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {songs.map((song: any, idx: number) => (
-                <div key={song.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
-                  <span className="text-xs w-5 text-center" style={{ color: "oklch(0.45 0.03 280)" }}>{idx + 1}</span>
-                  <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.16 0.02 280)" }}>
-                    {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" /> : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.75 0.18 85)" }} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      {song.genre && <span className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>{song.genre}</span>}
-                      {song.witnessId && <Badge className="text-xs px-1 py-0" style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", fontSize: "9px" }}>WID</Badge>}
-                      {song.aiConsent === "prohibited" && <Badge className="text-xs px-1 py-0" style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: "oklch(0.65 0.18 25)", fontSize: "9px" }}>AI PROHIBITED</Badge>}
+            {!songs?.length ? (
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+                <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
+                <p className="text-sm mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>No songs yet. Upload your first track to get started.</p>
+                <Link href="/upload">
+                  <Button style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>Upload Your First Track</Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {songs.map((song: any, idx: number) => (
+                  <div key={song.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                    <span className="text-xs w-5 text-center" style={{ color: "oklch(0.45 0.03 280)" }}>{idx + 1}</span>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.16 0.02 280)" }}>
+                      {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" /> : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.75 0.18 85)" }} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {song.genre && <span className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>{song.genre}</span>}
+                        {song.witnessId && <Badge className="text-xs px-1 py-0" style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", fontSize: "9px" }}>WID</Badge>}
+                        {song.aiConsent === "prohibited" && <Badge className="text-xs px-1 py-0" style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: "oklch(0.65 0.18 25)", fontSize: "9px" }}>AI PROHIBITED</Badge>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
+                      <span>{song.playCount || 0} plays</span>
+                      <span>{song.tipCount || 0} tips</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Link href={`/song/${song.id}`}>
+                        <button className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">
+                          <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                        </button>
+                      </Link>
+                      <button
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/10"
+                        title="Delete song"
+                        onClick={() => { setDeletingId(song.id); deleteMutation.mutate({ songId: song.id }); }}
+                        disabled={deletingId === song.id}
+                      >
+                        <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "oklch(0.5 0.03 280)" : "oklch(0.65 0.18 25)" }} />
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
-                    <span>{song.playCount || 0} plays</span>
-                    <span>{song.tipCount || 0} tips</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Link href={`/song/${song.id}`}>
-                      <button className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">
-                        <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
-                      </button>
-                    </Link>
-                    <button
-                      className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/10"
-                      title="Delete song"
-                      onClick={() => { setDeletingId(song.id); deleteMutation.mutate({ songId: song.id }); }}
-                      disabled={deletingId === song.id}
-                    >
-                      <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "oklch(0.5 0.03 280)" : "oklch(0.65 0.18 25)" }} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* My Transforms Tab */}
+        {activeTab === "transforms" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>My AI Transforms</h2>
+                <p className="text-xs mt-0.5" style={{ color: "oklch(0.5 0.03 280)" }}>AI-generated derivatives of your songs, linked to their original Witness IDs.</p>
+              </div>
             </div>
-          )}
-        </div>
+            {!transforms?.length ? (
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+                <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
+                <p className="text-sm mb-2" style={{ color: "oklch(0.5 0.03 280)" }}>No AI transforms yet.</p>
+                <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Open any song page and use the AI Transform button to create a derivative.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {transforms.map((t: any) => {
+                  const { label, color } = transformStatusLabel(t.status);
+                  return (
+                    <div key={t.id} className="rounded-xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                      <div className="flex items-start gap-4">
+                        {/* Status icon */}
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.16 0.02 280)" }}>
+                          {transformStatusIcon(t.status)}
+                        </div>
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-sm truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+                              Transform of "{t.originalSongTitle || `Song #${t.originalSongId}`}"
+                            </p>
+                            <Badge className="text-xs px-1.5 py-0 flex-shrink-0" style={{ background: `${color}20`, color, fontSize: "9px" }}>
+                              {label}
+                            </Badge>
+                          </div>
+                          <p className="text-xs mb-1 line-clamp-2" style={{ color: "oklch(0.6 0.04 280)" }}>
+                            <span style={{ color: "oklch(0.5 0.03 280)" }}>Prompt: </span>{t.prompt}
+                          </p>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            {t.style && (
+                              <span className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>Style: {t.style}</span>
+                            )}
+                            {t.originalWitnessId && (
+                              <Link href={`/verify/${t.originalWitnessId}`}>
+                                <span className="text-xs cursor-pointer hover:underline" style={{ color: "oklch(0.65 0.2 300)" }}>
+                                  WID: {t.originalWitnessId.slice(0, 12)}…
+                                </span>
+                              </Link>
+                            )}
+                            <span className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>
+                              {new Date(t.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {t.status === "failed" && t.errorMessage && (
+                            <p className="text-xs mt-1" style={{ color: "oklch(0.65 0.18 25)" }}>Error: {t.errorMessage}</p>
+                          )}
+                        </div>
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {t.outputUrl && (
+                            <>
+                              <a href={t.outputUrl} target="_blank" rel="noopener noreferrer">
+                                <button
+                                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                                  title="Play transform"
+                                >
+                                  <Play className="w-3 h-3" style={{ color: "oklch(0.75 0.18 85)" }} />
+                                </button>
+                              </a>
+                              <a href={t.outputUrl} download>
+                                <button
+                                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                                  title="Download transform"
+                                >
+                                  <Download className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                                </button>
+                              </a>
+                            </>
+                          )}
+                          <Link href={`/song/${t.originalSongId}`}>
+                            <button
+                              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                              title="View original song"
+                            >
+                              <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.55 0.04 280)" }} />
+                            </button>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
