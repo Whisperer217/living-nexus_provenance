@@ -1,7 +1,7 @@
 import { and, desc, eq, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
-  InsertUser, comments, downloads, licenses,
+  InsertUser, aiTransforms, comments, downloads, licenses,
   slotPurchases, songs, tips, users
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -252,4 +252,59 @@ export async function getRelatedSongs(songId: number, genre?: string | null, lim
     .where(and(...conditions))
     .orderBy(desc(songs.playCount))
     .limit(limit);
+}
+
+// ─── AI Transforms ────────────────────────────────────────────────────────────
+
+export async function createAiTransform(data: {
+  originalSongId: number;
+  userId: number;
+  prompt: string;
+  style?: string;
+  tags?: string[];
+  originalWitnessId?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const result = await db.insert(aiTransforms).values({
+    ...data,
+    tags: data.tags as unknown as string[],
+    status: "pending",
+  });
+  return result;
+}
+
+export async function updateAiTransform(id: number, data: {
+  sonautoTaskId?: string;
+  status?: "pending" | "processing" | "success" | "failed";
+  errorMessage?: string;
+  outputUrl?: string;
+  outputKey?: string;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(aiTransforms).set(data).where(eq(aiTransforms.id, id));
+}
+
+export async function getAiTransformsByInsertId(insertId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(aiTransforms).where(eq(aiTransforms.id, insertId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAiTransformsBySong(songId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(aiTransforms)
+    .where(and(eq(aiTransforms.originalSongId, songId), eq(aiTransforms.status, "success")))
+    .orderBy(desc(aiTransforms.createdAt))
+    .limit(20);
+}
+
+export async function getAiTransformById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(aiTransforms).where(eq(aiTransforms.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
 }

@@ -60,3 +60,13 @@
 - [x] Rewrite ExplorePage to load real DB songs via trpc.songs.discover — uses addAndPlay() for global player
 - [x] ExplorePage now shows loading skeleton, empty state, play count, WID badge, artist/genre links
 - [x] TypeScript: 0 errors | Vitest: 1/1 passing
+
+## Phase 8: AI Transform Feature (Sonauto API)
+- [x] Store SONAUTO_API_KEY as project secret
+- [x] Add aiTransforms table to drizzle schema (songId, userId, status, prompt, style, outputUrl, sonautoTaskId, errorMessage, timestamps)
+- [x] Push DB migration (direct SQL applied, lyricsText already in DB)
+- [x] Add createAiTransform / getAiTransformById / updateAiTransformStatus DB helpers to server/db.ts
+- [x] Add songs.aiTransform tRPC procedure (calls Sonauto V2 API, stores task in DB, returns transformId)
+- [x] Add songs.getTransformStatus tRPC procedure (polls DB + Sonauto API, updates status on completion)
+- [x] Replace AI Transform stub modal with full functional modal (prompt, style preset, quick tags, processing spinner, result audio player, download button)
+- [x] TypeScript: 0 errors | Vitest: 1/1 passing

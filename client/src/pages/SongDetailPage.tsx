@@ -73,6 +73,46 @@ export default function SongDetailPage() {
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
   const [shareOpen, setShareOpen] = useState(false);
   const [aiTransformOpen, setAiTransformOpen] = useState(false);
+  const [transformPrompt, setTransformPrompt] = useState("");
+  const [transformStyle, setTransformStyle] = useState("");
+  const [transformTags, setTransformTags] = useState<string[]>([]);
+  const [activeTransformId, setActiveTransformId] = useState<number | null>(null);
+  const [transformResult, setTransformResult] = useState<{ outputUrl: string; prompt: string } | null>(null);
+  const [transformPhase, setTransformPhase] = useState<"idle" | "processing" | "done" | "error">("idle");
+  const [transformError, setTransformError] = useState("");
+
+  const aiTransformMutation = trpc.songs.aiTransform.useMutation({
+    onSuccess: (data) => {
+      setActiveTransformId(data.transformId);
+      setTransformPhase("processing");
+    },
+    onError: (err) => {
+      setTransformPhase("error");
+      setTransformError(err.message);
+    },
+  });
+
+  const { data: transformStatus } = trpc.songs.getTransformStatus.useQuery(
+    { transformId: activeTransformId! },
+    {
+      enabled: !!activeTransformId && transformPhase === "processing",
+      refetchInterval: 4000,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  useEffect(() => {
+    if (!transformStatus) return;
+    if (transformStatus.status === "success" && transformStatus.outputUrl) {
+      setTransformResult({ outputUrl: transformStatus.outputUrl, prompt: transformStatus.prompt });
+      setTransformPhase("done");
+      setActiveTransformId(null);
+    } else if (transformStatus.status === "failed") {
+      setTransformPhase("error");
+      setTransformError(transformStatus.errorMessage || "Generation failed");
+      setActiveTransformId(null);
+    }
+  }, [transformStatus]);
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: songId },
@@ -563,37 +603,139 @@ export default function SongDetailPage() {
       </Dialog>
 
       {/* AI Transform Modal */}
-      <Dialog open={aiTransformOpen} onOpenChange={setAiTransformOpen}>
-        <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.65 0.2 300 / 0.4)" }}>
+      <Dialog open={aiTransformOpen} onOpenChange={(open) => {
+        if (!open && transformPhase === "processing") return;
+        setAiTransformOpen(open);
+        if (!open) {
+          setTransformPhase("idle"); setTransformResult(null);
+          setTransformError(""); setTransformPrompt("");
+          setTransformStyle(""); setTransformTags([]);
+        }
+      }}>
+        <DialogContent style={{ background: "oklch(0.10 0.015 280)", border: "1px solid oklch(0.65 0.2 300 / 0.5)", maxWidth: "520px" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.2 300)" }}>
-              <Wand2 className="w-5 h-5 inline mr-2" />AI Transform
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.2 300)", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Wand2 className="w-5 h-5" />AI Transform
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 text-center py-4">
-            <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center"
-              style={{ background: "oklch(0.65 0.2 300 / 0.1)", border: "2px solid oklch(0.65 0.2 300 / 0.3)" }}>
-              <Wand2 className="w-10 h-10" style={{ color: "oklch(0.65 0.2 300)" }} />
-            </div>
-            <div>
-              <p className="text-base font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.85 0.02 280)" }}>
-                Transform Your Track with AI
+
+          {transformPhase === "idle" && (
+            <div className="space-y-4 py-2">
+              {!user && (
+                <p className="text-sm text-center" style={{ color: "oklch(0.55 0.04 280)" }}>Sign in to transform tracks.</p>
+              )}
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.65 0.2 300)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>DESCRIBE THE TRANSFORMATION</label>
+                <Textarea
+                  value={transformPrompt}
+                  onChange={e => setTransformPrompt(e.target.value)}
+                  placeholder="e.g. Transform into a lo-fi hip hop beat with rain sounds and vinyl crackle"
+                  rows={3}
+                  maxLength={500}
+                  style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.3 0.04 280)", color: "oklch(0.85 0.02 280)", resize: "none" }}
+                />
+                <p className="text-xs mt-1" style={{ color: "oklch(0.4 0.03 280)" }}>{transformPrompt.length}/500</p>
+              </div>
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.65 0.2 300)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>STYLE PRESET (OPTIONAL)</label>
+                <Input
+                  value={transformStyle}
+                  onChange={e => setTransformStyle(e.target.value)}
+                  placeholder="e.g. cinematic, dark ambient, jazz"
+                  style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.3 0.04 280)", color: "oklch(0.85 0.02 280)" }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold mb-2 block" style={{ color: "oklch(0.65 0.2 300)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>QUICK TAGS</label>
+                <div className="flex flex-wrap gap-2">
+                  {["lo-fi", "jazz", "cinematic", "dark ambient", "trap", "acoustic", "orchestral", "electronic"].map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => setTransformTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])}
+                      className="px-2 py-0.5 rounded text-xs transition-all"
+                      style={{
+                        background: transformTags.includes(tag) ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.16 0.015 280)",
+                        border: `1px solid ${transformTags.includes(tag) ? "oklch(0.65 0.2 300 / 0.7)" : "oklch(0.28 0.03 280)"}`,
+                        color: transformTags.includes(tag) ? "oklch(0.65 0.2 300)" : "oklch(0.55 0.04 280)",
+                      }}
+                    >{tag}</button>
+                  ))}
+                </div>
+              </div>
+              <p className="text-xs" style={{ color: "oklch(0.38 0.03 280)" }}>
+                All AI transforms are linked to the original Witness ID. Generation takes ~60-90 seconds.
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: "oklch(0.55 0.04 280)" }}>
-                Remix, re-style, or reimagine your song in a completely different genre or aesthetic — all within Living Nexus. This feature is coming soon.
-              </p>
+              <Button
+                className="w-full font-semibold"
+                disabled={!user || !transformPrompt.trim() || aiTransformMutation.isPending}
+                onClick={() => aiTransformMutation.mutate({
+                  songId,
+                  prompt: transformPrompt.trim(),
+                  style: transformStyle.trim() || undefined,
+                  tags: transformTags.length > 0 ? transformTags : undefined,
+                })}
+                style={{ background: "oklch(0.65 0.2 300)", color: "oklch(0.08 0.01 280)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}
+              >
+                <Wand2 className="w-4 h-4 mr-2" />
+                {aiTransformMutation.isPending ? "SUBMITTING..." : "GENERATE TRANSFORM"}
+              </Button>
             </div>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {["Genre Shift", "Tempo Remix", "Vocal Style", "Instrumental", "Stem Separation"].map(feat => (
-                <Badge key={feat} style={{ background: "oklch(0.65 0.2 300 / 0.1)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)", fontSize: "11px" }}>
-                  {feat}
-                </Badge>
-              ))}
+          )}
+
+          {transformPhase === "processing" && (
+            <div className="py-8 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center animate-pulse"
+                style={{ background: "oklch(0.65 0.2 300 / 0.15)", border: "2px solid oklch(0.65 0.2 300 / 0.4)" }}>
+                <Wand2 className="w-8 h-8" style={{ color: "oklch(0.65 0.2 300)" }} />
+              </div>
+              <div>
+                <p className="font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.85 0.02 280)" }}>Generating Transform...</p>
+                <p className="text-sm" style={{ color: "oklch(0.5 0.04 280)" }}>The AI is reimagining your track. This takes 60-90 seconds.</p>
+              </div>
+              <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
+                <div className="h-full rounded-full animate-pulse" style={{ width: "60%", background: "oklch(0.65 0.2 300)" }} />
+              </div>
+              <p className="text-xs" style={{ color: "oklch(0.38 0.03 280)" }}>Do not close this dialog</p>
             </div>
-            <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>
-              AI transforms respect your Witness ID provenance — all derivatives are linked back to the original.
-            </p>
-          </div>
+          )}
+
+          {transformPhase === "done" && transformResult && (
+            <div className="py-4 space-y-4">
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3"
+                  style={{ background: "oklch(0.55 0.2 145 / 0.15)", border: "2px solid oklch(0.55 0.2 145 / 0.5)" }}>
+                  <Check className="w-6 h-6" style={{ color: "oklch(0.55 0.2 145)" }} />
+                </div>
+                <p className="font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.85 0.02 280)" }}>Transform Complete</p>
+                <p className="text-xs mt-1" style={{ color: "oklch(0.5 0.04 280)" }}>Prompt: {transformResult.prompt}</p>
+              </div>
+              <div className="rounded-lg p-3" style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.3 0.04 280)" }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: "oklch(0.65 0.2 300)", fontFamily: "'Orbitron', sans-serif" }}>TRANSFORMED TRACK</p>
+                <audio controls src={transformResult.outputUrl} className="w-full" style={{ height: "36px" }} />
+              </div>
+              <div className="flex gap-2">
+                <a href={transformResult.outputUrl} download className="flex-1">
+                  <Button variant="outline" className="w-full text-xs" style={{ borderColor: "oklch(0.3 0.04 280)", color: "oklch(0.7 0.04 280)" }}>Download</Button>
+                </a>
+                <Button
+                  className="flex-1 text-xs"
+                  onClick={() => { setTransformPhase("idle"); setTransformResult(null); setTransformPrompt(""); setTransformStyle(""); setTransformTags([]); }}
+                  style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.4)" }}
+                >New Transform</Button>
+              </div>
+            </div>
+          )}
+
+          {transformPhase === "error" && (
+            <div className="py-6 text-center space-y-3">
+              <p className="font-semibold" style={{ color: "oklch(0.65 0.2 25)" }}>Transform Failed</p>
+              <p className="text-sm" style={{ color: "oklch(0.55 0.04 280)" }}>{transformError}</p>
+              <Button
+                onClick={() => { setTransformPhase("idle"); setTransformError(""); }}
+                style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.4)" }}
+              >Try Again</Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
