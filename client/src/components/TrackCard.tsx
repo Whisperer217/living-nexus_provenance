@@ -3,8 +3,9 @@
    Divine noir track card with hover glow and play button
 ═══════════════════════════════════════════════════════════════════ */
 
-import { Play, Heart, DollarSign } from "lucide-react";
+import { Play, Heart, DollarSign, ExternalLink } from "lucide-react";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
+import { useLocation } from "wouter";
 
 interface Props {
   track: Track;
@@ -14,6 +15,7 @@ interface Props {
 
 export default function TrackCard({ track, index, onTip }: Props) {
   const { state, playTrack, toggleLike } = usePlayer();
+  const [, navigate] = useLocation();
   const isPlaying = state.currentIdx === index && state.isPlaying;
   const isActive = state.currentIdx === index;
   const isLiked = state.liked.has(track.id);
@@ -99,6 +101,13 @@ export default function TrackCard({ track, index, onTip }: Props) {
                 <DollarSign size={12} />
               </button>
             )}
+            <button
+              onClick={e => { e.stopPropagation(); navigate(`/track/${track.id}`); }}
+              className="p-1 text-white/30 hover:text-[#A78BFA] transition-colors"
+              title="Open track page"
+            >
+              <ExternalLink size={12} />
+            </button>
           </div>
         </div>
       </div>

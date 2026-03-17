@@ -5,6 +5,14 @@
 
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
 
+export interface Comment {
+  id: string;
+  author: string;
+  avatar?: string;
+  text: string;
+  timestamp: number;
+}
+
 export interface Track {
   id: string;
   title: string;
@@ -20,6 +28,8 @@ export interface Track {
   isOwn?: boolean;
   plays?: number;
   tips?: number;
+  comments?: Comment[];
+  shareCount?: number;
 }
 
 export const DEMO_TRACKS: Track[] = [
@@ -51,9 +61,15 @@ interface PlayerState {
   liked: Set<string>;
   tracks: Track[]; // user-uploaded tracks
   profileName: string;
+  profileBio: string;
+  profileLocation: string;
+  profileWebsite: string;
+  profileSocials: { twitter: string; instagram: string; youtube: string; soundcloud: string };
   profileAvatar: string | null;
   profileBanner: string | null;
   tipsEarned: number;
+  trackComments: Record<string, Comment[]>; // trackId -> comments
+  trackTips: Record<string, number>; // trackId -> tip total
   room: { code: string; name: string; listeners: string[] } | null;
 }
 
@@ -73,9 +89,16 @@ interface PlayerContextValue {
   toggleLike: (id: string) => void;
   addTrack: (t: Track) => void;
   setProfileName: (n: string) => void;
+  setProfileBio: (b: string) => void;
+  setProfileLocation: (l: string) => void;
+  setProfileWebsite: (w: string) => void;
+  setProfileSocials: (s: PlayerState["profileSocials"]) => void;
   setProfileAvatar: (url: string) => void;
   setProfileBanner: (url: string) => void;
   addTip: (amount: number) => void;
+  addTrackTip: (trackId: string, amount: number) => void;
+  addComment: (trackId: string, comment: Comment) => void;
+  incrementShare: (trackId: string) => void;
   setRoom: (r: PlayerState["room"]) => void;
 }
 
@@ -95,9 +118,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     liked: new Set(),
     tracks: [],
     profileName: "Alex Rivera",
+    profileBio: "Creating divine soundscapes from the cosmos. Music is the language of the soul.",
+    profileLocation: "Los Angeles, CA",
+    profileWebsite: "",
+    profileSocials: { twitter: "", instagram: "", youtube: "", soundcloud: "" },
     profileAvatar: null,
     profileBanner: null,
     tipsEarned: 0,
+    trackComments: {},
+    trackTips: {},
     room: null,
   });
 
@@ -237,9 +266,31 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setProfileName = useCallback((n: string) => setState(s => ({ ...s, profileName: n })), []);
+  const setProfileBio = useCallback((b: string) => setState(s => ({ ...s, profileBio: b })), []);
+  const setProfileLocation = useCallback((l: string) => setState(s => ({ ...s, profileLocation: l })), []);
+  const setProfileWebsite = useCallback((w: string) => setState(s => ({ ...s, profileWebsite: w })), []);
+  const setProfileSocials = useCallback((socials: PlayerState["profileSocials"]) => setState(s => ({ ...s, profileSocials: socials })), []);
   const setProfileAvatar = useCallback((url: string) => setState(s => ({ ...s, profileAvatar: url })), []);
   const setProfileBanner = useCallback((url: string) => setState(s => ({ ...s, profileBanner: url })), []);
   const addTip = useCallback((amount: number) => setState(s => ({ ...s, tipsEarned: s.tipsEarned + amount })), []);
+  const addTrackTip = useCallback((trackId: string, amount: number) => setState(s => ({
+    ...s,
+    trackTips: { ...s.trackTips, [trackId]: (s.trackTips[trackId] || 0) + amount },
+    tipsEarned: s.tipsEarned + amount,
+  })), []);
+  const addComment = useCallback((trackId: string, comment: Comment) => setState(s => ({
+    ...s,
+    trackComments: {
+      ...s.trackComments,
+      [trackId]: [...(s.trackComments[trackId] || []), comment],
+    },
+  })), []);
+  const incrementShare = useCallback((trackId: string) => setState(s => {
+    const all = [...DEMO_TRACKS, ...s.tracks];
+    const updated = all.map(t => t.id === trackId ? { ...t, shareCount: (t.shareCount || 0) + 1 } : t);
+    const userTracks = updated.filter(t => t.isOwn);
+    return { ...s, tracks: userTracks };
+  }), []);
   const setRoom = useCallback((r: PlayerState["room"]) => setState(s => ({ ...s, room: r })), []);
 
   return (
@@ -248,8 +299,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
       toggleLike, addTrack,
-      setProfileName, setProfileAvatar, setProfileBanner,
-      addTip, setRoom,
+      setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
+      setProfileAvatar, setProfileBanner,
+      addTip, addTrackTip, addComment, incrementShare, setRoom,
     }}>
       {children}
     </PlayerContext.Provider>

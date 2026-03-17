@@ -17,6 +17,7 @@ import TogetherPage from "./pages/TogetherPage";
 import ProfilePage from "./pages/ProfilePage";
 import UploadPage from "./pages/UploadPage";
 import LikedPage from "./pages/LikedPage";
+import TrackPage from "./pages/TrackPage";
 import NotFound from "./pages/NotFound";
 
 function Router() {
@@ -29,6 +30,8 @@ function Router() {
         <Route path="/profile" component={ProfilePage} />
         <Route path="/upload" component={UploadPage} />
         <Route path="/liked" component={LikedPage} />
+        <Route path="/track/:id" component={TrackPage} />
+        <Route path="/artist/:name" component={ProfilePage} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
