@@ -52,6 +52,7 @@ export const songs = mysqlTable("songs", {
   bpm: int("bpm"),
   keySignature: varchar("keySignature", { length: 16 }),
   moodTags: json("moodTags").$type<string[]>(),
+  lyricsText: text("lyricsText"),
   lyricsHash: varchar("lyricsHash", { length: 64 }),
   coWriters: json("coWriters").$type<string[]>(),
   albumName: varchar("albumName", { length: 255 }),

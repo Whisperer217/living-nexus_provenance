@@ -15,6 +15,7 @@ import SongDetailPage from "./pages/SongDetailPage";
 import CreatorProfilePage from "./pages/CreatorProfilePage";
 import DashboardPage from "./pages/DashboardPage";
 import DiscoverPage from "./pages/DiscoverPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 function Router() {
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/track/:id" component={TrackPage} />
         <Route path="/creator/:id" component={CreatorProfilePage} />
         <Route path="/dashboard" component={DashboardPage} />
+        <Route path="/profile" component={ProfilePage} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

@@ -31,3 +31,14 @@
 - [x] Vitest tests for key routers
 - [x] Dashboard nav item added to sidebar (desktop + mobile)
 - [x] Stripe Connect per Command Domains LLC spec (10% platform fee, transfer_data)
+
+## Phase 5: Suno-Inspired UI Overhaul
+- [x] Fix /profile 404 — added ProfilePage route to App.tsx
+- [x] Rebuild CreatorProfilePage — banner, avatar, stats, featured songs grid, full song list with context menu
+- [x] Rebuild SongDetailPage — lyrics panel (editable by owner), emoji reactions, related songs sidebar, AI Transform stub
+- [x] Rebuild LikedPage as Archive — tabbed library (Songs/Playlists/History), search, sort, genre filter, stats bar
+- [x] Add lyricsText column to songs table (migration applied)
+- [x] Add songs.updateLyrics and songs.getRelated tRPC procedures
+- [x] Add updateSongLyrics and getRelatedSongs db helpers
+- [x] Rename sidebar "Liked Songs" to "Archive" with Library icon
+- [x] TypeScript: 0 errors | Vitest: 1/1 passing

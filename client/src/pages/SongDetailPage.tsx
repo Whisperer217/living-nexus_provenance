@@ -1,4 +1,13 @@
-import { useState } from "react";
+/* ═══════════════════════════════════════════════════════════════════
+   LIVING NEXUS — SongDetailPage (v2)
+   Suno-inspired layout:
+   • Left: cover art + player controls + lyrics panel
+   • Right: comments + emoji reactions + related songs sidebar
+   • AI Transform stub (coming soon)
+   Divine Noir aesthetic — Orbitron/Cinzel, gold/cyan palette
+═══════════════════════════════════════════════════════════════════ */
+
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -8,20 +17,61 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Play, Pause, Heart, Share2, Copy, Twitter, DollarSign, MessageSquare, Shield, Music, ChevronLeft } from "lucide-react";
+import {
+  Play, Pause, Share2, Copy, DollarSign, MessageSquare,
+  Shield, Music, ChevronLeft, Download, Headphones,
+  SkipBack, SkipForward, Volume2, VolumeX, Wand2,
+  ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter,
+} from "lucide-react";
+
+const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
+
+function RelatedCard({ item }: { item: any }) {
+  const song = item.song;
+  const creator = item.creator;
+  return (
+    <Link href={`/song/${song.id}`}>
+      <div className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-white/[0.04] transition-all group">
+        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.16 0.02 280)" }}>
+          {song.coverArtUrl
+            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+            : <Music className="w-5 h-5 opacity-30" style={{ color: "oklch(0.75 0.18 85)" }} />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+          <p className="text-xs truncate" style={{ color: "oklch(0.5 0.03 280)" }}>
+            {creator?.artistHandle || creator?.name || "Unknown"}
+          </p>
+        </div>
+        <Play className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0" style={{ color: "oklch(0.75 0.18 85)" }} />
+      </div>
+    </Link>
+  );
+}
 
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const songId = parseInt(id || "0");
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audio] = useState(() => typeof Audio !== "undefined" ? new Audio() : null);
-  const [liked, setLiked] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
+
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
   const [commentText, setCommentText] = useState("");
-  const [authorName, setAuthorName] = useState(user?.name || "");
+  const [showLyrics, setShowLyrics] = useState(true);
+  const [editingLyrics, setEditingLyrics] = useState(false);
+  const [lyricsEdit, setLyricsEdit] = useState("");
+  const [reactions, setReactions] = useState<Record<string, number>>({});
+  const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
+  const [shareOpen, setShareOpen] = useState(false);
+  const [aiTransformOpen, setAiTransformOpen] = useState(false);
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: songId },
@@ -31,206 +81,412 @@ export default function SongDetailPage() {
     { songId },
     { enabled: !!songId }
   );
+  const { data: relatedData } = trpc.songs.getRelated.useQuery(
+    { songId, genre: songData?.song?.genre || undefined },
+    { enabled: !!songId && !!songData }
+  );
+
+  const song = songData?.song;
+  const creator = songData?.creator;
+  const isOwner = user?.id === creator?.id;
 
   const playMutation = trpc.songs.play.useMutation();
   const tipMutation = trpc.tips.createTipCheckout.useMutation({
-    onSuccess: (data: { url: string | null }) => { if (data.url) { window.open(data.url, "_blank"); toast.info("Redirecting to checkout..."); } },
+    onSuccess: (d: { url: string | null }) => {
+      if (d.url) { window.open(d.url, "_blank"); toast.info("Redirecting to checkout..."); }
+      setTipOpen(false);
+    },
     onError: (e: { message: string }) => toast.error(e.message),
   });
   const commentMutation = trpc.comments.add.useMutation({
-    onSuccess: () => { toast.success("Comment added!"); setCommentText(""); refetchComments(); },
+    onSuccess: () => { setCommentText(""); refetchComments(); toast.success("Comment posted!"); },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+  const downloadMutation = trpc.songs.download.useMutation({
+    onSuccess: (d: { url: string }) => { if (d.url) window.open(d.url, "_blank"); },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+  const updateLyricsMutation = trpc.songs.updateLyrics.useMutation({
+    onSuccess: () => { setEditingLyrics(false); toast.success("Lyrics saved!"); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
 
-  const handlePlay = () => {
-    if (!songData?.song.fileUrl) { toast.error("No audio available"); return; }
-    if (isPlaying) {
-      audio?.pause();
-      setIsPlaying(false);
-    } else {
-      if (audio) {
-        audio.src = songData.song.fileUrl;
-        audio.play().catch(() => toast.error("Could not play audio"));
-        audio.onended = () => setIsPlaying(false);
-        setIsPlaying(true);
-        playMutation.mutate({ songId });
-      }
+  useEffect(() => {
+    if (!song?.fileUrl) return;
+    const audio = new Audio(song.fileUrl);
+    audioRef.current = audio;
+    audio.volume = volume;
+    audio.addEventListener("loadedmetadata", () => { setDuration(audio.duration); setAudioReady(true); });
+    audio.addEventListener("timeupdate", () => setCurrentTime(audio.currentTime));
+    audio.addEventListener("ended", () => setIsPlaying(false));
+    return () => { audio.pause(); audio.src = ""; };
+  }, [song?.fileUrl]);
+
+  useEffect(() => {
+    if (song?.lyricsText) setLyricsEdit(song.lyricsText);
+  }, [song?.lyricsText]);
+
+  const togglePlay = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) { audio.pause(); setIsPlaying(false); }
+    else {
+      audio.play()
+        .then(() => { setIsPlaying(true); playMutation.mutate({ songId }); })
+        .catch(() => toast.error("Could not play audio"));
     }
+  }, [isPlaying, songId]);
+
+  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const t = parseFloat(e.target.value);
+    audio.currentTime = t;
+    setCurrentTime(t);
+  };
+
+  const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseFloat(e.target.value);
+    setVolume(v);
+    if (audioRef.current) audioRef.current.volume = v;
+    setMuted(v === 0);
+  };
+
+  const toggleMute = () => {
+    if (!audioRef.current) return;
+    const newMuted = !muted;
+    setMuted(newMuted);
+    audioRef.current.volume = newMuted ? 0 : volume;
+  };
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
+
+  const handleReaction = (emoji: string) => {
+    if (emoji === "+") { toast.info("More reactions coming soon!"); return; }
+    const newReactions = { ...reactions };
+    const newMy = new Set(myReactions);
+    if (newMy.has(emoji)) { newReactions[emoji] = (newReactions[emoji] || 1) - 1; newMy.delete(emoji); }
+    else { newReactions[emoji] = (newReactions[emoji] || 0) + 1; newMy.add(emoji); }
+    setReactions(newReactions);
+    setMyReactions(newMy);
   };
 
   const handleTip = () => {
+    if (!song) return;
     const cents = Math.round(parseFloat(tipAmount) * 100);
     if (!cents || cents < 100) { toast.error("Minimum tip is $1.00"); return; }
-    tipMutation.mutate({ songId, amountCents: cents, origin: window.location.origin });
-    setTipOpen(false);
+    tipMutation.mutate({ songId: song.id, amountCents: cents, origin: window.location.origin });
   };
 
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success("Song link copied to clipboard!");
-  };
-
-  const shareTwitter = () => {
-    const text = encodeURIComponent(`Check out "${songData?.song.title}" on Living Nexus`);
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
-  };
-
-  const handleComment = () => {
-    if (!commentText.trim()) return;
-    commentMutation.mutate({ songId, content: commentText, authorName: authorName || undefined });
+    toast.success("Link copied!");
+    setShareOpen(false);
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.015 280)" }}>
-      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: "oklch(0.75 0.18 85)", borderTopColor: "transparent" }} />
-    </div>
-  );
-
-  if (!songData) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.015 280)" }}>
-      <div className="text-center">
-        <p style={{ color: "oklch(0.6 0.04 280)" }}>Song not found.</p>
-        <Link href="/"><Button className="mt-4">Back to Discover</Button></Link>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.01 280)" }}>
+      <div className="text-center space-y-3">
+        <div className="w-16 h-16 rounded-2xl mx-auto animate-pulse" style={{ background: "oklch(0.75 0.18 85 / 0.2)" }} />
+        <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>Loading track...</p>
       </div>
     </div>
   );
 
-  const { song, creator } = songData;
-  const tipsEnabled = creator?.stripeAccountId && creator?.stripeAccountStatus === "enabled";
+  if (!song || !songData) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.01 280)" }}>
+      <div className="text-center">
+        <p style={{ color: "oklch(0.6 0.04 280)" }}>Song not found.</p>
+        <Link href="/"><Button className="mt-4" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>Go Home</Button></Link>
+      </div>
+    </div>
+  );
+
+  const tipsEnabled = creator?.stripeAccountStatus === "enabled";
+  const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.08 0.015 280)" }}>
-      <div className="container py-8 max-w-4xl">
-        {/* Back */}
+    <div className="min-h-screen pb-8" style={{ background: "oklch(0.08 0.01 280)" }}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
         <Link href={creator ? `/creator/${creator.id}` : "/"}>
-          <button className="flex items-center gap-1 text-sm mb-6 hover:underline" style={{ color: "oklch(0.55 0.04 280)" }}>
-            <ChevronLeft className="w-4 h-4" /> Back
+          <button className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity mb-6" style={{ color: "oklch(0.55 0.04 280)" }}>
+            <ChevronLeft className="w-4 h-4" />
+            {creator?.artistHandle || creator?.name || "Back"}
           </button>
         </Link>
 
-        {/* Main Card */}
-        <div className="rounded-2xl overflow-hidden mb-6" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
-          {/* Cover Art */}
-          <div className="relative h-48 md:h-64 flex items-center justify-center" style={{ background: song.coverArtUrl ? undefined : "linear-gradient(135deg, oklch(0.14 0.04 300), oklch(0.12 0.02 260))" }}>
-            {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" /> : <Music className="w-16 h-16 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />}
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, oklch(0.11 0.015 280))" }} />
-            {/* Play button overlay */}
-            <button onClick={handlePlay} className="absolute w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-105" style={{ background: "oklch(0.75 0.18 85)", boxShadow: "0 0 30px oklch(0.75 0.18 85 / 0.4)" }}>
-              {isPlaying ? <Pause className="w-6 h-6 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} /> : <Play className="w-6 h-6 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} />}
-            </button>
-          </div>
-
-          <div className="p-6">
-            {/* Title & Creator */}
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>{song.title}</h1>
-                {creator && (
-                  <Link href={`/creator/${creator.id}`}>
-                    <span className="text-sm hover:underline" style={{ color: "oklch(0.65 0.2 300)" }}>{creator.artistHandle || creator.name}</span>
-                  </Link>
-                )}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
+          {/* ── LEFT COLUMN ── */}
+          <div className="space-y-5">
+            {/* Cover + Meta */}
+            <div className="flex flex-col sm:flex-row gap-5">
+              <div className="w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, oklch(0.14 0.02 280), oklch(0.18 0.04 300))" }}>
+                {song.coverArtUrl
+                  ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+                  : <Music className="w-20 h-20 opacity-10" style={{ color: "oklch(0.75 0.18 85)" }} />}
               </div>
-              <div className="flex flex-wrap gap-2">
-                {song.genre && <Badge style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)" }}>{song.genre}</Badge>}
-                {song.witnessId && <Badge style={{ background: "oklch(0.75 0.18 85 / 0.2)", color: "oklch(0.75 0.18 85)" }}><Shield className="w-3 h-3 mr-1" />WID</Badge>}
-                {song.aiConsent === "prohibited" && <Badge style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: "oklch(0.65 0.18 25)" }}>AI Prohibited</Badge>}
-                {song.aiConsent === "permitted_attribution" && <Badge style={{ background: "oklch(0.65 0.18 85 / 0.2)", color: "oklch(0.65 0.18 85)" }}>AI w/ Attribution</Badge>}
+              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold leading-tight mb-2"
+                    style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+                    {song.title}
+                  </h1>
+                  {creator && (
+                    <Link href={`/creator/${creator.id}`}>
+                      <div className="flex items-center gap-2 mb-3 hover:opacity-80 cursor-pointer">
+                        <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold"
+                          style={{ background: "oklch(0.2 0.04 280)" }}>
+                          {creator.profilePhotoUrl
+                            ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover" />
+                            : <span style={{ color: "oklch(0.75 0.18 85)" }}>{(creator.artistHandle || creator.name || "?").charAt(0)}</span>}
+                        </div>
+                        <span className="text-sm font-medium" style={{ color: "oklch(0.75 0.04 280)" }}>
+                          {creator.artistHandle || creator.name}
+                        </span>
+                      </div>
+                    </Link>
+                  )}
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {song.genre && <Badge style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.6 0.04 280)", border: "1px solid oklch(0.22 0.02 280)", fontSize: "11px" }}>{song.genre}</Badge>}
+                    {song.bpm && <Badge style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.6 0.04 280)", border: "1px solid oklch(0.22 0.02 280)", fontSize: "11px" }}>{song.bpm} BPM</Badge>}
+                    {song.keySignature && <Badge style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.6 0.04 280)", border: "1px solid oklch(0.22 0.02 280)", fontSize: "11px" }}>{song.keySignature}</Badge>}
+                    {song.witnessId && (
+                      <Badge style={{ background: "oklch(0.65 0.2 300 / 0.15)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)", fontSize: "11px" }}>
+                        <Shield className="w-3 h-3 mr-1" />WID Protected
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    <span className="flex items-center gap-1"><Headphones className="w-3.5 h-3.5" />{song.playCount || 0} plays</span>
+                    <span className="flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" />{comments?.length || 0} comments</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {tipsEnabled && !isOwner && (
+                    <Button size="sm" onClick={() => setTipOpen(true)}
+                      style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                      <DollarSign className="w-3.5 h-3.5 mr-1" />Tip Artist
+                    </Button>
+                  )}
+                  <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
+                    style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
+                    <Download className="w-3.5 h-3.5 mr-1" />Download
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShareOpen(true)}
+                    style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
+                    <Share2 className="w-3.5 h-3.5 mr-1" />Share
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setAiTransformOpen(true)}
+                    style={{ borderColor: "oklch(0.65 0.2 300 / 0.4)", color: "oklch(0.65 0.2 300)" }}>
+                    <Wand2 className="w-3.5 h-3.5 mr-1" />AI Transform
+                  </Button>
+                </div>
               </div>
             </div>
 
-            {/* Metadata */}
-            <div className="flex flex-wrap gap-4 text-xs mb-5" style={{ color: "oklch(0.55 0.04 280)" }}>
-              {song.bpm && <span>BPM: {song.bpm}</span>}
-              {song.keySignature && <span>Key: {song.keySignature}</span>}
-              {song.albumName && <span>Album: {song.albumName}</span>}
-              {song.releaseDate && <span>Released: {song.releaseDate}</span>}
-              {song.isrc && <span>ISRC: {song.isrc}</span>}
-              <span>{song.playCount || 0} plays</span>
+            {/* Player */}
+            <div className="rounded-2xl p-5" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+              <div className="mb-3">
+                <input type="range" min={0} max={duration || 100} value={currentTime} onChange={seek}
+                  disabled={!audioReady} className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                  style={{ background: `linear-gradient(to right, oklch(0.75 0.18 85) ${progressPct}%, oklch(0.2 0.02 280) ${progressPct}%)`, outline: "none" }} />
+                <div className="flex justify-between text-xs mt-1" style={{ color: "oklch(0.45 0.03 280)" }}>
+                  <span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button className="w-8 h-8 flex items-center justify-center opacity-40">
+                    <SkipBack className="w-4 h-4" style={{ color: "oklch(0.75 0.04 280)" }} />
+                  </button>
+                  <button onClick={togglePlay} disabled={!audioReady && !song.fileUrl}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                    style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                  </button>
+                  <button className="w-8 h-8 flex items-center justify-center opacity-40">
+                    <SkipForward className="w-4 h-4" style={{ color: "oklch(0.75 0.04 280)" }} />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={toggleMute} className="opacity-60 hover:opacity-100">
+                    {muted
+                      ? <VolumeX className="w-4 h-4" style={{ color: "oklch(0.6 0.04 280)" }} />
+                      : <Volume2 className="w-4 h-4" style={{ color: "oklch(0.6 0.04 280)" }} />}
+                  </button>
+                  <input type="range" min={0} max={1} step={0.01} value={muted ? 0 : volume} onChange={changeVolume}
+                    className="w-20 h-1 rounded-full appearance-none cursor-pointer"
+                    style={{ background: `linear-gradient(to right, oklch(0.65 0.04 280) ${(muted ? 0 : volume) * 100}%, oklch(0.2 0.02 280) ${(muted ? 0 : volume) * 100}%)` }} />
+                </div>
+              </div>
             </div>
 
-            {/* Action Bar */}
-            <div className="flex flex-wrap gap-2">
-              <button onClick={() => setLiked(!liked)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors" style={{ background: liked ? "oklch(0.65 0.18 25 / 0.2)" : "oklch(0.16 0.02 280)", color: liked ? "oklch(0.65 0.18 25)" : "oklch(0.6 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
-                <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} /> Like
+            {/* Lyrics */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+              <button className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
+                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
+                <div className="flex items-center gap-2">
+                  {isOwner && !editingLyrics && (
+                    <button onClick={(e) => { e.stopPropagation(); setEditingLyrics(true); setLyricsEdit(song.lyricsText || ""); }}
+                      className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10">
+                      <Edit3 className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
+                    </button>
+                  )}
+                  {showLyrics
+                    ? <ChevronUp className="w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />
+                    : <ChevronDown className="w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />}
+                </div>
               </button>
-              <button onClick={copyLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-white/5" style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.6 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
-                <Copy className="w-3.5 h-3.5" /> Copy Link
-              </button>
-              <button onClick={shareTwitter} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-white/5" style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.6 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
-                <Twitter className="w-3.5 h-3.5" /> Share
-              </button>
-              {tipsEnabled && (
-                <button onClick={() => setTipOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
-                  <DollarSign className="w-3.5 h-3.5" /> Tip Artist
-                </button>
+              {showLyrics && (
+                <div className="px-5 pb-5">
+                  {editingLyrics ? (
+                    <div className="space-y-3">
+                      <Textarea value={lyricsEdit} onChange={(e) => setLyricsEdit(e.target.value)} rows={12}
+                        placeholder="Paste or type lyrics here..." className="font-mono text-sm resize-none"
+                        style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.85 0.02 280)" }} />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => updateLyricsMutation.mutate({ songId: song.id, lyricsText: lyricsEdit })}
+                          disabled={updateLyricsMutation.isPending}
+                          style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                          <Check className="w-3.5 h-3.5 mr-1" />Save
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditingLyrics(false)}
+                          style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
+                          <X className="w-3.5 h-3.5 mr-1" />Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : song.lyricsText ? (
+                    <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "oklch(0.75 0.03 280)" }}>
+                      {song.lyricsText}
+                    </pre>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-sm" style={{ color: "oklch(0.4 0.03 280)" }}>No lyrics added yet.</p>
+                      {isOwner && (
+                        <button onClick={() => setEditingLyrics(true)} className="text-xs mt-2 hover:underline"
+                          style={{ color: "oklch(0.65 0.2 300)" }}>
+                          + Add lyrics
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
-            </div>
-
-            {/* Unique URL */}
-            <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
-              <span className="text-xs flex-1 truncate font-mono" style={{ color: "oklch(0.5 0.03 280)" }}>{window.location.href}</span>
-              <button onClick={copyLink} className="text-xs flex-shrink-0 hover:underline" style={{ color: "oklch(0.65 0.2 300)" }}>Copy</button>
             </div>
 
             {/* Witness ID */}
             {song.witnessId && (
-              <div className="mt-4 p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.75 0.18 85 / 0.2)" }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <Shield className="w-3.5 h-3.5" style={{ color: "oklch(0.75 0.18 85)" }} />
-                  <span className="text-xs font-semibold" style={{ color: "oklch(0.75 0.18 85)", fontFamily: "'Orbitron', monospace" }}>WITNESS ID — PROVENANCE VERIFIED</span>
+              <div className="rounded-2xl p-5" style={{ background: "oklch(0.65 0.2 300 / 0.06)", border: "1px solid oklch(0.65 0.2 300 / 0.25)" }}>
+                <div className="flex items-start gap-3">
+                  <Shield className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.65 0.2 300)" }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.2 300)" }}>Witness ID Certified</p>
+                    <p className="text-xs font-mono break-all" style={{ color: "oklch(0.55 0.04 280)" }}>{song.witnessId}</p>
+                    {song.createdAt && (
+                      <p className="text-xs mt-1" style={{ color: "oklch(0.45 0.03 280)" }}>
+                        Registered {new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                      </p>
+                    )}
+                    {song.certificateUrl && (
+                      <a href={song.certificateUrl} target="_blank" rel="noreferrer"
+                        className="flex items-center gap-1 text-xs mt-2 hover:underline" style={{ color: "oklch(0.65 0.2 300)" }}>
+                        <ExternalLink className="w-3 h-3" />View Certificate
+                      </a>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs font-mono" style={{ color: "oklch(0.55 0.04 280)" }}>{song.witnessId}</p>
-                {song.fileHash && <p className="text-xs font-mono mt-1 truncate" style={{ color: "oklch(0.45 0.03 280)" }}>SHA-256: {song.fileHash}</p>}
               </div>
             )}
           </div>
-        </div>
 
-        {/* Comments */}
-        <div className="rounded-2xl p-6" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
-          <div className="flex items-center gap-2 mb-5">
-            <MessageSquare className="w-4 h-4" style={{ color: "oklch(0.65 0.2 300)" }} />
-            <h2 className="font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Comments ({comments?.length ?? 0})</h2>
-          </div>
-
-          {/* Add Comment */}
-          <div className="mb-6 space-y-2">
-            <Input
-              placeholder="Your name (optional)"
-              value={authorName}
-              onChange={e => setAuthorName(e.target.value)}
-              style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }}
-            />
-            <Textarea
-              placeholder="Leave a comment..."
-              value={commentText}
-              onChange={e => setCommentText(e.target.value)}
-              rows={3}
-              style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)", resize: "none" }}
-            />
-            <Button size="sm" onClick={handleComment} disabled={!commentText.trim() || commentMutation.isPending} style={{ background: "oklch(0.65 0.2 300)", color: "white" }}>
-              {commentMutation.isPending ? "Posting..." : "Post Comment"}
-            </Button>
-          </div>
-
-          {/* Comment List */}
-          {!comments?.length ? (
-            <p className="text-sm text-center py-6" style={{ color: "oklch(0.45 0.03 280)" }}>No comments yet. Be the first to leave one.</p>
-          ) : (
-            <div className="space-y-3">
-              {comments.map((c: any) => (
-                <div key={c.id} className="p-3 rounded-xl" style={{ background: "oklch(0.13 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold" style={{ color: "oklch(0.75 0.18 85)" }}>{c.authorName || "Anonymous"}</span>
-                    <span className="text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>{new Date(c.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <p className="text-sm" style={{ color: "oklch(0.75 0.04 280)" }}>{c.content}</p>
-                </div>
-              ))}
+          {/* ── RIGHT COLUMN ── */}
+          <div className="space-y-5">
+            {/* Emoji Reactions */}
+            <div className="rounded-2xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {REACTIONS.map(emoji => (
+                  <button key={emoji} onClick={() => handleReaction(emoji)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all hover:scale-110 active:scale-95"
+                    style={{
+                      background: myReactions.has(emoji) ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.16 0.02 280)",
+                      border: `1px solid ${myReactions.has(emoji) ? "oklch(0.75 0.18 85 / 0.4)" : "oklch(0.22 0.02 280)"}`,
+                    }}>
+                    <span>{emoji}</span>
+                    {reactions[emoji] ? <span className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>{reactions[emoji]}</span> : null}
+                  </button>
+                ))}
+              </div>
             </div>
-          )}
+
+            {/* Comments */}
+            <div className="rounded-2xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+              <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>
+                {comments?.length || 0} Comment{comments?.length !== 1 ? "s" : ""}
+              </h3>
+              <div className="flex gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                  style={{ background: "oklch(0.2 0.04 280)" }}>
+                  {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Input placeholder="Write a comment..." value={commentText} onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey && commentText.trim()) {
+                        e.preventDefault();
+                        commentMutation.mutate({ songId: song.id, content: commentText.trim(), authorName: user?.name || undefined });
+                      }
+                    }}
+                    style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.85 0.02 280)", fontSize: "13px" }} />
+                  {commentText.trim() && (
+                    <Button size="sm"
+                      onClick={() => commentMutation.mutate({ songId: song.id, content: commentText.trim(), authorName: user?.name || undefined })}
+                      disabled={commentMutation.isPending}
+                      style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                      Post
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                {comments?.map((c: any) => (
+                  <div key={c.id} className="flex gap-2">
+                    <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                      style={{ background: "oklch(0.18 0.03 280)" }}>
+                      <span style={{ color: "oklch(0.65 0.04 280)" }}>{(c.authorName || "A").charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-medium" style={{ color: "oklch(0.7 0.04 280)" }}>{c.authorName || "Anonymous"}</span>
+                        <span className="text-[10px]" style={{ color: "oklch(0.35 0.02 280)" }}>
+                          {new Date(c.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm" style={{ color: "oklch(0.7 0.03 280)" }}>{c.content}</p>
+                    </div>
+                  </div>
+                ))}
+                {(!comments || comments.length === 0) && (
+                  <p className="text-xs text-center py-4" style={{ color: "oklch(0.4 0.03 280)" }}>Be the first to comment</p>
+                )}
+              </div>
+            </div>
+
+            {/* Related */}
+            {relatedData && relatedData.length > 0 && (
+              <div className="rounded-2xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Related</h3>
+                <div className="space-y-1">
+                  {relatedData.map((item: any) => <RelatedCard key={item.song.id} item={item} />)}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -239,30 +495,84 @@ export default function SongDetailPage() {
         <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
-              Tip {creator?.artistHandle || creator?.name || "the Artist"}
+              Tip {creator?.artistHandle || creator?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>Support this creator directly. 90% goes to the artist, 10% supports the platform.</p>
+            <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>90% goes directly to the artist. 10% supports Living Nexus.</p>
             <div className="grid grid-cols-4 gap-2">
               {["1", "5", "10", "25"].map(amt => (
-                <button key={amt} onClick={() => setTipAmount(amt)} className="py-2 rounded-lg text-sm font-medium transition-all" style={{ background: tipAmount === amt ? "oklch(0.75 0.18 85)" : "oklch(0.16 0.02 280)", color: tipAmount === amt ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
+                <button key={amt} onClick={() => setTipAmount(amt)} className="py-2 rounded-lg text-sm font-medium transition-all"
+                  style={{ background: tipAmount === amt ? "oklch(0.75 0.18 85)" : "oklch(0.16 0.02 280)", color: tipAmount === amt ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
                   ${amt}
                 </button>
               ))}
             </div>
-            <Input
-              type="number"
-              placeholder="Custom amount ($)"
-              value={tipAmount}
-              onChange={e => setTipAmount(e.target.value)}
-              min="1"
-              step="0.01"
-              style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }}
-            />
-            <Button className="w-full" onClick={handleTip} disabled={tipMutation.isPending} style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+            <Input type="number" placeholder="Custom amount ($)" value={tipAmount} onChange={e => setTipAmount(e.target.value)} min="1" step="0.01"
+              style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }} />
+            <Button className="w-full" onClick={handleTip} disabled={tipMutation.isPending}
+              style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Tip`}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Modal */}
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Share Track</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <Input value={window.location.href} readOnly
+                style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.7 0.03 280)", fontSize: "12px" }} />
+              <Button onClick={copyLink} style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)", flexShrink: 0 }}>
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Listening to "${song.title}" on Living Nexus`)}&url=${encodeURIComponent(window.location.href)}`}
+              target="_blank" rel="noreferrer">
+              <Button variant="outline" className="w-full" style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
+                <Twitter className="w-4 h-4 mr-2" />Share on X
+              </Button>
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Transform Modal */}
+      <Dialog open={aiTransformOpen} onOpenChange={setAiTransformOpen}>
+        <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.65 0.2 300 / 0.4)" }}>
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.2 300)" }}>
+              <Wand2 className="w-5 h-5 inline mr-2" />AI Transform
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-center py-4">
+            <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center"
+              style={{ background: "oklch(0.65 0.2 300 / 0.1)", border: "2px solid oklch(0.65 0.2 300 / 0.3)" }}>
+              <Wand2 className="w-10 h-10" style={{ color: "oklch(0.65 0.2 300)" }} />
+            </div>
+            <div>
+              <p className="text-base font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.85 0.02 280)" }}>
+                Transform Your Track with AI
+              </p>
+              <p className="text-sm leading-relaxed" style={{ color: "oklch(0.55 0.04 280)" }}>
+                Remix, re-style, or reimagine your song in a completely different genre or aesthetic — all within Living Nexus. This feature is coming soon.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {["Genre Shift", "Tempo Remix", "Vocal Style", "Instrumental", "Stem Separation"].map(feat => (
+                <Badge key={feat} style={{ background: "oklch(0.65 0.2 300 / 0.1)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)", fontSize: "11px" }}>
+                  {feat}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>
+              AI transforms respect your Witness ID provenance — all derivatives are linked back to the original.
+            </p>
           </div>
         </DialogContent>
       </Dialog>

@@ -11,6 +11,7 @@ import {
   getSongsByUser, getSongWithCreator, getTipsBySong,
   getUserById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
+  updateSongLyrics, getRelatedSongs,
   updateUserProfile, updateUserStripeAccount,
 } from "./db";
 
@@ -157,6 +158,13 @@ export const appRouter = router({
       if (!song?.fileUrl) throw new Error("Song file not found");
       await recordDownload({ songId: input.songId, userId: ctx.user?.id });
       return { url: song.fileUrl };
+    }),
+    updateLyrics: protectedProcedure.input(z.object({ songId: z.number(), lyricsText: z.string().max(10000) })).mutation(async ({ ctx, input }) => {
+      await updateSongLyrics(input.songId, ctx.user.id, input.lyricsText);
+      return { success: true };
+    }),
+    getRelated: publicProcedure.input(z.object({ songId: z.number(), genre: z.string().optional() })).query(async ({ input }) => {
+      return getRelatedSongs(input.songId, input.genre, 6);
     }),
   }),
 

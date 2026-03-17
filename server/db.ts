@@ -1,4 +1,4 @@
-import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, desc, eq, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser, comments, downloads, licenses,
@@ -231,4 +231,25 @@ export async function recordSlotPurchase(data: { userId: number; stripePaymentIn
   if (!db) throw new Error("Database unavailable");
   await db.insert(slotPurchases).values(data);
   await db.execute(sql`UPDATE users SET songSlotsTotal = songSlotsTotal + ${data.slotsPurchased} WHERE id = ${data.userId}`);
+}
+
+export async function updateSongLyrics(songId: number, userId: number, lyricsText: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ lyricsText, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+}
+
+export async function getRelatedSongs(songId: number, genre?: string | null, limit = 6) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions: any[] = [eq(songs.isPublic, true), ne(songs.id, songId)];
+  if (genre) conditions.push(eq(songs.genre, genre));
+  return db.select({
+    song: songs,
+    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl },
+  }).from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(...conditions))
+    .orderBy(desc(songs.playCount))
+    .limit(limit);
 }
