@@ -90,3 +90,6 @@
 ## Deferred (out of credits)
 - [ ] Build /verify/:witnessId public provenance page
 - [ ] Wire Follow button on creator profiles (follows table + mutations)
+
+## Phase 12: Seed Track Artist Name Update
+- [x] Update 8 Explore page seed track artist names (Celestial Drift→Nova Kaine, Golden Hour Protocol→VLTG3, Midnight Sermon→Seraph Cole, Sacred Frequencies→Aura Vessel, Throne of Bass→D-Rex, Violet Prophecy→Lyric Haze, Architect of Sound→Marco Spire, Divine Static→Ghost Lumen)
