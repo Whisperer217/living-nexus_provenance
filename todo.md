@@ -53,3 +53,10 @@
 - [x] CreatorProfilePage handlePlay now uses global addAndPlay() instead of local Audio object
 - [x] HelmetProvider added to main.tsx for OG meta tag support
 - [x] TypeScript: 0 errors | Vitest: 1/1 passing
+
+## Phase 7: Routing & Player Fixes
+- [x] Add /archive route alias (maps to LikedPage/Archive)
+- [x] Add /listen-together route alias (maps to TogetherPage)
+- [x] Rewrite ExplorePage to load real DB songs via trpc.songs.discover — uses addAndPlay() for global player
+- [x] ExplorePage now shows loading skeleton, empty state, play count, WID badge, artist/genre links
+- [x] TypeScript: 0 errors | Vitest: 1/1 passing

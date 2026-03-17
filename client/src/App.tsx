@@ -28,6 +28,8 @@ function Router() {
         <Route path="/together" component={TogetherPage} />
         <Route path="/upload" component={UploadPage} />
         <Route path="/liked" component={LikedPage} />
+        <Route path="/archive" component={LikedPage} />
+        <Route path="/listen-together" component={TogetherPage} />
         <Route path="/song/:id" component={SongDetailPage} />
         <Route path="/track/:id" component={TrackPage} />
         <Route path="/creator/:id" component={CreatorProfilePage} />
