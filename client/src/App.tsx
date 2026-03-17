@@ -1,42 +1,62 @@
+/* ═══════════════════════════════════════════════════════════════════
+   LIVING NEXUS — App.tsx
+   Divine Noir: Art Deco × Cosmic Mysticism
+   Dark theme, Cinzel + DM Sans, Gold + Violet palette
+═══════════════════════════════════════════════════════════════════ */
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-
+import { PlayerProvider } from "./contexts/PlayerContext";
+import MainLayout from "./components/layout/MainLayout";
+import HomePage from "./pages/HomePage";
+import ExplorePage from "./pages/ExplorePage";
+import TogetherPage from "./pages/TogetherPage";
+import ProfilePage from "./pages/ProfilePage";
+import UploadPage from "./pages/UploadPage";
+import LikedPage from "./pages/LikedPage";
+import NotFound from "./pages/NotFound";
 
 function Router() {
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <MainLayout>
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="/explore" component={ExplorePage} />
+        <Route path="/together" component={TogetherPage} />
+        <Route path="/profile" component={ProfilePage} />
+        <Route path="/upload" component={UploadPage} />
+        <Route path="/liked" component={LikedPage} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </MainLayout>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
-function App() {
+export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <PlayerProvider>
+            <Toaster
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: "oklch(0.14 0.013 280)",
+                  border: "1px solid oklch(1 0 0 / 12%)",
+                  color: "oklch(0.94 0.006 280)",
+                  fontFamily: "'DM Sans', sans-serif",
+                },
+              }}
+            />
+            <Router />
+          </PlayerProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
 }
-
-export default App;
