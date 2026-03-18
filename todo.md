@@ -112,3 +112,10 @@
 - [x] Add songs.updateStatus tRPC procedure to routers.ts
 - [x] Add status dropdown to Dashboard My Songs tab (color-coded: Draft=amber, Published=green, Unlisted=purple, Deleted=red)
 - [x] Write Vitest test for songs.updateStatus (4 tests passing)
+
+## Phase 16: Archive Page Shell
+- [x] Review existing LikedPage/Archive component and /archive route in App.tsx
+- [x] Build new ArchivePage: auth guard (redirect to sign-in if not logged in), list user's own tracks
+- [x] Each row: cover art, title, genre, upload date, status tag (color-coded)
+- [x] Register /archive route in App.tsx (replaces LikedPage on /archive)
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

@@ -10,6 +10,7 @@ import ExplorePage from "./pages/ExplorePage";
 import TogetherPage from "./pages/TogetherPage";
 import UploadPage from "./pages/UploadPage";
 import LikedPage from "./pages/LikedPage";
+import ArchivePage from "./pages/ArchivePage";
 import TrackPage from "./pages/TrackPage";
 import SongDetailPage from "./pages/SongDetailPage";
 import CreatorProfilePage from "./pages/CreatorProfilePage";
@@ -28,7 +29,7 @@ function Router() {
         <Route path="/together" component={TogetherPage} />
         <Route path="/upload" component={UploadPage} />
         <Route path="/liked" component={LikedPage} />
-        <Route path="/archive" component={LikedPage} />
+        <Route path="/archive" component={ArchivePage} />
         <Route path="/listen-together" component={TogetherPage} />
         <Route path="/song/:id" component={SongDetailPage} />
         <Route path="/track/:id" component={TrackPage} />
