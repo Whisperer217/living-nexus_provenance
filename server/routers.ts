@@ -16,6 +16,7 @@ import {
   updateUserProfile, updateUserStripeAccount,
   createAiTransform, updateAiTransform, getAiTransformById,
   getAiTransformsBySong, getAiTransformsByUser,
+  getLikedSongs, toggleLike, getLikeStatus,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -265,8 +266,17 @@ export const appRouter = router({
     getMyTransforms: protectedProcedure.query(async ({ ctx }) => {
       return getAiTransformsByUser(ctx.user.id);
     }),
+    getLiked: protectedProcedure.query(async ({ ctx }) => {
+      return getLikedSongs(ctx.user.id);
+    }),
+    toggleLike: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => {
+      return toggleLike(ctx.user.id, input.songId);
+    }),
+    getLikeStatus: protectedProcedure.input(z.object({ songId: z.number() })).query(async ({ ctx, input }) => {
+      const liked = await getLikeStatus(ctx.user.id, input.songId);
+      return { liked };
+    }),
   }),
-
   comments: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),
     add: publicProcedure.input(z.object({ songId: z.number(), content: z.string().min(1).max(1000), authorName: z.string().max(128).optional() })).mutation(async ({ ctx, input }) => {

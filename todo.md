@@ -124,3 +124,12 @@
 - [x] Add publish toggle button to each track row on /archive page (Draft ↔ Published)
 - [x] Optimistic update via songs.updateStatus tRPC procedure (onMutate/onError/onSettled pattern)
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 18: Separate /liked and /archive Pages
+- [x] Audit likes DB schema, tRPC procedures, and existing LikedPage
+- [x] Created likes table in DB (userId, songId, createdAt, unique constraint)
+- [x] Added getLikedSongs, toggleLike, getLikeStatus helpers to db.ts
+- [x] Added songs.getLiked, songs.toggleLike, songs.getLikeStatus tRPC procedures
+- [x] Rewrote LikedPage to show tracks liked from other creators (not own uploads)
+- [x] /liked → LikedPage and /archive → ArchivePage already separately registered in App.tsx
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

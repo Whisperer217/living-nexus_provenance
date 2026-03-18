@@ -185,3 +185,13 @@ export const aiTransforms = mysqlTable("aiTransforms", {
 
 export type AiTransform = typeof aiTransforms.$inferSelect;
 export type InsertAiTransform = typeof aiTransforms.$inferInsert;
+// ─── Likes ────────────────────────────────────────────────────────────────────
+export const likes = mysqlTable("likes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),   // the user who liked
+  songId: int("songId").notNull(),   // the song that was liked
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Like = typeof likes.$inferSelect;
+export type InsertLike = typeof likes.$inferInsert;

@@ -380,3 +380,58 @@ export async function getTransformsByWitnessId(witnessId: string) {
     .orderBy(desc(aiTransforms.createdAt))
     .limit(20);
 }
+
+// ─── Likes ────────────────────────────────────────────────────────────────────
+
+export async function getLikedSongs(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { likes } = await import("../drizzle/schema");
+  return db
+    .select({
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+      likedAt: likes.createdAt,
+    })
+    .from(likes)
+    .innerJoin(songs, and(eq(likes.songId, songs.id), eq(songs.status, "Published")))
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(eq(likes.userId, userId))
+    .orderBy(desc(likes.createdAt))
+    .limit(100);
+}
+
+export async function toggleLike(userId: number, songId: number): Promise<{ liked: boolean }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { likes } = await import("../drizzle/schema");
+  const existing = await db
+    .select({ id: likes.id })
+    .from(likes)
+    .where(and(eq(likes.userId, userId), eq(likes.songId, songId)))
+    .limit(1);
+  if (existing.length > 0) {
+    await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.songId, songId)));
+    return { liked: false };
+  } else {
+    await db.insert(likes).values({ userId, songId });
+    return { liked: true };
+  }
+}
+
+export async function getLikeStatus(userId: number, songId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const { likes } = await import("../drizzle/schema");
+  const result = await db
+    .select({ id: likes.id })
+    .from(likes)
+    .where(and(eq(likes.userId, userId), eq(likes.songId, songId)))
+    .limit(1);
+  return result.length > 0;
+}
