@@ -119,3 +119,8 @@
 - [x] Each row: cover art, title, genre, upload date, status tag (color-coded)
 - [x] Register /archive route in App.tsx (replaces LikedPage on /archive)
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 17: Archive Publish Toggle
+- [x] Add publish toggle button to each track row on /archive page (Draft ↔ Published)
+- [x] Optimistic update via songs.updateStatus tRPC procedure (onMutate/onError/onSettled pattern)
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing
