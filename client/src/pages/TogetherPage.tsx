@@ -102,7 +102,7 @@ export default function TogetherPage() {
         {!state.room && (
           <div className="rounded-2xl p-6 mb-6 border"
             style={{
-              background: "linear-gradient(135deg, oklch(0.14 0.013 280), oklch(0.11 0.012 280))",
+              background: "linear-gradient(135deg, oklch(0.095 0.028 275), oklch(0.10 0.025 265))",
               borderColor: "oklch(0.55 0.22 295 / 30%)",
             }}>
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -140,7 +140,7 @@ export default function TogetherPage() {
         {/* ── Active room ── */}
         {state.room && (
           <div className="rounded-2xl p-5 mb-6 border border-white/[0.1]"
-            style={{ background: "oklch(0.14 0.013 280)" }}>
+            style={{ background: "oklch(0.095 0.028 275)" }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="pulse-dot" />
@@ -169,7 +169,7 @@ export default function TogetherPage() {
             <div className="flex flex-wrap gap-2 mb-4">
               {state.room.listeners.map((l, i) => (
                 <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[12px] font-body text-white/70"
-                  style={{ background: "oklch(0.18 0.014 280)" }}>
+                  style={{ background: "oklch(0.13 0.028 270)" }}>
                   <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
                     style={{ background: COLORS[i % COLORS.length] }}>
                     {l.charAt(0)}
@@ -182,7 +182,7 @@ export default function TogetherPage() {
             {/* Chat */}
             <div ref={chatRef}
               className="rounded-xl p-4 max-h-[200px] overflow-y-auto flex flex-col gap-2 mb-3"
-              style={{ background: "oklch(0.11 0.012 280)" }}>
+              style={{ background: "oklch(0.10 0.025 265)" }}>
               {messages.length === 0 && (
                 <div className="text-[12px] text-white/20 text-center font-body py-4">
                   The sanctuary awaits… say something 🎵
@@ -226,7 +226,7 @@ export default function TogetherPage() {
               onClick={() => joinRoom(room.code)}
               className="rounded-xl overflow-hidden border border-white/[0.07] cursor-pointer
                 hover:border-[#A78BFA]/30 hover:-translate-y-1 transition-all group"
-              style={{ background: "oklch(0.14 0.013 280)" }}
+              style={{ background: "oklch(0.095 0.028 275)" }}
             >
               <div className="aspect-video relative flex items-center justify-center text-5xl"
                 style={{ background: "linear-gradient(135deg,#1a0a3e,#0a1a3e)" }}>

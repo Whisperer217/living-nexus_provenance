@@ -139,7 +139,7 @@ export default function TrackPage() {
       <div className="rounded-2xl overflow-hidden border border-white/[0.08] mb-5">
         {/* Art */}
         <div className="relative h-[220px] flex items-center justify-center"
-          style={{ background: track.bg || "linear-gradient(135deg, oklch(0.11 0.012 280), oklch(0.18 0.014 280))" }}>
+          style={{ background: track.bg || "linear-gradient(135deg, oklch(0.10 0.025 265), oklch(0.13 0.028 270))" }}>
           {track.artUrl ? (
             <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover absolute inset-0" />
           ) : (

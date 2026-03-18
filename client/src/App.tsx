@@ -52,7 +52,7 @@ export default function App() {
               theme="dark"
               toastOptions={{
                 style: {
-                  background: "oklch(0.14 0.013 280)",
+                  background: "oklch(0.095 0.028 275)",
                   border: "1px solid oklch(1 0 0 / 12%)",
                   color: "oklch(0.94 0.006 280)",
                   fontFamily: "'DM Sans', sans-serif",

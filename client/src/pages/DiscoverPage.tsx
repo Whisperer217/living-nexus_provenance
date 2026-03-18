@@ -46,10 +46,12 @@ export default function DiscoverPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.08 0.015 280)" }}>
+    <div className="min-h-screen" style={{ background: "oklch(0.085 0.022 255)" }}>
       {/* Hero */}
-      <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, oklch(0.10 0.02 280) 0%, oklch(0.12 0.04 300) 50%, oklch(0.10 0.02 260) 100%)" }}>
+      <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, oklch(0.095 0.025 260) 0%, oklch(0.11 0.04 295) 50%, oklch(0.095 0.025 255) 100%)" }}>
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, oklch(0.75 0.18 85 / 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.65 0.2 300 / 0.2) 0%, transparent 50%)" }} />
+        {/* Radial depth: dark center bleeding to deep purple/blue edge */}
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 80% at 50% 50%, transparent 0%, oklch(0.085 0.022 255 / 0.3) 50%, oklch(0.07 0.08 290 / 0.6) 100%)" }} />
         <div className="relative container py-16 md:py-24">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2 mb-4">
@@ -67,7 +69,7 @@ export default function DiscoverPage() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/upload">
-                <Button size="lg" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                <Button size="lg" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.085 0.022 255)", fontFamily: "'Cinzel', serif" }}>
                   Upload Your Music
                 </Button>
               </Link>
@@ -90,7 +92,7 @@ export default function DiscoverPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-10"
-            style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }}
+            style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }}
           />
         </div>
 
@@ -101,7 +103,7 @@ export default function DiscoverPage() {
             <button
               onClick={() => setActiveGenre(undefined)}
               className="px-4 py-2 rounded-full text-sm font-medium transition-all"
-              style={{ background: !activeGenre ? "oklch(0.75 0.18 85)" : "oklch(0.14 0.015 280)", color: !activeGenre ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}
+              style={{ background: !activeGenre ? "oklch(0.75 0.18 85)" : "oklch(0.11 0.025 270)", color: !activeGenre ? "oklch(0.085 0.022 255)" : "oklch(0.7 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}
             >
               All
             </button>
@@ -110,7 +112,7 @@ export default function DiscoverPage() {
                 key={genre}
                 onClick={() => setActiveGenre(genre === activeGenre ? undefined : genre)}
                 className="px-4 py-2 rounded-full text-sm font-medium transition-all"
-                style={{ background: activeGenre === genre ? "oklch(0.75 0.18 85)" : "oklch(0.14 0.015 280)", color: activeGenre === genre ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)", border: `1px solid ${activeGenre === genre ? "oklch(0.75 0.18 85)" : "oklch(0.25 0.02 280)"}` }}
+                style={{ background: activeGenre === genre ? "oklch(0.75 0.18 85)" : "oklch(0.11 0.025 270)", color: activeGenre === genre ? "oklch(0.085 0.022 255)" : "oklch(0.7 0.04 280)", border: `1px solid ${activeGenre === genre ? "oklch(0.75 0.18 85)" : "oklch(0.25 0.02 280)"}` }}
               >
                 {genre}
               </button>
@@ -131,14 +133,14 @@ export default function DiscoverPage() {
           {songsLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="rounded-xl animate-pulse" style={{ background: "oklch(0.12 0.015 280)", height: 220 }} />
+                <div key={i} className="rounded-xl animate-pulse" style={{ background: "oklch(0.095 0.028 275)", height: 220 }} />
               ))}
             </div>
           ) : !songs?.length ? (
             <div className="text-center py-16" style={{ color: "oklch(0.5 0.03 280)" }}>
               <Music className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>No songs yet. Be the first to upload.</p>
-              <Link href="/upload"><Button className="mt-4" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>Upload Now</Button></Link>
+              <Link href="/upload"><Button className="mt-4" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.085 0.022 255)" }}>Upload Now</Button></Link>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -150,13 +152,13 @@ export default function DiscoverPage() {
                   onClick={() => handlePlay(item)}
                   className="group relative rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02]"
                   style={{
-                    background: "oklch(0.12 0.015 280)",
+                    background: "oklch(0.095 0.028 275)",
                     border: `1px solid ${isActive ? "oklch(0.75 0.18 85 / 0.8)" : "oklch(0.2 0.015 280)"}`,
                     outline: isActive ? "2px solid oklch(0.75 0.18 85 / 0.6)" : "none",
                     outlineOffset: "1px"
                   }}
                 >
-                  <div className="relative aspect-square" style={{ background: item.song.coverArtUrl ? undefined : "linear-gradient(135deg, oklch(0.15 0.03 280), oklch(0.20 0.05 300))" }}>
+                  <div className="relative aspect-square" style={{ background: item.song.coverArtUrl ? undefined : "linear-gradient(135deg, oklch(0.11 0.03 275), oklch(0.15 0.05 290))" }}>
                     {item.song.coverArtUrl ? (
                       <img src={item.song.coverArtUrl} alt={item.song.title} className="w-full h-full object-cover" />
                     ) : (
@@ -175,7 +177,7 @@ export default function DiscoverPage() {
                           <div className="flex items-end gap-[2px] h-5">
                             {[1,2,3,4].map(i => (
                               <div key={i} className="w-[3px] rounded-full" style={{
-                                background: "oklch(0.08 0.015 280)",
+                                background: "oklch(0.085 0.022 255)",
                                 height: "40%",
                                 animation: `waveBar 0.7s ease-in-out ${i * 0.12}s infinite alternate`
                               }} />
@@ -186,7 +188,7 @@ export default function DiscoverPage() {
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-opacity ${
                           isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                         }`} style={{ background: "oklch(0.75 0.18 85)" }}>
-                          <Play className="w-5 h-5 fill-current" style={{ color: "oklch(0.08 0.015 280)" }} />
+                          <Play className="w-5 h-5 fill-current" style={{ color: "oklch(0.085 0.022 255)" }} />
                         </div>
                       )}
                     </div>
@@ -220,7 +222,7 @@ export default function DiscoverPage() {
           {creatorsLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="rounded-xl animate-pulse" style={{ background: "oklch(0.12 0.015 280)", height: 140 }} />
+                <div key={i} className="rounded-xl animate-pulse" style={{ background: "oklch(0.095 0.028 275)", height: 140 }} />
               ))}
             </div>
           ) : !creators?.length ? (
@@ -232,7 +234,7 @@ export default function DiscoverPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {creators.slice(0, 12).map((creator) => (
                 <Link key={creator.id} href={`/creator/${creator.id}`}>
-                  <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+                  <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)" }}>
                     <div className="w-14 h-14 rounded-full mx-auto mb-2 overflow-hidden flex items-center justify-center" style={{ background: "oklch(0.18 0.025 280)", border: "2px solid oklch(0.75 0.18 85 / 0.3)" }}>
                       {creator.profilePhotoUrl ? (
                         <img src={creator.profilePhotoUrl} alt={creator.name || ""} className="w-full h-full object-cover" />
@@ -258,7 +260,7 @@ export default function DiscoverPage() {
             { icon: Music, title: "Creator-Owned", desc: "You own your music. Platform takes 10% on tips only. No royalty splits, no hidden fees on your catalog." },
             { icon: Users, title: "Tip Directly", desc: "Fans tip creators directly via Stripe Connect. Funds route to your bank account with full identity verification." },
           ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-xl p-6" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+            <div key={title} className="rounded-xl p-6" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)" }}>
               <Icon className="w-6 h-6 mb-3" style={{ color: "oklch(0.75 0.18 85)" }} />
               <h3 className="font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>{title}</h3>
               <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>{desc}</p>

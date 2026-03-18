@@ -39,7 +39,7 @@ export default function TipModal({ track, onClose }: Props) {
       <div
         className="w-[380px] max-w-[90vw] rounded-2xl p-7 relative animate-fade-up"
         style={{
-          background: "oklch(0.14 0.013 280)",
+          background: "oklch(0.095 0.028 275)",
           border: "1px solid oklch(1 0 0 / 12%)",
           boxShadow: "0 24px 80px rgba(0,0,0,0.8)",
         }}
@@ -57,7 +57,7 @@ export default function TipModal({ track, onClose }: Props) {
 
         {/* Artist info */}
         <div className="flex items-center gap-3 rounded-xl p-3 mb-5"
-          style={{ background: "oklch(0.18 0.014 280)" }}>
+          style={{ background: "oklch(0.13 0.028 270)" }}>
           <div className="w-11 h-11 rounded-full flex items-center justify-center text-lg overflow-hidden flex-shrink-0"
             style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}>
             {track.artUrl && track.artType !== "video"

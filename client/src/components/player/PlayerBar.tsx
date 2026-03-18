@@ -40,13 +40,13 @@ export default function PlayerBar() {
 
   return (
     <div className="flex-shrink-0 h-[82px] flex items-center px-4 gap-4 relative z-20
-      bg-[oklch(0.11_0.012_280)] border-t border-white/[0.07]"
-      style={{ boxShadow: "0 -4px 40px rgba(0,0,0,0.6)" }}
+      bg-[oklch(0.10_0.025_265)] border-t border-white/[0.06]"
+      style={{ boxShadow: "0 -4px 40px rgba(0,0,0,0.7), 0 -4px 32px oklch(0.55 0.22 295 / 0.10), 0 -1px 8px oklch(0.82 0.14 85 / 0.08)" }}
     >
       {/* ── Track info ── */}
       <div className="flex items-center gap-3 w-[220px] flex-shrink-0 min-w-0">
         <div className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl"
-          style={{ background: currentTrack?.bg || "oklch(0.14 0.013 280)" }}>
+          style={{ background: currentTrack?.bg || "oklch(0.13 0.028 270)" }}>
           {currentTrack?.artUrl && currentTrack.artType !== "video"
             ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
             : currentTrack?.artUrl && currentTrack.artType === "video"

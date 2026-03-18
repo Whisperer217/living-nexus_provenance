@@ -60,11 +60,11 @@
 }
 
 :root {
-  /* ── Divine Noir Palette ── */
-  --void:   oklch(0.08 0.01 280);   /* #06060F — primordial darkness */
-  --void-2: oklch(0.11 0.012 280);  /* #0E0E1A — sidebar */
-  --void-3: oklch(0.14 0.013 280);  /* #14141F — cards */
-  --void-4: oklch(0.18 0.014 280);  /* #1C1C2A — elevated */
+  /* ── Divine Noir Palette — Deep Navy-Black with Purple Undertone ── */
+  --void:   oklch(0.085 0.022 255);  /* #080d14 — deep navy-black base */
+  --void-2: oklch(0.10 0.025 265);   /* #0a0f1a — sidebar / nav */
+  --void-3: oklch(0.095 0.028 275);  /* #0a0812 — cards / surfaces (purple undertone) */
+  --void-4: oklch(0.13 0.028 270);   /* #101520 — elevated / hover */
 
   --gold:     oklch(0.82 0.14 85);  /* #E8C547 — divine radiance */
   --gold-dim: oklch(0.68 0.12 80);  /* #C9A84C — muted gold */
@@ -181,6 +181,65 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* ── Ambient glow — soft radial halo behind key UI elements ── */
+  .glow-gold {
+    position: relative;
+  }
+  .glow-gold::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 18px 2px oklch(0.82 0.14 85 / 0.12), 0 0 6px 0px oklch(0.82 0.14 85 / 0.18);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-violet {
+    position: relative;
+  }
+  .glow-violet::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 22px 3px oklch(0.55 0.22 295 / 0.14), 0 0 8px 0px oklch(0.68 0.18 295 / 0.20);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Hero radial gradient — dark center bleeding to deep purple/blue edge ── */
+  .hero-radial {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%,
+        oklch(0.085 0.022 255 / 0.0) 0%,
+        oklch(0.085 0.022 255 / 0.6) 45%,
+        oklch(0.09 0.06 280 / 0.85) 70%,
+        oklch(0.07 0.08 290 / 1.0) 100%
+      );
+    pointer-events: none;
+  }
+
+  /* ── Player bar ambient glow ── */
+  .player-glow {
+    box-shadow:
+      0 -4px 32px oklch(0.55 0.22 295 / 0.10),
+      0 -1px 8px oklch(0.82 0.14 85 / 0.08);
+  }
+
+  /* ── WID badge ambient glow ── */
+  .wid-glow {
+    box-shadow: 0 0 10px 1px oklch(0.68 0.18 295 / 0.35), 0 0 4px oklch(0.82 0.14 85 / 0.20);
+  }
+
+  /* ── Track card ambient glow on hover ── */
+  .track-card-glow {
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
+  }
+  .track-card-glow:hover {
+    box-shadow: 0 4px 28px oklch(0.55 0.22 295 / 0.18), 0 2px 10px oklch(0.82 0.14 85 / 0.10);
+    transform: translateY(-1px);
   }
 
   /* ── Noise texture overlay ── */

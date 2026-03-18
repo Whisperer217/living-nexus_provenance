@@ -175,7 +175,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
             </>
           )}
         </div>
-        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.16 0.02 280)" }}>
+        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
           {song.coverArtUrl
             ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
             : <Music className="w-4 h-4 opacity-30" style={{ color: "oklch(0.75 0.18 85)" }} />}
@@ -277,7 +277,7 @@ export default function CreatorProfilePage() {
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.01 280)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.085 0.022 255)" }}>
       <div className="space-y-2 text-center">
         <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "oklch(0.75 0.18 85 / 0.3)" }} />
         <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>Loading profile...</p>
@@ -286,7 +286,7 @@ export default function CreatorProfilePage() {
   );
 
   if (!data) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.01 280)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.085 0.022 255)" }}>
       <div className="text-center">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Creator not found.</p>
         <Link href="/">
@@ -311,7 +311,7 @@ export default function CreatorProfilePage() {
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.08 0.01 280)" }}>
+    <div className="min-h-screen" style={{ background: "oklch(0.085 0.022 255)" }}>
       <Helmet>
         <title>{profileTitle}</title>
         <meta name="description" content={profileDesc} />
@@ -357,7 +357,7 @@ export default function CreatorProfilePage() {
             className="w-28 h-28 rounded-2xl flex-shrink-0 flex items-center justify-center text-3xl font-bold overflow-hidden"
             style={{
               background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
-              outline: "4px solid oklch(0.08 0.01 280)",
+              outline: "4px solid oklch(0.085 0.022 255)",
             }}
           >
             {creator.profilePhotoUrl
@@ -539,7 +539,7 @@ export default function CreatorProfilePage() {
                   onClick={() => setTipAmount(amt)}
                   className="py-2 rounded-lg text-sm font-medium transition-all"
                   style={{
-                    background: tipAmount === amt ? "oklch(0.75 0.18 85)" : "oklch(0.16 0.02 280)",
+                    background: tipAmount === amt ? "oklch(0.75 0.18 85)" : "oklch(0.11 0.025 270)",
                     color: tipAmount === amt ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)",
                     border: "1px solid oklch(0.25 0.02 280)",
                   }}

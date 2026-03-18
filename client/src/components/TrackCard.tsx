@@ -23,15 +23,15 @@ export default function TrackCard({ track, index, onTip }: Props) {
   return (
     <div
       className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
-        border bg-[oklch(0.14_0.013_280)]
+        border bg-[oklch(0.095_0.028_275)] track-card-glow
         ${isActive
-          ? "border-[#E8C547]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6)]"
-          : "border-white/[0.06] hover:border-[#A78BFA]/30 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
+          ? "border-[#E8C547]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
+          : "border-white/[0.05] hover:border-[#A78BFA]/30"
         }`}
       onClick={() => playTrack(index)}
     >
       {/* Artwork */}
-      <div className="aspect-square relative overflow-hidden" style={{ background: track.bg || "oklch(0.18 0.014 280)" }}>
+      <div className="aspect-square relative overflow-hidden" style={{ background: track.bg || "oklch(0.13 0.028 270)" }}>
         {track.artUrl && track.artType !== "video" && (
           <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" />
         )}

@@ -41,7 +41,7 @@ function SongRow({ song, onPlay, onDelete, isOwner }: { song: any; onPlay: () =>
       style={{ borderBottom: "1px solid oklch(0.15 0.01 280)" }}>
       {/* Cover */}
       <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center cursor-pointer"
-        style={{ background: "oklch(0.16 0.02 280)" }} onClick={onPlay}>
+        style={{ background: "oklch(0.11 0.025 270)" }} onClick={onPlay}>
         {song.coverArtUrl
           ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
           : <Music className="w-5 h-5 opacity-30" style={{ color: "oklch(0.75 0.18 85)" }} />}
@@ -151,7 +151,7 @@ export default function LikedPage() {
   };
 
   if (!user) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.01 280)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.085 0.022 255)" }}>
       <div className="text-center space-y-4">
         <Library className="w-16 h-16 mx-auto opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
         <p className="text-lg font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Your Archive</p>
@@ -164,7 +164,7 @@ export default function LikedPage() {
   );
 
   return (
-    <div className="min-h-screen pb-10" style={{ background: "oklch(0.08 0.01 280)" }}>
+    <div className="min-h-screen pb-10" style={{ background: "oklch(0.085 0.022 255)" }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -188,7 +188,7 @@ export default function LikedPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-5 p-1 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+        <div className="flex gap-1 mb-5 p-1 rounded-xl" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.18 0.015 280)" }}>
           {TABS.map(tab => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -216,13 +216,13 @@ export default function LikedPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />
                 <Input placeholder="Search your songs..." value={search} onChange={e => setSearch(e.target.value)}
                   className="pl-9"
-                  style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.85 0.02 280)" }} />
+                  style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.85 0.02 280)" }} />
               </div>
               <div className="flex gap-2">
                 {/* Sort */}
                 <select value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}
                   className="px-3 py-2 rounded-lg text-sm"
-                  style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.7 0.04 280)" }}>
+                  style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.7 0.04 280)" }}>
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
                   <option value="title">Title A–Z</option>
@@ -232,7 +232,7 @@ export default function LikedPage() {
                 {allGenres.length > 0 && (
                   <select value={genreFilter} onChange={e => setGenreFilter(e.target.value)}
                     className="px-3 py-2 rounded-lg text-sm"
-                    style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.7 0.04 280)" }}>
+                    style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.7 0.04 280)" }}>
                     <option value="">All Genres</option>
                     {allGenres.map(g => <option key={g} value={g}>{g}</option>)}
                   </select>
@@ -250,7 +250,7 @@ export default function LikedPage() {
                 ].map(stat => {
                   const Icon = stat.icon;
                   return (
-                    <div key={stat.label} className="rounded-xl p-3 text-center" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                    <div key={stat.label} className="rounded-xl p-3 text-center" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.18 0.015 280)" }}>
                       <Icon className="w-4 h-4 mx-auto mb-1" style={{ color: "oklch(0.55 0.04 280)" }} />
                       <p className="text-lg font-bold" style={{ fontFamily: "'Orbitron', sans-serif", color: "oklch(0.85 0.08 85)" }}>{stat.value}</p>
                       <p className="text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>{stat.label}</p>
@@ -261,7 +261,7 @@ export default function LikedPage() {
             )}
 
             {/* Song list */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.18 0.015 280)" }}>
               {filteredSongs.length === 0 ? (
                 <div className="text-center py-16">
                   <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
@@ -299,7 +299,7 @@ export default function LikedPage() {
 
         {/* Playlists Tab */}
         {activeTab === "playlists" && (
-          <div className="rounded-2xl p-10 text-center" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          <div className="rounded-2xl p-10 text-center" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.18 0.015 280)" }}>
             <ListMusic className="w-14 h-14 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
             <p className="text-base font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Playlists</p>
             <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
@@ -313,7 +313,7 @@ export default function LikedPage() {
 
         {/* History Tab */}
         {activeTab === "history" && (
-          <div className="rounded-2xl p-10 text-center" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          <div className="rounded-2xl p-10 text-center" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.18 0.015 280)" }}>
             <History className="w-14 h-14 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
             <p className="text-base font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Listening History</p>
             <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>

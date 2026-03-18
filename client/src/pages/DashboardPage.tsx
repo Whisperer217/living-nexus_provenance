@@ -104,7 +104,7 @@ export default function DashboardPage() {
             { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "oklch(0.65 0.18 145)" },
             { label: "Tips Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: DollarSign, color: "oklch(0.65 0.18 45)" },
           ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="rounded-xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+            <div key={label} className="rounded-xl p-4" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4" style={{ color }} />
                 <span className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>{label}</span>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           {/* License Status */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)" }}>
             <div className="flex items-center gap-2 mb-3">
               <Shield className="w-4 h-4" style={{ color: "oklch(0.75 0.18 85)" }} />
               <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Creator License</h3>
@@ -138,7 +138,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Song Slots */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)" }}>
             <div className="flex items-center gap-2 mb-3">
               <Music className="w-4 h-4" style={{ color: "oklch(0.65 0.2 300)" }} />
               <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Song Slots</h3>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
               <div className="flex justify-between text-xs mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>
                 <span>{slotsUsed} used</span><span>{slotsTotal} total</span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: "oklch(0.18 0.02 280)" }}>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: "oklch(0.13 0.028 270)" }}>
                 <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "oklch(0.65 0.18 25)" : "oklch(0.65 0.2 300)" }} />
               </div>
             </div>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Tips / Stripe Connect */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)" }}>
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="w-4 h-4" style={{ color: "oklch(0.65 0.18 45)" }} />
               <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Tip Payments</h3>
@@ -188,7 +188,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.2 0.015 280)" }}>
           <button
             onClick={() => setActiveTab("songs")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
@@ -229,7 +229,7 @@ export default function DashboardPage() {
               </Link>
             </div>
             {!songs?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.095 0.028 275)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
                 <p className="text-sm mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>No songs yet. Upload your first track to get started.</p>
                 <Link href="/upload">
@@ -239,9 +239,9 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {songs.map((song: any, idx: number) => (
-                  <div key={song.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                  <div key={song.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.18 0.015 280)" }}>
                     <span className="text-xs w-5 text-center" style={{ color: "oklch(0.45 0.03 280)" }}>{idx + 1}</span>
-                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.16 0.02 280)" }}>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
                       {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" /> : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.75 0.18 85)" }} />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -288,7 +288,7 @@ export default function DashboardPage() {
               </div>
             </div>
             {!transforms?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.11 0.015 280)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.095 0.028 275)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
                 <p className="text-sm mb-2" style={{ color: "oklch(0.5 0.03 280)" }}>No AI transforms yet.</p>
                 <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Open any song page and use the AI Transform button to create a derivative.</p>
@@ -298,10 +298,10 @@ export default function DashboardPage() {
                 {transforms.map((t: any) => {
                   const { label, color } = transformStatusLabel(t.status);
                   return (
-                    <div key={t.id} className="rounded-xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                    <div key={t.id} className="rounded-xl p-4" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.18 0.015 280)" }}>
                       <div className="flex items-start gap-4">
                         {/* Status icon */}
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.16 0.02 280)" }}>
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.11 0.025 270)" }}>
                           {transformStatusIcon(t.status)}
                         </div>
                         {/* Info */}
