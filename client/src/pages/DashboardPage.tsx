@@ -27,6 +27,16 @@ export default function DashboardPage() {
     onSuccess: () => { toast.success("Song deleted"); refetchSongs(); setDeletingId(null); },
     onError: (e: { message: string }) => { toast.error(e.message); setDeletingId(null); },
   });
+  const updateStatusMutation = trpc.songs.updateStatus.useMutation({
+    onSuccess: () => { toast.success("Status updated"); refetchSongs(); },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+  const statusColor = (s: string) => ({
+    Draft: "oklch(0.65 0.18 45)",
+    Published: "oklch(0.65 0.18 145)",
+    Unlisted: "oklch(0.65 0.2 300)",
+    Deleted: "oklch(0.65 0.18 25)",
+  }[s] ?? "oklch(0.5 0.03 280)");
   const licenseMutation = trpc.licenses.purchaseLicense.useMutation({
     onSuccess: (data: { url: string | null }) => { if (data.url) window.open(data.url, "_blank"); toast.info("Redirecting to checkout..."); },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -256,6 +266,26 @@ export default function DashboardPage() {
                       <span>{song.playCount || 0} plays</span>
                       <span>{song.tipCount || 0} tips</span>
                     </div>
+                    <select
+                      value={song.status ?? "Published"}
+                      onChange={e => updateStatusMutation.mutate({ songId: song.id, status: e.target.value as any })}
+                      disabled={updateStatusMutation.isPending}
+                      title="Track status"
+                      style={{
+                        background: "oklch(0.13 0.04 270)",
+                        color: statusColor(song.status ?? "Published"),
+                        border: `1px solid ${statusColor(song.status ?? "Published")}44`,
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        padding: "2px 6px",
+                        cursor: "pointer",
+                        outline: "none",
+                      }}
+                    >
+                      {["Draft", "Published", "Unlisted", "Deleted"].map(s => (
+                        <option key={s} value={s} style={{ background: "oklch(0.13 0.04 270)", color: statusColor(s) }}>{s}</option>
+                      ))}
+                    </select>
                     <div className="flex items-center gap-1">
                       <Link href={`/song/${song.id}`}>
                         <button className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">

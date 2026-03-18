@@ -102,3 +102,13 @@
 - [x] Add ambient glow utility classes for hero, track cards, player bar, WID badge
 - [x] Add radial gradient on homepage hero (dark center → deep purple/blue edge)
 - [x] Update hardcoded oklch background values in layout, sidebar, player bar, track cards
+
+## Phase 15: Track Status Field
+- [x] Add songStatus enum (Draft, Published, Unlisted, Deleted) to drizzle schema
+- [x] Add status column to songs table with default 'Published'
+- [x] Run db:push / direct SQL to apply migration (existing rows defaulted to Published)
+- [x] Update DB helpers to filter by status (getPublicSongs, getSongWithCreator, getRelatedSongs exclude non-Published)
+- [x] Add updateSongStatus helper to db.ts
+- [x] Add songs.updateStatus tRPC procedure to routers.ts
+- [x] Add status dropdown to Dashboard My Songs tab (color-coded: Draft=amber, Published=green, Unlisted=purple, Deleted=red)
+- [x] Write Vitest test for songs.updateStatus (4 tests passing)

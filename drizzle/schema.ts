@@ -77,6 +77,9 @@ export const songs = mysqlTable("songs", {
   certificateUrl: text("certificateUrl"),
   certificateKey: text("certificateKey"),
 
+  // Status
+  status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
+
   // Stats
   isPublic: boolean("isPublic").default(true).notNull(),
   playCount: int("playCount").default(0).notNull(),

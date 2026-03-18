@@ -138,7 +138,7 @@ export async function getSongWithCreator(id: number) {
       stripeAccountId: users.stripeAccountId,
     },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
-    .where(and(eq(songs.id, id), eq(songs.isPublic, true))).limit(1);
+    .where(and(eq(songs.id, id), eq(songs.isPublic, true), eq(songs.status, "Published"))).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -152,7 +152,7 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 50;
-  const conditions: ReturnType<typeof eq>[] = [eq(songs.isPublic, true) as ReturnType<typeof eq>];
+  const conditions: ReturnType<typeof eq>[] = [eq(songs.isPublic, true) as ReturnType<typeof eq>, eq(songs.status, "Published") as ReturnType<typeof eq>];
   if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
   if (opts?.search) {
     conditions.push(or(
@@ -178,6 +178,16 @@ export async function deleteSong(songId: number, userId: number) {
   if (!db) return;
   await db.delete(songs).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
   await db.execute(sql`UPDATE users SET songSlotsUsed = GREATEST(songSlotsUsed - 1, 0) WHERE id = ${userId}`);
+}
+
+export async function updateSongStatus(
+  songId: number,
+  userId: number,
+  status: "Draft" | "Published" | "Unlisted" | "Deleted"
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ status, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
 // ─── Comments ─────────────────────────────────────────────────────────────────
@@ -242,7 +252,7 @@ export async function updateSongLyrics(songId: number, userId: number, lyricsTex
 export async function getRelatedSongs(songId: number, genre?: string | null, limit = 6) {
   const db = await getDb();
   if (!db) return [];
-  const conditions: any[] = [eq(songs.isPublic, true), ne(songs.id, songId)];
+  const conditions: any[] = [eq(songs.isPublic, true), eq(songs.status, "Published"), ne(songs.id, songId)];
   if (genre) conditions.push(eq(songs.genre, genre));
   return db.select({
     song: songs,

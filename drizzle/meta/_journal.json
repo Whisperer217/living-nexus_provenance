@@ -15,6 +15,13 @@
       "when": 1773722388145,
       "tag": "0001_amazing_argent",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1773722500000,
+      "tag": "0002_dizzy_paladin",
+      "breakpoints": true
     }
   ]
 }

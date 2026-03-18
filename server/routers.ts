@@ -12,7 +12,7 @@ import {
   getSongsByUser, getSongWithCreator, getTipsBySong,
   getUserById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
-  updateSongLyrics, getRelatedSongs,
+  updateSongLyrics, updateSongStatus, getRelatedSongs,
   updateUserProfile, updateUserStripeAccount,
   createAiTransform, updateAiTransform, getAiTransformById,
   getAiTransformsBySong, getAiTransformsByUser,
@@ -155,6 +155,13 @@ export const appRouter = router({
       return { success: true, fileUrl, coverArtUrl };
     }),
     delete: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => { await deleteSong(input.songId, ctx.user.id); return { success: true }; }),
+    updateStatus: protectedProcedure.input(z.object({
+      songId: z.number(),
+      status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]),
+    })).mutation(async ({ ctx, input }) => {
+      await updateSongStatus(input.songId, ctx.user.id, input.status);
+      return { success: true };
+    }),
     play: publicProcedure.input(z.object({ songId: z.number() })).mutation(async ({ input }) => { await incrementPlayCount(input.songId); return { success: true }; }),
     download: publicProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);
