@@ -48,7 +48,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.085_0.022_255)] via-[oklch(0.085_0.022_255)]/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.085_0.022_255)] via-transparent to-transparent" />
         {/* Radial depth: dark center bleeding to deep purple/blue edge */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 90% 70% at 50% 50%, transparent 0%, oklch(0.085 0.022 255 / 0.4) 40%, oklch(0.07 0.08 290 / 0.75) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 90% 70% at 50% 50%, transparent 0%, oklch(0.09 0.04 265 / 0.4) 40%, oklch(0.07 0.08 290 / 0.75) 100%)" }} />
         <div className="absolute inset-0 flex flex-col justify-end px-6 pb-6">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={14} className="text-[#E8C547]" />

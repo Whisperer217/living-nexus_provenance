@@ -161,7 +161,7 @@ export default function ExplorePage() {
                   onClick={() => handlePlay(item)}
                 >
                   {/* Artwork */}
-                  <div className="aspect-square relative overflow-hidden" style={{ background: "oklch(0.13 0.028 270)" }}>
+                  <div className="aspect-square relative overflow-hidden" style={{ background: "oklch(0.15 0.05 275)" }}>
                     {song.coverArtUrl ? (
                       <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
                     ) : (

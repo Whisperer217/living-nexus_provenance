@@ -46,7 +46,7 @@ export default function PlayerBar() {
       {/* ── Track info ── */}
       <div className="flex items-center gap-3 w-[220px] flex-shrink-0 min-w-0">
         <div className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl"
-          style={{ background: currentTrack?.bg || "oklch(0.13 0.028 270)" }}>
+          style={{ background: currentTrack?.bg || "oklch(0.15 0.05 275)" }}>
           {currentTrack?.artUrl && currentTrack.artType !== "video"
             ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
             : currentTrack?.artUrl && currentTrack.artType === "video"

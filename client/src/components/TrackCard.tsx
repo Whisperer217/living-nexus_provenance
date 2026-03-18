@@ -31,7 +31,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
       onClick={() => playTrack(index)}
     >
       {/* Artwork */}
-      <div className="aspect-square relative overflow-hidden" style={{ background: track.bg || "oklch(0.13 0.028 270)" }}>
+      <div className="aspect-square relative overflow-hidden" style={{ background: track.bg || "oklch(0.15 0.05 275)" }}>
         {track.artUrl && track.artType !== "video" && (
           <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" />
         )}

@@ -277,7 +277,7 @@ export default function CreatorProfilePage() {
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.085 0.022 255)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.09 0.04 265)" }}>
       <div className="space-y-2 text-center">
         <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "oklch(0.75 0.18 85 / 0.3)" }} />
         <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>Loading profile...</p>
@@ -286,7 +286,7 @@ export default function CreatorProfilePage() {
   );
 
   if (!data) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.085 0.022 255)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.09 0.04 265)" }}>
       <div className="text-center">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Creator not found.</p>
         <Link href="/">
@@ -311,7 +311,7 @@ export default function CreatorProfilePage() {
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.085 0.022 255)" }}>
+    <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
       <Helmet>
         <title>{profileTitle}</title>
         <meta name="description" content={profileDesc} />
@@ -357,7 +357,7 @@ export default function CreatorProfilePage() {
             className="w-28 h-28 rounded-2xl flex-shrink-0 flex items-center justify-center text-3xl font-bold overflow-hidden"
             style={{
               background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
-              outline: "4px solid oklch(0.085 0.022 255)",
+              outline: "4px solid oklch(0.09 0.04 265)",
             }}
           >
             {creator.profilePhotoUrl

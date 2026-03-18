@@ -186,7 +186,7 @@ export default function ProfilePage() {
           <img src={state.profileBanner} alt="Banner" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full"
-            style={{ background: "linear-gradient(135deg, oklch(0.10 0.025 265), oklch(0.13 0.028 270), oklch(0.14 0.013 295))" }}>
+            style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.15 0.05 275), oklch(0.14 0.013 295))" }}>
             <div className="absolute inset-0 opacity-20"
               style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #E8C547 0%, transparent 60%), radial-gradient(circle at 70% 30%, #7C3AED 0%, transparent 50%)" }} />
           </div>
@@ -404,7 +404,7 @@ export default function ProfilePage() {
                       bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all group"
                   >
                     <div className="w-11 h-11 rounded-lg flex items-center justify-center text-xl flex-shrink-0 overflow-hidden"
-                      style={{ background: track.bg || "oklch(0.13 0.028 270)" }}>
+                      style={{ background: track.bg || "oklch(0.15 0.05 275)" }}>
                       {track.artUrl
                         ? <img src={track.artUrl} alt="" className="w-full h-full object-cover" />
                         : track.emoji}
@@ -470,7 +470,7 @@ export default function ProfilePage() {
                     bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all group cursor-pointer"
                     onClick={() => playTrack(idx)}>
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
-                      style={{ background: track.bg || "oklch(0.13 0.028 270)" }}>
+                      style={{ background: track.bg || "oklch(0.15 0.05 275)" }}>
                       {track.emoji}
                     </div>
                     <div className="flex-1 min-w-0">

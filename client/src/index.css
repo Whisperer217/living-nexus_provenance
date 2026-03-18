@@ -61,10 +61,10 @@
 
 :root {
   /* ── Divine Noir Palette — Deep Navy-Black with Purple Undertone ── */
-  --void:   oklch(0.085 0.022 255);  /* #080d14 — deep navy-black base */
-  --void-2: oklch(0.10 0.025 265);   /* #0a0f1a — sidebar / nav */
-  --void-3: oklch(0.095 0.028 275);  /* #0a0812 — cards / surfaces (purple undertone) */
-  --void-4: oklch(0.13 0.028 270);   /* #101520 — elevated / hover */
+  --void:   oklch(0.09 0.04 265);   /* deep navy-black base — visible blue-navy tint */
+  --void-2: oklch(0.11 0.05 270);    /* sidebar / nav — slightly lighter navy */
+  --void-3: oklch(0.10 0.055 280);   /* cards / surfaces — clear purple undertone */
+  --void-4: oklch(0.15 0.05 275);    /* elevated / hover — noticeably lifted purple-navy */
 
   --gold:     oklch(0.82 0.14 85);  /* #E8C547 — divine radiance */
   --gold-dim: oklch(0.68 0.12 80);  /* #C9A84C — muted gold */
@@ -213,8 +213,8 @@
   .hero-radial {
     background:
       radial-gradient(ellipse 80% 60% at 50% 40%,
-        oklch(0.085 0.022 255 / 0.0) 0%,
-        oklch(0.085 0.022 255 / 0.6) 45%,
+        oklch(0.09 0.04 265 / 0.0) 0%,
+        oklch(0.09 0.04 265 / 0.6) 45%,
         oklch(0.09 0.06 280 / 0.85) 70%,
         oklch(0.07 0.08 290 / 1.0) 100%
       );

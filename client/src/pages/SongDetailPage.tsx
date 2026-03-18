@@ -257,7 +257,7 @@ export default function SongDetailPage() {
   const pageUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: "oklch(0.085 0.022 255)" }}>
+    <div className="min-h-screen pb-8" style={{ background: "oklch(0.09 0.04 265)" }}>
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
@@ -285,7 +285,7 @@ export default function SongDetailPage() {
             {/* Cover + Meta */}
             <div className="flex flex-col sm:flex-row gap-5">
               <div className="w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, oklch(0.10 0.025 265), oklch(0.13 0.04 290))" }}>
+                style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.13 0.04 290))" }}>
                 {song.coverArtUrl
                   ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
                   : <Music className="w-20 h-20 opacity-10" style={{ color: "oklch(0.75 0.18 85)" }} />}
@@ -350,7 +350,7 @@ export default function SongDetailPage() {
             </div>
 
             {/* Player */}
-            <div className="rounded-2xl p-5" style={{ background: "oklch(0.095 0.028 275)", border: "1px solid oklch(0.15 0.025 275)" }}>
+            <div className="rounded-2xl p-5" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.15 0.025 275)" }}>
               <div className="mb-3">
                 <input type="range" min={0} max={duration || 100} value={currentTime} onChange={seek}
                   disabled={!audioReady} className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
