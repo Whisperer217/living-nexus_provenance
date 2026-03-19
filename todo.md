@@ -142,3 +142,12 @@
 - [x] Smoke-tested: Discordbot UA on /song/1 returns correct OG tags with real cover art URL
 - [x] Regular browser UA falls through to normal SPA flow (no change)
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 20: Custom Domain livingnexus.org
+- [x] Audited all files — only 2 had old domain references
+- [x] Updated OG canonical URL in server/og.ts from manus.space to https://livingnexus.org
+- [x] cdn.manus.space genre icon URLs in DiscoverPage are Manus CDN assets (not app domain, cannot change)
+- [x] OAuth redirect URI: already dynamic via window.location.origin — no code change needed
+- [x] Stripe webhook URL: must be updated manually in Stripe Dashboard → Webhooks
+- [x] CloudFront/S3 CORS: managed by Manus platform infrastructure — no code change needed
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

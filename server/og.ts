@@ -53,7 +53,7 @@ const DEFAULT_OG = buildOgTags({
     "Discover, share, and experience music with cryptographic provenance. Every track carries a Witness ID — proof of creation that belongs to the artist.",
   image:
     "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png",
-  url: "https://livingnexus-7khkqvmb.manus.space",
+  url: "https://livingnexus.org",
   siteName: "Living Nexus",
 });
 
