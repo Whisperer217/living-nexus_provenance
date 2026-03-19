@@ -133,3 +133,12 @@
 - [x] Rewrote LikedPage to show tracks liked from other creators (not own uploads)
 - [x] /liked → LikedPage and /archive → ArchivePage already separately registered in App.tsx
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 19: Open Graph Meta Tags for /song/:id
+- [x] Audit server routing and HTML template (index.html) for OG tag injection point
+- [x] Created server/og.ts: bot-UA detection, DB fetch, OG+Twitter meta tag injection into HTML template
+- [x] OG tags: og:type, og:site_name, og:title, og:description, og:image (+width/height), og:url, twitter:card, twitter:title, twitter:description, twitter:image
+- [x] Registered registerOgRoutes(app) in server/_core/index.ts before Vite/static middleware
+- [x] Smoke-tested: Discordbot UA on /song/1 returns correct OG tags with real cover art URL
+- [x] Regular browser UA falls through to normal SPA flow (no change)
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

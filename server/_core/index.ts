@@ -4,6 +4,7 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { registerOgRoutes } from "../og";
 import { appRouter, handleStripeWebhook } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -45,6 +46,8 @@ async function startServer() {
       createContext,
     })
   );
+  // Open Graph meta tag injection for /song/:id (must be before Vite/static)
+  registerOgRoutes(app);
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
