@@ -39,14 +39,20 @@ export default function PlayerBar() {
   };
 
   return (
-    <div className="flex-shrink-0 flex items-center px-4 gap-4 relative z-20
-      bg-[oklch(0.10_0.025_265)] border-t border-white/[0.06]"
+    <div
+      className="flex items-center px-4 gap-4 z-50
+        bg-[oklch(0.10_0.025_265)] border-t border-white/[0.06]"
       style={{
+        /* position:fixed ensures env(safe-area-inset-bottom) resolves on Android Chrome/WebView.
+           flex-shrink-0 on a flex child is not enough — the browser only exposes the inset
+           value reliably when the element is anchored to the viewport edge. */
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
         boxShadow: "0 -4px 40px rgba(0,0,0,0.7), 0 -4px 32px oklch(0.55 0.22 295 / 0.10), 0 -1px 8px oklch(0.82 0.14 85 / 0.08)",
-        /* max() ensures at least 24px clearance for Android gesture nav bar.
-           env(safe-area-inset-bottom) wins when the browser exposes a real value (iPhone, PWA). */
-        paddingBottom: "max(env(safe-area-inset-bottom), 24px)",
-        minHeight: "82px",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        minHeight: "64px",
       }}
     >
       {/* ── Track info ── */}

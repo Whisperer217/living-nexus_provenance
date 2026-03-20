@@ -271,17 +271,22 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
         {/* ── Page content ── */}
         <main className="flex-1 flex flex-col overflow-hidden md:pt-0 pt-14">
-          {/* paddingBottom on the scroll container ensures last content clears player bar + device nav chrome */}
+          {/*
+            paddingBottom = player bar height (64px) + safe-area-inset-bottom.
+            The player bar is position:fixed so we must manually reserve space here.
+            calc() keeps the two values additive so content is never hidden behind
+            either the player bar or the Android gesture navigation bar.
+          */}
           <div
             className="flex-1 overflow-y-auto"
-            style={{ paddingBottom: "calc(82px + max(env(safe-area-inset-bottom), 24px))" }}
+            style={{ paddingBottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}
           >
             {children}
           </div>
         </main>
       </div>
 
-      {/* ── Player Bar (the altar) ── */}
+      {/* ── Player Bar (fixed to viewport bottom) ── */}
       <PlayerBar />
     </div>
   );
