@@ -178,3 +178,9 @@
 - [x] Unauthenticated users redirected to sign-in on heart click
 - [x] /liked page auto-refreshes via utils.songs.getLiked.invalidate() on toggle
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 24: Liked Songs Sidebar Nav Item
+- [x] Added Heart/Liked Songs nav link under MY MUSIC section in sidebar, linking to /liked
+- [x] Archive nav item now correctly points to /archive (was /liked)
+- [x] Updated PAGE_SUMMARIES for /archive and /liked in QuickRefSlider
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing
