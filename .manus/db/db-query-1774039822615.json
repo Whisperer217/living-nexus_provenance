@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE songs ADD COLUMN isLyricsOnly boolean NOT NULL DEFAULT false;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute ALTER TABLE songs ADD COLUMN isLyricsOnly boolean NOT NULL DEFAULT false;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 712
+}

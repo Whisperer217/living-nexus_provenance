@@ -465,6 +465,14 @@
           "autoincrement": false,
           "onUpdate": true,
           "default": "(now())"
+        },
+        "isLyricsOnly": {
+          "name": "isLyricsOnly",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
