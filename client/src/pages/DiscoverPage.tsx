@@ -22,7 +22,7 @@ const GENRE_ICONS: Record<string, string> = {
 export default function DiscoverPage() {
   const [search, setSearch] = useState("");
   const [activeGenre, setActiveGenre] = useState<string | undefined>();
-  const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
 
   const { data: songs, isLoading: songsLoading } = trpc.songs.discover.useQuery(
     { genre: activeGenre, search: search || undefined, limit: 24 },
@@ -31,19 +31,37 @@ export default function DiscoverPage() {
   const { data: creators, isLoading: creatorsLoading } = trpc.profile.allCreators.useQuery(undefined, { refetchOnWindowFocus: false });
   const playMutation = trpc.songs.play.useMutation();
 
-  const handlePlay = (song: any) => {
-    if (!song.song.fileUrl) { toast.error("No audio file available"); return; }
-    addAndPlay({
-      id: String(song.song.id),
-      title: song.song.title,
-      artist: song.creator?.artistHandle || song.creator?.name || "Unknown",
-      genre: song.song.genre || "",
-      audioUrl: song.song.fileUrl,
-      artUrl: song.song.coverArtUrl || undefined,
-      witnessId: song.song.witnessId || undefined,
-      aiDisclosure: song.creator?.aiDisclosure || undefined,
-    });
-    playMutation.mutate({ songId: song.song.id });
+  const handlePlay = (clickedSong: any) => {
+    if (!clickedSong.song.fileUrl) { toast.error("No audio file available"); return; }
+    if (songs && songs.length > 0) {
+      // Build full queue from current filtered results and play from the clicked track
+      const queue = songs
+        .filter(s => !!s.song.fileUrl)
+        .map(s => ({
+          id: String(s.song.id),
+          title: s.song.title,
+          artist: s.creator?.artistHandle || s.creator?.name || "Unknown",
+          genre: s.song.genre || "",
+          audioUrl: s.song.fileUrl!,
+          artUrl: s.song.coverArtUrl || undefined,
+          witnessId: s.song.witnessId || undefined,
+          aiDisclosure: s.creator?.aiDisclosure || undefined,
+        }));
+      const startIdx = queue.findIndex(t => t.id === String(clickedSong.song.id));
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0);
+    } else {
+      addAndPlay({
+        id: String(clickedSong.song.id),
+        title: clickedSong.song.title,
+        artist: clickedSong.creator?.artistHandle || clickedSong.creator?.name || "Unknown",
+        genre: clickedSong.song.genre || "",
+        audioUrl: clickedSong.song.fileUrl,
+        artUrl: clickedSong.song.coverArtUrl || undefined,
+        witnessId: clickedSong.song.witnessId || undefined,
+        aiDisclosure: clickedSong.creator?.aiDisclosure || undefined,
+      });
+    }
+    playMutation.mutate({ songId: clickedSong.song.id });
   };
 
   return (

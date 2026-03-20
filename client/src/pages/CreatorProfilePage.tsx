@@ -231,7 +231,7 @@ export default function CreatorProfilePage() {
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
-  const { addAndPlay, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, state: playerState } = usePlayer();
   const playingId = playerState.isPlaying && playerState.tracks[0]?.id ? parseInt(playerState.tracks[0].id) : null;
 
   const { data, isLoading, refetch } = trpc.profile.getCreator.useQuery(
@@ -257,15 +257,33 @@ export default function CreatorProfilePage() {
   const playMutation = trpc.songs.play.useMutation();
 
   const handlePlay = (song: any) => {
-    addAndPlay({
-      id: String(song.id),
-      title: song.title,
-      artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
-      genre: song.genre || "",
-      artUrl: song.coverArtUrl || undefined,
-      audioUrl: song.fileUrl || undefined,
-      aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
-    });
+    if (!song.fileUrl) { toast.error("No audio file available"); return; }
+    // Build queue from all this creator's public songs so playback continues
+    const creatorSongs = (data?.songs || []).filter((s: any) => !!s.fileUrl);
+    if (creatorSongs.length > 1) {
+      const queue = creatorSongs.map((s: any) => ({
+        id: String(s.id),
+        title: s.title,
+        artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
+        genre: s.genre || "",
+        audioUrl: s.fileUrl!,
+        artUrl: s.coverArtUrl || undefined,
+        witnessId: s.witnessId || undefined,
+        aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
+      }));
+      const startIdx = queue.findIndex(t => t.id === String(song.id));
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0);
+    } else {
+      addAndPlay({
+        id: String(song.id),
+        title: song.title,
+        artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
+        genre: song.genre || "",
+        artUrl: song.coverArtUrl || undefined,
+        audioUrl: song.fileUrl || undefined,
+        aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
+      });
+    }
     playMutation.mutate({ songId: song.id });
   };
 

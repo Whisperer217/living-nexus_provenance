@@ -25,7 +25,7 @@ const GENRE_CARDS = [
 const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp";
 
 export default function ExplorePage() {
-  const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
 
@@ -41,16 +41,33 @@ export default function ExplorePage() {
     const song = item.song;
     const creator = item.creator;
     if (!song.fileUrl) { toast.error("No audio file available for this track"); return; }
-    addAndPlay({
-      id: String(song.id),
-      title: song.title,
-      artist: creator?.artistHandle || creator?.name || "Unknown",
-      genre: song.genre || "",
-      audioUrl: song.fileUrl,
-      artUrl: song.coverArtUrl || undefined,
-      witnessId: song.witnessId || undefined,
-      aiDisclosure: creator?.aiDisclosure || undefined,
-    });
+    if (songs.length > 0) {
+      const queue = songs
+        .filter(s => !!s.song.fileUrl)
+        .map(s => ({
+          id: String(s.song.id),
+          title: s.song.title,
+          artist: s.creator?.artistHandle || s.creator?.name || "Unknown",
+          genre: s.song.genre || "",
+          audioUrl: s.song.fileUrl!,
+          artUrl: s.song.coverArtUrl || undefined,
+          witnessId: s.song.witnessId || undefined,
+          aiDisclosure: s.creator?.aiDisclosure || undefined,
+        }));
+      const startIdx = queue.findIndex(t => t.id === String(song.id));
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0);
+    } else {
+      addAndPlay({
+        id: String(song.id),
+        title: song.title,
+        artist: creator?.artistHandle || creator?.name || "Unknown",
+        genre: song.genre || "",
+        audioUrl: song.fileUrl,
+        artUrl: song.coverArtUrl || undefined,
+        witnessId: song.witnessId || undefined,
+        aiDisclosure: creator?.aiDisclosure || undefined,
+      });
+    }
     playMutation.mutate({ songId: song.id });
   };
 

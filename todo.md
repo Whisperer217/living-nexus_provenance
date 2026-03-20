@@ -308,3 +308,10 @@
 
 - [x] Delete all seed creator accounts (Aura Vessel, Nova Kaine, VLTG3, Ghost Lumen, Marco Spire, Lyric Haze, Seraph Cole, D-Rex) and their songs
 - [x] Harden player queue to only pull published songs with a real audio URL
+
+## Phase: Auto-Load Queue from DB
+
+- [x] Add public tRPC procedure to fetch all published songs for queue seeding
+- [x] Build QueueLoader component to seed PlayerContext on app mount
+- [x] Update Explore/HomePage/CreatorProfilePage to load full queue on song click
+- [x] Verify auto-advance, MobilePlayerPanel metadata updates correctly

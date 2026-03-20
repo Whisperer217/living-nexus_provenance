@@ -20,6 +20,7 @@ import DiscoverPage from "./pages/DiscoverPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import VerifyPage from "./pages/VerifyPage";
+import QueueLoader from "./components/QueueLoader";
 
 function Router() {
   return (
@@ -62,6 +63,7 @@ export default function App() {
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <PlayerProvider>
+            <QueueLoader />
             <Toaster
               theme="dark"
               toastOptions={{

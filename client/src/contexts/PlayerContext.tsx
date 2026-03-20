@@ -85,6 +85,10 @@ interface PlayerContextValue {
   toggleLike: (id: string) => void;
   addTrack: (t: Track) => void;
   addAndPlay: (t: Track) => void;
+  /** Replace the entire queue without starting playback (used for initial DB seed) */
+  setQueue: (tracks: Track[]) => void;
+  /** Replace the entire queue and immediately play the track at startIdx */
+  playQueueAt: (tracks: Track[], startIdx: number) => void;
   setProfileName: (n: string) => void;
   setProfileBio: (b: string) => void;
   setProfileLocation: (l: string) => void;
@@ -306,6 +310,29 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }), []);
   const setRoom = useCallback((r: PlayerState["room"]) => setState(s => ({ ...s, room: r })), []);
 
+  /** Replace the entire queue without starting playback */
+  const setQueue = useCallback((newTracks: Track[]) => {
+    const validTracks = newTracks.filter(t => !!t.audioUrl);
+    setState(s => {
+      // Only seed if queue is currently empty to avoid overwriting user-initiated playback
+      if (s.tracks.length > 0) return s;
+      return { ...s, tracks: validTracks };
+    });
+  }, []);
+
+  /** Replace the entire queue and immediately play the track at startIdx */
+  const playQueueAt = useCallback((newTracks: Track[], startIdx: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const validTracks = newTracks.filter(t => !!t.audioUrl);
+    const clampedIdx = Math.max(0, Math.min(startIdx, validTracks.length - 1));
+    const t = validTracks[clampedIdx];
+    if (!t?.audioUrl) return;
+    audio.src = safeAudioUrl(t.audioUrl);
+    audio.play().catch(() => {});
+    setState(s => ({ ...s, tracks: validTracks, currentIdx: clampedIdx, isPlaying: true }));
+  }, []);
+
   const currentTrackId = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.id ?? null) : null;
 
   // ── MediaSession API: lock screen / notification shade controls ──
@@ -354,7 +381,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       state, audioRef, allTracks, currentTrackId,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-      toggleLike, addTrack, addAndPlay,
+      toggleLike, addTrack, addAndPlay, setQueue, playQueueAt,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
       setProfileAvatar, setProfileBanner,
       addTip, addTrackTip, addComment, incrementShare, setRoom,
