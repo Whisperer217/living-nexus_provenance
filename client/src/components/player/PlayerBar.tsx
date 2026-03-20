@@ -39,9 +39,13 @@ export default function PlayerBar() {
   };
 
   return (
-    <div className="flex-shrink-0 h-[82px] flex items-center px-4 gap-4 relative z-20
+    <div className="flex-shrink-0 flex items-center px-4 gap-4 relative z-20
       bg-[oklch(0.10_0.025_265)] border-t border-white/[0.06]"
-      style={{ boxShadow: "0 -4px 40px rgba(0,0,0,0.7), 0 -4px 32px oklch(0.55 0.22 295 / 0.10), 0 -1px 8px oklch(0.82 0.14 85 / 0.08)" }}
+      style={{
+        boxShadow: "0 -4px 40px rgba(0,0,0,0.7), 0 -4px 32px oklch(0.55 0.22 295 / 0.10), 0 -1px 8px oklch(0.82 0.14 85 / 0.08)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        minHeight: "82px",
+      }}
     >
       {/* ── Track info ── */}
       <div className="flex items-center gap-3 w-[220px] flex-shrink-0 min-w-0">

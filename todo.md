@@ -191,3 +191,9 @@
 - [x] Updated TrackCard to show like count next to heart icon (shows on hover, formats 1k+ as "1.0k")
 - [x] Updated SongDetailPage to show like count next to Like/Liked button
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 26: Mobile Safe Area Inset Fix
+- [x] Added viewport-fit=cover to <meta name="viewport"> in client/index.html
+- [x] Added paddingBottom: env(safe-area-inset-bottom, 0px) to PlayerBar root element; changed fixed h-[82px] to minHeight: 82px so bar grows with safe area
+- [x] Added bottom padding to scrollable content div in MainLayout: calc(82px + env(safe-area-inset-bottom, 0px)); Tailwind pb-[82px] as fallback for desktop
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing
