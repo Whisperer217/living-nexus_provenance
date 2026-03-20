@@ -59,8 +59,8 @@ export async function getUserById(id: number) {
 }
 
 export async function updateUserProfile(userId: number, data: {
-  artistHandle?: string; bio?: string; profilePhotoUrl?: string; bannerUrl?: string;
-  bmiMemberNumber?: string; website?: string; twitterHandle?: string;
+  name?: string; artistHandle?: string; bio?: string; profilePhotoUrl?: string; bannerUrl?: string;
+  bmiMemberNumber?: string; website?: string; location?: string; twitterHandle?: string;
   instagramHandle?: string; youtubeHandle?: string;
 }) {
   const db = await getDb();

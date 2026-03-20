@@ -18,6 +18,7 @@ export const users = mysqlTable("users", {
   profilePhotoUrl: text("profilePhotoUrl"),
   bmiMemberNumber: varchar("bmiMemberNumber", { length: 64 }),
   website: text("website"),
+  location: varchar("location", { length: 128 }),
   twitterHandle: varchar("twitterHandle", { length: 64 }),
   instagramHandle: varchar("instagramHandle", { length: 64 }),
   youtubeHandle: varchar("youtubeHandle", { length: 64 }),

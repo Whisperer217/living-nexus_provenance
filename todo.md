@@ -161,3 +161,12 @@
 - [x] Passed lyricsText to upload mutation call
 - [x] Updated song detail page: lyrics section is read-only display only, hidden if no lyrics, no editing prompt
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 22: Profile Persistence Fix
+- [x] Audited: root cause was ProfilePage using PlayerContext state (in-memory) instead of DB
+- [x] Added location column to users table (SQL + drizzle schema)
+- [x] Added name and location to updateUserProfile helper and profile.update tRPC input schema
+- [x] Rewrote ProfilePage to load from trpc.profile.me and save via trpc.profile.update mutations
+- [x] Avatar/banner uploads call trpc.profile.uploadAvatar/uploadBanner and invalidate profile.me cache
+- [x] All editable fields (name, artistHandle, bio, location, website, socials) persist to DB permanently
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing
