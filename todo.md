@@ -245,3 +245,11 @@
 - [x] Active state shows Manage Stripe Account link
 - [x] Fee breakdown (90% creator / 10% platform) shown in Payments tab
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 32: Bug Fixes — Featured Creators, Song Detail Timeout
+- [x] Featured Creators: DB query is correct (only 3 valid creators exist); '?' avatars are expected fallback for creators without profile photos — not a missing-name issue. Filter is working correctly.
+- [x] /song/30001 timeout: root cause found — filename contains unencoded special chars (spaces, commas, !, emoji) in S3 URL causing browser Audio API to fail. DB queries are fast (110ms each).
+- [x] Fix 1: Added safeAudioUrl() helper in shared/const.ts that URL-encodes path segments of CDN/S3 URLs
+- [x] Fix 2: Applied safeAudioUrl() in SongDetailPage (Audio constructor) and PlayerContext (all audio.src assignments)
+- [x] Fix 3: Sanitized audioFileName in upload procedure to prevent future occurrences (replaces non-alphanumeric chars with underscores)
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

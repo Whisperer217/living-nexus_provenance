@@ -25,6 +25,7 @@ import {
   ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter, Heart,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
+import { safeAudioUrl } from "@shared/const";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
 
@@ -161,7 +162,7 @@ export default function SongDetailPage() {
 
   useEffect(() => {
     if (!song?.fileUrl) return;
-    const audio = new Audio(song.fileUrl);
+    const audio = new Audio(safeAudioUrl(song.fileUrl));
     audioRef.current = audio;
     audio.volume = volume;
     audio.addEventListener("loadedmetadata", () => { setDuration(audio.duration); setAudioReady(true); });

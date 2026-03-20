@@ -148,7 +148,9 @@ export const appRouter = router({
       if (!user) throw new Error("User not found");
       if (user.songSlotsUsed >= user.songSlotsTotal) throw new Error("No song slots available. Please purchase more slots.");
       const audioBuffer = Buffer.from(input.audioBase64, "base64");
-      const audioKey = `audio/${ctx.user.id}/${Date.now()}-${input.audioFileName}`;
+      // Sanitize filename: replace spaces, emojis, and special chars with underscores
+      const safeFileName = input.audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const audioKey = `audio/${ctx.user.id}/${Date.now()}-${safeFileName}`;
       const { url: fileUrl } = await storagePut(audioKey, audioBuffer, input.audioMimeType);
       let coverArtUrl: string | undefined;
       if (input.coverBase64 && input.coverMimeType) {

@@ -4,6 +4,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
+import { safeAudioUrl } from "@shared/const";
 
 export interface Comment {
   id: string;
@@ -155,7 +156,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         if (next >= tracks.length) next = 0;
         const t = tracks[next];
         if (t?.audioUrl) {
-          audio.src = t.audioUrl;
+          audio.src = safeAudioUrl(t.audioUrl);
           audio.play().catch(() => {});
         }
         return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl };
@@ -186,7 +187,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const t = tracks[idx];
       if (!t) return s;
       if (t.audioUrl) {
-        audio.src = t.audioUrl;
+        audio.src = safeAudioUrl(t.audioUrl);
         audio.play().catch(() => {});
       } else {
         audio.pause();
@@ -211,7 +212,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const t = tracks[next];
       const audio = audioRef.current;
       if (audio && t?.audioUrl) {
-        audio.src = t.audioUrl;
+        audio.src = safeAudioUrl(t.audioUrl);
         audio.play().catch(() => {});
       }
       return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl };
@@ -225,7 +226,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const t = tracks[prev];
       const audio = audioRef.current;
       if (audio && t?.audioUrl) {
-        audio.src = t.audioUrl;
+        audio.src = safeAudioUrl(t.audioUrl);
         audio.play().catch(() => {});
       }
       return { ...s, currentIdx: prev, isPlaying: !!t?.audioUrl };
@@ -277,7 +278,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const newTracks = [t, ...filtered];
       const newIdx = DEMO_TRACKS.length; // first user-track slot
       if (t.audioUrl) {
-        audio.src = t.audioUrl;
+        audio.src = safeAudioUrl(t.audioUrl);
         audio.play().catch(() => {});
       }
       return { ...s, tracks: newTracks, currentIdx: newIdx, isPlaying: !!t.audioUrl };
