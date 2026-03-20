@@ -328,6 +328,16 @@ export default function SongDetailPage() {
                         <Shield className="w-3 h-3 mr-1" />WID Protected
                       </Badge>
                     )}
+                    {creator?.aiDisclosure && creator.aiDisclosure !== "original" && (
+                      <Badge style={{
+                        background: creator.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.15)" : "oklch(0.60 0.18 55 / 0.15)",
+                        color: creator.aiDisclosure === "ai_generated" ? "oklch(0.75 0.18 25)" : "oklch(0.80 0.18 55)",
+                        border: `1px solid ${creator.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.4)" : "oklch(0.60 0.18 55 / 0.4)"}`,
+                        fontSize: "11px",
+                      }}>
+                        {creator.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex items-center gap-4 text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>
                     <span className="flex items-center gap-1"><Headphones className="w-3.5 h-3.5" />{song.playCount || 0} plays</span>

@@ -105,6 +105,8 @@ export const appRouter = router({
       twitterHandle: z.string().max(64).optional(),
       instagramHandle: z.string().max(64).optional(),
       youtubeHandle: z.string().max(64).optional(),
+      aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated"]).optional(),
+      primaryGenre: z.string().max(64).optional(),
     })).mutation(async ({ ctx, input }) => { await updateUserProfile(ctx.user.id, input); return { success: true }; }),
     uploadAvatar: protectedProcedure.input(z.object({ base64: z.string(), mimeType: z.string() })).mutation(async ({ ctx, input }) => {
       const buffer = Buffer.from(input.base64, "base64");

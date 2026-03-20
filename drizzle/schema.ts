@@ -24,6 +24,10 @@ export const users = mysqlTable("users", {
   youtubeHandle: varchar("youtubeHandle", { length: 64 }),
   bannerUrl: text("bannerUrl"),
 
+  // Creator AI & genre defaults
+  aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated"]).default("original"),
+  primaryGenre: varchar("primaryGenre", { length: 64 }),
+
   // License & slots
   licenseStatus: mysqlEnum("licenseStatus", ["free", "licensed"]).default("free").notNull(),
   songSlotsUsed: int("songSlotsUsed").default(0).notNull(),

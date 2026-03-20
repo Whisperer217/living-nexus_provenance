@@ -308,6 +308,42 @@ export default function ProfilePage() {
           />
         </div>
 
+        {/* ── Creator Defaults: AI Disclosure + Primary Genre ── */}
+        <div className="mb-4 p-4 rounded-xl border border-white/[0.07] bg-[oklch(0.11_0.012_280)]">
+          <p className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}>
+            Creator Defaults — applied to every upload
+          </p>
+          <div className="flex flex-wrap gap-4">
+            {/* AI Disclosure */}
+            <div className="flex flex-col gap-1.5 min-w-[180px]">
+              <label className="text-[11px] text-white/30 font-body">AI Disclosure</label>
+              <select
+                value={profile?.aiDisclosure || "original"}
+                onChange={e => save({ aiDisclosure: e.target.value as "original" | "ai_assisted" | "ai_generated" })}
+                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[oklch(0.14_0.013_280)] border border-white/[0.1] outline-none cursor-pointer hover:border-[#A78BFA]/50 transition-colors"
+                style={{ background: "oklch(0.14 0.013 280)" }}
+              >
+                <option value="original">Original — Human-created</option>
+                <option value="ai_assisted">AI-Assisted — Human + AI</option>
+                <option value="ai_generated">AI-Generated — AI-created</option>
+              </select>
+            </div>
+            {/* Primary Genre */}
+            <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+              <label className="text-[11px] text-white/30 font-body">Primary Genre / Style</label>
+              <input
+                type="text"
+                defaultValue={profile?.primaryGenre || ""}
+                placeholder="e.g. Gospel, Hip-Hop, Ambient…"
+                maxLength={64}
+                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[oklch(0.14_0.013_280)] border border-white/[0.1] outline-none placeholder:text-white/20 hover:border-[#A78BFA]/50 focus:border-[#A78BFA]/70 transition-colors"
+                onBlur={e => { const v = e.target.value.trim(); if (v !== (profile?.primaryGenre || "")) save({ primaryGenre: v }); }}
+                onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* ── Location + Website ── */}
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="flex items-center gap-1.5">

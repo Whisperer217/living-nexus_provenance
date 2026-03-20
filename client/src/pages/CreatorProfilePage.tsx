@@ -264,6 +264,7 @@ export default function CreatorProfilePage() {
       genre: song.genre || "",
       artUrl: song.coverArtUrl || undefined,
       audioUrl: song.fileUrl || undefined,
+      aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
     });
     playMutation.mutate({ songId: song.id });
   };

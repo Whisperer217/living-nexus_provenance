@@ -62,6 +62,8 @@ export async function updateUserProfile(userId: number, data: {
   name?: string; artistHandle?: string; bio?: string; profilePhotoUrl?: string; bannerUrl?: string;
   bmiMemberNumber?: string; website?: string; location?: string; twitterHandle?: string;
   instagramHandle?: string; youtubeHandle?: string;
+  aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
+  primaryGenre?: string;
 }) {
   const db = await getDb();
   if (!db) return;
@@ -149,7 +151,7 @@ export async function getSongWithCreator(id: number) {
     creator: {
       id: users.id, name: users.name, artistHandle: users.artistHandle,
       profilePhotoUrl: users.profilePhotoUrl, stripeAccountStatus: users.stripeAccountStatus,
-      stripeAccountId: users.stripeAccountId,
+      stripeAccountId: users.stripeAccountId, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre,
     },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     .where(and(eq(songs.id, id), eq(songs.isPublic, true), eq(songs.status, "Published"))).limit(1);
@@ -176,7 +178,7 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
   }
   return db.select({
     song: songs,
-    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl },
+    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     .where(and(...conditions)).orderBy(desc(songs.createdAt)).limit(limit);
 }

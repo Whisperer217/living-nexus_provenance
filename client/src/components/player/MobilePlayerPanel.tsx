@@ -211,6 +211,25 @@ export default function MobilePlayerPanel() {
             <p className="text-sm text-white/40 truncate font-body mt-0.5">
               {currentTrack?.artist || "—"}
             </p>
+            {/* Genre + AI Disclosure badges */}
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {currentTrack?.genre && (
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
+                  style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.22 0.02 280)" }}>
+                  {currentTrack.genre}
+                </span>
+              )}
+              {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
+                  style={{
+                    background: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.2)" : "oklch(0.60 0.18 55 / 0.2)",
+                    color: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.80 0.18 25)" : "oklch(0.85 0.18 55)",
+                    border: `1px solid ${currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.4)" : "oklch(0.60 0.18 55 / 0.4)"}`,
+                  }}>
+                  {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
+                </span>
+              )}
+            </div>
           </div>
           <button
             onClick={() => currentTrack && toggleLike(currentTrack.id)}

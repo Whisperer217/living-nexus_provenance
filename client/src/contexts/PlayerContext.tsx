@@ -32,6 +32,7 @@ export interface Track {
   comments?: Comment[];
   shareCount?: number;
   witnessId?: string;
+  aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
 }
 
 export const DEMO_TRACKS: Track[] = [

@@ -49,6 +49,7 @@ export default function ExplorePage() {
       audioUrl: song.fileUrl,
       artUrl: song.coverArtUrl || undefined,
       witnessId: song.witnessId || undefined,
+      aiDisclosure: creator?.aiDisclosure || undefined,
     });
     playMutation.mutate({ songId: song.id });
   };

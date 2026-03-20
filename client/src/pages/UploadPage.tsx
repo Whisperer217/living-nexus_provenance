@@ -167,6 +167,16 @@ export default function UploadPage() {
   const [generatingWid, setGeneratingWid] = useState(false);
   const [waveformActive, setWaveformActive] = useState(false);
 
+  // Load creator profile defaults (aiDisclosure, primaryGenre)
+  const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
+
+  // Auto-fill genre from profile default (only when genre is still empty)
+  useEffect(() => {
+    if (creatorProfile?.primaryGenre && !genre) {
+      setGenre(creatorProfile.primaryGenre);
+    }
+  }, [creatorProfile?.primaryGenre]);
+
   const uploadMutation = trpc.songs.upload.useMutation({
     onSuccess: () => { toast.success("Track published to Living Nexus!"); navigate("/dashboard"); },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -456,8 +466,22 @@ export default function UploadPage() {
                   style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
               </div>
               <div>
-                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Genre</label>
+                <label className="text-xs mb-1.5 flex items-center gap-2 font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                  Genre
+                  {creatorProfile?.primaryGenre && (
+                    <span className="text-[10px] font-normal" style={{ color: "oklch(0.45 0.03 280)" }}>
+                      — default from profile: <span style={{ color: "oklch(0.65 0.2 300)" }}>{creatorProfile.primaryGenre}</span>
+                    </span>
+                  )}
+                </label>
                 <div className="flex flex-wrap gap-2">
+                  {/* Allow free-text genre from profile if not in preset list */}
+                  {creatorProfile?.primaryGenre && !GENRES.includes(creatorProfile.primaryGenre) && (
+                    <button key="profile-genre" onClick={() => setGenre(genre === creatorProfile.primaryGenre ? "" : (creatorProfile.primaryGenre ?? ""))} className="px-3 py-1 rounded-full text-xs transition-all"
+                      style={{ background: genre === creatorProfile.primaryGenre ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === creatorProfile.primaryGenre ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === creatorProfile.primaryGenre ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>
+                      {creatorProfile.primaryGenre}
+                    </button>
+                  )}
                   {GENRES.map(g => (
                     <button key={g} onClick={() => setGenre(g === genre ? "" : g)} className="px-3 py-1 rounded-full text-xs transition-all"
                       style={{ background: genre === g ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === g ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === g ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>

@@ -41,6 +41,7 @@ export default function DiscoverPage() {
       audioUrl: song.song.fileUrl,
       artUrl: song.song.coverArtUrl || undefined,
       witnessId: song.song.witnessId || undefined,
+      aiDisclosure: song.creator?.aiDisclosure || undefined,
     });
     playMutation.mutate({ songId: song.song.id });
   };
@@ -195,6 +196,16 @@ export default function DiscoverPage() {
                     {item.song.witnessId && (
                       <div className="absolute top-2 right-2">
                         <Badge className="text-xs font-mono px-1 py-0" style={{ background: "oklch(0.65 0.2 300 / 0.9)", color: "white", fontSize: "9px" }}>WID</Badge>
+                      </div>
+                    )}
+                    {item.creator?.aiDisclosure && item.creator.aiDisclosure !== "original" && (
+                      <div className="absolute top-2 left-2">
+                        <Badge className="text-[8px] font-mono px-1 py-0" style={{
+                          background: item.creator.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.9)" : "oklch(0.60 0.18 55 / 0.9)",
+                          color: "white",
+                        }}>
+                          {item.creator.aiDisclosure === "ai_generated" ? "AI" : "AI+"}
+                        </Badge>
                       </div>
                     )}
                   </div>
