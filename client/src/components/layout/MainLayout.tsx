@@ -274,7 +274,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {/* paddingBottom on the scroll container ensures last content clears player bar + device nav chrome */}
           <div
             className="flex-1 overflow-y-auto"
-            style={{ paddingBottom: "calc(82px + env(safe-area-inset-bottom, 0px))" }}
+            style={{ paddingBottom: "calc(82px + max(env(safe-area-inset-bottom), 24px))" }}
           >
             {children}
           </div>
