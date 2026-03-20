@@ -227,3 +227,9 @@
 - [x] Stripe checkout fires immediately; creator receives funds via transfer_data.destination
 - [x] Stripe success redirect: ?jukebox=success&songId=X triggers confirmQueue mutation
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 30: Jukebox Bug Fixes
+- [x] Bug 1: Root cause — discover returns nested { song: {...}, creator: {...} }; browser was reading flat s.title/s.coverArtUrl. Fixed by flattening in flatSongs map: s.song.title, s.song.coverArtUrl, s.creator.name
+- [x] Bug 2: Root cause — same nested shape; s.id was undefined (real id at s.song.id). Fixed in flatSongs map: id: s.song?.id ?? s.id
+- [x] Both fixes applied in SongBrowserModal in TogetherPage.tsx
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

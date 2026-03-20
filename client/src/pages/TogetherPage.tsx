@@ -57,7 +57,16 @@ function SongBrowserModal({
     onError: (err) => toast.error(err.message),
   });
 
-  const filtered = (songs ?? []).filter((s: any) =>
+  // discover returns { song: {...}, creator: {...} } — flatten for the browser
+  const flatSongs = (songs ?? []).map((s: any) => ({
+    id: s.song?.id ?? s.id,
+    title: s.song?.title ?? s.title ?? "",
+    coverArtUrl: s.song?.coverArtUrl ?? s.coverArtUrl ?? null,
+    witnessId: s.song?.witnessId ?? s.witnessId ?? null,
+    creatorName: s.creator?.name ?? s.creator?.artistHandle ?? s.creatorName ?? null,
+  }));
+
+  const filtered = flatSongs.filter((s) =>
     !search || s.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -109,7 +118,7 @@ function SongBrowserModal({
               {filtered.length === 0 && (
                 <div className="text-center py-8 text-white/30 text-[13px] font-body">No tracks found</div>
               )}
-              {filtered.map((song: any) => (
+              {filtered.map((song) => (
                 <button
                   key={song.id}
                   onClick={() => setSelectedSong(song)}
@@ -122,8 +131,8 @@ function SongBrowserModal({
                       : <Music2 size={16} className="text-white/30" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-body text-white/85 truncate">{song.title}</div>
-                    <div className="text-[11px] text-white/35 font-body truncate">{song.creatorName || "Unknown"}</div>
+                    <div className="text-[13px] font-body text-white/85 truncate">{song.title || "Untitled"}</div>
+                    <div className="text-[11px] text-white/35 font-body truncate">{song.creatorName || "Unknown Artist"}</div>
                   </div>
                   {song.witnessId && (
                     <div className="text-[9px] px-1.5 py-0.5 rounded font-heading tracking-widest text-[#E8C547]/70 border border-[#E8C547]/20 flex-shrink-0">
