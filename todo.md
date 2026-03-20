@@ -233,3 +233,15 @@
 - [x] Bug 2: Root cause — same nested shape; s.id was undefined (real id at s.song.id). Fixed in flatSongs map: id: s.song?.id ?? s.id
 - [x] Both fixes applied in SongBrowserModal in TogetherPage.tsx
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 31: Stripe Connect Onboarding for Creators
+- [x] stripeAccountId and stripeAccountStatus already existed in schema — no migration needed
+- [x] DB helpers (updateUserStripeAccount) already existed
+- [x] tRPC procedures (tips.connectOnboarding, tips.connectStatus) already existed
+- [x] Stripe webhook account.updated handler already existed
+- [x] Dashboard already had Tip Payments card with Connect button
+- [x] Added Payments tab to ProfilePage with full status display (Not Connected / Pending / Active)
+- [x] Connect Stripe button opens Stripe Express onboarding in new tab
+- [x] Active state shows Manage Stripe Account link
+- [x] Fee breakdown (90% creator / 10% platform) shown in Payments tab
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

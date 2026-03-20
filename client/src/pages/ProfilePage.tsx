@@ -12,6 +12,7 @@ import {
   Camera, Edit2, Check, X, Music, Heart, DollarSign,
   MapPin, Globe, Twitter, Instagram, Youtube, Share2,
   Play, ExternalLink, Copy, TrendingUp, Loader2,
+  CheckCircle, AlertCircle, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -96,7 +97,19 @@ export default function ProfilePage() {
     enabled: !!user,
   });
 
-  const [activeTab, setActiveTab] = useState<"tracks" | "stats">("tracks");
+  const [activeTab, setActiveTab] = useState<"tracks" | "stats" | "payments">("tracks");
+
+  // ── Stripe Connect ───────────────────────────────────────────────
+  const { data: connectData, refetch: refetchConnect } = trpc.tips.connectStatus.useQuery(
+    undefined, { enabled: !!user }
+  );
+  const connectMutation = trpc.tips.connectOnboarding.useMutation({
+    onSuccess: (data) => {
+      if (data.url) window.open(data.url, "_blank");
+      setTimeout(() => refetchConnect(), 3000);
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   // ── Mutations ────────────────────────────────────────────────────
   const updateProfile = trpc.profile.update.useMutation({
@@ -366,7 +379,7 @@ export default function ProfilePage() {
 
         {/* ── Tabs ── */}
         <div className="flex gap-1 mb-5 border-b border-white/[0.07]">
-          {(["tracks","stats"] as const).map(tab => (
+          {(["tracks","stats","payments"] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -451,6 +464,85 @@ export default function ProfilePage() {
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {/* ── Payments / Stripe Connect tab ── */}
+        {activeTab === "payments" && (
+          <div className="space-y-4">
+            {/* Status card */}
+            <div className="p-5 rounded-2xl border" style={{ background: "oklch(0.12 0.055 280)", borderColor: "oklch(0.25 0.05 280)" }}>
+              <div className="flex items-center gap-2 mb-4">
+                <DollarSign size={16} className="text-[#E8C547]" />
+                <span className="font-heading text-[14px] text-white/90 tracking-wide">Stripe Connect</span>
+              </div>
+
+              {/* Status badge */}
+              {connectData?.status === "enabled" && (
+                <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "oklch(0.65 0.18 145 / 0.12)", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }}>
+                  <CheckCircle size={14} style={{ color: "oklch(0.65 0.18 145)" }} />
+                  <span className="text-[13px] font-body" style={{ color: "oklch(0.65 0.18 145)" }}>Active — Tips &amp; Jukebox payments enabled</span>
+                </div>
+              )}
+              {connectData?.status === "pending" && (
+                <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "oklch(0.65 0.18 45 / 0.12)", border: "1px solid oklch(0.65 0.18 45 / 0.3)" }}>
+                  <AlertCircle size={14} style={{ color: "oklch(0.65 0.18 45)" }} />
+                  <span className="text-[13px] font-body" style={{ color: "oklch(0.65 0.18 45)" }}>Pending — Complete Stripe verification to activate</span>
+                </div>
+              )}
+              {(!connectData?.status || connectData.status === "not_connected" || connectData.status === "error") && (
+                <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "oklch(0.5 0.03 280 / 0.15)", border: "1px solid oklch(0.5 0.03 280 / 0.3)" }}>
+                  <Zap size={14} className="text-white/30" />
+                  <span className="text-[13px] font-body text-white/40">Not Connected</span>
+                </div>
+              )}
+
+              <p className="text-[12px] font-body text-white/40 mb-4 leading-relaxed">
+                Connect your Stripe account to receive jukebox tips and direct fan tips.
+                You keep <strong className="text-white/70">90%</strong> of every tip — 10% goes to the platform.
+              </p>
+
+              {connectData?.status === "enabled" ? (
+                <button
+                  onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` })}
+                  disabled={connectMutation.isPending}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-body
+                    text-white/60 hover:text-white border border-white/[0.1] hover:border-white/[0.2] transition-all disabled:opacity-50"
+                >
+                  {connectMutation.isPending ? <Loader2 size={13} className="animate-spin" /> : <ExternalLink size={13} />}
+                  Manage Stripe Account
+                </button>
+              ) : (
+                <button
+                  onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` })}
+                  disabled={connectMutation.isPending}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-body
+                    font-medium text-black transition-all hover:-translate-y-0.5 disabled:opacity-50
+                    hover:shadow-[0_4px_20px_rgba(232,197,71,0.25)]"
+                  style={{ background: "linear-gradient(135deg, #E8C547, #C9A84C)" }}
+                >
+                  {connectMutation.isPending
+                    ? <><Loader2 size={13} className="animate-spin" /> Connecting…</>
+                    : connectData?.status === "pending"
+                      ? <><AlertCircle size={13} /> Continue Stripe Setup</>
+                      : <><Zap size={13} /> Connect Stripe</>}
+                </button>
+              )}
+            </div>
+
+            {/* Fee breakdown */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Your Cut", value: "90%", sub: "of every tip", color: "#E8C547" },
+                { label: "Platform Fee", value: "10%", sub: "keeps the lights on", color: "#A78BFA" },
+              ].map(s => (
+                <div key={s.label} className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
+                  <div className="text-[22px] font-heading mb-1" style={{ color: s.color }}>{s.value}</div>
+                  <div className="text-[12px] font-body text-white/70">{s.label}</div>
+                  <div className="text-[11px] font-body text-white/25 mt-0.5">{s.sub}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
