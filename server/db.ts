@@ -120,6 +120,7 @@ export async function createSong(data: {
   fileUrl?: string; fileKey?: string; coverArtUrl?: string; fileHash?: string;
   durationSeconds?: number; witnessId?: string; harmonicSignature?: number[];
   ecdsaPublicKey?: string; ecdsaSignature?: string; certificateUrl?: string; certificateKey?: string;
+  isLyricsOnly?: boolean;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
