@@ -66,6 +66,10 @@ export const songs = mysqlTable("songs", {
   isrc: varchar("isrc", { length: 32 }),
   aiConsent: mysqlEnum("aiConsent", ["prohibited", "permitted_attribution", "permitted"]).default("prohibited").notNull(),
 
+  // Editorial
+  caption: text("caption"),
+  collectionTag: varchar("collectionTag", { length: 128 }),
+
   // Files
   fileUrl: text("fileUrl"),
   fileKey: text("fileKey"),

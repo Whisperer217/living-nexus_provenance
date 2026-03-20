@@ -329,3 +329,11 @@
 - [x] Update MobilePlayerPanel heart button to use DB toggle + filled/empty state
 - [x] Update PlayerBar heart button to use DB toggle + filled/empty state
 - [x] Rewrite LikedPage to fetch from DB
+
+## Phase: Track Edit Panel
+- [x] Add caption and collectionTag columns to songs table (SQL migration applied)
+- [x] Add updateSongMetadata DB helper (caption, genre, collectionTag, coverArtUrl, aiConsent, status)
+- [x] Add songs.updateMetadata tRPC procedure (protected, owner-only)
+- [x] Add songs.uploadCoverArt tRPC procedure (base64 → S3 → DB)
+- [x] Build EditTrackPanel slide-out sheet component with all fields + WID immutability note
+- [x] Wire Edit button on ArchivePage rows to open EditTrackPanel

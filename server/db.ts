@@ -206,6 +206,30 @@ export async function updateSongStatus(
   await db.update(songs).set({ status, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
+export async function updateSongMetadata(
+  songId: number,
+  userId: number,
+  fields: {
+    caption?: string | null;
+    genre?: string | null;
+    collectionTag?: string | null;
+    coverArtUrl?: string | null;
+    aiConsent?: "prohibited" | "permitted_attribution" | "permitted";
+    status?: "Draft" | "Published" | "Unlisted" | "Deleted";
+  }
+) {
+  const db = await getDb();
+  if (!db) return;
+  const updateSet: Record<string, unknown> = { updatedAt: new Date() };
+  if (fields.caption !== undefined) updateSet.caption = fields.caption;
+  if (fields.genre !== undefined) updateSet.genre = fields.genre;
+  if (fields.collectionTag !== undefined) updateSet.collectionTag = fields.collectionTag;
+  if (fields.coverArtUrl !== undefined) updateSet.coverArtUrl = fields.coverArtUrl;
+  if (fields.aiConsent !== undefined) updateSet.aiConsent = fields.aiConsent;
+  if (fields.status !== undefined) updateSet.status = fields.status;
+  await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+}
+
 // ─── Comments ─────────────────────────────────────────────────────────────────
 
 export async function getCommentsBySong(songId: number) {

@@ -18,7 +18,7 @@ import {
   getAiTransformsBySong, getAiTransformsByUser,
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount,
   getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped,
-  getSongByWitnessId,
+  getSongByWitnessId, updateSongMetadata,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -196,7 +196,20 @@ export const appRouter = router({
       return { success: true, fileUrl, coverArtUrl };
     }),
 
-    // ── Batch Upload (Album) ──────────────────────────────────────────────────
+    uploadCoverArt: protectedProcedure.input(z.object({
+      songId: z.number(),
+      coverBase64: z.string(),
+      coverMimeType: z.string(),
+    })).mutation(async ({ ctx, input }) => {
+      const coverBuffer = Buffer.from(input.coverBase64, "base64");
+      const ext = input.coverMimeType.includes("png") ? "png" : "jpg";
+      const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}-edit.${ext}`, coverBuffer, input.coverMimeType);
+      // Immediately persist the new cover URL
+      await updateSongMetadata(input.songId, ctx.user.id, { coverArtUrl: url });
+      return { url };
+    }),
+
+    // ── Batch Upload (Album) ──────────────────────────────────────────────────────────────────
     batchUpload: protectedProcedure.input(z.object({
       albumName: z.string().min(1).max(255),
       genre: z.string().optional(),
@@ -262,6 +275,20 @@ export const appRouter = router({
       await updateSongStatus(input.songId, ctx.user.id, input.status);
       return { success: true };
     }),
+    updateMetadata: protectedProcedure.input(z.object({
+      songId: z.number(),
+      caption: z.string().max(2000).nullable().optional(),
+      genre: z.string().max(64).nullable().optional(),
+      collectionTag: z.string().max(128).nullable().optional(),
+      coverArtUrl: z.string().url().nullable().optional(),
+      aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]).optional(),
+      status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]).optional(),
+    })).mutation(async ({ ctx, input }) => {
+      const { songId, ...fields } = input;
+      await updateSongMetadata(songId, ctx.user.id, fields);
+      return { success: true };
+    }),
+
     play: publicProcedure.input(z.object({ songId: z.number() })).mutation(async ({ input }) => { await incrementPlayCount(input.songId); return { success: true }; }),
     download: publicProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);

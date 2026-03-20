@@ -11,7 +11,9 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Music, Upload, Globe, EyeOff } from "lucide-react";
+import { Music, Upload, Globe, EyeOff, Pencil } from "lucide-react";
+import { useState } from "react";
+import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
 
 /* ── Status tag ─────────────────────────────────────────────────── */
@@ -44,6 +46,7 @@ export default function ArchivePage() {
   const { isAuthenticated, loading } = useAuth();
   const [,] = useLocation();
   const utils = trpc.useUtils();
+  const [editingSong, setEditingSong] = useState<any | null>(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -93,6 +96,7 @@ export default function ArchivePage() {
   }
 
   return (
+    <>
     <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
       <div className="container py-10 max-w-4xl mx-auto px-4">
 
@@ -198,6 +202,20 @@ export default function ArchivePage() {
                       <StatusTag status={song.status ?? "Draft"} />
                     </div>
 
+                    {/* Edit button */}
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingSong(song); }}
+                      title="Edit track metadata"
+                      className="flex-shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+                      style={{
+                        background: "rgba(212,175,55,0.1)",
+                        color: "#D4AF37",
+                        border: "1px solid rgba(212,175,55,0.3)",
+                      }}
+                    >
+                      <Pencil className="w-3 h-3" /> Edit
+                    </button>
+
                     {/* Publish toggle */}
                     <button
                       onClick={(e) => handleToggle(e, song)}
@@ -234,5 +252,17 @@ export default function ArchivePage() {
         )}
       </div>
     </div>
-  );
+
+    {/* Edit Track Panel */}
+    {editingSong && (
+      <EditTrackPanel
+        song={editingSong}
+        onClose={() => setEditingSong(null)}
+        onSaved={() => {
+          setEditingSong(null);
+          utils.songs.mySongs.invalidate();
+        }}
+      />
+    )}
+  </>);
 }
