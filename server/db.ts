@@ -114,7 +114,7 @@ export async function getAllCreators() {
 
 export async function createSong(data: {
   userId: number; title: string; genre?: string; bpm?: number; keySignature?: string;
-  moodTags?: string[]; lyricsText?: string; lyricsHash?: string; isLyricsOnly?: boolean; coWriters?: string[]; albumName?: string;
+  moodTags?: string[]; lyricsText?: string; lyricsHash?: string; coWriters?: string[]; albumName?: string;
   releaseDate?: string; isrc?: string;
   aiConsent: "prohibited" | "permitted_attribution" | "permitted";
   fileUrl?: string; fileKey?: string; coverArtUrl?: string; fileHash?: string;

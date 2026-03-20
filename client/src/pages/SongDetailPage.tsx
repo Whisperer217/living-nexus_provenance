@@ -22,7 +22,7 @@ import {
   Play, Pause, Share2, Copy, DollarSign, MessageSquare,
   Shield, Music, ChevronLeft, Download, Headphones,
   SkipBack, SkipForward, Volume2, VolumeX, Wand2,
-  ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter, Heart, FileText,
+  ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter, Heart,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
 import { safeAudioUrl } from "@shared/const";
@@ -407,66 +407,19 @@ export default function SongDetailPage() {
             </div>
 
             {/* Lyrics — read-only, only shown if lyrics were submitted at upload time */}
-            {(song.lyricsText || song.isLyricsOnly) && (
+            {song.lyricsText && (
               <div className="rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
                 <button className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
-                    {song.isLyricsOnly && (
-                      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "oklch(0.65 0.2 300 / 0.15)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)" }}>
-                        <FileText className="w-3 h-3" /> LYRICS PROTECTED
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
                   {showLyrics
                     ? <ChevronUp className="w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />
                     : <ChevronDown className="w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />}
                 </button>
                 {showLyrics && (
                   <div className="px-5 pb-5">
-                    {song.isLyricsOnly && !song.fileUrl && (
-                      <div className="flex items-center gap-2 mb-4 p-2 rounded-lg" style={{ background: "oklch(0.65 0.2 300 / 0.08)", border: "1px solid oklch(0.65 0.2 300 / 0.2)" }}>
-                        <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "oklch(0.65 0.2 300)" }} />
-                        <p className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>LYRICS PROTECTED — Audio Not Yet Attached. These lyrics are cryptographically registered on the Living Nexus blockchain.</p>
-                      </div>
-                    )}
-                    {song.lyricsText ? (
-                      <div
-                        onCopy={(e) => {
-                          const selection = window.getSelection()?.toString() ?? "";
-                          if (!selection || !song.witnessId) return;
-                          const registrationDate = song.createdAt
-                            ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
-                            : "Unknown";
-                          const creatorName = creator?.artistHandle || creator?.name || "Unknown Artist";
-                          const verifyUrl = `${window.location.origin}/verify/${song.witnessId}`;
-                          const attribution = `\n\n---\nWID: ${song.witnessId}\nCreator: ${creatorName}\nRegistered: ${registrationDate}\nVerify: ${verifyUrl}\n© Living Nexus — Unauthorized reproduction prohibited`;
-                          e.clipboardData?.setData("text/plain", selection + attribution);
-                          e.preventDefault();
-                        }}
-                      >
-                        <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "oklch(0.75 0.03 280)" }}>
-                          {song.lyricsText}
-                        </pre>
-                        {song.witnessId && (
-                          <div className="mt-6 pt-4 select-all" style={{ borderTop: "1px solid oklch(0.2 0.015 280)" }}>
-                            <pre className="text-xs font-mono leading-5 whitespace-pre-wrap" style={{ color: "oklch(0.4 0.03 280)" }}>{[
-                              `--- WID CERTIFICATE ---`,
-                              `WID: ${song.witnessId}`,
-                              `Creator: ${creator?.artistHandle || creator?.name || "Unknown Artist"}`,
-                              `Title: ${song.title}`,
-                              `Registered: ${song.createdAt ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "Unknown"}`,
-                              `Lyrics Hash: ${song.lyricsHash || "N/A"}`,
-                              `Verify: ${window.location.origin}/verify/${song.witnessId}`,
-                              `© Living Nexus — Unauthorized reproduction prohibited`,
-                              `--- END CERTIFICATE ---`,
-                            ].join("\n")}</pre>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-sm italic" style={{ color: "oklch(0.45 0.03 280)" }}>No lyrics text provided.</p>
-                    )}
+                    <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "oklch(0.75 0.03 280)" }}>
+                      {song.lyricsText}
+                    </pre>
                   </div>
                 )}
               </div>
