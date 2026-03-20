@@ -271,11 +271,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
         {/* ── Page content ── */}
         <main className="flex-1 flex flex-col overflow-hidden md:pt-0 pt-14">
-          <div className="flex-1 overflow-y-auto">
-            {/* Extra bottom padding on mobile so last card clears the player bar + safe area */}
-            <div style={{ paddingBottom: "calc(82px + env(safe-area-inset-bottom, 0px))" }}>
-              {children}
-            </div>
+          {/* paddingBottom on the scroll container ensures last content clears player bar + device nav chrome */}
+          <div
+            className="flex-1 overflow-y-auto"
+            style={{ paddingBottom: "calc(82px + env(safe-area-inset-bottom, 0px))" }}
+          >
+            {children}
           </div>
         </main>
       </div>

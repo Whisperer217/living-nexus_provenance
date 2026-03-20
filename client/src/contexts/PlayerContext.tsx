@@ -315,6 +315,47 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const currentTrackId = state.currentIdx >= 0 ? ([...DEMO_TRACKS, ...state.tracks][state.currentIdx]?.id ?? null) : null;
 
+  // ── MediaSession API: lock screen / notification shade controls ──
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return;
+    const tracks = [...DEMO_TRACKS, ...state.tracks];
+    const track = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
+    if (!track) return;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: track.title || 'Unknown Track',
+      artist: track.artist || 'Living Nexus',
+      album: 'Living Nexus',
+      artwork: track.artUrl
+        ? [
+            { src: track.artUrl, sizes: '512x512', type: 'image/jpeg' },
+            { src: track.artUrl, sizes: '256x256', type: 'image/jpeg' },
+          ]
+        : [],
+    });
+
+    navigator.mediaSession.setActionHandler('play', () => {
+      audioRef.current?.play().catch(() => {});
+    });
+    navigator.mediaSession.setActionHandler('pause', () => {
+      audioRef.current?.pause();
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+      prevTrack();
+    });
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+      nextTrack();
+    });
+    navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+      const audio = audioRef.current;
+      if (audio) audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset ?? 10));
+    });
+    navigator.mediaSession.setActionHandler('seekforward', (details) => {
+      const audio = audioRef.current;
+      if (audio) audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (details.seekOffset ?? 10));
+    });
+  }, [state.currentIdx, state.tracks, nextTrack, prevTrack]);
+
   return (
     <PlayerContext.Provider value={{
       state, audioRef, allTracks, currentTrackId,

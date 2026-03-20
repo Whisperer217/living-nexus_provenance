@@ -280,3 +280,11 @@
 - [x] Confirmed PlayerBar already has paddingBottom: env(safe-area-inset-bottom, 0px) and minHeight: 82px
 - [x] Fixed content area: removed conflicting Tailwind pb-[82px] md:pb-0 classes that fought with inline style; now uses only inline style paddingBottom: calc(82px + env(safe-area-inset-bottom, 0px)) for all breakpoints
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 36: MediaSession API + Mobile Overlap Fix
+- [x] Added navigator.mediaSession.metadata (title, artist, artwork) to PlayerContext in useEffect that fires on currentIdx/tracks change
+- [x] Added all 6 mediaSession action handlers: play, pause, previoustrack, nexttrack, seekbackward (10s), seekforward (10s)
+- [x] Feature-detected with 'mediaSession' in navigator guard for non-supporting browsers
+- [x] Moved paddingBottom: calc(82px + env(safe-area-inset-bottom, 0px)) directly onto the overflow-y-auto scroll container (better Safari iOS compatibility vs inner wrapper)
+- [x] Removed redundant inner wrapper div
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing
