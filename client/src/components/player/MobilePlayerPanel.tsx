@@ -6,6 +6,8 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { usePlayer } from "@/contexts/PlayerContext";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, X,
@@ -23,8 +25,9 @@ export default function MobilePlayerPanel() {
     state, audioRef, allTracks,
     togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute,
-    setVolume, seek, toggleLike,
+    setVolume, seek,
   } = usePlayer();
+  const { user } = useAuth();
 
   const [open, setOpen] = useState(false);
 
@@ -34,7 +37,23 @@ export default function MobilePlayerPanel() {
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
-  const isLiked = currentTrack ? state.liked.has(currentTrack.id) : false;
+  const currentSongId = currentTrack?.id ? parseInt(currentTrack.id, 10) : null;
+
+  // DB-backed like state
+  const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(
+    { songId: currentSongId! },
+    { enabled: !!user && !!currentSongId && !isNaN(currentSongId) }
+  );
+  const isLiked = !!likeStatusData?.liked;
+
+  const toggleLikeMutation = trpc.songs.toggleLike.useMutation({
+    onSuccess: () => { refetchLikeStatus(); },
+  });
+
+  const handleToggleLike = useCallback(() => {
+    if (!user || !currentSongId || isNaN(currentSongId)) return;
+    toggleLikeMutation.mutate({ songId: currentSongId });
+  }, [user, currentSongId, toggleLikeMutation]);
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
 
   const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -232,8 +251,10 @@ export default function MobilePlayerPanel() {
             </div>
           </div>
           <button
-            onClick={() => currentTrack && toggleLike(currentTrack.id)}
-            className={`p-2 flex-shrink-0 transition-colors ${isLiked ? "text-[#A78BFA]" : "text-white/25 hover:text-white/60"}`}
+            onClick={handleToggleLike}
+            disabled={!user || toggleLikeMutation.isPending}
+            className={`p-2 flex-shrink-0 transition-colors ${isLiked ? "text-[#A78BFA]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
+            title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
           >
             <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
           </button>

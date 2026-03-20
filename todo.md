@@ -321,3 +321,11 @@
 - [x] Update global CSS tokens — text brightness, background gradient, card base, gold color, button glow
 - [x] Update DiscoverPage, ExplorePage, HomePage — text/card/badge/button
 - [x] Update SongDetailPage, CreatorProfilePage, ArchivePage, DashboardPage, UploadPage
+
+## Phase: Like Button DB Persistence
+- [x] Add likes table to schema and migrate
+- [x] Add DB helpers: toggleLike, isLiked, getUserLikedSongs
+- [x] Add tRPC procedures: songs.toggleLike, songs.getLiked, songs.checkLiked
+- [x] Update MobilePlayerPanel heart button to use DB toggle + filled/empty state
+- [x] Update PlayerBar heart button to use DB toggle + filled/empty state
+- [x] Rewrite LikedPage to fetch from DB

@@ -7,10 +7,11 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { usePlayer, Track } from "@/contexts/PlayerContext";
+import { safeAudioUrl } from "@shared/const";
 
 export default function LikedPage() {
   const { user, loading } = useAuth();
-  const { addAndPlay } = usePlayer();
+  const { playQueueAt } = usePlayer();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -31,6 +32,29 @@ export default function LikedPage() {
       </div>
     );
   }
+
+  // Build a Track array from liked songs for queue playback
+  const buildTracks = (): Track[] =>
+    (likedTracks ?? [])
+      .filter((item: any) => !!item.song?.fileUrl)
+      .map((item: any) => ({
+        id: String(item.song.id),
+        title: item.song.title,
+        artist: item.creator?.artistHandle || item.creator?.name || "Unknown Artist",
+        genre: item.song.genre || "",
+        audioUrl: safeAudioUrl(item.song.fileUrl),
+        artUrl: item.song.coverArtUrl || undefined,
+        artType: "image" as const,
+        witnessId: item.song.witnessId || undefined,
+        aiDisclosure: item.creator?.aiDisclosure || undefined,
+      }));
+
+  const handlePlay = (idx: number) => {
+    const tracks = buildTracks();
+    if (tracks.length === 0) return;
+    const clampedIdx = Math.max(0, Math.min(idx, tracks.length - 1));
+    playQueueAt(tracks, clampedIdx);
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -73,7 +97,7 @@ export default function LikedPage() {
             No liked tracks yet
           </p>
           <p className="text-sm mb-6" style={{ color: "#E2E8F0" }}>
-            When you like a track from another creator, it will appear here.
+            When you tap the heart on a track, it will appear here.
           </p>
           <Link href="/explore">
             <Button size="sm"
@@ -90,6 +114,7 @@ export default function LikedPage() {
               const song = item.song;
               const creator = item.creator;
               const likedAt = item.likedAt ? new Date(item.likedAt) : null;
+              const playIdx = buildTracks().findIndex(t => t.id === String(song.id));
 
               return (
                 <div key={song.id}
@@ -100,7 +125,7 @@ export default function LikedPage() {
 
                   {/* Index */}
                   <span className="w-6 text-center text-sm font-mono shrink-0"
-                    style={{ color: "oklch(0.4 0.03 280)" }}>
+                    style={{ color: "oklch(0.55 0.03 280)" }}>
                     {idx + 1}
                   </span>
 
@@ -121,7 +146,7 @@ export default function LikedPage() {
                   {/* Title + Creator */}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate text-sm"
-                      style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.88 0.02 85)" }}>
+                      style={{ fontFamily: "'Cinzel', serif", color: "#FFFFFF" }}>
                       {song.title}
                     </p>
                     <p className="text-xs truncate mt-0.5" style={{ color: "#E2E8F0" }}>
@@ -140,29 +165,24 @@ export default function LikedPage() {
                   {/* Liked date */}
                   {likedAt && (
                     <span className="hidden md:block text-xs shrink-0"
-                      style={{ color: "oklch(0.4 0.03 280)" }}>
+                      style={{ color: "oklch(0.55 0.03 280)" }}>
                       {likedAt.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                     </span>
                   )}
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 shrink-0">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => addAndPlay({
-                        id: String(song.id),
-                        title: song.title,
-                        artist: creator?.artistHandle || creator?.name || "Unknown",
-                        src: song.fileUrl || "",
-                        cover: song.coverArtUrl || "",
-                        genre: song.genre || "",
-                      } as Track)}
-                      title="Play"
-                      style={{ color: "oklch(0.84 0.155 85)" }}>
-                      <Play className="w-4 h-4" />
-                    </Button>
+                    {song.fileUrl && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handlePlay(playIdx >= 0 ? playIdx : 0)}
+                        title="Play"
+                        style={{ color: "oklch(0.84 0.155 85)" }}>
+                        <Play className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Link href={`/song/${song.id}`}>
                       <Button
                         size="icon"
