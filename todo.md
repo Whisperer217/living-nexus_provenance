@@ -274,3 +274,9 @@
 - [x] Added PAGE_SUMMARIES entry for /batch-upload
 - [x] Updated CreatorProfilePage to group tracks by albumName and show album sections above flat All Songs list
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 35: Mobile Player Bar Overlap Fix
+- [x] Confirmed viewport-fit=cover already set in index.html
+- [x] Confirmed PlayerBar already has paddingBottom: env(safe-area-inset-bottom, 0px) and minHeight: 82px
+- [x] Fixed content area: removed conflicting Tailwind pb-[82px] md:pb-0 classes that fought with inline style; now uses only inline style paddingBottom: calc(82px + env(safe-area-inset-bottom, 0px)) for all breakpoints
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing
