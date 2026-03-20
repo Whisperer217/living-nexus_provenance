@@ -1,4 +1,4 @@
-import { and, desc, eq, like, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser, aiTransforms, comments, downloads, licenses,
@@ -89,12 +89,25 @@ export async function updateUserLicense(userId: number, data: {
 export async function getAllCreators() {
   const db = await getDb();
   if (!db) return [];
-  return db.select({
-    id: users.id, name: users.name, artistHandle: users.artistHandle,
-    bio: users.bio, profilePhotoUrl: users.profilePhotoUrl, bannerUrl: users.bannerUrl,
-    licenseStatus: users.licenseStatus, songSlotsUsed: users.songSlotsUsed,
-    stripeAccountStatus: users.stripeAccountStatus,
-  }).from(users).orderBy(desc(users.createdAt));
+  // Only return creators who have a non-empty name AND at least one Published track
+  const results = await db
+    .select({
+      id: users.id, name: users.name, artistHandle: users.artistHandle,
+      bio: users.bio, profilePhotoUrl: users.profilePhotoUrl, bannerUrl: users.bannerUrl,
+      licenseStatus: users.licenseStatus, songSlotsUsed: users.songSlotsUsed,
+      stripeAccountStatus: users.stripeAccountStatus,
+      publishedCount: sql<number>`count(${songs.id})`,
+    })
+    .from(users)
+    .innerJoin(songs, and(eq(songs.userId, users.id), eq(songs.status, "Published")))
+    .where(and(
+      isNotNull(users.name),
+      ne(users.name, ""),
+    ))
+    .groupBy(users.id)
+    .having(sql`count(${songs.id}) > 0`)
+    .orderBy(desc(users.createdAt));
+  return results;
 }
 
 // ─── Songs ────────────────────────────────────────────────────────────────────

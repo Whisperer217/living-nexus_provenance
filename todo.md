@@ -204,3 +204,10 @@
 - [x] Fixed: const.ts now hardcodes PRODUCTION_ORIGIN = https://www.livingnexus.org; redirectUri always uses this regardless of current browser URL
 - [x] All 12 call sites of getLoginUrl() automatically benefit (no changes needed in pages)
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 28: Fix Featured Creators — Remove Anonymous/Empty Slots
+- [x] Found getAllCreators DB helper — was returning ALL users with no filters
+- [x] Rewrote getAllCreators: INNER JOIN on songs (status=Published), WHERE name IS NOT NULL AND name != '', GROUP BY user, HAVING count > 0
+- [x] Added isNotNull to drizzle-orm imports
+- [x] Added frontend safety filter: creators.filter(c => c.name && c.name.trim().length > 0) as a second line of defense
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

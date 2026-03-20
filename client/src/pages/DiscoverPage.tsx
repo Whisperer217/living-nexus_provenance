@@ -232,7 +232,7 @@ export default function DiscoverPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {creators.slice(0, 12).map((creator) => (
+              {creators.filter(c => c.name && c.name.trim().length > 0).slice(0, 12).map((creator) => (
                 <Link key={creator.id} href={`/creator/${creator.id}`}>
                   <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
                     <div className="w-14 h-14 rounded-full mx-auto mb-2 overflow-hidden flex items-center justify-center" style={{ background: "oklch(0.18 0.025 280)", border: "2px solid oklch(0.75 0.18 85 / 0.3)" }}>
