@@ -197,3 +197,10 @@
 - [x] Added paddingBottom: env(safe-area-inset-bottom, 0px) to PlayerBar root element; changed fixed h-[82px] to minHeight: 82px so bar grows with safe area
 - [x] Added bottom padding to scrollable content div in MainLayout: calc(82px + env(safe-area-inset-bottom, 0px)); Tailwind pb-[82px] as fallback for desktop
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 27: Fix OAuth Redirect URI to www.livingnexus.org
+- [x] Audited getLoginUrl() — root cause: window.location.origin resolves to sandbox preview URL when accessed via manus.space subdomain
+- [x] Audited server OAuth handler — no hardcoded domains, uses state param correctly
+- [x] Fixed: const.ts now hardcodes PRODUCTION_ORIGIN = https://www.livingnexus.org; redirectUri always uses this regardless of current browser URL
+- [x] All 12 call sites of getLoginUrl() automatically benefit (no changes needed in pages)
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing
