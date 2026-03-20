@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Upload, Music, Image as ImageIcon, Check, Shield, ChevronRight,
-  ChevronLeft, Play, Download, Copy, RefreshCw, Zap, Loader2,
+  ChevronLeft, Play, Download, Copy, RefreshCw, Zap, Loader2, FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -162,6 +162,9 @@ export default function UploadPage() {
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
 
+  const [uploadMode, setUploadMode] = useState<"audio" | "lyrics">("audio");
+  const [lyricsOnlyText, setLyricsOnlyText] = useState("");
+
   const [witnessData, setWitnessData] = useState<WitnessData | null>(null);
   const [generatingWid, setGeneratingWid] = useState(false);
   const [waveformActive, setWaveformActive] = useState(false);
@@ -191,15 +194,24 @@ export default function UploadPage() {
   }, [title]);
 
   const handleGenerateWid = async () => {
-    if (!audioFile) { toast.error("Please select an audio file first"); return; }
+    if (uploadMode === "audio" && !audioFile) { toast.error("Please select an audio file first"); return; }
+    if (uploadMode === "lyrics" && !lyricsOnlyText.trim()) { toast.error("Please enter your lyrics first"); return; }
     setGeneratingWid(true);
     try {
-      const buffer = await audioFile.arrayBuffer();
-      const fileHash = await sha256Hex(buffer);
+      let fileHash: string;
+      if (uploadMode === "lyrics") {
+        // Hash the lyrics text content
+        const enc = new TextEncoder();
+        fileHash = await sha256Hex(enc.encode(lyricsOnlyText).buffer as ArrayBuffer);
+      } else {
+        const buffer = await audioFile!.arrayBuffer();
+        fileHash = await sha256Hex(buffer);
+      }
       const wid = formatWID(fileHash);
       const frequencies = deriveHarmonicFrequencies(fileHash);
       const keypair = await generateECDSAKeypair();
-      const payload = `${wid}|${title || audioFile.name}|${user?.name || ""}|${Date.now()}${lyrics ? `|LYRICS:${lyrics.slice(0, 500)}` : ""}`;
+      const sourceLabel = uploadMode === "lyrics" ? `LYRICS:${lyricsOnlyText.slice(0, 200)}` : (lyrics ? `LYRICS:${lyrics.slice(0, 500)}` : "");
+      const payload = `${wid}|${title || (audioFile?.name ?? "Untitled")}|${user?.name || ""}|${Date.now()}${sourceLabel ? `|${sourceLabel}` : ""}`;
       const signature = await signPayload(keypair.privateKey, payload);
       const publicKeyJWK = await exportPublicKeyJWK(keypair.publicKey);
       const timestamp = new Date().toISOString();
@@ -238,23 +250,42 @@ export default function UploadPage() {
   };
 
   const handlePublish = async () => {
-    if (!audioFile || !title) { toast.error("Audio file and title are required"); return; }
+    if (uploadMode === "audio" && !audioFile) { toast.error("Audio file is required"); return; }
+    if (uploadMode === "lyrics" && !lyricsOnlyText.trim()) { toast.error("Lyrics text is required"); return; }
+    if (!title) { toast.error("Title is required"); return; }
     try {
-      const audioBase64 = await toBase64(audioFile);
       let coverBase64: string | undefined;
       let coverMimeType: string | undefined;
       if (coverFile) { coverBase64 = await toBase64(coverFile); coverMimeType = coverFile.type; }
-      uploadMutation.mutate({
-        audioBase64, audioMimeType: audioFile.type, audioFileName: audioFile.name,
-        coverBase64, coverMimeType, title, genre: genre || undefined,
-        bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
-        albumName: albumName || undefined, releaseDate: releaseDate || undefined,
-        isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
-        lyricsText: lyrics || undefined,
-        fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
-        harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
-        ecdsaSignature: witnessData?.signature,
-      });
+
+      if (uploadMode === "lyrics") {
+        uploadMutation.mutate({
+          mode: "lyrics",
+          coverBase64, coverMimeType, title, genre: genre || undefined,
+          bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
+          albumName: albumName || undefined, releaseDate: releaseDate || undefined,
+          isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+          lyricsText: lyricsOnlyText,
+          lyricsHash: witnessData?.fileHash,
+          witnessId: witnessData?.wid,
+          harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
+          ecdsaSignature: witnessData?.signature,
+        });
+      } else {
+        const audioBase64 = await toBase64(audioFile!);
+        uploadMutation.mutate({
+          mode: "audio",
+          audioBase64, audioMimeType: audioFile!.type, audioFileName: audioFile!.name,
+          coverBase64, coverMimeType, title, genre: genre || undefined,
+          bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
+          albumName: albumName || undefined, releaseDate: releaseDate || undefined,
+          isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+          lyricsText: lyrics || undefined,
+          fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
+          harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
+          ecdsaSignature: witnessData?.signature,
+        });
+      }
     } catch { toast.error("Failed to prepare upload"); }
   };
 
@@ -309,32 +340,74 @@ export default function UploadPage() {
           {step === 1 && (
             <div className="space-y-5">
               <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Select Files</h2>
-              <div
-                onClick={() => audioInputRef.current?.click()}
-                onDragOver={e => { e.preventDefault(); setAudioDragging(true); }}
-                onDragLeave={() => setAudioDragging(false)}
-                onDrop={handleAudioDrop}
-                className="rounded-xl p-8 text-center cursor-pointer transition-all"
-                style={{ border: `2px dashed ${audioFile ? "oklch(0.65 0.18 145)" : audioDragging ? "oklch(0.75 0.18 85)" : "oklch(0.28 0.02 280)"}`, background: audioFile ? "oklch(0.65 0.18 145 / 0.05)" : audioDragging ? "oklch(0.75 0.18 85 / 0.05)" : "oklch(0.09 0.01 280)" }}>
-                <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) { setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); } }} />
-                {audioFile ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.18 145 / 0.2)" }}>
-                      <Check className="w-5 h-5" style={{ color: "oklch(0.65 0.18 145)" }} />
-                    </div>
-                    <p className="font-medium text-sm" style={{ color: "oklch(0.65 0.18 145)" }}>{audioFile.name}</p>
-                    <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                    <button onClick={e => { e.stopPropagation(); setAudioFile(null); }} className="text-xs hover:underline" style={{ color: "oklch(0.55 0.04 280)" }}>Remove</button>
-                  </div>
-                ) : (
-                  <>
-                    <Music className="w-10 h-10 mx-auto mb-3" style={{ color: "oklch(0.75 0.18 85)", opacity: 0.4 }} />
-                    <p className="font-medium text-sm mb-1" style={{ color: "oklch(0.7 0.04 280)" }}>{audioDragging ? "Drop it!" : "Drop audio file here or click to browse"}</p>
-                    <p className="text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>MP3, WAV, FLAC, M4A, OGG supported</p>
-                  </>
-                )}
+
+              {/* Mode toggle */}
+              <div className="flex rounded-xl overflow-hidden" style={{ border: "1px solid oklch(0.22 0.015 280)" }}>
+                <button
+                  onClick={() => { setUploadMode("audio"); setWitnessData(null); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-all"
+                  style={{
+                    background: uploadMode === "audio" ? "oklch(0.75 0.18 85)" : "oklch(0.12 0.015 280)",
+                    color: uploadMode === "audio" ? "oklch(0.08 0.015 280)" : "oklch(0.55 0.04 280)",
+                    fontFamily: "'Cinzel', serif",
+                  }}>
+                  <Music className="w-4 h-4" /> Upload Audio
+                </button>
+                <button
+                  onClick={() => { setUploadMode("lyrics"); setWitnessData(null); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-all"
+                  style={{
+                    background: uploadMode === "lyrics" ? "oklch(0.65 0.2 300)" : "oklch(0.12 0.015 280)",
+                    color: uploadMode === "lyrics" ? "oklch(0.08 0.015 280)" : "oklch(0.55 0.04 280)",
+                    fontFamily: "'Cinzel', serif",
+                  }}>
+                  <FileText className="w-4 h-4" /> Protect Lyrics Only
+                </button>
               </div>
+              {uploadMode === "audio" ? (
+                <div
+                  onClick={() => audioInputRef.current?.click()}
+                  onDragOver={e => { e.preventDefault(); setAudioDragging(true); }}
+                  onDragLeave={() => setAudioDragging(false)}
+                  onDrop={handleAudioDrop}
+                  className="rounded-xl p-8 text-center cursor-pointer transition-all"
+                  style={{ border: `2px dashed ${audioFile ? "oklch(0.65 0.18 145)" : audioDragging ? "oklch(0.75 0.18 85)" : "oklch(0.28 0.02 280)"}`, background: audioFile ? "oklch(0.65 0.18 145 / 0.05)" : audioDragging ? "oklch(0.75 0.18 85 / 0.05)" : "oklch(0.09 0.01 280)" }}>
+                  <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if (f) { setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); } }} />
+                  {audioFile ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.18 145 / 0.2)" }}>
+                        <Check className="w-5 h-5" style={{ color: "oklch(0.65 0.18 145)" }} />
+                      </div>
+                      <p className="font-medium text-sm" style={{ color: "oklch(0.65 0.18 145)" }}>{audioFile.name}</p>
+                      <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <button onClick={e => { e.stopPropagation(); setAudioFile(null); }} className="text-xs hover:underline" style={{ color: "oklch(0.55 0.04 280)" }}>Remove</button>
+                    </div>
+                  ) : (
+                    <>
+                      <Music className="w-10 h-10 mx-auto mb-3" style={{ color: "oklch(0.75 0.18 85)", opacity: 0.4 }} />
+                      <p className="font-medium text-sm mb-1" style={{ color: "oklch(0.7 0.04 280)" }}>{audioDragging ? "Drop it!" : "Drop audio file here or click to browse"}</p>
+                      <p className="text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>MP3, WAV, FLAC, M4A, OGG supported</p>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "oklch(0.65 0.2 300 / 0.08)", border: "1px solid oklch(0.65 0.2 300 / 0.25)" }}>
+                    <FileText className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.65 0.2 300)" }} />
+                    <p className="text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>Your lyrics will be SHA-256 hashed and signed with ECDSA P-256. A WID certificate will prove you wrote these words before anyone else.</p>
+                  </div>
+                  <Textarea
+                    value={lyricsOnlyText}
+                    onChange={e => setLyricsOnlyText(e.target.value)}
+                    placeholder="Paste or type your lyrics here..."
+                    rows={12}
+                    className="font-mono text-sm resize-none"
+                    style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
+                  />
+                  <p className="text-xs text-right" style={{ color: "oklch(0.4 0.02 280)" }}>{lyricsOnlyText.length} characters</p>
+                </div>
+              )}
               <div onClick={() => coverInputRef.current?.click()} className="rounded-xl p-5 text-center cursor-pointer transition-all hover:bg-white/5"
                 style={{ border: `2px dashed ${coverFile ? "oklch(0.65 0.2 300)" : "oklch(0.22 0.015 280)"}`, background: coverFile ? "oklch(0.65 0.2 300 / 0.05)" : "oklch(0.09 0.01 280)" }}>
                 <input ref={coverInputRef} type="file" accept="image/*" className="hidden"
@@ -352,7 +425,10 @@ export default function UploadPage() {
                   </>
                 )}
               </div>
-              <Button className="w-full" disabled={!audioFile} onClick={() => setStep(2)} style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+              <Button className="w-full"
+                disabled={uploadMode === "audio" ? !audioFile : !lyricsOnlyText.trim()}
+                onClick={() => setStep(2)}
+                style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
                 Next: Metadata <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
@@ -470,13 +546,19 @@ export default function UploadPage() {
                 <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Witness ID — Cryptographic Provenance</h2>
                 <p className="text-xs mt-1" style={{ color: "oklch(0.5 0.03 280)" }}>All processing is local — your audio is hashed in-browser. ECDSA P-256 signature establishes tamper-evident ownership.</p>
               </div>
+              {uploadMode === "lyrics" && (
+                <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "oklch(0.65 0.2 300 / 0.08)", border: "1px solid oklch(0.65 0.2 300 / 0.3)" }}>
+                  <FileText className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.65 0.2 300)" }} />
+                  <p className="text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>Lyrics-Only Mode — your WID will be derived from the SHA-256 hash of your lyrics text. No audio file required.</p>
+                </div>
+              )}
               {!witnessData ? (
                 <div className="text-center py-10 rounded-xl" style={{ background: "oklch(0.09 0.01 280)", border: "2px dashed oklch(0.75 0.18 85 / 0.25)" }}>
                   <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "oklch(0.75 0.18 85 / 0.1)", border: "1px solid oklch(0.75 0.18 85 / 0.3)" }}>
                     <Shield className="w-8 h-8" style={{ color: "oklch(0.75 0.18 85)", opacity: 0.6 }} />
                   </div>
                   <p className="text-sm mb-1 font-medium" style={{ color: "oklch(0.7 0.04 280)" }}>Generate your Witness ID</p>
-                  <p className="text-xs mb-5" style={{ color: "oklch(0.45 0.03 280)" }}>SHA-256 hash + ECDSA P-256 signature + harmonic frequency derivation</p>
+                  <p className="text-xs mb-5" style={{ color: "oklch(0.45 0.03 280)" }}>{uploadMode === "lyrics" ? "SHA-256 hash of lyrics + ECDSA P-256 signature + harmonic frequency derivation" : "SHA-256 hash + ECDSA P-256 signature + harmonic frequency derivation"}</p>
                   <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
                     {generatingWid ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : <><Zap className="w-4 h-4 mr-2" /> Generate Witness ID</>}
                   </Button>
@@ -538,9 +620,20 @@ export default function UploadPage() {
           {step === 4 && (
             <div className="space-y-5">
               <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Review & Publish</h2>
+              {uploadMode === "lyrics" && witnessData && (
+                <div className="flex items-center gap-2 p-3 rounded-lg mb-3" style={{ background: "oklch(0.65 0.2 300 / 0.08)", border: "1px solid oklch(0.65 0.2 300 / 0.3)" }}>
+                  <FileText className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.65 0.2 300)" }} />
+                  <div>
+                    <p className="text-xs font-semibold" style={{ color: "oklch(0.65 0.2 300)" }}>LYRICS PROTECTED — Audio Not Yet Attached</p>
+                    <p className="text-xs mt-0.5" style={{ color: "oklch(0.55 0.04 280)" }}>Your lyrics are cryptographically registered. You can attach audio later.</p>
+                  </div>
+                </div>
+              )}
               <div className="rounded-xl overflow-hidden" style={{ border: "1px solid oklch(0.2 0.015 280)" }}>
                 {[
-                  { label: "Audio File", value: audioFile?.name },
+                  uploadMode === "audio"
+                    ? { label: "Audio File", value: audioFile?.name }
+                    : { label: "Registration Mode", value: "Lyrics Only", highlight: true },
                   { label: "Cover Art", value: coverFile?.name || "None" },
                   { label: "Title", value: title, highlight: true },
                   { label: "Genre", value: genre || "Not specified" },
@@ -549,14 +642,15 @@ export default function UploadPage() {
                   { label: "ISRC", value: isrc || "Not specified" },
                   { label: "Mood Tags", value: selectedMoods.length ? selectedMoods.join(", ") : "None" },
                   { label: "Witness ID", value: witnessData?.wid || "Not generated", wid: !!witnessData },
+                  uploadMode === "lyrics" ? { label: "Lyrics Hash", value: witnessData?.fileHash ? witnessData.fileHash.slice(0, 20) + "..." : "Not generated", wid: false } : null,
                   { label: "AI Consent", value: aiConsent.replace(/_/g, " ").toUpperCase() },
-                ].map(({ label, value, highlight, wid }, i) => (
+                ].filter(Boolean).map((item, i) => { const { label, value, highlight, wid } = item as { label: string; value: string | undefined; highlight?: boolean; wid?: boolean }; return (
                   <div key={label} className="flex justify-between items-center px-4 py-2.5 text-sm"
                     style={{ background: i % 2 === 0 ? "oklch(0.12 0.015 280)" : "oklch(0.105 0.013 280)" }}>
                     <span style={{ color: "oklch(0.5 0.03 280)" }}>{label}</span>
                     <span className={wid ? "font-mono text-xs" : ""} style={{ color: highlight ? "oklch(0.9 0.02 85)" : wid ? "oklch(0.75 0.18 85)" : "oklch(0.7 0.04 280)" }}>{value}</span>
                   </div>
-                ))}
+                ); })}
               </div>
               {!witnessData && (
                 <div className="flex items-start gap-2 p-3 rounded-lg" style={{ background: "oklch(0.75 0.18 85 / 0.08)", border: "1px solid oklch(0.75 0.18 85 / 0.2)" }}>

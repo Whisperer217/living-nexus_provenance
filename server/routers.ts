@@ -133,33 +133,58 @@ export const appRouter = router({
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     bySelf: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     upload: protectedProcedure.input(z.object({
-      audioBase64: z.string(), audioMimeType: z.string(), audioFileName: z.string(),
+      // Mode: 'audio' requires audioBase64; 'lyrics' skips audio upload
+      mode: z.enum(["audio", "lyrics"]).default("audio"),
+      audioBase64: z.string().optional(), audioMimeType: z.string().optional(), audioFileName: z.string().optional(),
       coverBase64: z.string().optional(), coverMimeType: z.string().optional(),
       title: z.string().min(1).max(255), genre: z.string().optional(), bpm: z.number().optional(),
       keySignature: z.string().optional(), moodTags: z.array(z.string()).optional(),
       coWriters: z.array(z.string()).optional(), albumName: z.string().optional(),
       releaseDate: z.string().optional(), isrc: z.string().optional(),
       aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]),
-      lyricsText: z.string().max(20000).optional(),
+      lyricsText: z.string().max(50000).optional(),
+      lyricsHash: z.string().optional(),
       fileHash: z.string().optional(), witnessId: z.string().optional(),
       harmonicSignature: z.array(z.number()).optional(), ecdsaPublicKey: z.string().optional(), ecdsaSignature: z.string().optional(),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
       if (user.songSlotsUsed >= user.songSlotsTotal) throw new Error("No song slots available. Please purchase more slots.");
-      const audioBuffer = Buffer.from(input.audioBase64, "base64");
-      // Sanitize filename: replace spaces, emojis, and special chars with underscores
-      const safeFileName = input.audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const audioKey = `audio/${ctx.user.id}/${Date.now()}-${safeFileName}`;
-      const { url: fileUrl } = await storagePut(audioKey, audioBuffer, input.audioMimeType);
+
+      const isLyricsOnly = input.mode === "lyrics";
+
+      // Audio mode: require audio file
+      let fileUrl: string | undefined;
+      let audioKey: string | undefined;
+      if (!isLyricsOnly) {
+        if (!input.audioBase64 || !input.audioMimeType || !input.audioFileName) {
+          throw new Error("Audio file is required for audio upload mode.");
+        }
+        const audioBuffer = Buffer.from(input.audioBase64, "base64");
+        const safeFileName = input.audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+        audioKey = `audio/${ctx.user.id}/${Date.now()}-${safeFileName}`;
+        const result = await storagePut(audioKey, audioBuffer, input.audioMimeType);
+        fileUrl = result.url;
+      }
+
       let coverArtUrl: string | undefined;
       if (input.coverBase64 && input.coverMimeType) {
         const coverBuffer = Buffer.from(input.coverBase64, "base64");
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.jpg`, coverBuffer, input.coverMimeType);
         coverArtUrl = url;
       }
-      await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature });
-      return { success: true, fileUrl, coverArtUrl };
+
+      await createSong({
+        userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm,
+        keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters,
+        albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc,
+        aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash,
+        isLyricsOnly,
+        fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash,
+        witnessId: input.witnessId, harmonicSignature: input.harmonicSignature,
+        ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature,
+      });
+      return { success: true, fileUrl: fileUrl ?? null, coverArtUrl: coverArtUrl ?? null, isLyricsOnly };
     }),
 
     // ── Batch Upload (Album) ──────────────────────────────────────────────────
