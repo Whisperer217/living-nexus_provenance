@@ -483,6 +483,56 @@ export default function CreatorProfilePage() {
           </section>
         )}
 
+        {/* ── Albums (grouped by albumName) ── */}
+        {(() => {
+          const albumMap = new Map<string, any[]>();
+          songs.forEach((song: any) => {
+            if (song.albumName) {
+              if (!albumMap.has(song.albumName)) albumMap.set(song.albumName, []);
+              albumMap.get(song.albumName)!.push(song);
+            }
+          });
+          const albumEntries = Array.from(albumMap.entries());
+          if (!albumEntries.length) return null;
+          return (
+            <section className="py-4">
+              <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Albums</h2>
+              <div className="space-y-5">
+                {albumEntries.map(([albumName, albumSongs]) => (
+                  <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                    <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid oklch(0.16 0.01 280)" }}>
+                      {albumSongs[0]?.coverArtUrl ? (
+                        <img src={albumSongs[0].coverArtUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.75 0.18 85 / 0.15)" }}>
+                          <Music className="w-6 h-6" style={{ color: "oklch(0.75 0.18 85)" }} />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-bold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>{albumName}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "oklch(0.5 0.03 280)" }}>{albumSongs.length} track{albumSongs.length !== 1 ? "s" : ""}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-0.5 p-2">
+                      {albumSongs.map((song: any, idx: number) => (
+                        <SongRow
+                          key={song.id}
+                          song={song}
+                          index={idx}
+                          isPlaying={playingId === song.id}
+                          onPlay={() => handlePlay(song)}
+                          isOwner={isOwner}
+                          onDelete={(id) => deleteMutation.mutate({ songId: id })}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
         {/* ── Full Song List (all songs in compact row format) ── */}
         {songs.length > 0 && (
           <section className="py-4 pb-32">

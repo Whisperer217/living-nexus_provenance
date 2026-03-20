@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import ExplorePage from "./pages/ExplorePage";
 import TogetherPage from "./pages/TogetherPage";
 import UploadPage from "./pages/UploadPage";
+import BatchUploadPage from "./pages/BatchUploadPage";
 import LikedPage from "./pages/LikedPage";
 import ArchivePage from "./pages/ArchivePage";
 import TrackPage from "./pages/TrackPage";
@@ -28,6 +29,7 @@ function Router() {
         <Route path="/explore" component={ExplorePage} />
         <Route path="/together" component={TogetherPage} />
         <Route path="/upload" component={UploadPage} />
+        <Route path="/batch-upload" component={BatchUploadPage} />
         <Route path="/liked" component={LikedPage} />
         <Route path="/archive" component={ArchivePage} />
         <Route path="/listen-together" component={TogetherPage} />

@@ -161,6 +161,65 @@ export const appRouter = router({
       await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature });
       return { success: true, fileUrl, coverArtUrl };
     }),
+
+    // ── Batch Upload (Album) ──────────────────────────────────────────────────
+    batchUpload: protectedProcedure.input(z.object({
+      albumName: z.string().min(1).max(255),
+      genre: z.string().optional(),
+      aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]),
+      coverBase64: z.string().optional(),
+      coverMimeType: z.string().optional(),
+      tracks: z.array(z.object({
+        audioBase64: z.string(),
+        audioMimeType: z.string(),
+        audioFileName: z.string(),
+        title: z.string().min(1).max(255),
+        fileHash: z.string().optional(),
+        witnessId: z.string().optional(),
+        harmonicSignature: z.array(z.number()).optional(),
+        ecdsaPublicKey: z.string().optional(),
+        ecdsaSignature: z.string().optional(),
+      })).min(1).max(50),
+    })).mutation(async ({ ctx, input }) => {
+      const user = await getUserById(ctx.user.id);
+      if (!user) throw new Error("User not found");
+      if (user.songSlotsUsed + input.tracks.length > user.songSlotsTotal) {
+        throw new Error(`Not enough song slots. You have ${user.songSlotsTotal - user.songSlotsUsed} slot(s) remaining but are trying to upload ${input.tracks.length} track(s).`);
+      }
+      // Upload shared cover art once
+      let coverArtUrl: string | undefined;
+      if (input.coverBase64 && input.coverMimeType) {
+        const coverBuffer = Buffer.from(input.coverBase64, "base64");
+        const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}-album.jpg`, coverBuffer, input.coverMimeType);
+        coverArtUrl = url;
+      }
+      // Upload each track and create song records
+      const results: { title: string; witnessId?: string; fileUrl: string }[] = [];
+      for (const track of input.tracks) {
+        const audioBuffer = Buffer.from(track.audioBase64, "base64");
+        const safeFileName = track.audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const audioKey = `audio/${ctx.user.id}/${Date.now()}-${safeFileName}`;
+        const { url: fileUrl } = await storagePut(audioKey, audioBuffer, track.audioMimeType);
+        await createSong({
+          userId: ctx.user.id,
+          title: track.title,
+          genre: input.genre,
+          albumName: input.albumName,
+          aiConsent: input.aiConsent,
+          fileUrl,
+          fileKey: audioKey,
+          coverArtUrl,
+          fileHash: track.fileHash,
+          witnessId: track.witnessId,
+          harmonicSignature: track.harmonicSignature,
+          ecdsaPublicKey: track.ecdsaPublicKey,
+          ecdsaSignature: track.ecdsaSignature,
+        });
+        results.push({ title: track.title, witnessId: track.witnessId, fileUrl });
+      }
+      return { success: true, trackCount: results.length, coverArtUrl, results };
+    }),
+
     delete: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => { await deleteSong(input.songId, ctx.user.id); return { success: true }; }),
     updateStatus: protectedProcedure.input(z.object({
       songId: z.number(),

@@ -261,3 +261,16 @@
 - [x] Improved creator card UI: colored gradient avatar background per creator (deterministic hue from id), larger initial letter, track count shown, name more prominent
 - [x] Frontend filter still in place: creators.filter(c => c.name && c.name.trim().length > 0)
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 34: Batch Upload / Album Feature
+- [x] Audited existing upload flow — WID generation uses SHA-256 + ECDSA P-256 in-browser, same pattern reused
+- [x] Added songs.batchUpload tRPC procedure: albumName, genre, aiConsent, coverBase64, tracks array (min 1, max 50)
+- [x] Each track gets its own WID generated client-side before upload (full ECDSA + SHA-256 flow)
+- [x] Shared cover art uploaded once to S3, URL applied to all tracks
+- [x] Slot check: throws if user.songSlotsUsed + tracks.length > user.songSlotsTotal
+- [x] Built BatchUploadPage: drag-and-drop multi-file zone, per-track title editing, WID badge per track, album metadata panel (cover art, album name, genre, AI consent), progress indicators
+- [x] Added /batch-upload route to App.tsx
+- [x] Added Batch Upload nav item to sidebar under MY MUSIC
+- [x] Added PAGE_SUMMARIES entry for /batch-upload
+- [x] Updated CreatorProfilePage to group tracks by albumName and show album sections above flat All Songs list
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

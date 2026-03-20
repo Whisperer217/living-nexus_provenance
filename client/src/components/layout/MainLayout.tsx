@@ -24,6 +24,7 @@ const NAV_ITEMS = [
   { label: "Listen Together", icon: Users, path: "/together", group: "Discover", badge: "LIVE" },
   { label: "My Profile", icon: User, path: "/profile", group: "My Music" },
   { label: "Upload", icon: Upload, path: "/upload", group: "My Music" },
+  { label: "Batch Upload", icon: Upload, path: "/batch-upload", group: "My Music" },
   { label: "Archive", icon: Library, path: "/archive", group: "My Music" },
   { label: "Liked Songs", icon: Heart, path: "/liked", group: "My Music" },
   { label: "Dashboard", icon: BarChart2, path: "/dashboard", group: "My Music" },
@@ -49,6 +50,10 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
   "/upload": {
     title: "Upload",
     points: ["Audio + artwork", "Track metadata", "Witness ID provenance", "Publish"],
+  },
+  "/batch-upload": {
+    title: "Batch Upload",
+    points: ["Upload full album", "One cover art", "Per-track WIDs", "Grouped on profile"],
   },
   "/archive": {
     title: "Archive",
