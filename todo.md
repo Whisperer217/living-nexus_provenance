@@ -170,3 +170,11 @@
 - [x] Avatar/banner uploads call trpc.profile.uploadAvatar/uploadBanner and invalidate profile.me cache
 - [x] All editable fields (name, artistHandle, bio, location, website, socials) persist to DB permanently
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 23: Wire Heart/Like Button
+- [x] Created useLike hook (client/src/hooks/useLike.ts) — DB-backed, optimistic update, auth guard
+- [x] Wired useLike to heart button in TrackCard (replaces PlayerContext in-memory Set)
+- [x] Wired useLike to Like button in SongDetailPage (pink filled/unfilled, hidden for own songs)
+- [x] Unauthenticated users redirected to sign-in on heart click
+- [x] /liked page auto-refreshes via utils.songs.getLiked.invalidate() on toggle
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

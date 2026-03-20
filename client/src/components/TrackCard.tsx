@@ -6,6 +6,7 @@
 import { Play, Heart, DollarSign, ExternalLink } from "lucide-react";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { useLocation } from "wouter";
+import { useLike } from "@/hooks/useLike";
 
 interface Props {
   track: Track;
@@ -14,11 +15,13 @@ interface Props {
 }
 
 export default function TrackCard({ track, index, onTip }: Props) {
-  const { state, playTrack, toggleLike } = usePlayer();
+  const { state, playTrack } = usePlayer();
   const [, navigate] = useLocation();
   const isPlaying = state.currentIdx === index && state.isPlaying;
   const isActive = state.currentIdx === index;
-  const isLiked = state.liked.has(track.id);
+  // Use DB-backed like state (falls back to unfilled for unauthenticated users)
+  const numericId = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
+  const { liked: isLiked, toggle: toggleLike } = useLike(isNaN(numericId) ? 0 : numericId);
 
   return (
     <div
@@ -88,8 +91,9 @@ export default function TrackCard({ track, index, onTip }: Props) {
           </span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onClick={e => { e.stopPropagation(); toggleLike(track.id); }}
-              className={`p-1 transition-colors ${isLiked ? "text-[#A78BFA]" : "text-white/30 hover:text-[#A78BFA]"}`}
+              onClick={e => toggleLike(e)}
+              className={`p-1 transition-colors ${isLiked ? "text-pink-400" : "text-white/30 hover:text-pink-400"}`}
+              title={isLiked ? "Unlike" : "Like"}
             >
               <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
             </button>

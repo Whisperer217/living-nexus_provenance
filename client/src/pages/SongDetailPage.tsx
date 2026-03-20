@@ -22,8 +22,9 @@ import {
   Play, Pause, Share2, Copy, DollarSign, MessageSquare,
   Shield, Music, ChevronLeft, Download, Headphones,
   SkipBack, SkipForward, Volume2, VolumeX, Wand2,
-  ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter,
+  ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter, Heart,
 } from "lucide-react";
+import { useLike } from "@/hooks/useLike";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
 
@@ -72,6 +73,7 @@ export default function SongDetailPage() {
   const [reactions, setReactions] = useState<Record<string, number>>({});
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
   const [shareOpen, setShareOpen] = useState(false);
+  const { liked: isLiked, toggle: toggleLike } = useLike(songId);
   const [aiTransformOpen, setAiTransformOpen] = useState(false);
   const [transformPrompt, setTransformPrompt] = useState("");
   const [transformStyle, setTransformStyle] = useState("");
@@ -331,6 +333,15 @@ export default function SongDetailPage() {
                     <Button size="sm" onClick={() => setTipOpen(true)}
                       style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
                       <DollarSign className="w-3.5 h-3.5 mr-1" />Tip Artist
+                    </Button>
+                  )}
+                  {!isOwner && (
+                    <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
+                      style={isLiked
+                        ? { borderColor: "oklch(0.65 0.22 350 / 0.6)", color: "oklch(0.75 0.22 350)" }
+                        : { borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
+                      <Heart className="w-3.5 h-3.5 mr-1" fill={isLiked ? "currentColor" : "none"} />
+                      {isLiked ? "Liked" : "Like"}
                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
