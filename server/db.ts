@@ -459,3 +459,95 @@ export async function getLikeCount(songId: number): Promise<number> {
     .where(eq(likes.songId, songId));
   return Number(result[0]?.count ?? 0);
 }
+
+// ─── Jukebox Queue ────────────────────────────────────────────────────────────
+
+export async function getJukeboxQueue(roomCode: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const { jukeboxQueue, songs, users } = await import("../drizzle/schema");
+  return db
+    .select({
+      id: jukeboxQueue.id,
+      roomCode: jukeboxQueue.roomCode,
+      songId: jukeboxQueue.songId,
+      tipperId: jukeboxQueue.tipperId,
+      tipperName: jukeboxQueue.tipperName,
+      tipAmountCents: jukeboxQueue.tipAmountCents,
+      position: jukeboxQueue.position,
+      playedAt: jukeboxQueue.playedAt,
+      skippedAt: jukeboxQueue.skippedAt,
+      createdAt: jukeboxQueue.createdAt,
+      // Song fields
+      songTitle: songs.title,
+      songCoverArtUrl: songs.coverArtUrl,
+      songWitnessId: songs.witnessId,
+      songFileUrl: songs.fileUrl,
+      songDurationSeconds: songs.durationSeconds,
+      // Creator fields
+      creatorId: users.id,
+      creatorName: users.name,
+      creatorArtistHandle: users.artistHandle,
+      creatorStripeAccountId: users.stripeAccountId,
+    })
+    .from(jukeboxQueue)
+    .innerJoin(songs, eq(jukeboxQueue.songId, songs.id))
+    .innerJoin(users, eq(songs.userId, users.id))
+    .where(
+      and(
+        eq(jukeboxQueue.roomCode, roomCode),
+        sql`${jukeboxQueue.playedAt} IS NULL`,
+        sql`${jukeboxQueue.skippedAt} IS NULL`,
+      )
+    )
+    .orderBy(jukeboxQueue.position, jukeboxQueue.createdAt);
+}
+
+export async function addToJukeboxQueue(data: {
+  roomCode: string;
+  songId: number;
+  tipperId: number;
+  tipperName: string;
+  tipAmountCents: number;
+  stripeSessionId?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { jukeboxQueue } = await import("../drizzle/schema");
+  // Get current max position for this room
+  const maxResult = await db
+    .select({ maxPos: sql<number>`COALESCE(MAX(${jukeboxQueue.position}), -1)` })
+    .from(jukeboxQueue)
+    .where(
+      and(
+        eq(jukeboxQueue.roomCode, data.roomCode),
+        sql`${jukeboxQueue.playedAt} IS NULL`,
+        sql`${jukeboxQueue.skippedAt} IS NULL`,
+      )
+    );
+  const nextPos = Number(maxResult[0]?.maxPos ?? -1) + 1;
+  const [result] = await db.insert(jukeboxQueue).values({
+    roomCode: data.roomCode,
+    songId: data.songId,
+    tipperId: data.tipperId,
+    tipperName: data.tipperName,
+    tipAmountCents: data.tipAmountCents,
+    stripeSessionId: data.stripeSessionId,
+    position: nextPos,
+  });
+  return result;
+}
+
+export async function markJukeboxItemPlayed(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { jukeboxQueue } = await import("../drizzle/schema");
+  await db.update(jukeboxQueue).set({ playedAt: new Date() }).where(eq(jukeboxQueue.id, id));
+}
+
+export async function markJukeboxItemSkipped(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { jukeboxQueue } = await import("../drizzle/schema");
+  await db.update(jukeboxQueue).set({ skippedAt: new Date() }).where(eq(jukeboxQueue.id, id));
+}

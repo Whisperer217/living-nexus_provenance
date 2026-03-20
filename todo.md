@@ -211,3 +211,19 @@
 - [x] Added isNotNull to drizzle-orm imports
 - [x] Added frontend safety filter: creators.filter(c => c.name && c.name.trim().length > 0) as a second line of defense
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 29: Jukebox Feature — Listen Together
+- [x] Audited TogetherPage — was fully client-side/demo with no DB
+- [x] Added jukeboxQueue DB table (roomCode, songId, tipperId, tipperName, tipAmountCents, stripeSessionId, position, playedAt, skippedAt)
+- [x] Ran pnpm db:push — migration applied successfully
+- [x] Added 4 jukebox DB helpers: getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped
+- [x] Added 4 tRPC procedures: jukebox.getQueue, jukebox.tipToQueue (Stripe checkout), jukebox.confirmQueue, jukebox.markPlayed, jukebox.skipCurrent
+- [x] Queue polling every 5s for real-time sync across room members
+- [x] Built NowPlayingPanel: cover art, title, creator, WID badge, tipper name + tip amount, hidden audio element
+- [x] Built QueuePanel (right side): upcoming songs + tipper + tip amount
+- [x] Built SongBrowserModal: search catalog, select song, set tip amount ($1 min), confirm
+- [x] Chat feed auto-announces: "[Username] tipped $X to [Creator] — [Track Title] is up next 🎵"
+- [x] Host skip button (HOST badge shown, skip only visible to room creator)
+- [x] Stripe checkout fires immediately; creator receives funds via transfer_data.destination
+- [x] Stripe success redirect: ?jukebox=success&songId=X triggers confirmQueue mutation
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

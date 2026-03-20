@@ -196,3 +196,21 @@ export const likes = mysqlTable("likes", {
 
 export type Like = typeof likes.$inferSelect;
 export type InsertLike = typeof likes.$inferInsert;
+
+// ─── Jukebox Queue ────────────────────────────────────────────────────────────
+export const jukeboxQueue = mysqlTable("jukeboxQueue", {
+  id: int("id").autoincrement().primaryKey(),
+  roomCode: varchar("roomCode", { length: 16 }).notNull(),
+  songId: int("songId").notNull(),
+  tipperId: int("tipperId").notNull(),          // user who tipped
+  tipperName: varchar("tipperName", { length: 128 }),
+  tipAmountCents: int("tipAmountCents").notNull(), // minimum 100 ($1)
+  stripeSessionId: varchar("stripeSessionId", { length: 128 }),
+  position: int("position").notNull().default(0), // ordering within room
+  playedAt: timestamp("playedAt"),               // null = not yet played
+  skippedAt: timestamp("skippedAt"),             // null = not skipped
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type JukeboxQueueItem = typeof jukeboxQueue.$inferSelect;
+export type InsertJukeboxQueueItem = typeof jukeboxQueue.$inferInsert;

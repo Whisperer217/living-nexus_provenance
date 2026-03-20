@@ -17,6 +17,7 @@ import {
   createAiTransform, updateAiTransform, getAiTransformById,
   getAiTransformsBySong, getAiTransformsByUser,
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount,
+  getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -363,6 +364,116 @@ export const appRouter = router({
       return { url: session.url };
     }),
   }),
+
+  // ── Jukebox ──────────────────────────────────────────────────────────────────
+  jukebox: router({
+    // Get current queue (pending items) for a room
+    getQueue: publicProcedure
+      .input(z.object({ roomCode: z.string().min(1) }))
+      .query(async ({ input }) => {
+        return getJukeboxQueue(input.roomCode);
+      }),
+
+    // Tip a song into the queue — creates Stripe Checkout Session
+    tipToQueue: protectedProcedure
+      .input(z.object({
+        roomCode: z.string().min(1),
+        songId: z.number().int().positive(),
+        amountCents: z.number().int().min(100), // $1 minimum
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const song = await getSongById(input.songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
+        const creator = await getUserById(song.userId);
+        if (!creator) throw new TRPCError({ code: "NOT_FOUND", message: "Creator not found" });
+        if (!creator.stripeAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "Creator has not enabled tips yet" });
+
+        const tipper = await getUserById(ctx.user.id);
+        const tipperName = tipper?.artistHandle || tipper?.name || "A listener";
+        const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
+
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card"],
+          customer_email: tipper?.email || undefined,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: `Jukebox Tip — "${song.title}"`,
+                description: `Queue "${song.title}" by ${creator.artistHandle || creator.name} in room ${input.roomCode}`,
+              },
+              unit_amount: input.amountCents,
+            },
+            quantity: 1,
+          }],
+          payment_intent_data: {
+            application_fee_amount: feeAmount,
+            transfer_data: { destination: creator.stripeAccountId },
+            metadata: {
+              type: "jukebox_tip",
+              roomCode: input.roomCode,
+              songId: input.songId.toString(),
+              tipperId: ctx.user.id.toString(),
+              tipperName,
+            },
+          },
+          client_reference_id: ctx.user.id.toString(),
+          metadata: {
+            type: "jukebox_tip",
+            roomCode: input.roomCode,
+            songId: input.songId.toString(),
+            tipperId: ctx.user.id.toString(),
+            tipperName,
+          },
+          allow_promotion_codes: false,
+          success_url: `${input.origin}/together?room=${input.roomCode}&jukebox=success&songId=${input.songId}`,
+          cancel_url: `${input.origin}/together?room=${input.roomCode}`,
+        });
+
+        return { url: session.url, sessionId: session.id };
+      }),
+
+    // Called after Stripe success redirect — adds item to queue
+    confirmQueue: protectedProcedure
+      .input(z.object({
+        roomCode: z.string().min(1),
+        songId: z.number().int().positive(),
+        amountCents: z.number().int().min(100),
+        stripeSessionId: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const tipper = await getUserById(ctx.user.id);
+        const tipperName = tipper?.artistHandle || tipper?.name || "A listener";
+        await addToJukeboxQueue({
+          roomCode: input.roomCode,
+          songId: input.songId,
+          tipperId: ctx.user.id,
+          tipperName,
+          tipAmountCents: input.amountCents,
+          stripeSessionId: input.stripeSessionId,
+        });
+        return { success: true };
+      }),
+
+    // Mark the current (first) item as played
+    markPlayed: protectedProcedure
+      .input(z.object({ itemId: z.number().int().positive() }))
+      .mutation(async ({ input }) => {
+        await markJukeboxItemPlayed(input.itemId);
+        return { success: true };
+      }),
+
+    // Host skips the current item
+    skipCurrent: protectedProcedure
+      .input(z.object({ itemId: z.number().int().positive() }))
+      .mutation(async ({ input }) => {
+        await markJukeboxItemSkipped(input.itemId);
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
+
