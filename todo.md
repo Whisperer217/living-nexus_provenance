@@ -88,7 +88,7 @@
 - [x] Add My Transforms tab to DashboardPage with status icons, prompt preview, WID link, play/download buttons
 
 ## Deferred (out of credits)
-- [ ] Build /verify/:witnessId public provenance page
+- [x] Build /verify/:witnessId public provenance page
 - [ ] Wire Follow button on creator profiles (follows table + mutations)
 
 ## Phase 12: Seed Track Artist Name Update

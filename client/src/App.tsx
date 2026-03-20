@@ -19,29 +19,40 @@ import DashboardPage from "./pages/DashboardPage";
 import DiscoverPage from "./pages/DiscoverPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
+import VerifyPage from "./pages/VerifyPage";
 
 function Router() {
   return (
-    <MainLayout>
-      <Switch>
-        <Route path="/" component={DiscoverPage} />
-        <Route path="/home" component={HomePage} />
-        <Route path="/explore" component={ExplorePage} />
-        <Route path="/together" component={TogetherPage} />
-        <Route path="/upload" component={UploadPage} />
-        <Route path="/batch-upload" component={BatchUploadPage} />
-        <Route path="/liked" component={LikedPage} />
-        <Route path="/archive" component={ArchivePage} />
-        <Route path="/listen-together" component={TogetherPage} />
-        <Route path="/song/:id" component={SongDetailPage} />
-        <Route path="/track/:id" component={TrackPage} />
-        <Route path="/creator/:id" component={CreatorProfilePage} />
-        <Route path="/dashboard" component={DashboardPage} />
-        <Route path="/profile" component={ProfilePage} />
-        <Route path="/404" component={NotFound} />
-        <Route component={NotFound} />
-      </Switch>
-    </MainLayout>
+    <Switch>
+      {/* Public standalone pages — no MainLayout/PlayerBar */}
+      <Route path="/verify" component={VerifyPage} />
+      <Route path="/verify/:witnessId" component={VerifyPage} />
+
+      {/* App pages inside MainLayout */}
+      <Route>
+        <MainLayout>
+          <Switch>
+            <Route path="/" component={DiscoverPage} />
+            <Route path="/home" component={HomePage} />
+            <Route path="/explore" component={ExplorePage} />
+            <Route path="/together" component={TogetherPage} />
+            <Route path="/upload" component={UploadPage} />
+            <Route path="/batch-upload" component={BatchUploadPage} />
+            <Route path="/liked" component={LikedPage} />
+            <Route path="/archive" component={ArchivePage} />
+            <Route path="/listen-together" component={TogetherPage} />
+            <Route path="/song/:id" component={SongDetailPage} />
+            <Route path="/songs/:id" component={SongDetailPage} />
+            <Route path="/track/:id" component={TrackPage} />
+            <Route path="/creator/:id" component={CreatorProfilePage} />
+            <Route path="/dashboard" component={DashboardPage} />
+            <Route path="/profile" component={ProfilePage} />
+            <Route path="/404" component={NotFound} />
+            <Route component={NotFound} />
+          </Switch>
+        </MainLayout>
+      </Route>
+    </Switch>
   );
 }
 

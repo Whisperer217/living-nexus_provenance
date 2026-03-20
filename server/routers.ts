@@ -18,6 +18,7 @@ import {
   getAiTransformsBySong, getAiTransformsByUser,
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount,
   getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped,
+  getSongByWitnessId,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -130,6 +131,30 @@ export const appRouter = router({
   songs: router({
     discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
     getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => getSongWithCreator(input.id)),
+    verifyWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
+      const result = await getSongByWitnessId(input.witnessId);
+      if (!result) throw new TRPCError({ code: "NOT_FOUND", message: "No record found for this Witness ID" });
+      const { song, creator } = result;
+      return {
+        witnessId: song.witnessId,
+        title: song.title,
+        artistName: creator?.artistHandle || creator?.name || "Unknown Artist",
+        artistHandle: creator?.artistHandle,
+        profilePhotoUrl: creator?.profilePhotoUrl,
+        songId: song.id,
+        registeredAt: song.createdAt,
+        fileHash: song.fileHash,
+        lyricsHash: song.lyricsHash,
+        isLyricsOnly: song.isLyricsOnly,
+        ecdsaSignature: song.ecdsaSignature,
+        ecdsaPublicKey: song.ecdsaPublicKey,
+        harmonicSignature: song.harmonicSignature,
+        coverArtUrl: song.coverArtUrl,
+        aiConsent: song.aiConsent,
+        genre: song.genre,
+        isrc: song.isrc,
+      };
+    }),
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     bySelf: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     upload: protectedProcedure.input(z.object({
