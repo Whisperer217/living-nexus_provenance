@@ -232,23 +232,31 @@ export default function DiscoverPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {creators.filter(c => c.name && c.name.trim().length > 0).slice(0, 12).map((creator) => (
-                <Link key={creator.id} href={`/creator/${creator.id}`}>
-                  <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
-                    <div className="w-14 h-14 rounded-full mx-auto mb-2 overflow-hidden flex items-center justify-center" style={{ background: "oklch(0.18 0.025 280)", border: "2px solid oklch(0.75 0.18 85 / 0.3)" }}>
-                      {creator.profilePhotoUrl ? (
-                        <img src={creator.profilePhotoUrl} alt={creator.name || ""} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-xl font-bold" style={{ color: "oklch(0.75 0.18 85)", fontFamily: "'Cinzel', serif" }}>{(creator.artistHandle || creator.name || "?")[0].toUpperCase()}</span>
+              {creators.filter(c => c.name && c.name.trim().length > 0).slice(0, 12).map((creator) => {
+                const displayName = creator.artistHandle || creator.name || "Creator";
+                const initial = displayName.charAt(0).toUpperCase();
+                // Deterministic gradient color per creator based on id
+                const hues = [30, 200, 280, 120, 340, 60];
+                const hue = hues[creator.id % hues.length];
+                return (
+                  <Link key={creator.id} href={`/creator/${creator.id}`}>
+                    <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+                      <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden flex items-center justify-center" style={{ background: creator.profilePhotoUrl ? undefined : `oklch(0.22 0.08 ${hue})`, border: "2px solid oklch(0.75 0.18 85 / 0.4)" }}>
+                        {creator.profilePhotoUrl ? (
+                          <img src={creator.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-2xl font-bold" style={{ color: `oklch(0.85 0.18 ${hue})`, fontFamily: "'Cinzel', serif" }}>{initial}</span>
+                        )}
+                      </div>
+                      <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{displayName}</p>
+                      <p className="text-xs mt-0.5" style={{ color: "oklch(0.55 0.04 280)" }}>{(creator as any).publishedCount ?? 0} track{((creator as any).publishedCount ?? 0) !== 1 ? "s" : ""}</p>
+                      {creator.licenseStatus === "licensed" && (
+                        <Badge className="mt-1" style={{ background: "oklch(0.75 0.18 85 / 0.2)", color: "oklch(0.75 0.18 85)", fontSize: "9px" }}>Licensed</Badge>
                       )}
                     </div>
-                    <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>{creator.artistHandle || creator.name || "Creator"}</p>
-                    {creator.licenseStatus === "licensed" && (
-                      <Badge className="mt-1 text-xs" style={{ background: "oklch(0.75 0.18 85 / 0.2)", color: "oklch(0.75 0.18 85)", fontSize: "9px" }}>Licensed</Badge>
-                    )}
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>

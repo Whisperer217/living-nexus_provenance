@@ -253,3 +253,11 @@
 - [x] Fix 2: Applied safeAudioUrl() in SongDetailPage (Audio constructor) and PlayerContext (all audio.src assignments)
 - [x] Fix 3: Sanitized audioFileName in upload procedure to prevent future occurrences (replaces non-alphanumeric chars with underscores)
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 33: Featured Creators Final Fix
+- [x] Verified getAllCreators DB query — filter is correct: INNER JOIN songs WHERE status=Published, WHERE name IS NOT NULL AND name != '', HAVING count > 0
+- [x] Verified live API response — exactly 3 valid creators returned: Doc Seraph Mercer, Greg Speed, Mannon The Conquerer
+- [x] Root cause of '?' confirmed: letter avatar fallback for creators without profile photos. NOT a data issue.
+- [x] Improved creator card UI: colored gradient avatar background per creator (deterministic hue from id), larger initial letter, track count shown, name more prominent
+- [x] Frontend filter still in place: creators.filter(c => c.name && c.name.trim().length > 0)
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing
