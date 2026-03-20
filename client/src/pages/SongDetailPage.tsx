@@ -386,59 +386,24 @@ export default function SongDetailPage() {
               </div>
             </div>
 
-            {/* Lyrics */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
-              <button className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
-                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
-                <div className="flex items-center gap-2">
-                  {isOwner && !editingLyrics && (
-                    <button onClick={(e) => { e.stopPropagation(); setEditingLyrics(true); setLyricsEdit(song.lyricsText || ""); }}
-                      className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10">
-                      <Edit3 className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
-                    </button>
-                  )}
+            {/* Lyrics — read-only, only shown if lyrics were submitted at upload time */}
+            {song.lyricsText && (
+              <div className="rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                <button className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
+                  <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
                   {showLyrics
                     ? <ChevronUp className="w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />
                     : <ChevronDown className="w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />}
-                </div>
-              </button>
-              {showLyrics && (
-                <div className="px-5 pb-5">
-                  {editingLyrics ? (
-                    <div className="space-y-3">
-                      <Textarea value={lyricsEdit} onChange={(e) => setLyricsEdit(e.target.value)} rows={12}
-                        placeholder="Paste or type lyrics here..." className="font-mono text-sm resize-none"
-                        style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.85 0.02 280)" }} />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => updateLyricsMutation.mutate({ songId: song.id, lyricsText: lyricsEdit })}
-                          disabled={updateLyricsMutation.isPending}
-                          style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
-                          <Check className="w-3.5 h-3.5 mr-1" />Save
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingLyrics(false)}
-                          style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
-                          <X className="w-3.5 h-3.5 mr-1" />Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : song.lyricsText ? (
+                </button>
+                {showLyrics && (
+                  <div className="px-5 pb-5">
                     <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "oklch(0.75 0.03 280)" }}>
                       {song.lyricsText}
                     </pre>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-sm" style={{ color: "oklch(0.4 0.03 280)" }}>No lyrics added yet.</p>
-                      {isOwner && (
-                        <button onClick={() => setEditingLyrics(true)} className="text-xs mt-2 hover:underline"
-                          style={{ color: "oklch(0.65 0.2 300)" }}>
-                          + Add lyrics
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Witness ID */}
             {song.witnessId && (

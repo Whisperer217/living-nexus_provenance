@@ -151,3 +151,13 @@
 - [x] Stripe webhook URL: must be updated manually in Stripe Dashboard → Webhooks
 - [x] CloudFront/S3 CORS: managed by Manus platform infrastructure — no code change needed
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 21: Move Lyrics to Upload Page
+- [x] Audited upload page, WID payload, DB schema (lyricsText/lyricsHash columns already exist)
+- [x] Added lyricsText to createSong DB helper and songs.upload tRPC input schema
+- [x] Added Textarea import and lyrics state to UploadPage
+- [x] Added LYRICS textarea to Step 2 (Metadata) of upload page, before AI Consent section
+- [x] Included lyrics in WID payload string: |LYRICS:{first 500 chars} appended to cryptographic payload
+- [x] Passed lyricsText to upload mutation call
+- [x] Updated song detail page: lyrics section is read-only display only, hidden if no lyrics, no editing prompt
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

@@ -137,6 +137,7 @@ export const appRouter = router({
       coWriters: z.array(z.string()).optional(), albumName: z.string().optional(),
       releaseDate: z.string().optional(), isrc: z.string().optional(),
       aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]),
+      lyricsText: z.string().max(20000).optional(),
       fileHash: z.string().optional(), witnessId: z.string().optional(),
       harmonicSignature: z.array(z.number()).optional(), ecdsaPublicKey: z.string().optional(), ecdsaSignature: z.string().optional(),
     })).mutation(async ({ ctx, input }) => {
@@ -152,7 +153,7 @@ export const appRouter = router({
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.jpg`, coverBuffer, input.coverMimeType);
         coverArtUrl = url;
       }
-      await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature });
+      await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature });
       return { success: true, fileUrl, coverArtUrl };
     }),
     delete: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => { await deleteSong(input.songId, ctx.user.id); return { success: true }; }),

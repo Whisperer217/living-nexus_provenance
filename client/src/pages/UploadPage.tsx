@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -157,6 +158,7 @@ export default function UploadPage() {
   const [releaseDate, setReleaseDate] = useState("");
   const [isrc, setIsrc] = useState("");
   const [bmiNumber, setBmiNumber] = useState("");
+  const [lyrics, setLyrics] = useState("");
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
 
@@ -197,7 +199,7 @@ export default function UploadPage() {
       const wid = formatWID(fileHash);
       const frequencies = deriveHarmonicFrequencies(fileHash);
       const keypair = await generateECDSAKeypair();
-      const payload = `${wid}|${title || audioFile.name}|${user?.name || ""}|${Date.now()}`;
+      const payload = `${wid}|${title || audioFile.name}|${user?.name || ""}|${Date.now()}${lyrics ? `|LYRICS:${lyrics.slice(0, 500)}` : ""}`;
       const signature = await signPayload(keypair.privateKey, payload);
       const publicKeyJWK = await exportPublicKeyJWK(keypair.publicKey);
       const timestamp = new Date().toISOString();
@@ -248,6 +250,7 @@ export default function UploadPage() {
         bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
         albumName: albumName || undefined, releaseDate: releaseDate || undefined,
         isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+        lyricsText: lyrics || undefined,
         fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
         harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
         ecdsaSignature: witnessData?.signature,
@@ -437,6 +440,18 @@ export default function UploadPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+              {/* Lyrics */}
+              <div>
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>LYRICS <span style={{ color: "oklch(0.45 0.03 280)" }}>(optional — included in WID registration)</span></label>
+                <Textarea
+                  value={lyrics}
+                  onChange={e => setLyrics(e.target.value)}
+                  placeholder="Paste or type your lyrics here..."
+                  rows={8}
+                  className="font-mono text-sm resize-none"
+                  style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
+                />
               </div>
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
