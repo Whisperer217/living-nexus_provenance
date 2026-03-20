@@ -184,3 +184,10 @@
 - [x] Archive nav item now correctly points to /archive (was /liked)
 - [x] Updated PAGE_SUMMARIES for /archive and /liked in QuickRefSlider
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 25: Like Count Badge
+- [x] Added getLikeCount DB helper to server/db.ts (COUNT(*) query on likes table)
+- [x] Added songs.getLikeCount tRPC procedure (public, returns total likes for a songId)
+- [x] Updated TrackCard to show like count next to heart icon (shows on hover, formats 1k+ as "1.0k")
+- [x] Updated SongDetailPage to show like count next to Like/Liked button
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

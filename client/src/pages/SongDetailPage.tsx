@@ -74,6 +74,11 @@ export default function SongDetailPage() {
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
   const [shareOpen, setShareOpen] = useState(false);
   const { liked: isLiked, toggle: toggleLike } = useLike(songId);
+  const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
+    { songId },
+    { enabled: songId > 0 }
+  );
+  const likeCount = likeCountData?.count ?? 0;
   const [aiTransformOpen, setAiTransformOpen] = useState(false);
   const [transformPrompt, setTransformPrompt] = useState("");
   const [transformStyle, setTransformStyle] = useState("");
@@ -337,12 +342,15 @@ export default function SongDetailPage() {
                   )}
                   {!isOwner && (
                     <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
-                      style={isLiked
-                        ? { borderColor: "oklch(0.65 0.22 350 / 0.6)", color: "oklch(0.75 0.22 350)" }
-                        : { borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
-                      <Heart className="w-3.5 h-3.5 mr-1" fill={isLiked ? "currentColor" : "none"} />
-                      {isLiked ? "Liked" : "Like"}
-                    </Button>
+                       style={isLiked
+                         ? { borderColor: "oklch(0.65 0.22 350 / 0.6)", color: "oklch(0.75 0.22 350)" }
+                         : { borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
+                       <Heart className="w-3.5 h-3.5 mr-1" fill={isLiked ? "currentColor" : "none"} />
+                       {isLiked ? "Liked" : "Like"}
+                       {likeCount > 0 && (
+                         <span className="ml-1 text-[11px] tabular-nums opacity-70">{likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}</span>
+                       )}
+                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
                     style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>

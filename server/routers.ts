@@ -16,7 +16,7 @@ import {
   updateUserProfile, updateUserStripeAccount,
   createAiTransform, updateAiTransform, getAiTransformById,
   getAiTransformsBySong, getAiTransformsByUser,
-  getLikedSongs, toggleLike, getLikeStatus,
+  getLikedSongs, toggleLike, getLikeStatus, getLikeCount,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -278,6 +278,10 @@ export const appRouter = router({
     getLikeStatus: protectedProcedure.input(z.object({ songId: z.number() })).query(async ({ ctx, input }) => {
       const liked = await getLikeStatus(ctx.user.id, input.songId);
       return { liked };
+    }),
+    getLikeCount: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => {
+      const count = await getLikeCount(input.songId);
+      return { count };
     }),
   }),
   comments: router({

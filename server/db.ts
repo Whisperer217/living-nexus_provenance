@@ -435,3 +435,14 @@ export async function getLikeStatus(userId: number, songId: number): Promise<boo
     .limit(1);
   return result.length > 0;
 }
+
+export async function getLikeCount(songId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const { likes } = await import("../drizzle/schema");
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(likes)
+    .where(eq(likes.songId, songId));
+  return Number(result[0]?.count ?? 0);
+}

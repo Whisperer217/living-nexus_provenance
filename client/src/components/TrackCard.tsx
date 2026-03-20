@@ -7,6 +7,7 @@ import { Play, Heart, DollarSign, ExternalLink } from "lucide-react";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { useLocation } from "wouter";
 import { useLike } from "@/hooks/useLike";
+import { trpc } from "@/lib/trpc";
 
 interface Props {
   track: Track;
@@ -22,6 +23,11 @@ export default function TrackCard({ track, index, onTip }: Props) {
   // Use DB-backed like state (falls back to unfilled for unauthenticated users)
   const numericId = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
   const { liked: isLiked, toggle: toggleLike } = useLike(isNaN(numericId) ? 0 : numericId);
+  const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
+    { songId: isNaN(numericId) ? 0 : numericId },
+    { enabled: !isNaN(numericId) && numericId > 0 }
+  );
+  const likeCount = likeCountData?.count ?? 0;
 
   return (
     <div
@@ -92,10 +98,13 @@ export default function TrackCard({ track, index, onTip }: Props) {
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={e => toggleLike(e)}
-              className={`p-1 transition-colors ${isLiked ? "text-pink-400" : "text-white/30 hover:text-pink-400"}`}
+              className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-white/30 hover:text-pink-400"}`}
               title={isLiked ? "Unlike" : "Like"}
             >
               <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
+              {likeCount > 0 && (
+                <span className="text-[10px] leading-none font-medium tabular-nums">{likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}</span>
+              )}
             </button>
             {onTip && (
               <button
