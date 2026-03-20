@@ -295,3 +295,11 @@
 - [x] Fixed content area: paddingBottom changed from calc(82px + env(safe-area-inset-bottom, 0px)) to calc(82px + max(env(safe-area-inset-bottom), 24px))
 - [x] max() ensures 24px minimum clearance on Android gesture nav; real safe-area-inset wins on iPhone/PWA
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase 28: Mobile Player Side Panel
+- [x] Build MobilePlayerPanel — floating right-edge tab with song art thumbnail + playing wave indicator
+- [x] Slide-out right panel with large art, title, artist, progress bar, play/pause/skip/shuffle/repeat, volume
+- [x] Swipe-right-to-close gesture + backdrop tap to close + Escape key
+- [x] Desktop PlayerBar hidden on mobile (md:hidden), MobilePlayerPanel hidden on desktop (md:hidden)
+- [x] Removed bottom padding on mobile scroll area (side panel frees bottom of screen)
+- [x] TypeScript: 0 errors | Vitest: 4/4 passing

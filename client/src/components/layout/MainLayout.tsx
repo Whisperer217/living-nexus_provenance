@@ -10,6 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import PlayerBar from "@/components/player/PlayerBar";
+import MobilePlayerPanel from "@/components/player/MobilePlayerPanel";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
@@ -272,22 +273,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* ── Page content ── */}
         <main className="flex-1 flex flex-col overflow-hidden md:pt-0 pt-14">
           {/*
-            paddingBottom = player bar height (64px) + safe-area-inset-bottom.
-            The player bar is position:fixed so we must manually reserve space here.
-            calc() keeps the two values additive so content is never hidden behind
-            either the player bar or the Android gesture navigation bar.
+            Desktop: paddingBottom reserves space for the fixed PlayerBar (64px) + safe-area.
+            Mobile: MobilePlayerPanel is a side panel — no bottom space needed.
           */}
-          <div
-            className="flex-1 overflow-y-auto"
-            style={{ paddingBottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}
-          >
+          {/* Desktop: padding-bottom reserves space for fixed PlayerBar. Mobile: no bottom padding needed (side panel). */}
+          <style>{`@media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } }`}</style>
+          <div className="flex-1 overflow-y-auto player-scroll-area">
             {children}
           </div>
         </main>
       </div>
 
-      {/* ── Player Bar (fixed to viewport bottom) ── */}
-      <PlayerBar />
+      {/* ── Desktop Player Bar (fixed bottom, hidden on mobile) ── */}
+      <div className="hidden md:block">
+        <PlayerBar />
+      </div>
+
+      {/* ── Mobile Player Panel (floating tab + right slide-out, hidden on desktop) ── */}
+      <MobilePlayerPanel />
     </div>
   );
 }
