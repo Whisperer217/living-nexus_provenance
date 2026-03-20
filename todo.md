@@ -303,3 +303,8 @@
 - [x] Desktop PlayerBar hidden on mobile (md:hidden), MobilePlayerPanel hidden on desktop (md:hidden)
 - [x] Removed bottom padding on mobile scroll area (side panel frees bottom of screen)
 - [x] TypeScript: 0 errors | Vitest: 4/4 passing
+
+## Phase: Seed Data Purge + Queue Hardening
+
+- [x] Delete all seed creator accounts (Aura Vessel, Nova Kaine, VLTG3, Ghost Lumen, Marco Spire, Lyric Haze, Seraph Cole, D-Rex) and their songs
+- [x] Harden player queue to only pull published songs with a real audio URL

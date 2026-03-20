@@ -4,7 +4,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { usePlayer, DEMO_TRACKS } from "@/contexts/PlayerContext";
+import { usePlayer } from "@/contexts/PlayerContext";
 import TrackCard from "@/components/TrackCard";
 import TipModal from "@/components/TipModal";
 import { Sparkles } from "lucide-react";
@@ -126,39 +126,44 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* ── Trending section ── */}
-        <div className="gold-divider mb-6" />
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading text-[16px] tracking-wider text-white/80">Trending Now</h2>
-        </div>
-        <div className="space-y-2">
-          {DEMO_TRACKS.slice(0, 5).map((track, i) => {
-            const idx = tracks.indexOf(track);
-            const isActive = state.currentIdx === idx;
-            return (
-              <div
-                key={track.id}
-                className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all group
-                  ${isActive ? "bg-white/[0.06] border border-[#E8C547]/20" : "hover:bg-white/[0.03] border border-transparent"}`}
-                onClick={() => playTrack(idx)}
-              >
-                <span className="text-[13px] font-heading text-white/20 w-5 text-center">{i + 1}</span>
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0 overflow-hidden"
-                  style={{ background: track.bg || "oklch(0.18 0.014 280)" }}>
-                  {track.emoji}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-body text-white/80 truncate">{track.title}</div>
-                  <div className="text-[11px] text-white/30 truncate">{track.artist}</div>
-                </div>
-                <div className="text-[11px] text-white/25 font-body tabular-nums">{track.dur}</div>
-                <div className="text-[11px] text-white/20 font-body hidden sm:block">
-                  {(track.plays || 0).toLocaleString()} plays
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {/* ── Trending section — real tracks only ── */}
+        {tracks.length > 0 && (
+          <>
+            <div className="gold-divider mb-6" />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-heading text-[16px] tracking-wider text-white/80">Trending Now</h2>
+            </div>
+            <div className="space-y-2">
+              {tracks.slice(0, 5).map((track, i) => {
+                const idx = tracks.indexOf(track);
+                const isActive = state.currentIdx === idx;
+                return (
+                  <div
+                    key={track.id}
+                    className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all group
+                      ${isActive ? "bg-white/[0.06] border border-[#E8C547]/20" : "hover:bg-white/[0.03] border border-transparent"}`}
+                    onClick={() => playTrack(idx)}
+                  >
+                    <span className="text-[13px] font-heading text-white/20 w-5 text-center">{i + 1}</span>
+                    <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden rounded-lg"
+                      style={{ background: "oklch(0.16 0.02 280)" }}>
+                      {track.artUrl
+                        ? <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-white/20 text-lg">🎵</div>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-body text-white/80 truncate">{track.title}</div>
+                      <div className="text-[11px] text-white/30 truncate">{track.artist}</div>
+                    </div>
+                    <div className="text-[11px] text-white/20 font-body hidden sm:block">
+                      {(track.plays || 0).toLocaleString()} plays
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Tip modal */}

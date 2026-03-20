@@ -1,0 +1,160 @@
+{
+  "query": "SELECT s.id, s.title, s.status, s.isPublic, s.fileUrl, u.id as userId, u.name, u.artistHandle FROM songs s LEFT JOIN users u ON s.userId = u.id ORDER BY s.id ASC LIMIT 100;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT s.id, s.title, s.status, s.isPublic, s.fileUrl, u.id as userId, u.name, u.artistHandle FROM songs s LEFT JOIN users u ON s.userId = u.id ORDER BY s.id ASC LIMIT 100;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Fix DA Server",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773721443170-Fix DA Server.mp3",
+      "userId": "1",
+      "name": "Doc Seraph Mercer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "30001",
+      "title": "Ave,Ave!!! Christus Rex!!!👑",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1773790093579-Ave,Ave!!! Christus Rex!!!👑.mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "60001",
+      "title": "PUSH FORWARD",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773951401271-REMIXED WITH MY VOICE PUSH FORWARD.mp3",
+      "userId": "1",
+      "name": "Doc Seraph Mercer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "60002",
+      "title": "Anchor In The Dark",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773952177770-Anchor In The Dark.mp3",
+      "userId": "1",
+      "name": "Doc Seraph Mercer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "90001",
+      "title": "Jah Heal Me",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/330007/1773969276686-Jah Heal Me.mp3",
+      "userId": "330007",
+      "name": "Greg Speed",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "120001",
+      "title": "Creator (Poetry of Creation Mix) ",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1773976223835-Creator (Poetry of Creation Mix) .mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "150001",
+      "title": "Wounds Become Witnesses - The Sovereign Sky",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773979952058-Wounds Become Witnesses - The Sovereign Sky - Sonauto.mp3",
+      "userId": "1",
+      "name": "Doc Seraph Mercer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "150002",
+      "title": "Wounds Become Witnesses - The Sovereign Sky (Remix)",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773980282034-Wounds Become Witnesses - The Sovereign Sky (Remix).mp3",
+      "userId": "1",
+      "name": "Doc Seraph Mercer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "180001",
+      "title": "Lesson Learned",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774018138783-Lesson_Learned.mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "180002",
+      "title": "Obedience",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774018712733-Obedience.mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "210001",
+      "title": "Suffer",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774019812705-Suffer.mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "210002",
+      "title": "Right Where You Want Me",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774020202736-Right_Where_You_Want_Me.mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "210003",
+      "title": "Bow Down",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774020749406-Bow_Down.mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "210004",
+      "title": "Scene of a Murder",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774021409850-Scene_of_a_Murder__Remastered_.mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "210005",
+      "title": "Light the Fire",
+      "status": "Published",
+      "isPublic": "1",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774021848162-Folly.mp3",
+      "userId": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tstatus\tisPublic\tfileUrl\tuserId\tname\tartistHandle\n1\tFix DA Server\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773721443170-Fix DA Server.mp3\t1\tDoc Seraph Mercer\tNULL\n30001\tAve,Ave!!! Christus Rex!!!👑\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1773790093579-Ave,Ave!!! Christus Rex!!!👑.mp3\t180001\tMannon The Conquerer\tNULL\n60001\tPUSH FORWARD\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773951401271-REMIXED WITH MY VOICE PUSH FORWARD.mp3\t1\tDoc Seraph Mercer\tNULL\n60002\tAnchor In The Dark\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773952177770-Anchor In The Dark.mp3\t1\tDoc Seraph Mercer\tNULL\n90001\tJah Heal Me\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/330007/1773969276686-Jah Heal Me.mp3\t330007\tGreg Speed\tNULL\n120001\tCreator (Poetry of Creation Mix) \tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1773976223835-Creator (Poetry of Creation Mix) .mp3\t180001\tMannon The Conquerer\tNULL\n150001\tWounds Become Witnesses - The Sovereign Sky\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773979952058-Wounds Become Witnesses - The Sovereign Sky - Sonauto.mp3\t1\tDoc Seraph Mercer\tNULL\n150002\tWounds Become Witnesses - The Sovereign Sky (Remix)\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773980282034-Wounds Become Witnesses - The Sovereign Sky (Remix).mp3\t1\tDoc Seraph Mercer\tNULL\n180001\tLesson Learned\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774018138783-Lesson_Learned.mp3\t180001\tMannon The Conquerer\tNULL\n180002\tObedience\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774018712733-Obedience.mp3\t180001\tMannon The Conquerer\tNULL\n210001\tSuffer\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774019812705-Suffer.mp3\t180001\tMannon The Conquerer\tNULL\n210002\tRight Where You Want Me\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774020202736-Right_Where_You_Want_Me.mp3\t180001\tMannon The Conquerer\tNULL\n210003\tBow Down\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774020749406-Bow_Down.mp3\t180001\tMannon The Conquerer\tNULL\n210004\tScene of a Murder\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774021409850-Scene_of_a_Murder__Remastered_.mp3\t180001\tMannon The Conquerer\tNULL\n210005\tLight the Fire\tPublished\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774021848162-Folly.mp3\t180001\tMannon The Conquerer\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 379
+}

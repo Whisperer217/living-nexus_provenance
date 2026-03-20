@@ -6,7 +6,7 @@
 
 import { useState, useRef } from "react";
 import { useParams, useLocation } from "wouter";
-import { usePlayer, DEMO_TRACKS, Comment } from "@/contexts/PlayerContext";
+import { usePlayer, Comment } from "@/contexts/PlayerContext";
 import {
   Play, Pause, Heart, Share2, Copy, Link2, MessageCircle,
   DollarSign, ArrowLeft, Twitter, Facebook, Send, Check,

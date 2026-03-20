@@ -35,16 +35,8 @@ export interface Track {
   aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
 }
 
-export const DEMO_TRACKS: Track[] = [
-  { id: "d1", title: "Celestial Drift", artist: "Nova Kaine", genre: "Ambient", emoji: "🌌", bg: "linear-gradient(135deg,#1a0a2e,#0a1a2e)", dur: "3:42", plays: 0 },
-  { id: "d2", title: "Golden Hour Protocol", artist: "VLTG3", genre: "Electronic", emoji: "✨", bg: "linear-gradient(135deg,#2e1a0a,#1a2e0a)", dur: "4:18", plays: 0 },
-  { id: "d3", title: "Midnight Sermon", artist: "Seraph Cole", genre: "Lo-fi", emoji: "🕯️", bg: "linear-gradient(135deg,#0a0a2e,#1a0a1a)", dur: "2:55", plays: 0 },
-  { id: "d4", title: "Sacred Frequencies", artist: "Aura Vessel", genre: "Ambient", emoji: "🔮", bg: "linear-gradient(135deg,#1a0a2e,#2e0a1a)", dur: "5:01", plays: 0 },
-  { id: "d5", title: "Throne of Bass", artist: "D-Rex", genre: "Trap", emoji: "👑", bg: "linear-gradient(135deg,#2e1a00,#1a0a00)", dur: "3:28", plays: 0 },
-  { id: "d6", title: "Violet Prophecy", artist: "Lyric Haze", genre: "R&B", emoji: "💜", bg: "linear-gradient(135deg,#1a0a2e,#0a1a2e)", dur: "4:07", plays: 0 },
-  { id: "d7", title: "Architect of Sound", artist: "Marco Spire", genre: "House", emoji: "🏛️", bg: "linear-gradient(135deg,#0a2e1a,#0a1a2e)", dur: "6:22", plays: 0 },
-  { id: "d8", title: "Divine Static", artist: "Ghost Lumen", genre: "Indie", emoji: "⚡", bg: "linear-gradient(135deg,#2e2e0a,#1a0a0a)", dur: "3:14", plays: 0 },
-];
+// DEMO_TRACKS removed — queue only contains real DB-sourced tracks with valid audio URLs
+export const DEMO_TRACKS: Track[] = [];
 
 export const DEMO_ROOMS = [
   { code: "NEXUS", name: "Celestial Lounge", listeners: 4, track: "Celestial Drift", emoji: "🌌" },
@@ -135,7 +127,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     room: null,
   });
 
-  const allTracks = useCallback(() => [...DEMO_TRACKS, ...state.tracks], [state.tracks]);
+  // Only real DB-sourced tracks — DEMO_TRACKS is empty, guard is here for safety
+  const allTracks = useCallback(() => state.tracks.filter(t => !!t.audioUrl), [state.tracks]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -146,7 +139,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const onDurationChange = () => setState(s => ({ ...s, duration: audio.duration || 0 }));
     const onEnded = () => {
       setState(s => {
-        const tracks = [...DEMO_TRACKS, ...s.tracks];
+        const tracks = s.tracks.filter(t => !!t.audioUrl);
         if (s.isRepeat) {
           audio.currentTime = 0;
           audio.play().catch(() => {});
@@ -184,7 +177,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const audio = audioRef.current;
     if (!audio) return;
     setState(s => {
-      const tracks = [...DEMO_TRACKS, ...s.tracks];
+      const tracks = s.tracks.filter(t => !!t.audioUrl);
       const t = tracks[idx];
       if (!t) return s;
       if (t.audioUrl) {
@@ -206,7 +199,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const nextTrack = useCallback(() => {
     setState(s => {
-      const tracks = [...DEMO_TRACKS, ...s.tracks];
+      const tracks = s.tracks.filter(t => !!t.audioUrl);
       let next = s.isShuffle
         ? Math.floor(Math.random() * tracks.length)
         : (s.currentIdx + 1) % tracks.length;
@@ -222,7 +215,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const prevTrack = useCallback(() => {
     setState(s => {
-      const tracks = [...DEMO_TRACKS, ...s.tracks];
+      const tracks = s.tracks.filter(t => !!t.audioUrl);
       const prev = (s.currentIdx - 1 + tracks.length) % tracks.length;
       const t = tracks[prev];
       const audio = audioRef.current;
@@ -271,13 +264,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Add a track (or replace existing) and immediately play it
+  // Guard: silently reject tracks without a real audio URL
   const addAndPlay = useCallback((t: Track) => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !t.audioUrl) return;
     setState(s => {
       const filtered = s.tracks.filter(tr => tr.id !== t.id);
       const newTracks = [t, ...filtered];
-      const newIdx = DEMO_TRACKS.length; // first user-track slot
+      const newIdx = 0; // always first slot since DEMO_TRACKS is empty
       if (t.audioUrl) {
         audio.src = safeAudioUrl(t.audioUrl);
         audio.play().catch(() => {});
@@ -307,19 +301,17 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     },
   })), []);
   const incrementShare = useCallback((trackId: string) => setState(s => {
-    const all = [...DEMO_TRACKS, ...s.tracks];
-    const updated = all.map(t => t.id === trackId ? { ...t, shareCount: (t.shareCount || 0) + 1 } : t);
-    const userTracks = updated.filter(t => t.isOwn);
-    return { ...s, tracks: userTracks };
+    const updated = s.tracks.map(t => t.id === trackId ? { ...t, shareCount: (t.shareCount || 0) + 1 } : t);
+    return { ...s, tracks: updated };
   }), []);
   const setRoom = useCallback((r: PlayerState["room"]) => setState(s => ({ ...s, room: r })), []);
 
-  const currentTrackId = state.currentIdx >= 0 ? ([...DEMO_TRACKS, ...state.tracks][state.currentIdx]?.id ?? null) : null;
+  const currentTrackId = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.id ?? null) : null;
 
   // ── MediaSession API: lock screen / notification shade controls ──
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
-    const tracks = [...DEMO_TRACKS, ...state.tracks];
+    const tracks = state.tracks.filter(t => !!t.audioUrl);
     const track = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
     if (!track) return;
 
