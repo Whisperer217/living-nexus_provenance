@@ -86,7 +86,7 @@ export default function PlayerBar() {
         <div className="flex items-center gap-4">
           <button
             onClick={toggleShuffle}
-            className={`p-1 transition-colors ${state.isShuffle ? "text-[#E8C547]" : "text-white/30 hover:text-white/70"}`}
+            className={`p-1 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/30 hover:text-white/70"}`}
           >
             <Shuffle size={14} />
           </button>
@@ -108,7 +108,7 @@ export default function PlayerBar() {
           </button>
           <button
             onClick={toggleRepeat}
-            className={`p-1 transition-colors ${state.isRepeat ? "text-[#E8C547]" : "text-white/30 hover:text-white/70"}`}
+            className={`p-1 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/30 hover:text-white/70"}`}
           >
             <Repeat size={14} />
           </button>
@@ -125,7 +125,7 @@ export default function PlayerBar() {
               className="h-full rounded-full relative transition-all"
               style={{
                 width: `${progress}%`,
-                background: "linear-gradient(90deg, #7C3AED, #E8C547)",
+                background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
               }}
             >
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white
@@ -163,7 +163,7 @@ export default function PlayerBar() {
           onClick={handleVolume}
         >
           <div
-            className="h-full rounded-full bg-white/40 group-hover:bg-[#E8C547] transition-colors"
+            className="h-full rounded-full bg-white/40 group-hover:bg-[#D4AF37] transition-colors"
             style={{ width: state.isMuted ? "0%" : `${state.volume * 100}%` }}
           />
         </div>

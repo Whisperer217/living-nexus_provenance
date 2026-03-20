@@ -138,7 +138,7 @@ export default function MobilePlayerPanel() {
                 key={i}
                 className="w-[3px] rounded-full"
                 style={{
-                  background: "#E8C547",
+                  background: "#D4AF37",
                   animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`,
                   height: "6px",
                 }}
@@ -250,7 +250,7 @@ export default function MobilePlayerPanel() {
               className="h-full rounded-full relative"
               style={{
                 width: `${progress}%`,
-                background: "linear-gradient(90deg, #7C3AED, #E8C547)",
+                background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
                 transition: "width 0.25s linear",
               }}
             >
@@ -268,7 +268,7 @@ export default function MobilePlayerPanel() {
         <div className="px-6 pb-4 flex items-center justify-between">
           <button
             onClick={toggleShuffle}
-            className={`p-2 transition-colors ${state.isShuffle ? "text-[#E8C547]" : "text-white/30 hover:text-white/60"}`}
+            className={`p-2 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/30 hover:text-white/60"}`}
           >
             <Shuffle size={18} />
           </button>
@@ -290,7 +290,7 @@ export default function MobilePlayerPanel() {
           </button>
           <button
             onClick={toggleRepeat}
-            className={`p-2 transition-colors ${state.isRepeat ? "text-[#E8C547]" : "text-white/30 hover:text-white/60"}`}
+            className={`p-2 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/30 hover:text-white/60"}`}
           >
             <Repeat size={18} />
           </button>
@@ -307,7 +307,7 @@ export default function MobilePlayerPanel() {
             onTouchMove={handleVolumeTouch}
           >
             <div
-              className="h-full rounded-full bg-white/40 group-hover:bg-[#E8C547] transition-colors"
+              className="h-full rounded-full bg-white/40 group-hover:bg-[#D4AF37] transition-colors"
               style={{ width: state.isMuted ? "0%" : `${state.volume * 100}%` }}
             />
           </div>

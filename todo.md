@@ -315,3 +315,9 @@
 - [x] Build QueueLoader component to seed PlayerContext on app mount
 - [x] Update Explore/HomePage/CreatorProfilePage to load full queue on song click
 - [x] Verify auto-advance, MobilePlayerPanel metadata updates correctly
+
+## Phase: Visual Design Upgrade
+
+- [x] Update global CSS tokens — text brightness, background gradient, card base, gold color, button glow
+- [x] Update DiscoverPage, ExplorePage, HomePage — text/card/badge/button
+- [x] Update SongDetailPage, CreatorProfilePage, ArchivePage, DashboardPage, UploadPage

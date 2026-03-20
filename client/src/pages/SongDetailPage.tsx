@@ -38,7 +38,7 @@ function RelatedCard({ item }: { item: any }) {
         <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.16 0.02 280)" }}>
           {song.coverArtUrl
             ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
-            : <Music className="w-5 h-5 opacity-30" style={{ color: "oklch(0.75 0.18 85)" }} />}
+            : <Music className="w-5 h-5 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
@@ -46,7 +46,7 @@ function RelatedCard({ item }: { item: any }) {
             {creator?.artistHandle || creator?.name || "Unknown"}
           </p>
         </div>
-        <Play className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0" style={{ color: "oklch(0.75 0.18 85)" }} />
+        <Play className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0" style={{ color: "oklch(0.84 0.155 85)" }} />
       </div>
     </Link>
   );
@@ -250,7 +250,7 @@ export default function SongDetailPage() {
     <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.01 280)" }}>
       <div className="text-center">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Song not found.</p>
-        <Link href="/"><Button className="mt-4" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>Go Home</Button></Link>
+        <Link href="/"><Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Go Home</Button></Link>
       </div>
     </div>
   );
@@ -281,7 +281,7 @@ export default function SongDetailPage() {
       </Helmet>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
         <Link href={creator ? `/creator/${creator.id}` : "/"}>
-          <button className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity mb-6" style={{ color: "oklch(0.55 0.04 280)" }}>
+          <button className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity mb-6" style={{ color: "#E2E8F0" }}>
             <ChevronLeft className="w-4 h-4" />
             {creator?.artistHandle || creator?.name || "Back"}
           </button>
@@ -296,7 +296,7 @@ export default function SongDetailPage() {
                 style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.13 0.04 290))" }}>
                 {song.coverArtUrl
                   ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
-                  : <Music className="w-20 h-20 opacity-10" style={{ color: "oklch(0.75 0.18 85)" }} />}
+                  : <Music className="w-20 h-20 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />}
               </div>
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
@@ -311,7 +311,7 @@ export default function SongDetailPage() {
                           style={{ background: "oklch(0.2 0.04 280)" }}>
                           {creator.profilePhotoUrl
                             ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover" />
-                            : <span style={{ color: "oklch(0.75 0.18 85)" }}>{(creator.artistHandle || creator.name || "?").charAt(0)}</span>}
+                            : <span style={{ color: "oklch(0.84 0.155 85)" }}>{(creator.artistHandle || creator.name || "?").charAt(0)}</span>}
                         </div>
                         <span className="text-sm font-medium" style={{ color: "oklch(0.75 0.04 280)" }}>
                           {creator.artistHandle || creator.name}
@@ -339,7 +339,7 @@ export default function SongDetailPage() {
                       </Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>
+                  <div className="flex items-center gap-4 text-xs" style={{ color: "#E2E8F0" }}>
                     <span className="flex items-center gap-1"><Headphones className="w-3.5 h-3.5" />{song.playCount || 0} plays</span>
                     <span className="flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" />{comments?.length || 0} comments</span>
                   </div>
@@ -347,7 +347,7 @@ export default function SongDetailPage() {
                 <div className="flex flex-wrap gap-2 mt-3">
                   {tipsEnabled && !isOwner && (
                     <Button size="sm" onClick={() => setTipOpen(true)}
-                      style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                      style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
                       <DollarSign className="w-3.5 h-3.5 mr-1" />Tip Artist
                     </Button>
                   )}
@@ -380,12 +380,12 @@ export default function SongDetailPage() {
             </div>
 
             {/* Player */}
-            <div className="rounded-2xl p-5" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.15 0.025 275)" }}>
+            <div className="rounded-2xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.15 0.025 275)" }}>
               <div className="mb-3">
                 <input type="range" min={0} max={duration || 100} value={currentTime} onChange={seek}
                   disabled={!audioReady} className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-                  style={{ background: `linear-gradient(to right, oklch(0.75 0.18 85) ${progressPct}%, oklch(0.2 0.02 280) ${progressPct}%)`, outline: "none" }} />
-                <div className="flex justify-between text-xs mt-1" style={{ color: "oklch(0.45 0.03 280)" }}>
+                  style={{ background: `linear-gradient(to right, oklch(0.84 0.155 85) ${progressPct}%, oklch(0.2 0.02 280) ${progressPct}%)`, outline: "none" }} />
+                <div className="flex justify-between text-xs mt-1" style={{ color: "#E2E8F0" }}>
                   <span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span>
                 </div>
               </div>
@@ -396,7 +396,7 @@ export default function SongDetailPage() {
                   </button>
                   <button onClick={togglePlay} disabled={!audioReady && !song.fileUrl}
                     className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-                    style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                    style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                   </button>
                   <button className="w-8 h-8 flex items-center justify-center opacity-40">
@@ -423,14 +423,14 @@ export default function SongDetailPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
                     {song.isLyricsOnly && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.75 0.18 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)", letterSpacing: "0.06em" }}>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)", letterSpacing: "0.06em" }}>
                         <Shield className="w-2.5 h-2.5" /> LYRICS PROTECTED — Audio Not Yet Attached
                       </span>
                     )}
                   </div>
                   {showLyrics
-                    ? <ChevronUp className="w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />
-                    : <ChevronDown className="w-4 h-4" style={{ color: "oklch(0.45 0.03 280)" }} />}
+                    ? <ChevronUp className="w-4 h-4" style={{ color: "#E2E8F0" }} />
+                    : <ChevronDown className="w-4 h-4" style={{ color: "#E2E8F0" }} />}
                 </button>
                 {showLyrics && (
                   <div className="px-5 pb-5"
@@ -460,7 +460,7 @@ export default function SongDetailPage() {
                     </pre>
                     {song.witnessId && (
                       <div className="mt-4 pt-4" style={{ borderTop: "1px solid oklch(0.2 0.015 280)" }}>
-                        <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "oklch(0.45 0.03 280)" }}>{[
+                        <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "#E2E8F0" }}>{[
                           "═══════════════════════════════",
                           "WITNESS ID CERTIFICATE",
                           `WID: ${song.witnessId}`,
@@ -483,9 +483,9 @@ export default function SongDetailPage() {
                   <Shield className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.65 0.2 300)" }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.2 300)" }}>Witness ID Certified</p>
-                    <p className="text-xs font-mono break-all" style={{ color: "oklch(0.55 0.04 280)" }}>{song.witnessId}</p>
+                    <p className="text-xs font-mono break-all" style={{ color: "#E2E8F0" }}>{song.witnessId}</p>
                     {song.createdAt && (
-                      <p className="text-xs mt-1" style={{ color: "oklch(0.45 0.03 280)" }}>
+                      <p className="text-xs mt-1" style={{ color: "#E2E8F0" }}>
                         Registered {new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                       </p>
                     )}
@@ -543,7 +543,7 @@ export default function SongDetailPage() {
                     <Button size="sm"
                       onClick={() => commentMutation.mutate({ songId: song.id, content: commentText.trim(), authorName: user?.name || undefined })}
                       disabled={commentMutation.isPending}
-                      style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                      style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
                       Post
                     </Button>
                   )}
@@ -599,7 +599,7 @@ export default function SongDetailPage() {
             <div className="grid grid-cols-4 gap-2">
               {["1", "5", "10", "25"].map(amt => (
                 <button key={amt} onClick={() => setTipAmount(amt)} className="py-2 rounded-lg text-sm font-medium transition-all"
-                  style={{ background: tipAmount === amt ? "oklch(0.75 0.18 85)" : "oklch(0.16 0.02 280)", color: tipAmount === amt ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
+                  style={{ background: tipAmount === amt ? "oklch(0.84 0.155 85)" : "oklch(0.16 0.02 280)", color: tipAmount === amt ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
                   ${amt}
                 </button>
               ))}
@@ -607,7 +607,7 @@ export default function SongDetailPage() {
             <Input type="number" placeholder="Custom amount ($)" value={tipAmount} onChange={e => setTipAmount(e.target.value)} min="1" step="0.01"
               style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }} />
             <Button className="w-full" onClick={handleTip} disabled={tipMutation.isPending}
-              style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Tip`}
             </Button>
           </div>
@@ -624,7 +624,7 @@ export default function SongDetailPage() {
             <div className="flex gap-2">
               <Input value={window.location.href} readOnly
                 style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.7 0.03 280)", fontSize: "12px" }} />
-              <Button onClick={copyLink} style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)", flexShrink: 0 }}>
+              <Button onClick={copyLink} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", flexShrink: 0 }}>
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
@@ -658,7 +658,7 @@ export default function SongDetailPage() {
           {transformPhase === "idle" && (
             <div className="space-y-4 py-2">
               {!user && (
-                <p className="text-sm text-center" style={{ color: "oklch(0.55 0.04 280)" }}>Sign in to transform tracks.</p>
+                <p className="text-sm text-center" style={{ color: "#E2E8F0" }}>Sign in to transform tracks.</p>
               )}
               <div>
                 <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.65 0.2 300)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>DESCRIBE THE TRANSFORMATION</label>
@@ -765,7 +765,7 @@ export default function SongDetailPage() {
           {transformPhase === "error" && (
             <div className="py-6 text-center space-y-3">
               <p className="font-semibold" style={{ color: "oklch(0.65 0.2 25)" }}>Transform Failed</p>
-              <p className="text-sm" style={{ color: "oklch(0.55 0.04 280)" }}>{transformError}</p>
+              <p className="text-sm" style={{ color: "#E2E8F0" }}>{transformError}</p>
               <Button
                 onClick={() => { setTransformPhase("idle"); setTransformError(""); }}
                 style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.4)" }}

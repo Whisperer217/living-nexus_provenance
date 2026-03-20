@@ -27,7 +27,7 @@ export default function LikedPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 rounded-full border-2 animate-spin"
-          style={{ borderColor: "oklch(0.75 0.18 85)", borderTopColor: "transparent" }} />
+          style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
       </div>
     );
   }
@@ -44,7 +44,7 @@ export default function LikedPage() {
           <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
             Liked Tracks
           </h1>
-          <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
+          <p className="text-sm" style={{ color: "#E2E8F0" }}>
             Music you've saved from other creators
           </p>
         </div>
@@ -61,30 +61,30 @@ export default function LikedPage() {
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="h-20 rounded-xl animate-pulse"
-              style={{ background: "oklch(0.10 0.055 280)" }} />
+              style={{ background: "oklch(0.115 0.055 278)" }} />
           ))}
         </div>
       ) : !likedTracks || likedTracks.length === 0 ? (
         <div className="rounded-2xl p-16 text-center"
-          style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
           <Heart className="w-14 h-14 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
           <p className="text-base font-semibold mb-2"
             style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>
             No liked tracks yet
           </p>
-          <p className="text-sm mb-6" style={{ color: "oklch(0.5 0.03 280)" }}>
+          <p className="text-sm mb-6" style={{ color: "#E2E8F0" }}>
             When you like a track from another creator, it will appear here.
           </p>
           <Link href="/explore">
             <Button size="sm"
-              style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
               Explore Tracks
             </Button>
           </Link>
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden"
-          style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
           <div className="divide-y" style={{ borderColor: "oklch(0.15 0.01 280)" }}>
             {likedTracks.map((item: any, idx: number) => {
               const song = item.song;
@@ -124,7 +124,7 @@ export default function LikedPage() {
                       style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.88 0.02 85)" }}>
                       {song.title}
                     </p>
-                    <p className="text-xs truncate mt-0.5" style={{ color: "oklch(0.5 0.03 280)" }}>
+                    <p className="text-xs truncate mt-0.5" style={{ color: "#E2E8F0" }}>
                       {creator?.artistHandle || creator?.name || "Unknown Artist"}
                     </p>
                   </div>
@@ -160,7 +160,7 @@ export default function LikedPage() {
                         genre: song.genre || "",
                       } as Track)}
                       title="Play"
-                      style={{ color: "oklch(0.75 0.18 85)" }}>
+                      style={{ color: "oklch(0.84 0.155 85)" }}>
                       <Play className="w-4 h-4" />
                     </Button>
                     <Link href={`/song/${song.id}`}>
@@ -169,7 +169,7 @@ export default function LikedPage() {
                         variant="ghost"
                         className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
                         title="View track"
-                        style={{ color: "oklch(0.55 0.04 280)" }}>
+                        style={{ color: "#E2E8F0" }}>
                         <ExternalLink className="w-4 h-4" />
                       </Button>
                     </Link>

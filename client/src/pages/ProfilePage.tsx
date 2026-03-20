@@ -46,7 +46,7 @@ function EditableField({
             placeholder={placeholder}
             className="flex-1 px-3 py-2 rounded-xl text-[13px] font-body text-white/80
               bg-[oklch(0.14_0.013_280)] border border-[#A78BFA]/50 outline-none resize-none
-              placeholder:text-white/20"
+              placeholder:text-white/60"
             autoFocus
           />
         ) : (
@@ -56,15 +56,15 @@ function EditableField({
             placeholder={placeholder}
             className="flex-1 px-3 py-2 rounded-xl text-[13px] font-body text-white/80
               bg-[oklch(0.14_0.013_280)] border border-[#A78BFA]/50 outline-none
-              placeholder:text-white/20"
+              placeholder:text-white/60"
             autoFocus
             onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
           />
         )}
-        <button onClick={save} className="p-2 text-[#E8C547] hover:text-[#E8C547]/80 flex-shrink-0">
+        <button onClick={save} className="p-2 text-[#D4AF37] hover:text-[#D4AF37]/80 flex-shrink-0">
           <Check size={14} />
         </button>
-        <button onClick={cancel} className="p-2 text-white/30 hover:text-white/60 flex-shrink-0">
+        <button onClick={cancel} className="p-2 text-white/70 hover:text-white/60 flex-shrink-0">
           <X size={14} />
         </button>
       </div>
@@ -73,10 +73,10 @@ function EditableField({
 
   return (
     <div className="group flex items-center gap-2 cursor-pointer" onClick={() => setEditing(true)}>
-      <span className={`text-[13px] font-body ${value ? "text-white/60" : "text-white/20 italic"}`}>
+      <span className={`text-[13px] font-body ${value ? "text-white/60" : "text-white/60 italic"}`}>
         {value || placeholder}
       </span>
-      <Edit2 size={11} className="text-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <Edit2 size={11} className="text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   );
 }
@@ -185,7 +185,7 @@ export default function ProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-white/40 font-body text-[14px]">Sign in to view your profile</p>
-        <a href={getLoginUrl()} className="px-5 py-2.5 rounded-xl bg-[#E8C547]/10 border border-[#E8C547]/30 text-[#E8C547] font-heading text-[13px] tracking-wider hover:bg-[#E8C547]/20 transition-all">
+        <a href={getLoginUrl()} className="px-5 py-2.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] font-heading text-[13px] tracking-wider hover:bg-[#D4AF37]/20 transition-all">
           Sign In
         </a>
       </div>
@@ -205,7 +205,7 @@ export default function ProfilePage() {
           <div className="w-full h-full"
             style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.15 0.05 275), oklch(0.14 0.013 295))" }}>
             <div className="absolute inset-0 opacity-20"
-              style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #E8C547 0%, transparent 60%), radial-gradient(circle at 70% 30%, #7C3AED 0%, transparent 50%)" }} />
+              style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #D4AF37 0%, transparent 60%), radial-gradient(circle at 70% 30%, #7C3AED 0%, transparent 50%)" }} />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.08_0.01_280)] via-transparent to-transparent" />
@@ -226,7 +226,7 @@ export default function ProfilePage() {
         {/* ── Avatar + Name row ── */}
         <div className="flex items-end gap-4 -mt-12 mb-5">
           <div className="relative group flex-shrink-0">
-            <div className="w-24 h-24 rounded-2xl border-2 border-[#E8C547]/30 overflow-hidden
+            <div className="w-24 h-24 rounded-2xl border-2 border-[#D4AF37]/30 overflow-hidden
               bg-[oklch(0.14_0.013_280)] flex items-center justify-center">
               {profile?.profilePhotoUrl ? (
                 <img src={profile.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -255,13 +255,13 @@ export default function ProfilePage() {
                 onSave={v => save({ name: v })}
                 placeholder="Your artist name"
               />
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#E8C547]/10 border border-[#E8C547]/20 text-[#E8C547] font-heading tracking-wider flex-shrink-0">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-heading tracking-wider flex-shrink-0">
                 ARTIST
               </span>
             </div>
             <div className="flex items-center gap-3">
               {profile?.location && (
-                <div className="flex items-center gap-1 text-[11px] text-white/30">
+                <div className="flex items-center gap-1 text-[11px] text-white/70">
                   <MapPin size={10} />
                   <span>{profile.location}</span>
                 </div>
@@ -280,7 +280,7 @@ export default function ProfilePage() {
             onClick={copyProfileLink}
             className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-body
               bg-[oklch(0.14_0.013_280)] border border-white/[0.08] text-white/50
-              hover:border-[#E8C547]/30 hover:text-[#E8C547] transition-all"
+              hover:border-[#D4AF37]/30 hover:text-[#D4AF37] transition-all"
           >
             <Copy size={12} /> Copy Link
           </button>
@@ -288,7 +288,7 @@ export default function ProfilePage() {
 
         {/* ── Artist Handle ── */}
         <div className="mb-3 flex items-center gap-1.5">
-          <span className="text-[11px] text-white/25 font-body">@</span>
+          <span className="text-[11px] text-white/65 font-body">@</span>
           <EditableField
             label="Artist Handle"
             value={profile?.artistHandle || ""}
@@ -310,13 +310,13 @@ export default function ProfilePage() {
 
         {/* ── Creator Defaults: AI Disclosure + Primary Genre ── */}
         <div className="mb-4 p-4 rounded-xl border border-white/[0.07] bg-[oklch(0.11_0.012_280)]">
-          <p className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}>
+          <p className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: "#E2E8F0", fontFamily: "'Cinzel', serif" }}>
             Creator Defaults — applied to every upload
           </p>
           <div className="flex flex-wrap gap-4">
             {/* AI Disclosure */}
             <div className="flex flex-col gap-1.5 min-w-[180px]">
-              <label className="text-[11px] text-white/30 font-body">AI Disclosure</label>
+              <label className="text-[11px] text-white/70 font-body">AI Disclosure</label>
               <select
                 value={profile?.aiDisclosure || "original"}
                 onChange={e => save({ aiDisclosure: e.target.value as "original" | "ai_assisted" | "ai_generated" })}
@@ -330,13 +330,13 @@ export default function ProfilePage() {
             </div>
             {/* Primary Genre */}
             <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-              <label className="text-[11px] text-white/30 font-body">Primary Genre / Style</label>
+              <label className="text-[11px] text-white/70 font-body">Primary Genre / Style</label>
               <input
                 type="text"
                 defaultValue={profile?.primaryGenre || ""}
                 placeholder="e.g. Gospel, Hip-Hop, Ambient…"
                 maxLength={64}
-                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[oklch(0.14_0.013_280)] border border-white/[0.1] outline-none placeholder:text-white/20 hover:border-[#A78BFA]/50 focus:border-[#A78BFA]/70 transition-colors"
+                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[oklch(0.14_0.013_280)] border border-white/[0.1] outline-none placeholder:text-white/60 hover:border-[#A78BFA]/50 focus:border-[#A78BFA]/70 transition-colors"
                 onBlur={e => { const v = e.target.value.trim(); if (v !== (profile?.primaryGenre || "")) save({ primaryGenre: v }); }}
                 onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
               />
@@ -347,7 +347,7 @@ export default function ProfilePage() {
         {/* ── Location + Website ── */}
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="flex items-center gap-1.5">
-            <MapPin size={12} className="text-white/25" />
+            <MapPin size={12} className="text-white/65" />
             <EditableField
               label="Location"
               value={profile?.location || ""}
@@ -356,7 +356,7 @@ export default function ProfilePage() {
             />
           </div>
           <div className="flex items-center gap-1.5">
-            <Globe size={12} className="text-white/25" />
+            <Globe size={12} className="text-white/65" />
             <EditableField
               label="Website"
               value={profile?.website || ""}
@@ -398,7 +398,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
             { label: "Tracks", value: dbSongs.length, icon: Music, color: "#A78BFA" },
-            { label: "Plays", value: totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays, icon: TrendingUp, color: "#E8C547" },
+            { label: "Plays", value: totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays, icon: TrendingUp, color: "#D4AF37" },
             { label: "Tips", value: `$0`, icon: DollarSign, color: "#4ade80" },
           ].map(s => {
             const Icon = s.icon;
@@ -407,7 +407,7 @@ export default function ProfilePage() {
                 bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
                 <Icon size={14} style={{ color: s.color }} />
                 <span className="text-[15px] font-heading text-white/90">{s.value}</span>
-                <span className="text-[10px] font-body text-white/30">{s.label}</span>
+                <span className="text-[10px] font-body text-white/70">{s.label}</span>
               </div>
             );
           })}
@@ -421,8 +421,8 @@ export default function ProfilePage() {
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2.5 text-[12px] font-heading tracking-wider capitalize transition-all border-b-2 -mb-px
                 ${activeTab === tab
-                  ? "border-[#E8C547] text-[#E8C547]"
-                  : "border-transparent text-white/35 hover:text-white/60"
+                  ? "border-[#D4AF37] text-[#D4AF37]"
+                  : "border-transparent text-white/75 hover:text-white/60"
                 }`}
             >
               {tab}
@@ -434,7 +434,7 @@ export default function ProfilePage() {
         {activeTab === "tracks" && (
           <div className="space-y-3">
             {dbSongs.length === 0 ? (
-              <div className="text-center py-12 text-white/25 font-body text-[13px]">
+              <div className="text-center py-12 text-white/65 font-body text-[13px]">
                 No tracks yet.{" "}
                 <button onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">
                   Upload your first track
@@ -450,29 +450,29 @@ export default function ProfilePage() {
                   <div className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[oklch(0.15_0.05_275)]">
                     {song.coverArtUrl
                       ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center text-white/20"><Music size={16} /></div>
+                      : <div className="w-full h-full flex items-center justify-center text-white/60"><Music size={16} /></div>
                     }
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] font-body text-white/85 truncate">{song.title}</span>
                       {song.genre && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.05] text-white/30 font-body flex-shrink-0">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.05] text-white/70 font-body flex-shrink-0">
                           {song.genre}
                         </span>
                       )}
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-body flex-shrink-0 ${
                         song.status === "Published" ? "bg-green-500/10 text-green-400" :
                         song.status === "Draft" ? "bg-amber-500/10 text-amber-400" :
-                        "bg-white/[0.05] text-white/30"
+                        "bg-white/[0.05] text-white/70"
                       }`}>{song.status || "Published"}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-[11px] text-white/25 font-body">
+                      <span className="text-[11px] text-white/65 font-body">
                         {(song.playCount || 0).toLocaleString()} plays
                       </span>
                       {song.createdAt && (
-                        <span className="text-[11px] text-white/20 font-body">
+                        <span className="text-[11px] text-white/60 font-body">
                           {new Date(song.createdAt).toLocaleDateString()}
                         </span>
                       )}
@@ -491,7 +491,7 @@ export default function ProfilePage() {
                         const url = `${window.location.origin}/song/${song.id}`;
                         navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!"));
                       }}
-                      className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#E8C547] hover:bg-white/[0.1] transition-all"
+                      className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#D4AF37] hover:bg-white/[0.1] transition-all"
                       title="Copy song link"
                     >
                       <Copy size={12} />
@@ -509,7 +509,7 @@ export default function ProfilePage() {
             {/* Status card */}
             <div className="p-5 rounded-2xl border" style={{ background: "oklch(0.12 0.055 280)", borderColor: "oklch(0.25 0.05 280)" }}>
               <div className="flex items-center gap-2 mb-4">
-                <DollarSign size={16} className="text-[#E8C547]" />
+                <DollarSign size={16} className="text-[#D4AF37]" />
                 <span className="font-heading text-[14px] text-white/90 tracking-wide">Stripe Connect</span>
               </div>
 
@@ -528,7 +528,7 @@ export default function ProfilePage() {
               )}
               {(!connectData?.status || connectData.status === "not_connected" || connectData.status === "error") && (
                 <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "oklch(0.5 0.03 280 / 0.15)", border: "1px solid oklch(0.5 0.03 280 / 0.3)" }}>
-                  <Zap size={14} className="text-white/30" />
+                  <Zap size={14} className="text-white/70" />
                   <span className="text-[13px] font-body text-white/40">Not Connected</span>
                 </div>
               )}
@@ -555,7 +555,7 @@ export default function ProfilePage() {
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-body
                     font-medium text-black transition-all hover:-translate-y-0.5 disabled:opacity-50
                     hover:shadow-[0_4px_20px_rgba(232,197,71,0.25)]"
-                  style={{ background: "linear-gradient(135deg, #E8C547, #C9A84C)" }}
+                  style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
                 >
                   {connectMutation.isPending
                     ? <><Loader2 size={13} className="animate-spin" /> Connecting…</>
@@ -569,13 +569,13 @@ export default function ProfilePage() {
             {/* Fee breakdown */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Your Cut", value: "90%", sub: "of every tip", color: "#E8C547" },
+                { label: "Your Cut", value: "90%", sub: "of every tip", color: "#D4AF37" },
                 { label: "Platform Fee", value: "10%", sub: "keeps the lights on", color: "#A78BFA" },
               ].map(s => (
                 <div key={s.label} className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
                   <div className="text-[22px] font-heading mb-1" style={{ color: s.color }}>{s.value}</div>
                   <div className="text-[12px] font-body text-white/70">{s.label}</div>
-                  <div className="text-[11px] font-body text-white/25 mt-0.5">{s.sub}</div>
+                  <div className="text-[11px] font-body text-white/65 mt-0.5">{s.sub}</div>
                 </div>
               ))}
             </div>
@@ -587,7 +587,7 @@ export default function ProfilePage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Total Plays", value: totalPlays.toLocaleString(), sub: "across all tracks", color: "#E8C547" },
+                { label: "Total Plays", value: totalPlays.toLocaleString(), sub: "across all tracks", color: "#D4AF37" },
                 { label: "Tracks Published", value: dbSongs.filter((s: any) => s.status === "Published").length, sub: "live on Explore", color: "#A78BFA" },
                 { label: "Tracks in Draft", value: dbSongs.filter((s: any) => s.status === "Draft").length, sub: "not yet published", color: "#fb923c" },
                 { label: "Total Tracks", value: dbSongs.length, sub: "in your archive", color: "#4ade80" },
@@ -595,7 +595,7 @@ export default function ProfilePage() {
                 <div key={s.label} className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
                   <div className="text-[22px] font-heading mb-1" style={{ color: s.color }}>{s.value}</div>
                   <div className="text-[12px] font-body text-white/70">{s.label}</div>
-                  <div className="text-[11px] font-body text-white/25 mt-0.5">{s.sub}</div>
+                  <div className="text-[11px] font-body text-white/65 mt-0.5">{s.sub}</div>
                 </div>
               ))}
             </div>
@@ -603,9 +603,9 @@ export default function ProfilePage() {
               <div className="text-[12px] font-heading tracking-wider text-white/40 mb-3">Top Tracks by Plays</div>
               {[...(dbSongs as any[])].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5).map((s, i) => (
                 <div key={s.id} className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
-                  <span className="text-[12px] font-heading text-white/20 w-4">{i + 1}</span>
+                  <span className="text-[12px] font-heading text-white/60 w-4">{i + 1}</span>
                   <span className="flex-1 text-[12px] font-body text-white/60 truncate">{s.title}</span>
-                  <span className="text-[12px] font-body text-[#E8C547]/60">{(s.playCount || 0).toLocaleString()}</span>
+                  <span className="text-[12px] font-body text-[#D4AF37]/60">{(s.playCount || 0).toLocaleString()}</span>
                 </div>
               ))}
             </div>
@@ -635,7 +635,7 @@ function SocialsEditor({
       <button
         onClick={() => setEditing(true)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-body
-          bg-[oklch(0.14_0.013_280)] border border-white/[0.06] text-white/30
+          bg-[oklch(0.14_0.013_280)] border border-white/[0.06] text-white/70
           hover:border-[#A78BFA]/30 hover:text-[#A78BFA] transition-all"
       >
         <Edit2 size={10} /> Edit Socials
@@ -657,13 +657,13 @@ function SocialsEditor({
           placeholder={placeholder}
           className="px-3 py-1.5 rounded-lg text-[12px] font-body text-white/70
             bg-[oklch(0.14_0.013_280)] border border-white/[0.08] outline-none
-            focus:border-[#A78BFA]/50 placeholder:text-white/20"
+            focus:border-[#A78BFA]/50 placeholder:text-white/60"
         />
       ))}
       <div className="col-span-2 flex gap-2">
         <button
           onClick={() => { onSave(t, i, y); setEditing(false); }}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] bg-[#E8C547]/10 border border-[#E8C547]/30 text-[#E8C547]"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37]"
         >
           <Check size={12} /> Save
         </button>

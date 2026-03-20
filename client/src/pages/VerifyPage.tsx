@@ -86,7 +86,7 @@ export default function VerifyPage() {
 
   const aiConsentLabel = (v?: string) => {
     if (v === "prohibited") return { text: "AI Training Prohibited", color: "oklch(0.65 0.18 25)" };
-    if (v === "permitted_attribution") return { text: "Permitted with Attribution", color: "oklch(0.75 0.18 85)" };
+    if (v === "permitted_attribution") return { text: "Permitted with Attribution", color: "oklch(0.84 0.155 85)" };
     if (v === "permitted") return { text: "Freely Permitted", color: "oklch(0.65 0.18 145)" };
     return { text: "Not specified", color: "oklch(0.45 0.03 280)" };
   };
@@ -133,7 +133,7 @@ export default function VerifyPage() {
             <Button
               onClick={handleSearch}
               disabled={!inputWid.trim() || isLoading}
-              style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             </Button>
@@ -142,14 +142,14 @@ export default function VerifyPage() {
           {/* Loading */}
           {isLoading && (
             <div className="text-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "oklch(0.75 0.18 85)" }} />
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "oklch(0.84 0.155 85)" }} />
               <p className="text-sm" style={{ color: "oklch(0.48 0.03 280)" }}>Querying provenance ledger…</p>
             </div>
           )}
 
           {/* Not found */}
           {!isLoading && error && (
-            <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
+            <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
               <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "oklch(0.65 0.18 25)" }} />
               <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 25)" }}>
                 Not Verified
@@ -184,7 +184,7 @@ export default function VerifyPage() {
                 {/* Audio / Lyrics indicator */}
                 <div className="flex items-center justify-center gap-2">
                   {data.isLyricsOnly ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.75 0.18 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}>
                       <FileText className="w-3.5 h-3.5" /> Lyrics Registration
                     </span>
                   ) : (
@@ -257,7 +257,7 @@ export default function VerifyPage() {
                 <Button
                   className="flex-1"
                   onClick={() => navigate(`/songs/${data.songId}`)}
-                  style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
+                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" /> View Track
                 </Button>
@@ -279,8 +279,8 @@ export default function VerifyPage() {
 
           {/* Empty state — no query yet */}
           {!isLoading && !error && !data && !queryWid && (
-            <div className="text-center py-12 rounded-2xl" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
-              <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
+            <div className="text-center py-12 rounded-2xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+              <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
               <p className="text-sm" style={{ color: "oklch(0.42 0.03 280)" }}>
                 Enter a Witness ID above to verify a registered work.
               </p>

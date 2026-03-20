@@ -87,11 +87,11 @@ function SongBrowserModal({
       style={{ background: "rgba(0,0,0,0.75)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="w-full max-w-lg rounded-2xl overflow-hidden border border-white/[0.1]"
-        style={{ background: "oklch(0.10 0.055 280)", maxHeight: "85vh" }}>
+        style={{ background: "oklch(0.115 0.055 278)", maxHeight: "85vh" }}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
-            <ListMusic size={16} className="text-[#E8C547]" />
+            <ListMusic size={16} className="text-[#D4AF37]" />
             <span className="font-heading text-[14px] text-white/90 tracking-wide">Queue a Song</span>
           </div>
           <button onClick={onClose} className="text-white/40 hover:text-white/70 transition-colors">
@@ -104,19 +104,19 @@ function SongBrowserModal({
             {/* Search */}
             <div className="px-4 py-3 border-b border-white/[0.06]">
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/[0.08]">
-                <Search size={13} className="text-white/30" />
+                <Search size={13} className="text-white/70" />
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search tracks…"
-                  className="flex-1 bg-transparent text-[13px] font-body text-white/80 outline-none placeholder:text-white/20"
+                  className="flex-1 bg-transparent text-[13px] font-body text-white/80 outline-none placeholder:text-white/60"
                 />
               </div>
             </div>
             {/* Song list */}
             <div className="overflow-y-auto" style={{ maxHeight: "50vh" }}>
               {filtered.length === 0 && (
-                <div className="text-center py-8 text-white/30 text-[13px] font-body">No tracks found</div>
+                <div className="text-center py-8 text-white/70 text-[13px] font-body">No tracks found</div>
               )}
               {filtered.map((song) => (
                 <button
@@ -128,14 +128,14 @@ function SongBrowserModal({
                     style={{ background: "oklch(0.15 0.04 280)" }}>
                     {song.coverArtUrl
                       ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                      : <Music2 size={16} className="text-white/30" />}
+                      : <Music2 size={16} className="text-white/70" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-body text-white/85 truncate">{song.title || "Untitled"}</div>
-                    <div className="text-[11px] text-white/35 font-body truncate">{song.creatorName || "Unknown Artist"}</div>
+                    <div className="text-[11px] text-white/75 font-body truncate">{song.creatorName || "Unknown Artist"}</div>
                   </div>
                   {song.witnessId && (
-                    <div className="text-[9px] px-1.5 py-0.5 rounded font-heading tracking-widest text-[#E8C547]/70 border border-[#E8C547]/20 flex-shrink-0">
+                    <div className="text-[9px] px-1.5 py-0.5 rounded font-heading tracking-widest text-[#D4AF37]/70 border border-[#D4AF37]/20 flex-shrink-0">
                       WID
                     </div>
                   )}
@@ -152,29 +152,29 @@ function SongBrowserModal({
                 style={{ background: "oklch(0.18 0.04 280)" }}>
                 {selectedSong.coverArtUrl
                   ? <img src={selectedSong.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                  : <Music2 size={20} className="text-white/30" />}
+                  : <Music2 size={20} className="text-white/70" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[14px] font-heading text-white/90 tracking-wide truncate">{selectedSong.title}</div>
                 <div className="text-[12px] text-white/45 font-body">{selectedSong.creatorName || "Unknown Creator"}</div>
                 {selectedSong.witnessId && (
                   <div className="flex items-center gap-1 mt-1">
-                    <Fingerprint size={10} className="text-[#E8C547]/60" />
-                    <span className="text-[10px] text-[#E8C547]/60 font-heading tracking-widest">WID</span>
+                    <Fingerprint size={10} className="text-[#D4AF37]/60" />
+                    <span className="text-[10px] text-[#D4AF37]/60 font-heading tracking-widest">WID</span>
                   </div>
                 )}
               </div>
-              <button onClick={() => setSelectedSong(null)} className="text-white/30 hover:text-white/60 transition-colors">
+              <button onClick={() => setSelectedSong(null)} className="text-white/70 hover:text-white/60 transition-colors">
                 <X size={14} />
               </button>
             </div>
 
             <div className="mb-4">
-              <label className="text-[11px] font-heading tracking-[0.1em] uppercase text-white/35 mb-2 block">
+              <label className="text-[11px] font-heading tracking-[0.1em] uppercase text-white/75 mb-2 block">
                 Tip Amount (min $1.00)
               </label>
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.1] bg-white/[0.04]">
-                <DollarSign size={14} className="text-[#E8C547]/70" />
+                <DollarSign size={14} className="text-[#D4AF37]/70" />
                 <input
                   type="number"
                   min="1"
@@ -184,7 +184,7 @@ function SongBrowserModal({
                   className="flex-1 bg-transparent text-[14px] font-body text-white/85 outline-none"
                 />
               </div>
-              <p className="text-[11px] text-white/25 font-body mt-1.5">
+              <p className="text-[11px] text-white/65 font-body mt-1.5">
                 Tip goes directly to the creator. Song plays for everyone in the room.
               </p>
             </div>
@@ -192,7 +192,7 @@ function SongBrowserModal({
             {!user ? (
               <a href={getLoginUrl("/together")}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all"
-                style={{ background: "linear-gradient(135deg, #E8C547, #C9A84C)" }}>
+                style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}>
                 Sign in to Tip &amp; Queue
               </a>
             ) : (
@@ -200,7 +200,7 @@ function SongBrowserModal({
                 onClick={handleTip}
                 disabled={tipToQueue.isPending}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #E8C547, #C9A84C)" }}>
+                style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}>
                 {tipToQueue.isPending ? "Opening checkout…" : `Tip $${tipAmount} & Queue`}
               </button>
             )}
@@ -235,14 +235,14 @@ function NowPlayingPanel({
   if (!item) return null;
 
   return (
-    <div className="rounded-2xl p-5 mb-4 border border-[#E8C547]/20 relative overflow-hidden"
+    <div className="rounded-2xl p-5 mb-4 border border-[#D4AF37]/20 relative overflow-hidden"
       style={{ background: "linear-gradient(135deg, oklch(0.12 0.06 280), oklch(0.10 0.04 270))" }}>
       {/* Glow */}
       <div className="absolute inset-0 opacity-10 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 50% 0%, #E8C547 0%, transparent 70%)" }} />
+        style={{ background: "radial-gradient(ellipse at 50% 0%, #D4AF37 0%, transparent 70%)" }} />
 
-      <div className="text-[10px] font-heading tracking-[0.15em] uppercase text-[#E8C547]/60 mb-3 flex items-center gap-1.5">
-        <Play size={9} className="text-[#E8C547]/60" />
+      <div className="text-[10px] font-heading tracking-[0.15em] uppercase text-[#D4AF37]/60 mb-3 flex items-center gap-1.5">
+        <Play size={9} className="text-[#D4AF37]/60" />
         Now Playing
       </div>
 
@@ -252,7 +252,7 @@ function NowPlayingPanel({
           style={{ background: "oklch(0.15 0.04 280)" }}>
           {item.songCoverArtUrl
             ? <img src={item.songCoverArtUrl} alt="" className="w-full h-full object-cover" />
-            : <Music2 size={24} className="text-white/25" />}
+            : <Music2 size={24} className="text-white/65" />}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -262,17 +262,17 @@ function NowPlayingPanel({
           {/* WID badge */}
           {item.songWitnessId && (
             <div className="flex items-center gap-1.5 mb-2">
-              <Fingerprint size={11} className="text-[#E8C547]/70" />
-              <span className="text-[10px] font-heading tracking-widest text-[#E8C547]/70">WID</span>
-              <span className="text-[10px] font-mono text-white/30 truncate max-w-[120px]">{item.songWitnessId.slice(0, 16)}…</span>
+              <Fingerprint size={11} className="text-[#D4AF37]/70" />
+              <span className="text-[10px] font-heading tracking-widest text-[#D4AF37]/70">WID</span>
+              <span className="text-[10px] font-mono text-white/70 truncate max-w-[120px]">{item.songWitnessId.slice(0, 16)}…</span>
             </div>
           )}
 
           {/* Tipper */}
-          <div className="text-[11px] text-white/35 font-body">
+          <div className="text-[11px] text-white/75 font-body">
             Queued by <span className="text-[#A78BFA]/80">{item.tipperName}</span>
             {" · "}
-            <span className="text-[#E8C547]/60">${(item.tipAmountCents / 100).toFixed(2)} tip</span>
+            <span className="text-[#D4AF37]/60">${(item.tipAmountCents / 100).toFixed(2)} tip</span>
           </div>
         </div>
 
@@ -297,8 +297,8 @@ function QueuePanel({ items }: { items: any[] }) {
   if (items.length === 0) return (
     <div className="rounded-xl p-4 border border-white/[0.06] text-center"
       style={{ background: "oklch(0.10 0.04 280)" }}>
-      <ListMusic size={20} className="mx-auto mb-2 text-white/20" />
-      <p className="text-[12px] text-white/25 font-body">Queue is empty — tip a song to add it!</p>
+      <ListMusic size={20} className="mx-auto mb-2 text-white/60" />
+      <p className="text-[12px] text-white/65 font-body">Queue is empty — tip a song to add it!</p>
     </div>
   );
 
@@ -306,23 +306,23 @@ function QueuePanel({ items }: { items: any[] }) {
     <div className="rounded-xl overflow-hidden border border-white/[0.06]"
       style={{ background: "oklch(0.10 0.04 280)" }}>
       <div className="px-4 py-3 border-b border-white/[0.06]">
-        <span className="text-[10px] font-heading tracking-[0.12em] uppercase text-white/30">Up Next ({items.length})</span>
+        <span className="text-[10px] font-heading tracking-[0.12em] uppercase text-white/70">Up Next ({items.length})</span>
       </div>
       <div className="max-h-[280px] overflow-y-auto">
         {items.map((item, idx) => (
           <div key={item.id}
             className="flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.04] last:border-0">
-            <span className="text-[11px] text-white/20 font-body w-4 text-center flex-shrink-0">{idx + 1}</span>
+            <span className="text-[11px] text-white/60 font-body w-4 text-center flex-shrink-0">{idx + 1}</span>
             <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
               style={{ background: "oklch(0.15 0.04 280)" }}>
               {item.songCoverArtUrl
                 ? <img src={item.songCoverArtUrl} alt="" className="w-full h-full object-cover" />
-                : <Music2 size={12} className="text-white/25" />}
+                : <Music2 size={12} className="text-white/65" />}
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[12px] font-body text-white/75 truncate">{item.songTitle}</div>
-              <div className="text-[10px] text-white/30 font-body truncate">
-                by {item.tipperName} · <span className="text-[#E8C547]/50">${(item.tipAmountCents / 100).toFixed(2)}</span>
+              <div className="text-[10px] text-white/70 font-body truncate">
+                by {item.tipperName} · <span className="text-[#D4AF37]/50">${(item.tipAmountCents / 100).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -480,7 +480,7 @@ export default function TogetherPage() {
         {!state.room && (
           <div className="rounded-2xl p-6 mb-6 border"
             style={{
-              background: "linear-gradient(135deg, oklch(0.10 0.055 280), oklch(0.11 0.05 270))",
+              background: "linear-gradient(135deg, oklch(0.115 0.055 278), oklch(0.11 0.05 270))",
               borderColor: "oklch(0.55 0.22 295 / 30%)",
             }}>
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -488,7 +488,7 @@ export default function TogetherPage() {
                 onClick={createRoom}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-body text-[13px] font-medium
                   text-black transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(232,197,71,0.3)]"
-                style={{ background: "linear-gradient(135deg, #E8C547, #C9A84C)" }}
+                style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
               >
                 <Plus size={14} />
                 Create Sanctuary
@@ -502,7 +502,7 @@ export default function TogetherPage() {
                   placeholder="Enter room code…"
                   maxLength={6}
                   className="bg-[oklch(0.14_0.013_280)] border-none px-4 py-2.5 text-[13px] font-body
-                    text-white/80 outline-none w-44 tracking-widest placeholder:tracking-normal placeholder:text-white/20"
+                    text-white/80 outline-none w-44 tracking-widest placeholder:tracking-normal placeholder:text-white/60"
                 />
                 <button
                   onClick={() => joinRoom()}
@@ -521,7 +521,7 @@ export default function TogetherPage() {
             {/* Left: Chat + Room info */}
             <div className="flex-1 min-w-0">
               <div className="rounded-2xl p-5 mb-4 border border-white/[0.1]"
-                style={{ background: "oklch(0.10 0.055 280)" }}>
+                style={{ background: "oklch(0.115 0.055 278)" }}>
                 {/* Room header */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -532,8 +532,8 @@ export default function TogetherPage() {
                       {state.room.code}
                     </span>
                     {isHost && (
-                      <span className="text-[10px] font-heading tracking-widest text-[#E8C547]/70 px-2 py-0.5 rounded
-                        bg-[#E8C547]/10 border border-[#E8C547]/20">HOST</span>
+                      <span className="text-[10px] font-heading tracking-widest text-[#D4AF37]/70 px-2 py-0.5 rounded
+                        bg-[#D4AF37]/10 border border-[#D4AF37]/20">HOST</span>
                     )}
                   </div>
                   <div className="flex gap-2">
@@ -551,7 +551,7 @@ export default function TogetherPage() {
                 </div>
 
                 {/* Listeners */}
-                <div className="text-[10px] font-heading tracking-[0.12em] uppercase text-white/25 mb-2">Listeners</div>
+                <div className="text-[10px] font-heading tracking-[0.12em] uppercase text-white/65 mb-2">Listeners</div>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {state.room.listeners.map((l, i) => (
                     <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[12px] font-body text-white/70"
@@ -570,13 +570,13 @@ export default function TogetherPage() {
                   className="rounded-xl p-4 max-h-[200px] overflow-y-auto flex flex-col gap-2 mb-3"
                   style={{ background: "oklch(0.11 0.05 270)" }}>
                   {messages.length === 0 && (
-                    <div className="text-[12px] text-white/20 text-center font-body py-4">
+                    <div className="text-[12px] text-white/60 text-center font-body py-4">
                       The sanctuary awaits… say something 🎵
                     </div>
                   )}
                   {messages.map((msg, i) => (
                     <div key={i} className="flex gap-2 text-[13px]">
-                      <span className={`font-medium flex-shrink-0 ${msg.isOwn ? "text-[#E8C547]" : msg.isJukebox ? "text-[#E8C547]/70" : "text-[#A78BFA]"}`}>
+                      <span className={`font-medium flex-shrink-0 ${msg.isOwn ? "text-[#D4AF37]" : msg.isJukebox ? "text-[#D4AF37]/70" : "text-[#A78BFA]"}`}>
                         {msg.user}
                       </span>
                       <span className={`font-body ${msg.isJukebox ? "text-white/60 italic" : "text-white/50"}`}>{msg.text}</span>
@@ -592,7 +592,7 @@ export default function TogetherPage() {
                     placeholder="Say something…"
                     className="flex-1 bg-[oklch(0.11_0.012_280)] border border-white/[0.08] rounded-lg
                       px-3.5 py-2 text-[13px] font-body text-white/80 outline-none
-                      focus:border-[#A78BFA]/40 transition-colors placeholder:text-white/20"
+                      focus:border-[#A78BFA]/40 transition-colors placeholder:text-white/60"
                   />
                   <button onClick={sendChat}
                     className="px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08]
@@ -625,12 +625,12 @@ export default function TogetherPage() {
                 onClick={() => setShowBrowser(true)}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium
                   text-black transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(232,197,71,0.25)]"
-                style={{ background: "linear-gradient(135deg, #E8C547, #C9A84C)" }}
+                style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
               >
                 <DollarSign size={14} />
                 Tip a Song into the Queue
               </button>
-              <p className="text-[11px] text-white/25 font-body text-center mt-2">
+              <p className="text-[11px] text-white/65 font-body text-center mt-2">
                 $1 minimum · tip goes to the creator
               </p>
             </div>
@@ -648,7 +648,7 @@ export default function TogetherPage() {
                   onClick={() => joinRoom(room.code)}
                   className="rounded-xl overflow-hidden border border-white/[0.07] cursor-pointer
                     hover:border-[#A78BFA]/30 hover:-translate-y-1 transition-all group"
-                  style={{ background: "oklch(0.10 0.055 280)" }}
+                  style={{ background: "oklch(0.115 0.055 278)" }}
                 >
                   <div className="aspect-video relative flex items-center justify-center text-5xl"
                     style={{ background: "linear-gradient(135deg,#1a0a3e,#0a1a3e)" }}>
@@ -660,11 +660,11 @@ export default function TogetherPage() {
                   </div>
                   <div className="p-3">
                     <div className="text-[13px] font-heading text-white/80 tracking-wide mb-1">{room.name}</div>
-                    <div className="text-[11px] text-white/35 font-body">
+                    <div className="text-[11px] text-white/75 font-body">
                       {room.listeners} listening · {room.track}
                     </div>
                     <div className="mt-2">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/30 font-body tracking-widest">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 font-body tracking-widest">
                         {room.code}
                       </span>
                     </div>

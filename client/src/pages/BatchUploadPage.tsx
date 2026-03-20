@@ -93,7 +93,7 @@ export default function BatchUploadPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Sign in to upload music</p>
-        <Button onClick={() => { window.location.href = getLoginUrl("/batch-upload"); }} style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.02 280)" }}>
+        <Button onClick={() => { window.location.href = getLoginUrl("/batch-upload"); }} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.02 280)" }}>
           Sign In
         </Button>
       </div>
@@ -238,8 +238,8 @@ export default function BatchUploadPage() {
 
       {uploadDone ? (
         // ── Success state ──────────────────────────────────────────────────
-        <div className="rounded-2xl p-10 text-center" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.75 0.18 85 / 0.3)" }}>
-          <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: "oklch(0.75 0.18 85)" }} />
+        <div className="rounded-2xl p-10 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.75 0.18 85 / 0.3)" }}>
+          <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: "oklch(0.84 0.155 85)" }} />
           <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
             Album Published
           </h2>
@@ -250,12 +250,12 @@ export default function BatchUploadPage() {
             {tracks.filter(t => t.status === "done").map(t => (
               <div key={t.id} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "oklch(0.14 0.04 280)" }}>
                 <span className="text-sm truncate" style={{ color: "oklch(0.8 0.02 85)" }}>{t.title}</span>
-                {t.wid && <Badge className="ml-2 shrink-0 text-xs" style={{ background: "oklch(0.75 0.18 85 / 0.2)", color: "oklch(0.75 0.18 85)", fontSize: "9px" }}>{t.wid.slice(0, 18)}…</Badge>}
+                {t.wid && <Badge className="ml-2 shrink-0 text-xs" style={{ background: "oklch(0.75 0.18 85 / 0.2)", color: "oklch(0.84 0.155 85)", fontSize: "9px" }}>{t.wid.slice(0, 18)}…</Badge>}
               </div>
             ))}
           </div>
           <div className="flex gap-3 justify-center">
-            <Button onClick={() => navigate("/archive")} style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.02 280)" }}>
+            <Button onClick={() => navigate("/archive")} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.02 280)" }}>
               View Archive <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
             <Button variant="outline" onClick={() => { setTracks([]); setAlbumName(""); setGenre(""); setCoverFile(null); setCoverPreview(null); setUploadDone(false); }} style={{ borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.7 0.04 280)" }}>
@@ -275,11 +275,11 @@ export default function BatchUploadPage() {
               onClick={() => fileInputRef.current?.click()}
               className="rounded-xl p-8 text-center cursor-pointer transition-all"
               style={{
-                background: isDragging ? "oklch(0.14 0.06 280)" : "oklch(0.10 0.055 280)",
-                border: `2px dashed ${isDragging ? "oklch(0.75 0.18 85)" : "oklch(0.25 0.02 280)"}`,
+                background: isDragging ? "oklch(0.14 0.06 280)" : "oklch(0.115 0.055 278)",
+                border: `2px dashed ${isDragging ? "oklch(0.84 0.155 85)" : "oklch(0.25 0.02 280)"}`,
               }}
             >
-              <Upload className="w-10 h-10 mx-auto mb-3" style={{ color: isDragging ? "oklch(0.75 0.18 85)" : "oklch(0.4 0.03 280)" }} />
+              <Upload className="w-10 h-10 mx-auto mb-3" style={{ color: isDragging ? "oklch(0.84 0.155 85)" : "oklch(0.4 0.03 280)" }} />
               <p className="font-semibold mb-1" style={{ color: "oklch(0.75 0.04 280)" }}>Drop audio files here</p>
               <p className="text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>MP3, WAV, FLAC, OGG, AAC, M4A — up to 50 tracks</p>
               <input ref={fileInputRef} type="file" multiple accept="audio/*" className="hidden" onChange={e => addFiles(Array.from(e.target.files || []))} />
@@ -311,9 +311,9 @@ export default function BatchUploadPage() {
                         ) : track.status === "ready" ? (
                           <CheckCircle className="w-4 h-4" style={{ color: "oklch(0.65 0.15 150)" }} />
                         ) : track.status === "uploading" ? (
-                          <Loader2 className="w-4 h-4 animate-spin" style={{ color: "oklch(0.75 0.18 85)" }} />
+                          <Loader2 className="w-4 h-4 animate-spin" style={{ color: "oklch(0.84 0.155 85)" }} />
                         ) : track.status === "done" ? (
-                          <CheckCircle className="w-4 h-4" style={{ color: "oklch(0.75 0.18 85)" }} />
+                          <CheckCircle className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
                         ) : (
                           <AlertCircle className="w-4 h-4" style={{ color: "oklch(0.65 0.18 25)" }} />
                         )}
@@ -331,7 +331,7 @@ export default function BatchUploadPage() {
 
                       {/* WID badge */}
                       {track.wid && (
-                        <Badge className="shrink-0 hidden sm:flex text-xs" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.75 0.18 85)", fontSize: "9px" }}>
+                        <Badge className="shrink-0 hidden sm:flex text-xs" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", fontSize: "9px" }}>
                           {track.wid.slice(0, 14)}…
                         </Badge>
                       )}
@@ -364,8 +364,8 @@ export default function BatchUploadPage() {
 
           {/* Right: Album metadata */}
           <div className="flex flex-col gap-4">
-            <div className="rounded-xl p-5" style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
-              <h2 className="text-sm font-bold mb-4 uppercase tracking-widest" style={{ color: "oklch(0.75 0.18 85)", fontFamily: "'Cinzel', serif" }}>
+            <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+              <h2 className="text-sm font-bold mb-4 uppercase tracking-widest" style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>
                 Album Details
               </h2>
 
@@ -431,7 +431,7 @@ export default function BatchUploadPage() {
                 onClick={handleSubmit}
                 disabled={isUploading || tracks.length === 0 || !albumName.trim() || hashingCount > 0}
                 className="w-full font-bold"
-                style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.02 280)" }}
+                style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.02 280)" }}
               >
                 {isUploading ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Uploading…</>

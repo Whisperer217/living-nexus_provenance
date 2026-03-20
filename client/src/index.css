@@ -63,28 +63,28 @@
   /* ── Divine Noir Palette — Deep Navy-Black with Purple Undertone ── */
   --void:   oklch(0.09 0.04 265);   /* deep navy-black base — visible blue-navy tint */
   --void-2: oklch(0.11 0.05 270);    /* sidebar / nav — slightly lighter navy */
-  --void-3: oklch(0.10 0.055 280);   /* cards / surfaces — clear purple undertone */
-  --void-4: oklch(0.15 0.05 275);    /* elevated / hover — noticeably lifted purple-navy */
+  --void-3: oklch(0.115 0.055 278);  /* cards / surfaces — bumped up for contrast #0d1520 */
+  --void-4: oklch(0.17 0.055 275);   /* elevated / hover — noticeably lifted purple-navy */
 
-  --gold:     oklch(0.82 0.14 85);  /* #E8C547 — divine radiance */
-  --gold-dim: oklch(0.68 0.12 80);  /* #C9A84C — muted gold */
+  --gold:     oklch(0.84 0.155 85);  /* #D4AF37 true gold — brighter, more luminous */
+  --gold-dim: oklch(0.72 0.13 82);   /* #D4AF37 — muted gold */
   --violet:     oklch(0.55 0.22 295); /* #7C3AED — sacred violet */
-  --violet-dim: oklch(0.68 0.18 295); /* #A78BFA — soft violet */
+  --violet-dim: oklch(0.70 0.18 295); /* #A78BFA — soft violet, slightly brighter */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
   --background: var(--void);
-  --foreground: oklch(0.94 0.006 280);
+  --foreground: oklch(1.0 0 0);       /* pure white #FFFFFF primary text */
   --card: var(--void-3);
-  --card-foreground: oklch(0.94 0.006 280);
+  --card-foreground: oklch(1.0 0 0);
   --popover: var(--void-2);
-  --popover-foreground: oklch(0.94 0.006 280);
+  --popover-foreground: oklch(1.0 0 0);
   --primary: var(--gold);
   --primary-foreground: oklch(0.08 0.01 280);
   --secondary: var(--void-4);
-  --secondary-foreground: oklch(0.82 0.006 280);
+  --secondary-foreground: oklch(0.92 0.006 280); /* #E2E8F0 minimum secondary */
   --muted: var(--void-3);
-  --muted-foreground: oklch(0.52 0.015 285);
+  --muted-foreground: oklch(0.72 0.015 285); /* bumped from 0.52 — much more readable */
   --accent: var(--violet-dim);
   --accent-foreground: oklch(0.08 0.01 280);
   --destructive: oklch(0.65 0.22 25);
@@ -100,12 +100,12 @@
   --chart-5: oklch(0.72 0.16 220);
 
   --sidebar: var(--void-2);
-  --sidebar-foreground: oklch(0.94 0.006 280);
+  --sidebar-foreground: oklch(1.0 0 0);
   --sidebar-primary: var(--gold);
   --sidebar-primary-foreground: oklch(0.08 0.01 280);
   --sidebar-accent: var(--void-4);
-  --sidebar-accent-foreground: oklch(0.94 0.006 280);
-  --sidebar-border: oklch(1 0 0 / 7%);
+  --sidebar-accent-foreground: oklch(1.0 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: var(--gold);
 }
 
@@ -171,7 +171,7 @@
 
   /* ── Gold gradient text ── */
   .text-gold-gradient {
-    background: linear-gradient(135deg, #E8C547, #C9A84C, #E8C547);
+    background: linear-gradient(135deg, #D4AF37, #D4AF37, #D4AF37);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -228,9 +228,13 @@
       0 -1px 8px oklch(0.82 0.14 85 / 0.08);
   }
 
-  /* ── WID badge ambient glow ── */
+  /* ── WID badge ambient glow — luminous gold/amber ── */
   .wid-glow {
-    box-shadow: 0 0 10px 1px oklch(0.68 0.18 295 / 0.35), 0 0 4px oklch(0.82 0.14 85 / 0.20);
+    box-shadow:
+      0 0 14px 3px oklch(0.84 0.155 85 / 0.45),
+      0 0 6px 1px oklch(0.84 0.155 85 / 0.30),
+      0 0 28px 6px oklch(0.68 0.18 295 / 0.20);
+    border-color: oklch(0.84 0.155 85 / 0.55) !important;
   }
 
   /* ── Track card ambient glow on hover ── */
@@ -312,11 +316,66 @@
     100% { background-position: 200% center; }
   }
   .gold-shimmer {
-    background: linear-gradient(90deg, #C9A84C, #E8C547, #F5D77A, #E8C547, #C9A84C);
+    background: linear-gradient(90deg, #D4AF37, #D4AF37, #F5D77A, #D4AF37, #D4AF37);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: goldShimmer 4s linear infinite;
+  }
+
+  /* ── Cosmic cathedral background — deep navy with purple/teal radial glow ── */
+  .cosmic-bg {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%,
+        oklch(0.18 0.08 290 / 0.35) 0%,
+        oklch(0.12 0.06 280 / 0.20) 40%,
+        transparent 70%
+      ),
+      radial-gradient(ellipse 60% 40% at 50% 100%,
+        oklch(0.14 0.06 200 / 0.20) 0%,
+        oklch(0.10 0.04 220 / 0.12) 50%,
+        transparent 80%
+      ),
+      oklch(0.09 0.04 265);
+  }
+
+  /* ── CTA button glow ── */
+  .btn-gold-glow {
+    box-shadow: 0 0 0 0 oklch(0.84 0.155 85 / 0);
+    transition: box-shadow 0.25s ease, transform 0.15s ease;
+  }
+  .btn-gold-glow:hover {
+    box-shadow:
+      0 0 18px 4px oklch(0.84 0.155 85 / 0.35),
+      0 4px 16px oklch(0.84 0.155 85 / 0.20);
+    transform: translateY(-1px);
+  }
+  .btn-violet-glow {
+    box-shadow: 0 0 0 0 oklch(0.55 0.22 295 / 0);
+    transition: box-shadow 0.25s ease, transform 0.15s ease;
+  }
+  .btn-violet-glow:hover {
+    box-shadow:
+      0 0 18px 4px oklch(0.55 0.22 295 / 0.35),
+      0 4px 16px oklch(0.68 0.18 295 / 0.20);
+    transform: translateY(-1px);
+  }
+
+  /* ── Genre pill ── */
+  .genre-pill {
+    border: 1px solid oklch(0.84 0.155 85 / 0.30);
+    color: oklch(0.90 0.04 280);
+    background: oklch(0.84 0.155 85 / 0.07);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .genre-pill:hover, .genre-pill.active {
+    border-color: oklch(0.84 0.155 85 / 0.65);
+    color: oklch(0.84 0.155 85);
+    background: oklch(0.84 0.155 85 / 0.12);
   }
 }

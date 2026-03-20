@@ -142,13 +142,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-[13.5px] transition-all duration-150 rounded-none
                         ${sidebarOpen ? "" : "justify-center px-0"}
                         ${active
-                          ? "bg-white/[0.06] text-[oklch(0.94_0.006_280)] border-r-2 border-[#E8C547]"
+                          ? "bg-white/[0.06] text-[oklch(0.94_0.006_280)] border-r-2 border-[#D4AF37]"
                           : "text-white/40 hover:bg-white/[0.04] hover:text-white/80"
                         }`}
                     >
                       <Icon
                         size={15}
-                        className={`flex-shrink-0 ${active ? "text-[#E8C547]" : "opacity-60"}`}
+                        className={`flex-shrink-0 ${active ? "text-[#D4AF37]" : "opacity-60"}`}
                       />
                       {sidebarOpen && (
                         <>
@@ -228,7 +228,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </div>
           <button
             onClick={() => setQrOpen(o => !o)}
-            className="p-2 rounded-lg text-white/40 hover:text-[#E8C547] transition-all"
+            className="p-2 rounded-lg text-white/40 hover:text-[#D4AF37] transition-all"
           >
             <ChevronRight size={16} className={`transition-transform ${qrOpen ? "rotate-180" : ""}`} />
           </button>
@@ -252,9 +252,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         key={item.path}
                         onClick={() => goTo(item.path)}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-[14px] transition-all
-                          ${active ? "bg-white/[0.06] text-white border-r-2 border-[#E8C547]" : "text-white/50 hover:text-white hover:bg-white/[0.04]"}`}
+                          ${active ? "bg-white/[0.06] text-white border-r-2 border-[#D4AF37]" : "text-white/50 hover:text-white hover:bg-white/[0.04]"}`}
                       >
-                        <Icon size={16} className={active ? "text-[#E8C547]" : "opacity-60"} />
+                        <Icon size={16} className={active ? "text-[#D4AF37]" : "opacity-60"} />
                         <span className="font-body">{item.label}</span>
                         {item.badge && (
                           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 ml-auto">

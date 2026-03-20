@@ -58,7 +58,7 @@ export default function TrackPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Music size={40} className="text-white/15" />
-        <p className="text-white/30 font-body text-[14px]">Track not found</p>
+        <p className="text-white/70 font-body text-[14px]">Track not found</p>
         <button onClick={() => navigate("/")} className="text-[#A78BFA] text-[13px] hover:underline">
           ← Back to Home
         </button>
@@ -130,7 +130,7 @@ export default function TrackPage() {
       {/* ── Back button ── */}
       <button
         onClick={() => navigate(-1 as any)}
-        className="flex items-center gap-1.5 text-[12px] font-body text-white/30 hover:text-white/60 mb-5 transition-colors"
+        className="flex items-center gap-1.5 text-[12px] font-body text-white/70 hover:text-white/60 mb-5 transition-colors"
       >
         <ArrowLeft size={14} /> Back
       </button>
@@ -151,7 +151,7 @@ export default function TrackPage() {
           <button
             onClick={handlePlay}
             className="absolute bottom-4 left-4 w-12 h-12 rounded-full flex items-center justify-center
-              bg-[#E8C547] hover:bg-[#E8C547]/90 active:scale-95 transition-all shadow-lg shadow-[#E8C547]/20"
+              bg-[#D4AF37] hover:bg-[#D4AF37]/90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20"
           >
             {isPlaying
               ? <Pause size={20} className="text-black" />
@@ -177,11 +177,11 @@ export default function TrackPage() {
 
           {/* Stats row */}
           <div className="flex items-center gap-4 mb-4">
-            <div className="flex items-center gap-1.5 text-[12px] text-white/30 font-body">
+            <div className="flex items-center gap-1.5 text-[12px] text-white/70 font-body">
               <TrendingUp size={12} />
               <span>{(track.plays || 0).toLocaleString()} plays</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[12px] text-white/30 font-body">
+            <div className="flex items-center gap-1.5 text-[12px] text-white/70 font-body">
               <MessageCircle size={12} />
               <span>{comments.length} comments</span>
             </div>
@@ -192,7 +192,7 @@ export default function TrackPage() {
               </div>
             )}
             {track.dur && (
-              <div className="text-[12px] text-white/25 font-body ml-auto">{track.dur}</div>
+              <div className="text-[12px] text-white/65 font-body ml-auto">{track.dur}</div>
             )}
           </div>
 
@@ -250,7 +250,7 @@ export default function TrackPage() {
             <button
               onClick={copyLink}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-body transition-all border
-                bg-white/[0.04] border-white/[0.08] text-white/40 hover:border-[#E8C547]/30 hover:text-[#E8C547]"
+                bg-white/[0.04] border-white/[0.08] text-white/40 hover:border-[#D4AF37]/30 hover:text-[#D4AF37]"
             >
               <Link2 size={13} /> Copy Link
             </button>
@@ -261,7 +261,7 @@ export default function TrackPage() {
       {/* ── Unique Track URL ── */}
       <div className="rounded-xl border border-white/[0.07] bg-[oklch(0.12_0.012_280)] p-3 mb-5 flex items-center gap-3">
         <Link2 size={14} className="text-[#A78BFA]/60 flex-shrink-0" />
-        <span className="flex-1 text-[11px] font-body text-white/30 truncate">{trackUrl}</span>
+        <span className="flex-1 text-[11px] font-body text-white/70 truncate">{trackUrl}</span>
         <button
           onClick={copyLink}
           className="flex-shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-body transition-all
@@ -272,15 +272,15 @@ export default function TrackPage() {
       </div>
 
       {/* ── Tip Jar ── */}
-      <div className="rounded-2xl border border-[#E8C547]/20 bg-[oklch(0.11_0.012_280)] p-5 mb-5">
+      <div className="rounded-2xl border border-[#D4AF37]/20 bg-[oklch(0.11_0.012_280)] p-5 mb-5">
         <div className="flex items-center gap-2 mb-2">
-          <DollarSign size={15} className="text-[#E8C547]" />
-          <span className="font-heading text-[13px] tracking-wider text-[#E8C547]">Tip the Artist</span>
+          <DollarSign size={15} className="text-[#D4AF37]" />
+          <span className="font-heading text-[13px] tracking-wider text-[#D4AF37]">Tip the Artist</span>
           {tipTotal > 0 && (
             <span className="ml-auto text-[11px] font-body text-[#4ade80]/70">${tipTotal} raised</span>
           )}
         </div>
-        <p className="text-[12px] text-white/35 font-body mb-4">
+        <p className="text-[12px] text-white/75 font-body mb-4">
           Love this track? Show {track.artist} some love directly.
         </p>
         <div className="grid grid-cols-5 gap-2 mb-3">
@@ -290,8 +290,8 @@ export default function TrackPage() {
               onClick={() => { setTipSelected(amt); setCustomTip(""); }}
               className={`py-2 rounded-xl text-[12px] font-heading transition-all border
                 ${tipSelected === amt
-                  ? "bg-[#E8C547]/15 border-[#E8C547] text-[#E8C547]"
-                  : "bg-[oklch(0.14_0.013_280)] border-white/[0.08] text-white/45 hover:border-[#E8C547]/40 hover:text-[#E8C547]"
+                  ? "bg-[#D4AF37]/15 border-[#D4AF37] text-[#D4AF37]"
+                  : "bg-[oklch(0.14_0.013_280)] border-white/[0.08] text-white/45 hover:border-[#D4AF37]/40 hover:text-[#D4AF37]"
                 }`}
             >
               ${amt}
@@ -306,13 +306,13 @@ export default function TrackPage() {
             onChange={e => { setCustomTip(e.target.value); setTipSelected(null); }}
             className="flex-1 px-3 py-2 rounded-xl text-[12px] font-body text-white/70
               bg-[oklch(0.14_0.013_280)] border border-white/[0.08] outline-none
-              focus:border-[#E8C547]/50 placeholder:text-white/20"
+              focus:border-[#D4AF37]/50 placeholder:text-white/60"
           />
           <button
             onClick={sendTip}
             className="px-4 py-2 rounded-xl font-heading text-[12px] tracking-wider transition-all
-              bg-[#E8C547]/10 border border-[#E8C547]/30 text-[#E8C547]
-              hover:bg-[#E8C547]/20 hover:border-[#E8C547]/60 active:scale-[0.98]"
+              bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37]
+              hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 active:scale-[0.98]"
           >
             Send ✦
           </button>
@@ -324,7 +324,7 @@ export default function TrackPage() {
         <div className="flex items-center gap-2 mb-4">
           <MessageCircle size={15} className="text-[#A78BFA]" />
           <span className="font-heading text-[13px] tracking-wider text-white/70">
-            Comments <span className="text-white/25">({comments.length})</span>
+            Comments <span className="text-white/65">({comments.length})</span>
           </span>
         </div>
 
@@ -336,7 +336,7 @@ export default function TrackPage() {
             placeholder="Your name"
             className="w-full px-3 py-2 rounded-xl text-[12px] font-body text-white/70
               bg-[oklch(0.14_0.013_280)] border border-white/[0.08] outline-none
-              focus:border-[#A78BFA]/50 placeholder:text-white/20"
+              focus:border-[#A78BFA]/50 placeholder:text-white/60"
           />
           <div className="flex gap-2">
             <textarea
@@ -347,7 +347,7 @@ export default function TrackPage() {
               onKeyDown={e => { if (e.key === "Enter" && e.metaKey) submitComment(); }}
               className="flex-1 px-3 py-2 rounded-xl text-[12px] font-body text-white/70
                 bg-[oklch(0.14_0.013_280)] border border-white/[0.08] outline-none resize-none
-                focus:border-[#A78BFA]/50 placeholder:text-white/20"
+                focus:border-[#A78BFA]/50 placeholder:text-white/60"
             />
             <button
               onClick={submitComment}
@@ -358,12 +358,12 @@ export default function TrackPage() {
               Post
             </button>
           </div>
-          <p className="text-[10px] text-white/20 font-body">⌘ + Enter to post</p>
+          <p className="text-[10px] text-white/60 font-body">⌘ + Enter to post</p>
         </div>
 
         {/* Comment list */}
         {comments.length === 0 ? (
-          <div className="text-center py-8 text-white/20 font-body text-[12px]">
+          <div className="text-center py-8 text-white/60 font-body text-[12px]">
             Be the first to comment on this track ✦
           </div>
         ) : (
@@ -377,7 +377,7 @@ export default function TrackPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 mb-0.5">
                     <span className="text-[12px] font-body text-white/70">{c.author}</span>
-                    <span className="text-[10px] font-body text-white/20">{timeAgo(c.timestamp)}</span>
+                    <span className="text-[10px] font-body text-white/60">{timeAgo(c.timestamp)}</span>
                   </div>
                   <p className="text-[13px] font-body text-white/55 leading-relaxed">{c.text}</p>
                 </div>

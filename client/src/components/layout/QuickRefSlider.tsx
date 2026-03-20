@@ -21,7 +21,7 @@ export default function QuickRefSlider({ open, onToggle, summary }: Props) {
         className={`fixed left-0 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center
           w-5 h-16 rounded-r-lg transition-all duration-300
           bg-[oklch(0.14_0.013_280)] border border-l-0 border-white/[0.1]
-          text-white/30 hover:text-[#E8C547] hover:border-[#E8C547]/30
+          text-white/30 hover:text-[#D4AF37] hover:border-[#D4AF37]/30
           ${open ? "translate-x-[180px]" : "translate-x-0"}`}
         title="Quick Reference"
       >
@@ -43,14 +43,14 @@ export default function QuickRefSlider({ open, onToggle, summary }: Props) {
           <div className="text-[9px] font-heading tracking-[0.18em] uppercase text-white/25 mb-1">
             Quick Reference
           </div>
-          <div className="text-[13px] font-heading text-[#E8C547]">{summary.title}</div>
+          <div className="text-[13px] font-heading text-[#D4AF37]">{summary.title}</div>
         </div>
 
         {/* Points */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
           {summary.points.map((point, i) => (
             <div key={i} className="flex items-start gap-2">
-              <div className="w-1 h-1 rounded-full bg-[#E8C547]/40 mt-1.5 flex-shrink-0" />
+              <div className="w-1 h-1 rounded-full bg-[#D4AF37]/40 mt-1.5 flex-shrink-0" />
               <span className="text-[12px] font-body text-white/50 leading-relaxed">{point}</span>
             </div>
           ))}

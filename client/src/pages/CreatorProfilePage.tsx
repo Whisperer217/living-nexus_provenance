@@ -96,14 +96,14 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
           <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, oklch(0.14 0.02 280), oklch(0.18 0.04 300))" }}>
-            <Music className="w-10 h-10 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
+            <Music className="w-10 h-10 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
           </div>
         )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center">
           <button
             onClick={(e) => { e.preventDefault(); onPlay(); }}
             className="w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100"
-            style={{ background: "oklch(0.75 0.18 85)" }}
+            style={{ background: "oklch(0.84 0.155 85)" }}
           >
             {isPlaying
               ? <Pause className="w-5 h-5" style={{ color: "oklch(0.08 0.015 280)" }} />
@@ -165,23 +165,23 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           {isPlaying ? (
             <div className="flex gap-0.5 items-end h-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="w-0.5 rounded-full animate-pulse" style={{ height: `${8 + i * 3}px`, background: "oklch(0.75 0.18 85)", animationDelay: `${i * 0.1}s` }} />
+                <div key={i} className="w-0.5 rounded-full animate-pulse" style={{ height: `${8 + i * 3}px`, background: "oklch(0.84 0.155 85)", animationDelay: `${i * 0.1}s` }} />
               ))}
             </div>
           ) : (
             <>
-              <span className="text-xs group-hover:hidden" style={{ color: "oklch(0.45 0.03 280)" }}>{index + 1}</span>
-              <Play className="w-3.5 h-3.5 hidden group-hover:block" style={{ color: "oklch(0.75 0.18 85)" }} />
+              <span className="text-xs group-hover:hidden" style={{ color: "#E2E8F0" }}>{index + 1}</span>
+              <Play className="w-3.5 h-3.5 hidden group-hover:block" style={{ color: "oklch(0.84 0.155 85)" }} />
             </>
           )}
         </div>
         <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
           {song.coverArtUrl
             ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
-            : <Music className="w-4 h-4 opacity-30" style={{ color: "oklch(0.75 0.18 85)" }} />}
+            : <Music className="w-4 h-4 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate" style={{ color: isPlaying ? "oklch(0.75 0.18 85)" : "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+          <p className="text-sm font-medium truncate" style={{ color: isPlaying ? "oklch(0.84 0.155 85)" : "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             {song.genre && <span className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{song.genre}</span>}
             {song.witnessId && (
@@ -191,12 +191,12 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
             )}
           </div>
         </div>
-        <div className="hidden sm:flex items-center gap-4 text-xs" style={{ color: "oklch(0.45 0.03 280)" }}>
+        <div className="hidden sm:flex items-center gap-4 text-xs" style={{ color: "#E2E8F0" }}>
           <span className="flex items-center gap-1"><Headphones className="w-3 h-3" /> {song.playCount || 0}</span>
           <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {song.tipCount || 0}</span>
         </div>
         {song.durationSeconds && (
-          <span className="hidden sm:block text-xs font-mono" style={{ color: "oklch(0.45 0.03 280)" }}>
+          <span className="hidden sm:block text-xs font-mono" style={{ color: "#E2E8F0" }}>
             {Math.floor(song.durationSeconds / 60)}:{String(Math.round(song.durationSeconds % 60)).padStart(2, "0")}
           </span>
         )}
@@ -309,7 +309,7 @@ export default function CreatorProfilePage() {
       <div className="text-center">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Creator not found.</p>
         <Link href="/">
-          <Button className="mt-4" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>Go Home</Button>
+          <Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Go Home</Button>
         </Link>
       </div>
     </div>
@@ -381,7 +381,7 @@ export default function CreatorProfilePage() {
           >
             {creator.profilePhotoUrl
               ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover" />
-              : <span style={{ color: "oklch(0.75 0.18 85)" }}>{(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}</span>}
+              : <span style={{ color: "oklch(0.84 0.155 85)" }}>{(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}</span>}
           </div>
 
           {/* Name + meta */}
@@ -394,29 +394,29 @@ export default function CreatorProfilePage() {
             )}
             <div className="flex flex-wrap gap-3 mt-2">
               {creator.website && (
-                <a href={creator.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "oklch(0.55 0.04 280)" }}>
+                <a href={creator.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                   <Globe className="w-3 h-3" />{creator.website.replace(/^https?:\/\//, "")}
                 </a>
               )}
               {creator.twitterHandle && (
-                <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "oklch(0.55 0.04 280)" }}>
+                <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                   <Twitter className="w-3 h-3" />@{creator.twitterHandle}
                 </a>
               )}
               {creator.instagramHandle && (
-                <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "oklch(0.55 0.04 280)" }}>
+                <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                   <Instagram className="w-3 h-3" />@{creator.instagramHandle}
                 </a>
               )}
               {creator.youtubeHandle && (
-                <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "oklch(0.55 0.04 280)" }}>
+                <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                   <Youtube className="w-3 h-3" />@{creator.youtubeHandle}
                 </a>
               )}
             </div>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {creator.licenseStatus === "licensed" && (
-                <Badge style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.75 0.18 85)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", fontSize: "10px" }}>
+                <Badge style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", fontSize: "10px" }}>
                   LICENSED CREATOR
                 </Badge>
               )}
@@ -449,7 +449,7 @@ export default function CreatorProfilePage() {
                 )}
               </>
             ) : tipsEnabled && songs.length > 0 ? (
-              <Button size="sm" onClick={() => setTipOpen(true)} style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+              <Button size="sm" onClick={() => setTipOpen(true)} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
                 <DollarSign className="w-3.5 h-3.5 mr-1" /> Tip Artist
               </Button>
             ) : null}
@@ -473,7 +473,7 @@ export default function CreatorProfilePage() {
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-1">
-                <Icon className="w-3.5 h-3.5 opacity-50" style={{ color: "oklch(0.75 0.18 85)" }} />
+                <Icon className="w-3.5 h-3.5 opacity-50" style={{ color: "oklch(0.84 0.155 85)" }} />
                 <span className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{label}</span>
               </div>
               <p className="text-xl font-bold" style={{ fontFamily: "'Orbitron', monospace", color: "oklch(0.9 0.02 85)" }}>{value}</p>
@@ -524,7 +524,7 @@ export default function CreatorProfilePage() {
                         <img src={albumSongs[0].coverArtUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
                       ) : (
                         <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.75 0.18 85 / 0.15)" }}>
-                          <Music className="w-6 h-6" style={{ color: "oklch(0.75 0.18 85)" }} />
+                          <Music className="w-6 h-6" style={{ color: "oklch(0.84 0.155 85)" }} />
                         </div>
                       )}
                       <div>
@@ -576,11 +576,11 @@ export default function CreatorProfilePage() {
 
         {songs.length === 0 && (
           <div className="text-center py-24">
-            <Music className="w-16 h-16 mx-auto mb-4 opacity-10" style={{ color: "oklch(0.75 0.18 85)" }} />
+            <Music className="w-16 h-16 mx-auto mb-4 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />
             <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>No public songs yet.</p>
             {isOwner && (
               <Link href="/upload">
-                <Button className="mt-4" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+                <Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
                   Upload Your First Track
                 </Button>
               </Link>
@@ -608,7 +608,7 @@ export default function CreatorProfilePage() {
                   onClick={() => setTipAmount(amt)}
                   className="py-2 rounded-lg text-sm font-medium transition-all"
                   style={{
-                    background: tipAmount === amt ? "oklch(0.75 0.18 85)" : "oklch(0.11 0.025 270)",
+                    background: tipAmount === amt ? "oklch(0.84 0.155 85)" : "oklch(0.11 0.025 270)",
                     color: tipAmount === amt ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)",
                     border: "1px solid oklch(0.25 0.02 280)",
                   }}
@@ -630,7 +630,7 @@ export default function CreatorProfilePage() {
               className="w-full"
               onClick={handleTip}
               disabled={tipMutation.isPending}
-              style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
             >
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Tip`}
             </Button>

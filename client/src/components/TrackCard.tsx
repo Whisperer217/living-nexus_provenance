@@ -34,7 +34,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
       className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
         border bg-[oklch(0.095_0.028_275)] track-card-glow
         ${isActive
-          ? "border-[#E8C547]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
+          ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
           : "border-white/[0.05] hover:border-[#A78BFA]/30"
         }`}
       onClick={() => playTrack(index)}
@@ -62,7 +62,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
         {/* Play button */}
         <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
           transition-all duration-200 z-10
-          ${isActive ? "opacity-100 bg-[#E8C547]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+          ${isActive ? "opacity-100 bg-[#D4AF37]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
         >
           {isPlaying
             ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
@@ -73,7 +73,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
         {/* Badge */}
         {track.isOwn && (
           <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
-            bg-black/70 text-[#E8C547] border border-[#E8C547]/30 z-10 font-heading tracking-wider">
+            bg-black/70 text-[#D4AF37] border border-[#D4AF37]/30 z-10 font-heading tracking-wider">
             YOURS
           </div>
         )}
@@ -84,7 +84,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
         <div className="text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide">
           {track.title}
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-white/35">
+        <div className="flex items-center gap-2 text-[11px] text-white/75">
           <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold
             bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
             {track.artist.charAt(0)}
@@ -92,13 +92,13 @@ export default function TrackCard({ track, index, onTip }: Props) {
           <span className="truncate">{track.artist}</span>
         </div>
         <div className="flex items-center justify-between mt-2">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/30 font-body">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 font-body">
             {track.genre}
           </span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={e => toggleLike(e)}
-              className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-white/30 hover:text-pink-400"}`}
+              className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-white/70 hover:text-pink-400"}`}
               title={isLiked ? "Unlike" : "Like"}
             >
               <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
@@ -109,14 +109,14 @@ export default function TrackCard({ track, index, onTip }: Props) {
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(index); }}
-                className="p-1 text-white/30 hover:text-[#E8C547] transition-colors"
+                className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
               >
                 <DollarSign size={12} />
               </button>
             )}
             <button
               onClick={e => { e.stopPropagation(); navigate(`/track/${track.id}`); }}
-              className="p-1 text-white/30 hover:text-[#A78BFA] transition-colors"
+              className="p-1 text-white/70 hover:text-[#A78BFA] transition-colors"
               title="Open track page"
             >
               <ExternalLink size={12} />

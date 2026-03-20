@@ -37,7 +37,7 @@ export default function HomePage() {
   const tipTrack = tipTarget !== null ? tracks[tipTarget] : null;
 
   return (
-    <div className="animate-fade-up">
+    <div className="animate-fade-up cosmic-bg min-h-screen">
       {/* ── Hero Banner ── */}
       <div className="relative h-[220px] overflow-hidden">
         <img
@@ -51,13 +51,13 @@ export default function HomePage() {
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 90% 70% at 50% 50%, transparent 0%, oklch(0.09 0.04 265 / 0.4) 40%, oklch(0.07 0.08 290 / 0.75) 100%)" }} />
         <div className="absolute inset-0 flex flex-col justify-end px-6 pb-6">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles size={14} className="text-[#E8C547]" />
-            <span className="text-[10px] font-heading tracking-[0.2em] uppercase text-[#E8C547]">
+            <Sparkles size={14} className="text-[#D4AF37]" />
+            <span className="text-[10px] font-heading tracking-[0.2em] uppercase text-[#D4AF37]">
               Featured Today
             </span>
           </div>
           <h1 className="font-display text-3xl gold-shimmer mb-1">Living Nexus</h1>
-          <p className="text-[13px] text-white/50 font-body max-w-[380px]">
+          <p className="text-[13px] font-body max-w-[380px]" style={{ color: "#E2E8F0" }}>
             Where divine sound meets the cosmos. Discover, share, and ascend.
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function HomePage() {
       <div className="px-6 py-5">
         {/* ── Genre icon cards ── */}
         <div className="mb-7">
-          <h2 className="font-heading text-[13px] tracking-[0.14em] uppercase text-white/30 mb-3">Browse Genres</h2>
+          <h2 className="font-heading text-[13px] tracking-[0.14em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.65)" }}>Browse Genres</h2>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
             {GENRE_CARDS.map(g => (
               <button
@@ -74,7 +74,7 @@ export default function HomePage() {
                 onClick={() => setActiveGenre(g.label)}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
                   ${activeGenre === g.label
-                    ? "border-[#E8C547]/40 bg-[#E8C547]/[0.07]"
+                    ? "border-[#D4AF37]/40 bg-[#D4AF37]/[0.07]"
                     : "border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.14] hover:bg-white/[0.04]"
                   }`}
               >
@@ -89,13 +89,13 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="w-10 h-10 flex items-center justify-center rounded-lg"
-                    style={{ background: "linear-gradient(135deg, #E8C547, #7C3AED)" }}>
+                    style={{ background: "linear-gradient(135deg, #D4AF37, #7C3AED)" }}>
                     <span className="text-[11px] font-heading font-bold text-black">ALL</span>
                   </div>
                 )}
                 <span
                   className="text-[10px] font-body truncate w-full text-center transition-colors"
-                  style={{ color: activeGenre === g.label ? g.color : "rgba(255,255,255,0.4)" }}
+                  style={{ color: activeGenre === g.label ? g.color : "rgba(255,255,255,0.75)" }}
                 >
                   {g.label}
                 </span>
@@ -106,10 +106,10 @@ export default function HomePage() {
 
         {/* ── Featured section ── */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading text-[16px] tracking-wider text-white/80">
+          <h2 className="font-heading text-[16px] tracking-wider text-white">
             {activeGenre === "All" ? "Discover Tracks" : activeGenre}
           </h2>
-          <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#E8C547] transition-colors font-body">
+          <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#D4AF37] transition-colors font-body">
             See all
           </span>
         </div>
@@ -131,7 +131,7 @@ export default function HomePage() {
           <>
             <div className="gold-divider mb-6" />
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-heading text-[16px] tracking-wider text-white/80">Trending Now</h2>
+              <h2 className="font-heading text-[16px] tracking-wider text-white">Trending Now</h2>
             </div>
             <div className="space-y-2">
               {tracks.slice(0, 5).map((track, i) => {
@@ -141,21 +141,21 @@ export default function HomePage() {
                   <div
                     key={track.id}
                     className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all group
-                      ${isActive ? "bg-white/[0.06] border border-[#E8C547]/20" : "hover:bg-white/[0.03] border border-transparent"}`}
+                      ${isActive ? "bg-white/[0.06] border border-[#D4AF37]/20" : "hover:bg-white/[0.03] border border-transparent"}`}
                     onClick={() => playTrack(idx)}
                   >
-                    <span className="text-[13px] font-heading text-white/20 w-5 text-center">{i + 1}</span>
+                    <span className="text-[13px] font-heading text-white/60 w-5 text-center">{i + 1}</span>
                     <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden rounded-lg"
                       style={{ background: "oklch(0.16 0.02 280)" }}>
                       {track.artUrl
                         ? <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center text-white/20 text-lg">🎵</div>}
+                        : <div className="w-full h-full flex items-center justify-center text-white/60 text-lg">🎵</div>}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-body text-white/80 truncate">{track.title}</div>
-                      <div className="text-[11px] text-white/30 truncate">{track.artist}</div>
+                    <div className="text-[13px] font-body text-white truncate">{track.title}</div>
+                    <div className="text-[11px] truncate" style={{ color: "#E2E8F0" }}>{track.artist}</div>
                     </div>
-                    <div className="text-[11px] text-white/20 font-body hidden sm:block">
+                    <div className="text-[11px] font-body hidden sm:block" style={{ color: "rgba(255,255,255,0.55)" }}>
                       {(track.plays || 0).toLocaleString()} plays
                     </div>
                   </div>

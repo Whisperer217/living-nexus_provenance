@@ -87,7 +87,7 @@ export default function ArchivePage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.09 0.04 265)" }}>
         <div className="w-8 h-8 rounded-full border-2 animate-spin"
-          style={{ borderColor: "oklch(0.75 0.18 85)", borderTopColor: "transparent" }} />
+          style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
       </div>
     );
   }
@@ -103,12 +103,12 @@ export default function ArchivePage() {
               style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
               My Archive
             </h1>
-            <p className="text-sm mt-1" style={{ color: "oklch(0.55 0.04 280)" }}>
+            <p className="text-sm mt-1" style={{ color: "#E2E8F0" }}>
               All tracks you have uploaded to Living Nexus
             </p>
           </div>
           <Link href="/upload">
-            <Button size="sm" style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+            <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
               <Upload className="w-3 h-3 mr-1" /> Upload New
             </Button>
           </Link>
@@ -116,7 +116,7 @@ export default function ArchivePage() {
 
         {/* ── Track count ────────────────────────────────────────── */}
         {!songsLoading && songs && (
-          <p className="text-xs mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>
+          <p className="text-xs mb-4" style={{ color: "#E2E8F0" }}>
             {songs.length} {songs.length === 1 ? "track" : "tracks"}
           </p>
         )}
@@ -126,7 +126,7 @@ export default function ArchivePage() {
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-16 rounded-xl animate-pulse"
-                style={{ background: "oklch(0.10 0.055 280)" }} />
+                style={{ background: "oklch(0.115 0.055 278)" }} />
             ))}
           </div>
         )}
@@ -134,13 +134,13 @@ export default function ArchivePage() {
         {/* ── Empty state ────────────────────────────────────────── */}
         {!songsLoading && (!songs || songs.length === 0) && (
           <div className="text-center py-20 rounded-xl"
-            style={{ background: "oklch(0.10 0.055 280)", border: "1px dashed oklch(0.25 0.02 280)" }}>
-            <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.18 85)" }} />
-            <p className="text-sm mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>
+            style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+            <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
+            <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>
               You have not uploaded any tracks yet.
             </p>
             <Link href="/upload">
-              <Button style={{ background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" }}>
+              <Button style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
                 Upload Your First Track
               </Button>
             </Link>
@@ -158,11 +158,11 @@ export default function ArchivePage() {
                 <Link key={song.id} href={`/song/${song.id}`}>
                   <div
                     className="flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-colors hover:brightness-110"
-                    style={{ background: "oklch(0.10 0.055 280)", border: "1px solid oklch(0.18 0.015 280)" }}
+                    style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}
                   >
                     {/* Row number */}
                     <span className="text-xs w-5 text-center flex-shrink-0"
-                      style={{ color: "oklch(0.45 0.03 280)" }}>
+                      style={{ color: "#E2E8F0" }}>
                       {idx + 1}
                     </span>
 
@@ -171,7 +171,7 @@ export default function ArchivePage() {
                       style={{ background: "oklch(0.11 0.025 270)" }}>
                       {song.coverArtUrl
                         ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
-                        : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.75 0.18 85)" }} />}
+                        : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
                     </div>
 
                     {/* Title + genre */}
@@ -181,7 +181,7 @@ export default function ArchivePage() {
                         {song.title}
                       </p>
                       {song.genre && (
-                        <p className="text-xs mt-0.5 truncate" style={{ color: "oklch(0.55 0.04 280)" }}>
+                        <p className="text-xs mt-0.5 truncate" style={{ color: "#E2E8F0" }}>
                           {song.genre}
                         </p>
                       )}
@@ -189,7 +189,7 @@ export default function ArchivePage() {
 
                     {/* Upload date */}
                     <span className="text-xs flex-shrink-0 hidden sm:block"
-                      style={{ color: "oklch(0.5 0.03 280)" }}>
+                      style={{ color: "#E2E8F0" }}>
                       {formatDate(song.createdAt)}
                     </span>
 
@@ -212,7 +212,7 @@ export default function ArchivePage() {
                           }
                         : {
                             background: "oklch(0.75 0.18 85 / 0.15)",
-                            color: "oklch(0.75 0.18 85)",
+                            color: "oklch(0.84 0.155 85)",
                             border: "1px solid oklch(0.75 0.18 85 / 0.35)",
                           }
                       }

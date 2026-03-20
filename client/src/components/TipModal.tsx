@@ -39,7 +39,7 @@ export default function TipModal({ track, onClose }: Props) {
       <div
         className="w-[380px] max-w-[90vw] rounded-2xl p-7 relative animate-fade-up"
         style={{
-          background: "oklch(0.10 0.055 280)",
+          background: "oklch(0.115 0.055 278)",
           border: "1px solid oklch(1 0 0 / 12%)",
           boxShadow: "0 24px 80px rgba(0,0,0,0.8)",
         }}
@@ -47,13 +47,13 @@ export default function TipModal({ track, onClose }: Props) {
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/[0.06] transition-all"
         >
           <X size={16} />
         </button>
 
         <div className="font-heading text-xl text-white/90 mb-1 tracking-wide">Support Artist</div>
-        <div className="text-[13px] text-white/35 mb-5 font-body">Send a tip to show your appreciation</div>
+        <div className="text-[13px] text-white/75 mb-5 font-body">Send a tip to show your appreciation</div>
 
         {/* Artist info */}
         <div className="flex items-center gap-3 rounded-xl p-3 mb-5"
@@ -67,7 +67,7 @@ export default function TipModal({ track, onClose }: Props) {
           </div>
           <div>
             <div className="text-[14px] font-medium text-white/90 font-body">{track.artist}</div>
-            <div className="text-[12px] text-white/35 font-body">{track.title}</div>
+            <div className="text-[12px] text-white/75 font-body">{track.title}</div>
           </div>
         </div>
 
@@ -79,8 +79,8 @@ export default function TipModal({ track, onClose }: Props) {
               onClick={() => { setSelected(amt); setCustom(""); }}
               className={`py-2.5 rounded-lg text-[14px] font-bold transition-all
                 ${selected === amt && !custom
-                  ? "bg-[#E8C547]/10 border border-[#E8C547] text-[#E8C547]"
-                  : "bg-white/[0.04] border border-white/[0.08] text-white/50 hover:border-[#E8C547]/40 hover:text-[#E8C547]"
+                  ? "bg-[#D4AF37]/10 border border-[#D4AF37] text-[#D4AF37]"
+                  : "bg-white/[0.04] border border-white/[0.08] text-white/50 hover:border-[#D4AF37]/40 hover:text-[#D4AF37]"
                 }`}
             >
               {amt}
@@ -90,7 +90,7 @@ export default function TipModal({ track, onClose }: Props) {
 
         {/* Custom amount */}
         <div className="relative mb-5">
-          <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70" />
           <input
             type="number"
             placeholder="Custom amount"
@@ -98,7 +98,7 @@ export default function TipModal({ track, onClose }: Props) {
             onChange={e => { setCustom(e.target.value); setSelected(""); }}
             className="w-full pl-8 pr-4 py-2.5 rounded-lg text-[14px] font-body text-white/80
               bg-white/[0.04] border border-white/[0.08] outline-none
-              focus:border-[#E8C547]/50 transition-colors placeholder:text-white/20"
+              focus:border-[#D4AF37]/50 transition-colors placeholder:text-white/60"
           />
         </div>
 
@@ -106,7 +106,7 @@ export default function TipModal({ track, onClose }: Props) {
           onClick={handleSend}
           className="w-full py-3 rounded-xl font-heading text-[14px] tracking-wider text-black font-bold
             transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(232,197,71,0.4)]"
-          style={{ background: "linear-gradient(135deg, #E8C547, #C9A84C)" }}
+          style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
         >
           Send Tip
         </button>
