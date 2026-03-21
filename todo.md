@@ -423,3 +423,9 @@
 - [x] Update detection — postMessage to clients, gold banner in app
 - [x] Branded offline.html page ("Your WIDs are safe 🔐")
 - [x] Clean SW registration in index.html — unregister all old workers first
+
+## Phase: Player Experience Improvements
+- [x] Creator page song click → load into Now Playing side panel immediately (addAndPlay + open panel)
+- [x] Scrollable lyrics section in MobilePlayerPanel (scrollable, shows lyricsText from DB)
+- [x] Empty lyrics state: "No lyrics registered — upload lyrics to protect your words."
+- [x] Draggable floating player tab — vertical drag on right edge, session-persistent position

@@ -231,7 +231,7 @@ export default function CreatorProfilePage() {
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
-  const { addAndPlay, playQueueAt, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState } = usePlayer();
   const playingId = playerState.isPlaying && playerState.tracks[0]?.id ? parseInt(playerState.tracks[0].id) : null;
 
   const { data, isLoading, refetch } = trpc.profile.getCreator.useQuery(
@@ -285,6 +285,8 @@ export default function CreatorProfilePage() {
       });
     }
     playMutation.mutate({ songId: song.id });
+    // Open the Now Playing side panel immediately on mobile
+    openNowPlayingPanel();
   };
 
   const handleTip = () => {

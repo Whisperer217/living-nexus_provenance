@@ -27,15 +27,56 @@ export default function MobilePlayerPanel() {
     togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute,
     setVolume, seek,
+    isNowPlayingPanelOpen, openNowPlayingPanel, closeNowPlayingPanel,
   } = usePlayer();
   const { user } = useAuth();
 
-  const [open, setOpen] = useState(false);
+  const open = isNowPlayingPanelOpen;
+  const togglePanel = () => isNowPlayingPanelOpen ? closeNowPlayingPanel() : openNowPlayingPanel();
   const [tipOpen, setTipOpen] = useState(false);
 
   // Touch-swipe to close (swipe right ≥ 60px)
   const touchStartX = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // ── Draggable floating tab ──────────────────────────────────────────
+  // Position stored as distance from top of viewport (px)
+  const STORAGE_KEY = "ln_player_tab_top";
+  const DEFAULT_TOP = () => Math.max(0, window.innerHeight - 220);
+  const [tabTop, setTabTop] = useState<number>(() => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      return saved ? parseInt(saved, 10) : DEFAULT_TOP();
+    } catch { return DEFAULT_TOP(); }
+  });
+  const dragStartY = useRef<number | null>(null);
+  const dragStartTop = useRef<number>(0);
+  const isDragging = useRef(false);
+
+  const onTabTouchStart = useCallback((e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0].clientY;
+    dragStartTop.current = tabTop;
+    isDragging.current = false;
+  }, [tabTop]);
+
+  const onTabTouchMove = useCallback((e: React.TouchEvent) => {
+    if (dragStartY.current === null) return;
+    const delta = e.touches[0].clientY - dragStartY.current;
+    if (Math.abs(delta) > 4) isDragging.current = true;
+    if (!isDragging.current) return;
+    e.stopPropagation();
+    const newTop = Math.max(60, Math.min(window.innerHeight - 160, dragStartTop.current + delta));
+    setTabTop(newTop);
+  }, []);
+
+  const onTabTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (isDragging.current) {
+      e.preventDefault();
+      try { sessionStorage.setItem(STORAGE_KEY, String(tabTop)); } catch {}
+    }
+    dragStartY.current = null;
+    isDragging.current = false;
+  }, [tabTop]);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
@@ -97,13 +138,13 @@ export default function MobilePlayerPanel() {
   const onTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
     const delta = e.changedTouches[0].clientX - touchStartX.current;
-    if (delta > 60) setOpen(false);
+    if (delta > 60) closeNowPlayingPanel();
     touchStartX.current = null;
   };
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeNowPlayingPanel(); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
@@ -126,15 +167,18 @@ export default function MobilePlayerPanel() {
 
   return (
     <>
-      {/* ── Floating tab (right edge) ── */}
+      {/* ── Floating tab (right edge, draggable) ── */}
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={(e) => { if (!isDragging.current) togglePanel(); }}
+        onTouchStart={onTabTouchStart}
+        onTouchMove={onTabTouchMove}
+        onTouchEnd={onTabTouchEnd}
         aria-label={open ? "Collapse player" : "Expand player"}
         className="md:hidden fixed z-50 flex flex-col items-center justify-center gap-1
-          transition-all duration-200 active:scale-95"
+          transition-[box-shadow] duration-200 active:scale-95"
         style={{
           right: 0,
-          bottom: `calc(120px + env(safe-area-inset-bottom, 0px))`,
+          top: `${tabTop}px`,
           width: "44px",
           paddingTop: "10px",
           paddingBottom: "10px",
@@ -189,7 +233,7 @@ export default function MobilePlayerPanel() {
       {open && (
         <div
           className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-          onClick={() => setOpen(false)}
+          onClick={closeNowPlayingPanel}
         />
       )}
 
@@ -219,7 +263,7 @@ export default function MobilePlayerPanel() {
             Now Playing
           </span>
           <button
-            onClick={() => setOpen(false)}
+            onClick={closeNowPlayingPanel}
             className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
           >
             <X size={16} />
@@ -367,8 +411,49 @@ export default function MobilePlayerPanel() {
           </div>
         </div>
 
+        {/* ── Lyrics section ── */}
+        <div className="px-5 pb-4 flex-1 flex flex-col min-h-0">
+          <div className="flex items-center justify-between mb-2">
+            <span
+              className="text-[9px] font-bold tracking-widest uppercase"
+              style={{ color: "oklch(0.40 0.03 280)", fontFamily: "'Cinzel', serif" }}
+            >
+              Lyrics
+            </span>
+            {songDetail?.song?.lyricsText && (
+              <span className="text-[9px]" style={{ color: "oklch(0.35 0.02 280)" }}>scroll to read</span>
+            )}
+          </div>
+          <div
+            className="flex-1 overflow-y-auto rounded-xl px-4 py-3 min-h-[120px] max-h-[200px]"
+            style={{
+              background: "oklch(0.08 0.015 275)",
+              border: "1px solid oklch(0.16 0.02 275)",
+              scrollbarWidth: "thin",
+              scrollbarColor: "oklch(0.25 0.02 275) transparent",
+            }}
+          >
+            {songDetail?.song?.lyricsText ? (
+              <pre
+                className="text-[11px] leading-relaxed whitespace-pre-wrap font-body"
+                style={{ color: "oklch(0.65 0.03 280)", fontFamily: "'Inter', sans-serif" }}
+              >
+                {songDetail.song.lyricsText}
+              </pre>
+            ) : (
+              <p
+                className="text-[11px] italic text-center mt-4"
+                style={{ color: "oklch(0.35 0.02 280)" }}
+              >
+                No lyrics registered —{" "}
+                <span style={{ color: "oklch(0.84 0.155 85)" }}>upload lyrics to protect your words.</span>
+              </p>
+            )}
+          </div>
+        </div>
+
         {/* Swipe hint */}
-        <p className="text-center text-[10px] pb-4" style={{ color: "oklch(0.28 0.02 280)" }}>
+        <p className="text-center text-[10px] pb-3" style={{ color: "oklch(0.28 0.02 280)" }}>
           Swipe right to close
         </p>
       </div>

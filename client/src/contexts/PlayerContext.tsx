@@ -85,6 +85,12 @@ interface PlayerContextValue {
   toggleLike: (id: string) => void;
   addTrack: (t: Track) => void;
   addAndPlay: (t: Track) => void;
+  /** Open the Now Playing side panel (mobile) */
+  openNowPlayingPanel: () => void;
+  /** Whether the Now Playing side panel is open */
+  isNowPlayingPanelOpen: boolean;
+  /** Close the Now Playing side panel */
+  closeNowPlayingPanel: () => void;
   /** Replace the entire queue without starting playback (used for initial DB seed) */
   setQueue: (tracks: Track[]) => void;
   /** Replace the entire queue and immediately play the track at startIdx */
@@ -107,6 +113,9 @@ const PlayerContext = createContext<PlayerContextValue | null>(null);
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(new Audio());
+  const [isNowPlayingPanelOpen, setIsNowPlayingPanelOpen] = useState(false);
+  const openNowPlayingPanel = useCallback(() => setIsNowPlayingPanelOpen(true), []);
+  const closeNowPlayingPanel = useCallback(() => setIsNowPlayingPanelOpen(false), []);
   const [state, setState] = useState<PlayerState>({
     currentIdx: -1,
     isPlaying: false,
@@ -269,6 +278,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   // Add a track (or replace existing) and immediately play it
   // Guard: silently reject tracks without a real audio URL
+  // Also opens the Now Playing panel on mobile automatically
   const addAndPlay = useCallback((t: Track) => {
     const audio = audioRef.current;
     if (!audio || !t.audioUrl) return;
@@ -382,6 +392,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
       toggleLike, addTrack, addAndPlay, setQueue, playQueueAt,
+      openNowPlayingPanel, isNowPlayingPanelOpen, closeNowPlayingPanel,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
       setProfileAvatar, setProfileBanner,
       addTip, addTrackTip, addComment, incrementShare, setRoom,
