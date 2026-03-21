@@ -6,6 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { storagePut } from "./storage";
+import { invokeLLM } from "./_core/llm";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -172,6 +173,7 @@ export const appRouter = router({
       isLyricsOnly: z.boolean().optional(),
       fileHash: z.string().optional(), witnessId: z.string().optional(),
       harmonicSignature: z.array(z.number()).optional(), ecdsaPublicKey: z.string().optional(), ecdsaSignature: z.string().optional(),
+      caption: z.string().max(2000).optional(),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
@@ -192,7 +194,7 @@ export const appRouter = router({
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.jpg`, coverBuffer, input.coverMimeType);
         coverArtUrl = url;
       }
-      await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature });
+      await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption });
       return { success: true, fileUrl, coverArtUrl };
     }),
 
@@ -406,6 +408,40 @@ export const appRouter = router({
       const count = await getLikeCount(input.songId);
       return { count };
     }),
+
+    generateCaption: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(255),
+        genre: z.string().optional(),
+        lyrics: z.string().max(5000).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const lyricsSnippet = input.lyrics
+          ? `\n\nLyrics excerpt:\n${input.lyrics.slice(0, 1500)}`
+          : "";
+
+        const systemPrompt = `You are a music caption writer for Living Nexus, a sovereign music platform built on cryptographic provenance. Your job is to write a short, compelling caption/description for a music track that a creator is uploading. The caption should:
+- Be 1-3 sentences (50-150 words max)
+- Capture the spirit and feel of the track based on its title, genre, and lyrics
+- Sound authentic and creator-voiced — not corporate or generic
+- Avoid clichés like "a journey" or "sonic landscape"
+- Optionally reference the genre or mood naturally
+- End with energy — make someone want to listen
+Return ONLY the caption text. No quotes. No labels. No explanation.`;
+
+        const userMessage = `Track title: "${input.title}"\nGenre: ${input.genre || "Not specified"}${lyricsSnippet}`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+        });
+
+        const caption = (response as any)?.choices?.[0]?.message?.content?.trim() ?? "";
+        if (!caption) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Caption generation failed. Please try again." });
+        return { caption };
+      }),
   }),
   comments: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),

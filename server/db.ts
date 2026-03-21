@@ -123,6 +123,7 @@ export async function createSong(data: {
   durationSeconds?: number; witnessId?: string; harmonicSignature?: number[];
   ecdsaPublicKey?: string; ecdsaSignature?: string; certificateUrl?: string; certificateKey?: string;
   isLyricsOnly?: boolean;
+  caption?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");

@@ -11,6 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Upload, Music, Image as ImageIcon, Check, Shield, ChevronRight,
   ChevronLeft, Play, Download, Copy, RefreshCw, Zap, Loader2,
+  Sparkles, CheckCircle2, X as XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -161,6 +162,9 @@ export default function UploadPage() {
   const [lyrics, setLyrics] = useState("");
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
+  const [caption, setCaption] = useState("");
+  const [captionSuggestion, setCaptionSuggestion] = useState<string | null>(null);
+  const [captionState, setCaptionState] = useState<"idle" | "loading" | "suggested" | "accepted">("idle");
 
   const [uploadMode, setUploadMode] = useState<"audio" | "lyrics">("audio");
   const [witnessData, setWitnessData] = useState<WitnessData | null>(null);
@@ -176,6 +180,37 @@ export default function UploadPage() {
       setGenre(creatorProfile.primaryGenre);
     }
   }, [creatorProfile?.primaryGenre]);
+
+  const generateCaptionMutation = trpc.songs.generateCaption.useMutation({
+    onSuccess: (data) => {
+      setCaptionSuggestion(data.caption);
+      setCaptionState("suggested");
+    },
+    onError: (e: { message: string }) => {
+      toast.error(e.message || "Caption generation failed");
+      setCaptionState("idle");
+    },
+  });
+
+  const handleGenerateCaption = () => {
+    if (!title) { toast.error("Add a track title first"); return; }
+    setCaptionState("loading");
+    generateCaptionMutation.mutate({ title, genre: genre || undefined, lyrics: lyrics || undefined });
+  };
+
+  const handleAcceptCaption = () => {
+    if (captionSuggestion) {
+      setCaption(captionSuggestion);
+      setCaptionState("accepted");
+      setCaptionSuggestion(null);
+      toast.success("Caption accepted");
+    }
+  };
+
+  const handleIgnoreCaption = () => {
+    setCaptionSuggestion(null);
+    setCaptionState("idle");
+  };
 
   const uploadMutation = trpc.songs.upload.useMutation({
     onSuccess: () => { toast.success("Track published to Living Nexus!"); navigate("/dashboard"); },
@@ -290,7 +325,8 @@ export default function UploadPage() {
           fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
           harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
           ecdsaSignature: witnessData?.signature,
-        });
+          caption: caption || undefined,
+        } as any);
       } catch { toast.error("Failed to prepare upload"); }
       return;
     }
@@ -300,7 +336,7 @@ export default function UploadPage() {
       let coverBase64: string | undefined;
       let coverMimeType: string | undefined;
       if (coverFile) { coverBase64 = await toBase64(coverFile); coverMimeType = coverFile.type; }
-      uploadMutation.mutate({
+        uploadMutation.mutate({
         audioBase64, audioMimeType: audioFile.type, audioFileName: audioFile.name,
         coverBase64, coverMimeType, title, genre: genre || undefined,
         bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
@@ -310,7 +346,8 @@ export default function UploadPage() {
         fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
         harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
         ecdsaSignature: witnessData?.signature,
-      });
+        caption: caption || undefined,
+      } as any);
     } catch { toast.error("Failed to prepare upload"); }
   };
 
@@ -565,6 +602,148 @@ export default function UploadPage() {
                   className="font-mono text-sm resize-none"
                   style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
                 />
+              </div>
+
+              {/* ── Smart Caption Generator ── */}
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  background: "oklch(0.11 0.04 280)",
+                  border: "1px solid oklch(0.75 0.18 85 / 0.25)",
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={14} style={{ color: "#D4AF37" }} />
+                    <span className="text-xs font-bold tracking-wider uppercase" style={{ color: "#D4AF37" }}>
+                      Smart Caption Generator
+                    </span>
+                    <span
+                      className="text-[9px] px-1.5 py-0.5 rounded font-bold tracking-wider uppercase"
+                      style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "#D4AF37", border: "1px solid oklch(0.75 0.18 85 / 0.3)" }}
+                    >
+                      AI
+                    </span>
+                  </div>
+                  {captionState !== "loading" && (
+                    <button
+                      onClick={handleGenerateCaption}
+                      disabled={!title}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        background: "oklch(0.75 0.18 85 / 0.12)",
+                        border: "1px solid oklch(0.75 0.18 85 / 0.4)",
+                        color: "#D4AF37",
+                      }}
+                    >
+                      {captionState === "accepted" ? (
+                        <><RefreshCw size={11} /> Regenerate</>
+                      ) : (
+                        <><Sparkles size={11} /> Generate Caption</>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                <p className="text-[11px] mb-3" style={{ color: "oklch(0.55 0.04 280)" }}>
+                  Llama AI analyzes your title, genre, and lyrics to suggest a caption. Accept, edit, or ignore it.
+                </p>
+
+                {/* Loading state */}
+                {captionState === "loading" && (
+                  <div className="flex items-center gap-2 py-3">
+                    <Loader2 size={14} className="animate-spin" style={{ color: "#D4AF37" }} />
+                    <span className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>Generating caption with Llama AI...</span>
+                  </div>
+                )}
+
+                {/* Suggestion card */}
+                {captionState === "suggested" && captionSuggestion && (
+                  <div
+                    className="rounded-lg p-3 mb-3"
+                    style={{
+                      background: "oklch(0.09 0.02 280)",
+                      border: "1px solid oklch(0.75 0.18 85 / 0.2)",
+                    }}
+                  >
+                    <p className="text-xs leading-relaxed mb-3" style={{ color: "oklch(0.85 0.02 280)" }}>
+                      {captionSuggestion}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleAcceptCaption}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                        style={{
+                          background: "oklch(0.65 0.18 145 / 0.15)",
+                          border: "1px solid oklch(0.65 0.18 145 / 0.4)",
+                          color: "oklch(0.75 0.18 145)",
+                        }}
+                      >
+                        <CheckCircle2 size={11} /> Accept
+                      </button>
+                      <button
+                        onClick={() => {
+                          const edited = window.prompt("Edit the caption:", captionSuggestion);
+                          if (edited !== null) {
+                            setCaption(edited);
+                            setCaptionState("accepted");
+                            setCaptionSuggestion(null);
+                            toast.success("Caption saved");
+                          }
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                        style={{
+                          background: "oklch(0.75 0.18 85 / 0.1)",
+                          border: "1px solid oklch(0.75 0.18 85 / 0.3)",
+                          color: "#D4AF37",
+                        }}
+                      >
+                        <RefreshCw size={11} /> Edit
+                      </button>
+                      <button
+                        onClick={handleIgnoreCaption}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                        style={{
+                          background: "oklch(1 0 0 / 0.04)",
+                          border: "1px solid oklch(1 0 0 / 0.1)",
+                          color: "oklch(0.5 0.03 280)",
+                        }}
+                      >
+                        <XIcon size={11} /> Ignore
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Accepted caption display */}
+                {captionState === "accepted" && caption && (
+                  <div
+                    className="rounded-lg p-3"
+                    style={{
+                      background: "oklch(0.65 0.18 145 / 0.06)",
+                      border: "1px solid oklch(0.65 0.18 145 / 0.25)",
+                    }}
+                  >
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.75 0.18 145)" }} />
+                      <p className="text-xs leading-relaxed" style={{ color: "oklch(0.82 0.02 280)" }}>
+                        {caption}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Idle: caption field for manual entry */}
+                {captionState === "idle" && (
+                  <Textarea
+                    value={caption}
+                    onChange={e => setCaption(e.target.value)}
+                    placeholder="Write your own caption, or click Generate Caption above..."
+                    rows={3}
+                    className="text-sm resize-none"
+                    style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
+                  />
+                )}
               </div>
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>

@@ -364,3 +364,9 @@
 - [x] Add proper line spacing between name, emoji, Discord handle, and date
 - [x] Fix contribution tag pill spacing — consistent gap, no crowding
 - [x] Add more top margin to View Creator Profile button
+
+## Phase: Smart Caption Generator (Llama AI)
+- [x] Add songs.generateCaption tRPC procedure using invokeLLM (title + genre + lyrics → caption)
+- [x] Build SmartCaptionGenerator UI component with loading state, suggestion display, accept/edit/ignore actions
+- [x] Integrate SmartCaptionGenerator into UploadPage caption/description field
+- [x] Write vitest test for generateCaption procedure
