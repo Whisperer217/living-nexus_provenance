@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Play, Pause, Search, Music, Users, Shield, ChevronRight } from "lucide-react";
+import { Play, Pause, Search, Music, Users, Shield, ChevronRight, Star } from "lucide-react";
 import { toast } from "sonner";
 import { usePlayer } from "@/contexts/PlayerContext";
 
@@ -303,6 +303,25 @@ export default function DiscoverPage() {
               <p className="text-sm" style={{ color: "#E2E8F0" }}>{desc}</p>
             </div>
           ))}
+        </div>
+
+        {/* ── Footer ── */}
+        <div className="py-8 border-t text-center" style={{ borderColor: "oklch(0.2 0.015 280)" }}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-4">
+            <Link href="/contributors" className="flex items-center gap-2 text-sm transition-all hover:opacity-100 opacity-60 hover:opacity-100" style={{ color: "#D4AF37" }}>
+              <Star size={14} />
+              Founding Creators
+            </Link>
+            <Link href="/explore" className="text-sm opacity-50 hover:opacity-80 transition-all" style={{ color: "#E2E8F0" }}>
+              Explore All Tracks
+            </Link>
+            <Link href="/upload" className="text-sm opacity-50 hover:opacity-80 transition-all" style={{ color: "#E2E8F0" }}>
+              Upload Your Music
+            </Link>
+          </div>
+          <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>
+            Living Nexus — Sovereign music. Cryptographic provenance. Creator-owned. · Genesis Day March 20, 2026
+          </p>
         </div>
       </div>
     </div>

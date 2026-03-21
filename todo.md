@@ -349,3 +349,11 @@
 - [x] EditTrackPanel — fix field overlapping, 16px spacing, clear labels, scrollable to Save button
 - [x] Archive page — add padding-bottom so track list is fully scrollable past player bar
 - [x] Dashboard My Songs — add padding-bottom so track list is fully scrollable past player bar
+
+## Phase: Founding Creators Page
+- [x] Build /contributors page with five founder cards (gradient avatars, gold badges, contribution tags)
+- [x] Hero header with Genesis Day badge and founding quote
+- [x] Add "Founding Creators" nav item to sidebar (desktop + mobile)
+- [x] Add footer with Founding Creators link to DiscoverPage
+- [x] Register /contributors route in App.tsx
+- [x] View Creator Profile button links to matched creator profile

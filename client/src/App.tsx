@@ -20,6 +20,7 @@ import DiscoverPage from "./pages/DiscoverPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import VerifyPage from "./pages/VerifyPage";
+import ContributorsPage from "./pages/ContributorsPage";
 import QueueLoader from "./components/QueueLoader";
 
 function Router() {
@@ -48,6 +49,7 @@ function Router() {
             <Route path="/creator/:id" component={CreatorProfilePage} />
             <Route path="/dashboard" component={DashboardPage} />
             <Route path="/profile" component={ProfilePage} />
+            <Route path="/contributors" component={ContributorsPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />
           </Switch>

@@ -14,7 +14,7 @@ import MobilePlayerPanel from "@/components/player/MobilePlayerPanel";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
-  Menu, X, ChevronRight, LogIn, Heart,
+  Menu, X, ChevronRight, LogIn, Heart, Star,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { label: "Home", icon: Home, path: "/", group: "Discover" },
   { label: "Explore", icon: Compass, path: "/explore", group: "Discover" },
   { label: "Listen Together", icon: Users, path: "/together", group: "Discover", badge: "LIVE" },
+  { label: "Founding Creators", icon: Star, path: "/contributors", group: "Discover" },
   { label: "My Profile", icon: User, path: "/profile", group: "My Music" },
   { label: "Upload", icon: Upload, path: "/upload", group: "My Music" },
   { label: "Batch Upload", icon: Upload, path: "/batch-upload", group: "My Music" },
@@ -67,6 +68,10 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
   "/dashboard": {
     title: "Dashboard",
     points: ["Song catalog", "Tips earned", "Enable tips", "License status"],
+  },
+  "/contributors": {
+    title: "Founding Creators",
+    points: ["Genesis Day", "March 20, 2026", "Five founders", "Witness ID pioneers"],
   },
 };
 
