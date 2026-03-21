@@ -396,3 +396,11 @@
 - [x] Fix: Use window.location.origin + path as returnUrl (not window.location.href)
 - [x] Fix all broken frontend payment/onboarding issues
 - [x] Write vitest tests for payment flow (12 tests — fee split, webhook parsing, URL params, returnUrl)
+
+## Phase: Live Tip Ticker Bar
+- [x] Add tips.recentTips tRPC procedure (public, last 20 tips with fan name, creator name, amount, song title)
+- [x] Build TipTicker component — horizontal CSS marquee, gold text, dark semi-transparent bg, 30s refetch
+- [x] Integrate TipTicker into MainLayout below the top nav bar (desktop + mobile)
+- [x] Empty state: "Be the first to tip a creator on Living Nexus 🎵"
+- [x] Mobile: slightly smaller text but still visible
+- [x] Write vitest test for recentTips procedure

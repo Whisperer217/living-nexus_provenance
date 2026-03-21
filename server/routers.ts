@@ -19,7 +19,7 @@ import {
   getAiTransformsBySong, getAiTransformsByUser,
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount,
   getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped,
-  getSongByWitnessId, updateSongMetadata,
+  getSongByWitnessId, updateSongMetadata, getRecentTips,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -503,6 +503,17 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         await updateUserStripeAccount(ctx.user.id, { stripeAccountStatus: status as any });
         return { status, accountId: user.stripeAccountId, chargesEnabled: account.charges_enabled };
       } catch { return { status: "error", accountId: user.stripeAccountId }; }
+    }),
+    recentTips: publicProcedure.query(async () => {
+      const rows = await getRecentTips(20);
+      return rows.map(r => ({
+        id: r.id,
+        amountCents: r.amountCents,
+        songTitle: r.songTitle,
+        fanName: r.fanName || "A fan",
+        creatorName: r.creatorHandle || r.creatorName || "a creator",
+        createdAt: r.createdAt,
+      }));
     }),
     createTipCheckout: publicProcedure.input(z.object({ songId: z.number(), amountCents: z.number().min(100).max(50000), origin: z.string().url() })).mutation(async ({ ctx, input }) => {
       const songData = await getSongWithCreator(input.songId);

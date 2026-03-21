@@ -12,6 +12,7 @@ import { getLoginUrl } from "@/const";
 import PlayerBar from "@/components/player/PlayerBar";
 import MobilePlayerPanel from "@/components/player/MobilePlayerPanel";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
+import TipTicker from "@/components/TipTicker";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
   Menu, X, ChevronRight, LogIn, Heart, Star,
@@ -277,6 +278,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
         {/* ── Page content ── */}
         <main className="flex-1 flex flex-col overflow-hidden md:pt-0 pt-14">
+          {/* ── Live Tip Ticker ── */}
+          <TipTicker />
           {/*
             Desktop: paddingBottom reserves space for the fixed PlayerBar (64px) + safe-area.
             Mobile: MobilePlayerPanel is a side panel — no bottom space needed.

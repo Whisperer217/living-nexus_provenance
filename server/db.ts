@@ -1,3 +1,4 @@
+import { alias } from "drizzle-orm/mysql-core";
 import { and, desc, eq, isNotNull, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
@@ -580,3 +581,29 @@ export async function markJukeboxItemSkipped(id: number) {
   await db.update(jukeboxQueue).set({ skippedAt: new Date() }).where(eq(jukeboxQueue.id, id));
 }
 
+
+// ─── Recent Tips (for ticker) ─────────────────────────────────────────────────
+
+export async function getRecentTips(limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const tipper = alias(users, "tipper");
+  const creator = alias(users, "creator");
+  const rows = await db
+    .select({
+      id: tips.id,
+      amountCents: tips.amountCents,
+      createdAt: tips.createdAt,
+      songTitle: songs.title,
+      fanName: tipper.name,
+      creatorName: creator.name,
+      creatorHandle: creator.artistHandle,
+    })
+    .from(tips)
+    .innerJoin(songs, eq(tips.songId, songs.id))
+    .innerJoin(creator, eq(songs.userId, creator.id))
+    .leftJoin(tipper, eq(tips.tipperUserId, tipper.id))
+    .orderBy(desc(tips.createdAt))
+    .limit(limit);
+  return rows;
+}
