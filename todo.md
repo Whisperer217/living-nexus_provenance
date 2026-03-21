@@ -357,3 +357,10 @@
 - [x] Add footer with Founding Creators link to DiscoverPage
 - [x] Register /contributors route in App.tsx
 - [x] View Creator Profile button links to matched creator profile
+
+## Phase: Contributors Page Card Layout Fixes
+- [x] Move Founding Creator badge above the name — not overlapping
+- [x] Reduce creator name font size so long names fit on one or two clean lines
+- [x] Add proper line spacing between name, emoji, Discord handle, and date
+- [x] Fix contribution tag pill spacing — consistent gap, no crowding
+- [x] Add more top margin to View Creator Profile button

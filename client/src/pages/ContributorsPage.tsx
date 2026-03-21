@@ -125,63 +125,70 @@ function FounderCard({
         }}
       />
 
-      {/* Founding Creator badge — top right */}
-      <div className="absolute top-4 right-4 z-10">
-        <span
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
-          style={{
-            background: "oklch(0.75 0.18 85 / 0.15)",
-            border: "1px solid #D4AF37",
-            color: "#D4AF37",
-            boxShadow: "0 0 10px #D4AF3755, 0 0 20px #D4AF3722",
-          }}
-        >
-          <Award size={10} />
-          Founding Creator
-        </span>
-      </div>
-
       {/* Card body */}
-      <div className="p-6 flex flex-col gap-5 flex-1">
-        {/* Avatar + name row */}
-        <div className="flex items-center gap-4 pr-28">
+      <div className="p-6 flex flex-col gap-0 flex-1">
+
+        {/* ── Founding Creator badge — in flow, top of card ── */}
+        <div className="mb-4">
+          <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
+            style={{
+              background: "oklch(0.75 0.18 85 / 0.15)",
+              border: "1px solid #D4AF37",
+              color: "#D4AF37",
+              boxShadow: "0 0 10px #D4AF3755, 0 0 20px #D4AF3722",
+            }}
+          >
+            <Award size={10} />
+            Founding Creator
+          </span>
+        </div>
+
+        {/* ── Avatar + identity block ── */}
+        <div className="flex items-start gap-4 mb-5">
           {founder.photoUrl ? (
             <img
               src={founder.photoUrl}
               alt={founder.displayName}
-              className="w-20 h-20 rounded-full object-cover flex-shrink-0"
+              className="w-16 h-16 rounded-full object-cover flex-shrink-0 mt-0.5"
               style={{ boxShadow: `0 0 20px ${founder.gradient[1]}44` }}
             />
           ) : (
-            <LetterAvatar name={founder.displayName} gradient={founder.gradient} size={80} />
+            <div className="flex-shrink-0 mt-0.5">
+              <LetterAvatar name={founder.displayName} gradient={founder.gradient} size={64} />
+            </div>
           )}
-          <div className="min-w-0">
-            <h3 className="font-display text-xl text-white leading-tight">
-              {founder.displayName}{" "}
-              <span className="text-lg" role="img" aria-label="emoji">
-                {founder.emoji}
-              </span>
+          <div className="min-w-0 flex flex-col gap-1">
+            {/* Name on its own line */}
+            <h3 className="font-display text-base leading-snug text-white break-words">
+              {founder.displayName}
             </h3>
+            {/* Emoji on its own line */}
+            <p className="text-base leading-none" role="img" aria-label="emoji">
+              {founder.emoji}
+            </p>
+            {/* Discord name on its own line */}
             {founder.discordName && (
-              <p className="text-sm mt-0.5" style={{ color: "oklch(0.7 0.06 280)" }}>
+              <p className="text-xs leading-snug" style={{ color: "oklch(0.65 0.06 280)" }}>
                 ({founder.discordName})
               </p>
             )}
+            {/* Date on its own line */}
             <p
-              className="text-xs mt-1 tracking-widest uppercase"
-              style={{ color: "oklch(0.5 0.04 280)" }}
+              className="text-[10px] tracking-widest uppercase leading-snug"
+              style={{ color: "oklch(0.45 0.04 280)" }}
             >
               March 20, 2026
             </p>
           </div>
         </div>
 
-        {/* Contribution tags */}
-        <div className="flex flex-wrap gap-2">
+        {/* ── Contribution tags ── */}
+        <div className="flex flex-wrap gap-2 mb-5">
           {founder.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-1 rounded-full text-[11px] font-medium"
+              className="px-3 py-1 rounded-full text-[11px] font-medium leading-none"
               style={{
                 background: "oklch(1 0 0 / 0.06)",
                 border: "1px solid oklch(1 0 0 / 0.12)",
@@ -193,8 +200,8 @@ function FounderCard({
           ))}
         </div>
 
-        {/* View Profile button */}
-        <div className="mt-auto pt-2">
+        {/* ── View Profile button ── */}
+        <div className="mt-auto pt-4">
           <button
             onClick={handleViewProfile}
             disabled={!matchedCreator?.id}
