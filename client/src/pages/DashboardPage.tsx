@@ -249,57 +249,77 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {songs.map((song: any, idx: number) => (
-                  <div key={song.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
-                    <span className="text-xs w-5 text-center" style={{ color: "#E2E8F0" }}>{idx + 1}</span>
-                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
-                      {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" /> : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        {song.genre && <span className="text-xs" style={{ color: "#E2E8F0" }}>{song.genre}</span>}
-                        {song.witnessId && <Badge className="text-xs px-1 py-0" style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", fontSize: "9px" }}>WID</Badge>}
-                        {song.aiConsent === "prohibited" && <Badge className="text-xs px-1 py-0" style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: "oklch(0.65 0.18 25)", fontSize: "9px" }}>AI PROHIBITED</Badge>}
+                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                    {/* Top row: index + cover + title + actions */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#E2E8F0", minWidth: "20px" }}>{idx + 1}</span>
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
+                        {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" /> : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif", fontSize: "13px" }}>{song.title}</p>
+                        {song.genre && (
+                          <p className="text-xs truncate mt-0.5" style={{ color: "#E2E8F0", fontSize: "12px" }}>{song.genre}</p>
+                        )}
+                      </div>
+                      {/* Action buttons — always visible */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Link href={`/song/${song.id}`}>
+                          <button className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">
+                            <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                          </button>
+                        </Link>
+                        <button
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/10"
+                          title="Delete song"
+                          onClick={() => { setDeletingId(song.id); deleteMutation.mutate({ songId: song.id }); }}
+                          disabled={deletingId === song.id}
+                        >
+                          <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "oklch(0.5 0.03 280)" : "oklch(0.65 0.18 25)" }} />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-xs" style={{ color: "#E2E8F0" }}>
-                      <span>{song.playCount || 0} plays</span>
-                      <span>{song.tipCount || 0} tips</span>
-                    </div>
-                    <select
-                      value={song.status ?? "Published"}
-                      onChange={e => updateStatusMutation.mutate({ songId: song.id, status: e.target.value as any })}
-                      disabled={updateStatusMutation.isPending}
-                      title="Track status"
-                      style={{
-                        background: "oklch(0.13 0.04 270)",
-                        color: statusColor(song.status ?? "Published"),
-                        border: `1px solid ${statusColor(song.status ?? "Published")}44`,
-                        borderRadius: "6px",
-                        fontSize: "11px",
-                        padding: "2px 6px",
-                        cursor: "pointer",
-                        outline: "none",
-                      }}
-                    >
-                      {["Draft", "Published", "Unlisted", "Deleted"].map(s => (
-                        <option key={s} value={s} style={{ background: "oklch(0.13 0.04 270)", color: statusColor(s) }}>{s}</option>
-                      ))}
-                    </select>
-                    <div className="flex items-center gap-1">
-                      <Link href={`/song/${song.id}`}>
-                        <button className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">
-                          <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
-                        </button>
-                      </Link>
-                      <button
-                        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/10"
-                        title="Delete song"
-                        onClick={() => { setDeletingId(song.id); deleteMutation.mutate({ songId: song.id }); }}
-                        disabled={deletingId === song.id}
+
+                    {/* Bottom row: metadata grid */}
+                    <div className="mt-2 ml-[52px] flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                      {/* Play count */}
+                      <span style={{ color: "#E2E8F0", fontSize: "12px", whiteSpace: "nowrap" }}>
+                        {song.playCount || 0} plays
+                      </span>
+                      {/* Tip count */}
+                      <span style={{ color: "#E2E8F0", fontSize: "12px", whiteSpace: "nowrap" }}>
+                        {song.tipCount || 0} tips
+                      </span>
+                      {/* WID badge */}
+                      {song.witnessId && (
+                        <Badge className="px-1.5 py-0" style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", fontSize: "10px" }}>WID</Badge>
+                      )}
+                      {/* AI badge */}
+                      {song.aiConsent === "prohibited" && (
+                        <Badge className="px-1.5 py-0" style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: "oklch(0.65 0.18 25)", fontSize: "10px" }}>AI OFF</Badge>
+                      )}
+                      {/* Status dropdown */}
+                      <select
+                        value={song.status ?? "Published"}
+                        onChange={e => updateStatusMutation.mutate({ songId: song.id, status: e.target.value as any })}
+                        disabled={updateStatusMutation.isPending}
+                        title="Track status"
+                        style={{
+                          background: "oklch(0.13 0.04 270)",
+                          color: statusColor(song.status ?? "Published"),
+                          border: `1px solid ${statusColor(song.status ?? "Published")}44`,
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                          padding: "2px 8px",
+                          cursor: "pointer",
+                          outline: "none",
+                          minWidth: "90px",
+                        }}
                       >
-                        <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "oklch(0.5 0.03 280)" : "oklch(0.65 0.18 25)" }} />
-                      </button>
+                        {["Draft", "Published", "Unlisted", "Deleted"].map(s => (
+                          <option key={s} value={s} style={{ background: "oklch(0.13 0.04 270)", color: statusColor(s) }}>{s}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 ))}

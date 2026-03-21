@@ -337,3 +337,6 @@
 - [x] Add songs.uploadCoverArt tRPC procedure (base64 → S3 → DB)
 - [x] Build EditTrackPanel slide-out sheet component with all fields + WID immutability note
 - [x] Wire Edit button on ArchivePage rows to open EditTrackPanel
+
+## Phase: Dashboard My Songs Mobile Fix
+- [x] Fix My Songs list mobile layout — metadata wraps cleanly, min 12px font, proper spacing
