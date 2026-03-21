@@ -378,3 +378,21 @@
 - [x] Create service worker (sw.js) for basic offline caching
 - [x] Wire manifest link and service worker registration into index.html
 - [x] Add apple-touch-icon and theme-color meta tags
+
+## Phase: Payment Flow Audit & Fixes
+- [x] Audit Stripe Connect configuration (90/10 split, destination charges)
+- [x] Audit tip flow backend (song page tip procedure)
+- [x] Audit jukebox tip flow backend (queue + payment)
+- [x] Audit creator Connect onboarding backend
+- [x] Audit tip UI on song detail page
+- [x] Audit jukebox tip UI
+- [x] Audit creator Connect onboarding UI
+- [x] Fix: Add checkout.session.completed webhook handler (tip + jukebox_tip)
+- [x] Fix: Add amountCents to jukebox success_url so confirmQueue uses real amount
+- [x] Fix all broken backend payment/routing issues
+- [x] Fix: Add tip=success toast handler to SongDetailPage
+- [x] Fix: Read amountCents from URL params in TogetherPage confirmQueue handler
+- [x] Fix: Use same-window redirect for Connect onboarding (not new tab) — mobile compatible
+- [x] Fix: Use window.location.origin + path as returnUrl (not window.location.href)
+- [x] Fix all broken frontend payment/onboarding issues
+- [x] Write vitest tests for payment flow (12 tests — fee split, webhook parsing, URL params, returnUrl)

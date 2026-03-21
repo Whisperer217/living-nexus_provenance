@@ -52,6 +52,35 @@ export async function handleStripeWebhook(req: any, res: any) {
         }
         break;
       }
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const meta = session.metadata || {};
+        // Song-page tip: record tip via webhook (reliable path)
+        if (meta.type === "tip" && meta.songId) {
+          const amountCents = session.amount_total ?? 0;
+          const tipperUserId = meta.userId ? parseInt(meta.userId) : undefined;
+          await recordTip({
+            songId: parseInt(meta.songId),
+            tipperUserId,
+            amountCents,
+            stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          });
+        }
+        // Jukebox tip: auto-queue song when payment completes (webhook path)
+        if (meta.type === "jukebox_tip" && meta.roomCode && meta.songId && meta.tipperId) {
+          const amountCents = session.amount_total ?? 100;
+          const tipperName = meta.tipperName || "A listener";
+          await addToJukeboxQueue({
+            roomCode: meta.roomCode,
+            songId: parseInt(meta.songId),
+            tipperId: parseInt(meta.tipperId),
+            tipperName,
+            tipAmountCents: amountCents,
+            stripeSessionId: session.id,
+          });
+        }
+        break;
+      }
       case "account.updated": {
         const account = event.data.object as Stripe.Account;
         const allCreators = await getAllCreators();
@@ -586,7 +615,7 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
             tipperName,
           },
           allow_promotion_codes: false,
-          success_url: `${input.origin}/together?room=${input.roomCode}&jukebox=success&songId=${input.songId}`,
+          success_url: `${input.origin}/together?room=${input.roomCode}&jukebox=success&songId=${input.songId}&amountCents=${input.amountCents}`,
           cancel_url: `${input.origin}/together?room=${input.roomCode}`,
         });
 

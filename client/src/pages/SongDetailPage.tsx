@@ -175,6 +175,15 @@ export default function SongDetailPage() {
     if (song?.lyricsText) setLyricsEdit(song.lyricsText);
   }, [song?.lyricsText]);
 
+  // Handle Stripe tip success redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tip") === "success") {
+      toast.success("🙏 Your tip was sent! The creator receives 90% directly.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;

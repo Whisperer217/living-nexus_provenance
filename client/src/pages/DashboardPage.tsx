@@ -46,7 +46,10 @@ export default function DashboardPage() {
     onError: (e: { message: string }) => toast.error(e.message),
   });
   const connectMutation = trpc.tips.connectOnboarding.useMutation({
-    onSuccess: (data: { url: string }) => { window.open(data.url, "_blank"); },
+    onSuccess: (data: { url: string }) => {
+      // Same-window redirect so Stripe Connect return_url works on mobile
+      window.location.href = data.url;
+    },
     onError: (e: { message: string }) => toast.error(e.message),
   });
 
@@ -189,7 +192,7 @@ export default function DashboardPage() {
                     <span className="text-xs" style={{ color: "oklch(0.65 0.18 45)" }}>Pending verification</span>
                   </div>
                 )}
-                <Button size="sm" className="w-full" variant="outline" onClick={() => connectMutation.mutate({ returnUrl: window.location.href })} disabled={connectMutation.isPending} style={{ borderColor: "oklch(0.65 0.18 145 / 0.5)", color: "oklch(0.65 0.18 145)" }}>
+                <Button size="sm" className="w-full" variant="outline" onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })} disabled={connectMutation.isPending} style={{ borderColor: "oklch(0.65 0.18 145 / 0.5)", color: "oklch(0.65 0.18 145)" }}>
                   {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Continue Setup" : "Enable Tips"}
                 </Button>
               </>

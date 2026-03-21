@@ -105,8 +105,8 @@ export default function ProfilePage() {
   );
   const connectMutation = trpc.tips.connectOnboarding.useMutation({
     onSuccess: (data) => {
-      if (data.url) window.open(data.url, "_blank");
-      setTimeout(() => refetchConnect(), 3000);
+      // Same-window redirect so Stripe Connect return_url works on mobile
+      if (data.url) window.location.href = data.url;
     },
     onError: (err) => toast.error(err.message),
   });

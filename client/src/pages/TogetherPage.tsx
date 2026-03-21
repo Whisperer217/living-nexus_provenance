@@ -366,8 +366,9 @@ export default function TogetherPage() {
     if (params.get("jukebox") === "success") {
       const songId = parseInt(params.get("songId") || "0");
       const roomCode = params.get("room") || state.room.code;
+      const amountCents = parseInt(params.get("amountCents") || "100");
       if (songId && user) {
-        confirmQueue.mutate({ roomCode, songId, amountCents: 100 });
+        confirmQueue.mutate({ roomCode, songId, amountCents });
         // Clean URL
         window.history.replaceState({}, "", `/together?room=${roomCode}`);
       }
