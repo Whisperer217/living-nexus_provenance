@@ -154,12 +154,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       {/* Panel */}
       <div
         ref={panelRef}
-        className="relative ml-auto w-full max-w-md h-full overflow-y-auto flex flex-col"
+        className="relative ml-auto w-full max-w-md flex flex-col"
         style={{
+          height: "100dvh",
           background: "linear-gradient(180deg, #0d1520 0%, #080d14 100%)",
           borderLeft: "1px solid rgba(212,175,55,0.2)",
           boxShadow: "-8px 0 40px rgba(0,0,0,0.6)",
           minWidth: 0,
+          overflowY: "hidden",
         }}
       >
         {/* Header */}
@@ -197,10 +199,10 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         </div>
 
         {/* Form */}
-        <div className="flex-1 px-4 sm:px-6 py-5 space-y-5">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-6 space-y-6" style={{ WebkitOverflowScrolling: "touch" }}>
 
           {/* Cover Art */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium">Cover Art</Label>
             <div className="flex flex-col items-start gap-3">
               <div
@@ -239,7 +241,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           </div>
 
           {/* Caption */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium">Caption / Description</Label>
             <Textarea
               value={caption}
@@ -258,7 +260,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           </div>
 
           {/* Genre */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium">Genre</Label>
             <Select value={genre} onValueChange={setGenre}>
               <SelectTrigger
@@ -282,7 +284,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           </div>
 
           {/* Collection Tag */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium">Collection / Grouping Tag</Label>
             <Input
               value={collectionTag}
@@ -300,7 +302,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           </div>
 
           {/* AI Disclosure */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium flex items-center gap-2">
               <Shield size={14} style={{ color: "#D4AF37" }} />
               AI Disclosure
@@ -331,7 +333,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           </div>
 
           {/* Visibility */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium">Track Visibility</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as any)}>
               <SelectTrigger
@@ -357,8 +359,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
         {/* Footer */}
         <div
-          className="sticky bottom-0 px-4 sm:px-6 py-4 flex gap-3"
-          style={{ background: "#0d1520", borderTop: "1px solid rgba(212,175,55,0.15)" }}
+          className="flex-shrink-0 px-4 sm:px-6 py-4 flex gap-3"
+          style={{
+            background: "#0d1520",
+            borderTop: "1px solid rgba(212,175,55,0.15)",
+            paddingBottom: "max(16px, env(safe-area-inset-bottom))",
+          }}
         >
           <Button
             variant="outline"

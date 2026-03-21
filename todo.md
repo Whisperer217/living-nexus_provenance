@@ -344,3 +344,8 @@
 ## Phase: Archive + EditTrackPanel Mobile Bug Fixes
 - [x] Archive page — click track row to load into player and play
 - [x] EditTrackPanel — single column stacking on screens under 480px
+
+## Phase: Mobile Layout Bug Fixes (Round 2)
+- [x] EditTrackPanel — fix field overlapping, 16px spacing, clear labels, scrollable to Save button
+- [x] Archive page — add padding-bottom so track list is fully scrollable past player bar
+- [x] Dashboard My Songs — add padding-bottom so track list is fully scrollable past player bar

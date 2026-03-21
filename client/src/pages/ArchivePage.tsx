@@ -127,7 +127,7 @@ export default function ArchivePage() {
   return (
     <>
     <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
-      <div className="container py-10 max-w-4xl mx-auto px-4">
+      <div className="container py-10 max-w-4xl mx-auto px-4" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-8">

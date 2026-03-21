@@ -85,7 +85,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "oklch(0.08 0.015 280)" }}>
-      <div className="container py-10">
+      <div className="container py-10" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
