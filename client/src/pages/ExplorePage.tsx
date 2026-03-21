@@ -53,9 +53,10 @@ export default function ExplorePage() {
           artUrl: s.song.coverArtUrl || undefined,
           witnessId: s.song.witnessId || undefined,
           aiDisclosure: s.creator?.aiDisclosure || undefined,
+          creatorHandle: s.creator?.id ? String(s.creator.id) : undefined,
         }));
       const startIdx = queue.findIndex(t => t.id === String(song.id));
-      playQueueAt(queue, startIdx >= 0 ? startIdx : 0);
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "EXPLORE");
     } else {
       addAndPlay({
         id: String(song.id),

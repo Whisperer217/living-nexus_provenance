@@ -443,3 +443,18 @@
 - [x] Background creator page routing — queue advance navigates to next creator's profile behind the panel
 - [x] Two-section panel layout — fixed top (art, title, artist, WID badge, tip) + scrollable bottom (progress, controls, volume, lyrics)
 - [x] Crossfade cover art — key-based remount with panelArtFadeIn fade+scale animation on track change
+
+## Phase: Full Player Queue Architecture Rebuild
+- [x] Add QueueContext enum to PlayerContext (CREATOR_PAGE, EXPLORE, HOME, SEARCH, SONG_DETAIL, PLAYLIST, LIKED)
+- [x] Each page sets its own queue context when loading songs into the player
+- [x] Auto-advance pulls next track from active context queue
+- [x] Shuffle and repeat operate within current context queue only
+- [x] Add playlistItems table to DB schema and push migration (direct SQL applied)
+- [x] Add playlist tRPC procedures (playlist.check, playlist.add, playlist.remove, playlist.get)
+- [x] Add Add to Playlist button on TrackCard, PlayerBar, MobilePlayerPanel, and SongDetailPage
+- [x] Build My Playlist page at /playlist with full shuffle/repeat support and queue context
+- [x] Add My Playlist to sidebar navigation
+- [x] Add Take to Room button in MobilePlayerPanel (Now Playing panel)
+- [x] Wire Take to Room to Jukebox SongBrowserModal with room selector
+- [x] Add My Playlist tab to Jukebox SongBrowserModal (drag from playlist into room queue)
+- [x] TypeScript: 0 errors | Vitest: 40/40 passing

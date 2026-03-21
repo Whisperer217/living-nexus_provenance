@@ -73,7 +73,7 @@ export default function ArchivePage() {
     // Build queue starting from clicked song, then remaining
     const tracks = playable.map(buildTrack);
     const startIdx = tracks.findIndex((t) => t.id === String(clickedTrack.id));
-    playQueueAt(tracks, startIdx >= 0 ? startIdx : 0);
+    playQueueAt(tracks, startIdx >= 0 ? startIdx : 0, "PLAYLIST");
     toast.success(`Now playing: ${clickedTrack.title}`);
   };
 

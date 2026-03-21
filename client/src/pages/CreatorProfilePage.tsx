@@ -272,7 +272,7 @@ export default function CreatorProfilePage() {
         aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
       }));
       const startIdx = queue.findIndex(t => t.id === String(song.id));
-      playQueueAt(queue, startIdx >= 0 ? startIdx : 0);
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
     } else {
       addAndPlay({
         id: String(song.id),

@@ -36,6 +36,28 @@ export interface Track {
   creatorHandle?: string; // used for background creator page routing on queue advance
 }
 
+/** Describes WHERE the current queue was built from — controls shuffle/repeat scope */
+export type QueueContext =
+  | "CREATOR_PAGE"   // creator's published songs only
+  | "EXPLORE"        // all published songs on platform
+  | "HOME"           // latest releases
+  | "SEARCH"         // search results
+  | "SONG_DETAIL"    // related songs (same genre / creator)
+  | "PLAYLIST"       // user's personal saved playlist
+  | "LIKED"          // user's liked songs
+  | "NONE";          // no context (single addAndPlay)
+
+export const QUEUE_CONTEXT_LABELS: Record<QueueContext, string> = {
+  CREATOR_PAGE: "Creator",
+  EXPLORE: "Explore",
+  HOME: "New Releases",
+  SEARCH: "Search Results",
+  SONG_DETAIL: "Related",
+  PLAYLIST: "My Playlist",
+  LIKED: "Liked Songs",
+  NONE: "Now Playing",
+};
+
 // DEMO_TRACKS removed — queue only contains real DB-sourced tracks with valid audio URLs
 export const DEMO_TRACKS: Track[] = [];
 
@@ -55,7 +77,8 @@ interface PlayerState {
   currentTime: number;
   duration: number;
   liked: Set<string>;
-  tracks: Track[]; // user-uploaded tracks
+  tracks: Track[]; // current context queue
+  queueContext: QueueContext; // where the queue was built from
   profileName: string;
   profileBio: string;
   profileLocation: string;
@@ -74,6 +97,8 @@ interface PlayerContextValue {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   allTracks: () => Track[];
   currentTrackId: string | null;
+  /** Label for the current queue context (e.g. "Explore", "Creator", "My Playlist") */
+  queueContextLabel: string;
   playTrack: (idx: number) => void;
   togglePlay: () => void;
   nextTrack: () => void;
@@ -85,6 +110,7 @@ interface PlayerContextValue {
   seek: (t: number) => void;
   toggleLike: (id: string) => void;
   addTrack: (t: Track) => void;
+  /** Add a single track and play it immediately (context = NONE) */
   addAndPlay: (t: Track) => void;
   /** Open the Now Playing side panel (mobile) */
   openNowPlayingPanel: () => void;
@@ -94,8 +120,11 @@ interface PlayerContextValue {
   closeNowPlayingPanel: () => void;
   /** Replace the entire queue without starting playback (used for initial DB seed) */
   setQueue: (tracks: Track[]) => void;
-  /** Replace the entire queue and immediately play the track at startIdx */
-  playQueueAt: (tracks: Track[], startIdx: number) => void;
+  /**
+   * Replace the entire queue with a context-tagged set and immediately play startIdx.
+   * Shuffle and repeat will operate ONLY within this queue.
+   */
+  playQueueAt: (tracks: Track[], startIdx: number, context?: QueueContext) => void;
   setProfileName: (n: string) => void;
   setProfileBio: (b: string) => void;
   setProfileLocation: (l: string) => void;
@@ -130,6 +159,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     duration: 0,
     liked: new Set(),
     tracks: [],
+    queueContext: "NONE",
     profileName: "",
     profileBio: "",
     profileLocation: "",
@@ -161,8 +191,19 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           audio.play().catch(() => {});
           return s;
         }
+        // Shuffle and repeat operate ONLY within the current context queue
         let next = s.currentIdx + 1;
-        if (s.isShuffle) next = Math.floor(Math.random() * tracks.length);
+        if (s.isShuffle) {
+          // Pick a random index that is NOT the current one (if queue has >1 track)
+          if (tracks.length > 1) {
+            let rand = Math.floor(Math.random() * (tracks.length - 1));
+            if (rand >= s.currentIdx) rand += 1;
+            next = rand;
+          } else {
+            next = 0;
+          }
+        }
+        // Wrap around within the context queue
         if (next >= tracks.length) next = 0;
         const t = tracks[next];
         if (t?.audioUrl) {
@@ -279,21 +320,20 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setState(s => ({ ...s, tracks: [t, ...s.tracks] }));
   }, []);
 
-  // Add a track (or replace existing) and immediately play it
+  // Add a single track and immediately play it — context is NONE (no queue context)
   // Guard: silently reject tracks without a real audio URL
-  // Also opens the Now Playing panel on mobile automatically
   const addAndPlay = useCallback((t: Track) => {
     const audio = audioRef.current;
     if (!audio || !t.audioUrl) return;
     setState(s => {
       const filtered = s.tracks.filter(tr => tr.id !== t.id);
       const newTracks = [t, ...filtered];
-      const newIdx = 0; // always first slot since DEMO_TRACKS is empty
+      const newIdx = 0;
       if (t.audioUrl) {
         audio.src = safeAudioUrl(t.audioUrl);
         audio.play().catch(() => {});
       }
-      return { ...s, tracks: newTracks, currentIdx: newIdx, isPlaying: !!t.audioUrl };
+      return { ...s, tracks: newTracks, currentIdx: newIdx, isPlaying: !!t.audioUrl, queueContext: "NONE" };
     });
   }, []);
 
@@ -323,7 +363,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }), []);
   const setRoom = useCallback((r: PlayerState["room"]) => setState(s => ({ ...s, room: r })), []);
 
-  /** Replace the entire queue without starting playback */
+  /** Replace the entire queue without starting playback (used for initial DB seed) */
   const setQueue = useCallback((newTracks: Track[]) => {
     const validTracks = newTracks.filter(t => !!t.audioUrl);
     setState(s => {
@@ -333,8 +373,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  /** Replace the entire queue and immediately play the track at startIdx */
-  const playQueueAt = useCallback((newTracks: Track[], startIdx: number) => {
+  /**
+   * Replace the entire queue with a context-tagged set and immediately play startIdx.
+   * Shuffle and repeat will operate ONLY within this context queue.
+   */
+  const playQueueAt = useCallback((newTracks: Track[], startIdx: number, context: QueueContext = "NONE") => {
     const audio = audioRef.current;
     if (!audio) return;
     const validTracks = newTracks.filter(t => !!t.audioUrl);
@@ -343,11 +386,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (!t?.audioUrl) return;
     audio.src = safeAudioUrl(t.audioUrl);
     audio.play().catch(() => {});
-    setState(s => ({ ...s, tracks: validTracks, currentIdx: clampedIdx, isPlaying: true }));
+    setState(s => ({ ...s, tracks: validTracks, currentIdx: clampedIdx, isPlaying: true, queueContext: context }));
   }, []);
 
   const currentTrackId = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.id ?? null) : null;
   const backgroundCreatorHandle = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.creatorHandle ?? null) : null;
+  const queueContextLabel = QUEUE_CONTEXT_LABELS[state.queueContext] ?? "Now Playing";
 
   // ── MediaSession API: lock screen / notification shade controls ──
   useEffect(() => {
@@ -392,7 +436,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PlayerContext.Provider value={{
-      state, audioRef, allTracks, currentTrackId,
+      state, audioRef, allTracks, currentTrackId, queueContextLabel,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
       toggleLike, addTrack, addAndPlay, setQueue, playQueueAt,

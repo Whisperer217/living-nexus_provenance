@@ -53,7 +53,7 @@ export default function LikedPage() {
     const tracks = buildTracks();
     if (tracks.length === 0) return;
     const clampedIdx = Math.max(0, Math.min(idx, tracks.length - 1));
-    playQueueAt(tracks, clampedIdx);
+    playQueueAt(tracks, clampedIdx, "LIKED");
     openNowPlayingPanel();
   };
 

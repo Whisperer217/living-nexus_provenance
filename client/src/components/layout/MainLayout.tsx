@@ -15,7 +15,7 @@ import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import TipTicker from "@/components/TipTicker";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
-  Menu, X, ChevronRight, LogIn, Heart, Star,
+  Menu, X, ChevronRight, LogIn, Heart, Star, ListMusic,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -30,6 +30,7 @@ const NAV_ITEMS = [
   { label: "Batch Upload", icon: Upload, path: "/batch-upload", group: "My Music" },
   { label: "Archive", icon: Library, path: "/archive", group: "My Music" },
   { label: "Liked Songs", icon: Heart, path: "/liked", group: "My Music" },
+  { label: "My Playlist", icon: ListMusic, path: "/playlist", group: "My Music" },
   { label: "Dashboard", icon: BarChart2, path: "/dashboard", group: "My Music" },
 ];
 
@@ -73,6 +74,10 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
   "/contributors": {
     title: "Founding Creators",
     points: ["Genesis Day", "March 20, 2026", "Five founders", "Witness ID pioneers"],
+  },
+  "/playlist": {
+    title: "My Playlist",
+    points: ["Saved tracks", "Bookmark any song", "Play as queue", "Full PLAYLIST context"],
   },
 };
 

@@ -223,3 +223,17 @@ export const jukeboxQueue = mysqlTable("jukeboxQueue", {
 
 export type JukeboxQueueItem = typeof jukeboxQueue.$inferSelect;
 export type InsertJukeboxQueueItem = typeof jukeboxQueue.$inferInsert;
+
+// ─── Playlist Items ───────────────────────────────────────────────────────────
+// Each user has a single personal playlist; rows are ordered by `position` ASC
+export const playlistItems = mysqlTable("playlistItems", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),   // owner of the playlist
+  songId: int("songId").notNull(),   // the saved song
+  position: int("position").notNull().default(0), // ordering within playlist
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PlaylistItem = typeof playlistItems.$inferSelect;
+export type InsertPlaylistItem = typeof playlistItems.$inferInsert;
+

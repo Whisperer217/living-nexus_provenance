@@ -20,6 +20,7 @@ import {
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount,
   getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped,
   getSongByWitnessId, updateSongMetadata, getRecentTips,
+  getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -669,6 +670,37 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .mutation(async ({ input }) => {
         await markJukeboxItemSkipped(input.itemId);
         return { success: true };
+      }),
+  }),
+
+  // ─── Playlist ─────────────────────────────────────────────────────────────
+  playlist: router({
+    /** Get the current user's playlist with full song + creator info */
+    get: protectedProcedure.query(async ({ ctx }) => {
+      return getPlaylist(ctx.user.id);
+    }),
+
+    /** Add a song to the current user's playlist (idempotent) */
+    add: protectedProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        return addToPlaylist(ctx.user.id, input.songId);
+      }),
+
+    /** Remove a song from the current user's playlist */
+    remove: protectedProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await removeFromPlaylist(ctx.user.id, input.songId);
+        return { removed: true };
+      }),
+
+    /** Check if a specific song is in the current user's playlist */
+    check: protectedProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const inPlaylist = await isInPlaylist(ctx.user.id, input.songId);
+        return { inPlaylist };
       }),
   }),
 });

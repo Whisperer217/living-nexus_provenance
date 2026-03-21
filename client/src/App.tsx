@@ -21,6 +21,7 @@ import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import VerifyPage from "./pages/VerifyPage";
 import ContributorsPage from "./pages/ContributorsPage";
+import PlaylistPage from "./pages/PlaylistPage";
 import QueueLoader from "./components/QueueLoader";
 
 function Router() {
@@ -50,6 +51,7 @@ function Router() {
             <Route path="/dashboard" component={DashboardPage} />
             <Route path="/profile" component={ProfilePage} />
             <Route path="/contributors" component={ContributorsPage} />
+            <Route path="/playlist" component={PlaylistPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />
           </Switch>

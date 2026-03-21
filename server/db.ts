@@ -607,3 +607,82 @@ export async function getRecentTips(limit = 20) {
     .limit(limit);
   return rows;
 }
+
+// ─── Playlist ─────────────────────────────────────────────────────────────────
+
+export async function getPlaylist(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { playlistItems } = await import("../drizzle/schema");
+  return db
+    .select({
+      id: playlistItems.id,
+      position: playlistItems.position,
+      addedAt: playlistItems.createdAt,
+      song: {
+        id: songs.id,
+        title: songs.title,
+        genre: songs.genre,
+        fileUrl: songs.fileUrl,
+        coverArtUrl: songs.coverArtUrl,
+        witnessId: songs.witnessId,
+        durationSeconds: songs.durationSeconds,
+        playCount: songs.playCount,
+        tipCount: songs.tipCount,
+        status: songs.status,
+      },
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+        aiDisclosure: users.aiDisclosure,
+      },
+    })
+    .from(playlistItems)
+    .innerJoin(songs, and(eq(playlistItems.songId, songs.id), eq(songs.status, "Published")))
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(eq(playlistItems.userId, userId))
+    .orderBy(playlistItems.position, playlistItems.createdAt)
+    .limit(200);
+}
+
+export async function addToPlaylist(userId: number, songId: number): Promise<{ added: boolean }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { playlistItems } = await import("../drizzle/schema");
+  // Idempotent: if already in playlist, return added: false
+  const existing = await db
+    .select({ id: playlistItems.id })
+    .from(playlistItems)
+    .where(and(eq(playlistItems.userId, userId), eq(playlistItems.songId, songId)))
+    .limit(1);
+  if (existing.length > 0) return { added: false };
+  // Get next position
+  const maxResult = await db
+    .select({ maxPos: sql<number>`COALESCE(MAX(${playlistItems.position}), -1)` })
+    .from(playlistItems)
+    .where(eq(playlistItems.userId, userId));
+  const nextPos = Number(maxResult[0]?.maxPos ?? -1) + 1;
+  await db.insert(playlistItems).values({ userId, songId, position: nextPos });
+  return { added: true };
+}
+
+export async function removeFromPlaylist(userId: number, songId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { playlistItems } = await import("../drizzle/schema");
+  await db.delete(playlistItems).where(and(eq(playlistItems.userId, userId), eq(playlistItems.songId, songId)));
+}
+
+export async function isInPlaylist(userId: number, songId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const { playlistItems } = await import("../drizzle/schema");
+  const result = await db
+    .select({ id: playlistItems.id })
+    .from(playlistItems)
+    .where(and(eq(playlistItems.userId, userId), eq(playlistItems.songId, songId)))
+    .limit(1);
+  return result.length > 0;
+}

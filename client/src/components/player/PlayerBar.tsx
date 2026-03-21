@@ -10,6 +10,7 @@ import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign,
 } from "lucide-react";
+import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import PlayerTipModal from "./PlayerTipModal";
@@ -186,6 +187,11 @@ export default function PlayerBar() {
           >
             <DollarSign size={14} />
           </button>
+        )}
+
+        {/* Add to Playlist */}
+        {currentSongId && (
+          <AddToPlaylistButton songId={currentSongId} variant="compact" />
         )}
 
         {/* Listen Together shortcut */}

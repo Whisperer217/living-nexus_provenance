@@ -12,8 +12,9 @@ import { useLocation } from "wouter";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, X,
-  Music, DollarSign,
+  Music, DollarSign, Users,
 } from "lucide-react";
+import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import PlayerTipModal from "./PlayerTipModal";
 
 function fmtTime(s: number) {
@@ -29,6 +30,7 @@ export default function MobilePlayerPanel() {
     toggleShuffle, toggleRepeat, toggleMute,
     setVolume, seek,
     isNowPlayingPanelOpen, openNowPlayingPanel, closeNowPlayingPanel,
+    queueContextLabel,
   } = usePlayer();
   const { user } = useAuth();
 
@@ -276,12 +278,20 @@ export default function MobilePlayerPanel() {
         <div className="flex-shrink-0">
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <span
-              className="text-[10px] font-bold tracking-widest uppercase"
-              style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}
-            >
-              Now Playing
-            </span>
+            <div className="flex flex-col gap-0.5">
+              <span
+                className="text-[10px] font-bold tracking-widest uppercase"
+                style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}
+              >
+                Now Playing
+              </span>
+              <span
+                className="text-[9px] tracking-wider"
+                style={{ color: "oklch(0.84 0.155 85 / 0.70)", fontFamily: "'Cinzel', serif" }}
+              >
+                {queueContextLabel}
+              </span>
+            </div>
             <button
               onClick={closeNowPlayingPanel}
               className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
@@ -375,6 +385,22 @@ export default function MobilePlayerPanel() {
               >
                 <DollarSign size={14} />
                 {tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+              </button>
+            </div>
+          )}
+
+          {/* Action buttons row: Add to Playlist + Take to Room */}
+          {currentTrack && currentSongId && (
+            <div className="px-5 pb-3 flex items-center gap-2">
+              <AddToPlaylistButton songId={currentSongId} variant="full" className="flex-1" />
+              <button
+                onClick={() => { closeNowPlayingPanel(); navigate("/together"); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body transition-all
+                  bg-white/[0.06] text-white/70 border border-white/[0.12] hover:bg-white/[0.10] hover:text-white flex-1 justify-center"
+                title="Take to Sanctuary room"
+              >
+                <Users size={13} />
+                Take to Room
               </button>
             </div>
           )}

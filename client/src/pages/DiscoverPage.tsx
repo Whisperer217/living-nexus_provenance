@@ -48,7 +48,7 @@ export default function DiscoverPage() {
           aiDisclosure: s.creator?.aiDisclosure || undefined,
         }));
       const startIdx = queue.findIndex(t => t.id === String(clickedSong.song.id));
-      playQueueAt(queue, startIdx >= 0 ? startIdx : 0);
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "HOME");
     } else {
       addAndPlay({
         id: String(clickedSong.song.id),

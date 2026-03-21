@@ -45,7 +45,9 @@ function SongBrowserModal({
   const [tipAmount, setTipAmount] = useState("1");
   const [confirming, setConfirming] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<"discover" | "playlist">("discover");
   const { data: songs } = trpc.songs.discover.useQuery({ limit: 50 });
+  const { data: playlistItems } = trpc.playlist.get.useQuery(undefined, { enabled: !!user });
   const tipToQueue = trpc.jukebox.tipToQueue.useMutation({
     onSuccess: (data) => {
       if (data.url) {
@@ -56,6 +58,15 @@ function SongBrowserModal({
     },
     onError: (err) => toast.error(err.message),
   });
+
+  // Flatten playlist items for the browser
+  const flatPlaylistSongs = (playlistItems ?? []).map((item: any) => ({
+    id: item.song?.id,
+    title: item.song?.title ?? "",
+    coverArtUrl: item.song?.coverArtUrl ?? null,
+    witnessId: item.song?.witnessId ?? null,
+    creatorName: item.creator?.artistHandle || item.creator?.name || null,
+  }));
 
   // discover returns { song: {...}, creator: {...} } — flatten for the browser
   const flatSongs = (songs ?? []).map((s: any) => ({
@@ -98,27 +109,54 @@ function SongBrowserModal({
             <X size={16} />
           </button>
         </div>
+        {/* Tabs */}
+        {!selectedSong && (
+          <div className="flex border-b border-white/[0.08]">
+            <button
+              onClick={() => setActiveTab("discover")}
+              className={`flex-1 py-2.5 text-[12px] font-heading tracking-wider transition-colors
+                ${activeTab === "discover" ? "text-[#D4AF37] border-b-2 border-[#D4AF37]" : "text-white/40 hover:text-white/60"}`}
+            >
+              Discover
+            </button>
+            <button
+              onClick={() => setActiveTab("playlist")}
+              className={`flex-1 py-2.5 text-[12px] font-heading tracking-wider transition-colors
+                ${activeTab === "playlist" ? "text-[#D4AF37] border-b-2 border-[#D4AF37]" : "text-white/40 hover:text-white/60"}`}
+            >
+              My Playlist {flatPlaylistSongs.length > 0 && `(${flatPlaylistSongs.length})`}
+            </button>
+          </div>
+        )}
 
         {!selectedSong ? (
           <>
-            {/* Search */}
-            <div className="px-4 py-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/[0.08]">
-                <Search size={13} className="text-white/70" />
-                <input
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search tracks…"
-                  className="flex-1 bg-transparent text-[13px] font-body text-white/80 outline-none placeholder:text-white/60"
-                />
+            {/* Search — only for discover tab */}
+            {activeTab === "discover" && (
+              <div className="px-4 py-3 border-b border-white/[0.06]">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/[0.08]">
+                  <Search size={13} className="text-white/70" />
+                  <input
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search tracks…"
+                    className="flex-1 bg-transparent text-[13px] font-body text-white/80 outline-none placeholder:text-white/60"
+                  />
+                </div>
               </div>
-            </div>
+            )}
             {/* Song list */}
             <div className="overflow-y-auto" style={{ maxHeight: "50vh" }}>
-              {filtered.length === 0 && (
+              {activeTab === "playlist" && flatPlaylistSongs.length === 0 && (
+                <div className="text-center py-8">
+                  <div className="text-white/40 text-[13px] font-body mb-2">Your playlist is empty</div>
+                  <div className="text-white/25 text-[11px] font-body">Add songs from Explore or any track page</div>
+                </div>
+              )}
+              {activeTab === "discover" && filtered.length === 0 && (
                 <div className="text-center py-8 text-white/70 text-[13px] font-body">No tracks found</div>
               )}
-              {filtered.map((song) => (
+              {(activeTab === "discover" ? filtered : flatPlaylistSongs).map((song) => (
                 <button
                   key={song.id}
                   onClick={() => setSelectedSong(song)}

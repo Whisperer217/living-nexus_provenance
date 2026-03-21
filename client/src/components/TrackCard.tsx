@@ -4,6 +4,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { Play, Heart, DollarSign, ExternalLink } from "lucide-react";
+import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { useLocation } from "wouter";
 import { useLike } from "@/hooks/useLike";
@@ -119,6 +120,9 @@ export default function TrackCard({ track, index, onTip }: Props) {
               >
                 <DollarSign size={12} />
               </button>
+            )}
+            {!isNaN(numericId) && numericId > 0 && (
+              <AddToPlaylistButton songId={numericId} variant="compact" className="w-6 h-6" />
             )}
             <button
               onClick={e => { e.stopPropagation(); navigate(`/track/${track.id}`); }}

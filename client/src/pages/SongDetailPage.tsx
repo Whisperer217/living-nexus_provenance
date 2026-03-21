@@ -25,6 +25,7 @@ import {
   ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter, Heart,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
+import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { safeAudioUrl } from "@shared/const";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
@@ -371,6 +372,9 @@ export default function SongDetailPage() {
                          <span className="ml-1 text-[11px] tabular-nums opacity-70">{likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}</span>
                        )}
                      </Button>
+                  )}
+                  {!isOwner && (
+                    <AddToPlaylistButton songId={song.id} variant="full" />
                   )}
                   <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
                     style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
