@@ -340,3 +340,7 @@
 
 ## Phase: Dashboard My Songs Mobile Fix
 - [x] Fix My Songs list mobile layout — metadata wraps cleanly, min 12px font, proper spacing
+
+## Phase: Archive + EditTrackPanel Mobile Bug Fixes
+- [x] Archive page — click track row to load into player and play
+- [x] EditTrackPanel — single column stacking on screens under 480px

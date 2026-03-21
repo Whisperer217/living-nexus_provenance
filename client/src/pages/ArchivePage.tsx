@@ -11,10 +11,11 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Music, Upload, Globe, EyeOff, Pencil } from "lucide-react";
+import { Music, Upload, Globe, EyeOff, Pencil, ExternalLink, Play } from "lucide-react";
 import { useState } from "react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
+import { usePlayer } from "@/contexts/PlayerContext";
 
 /* ── Status tag ─────────────────────────────────────────────────── */
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
@@ -47,6 +48,34 @@ export default function ArchivePage() {
   const [,] = useLocation();
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
+  const { playQueueAt } = usePlayer();
+
+  const buildTrack = (song: any) => ({
+    id: String(song.id),
+    title: song.title,
+    artist: song.artistName ?? "Unknown Artist",
+    audioUrl: song.audioUrl ?? "",
+    coverArt: song.coverArtUrl ?? "",
+    genre: song.genre ?? "",
+    witnessId: song.witnessId ?? "",
+    aiDisclosure: song.aiConsent ?? "original",
+  });
+
+  const handlePlay = (e: React.MouseEvent, songs: any[], idx: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const playable = songs.filter((s: any) => s.audioUrl);
+    const clickedTrack = songs[idx];
+    if (!clickedTrack?.audioUrl) {
+      toast.error("This track has no audio file attached.");
+      return;
+    }
+    // Build queue starting from clicked song, then remaining
+    const tracks = playable.map(buildTrack);
+    const startIdx = tracks.findIndex((t) => t.id === String(clickedTrack.id));
+    playQueueAt(tracks, startIdx >= 0 ? startIdx : 0);
+    toast.success(`Now playing: ${clickedTrack.title}`);
+  };
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -157,13 +186,18 @@ export default function ArchivePage() {
             {songs.map((song: any, idx: number) => {
               const isPublished = song.status === "Published";
               const isPending = updateStatus.isPending && updateStatus.variables?.songId === song.id;
+              const hasAudio = !!song.audioUrl;
 
               return (
-                <Link key={song.id} href={`/song/${song.id}`}>
-                  <div
-                    className="flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-colors hover:brightness-110"
-                    style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}
-                  >
+                <div key={song.id}
+                  onClick={(e) => hasAudio && handlePlay(e, songs, idx)}
+                  className="flex items-center gap-4 p-3 rounded-xl transition-colors hover:brightness-110"
+                  style={{
+                    background: "oklch(0.115 0.055 278)",
+                    border: "1px solid oklch(0.18 0.015 280)",
+                    cursor: hasAudio ? "pointer" : "default",
+                  }}
+                >
                     {/* Row number */}
                     <span className="text-xs w-5 text-center flex-shrink-0"
                       style={{ color: "#E2E8F0" }}>
@@ -202,50 +236,71 @@ export default function ArchivePage() {
                       <StatusTag status={song.status ?? "Draft"} />
                     </div>
 
-                    {/* Edit button */}
-                    <button
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingSong(song); }}
-                      title="Edit track metadata"
-                      className="flex-shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
-                      style={{
-                        background: "rgba(212,175,55,0.1)",
-                        color: "#D4AF37",
-                        border: "1px solid rgba(212,175,55,0.3)",
-                      }}
-                    >
-                      <Pencil className="w-3 h-3" /> Edit
-                    </button>
-
-                    {/* Publish toggle */}
-                    <button
-                      onClick={(e) => handleToggle(e, song)}
-                      disabled={isPending}
-                      title={isPublished ? "Unpublish (set to Draft)" : "Publish"}
-                      className="flex-shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all disabled:opacity-50"
-                      style={isPublished
-                        ? {
-                            background: "oklch(0.65 0.18 145 / 0.15)",
-                            color: "oklch(0.65 0.18 145)",
-                            border: "1px solid oklch(0.65 0.18 145 / 0.35)",
-                          }
-                        : {
-                            background: "oklch(0.75 0.18 85 / 0.15)",
-                            color: "oklch(0.84 0.155 85)",
-                            border: "1px solid oklch(0.75 0.18 85 / 0.35)",
-                          }
-                      }
-                    >
-                      {isPending ? (
-                        <span className="w-3 h-3 rounded-full border border-t-transparent animate-spin"
-                          style={{ borderColor: "currentColor", borderTopColor: "transparent" }} />
-                      ) : isPublished ? (
-                        <><EyeOff className="w-3 h-3" /> Unpublish</>
-                      ) : (
-                        <><Globe className="w-3 h-3" /> Publish</>
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      {/* Play indicator */}
+                      {hasAudio && (
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center"
+                          style={{ color: "oklch(0.84 0.155 85)" }}
+                          title="Click row to play">
+                          <Play className="w-3 h-3" />
+                        </div>
                       )}
-                    </button>
+
+                      {/* View song page */}
+                      <Link href={`/song/${song.id}`}>
+                        <button
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                          title="View song page"
+                        >
+                          <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                        </button>
+                      </Link>
+
+                      {/* Edit */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditingSong(song); }}
+                        title="Edit track metadata"
+                        className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all"
+                        style={{
+                          background: "rgba(212,175,55,0.1)",
+                          color: "#D4AF37",
+                          border: "1px solid rgba(212,175,55,0.3)",
+                        }}
+                      >
+                        <Pencil className="w-3 h-3" /> Edit
+                      </button>
+
+                      {/* Publish toggle */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleToggle(e, song); }}
+                        disabled={isPending}
+                        title={isPublished ? "Unpublish (set to Draft)" : "Publish"}
+                        className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all disabled:opacity-50"
+                        style={isPublished
+                          ? {
+                              background: "oklch(0.65 0.18 145 / 0.15)",
+                              color: "oklch(0.65 0.18 145)",
+                              border: "1px solid oklch(0.65 0.18 145 / 0.35)",
+                            }
+                          : {
+                              background: "oklch(0.75 0.18 85 / 0.15)",
+                              color: "oklch(0.84 0.155 85)",
+                              border: "1px solid oklch(0.75 0.18 85 / 0.35)",
+                            }
+                        }
+                      >
+                        {isPending ? (
+                          <span className="w-3 h-3 rounded-full border border-t-transparent animate-spin"
+                            style={{ borderColor: "currentColor", borderTopColor: "transparent" }} />
+                        ) : isPublished ? (
+                          <><EyeOff className="w-3 h-3" /> Unpublish</>
+                        ) : (
+                          <><Globe className="w-3 h-3" /> Publish</>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </Link>
               );
             })}
           </div>

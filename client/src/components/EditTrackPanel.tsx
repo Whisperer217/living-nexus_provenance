@@ -159,11 +159,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           background: "linear-gradient(180deg, #0d1520 0%, #080d14 100%)",
           borderLeft: "1px solid rgba(212,175,55,0.2)",
           boxShadow: "-8px 0 40px rgba(0,0,0,0.6)",
+          minWidth: 0,
         }}
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-6 py-4 sticky top-0 z-10"
+          className="flex items-center justify-between px-4 sm:px-6 py-4 sticky top-0 z-10"
           style={{ background: "#0d1520", borderBottom: "1px solid rgba(212,175,55,0.15)" }}
         >
           <div>
@@ -183,7 +184,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
         {/* WID immutability notice */}
         <div
-          className="mx-6 mt-4 px-4 py-3 rounded-lg flex items-start gap-3"
+          className="mx-4 sm:mx-6 mt-4 px-4 py-3 rounded-lg flex items-start gap-3"
           style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)" }}
         >
           <Lock size={16} style={{ color: "#D4AF37", marginTop: 2, flexShrink: 0 }} />
@@ -196,12 +197,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         </div>
 
         {/* Form */}
-        <div className="flex-1 px-6 py-5 space-y-5">
+        <div className="flex-1 px-4 sm:px-6 py-5 space-y-5">
 
           {/* Cover Art */}
           <div className="space-y-2">
             <Label className="text-white text-sm font-medium">Cover Art</Label>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col items-start gap-3">
               <div
                 className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0"
                 style={{ border: "1px solid rgba(212,175,55,0.3)", background: "#0a0f1a" }}
@@ -214,7 +215,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                   </div>
                 )}
               </div>
-              <div className="flex-1">
+              <div className="w-full">
                 <Button
                   variant="outline"
                   size="sm"
@@ -356,7 +357,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
         {/* Footer */}
         <div
-          className="sticky bottom-0 px-6 py-4 flex gap-3"
+          className="sticky bottom-0 px-4 sm:px-6 py-4 flex gap-3"
           style={{ background: "#0d1520", borderTop: "1px solid rgba(212,175,55,0.15)" }}
         >
           <Button
