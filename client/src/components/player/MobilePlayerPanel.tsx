@@ -11,8 +11,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, X,
-  Music,
+  Music, DollarSign,
 } from "lucide-react";
+import PlayerTipModal from "./PlayerTipModal";
 
 function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
@@ -30,6 +31,7 @@ export default function MobilePlayerPanel() {
   const { user } = useAuth();
 
   const [open, setOpen] = useState(false);
+  const [tipOpen, setTipOpen] = useState(false);
 
   // Touch-swipe to close (swipe right ≥ 60px)
   const touchStartX = useRef<number | null>(null);
@@ -38,6 +40,14 @@ export default function MobilePlayerPanel() {
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
   const currentSongId = currentTrack?.id ? parseInt(currentTrack.id, 10) : null;
+
+  // Song detail (for tip status)
+  const { data: songDetail } = trpc.songs.getById.useQuery(
+    { id: currentSongId! },
+    { enabled: !!currentSongId && !isNaN(currentSongId), staleTime: 60_000 }
+  );
+  const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
+  const tipsEnabled = !!creatorStripeAccountId;
 
   // DB-backed like state
   const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(
@@ -260,6 +270,29 @@ export default function MobilePlayerPanel() {
           </button>
         </div>
 
+        {/* ── Tip button ── */}
+        {currentTrack && (
+          <div className="px-6 pb-3">
+            <button
+              onClick={() => setTipOpen(true)}
+              disabled={!tipsEnabled}
+              className="w-full py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all
+                flex items-center justify-center gap-2
+                disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                background: tipsEnabled ? "oklch(0.84 0.155 85)" : "oklch(0.18 0.02 275)",
+                color: tipsEnabled ? "oklch(0.08 0.01 280)" : "oklch(0.45 0.03 280)",
+                border: tipsEnabled ? "none" : "1px solid oklch(0.24 0.02 275)",
+                fontFamily: "'Cinzel', serif",
+              }}
+              title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+            >
+              <DollarSign size={14} />
+              {tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+            </button>
+          </div>
+        )}
+
         {/* ── Progress bar ── */}
         <div className="px-6 pb-3">
           <div
@@ -347,6 +380,16 @@ export default function MobilePlayerPanel() {
           to   { height: 10px; }
         }
       `}</style>
+
+      {/* ── Tip Modal ── */}
+      {tipOpen && currentSongId && (
+        <PlayerTipModal
+          songId={currentSongId}
+          artistName={currentTrack?.artist || "this creator"}
+          stripeAccountId={creatorStripeAccountId}
+          onClose={() => setTipOpen(false)}
+        />
+      )}
     </>
   );
 }

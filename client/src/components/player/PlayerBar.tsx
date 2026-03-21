@@ -8,9 +8,11 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Play, Pause, SkipBack, SkipForward,
-  Shuffle, Repeat, Volume2, VolumeX, Heart, Users,
+  Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign,
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { useState } from "react";
+import PlayerTipModal from "./PlayerTipModal";
 
 function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
@@ -23,10 +25,19 @@ export default function PlayerBar() {
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek } = usePlayer();
   const [, navigate] = useLocation();
   const { user } = useAuth();
+  const [tipOpen, setTipOpen] = useState(false);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
   const currentSongId = currentTrack?.id ? parseInt(currentTrack.id, 10) : null;
+
+  // Song detail for tip status (only fetched when a song is playing)
+  const { data: songDetail } = trpc.songs.getById.useQuery(
+    { id: currentSongId! },
+    { enabled: !!currentSongId && !isNaN(currentSongId), staleTime: 60_000 }
+  );
+  const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
+  const tipsEnabled = !!creatorStripeAccountId;
 
   // DB-backed like state
   const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(
@@ -161,6 +172,22 @@ export default function PlayerBar() {
           </div>
         )}
 
+        {/* Tip button */}
+        {currentTrack && (
+          <button
+            onClick={() => setTipOpen(true)}
+            disabled={!tipsEnabled}
+            className={`p-1.5 transition-colors ${
+              tipsEnabled
+                ? "text-[#D4AF37] hover:text-[#F5D76E]"
+                : "text-white/15 cursor-not-allowed"
+            }`}
+            title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+          >
+            <DollarSign size={14} />
+          </button>
+        )}
+
         {/* Listen Together shortcut */}
         <button
           onClick={() => navigate("/together")}
@@ -184,6 +211,15 @@ export default function PlayerBar() {
           />
         </div>
       </div>
+      {/* Tip Modal */}
+      {tipOpen && currentSongId && (
+        <PlayerTipModal
+          songId={currentSongId}
+          artistName={currentTrack?.artist || "this creator"}
+          stripeAccountId={creatorStripeAccountId}
+          onClose={() => setTipOpen(false)}
+        />
+      )}
     </div>
   );
 }

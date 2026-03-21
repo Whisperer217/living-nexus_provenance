@@ -407,3 +407,10 @@
 
 ## Phase: Tip Ticker Relocation
 - [x] Move TipTicker from top of main content to bottom of layout (above player bar)
+
+## Phase: Full Tip Surface Area
+- [x] Build reusable TipModal component (amount selector, tip mutation, greyed-out state if tips not enabled)
+- [x] Add Tip button to MobilePlayerPanel (Now Playing side panel) below song title/artist, above progress bar
+- [x] Add gold dollar-sign tip icon to PlayerBar (mini player bar) next to like button
+- [x] Wire both buttons to TipModal with current song creator data from PlayerContext
+- [x] Write vitest test for tip surface area logic
