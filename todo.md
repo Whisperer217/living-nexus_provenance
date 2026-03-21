@@ -429,3 +429,17 @@
 - [x] Scrollable lyrics section in MobilePlayerPanel (scrollable, shows lyricsText from DB)
 - [x] Empty lyrics state: "No lyrics registered — upload lyrics to protect your words."
 - [x] Draggable floating player tab — vertical drag on right edge, session-persistent position
+
+## Phase: Five Connected Player Fixes
+- [ ] Universal play handoff — every song card/play button on platform routes to side panel
+- [ ] Single audio instance — stop current before starting new song
+- [ ] Background creator page routing on queue advance
+- [ ] Restructure MobilePlayerPanel: fixed top section + scrollable bottom section with lyrics
+- [ ] Smooth crossfade cover art transition between songs
+
+## Phase: Five Player Fixes
+- [x] Universal play handoff — every song card (TrackCard, HomePage, ExplorePage, DiscoverPage, LikedPage, TrackPage) calls addAndPlay + openNowPlayingPanel
+- [x] Single audio instance — addAndPlay stops current audio before starting new track
+- [x] Background creator page routing — queue advance navigates to next creator's profile behind the panel
+- [x] Two-section panel layout — fixed top (art, title, artist, WID badge, tip) + scrollable bottom (progress, controls, volume, lyrics)
+- [x] Crossfade cover art — key-based remount with panelArtFadeIn fade+scale animation on track change

@@ -33,8 +33,8 @@ export default function TrackPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const {
-    state, allTracks, playTrack, togglePlay, toggleLike,
-    addTrackTip, addComment, incrementShare,
+    state, allTracks, addAndPlay, togglePlay, toggleLike,
+    openNowPlayingPanel, addTrackTip, addComment, incrementShare,
   } = usePlayer();
 
   const tracks = allTracks();
@@ -67,10 +67,11 @@ export default function TrackPage() {
   }
 
   const handlePlay = () => {
-    if (state.currentIdx === trackIdx) {
+    if (track && state.currentIdx === trackIdx) {
       togglePlay();
-    } else {
-      playTrack(trackIdx);
+    } else if (track) {
+      addAndPlay(track);
+      openNowPlayingPanel();
     }
   };
 

@@ -22,7 +22,7 @@ const GENRE_ICONS: Record<string, string> = {
 export default function DiscoverPage() {
   const [search, setSearch] = useState("");
   const [activeGenre, setActiveGenre] = useState<string | undefined>();
-  const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
 
   const { data: songs, isLoading: songsLoading } = trpc.songs.discover.useQuery(
     { genre: activeGenre, search: search || undefined, limit: 24 },
@@ -62,6 +62,7 @@ export default function DiscoverPage() {
       });
     }
     playMutation.mutate({ songId: clickedSong.song.id });
+    openNowPlayingPanel();
   };
 
   return (

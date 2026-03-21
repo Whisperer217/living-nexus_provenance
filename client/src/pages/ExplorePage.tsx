@@ -25,7 +25,7 @@ const GENRE_CARDS = [
 const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp";
 
 export default function ExplorePage() {
-  const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
 
@@ -69,6 +69,7 @@ export default function ExplorePage() {
       });
     }
     playMutation.mutate({ songId: song.id });
+    openNowPlayingPanel();
   };
 
   return (

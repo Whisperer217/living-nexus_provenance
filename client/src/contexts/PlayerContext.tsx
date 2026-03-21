@@ -33,6 +33,7 @@ export interface Track {
   shareCount?: number;
   witnessId?: string;
   aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
+  creatorHandle?: string; // used for background creator page routing on queue advance
 }
 
 // DEMO_TRACKS removed — queue only contains real DB-sourced tracks with valid audio URLs
@@ -107,6 +108,8 @@ interface PlayerContextValue {
   addComment: (trackId: string, comment: Comment) => void;
   incrementShare: (trackId: string) => void;
   setRoom: (r: PlayerState["room"]) => void;
+  /** The creator handle of the currently playing track — for background routing */
+  backgroundCreatorHandle: string | null;
 }
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
@@ -344,6 +347,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const currentTrackId = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.id ?? null) : null;
+  const backgroundCreatorHandle = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.creatorHandle ?? null) : null;
 
   // ── MediaSession API: lock screen / notification shade controls ──
   useEffect(() => {
@@ -396,6 +400,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
       setProfileAvatar, setProfileBanner,
       addTip, addTrackTip, addComment, incrementShare, setRoom,
+      backgroundCreatorHandle,
     }}>
       {children}
     </PlayerContext.Provider>

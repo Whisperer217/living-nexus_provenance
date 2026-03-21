@@ -8,6 +8,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocation } from "wouter";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, X,
@@ -77,6 +78,23 @@ export default function MobilePlayerPanel() {
     dragStartY.current = null;
     isDragging.current = false;
   }, [tabTop]);
+
+  const { backgroundCreatorHandle } = usePlayer();
+  const [, navigate] = useLocation();
+
+  // Background creator page routing — when queue auto-advances while panel is open,
+  // navigate to the next creator's profile so closing the panel lands there
+  const prevCreatorHandle = useRef<string | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    if (!backgroundCreatorHandle) return;
+    if (backgroundCreatorHandle === prevCreatorHandle.current) return;
+    prevCreatorHandle.current = backgroundCreatorHandle;
+    // Only background-navigate if panel is already open (not on first open)
+    if (prevCreatorHandle.current !== null) {
+      navigate(`/creator/${backgroundCreatorHandle}`);
+    }
+  }, [backgroundCreatorHandle, open, navigate]);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
@@ -254,195 +272,217 @@ export default function MobilePlayerPanel() {
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <span
-            className="text-[10px] font-bold tracking-widest uppercase"
-            style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}
-          >
-            Now Playing
-          </span>
-          <button
-            onClick={closeNowPlayingPanel}
-            className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* ── Large art ── */}
-        <div className="px-6 pb-4">
-          <ArtContent size="w-full aspect-square" />
-        </div>
-
-        {/* ── Track info + like ── */}
-        <div className="px-6 pb-4 flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-base font-semibold text-white/90 truncate font-body leading-tight">
-              {currentTrack?.title || "No track selected"}
-            </p>
-            <p className="text-sm text-white/40 truncate font-body mt-0.5">
-              {currentTrack?.artist || "—"}
-            </p>
-            {/* Genre + AI Disclosure badges */}
-            <div className="flex flex-wrap gap-1.5 mt-1.5">
-              {currentTrack?.genre && (
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
-                  style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.22 0.02 280)" }}>
-                  {currentTrack.genre}
-                </span>
-              )}
-              {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
-                  style={{
-                    background: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.2)" : "oklch(0.60 0.18 55 / 0.2)",
-                    color: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.80 0.18 25)" : "oklch(0.85 0.18 55)",
-                    border: `1px solid ${currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.4)" : "oklch(0.60 0.18 55 / 0.4)"}`,
-                  }}>
-                  {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
-                </span>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={handleToggleLike}
-            disabled={!user || toggleLikeMutation.isPending}
-            className={`p-2 flex-shrink-0 transition-colors ${isLiked ? "text-[#A78BFA]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
-            title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
-          >
-            <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
-          </button>
-        </div>
-
-        {/* ── Tip button ── */}
-        {currentTrack && (
-          <div className="px-6 pb-3">
-            <button
-              onClick={() => setTipOpen(true)}
-              disabled={!tipsEnabled}
-              className="w-full py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all
-                flex items-center justify-center gap-2
-                disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{
-                background: tipsEnabled ? "oklch(0.84 0.155 85)" : "oklch(0.18 0.02 275)",
-                color: tipsEnabled ? "oklch(0.08 0.01 280)" : "oklch(0.45 0.03 280)",
-                border: tipsEnabled ? "none" : "1px solid oklch(0.24 0.02 275)",
-                fontFamily: "'Cinzel', serif",
-              }}
-              title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+        {/* ══ FIXED TOP SECTION — art, title, artist, badges, tip ══ */}
+        <div className="flex-shrink-0">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <span
+              className="text-[10px] font-bold tracking-widest uppercase"
+              style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}
             >
-              <DollarSign size={14} />
-              {tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+              Now Playing
+            </span>
+            <button
+              onClick={closeNowPlayingPanel}
+              className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
+            >
+              <X size={16} />
             </button>
           </div>
-        )}
 
-        {/* ── Progress bar ── */}
-        <div className="px-6 pb-3">
-          <div
-            className="w-full h-1.5 rounded-full bg-white/10 cursor-pointer relative group"
-            onClick={handleSeek}
-            onTouchMove={handleSeekTouch}
-          >
+          {/* Large art — crossfade handled via key-based remount */}
+          <div className="px-5 pb-3">
             <div
-              className="h-full rounded-full relative"
+              key={currentTrack?.id || "empty"}
+              className="w-full aspect-square rounded-xl overflow-hidden flex items-center justify-center"
               style={{
-                width: `${progress}%`,
-                background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
-                transition: "width 0.25s linear",
+                background: currentTrack?.bg || "oklch(0.15 0.05 275)",
+                animation: "panelArtFadeIn 0.4s ease",
               }}
             >
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white
-                opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
+              {currentTrack?.artUrl && currentTrack.artType !== "video" ? (
+                <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
+              ) : currentTrack?.artUrl && currentTrack.artType === "video" ? (
+                <video src={currentTrack.artUrl} className="w-full h-full object-cover" muted />
+              ) : (
+                <Music className="w-1/2 h-1/2 opacity-30 text-white" />
+              )}
             </div>
           </div>
-          <div className="flex justify-between mt-1.5">
-            <span className="text-[11px] text-white/30 tabular-nums">{fmtTime(state.currentTime)}</span>
-            <span className="text-[11px] text-white/30 tabular-nums">{fmtTime(state.duration)}</span>
-          </div>
-        </div>
 
-        {/* ── Main controls ── */}
-        <div className="px-6 pb-4 flex items-center justify-between">
-          <button
-            onClick={toggleShuffle}
-            className={`p-2 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/30 hover:text-white/60"}`}
-          >
-            <Shuffle size={18} />
-          </button>
-          <button onClick={prevTrack} className="p-2 text-white/60 hover:text-white transition-colors">
-            <SkipBack size={24} />
-          </button>
-          <button
-            onClick={togglePlay}
-            className="w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
-            style={{ background: "oklch(0.94 0.006 280)", color: "oklch(0.08 0.01 280)" }}
-          >
-            {state.isPlaying
-              ? <Pause size={22} fill="currentColor" />
-              : <Play size={22} fill="currentColor" className="ml-1" />
-            }
-          </button>
-          <button onClick={nextTrack} className="p-2 text-white/60 hover:text-white transition-colors">
-            <SkipForward size={24} />
-          </button>
-          <button
-            onClick={toggleRepeat}
-            className={`p-2 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/30 hover:text-white/60"}`}
-          >
-            <Repeat size={18} />
-          </button>
-        </div>
-
-        {/* ── Volume ── */}
-        <div className="px-6 pb-6 flex items-center gap-3">
-          <button onClick={toggleMute} className="p-1 text-white/35 hover:text-white transition-colors flex-shrink-0">
-            {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-          </button>
-          <div
-            className="flex-1 h-1.5 rounded-full bg-white/10 cursor-pointer relative group"
-            onClick={handleVolumeClick}
-            onTouchMove={handleVolumeTouch}
-          >
-            <div
-              className="h-full rounded-full bg-white/40 group-hover:bg-[#D4AF37] transition-colors"
-              style={{ width: state.isMuted ? "0%" : `${state.volume * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* ── Lyrics section ── */}
-        <div className="px-5 pb-4 flex-1 flex flex-col min-h-0">
-          <div className="flex items-center justify-between mb-2">
-            <span
-              className="text-[9px] font-bold tracking-widest uppercase"
-              style={{ color: "oklch(0.40 0.03 280)", fontFamily: "'Cinzel', serif" }}
+          {/* Track info + like */}
+          <div className="px-5 pb-2 flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[15px] font-semibold text-white/90 font-body leading-snug line-clamp-2">
+                {currentTrack?.title || "No track selected"}
+              </p>
+              <p className="text-sm text-white/50 truncate font-body mt-0.5">
+                {currentTrack?.artist || "—"}
+              </p>
+              {/* WID badge */}
+              {currentTrack?.witnessId && (
+                <span className="inline-block mt-1.5 text-[9px] font-mono px-2 py-0.5 rounded-full"
+                  style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
+                  🔐 WID: {currentTrack.witnessId.slice(0, 12)}…
+                </span>
+              )}
+              {/* Genre + AI Disclosure badges */}
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {currentTrack?.genre && (
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
+                    style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.22 0.02 280)" }}>
+                    {currentTrack.genre}
+                  </span>
+                )}
+                {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
+                    style={{
+                      background: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.2)" : "oklch(0.60 0.18 55 / 0.2)",
+                      color: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.80 0.18 25)" : "oklch(0.85 0.18 55)",
+                      border: `1px solid ${currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.4)" : "oklch(0.60 0.18 55 / 0.4)"}`,
+                    }}>
+                    {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={handleToggleLike}
+              disabled={!user || toggleLikeMutation.isPending}
+              className={`p-2 flex-shrink-0 transition-colors ${isLiked ? "text-[#A78BFA]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
+              title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
             >
-              Lyrics
-            </span>
-            {songDetail?.song?.lyricsText && (
-              <span className="text-[9px]" style={{ color: "oklch(0.35 0.02 280)" }}>scroll to read</span>
-            )}
+              <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+            </button>
           </div>
-          <div
-            className="flex-1 overflow-y-auto rounded-xl px-4 py-3 min-h-[120px] max-h-[200px]"
-            style={{
-              background: "oklch(0.08 0.015 275)",
-              border: "1px solid oklch(0.16 0.02 275)",
-              scrollbarWidth: "thin",
-              scrollbarColor: "oklch(0.25 0.02 275) transparent",
-            }}
-          >
+
+          {/* Tip button */}
+          {currentTrack && (
+            <div className="px-5 pb-3">
+              <button
+                onClick={() => setTipOpen(true)}
+                disabled={!tipsEnabled}
+                className="w-full py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all
+                  flex items-center justify-center gap-2
+                  disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  background: tipsEnabled ? "oklch(0.84 0.155 85)" : "oklch(0.18 0.02 275)",
+                  color: tipsEnabled ? "oklch(0.08 0.01 280)" : "oklch(0.45 0.03 280)",
+                  border: tipsEnabled ? "none" : "1px solid oklch(0.24 0.02 275)",
+                  fontFamily: "'Cinzel', serif",
+                }}
+                title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+              >
+                <DollarSign size={14} />
+                {tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+              </button>
+            </div>
+          )}
+
+          {/* Gold divider */}
+          <div className="mx-5 mb-1" style={{ height: "1px", background: "oklch(0.84 0.155 85 / 0.12)" }} />
+        </div>
+
+        {/* ══ SCROLLABLE BOTTOM SECTION — progress, controls, volume, lyrics ══ */}
+        <div
+          className="flex-1 overflow-y-auto"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}
+        >
+          {/* Progress bar */}
+          <div className="px-5 pt-4 pb-3">
+            <div
+              className="w-full h-1.5 rounded-full bg-white/10 cursor-pointer relative group"
+              onClick={handleSeek}
+              onTouchMove={handleSeekTouch}
+            >
+              <div
+                className="h-full rounded-full relative"
+                style={{
+                  width: `${progress}%`,
+                  background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
+                  transition: "width 0.25s linear",
+                }}
+              >
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white
+                  opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
+              </div>
+            </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[11px] text-white/30 tabular-nums">{fmtTime(state.currentTime)}</span>
+              <span className="text-[11px] text-white/30 tabular-nums">{fmtTime(state.duration)}</span>
+            </div>
+          </div>
+
+          {/* Main controls */}
+          <div className="px-5 pb-4 flex items-center justify-between">
+            <button
+              onClick={toggleShuffle}
+              className={`p-2 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/30 hover:text-white/60"}`}
+            >
+              <Shuffle size={18} />
+            </button>
+            <button onClick={prevTrack} className="p-2 text-white/60 hover:text-white transition-colors">
+              <SkipBack size={24} />
+            </button>
+            <button
+              onClick={togglePlay}
+              className="w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
+              style={{ background: "oklch(0.94 0.006 280)", color: "oklch(0.08 0.01 280)" }}
+            >
+              {state.isPlaying
+                ? <Pause size={22} fill="currentColor" />
+                : <Play size={22} fill="currentColor" className="ml-1" />
+              }
+            </button>
+            <button onClick={nextTrack} className="p-2 text-white/60 hover:text-white transition-colors">
+              <SkipForward size={24} />
+            </button>
+            <button
+              onClick={toggleRepeat}
+              className={`p-2 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/30 hover:text-white/60"}`}
+            >
+              <Repeat size={18} />
+            </button>
+          </div>
+
+          {/* Volume */}
+          <div className="px-5 pb-5 flex items-center gap-3">
+            <button onClick={toggleMute} className="p-1 text-white/35 hover:text-white transition-colors flex-shrink-0">
+              {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
+            <div
+              className="flex-1 h-1.5 rounded-full bg-white/10 cursor-pointer relative group"
+              onClick={handleVolumeClick}
+              onTouchMove={handleVolumeTouch}
+            >
+              <div
+                className="h-full rounded-full bg-white/40 group-hover:bg-[#D4AF37] transition-colors"
+                style={{ width: state.isMuted ? "0%" : `${state.volume * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Lyrics section */}
+          <div className="px-5 pb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                className="text-[9px] font-bold tracking-widest uppercase"
+                style={{ color: "oklch(0.40 0.03 280)", fontFamily: "'Cinzel', serif" }}
+              >
+                Lyrics
+              </span>
+              <div className="flex-1" style={{ height: "1px", background: "oklch(0.18 0.02 275)" }} />
+            </div>
             {songDetail?.song?.lyricsText ? (
               <pre
-                className="text-[11px] leading-relaxed whitespace-pre-wrap font-body"
-                style={{ color: "oklch(0.65 0.03 280)", fontFamily: "'Inter', sans-serif" }}
+                className="text-[13px] leading-7 whitespace-pre-wrap font-body"
+                style={{ color: "oklch(0.72 0.03 280)", fontFamily: "'Inter', sans-serif" }}
               >
                 {songDetail.song.lyricsText}
               </pre>
             ) : (
               <p
-                className="text-[11px] italic text-center mt-4"
+                className="text-[12px] italic text-center py-6"
                 style={{ color: "oklch(0.35 0.02 280)" }}
               >
                 No lyrics registered —{" "}
@@ -450,19 +490,23 @@ export default function MobilePlayerPanel() {
               </p>
             )}
           </div>
-        </div>
 
-        {/* Swipe hint */}
-        <p className="text-center text-[10px] pb-3" style={{ color: "oklch(0.28 0.02 280)" }}>
-          Swipe right to close
-        </p>
+          {/* Swipe hint */}
+          <p className="text-center text-[10px] pb-4" style={{ color: "oklch(0.25 0.02 280)" }}>
+            Swipe right to close
+          </p>
+        </div>
       </div>
 
-      {/* Keyframe for the tab wave animation */}
+      {/* Keyframes */}
       <style>{`
         @keyframes mobileWave {
           from { height: 3px; }
           to   { height: 10px; }
+        }
+        @keyframes panelArtFadeIn {
+          from { opacity: 0; transform: scale(0.97); }
+          to   { opacity: 1; transform: scale(1); }
         }
       `}</style>
 

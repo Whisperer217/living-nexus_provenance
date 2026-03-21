@@ -11,7 +11,7 @@ import { safeAudioUrl } from "@shared/const";
 
 export default function LikedPage() {
   const { user, loading } = useAuth();
-  const { playQueueAt } = usePlayer();
+  const { playQueueAt, openNowPlayingPanel } = usePlayer();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -54,6 +54,7 @@ export default function LikedPage() {
     if (tracks.length === 0) return;
     const clampedIdx = Math.max(0, Math.min(idx, tracks.length - 1));
     playQueueAt(tracks, clampedIdx);
+    openNowPlayingPanel();
   };
 
   return (

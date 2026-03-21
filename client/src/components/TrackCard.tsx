@@ -16,10 +16,16 @@ interface Props {
 }
 
 export default function TrackCard({ track, index, onTip }: Props) {
-  const { state, playTrack } = usePlayer();
+  const { state, addAndPlay, openNowPlayingPanel } = usePlayer();
   const [, navigate] = useLocation();
   const isPlaying = state.currentIdx === index && state.isPlaying;
   const isActive = state.currentIdx === index;
+
+  const handlePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addAndPlay(track);
+    openNowPlayingPanel();
+  };
   // Use DB-backed like state (falls back to unfilled for unauthenticated users)
   const numericId = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
   const { liked: isLiked, toggle: toggleLike } = useLike(isNaN(numericId) ? 0 : numericId);
@@ -37,7 +43,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
           ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
           : "border-white/[0.05] hover:border-[#A78BFA]/30"
         }`}
-      onClick={() => playTrack(index)}
+      onClick={handlePlay}
     >
       {/* Artwork */}
       <div className="aspect-square relative overflow-hidden" style={{ background: track.bg || "oklch(0.15 0.05 275)" }}>

@@ -25,7 +25,7 @@ const GENRES = GENRE_CARDS.map(g => g.label);
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-hero-76TJneE6NXajYSDJWHEXPg.webp";
 
 export default function HomePage() {
-  const { state, allTracks, playTrack } = usePlayer();
+  const { state, allTracks, addAndPlay, openNowPlayingPanel } = usePlayer();
   const [activeGenre, setActiveGenre] = useState("All");
   const [tipTarget, setTipTarget] = useState<number | null>(null);
 
@@ -142,7 +142,7 @@ export default function HomePage() {
                     key={track.id}
                     className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all group
                       ${isActive ? "bg-white/[0.06] border border-[#D4AF37]/20" : "hover:bg-white/[0.03] border border-transparent"}`}
-                    onClick={() => playTrack(idx)}
+                    onClick={() => { addAndPlay(track); openNowPlayingPanel(); }}
                   >
                     <span className="text-[13px] font-heading text-white/60 w-5 text-center">{i + 1}</span>
                     <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden rounded-lg"
