@@ -370,3 +370,11 @@
 - [x] Build SmartCaptionGenerator UI component with loading state, suggestion display, accept/edit/ignore actions
 - [x] Integrate SmartCaptionGenerator into UploadPage caption/description field
 - [x] Write vitest test for generateCaption procedure
+
+## Phase: PWA Manifest & Service Worker
+- [x] Generate 192x192 and 512x512 app icons from Living Nexus logo
+- [x] Upload icons to CDN and place in client/public
+- [x] Create manifest.json with all required PWA fields
+- [x] Create service worker (sw.js) for basic offline caching
+- [x] Wire manifest link and service worker registration into index.html
+- [x] Add apple-touch-icon and theme-color meta tags
