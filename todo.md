@@ -404,3 +404,6 @@
 - [x] Empty state: "Be the first to tip a creator on Living Nexus 🎵"
 - [x] Mobile: slightly smaller text but still visible
 - [x] Write vitest test for recentTips procedure
+
+## Phase: Tip Ticker Relocation
+- [x] Move TipTicker from top of main content to bottom of layout (above player bar)

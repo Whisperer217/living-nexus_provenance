@@ -278,19 +278,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
         {/* ── Page content ── */}
         <main className="flex-1 flex flex-col overflow-hidden md:pt-0 pt-14">
-          {/* ── Live Tip Ticker ── */}
-          <TipTicker />
           {/*
-            Desktop: paddingBottom reserves space for the fixed PlayerBar (64px) + safe-area.
-            Mobile: MobilePlayerPanel is a side panel — no bottom space needed.
+            Desktop: paddingBottom reserves space for the fixed PlayerBar (64px) + ticker (28px) + safe-area.
+            Mobile: MobilePlayerPanel is a side panel — no bottom padding needed.
           */}
-          {/* Desktop: padding-bottom reserves space for fixed PlayerBar. Mobile: no bottom padding needed (side panel). */}
-          <style>{`@media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } }`}</style>
+          <style>{`@media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(64px + 28px + env(safe-area-inset-bottom, 0px)) !important; } }`}</style>
           <div className="flex-1 overflow-y-auto player-scroll-area">
             {children}
           </div>
         </main>
       </div>
+
+      {/* ── Live Tip Ticker — sits above the player bar on desktop, above mobile nav on mobile ── */}
+      <TipTicker />
 
       {/* ── Desktop Player Bar (fixed bottom, hidden on mobile) ── */}
       <div className="hidden md:block">
