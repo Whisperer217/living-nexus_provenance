@@ -414,3 +414,12 @@
 - [x] Add gold dollar-sign tip icon to PlayerBar (mini player bar) next to like button
 - [x] Wire both buttons to TipModal with current song creator data from PlayerContext
 - [x] Write vitest test for tip surface area logic
+
+## Phase: Production-Grade Service Worker
+- [x] Write sw.js: Network First for API/dynamic, Cache First for static, SWR for audio
+- [x] Versioned caches — auto-purge old caches on activate
+- [x] skipWaiting + clientsClaim for immediate activation
+- [x] Background sync for offline tip and upload queuing
+- [x] Update detection — postMessage to clients, gold banner in app
+- [x] Branded offline.html page ("Your WIDs are safe 🔐")
+- [x] Clean SW registration in index.html — unregister all old workers first
