@@ -323,10 +323,55 @@ export default function MobilePlayerPanel() {
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
+        {/* ══ NOW PLAYING HEADER — above the art, not overlapping ══ */}
+        <div
+          className="flex-shrink-0 flex items-center justify-between px-4 py-2"
+          style={{ background: "oklch(0.08 0.018 275)" }}
+        >
+          <div>
+            <span
+              className="text-[9px] font-bold tracking-widest uppercase block"
+              style={{ color: "oklch(0.84 0.155 85 / 0.85)", fontFamily: "'Cinzel', serif" }}
+            >
+              Now Playing
+            </span>
+            <span
+              className="text-[8px] tracking-wider"
+              style={{ color: "oklch(0.65 0.03 280 / 0.7)", fontFamily: "'Cinzel', serif" }}
+            >
+              {queueContextLabel}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {/* Video/Art toggle */}
+            {videoUrl && (
+              <button
+                onClick={() => setShowVideo(v => !v)}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold tracking-wide transition-all"
+                style={{
+                  background: showVideo ? "oklch(0.84 0.155 85 / 0.9)" : "oklch(0.14 0.025 275)",
+                  color: showVideo ? "oklch(0.08 0.01 280)" : "oklch(0.9 0.02 85)",
+                  border: showVideo ? "none" : "1px solid oklch(0.84 0.155 85 / 0.4)",
+                }}
+              >
+                {showVideo ? <ImageIcon size={10} /> : <Video size={10} />}
+                {showVideo ? "Art" : "Video"}
+              </button>
+            )}
+            <button
+              onClick={closeNowPlayingPanel}
+              className="p-1.5 rounded-full transition-all"
+              style={{ background: "oklch(0.14 0.025 275)", color: "oklch(0.85 0.02 280)" }}
+            >
+              <X size={15} />
+            </button>
+          </div>
+        </div>
+
         {/* ══ FULL-BLEED ART HERO — untouched, edge to edge ══ */}
         <div
           className="relative flex-shrink-0"
-          style={{ height: "48%", minHeight: "220px", maxHeight: "340px" }}
+          style={{ height: "44%", minHeight: "200px", maxHeight: "310px" }}
         >
           {/* Background art */}
           {videoUrl && showVideo ? (
@@ -365,61 +410,7 @@ export default function MobilePlayerPanel() {
             }}
           />
 
-          {/* Header row — NOW PLAYING label + Cinema Mode + close */}
-          <div className="absolute top-0 left-0 right-0 flex items-start justify-between px-4 pt-4 z-20">
-            <div>
-              <span
-                className="text-[9px] font-bold tracking-widest uppercase block"
-                style={{ color: "oklch(0.84 0.155 85 / 0.85)", fontFamily: "'Cinzel', serif" }}
-              >
-                Now Playing
-              </span>
-              <span
-                className="text-[8px] tracking-wider"
-                style={{ color: "oklch(0.65 0.03 280 / 0.7)", fontFamily: "'Cinzel', serif" }}
-              >
-                {queueContextLabel}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              {/* Video/Art toggle */}
-              {videoUrl && (
-                <button
-                  onClick={() => setShowVideo(v => !v)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold tracking-wide transition-all"
-                  style={{
-                    background: showVideo ? "oklch(0.84 0.155 85 / 0.9)" : "oklch(0 0 0 / 0.45)",
-                    color: showVideo ? "oklch(0.08 0.01 280)" : "oklch(0.9 0.02 85)",
-                    border: showVideo ? "none" : "1px solid oklch(0.84 0.155 85 / 0.4)",
-                    backdropFilter: "blur(6px)",
-                  }}
-                >
-                  {showVideo ? <ImageIcon size={10} /> : <Video size={10} />}
-                  {showVideo ? "Art" : "Video"}
-                </button>
-              )}
-              {/* Cinema Mode toggle — always visible */}
-              <button
-                onClick={() => setCinemaMode(v => !v)}
-                className="p-1.5 rounded-full transition-all"
-                style={{
-                  background: cinemaMode ? "oklch(0.84 0.155 85 / 0.9)" : "oklch(0 0 0 / 0.40)",
-                  color: cinemaMode ? "oklch(0.08 0.01 280)" : "oklch(0.85 0.02 280)",
-                  backdropFilter: "blur(6px)",
-                }}
-                title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — art + lyrics only"}
-              >
-                {cinemaMode ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
-              <button
-                onClick={closeNowPlayingPanel}
-                className="p-1.5 rounded-full transition-all"
-                style={{ background: "oklch(0 0 0 / 0.40)", backdropFilter: "blur(6px)", color: "oklch(0.85 0.02 280)" }}
-              >
-                <X size={15} />
-              </button>
-            </div>
-          </div>
+          {/* No header row on the art — label is above the image now */}
 
           {/* Vertical volume bar — right edge of art (hidden in cinema mode) */}
           {!cinemaMode && (
@@ -576,7 +567,7 @@ export default function MobilePlayerPanel() {
                     {fmtTime(state.duration)}
                   </span>
                 </div>
-                {/* Controls */}
+                {/* Controls — shuffle, back, play/pause, next, repeat, cinema mode */}
                 <div className="flex items-center justify-between">
                   <button
                     onClick={toggleShuffle}
@@ -605,6 +596,14 @@ export default function MobilePlayerPanel() {
                     className={`p-2 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/35 hover:text-white/70"}`}
                   >
                     <Repeat size={18} />
+                  </button>
+                  {/* Cinema Mode toggle — lives in controls row */}
+                  <button
+                    onClick={() => setCinemaMode(v => !v)}
+                    className={`p-2 transition-colors ${cinemaMode ? "text-[#D4AF37]" : "text-white/35 hover:text-white/70"}`}
+                    title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — art + lyrics only"}
+                  >
+                    {cinemaMode ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
@@ -681,9 +680,9 @@ export default function MobilePlayerPanel() {
               <ZoneDivider />
 
               {/* ─────────────────────────────────────────────────────
-                  ZONE 5 — Volume control
+                  ZONE 5 — Volume control (extra top margin separates from actions)
               ───────────────────────────────────────────────────── */}
-              <div className={`${zone} flex items-center gap-2`}>
+              <div className="px-4 pt-5 pb-4 flex items-center gap-2">
                 <button
                   onClick={() => setVolBarActive(v => !v)}
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-body transition-all ${

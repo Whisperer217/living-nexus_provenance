@@ -554,3 +554,8 @@
 - [x] Rewrite scrollable content: clearly separated zones (track info, progress+controls, tip, actions+share, volume, lyrics)
 - [x] Add Share button with Web Share API (navigator.share), clipboard fallback
 - [x] Add Cinema Mode toggle — hides all zones except art + lyrics, toggle always visible
+
+## Phase 51: MobilePlayerPanel Three Fixes
+- [x] Move Cinema Mode eye icon from art overlay to playback controls row
+- [x] Add clear padding/margin between actions row and volume row
+- [x] Move Now Playing / context label above the cover art (header area, not overlapping image)
