@@ -735,3 +735,31 @@ export async function getCreatorForOg(userId: number) {
 
   return { creator, publishedCount, widCount };
 }
+
+// ─── Download Permission Helpers ───────────────────────────────────────────────
+
+/** Get total amount a specific user has tipped on a specific song (in cents) */
+export async function getUserTipTotalForSong(userId: number, songId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db
+    .select({ total: sql<number>`COALESCE(SUM(${tips.amountCents}), 0)` })
+    .from(tips)
+    .where(and(eq(tips.songId, songId), eq(tips.tipperUserId, userId)));
+  return Number(result[0]?.total ?? 0);
+}
+
+/** Update a song's download permission (creator only — caller must verify ownership) */
+export async function updateSongDownloadPermission(
+  songId: number,
+  userId: number,
+  permission: "none" | "free" | "tipped",
+  tipThresholdCents: number = 179
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db
+    .update(songs)
+    .set({ downloadPermission: permission, downloadTipThresholdCents: tipThresholdCents, updatedAt: new Date() })
+    .where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+}

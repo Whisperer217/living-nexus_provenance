@@ -499,3 +499,16 @@
 - [x] Smoke-tested: curl with Discordbot UA on /creator/1 returns all correct tags with real CloudFront banner URL
 - [x] Regular browser UA on /creator/1 still gets normal SPA (no OG injection)
 - [x] TypeScript: 0 errors | Vitest: 40/40 passing
+
+## Phase: Per-Track Download Permission System
+- [x] Add downloadPermission enum field to songs table: "none" | "free" | "tipped" (default: "none")
+- [x] Add downloadTipThresholdCents field to songs table (default: 179 = $1.79)
+- [x] Push DB migration for new fields (direct SQL applied)
+- [x] Add getUserTipTotalForSong and updateSongDownloadPermission DB helpers to server/db.ts
+- [x] Add download.getPermission, download.request (tip-gated check), download.updatePermission tRPC procedures
+- [x] Add download permission section to EditTrackPanel (3 radio options + tip threshold input)
+- [x] Archive selector labels: "No Downloads", "Free Download", "Tip to Download ($1.79)"
+- [x] UploadPage: downloadPermission defaults to "none" (auto-off), shown in Review step with note
+- [x] SongDetailPage: permission-aware download button (hidden/free/tip-gated with price shown)
+- [x] Tip-gated download: server checks if user has tipped >= threshold before returning download URL
+- [x] TypeScript: 0 errors | Vitest: 40/40 passing

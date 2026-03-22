@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Shield, Lock } from "lucide-react";
+import { X, Upload, Shield, Lock, Download } from "lucide-react";
 import { toast } from "sonner";
 
 const GENRES = [
@@ -50,6 +50,8 @@ interface Song {
   aiConsent?: string | null;
   status: string;
   witnessId?: string | null;
+  downloadPermission?: string | null;
+  downloadTipThresholdCents?: number | null;
 }
 
 interface EditTrackPanelProps {
@@ -71,10 +73,29 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   );
   const [coverUploading, setCoverUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [downloadPermission, setDownloadPermission] = useState<"none" | "free" | "tipped">(
+    (song.downloadPermission as any) ?? "none"
+  );
+  const [tipThresholdCents, setTipThresholdCents] = useState<number>(
+    song.downloadTipThresholdCents ?? 179
+  );
+  const [dlSaving, setDlSaving] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const utils = trpc.useUtils();
+  const updateDownloadPermission = trpc.songDownload.updatePermission.useMutation({
+    onSuccess: () => {
+      toast.success("Download permission updated");
+      utils.songs.mySongs.invalidate();
+      setDlSaving(false);
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err.message || "Failed to update download permission");
+      setDlSaving(false);
+    },
+  });
+
   const updateMetadata = trpc.songs.updateMetadata.useMutation({
     onSuccess: () => {
       utils.songs.mySongs.invalidate();
@@ -141,6 +162,15 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       status,
     });
     setSaving(false);
+  }
+
+  async function handleSaveDownloadPermission() {
+    setDlSaving(true);
+    await updateDownloadPermission.mutateAsync({
+      songId: song.id,
+      permission: downloadPermission,
+      tipThresholdCents,
+    });
   }
 
   return (
@@ -354,6 +384,85 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* ── Download Permission ─────────────────────────────────── */}
+          <div
+            className="space-y-3 rounded-xl p-4"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <Label className="text-white text-sm font-medium flex items-center gap-2">
+              <Download size={14} style={{ color: "#60a5fa" }} />
+              Download Permission
+            </Label>
+            <p className="text-xs" style={{ color: "#64748b" }}>
+              Controls whether fans can download this track. Defaults to <strong style={{ color: "#94a3b8" }}>off</strong> on every upload.
+            </p>
+
+            {/* Three option buttons */}
+            <div className="flex flex-col gap-2">
+              {([
+                { value: "none",   label: "No Download",           desc: "Fans cannot download this track.",                         color: "#ef4444" },
+                { value: "free",   label: "Free Download",          desc: "Anyone can download at no cost.",                         color: "#22c55e" },
+                { value: "tipped", label: "Tip-Gated Download",     desc: `Unlock after tipping $${(tipThresholdCents / 100).toFixed(2)}.`, color: "#f59e0b" },
+              ] as const).map(({ value, label, desc, color }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setDownloadPermission(value)}
+                  className="w-full text-left rounded-lg px-3 py-2.5 transition-all"
+                  style={{
+                    background: downloadPermission === value ? `${color}18` : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${downloadPermission === value ? color : "rgba(255,255,255,0.08)"}`,
+                  }}
+                >
+                  <p className="text-sm font-semibold" style={{ color: downloadPermission === value ? color : "#f1f5f9" }}>
+                    {label}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>{desc}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Tip threshold input — only shown when tipped is selected */}
+            {downloadPermission === "tipped" && (
+              <div className="space-y-1.5 pt-1">
+                <Label className="text-xs" style={{ color: "#94a3b8" }}>Minimum tip to unlock (cents)</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm" style={{ color: "#64748b" }}>$</span>
+                  <input
+                    type="number"
+                    min={50}
+                    max={100000}
+                    step={1}
+                    value={(tipThresholdCents / 100).toFixed(2)}
+                    onChange={(e) => {
+                      const dollars = parseFloat(e.target.value);
+                      if (!isNaN(dollars) && dollars >= 0.5) setTipThresholdCents(Math.round(dollars * 100));
+                    }}
+                    className="flex-1 rounded-md px-3 py-1.5 text-sm"
+                    style={{
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(245,158,11,0.3)",
+                      color: "#f1f5f9",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+                <p className="text-xs" style={{ color: "#64748b" }}>Minimum $0.50 · Default $1.79 per track</p>
+              </div>
+            )}
+
+            {/* Save download permission button */}
+            <Button
+              size="sm"
+              onClick={handleSaveDownloadPermission}
+              disabled={dlSaving}
+              className="w-full text-sm font-semibold"
+              style={{ background: "rgba(96,165,250,0.15)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.3)" }}
+            >
+              {dlSaving ? "Saving…" : "Save Download Setting"}
+            </Button>
           </div>
         </div>
 

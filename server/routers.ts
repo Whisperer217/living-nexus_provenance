@@ -21,6 +21,7 @@ import {
   getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped,
   getSongByWitnessId, updateSongMetadata, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
+  getUserTipTotalForSong, updateSongDownloadPermission,
 } from "./db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
@@ -669,6 +670,47 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .mutation(async ({ input }) => {
         await markJukeboxItemSkipped(input.itemId);
         return { success: true };
+      }),
+  }),
+
+  // ─── Downloads ─────────────────────────────────────────────────────────────
+  songDownload: router({
+    /** Get download permission info for a song (public — bots and unauthenticated users get permission info too) */
+    getPermission: publicProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const song = await getSongById(input.songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
+        const permission = song.downloadPermission as "none" | "free" | "tipped";
+        const thresholdCents = song.downloadTipThresholdCents ?? 179;
+        let userTipTotal = 0;
+        if (ctx.user && permission === "tipped") {
+          userTipTotal = await getUserTipTotalForSong(ctx.user.id, input.songId);
+        }
+        return {
+          permission,
+          thresholdCents,
+          thresholdDollars: (thresholdCents / 100).toFixed(2),
+          userTipTotal,
+          canDownload:
+            permission === "free" ||
+            (permission === "tipped" && ctx.user != null && userTipTotal >= thresholdCents),
+        };
+      }),
+
+    /** Update download permission for a song (creator only) */
+    updatePermission: protectedProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        permission: z.enum(["none", "free", "tipped"]),
+        tipThresholdCents: z.number().int().min(50).max(100000).optional().default(179),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const song = await getSongById(input.songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
+        if (song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+        await updateSongDownloadPermission(input.songId, ctx.user.id, input.permission, input.tipThresholdCents);
+        return { success: true, permission: input.permission };
       }),
   }),
 

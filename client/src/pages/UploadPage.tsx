@@ -800,6 +800,7 @@ export default function UploadPage() {
                   { label: "Mood Tags", value: selectedMoods.length ? selectedMoods.join(", ") : "None" },
                   { label: "Witness ID", value: witnessData?.wid || "Not generated", wid: !!witnessData },
                   { label: "AI Consent", value: aiConsent.replace(/_/g, " ").toUpperCase() },
+                  { label: "Download", value: "Off — Change in Archive after publish" },
                 ].map(({ label, value, highlight, wid }, i) => (
                   <div key={label} className="flex justify-between items-center px-4 py-2.5 text-sm"
                     style={{ background: i % 2 === 0 ? "oklch(0.12 0.015 280)" : "oklch(0.105 0.013 280)" }}>

@@ -376,10 +376,28 @@ export default function SongDetailPage() {
                   {!isOwner && (
                     <AddToPlaylistButton songId={song.id} variant="full" />
                   )}
-                  <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
-                    style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
-                    <Download className="w-3.5 h-3.5 mr-1" />Download
-                  </Button>
+                  {/* Download button — permission-aware */}
+                  {(() => {
+                    const dlPerm = (song as any).downloadPermission as string | undefined;
+                    const tipCents = (song as any).downloadTipThresholdCents as number | undefined;
+                    if (!dlPerm || dlPerm === "none") return null;
+                    if (dlPerm === "free") return (
+                      <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
+                        disabled={downloadMutation.isPending}
+                        style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
+                        <Download className="w-3.5 h-3.5 mr-1" />{downloadMutation.isPending ? "…" : "Download"}
+                      </Button>
+                    );
+                    if (dlPerm === "tipped") return (
+                      <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
+                        disabled={downloadMutation.isPending}
+                        title={`Tip $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`}
+                        style={{ borderColor: "oklch(0.75 0.18 85 / 0.4)", color: "oklch(0.84 0.155 85)" }}>
+                        <Download className="w-3.5 h-3.5 mr-1" />{downloadMutation.isPending ? "Checking…" : `Download ($${((tipCents ?? 179) / 100).toFixed(2)} tip)`}
+                      </Button>
+                    );
+                    return null;
+                  })()}
                   <Button size="sm" variant="outline" onClick={() => setShareOpen(true)}
                     style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
                     <Share2 className="w-3.5 h-3.5 mr-1" />Share

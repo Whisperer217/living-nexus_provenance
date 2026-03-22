@@ -87,6 +87,13 @@ export const songs = mysqlTable("songs", {
   certificateUrl: text("certificateUrl"),
   certificateKey: text("certificateKey"),
 
+  // Download permissions
+  // "none"   = downloads disabled (default — auto-off on every upload)
+  // "free"   = anyone can download at no cost
+  // "tipped" = download unlocked only after tipping >= downloadTipThresholdCents
+  downloadPermission: mysqlEnum("downloadPermission", ["none", "free", "tipped"]).default("none").notNull(),
+  downloadTipThresholdCents: int("downloadTipThresholdCents").default(179).notNull(), // $1.79 default
+
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
 
