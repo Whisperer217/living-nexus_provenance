@@ -530,3 +530,9 @@
 - [x] Song Detail Page: full-width video above track info when videoUrl present
 - [x] Edit Track Panel: video upload/replace section
 - [x] Tests pass (40/40), zero breaking changes verified, TypeScript: 0 errors
+
+## Phase 45: Manifesto + What's New Popup
+- [x] Build /manifesto page — sovereign music doctrine, WID philosophy, creator ownership declaration
+- [x] Build What's New / Updates popup — changelog modal with mini how-to guide, first-visit trigger, dismissable
+- [x] Add Manifesto link to sidebar nav and footer
+- [x] Tests pass (40/40), TypeScript: 0 errors, checkpoint saved
