@@ -1,10 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — MobilePlayerPanel
+   v1.5.0 — two UX fixes applied on top of v1.4.0 baseline:
+     • Cinema Mode eye icon moved from header → next to heart/like button
+     • Swipe-right-to-close removed; replaced with grab handle at bottom
+       of lyrics section (swipe down ≥ 60 px closes, swipe up ≥ 60 px expands)
    v1.4.0 baseline + 4 additions:
      1. Share button (Web Share API + clipboard fallback) in action row
      2. Hide Player button (ChevronDown) in header alongside X
      3. WID badge + AI/genre tags on their own row below artist name
-     4. Cinema Mode toggle (Eye icon) in panel header
+     4. Cinema Mode toggle (Eye icon) — now next to heart button
    Cover art: rounded square, padded, unchanged from v1.4.0.
    Controls overlay: bottom of art, unchanged from v1.4.0.
 ═══════════════════════════════════════════════════════════════════ */
@@ -44,15 +48,28 @@ export default function MobilePlayerPanel() {
   const togglePanel = () => isNowPlayingPanelOpen ? closeNowPlayingPanel() : openNowPlayingPanel();
   const [tipOpen, setTipOpen] = useState(false);
 
-  // Addition 4: Cinema Mode
+  // Cinema Mode
   const [cinemaMode, setCinemaMode] = useState(false);
 
-  // Addition 1: Share copied state
+  // Share copied state
   const [copied, setCopied] = useState(false);
 
-  // Touch-swipe to close (swipe right ≥ 60px)
-  const touchStartX = useRef<number | null>(null);
+  // Panel ref (no swipe-right gesture — removed)
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Grab-handle swipe state (swipe down ≥ 60 px closes, swipe up ≥ 60 px expands)
+  const grabTouchStartY = useRef<number | null>(null);
+
+  const onGrabTouchStart = (e: React.TouchEvent) => {
+    grabTouchStartY.current = e.touches[0].clientY;
+  };
+  const onGrabTouchEnd = (e: React.TouchEvent) => {
+    if (grabTouchStartY.current === null) return;
+    const delta = e.changedTouches[0].clientY - grabTouchStartY.current;
+    if (delta > 60) closeNowPlayingPanel();
+    else if (delta < -60 && !open) openNowPlayingPanel();
+    grabTouchStartY.current = null;
+  };
 
   // ── Draggable floating tab ──────────────────────────────────────────
   const STORAGE_KEY = "ln_player_tab_top";
@@ -149,17 +166,6 @@ export default function MobilePlayerPanel() {
     seek(((touch.clientX - rect.left) / rect.width) * audioRef.current.duration);
   }, [audioRef, seek]);
 
-  // Swipe-right-to-close
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - touchStartX.current;
-    if (delta > 60) closeNowPlayingPanel();
-    touchStartX.current = null;
-  };
-
   // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeNowPlayingPanel(); };
@@ -207,7 +213,7 @@ export default function MobilePlayerPanel() {
     setVolume(ratio);
   }, [setVolume]);
 
-  // Addition 1: Share handler
+  // Share handler
   const handleShare = useCallback(async () => {
     if (!currentTrack) return;
     const url = currentSongId
@@ -302,12 +308,10 @@ export default function MobilePlayerPanel() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════
-          SIDE PANEL
+          SIDE PANEL  (no swipe-right-to-close — use grab handle below)
       ══════════════════════════════════════════════════════════════ */}
       <div
         ref={panelRef}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
         className="md:hidden fixed top-0 right-0 h-full z-50 flex flex-col
           transition-transform duration-300 ease-in-out"
         style={{
@@ -352,19 +356,6 @@ export default function MobilePlayerPanel() {
               )}
             </div>
             <div className="flex items-center gap-1">
-              {/* Cinema Mode toggle — always visible in header */}
-              <button
-                onClick={() => setCinemaMode(v => !v)}
-                className="p-1.5 rounded-lg transition-all"
-                style={{
-                  color: cinemaMode ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)",
-                  background: cinemaMode ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
-                  border: cinemaMode ? "1px solid oklch(0.84 0.155 85 / 0.35)" : "1px solid transparent",
-                }}
-                title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — art + lyrics only"}
-              >
-                {cinemaMode ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
               {/* Hide Player (collapse) */}
               <button
                 onClick={closeNowPlayingPanel}
@@ -548,7 +539,7 @@ export default function MobilePlayerPanel() {
           {/* ── Content below art — hidden in Cinema Mode except lyrics ── */}
           {!cinemaMode && (
             <>
-              {/* Track title + artist + like */}
+              {/* Track title + artist + Cinema Mode toggle + heart/like */}
               <div className="px-5 pb-2 flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-[15px] font-semibold text-white/90 font-body leading-snug line-clamp-2">
@@ -557,7 +548,7 @@ export default function MobilePlayerPanel() {
                   <p className="text-sm text-white/50 truncate font-body mt-0.5">
                     {currentTrack?.artist || "—"}
                   </p>
-                  {/* Addition 3: WID badge + genre/AI tags — own row below artist */}
+                  {/* WID badge + genre/AI tags — own row below artist */}
                   <div className="flex flex-wrap items-center gap-1.5 mt-2">
                     {currentTrack?.witnessId && (
                       <span
@@ -603,6 +594,19 @@ export default function MobilePlayerPanel() {
                     )}
                   </div>
                 </div>
+                {/* Cinema Mode toggle — sits directly next to the heart button */}
+                <button
+                  onClick={() => setCinemaMode(v => !v)}
+                  className="p-2 flex-shrink-0 rounded-lg transition-all"
+                  style={{
+                    color: cinemaMode ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)",
+                    background: cinemaMode ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
+                    border: cinemaMode ? "1px solid oklch(0.84 0.155 85 / 0.35)" : "1px solid transparent",
+                  }}
+                  title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — art + lyrics only"}
+                >
+                  {cinemaMode ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
                 <button
                   onClick={handleToggleLike}
                   disabled={!user || toggleLikeMutation.isPending}
@@ -636,7 +640,7 @@ export default function MobilePlayerPanel() {
                 </div>
               )}
 
-              {/* Addition 1: Action buttons — Playlist + Room + Share */}
+              {/* Action buttons — Playlist + Room + Share */}
               {currentTrack && currentSongId && (
                 <div className="px-5 pb-3 flex items-center gap-2">
                   <AddToPlaylistButton songId={currentSongId} variant="full" className="flex-1" />
@@ -674,7 +678,7 @@ export default function MobilePlayerPanel() {
           )}
         </div>
 
-        {/* ══ SCROLLABLE SECTION — volume + lyrics ══ */}
+        {/* ══ SCROLLABLE SECTION — volume + lyrics + grab handle ══ */}
         <div
           className="flex-1 overflow-y-auto"
           style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}
@@ -710,7 +714,7 @@ export default function MobilePlayerPanel() {
           )}
 
           {/* Lyrics */}
-          <div className="px-5 pb-8 pt-2">
+          <div className="px-5 pb-4 pt-2">
             <div className="flex items-center gap-2 mb-4">
               <span
                 className="text-[10px] font-bold tracking-widest uppercase"
@@ -751,9 +755,22 @@ export default function MobilePlayerPanel() {
             )}
           </div>
 
-          <p className="text-center text-[10px] pb-4" style={{ color: "oklch(0.25 0.02 280)" }}>
-            Swipe right to close
-          </p>
+          {/* ── Grab handle — swipe down to close, swipe up to expand ── */}
+          <div
+            className="flex flex-col items-center pb-6 pt-3 cursor-grab active:cursor-grabbing select-none"
+            onTouchStart={onGrabTouchStart}
+            onTouchEnd={onGrabTouchEnd}
+            title="Swipe down to close"
+          >
+            <div
+              className="rounded-full"
+              style={{
+                width: "48px",
+                height: "5px",
+                background: "oklch(0.28 0.02 275)",
+              }}
+            />
+          </div>
         </div>
       </div>
 

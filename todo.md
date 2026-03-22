@@ -570,3 +570,8 @@
 
 ## Phase 53: Cinema Mode Toggle Fix
 - [x] Pin Cinema Mode toggle as always-visible floating button — visible in both normal and cinema states so user can always exit
+
+## Phase 54: Player UX Fixes
+- [x] Move Cinema Mode eye icon to sit directly next to the heart/like button (same row)
+- [x] Remove swipe-right-to-close gesture entirely
+- [x] Add bottom grab handle (pill bar) — drag down to close, drag up to expand; no accidental triggers while scrolling lyrics
