@@ -470,3 +470,10 @@
 - [x] Smoke-tested: curl with Discordbot UA on /song/300005 returns all correct OG tags with real CloudFront cover art URL
 - [x] Regular browser UA still gets normal SPA (no OG injection)
 - [x] TypeScript: 0 errors | Vitest: 40/40 passing
+
+## Phase: Upload JSON Error Fix (Large WAV Files)
+- [x] Root cause: WAV files >37MB base64-encoded exceed the 50mb Express body parser limit, server returns 413 HTML error page instead of JSON ("Unexpected token '<'" on client)
+- [x] Fix: Increased Express body parser limit from 50mb to 500mb (covers WAV files up to ~375MB raw)
+- [x] Fix: Added frontend file size guard on audio input onChange (375MB max, clear toast error message)
+- [x] Fix: Added frontend file size guard on drag-and-drop handler (375MB max, same toast)
+- [x] TypeScript: 0 errors | Vitest: 40/40 passing

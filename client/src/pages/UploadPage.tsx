@@ -229,6 +229,10 @@ export default function UploadPage() {
     setAudioDragging(false);
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("audio/")) {
+      if (file.size > 375 * 1024 * 1024) {
+        toast.error(`File too large (${(file.size/1024/1024).toFixed(0)} MB). Maximum size is 375 MB. Consider converting WAV to MP3 first.`);
+        return;
+      }
       setAudioFile(file);
       if (!title) setTitle(file.name.replace(/\.[^/.]+$/, ""));
     } else {
@@ -428,7 +432,7 @@ export default function UploadPage() {
                   className="rounded-xl p-8 text-center cursor-pointer transition-all"
                   style={{ border: `2px dashed ${audioFile ? "oklch(0.65 0.18 145)" : audioDragging ? "oklch(0.84 0.155 85)" : "oklch(0.28 0.02 280)"}`, background: audioFile ? "oklch(0.65 0.18 145 / 0.05)" : audioDragging ? "oklch(0.75 0.18 85 / 0.05)" : "oklch(0.09 0.01 280)" }}>
                   <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if (f) { setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); } }} />
+                    onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 375 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 375 MB. Consider converting WAV to MP3 first.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); } }} />
                   {audioFile ? (
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.18 145 / 0.2)" }}>
