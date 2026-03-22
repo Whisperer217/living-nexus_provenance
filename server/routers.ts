@@ -192,8 +192,12 @@ export const appRouter = router({
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     bySelf: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     upload: protectedProcedure.input(z.object({
+      // Legacy base64 fields (still accepted for backward compat)
       audioBase64: z.string().optional(), audioMimeType: z.string().optional(), audioFileName: z.string().optional(),
       coverBase64: z.string().optional(), coverMimeType: z.string().optional(),
+      // Preferred: pre-uploaded S3 URLs from /api/upload-file
+      fileUrl: z.string().url().optional(), fileKey: z.string().optional(),
+      coverArtUrl: z.string().url().optional(),
       title: z.string().min(1).max(255), genre: z.string().optional(), bpm: z.number().optional(),
       keySignature: z.string().optional(), moodTags: z.array(z.string()).optional(),
       coWriters: z.array(z.string()).optional(), albumName: z.string().optional(),
@@ -209,18 +213,19 @@ export const appRouter = router({
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
       if (user.songSlotsUsed >= user.songSlotsTotal) throw new Error("No song slots available. Please purchase more slots.");
-      let fileUrl: string | undefined;
-      let audioKey: string | undefined;
-      if (!input.isLyricsOnly && input.audioBase64 && input.audioMimeType && input.audioFileName) {
+      let fileUrl: string | undefined = input.fileUrl;
+      let audioKey: string | undefined = input.fileKey;
+      // Fallback: legacy base64 path (for backward compat)
+      if (!fileUrl && !input.isLyricsOnly && input.audioBase64 && input.audioMimeType && input.audioFileName) {
         const audioBuffer = Buffer.from(input.audioBase64, "base64");
-        // Sanitize filename: replace spaces, emojis, and special chars with underscores
         const safeFileName = input.audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
         audioKey = `audio/${ctx.user.id}/${Date.now()}-${safeFileName}`;
         const { url } = await storagePut(audioKey, audioBuffer, input.audioMimeType);
         fileUrl = url;
       }
-      let coverArtUrl: string | undefined;
-      if (input.coverBase64 && input.coverMimeType) {
+      let coverArtUrl: string | undefined = input.coverArtUrl;
+      // Fallback: legacy base64 cover path
+      if (!coverArtUrl && input.coverBase64 && input.coverMimeType) {
         const coverBuffer = Buffer.from(input.coverBase64, "base64");
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.jpg`, coverBuffer, input.coverMimeType);
         coverArtUrl = url;
@@ -248,12 +253,19 @@ export const appRouter = router({
       albumName: z.string().min(1).max(255),
       genre: z.string().optional(),
       aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]),
+      // Preferred: pre-uploaded cover S3 URL from /api/upload-file
+      coverArtUrl: z.string().url().optional(),
+      // Legacy base64 cover (still accepted for backward compat)
       coverBase64: z.string().optional(),
       coverMimeType: z.string().optional(),
       tracks: z.array(z.object({
-        audioBase64: z.string(),
-        audioMimeType: z.string(),
-        audioFileName: z.string(),
+        // Preferred: pre-uploaded S3 URL from /api/upload-file
+        fileUrl: z.string().url().optional(),
+        fileKey: z.string().optional(),
+        // Legacy base64 fields (still accepted for backward compat)
+        audioBase64: z.string().optional(),
+        audioMimeType: z.string().optional(),
+        audioFileName: z.string().optional(),
         title: z.string().min(1).max(255),
         fileHash: z.string().optional(),
         witnessId: z.string().optional(),
@@ -267,20 +279,27 @@ export const appRouter = router({
       if (user.songSlotsUsed + input.tracks.length > user.songSlotsTotal) {
         throw new Error(`Not enough song slots. You have ${user.songSlotsTotal - user.songSlotsUsed} slot(s) remaining but are trying to upload ${input.tracks.length} track(s).`);
       }
-      // Upload shared cover art once
-      let coverArtUrl: string | undefined;
-      if (input.coverBase64 && input.coverMimeType) {
+      // Resolve cover art URL (prefer pre-uploaded, fallback to base64)
+      let coverArtUrl: string | undefined = input.coverArtUrl;
+      if (!coverArtUrl && input.coverBase64 && input.coverMimeType) {
         const coverBuffer = Buffer.from(input.coverBase64, "base64");
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}-album.jpg`, coverBuffer, input.coverMimeType);
         coverArtUrl = url;
       }
-      // Upload each track and create song records
+      // Create song records (files already uploaded via /api/upload-file)
       const results: { title: string; witnessId?: string; fileUrl: string }[] = [];
       for (const track of input.tracks) {
-        const audioBuffer = Buffer.from(track.audioBase64, "base64");
-        const safeFileName = track.audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const audioKey = `audio/${ctx.user.id}/${Date.now()}-${safeFileName}`;
-        const { url: fileUrl } = await storagePut(audioKey, audioBuffer, track.audioMimeType);
+        let fileUrl: string | undefined = track.fileUrl;
+        let audioKey: string | undefined = track.fileKey;
+        // Fallback: legacy base64 path
+        if (!fileUrl && track.audioBase64 && track.audioMimeType && track.audioFileName) {
+          const audioBuffer = Buffer.from(track.audioBase64, "base64");
+          const safeFileName = track.audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+          audioKey = `audio/${ctx.user.id}/${Date.now()}-${safeFileName}`;
+          const { url } = await storagePut(audioKey, audioBuffer, track.audioMimeType);
+          fileUrl = url;
+        }
+        if (!fileUrl) throw new Error(`No file URL for track: ${track.title}`);
         await createSong({
           userId: ctx.user.id,
           title: track.title,

@@ -153,58 +153,69 @@ export default function BatchUploadPage() {
   }, [addFiles]);
 
   // ── Submit ────────────────────────────────────────────────────────────────
+  // Helper: upload a single file via multipart POST to /api/upload-file
+  const uploadFileToS3 = async (file: File, type: "audio" | "cover" | "video"): Promise<{ url: string; key: string }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+    formData.append("filename", file.name);
+    const res = await fetch("/api/upload-file", {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || `Upload failed (${res.status})`);
+    }
+    return res.json();
+  };
+
   const handleSubmit = async () => {
     if (!albumName.trim()) { toast.error("Album name is required"); return; }
     const readyTracks = tracks.filter(t => t.status === "ready");
     if (!readyTracks.length) { toast.error("No tracks ready. Wait for WID generation to complete."); return; }
 
     setIsUploading(true);
-    // Mark all as uploading
     setTracks(prev => prev.map(t => t.status === "ready" ? { ...t, status: "uploading" } : t));
 
     try {
-      // Convert cover to base64
-      let coverBase64: string | undefined;
-      let coverMimeType: string | undefined;
+      // Upload cover art via multipart (no base64 encoding)
+      let coverArtUrl: string | undefined;
       if (coverFile) {
-        const buf = await coverFile.arrayBuffer();
-        const cbytes = new Uint8Array(buf);
-        let cbinary = "";
-        for (let i = 0; i < cbytes.length; i++) cbinary += String.fromCharCode(cbytes[i]);
-        coverBase64 = btoa(cbinary);
-        coverMimeType = coverFile.type || "image/jpeg";
+        toast.loading("Uploading cover art…", { id: "batch-cover" });
+        const { url } = await uploadFileToS3(coverFile, "cover");
+        coverArtUrl = url;
+        toast.dismiss("batch-cover");
       }
 
-      // Convert each track to base64
-      const trackPayloads = await Promise.all(readyTracks.map(async track => {
-        const buf = await track.file.arrayBuffer();
-        const bytes = new Uint8Array(buf);
-        let binary = "";
-        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-        const audioBase64 = btoa(binary);
-        return {
-          audioBase64,
-          audioMimeType: track.file.type || "audio/mpeg",
-          audioFileName: track.file.name,
+      // Upload each audio file via multipart, sequentially to show per-track progress
+      const trackPayloads = [];
+      for (const track of readyTracks) {
+        toast.loading(`Uploading ${track.title}…`, { id: `batch-track-${track.id}` });
+        const { url: fileUrl, key: fileKey } = await uploadFileToS3(track.file, "audio");
+        toast.dismiss(`batch-track-${track.id}`);
+        trackPayloads.push({
+          fileUrl,
+          fileKey,
           title: track.title,
           fileHash: track.fileHash,
           witnessId: track.wid,
           harmonicSignature: track.harmonicSignature,
           ecdsaPublicKey: track.ecdsaPublicKey,
           ecdsaSignature: track.ecdsaSignature,
-        };
-      }));
+        });
+      }
 
+      // Now call tRPC with only metadata + S3 URLs (no large binary data)
       const result = await batchUpload.mutateAsync({
         albumName: albumName.trim(),
         genre: genre || undefined,
         aiConsent,
-        coverBase64,
-        coverMimeType,
+        coverArtUrl,
         tracks: trackPayloads,
       });
 
-      // Mark all as done
       setTracks(prev => prev.map(t => t.status === "uploading" ? { ...t, status: "done" } : t));
       setUploadDone(true);
       toast.success(`Album uploaded! ${result.trackCount} track${result.trackCount !== 1 ? "s" : ""} with individual WIDs.`);

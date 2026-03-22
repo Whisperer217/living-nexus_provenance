@@ -595,3 +595,12 @@
 ## Phase 56: Eye Icon Order Fix
 - [x] Swap heart and eye icon order — heart now renders first (left), eye directly to its right
 - [x] Confirmed "6 errors" toast is the nested-anchor bug already fixed in checkpoint 8560ca11 (not yet published)
+
+## Phase 57: Fix Batch Upload JSON Body Size Error
+- [x] Root cause identified: base64 audio files sent through tRPC JSON body exceed platform ingress limit
+- [x] Add /api/upload-file multipart endpoint to server (accepts raw file, returns S3 URL)
+- [x] Update BatchUploadPage to upload files via multipart POST, pass S3 URLs to tRPC batchUpload
+- [x] Update server batchUpload procedure to accept fileUrl instead of audioBase64
+- [x] Update UploadPage to use same multipart upload pattern (same root cause)
+- [x] Update server upload procedure to accept fileUrl instead of audioBase64
+- [x] Verify TypeScript clean and tests pass

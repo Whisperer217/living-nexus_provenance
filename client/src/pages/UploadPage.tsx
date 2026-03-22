@@ -341,15 +341,36 @@ export default function UploadPage() {
     URL.revokeObjectURL(url);
   };
 
+  // Helper: upload a single file via multipart POST to /api/upload-file
+  const uploadFileToS3 = async (file: File, type: "audio" | "cover" | "video"): Promise<{ url: string; key: string }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+    formData.append("filename", file.name);
+    const res = await fetch("/api/upload-file", {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || `Upload failed (${res.status})`);
+    }
+    return res.json();
+  };
+
   const handlePublish = async () => {
     if (uploadMode === "lyrics") {
       if (!title || !lyrics.trim()) { toast.error("Title and lyrics are required"); return; }
       try {
-        let coverBase64: string | undefined;
-        let coverMimeType: string | undefined;
-        if (coverFile) { coverBase64 = await toBase64(coverFile); coverMimeType = coverFile.type; }
+        // Lyrics-only: cover art may still be an image, upload via multipart
+        let coverArtUrl: string | undefined;
+        if (coverFile) {
+          const { url } = await uploadFileToS3(coverFile, "cover");
+          coverArtUrl = url;
+        }
         uploadMutation.mutate({
-          coverBase64, coverMimeType, title, genre: genre || undefined,
+          coverArtUrl, title, genre: genre || undefined,
           bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
           albumName: albumName || undefined, releaseDate: releaseDate || undefined,
           isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
@@ -361,18 +382,23 @@ export default function UploadPage() {
           ecdsaSignature: witnessData?.signature,
           caption: caption || undefined,
         } as any);
-      } catch { toast.error("Failed to prepare upload"); }
+      } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
     }
     if (!audioFile || !title) { toast.error("Audio file and title are required"); return; }
     try {
-      const audioBase64 = await toBase64(audioFile);
-      let coverBase64: string | undefined;
-      let coverMimeType: string | undefined;
-      if (coverFile) { coverBase64 = await toBase64(coverFile); coverMimeType = coverFile.type; }
-        uploadMutation.mutate({
-        audioBase64, audioMimeType: audioFile.type, audioFileName: audioFile.name,
-        coverBase64, coverMimeType, title, genre: genre || undefined,
+      // Upload audio and cover via multipart — no base64 encoding
+      toast.loading("Uploading audio file…", { id: "upload-audio" });
+      const { url: fileUrl, key: fileKey } = await uploadFileToS3(audioFile, "audio");
+      toast.dismiss("upload-audio");
+      let coverArtUrl: string | undefined;
+      if (coverFile) {
+        const { url } = await uploadFileToS3(coverFile, "cover");
+        coverArtUrl = url;
+      }
+      uploadMutation.mutate({
+        fileUrl, fileKey, coverArtUrl,
+        title, genre: genre || undefined,
         bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
         albumName: albumName || undefined, releaseDate: releaseDate || undefined,
         isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
@@ -382,7 +408,7 @@ export default function UploadPage() {
         ecdsaSignature: witnessData?.signature,
         caption: caption || undefined,
       } as any);
-    } catch { toast.error("Failed to prepare upload"); }
+    } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
   };
 
   if (!isAuthenticated) return (
