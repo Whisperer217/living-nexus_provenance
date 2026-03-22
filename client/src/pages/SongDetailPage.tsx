@@ -23,6 +23,7 @@ import {
   Shield, Music, ChevronLeft, Download, Headphones,
   SkipBack, SkipForward, Volume2, VolumeX, Wand2,
   ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter, Heart,
+  Video, ImageIcon,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
@@ -81,6 +82,9 @@ export default function SongDetailPage() {
     { enabled: songId > 0 }
   );
   const likeCount = likeCountData?.count ?? 0;
+  const [showVideo, setShowVideo] = useState(false);
+  const videoDetailRef = useRef<HTMLVideoElement>(null);
+
   const [aiTransformOpen, setAiTransformOpen] = useState(false);
   const [transformPrompt, setTransformPrompt] = useState("");
   const [transformStyle, setTransformStyle] = useState("");
@@ -302,11 +306,66 @@ export default function SongDetailPage() {
           <div className="space-y-5">
             {/* Cover + Meta */}
             <div className="flex flex-col sm:flex-row gap-5">
-              <div className="w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.13 0.04 290))" }}>
-                {song.coverArtUrl
-                  ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
-                  : <Music className="w-20 h-20 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />}
+              {/* Art / Video block */}
+              <div className="relative w-full sm:w-56 flex-shrink-0">
+                {/* Full-width video player (only when videoUrl present) */}
+                {(song as any).videoUrl && (
+                  <div
+                    className="w-full rounded-2xl overflow-hidden mb-3"
+                    style={{ aspectRatio: "16/9", background: "oklch(0.08 0.01 280)" }}
+                  >
+                    {showVideo ? (
+                      <video
+                        ref={videoDetailRef}
+                        src={(song as any).videoUrl}
+                        className="w-full h-full object-contain"
+                        controls
+                        playsInline
+                        autoPlay={isPlaying}
+                        muted={muted}
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-full flex items-center justify-center cursor-pointer group"
+                        onClick={() => setShowVideo(true)}
+                        style={{ background: "oklch(0.10 0.02 275)" }}
+                      >
+                        {song.coverArtUrl
+                          ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+                          : <Music className="w-16 h-16 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold"
+                            style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.01 280)" }}>
+                            <Video size={14} /> Watch Video
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* Toggle button */}
+                {(song as any).videoUrl && (
+                  <button
+                    onClick={() => setShowVideo(v => !v)}
+                    className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg mb-3 transition-all"
+                    style={{
+                      background: showVideo ? "oklch(0.84 0.155 85 / 0.15)" : "oklch(0.14 0.02 280)",
+                      color: showVideo ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 280)",
+                      border: `1px solid ${showVideo ? "oklch(0.84 0.155 85 / 0.4)" : "oklch(0.22 0.02 280)"}`,
+                    }}
+                  >
+                    {showVideo ? <><ImageIcon size={12} /> Cover Art</> : <><Video size={12} /> Music Video</>}
+                  </button>
+                )}
+                {/* Cover art (only shown when no video or video is hidden) */}
+                {!(song as any).videoUrl && (
+                  <div className="w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex items-center justify-center"
+                    style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.13 0.04 290))" }}>
+                    {song.coverArtUrl
+                      ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+                      : <Music className="w-20 h-20 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />}
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>

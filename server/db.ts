@@ -291,6 +291,16 @@ export async function updateSongLyrics(songId: number, userId: number, lyricsTex
   await db.update(songs).set({ lyricsText, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
+export async function updateSongVideo(
+  songId: number,
+  userId: number,
+  fields: { videoUrl: string | null; videoKey: string | null; videoWitnessId: string | null }
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ ...fields, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+}
+
 export async function getRelatedSongs(songId: number, genre?: string | null, limit = 6) {
   const db = await getDb();
   if (!db) return [];

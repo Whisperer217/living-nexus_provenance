@@ -87,6 +87,11 @@ export const songs = mysqlTable("songs", {
   certificateUrl: text("certificateUrl"),
   certificateKey: text("certificateKey"),
 
+  // Music Video (optional)
+  videoUrl: text("videoUrl"),
+  videoKey: text("videoKey"),
+  videoWitnessId: varchar("videoWitnessId", { length: 64 }),
+
   // Download permissions
   // "none"   = downloads disabled (default — auto-off on every upload)
   // "free"   = anyone can download at no cost

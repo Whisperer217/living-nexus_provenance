@@ -13,7 +13,7 @@ import {
   getSongsByUser, getSongWithCreator, getTipsBySong,
   getUserById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
-  updateSongLyrics, updateSongStatus, getRelatedSongs,
+  updateSongLyrics, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
   createAiTransform, updateAiTransform, getAiTransformById,
   getAiTransformsBySong, getAiTransformsByUser,
@@ -225,8 +225,9 @@ export const appRouter = router({
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.jpg`, coverBuffer, input.coverMimeType);
         coverArtUrl = url;
       }
-      await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption });
-      return { success: true, fileUrl, coverArtUrl };
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption });
+      const songId = (insertResult as any).insertId as number;
+      return { success: true, fileUrl, coverArtUrl, songId };
     }),
 
     uploadCoverArt: protectedProcedure.input(z.object({
@@ -331,6 +332,36 @@ export const appRouter = router({
     }),
     updateLyrics: protectedProcedure.input(z.object({ songId: z.number(), lyricsText: z.string().max(10000) })).mutation(async ({ ctx, input }) => {
       await updateSongLyrics(input.songId, ctx.user.id, input.lyricsText);
+      return { success: true };
+    }),
+
+    // ── Video Upload ──────────────────────────────────────────────────────────
+    uploadVideo: protectedProcedure.input(z.object({
+      songId: z.number(),
+      videoBase64: z.string(),
+      videoMimeType: z.string(),
+      videoFileName: z.string(),
+      videoWitnessId: z.string().optional(), // SHA-256 hash computed on client
+    })).mutation(async ({ ctx, input }) => {
+      // Verify song belongs to this user
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+      const videoBuffer = Buffer.from(input.videoBase64, "base64");
+      const safeFileName = input.videoFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const videoKey = `videos/${ctx.user.id}/${Date.now()}-${safeFileName}`;
+      const { url: videoUrl } = await storagePut(videoKey, videoBuffer, input.videoMimeType);
+      await updateSongVideo(input.songId, ctx.user.id, {
+        videoUrl,
+        videoKey,
+        videoWitnessId: input.videoWitnessId ?? null,
+      });
+      return { videoUrl, videoKey, videoWitnessId: input.videoWitnessId ?? null };
+    }),
+
+    removeVideo: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+      await updateSongVideo(input.songId, ctx.user.id, { videoUrl: null, videoKey: null, videoWitnessId: null });
       return { success: true };
     }),
     getRelated: publicProcedure.input(z.object({ songId: z.number(), genre: z.string().optional() })).query(async ({ input }) => {

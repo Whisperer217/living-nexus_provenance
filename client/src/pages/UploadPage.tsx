@@ -11,7 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Upload, Music, Image as ImageIcon, Check, Shield, ChevronRight,
   ChevronLeft, Play, Download, Copy, RefreshCw, Zap, Loader2,
-  Sparkles, CheckCircle2, X as XIcon,
+  Sparkles, CheckCircle2, X as XIcon, Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -150,6 +150,8 @@ export default function UploadPage() {
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [audioDragging, setAudioDragging] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
   const [genre, setGenre] = useState("");
@@ -213,8 +215,35 @@ export default function UploadPage() {
     setCaptionState("idle");
   };
 
+  const uploadVideoMutation = trpc.songs.uploadVideo.useMutation();
+
   const uploadMutation = trpc.songs.upload.useMutation({
-    onSuccess: () => { toast.success("Track published to Living Nexus!"); navigate("/dashboard"); },
+    onSuccess: async (data: any) => {
+      // If a video file was selected, upload it now that we have the song ID
+      if (videoFile && data?.songId) {
+        try {
+          toast.info("Uploading music video…");
+          const videoBase64 = await toBase64(videoFile);
+          // Compute SHA-256 witness for the video file
+          const videoBuf = await videoFile.arrayBuffer();
+          const videoHash = await sha256Hex(videoBuf);
+          const videoWitnessId = `WID-VID-${videoHash.slice(0, 8).toUpperCase()}-${videoHash.slice(8, 16).toUpperCase()}`;
+          await uploadVideoMutation.mutateAsync({
+            songId: data.songId,
+            videoBase64,
+            videoMimeType: videoFile.type || "video/mp4",
+            videoFileName: videoFile.name,
+            videoWitnessId,
+          });
+          toast.success("Music video uploaded and witnessed!");
+        } catch (err: any) {
+          toast.error("Audio published but video upload failed: " + (err?.message || "Unknown error"));
+        }
+      } else {
+        toast.success("Track published to Living Nexus!");
+      }
+      navigate("/dashboard");
+    },
     onError: (e: { message: string }) => toast.error(e.message),
   });
 
@@ -489,6 +518,35 @@ export default function UploadPage() {
                   </>
                 )}
               </div>
+              {/* Video Upload (audio mode only) */}
+              {uploadMode === "audio" && (
+                <div onClick={() => videoInputRef.current?.click()} className="rounded-xl p-5 text-center cursor-pointer transition-all hover:bg-white/5"
+                  style={{ border: `2px dashed ${videoFile ? "oklch(0.65 0.18 200)" : "oklch(0.22 0.015 280)"}`, background: videoFile ? "oklch(0.65 0.18 200 / 0.05)" : "oklch(0.09 0.01 280)" }}>
+                  <input ref={videoInputRef} type="file" accept="video/mp4,video/quicktime,video/mov,.mp4,.mov" className="hidden"
+                    onChange={e => {
+                      const f = e.target.files?.[0];
+                      if (f) {
+                        if (f.size > 500 * 1024 * 1024) { toast.error(`Video too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum is 500 MB.`); e.target.value = ""; return; }
+                        setVideoFile(f);
+                      }
+                    }} />
+                  {videoFile ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Check className="w-4 h-4" style={{ color: "oklch(0.65 0.18 200)" }} />
+                      <span className="text-sm" style={{ color: "oklch(0.65 0.18 200)" }}>{videoFile.name}</span>
+                      <span className="text-xs" style={{ color: "#E2E8F0" }}>({(videoFile.size/1024/1024).toFixed(1)} MB)</span>
+                      <button onClick={e => { e.stopPropagation(); setVideoFile(null); }} className="text-xs hover:underline ml-2" style={{ color: "#E2E8F0" }}>Remove</button>
+                    </div>
+                  ) : (
+                    <>
+                      <Video className="w-6 h-6 mx-auto mb-1" style={{ color: "oklch(0.65 0.18 200)", opacity: 0.4 }} />
+                      <p className="text-sm" style={{ color: "#E2E8F0" }}>Music Video <span style={{ color: "oklch(0.5 0.03 280)" }}>(optional)</span> — MP4, MOV, max 500 MB</p>
+                      <p className="text-xs mt-0.5" style={{ color: "oklch(0.4 0.02 280)" }}>Video gets its own Witness ID alongside your audio</p>
+                    </>
+                  )}
+                </div>
+              )}
+
               <Button
                 className="w-full"
                 disabled={uploadMode === "audio" ? !audioFile : !lyrics.trim()}

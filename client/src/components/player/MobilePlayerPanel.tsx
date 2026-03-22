@@ -12,7 +12,7 @@ import { useLocation } from "wouter";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, X,
-  Music, DollarSign, Users,
+  Music, DollarSign, Users, Video, ImageIcon,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import PlayerTipModal from "./PlayerTipModal";
@@ -168,6 +168,28 @@ export default function MobilePlayerPanel() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  // Video/art toggle state
+  const [showVideo, setShowVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
+
+  // Sync video playback with audio player
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !videoUrl) return;
+    if (state.isPlaying && showVideo) {
+      vid.currentTime = state.currentTime;
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+    }
+  }, [state.isPlaying, showVideo, videoUrl]);
+
+  // Reset video toggle when track changes
+  useEffect(() => {
+    setShowVideo(false);
+  }, [currentTrack?.id]);
 
   // Vertical volume bar state
   const [volBarActive, setVolBarActive] = useState(false);
@@ -330,12 +352,41 @@ export default function MobilePlayerPanel() {
                 animation: "panelArtFadeIn 0.4s ease",
               }}
             >
-              {currentTrack?.artUrl && currentTrack.artType !== "video" ? (
+              {/* Video player or cover art */}
+              {videoUrl && showVideo ? (
+                <video
+                  ref={videoRef}
+                  src={videoUrl}
+                  className="w-full h-full object-cover"
+                  playsInline
+                  loop
+                  muted={state.isMuted}
+                />
+              ) : currentTrack?.artUrl && currentTrack.artType !== "video" ? (
                 <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
               ) : currentTrack?.artUrl && currentTrack.artType === "video" ? (
                 <video src={currentTrack.artUrl} className="w-full h-full object-cover" muted />
               ) : (
                 <Music className="w-1/2 h-1/2 opacity-30 text-white" />
+              )}
+
+              {/* Video / Art toggle button — top-left corner, only shown when videoUrl exists */}
+              {videoUrl && (
+                <button
+                  onClick={() => setShowVideo(v => !v)}
+                  className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold tracking-wide transition-all"
+                  style={{
+                    background: showVideo ? "oklch(0.84 0.155 85 / 0.9)" : "oklch(0 0 0 / 0.55)",
+                    color: showVideo ? "oklch(0.08 0.01 280)" : "oklch(0.9 0.02 85)",
+                    border: showVideo ? "none" : "1px solid oklch(0.84 0.155 85 / 0.4)",
+                    backdropFilter: "blur(4px)",
+                    zIndex: 20,
+                  }}
+                  title={showVideo ? "Switch to cover art" : "Watch music video"}
+                >
+                  {showVideo ? <ImageIcon size={11} /> : <Video size={11} />}
+                  {showVideo ? "Art" : "Video"}
+                </button>
               )}
 
               {/* ── Vertical volume bar — right edge of art, tap volume icon to activate ── */}

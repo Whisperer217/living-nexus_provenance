@@ -521,3 +521,12 @@
 - [x] Vertical volume bar on right side of cover art: tap/drag to rise, collapses when not active
 - [x] Improve lyrics readability in Now Playing panel (larger text, better contrast, line spacing)
 - [x] Add lyrics editing to Archive Edit Track panel (post-upload lyrics add/update)
+
+## Phase 44: Music Video Support
+- [x] DB: add nullable videoUrl, videoKey, videoWitnessId columns to songs table + migrate
+- [x] Server: uploadVideo procedure (S3 + WID hash), update getSongDetail/mySongs to include video fields
+- [x] Upload Page: optional video upload field (MP4/MOV, max 500MB) with S3 upload + WID
+- [x] Now Playing Panel: video player when videoUrl present, video/audio toggle button
+- [x] Song Detail Page: full-width video above track info when videoUrl present
+- [x] Edit Track Panel: video upload/replace section
+- [x] Tests pass (40/40), zero breaking changes verified, TypeScript: 0 errors

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Shield, Lock, Download, FileText } from "lucide-react";
+import { X, Upload, Shield, Lock, Download, FileText, Video } from "lucide-react";
 import { toast } from "sonner";
 
 const GENRES = [
@@ -53,6 +53,8 @@ interface Song {
   downloadPermission?: string | null;
   downloadTipThresholdCents?: number | null;
   lyricsText?: string | null;
+  videoUrl?: string | null;
+  videoWitnessId?: string | null;
 }
 
 interface EditTrackPanelProps {
@@ -87,6 +89,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [dlSaving, setDlSaving] = useState(false);
   const [lyrics, setLyrics] = useState(song.lyricsText ?? "");
   const [lyricsSaving, setLyricsSaving] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(song.videoUrl ?? null);
+  const [currentVideoWid, setCurrentVideoWid] = useState<string | null>(song.videoWitnessId ?? null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -127,6 +134,44 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
+
+  const uploadVideoMutation = trpc.songs.uploadVideo.useMutation({
+    onSuccess: (data: any) => {
+      setCurrentVideoUrl(data.videoUrl);
+      setCurrentVideoWid(data.videoWitnessId);
+      setVideoFile(null);
+      setVideoUploading(false);
+      toast.success("Music video uploaded and witnessed!");
+      utils.songs.mySongs.invalidate();
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err.message || "Video upload failed");
+      setVideoUploading(false);
+    },
+  });
+
+  async function handleVideoUpload() {
+    if (!videoFile) return;
+    setVideoUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = (ev.target?.result as string).split(",")[1];
+      // Compute SHA-256 witness for the video file
+      const videoBuf = await videoFile.arrayBuffer();
+      const hashBuf = await crypto.subtle.digest("SHA-256", videoBuf);
+      const hashArr = Array.from(new Uint8Array(hashBuf));
+      const hashHex = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
+      const videoWitnessId = `WID-VID-${hashHex.slice(0, 8).toUpperCase()}-${hashHex.slice(8, 16).toUpperCase()}`;
+      await uploadVideoMutation.mutateAsync({
+        songId: song.id,
+        videoBase64: base64,
+        videoMimeType: videoFile.type || "video/mp4",
+        videoFileName: videoFile.name,
+        videoWitnessId,
+      });
+    };
+    reader.readAsDataURL(videoFile);
+  }
 
   const uploadCoverArt = trpc.songs.uploadCoverArt.useMutation({
     onSuccess: (data) => {
@@ -543,6 +588,84 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 {lyricsSaving ? "Saving…" : "Save Lyrics"}
               </Button>
             </div>
+          </div>
+
+          {/* ── Music Video Upload ──────────────────────────────────────────────────────────────────────────────────── */}
+          <div
+            className="space-y-3 rounded-xl p-4"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <Label className="text-white text-sm font-medium flex items-center gap-2">
+              <Video size={14} style={{ color: "oklch(0.65 0.18 200)" }} />
+              Music Video
+            </Label>
+            <p className="text-xs" style={{ color: "#64748b" }}>
+              Attach a music video to this track. The video gets its own Witness ID alongside the audio. MP4 or MOV, max 500 MB.
+            </p>
+
+            {/* Current video preview */}
+            {currentVideoUrl && (
+              <div className="rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", background: "#0a0f1a" }}>
+                <video src={currentVideoUrl} className="w-full h-full object-contain" controls playsInline />
+              </div>
+            )}
+
+            {/* Current video WID */}
+            {currentVideoWid && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono"
+                style={{ background: "oklch(0.65 0.18 200 / 0.08)", border: "1px solid oklch(0.65 0.18 200 / 0.25)", color: "oklch(0.65 0.18 200)" }}>
+                🔐 Video WID: {currentVideoWid}
+              </div>
+            )}
+
+            {/* File picker */}
+            <div
+              onClick={() => videoInputRef.current?.click()}
+              className="rounded-xl p-4 text-center cursor-pointer transition-all hover:bg-white/5"
+              style={{
+                border: `2px dashed ${videoFile ? "oklch(0.65 0.18 200)" : "rgba(255,255,255,0.12)"}`,
+                background: videoFile ? "oklch(0.65 0.18 200 / 0.05)" : "transparent",
+              }}
+            >
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/mp4,video/quicktime,video/mov,.mp4,.mov"
+                className="hidden"
+                onChange={e => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  if (f.size > 500 * 1024 * 1024) { toast.error(`Video too large (${(f.size/1024/1024).toFixed(0)} MB). Max 500 MB.`); e.target.value = ""; return; }
+                  setVideoFile(f);
+                }}
+              />
+              {videoFile ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Video size={14} style={{ color: "oklch(0.65 0.18 200)" }} />
+                  <span className="text-sm" style={{ color: "oklch(0.65 0.18 200)" }}>{videoFile.name}</span>
+                  <span className="text-xs" style={{ color: "#94a3b8" }}>({(videoFile.size/1024/1024).toFixed(1)} MB)</span>
+                  <button onClick={e => { e.stopPropagation(); setVideoFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
+                </div>
+              ) : (
+                <>
+                  <Video size={20} className="mx-auto mb-1" style={{ color: "oklch(0.65 0.18 200)", opacity: 0.4 }} />
+                  <p className="text-sm" style={{ color: "#94a3b8" }}>{currentVideoUrl ? "Replace video" : "Upload music video"}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "#475569" }}>MP4, MOV — max 500 MB</p>
+                </>
+              )}
+            </div>
+
+            {videoFile && (
+              <Button
+                size="sm"
+                onClick={handleVideoUpload}
+                disabled={videoUploading}
+                className="w-full text-sm font-semibold"
+                style={{ background: "oklch(0.65 0.18 200 / 0.15)", color: "oklch(0.65 0.18 200)", border: "1px solid oklch(0.65 0.18 200 / 0.3)" }}
+              >
+                {videoUploading ? "Uploading video…" : "Upload & Witness Video"}
+              </Button>
+            )}
           </div>
 
         </div>{/* end Form */}
