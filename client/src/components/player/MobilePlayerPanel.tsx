@@ -434,11 +434,11 @@ export default function MobilePlayerPanel() {
           className="flex-1 overflow-y-auto flex flex-col"
           style={{ scrollbarWidth: "none" }}
         >
-          {/* WID + genre badges */}
-          <div className="px-4 pt-3 pb-2 flex flex-wrap gap-1.5">
+          {/* WID + genre badges — own clearly-spaced row */}
+          <div className="px-4 pt-4 pb-3 flex flex-wrap gap-1.5">
             {currentTrack?.witnessId && (
               <span
-                className="text-[9px] font-mono px-2 py-0.5 rounded-full"
+                className="text-[9px] font-mono px-2 py-1 rounded-full"
                 style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
               >
                 🔐 WID: {currentTrack.witnessId.slice(0, 12)}…
@@ -446,7 +446,7 @@ export default function MobilePlayerPanel() {
             )}
             {currentTrack?.genre && (
               <span
-                className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
+                className="text-[9px] font-mono px-2 py-1 rounded-full"
                 style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.22 0.02 280)" }}
               >
                 {currentTrack.genre}
@@ -454,7 +454,7 @@ export default function MobilePlayerPanel() {
             )}
             {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
               <span
-                className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
+                className="text-[9px] font-mono px-2 py-1 rounded-full"
                 style={{
                   background: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.2)" : "oklch(0.60 0.18 55 / 0.2)",
                   color: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.80 0.18 25)" : "oklch(0.85 0.18 55)",
@@ -466,10 +466,10 @@ export default function MobilePlayerPanel() {
             )}
           </div>
 
-          {/* Progress bar */}
-          <div className="px-4 pb-1">
+          {/* Progress bar — clearly separated from badges */}
+          <div className="px-4 pb-2">
             <div
-              className="w-full h-1 rounded-full bg-white/15 cursor-pointer relative group"
+              className="w-full h-[3px] rounded-full bg-white/15 cursor-pointer relative group"
               onClick={handleSeek}
               onTouchMove={handleSeekTouch}
             >
@@ -481,26 +481,26 @@ export default function MobilePlayerPanel() {
                   transition: "width 0.25s linear",
                 }}
               >
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white
                   opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
               </div>
             </div>
-            <div className="flex justify-between mt-1">
+            <div className="flex justify-between mt-1.5">
               <span className="text-[10px] tabular-nums" style={{ color: "oklch(0.45 0.03 280)" }}>{fmtTime(state.currentTime)}</span>
               <span className="text-[10px] tabular-nums" style={{ color: "oklch(0.45 0.03 280)" }}>{fmtTime(state.duration)}</span>
             </div>
           </div>
 
-          {/* Playback controls */}
-          <div className="px-4 pb-3 flex items-center justify-between">
+          {/* Playback controls — generous vertical padding */}
+          <div className="px-4 py-3 flex items-center justify-between">
             <button
               onClick={toggleShuffle}
               className={`p-2 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/35 hover:text-white/70"}`}
             >
-              <Shuffle size={17} />
+              <Shuffle size={18} />
             </button>
             <button onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
-              <SkipBack size={24} />
+              <SkipBack size={26} />
             </button>
             <button
               onClick={togglePlay}
@@ -513,24 +513,24 @@ export default function MobilePlayerPanel() {
               }
             </button>
             <button onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
-              <SkipForward size={24} />
+              <SkipForward size={26} />
             </button>
             <button
               onClick={toggleRepeat}
               className={`p-2 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/35 hover:text-white/70"}`}
             >
-              <Repeat size={17} />
+              <Repeat size={18} />
             </button>
           </div>
 
-          {/* Volume toggle row */}
-          <div className="px-4 pb-3 flex items-center gap-2">
+          {/* Volume row — inline pill: icon + % + mute toggle */}
+          <div className="px-4 pb-4 flex items-center gap-2">
             <button
               onClick={() => setVolBarActive(v => !v)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-body transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-body transition-all ${
                 volBarActive
                   ? "text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30"
-                  : "text-white/35 hover:text-white/60 border border-white/10"
+                  : "text-white/40 hover:text-white/65 border border-white/10"
               }`}
               title={volBarActive ? "Hide volume bar" : "Show volume bar"}
             >
@@ -539,11 +539,11 @@ export default function MobilePlayerPanel() {
             </button>
             <button
               onClick={toggleMute}
-              className="ml-auto text-[10px] font-body px-2 py-1 rounded-md transition-all"
+              className="ml-auto text-[10px] font-body px-3 py-2 rounded-xl transition-all"
               style={{
                 color: state.isMuted ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
-                background: state.isMuted ? "oklch(0.84 0.155 85 / 0.1)" : "transparent",
-                border: `1px solid ${state.isMuted ? "oklch(0.84 0.155 85 / 0.3)" : "oklch(0.22 0.02 275)"}`,
+                background: state.isMuted ? "oklch(0.84 0.155 85 / 0.1)" : "oklch(0.12 0.02 275)",
+                border: `1px solid ${state.isMuted ? "oklch(0.84 0.155 85 / 0.3)" : "oklch(0.20 0.02 275)"}`,
               }}
             >
               {state.isMuted ? "Unmute" : "Mute"}

@@ -546,3 +546,6 @@
 ## Phase 48: Full-Bleed Now Playing Panel
 - [x] Rewrite MobilePlayerPanel: full-bleed cover art top half, dark gradient fade, lyrics in panel, WID badge + Tip Creator pinned above controls
 - [x] TypeScript check (0 errors), tests pass (40/40), checkpoint saved
+
+## Phase 49: MobilePlayerPanel Spacing Fixes
+- [x] Fix WID/badge row overlapping progress bar, tighten controls row, clean up volume/mute layout
