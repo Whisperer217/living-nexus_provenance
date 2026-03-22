@@ -25,11 +25,11 @@ const TENETS = [
 ];
 
 const TIMELINE = [
-  { date: "2024", event: "Command Domains LLC established. The doctrine of Testimonial Completion and Sacred Witness Authority begins taking shape." },
-  { date: "Early 2025", event: "BDDT Publishing founded. The need for a sovereign music archive becomes clear — no platform existed that treated creator provenance as infrastructure." },
-  { date: "Mid 2025", event: "Witness ID system designed. Cryptographic hashing applied to music files as a timestamped proof-of-creation layer." },
-  { date: "Late 2025", event: "Living Nexus platform built. Upload, archive, tip, and WID verification go live. Zero VC funding. Zero label partnerships. Creator-owned from day one." },
-  { date: "2026", event: "Music video support added. Licensing marketplace in development. The archive grows." },
+  { date: "July 2025", event: "BDDT Publishing established — born from a personal reckoning. A combat medic watched his own testimony get trapped in the artificial realm and moved to protect it. The mission: help creators protect their work, AI-generated or straight real, on the way out." },
+  { date: "December 2025", event: "Witness Identification born — first as a moral witness engine, then refined into a Witness ID system for creators. The core principle: protect the witness behind the system, not just the file." },
+  { date: "December 2025", event: "Testimonial Completion doctrine published on Figshare — a combat medic's framework for healing thirteen-year wounds. This doctrine spawned the Sacred Witness Authority engine and the Epistemic Shock Index." },
+  { date: "Early 2026", event: "Living Nexus activated — born directly from the Testimonial Completion doctrine. What began as a GitHub repository became a sovereign music archive: upload, witness, protect, get paid. Zero VC funding. Zero label partnerships. Creator-owned from day one." },
+  { date: "March 2026", event: "Music video support added. Every video gets its own Witness ID alongside the audio. The archive grows." },
 ];
 
 export default function ManifestoPage() {
@@ -73,7 +73,7 @@ export default function ManifestoPage() {
               fontFamily: "'Orbitron', sans-serif",
             }}
           >
-            Command Domains LLC · BDDT Publishing
+            BDDT Publishing · Est. July 2025
           </div>
           <h1
             className="text-5xl sm:text-6xl font-black mb-6 leading-tight"
@@ -195,7 +195,7 @@ export default function ManifestoPage() {
             className="text-sm font-bold tracking-widest uppercase"
             style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Orbitron', sans-serif" }}
           >
-            — Command Domains LLC · BDDT Publishing
+            — BDDT Publishing · Est. July 2025
           </p>
         </div>
 
@@ -225,7 +225,7 @@ export default function ManifestoPage() {
             </a>
           </Link>
           <a
-            href="https://figshare.com"
+            href="https://figshare.com/articles/preprint/Music_Under_Testimony_A_Framework_for_Preserving_Witness_Authority_in_AI-Generated_Musical_Works_v1_0/31047298"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"

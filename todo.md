@@ -539,3 +539,6 @@
 
 ## Phase 46: Mobile Fixes
 - [x] Fix WhatsNewModal mobile layout — tighten padding, constrain height, prevent text overflow, pin footer
+
+## Phase 47: Manifesto Timeline Correction
+- [x] Rewrite origin timeline with accurate history: BDDT July 2025, WID Dec 2025, Living Nexus born from Testimonial Completion doctrine
