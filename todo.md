@@ -536,3 +536,6 @@
 - [x] Build What's New / Updates popup — changelog modal with mini how-to guide, first-visit trigger, dismissable
 - [x] Add Manifesto link to sidebar nav and footer
 - [x] Tests pass (40/40), TypeScript: 0 errors, checkpoint saved
+
+## Phase 46: Mobile Fixes
+- [x] Fix WhatsNewModal mobile layout — tighten padding, constrain height, prevent text overflow, pin footer
