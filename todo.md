@@ -542,3 +542,7 @@
 
 ## Phase 47: Manifesto Timeline Correction
 - [x] Rewrite origin timeline with accurate history: BDDT July 2025, WID Dec 2025, Living Nexus born from Testimonial Completion doctrine
+
+## Phase 48: Full-Bleed Now Playing Panel
+- [x] Rewrite MobilePlayerPanel: full-bleed cover art top half, dark gradient fade, lyrics in panel, WID badge + Tip Creator pinned above controls
+- [x] TypeScript check (0 errors), tests pass (40/40), checkpoint saved
