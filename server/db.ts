@@ -686,3 +686,52 @@ export async function isInPlaylist(userId: number, songId: number): Promise<bool
     .limit(1);
   return result.length > 0;
 }
+
+// ─── Creator OG Nomination Card ───────────────────────────────────────────────
+/**
+ * Fetch all data needed to build a creator profile OG nomination card.
+ * Returns the creator's identity fields plus their published song count
+ * and WID count (songs that have a witnessId set).
+ */
+export async function getCreatorForOg(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const userResult = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      bio: users.bio,
+      profilePhotoUrl: users.profilePhotoUrl,
+      bannerUrl: users.bannerUrl,
+      primaryGenre: users.primaryGenre,
+      location: users.location,
+      twitterHandle: users.twitterHandle,
+      instagramHandle: users.instagramHandle,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (userResult.length === 0) return undefined;
+  const creator = userResult[0];
+
+  const songCountResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(songs)
+    .where(and(eq(songs.userId, userId), eq(songs.status, "Published")));
+  const publishedCount = Number(songCountResult[0]?.count ?? 0);
+
+  const widCountResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(songs)
+    .where(and(
+      eq(songs.userId, userId),
+      eq(songs.status, "Published"),
+      isNotNull(songs.witnessId),
+    ));
+  const widCount = Number(widCountResult[0]?.count ?? 0);
+
+  return { creator, publishedCount, widCount };
+}

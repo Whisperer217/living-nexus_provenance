@@ -488,3 +488,14 @@
 - [x] Add permanent note under caption field: "Your lyrics are WID protected and never used for AI training."
 - [x] Caption field stays blank if creator skips — they fill it manually
 - [x] TypeScript: 0 errors | Vitest: 40/40 passing
+
+## Phase: Creator Profile OG Nomination Card
+- [x] Add getCreatorForOg DB helper (userId → name, artistHandle, bio, profilePhotoUrl, bannerUrl, primaryGenre, location, twitterHandle, instagramHandle, publishedSongCount, widCount)
+- [x] Add /creator/:id OG route to server/og.ts (bot UA detection, DB fetch, inject creator meta tags)
+- [x] og:type = profile, og:title = "Artist Name | Living Nexus Creator", og:description = bio + stats
+- [x] og:image = bannerUrl (preferred) or profilePhotoUrl or fallback platform logo
+- [x] twitter:card = summary_large_image, twitter:creator = @twitterHandle if set
+- [x] og:url = https://www.livingnexus.org/creator/:id (canonical)
+- [x] Smoke-tested: curl with Discordbot UA on /creator/1 returns all correct tags with real CloudFront banner URL
+- [x] Regular browser UA on /creator/1 still gets normal SPA (no OG injection)
+- [x] TypeScript: 0 errors | Vitest: 40/40 passing
