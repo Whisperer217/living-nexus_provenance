@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Shield, Lock, Download } from "lucide-react";
+import { X, Upload, Shield, Lock, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 const GENRES = [
@@ -52,6 +52,7 @@ interface Song {
   witnessId?: string | null;
   downloadPermission?: string | null;
   downloadTipThresholdCents?: number | null;
+  lyricsText?: string | null;
 }
 
 interface EditTrackPanelProps {
@@ -84,6 +85,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     ((song.downloadTipThresholdCents ?? 179) / 100).toFixed(2)
   );
   const [dlSaving, setDlSaving] = useState(false);
+  const [lyrics, setLyrics] = useState(song.lyricsText ?? "");
+  const [lyricsSaving, setLyricsSaving] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -166,6 +169,23 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       status,
     });
     setSaving(false);
+  }
+
+  const updateLyrics = trpc.songs.updateLyrics.useMutation({
+    onSuccess: () => {
+      toast.success("Lyrics saved");
+      utils.songs.mySongs.invalidate();
+      setLyricsSaving(false);
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err.message || "Failed to save lyrics");
+      setLyricsSaving(false);
+    },
+  });
+
+  async function handleSaveLyrics() {
+    setLyricsSaving(true);
+    await updateLyrics.mutateAsync({ songId: song.id, lyricsText: lyrics });
   }
 
   async function handleSaveDownloadPermission() {
@@ -480,7 +500,52 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               {dlSaving ? "Saving…" : "Save Download Setting"}
             </Button>
           </div>
-        </div>
+
+          {/* ── Lyrics Editor ──────────────────────────────────────────────────────────────────────────────────────── */}
+          <div
+            className="space-y-3 rounded-xl p-4"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <Label className="text-white text-sm font-medium flex items-center gap-2">
+              <FileText size={14} style={{ color: "#D4AF37" }} />
+              Lyrics
+            </Label>
+            <p className="text-xs" style={{ color: "#64748b" }}>
+              Add or update the lyrics for this track. Lyrics are displayed in the Now Playing panel and serve as a timestamped record of your words.
+            </p>
+            <textarea
+              value={lyrics}
+              onChange={(e) => setLyrics(e.target.value)}
+              placeholder="Paste or type your lyrics here…"
+              rows={10}
+              className="w-full rounded-lg px-3 py-2.5 text-sm resize-y"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(212,175,55,0.2)",
+                color: "#e2e8f0",
+                outline: "none",
+                fontFamily: "'Inter', sans-serif",
+                lineHeight: "1.8",
+                minHeight: "160px",
+              }}
+            />
+            <div className="flex items-center justify-between">
+              <span className="text-xs" style={{ color: "#475569" }}>
+                {lyrics.length} / 10,000 characters
+              </span>
+              <Button
+                size="sm"
+                onClick={handleSaveLyrics}
+                disabled={lyricsSaving}
+                className="text-sm font-semibold"
+                style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.3)" }}
+              >
+                {lyricsSaving ? "Saving…" : "Save Lyrics"}
+              </Button>
+            </div>
+          </div>
+
+        </div>{/* end Form */}
 
         {/* Footer */}
         <div

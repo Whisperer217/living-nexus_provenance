@@ -516,3 +516,8 @@
 ## Phase 42: Now Playing Panel Redesign + Tip Input Fix
 - [x] Fix tip threshold input: allow free-form typing, backspace, and custom amounts (not hardcoded)
 - [x] Redesign Now Playing side panel: player controls overlay bottom of cover art, freeing space below for lyrics/info
+
+## Phase 43: Player + Lyrics + Archive Improvements
+- [x] Vertical volume bar on right side of cover art: tap/drag to rise, collapses when not active
+- [x] Improve lyrics readability in Now Playing panel (larger text, better contrast, line spacing)
+- [x] Add lyrics editing to Archive Edit Track panel (post-upload lyrics add/update)

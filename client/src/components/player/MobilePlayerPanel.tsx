@@ -169,6 +169,26 @@ export default function MobilePlayerPanel() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // Vertical volume bar state
+  const [volBarActive, setVolBarActive] = useState(false);
+  const volBarRef = useRef<HTMLDivElement>(null);
+
+  const handleVolBarTouch = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const touch = e.touches[0];
+    // Vertical: top = 0 vol, bottom = full vol — invert so dragging UP increases volume
+    const ratio = 1 - Math.max(0, Math.min(1, (touch.clientY - rect.top) / rect.height));
+    setVolume(ratio);
+  }, [setVolume]);
+
+  const handleVolBarClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    setVolume(ratio);
+  }, [setVolume]);
+
   // Art renderer
   const ArtContent = ({ size }: { size: string }) => (
     <div
@@ -318,6 +338,57 @@ export default function MobilePlayerPanel() {
                 <Music className="w-1/2 h-1/2 opacity-30 text-white" />
               )}
 
+              {/* ── Vertical volume bar — right edge of art, tap volume icon to activate ── */}
+              <div
+                className="absolute top-0 right-0 h-full flex flex-col items-center justify-end"
+                style={{
+                  width: "44px",
+                  paddingBottom: "80px", // above the controls overlay
+                  paddingTop: "8px",
+                  zIndex: 10,
+                  transition: "opacity 0.2s",
+                  opacity: volBarActive ? 1 : 0,
+                  pointerEvents: volBarActive ? "auto" : "none",
+                }}
+              >
+                {/* Track: full height clickable area */}
+                <div
+                  ref={volBarRef}
+                  className="relative flex-1 w-2 rounded-full cursor-pointer"
+                  style={{
+                    background: "oklch(1 0 0 / 0.15)",
+                    maxHeight: "100%",
+                  }}
+                  onClick={handleVolBarClick}
+                  onTouchMove={handleVolBarTouch}
+                >
+                  {/* Fill from bottom */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 rounded-full"
+                    style={{
+                      height: state.isMuted ? "0%" : `${state.volume * 100}%`,
+                      background: "linear-gradient(to top, #D4AF37, #7C3AED)",
+                      transition: "height 0.1s linear",
+                    }}
+                  />
+                  {/* Thumb */}
+                  <div
+                    className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white shadow-lg"
+                    style={{
+                      bottom: `calc(${state.isMuted ? 0 : state.volume * 100}% - 8px)`,
+                      transition: "bottom 0.1s linear",
+                    }}
+                  />
+                </div>
+                {/* Volume icon at bottom of bar */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+                  className="mt-2 mb-1 text-white/60 hover:text-white transition-colors"
+                >
+                  {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                </button>
+              </div>
+
               {/* ── Controls overlay — sits on top of the bottom ~35% of the art ── */}
               <div
                 className="absolute bottom-0 left-0 right-0 flex flex-col"
@@ -352,7 +423,7 @@ export default function MobilePlayerPanel() {
                 </div>
 
                 {/* Main controls row */}
-                <div className="px-4 flex items-center justify-between">
+                <div className="px-4 flex items-center justify-between" style={{ paddingRight: volBarActive ? "48px" : "16px", transition: "padding 0.2s" }}>
                   <button
                     onClick={toggleShuffle}
                     className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/40 hover:text-white/70"}`}
@@ -475,54 +546,76 @@ export default function MobilePlayerPanel() {
           <div className="mx-5 mb-1" style={{ height: "1px", background: "oklch(0.84 0.155 85 / 0.12)" }} />
         </div>
 
-        {/* ══ SCROLLABLE BOTTOM SECTION — volume, lyrics ══ */}
+        {/* ══ SCROLLABLE BOTTOM SECTION — volume toggle + lyrics ══ */}
         <div
           className="flex-1 overflow-y-auto"
           style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}
         >
-          {/* Volume */}
-          <div className="px-5 pb-5 flex items-center gap-3">
-            <button onClick={toggleMute} className="p-1 text-white/35 hover:text-white transition-colors flex-shrink-0">
-              {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </button>
-            <div
-              className="flex-1 h-1.5 rounded-full bg-white/10 cursor-pointer relative group"
-              onClick={handleVolumeClick}
-              onTouchMove={handleVolumeTouch}
+          {/* Volume toggle row — tapping the icon shows/hides the vertical bar on the art */}
+          <div className="px-5 pt-3 pb-2 flex items-center gap-3">
+            <button
+              onClick={() => setVolBarActive(v => !v)}
+              className={`p-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-body ${
+                volBarActive
+                  ? "text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30"
+                  : "text-white/35 hover:text-white/70 border border-transparent"
+              }`}
+              title={volBarActive ? "Hide volume bar" : "Show volume bar on art"}
             >
-              <div
-                className="h-full rounded-full bg-white/40 group-hover:bg-[#D4AF37] transition-colors"
-                style={{ width: state.isMuted ? "0%" : `${state.volume * 100}%` }}
-              />
-            </div>
+              {state.isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+              <span style={{ color: "inherit" }}>
+                {state.isMuted ? "Muted" : `${Math.round(state.volume * 100)}%`}
+              </span>
+            </button>
+            <button
+              onClick={toggleMute}
+              className="ml-auto text-[10px] font-body px-2 py-1 rounded-md transition-all"
+              style={{
+                color: state.isMuted ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
+                background: state.isMuted ? "oklch(0.84 0.155 85 / 0.1)" : "transparent",
+                border: `1px solid ${state.isMuted ? "oklch(0.84 0.155 85 / 0.3)" : "oklch(0.22 0.02 275)"}`,
+              }}
+            >
+              {state.isMuted ? "Unmute" : "Mute"}
+            </button>
           </div>
 
-          {/* Lyrics section */}
-          <div className="px-5 pb-8">
-            <div className="flex items-center gap-2 mb-3">
+          {/* Lyrics section — improved readability */}
+          <div className="px-5 pb-8 pt-2">
+            <div className="flex items-center gap-2 mb-4">
               <span
-                className="text-[9px] font-bold tracking-widest uppercase"
-                style={{ color: "oklch(0.40 0.03 280)", fontFamily: "'Cinzel', serif" }}
+                className="text-[10px] font-bold tracking-widest uppercase"
+                style={{ color: "oklch(0.84 0.155 85 / 0.7)", fontFamily: "'Cinzel', serif" }}
               >
                 Lyrics
               </span>
-              <div className="flex-1" style={{ height: "1px", background: "oklch(0.18 0.02 275)" }} />
+              <div className="flex-1" style={{ height: "1px", background: "oklch(0.84 0.155 85 / 0.15)" }} />
             </div>
             {songDetail?.song?.lyricsText ? (
               <pre
-                className="text-[13px] leading-7 whitespace-pre-wrap font-body"
-                style={{ color: "oklch(0.72 0.03 280)", fontFamily: "'Inter', sans-serif" }}
+                className="whitespace-pre-wrap"
+                style={{
+                  fontFamily: "'Inter', 'Georgia', serif",
+                  fontSize: "15px",
+                  lineHeight: "2",
+                  color: "oklch(0.88 0.02 280)",
+                  letterSpacing: "0.01em",
+                }}
               >
                 {songDetail.song.lyricsText}
               </pre>
             ) : (
-              <p
-                className="text-[12px] italic text-center py-6"
-                style={{ color: "oklch(0.35 0.02 280)" }}
+              <div
+                className="rounded-xl p-6 text-center"
+                style={{ background: "oklch(0.10 0.02 275)", border: "1px dashed oklch(0.22 0.02 275)" }}
               >
-                No lyrics registered —{" "}
-                <span style={{ color: "oklch(0.84 0.155 85)" }}>upload lyrics to protect your words.</span>
-              </p>
+                <p className="text-[13px] italic mb-1" style={{ color: "oklch(0.50 0.02 280)" }}>
+                  No lyrics registered
+                </p>
+                <p className="text-[12px]" style={{ color: "oklch(0.84 0.155 85)" }}>
+                  Upload lyrics to protect your words.
+                </p>
+              </div>
             )}
           </div>
 
