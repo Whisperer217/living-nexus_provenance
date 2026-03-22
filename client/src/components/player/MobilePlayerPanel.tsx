@@ -323,37 +323,49 @@ export default function MobilePlayerPanel() {
         {/* ══ FIXED TOP SECTION ══ */}
         <div className="flex-shrink-0">
 
-          {/* ── Header: Now Playing label + Cinema Mode + Hide + Close ── */}
+          {/* ── Header: Now Playing label + Hide + Close — always visible ── */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
             <div className="flex flex-col gap-0.5">
-              <span
-                className="text-[10px] font-bold tracking-widest uppercase"
-                style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}
-              >
-                Now Playing
-              </span>
-              <span
-                className="text-[9px] tracking-wider"
-                style={{ color: "oklch(0.84 0.155 85 / 0.70)", fontFamily: "'Cinzel', serif" }}
-              >
-                {queueContextLabel}
-              </span>
+              {!cinemaMode && (
+                <>
+                  <span
+                    className="text-[10px] font-bold tracking-widest uppercase"
+                    style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}
+                  >
+                    Now Playing
+                  </span>
+                  <span
+                    className="text-[9px] tracking-wider"
+                    style={{ color: "oklch(0.84 0.155 85 / 0.70)", fontFamily: "'Cinzel', serif" }}
+                  >
+                    {queueContextLabel}
+                  </span>
+                </>
+              )}
+              {cinemaMode && (
+                <span
+                  className="text-[9px] tracking-widest uppercase"
+                  style={{ color: "oklch(0.84 0.155 85 / 0.45)", fontFamily: "'Cinzel', serif" }}
+                >
+                  Cinema
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-1">
-              {/* Addition 4: Cinema Mode toggle in header */}
+              {/* Cinema Mode toggle — always visible in header */}
               <button
                 onClick={() => setCinemaMode(v => !v)}
                 className="p-1.5 rounded-lg transition-all"
                 style={{
                   color: cinemaMode ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)",
-                  background: cinemaMode ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
-                  border: cinemaMode ? "1px solid oklch(0.84 0.155 85 / 0.28)" : "1px solid transparent",
+                  background: cinemaMode ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
+                  border: cinemaMode ? "1px solid oklch(0.84 0.155 85 / 0.35)" : "1px solid transparent",
                 }}
                 title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — art + lyrics only"}
               >
                 {cinemaMode ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
-              {/* Addition 2: Hide Player (collapse) */}
+              {/* Hide Player (collapse) */}
               <button
                 onClick={closeNowPlayingPanel}
                 className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"

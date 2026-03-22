@@ -567,3 +567,6 @@
 - [x] Add Hide Player button to collapse/minimize the panel
 - [x] Add WID badge + AI tag as their own row below artist name
 - [x] Add Cinema Mode toggle (eye icon) in panel header — not on cover art
+
+## Phase 53: Cinema Mode Toggle Fix
+- [x] Pin Cinema Mode toggle as always-visible floating button — visible in both normal and cinema states so user can always exit
