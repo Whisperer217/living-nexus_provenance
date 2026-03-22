@@ -575,3 +575,19 @@
 - [x] Move Cinema Mode eye icon to sit directly next to the heart/like button (same row)
 - [x] Remove swipe-right-to-close gesture entirely
 - [x] Add bottom grab handle (pill bar) — drag down to close, drag up to expand; no accidental triggers while scrolling lyrics
+
+## Phase 55: Pre-Publish Full Audit
+- [x] TypeScript: 0 errors (full tsc --noEmit pass)
+- [x] Vitest: 40/40 tests passing (6 test files)
+- [x] All routes registered in App.tsx verified (14 routes + 2 verify routes)
+- [x] No large files in client/public (64KB total — safe for deploy)
+- [x] No HTTP 4xx/5xx errors in network log
+- [x] Dev server healthy: LSP clean, TypeScript clean, dependencies OK
+- [x] Fix nested <a> inside <Link> in WhatsNewModal footer (React DOM error)
+- [x] Add DialogDescription (sr-only) to WhatsNewModal (accessibility warning)
+- [x] Bump WhatsNewModal version v1.4.0 → v1.5.0 with Cinema Mode, Share, WID row, grab handle entries
+- [x] Confirmed: no large media files in project directory (all assets on CDN)
+- [x] Confirmed: service worker, manifest.json, offline.html all correct
+- [x] Confirmed: OG tag injection working for /song/:id and /creator/:id
+- [x] Confirmed: Stripe webhook registered before express.json() (correct order)
+- [x] Confirmed: orphaned pages (ComponentShowcase, MusicWitnessIDPage) are intentionally unrouted

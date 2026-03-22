@@ -1,17 +1,28 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Shield, Upload, Music, Video, DollarSign, Users, BookOpen, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v1.4.0";
+const CURRENT_VERSION = "v1.5.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v1.4.0",
+    version: "v1.5.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Music, text: "Cinema Mode — tap the eye icon next to the heart button to hide all controls and focus on art + lyrics." },
+      { icon: Shield, text: "WID + AI tags row — your Witness ID and genre/AI disclosure now appear directly below the artist name." },
+      { icon: Users, text: "Share button — share any track via native share sheet or copy link to clipboard." },
+      { icon: BookOpen, text: "Grab handle — swipe down on the pill bar at the bottom of the player to close; no more accidental swipe-right dismissals." },
+    ],
+  },
+  {
+    version: "v1.4.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Video, text: "Music video support — attach an MP4/MOV to any track. Each video gets its own Witness ID." },
       { icon: Shield, text: "Video WID protection — your video is cryptographically hashed and timestamped alongside your audio." },
@@ -91,6 +102,9 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
           maxHeight: "min(88vh, 640px)",
         }}
       >
+        <DialogDescription className="sr-only">
+          Living Nexus platform updates and how-to guide for new features.
+        </DialogDescription>
         {/* Header — compact on mobile */}
         <div
           className="flex-shrink-0 px-4 pt-4 pb-3"
@@ -227,14 +241,13 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
           className="flex-shrink-0 px-4 py-3 flex items-center justify-between gap-3"
           style={{ borderTop: "1px solid oklch(0.84 0.155 85 / 0.1)" }}
         >
-          <Link href="/manifesto">
-            <a
-              onClick={handleClose}
-              className="text-[11px] flex items-center gap-1 hover:underline whitespace-nowrap"
-              style={{ color: "oklch(0.50 0.04 280)" }}
-            >
-              Read the Manifesto <ChevronRight size={10} />
-            </a>
+          <Link
+            href="/manifesto"
+            onClick={handleClose}
+            className="text-[11px] flex items-center gap-1 hover:underline whitespace-nowrap"
+            style={{ color: "oklch(0.50 0.04 280)" }}
+          >
+            Read the Manifesto <ChevronRight size={10} />
           </Link>
           <Button
             onClick={handleClose}
