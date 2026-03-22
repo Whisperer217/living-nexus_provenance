@@ -300,11 +300,11 @@ export default function MobilePlayerPanel() {
             </button>
           </div>
 
-          {/* Large art — crossfade handled via key-based remount */}
+          {/* Large art with controls overlaid at bottom — frees space below for lyrics/info */}
           <div className="px-5 pb-3">
             <div
               key={currentTrack?.id || "empty"}
-              className="w-full aspect-square rounded-xl overflow-hidden flex items-center justify-center"
+              className="w-full aspect-square rounded-xl overflow-hidden relative flex items-center justify-center"
               style={{
                 background: currentTrack?.bg || "oklch(0.15 0.05 275)",
                 animation: "panelArtFadeIn 0.4s ease",
@@ -317,6 +317,72 @@ export default function MobilePlayerPanel() {
               ) : (
                 <Music className="w-1/2 h-1/2 opacity-30 text-white" />
               )}
+
+              {/* ── Controls overlay — sits on top of the bottom ~35% of the art ── */}
+              <div
+                className="absolute bottom-0 left-0 right-0 flex flex-col"
+                style={{
+                  background: "linear-gradient(to top, oklch(0 0 0 / 0.82) 0%, oklch(0 0 0 / 0.55) 60%, transparent 100%)",
+                  paddingBottom: "12px",
+                }}
+              >
+                {/* Progress bar inside overlay */}
+                <div className="px-4 pt-3 pb-1">
+                  <div
+                    className="w-full h-1 rounded-full bg-white/20 cursor-pointer relative group"
+                    onClick={handleSeek}
+                    onTouchMove={handleSeekTouch}
+                  >
+                    <div
+                      className="h-full rounded-full relative"
+                      style={{
+                        width: `${progress}%`,
+                        background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
+                        transition: "width 0.25s linear",
+                      }}
+                    >
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white
+                        opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[10px] text-white/50 tabular-nums">{fmtTime(state.currentTime)}</span>
+                    <span className="text-[10px] text-white/50 tabular-nums">{fmtTime(state.duration)}</span>
+                  </div>
+                </div>
+
+                {/* Main controls row */}
+                <div className="px-4 flex items-center justify-between">
+                  <button
+                    onClick={toggleShuffle}
+                    className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/40 hover:text-white/70"}`}
+                  >
+                    <Shuffle size={16} />
+                  </button>
+                  <button onClick={prevTrack} className="p-1.5 text-white/70 hover:text-white transition-colors">
+                    <SkipBack size={22} />
+                  </button>
+                  <button
+                    onClick={togglePlay}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-lg"
+                    style={{ background: "oklch(0.94 0.006 280)", color: "oklch(0.08 0.01 280)" }}
+                  >
+                    {state.isPlaying
+                      ? <Pause size={20} fill="currentColor" />
+                      : <Play size={20} fill="currentColor" className="ml-0.5" />
+                    }
+                  </button>
+                  <button onClick={nextTrack} className="p-1.5 text-white/70 hover:text-white transition-colors">
+                    <SkipForward size={22} />
+                  </button>
+                  <button
+                    onClick={toggleRepeat}
+                    className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/40 hover:text-white/70"}`}
+                  >
+                    <Repeat size={16} />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -409,68 +475,11 @@ export default function MobilePlayerPanel() {
           <div className="mx-5 mb-1" style={{ height: "1px", background: "oklch(0.84 0.155 85 / 0.12)" }} />
         </div>
 
-        {/* ══ SCROLLABLE BOTTOM SECTION — progress, controls, volume, lyrics ══ */}
+        {/* ══ SCROLLABLE BOTTOM SECTION — volume, lyrics ══ */}
         <div
           className="flex-1 overflow-y-auto"
           style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}
         >
-          {/* Progress bar */}
-          <div className="px-5 pt-4 pb-3">
-            <div
-              className="w-full h-1.5 rounded-full bg-white/10 cursor-pointer relative group"
-              onClick={handleSeek}
-              onTouchMove={handleSeekTouch}
-            >
-              <div
-                className="h-full rounded-full relative"
-                style={{
-                  width: `${progress}%`,
-                  background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
-                  transition: "width 0.25s linear",
-                }}
-              >
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white
-                  opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
-              </div>
-            </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-[11px] text-white/30 tabular-nums">{fmtTime(state.currentTime)}</span>
-              <span className="text-[11px] text-white/30 tabular-nums">{fmtTime(state.duration)}</span>
-            </div>
-          </div>
-
-          {/* Main controls */}
-          <div className="px-5 pb-4 flex items-center justify-between">
-            <button
-              onClick={toggleShuffle}
-              className={`p-2 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/30 hover:text-white/60"}`}
-            >
-              <Shuffle size={18} />
-            </button>
-            <button onClick={prevTrack} className="p-2 text-white/60 hover:text-white transition-colors">
-              <SkipBack size={24} />
-            </button>
-            <button
-              onClick={togglePlay}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
-              style={{ background: "oklch(0.94 0.006 280)", color: "oklch(0.08 0.01 280)" }}
-            >
-              {state.isPlaying
-                ? <Pause size={22} fill="currentColor" />
-                : <Play size={22} fill="currentColor" className="ml-1" />
-              }
-            </button>
-            <button onClick={nextTrack} className="p-2 text-white/60 hover:text-white transition-colors">
-              <SkipForward size={24} />
-            </button>
-            <button
-              onClick={toggleRepeat}
-              className={`p-2 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/30 hover:text-white/60"}`}
-            >
-              <Repeat size={18} />
-            </button>
-          </div>
-
           {/* Volume */}
           <div className="px-5 pb-5 flex items-center gap-3">
             <button onClick={toggleMute} className="p-1 text-white/35 hover:text-white transition-colors flex-shrink-0">

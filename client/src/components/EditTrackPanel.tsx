@@ -79,6 +79,10 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [tipThresholdCents, setTipThresholdCents] = useState<number>(
     song.downloadTipThresholdCents ?? 179
   );
+  // String state for the input field so backspace / free-form typing works
+  const [tipThresholdInput, setTipThresholdInput] = useState<string>(
+    ((song.downloadTipThresholdCents ?? 179) / 100).toFixed(2)
+  );
   const [dlSaving, setDlSaving] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -431,14 +435,26 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 <div className="flex items-center gap-2">
                   <span className="text-sm" style={{ color: "#64748b" }}>$</span>
                   <input
-                    type="number"
-                    min={50}
-                    max={100000}
-                    step={1}
-                    value={(tipThresholdCents / 100).toFixed(2)}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="1.79"
+                    value={tipThresholdInput}
                     onChange={(e) => {
-                      const dollars = parseFloat(e.target.value);
-                      if (!isNaN(dollars) && dollars >= 0.5) setTipThresholdCents(Math.round(dollars * 100));
+                      const raw = e.target.value;
+                      setTipThresholdInput(raw);
+                      const dollars = parseFloat(raw);
+                      if (!isNaN(dollars) && dollars >= 0.5) {
+                        setTipThresholdCents(Math.round(dollars * 100));
+                      }
+                    }}
+                    onBlur={() => {
+                      // Normalise display on blur
+                      const dollars = parseFloat(tipThresholdInput);
+                      if (!isNaN(dollars) && dollars >= 0.5) {
+                        setTipThresholdInput((Math.round(dollars * 100) / 100).toFixed(2));
+                      } else {
+                        setTipThresholdInput((tipThresholdCents / 100).toFixed(2));
+                      }
                     }}
                     className="flex-1 rounded-md px-3 py-1.5 text-sm"
                     style={{

@@ -512,3 +512,7 @@
 - [x] SongDetailPage: permission-aware download button (hidden/free/tip-gated with price shown)
 - [x] Tip-gated download: server checks if user has tipped >= threshold before returning download URL
 - [x] TypeScript: 0 errors | Vitest: 40/40 passing
+
+## Phase 42: Now Playing Panel Redesign + Tip Input Fix
+- [x] Fix tip threshold input: allow free-form typing, backspace, and custom amounts (not hardcoded)
+- [x] Redesign Now Playing side panel: player controls overlay bottom of cover art, freeing space below for lyrics/info
