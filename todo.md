@@ -614,3 +614,9 @@
 - [x] Build WelcomeModal component (intro text + Discord link, shown on first login)
 - [x] Wire WelcomeModal into App.tsx — show when authenticated and hasSeenWelcome is false
 - [x] Write vitest tests for admin.getUsers and onboarding.markWelcomeSeen (7 test files, 44 tests passing)
+
+## Phase 59: Add Log Out Button
+- [x] Add Log Out to sidebar/hamburger nav — bottom of nav, below all items, subtle styling, no icon
+- [x] Add Log Out to Profile page — bottom of page, visible only when viewing own profile while logged in
+- [x] Behavior: clears session, redirects to home, Sign In reappears in nav
+- [x] TypeScript clean, tests pass

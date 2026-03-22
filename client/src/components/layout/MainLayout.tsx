@@ -15,7 +15,7 @@ import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import TipTicker from "@/components/TipTicker";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
-  Menu, X, ChevronRight, LogIn, Heart, Star, ListMusic, BookOpen,
+  Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic, BookOpen,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -89,7 +89,16 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { state } = usePlayer();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout();
+    } finally {
+      setMobileMenuOpen(false);
+      navigate("/");
+    }
+  }, [logout, navigate]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
@@ -185,7 +194,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </nav>
 
           {/* Profile footer / Login CTA */}
-          <div className={`p-3 border-t border-white/[0.07] ${!sidebarOpen && "flex justify-center"}`}>
+          <div className={`p-3 border-t border-white/[0.07] ${!sidebarOpen && "flex flex-col items-center gap-2"}`}>
             {!authLoading && !user ? (
               // Unauthenticated: show login CTA
               <a
@@ -202,29 +211,41 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 )}
               </a>
             ) : (
-              // Authenticated: show profile button
-              <button
-                onClick={() => goTo("/profile")}
-                className={`flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.06] transition-all w-full ${!sidebarOpen && "justify-center w-auto"}`}
-              >
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}
+              // Authenticated: show profile button + log out
+              <>
+                <button
+                  onClick={() => goTo("/profile")}
+                  className={`flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.06] transition-all w-full ${!sidebarOpen && "justify-center w-auto"}`}
                 >
-                  {user?.profilePhotoUrl
-                    ? <img src={user.profilePhotoUrl} alt="avatar" className="w-full h-full object-cover rounded-full" />
-                    : state.profileAvatar
-                    ? <img src={state.profileAvatar} alt="avatar" className="w-full h-full object-cover rounded-full" />
-                    : (user?.name || state.profileName || "?").charAt(0).toUpperCase()
-                  }
-                </div>
-                {sidebarOpen && (
-                  <div className="min-w-0 flex-1 text-left">
-                    <div className="text-[13px] font-medium text-white/90 truncate">{user?.name || state.profileName || "Artist"}</div>
-                    <div className="text-[11px] text-white/35">Artist</div>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 overflow-hidden"
+                    style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}
+                  >
+                    {user?.profilePhotoUrl
+                      ? <img src={user.profilePhotoUrl} alt="avatar" className="w-full h-full object-cover rounded-full" />
+                      : state.profileAvatar
+                      ? <img src={state.profileAvatar} alt="avatar" className="w-full h-full object-cover rounded-full" />
+                      : (user?.name || state.profileName || "?").charAt(0).toUpperCase()
+                    }
                   </div>
-                )}
-              </button>
+                  {sidebarOpen && (
+                    <div className="min-w-0 flex-1 text-left">
+                      <div className="text-[13px] font-medium text-white/90 truncate">{user?.name || state.profileName || "Artist"}</div>
+                      <div className="text-[11px] text-white/35">Artist</div>
+                    </div>
+                  )}
+                </button>
+                {/* Log Out — subtle utility button */}
+                <button
+                  onClick={handleLogout}
+                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md w-full transition-all
+                    text-white/30 hover:text-white/60 hover:bg-white/[0.04]
+                    ${!sidebarOpen && "justify-center"}`}
+                >
+                  <LogOut size={13} className="flex-shrink-0" />
+                  {sidebarOpen && <span className="text-[12px] font-body">Log Out</span>}
+                </button>
+              </>
             )}
           </div>
         </aside>
@@ -282,6 +303,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   })}
                 </div>
               ))}
+              {/* Log Out — bottom of mobile nav, visible only when authenticated */}
+              {user && (
+                <div className="mt-2 px-4 pb-4 border-t border-white/[0.07] pt-3">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all text-white/35 hover:text-white/60 hover:bg-white/[0.04]"
+                  >
+                    <LogOut size={14} className="flex-shrink-0" />
+                    <span className="text-[13px] font-body">Log Out</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

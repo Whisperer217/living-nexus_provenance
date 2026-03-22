@@ -12,7 +12,7 @@ import {
   Camera, Edit2, Check, X, Music, Heart, DollarSign,
   MapPin, Globe, Twitter, Instagram, Youtube, Share2,
   Play, ExternalLink, Copy, TrendingUp, Loader2,
-  CheckCircle, AlertCircle, Zap,
+  CheckCircle, AlertCircle, Zap, LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -83,9 +83,17 @@ function EditableField({
 
 /* ── Main ProfilePage ──────────────────────────────────────────── */
 export default function ProfilePage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate("/");
+    }
+  };
 
   // Load full profile from DB
   const { data: profile, isLoading: profileLoading } = trpc.profile.me.useQuery(undefined, {
@@ -611,6 +619,17 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* Log Out — bottom of profile, subtle utility */}
+        <div className="mt-8 pb-8 flex justify-center">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-white/25 hover:text-white/50 hover:bg-white/[0.04] text-[13px] font-body"
+          >
+            <LogOut size={13} />
+            Log Out
+          </button>
+        </div>
       </div>
     </div>
   );
