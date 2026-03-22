@@ -38,6 +38,9 @@ export const users = mysqlTable("users", {
   stripeAccountId: varchar("stripeAccountId", { length: 64 }),
   stripeAccountStatus: mysqlEnum("stripeAccountStatus", ["pending", "restricted", "enabled", "disabled"]).default("pending"),
 
+  // Onboarding
+  hasSeenWelcome: boolean("hasSeenWelcome").default(false).notNull(),
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),

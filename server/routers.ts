@@ -22,7 +22,9 @@ import {
   getSongByWitnessId, updateSongMetadata, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
   getUserTipTotalForSong, updateSongDownloadPermission,
+  getAllUsersWithStats, markWelcomeSeen,
 } from "./db";
+import { ENV } from "./_core/env";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
 const PLATFORM_FEE_PERCENT = 10;
@@ -794,7 +796,25 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         return { inPlaylist };
       }),
   }),
+
+  // ── Admin ──────────────────────────────────────────────────────────────────
+  admin: router({
+    /** Return all users with stats. Only the platform owner may call this. */
+    getUsers: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.openId !== ENV.ownerOpenId) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Owner access only" });
+      }
+      return getAllUsersWithStats();
+    }),
+  }),
+
+  // ── Onboarding ─────────────────────────────────────────────────────────────
+  onboarding: router({
+    /** Mark the welcome modal as seen for the current user. */
+    markWelcomeSeen: protectedProcedure.mutation(async ({ ctx }) => {
+      await markWelcomeSeen(ctx.user.id);
+      return { ok: true };
+    }),
+  }),
 });
-
 export type AppRouter = typeof appRouter;
-

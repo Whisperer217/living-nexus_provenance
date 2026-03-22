@@ -773,3 +773,72 @@ export async function updateSongDownloadPermission(
     .set({ downloadPermission: permission, downloadTipThresholdCents: tipThresholdCents, updatedAt: new Date() })
     .where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+/** Return all users with per-user track count and WID count (owner-only use). */
+export async function getAllUsersWithStats(): Promise<Array<{
+  id: number;
+  name: string | null;
+  email: string | null;
+  artistHandle: string | null;
+  role: string;
+  licenseStatus: string;
+  songSlotsUsed: number;
+  songSlotsTotal: number;
+  createdAt: Date;
+  lastSignedIn: Date;
+  trackCount: number;
+  widCount: number;
+}>> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  const allUsers = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      artistHandle: users.artistHandle,
+      role: users.role,
+      licenseStatus: users.licenseStatus,
+      songSlotsUsed: users.songSlotsUsed,
+      songSlotsTotal: users.songSlotsTotal,
+      createdAt: users.createdAt,
+      lastSignedIn: users.lastSignedIn,
+    })
+    .from(users)
+    .orderBy(desc(users.createdAt));
+
+  // Fetch per-user track and WID counts in two queries
+  const trackCounts = await db
+    .select({ userId: songs.userId, count: sql<number>`count(*)` })
+    .from(songs)
+    .where(ne(songs.status as any, "Deleted"))
+    .groupBy(songs.userId);
+
+  const widCounts = await db
+    .select({ userId: songs.userId, count: sql<number>`count(*)` })
+    .from(songs)
+    .where(and(isNotNull(songs.witnessId), ne(songs.status as any, "Deleted")))
+    .groupBy(songs.userId);
+
+  const trackMap = new Map(trackCounts.map(r => [r.userId, Number(r.count)]));
+  const widMap = new Map(widCounts.map(r => [r.userId, Number(r.count)]));
+
+  return allUsers.map(u => ({
+    ...u,
+    trackCount: trackMap.get(u.id) ?? 0,
+    widCount: widMap.get(u.id) ?? 0,
+  }));
+}
+
+/** Mark that a user has seen the welcome modal (idempotent). */
+export async function markWelcomeSeen(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db
+    .update(users)
+    .set({ hasSeenWelcome: true, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}

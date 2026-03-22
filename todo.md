@@ -604,3 +604,13 @@
 - [x] Update UploadPage to use same multipart upload pattern (same root cause)
 - [x] Update server upload procedure to accept fileUrl instead of audioBase64
 - [x] Verify TypeScript clean and tests pass
+
+## Phase 58: Admin User Roster + First-Login Welcome Modal
+- [x] Add admin.getUsers procedure (owner-only, returns all users with track count, WID count, license status)
+- [x] Build /admin/users page with sortable table (display name, join date, track count, WID count, license status)
+- [x] Add route guard: only OWNER_OPEN_ID can access /admin/users
+- [x] Add hasSeenWelcome boolean column to users table, push migration
+- [x] Add onboarding.markWelcomeSeen mutation (sets hasSeenWelcome = true)
+- [x] Build WelcomeModal component (intro text + Discord link, shown on first login)
+- [x] Wire WelcomeModal into App.tsx — show when authenticated and hasSeenWelcome is false
+- [x] Write vitest tests for admin.getUsers and onboarding.markWelcomeSeen (7 test files, 44 tests passing)

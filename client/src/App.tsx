@@ -23,8 +23,10 @@ import VerifyPage from "./pages/VerifyPage";
 import ContributorsPage from "./pages/ContributorsPage";
 import PlaylistPage from "./pages/PlaylistPage";
 import ManifestoPage from "./pages/ManifestoPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
+import WelcomeModal from "./components/WelcomeModal";
 
 function Router() {
   return (
@@ -55,6 +57,7 @@ function Router() {
             <Route path="/contributors" component={ContributorsPage} />
             <Route path="/playlist" component={PlaylistPage} />
             <Route path="/manifesto" component={ManifestoPage} />
+            <Route path="/admin/users" component={AdminUsersPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />
           </Switch>
@@ -72,6 +75,7 @@ export default function App() {
           <PlayerProvider>
             <QueueLoader />
             <WhatsNewModal />
+            <WelcomeModal />
             <Toaster
               theme="dark"
               toastOptions={{
