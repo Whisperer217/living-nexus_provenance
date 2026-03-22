@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Music2, Shield, Users } from "lucide-react";
 
-const DISCORD_URL = "https://discord.gg/livingnexus";
+const DISCORD_URL = "https://discord.com/channels/1459384199025918073/1459384202792276084";
 
 export default function WelcomeModal() {
   const { user, isAuthenticated, loading } = useAuth();
