@@ -591,3 +591,7 @@
 - [x] Confirmed: OG tag injection working for /song/:id and /creator/:id
 - [x] Confirmed: Stripe webhook registered before express.json() (correct order)
 - [x] Confirmed: orphaned pages (ComponentShowcase, MusicWitnessIDPage) are intentionally unrouted
+
+## Phase 56: Eye Icon Order Fix
+- [x] Swap heart and eye icon order — heart now renders first (left), eye directly to its right
+- [x] Confirmed "6 errors" toast is the nested-anchor bug already fixed in checkpoint 8560ca11 (not yet published)

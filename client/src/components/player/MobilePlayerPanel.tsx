@@ -594,6 +594,15 @@ export default function MobilePlayerPanel() {
                     )}
                   </div>
                 </div>
+                {/* Heart/like — leftmost of the two icon buttons */}
+                <button
+                  onClick={handleToggleLike}
+                  disabled={!user || toggleLikeMutation.isPending}
+                  className={`p-2 flex-shrink-0 transition-colors ${isLiked ? "text-[#A78BFA]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
+                  title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
+                >
+                  <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+                </button>
                 {/* Cinema Mode toggle — sits directly next to the heart button */}
                 <button
                   onClick={() => setCinemaMode(v => !v)}
@@ -606,14 +615,6 @@ export default function MobilePlayerPanel() {
                   title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — art + lyrics only"}
                 >
                   {cinemaMode ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-                <button
-                  onClick={handleToggleLike}
-                  disabled={!user || toggleLikeMutation.isPending}
-                  className={`p-2 flex-shrink-0 transition-colors ${isLiked ? "text-[#A78BFA]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
-                  title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
-                >
-                  <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
                 </button>
               </div>
 
