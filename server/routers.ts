@@ -443,23 +443,22 @@ export const appRouter = router({
       .input(z.object({
         title: z.string().min(1).max(255),
         genre: z.string().optional(),
-        lyrics: z.string().max(5000).optional(),
+        // NOTE: lyrics are intentionally NOT accepted here.
+        // Per platform policy, only title and genre are sent to AI.
+        // Lyrics are WID-protected and must never be sent to external AI systems.
       }))
       .mutation(async ({ input }) => {
-        const lyricsSnippet = input.lyrics
-          ? `\n\nLyrics excerpt:\n${input.lyrics.slice(0, 1500)}`
-          : "";
-
         const systemPrompt = `You are a music caption writer for Living Nexus, a sovereign music platform built on cryptographic provenance. Your job is to write a short, compelling caption/description for a music track that a creator is uploading. The caption should:
 - Be 1-3 sentences (50-150 words max)
-- Capture the spirit and feel of the track based on its title, genre, and lyrics
+- Capture the spirit and feel of the track based on its title and genre only
 - Sound authentic and creator-voiced — not corporate or generic
 - Avoid clichés like "a journey" or "sonic landscape"
 - Optionally reference the genre or mood naturally
 - End with energy — make someone want to listen
 Return ONLY the caption text. No quotes. No labels. No explanation.`;
 
-        const userMessage = `Track title: "${input.title}"\nGenre: ${input.genre || "Not specified"}${lyricsSnippet}`;
+        // IMPORTANT: Only title and genre are sent. Lyrics and audio are NEVER sent.
+        const userMessage = `Track title: "${input.title}"\nGenre: ${input.genre || "Not specified"}`;
 
         const response = await invokeLLM({
           messages: [

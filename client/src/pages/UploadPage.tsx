@@ -195,7 +195,8 @@ export default function UploadPage() {
   const handleGenerateCaption = () => {
     if (!title) { toast.error("Add a track title first"); return; }
     setCaptionState("loading");
-    generateCaptionMutation.mutate({ title, genre: genre || undefined, lyrics: lyrics || undefined });
+    // Only title and genre are sent — lyrics are WID-protected and never sent to AI
+    generateCaptionMutation.mutate({ title, genre: genre || undefined });
   };
 
   const handleAcceptCaption = () => {
@@ -608,147 +609,7 @@ export default function UploadPage() {
                 />
               </div>
 
-              {/* ── Smart Caption Generator ── */}
-              <div
-                className="rounded-xl p-4"
-                style={{
-                  background: "oklch(0.11 0.04 280)",
-                  border: "1px solid oklch(0.75 0.18 85 / 0.25)",
-                }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={14} style={{ color: "#D4AF37" }} />
-                    <span className="text-xs font-bold tracking-wider uppercase" style={{ color: "#D4AF37" }}>
-                      Smart Caption Generator
-                    </span>
-                    <span
-                      className="text-[9px] px-1.5 py-0.5 rounded font-bold tracking-wider uppercase"
-                      style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "#D4AF37", border: "1px solid oklch(0.75 0.18 85 / 0.3)" }}
-                    >
-                      AI
-                    </span>
-                  </div>
-                  {captionState !== "loading" && (
-                    <button
-                      onClick={handleGenerateCaption}
-                      disabled={!title}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{
-                        background: "oklch(0.75 0.18 85 / 0.12)",
-                        border: "1px solid oklch(0.75 0.18 85 / 0.4)",
-                        color: "#D4AF37",
-                      }}
-                    >
-                      {captionState === "accepted" ? (
-                        <><RefreshCw size={11} /> Regenerate</>
-                      ) : (
-                        <><Sparkles size={11} /> Generate Caption</>
-                      )}
-                    </button>
-                  )}
-                </div>
-
-                <p className="text-[11px] mb-3" style={{ color: "oklch(0.55 0.04 280)" }}>
-                  Llama AI analyzes your title, genre, and lyrics to suggest a caption. Accept, edit, or ignore it.
-                </p>
-
-                {/* Loading state */}
-                {captionState === "loading" && (
-                  <div className="flex items-center gap-2 py-3">
-                    <Loader2 size={14} className="animate-spin" style={{ color: "#D4AF37" }} />
-                    <span className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>Generating caption with Llama AI...</span>
-                  </div>
-                )}
-
-                {/* Suggestion card */}
-                {captionState === "suggested" && captionSuggestion && (
-                  <div
-                    className="rounded-lg p-3 mb-3"
-                    style={{
-                      background: "oklch(0.09 0.02 280)",
-                      border: "1px solid oklch(0.75 0.18 85 / 0.2)",
-                    }}
-                  >
-                    <p className="text-xs leading-relaxed mb-3" style={{ color: "oklch(0.85 0.02 280)" }}>
-                      {captionSuggestion}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleAcceptCaption}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                        style={{
-                          background: "oklch(0.65 0.18 145 / 0.15)",
-                          border: "1px solid oklch(0.65 0.18 145 / 0.4)",
-                          color: "oklch(0.75 0.18 145)",
-                        }}
-                      >
-                        <CheckCircle2 size={11} /> Accept
-                      </button>
-                      <button
-                        onClick={() => {
-                          const edited = window.prompt("Edit the caption:", captionSuggestion);
-                          if (edited !== null) {
-                            setCaption(edited);
-                            setCaptionState("accepted");
-                            setCaptionSuggestion(null);
-                            toast.success("Caption saved");
-                          }
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                        style={{
-                          background: "oklch(0.75 0.18 85 / 0.1)",
-                          border: "1px solid oklch(0.75 0.18 85 / 0.3)",
-                          color: "#D4AF37",
-                        }}
-                      >
-                        <RefreshCw size={11} /> Edit
-                      </button>
-                      <button
-                        onClick={handleIgnoreCaption}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                        style={{
-                          background: "oklch(1 0 0 / 0.04)",
-                          border: "1px solid oklch(1 0 0 / 0.1)",
-                          color: "oklch(0.5 0.03 280)",
-                        }}
-                      >
-                        <XIcon size={11} /> Ignore
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Accepted caption display */}
-                {captionState === "accepted" && caption && (
-                  <div
-                    className="rounded-lg p-3"
-                    style={{
-                      background: "oklch(0.65 0.18 145 / 0.06)",
-                      border: "1px solid oklch(0.65 0.18 145 / 0.25)",
-                    }}
-                  >
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.75 0.18 145)" }} />
-                      <p className="text-xs leading-relaxed" style={{ color: "oklch(0.82 0.02 280)" }}>
-                        {caption}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Idle: caption field for manual entry */}
-                {captionState === "idle" && (
-                  <Textarea
-                    value={caption}
-                    onChange={e => setCaption(e.target.value)}
-                    placeholder="Write your own caption, or click Generate Caption above..."
-                    rows={3}
-                    className="text-sm resize-none"
-                    style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
-                  />
-                )}
-              </div>
+              {/* Caption section moved to Step 3 (after WID is confirmed) */}
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
@@ -827,6 +688,86 @@ export default function UploadPage() {
                   <Button variant="outline" className="w-full" onClick={downloadCertificate} style={{ borderColor: "oklch(0.75 0.18 85 / 0.4)", color: "oklch(0.84 0.155 85)" }}>
                     <Download className="w-4 h-4 mr-2" /> Download Witness Certificate (HTML)
                   </Button>
+
+                  {/* ── Post-WID Caption Consent Prompt ── */}
+                  <div className="rounded-xl p-4 mt-2" style={{ background: "oklch(0.11 0.04 280)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
+                      <span className="text-sm font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>Your track is now WID Protected 🔐</span>
+                    </div>
+                    {captionState === "idle" && !caption && (
+                      <>
+                        <p className="text-xs mb-1" style={{ color: "oklch(0.75 0.04 280)" }}>Would you like AI to suggest a caption?</p>
+                        <p className="text-[11px] mb-3 leading-relaxed" style={{ color: "oklch(0.5 0.03 280)" }}>
+                          Note: This sends your <strong style={{ color: "oklch(0.65 0.04 280)" }}>track title and genre only</strong> — NOT your lyrics — to an AI system to generate a description.<br />
+                          Your lyrics and audio are never sent. This is optional and can be skipped.
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleGenerateCaption}
+                            disabled={!title}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
+                            style={{ background: "oklch(0.75 0.18 85 / 0.15)", border: "1px solid oklch(0.75 0.18 85 / 0.4)", color: "#D4AF37" }}
+                          >
+                            <Sparkles size={11} /> Generate Caption
+                          </button>
+                          <button
+                            onClick={() => setCaptionState("accepted")}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                            style={{ background: "oklch(1 0 0 / 0.04)", border: "1px solid oklch(1 0 0 / 0.1)", color: "oklch(0.5 0.03 280)" }}
+                          >
+                            <XIcon size={11} /> Skip — I'll write my own
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {captionState === "loading" && (
+                      <div className="flex items-center gap-2 py-2">
+                        <Loader2 size={13} className="animate-spin" style={{ color: "#D4AF37" }} />
+                        <span className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>Generating caption — only title and genre sent to AI...</span>
+                      </div>
+                    )}
+                    {captionState === "suggested" && captionSuggestion && (
+                      <div className="rounded-lg p-3 mb-3" style={{ background: "oklch(0.09 0.02 280)", border: "1px solid oklch(0.75 0.18 85 / 0.2)" }}>
+                        <p className="text-xs leading-relaxed mb-3" style={{ color: "oklch(0.85 0.02 280)" }}>{captionSuggestion}</p>
+                        <div className="flex gap-2">
+                          <button onClick={handleAcceptCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.4)", color: "oklch(0.75 0.18 145)" }}>
+                            <CheckCircle2 size={11} /> Accept
+                          </button>
+                          <button onClick={() => { const edited = window.prompt("Edit the caption:", captionSuggestion); if (edited !== null) { setCaption(edited); setCaptionState("accepted"); setCaptionSuggestion(null); toast.success("Caption saved"); } }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.75 0.18 85 / 0.1)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "#D4AF37" }}>
+                            <RefreshCw size={11} /> Edit
+                          </button>
+                          <button onClick={handleIgnoreCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(1 0 0 / 0.04)", border: "1px solid oklch(1 0 0 / 0.1)", color: "oklch(0.5 0.03 280)" }}>
+                            <XIcon size={11} /> Ignore
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {(captionState === "accepted" || caption) && (
+                      <div className="space-y-2">
+                        {captionState === "accepted" && caption && (
+                          <div className="rounded-lg p-3" style={{ background: "oklch(0.65 0.18 145 / 0.06)", border: "1px solid oklch(0.65 0.18 145 / 0.25)" }}>
+                            <div className="flex items-start gap-2">
+                              <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.75 0.18 145)" }} />
+                              <p className="text-xs leading-relaxed" style={{ color: "oklch(0.82 0.02 280)" }}>{caption}</p>
+                            </div>
+                          </div>
+                        )}
+                        <Textarea
+                          value={caption}
+                          onChange={e => setCaption(e.target.value)}
+                          placeholder="Write your own caption here..."
+                          rows={3}
+                          className="text-sm resize-none"
+                          style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
+                        />
+                        <p className="text-[10px]" style={{ color: "oklch(0.42 0.03 280)", letterSpacing: "0.04em" }}>
+                          🔐 Your lyrics are WID protected and never used for AI training.
+                        </p>
+                        <button onClick={() => { setCaptionState("idle"); setCaption(""); }} className="text-[10px] hover:underline" style={{ color: "oklch(0.45 0.03 280)" }}>Reset caption</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               <div className="flex gap-2 pt-2">

@@ -477,3 +477,14 @@
 - [x] Fix: Added frontend file size guard on audio input onChange (375MB max, clear toast error message)
 - [x] Fix: Added frontend file size guard on drag-and-drop handler (375MB max, same toast)
 - [x] TypeScript: 0 errors | Vitest: 40/40 passing
+
+## Phase: AI Caption Generator Flow Fix
+- [x] WID must always generate before caption prompt appears — no exceptions
+- [x] After WID confirmed, show optional consent prompt: "Your track is now WID Protected 🔐 — Would you like AI to suggest a caption?"
+- [x] Consent prompt explains: title and genre only sent to AI, never lyrics or audio
+- [x] Two buttons: "Generate Caption" and "Skip — I'll write my own"
+- [x] Server-side caption procedure: removed lyrics from input schema (only title + genre accepted)
+- [x] Frontend mutation call: removed lyrics from payload
+- [x] Add permanent note under caption field: "Your lyrics are WID protected and never used for AI training."
+- [x] Caption field stays blank if creator skips — they fill it manually
+- [x] TypeScript: 0 errors | Vitest: 40/40 passing
