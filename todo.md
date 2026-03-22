@@ -559,3 +559,11 @@
 - [x] Move Cinema Mode eye icon from art overlay to playback controls row
 - [x] Add clear padding/margin between actions row and volume row
 - [x] Move Now Playing / context label above the cover art (header area, not overlapping image)
+
+## Phase 52: Now Playing Panel — Rollback + Four Clean Additions
+- [x] Check live site at livingnexus.org to confirm v1.4.0 baseline layout
+- [x] Roll back MobilePlayerPanel to v1.4.0 baseline (cover art top, title/artist, progress, controls, tip, playlist/room, volume, lyrics)
+- [x] Add Share button in action row (Playlist, Room, Share)
+- [x] Add Hide Player button to collapse/minimize the panel
+- [x] Add WID badge + AI tag as their own row below artist name
+- [x] Add Cinema Mode toggle (eye icon) in panel header — not on cover art
