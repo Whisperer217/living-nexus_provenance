@@ -458,3 +458,15 @@
 - [x] Wire Take to Room to Jukebox SongBrowserModal with room selector
 - [x] Add My Playlist tab to Jukebox SongBrowserModal (drag from playlist into room queue)
 - [x] TypeScript: 0 errors | Vitest: 40/40 passing
+
+## Phase: Open Graph Meta Tag Fix
+- [x] Audit server/og.ts — identified 3 bugs: canonical URL used req.headers.origin (undefined for bots), description format wrong, bot UA list incomplete
+- [x] Fix canonical URL: always use https://www.livingnexus.org (never sandbox/preview URLs)
+- [x] Fix og:title format: "Song Title — Artist Name | Living Nexus"
+- [x] Fix og:description format: "Listen to [Song Title] by [Artist] on Living Nexus — WID Protected"
+- [x] Fix og:image: use song.coverArtUrl (CloudFront URL), fall back to platform logo
+- [x] Confirm og:image:width=1200, og:image:height=630, og:type=music.song, twitter:card=summary_large_image
+- [x] Expand bot UA detection: added Applebot, AppleNewsBot, Signal, Iframely, Embedly, Prerender, meta-externalagent
+- [x] Smoke-tested: curl with Discordbot UA on /song/300005 returns all correct OG tags with real CloudFront cover art URL
+- [x] Regular browser UA still gets normal SPA (no OG injection)
+- [x] TypeScript: 0 errors | Vitest: 40/40 passing

@@ -12,6 +12,13 @@ import fs from "fs";
 import path from "path";
 import { getSongWithCreator } from "./db";
 
+/** Canonical production origin — always use this for og:url */
+const CANONICAL_ORIGIN = "https://www.livingnexus.org";
+
+/** Fallback cover art (platform logo) when a song has no cover art */
+const FALLBACK_IMAGE =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+
 /** Escape a string for safe use inside an HTML attribute value. */
 function escAttr(s: string): string {
   return s
@@ -51,9 +58,8 @@ const DEFAULT_OG = buildOgTags({
   title: "Living Nexus — Sovereign Music Platform",
   description:
     "Discover, share, and experience music with cryptographic provenance. Every track carries a Witness ID — proof of creation that belongs to the artist.",
-  image:
-    "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png",
-  url: "https://livingnexus.org",
+  image: FALLBACK_IMAGE,
+  url: CANONICAL_ORIGIN,
   siteName: "Living Nexus",
 });
 
@@ -76,6 +82,29 @@ function readIndexHtml(distPath: string): string {
 }
 
 /**
+ * Detect social/link-preview crawlers by User-Agent.
+ *
+ * This list covers:
+ * - Discord (Discordbot)
+ * - Twitter/X (Twitterbot)
+ * - Facebook (facebookexternalhit)
+ * - LinkedIn (LinkedInBot)
+ * - Slack (Slackbot-LinkExpanding)
+ * - Telegram (TelegramBot)
+ * - WhatsApp (WhatsApp)
+ * - iMessage / Apple (Applebot, iMessage link preview uses "AppleNewsBot" or plain fetch)
+ * - Signal (Signal)
+ * - Google (Googlebot)
+ * - Bing (bingbot)
+ * - CLI tools (curl, wget, python-requests, Go-http-client)
+ */
+function isCrawler(ua: string): boolean {
+  return /Discordbot|Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|TelegramBot|WhatsApp|Applebot|AppleNewsBot|Signal|Googlebot|bingbot|curl|wget|python-requests|Go-http-client|Iframely|Embedly|Prerender|OpenGraph|preview\.io|meta-externalagent/i.test(
+    ua
+  );
+}
+
+/**
  * Register the /song/:id OG middleware on the Express app.
  *
  * MUST be called BEFORE setupVite / serveStatic so this handler runs first.
@@ -88,37 +117,38 @@ export function registerOgRoutes(app: Express) {
     // Only intercept requests from bots / crawlers.
     // Regular browsers get the normal SPA flow (Vite or static).
     const ua = req.headers["user-agent"] || "";
-    const isBot =
-      /Discordbot|Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|TelegramBot|WhatsApp|iMessage|Googlebot|bingbot|curl|wget|python-requests|Go-http-client/i.test(
-        ua
-      );
-
-    if (!isBot) return next();
+    if (!isCrawler(ua)) return next();
 
     try {
       const result = await getSongWithCreator(songId);
       if (!result) return next();
 
       const { song, creator } = result;
+
+      // Prefer artistHandle (stage name) over display name
       const artistName =
-        (creator as any)?.artistHandle || (creator as any)?.name || "Unknown Artist";
-      const title = `${song.title} — ${artistName} | Living Nexus`;
-      const description = `Listen to "${song.title}" by ${artistName} on Living Nexus. ${
-        song.genre ? `Genre: ${song.genre}. ` : ""
-      }Every track carries a cryptographic Witness ID — proof of creation that belongs to the artist.`;
+        (creator as any)?.artistHandle?.trim() ||
+        (creator as any)?.name?.trim() ||
+        "Unknown Artist";
 
-      const image =
-        (song as any).coverArtUrl ||
-        "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+      // og:title — "Song Title — Artist Name | Living Nexus"
+      const ogTitle = `${song.title} — ${artistName} | Living Nexus`;
 
-      const origin = req.headers.origin || `${req.protocol}://${req.headers.host}`;
-      const url = `${origin}/song/${songId}`;
+      // og:description — exact spec format
+      const ogDescription = `Listen to ${song.title} by ${artistName} on Living Nexus — WID Protected`;
+
+      // og:image — cover art from CloudFront, fall back to platform logo
+      const coverArt = (song as any).coverArtUrl?.trim();
+      const ogImage = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
+
+      // og:url — always canonical production URL (never sandbox/preview URLs)
+      const ogUrl = `${CANONICAL_ORIGIN}/song/${songId}`;
 
       const ogBlock = buildOgTags({
-        title,
-        description,
-        image,
-        url,
+        title: ogTitle,
+        description: ogDescription,
+        image: ogImage,
+        url: ogUrl,
         siteName: "Living Nexus",
       });
 
@@ -142,7 +172,7 @@ export function registerOgRoutes(app: Express) {
 
       if (!html) return next();
 
-      const page = injectOg(html, ogBlock, title);
+      const page = injectOg(html, ogBlock, ogTitle);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
       console.error("[OG] Error generating meta tags for song", songId, err);
