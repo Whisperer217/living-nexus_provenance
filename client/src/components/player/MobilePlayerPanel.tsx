@@ -1,8 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MobilePlayerPanel  (v2 — full-bleed cinematic)
-   Cover art fills the top half of the panel. A dark gradient sweeps
-   down into the lyrics/info area below. WID badge, Tip button, and
-   playback controls are all part of the single immersive view.
+   LIVING NEXUS — MobilePlayerPanel  (v3 — zoned cinematic + Cinema Mode)
+   Art stays full-bleed. Below the art: distinct separated zones.
+   Cinema Mode hides everything except art + lyrics.
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -14,6 +13,7 @@ import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, X,
   Music, DollarSign, Users, Video, ImageIcon,
+  Share2, Eye, EyeOff, Copy, Check,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import PlayerTipModal from "./PlayerTipModal";
@@ -22,6 +22,16 @@ function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
   const m = Math.floor(s / 60);
   return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
+}
+
+/* ── Zone separator ─────────────────────────────────────────────── */
+function ZoneDivider() {
+  return (
+    <div
+      className="mx-4"
+      style={{ height: "1px", background: "oklch(0.84 0.155 85 / 0.08)", margin: "0 16px" }}
+    />
+  );
 }
 
 export default function MobilePlayerPanel() {
@@ -38,6 +48,8 @@ export default function MobilePlayerPanel() {
   const open = isNowPlayingPanelOpen;
   const togglePanel = () => isNowPlayingPanelOpen ? closeNowPlayingPanel() : openNowPlayingPanel();
   const [tipOpen, setTipOpen] = useState(false);
+  const [cinemaMode, setCinemaMode] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Touch-swipe to close (swipe right ≥ 60px)
   const touchStartX = useRef<number | null>(null);
@@ -170,7 +182,7 @@ export default function MobilePlayerPanel() {
     }
   }, [state.isPlaying, showVideo, videoUrl]);
 
-  useEffect(() => { setShowVideo(false); }, [currentTrack?.id]);
+  useEffect(() => { setShowVideo(false); setCinemaMode(false); }, [currentTrack?.id]);
 
   // Volume bar
   const [volBarActive, setVolBarActive] = useState(false);
@@ -191,10 +203,41 @@ export default function MobilePlayerPanel() {
     setVolume(ratio);
   }, [setVolume]);
 
+  // Share handler
+  const handleShare = useCallback(async () => {
+    if (!currentTrack) return;
+    const url = currentSongId
+      ? `${window.location.origin}/song/${currentSongId}`
+      : window.location.href;
+    const shareData = {
+      title: currentTrack.title || "Track on Living Nexus",
+      text: `${currentTrack.title} by ${currentTrack.artist} — Listen on Living Nexus`,
+      url,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {}
+    }
+  }, [currentTrack, currentSongId]);
+
   // ── Art background URL ──────────────────────────────────────────────
   const artBg = currentTrack?.artUrl && currentTrack.artType !== "video"
     ? `url(${currentTrack.artUrl})`
     : null;
+
+  // ── Shared zone style ───────────────────────────────────────────────
+  const zone = "px-4 py-4";
 
   return (
     <>
@@ -280,7 +323,7 @@ export default function MobilePlayerPanel() {
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        {/* ══ FULL-BLEED ART HERO — top ~48% of the panel ══ */}
+        {/* ══ FULL-BLEED ART HERO — untouched, edge to edge ══ */}
         <div
           className="relative flex-shrink-0"
           style={{ height: "48%", minHeight: "220px", maxHeight: "340px" }}
@@ -322,7 +365,7 @@ export default function MobilePlayerPanel() {
             }}
           />
 
-          {/* Header row — NOW PLAYING label + close */}
+          {/* Header row — NOW PLAYING label + Cinema Mode + close */}
           <div className="absolute top-0 left-0 right-0 flex items-start justify-between px-4 pt-4 z-20">
             <div>
               <span
@@ -338,7 +381,7 @@ export default function MobilePlayerPanel() {
                 {queueContextLabel}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {/* Video/Art toggle */}
               {videoUrl && (
                 <button
@@ -355,6 +398,19 @@ export default function MobilePlayerPanel() {
                   {showVideo ? "Art" : "Video"}
                 </button>
               )}
+              {/* Cinema Mode toggle — always visible */}
+              <button
+                onClick={() => setCinemaMode(v => !v)}
+                className="p-1.5 rounded-full transition-all"
+                style={{
+                  background: cinemaMode ? "oklch(0.84 0.155 85 / 0.9)" : "oklch(0 0 0 / 0.40)",
+                  color: cinemaMode ? "oklch(0.08 0.01 280)" : "oklch(0.85 0.02 280)",
+                  backdropFilter: "blur(6px)",
+                }}
+                title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — art + lyrics only"}
+              >
+                {cinemaMode ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
               <button
                 onClick={closeNowPlayingPanel}
                 className="p-1.5 rounded-full transition-all"
@@ -365,40 +421,42 @@ export default function MobilePlayerPanel() {
             </div>
           </div>
 
-          {/* Vertical volume bar — right edge of art */}
-          <div
-            className="absolute top-10 right-3 bottom-20 flex flex-col items-center justify-end z-20"
-            style={{
-              width: "28px",
-              transition: "opacity 0.2s",
-              opacity: volBarActive ? 1 : 0,
-              pointerEvents: volBarActive ? "auto" : "none",
-            }}
-          >
+          {/* Vertical volume bar — right edge of art (hidden in cinema mode) */}
+          {!cinemaMode && (
             <div
-              ref={volBarRef}
-              className="relative flex-1 w-1.5 rounded-full cursor-pointer"
-              style={{ background: "oklch(1 0 0 / 0.18)", maxHeight: "100%" }}
-              onClick={handleVolBarClick}
-              onTouchMove={handleVolBarTouch}
+              className="absolute top-10 right-3 bottom-20 flex flex-col items-center justify-end z-20"
+              style={{
+                width: "28px",
+                transition: "opacity 0.2s",
+                opacity: volBarActive ? 1 : 0,
+                pointerEvents: volBarActive ? "auto" : "none",
+              }}
             >
               <div
-                className="absolute bottom-0 left-0 right-0 rounded-full"
-                style={{
-                  height: state.isMuted ? "0%" : `${state.volume * 100}%`,
-                  background: "linear-gradient(to top, #D4AF37, #7C3AED)",
-                  transition: "height 0.1s linear",
-                }}
-              />
-              <div
-                className="absolute left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-lg"
-                style={{
-                  bottom: `calc(${state.isMuted ? 0 : state.volume * 100}% - 7px)`,
-                  transition: "bottom 0.1s linear",
-                }}
-              />
+                ref={volBarRef}
+                className="relative flex-1 w-1.5 rounded-full cursor-pointer"
+                style={{ background: "oklch(1 0 0 / 0.18)", maxHeight: "100%" }}
+                onClick={handleVolBarClick}
+                onTouchMove={handleVolBarTouch}
+              >
+                <div
+                  className="absolute bottom-0 left-0 right-0 rounded-full"
+                  style={{
+                    height: state.isMuted ? "0%" : `${state.volume * 100}%`,
+                    background: "linear-gradient(to top, #D4AF37, #7C3AED)",
+                    transition: "height 0.1s linear",
+                  }}
+                />
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-lg"
+                  style={{
+                    bottom: `calc(${state.isMuted ? 0 : state.volume * 100}% - 7px)`,
+                    transition: "bottom 0.1s linear",
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Track title + artist + like — bottom of art hero */}
           <div className="absolute bottom-0 left-0 right-0 px-4 pb-3 z-20">
@@ -429,179 +487,243 @@ export default function MobilePlayerPanel() {
           </div>
         </div>
 
-        {/* ══ SCROLLABLE CONTENT — WID, badges, progress, controls, tip, actions, lyrics ══ */}
+        {/* ══ SCROLLABLE CONTENT ══ */}
         <div
           className="flex-1 overflow-y-auto flex flex-col"
           style={{ scrollbarWidth: "none" }}
         >
-          {/* WID + genre badges — own clearly-spaced row */}
-          <div className="px-4 pt-4 pb-3 flex flex-wrap gap-1.5">
-            {currentTrack?.witnessId && (
-              <span
-                className="text-[9px] font-mono px-2 py-1 rounded-full"
-                style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
-              >
-                🔐 WID: {currentTrack.witnessId.slice(0, 12)}…
-              </span>
-            )}
-            {currentTrack?.genre && (
-              <span
-                className="text-[9px] font-mono px-2 py-1 rounded-full"
-                style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.22 0.02 280)" }}
-              >
-                {currentTrack.genre}
-              </span>
-            )}
-            {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
-              <span
-                className="text-[9px] font-mono px-2 py-1 rounded-full"
-                style={{
-                  background: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.2)" : "oklch(0.60 0.18 55 / 0.2)",
-                  color: currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.80 0.18 25)" : "oklch(0.85 0.18 55)",
-                  border: `1px solid ${currentTrack.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.4)" : "oklch(0.60 0.18 55 / 0.4)"}`,
-                }}
-              >
-                {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
-              </span>
-            )}
-          </div>
 
-          {/* Progress bar — clearly separated from badges */}
-          <div className="px-4 pb-2">
-            <div
-              className="w-full h-[3px] rounded-full bg-white/15 cursor-pointer relative group"
-              onClick={handleSeek}
-              onTouchMove={handleSeekTouch}
-            >
-              <div
-                className="h-full rounded-full relative"
-                style={{
-                  width: `${progress}%`,
-                  background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
-                  transition: "width 0.25s linear",
-                }}
-              >
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white
-                  opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
+          {/* ─────────────────────────────────────────────────────────
+              ZONE 1 — Track info: WID badge + genre/AI tags
+              Hidden in Cinema Mode
+          ───────────────────────────────────────────────────────── */}
+          {!cinemaMode && (
+            <>
+              <div className={`${zone} flex flex-wrap gap-2`}>
+                {currentTrack?.witnessId && (
+                  <span
+                    className="text-[9px] font-mono px-2.5 py-1 rounded-full"
+                    style={{
+                      background: "oklch(0.84 0.155 85 / 0.12)",
+                      color: "oklch(0.84 0.155 85)",
+                      border: "1px solid oklch(0.84 0.155 85 / 0.3)",
+                    }}
+                  >
+                    🔐 WID: {currentTrack.witnessId.slice(0, 12)}…
+                  </span>
+                )}
+                {currentTrack?.genre && (
+                  <span
+                    className="text-[9px] font-mono px-2.5 py-1 rounded-full"
+                    style={{
+                      background: "oklch(0.16 0.02 280)",
+                      color: "oklch(0.55 0.04 280)",
+                      border: "1px solid oklch(0.22 0.02 280)",
+                    }}
+                  >
+                    {currentTrack.genre}
+                  </span>
+                )}
+                {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
+                  <span
+                    className="text-[9px] font-mono px-2.5 py-1 rounded-full"
+                    style={{
+                      background: currentTrack.aiDisclosure === "ai_generated"
+                        ? "oklch(0.55 0.18 25 / 0.2)"
+                        : "oklch(0.60 0.18 55 / 0.2)",
+                      color: currentTrack.aiDisclosure === "ai_generated"
+                        ? "oklch(0.80 0.18 25)"
+                        : "oklch(0.85 0.18 55)",
+                      border: `1px solid ${currentTrack.aiDisclosure === "ai_generated"
+                        ? "oklch(0.55 0.18 25 / 0.4)"
+                        : "oklch(0.60 0.18 55 / 0.4)"}`,
+                    }}
+                  >
+                    {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
+                  </span>
+                )}
               </div>
-            </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-[10px] tabular-nums" style={{ color: "oklch(0.45 0.03 280)" }}>{fmtTime(state.currentTime)}</span>
-              <span className="text-[10px] tabular-nums" style={{ color: "oklch(0.45 0.03 280)" }}>{fmtTime(state.duration)}</span>
-            </div>
-          </div>
 
-          {/* Playback controls — generous vertical padding */}
-          <div className="px-4 py-3 flex items-center justify-between">
-            <button
-              onClick={toggleShuffle}
-              className={`p-2 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/35 hover:text-white/70"}`}
-            >
-              <Shuffle size={18} />
-            </button>
-            <button onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
-              <SkipBack size={26} />
-            </button>
-            <button
-              onClick={togglePlay}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-xl"
-              style={{ background: "oklch(0.94 0.006 280)", color: "oklch(0.08 0.01 280)" }}
-            >
-              {state.isPlaying
-                ? <Pause size={22} fill="currentColor" />
-                : <Play size={22} fill="currentColor" className="ml-0.5" />
-              }
-            </button>
-            <button onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
-              <SkipForward size={26} />
-            </button>
-            <button
-              onClick={toggleRepeat}
-              className={`p-2 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/35 hover:text-white/70"}`}
-            >
-              <Repeat size={18} />
-            </button>
-          </div>
+              <ZoneDivider />
 
-          {/* Volume row — inline pill: icon + % + mute toggle */}
-          <div className="px-4 pb-4 flex items-center gap-2">
-            <button
-              onClick={() => setVolBarActive(v => !v)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-body transition-all ${
-                volBarActive
-                  ? "text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30"
-                  : "text-white/40 hover:text-white/65 border border-white/10"
-              }`}
-              title={volBarActive ? "Hide volume bar" : "Show volume bar"}
-            >
-              {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-              <span>{state.isMuted ? "Muted" : `${Math.round(state.volume * 100)}%`}</span>
-            </button>
-            <button
-              onClick={toggleMute}
-              className="ml-auto text-[10px] font-body px-3 py-2 rounded-xl transition-all"
-              style={{
-                color: state.isMuted ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
-                background: state.isMuted ? "oklch(0.84 0.155 85 / 0.1)" : "oklch(0.12 0.02 275)",
-                border: `1px solid ${state.isMuted ? "oklch(0.84 0.155 85 / 0.3)" : "oklch(0.20 0.02 275)"}`,
-              }}
-            >
-              {state.isMuted ? "Unmute" : "Mute"}
-            </button>
-          </div>
+              {/* ─────────────────────────────────────────────────────
+                  ZONE 2 — Progress bar + Playback controls
+              ───────────────────────────────────────────────────── */}
+              <div className={zone}>
+                {/* Progress bar */}
+                <div
+                  className="w-full h-[3px] rounded-full bg-white/15 cursor-pointer relative group mb-1.5"
+                  onClick={handleSeek}
+                  onTouchMove={handleSeekTouch}
+                >
+                  <div
+                    className="h-full rounded-full relative"
+                    style={{
+                      width: `${progress}%`,
+                      background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
+                      transition: "width 0.25s linear",
+                    }}
+                  >
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white
+                      opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
+                  </div>
+                </div>
+                <div className="flex justify-between mb-3">
+                  <span className="text-[10px] tabular-nums" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    {fmtTime(state.currentTime)}
+                  </span>
+                  <span className="text-[10px] tabular-nums" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    {fmtTime(state.duration)}
+                  </span>
+                </div>
+                {/* Controls */}
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={toggleShuffle}
+                    className={`p-2 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/35 hover:text-white/70"}`}
+                  >
+                    <Shuffle size={18} />
+                  </button>
+                  <button onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
+                    <SkipBack size={26} />
+                  </button>
+                  <button
+                    onClick={togglePlay}
+                    className="w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-xl"
+                    style={{ background: "oklch(0.94 0.006 280)", color: "oklch(0.08 0.01 280)" }}
+                  >
+                    {state.isPlaying
+                      ? <Pause size={22} fill="currentColor" />
+                      : <Play size={22} fill="currentColor" className="ml-0.5" />
+                    }
+                  </button>
+                  <button onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
+                    <SkipForward size={26} />
+                  </button>
+                  <button
+                    onClick={toggleRepeat}
+                    className={`p-2 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/35 hover:text-white/70"}`}
+                  >
+                    <Repeat size={18} />
+                  </button>
+                </div>
+              </div>
 
-          {/* Tip button */}
-          {currentTrack && (
-            <div className="px-4 pb-2">
-              <button
-                onClick={() => setTipOpen(true)}
-                disabled={!tipsEnabled}
-                className="w-full py-3 rounded-xl text-sm font-bold tracking-wide transition-all
-                  flex items-center justify-center gap-2
-                  disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{
-                  background: tipsEnabled ? "oklch(0.84 0.155 85)" : "oklch(0.14 0.02 275)",
-                  color: tipsEnabled ? "oklch(0.08 0.01 280)" : "oklch(0.40 0.03 280)",
-                  border: tipsEnabled ? "none" : "1px solid oklch(0.20 0.02 275)",
-                  fontFamily: "'Cinzel', serif",
-                }}
-                title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
-              >
-                <DollarSign size={15} />
-                {tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips Not Enabled Yet"}
-              </button>
-            </div>
+              <ZoneDivider />
+
+              {/* ─────────────────────────────────────────────────────
+                  ZONE 3 — Tip button (standalone, visually distinct)
+              ───────────────────────────────────────────────────── */}
+              {currentTrack && (
+                <div className={zone}>
+                  <button
+                    onClick={() => setTipOpen(true)}
+                    disabled={!tipsEnabled}
+                    className="w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all
+                      flex items-center justify-center gap-2
+                      disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{
+                      background: tipsEnabled
+                        ? "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.75 0.18 75))"
+                        : "oklch(0.12 0.02 275)",
+                      color: tipsEnabled ? "oklch(0.08 0.01 280)" : "oklch(0.35 0.03 280)",
+                      border: tipsEnabled ? "none" : "1px solid oklch(0.20 0.02 275)",
+                      fontFamily: "'Cinzel', serif",
+                      boxShadow: tipsEnabled ? "0 4px 20px oklch(0.84 0.155 85 / 0.25)" : "none",
+                    }}
+                    title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
+                  >
+                    <DollarSign size={16} />
+                    {tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips Not Enabled Yet"}
+                  </button>
+                </div>
+              )}
+
+              <ZoneDivider />
+
+              {/* ─────────────────────────────────────────────────────
+                  ZONE 4 — Actions: Playlist + Room + Share
+              ───────────────────────────────────────────────────── */}
+              {currentTrack && currentSongId && (
+                <div className={`${zone} flex items-center gap-2`}>
+                  <AddToPlaylistButton songId={currentSongId} variant="full" className="flex-1" />
+                  <button
+                    onClick={() => { closeNowPlayingPanel(); navigate("/together"); }}
+                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[11px] font-body transition-all
+                      border flex-1 justify-center"
+                    style={{
+                      background: "oklch(0.12 0.02 275)",
+                      color: "oklch(0.65 0.03 280)",
+                      border: "1px solid oklch(0.20 0.02 275)",
+                    }}
+                  >
+                    <Users size={13} />
+                    Room
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[11px] font-body transition-all border"
+                    style={{
+                      background: copied ? "oklch(0.84 0.155 85 / 0.15)" : "oklch(0.12 0.02 275)",
+                      color: copied ? "oklch(0.84 0.155 85)" : "oklch(0.65 0.03 280)",
+                      border: copied
+                        ? "1px solid oklch(0.84 0.155 85 / 0.4)"
+                        : "1px solid oklch(0.20 0.02 275)",
+                    }}
+                    title="Share this track"
+                  >
+                    {copied ? <Check size={13} /> : <Share2 size={13} />}
+                    {copied ? "Copied" : "Share"}
+                  </button>
+                </div>
+              )}
+
+              <ZoneDivider />
+
+              {/* ─────────────────────────────────────────────────────
+                  ZONE 5 — Volume control
+              ───────────────────────────────────────────────────── */}
+              <div className={`${zone} flex items-center gap-2`}>
+                <button
+                  onClick={() => setVolBarActive(v => !v)}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-body transition-all ${
+                    volBarActive
+                      ? "text-[#D4AF37] border border-[#D4AF37]/30"
+                      : "text-white/40 hover:text-white/65 border border-white/10"
+                  }`}
+                  style={{
+                    background: volBarActive ? "oklch(0.84 0.155 85 / 0.08)" : "oklch(0.12 0.02 275)",
+                  }}
+                  title={volBarActive ? "Hide volume bar" : "Show volume bar on art"}
+                >
+                  {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                  <span>{state.isMuted ? "Muted" : `Volume ${Math.round(state.volume * 100)}%`}</span>
+                </button>
+                <button
+                  onClick={toggleMute}
+                  className="ml-auto text-[10px] font-body px-3 py-2.5 rounded-xl transition-all"
+                  style={{
+                    color: state.isMuted ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
+                    background: state.isMuted ? "oklch(0.84 0.155 85 / 0.1)" : "oklch(0.12 0.02 275)",
+                    border: `1px solid ${state.isMuted ? "oklch(0.84 0.155 85 / 0.3)" : "oklch(0.20 0.02 275)"}`,
+                  }}
+                >
+                  {state.isMuted ? "Unmute" : "Mute"}
+                </button>
+              </div>
+
+              <ZoneDivider />
+            </>
           )}
 
-          {/* Action buttons: Add to Playlist + Take to Room */}
-          {currentTrack && currentSongId && (
-            <div className="px-4 pb-3 flex items-center gap-2">
-              <AddToPlaylistButton songId={currentSongId} variant="full" className="flex-1" />
-              <button
-                onClick={() => { closeNowPlayingPanel(); navigate("/together"); }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all
-                  border flex-1 justify-center"
-                style={{
-                  background: "oklch(0.12 0.02 275)",
-                  color: "oklch(0.65 0.03 280)",
-                  border: "1px solid oklch(0.20 0.02 275)",
-                }}
-              >
-                <Users size={13} />
-                Take to Room
-              </button>
-            </div>
-          )}
-
-          {/* Divider */}
-          <div className="mx-4 mb-3" style={{ height: "1px", background: "oklch(0.84 0.155 85 / 0.10)" }} />
-
-          {/* ── LYRICS ── */}
-          <div className="px-4 pb-10">
-            <div className="flex items-center gap-2 mb-4">
+          {/* ─────────────────────────────────────────────────────────
+              ZONE 6 — Lyrics (always visible, even in Cinema Mode)
+          ───────────────────────────────────────────────────── */}
+          <div className={`${zone} pb-10`}>
+            <div className="flex items-center gap-3 mb-5">
               <span
                 className="text-[10px] font-bold tracking-widest uppercase"
-                style={{ color: "oklch(0.84 0.155 85 / 0.7)", fontFamily: "'Cinzel', serif" }}
+                style={{ color: "oklch(0.84 0.155 85 / 0.8)", fontFamily: "'Cinzel', serif" }}
               >
                 Lyrics
               </span>
@@ -613,19 +735,22 @@ export default function MobilePlayerPanel() {
                 style={{
                   fontFamily: "'Inter', Georgia, serif",
                   fontSize: "15px",
-                  lineHeight: "2",
+                  lineHeight: "2.1",
                   color: "oklch(0.88 0.02 280)",
-                  letterSpacing: "0.01em",
+                  letterSpacing: "0.015em",
                 }}
               >
                 {songDetail.song.lyricsText}
               </pre>
             ) : (
               <div
-                className="rounded-xl p-5 text-center"
-                style={{ background: "oklch(0.10 0.02 275)", border: "1px dashed oklch(0.20 0.02 275)" }}
+                className="rounded-xl p-6 text-center"
+                style={{
+                  background: "oklch(0.10 0.02 275)",
+                  border: "1px dashed oklch(0.20 0.02 275)",
+                }}
               >
-                <p className="text-[13px] italic mb-1" style={{ color: "oklch(0.45 0.02 280)" }}>
+                <p className="text-[13px] italic mb-1.5" style={{ color: "oklch(0.45 0.02 280)" }}>
                   No lyrics registered
                 </p>
                 <p className="text-[12px]" style={{ color: "oklch(0.84 0.155 85)" }}>
@@ -635,7 +760,7 @@ export default function MobilePlayerPanel() {
             )}
           </div>
 
-          <p className="text-center text-[10px] pb-4" style={{ color: "oklch(0.22 0.02 280)" }}>
+          <p className="text-center text-[10px] pb-5" style={{ color: "oklch(0.22 0.02 280)" }}>
             Swipe right to close
           </p>
         </div>

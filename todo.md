@@ -549,3 +549,8 @@
 
 ## Phase 49: MobilePlayerPanel Spacing Fixes
 - [x] Fix WID/badge row overlapping progress bar, tighten controls row, clean up volume/mute layout
+
+## Phase 50: Now Playing Panel — Zone Separation + Cinema Mode
+- [x] Rewrite scrollable content: clearly separated zones (track info, progress+controls, tip, actions+share, volume, lyrics)
+- [x] Add Share button with Web Share API (navigator.share), clipboard fallback
+- [x] Add Cinema Mode toggle — hides all zones except art + lyrics, toggle always visible
