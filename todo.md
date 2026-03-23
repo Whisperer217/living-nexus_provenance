@@ -689,3 +689,7 @@
 - [x] Register /pricing route in App.tsx
 - [x] Add "Creator License" nav item with gold $88.88 badge in sidebar (MainLayout)
 - [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
+
+## Phase 69: PFC Miller Dedication in Manifesto
+- [x] Add PFC Miller dedication to ManifestoPage — exact text as specified
+- [x] Checkpoint

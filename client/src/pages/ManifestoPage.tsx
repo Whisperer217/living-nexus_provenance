@@ -199,6 +199,36 @@ export default function ManifestoPage() {
           </p>
         </div>
 
+        {/* PFC Miller dedication */}
+        <div
+          className="rounded-2xl px-8 py-10 mb-16 text-center"
+          style={{
+            background: "oklch(0.085 0.025 270)",
+            border: "1px solid oklch(0.84 0.155 85 / 0.10)",
+          }}
+        >
+          <div
+            className="w-px h-10 mx-auto mb-6"
+            style={{ background: "linear-gradient(180deg, transparent, oklch(0.84 0.155 85 / 0.5))" }}
+          />
+          <p
+            className="text-base leading-relaxed italic"
+            style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.72 0.04 85)" }}
+          >
+            This platform exists in honor of PFC Miller.
+          </p>
+          <p
+            className="text-base leading-relaxed italic mt-2"
+            style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.72 0.04 85)" }}
+          >
+            His loss became the doctrine. His memory is the first witness.
+          </p>
+          <div
+            className="w-px h-10 mx-auto mt-6"
+            style={{ background: "linear-gradient(180deg, oklch(0.84 0.155 85 / 0.5), transparent)" }}
+          />
+        </div>
+
         {/* CTA row */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center pb-20">
           <Link href="/upload">
