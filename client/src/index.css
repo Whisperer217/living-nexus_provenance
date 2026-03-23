@@ -1,8 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — Divine Noir Design System
-   Philosophy: Art Deco Noir × Cosmic Mysticism
-   Colors: Midnight void + Royal Gold + Sacred Violet
+   LIVING NEXUS — Divine Steel Design System
+   Philosophy: Sacred Technology × Sovereign Witness
+   Colors: Deep Navy + Sovereign Gold + Orbital Teal
    Typography: Cinzel (proclamation) + DM Sans (clarity)
+   Doctrine: Laminin/Logos v0.1 — He holds all things together
 ═══════════════════════════════════════════════════════════════════ */
 
 @import "tailwindcss";
@@ -51,6 +52,8 @@
   /* Living Nexus custom tokens */
   --color-gold: var(--gold);
   --color-gold-dim: var(--gold-dim);
+  --color-teal: var(--teal);
+  --color-teal-dim: var(--teal-dim);
   --color-violet: var(--violet);
   --color-violet-dim: var(--violet-dim);
   --color-void: var(--void);
@@ -60,52 +63,55 @@
 }
 
 :root {
-  /* ── Divine Noir Palette — Deep Navy-Black with Purple Undertone ── */
-  --void:   oklch(0.09 0.04 265);   /* deep navy-black base — visible blue-navy tint */
-  --void-2: oklch(0.11 0.05 270);    /* sidebar / nav — slightly lighter navy */
-  --void-3: oklch(0.115 0.055 278);  /* cards / surfaces — bumped up for contrast #0d1520 */
-  --void-4: oklch(0.17 0.055 275);   /* elevated / hover — noticeably lifted purple-navy */
+  /* ── Divine Steel Palette — Deep Navy + Sovereign Gold + Orbital Teal ── */
+  /* Mirrors the Living Nexus orbital sphere logo exactly */
+  --void:   oklch(0.095 0.045 265);  /* #0d0d1a deep navy — not pure black */
+  --void-2: oklch(0.115 0.05 268);   /* #13132b sidebar / nav */
+  --void-3: oklch(0.135 0.055 272);  /* #1a1a3e cards / surfaces */
+  --void-4: oklch(0.185 0.06 270);   /* elevated surfaces, modals */
 
-  --gold:     oklch(0.84 0.155 85);  /* #D4AF37 true gold — brighter, more luminous */
-  --gold-dim: oklch(0.72 0.13 82);   /* #D4AF37 — muted gold */
-  --violet:     oklch(0.55 0.22 295); /* #7C3AED — sacred violet */
-  --violet-dim: oklch(0.70 0.18 295); /* #A78BFA — soft violet, slightly brighter */
+  --gold:     oklch(0.80 0.145 82);  /* #c9a84c sovereign gold — exact spec */
+  --gold-dim: oklch(0.68 0.12 80);   /* muted gold for secondary uses */
+  --teal:     oklch(0.82 0.155 175); /* #00d4aa orbital teal — pulled from logo */
+  --teal-dim: oklch(0.68 0.12 172);  /* muted teal */
+  --violet:     oklch(0.50 0.20 295); /* #7b5ea7 gunmetal purple */
+  --violet-dim: oklch(0.65 0.16 292); /* soft purple */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
   --background: var(--void);
-  --foreground: oklch(1.0 0 0);       /* pure white #FFFFFF primary text */
+  --foreground: oklch(0.96 0.008 270);  /* #f0f0ff soft blue-white — readable in daylight */
   --card: var(--void-3);
-  --card-foreground: oklch(1.0 0 0);
+  --card-foreground: oklch(0.96 0.008 270);
   --popover: var(--void-2);
-  --popover-foreground: oklch(1.0 0 0);
+  --popover-foreground: oklch(0.96 0.008 270);
   --primary: var(--gold);
   --primary-foreground: oklch(0.08 0.01 280);
   --secondary: var(--void-4);
-  --secondary-foreground: oklch(0.92 0.006 280); /* #E2E8F0 minimum secondary */
+  --secondary-foreground: oklch(0.96 0.008 270);
   --muted: var(--void-3);
-  --muted-foreground: oklch(0.72 0.015 285); /* bumped from 0.52 — much more readable */
-  --accent: var(--violet-dim);
+  --muted-foreground: oklch(0.68 0.02 280); /* #a0a0c0 purple-grey — visible in ambient light */
+  --accent: var(--teal);
   --accent-foreground: oklch(0.08 0.01 280);
   --destructive: oklch(0.65 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(1 0 0 / 7%);
-  --input: oklch(1 0 0 / 10%);
+  --border: oklch(0.28 0.04 270 / 80%); /* #2a2a4a visible but not harsh */
+  --input: oklch(0.28 0.04 270 / 60%);
   --ring: var(--gold);
 
   --chart-1: var(--gold);
-  --chart-2: var(--violet-dim);
+  --chart-2: var(--teal);
   --chart-3: oklch(0.65 0.18 160);
   --chart-4: oklch(0.70 0.20 30);
-  --chart-5: oklch(0.72 0.16 220);
+  --chart-5: var(--violet-dim);
 
   --sidebar: var(--void-2);
-  --sidebar-foreground: oklch(1.0 0 0);
+  --sidebar-foreground: oklch(0.96 0.008 270);
   --sidebar-primary: var(--gold);
   --sidebar-primary-foreground: oklch(0.08 0.01 280);
   --sidebar-accent: var(--void-4);
-  --sidebar-accent-foreground: oklch(1.0 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-accent-foreground: oklch(0.96 0.008 270);
+  --sidebar-border: oklch(0.28 0.04 270 / 60%);
   --sidebar-ring: var(--gold);
 }
 
@@ -120,6 +126,15 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'DM Sans', sans-serif;
+    font-weight: 400; /* base — components bump up as needed */
+  }
+  /* Typography weight upgrade — body text one step heavier for daylight readability */
+  p, span, li, td, th, label, input, textarea, select {
+    font-weight: 450;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: oklch(0.96 0.008 270); /* --text-primary always on headings */
+    letter-spacing: 0.02em;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -171,13 +186,19 @@
 
   /* ── Gold gradient text ── */
   .text-gold-gradient {
-    background: linear-gradient(135deg, #D4AF37, #D4AF37, #D4AF37);
+    background: linear-gradient(135deg, #c9a84c, #e8c96a, #c9a84c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-teal-gradient {
+    background: linear-gradient(135deg, #00d4aa, #00f0c0, #00d4aa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-violet-gradient {
-    background: linear-gradient(135deg, #A78BFA, #7C3AED);
+    background: linear-gradient(135deg, #9b7fc4, #7b5ea7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -224,8 +245,22 @@
   /* ── Player bar ambient glow ── */
   .player-glow {
     box-shadow:
-      0 -4px 32px oklch(0.55 0.22 295 / 0.10),
-      0 -1px 8px oklch(0.82 0.14 85 / 0.08);
+      0 -4px 32px oklch(0.82 0.155 175 / 0.08),
+      0 -1px 8px oklch(0.80 0.145 82 / 0.10);
+  }
+
+  /* ── Teal glow for teal-accented elements ── */
+  .glow-teal {
+    position: relative;
+  }
+  .glow-teal::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 18px 2px oklch(0.82 0.155 175 / 0.18), 0 0 6px 0px oklch(0.82 0.155 175 / 0.25);
+    pointer-events: none;
+    z-index: 0;
   }
 
   /* ── WID badge ambient glow — luminous gold/amber ── */
@@ -316,7 +351,7 @@
     100% { background-position: 200% center; }
   }
   .gold-shimmer {
-    background: linear-gradient(90deg, #D4AF37, #D4AF37, #F5D77A, #D4AF37, #D4AF37);
+    background: linear-gradient(90deg, #c9a84c, #c9a84c, #e8c96a, #c9a84c, #c9a84c);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -324,20 +359,29 @@
     animation: goldShimmer 4s linear infinite;
   }
 
-  /* ── Cosmic cathedral background — deep navy with purple/teal radial glow ── */
+  /* ── Animated gold progress glow ── */
+  @keyframes progressGlow {
+    0%, 100% { box-shadow: 0 0 4px 1px oklch(0.80 0.145 82 / 0.5); }
+    50% { box-shadow: 0 0 8px 3px oklch(0.80 0.145 82 / 0.8); }
+  }
+  .progress-playhead {
+    animation: progressGlow 1.8s ease-in-out infinite;
+  }
+
+  /* ── Cosmic cathedral background — deep navy with gold/teal radial glow ── */
   .cosmic-bg {
     background:
       radial-gradient(ellipse 80% 50% at 50% 0%,
-        oklch(0.18 0.08 290 / 0.35) 0%,
-        oklch(0.12 0.06 280 / 0.20) 40%,
+        oklch(0.25 0.08 175 / 0.18) 0%,
+        oklch(0.18 0.06 200 / 0.12) 40%,
         transparent 70%
       ),
       radial-gradient(ellipse 60% 40% at 50% 100%,
-        oklch(0.14 0.06 200 / 0.20) 0%,
-        oklch(0.10 0.04 220 / 0.12) 50%,
+        oklch(0.20 0.06 82 / 0.12) 0%,
+        oklch(0.14 0.04 90 / 0.08) 50%,
         transparent 80%
       ),
-      oklch(0.09 0.04 265);
+      oklch(0.095 0.045 265);
   }
 
   /* ── CTA button glow ── */

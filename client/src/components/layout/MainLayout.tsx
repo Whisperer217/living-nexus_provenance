@@ -127,8 +127,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* ── Sidebar (desktop) ── */}
         <aside
           className={`hidden md:flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out
-            border-r border-white/[0.07] bg-[oklch(0.11_0.012_280)]
+            border-r bg-[oklch(0.115_0.05_268)]
             ${sidebarOpen ? "w-[220px]" : "w-[64px]"}`}
+          style={{ borderColor: "oklch(0.28 0.04 270 / 60%)" }}
         >
           {/* Logo */}
           <div className={`flex items-center gap-3 px-4 py-5 border-b border-white/[0.07] ${!sidebarOpen && "justify-center px-0"}`}>
@@ -167,13 +168,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-[13.5px] transition-all duration-150 rounded-none
                         ${sidebarOpen ? "" : "justify-center px-0"}
                         ${active
-                          ? "bg-white/[0.06] text-[oklch(0.94_0.006_280)] border-r-2 border-[#D4AF37]"
-                          : "text-white/40 hover:bg-white/[0.04] hover:text-white/80"
+                          ? "text-[oklch(0.96_0.008_270)] border-r-2"
+                          : "text-white/40 hover:text-[oklch(0.82_0.155_175)] hover:bg-[oklch(0.82_0.155_175/0.06)]"
                         }`}
+                      style={active ? { background: "oklch(0.80 0.145 82 / 0.08)", borderColor: "oklch(0.80 0.145 82)" } : {}}
                     >
                       <Icon
                         size={15}
-                        className={`flex-shrink-0 ${active ? "text-[#D4AF37]" : "opacity-60"}`}
+                        className="flex-shrink-0"
+                        style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit", opacity: active ? 1 : 0.6 }}
                       />
                       {sidebarOpen && (
                         <>

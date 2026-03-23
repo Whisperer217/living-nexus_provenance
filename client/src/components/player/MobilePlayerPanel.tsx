@@ -542,25 +542,42 @@ export default function MobilePlayerPanel() {
               {/* Track title + artist + Cinema Mode toggle + heart/like */}
               <div className="px-5 pb-2 flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-semibold text-white/90 font-body leading-snug line-clamp-2">
+                  {/* Title — clickable → song page */}
+                  <button
+                    onClick={() => { if (currentSongId) navigate(`/song/${currentSongId}`); }}
+                    disabled={!currentSongId}
+                    className="text-[15px] font-semibold font-body leading-snug line-clamp-2 text-left w-full
+                      transition-colors hover:opacity-80 disabled:cursor-default"
+                    style={{ color: "oklch(0.96 0.008 270)" }}
+                  >
                     {currentTrack?.title || "No track selected"}
-                  </p>
-                  <p className="text-sm text-white/50 truncate font-body mt-0.5">
+                  </button>
+                  {/* Artist — clickable → creator page */}
+                  <button
+                    onClick={() => { if (songDetail?.creator?.id) navigate(`/creator/${songDetail.creator.id}`); }}
+                    disabled={!songDetail?.creator?.id}
+                    className="text-sm truncate font-body mt-0.5 text-left w-full
+                      transition-colors hover:opacity-80 disabled:cursor-default"
+                    style={{ color: "oklch(0.82 0.155 175)" }}
+                  >
                     {currentTrack?.artist || "—"}
-                  </p>
+                  </button>
                   {/* WID badge + genre/AI tags — own row below artist */}
                   <div className="flex flex-wrap items-center gap-1.5 mt-2">
                     {currentTrack?.witnessId && (
-                      <span
-                        className="inline-flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full"
+                      <button
+                        onClick={() => navigate(`/verify/${currentTrack.witnessId}`)}
+                        className="inline-flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full
+                          transition-opacity hover:opacity-80"
                         style={{
-                          background: "oklch(0.84 0.155 85 / 0.12)",
-                          color: "oklch(0.84 0.155 85)",
-                          border: "1px solid oklch(0.84 0.155 85 / 0.3)",
+                          background: "oklch(0.80 0.145 82 / 0.12)",
+                          color: "oklch(0.80 0.145 82)",
+                          border: "1px solid oklch(0.80 0.145 82 / 0.3)",
                         }}
+                        title="View Witness Certificate"
                       >
                         🔐 WID: {currentTrack.witnessId.slice(0, 12)}…
-                      </span>
+                      </button>
                     )}
                     {currentTrack?.genre && (
                       <span

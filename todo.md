@@ -627,3 +627,14 @@
 - [x] Build /verify/:witnessId public page — courtroom UI (no login required); added Covenant Declaration + Laminin doctrine footer
 - [x] Register /verify/:witnessId route in App.tsx — already registered
 - [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
+
+## Phase 61: Divine Steel Color System + Desktop Player + Architecture Polish
+- [x] Apply Divine Steel color tokens to index.css (deep navy/gold/teal palette)
+- [x] Bump body text weight globally (regular→medium, medium→semibold)
+- [x] Upgrade desktop player bar: 56px art, clickable title/artist, animated gold progress, volume slider, expand button
+- [x] Add clickable links to mobile player: title→/song/:id, artist→/creator/:id, WID badge→/verify/:witnessId
+- [x] Sidebar nav: accent-teal hover, accent-gold left border on active item
+- [x] Cards: bg-surface background with border-subtle border
+- [x] Section headers: text-primary with letter spacing
+- [x] Button system: primary=gold, secondary=bg-elevated+border-subtle
+- [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
