@@ -1,17 +1,27 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Shield, Upload, Music, Video, DollarSign, Users, BookOpen, ChevronRight } from "lucide-react";
+import { Shield, Upload, Music, Video, DollarSign, Users, BookOpen, ChevronRight, Maximize2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v1.5.0";
+const CURRENT_VERSION = "v1.6.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v1.5.0",
+    version: "v1.6.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Maximize2, text: "Desktop Cinematic Bar — click \"expand player\" above the bottom bar. Full theater view opens with art or video, controls, WID, and a live comment feed. Leave a witness on any track." },
+      { icon: MessageCircle, text: "Mobile Comments — Cinema Mode now has Lyrics and Comments tabs. Read the thread or leave your mark while the music plays." },
+      { icon: MessageCircle, text: "Live Feed polling — the comment feed in the expanded bar refreshes automatically every 15 seconds so you see new witnesses in real time." },
+    ],
+  },
+  {
+    version: "v1.5.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Music, text: "Cinema Mode — tap the eye icon next to the heart button to hide all controls and focus on art + lyrics." },
       { icon: Shield, text: "WID + AI tags row — your Witness ID and genre/AI disclosure now appear directly below the artist name." },

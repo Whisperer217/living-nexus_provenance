@@ -675,3 +675,11 @@
 - [x] Mobile MobilePlayerPanel: add Comments tab alongside existing Lyrics tab in Cinema Mode
 - [x] Mobile Comments tab: trpc.comments.list + trpc.comments.add, same UI as TheaterPlayer
 - [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
+
+## Phase 67: Phase 66 Quick Fixes + Payment Audit
+- [x] Audit: read current payment/licensing modal code and Stripe price IDs
+- [x] Audit: read Archive gate UI code
+- [x] Fix 1: Add refetchInterval: 15_000 to Live Feed comment query in PlayerBar
+- [x] Fix 2: Add comment count badge pill to expand tab button in PlayerBar
+- [x] Fix 3: Bump What's New modal to v1.6.0 with Cinematic Bar + Mobile Comments entries
+- [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint

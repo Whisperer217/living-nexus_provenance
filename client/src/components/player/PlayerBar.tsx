@@ -50,10 +50,10 @@ export default function PlayerBar() {
   const tipsEnabled = !!creatorStripeAccountId;
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
 
-  // Comments (only fetched when expanded)
+  // Comments (only fetched when expanded, polled every 15 s for live feel)
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
     { songId: currentSongId! },
-    { enabled: isExpanded && !!currentSongId && !isNaN(currentSongId), staleTime: 15_000 }
+    { enabled: isExpanded && !!currentSongId && !isNaN(currentSongId), staleTime: 15_000, refetchInterval: 15_000 }
   );
   const addCommentMutation = trpc.comments.add.useMutation({
     onSuccess: () => { refetchComments(); setNewComment(""); },
@@ -153,6 +153,14 @@ export default function PlayerBar() {
         >
           {isExpanded ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
           {isExpanded ? "collapse" : "expand player"}
+          {!isExpanded && commentsData && commentsData.length > 0 && (
+            <span
+              className="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold leading-none"
+              style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.08 0.01 280)" }}
+            >
+              {commentsData.length} {commentsData.length === 1 ? "witness" : "witnesses"}
+            </span>
+          )}
         </button>
       )}
 
