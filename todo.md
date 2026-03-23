@@ -683,3 +683,9 @@
 - [x] Fix 2: Add comment count badge pill to expand tab button in PlayerBar
 - [x] Fix 3: Bump What's New modal to v1.6.0 with Cinematic Bar + Mobile Comments entries
 - [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
+
+## Phase 68: Pricing Covenant Page
+- [x] Build PricingCovenantPage.tsx — Aid Bag Statement, covenant breakdown, $88.88 Stripe checkout
+- [x] Register /pricing route in App.tsx
+- [x] Add "Creator License" nav item with gold $88.88 badge in sidebar (MainLayout)
+- [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint

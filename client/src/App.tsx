@@ -24,6 +24,7 @@ import ContributorsPage from "./pages/ContributorsPage";
 import PlaylistPage from "./pages/PlaylistPage";
 import ManifestoPage from "./pages/ManifestoPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
+import PricingCovenantPage from "./pages/PricingCovenantPage";
 import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
 import WelcomeModal from "./components/WelcomeModal";
@@ -58,6 +59,7 @@ function Router() {
             <Route path="/playlist" component={PlaylistPage} />
             <Route path="/manifesto" component={ManifestoPage} />
             <Route path="/admin/users" component={AdminUsersPage} />
+            <Route path="/pricing" component={PricingCovenantPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />
           </Switch>

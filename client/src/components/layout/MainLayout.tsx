@@ -16,7 +16,7 @@ import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import TipTicker from "@/components/TipTicker";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
-  Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic, BookOpen,
+  Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic, BookOpen, Shield,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -27,6 +27,7 @@ const NAV_ITEMS = [
   { label: "Listen Together", icon: Users, path: "/together", group: "Discover", badge: "LIVE" },
   { label: "Founding Creators", icon: Star, path: "/contributors", group: "Discover" },
   { label: "Manifesto", icon: BookOpen, path: "/manifesto", group: "Discover" },
+  { label: "Creator License", icon: Shield, path: "/pricing", group: "Discover", badge: "$88.88" },
   { label: "My Profile", icon: User, path: "/profile", group: "My Music" },
   { label: "Upload", icon: Upload, path: "/upload", group: "My Music" },
   { label: "Batch Upload", icon: Upload, path: "/batch-upload", group: "My Music" },
@@ -259,7 +260,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         <>
                           <span className="font-body flex-1 text-left">{item.label}</span>
                           {item.badge && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[oklch(0.65_0.18_160)/20] text-[oklch(0.65_0.18_160)] border border-[oklch(0.65_0.18_160)/30]">
+                            <span
+                              className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                              style={item.badge === "$88.88"
+                                ? { background: "oklch(0.80 0.145 82 / 0.15)", color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.35)" }
+                                : { background: "oklch(0.65 0.18 160 / 0.20)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.30)" }
+                              }
+                            >
                               {item.badge}
                             </span>
                           )}
