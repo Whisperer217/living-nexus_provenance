@@ -11,6 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import PlayerBar from "@/components/player/PlayerBar";
 import MobilePlayerPanel from "@/components/player/MobilePlayerPanel";
+import TheaterPlayer from "@/components/player/TheaterPlayer";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import TipTicker from "@/components/TipTicker";
 import {
@@ -421,6 +422,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* ── Mobile Player Panel (floating tab + right slide-out, hidden on desktop) ── */}
       <MobilePlayerPanel />
+
+      {/* ── Theater Player — full-screen desktop overlay ── */}
+      <TheaterPlayer />
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Play, Pause, SkipBack, SkipForward,
-  Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, ChevronUp,
+  Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, Maximize2,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { useLocation } from "wouter";
@@ -26,7 +26,7 @@ export default function PlayerBar() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-    openNowPlayingPanel,
+    openTheater,
   } = usePlayer();
   const [, navigate] = useLocation();
   const { user } = useAuth();
@@ -307,16 +307,16 @@ export default function PlayerBar() {
           />
         </div>
 
-        {/* Expand to full Now Playing panel */}
+        {/* Expand to Theater Player */}
         <button
-          onClick={openNowPlayingPanel}
+          onClick={openTheater}
           className="p-1.5 transition-colors ml-1"
           style={{ color: "oklch(0.68 0.02 280)" }}
           onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
           onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
-          title="Open Now Playing"
+          title="Open Theater Player"
         >
-          <ChevronUp size={16} />
+          <Maximize2 size={16} />
         </button>
       </div>
 

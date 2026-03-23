@@ -118,6 +118,12 @@ interface PlayerContextValue {
   isNowPlayingPanelOpen: boolean;
   /** Close the Now Playing side panel */
   closeNowPlayingPanel: () => void;
+  /** Open the full-screen Theater Player (desktop) */
+  openTheater: () => void;
+  /** Whether the Theater Player overlay is open */
+  isTheaterOpen: boolean;
+  /** Close the Theater Player overlay */
+  closeTheater: () => void;
   /** Replace the entire queue without starting playback (used for initial DB seed) */
   setQueue: (tracks: Track[]) => void;
   /**
@@ -148,6 +154,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [isNowPlayingPanelOpen, setIsNowPlayingPanelOpen] = useState(false);
   const openNowPlayingPanel = useCallback(() => setIsNowPlayingPanelOpen(true), []);
   const closeNowPlayingPanel = useCallback(() => setIsNowPlayingPanelOpen(false), []);
+  const [isTheaterOpen, setIsTheaterOpen] = useState(false);
+  const openTheater = useCallback(() => setIsTheaterOpen(true), []);
+  const closeTheater = useCallback(() => setIsTheaterOpen(false), []);
   const [state, setState] = useState<PlayerState>({
     currentIdx: -1,
     isPlaying: false,
@@ -441,6 +450,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
       toggleLike, addTrack, addAndPlay, setQueue, playQueueAt,
       openNowPlayingPanel, isNowPlayingPanelOpen, closeNowPlayingPanel,
+      openTheater, isTheaterOpen, closeTheater,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
       setProfileAvatar, setProfileBanner,
       addTip, addTrackTip, addComment, incrementShare, setRoom,

@@ -657,3 +657,13 @@
 - [x] Fix 4: Mobile nav bottom padding = max(80px, 80px + safe-area-inset-bottom)
 - [x] Fix 5: 🔐 Verify WID → /verify added to every page's Quick Reference list
 - [x] TypeScript clean (0 errors), tests pass (44/44)
+
+## Phase 65: Quick Tab Upgrade + Desktop Theater Player
+- [x] Quick Tab: add Log Out button at bottom of panel (visible when logged in)
+- [x] Quick Tab: replace static trigger with glowing gold pulse tab button
+- [x] Quick Tab: add Recent Tracks mini-feed (last 6 tracks, tappable to load)
+- [x] Theater Player: build TheaterPlayer.tsx (full-screen modal, video/art, lyrics+comments tabs)
+- [x] Theater Player: comments table already existed in schema (no migration needed)
+- [x] Theater Player: trpc.comments.list and trpc.comments.add procedures already existed
+- [x] Theater Player: wire expand button in PlayerBar (Maximize2 icon) to open TheaterPlayer
+- [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
