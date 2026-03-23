@@ -47,7 +47,7 @@ const FOUNDERS: Founder[] = [
     id: 4,
     displayName: "Slimdoggy",
     emoji: "⚖️",
-    tags: ["Founding Creator", "Legal Scout", "Community Researcher"],
+    tags: ["Founding Creator", "Legal Scout", "Community Researcher", "Grammar Police"],
     gradient: ["#1E3A5F", "#60A5FA"],
   },
   {
