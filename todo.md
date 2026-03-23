@@ -620,3 +620,10 @@
 - [x] Add Log Out to Profile page — bottom of page, visible only when viewing own profile while logged in
 - [x] Behavior: clears session, redirects to home, Sign In reappears in nav
 - [x] TypeScript clean, tests pass
+
+## Phase 60: Laminin Doctrine + /verify/:witnessId Courtroom Page
+- [x] Save DOCTRINE.md to codebase root (Laminin/Logos Doctrine v0.1)
+- [x] Add trpc.verify.getByWid public procedure — already existed as songs.verifyWid
+- [x] Build /verify/:witnessId public page — courtroom UI (no login required); added Covenant Declaration + Laminin doctrine footer
+- [x] Register /verify/:witnessId route in App.tsx — already registered
+- [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint

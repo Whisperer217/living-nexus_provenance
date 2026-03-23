@@ -270,9 +270,27 @@ export default function VerifyPage() {
                 </Button>
               </div>
 
+              {/* ── Covenant Declaration ── */}
+              <div className="rounded-2xl px-5 py-5" style={{ background: "oklch(0.12 0.04 85 / 0.10)", border: "1px solid oklch(0.75 0.18 85 / 0.15)" }}>
+                <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "oklch(0.75 0.18 85 / 0.7)", fontFamily: "'Cinzel', serif" }}>
+                  Covenant Declaration
+                </p>
+                <p className="text-[12px] leading-relaxed mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>
+                  This record was sealed by Living Nexus at the moment of creation. The Witness ID is
+                  cryptographically bound to the original file and cannot be transferred or reassigned.
+                  The creator owns this proof. The platform hosts it.
+                </p>
+                <p className="text-[11px] italic" style={{ color: "oklch(0.4 0.03 280)" }}>
+                  "He is before all things, and in Him all things hold together." — Colossians 1:17
+                </p>
+              </div>
+
               {/* ── Footer note ── */}
               <p className="text-center text-xs pt-2" style={{ color: "oklch(0.35 0.02 280)" }}>
-                BDDT Publishing · Command Domains LLC · Sovereign Shutter™ Framework
+                BDDT Publishing · Command Domains LLC · Living Nexus Witness Registry
+              </p>
+              <p className="text-center text-[10px] pb-2" style={{ color: "oklch(0.28 0.02 280)" }}>
+                Laminin/Logos Doctrine v0.1 · Sovereign Shutter™ Framework
               </p>
             </div>
           )}
