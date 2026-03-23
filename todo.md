@@ -667,3 +667,11 @@
 - [x] Theater Player: trpc.comments.list and trpc.comments.add procedures already existed
 - [x] Theater Player: wire expand button in PlayerBar (Maximize2 icon) to open TheaterPlayer
 - [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
+
+## Phase 66: Cinematic Bar Expansion + Mobile Comments Tab
+- [x] Desktop PlayerBar: add isExpanded state + expand/collapse tab button on top of bar
+- [x] Desktop PlayerBar expanded view: 256px art/video panel (left), track info + controls (center), live comment feed + input (right)
+- [x] Desktop PlayerBar: gold glow gradient overlay on art, gold border on expanded bar
+- [x] Mobile MobilePlayerPanel: add Comments tab alongside existing Lyrics tab in Cinema Mode
+- [x] Mobile Comments tab: trpc.comments.list + trpc.comments.add, same UI as TheaterPlayer
+- [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint

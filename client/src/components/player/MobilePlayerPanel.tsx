@@ -22,7 +22,7 @@ import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, X,
   Music, DollarSign, Users, Video, ImageIcon,
-  Share2, ChevronDown, Eye, EyeOff, Check,
+  Share2, ChevronDown, Eye, EyeOff, Check, MessageCircle,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import PlayerTipModal from "./PlayerTipModal";
@@ -50,6 +50,9 @@ export default function MobilePlayerPanel() {
 
   // Cinema Mode
   const [cinemaMode, setCinemaMode] = useState(false);
+  // Lyrics/Comments tab in Cinema Mode
+  const [cinemaTab, setCinemaTab] = useState<"lyrics" | "comments">("lyrics");
+  const [newComment, setNewComment] = useState("");
 
   // Share copied state
   const [copied, setCopied] = useState(false);
@@ -135,6 +138,23 @@ export default function MobilePlayerPanel() {
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
 
+  // Comments (only fetched when Comments tab is active in Cinema Mode)
+  const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
+    { songId: currentSongId! },
+    { enabled: cinemaMode && cinemaTab === "comments" && !!currentSongId && !isNaN(currentSongId), staleTime: 30_000 }
+  );
+  const addCommentMutation = trpc.comments.add.useMutation({
+    onSuccess: () => { refetchComments(); setNewComment(""); },
+  });
+  const submitComment = useCallback(() => {
+    if (!newComment.trim() || !currentSongId) return;
+    addCommentMutation.mutate({
+      songId: currentSongId,
+      content: newComment.trim(),
+      authorName: user?.name ?? "Anonymous",
+    });
+  }, [newComment, currentSongId, addCommentMutation, user]);
+
   // DB-backed like state
   const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(
     { songId: currentSongId! },
@@ -192,6 +212,8 @@ export default function MobilePlayerPanel() {
   useEffect(() => {
     setShowVideo(false);
     setCinemaMode(false);
+    setCinemaTab("lyrics");
+    setNewComment("");
   }, [currentTrack?.id]);
 
   // Vertical volume bar
@@ -731,44 +753,131 @@ export default function MobilePlayerPanel() {
             </div>
           )}
 
-          {/* Lyrics */}
-          <div className="px-5 pb-4 pt-2">
-            <div className="flex items-center gap-2 mb-4">
-              <span
-                className="text-[10px] font-bold tracking-widest uppercase"
-                style={{ color: "oklch(0.84 0.155 85 / 0.7)", fontFamily: "'Cinzel', serif" }}
-              >
-                Lyrics
-              </span>
-              <div className="flex-1" style={{ height: "1px", background: "oklch(0.84 0.155 85 / 0.15)" }} />
+          {/* Lyrics / Comments tabs */}
+          <div className="px-0 pb-4 pt-0">
+            {/* Tab bar */}
+            <div
+              className="flex mx-5 mb-3"
+              style={{ borderBottom: "1px solid oklch(0.22 0.04 270 / 60%)" }}
+            >
+              {(["lyrics", "comments"] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setCinemaTab(tab)}
+                  className="flex-1 py-2 text-[12px] font-medium capitalize transition-colors flex items-center justify-center gap-1.5"
+                  style={{
+                    color: cinemaTab === tab ? "oklch(0.80 0.145 82)" : "oklch(0.45 0.02 280)",
+                    borderBottom: cinemaTab === tab ? "2px solid oklch(0.80 0.145 82)" : "2px solid transparent",
+                    fontFamily: "'Cinzel', serif",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  {tab === "lyrics" ? <Music size={11} /> : <MessageCircle size={11} />}
+                  {tab}
+                </button>
+              ))}
             </div>
-            {songDetail?.song?.lyricsText ? (
-              <pre
-                className="whitespace-pre-wrap"
-                style={{
-                  fontFamily: "'Inter', Georgia, serif",
-                  fontSize: "15px",
-                  lineHeight: "2",
-                  color: "oklch(0.88 0.02 280)",
-                  letterSpacing: "0.01em",
-                }}
-              >
-                {songDetail.song.lyricsText}
-              </pre>
-            ) : (
-              <div
-                className="rounded-xl p-6 text-center"
-                style={{
-                  background: "oklch(0.10 0.02 275)",
-                  border: "1px dashed oklch(0.22 0.02 275)",
-                }}
-              >
-                <p className="text-[13px] italic mb-1.5" style={{ color: "oklch(0.50 0.02 280)" }}>
-                  No lyrics registered
-                </p>
-                <p className="text-[12px]" style={{ color: "oklch(0.84 0.155 85)" }}>
-                  Upload lyrics to protect your words.
-                </p>
+
+            {/* Lyrics panel */}
+            {cinemaTab === "lyrics" && (
+              <div className="px-5">
+                {songDetail?.song?.lyricsText ? (
+                  <pre
+                    className="whitespace-pre-wrap"
+                    style={{
+                      fontFamily: "'Inter', Georgia, serif",
+                      fontSize: "15px",
+                      lineHeight: "2",
+                      color: "oklch(0.88 0.02 280)",
+                      letterSpacing: "0.01em",
+                    }}
+                  >
+                    {songDetail.song.lyricsText}
+                  </pre>
+                ) : (
+                  <div
+                    className="rounded-xl p-6 text-center"
+                    style={{
+                      background: "oklch(0.10 0.02 275)",
+                      border: "1px dashed oklch(0.22 0.02 275)",
+                    }}
+                  >
+                    <p className="text-[13px] italic mb-1.5" style={{ color: "oklch(0.50 0.02 280)" }}>
+                      No lyrics registered
+                    </p>
+                    <p className="text-[12px]" style={{ color: "oklch(0.84 0.155 85)" }}>
+                      Upload lyrics to protect your words.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Comments panel */}
+            {cinemaTab === "comments" && (
+              <div className="px-5">
+                {/* Comment list */}
+                <div className="space-y-3 mb-4">
+                  {commentsData && commentsData.length > 0 ? (
+                    commentsData.map(c => (
+                      <div key={c.id} className="flex gap-2.5">
+                        <div
+                          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                          style={{ background: "oklch(0.22 0.08 270)", color: "oklch(0.80 0.145 82)" }}
+                        >
+                          {(c.authorName ?? "?")[0].toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-2 mb-0.5">
+                            <span className="text-[12px] font-semibold" style={{ color: "oklch(0.82 0.155 175)" }}>
+                              {c.authorName ?? "Anonymous"}
+                            </span>
+                            <span className="text-[10px]" style={{ color: "oklch(0.45 0.02 280)" }}>
+                              {new Date(c.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-[13px] leading-relaxed" style={{ color: "oklch(0.80 0.02 280)" }}>
+                            {c.content}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6">
+                      <MessageCircle size={24} className="mx-auto mb-2 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
+                      <p className="text-[13px] italic" style={{ color: "oklch(0.45 0.02 280)" }}>
+                        No comments yet. Be the first.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {/* Comment input */}
+                <div className="flex gap-2">
+                  <input
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
+                    placeholder={user ? "Leave a witness..." : "Sign in to comment"}
+                    disabled={!user || addCommentMutation.isPending}
+                    maxLength={1000}
+                    className="flex-1 rounded-lg px-3 py-2 text-[13px] outline-none transition-colors disabled:opacity-50"
+                    style={{
+                      background: "oklch(0.12 0.04 270)",
+                      border: "1px solid oklch(0.22 0.04 270)",
+                      color: "oklch(0.88 0.02 280)",
+                    }}
+                    onFocus={e => (e.currentTarget.style.borderColor = "oklch(0.80 0.145 82 / 0.5)")}
+                    onBlur={e => (e.currentTarget.style.borderColor = "oklch(0.22 0.04 270)")}
+                  />
+                  <button
+                    onClick={submitComment}
+                    disabled={!user || !newComment.trim() || addCommentMutation.isPending}
+                    className="px-3 py-2 rounded-lg text-[12px] font-semibold transition-colors disabled:opacity-40"
+                    style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.08 0.01 280)" }}
+                  >
+                    Post
+                  </button>
+                </div>
               </div>
             )}
           </div>
