@@ -117,7 +117,7 @@ export default function DiscoverPage() {
         </div>
 
         {/* Genre Filter */}
-        <div>
+        <div id="section-genres">
           <h2 className="text-sm font-mono tracking-widest uppercase mb-4" style={{ color: "oklch(0.80 0.04 280)" }}>Browse by Genre</h2>
           <div className="flex flex-wrap gap-3">
             <button
@@ -141,7 +141,7 @@ export default function DiscoverPage() {
         </div>
 
         {/* Songs Grid */}
-        <div>
+        <div id="section-new-releases">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
               {activeGenre ? `${activeGenre} Tracks` : "Latest Releases"}
@@ -246,7 +246,7 @@ export default function DiscoverPage() {
 
         {/* Creators Gallery */}
         <div>
-          <div className="flex items-center justify-between mb-6">
+          <div id="section-featured" className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Featured Creators</h2>
           </div>
           {creatorsLoading ? (

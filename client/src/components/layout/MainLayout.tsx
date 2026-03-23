@@ -35,54 +35,118 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: BarChart2, path: "/dashboard", group: "My Music" },
 ];
 
-const PAGE_SUMMARIES: Record<string, { title: string; points: string[] }> = {
+interface QuickRefPoint { label: string; path?: string; scrollTo?: string; }
+const PAGE_SUMMARIES: Record<string, { title: string; points: QuickRefPoint[] }> = {
   "/": {
     title: "Home",
-    points: ["Featured tracks", "Genre filters", "Trending artists", "New releases"],
+    points: [
+      { label: "Featured tracks", path: "/", scrollTo: "section-featured" },
+      { label: "Genre filters", path: "/", scrollTo: "section-genres" },
+      { label: "Trending artists", path: "/", scrollTo: "section-trending" },
+      { label: "New releases", path: "/", scrollTo: "section-new-releases" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/explore": {
     title: "Explore",
-    points: ["All genres", "Search tracks", "Discover artists", "Charts"],
+    points: [
+      { label: "All genres", path: "/explore" },
+      { label: "Search tracks", path: "/explore" },
+      { label: "Discover artists", path: "/explore" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/together": {
     title: "Together",
-    points: ["Create a room", "Join by code", "Live chat", "Synced playback"],
+    points: [
+      { label: "Create a room", path: "/together" },
+      { label: "Join by code", path: "/together" },
+      { label: "Live chat", path: "/together" },
+      { label: "Synced playback", path: "/together" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/profile": {
     title: "Profile",
-    points: ["Your tracks", "Liked songs", "Activity feed", "Tips earned"],
+    points: [
+      { label: "Your tracks", path: "/profile" },
+      { label: "Liked songs", path: "/liked" },
+      { label: "Archive", path: "/archive" },
+      { label: "Dashboard", path: "/dashboard" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/upload": {
     title: "Upload",
-    points: ["Audio + artwork", "Track metadata", "Witness ID provenance", "Publish"],
+    points: [
+      { label: "Audio + artwork", path: "/upload" },
+      { label: "Track metadata", path: "/upload" },
+      { label: "Witness ID provenance", path: "/upload" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/batch-upload": {
     title: "Batch Upload",
-    points: ["Upload full album", "One cover art", "Per-track WIDs", "Grouped on profile"],
+    points: [
+      { label: "Upload full album", path: "/batch-upload" },
+      { label: "One cover art", path: "/batch-upload" },
+      { label: "Per-track WIDs", path: "/batch-upload" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/archive": {
     title: "Archive",
-    points: ["Your songs", "Publish / unpublish", "Status filter", "Track management"],
+    points: [
+      { label: "Your songs", path: "/archive" },
+      { label: "Publish / unpublish", path: "/archive" },
+      { label: "Status filter", path: "/archive" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/liked": {
     title: "Liked Songs",
-    points: ["Songs you loved", "From other creators", "Heart to save", "Your personal playlist"],
+    points: [
+      { label: "Songs you loved", path: "/liked" },
+      { label: "From other creators", path: "/explore" },
+      { label: "Heart to save", path: "/liked" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/dashboard": {
     title: "Dashboard",
-    points: ["Song catalog", "Tips earned", "Enable tips", "License status"],
+    points: [
+      { label: "Song catalog", path: "/dashboard" },
+      { label: "Tips earned", path: "/dashboard" },
+      { label: "Enable tips", path: "/dashboard" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/contributors": {
     title: "Founding Creators",
-    points: ["Genesis Day", "March 20, 2026", "Five founders", "Witness ID pioneers"],
+    points: [
+      { label: "Genesis Day", path: "/contributors" },
+      { label: "March 20, 2026", path: "/contributors" },
+      { label: "Five founders", path: "/contributors" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/manifesto": {
     title: "Manifesto",
-    points: ["Creator sovereignty", "WID provenance", "Anti-extraction", "The doctrine"],
+    points: [
+      { label: "Creator sovereignty", path: "/manifesto" },
+      { label: "WID provenance", path: "/manifesto" },
+      { label: "Anti-extraction", path: "/manifesto" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
   "/playlist": {
     title: "My Playlist",
-    points: ["Saved tracks", "Bookmark any song", "Play as queue", "Full PLAYLIST context"],
+    points: [
+      { label: "Saved tracks", path: "/playlist" },
+      { label: "Bookmark any song", path: "/playlist" },
+      { label: "Play as queue", path: "/playlist" },
+      { label: "🔐 Verify WID", path: "/verify" },
+    ],
   },
 };
 
@@ -103,6 +167,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
 
+  // One-panel rule: opening one panel closes the other
+  const openMobileMenu = useCallback(() => {
+    setQrOpen(false);
+    setMobileMenuOpen(true);
+  }, []);
+  const toggleQr = useCallback(() => {
+    if (!qrOpen) {
+      setMobileMenuOpen(false);
+    }
+    setQrOpen(o => !o);
+  }, [qrOpen]);
+
   const goTo = useCallback((path: string) => {
     navigate(path);
     setMobileMenuOpen(false);
@@ -116,7 +192,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* ── Quick Reference Slider (left edge) ── */}
       <QuickRefSlider
         open={qrOpen}
-        onToggle={() => setQrOpen(o => !o)}
+        onToggle={toggleQr}
         summary={pageSummary}
         currentPath={location}
       />
@@ -257,7 +333,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-3 px-4 py-3
           bg-[oklch(0.11_0.012_280)] border-b border-white/[0.07]">
           <button
-            onClick={() => setMobileMenuOpen(o => !o)}
+            onClick={() => mobileMenuOpen ? setMobileMenuOpen(false) : openMobileMenu()}
             className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.06] transition-all"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -267,7 +343,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <span className="font-display text-base gold-shimmer">Living Nexus</span>
           </div>
           <button
-            onClick={() => setQrOpen(o => !o)}
+            onClick={toggleQr}
             className="p-2 rounded-lg text-white/40 hover:text-[#D4AF37] transition-all"
           >
             <ChevronRight size={16} className={`transition-transform ${qrOpen ? "rotate-180" : ""}`} />
@@ -278,7 +354,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
             <div
-              className="w-64 h-full bg-[oklch(0.11_0.012_280)] border-r border-white/[0.07] pt-16"
+              className="w-64 h-full bg-[oklch(0.11_0.012_280)] border-r border-white/[0.07] pt-16 overflow-y-auto"
+              style={{ paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))" }}
               onClick={e => e.stopPropagation()}
             >
               {groups.map(group => (
@@ -308,7 +385,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               ))}
               {/* Log Out — bottom of mobile nav, visible only when authenticated */}
               {user && (
-                <div className="mt-2 px-4 pb-4 border-t border-white/[0.07] pt-3">
+                <div className="mt-2 px-4 border-t border-white/[0.07] pt-3">
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all text-white/35 hover:text-white/60 hover:bg-white/[0.04]"

@@ -649,3 +649,11 @@
 ## Phase 63: Add Grammar Police Tag to Slimdoggy
 - [x] Found Slimdoggy in ContributorsPage.tsx (hardcoded founder data)
 - [x] Added "Grammar Police" to Slimdoggy's tags array in ContributorsPage.tsx
+
+## Phase 64: Navigation & UX Fixes (5 items)
+- [x] Fix 1: Log Out confirmed in all 3 locations (mobile nav, desktop sidebar, profile page)
+- [x] Fix 2: Quick Reference items → working nav links with navigate+scroll behavior
+- [x] Fix 3: One panel at a time — opening mobile nav closes Quick Reference and vice versa
+- [x] Fix 4: Mobile nav bottom padding = max(80px, 80px + safe-area-inset-bottom)
+- [x] Fix 5: 🔐 Verify WID → /verify added to every page's Quick Reference list
+- [x] TypeScript clean (0 errors), tests pass (44/44)
