@@ -7,11 +7,12 @@
    Divine Noir aesthetic — Orbitron/Cinzel, gold/cyan palette
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { usePlayer } from "@/contexts/PlayerContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -21,8 +22,7 @@ import { toast } from "sonner";
 import {
   Play, Pause, Share2, Copy, DollarSign, MessageSquare,
   Shield, Music, ChevronLeft, Download, Headphones,
-  SkipBack, SkipForward, Volume2, VolumeX, Wand2,
-  ExternalLink, Edit3, Check, X, ChevronDown, ChevronUp, Twitter, Heart,
+  Wand2, ExternalLink, Check, ChevronDown, ChevronUp, Twitter, Heart,
   Video, ImageIcon,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
@@ -57,15 +57,8 @@ function RelatedCard({ item }: { item: any }) {
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { addAndPlay, state: playerState, currentTrackId, openNowPlayingPanel } = usePlayer();
   const songId = parseInt(id || "0");
-
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const [audioReady, setAudioReady] = useState(false);
 
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
@@ -76,6 +69,9 @@ export default function SongDetailPage() {
   const [reactions, setReactions] = useState<Record<string, number>>({});
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
   const [shareOpen, setShareOpen] = useState(false);
+  // Derive play state from global player — this page is a remote control only
+  const isThisTrackActive = currentTrackId === `song-${songId}`;
+  const isPlaying = isThisTrackActive && playerState.isPlaying;
   const { liked: isLiked, toggle: toggleLike } = useLike(songId);
   const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
     { songId },
@@ -166,17 +162,6 @@ export default function SongDetailPage() {
   });
 
   useEffect(() => {
-    if (!song?.fileUrl) return;
-    const audio = new Audio(safeAudioUrl(song.fileUrl));
-    audioRef.current = audio;
-    audio.volume = volume;
-    audio.addEventListener("loadedmetadata", () => { setDuration(audio.duration); setAudioReady(true); });
-    audio.addEventListener("timeupdate", () => setCurrentTime(audio.currentTime));
-    audio.addEventListener("ended", () => setIsPlaying(false));
-    return () => { audio.pause(); audio.src = ""; };
-  }, [song?.fileUrl]);
-
-  useEffect(() => {
     if (song?.lyricsText) setLyricsEdit(song.lyricsText);
   }, [song?.lyricsText]);
 
@@ -189,43 +174,39 @@ export default function SongDetailPage() {
     }
   }, []);
 
-  const togglePlay = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (isPlaying) { audio.pause(); setIsPlaying(false); }
-    else {
-      audio.play()
-        .then(() => { setIsPlaying(true); playMutation.mutate({ songId }); })
-        .catch(() => toast.error("Could not play audio"));
+  /** Route all playback through the global player — this page owns no audio. */
+  const handlePlay = () => {
+    if (!song) return;
+    if (isThisTrackActive) {
+      // Track is already loaded — just toggle play/pause in global player
+      // PlayerContext togglePlay is available via audioRef; use addAndPlay to re-trigger
+      addAndPlay({
+        id: `song-${song.id}`,
+        title: song.title,
+        artist: creator?.artistHandle || creator?.name || "Unknown",
+        genre: song.genre || "",
+        audioUrl: safeAudioUrl(song.fileUrl),
+        artUrl: song.coverArtUrl || undefined,
+        witnessId: song.witnessId || undefined,
+        aiDisclosure: (creator?.aiDisclosure as any) || undefined,
+        creatorHandle: creator?.artistHandle || creator?.name || undefined,
+      });
+    } else {
+      // New track — load into global player and start playing
+      addAndPlay({
+        id: `song-${song.id}`,
+        title: song.title,
+        artist: creator?.artistHandle || creator?.name || "Unknown",
+        genre: song.genre || "",
+        audioUrl: safeAudioUrl(song.fileUrl),
+        artUrl: song.coverArtUrl || undefined,
+        witnessId: song.witnessId || undefined,
+        aiDisclosure: (creator?.aiDisclosure as any) || undefined,
+        creatorHandle: creator?.artistHandle || creator?.name || undefined,
+      });
+      playMutation.mutate({ songId });
+      openNowPlayingPanel();
     }
-  }, [isPlaying, songId]);
-
-  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const t = parseFloat(e.target.value);
-    audio.currentTime = t;
-    setCurrentTime(t);
-  };
-
-  const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = parseFloat(e.target.value);
-    setVolume(v);
-    if (audioRef.current) audioRef.current.volume = v;
-    setMuted(v === 0);
-  };
-
-  const toggleMute = () => {
-    if (!audioRef.current) return;
-    const newMuted = !muted;
-    setMuted(newMuted);
-    audioRef.current.volume = newMuted ? 0 : volume;
-  };
-
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
   const handleReaction = (emoji: string) => {
@@ -270,7 +251,6 @@ export default function SongDetailPage() {
   );
 
   const tipsEnabled = creator?.stripeAccountStatus === "enabled";
-  const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
   const pageTitle = `${song.title} — Living Nexus`;
   const pageDesc = song.genre
     ? `${song.genre} track by ${creator?.artistHandle || creator?.name || "Unknown Artist"}${song.witnessId ? " · Witness ID protected" : ""}`
@@ -322,7 +302,7 @@ export default function SongDetailPage() {
                         controls
                         playsInline
                         autoPlay={isPlaying}
-                        muted={muted}
+                        muted={false}
                       />
                     ) : (
                       <div
@@ -469,42 +449,27 @@ export default function SongDetailPage() {
               </div>
             </div>
 
-            {/* Player */}
-            <div className="rounded-2xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.15 0.025 275)" }}>
-              <div className="mb-3">
-                <input type="range" min={0} max={duration || 100} value={currentTime} onChange={seek}
-                  disabled={!audioReady} className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-                  style={{ background: `linear-gradient(to right, oklch(0.84 0.155 85) ${progressPct}%, oklch(0.2 0.02 280) ${progressPct}%)`, outline: "none" }} />
-                <div className="flex justify-between text-xs mt-1" style={{ color: "#E2E8F0" }}>
-                  <span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span>
+            {/* Play button — remote control for the global player only */}
+            {song.fileUrl && (
+              <div className="flex items-center gap-4 rounded-2xl px-5 py-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.15 0.025 275)" }}>
+                <button
+                  onClick={handlePlay}
+                  className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 flex-shrink-0"
+                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate" style={{ color: "oklch(0.75 0.04 280)" }}>
+                    {isThisTrackActive ? (isPlaying ? "Now Playing" : "Paused — tap to resume") : "Tap to play in the global player"}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    {isThisTrackActive ? "Controls in the player bar below" : "One audio source. One witness."}
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <button className="w-8 h-8 flex items-center justify-center opacity-40">
-                    <SkipBack className="w-4 h-4" style={{ color: "oklch(0.75 0.04 280)" }} />
-                  </button>
-                  <button onClick={togglePlay} disabled={!audioReady && !song.fileUrl}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-                    style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
-                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center opacity-40">
-                    <SkipForward className="w-4 h-4" style={{ color: "oklch(0.75 0.04 280)" }} />
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={toggleMute} className="opacity-60 hover:opacity-100">
-                    {muted
-                      ? <VolumeX className="w-4 h-4" style={{ color: "oklch(0.6 0.04 280)" }} />
-                      : <Volume2 className="w-4 h-4" style={{ color: "oklch(0.6 0.04 280)" }} />}
-                  </button>
-                  <input type="range" min={0} max={1} step={0.01} value={muted ? 0 : volume} onChange={changeVolume}
-                    className="w-20 h-1 rounded-full appearance-none cursor-pointer"
-                    style={{ background: `linear-gradient(to right, oklch(0.65 0.04 280) ${(muted ? 0 : volume) * 100}%, oklch(0.2 0.02 280) ${(muted ? 0 : volume) * 100}%)` }} />
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* Lyrics — read-only, only shown if lyrics were submitted at upload time */}
             {song.lyricsText && (

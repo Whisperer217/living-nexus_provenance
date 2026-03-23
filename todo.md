@@ -638,3 +638,10 @@
 - [x] Section headers: text-primary with letter spacing
 - [x] Button system: primary=gold, secondary=bg-elevated+border-subtle
 - [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
+
+## Phase 62: Fix Dual Audio / Player Sync (Covenant Breach)
+- [x] Audit SongDetailPage for independent <audio> elements and local play state
+- [x] Remove all independent audio from SongDetailPage — wire play button to global PlayerContext.addAndPlay()
+- [x] Audit all other pages for independent audio (CreatorProfilePage, ExplorePage, MobilePlayerPanel) — clean
+- [x] Ensure PlayerContext is the single source of truth — one audio element, one player
+- [x] TypeScript clean (0 errors), tests pass (44/44), checkpoint
