@@ -126,7 +126,7 @@ export default function PlayerBar() {
         bottom: 0,
         left: 0,
         right: 0,
-        height: isExpanded ? "140px" : "68px",
+        height: isExpanded ? "256px" : "68px",
         background: "oklch(0.115 0.05 268)",
         borderTop: isExpanded
           ? "1px solid oklch(0.80 0.145 82 / 0.20)"
@@ -168,8 +168,8 @@ export default function PlayerBar() {
       {isExpanded && currentTrack && (
         <div className="flex h-full overflow-hidden">
 
-          {/* LEFT — Art / Video — compact square aligned to sidebar width */}
-          <div className="w-[164px] flex-shrink-0 relative overflow-hidden" style={{ minWidth: "164px" }}>
+          {/* LEFT — Art / Video (256px wide) */}
+          <div className="w-64 h-full flex-shrink-0 relative overflow-hidden">
             {videoUrl ? (
               <video
                 src={videoUrl}
@@ -187,60 +187,58 @@ export default function PlayerBar() {
               />
             ) : (
               <div
-                className="w-full h-full flex items-center justify-center text-4xl"
+                className="w-full h-full flex items-center justify-center text-5xl"
                 style={{ background: currentTrack.bg || "oklch(0.12 0.06 270)" }}
               >
                 {currentTrack.emoji || "🎵"}
               </div>
             )}
-            {/* Gold gradient fade right */}
+            {/* Gold gradient fade to center */}
             <div
               className="absolute inset-0 pointer-events-none"
-              style={{ background: "linear-gradient(to right, transparent 55%, oklch(0.115 0.05 268))" }}
+              style={{ background: "linear-gradient(to right, transparent 60%, oklch(0.115 0.05 268))" }}
             />
           </div>
 
-          {/* CENTER — Track info + progress + controls — compact single column */}
-          <div className="flex-1 flex flex-col justify-center px-4 py-2 min-w-0 overflow-hidden gap-1.5">
-            {/* Row 1: title + artist + WID + actions */}
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex-1 min-w-0">
+          {/* CENTER — Track info + controls */}
+          <div className="flex-1 flex flex-col justify-between px-5 py-3 min-w-0 overflow-hidden">
+            {/* Track info */}
+            <div>
+              <button
+                onClick={goToSong}
+                disabled={!currentSongId}
+                className="text-lg font-bold truncate block w-full text-left transition-colors hover:text-[oklch(0.80_0.145_82)] disabled:cursor-default mb-0.5"
+                style={{ color: "oklch(0.96 0.008 270)", fontFamily: "'Cinzel', serif" }}
+              >
+                {currentTrack.title}
+              </button>
+              <button
+                onClick={goToCreator}
+                disabled={!currentTrack}
+                className="text-sm truncate block w-full text-left transition-opacity hover:opacity-80 disabled:cursor-default mb-1"
+                style={{ color: "oklch(0.82 0.155 175)" }}
+              >
+                {currentTrack.artist || "—"}
+              </button>
+              {currentTrack.witnessId && (
                 <button
-                  onClick={goToSong}
-                  disabled={!currentSongId}
-                  className="text-[13px] font-bold truncate block w-full text-left transition-colors hover:text-[oklch(0.80_0.145_82)] disabled:cursor-default leading-tight"
-                  style={{ color: "oklch(0.96 0.008 270)", fontFamily: "'Cinzel', serif" }}
+                  onClick={goToVerify}
+                  className="text-[9px] font-mono truncate block text-left transition-opacity hover:opacity-80 mb-2"
+                  style={{ color: "oklch(0.80 0.145 82 / 0.6)" }}
+                  title="View Witness Certificate"
                 >
-                  {currentTrack.title}
+                  WID: {currentTrack.witnessId.slice(0, 22)}…
                 </button>
-                <button
-                  onClick={goToCreator}
-                  disabled={!currentTrack}
-                  className="text-[11px] truncate block w-full text-left transition-opacity hover:opacity-80 disabled:cursor-default leading-tight"
-                  style={{ color: "oklch(0.82 0.155 175)" }}
-                >
-                  {currentTrack.artist || "—"}
-                </button>
-                {currentTrack.witnessId && (
-                  <button
-                    onClick={goToVerify}
-                    className="text-[9px] font-mono truncate block text-left transition-opacity hover:opacity-80"
-                    style={{ color: "oklch(0.80 0.145 82 / 0.55)" }}
-                    title="View Witness Certificate"
-                  >
-                    WID: {currentTrack.witnessId.slice(0, 20)}…
-                  </button>
-                )}
-              </div>
-              {/* Like + Tip + Playlist */}
-              <div className="flex items-center gap-1 flex-shrink-0">
+              )}
+              {/* Like + Tip */}
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => { if (user && currentSongId && !isNaN(currentSongId)) toggleLikeMutation.mutate({ songId: currentSongId }); }}
                   disabled={!user || toggleLikeMutation.isPending}
                   className={`p-1.5 transition-colors ${isLiked ? "text-[oklch(0.82_0.155_175)]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
                   title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
                 >
-                  <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
+                  <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
                 </button>
                 {tipsEnabled && (
                   <button
@@ -248,16 +246,16 @@ export default function PlayerBar() {
                     className="p-1.5 transition-colors text-[oklch(0.80_0.145_82)] hover:text-[oklch(0.88_0.16_85)]"
                     title={`Tip ${currentTrack.artist}`}
                   >
-                    <DollarSign size={13} />
+                    <DollarSign size={15} />
                   </button>
                 )}
                 {currentSongId && <AddToPlaylistButton songId={currentSongId} variant="compact" />}
               </div>
             </div>
 
-            {/* Row 2: progress bar */}
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] w-7 text-right tabular-nums" style={{ color: "oklch(0.68 0.02 280)" }}>
+            {/* Progress bar */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "oklch(0.68 0.02 280)" }}>
                 {fmtTime(state.currentTime)}
               </span>
               <div
@@ -267,48 +265,52 @@ export default function PlayerBar() {
               >
                 <div
                   className="h-full rounded-full relative transition-all"
-                  style={{ width: `${progress}%`, background: "linear-gradient(90deg, oklch(0.50 0.20 295), oklch(0.80 0.145 82))" }}
+                  style={{
+                    width: `${progress}%`,
+                    background: "linear-gradient(90deg, oklch(0.50 0.20 295), oklch(0.80 0.145 82))",
+                  }}
                 >
                   {state.isPlaying && (
                     <div
-                      className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full progress-playhead"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full progress-playhead"
                       style={{ background: "oklch(0.80 0.145 82)", boxShadow: "0 0 6px 2px oklch(0.80 0.145 82 / 0.7)" }}
                     />
                   )}
                 </div>
               </div>
-              <span className="text-[10px] w-7 tabular-nums" style={{ color: "oklch(0.68 0.02 280)" }}>
+              <span className="text-[11px] w-8 tabular-nums" style={{ color: "oklch(0.68 0.02 280)" }}>
                 {fmtTime(state.duration)}
               </span>
             </div>
 
-            {/* Row 3: playback controls + volume */}
+            {/* Playback controls */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <button onClick={toggleShuffle} className={`p-1 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
-                  <Shuffle size={13} />
+              <div className="flex items-center gap-3">
+                <button onClick={toggleShuffle} className={`p-1.5 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
+                  <Shuffle size={14} />
                 </button>
-                <button onClick={prevTrack} className="p-1 text-white/50 hover:text-white transition-colors">
-                  <SkipBack size={16} />
+                <button onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+                  <SkipBack size={18} />
                 </button>
                 <button
                   onClick={togglePlay}
-                  className="w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
                   style={{ background: "oklch(0.96 0.008 270)", color: "oklch(0.08 0.01 280)" }}
                 >
                   {state.isPlaying
-                    ? <Pause size={14} fill="currentColor" />
-                    : <Play size={14} fill="currentColor" className="ml-0.5" />
+                    ? <Pause size={17} fill="currentColor" />
+                    : <Play size={17} fill="currentColor" className="ml-0.5" />
                   }
                 </button>
-                <button onClick={nextTrack} className="p-1 text-white/50 hover:text-white transition-colors">
-                  <SkipForward size={16} />
+                <button onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+                  <SkipForward size={18} />
                 </button>
-                <button onClick={toggleRepeat} className={`p-1 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
-                  <Repeat size={13} />
+                <button onClick={toggleRepeat} className={`p-1.5 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
+                  <Repeat size={14} />
                 </button>
               </div>
-              <div className="flex items-center gap-1.5">
+              {/* Volume */}
+              <div className="flex items-center gap-2">
                 <button
                   onClick={toggleMute}
                   className="p-1 transition-colors"
@@ -316,10 +318,10 @@ export default function PlayerBar() {
                   onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.96 0.008 270)")}
                   onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
                 >
-                  {state.isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                  {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
                 </button>
                 <div
-                  className="w-16 h-1.5 rounded-full cursor-pointer"
+                  className="w-20 h-1.5 rounded-full cursor-pointer"
                   style={{ background: "oklch(0.28 0.04 270 / 80%)" }}
                   onClick={handleVolume}
                 >
@@ -330,13 +332,13 @@ export default function PlayerBar() {
                 </div>
                 <button
                   onClick={openTheater}
-                  className="p-1 transition-colors ml-0.5"
+                  className="p-1.5 transition-colors ml-1"
                   style={{ color: "oklch(0.68 0.02 280)" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
                   onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
                   title="Open Theater Player"
                 >
-                  <Maximize2 size={13} />
+                  <Maximize2 size={14} />
                 </button>
               </div>
             </div>
