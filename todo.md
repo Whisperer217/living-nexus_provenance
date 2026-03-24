@@ -697,3 +697,8 @@
 ## Phase 70: QuickRef Panel Layout Fix
 - [x] Fix recent tracks feed bottom spacing so Log Out button is always visible and not obscured
 - [x] Checkpoint
+
+## Phase 71: PlayerBar Expanded — Cover Art Inline with Sidebar
+- [x] Redesign expanded PlayerBar: bar height reduced to 140px, art panel is 164px wide (sidebar-aligned), compact 3-row layout
+- [x] Logout button remains accessible — bar no longer dominates vertical space
+- [x] TypeScript clean (0 errors), checkpoint
