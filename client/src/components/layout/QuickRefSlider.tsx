@@ -121,7 +121,7 @@ export default function QuickRefSlider({ open, onToggle, summary, currentPath }:
         </div>
 
         {/* Nav points */}
-        <div className="overflow-y-auto px-4 py-4 space-y-1" style={{ maxHeight: "220px" }}>
+        <div className="overflow-y-auto flex-shrink-0 px-4 py-4 space-y-1" style={{ maxHeight: "160px" }}>
           {summary.points.map((point, i) => {
             const p = typeof point === "string" ? { label: point } : point;
             const isLink = !!(p.path || p.scrollTo);
@@ -153,12 +153,12 @@ export default function QuickRefSlider({ open, onToggle, summary, currentPath }:
 
         {/* Recent Tracks mini-feed */}
         {recentTracks.length > 0 && (
-          <div className="px-4 py-3 border-t border-white/[0.07]">
+          <div className="px-4 py-3 border-t border-white/[0.07] flex-1 min-h-0 flex flex-col">
             <p className="text-[9px] font-heading tracking-[0.15em] uppercase mb-2"
               style={{ color: "oklch(0.80 0.145 82)" }}>
               Recent Tracks
             </p>
-            <div className="space-y-1 overflow-y-auto" style={{ maxHeight: "180px" }}>
+            <div className="space-y-1 overflow-y-auto flex-1 min-h-0" style={{ maxHeight: "160px" }}>
               {recentTracks.slice(0, 6).map((track) => (
                 <button
                   key={track.song.id}

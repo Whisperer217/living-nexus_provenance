@@ -693,3 +693,7 @@
 ## Phase 69: PFC Miller Dedication in Manifesto
 - [x] Add PFC Miller dedication to ManifestoPage — exact text as specified
 - [x] Checkpoint
+
+## Phase 70: QuickRef Panel Layout Fix
+- [x] Fix recent tracks feed bottom spacing so Log Out button is always visible and not obscured
+- [x] Checkpoint
