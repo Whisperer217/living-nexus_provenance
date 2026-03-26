@@ -1,17 +1,28 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Shield, Upload, Music, Video, DollarSign, Users, BookOpen, ChevronRight, Maximize2, MessageCircle } from "lucide-react";
+import { Shield, Upload, Music, Video, DollarSign, Users, BookOpen, ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v1.6.0";
+const CURRENT_VERSION = "v1.7.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v1.6.0",
+    version: "v1.7.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: CreditCard, text: "Live Payments — Creator License ($88.88) and Fan Tips are now powered by real Stripe payments. Your money goes directly to creators." },
+      { icon: DollarSign, text: "Fan Tips — tip any creator directly from their song page. Choose $1, $2, $5, $10, $25, or a custom amount. Creators keep 90%." },
+      { icon: Download, text: "Tip-to-Download — creators can gate downloads behind a minimum tip. Pay once, download unlocks instantly." },
+      { icon: Zap, text: "Stripe Connect for Creators — go to Dashboard → Enable Tips to connect your Stripe account and start receiving tips directly to your bank." },
+    ],
+  },
+  {
+    version: "v1.6.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Maximize2, text: "Desktop Cinematic Bar — click \"expand player\" above the bottom bar. Full theater view opens with art or video, controls, WID, and a live comment feed. Leave a witness on any track." },
       { icon: MessageCircle, text: "Mobile Comments — Cinema Mode now has Lyrics and Comments tabs. Read the thread or leave your mark while the music plays." },

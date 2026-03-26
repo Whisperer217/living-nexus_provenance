@@ -741,3 +741,21 @@
 ## Phase 78: Fix Tip-to-Download + Ticker Bugs
 - [x] Fix: song file does not download after Stripe tip-to-download checkout completes
 - [x] Fix: tip ticker banner ("Be the first to tip") does not update after a tip payment
+
+## Phase 79: What's New v1.7.0
+- [x] Add v1.7.0 entry to What's New modal: live payments, Fan Tips, Tip-to-Download, Stripe Connect onboarding CTA
+- [x] Bump version badge to v1.7.0 and mark as Latest
+
+## Phase 80: Creator Activity Feed (Phase B)
+- [x] Add getEventsForCreator(creatorId) helper to server/db.ts (fetches all events across creator's songs with song title/cover)
+- [x] Add events.getForCreator protected tRPC procedure
+- [x] Add Activity tab to DashboardPage (tab button + content panel)
+- [x] Show TIP events gold-elevated, COMMENT events purple, WITNESS events green
+- [x] Show song title, actor name, timestamp, and payload message per event
+- [x] Auto-refresh every 30 seconds
+- [x] Empty state with icon when no events yet
+
+## Phase 81: Listen Together Polish
+- [x] Fix "HOCopy" button overlap on mobile (Host/Copy buttons colliding)
+- [x] Room name + live dot on top row, room code + HOST badge on second row
+- [x] Copy + Leave buttons on their own flex-shrink-0 group — no longer collide with room name

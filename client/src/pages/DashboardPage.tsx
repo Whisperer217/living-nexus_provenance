@@ -8,10 +8,10 @@ import { toast } from "sonner";
 import {
   Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
-  XCircle, Download, Play
+  XCircle, Download, Play, Activity, MessageCircle, Zap
 } from "lucide-react";
 
-type Tab = "songs" | "transforms";
+type Tab = "songs" | "transforms" | "activity";
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
@@ -20,6 +20,10 @@ export default function DashboardPage() {
 
   const { data: songs, refetch: refetchSongs } = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated });
   const { data: transforms } = trpc.songs.getMyTransforms.useQuery(undefined, { enabled: isAuthenticated && activeTab === "transforms" });
+  const { data: activityEvents, isLoading: activityLoading } = trpc.events.getForCreator.useQuery(
+    { limit: 200 },
+    { enabled: isAuthenticated && activeTab === "activity", refetchInterval: 30_000 }
+  );
   const { data: licenseData } = trpc.licenses.myStatus.useQuery(undefined, { enabled: isAuthenticated });
   const { data: connectData } = trpc.tips.connectStatus.useQuery(undefined, { enabled: isAuthenticated });
 
@@ -228,6 +232,19 @@ export default function DashboardPage() {
             My Transforms
             {transforms?.length ? <span className="text-xs opacity-70">({transforms.length})</span> : null}
           </button>
+          <button
+            onClick={() => setActiveTab("activity")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "activity" ? "oklch(0.65 0.18 45)" : "transparent",
+              color: activeTab === "activity" ? "oklch(0.08 0.015 280)" : "oklch(0.6 0.04 280)",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <Activity className="w-4 h-4" />
+            Activity
+            {activityEvents?.length ? <span className="text-xs opacity-70">({activityEvents.length})</span> : null}
+          </button>
         </div>
 
         {/* My Songs Tab */}
@@ -326,6 +343,89 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Activity Feed Tab */}
+        {activeTab === "activity" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Activity Feed</h2>
+                <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>All interactions on your songs — tips, comments, and witnesses. Auto-refreshes every 30s.</p>
+              </div>
+            </div>
+            {activityLoading ? (
+              <div className="text-center py-16">
+                <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
+              </div>
+            ) : !activityEvents?.length ? (
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+                <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
+                <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No activity yet.</p>
+                <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Tips, comments, and witnesses on your songs will appear here.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {(activityEvents as any[]).map((evt) => {
+                  const isTip = evt.type === "TIP";
+                  const isComment = evt.type === "COMMENT";
+                  const payload = evt.payload as any ?? {};
+                  const accentColor = isTip ? "oklch(0.84 0.155 85)" : isComment ? "oklch(0.65 0.2 300)" : "oklch(0.65 0.18 145)";
+                  return (
+                    <div
+                      key={evt.id}
+                      className="rounded-xl p-3 flex gap-3 items-start"
+                      style={{
+                        background: isTip ? "oklch(0.84 0.155 85 / 0.06)" : "oklch(0.115 0.055 278)",
+                        border: `1px solid ${isTip ? "oklch(0.84 0.155 85 / 0.25)" : "oklch(0.18 0.015 280)"}`,
+                      }}
+                    >
+                      {/* Icon */}
+                      <div
+                        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                        style={{ background: `${accentColor}20`, border: `1px solid ${accentColor}40` }}
+                      >
+                        {isTip ? <DollarSign className="w-4 h-4" style={{ color: accentColor }} /> :
+                         isComment ? <MessageCircle className="w-4 h-4" style={{ color: accentColor }} /> :
+                         <Zap className="w-4 h-4" style={{ color: accentColor }} />}
+                      </div>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-semibold" style={{ color: accentColor }}>
+                            {isTip ? `$${((payload.amount ?? 0) / 100).toFixed(2)} Tip` :
+                             isComment ? "Comment" : evt.type.replace(/_/g, " ")}
+                          </span>
+                          {evt.actorName && (
+                            <span className="text-xs" style={{ color: "oklch(0.7 0.03 280)" }}>by {evt.actorName}</span>
+                          )}
+                          {evt.songTitle && (
+                            <Link href={`/song/${evt.workId}`}>
+                              <span className="text-xs hover:underline truncate" style={{ color: "oklch(0.55 0.04 280)" }}>on "{evt.songTitle}"</span>
+                            </Link>
+                          )}
+                        </div>
+                        {(payload.message || payload.text) && (
+                          <p className="text-xs mt-0.5 line-clamp-2" style={{ color: "#E2E8F0" }}>
+                            {payload.message || payload.text}
+                          </p>
+                        )}
+                        <p className="text-xs mt-0.5" style={{ color: "oklch(0.38 0.02 280)" }}>
+                          {new Date(evt.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                      {/* Cover art thumbnail */}
+                      {evt.songCoverArtUrl && (
+                        <div className="flex-shrink-0 w-8 h-8 rounded-md overflow-hidden">
+                          <img src={evt.songCoverArtUrl} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

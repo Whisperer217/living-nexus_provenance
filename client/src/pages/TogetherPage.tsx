@@ -562,10 +562,29 @@ export default function TogetherPage() {
               <div className="rounded-2xl p-5 mb-4 border border-white/[0.1]"
                 style={{ background: "oklch(0.115 0.055 278)" }}>
                 {/* Room header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="pulse-dot" />
-                    <span className="font-heading text-[15px] text-white/90 tracking-wide">{state.room.name}</span>
+                <div className="flex flex-col gap-2 mb-4">
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Left: room name + live dot */}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="pulse-dot flex-shrink-0" />
+                      <span className="font-heading text-[15px] text-white/90 tracking-wide truncate">{state.room.name}</span>
+                    </div>
+                    {/* Right: Copy + Leave */}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button onClick={copyCode}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
+                          text-white/50 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-all border border-white/[0.08]">
+                        <Copy size={11} /> Copy
+                      </button>
+                      <button onClick={leaveRoom}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
+                          text-red-400/70 hover:text-red-400 bg-red-500/5 hover:bg-red-500/10 transition-all border border-red-500/10">
+                        <LogOut size={11} /> Leave
+                      </button>
+                    </div>
+                  </div>
+                  {/* Room code + host badge on second row */}
+                  <div className="flex items-center gap-2">
                     <span className="text-[11px] font-bold tracking-widest text-[#A78BFA] px-2 py-0.5 rounded
                       bg-[#A78BFA]/10 border border-[#A78BFA]/30">
                       {state.room.code}
@@ -574,18 +593,6 @@ export default function TogetherPage() {
                       <span className="text-[10px] font-heading tracking-widest text-[#D4AF37]/70 px-2 py-0.5 rounded
                         bg-[#D4AF37]/10 border border-[#D4AF37]/20">HOST</span>
                     )}
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={copyCode}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
-                        text-white/50 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-all border border-white/[0.08]">
-                      <Copy size={11} /> Copy
-                    </button>
-                    <button onClick={leaveRoom}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
-                        text-red-400/70 hover:text-red-400 bg-red-500/5 hover:bg-red-500/10 transition-all border border-red-500/10">
-                      <LogOut size={11} /> Leave
-                    </button>
                   </div>
                 </div>
 

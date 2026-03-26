@@ -23,7 +23,7 @@ import {
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
   getUserTipTotalForSong, updateSongDownloadPermission,
   getAllUsersWithStats, markWelcomeSeen,
-  createEvent, getEventsByWork,
+  createEvent, getEventsByWork, getEventsForCreator,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -599,6 +599,10 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
     getByWork: publicProcedure
       .input(z.object({ workId: z.number(), limit: z.number().max(200).optional() }))
       .query(async ({ input }) => getEventsByWork(input.workId, input.limit ?? 100)),
+    // Fetch all events across all songs owned by the authenticated creator
+    getForCreator: protectedProcedure
+      .input(z.object({ limit: z.number().max(500).optional() }))
+      .query(async ({ ctx, input }) => getEventsForCreator(ctx.user.id, input.limit ?? 200)),
   }),
 
   tips: router({

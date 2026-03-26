@@ -891,6 +891,35 @@ export async function getEventsByWork(workId: number, limit = 100) {
     .limit(limit);
 }
 
+/** Fetch all events across all songs owned by a creator, ordered newest first. */
+export async function getEventsForCreator(creatorId: number, limit = 200) {
+  const db = await getDb();
+  if (!db) return [];
+  const { isNull, inArray } = await import("drizzle-orm");
+  // First get all song IDs for this creator
+  const creatorSongs = await db
+    .select({ id: songs.id, title: songs.title, coverArtUrl: songs.coverArtUrl })
+    .from(songs)
+    .where(eq(songs.userId, creatorId));
+  if (!creatorSongs.length) return [];
+  const songIds = creatorSongs.map((s: { id: number; title: string | null; coverArtUrl: string | null }) => s.id);
+  const songMap: Record<number, { id: number; title: string | null; coverArtUrl: string | null }> = Object.fromEntries(
+    creatorSongs.map((s: { id: number; title: string | null; coverArtUrl: string | null }) => [s.id, s])
+  );
+  const evts = await db
+    .select()
+    .from(events)
+    .where(and(inArray(events.workId, songIds), isNull(events.deletedAt)))
+    .orderBy(desc(events.createdAt))
+    .limit(limit);
+  // Attach song title/cover to each event for display
+  return evts.map((e: typeof evts[number]) => ({
+    ...e,
+    songTitle: songMap[e.workId]?.title ?? null,
+    songCoverArtUrl: songMap[e.workId]?.coverArtUrl ?? null,
+  }));
+}
+
 /** Mark that a user has seen the welcome modal (idempotent). */
 export async function markWelcomeSeen(userId: number): Promise<void> {
   const db = await getDb();
