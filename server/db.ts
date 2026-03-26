@@ -3,7 +3,7 @@ import { and, desc, eq, isNotNull, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser, aiTransforms, comments, downloads, licenses,
-  slotPurchases, songs, tips, users
+  slotPurchases, songs, tips, users, events
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -831,6 +831,48 @@ export async function getAllUsersWithStats(): Promise<Array<{
     trackCount: trackMap.get(u.id) ?? 0,
     widCount: widMap.get(u.id) ?? 0,
   }));
+}
+
+// ─── Events (Unified Interaction Ledger) ─────────────────────────────────────
+
+/**
+ * Write a new event to the ledger.
+ * Events is the primary write target — tips and comments still write to their
+ * own tables for finance/query purposes, but events is the source of truth
+ * for the unified interaction thread.
+ */
+export async function createEvent(data: {
+  type: "TIP" | "COMMENT" | "LIKE" | "FOLLOW" | "WITNESS_REGISTERED" | "WITNESS_VERIFIED" | "WORK_REFERENCED" | "SYSTEM_UPDATE" | "PRESERVATION_MODE";
+  workId: number;
+  actorId?: number;
+  actorName?: string;
+  payload?: Record<string, unknown>;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Events] DB unavailable, event not recorded"); return; }
+  await db.insert(events).values({
+    type: data.type,
+    workId: data.workId,
+    actorId: data.actorId ?? null,
+    actorName: data.actorName ?? null,
+    payload: data.payload ?? null,
+  });
+}
+
+/**
+ * Fetch all non-deleted events for a given work (song), ordered newest first.
+ * Used to render the unified interaction thread on the song detail page.
+ */
+export async function getEventsByWork(workId: number, limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  const { isNull } = await import("drizzle-orm");
+  return db
+    .select()
+    .from(events)
+    .where(and(eq(events.workId, workId), isNull(events.deletedAt)))
+    .orderBy(desc(events.createdAt))
+    .limit(limit);
 }
 
 /** Mark that a user has seen the welcome modal (idempotent). */

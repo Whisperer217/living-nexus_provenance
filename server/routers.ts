@@ -23,6 +23,7 @@ import {
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
   getUserTipTotalForSong, updateSongDownloadPermission,
   getAllUsersWithStats, markWelcomeSeen,
+  createEvent, getEventsByWork,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -63,8 +64,23 @@ export async function handleStripeWebhook(req: any, res: any) {
         if (meta.type === "tip" && meta.songId) {
           const amountCents = session.amount_total ?? 0;
           const tipperUserId = meta.userId ? parseInt(meta.userId) : undefined;
+          const songId = parseInt(meta.songId);
+          // Events is the primary write target
+          await createEvent({
+            type: "TIP",
+            workId: songId,
+            actorId: tipperUserId,
+            actorName: meta.tipperName || undefined,
+            payload: {
+              amountCents,
+              message: meta.message || undefined,
+              stripeSessionId: session.id,
+              legacyType: "tip",
+            },
+          });
+          // Secondary write: tips table for finance reconciliation
           await recordTip({
-            songId: parseInt(meta.songId),
+            songId,
             tipperUserId,
             amountCents,
             stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
@@ -74,8 +90,22 @@ export async function handleStripeWebhook(req: any, res: any) {
         if (meta.type === "tip_download" && meta.songId) {
           const amountCents = session.amount_total ?? 0;
           const tipperUserId = meta.userId ? parseInt(meta.userId) : undefined;
+          const songId = parseInt(meta.songId);
+          // Events is the primary write target
+          await createEvent({
+            type: "TIP",
+            workId: songId,
+            actorId: tipperUserId,
+            actorName: meta.tipperName || undefined,
+            payload: {
+              amountCents,
+              stripeSessionId: session.id,
+              legacyType: "tip_download",
+            },
+          });
+          // Secondary write: tips table for finance reconciliation
           await recordTip({
-            songId: parseInt(meta.songId),
+            songId,
             tipperUserId,
             amountCents,
             stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
@@ -549,9 +579,26 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
   comments: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),
     add: publicProcedure.input(z.object({ songId: z.number(), content: z.string().min(1).max(1000), authorName: z.string().max(128).optional() })).mutation(async ({ ctx, input }) => {
-      await addComment({ songId: input.songId, userId: ctx.user?.id, authorName: input.authorName || ctx.user?.name || "Anonymous", content: input.content });
+      // Events is the primary write target
+      const actorName = input.authorName || ctx.user?.name || "Anonymous";
+      await createEvent({
+        type: "COMMENT",
+        workId: input.songId,
+        actorId: ctx.user?.id,
+        actorName,
+        payload: { content: input.content },
+      });
+      // Secondary write: comments table for legacy queries
+      await addComment({ songId: input.songId, userId: ctx.user?.id, authorName: actorName, content: input.content });
       return { success: true };
     }),
+  }),
+
+  events: router({
+    // Fetch the unified interaction thread for a work (song)
+    getByWork: publicProcedure
+      .input(z.object({ workId: z.number(), limit: z.number().max(200).optional() }))
+      .query(async ({ input }) => getEventsByWork(input.workId, input.limit ?? 100)),
   }),
 
   tips: router({

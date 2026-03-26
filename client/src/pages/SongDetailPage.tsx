@@ -131,6 +131,10 @@ export default function SongDetailPage() {
     { songId },
     { enabled: !!songId }
   );
+  const { data: eventThread, refetch: refetchEvents } = trpc.events.getByWork.useQuery(
+    { workId: songId },
+    { enabled: !!songId }
+  );
   const { data: relatedData } = trpc.songs.getRelated.useQuery(
     { songId, genre: songData?.song?.genre || undefined },
     { enabled: !!songId && !!songData }
@@ -155,7 +159,7 @@ export default function SongDetailPage() {
     onError: (e: { message: string }) => toast.error(e.message),
   });
   const commentMutation = trpc.comments.add.useMutation({
-    onSuccess: () => { setCommentText(""); refetchComments(); toast.success("Comment posted!"); },
+    onSuccess: () => { setCommentText(""); refetchComments(); refetchEvents(); toast.success("Comment posted!"); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
   const downloadMutation = trpc.songs.download.useMutation({
@@ -617,11 +621,17 @@ export default function SongDetailPage() {
               </div>
             </div>
 
-            {/* Comments */}
+            {/* Unified Interaction Thread */}
             <div className="rounded-2xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
-              <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>
-                {comments?.length || 0} Comment{comments?.length !== 1 ? "s" : ""}
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>
+                <MessageSquare className="w-4 h-4" />
+                Activity
+                {eventThread && eventThread.length > 0 && (
+                  <span className="text-xs font-normal" style={{ color: "oklch(0.45 0.03 280)" }}>{eventThread.length}</span>
+                )}
               </h3>
+
+              {/* Comment input */}
               <div className="flex gap-2 mb-4">
                 <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
                   style={{ background: "oklch(0.2 0.04 280)" }}>
@@ -646,26 +656,61 @@ export default function SongDetailPage() {
                   )}
                 </div>
               </div>
-              <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-                {comments?.map((c: any) => (
-                  <div key={c.id} className="flex gap-2">
-                    <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                      style={{ background: "oklch(0.18 0.03 280)" }}>
-                      <span style={{ color: "oklch(0.65 0.04 280)" }}>{(c.authorName || "A").charAt(0).toUpperCase()}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-xs font-medium" style={{ color: "oklch(0.7 0.04 280)" }}>{c.authorName || "Anonymous"}</span>
-                        <span className="text-[10px]" style={{ color: "oklch(0.35 0.02 280)" }}>
-                          {new Date(c.createdAt).toLocaleDateString()}
-                        </span>
+
+              {/* Unified event thread */}
+              <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                {eventThread && eventThread.length > 0 ? (
+                  eventThread.map((ev: any) => {
+                    const isTip = ev.type === "TIP";
+                    const payload = ev.payload || {};
+                    const actorInitial = (ev.actorName || "A").charAt(0).toUpperCase();
+                    const timeStr = new Date(ev.createdAt).toLocaleDateString();
+
+                    if (isTip) {
+                      const dollars = ((payload.amountCents || 0) / 100).toFixed(2);
+                      return (
+                        <div key={ev.id} className="flex gap-2 rounded-xl px-3 py-2"
+                          style={{ background: "oklch(0.14 0.04 85 / 0.25)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+                          <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                            style={{ background: "oklch(0.84 0.155 85 / 0.2)" }}>
+                            <DollarSign className="w-3.5 h-3.5" style={{ color: "oklch(0.84 0.155 85)" }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-xs font-semibold" style={{ color: "oklch(0.84 0.155 85)" }}>
+                                {ev.actorName || "A fan"}
+                              </span>
+                              <span className="text-[10px]" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }}>tipped</span>
+                              <span className="text-xs font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>${dollars}</span>
+                              <span className="text-[10px] ml-auto" style={{ color: "oklch(0.35 0.02 280)" }}>{timeStr}</span>
+                            </div>
+                            {payload.message && (
+                              <p className="text-xs italic" style={{ color: "oklch(0.65 0.06 85)" }}>"{payload.message}"</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // COMMENT
+                    return (
+                      <div key={ev.id} className="flex gap-2">
+                        <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                          style={{ background: "oklch(0.18 0.03 280)" }}>
+                          <span style={{ color: "oklch(0.65 0.04 280)" }}>{actorInitial}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-xs font-medium" style={{ color: "oklch(0.7 0.04 280)" }}>{ev.actorName || "Anonymous"}</span>
+                            <span className="text-[10px] ml-auto" style={{ color: "oklch(0.35 0.02 280)" }}>{timeStr}</span>
+                          </div>
+                          <p className="text-sm" style={{ color: "oklch(0.7 0.03 280)" }}>{payload.content || ""}</p>
+                        </div>
                       </div>
-                      <p className="text-sm" style={{ color: "oklch(0.7 0.03 280)" }}>{c.content}</p>
-                    </div>
-                  </div>
-                ))}
-                {(!comments || comments.length === 0) && (
-                  <p className="text-xs text-center py-4" style={{ color: "oklch(0.4 0.03 280)" }}>Be the first to comment</p>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs text-center py-4" style={{ color: "oklch(0.4 0.03 280)" }}>Be the first to comment or tip</p>
                 )}
               </div>
             </div>

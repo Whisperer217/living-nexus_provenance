@@ -718,3 +718,14 @@
 - [x] Wire Tip-to-Download gate: fan clicks Download on a gated track → Stripe checkout → on success, serve download URL
 - [x] Creator sets minimum tip amount for gated downloads in Archive (already has Free/Tip-to-Download/No Downloads toggle)
 - [x] Add tip_download webhook handling to record tip and unlock download
+
+## Phase 76: Event Ledger — Phase A (Foundation)
+- [x] Add events table to drizzle/schema.ts (id, type, workId, actorId, payload jsonb, createdAt, softDeleted)
+- [x] Run pnpm db:push to migrate schema
+- [x] Add createEvent, getEventsByWork helpers in server/db.ts
+- [x] Wire createTip → write TIP event first, then tips table (finance)
+- [x] Wire createComment → write COMMENT event (events is primary)
+- [x] Backfill existing tips into events table with legacyId in payload
+- [x] Backfill existing comments into events table with legacyId in payload
+- [x] Build unified thread on SongDetailPage: one stream, tips gold-elevated, time-ordered
+- [x] Validate data integrity, run tests, save checkpoint

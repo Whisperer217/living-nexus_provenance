@@ -29,6 +29,13 @@
       "when": 1774183883841,
       "tag": "0003_add_video_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1774503076583,
+      "tag": "0004_true_the_anarchist",
+      "breakpoints": true
     }
   ]
 }

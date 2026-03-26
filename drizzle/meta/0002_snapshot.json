@@ -2,7 +2,7 @@
   "version": "5",
   "dialect": "mysql",
   "id": "8bc1c830-a64e-4c55-8f56-82cf3a59ab50",
-  "prevId": "0e733165-3298-4991-8111-cafc756b51f5",
+  "prevId": "c4b66c42-d431-4773-a84b-ec8b5da0bac0",
   "tables": {
     "comments": {
       "name": "comments",

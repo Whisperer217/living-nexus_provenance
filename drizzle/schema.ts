@@ -252,3 +252,43 @@ export const playlistItems = mysqlTable("playlistItems", {
 export type PlaylistItem = typeof playlistItems.$inferSelect;
 export type InsertPlaylistItem = typeof playlistItems.$inferInsert;
 
+// ─── Events (Unified Interaction Ledger) ─────────────────────────────────────
+// Append-only. Every interaction tied to a Work (WID) flows through here.
+// Tips and comments remain in their own tables for finance/query purposes,
+// but events is the primary write target and the source of truth for the thread.
+export const events = mysqlTable("events", {
+  id: int("id").autoincrement().primaryKey(),
+
+  // Event classification
+  type: mysqlEnum("type", [
+    "TIP",
+    "COMMENT",
+    "LIKE",
+    "FOLLOW",
+    "WITNESS_REGISTERED",
+    "WITNESS_VERIFIED",
+    "WORK_REFERENCED",
+    "SYSTEM_UPDATE",
+    "PRESERVATION_MODE",
+  ]).notNull(),
+
+  // Work reference (WID origin node)
+  workId: int("workId").notNull(),   // maps to songs.id
+
+  // Actor (human source)
+  actorId: int("actorId"),           // maps to users.id; null = anonymous
+  actorName: varchar("actorName", { length: 128 }), // denormalized for display
+
+  // Structured payload (type-specific data)
+  payload: json("payload").$type<Record<string, unknown>>(),
+
+  // Soft delete — events are never hard-deleted (audit preserved)
+  deletedAt: timestamp("deletedAt"),
+
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = typeof events.$inferInsert;
+
+
