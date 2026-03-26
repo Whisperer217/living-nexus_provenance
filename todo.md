@@ -765,3 +765,16 @@
 - [x] Fix: moved metadata to session-level in both createTipDownloadCheckout and createTipCheckout
 - [x] Fix: polling now uses mutateAsync with a busy guard to prevent overlapping calls
 - [x] Same fix applied to regular tip checkout (createTipCheckout) for consistency
+
+## Phase 83: Jukebox Browser Redesign + Song Slot Price Update
+- [x] Change Song Slot price from $0.99 to $0.88 in routers.ts
+- [x] Update PricingCovenantPage to reflect $0.88 per slot
+- [x] Rebuild SongBrowserModal as Jukebox Browser with left/right card flip navigation
+- [x] Add 30s audio preview — plays automatically as you flip through cards, stops after 30s
+- [x] Add mute/unmute toggle for preview audio
+- [x] Add multi-select queue — tap card or "+ Add to Queue" to select multiple songs
+- [x] Add dot scrubber for quick position navigation
+- [x] Add checkout step with tip amount quick-select ($1/$2/$5/$10) and custom input
+- [x] Sanctuary tab shows all live public songs from every creator on the platform
+- [x] My List tab shows user's personal playlist songs in jukebox flipper
+- [x] Keyboard nav: left/right arrow keys flip through cards

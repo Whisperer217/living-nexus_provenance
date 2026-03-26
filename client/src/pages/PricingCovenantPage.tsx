@@ -31,7 +31,7 @@ const COVENANT_ITEMS = [
   {
     icon: Music,
     title: "100 song slots",
-    body: "Upload up to 100 tracks. Audio, cover art, lyrics, music video — all protected, all witnessed. Additional slots are available at $0.99 each if you need to grow beyond 100.",
+    body: "Upload up to 100 tracks. Audio, cover art, lyrics, music video — all protected, all witnessed. Additional slots are available at $0.88 each if you need to grow beyond 100.",
   },
   {
     icon: Zap,

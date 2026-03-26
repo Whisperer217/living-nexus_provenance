@@ -726,7 +726,7 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
     }),
     purchaseSlots: protectedProcedure.input(z.object({ slots: z.number().min(1).max(1000), origin: z.string().url() })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
-      const amountCents = input.slots * 99;
+      const amountCents = input.slots * 88;
       const session = await stripe.checkout.sessions.create({
         mode: "payment", payment_method_types: ["card"], customer_email: user?.email || undefined,
         line_items: [{ price_data: { currency: "usd", product_data: { name: `${input.slots} Song Slot${input.slots > 1 ? "s" : ""}`, description: `Add ${input.slots} additional song slot${input.slots > 1 ? "s" : ""} to your Living Nexus account` }, unit_amount: amountCents }, quantity: 1 }],

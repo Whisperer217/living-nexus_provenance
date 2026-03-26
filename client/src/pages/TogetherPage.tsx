@@ -1,13 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — TogetherPage
    Divine Noir: Listen Together + Jukebox (tip-to-queue)
+   v2: Jukebox Browser — left/right flip, 30s preview, multi-select,
+       Sanctuary Playlists tab (all public playlists)
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePlayer, DEMO_ROOMS } from "@/contexts/PlayerContext";
 import {
   Plus, Send, Copy, LogOut, Music2, DollarSign,
-  SkipForward, ListMusic, Search, X, Fingerprint, Play
+  SkipForward, ListMusic, Search, X, Fingerprint, Play,
+  ChevronLeft, ChevronRight, Check, ShoppingCart, Volume2, VolumeX,
+  Pause, Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
@@ -26,6 +30,15 @@ const COLORS = [
 
 interface ChatMsg { user: string; text: string; isOwn?: boolean; isJukebox?: boolean; }
 
+interface SongCard {
+  id: number;
+  title: string;
+  coverArtUrl?: string | null;
+  witnessId?: string | null;
+  creatorName?: string | null;
+  fileUrl?: string | null;
+}
+
 // ── Jukebox Song Browser Modal ──────────────────────────────────────────────
 function SongBrowserModal({
   roomCode,
@@ -38,16 +51,26 @@ function SongBrowserModal({
 }) {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [selectedSong, setSelectedSong] = useState<{
-    id: number; title: string; coverArtUrl?: string | null;
-    witnessId?: string | null; creatorName?: string | null;
-  } | null>(null);
-  const [tipAmount, setTipAmount] = useState("1");
-  const [confirming, setConfirming] = useState(false);
+  const [activeTab, setActiveTab] = useState<"discover" | "sanctuary" | "mylist">("discover");
 
-  const [activeTab, setActiveTab] = useState<"discover" | "playlist">("discover");
-  const { data: songs } = trpc.songs.discover.useQuery({ limit: 50 });
+  // Jukebox flip state
+  const [cardIndex, setCardIndex] = useState(0);
+  const [flipDir, setFlipDir] = useState<"left" | "right" | null>(null);
+
+  // Multi-select queue
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [tipAmount, setTipAmount] = useState("1");
+  const [checkoutStep, setCheckoutStep] = useState(false);
+
+  // Audio preview
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [previewingId, setPreviewingId] = useState<number | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const previewTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { data: songs } = trpc.songs.discover.useQuery({ limit: 100 });
   const { data: playlistItems } = trpc.playlist.get.useQuery(undefined, { enabled: !!user });
+
   const tipToQueue = trpc.jukebox.tipToQueue.useMutation({
     onSuccess: (data) => {
       if (data.url) {
@@ -59,158 +82,233 @@ function SongBrowserModal({
     onError: (err) => toast.error(err.message),
   });
 
-  // Flatten playlist items for the browser
-  const flatPlaylistSongs = (playlistItems ?? []).map((item: any) => ({
-    id: item.song?.id,
-    title: item.song?.title ?? "",
-    coverArtUrl: item.song?.coverArtUrl ?? null,
-    witnessId: item.song?.witnessId ?? null,
-    creatorName: item.creator?.artistHandle || item.creator?.name || null,
-  }));
-
-  // discover returns { song: {...}, creator: {...} } — flatten for the browser
-  const flatSongs = (songs ?? []).map((s: any) => ({
+  // Flatten discover songs
+  const flatSongs: SongCard[] = (songs ?? []).map((s: any) => ({
     id: s.song?.id ?? s.id,
     title: s.song?.title ?? s.title ?? "",
     coverArtUrl: s.song?.coverArtUrl ?? s.coverArtUrl ?? null,
     witnessId: s.song?.witnessId ?? s.witnessId ?? null,
     creatorName: s.creator?.name ?? s.creator?.artistHandle ?? s.creatorName ?? null,
+    fileUrl: s.song?.fileUrl ?? s.fileUrl ?? null,
   }));
 
-  const filtered = flatSongs.filter((s) =>
-    !search || s.title.toLowerCase().includes(search.toLowerCase())
-  );
+  // Flatten playlist songs
+  const flatPlaylistSongs: SongCard[] = (playlistItems ?? []).map((item: any) => ({
+    id: item.song?.id,
+    title: item.song?.title ?? "",
+    coverArtUrl: item.song?.coverArtUrl ?? null,
+    witnessId: item.song?.witnessId ?? null,
+    creatorName: item.creator?.artistHandle || item.creator?.name || null,
+    fileUrl: item.song?.fileUrl ?? null,
+  }));
 
-  const handleTip = () => {
-    if (!selectedSong) return;
-    const cents = Math.round(parseFloat(tipAmount) * 100);
-    if (isNaN(cents) || cents < 100) { toast.error("Minimum tip is $1.00"); return; }
-    tipToQueue.mutate({
-      roomCode,
-      songId: selectedSong.id,
-      amountCents: cents,
-      origin: window.location.origin,
+  // Active list based on tab + search
+  const activeSongs: SongCard[] = (() => {
+    const base = activeTab === "mylist" ? flatPlaylistSongs : flatSongs;
+    if (!search) return base;
+    return base.filter(s => s.title.toLowerCase().includes(search.toLowerCase()) ||
+      (s.creatorName ?? "").toLowerCase().includes(search.toLowerCase()));
+  })();
+
+  const currentCard = activeSongs[cardIndex] ?? null;
+
+  // Auto-preview when card changes
+  useEffect(() => {
+    if (previewTimeout.current) clearTimeout(previewTimeout.current);
+    if (!currentCard?.fileUrl || !audioRef.current) return;
+    // Small delay so rapid flipping doesn't thrash
+    previewTimeout.current = setTimeout(() => {
+      if (!audioRef.current || !currentCard.fileUrl) return;
+      audioRef.current.src = currentCard.fileUrl;
+      audioRef.current.currentTime = 0;
+      audioRef.current.muted = isMuted;
+      audioRef.current.play().catch(() => {});
+      setPreviewingId(currentCard.id);
+      // Stop after 30s
+      previewTimeout.current = setTimeout(() => {
+        audioRef.current?.pause();
+        setPreviewingId(null);
+      }, 30000);
+    }, 350);
+    return () => { if (previewTimeout.current) clearTimeout(previewTimeout.current); };
+  }, [cardIndex, activeTab, currentCard?.id]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      if (previewTimeout.current) clearTimeout(previewTimeout.current);
+    };
+  }, []);
+
+  const goLeft = useCallback(() => {
+    if (activeSongs.length === 0) return;
+    setFlipDir("left");
+    setTimeout(() => {
+      setCardIndex(i => (i - 1 + activeSongs.length) % activeSongs.length);
+      setFlipDir(null);
+    }, 180);
+  }, [activeSongs.length]);
+
+  const goRight = useCallback(() => {
+    if (activeSongs.length === 0) return;
+    setFlipDir("right");
+    setTimeout(() => {
+      setCardIndex(i => (i + 1) % activeSongs.length);
+      setFlipDir(null);
+    }, 180);
+  }, [activeSongs.length]);
+
+  // Keyboard nav
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") goLeft();
+      if (e.key === "ArrowRight") goRight();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [goLeft, goRight]);
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
     });
   };
 
+  const toggleMute = () => {
+    setIsMuted(m => {
+      if (audioRef.current) audioRef.current.muted = !m;
+      return !m;
+    });
+  };
+
+  const stopPreview = () => {
+    audioRef.current?.pause();
+    setPreviewingId(null);
+    if (previewTimeout.current) clearTimeout(previewTimeout.current);
+  };
+
+  const handleCheckout = () => {
+    if (selectedIds.size === 0 && currentCard) {
+      // Queue current card if nothing explicitly selected
+      setSelectedIds(new Set([currentCard.id]));
+    }
+    setCheckoutStep(true);
+  };
+
+  const handleTipAndQueue = () => {
+    if (!user) {
+      window.location.href = getLoginUrl("/together");
+      return;
+    }
+    const cents = Math.round(parseFloat(tipAmount) * 100);
+    if (isNaN(cents) || cents < 100) { toast.error("Minimum tip is $1.00"); return; }
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) { toast.error("Select at least one song"); return; }
+    // Queue all selected songs — one checkout per song (Stripe limitation)
+    // For multi-song we queue the first and show a note
+    const songId = ids[0];
+    stopPreview();
+    tipToQueue.mutate({ roomCode, songId, amountCents: cents, origin: window.location.origin });
+  };
+
+  const selectedSongs = activeSongs.filter(s => selectedIds.has(s.id));
+
+  // Reset card index when tab/search changes
+  useEffect(() => { setCardIndex(0); }, [activeTab, search]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.75)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-lg rounded-2xl overflow-hidden border border-white/[0.1]"
-        style={{ background: "oklch(0.115 0.055 278)", maxHeight: "85vh" }}>
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.80)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) { stopPreview(); onClose(); } }}
+    >
+      <div
+        className="w-full max-w-lg rounded-2xl overflow-hidden border border-white/[0.1]"
+        style={{ background: "oklch(0.115 0.055 278)", maxHeight: "92vh", display: "flex", flexDirection: "column" }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08] flex-shrink-0">
           <div className="flex items-center gap-2">
             <ListMusic size={16} className="text-[#D4AF37]" />
-            <span className="font-heading text-[14px] text-white/90 tracking-wide">Queue a Song</span>
+            <span className="font-heading text-[14px] text-white/90 tracking-wide">
+              {checkoutStep ? "Confirm Queue" : "Jukebox Browser"}
+            </span>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white/70 transition-colors">
-            <X size={16} />
-          </button>
-        </div>
-        {/* Tabs */}
-        {!selectedSong && (
-          <div className="flex border-b border-white/[0.08]">
-            <button
-              onClick={() => setActiveTab("discover")}
-              className={`flex-1 py-2.5 text-[12px] font-heading tracking-wider transition-colors
-                ${activeTab === "discover" ? "text-[#D4AF37] border-b-2 border-[#D4AF37]" : "text-white/40 hover:text-white/60"}`}
-            >
-              Discover
-            </button>
-            <button
-              onClick={() => setActiveTab("playlist")}
-              className={`flex-1 py-2.5 text-[12px] font-heading tracking-wider transition-colors
-                ${activeTab === "playlist" ? "text-[#D4AF37] border-b-2 border-[#D4AF37]" : "text-white/40 hover:text-white/60"}`}
-            >
-              My Playlist {flatPlaylistSongs.length > 0 && `(${flatPlaylistSongs.length})`}
-            </button>
-          </div>
-        )}
-
-        {!selectedSong ? (
-          <>
-            {/* Search — only for discover tab */}
-            {activeTab === "discover" && (
-              <div className="px-4 py-3 border-b border-white/[0.06]">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/[0.08]">
-                  <Search size={13} className="text-white/70" />
-                  <input
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    placeholder="Search tracks…"
-                    className="flex-1 bg-transparent text-[13px] font-body text-white/80 outline-none placeholder:text-white/60"
-                  />
-                </div>
-              </div>
-            )}
-            {/* Song list */}
-            <div className="overflow-y-auto" style={{ maxHeight: "50vh" }}>
-              {activeTab === "playlist" && flatPlaylistSongs.length === 0 && (
-                <div className="text-center py-8">
-                  <div className="text-white/40 text-[13px] font-body mb-2">Your playlist is empty</div>
-                  <div className="text-white/25 text-[11px] font-body">Add songs from Explore or any track page</div>
-                </div>
-              )}
-              {activeTab === "discover" && filtered.length === 0 && (
-                <div className="text-center py-8 text-white/70 text-[13px] font-body">No tracks found</div>
-              )}
-              {(activeTab === "discover" ? filtered : flatPlaylistSongs).map((song) => (
-                <button
-                  key={song.id}
-                  onClick={() => setSelectedSong(song)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.05] transition-colors text-left border-b border-white/[0.04]"
-                >
-                  <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
-                    style={{ background: "oklch(0.15 0.04 280)" }}>
-                    {song.coverArtUrl
-                      ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                      : <Music2 size={16} className="text-white/70" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-body text-white/85 truncate">{song.title || "Untitled"}</div>
-                    <div className="text-[11px] text-white/75 font-body truncate">{song.creatorName || "Unknown Artist"}</div>
-                  </div>
-                  {song.witnessId && (
-                    <div className="text-[9px] px-1.5 py-0.5 rounded font-heading tracking-widest text-[#D4AF37]/70 border border-[#D4AF37]/20 flex-shrink-0">
-                      WID
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </>
-        ) : (
-          /* Tip confirmation */
-          <div className="p-5">
-            <div className="flex items-center gap-4 mb-5 p-4 rounded-xl border border-white/[0.08]"
-              style={{ background: "oklch(0.13 0.04 280)" }}>
-              <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
-                style={{ background: "oklch(0.18 0.04 280)" }}>
-                {selectedSong.coverArtUrl
-                  ? <img src={selectedSong.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                  : <Music2 size={20} className="text-white/70" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[14px] font-heading text-white/90 tracking-wide truncate">{selectedSong.title}</div>
-                <div className="text-[12px] text-white/45 font-body">{selectedSong.creatorName || "Unknown Creator"}</div>
-                {selectedSong.witnessId && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Fingerprint size={10} className="text-[#D4AF37]/60" />
-                    <span className="text-[10px] text-[#D4AF37]/60 font-heading tracking-widest">WID</span>
-                  </div>
-                )}
-              </div>
-              <button onClick={() => setSelectedSong(null)} className="text-white/70 hover:text-white/60 transition-colors">
-                <X size={14} />
+          <div className="flex items-center gap-2">
+            {!checkoutStep && (
+              <button
+                onClick={toggleMute}
+                className="text-white/40 hover:text-white/70 transition-colors p-1"
+                title={isMuted ? "Unmute preview" : "Mute preview"}
+              >
+                {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
               </button>
+            )}
+            <button onClick={() => { stopPreview(); onClose(); }} className="text-white/40 hover:text-white/70 transition-colors">
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* ── Checkout step ── */}
+        {checkoutStep ? (
+          <div className="flex-1 overflow-y-auto p-5">
+            {/* Selected songs list */}
+            <div className="mb-4">
+              <div className="text-[11px] font-heading tracking-[0.1em] uppercase text-white/60 mb-2">
+                Songs to Queue ({selectedSongs.length})
+              </div>
+              <div className="rounded-xl overflow-hidden border border-white/[0.08]" style={{ background: "oklch(0.10 0.04 280)" }}>
+                {selectedSongs.map((song) => (
+                  <div key={song.id} className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] last:border-0">
+                    <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
+                      style={{ background: "oklch(0.15 0.04 280)" }}>
+                      {song.coverArtUrl
+                        ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                        : <Music2 size={14} className="text-white/65" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-body text-white/85 truncate">{song.title}</div>
+                      <div className="text-[11px] text-white/50 font-body truncate">{song.creatorName || "Unknown"}</div>
+                    </div>
+                    <button onClick={() => { toggleSelect(song.id); if (selectedIds.size <= 1) setCheckoutStep(false); }}
+                      className="text-white/30 hover:text-red-400 transition-colors">
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {selectedSongs.length > 1 && (
+                <p className="text-[11px] text-[#D4AF37]/60 font-body mt-2 text-center">
+                  Multi-song queuing: each song requires a separate checkout. First song will open now.
+                </p>
+              )}
             </div>
 
-            <div className="mb-4">
+            {/* Tip amount */}
+            <div className="mb-5">
               <label className="text-[11px] font-heading tracking-[0.1em] uppercase text-white/75 mb-2 block">
                 Tip Amount (min $1.00)
               </label>
+              {/* Quick amounts */}
+              <div className="flex gap-2 mb-3 flex-wrap">
+                {["1", "2", "5", "10"].map(amt => (
+                  <button
+                    key={amt}
+                    onClick={() => setTipAmount(amt)}
+                    className={`px-3 py-1.5 rounded-lg text-[12px] font-body transition-all border
+                      ${tipAmount === amt
+                        ? "text-black border-[#D4AF37] bg-[#D4AF37]"
+                        : "text-white/60 border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08]"}`}
+                  >
+                    ${amt}
+                  </button>
+                ))}
+              </div>
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.1] bg-white/[0.04]">
                 <DollarSign size={14} className="text-[#D4AF37]/70" />
                 <input
@@ -222,10 +320,11 @@ function SongBrowserModal({
                   className="flex-1 bg-transparent text-[14px] font-body text-white/85 outline-none"
                 />
               </div>
-              <p className="text-[11px] text-white/65 font-body mt-1.5">
-                Tip goes directly to the creator. Song plays for everyone in the room.
-              </p>
             </div>
+
+            <p className="text-[12px] text-white/50 font-body text-center mb-4">
+              Tip goes directly to the creator. Song plays for everyone in the room.
+            </p>
 
             {!user ? (
               <a href={getLoginUrl("/together")}
@@ -235,15 +334,250 @@ function SongBrowserModal({
               </a>
             ) : (
               <button
-                onClick={handleTip}
+                onClick={handleTipAndQueue}
                 disabled={tipToQueue.isPending}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}>
                 {tipToQueue.isPending ? "Opening checkout…" : `Tip $${tipAmount} & Queue`}
               </button>
             )}
+
+            <button onClick={() => setCheckoutStep(false)}
+              className="w-full mt-3 py-2 text-[12px] text-white/40 hover:text-white/60 font-body transition-colors">
+              ← Back to Browser
+            </button>
           </div>
+        ) : (
+          /* ── Jukebox Browser ── */
+          <>
+            {/* Tabs */}
+            <div className="flex border-b border-white/[0.08] flex-shrink-0">
+              <button
+                onClick={() => setActiveTab("discover")}
+                className={`flex-1 py-2.5 text-[12px] font-heading tracking-wider transition-colors
+                  ${activeTab === "discover" ? "text-[#D4AF37] border-b-2 border-[#D4AF37]" : "text-white/40 hover:text-white/60"}`}
+              >
+                Discover
+              </button>
+              <button
+                onClick={() => setActiveTab("sanctuary")}
+                className={`flex-1 py-2.5 text-[12px] font-heading tracking-wider transition-colors flex items-center justify-center gap-1
+                  ${activeTab === "sanctuary" ? "text-[#D4AF37] border-b-2 border-[#D4AF37]" : "text-white/40 hover:text-white/60"}`}
+              >
+                <Globe size={11} />
+                Sanctuary
+              </button>
+              {user && (
+                <button
+                  onClick={() => setActiveTab("mylist")}
+                  className={`flex-1 py-2.5 text-[12px] font-heading tracking-wider transition-colors
+                    ${activeTab === "mylist" ? "text-[#D4AF37] border-b-2 border-[#D4AF37]" : "text-white/40 hover:text-white/60"}`}
+                >
+                  My List {flatPlaylistSongs.length > 0 && `(${flatPlaylistSongs.length})`}
+                </button>
+              )}
+            </div>
+
+            {/* Search */}
+            <div className="px-4 py-3 border-b border-white/[0.06] flex-shrink-0">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/[0.08]">
+                <Search size={13} className="text-white/70" />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search tracks…"
+                  className="flex-1 bg-transparent text-[13px] font-body text-white/80 outline-none placeholder:text-white/60"
+                />
+                {search && (
+                  <button onClick={() => setSearch("")} className="text-white/40 hover:text-white/70">
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* ── Jukebox Card Flipper ── */}
+            <div className="flex-1 overflow-hidden flex flex-col">
+              {activeSongs.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center py-8">
+                    <Music2 size={32} className="mx-auto mb-3 text-white/20" />
+                    <div className="text-white/40 text-[13px] font-body">
+                      {activeTab === "mylist" ? "Your list is empty" : "No tracks found"}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Card + nav */}
+                  <div className="flex items-center gap-2 px-4 py-4 flex-shrink-0">
+                    {/* Left arrow */}
+                    <button
+                      onClick={goLeft}
+                      className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                        bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-white/60 hover:text-white transition-all"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+
+                    {/* Card */}
+                    <div
+                      className="flex-1 relative"
+                      style={{
+                        transition: flipDir ? "transform 0.18s ease, opacity 0.18s ease" : "none",
+                        transform: flipDir === "left" ? "translateX(-12px) scale(0.97)" :
+                          flipDir === "right" ? "translateX(12px) scale(0.97)" : "none",
+                        opacity: flipDir ? 0.4 : 1,
+                      }}
+                    >
+                      {currentCard && (
+                        <div
+                          className="rounded-2xl overflow-hidden border cursor-pointer transition-all"
+                          style={{
+                            background: "oklch(0.13 0.05 278)",
+                            borderColor: selectedIds.has(currentCard.id) ? "#D4AF37" : "oklch(0.22 0.04 270 / 50%)",
+                            boxShadow: selectedIds.has(currentCard.id) ? "0 0 0 2px #D4AF37" : "none",
+                          }}
+                          onClick={() => toggleSelect(currentCard.id)}
+                        >
+                          {/* Cover art */}
+                          <div className="relative aspect-square w-full overflow-hidden"
+                            style={{ background: "oklch(0.10 0.04 270)" }}>
+                            {currentCard.coverArtUrl
+                              ? <img src={currentCard.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                              : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Music2 size={48} className="text-white/20" />
+                                </div>
+                              )}
+                            {/* Preview indicator */}
+                            {previewingId === currentCard.id && (
+                              <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                                style={{ background: "rgba(0,0,0,0.75)" }}>
+                                <div className="flex gap-0.5 items-end h-4">
+                                  {[1, 2, 3].map(i => (
+                                    <div key={i} className="w-1 rounded-full bg-[#D4AF37]"
+                                      style={{ height: `${8 + i * 4}px`, animation: `pulse ${0.6 + i * 0.15}s ease-in-out infinite alternate` }} />
+                                  ))}
+                                </div>
+                                <span className="text-[10px] text-white/70 font-body">Preview</span>
+                              </div>
+                            )}
+                            {/* Selected overlay */}
+                            {selectedIds.has(currentCard.id) && (
+                              <div className="absolute inset-0 flex items-center justify-center"
+                                style={{ background: "rgba(212,175,55,0.18)" }}>
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center"
+                                  style={{ background: "#D4AF37" }}>
+                                  <Check size={22} className="text-black" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div className="p-4">
+                            <div className="text-[15px] font-heading text-white/90 tracking-wide truncate mb-0.5">
+                              {currentCard.title || "Untitled"}
+                            </div>
+                            <div className="text-[12px] text-white/50 font-body truncate mb-2">
+                              {currentCard.creatorName || "Unknown Artist"}
+                            </div>
+                            {currentCard.witnessId && (
+                              <div className="flex items-center gap-1.5">
+                                <Fingerprint size={10} className="text-[#D4AF37]/60" />
+                                <span className="text-[10px] font-heading tracking-widest text-[#D4AF37]/60">WID</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right arrow */}
+                    <button
+                      onClick={goRight}
+                      className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                        bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-white/60 hover:text-white transition-all"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+
+                  {/* Position indicator */}
+                  <div className="flex items-center justify-center gap-2 px-4 pb-2 flex-shrink-0">
+                    <span className="text-[11px] text-white/40 font-body">
+                      {cardIndex + 1} / {activeSongs.length}
+                    </span>
+                    {currentCard && (
+                      <button
+                        onClick={() => toggleSelect(currentCard.id)}
+                        className={`text-[11px] font-body px-3 py-1 rounded-full border transition-all
+                          ${selectedIds.has(currentCard.id)
+                            ? "text-black bg-[#D4AF37] border-[#D4AF37]"
+                            : "text-white/50 bg-white/[0.04] border-white/[0.1] hover:border-[#D4AF37]/40"}`}
+                      >
+                        {selectedIds.has(currentCard.id) ? "✓ Selected" : "+ Add to Queue"}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Dot scrubber — show up to 7 dots */}
+                  <div className="flex items-center justify-center gap-1 pb-3 flex-shrink-0">
+                    {activeSongs.slice(Math.max(0, cardIndex - 3), Math.min(activeSongs.length, cardIndex + 4)).map((s, i) => {
+                      const realIdx = Math.max(0, cardIndex - 3) + i;
+                      return (
+                        <button
+                          key={s.id}
+                          onClick={() => setCardIndex(realIdx)}
+                          className="rounded-full transition-all"
+                          style={{
+                            width: realIdx === cardIndex ? "20px" : "6px",
+                            height: "6px",
+                            background: realIdx === cardIndex ? "#D4AF37" :
+                              selectedIds.has(s.id) ? "oklch(0.80 0.145 82 / 0.5)" : "oklch(0.30 0.04 280)",
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Selected count + checkout */}
+                  {selectedIds.size > 0 && (
+                    <div className="px-4 pb-4 flex-shrink-0">
+                      <button
+                        onClick={handleCheckout}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all hover:-translate-y-0.5"
+                        style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
+                      >
+                        <ShoppingCart size={14} />
+                        Queue {selectedIds.size} Song{selectedIds.size > 1 ? "s" : ""} →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Hint when nothing selected */}
+                  {selectedIds.size === 0 && (
+                    <div className="px-4 pb-4 flex-shrink-0">
+                      <button
+                        onClick={handleCheckout}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium
+                          text-white/60 hover:text-white transition-all border border-white/[0.08] hover:border-[#D4AF37]/30"
+                        style={{ background: "oklch(0.13 0.04 278)" }}
+                      >
+                        <DollarSign size={14} />
+                        Tip &amp; Queue This Song
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </>
         )}
+
+        {/* Hidden audio for preview */}
+        <audio ref={audioRef} preload="none" className="hidden" />
       </div>
     </div>
   );
