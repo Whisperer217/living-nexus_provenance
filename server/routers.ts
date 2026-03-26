@@ -672,7 +672,8 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       const session = await stripe.checkout.sessions.create({
         mode: "payment", payment_method_types: ["card"],
         line_items: [{ price_data: { currency: "usd", product_data: { name: `Download: "${song.title}"`, description: `Tip-to-download — supporting ${creator.artistHandle || creator.name || "this creator"} on Living Nexus` }, unit_amount: thresholdCents }, quantity: 1 }],
-        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId }, metadata: { type: "tip_download", songId: input.songId.toString(), userId: ctx.user?.id?.toString() || "" } },
+        metadata: { type: "tip_download", songId: input.songId.toString(), userId: ctx.user?.id?.toString() || "", tipperName: ctx.user?.name || "" },
+        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
         success_url: `${input.origin}/song/${input.songId}?download=unlocked`,
         cancel_url: `${input.origin}/song/${input.songId}`,
         allow_promotion_codes: false,
@@ -697,7 +698,8 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       const session = await stripe.checkout.sessions.create({
         mode: "payment", payment_method_types: ["card"],
         line_items: [{ price_data: { currency: "usd", product_data: { name: `Tip for "${song.title}"`, description: `Supporting ${creator.artistHandle || creator.name || "this creator"} on Living Nexus` }, unit_amount: input.amountCents }, quantity: 1 }],
-        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId }, metadata: { type: "tip", songId: input.songId.toString(), userId: ctx.user?.id?.toString() || "" } },
+        metadata: { type: "tip", songId: input.songId.toString(), userId: ctx.user?.id?.toString() || "", tipperName: ctx.user?.name || "" },
+        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
         success_url: `${input.origin}/song/${input.songId}?tip=success`,
         cancel_url: `${input.origin}/song/${input.songId}`,
         allow_promotion_codes: false,

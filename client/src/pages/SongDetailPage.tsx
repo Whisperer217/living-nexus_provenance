@@ -193,41 +193,36 @@ export default function SongDetailPage() {
       toast.loading("Payment received — unlocking download...", { id: "download-unlock" });
       window.history.replaceState({}, "", window.location.pathname);
 
-      // Poll the permission endpoint until the webhook has recorded the tip (up to 15s)
+      // Poll the permission endpoint until the webhook has recorded the tip (up to 20s)
       let attempts = 0;
       const maxAttempts = 10;
+      let busy = false;
       const poll = setInterval(async () => {
+        if (busy) return; // prevent overlapping calls
         attempts++;
+        busy = true;
         try {
-          // Force-refetch permission (bypass staleTime cache)
+          // Force-refetch permission to bypass staleTime cache
           await utils.songDownload.getPermission.invalidate({ songId });
-          // Then trigger the actual download
-          downloadMutation.mutate({ songId }, {
-            onSuccess: (d) => {
-              clearInterval(poll);
-              toast.dismiss("download-unlock");
-              toast.success("✅ Download started!");
-              if (d.url) window.open(d.url, "_blank");
-              // Also refresh the ticker
-              utils.tips.recentTips.invalidate();
-              utils.events.getByWork.invalidate({ workId: songId });
-            },
-            onError: (e) => {
-              if (attempts >= maxAttempts) {
-                clearInterval(poll);
-                toast.dismiss("download-unlock");
-                toast.error("Download unlock is taking longer than expected. Refresh the page and try downloading again.");
-              }
-              // Otherwise keep polling — webhook may not have fired yet
-              console.warn(`[download-unlock] attempt ${attempts}/${maxAttempts}:`, e.message);
-            },
-          });
-        } catch {
+          // Attempt the download — will throw FORBIDDEN if tip not yet recorded
+          const d = await downloadMutation.mutateAsync({ songId });
+          clearInterval(poll);
+          toast.dismiss("download-unlock");
+          toast.success("✅ Download started!");
+          if (d.url) window.open(d.url, "_blank");
+          // Refresh ticker and activity thread
+          utils.tips.recentTips.invalidate();
+          utils.events.getByWork.invalidate({ workId: songId });
+        } catch (e: any) {
           if (attempts >= maxAttempts) {
             clearInterval(poll);
             toast.dismiss("download-unlock");
-            toast.error("Could not verify payment. Please refresh and try downloading.");
+            toast.error("Download unlock is taking longer than expected. Refresh the page and try downloading again.");
+          } else {
+            console.warn(`[download-unlock] attempt ${attempts}/${maxAttempts}: ${e?.message}`);
           }
+        } finally {
+          busy = false;
         }
       }, 2000); // poll every 2 seconds
     }

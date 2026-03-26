@@ -759,3 +759,9 @@
 - [x] Fix "HOCopy" button overlap on mobile (Host/Copy buttons colliding)
 - [x] Room name + live dot on top row, room code + HOST badge on second row
 - [x] Copy + Leave buttons on their own flex-shrink-0 group — no longer collide with room name
+
+## Phase 82: Fix Tip-to-Download Perpetual Polling
+- [x] Root cause: metadata was in payment_intent_data.metadata (not session.metadata) — webhook reads session.metadata, so userId was always empty
+- [x] Fix: moved metadata to session-level in both createTipDownloadCheckout and createTipCheckout
+- [x] Fix: polling now uses mutateAsync with a busy guard to prevent overlapping calls
+- [x] Same fix applied to regular tip checkout (createTipCheckout) for consistency
