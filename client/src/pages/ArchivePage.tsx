@@ -208,7 +208,7 @@ export default function ArchivePage() {
                     <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
                       style={{ background: "oklch(0.11 0.025 270)" }}>
                       {song.coverArtUrl
-                        ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+                        ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
                         : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
                     </div>
 

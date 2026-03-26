@@ -268,7 +268,7 @@ function SongBrowserModal({
                     <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
                       style={{ background: "oklch(0.15 0.04 280)" }}>
                       {song.coverArtUrl
-                        ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                        ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover object-top" />
                         : <Music2 size={14} className="text-white/65" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -414,7 +414,7 @@ function SongBrowserModal({
                     {/* Left arrow */}
                     <button
                       onClick={goLeft}
-                      className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                      className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center z-10 relative
                         bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-white/60 hover:text-white transition-all"
                     >
                       <ChevronLeft size={16} />
@@ -422,7 +422,7 @@ function SongBrowserModal({
 
                     {/* Card */}
                     <div
-                      className="flex-1 relative"
+                      className="flex-1 relative min-w-0"
                       style={{
                         transition: flipDir ? "transform 0.18s ease, opacity 0.18s ease" : "none",
                         transform: flipDir === "left" ? "translateX(-12px) scale(0.97)" :
@@ -443,7 +443,7 @@ function SongBrowserModal({
                           {/* Cover art */}
                           <div className="relative w-full overflow-hidden" style={{ height: "220px", background: "oklch(0.10 0.04 270)" }}>
                             {currentCard.coverArtUrl
-                              ? <img src={currentCard.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                              ? <img src={currentCard.coverArtUrl} alt="" className="w-full h-full object-cover object-top" />
                               : (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <Music2 size={48} className="text-white/20" />
@@ -496,7 +496,7 @@ function SongBrowserModal({
                     {/* Right arrow */}
                     <button
                       onClick={goRight}
-                      className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                      className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center z-10 relative
                         bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-white/60 hover:text-white transition-all"
                     >
                       <ChevronRight size={16} />

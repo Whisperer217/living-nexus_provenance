@@ -93,7 +93,7 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
         style={{ height: "180px", background: "oklch(0.14 0.015 280)" }}
       >
         {song.coverArtUrl ? (
-          <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+          <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
         ) : (
           <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, oklch(0.14 0.02 280), oklch(0.18 0.04 300))" }}>
             <Music className="w-10 h-10 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
@@ -177,7 +177,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
         </div>
         <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
           {song.coverArtUrl
-            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
             : <Music className="w-4 h-4 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />}
         </div>
         <div className="flex-1 min-w-0">

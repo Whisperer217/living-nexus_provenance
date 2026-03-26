@@ -39,7 +39,7 @@ function RelatedCard({ item }: { item: any }) {
       <div className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-white/[0.04] transition-all group">
         <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.16 0.02 280)" }}>
           {song.coverArtUrl
-            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
             : <Music className="w-5 h-5 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />}
         </div>
         <div className="flex-1 min-w-0">
@@ -365,7 +365,7 @@ export default function SongDetailPage() {
                         style={{ background: "oklch(0.10 0.02 275)" }}
                       >
                         {song.coverArtUrl
-                          ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+                          ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
                           : <Music className="w-16 h-16 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold"
@@ -396,7 +396,7 @@ export default function SongDetailPage() {
                   <div className="w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex items-center justify-center"
                     style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.13 0.04 290))" }}>
                     {song.coverArtUrl
-                      ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+                      ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
                       : <Music className="w-20 h-20 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />}
                   </div>
                 )}

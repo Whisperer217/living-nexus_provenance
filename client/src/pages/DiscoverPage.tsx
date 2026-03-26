@@ -180,7 +180,7 @@ export default function DiscoverPage() {
                 >
                   <div className="relative overflow-hidden" style={{ height: "180px", background: item.song.coverArtUrl ? undefined : "linear-gradient(135deg, oklch(0.11 0.03 275), oklch(0.15 0.05 290))" }}>
                     {item.song.coverArtUrl ? (
-                      <img src={item.song.coverArtUrl} alt={item.song.title} className="w-full h-full object-cover" />
+                      <img src={item.song.coverArtUrl} alt={item.song.title} className="w-full h-full object-cover object-top" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Music className="w-10 h-10 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />

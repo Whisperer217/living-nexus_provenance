@@ -183,7 +183,7 @@ export default function ExplorePage() {
                   {/* Artwork */}
                   <div className="relative overflow-hidden" style={{ height: "180px", background: "oklch(0.15 0.05 275)" }}>
                     {song.coverArtUrl ? (
-                      <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+                      <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Music className="w-10 h-10 opacity-20" style={{ color: "#D4AF37" }} />

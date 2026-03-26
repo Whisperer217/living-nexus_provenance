@@ -289,9 +289,9 @@ export default function MobilePlayerPanel() {
           style={{ background: currentTrack?.bg || "oklch(0.18 0.04 275)" }}
         >
           {currentTrack?.artUrl && currentTrack.artType !== "video" ? (
-            <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
+            <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover object-top" />
           ) : currentTrack?.artUrl && currentTrack.artType === "video" ? (
-            <video src={currentTrack.artUrl} className="w-full h-full object-cover" muted />
+            <video src={currentTrack.artUrl} className="w-full h-full object-cover object-top" muted />
           ) : (
             <Music className="w-4 h-4 opacity-40 text-white" />
           )}
@@ -419,9 +419,9 @@ export default function MobilePlayerPanel() {
                   muted={state.isMuted}
                 />
               ) : currentTrack?.artUrl && currentTrack.artType !== "video" ? (
-                <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
+                <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover object-top" />
               ) : currentTrack?.artUrl && currentTrack.artType === "video" ? (
-                <video src={currentTrack.artUrl} className="w-full h-full object-cover" muted />
+                <video src={currentTrack.artUrl} className="w-full h-full object-cover object-top" muted />
               ) : (
                 <Music className="w-1/2 h-1/2 opacity-30 text-white" />
               )}

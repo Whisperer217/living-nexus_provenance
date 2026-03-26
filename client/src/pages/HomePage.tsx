@@ -148,7 +148,7 @@ export default function HomePage() {
                     <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden rounded-lg"
                       style={{ background: "oklch(0.16 0.02 280)" }}>
                       {track.artUrl
-                        ? <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" />
+                        ? <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover object-top" />
                         : <div className="w-full h-full flex items-center justify-center text-white/60 text-lg">🎵</div>}
                     </div>
                     <div className="flex-1 min-w-0">

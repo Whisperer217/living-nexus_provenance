@@ -49,10 +49,10 @@ export default function TrackCard({ track, index, onTip }: Props) {
       {/* Artwork */}
       <div className="relative overflow-hidden" style={{ height: "180px", background: track.bg || "oklch(0.15 0.05 275)" }}>
         {track.artUrl && track.artType !== "video" && (
-          <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" />
+          <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover object-top" />
         )}
         {track.artUrl && track.artType === "video" && (
-          <video src={track.artUrl} className="w-full h-full object-cover" muted loop />
+          <video src={track.artUrl} className="w-full h-full object-cover object-top" muted loop />
         )}
         {!track.artUrl && (
           <div className="w-full h-full flex items-center justify-center text-5xl">

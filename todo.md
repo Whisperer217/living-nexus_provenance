@@ -787,3 +787,9 @@
 - [x] Fix CreatorProfilePage FeaturedCard — replace aspectRatio 1/1 with fixed 180px height
 - [x] Fix MobilePlayerPanel cover art — replace aspect-square with fixed 280px height
 - [x] All containers use object-cover so any image (portrait/landscape/square) fills cleanly without distortion
+
+## Phase 85: Cover Art Centering + Arrow Overflow Fix
+- [x] Change object-cover to object-cover object-top on all cover art images so faces/subjects are always visible
+- [x] Add z-10 relative to jukebox nav arrows so they always sit above the card
+- [x] Add min-w-0 to card wrapper to prevent flex overflow into arrow space
+- [x] Applied object-top across 12 files: TogetherPage, TrackCard, DiscoverPage, ExplorePage, CreatorProfilePage, SongDetailPage, ArchivePage, PlaylistPage, DashboardPage, LikedPage, HomePage, MobilePlayerPanel
