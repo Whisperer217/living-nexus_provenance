@@ -544,7 +544,6 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         const account = await stripe.accounts.create({
           controller: {
             stripe_dashboard: { type: "full" },
-            fees: { payer: "application" },
             losses: { payments: "stripe" },
             requirement_collection: "stripe",
           },
