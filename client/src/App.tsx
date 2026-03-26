@@ -1,71 +1,89 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { lazy, Suspense } from "react";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PlayerProvider } from "./contexts/PlayerContext";
 import MainLayout from "./components/layout/MainLayout";
-import HomePage from "./pages/HomePage";
-import ExplorePage from "./pages/ExplorePage";
-import TogetherPage from "./pages/TogetherPage";
-import UploadPage from "./pages/UploadPage";
-import BatchUploadPage from "./pages/BatchUploadPage";
-import LikedPage from "./pages/LikedPage";
-import ArchivePage from "./pages/ArchivePage";
-import TrackPage from "./pages/TrackPage";
-import SongDetailPage from "./pages/SongDetailPage";
-import CreatorProfilePage from "./pages/CreatorProfilePage";
-import DashboardPage from "./pages/DashboardPage";
-import DiscoverPage from "./pages/DiscoverPage";
-import ProfilePage from "./pages/ProfilePage";
-import NotFound from "./pages/NotFound";
-import VerifyPage from "./pages/VerifyPage";
-import ContributorsPage from "./pages/ContributorsPage";
-import PlaylistPage from "./pages/PlaylistPage";
-import ManifestoPage from "./pages/ManifestoPage";
-import AdminUsersPage from "./pages/AdminUsersPage";
-import PricingCovenantPage from "./pages/PricingCovenantPage";
 import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
 import WelcomeModal from "./components/WelcomeModal";
 
+// Lazy-loaded page components — each becomes its own JS chunk
+// This cuts initial bundle size significantly; pages load on first visit only
+const HomePage = lazy(() => import("./pages/HomePage"));
+const ExplorePage = lazy(() => import("./pages/ExplorePage"));
+const TogetherPage = lazy(() => import("./pages/TogetherPage"));
+const UploadPage = lazy(() => import("./pages/UploadPage"));
+const BatchUploadPage = lazy(() => import("./pages/BatchUploadPage"));
+const LikedPage = lazy(() => import("./pages/LikedPage"));
+const ArchivePage = lazy(() => import("./pages/ArchivePage"));
+const TrackPage = lazy(() => import("./pages/TrackPage"));
+const SongDetailPage = lazy(() => import("./pages/SongDetailPage"));
+const CreatorProfilePage = lazy(() => import("./pages/CreatorProfilePage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const DiscoverPage = lazy(() => import("./pages/DiscoverPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const VerifyPage = lazy(() => import("./pages/VerifyPage"));
+const ContributorsPage = lazy(() => import("./pages/ContributorsPage"));
+const PlaylistPage = lazy(() => import("./pages/PlaylistPage"));
+const ManifestoPage = lazy(() => import("./pages/ManifestoPage"));
+const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
+const PricingCovenantPage = lazy(() => import("./pages/PricingCovenantPage"));
+
+// Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
+        style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
+    </div>
+  );
+}
+
 function Router() {
   return (
-    <Switch>
-      {/* Public standalone pages — no MainLayout/PlayerBar */}
-      <Route path="/verify" component={VerifyPage} />
-      <Route path="/verify/:witnessId" component={VerifyPage} />
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        {/* Public standalone pages — no MainLayout/PlayerBar */}
+        <Route path="/verify" component={VerifyPage} />
+        <Route path="/verify/:witnessId" component={VerifyPage} />
 
-      {/* App pages inside MainLayout */}
-      <Route>
-        <MainLayout>
-          <Switch>
-            <Route path="/" component={DiscoverPage} />
-            <Route path="/home" component={HomePage} />
-            <Route path="/explore" component={ExplorePage} />
-            <Route path="/together" component={TogetherPage} />
-            <Route path="/upload" component={UploadPage} />
-            <Route path="/batch-upload" component={BatchUploadPage} />
-            <Route path="/liked" component={LikedPage} />
-            <Route path="/archive" component={ArchivePage} />
-            <Route path="/listen-together" component={TogetherPage} />
-            <Route path="/song/:id" component={SongDetailPage} />
-            <Route path="/songs/:id" component={SongDetailPage} />
-            <Route path="/track/:id" component={TrackPage} />
-            <Route path="/creator/:id" component={CreatorProfilePage} />
-            <Route path="/dashboard" component={DashboardPage} />
-            <Route path="/profile" component={ProfilePage} />
-            <Route path="/contributors" component={ContributorsPage} />
-            <Route path="/playlist" component={PlaylistPage} />
-            <Route path="/manifesto" component={ManifestoPage} />
-            <Route path="/admin/users" component={AdminUsersPage} />
-            <Route path="/pricing" component={PricingCovenantPage} />
-            <Route path="/404" component={NotFound} />
-            <Route component={NotFound} />
-          </Switch>
-        </MainLayout>
-      </Route>
-    </Switch>
+        {/* App pages inside MainLayout */}
+        <Route>
+          <MainLayout>
+            <Suspense fallback={<PageLoader />}>
+              <Switch>
+                <Route path="/" component={DiscoverPage} />
+                <Route path="/home" component={HomePage} />
+                <Route path="/explore" component={ExplorePage} />
+                <Route path="/together" component={TogetherPage} />
+                <Route path="/upload" component={UploadPage} />
+                <Route path="/batch-upload" component={BatchUploadPage} />
+                <Route path="/liked" component={LikedPage} />
+                <Route path="/archive" component={ArchivePage} />
+                <Route path="/listen-together" component={TogetherPage} />
+                <Route path="/song/:id" component={SongDetailPage} />
+                <Route path="/songs/:id" component={SongDetailPage} />
+                <Route path="/track/:id" component={TrackPage} />
+                <Route path="/creator/:id" component={CreatorProfilePage} />
+                <Route path="/dashboard" component={DashboardPage} />
+                <Route path="/profile" component={ProfilePage} />
+                <Route path="/contributors" component={ContributorsPage} />
+                <Route path="/playlist" component={PlaylistPage} />
+                <Route path="/manifesto" component={ManifestoPage} />
+                <Route path="/admin/users" component={AdminUsersPage} />
+                <Route path="/pricing" component={PricingCovenantPage} />
+                <Route path="/404" component={NotFound} />
+                <Route component={NotFound} />
+              </Switch>
+            </Suspense>
+          </MainLayout>
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }
 

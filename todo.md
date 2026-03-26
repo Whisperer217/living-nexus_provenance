@@ -729,3 +729,11 @@
 - [x] Backfill existing comments into events table with legacyId in payload
 - [x] Build unified thread on SongDetailPage: one stream, tips gold-elevated, time-ordered
 - [x] Validate data integrity, run tests, save checkpoint
+
+## Phase 77: Performance Optimization
+- [x] Replace single drizzle(DATABASE_URL) connection with mysql2 connection pool (connectionLimit: 20)
+- [x] Add compression middleware (gzip) to Express server
+- [x] Add security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
+- [x] Lazy load all route-level page components in App.tsx (React.lazy + Suspense)
+- [x] Add staleTime (30s) and gcTime (5min) to QueryClient to reduce redundant refetches
+- [x] Smart retry logic: skip retries on 4xx errors, retry up to 2x on network errors
