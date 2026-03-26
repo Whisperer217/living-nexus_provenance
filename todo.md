@@ -817,3 +817,8 @@
 - [x] Public/Private toggle per note — public notes visible to all
 - [x] Optional video embed (YouTube) and cover image per note
 - [x] Category filter bar on Field Notes page
+
+## Phase 87: WID Spec Public Download
+- [x] Created /doctrine/wid-spec page with public download for WID Public Specification v1.0 PDF
+- [x] Added WID Specification nav item to SYSTEM group in MainLayout sidebar
+- [x] Wired CDN PDF download button — https://d2xsxph8kpxj0f.cloudfront.net/...WID_Public_Specification_v1.0.pdf

@@ -47,6 +47,7 @@ const NAV_ITEMS = [
   { label: "Upload",           icon: Upload,      path: "/upload",      group: "SYSTEM" },
   { label: "Batch Upload",     icon: Upload,      path: "/batch-upload",group: "SYSTEM" },
   { label: "Witness Records",  icon: ScrollText,  path: "/archive",     group: "SYSTEM" },
+  { label: "WID Specification", icon: CheckCircle2, path: "/doctrine/wid-spec", group: "SYSTEM" },
 ];
 
 const GROUPS = ["DISCOVER", "MY COMMAND", "SYSTEM"];
