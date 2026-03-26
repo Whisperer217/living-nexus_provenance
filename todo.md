@@ -706,3 +706,15 @@
 ## Phase 73: Fix Stripe Connect "Enable Tips" Error
 - [x] Update stripe.accounts.create() to use controller-based account creation (new Connect API)
 - [x] Ensure connectOnboarding procedure works with live Stripe Connect enabled account
+
+## Phase 74: Fix Tip "No such destination" Error
+- [x] Clear stale test stripeAccountId values from users table in DB
+- [x] Add live-mode account validation before creating tip checkout (retrieve account, check charges_enabled)
+- [x] Return clear error to frontend if creator hasn't reconnected Stripe in live mode
+
+## Phase 75: Prominent Tips + Tip-to-Download Gate
+- [x] Move Tip button to top of song detail page (same row as Like/Share, always visible)
+- [x] Show tip amounts ($1/$2/$5/$10/$25/Custom) inline on song page without needing a modal first
+- [x] Wire Tip-to-Download gate: fan clicks Download on a gated track → Stripe checkout → on success, serve download URL
+- [x] Creator sets minimum tip amount for gated downloads in Archive (already has Free/Tip-to-Download/No Downloads toggle)
+- [x] Add tip_download webhook handling to record tip and unlock download

@@ -148,6 +148,12 @@ export default function SongDetailPage() {
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });
+  const tipDownloadMutation = trpc.tips.createTipDownloadCheckout.useMutation({
+    onSuccess: (d: { url: string | null }) => {
+      if (d.url) { window.open(d.url, "_blank"); toast.info("Redirecting to checkout — download unlocks after payment..."); }
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
   const commentMutation = trpc.comments.add.useMutation({
     onSuccess: () => { setCommentText(""); refetchComments(); toast.success("Comment posted!"); },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -170,6 +176,14 @@ export default function SongDetailPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("tip") === "success") {
       toast.success("🙏 Your tip was sent! The creator receives 90% directly.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    if (params.get("download") === "unlocked") {
+      toast.success("✅ Payment received! Your download is now unlocked.");
+      // Trigger the download automatically after a short delay
+      setTimeout(() => {
+        if (songId) downloadMutation.mutate({ songId });
+      }, 1500);
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
@@ -394,12 +408,6 @@ export default function SongDetailPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {tipsEnabled && !isOwner && (
-                    <Button size="sm" onClick={() => setTipOpen(true)}
-                      style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
-                      <DollarSign className="w-3.5 h-3.5 mr-1" />Tip Artist
-                    </Button>
-                  )}
                   {!isOwner && (
                     <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
                        style={isLiked
@@ -428,11 +436,12 @@ export default function SongDetailPage() {
                       </Button>
                     );
                     if (dlPerm === "tipped") return (
-                      <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
-                        disabled={downloadMutation.isPending}
+                      <Button size="sm" variant="outline"
+                        onClick={() => tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin })}
+                        disabled={tipDownloadMutation.isPending}
                         title={`Tip $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`}
                         style={{ borderColor: "oklch(0.75 0.18 85 / 0.4)", color: "oklch(0.84 0.155 85)" }}>
-                        <Download className="w-3.5 h-3.5 mr-1" />{downloadMutation.isPending ? "Checking…" : `Download ($${((tipCents ?? 179) / 100).toFixed(2)} tip)`}
+                        <Download className="w-3.5 h-3.5 mr-1" />{tipDownloadMutation.isPending ? "Processing…" : `Download ($${((tipCents ?? 179) / 100).toFixed(2)} tip)`}
                       </Button>
                     );
                     return null;
@@ -467,6 +476,39 @@ export default function SongDetailPage() {
                   <p className="text-xs mt-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
                     {isThisTrackActive ? "Controls in the player bar below" : "One audio source. One witness."}
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── PROMINENT TIP PANEL ── */}
+            {tipsEnabled && !isOwner && (
+              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, oklch(0.13 0.04 60 / 0.6), oklch(0.11 0.02 280))", border: "1px solid oklch(0.84 0.155 85 / 0.35)" }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <DollarSign className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
+                  <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>
+                    Tip {creator?.artistHandle || creator?.name}
+                  </p>
+                  <span className="text-xs ml-auto" style={{ color: "oklch(0.55 0.04 280)" }}>90% goes directly to the artist</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {["1", "2", "5", "10", "25"].map(amt => (
+                    <button
+                      key={amt}
+                      onClick={() => { setTipAmount(amt); tipMutation.mutate({ songId: song.id, amountCents: Math.round(parseFloat(amt) * 100), origin: window.location.origin }); }}
+                      disabled={tipMutation.isPending}
+                      className="px-4 py-2 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
+                      style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+                    >
+                      ${amt}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setTipOpen(true)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95"
+                    style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.75 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}
+                  >
+                    Custom
+                  </button>
                 </div>
               </div>
             )}

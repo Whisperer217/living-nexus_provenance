@@ -70,6 +70,17 @@ export async function handleStripeWebhook(req: any, res: any) {
             stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
           });
         }
+        // Tip-to-Download: record as a tip so getUserTipTotalForSong unlocks the download
+        if (meta.type === "tip_download" && meta.songId) {
+          const amountCents = session.amount_total ?? 0;
+          const tipperUserId = meta.userId ? parseInt(meta.userId) : undefined;
+          await recordTip({
+            songId: parseInt(meta.songId),
+            tipperUserId,
+            amountCents,
+            stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          });
+        }
         // Jukebox tip: auto-queue song when payment completes (webhook path)
         if (meta.type === "jukebox_tip" && meta.roomCode && meta.songId && meta.tipperId) {
           const amountCents = session.amount_total ?? 100;
@@ -348,6 +359,16 @@ export const appRouter = router({
     download: publicProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);
       if (!song?.fileUrl) throw new Error("Song file not found");
+      const perm = (song as any).downloadPermission as string | undefined;
+      // Enforce permission gate
+      if (!perm || perm === "none") throw new TRPCError({ code: "FORBIDDEN", message: "Downloads are not enabled for this track." });
+      if (perm === "tipped") {
+        // Must have tipped at least the threshold amount
+        if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sign in to download this track." });
+        const thresholdCents = (song as any).downloadTipThresholdCents ?? 179;
+        const userTipTotal = await getUserTipTotalForSong(ctx.user.id, input.songId);
+        if (userTipTotal < thresholdCents) throw new TRPCError({ code: "FORBIDDEN", message: `Tip $${(thresholdCents / 100).toFixed(2)} to unlock this download.` });
+      }
       await recordDownload({ songId: input.songId, userId: ctx.user?.id });
       return { url: song.fileUrl };
     }),
@@ -581,6 +602,25 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         createdAt: r.createdAt,
       }));
     }),
+    /** Tip-to-Download: create a Stripe checkout that, on success, unlocks the download */
+    createTipDownloadCheckout: publicProcedure.input(z.object({ songId: z.number(), origin: z.string().url() })).mutation(async ({ ctx, input }) => {
+      const songData = await getSongWithCreator(input.songId);
+      if (!songData) throw new Error("Song not found");
+      const { song, creator } = songData;
+      if (!creator?.stripeAccountId) throw new Error("This creator has not enabled tips yet. Ask them to connect Stripe in their Dashboard.");
+      const thresholdCents = (song as any).downloadTipThresholdCents ?? 179;
+      const feeAmount = Math.round(thresholdCents * PLATFORM_FEE_PERCENT / 100);
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment", payment_method_types: ["card"],
+        line_items: [{ price_data: { currency: "usd", product_data: { name: `Download: "${song.title}"`, description: `Tip-to-download — supporting ${creator.artistHandle || creator.name || "this creator"} on Living Nexus` }, unit_amount: thresholdCents }, quantity: 1 }],
+        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId }, metadata: { type: "tip_download", songId: input.songId.toString(), userId: ctx.user?.id?.toString() || "" } },
+        success_url: `${input.origin}/song/${input.songId}?download=unlocked`,
+        cancel_url: `${input.origin}/song/${input.songId}`,
+        allow_promotion_codes: false,
+      });
+      return { url: session.url };
+    }),
+
     createTipCheckout: publicProcedure.input(z.object({ songId: z.number(), amountCents: z.number().min(100).max(50000), origin: z.string().url() })).mutation(async ({ ctx, input }) => {
       const songData = await getSongWithCreator(input.songId);
       if (!songData) throw new Error("Song not found");
