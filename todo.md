@@ -778,3 +778,12 @@
 - [x] Sanctuary tab shows all live public songs from every creator on the platform
 - [x] My List tab shows user's personal playlist songs in jukebox flipper
 - [x] Keyboard nav: left/right arrow keys flip through cards
+
+## Phase 84: Cover Art Image Sizing Fix
+- [x] Fix jukebox card — replace aspect-square with fixed 220px height so portrait images don't overflow
+- [x] Fix TrackCard artwork — replace aspect-square with fixed 180px height
+- [x] Fix DiscoverPage song grid — replace aspect-square with fixed 180px height
+- [x] Fix ExplorePage song grid — replace aspect-square with fixed 180px height (skeleton + live cards)
+- [x] Fix CreatorProfilePage FeaturedCard — replace aspectRatio 1/1 with fixed 180px height
+- [x] Fix MobilePlayerPanel cover art — replace aspect-square with fixed 280px height
+- [x] All containers use object-cover so any image (portrait/landscape/square) fills cleanly without distortion

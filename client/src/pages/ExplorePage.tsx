@@ -152,7 +152,7 @@ export default function ExplorePage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="rounded-xl overflow-hidden border border-white/[0.06] bg-[oklch(0.14_0.013_280)] animate-pulse">
-                <div className="aspect-square bg-white/[0.04]" />
+                <div className="bg-white/[0.04]" style={{ height: "180px" }} />
                 <div className="p-3 space-y-2">
                   <div className="h-3 bg-white/[0.06] rounded w-3/4" />
                   <div className="h-2.5 bg-white/[0.04] rounded w-1/2" />
@@ -181,7 +181,7 @@ export default function ExplorePage() {
                   onClick={() => handlePlay(item)}
                 >
                   {/* Artwork */}
-                  <div className="aspect-square relative overflow-hidden" style={{ background: "oklch(0.15 0.05 275)" }}>
+                  <div className="relative overflow-hidden" style={{ height: "180px", background: "oklch(0.15 0.05 275)" }}>
                     {song.coverArtUrl ? (
                       <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
                     ) : (

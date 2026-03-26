@@ -90,7 +90,7 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
     <Link href={`/song/${song.id}`}>
       <div
         className="relative rounded-xl overflow-hidden cursor-pointer group"
-        style={{ aspectRatio: "1/1", background: "oklch(0.14 0.015 280)" }}
+        style={{ height: "180px", background: "oklch(0.14 0.015 280)" }}
       >
         {song.coverArtUrl ? (
           <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />

@@ -401,8 +401,9 @@ export default function MobilePlayerPanel() {
           <div className="px-5 pb-3">
             <div
               key={currentTrack?.id || "empty"}
-              className="w-full aspect-square rounded-xl overflow-hidden relative flex items-center justify-center"
+              className="w-full rounded-xl overflow-hidden relative flex items-center justify-center"
               style={{
+                height: "280px",
                 background: currentTrack?.bg || "oklch(0.15 0.05 275)",
                 animation: "panelArtFadeIn 0.4s ease",
               }}

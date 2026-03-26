@@ -441,8 +441,7 @@ function SongBrowserModal({
                           onClick={() => toggleSelect(currentCard.id)}
                         >
                           {/* Cover art */}
-                          <div className="relative aspect-square w-full overflow-hidden"
-                            style={{ background: "oklch(0.10 0.04 270)" }}>
+                          <div className="relative w-full overflow-hidden" style={{ height: "220px", background: "oklch(0.10 0.04 270)" }}>
                             {currentCard.coverArtUrl
                               ? <img src={currentCard.coverArtUrl} alt="" className="w-full h-full object-cover" />
                               : (
