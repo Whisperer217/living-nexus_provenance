@@ -793,3 +793,27 @@
 - [x] Add z-10 relative to jukebox nav arrows so they always sit above the card
 - [x] Add min-w-0 to card wrapper to prevent flex overflow into arrow space
 - [x] Applied object-top across 12 files: TogetherPage, TrackCard, DiscoverPage, ExplorePage, CreatorProfilePage, SongDetailPage, ArchivePage, PlaylistPage, DashboardPage, LikedPage, HomePage, MobilePlayerPanel
+
+## Phase 86: Sovereign Identity Command Center
+- [ ] Rebuild sidebar nav groups: DISCOVER / MY COMMAND / SYSTEM / ACCOUNT
+- [ ] Add identity header to sidebar: avatar + name + WID status badge + verified indicator
+- [ ] Rename "Archive" → "LNA (Living Nexus Archive)" in nav
+- [ ] Add "Witness Records" nav item under MY COMMAND
+- [ ] Add "Field Notes" nav item + route under MY COMMAND
+- [ ] Rebuild mobile menu with identity header at top (avatar + name + WID)
+- [ ] Add Field Notes schema (fieldNotes table), db helper, and tRPC procedures
+- [ ] Build FieldNotesPage with create/edit/view entries (blog/doctrine posts)
+- [ ] Upgrade profile page: add activity feed, snapshot stats (total works, verified records, last activity)
+- [ ] Add featured works pin (1-3 items) to profile page
+
+## Phase 86: Sovereign Identity Command Center
+- [x] Rebuilt sidebar as identity-first command center with grouped sections (DISCOVER / MY COMMAND / SYSTEM / ACCOUNT)
+- [x] Identity header with avatar, WID/license status badge at top of sidebar
+- [x] Added Activity tab to ProfilePage with provenance event feed (TIP, LIKE, WID events, etc.)
+- [x] Added snapshot stats (Total Works, Published, Witnessed, License Status) to profile
+- [x] Added Field Notes section (doctrine/blog posts) with schema migration (field_notes table)
+- [x] Added /field-notes route and sidebar link under MY COMMAND
+- [x] Field Notes supports 4 categories: Doctrine, Journal, Update, Concept
+- [x] Public/Private toggle per note — public notes visible to all
+- [x] Optional video embed (YouTube) and cover image per note
+- [x] Category filter bar on Field Notes page

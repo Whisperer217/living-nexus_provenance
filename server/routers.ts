@@ -24,6 +24,9 @@ import {
   getUserTipTotalForSong, updateSongDownloadPermission,
   getAllUsersWithStats, markWelcomeSeen,
   createEvent, getEventsByWork, getEventsForCreator,
+  getCreatorForOg,
+  createFieldNote, getFieldNotesByUser, getPublicFieldNotes,
+  updateFieldNote, deleteFieldNote,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -203,6 +206,23 @@ export const appRouter = router({
       const publicSongs = songs.filter((s: any) => s.isPublic);
       return { creator, songs: publicSongs };
     }),
+    myStats: protectedProcedure.query(async ({ ctx }) => {
+      const [stats, songs, user] = await Promise.all([
+        getCreatorForOg(ctx.user.id),
+        getSongsByUser(ctx.user.id),
+        getUserById(ctx.user.id),
+      ]);
+      return {
+        totalWorks: songs.length,
+        publishedWorks: songs.filter((s: any) => s.status === 'Published').length,
+        witnessedWorks: stats?.widCount ?? 0,
+        licenseStatus: user?.licenseStatus ?? 'free',
+        memberSince: user?.createdAt ?? new Date(),
+      };
+    }),
+    myActivity: protectedProcedure
+      .input(z.object({ limit: z.number().max(50).default(20) }))
+      .query(async ({ ctx, input }) => getEventsForCreator(ctx.user.id, input.limit)),
   }),
 
   songs: router({
@@ -927,6 +947,45 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         throw new TRPCError({ code: "FORBIDDEN", message: "Owner access only" });
       }
       return getAllUsersWithStats();
+    }),
+  }),
+
+  // ── Field Notes ────────────────────────────────────────────────────────────
+  fieldNotes: router({
+    /** Get all field notes for the current user */
+    mine: protectedProcedure.query(async ({ ctx }) => getFieldNotesByUser(ctx.user.id)),
+    /** Get all public field notes (for the public Field Notes page) */
+    public: publicProcedure.input(z.object({ limit: z.number().max(100).default(50) })).query(async ({ input }) => getPublicFieldNotes(input.limit)),
+    /** Create a new field note */
+    create: protectedProcedure.input(z.object({
+      title: z.string().min(1).max(256),
+      body: z.string().min(1),
+      category: z.enum(["doctrine", "journal", "update", "concept"]).default("journal"),
+      isPublic: z.boolean().default(false),
+      videoUrl: z.string().url().optional().or(z.literal("")),
+      coverImageUrl: z.string().url().optional().or(z.literal("")),
+    })).mutation(async ({ ctx, input }) => {
+      const id = await createFieldNote({ ...input, userId: ctx.user.id, videoUrl: input.videoUrl || undefined, coverImageUrl: input.coverImageUrl || undefined });
+      return { id };
+    }),
+    /** Update an existing field note (owner only) */
+    update: protectedProcedure.input(z.object({
+      id: z.number().int().positive(),
+      title: z.string().min(1).max(256).optional(),
+      body: z.string().min(1).optional(),
+      category: z.enum(["doctrine", "journal", "update", "concept"]).optional(),
+      isPublic: z.boolean().optional(),
+      videoUrl: z.string().url().optional().or(z.literal("")),
+      coverImageUrl: z.string().url().optional().or(z.literal("")),
+    })).mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await updateFieldNote(id, ctx.user.id, { ...data, videoUrl: data.videoUrl || null, coverImageUrl: data.coverImageUrl || null });
+      return { ok: true };
+    }),
+    /** Soft-delete a field note (owner only) */
+    delete: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      await deleteFieldNote(input.id, ctx.user.id);
+      return { ok: true };
     }),
   }),
 

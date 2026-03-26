@@ -929,3 +929,76 @@ export async function markWelcomeSeen(userId: number): Promise<void> {
     .set({ hasSeenWelcome: true, updatedAt: new Date() })
     .where(eq(users.id, userId));
 }
+
+// ─── Field Notes ──────────────────────────────────────────────────────────────
+export async function createFieldNote(data: {
+  userId: number;
+  title: string;
+  body: string;
+  category: "doctrine" | "journal" | "update" | "concept";
+  isPublic: boolean;
+  videoUrl?: string;
+  coverImageUrl?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { fieldNotes } = await import("../drizzle/schema");
+  const [result] = await (db as any).insert(fieldNotes).values({
+    ...data,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  return (result as any).insertId as number;
+}
+
+export async function getFieldNotesByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { fieldNotes } = await import("../drizzle/schema");
+  const { isNull } = await import("drizzle-orm");
+  return (db as any)
+    .select()
+    .from(fieldNotes)
+    .where(and(eq(fieldNotes.userId, userId), isNull(fieldNotes.deletedAt)))
+    .orderBy(desc(fieldNotes.createdAt));
+}
+
+export async function getPublicFieldNotes(limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  const { fieldNotes } = await import("../drizzle/schema");
+  const { isNull } = await import("drizzle-orm");
+  return (db as any)
+    .select()
+    .from(fieldNotes)
+    .where(and(eq(fieldNotes.isPublic, true), isNull(fieldNotes.deletedAt)))
+    .orderBy(desc(fieldNotes.createdAt))
+    .limit(limit);
+}
+
+export async function updateFieldNote(id: number, userId: number, data: {
+  title?: string;
+  body?: string;
+  category?: "doctrine" | "journal" | "update" | "concept";
+  isPublic?: boolean;
+  videoUrl?: string | null;
+  coverImageUrl?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { fieldNotes } = await import("../drizzle/schema");
+  await (db as any)
+    .update(fieldNotes)
+    .set({ ...data, updatedAt: new Date() })
+    .where(and(eq(fieldNotes.id, id), eq(fieldNotes.userId, userId)));
+}
+
+export async function deleteFieldNote(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { fieldNotes } = await import("../drizzle/schema");
+  await (db as any)
+    .update(fieldNotes)
+    .set({ deletedAt: new Date() })
+    .where(and(eq(fieldNotes.id, id), eq(fieldNotes.userId, userId)));
+}

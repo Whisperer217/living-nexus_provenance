@@ -32,6 +32,7 @@ const PlaylistPage = lazy(() => import("./pages/PlaylistPage"));
 const ManifestoPage = lazy(() => import("./pages/ManifestoPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
 const PricingCovenantPage = lazy(() => import("./pages/PricingCovenantPage"));
+const FieldNotesPage = lazy(() => import("./pages/FieldNotesPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -76,6 +77,7 @@ function Router() {
                 <Route path="/manifesto" component={ManifestoPage} />
                 <Route path="/admin/users" component={AdminUsersPage} />
                 <Route path="/pricing" component={PricingCovenantPage} />
+                <Route path="/field-notes" component={FieldNotesPage} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>

@@ -13,6 +13,7 @@ import {
   MapPin, Globe, Twitter, Instagram, Youtube, Share2,
   Play, ExternalLink, Copy, TrendingUp, Loader2,
   CheckCircle, AlertCircle, Zap, LogOut,
+  Fingerprint, ScrollText, Activity, Upload, Star, Layers,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -105,7 +106,11 @@ export default function ProfilePage() {
     enabled: !!user,
   });
 
-  const [activeTab, setActiveTab] = useState<"tracks" | "stats" | "payments">("tracks");
+  const [activeTab, setActiveTab] = useState<"tracks" | "stats" | "activity" | "payments">("tracks");
+
+  // ── Identity data ────────────────────────────────────────────────
+  const { data: myStats } = trpc.profile.myStats.useQuery(undefined, { enabled: !!user });
+  const { data: myActivity = [] } = trpc.profile.myActivity.useQuery({ limit: 20 }, { enabled: !!user && activeTab === "activity" });
 
   // ── Stripe Connect ───────────────────────────────────────────────
   const { data: connectData, refetch: refetchConnect } = trpc.tips.connectStatus.useQuery(
@@ -421,9 +426,43 @@ export default function ProfilePage() {
           })}
         </div>
 
+        {/* ── Sovereign Identity Card ── */}
+        <div className="mb-5 p-4 rounded-2xl border" style={{ background: "oklch(0.11 0.04 270 / 70%)", borderColor: "oklch(0.28 0.04 270 / 50%)" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Fingerprint size={13} style={{ color: "#D4AF37" }} />
+            <span className="text-[10px] font-heading tracking-[0.16em] uppercase" style={{ color: "#D4AF37" }}>Sovereign Identity</span>
+            {myStats?.licenseStatus === "licensed" && (
+              <span className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.145 82 / 0.15)", color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.35)" }}>LICENSED</span>
+            )}
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { label: "Total Works", value: myStats?.totalWorks ?? dbSongs.length, icon: Layers, color: "#A78BFA" },
+              { label: "Published", value: myStats?.publishedWorks ?? dbSongs.filter((s: any) => s.status === "Published").length, icon: Upload, color: "#4ade80" },
+              { label: "Witnessed", value: myStats?.witnessedWorks ?? 0, icon: ScrollText, color: "#D4AF37" },
+              { label: "Plays", value: totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays, icon: TrendingUp, color: "#fb923c" },
+            ].map(s => {
+              const Icon = s.icon;
+              return (
+                <div key={s.label} className="flex flex-col items-center gap-1 p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05]">
+                  <Icon size={12} style={{ color: s.color }} />
+                  <span className="text-[14px] font-heading" style={{ color: s.color }}>{s.value}</span>
+                  <span className="text-[9px] font-body text-white/40 text-center leading-tight">{s.label}</span>
+                </div>
+              );
+            })}
+          </div>
+          {myStats?.memberSince && (
+            <div className="mt-3 pt-3 border-t border-white/[0.05] flex items-center gap-1.5">
+              <Star size={9} className="text-white/25" />
+              <span className="text-[10px] font-body text-white/25">Member since {new Date(myStats.memberSince).toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+            </div>
+          )}
+        </div>
+
         {/* ── Tabs ── */}
         <div className="flex gap-1 mb-5 border-b border-white/[0.07]">
-          {(["tracks","stats","payments"] as const).map(tab => (
+          {(["tracks","activity","stats","payments"] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -507,6 +546,67 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        )}
+
+        {/* ── Activity tab ── */}
+        {activeTab === "activity" && (
+          <div className="space-y-2">
+            {myActivity.length === 0 ? (
+              <div className="text-center py-12">
+                <Activity size={28} className="mx-auto mb-3 text-white/15" />
+                <p className="text-white/40 font-body text-[13px]">No activity yet</p>
+                <p className="text-white/25 font-body text-[11px] mt-1">Upload a track or register a WID to start your provenance record</p>
+              </div>
+            ) : (
+              (myActivity as any[]).map((evt) => {
+                const iconMap: Record<string, { icon: any; color: string; label: string }> = {
+                  TIP: { icon: DollarSign, color: "#4ade80", label: "Tip received" },
+                  COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Comment" },
+                  LIKE: { icon: Heart, color: "#f472b6", label: "Like" },
+                  WITNESS_REGISTERED: { icon: Fingerprint, color: "#D4AF37", label: "WID Registered" },
+                  WITNESS_VERIFIED: { icon: CheckCircle, color: "#D4AF37", label: "WID Verified" },
+                  WORK_REFERENCED: { icon: Layers, color: "#fb923c", label: "Work Referenced" },
+                  SYSTEM_UPDATE: { icon: Zap, color: "#60a5fa", label: "System Update" },
+                  PRESERVATION_MODE: { icon: Star, color: "#D4AF37", label: "Preservation Mode" },
+                };
+                const meta = iconMap[evt.type] ?? { icon: Activity, color: "#A78BFA", label: evt.type };
+                const Icon = meta.icon;
+                return (
+                  <div key={evt.id} className="flex items-start gap-3 p-3 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04] transition-all">
+                    <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: `${meta.color}15`, border: `1px solid ${meta.color}30` }}>
+                      <Icon size={13} style={{ color: meta.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[12px] font-body text-white/75">{meta.label}</span>
+                        {evt.songTitle && (
+                          <span className="text-[11px] font-body text-white/40 truncate">— {evt.songTitle}</span>
+                        )}
+                      </div>
+                      {evt.actorName && (
+                        <span className="text-[11px] font-body text-white/35">by {evt.actorName}</span>
+                      )}
+                      {evt.payload?.amountCents && (
+                        <span className="text-[11px] font-body" style={{ color: "#4ade80" }}>
+                          {" "}${((evt.payload.amountCents as number) / 100).toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      {evt.songCoverArtUrl && (
+                        <div className="w-8 h-8 rounded-lg overflow-hidden mb-1">
+                          <img src={evt.songCoverArtUrl} alt="" className="w-full h-full object-cover object-top" />
+                        </div>
+                      )}
+                      <span className="text-[10px] font-body text-white/25">
+                        {new Date(evt.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         )}

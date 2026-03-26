@@ -291,4 +291,24 @@ export const events = mysqlTable("events", {
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = typeof events.$inferInsert;
 
-
+// ─── Field Notes (Doctrine / Creator Log) ─────────────────────────────────────
+export const fieldNotes = mysqlTable("field_notes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 256 }).notNull(),
+  body: text("body").notNull(),
+  category: mysqlEnum("category", [
+    "doctrine",
+    "journal",
+    "update",
+    "concept",
+  ]).default("journal").notNull(),
+  isPublic: boolean("isPublic").default(false).notNull(),
+  videoUrl: varchar("videoUrl", { length: 1024 }),
+  coverImageUrl: varchar("coverImageUrl", { length: 1024 }),
+  deletedAt: timestamp("deletedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type FieldNote = typeof fieldNotes.$inferSelect;
+export type InsertFieldNote = typeof fieldNotes.$inferInsert;
