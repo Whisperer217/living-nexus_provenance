@@ -737,3 +737,7 @@
 - [x] Lazy load all route-level page components in App.tsx (React.lazy + Suspense)
 - [x] Add staleTime (30s) and gcTime (5min) to QueryClient to reduce redundant refetches
 - [x] Smart retry logic: skip retries on 4xx errors, retry up to 2x on network errors
+
+## Phase 78: Fix Tip-to-Download + Ticker Bugs
+- [x] Fix: song file does not download after Stripe tip-to-download checkout completes
+- [x] Fix: tip ticker banner ("Be the first to tip") does not update after a tip payment
