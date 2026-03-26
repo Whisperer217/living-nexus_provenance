@@ -120,11 +120,11 @@ export default function PlayerBar() {
 
   return (
     <div
-      className="z-50 transition-all duration-500 ease-in-out"
+      className="z-50 transition-all duration-500 ease-in-out hidden md:block"
       style={{
         position: "fixed",
         bottom: 0,
-        left: 0,
+        left: "164px",
         right: 0,
         height: isExpanded ? "256px" : "68px",
         background: "oklch(0.115 0.05 268)",

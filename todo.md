@@ -697,3 +697,8 @@
 ## Phase 70: QuickRef Panel Layout Fix
 - [x] Fix recent tracks feed bottom spacing so Log Out button is always visible and not obscured
 - [x] Checkpoint
+
+## Phase 72: PlayerBar Sidebar Offset Fix
+- [x] Fix PlayerBar left offset to 164px (sidebar width) so it does not cover Log Out button
+- [x] Visual editor inline styles were not persisted to file — no cleanup needed
+- [x] TypeScript clean (0 errors), checkpoint
