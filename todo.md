@@ -702,3 +702,7 @@
 - [x] Fix PlayerBar left offset to 164px (sidebar width) so it does not cover Log Out button
 - [x] Visual editor inline styles were not persisted to file — no cleanup needed
 - [x] TypeScript clean (0 errors), checkpoint
+
+## Phase 73: Fix Stripe Connect "Enable Tips" Error
+- [x] Update stripe.accounts.create() to use controller-based account creation (new Connect API)
+- [x] Ensure connectOnboarding procedure works with live Stripe Connect enabled account

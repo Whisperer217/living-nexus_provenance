@@ -540,7 +540,21 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       if (!user) throw new Error("User not found");
       let accountId = user.stripeAccountId;
       if (!accountId) {
-        const account = await stripe.accounts.create({ type: "express", email: user.email || undefined, metadata: { userId: ctx.user.id.toString() } });
+        // Use the new controller-based account creation (works with Connect platform setup)
+        const account = await stripe.accounts.create({
+          controller: {
+            stripe_dashboard: { type: "full" },
+            fees: { payer: "application" },
+            losses: { payments: "stripe" },
+            requirement_collection: "stripe",
+          },
+          capabilities: {
+            card_payments: { requested: true },
+            transfers: { requested: true },
+          },
+          email: user.email || undefined,
+          metadata: { userId: ctx.user.id.toString() },
+        });
         accountId = account.id;
         await updateUserStripeAccount(ctx.user.id, { stripeAccountId: accountId, stripeAccountStatus: "pending" });
       }
