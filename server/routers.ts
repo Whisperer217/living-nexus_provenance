@@ -608,6 +608,14 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       if (!songData) throw new Error("Song not found");
       const { song, creator } = songData;
       if (!creator?.stripeAccountId) throw new Error("This creator has not enabled tips yet. Ask them to connect Stripe in their Dashboard.");
+      // Verify the connected account is ready to receive transfers
+      try {
+        const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+        if (!acct.charges_enabled) throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's Stripe account is still being verified. Tips will be available once their onboarding is complete." });
+      } catch (e: any) {
+        if (e instanceof TRPCError) throw e;
+        throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's payment account is not yet active. Please try again later." });
+      }
       const thresholdCents = (song as any).downloadTipThresholdCents ?? 179;
       const feeAmount = Math.round(thresholdCents * PLATFORM_FEE_PERCENT / 100);
       const session = await stripe.checkout.sessions.create({
@@ -626,6 +634,14 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       if (!songData) throw new Error("Song not found");
       const { song, creator } = songData;
       if (!creator?.stripeAccountId) throw new Error("This creator has not enabled tips yet.");
+      // Verify the connected account is ready to receive transfers
+      try {
+        const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+        if (!acct.charges_enabled) throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's Stripe account is still being verified. Tips will be available once their onboarding is complete." });
+      } catch (e: any) {
+        if (e instanceof TRPCError) throw e;
+        throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's payment account is not yet active. Please try again later." });
+      }
       const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
       const session = await stripe.checkout.sessions.create({
         mode: "payment", payment_method_types: ["card"],
