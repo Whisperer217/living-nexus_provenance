@@ -483,7 +483,7 @@ export default function ProfilePage() {
           {[
             { label: "Tracks", value: dbSongs.length, icon: Music, color: "#A78BFA" },
             { label: "Plays", value: totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays, icon: TrendingUp, color: "#D4AF37" },
-            { label: "Tips", value: `$0`, icon: DollarSign, color: "#4ade80" },
+            { label: "Gifts", value: `$0`, icon: DollarSign, color: "#4ade80" },
           ].map(s => {
             const Icon = s.icon;
             return (
@@ -633,7 +633,7 @@ export default function ProfilePage() {
             ) : (
               (myActivity as any[]).map((evt) => {
                 const iconMap: Record<string, { icon: any; color: string; label: string }> = {
-                  TIP: { icon: DollarSign, color: "#4ade80", label: "Tip received" },
+                  TIP: { icon: DollarSign, color: "#4ade80", label: "Gift received" },
                   COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Comment" },
                   LIKE: { icon: Heart, color: "#f472b6", label: "Like" },
                   WITNESS_REGISTERED: { icon: Fingerprint, color: "#D4AF37", label: "WID Registered" },
@@ -714,7 +714,7 @@ export default function ProfilePage() {
 
               <p className="text-[12px] font-body text-white/40 mb-4 leading-relaxed">
                 Connect your Stripe account to receive jukebox tips and direct fan tips.
-                You keep <strong className="text-white/70">90%</strong> of every tip — 10% goes to the platform.
+                You keep <strong className="text-white/70">90%</strong> of every gift — 10% goes to the platform.
               </p>
 
               {connectData?.status === "enabled" ? (
@@ -748,7 +748,7 @@ export default function ProfilePage() {
             {/* Fee breakdown */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Your Cut", value: "90%", sub: "of every tip", color: "#D4AF37" },
+                { label: "Your Cut", value: "90%", sub: "of every gift", color: "#D4AF37" },
                 { label: "Platform Fee", value: "10%", sub: "keeps the lights on", color: "#A78BFA" },
               ].map(s => (
                 <div key={s.label} className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">

@@ -296,7 +296,7 @@ export default function DiscoverPage() {
           {[
             { icon: Shield, title: "Witness ID Provenance", desc: "Every upload generates a cryptographic Witness ID — your sovereign proof of creation, signed and timestamped." },
             { icon: Music, title: "Creator-Owned", desc: "You own your music. Platform takes 10% on tips only. No royalty splits, no hidden fees on your catalog." },
-            { icon: Users, title: "Tip Directly", desc: "Fans tip creators directly via Stripe Connect. Funds route to your bank account with full identity verification." },
+            { icon: Users, title: "Gift Directly", desc: "Fans gift creators directly via Stripe Connect. Funds route to your bank account with full identity verification." },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="rounded-xl p-6" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
               <Icon className="w-6 h-6 mb-3" style={{ color: "oklch(0.84 0.155 85)" }} />

@@ -473,7 +473,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               {([
                 { value: "none",   label: "No Download",           desc: "Fans cannot download this track.",                         color: "#ef4444" },
                 { value: "free",   label: "Free Download",          desc: "Anyone can download at no cost.",                         color: "#22c55e" },
-                { value: "tipped", label: "Tip-Gated Download",     desc: `Unlock after tipping $${(tipThresholdCents / 100).toFixed(2)}.`, color: "#f59e0b" },
+                { value: "tipped", label: "Gift-Gated Download",     desc: `Unlock after gifting $${(tipThresholdCents / 100).toFixed(2)}.`, color: "#f59e0b" },
               ] as const).map(({ value, label, desc, color }) => (
                 <button
                   key={value}
@@ -496,7 +496,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             {/* Tip threshold input — only shown when tipped is selected */}
             {downloadPermission === "tipped" && (
               <div className="space-y-1.5 pt-1">
-                <Label className="text-xs" style={{ color: "#94a3b8" }}>Minimum tip to unlock (cents)</Label>
+                <Label className="text-xs" style={{ color: "#94a3b8" }}>Minimum gift to unlock (cents)</Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm" style={{ color: "#64748b" }}>$</span>
                   <input

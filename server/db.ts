@@ -4,7 +4,8 @@ import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {
   InsertUser, aiTransforms, comments, downloads, licenses,
-  slotPurchases, songs, tips, users, events
+  slotPurchases, songs, tips, users, events,
+  jukeboxOfferings, jukeboxPlayEvents
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1480,4 +1481,140 @@ export async function getWitnessRegistry({
     creatorName: r.creatorName,
     artistHandle: r.artistHandle,
   }));
+}
+
+// ─── Jukebox Offerings ────────────────────────────────────────────────────────
+
+export async function createJukeboxOffering(data: {
+  roomCode: string;
+  gifterId: number;
+  amountCents: number;
+  stripePaymentIntentId?: string;
+  status?: "pending" | "completed" | "failed";
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const result = await db.insert(jukeboxOfferings).values({
+    roomCode: data.roomCode,
+    gifterId: data.gifterId,
+    amountCents: data.amountCents,
+    stripePaymentIntentId: data.stripePaymentIntentId ?? null,
+    status: data.status ?? "pending",
+  });
+  return result;
+}
+
+export async function updateJukeboxOfferingStatus(
+  stripePaymentIntentId: string,
+  status: "pending" | "completed" | "failed"
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(jukeboxOfferings)
+    .set({ status })
+    .where(eq(jukeboxOfferings.stripePaymentIntentId, stripePaymentIntentId));
+}
+
+export async function getOfferingsForRoom(roomCode: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(jukeboxOfferings)
+    .where(and(eq(jukeboxOfferings.roomCode, roomCode), eq(jukeboxOfferings.status, "completed")))
+    .orderBy(desc(jukeboxOfferings.createdAt));
+}
+
+// ─── Jukebox Play Events ──────────────────────────────────────────────────────
+
+export async function recordJukeboxPlayEvent(data: {
+  roomCode: string;
+  songId: number;
+  creatorId: number;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(jukeboxPlayEvents).values({
+    roomCode: data.roomCode,
+    songId: data.songId,
+    creatorId: data.creatorId,
+  });
+}
+
+export async function getPlayEventsForRoom(roomCode: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(jukeboxPlayEvents)
+    .where(eq(jukeboxPlayEvents.roomCode, roomCode))
+    .orderBy(desc(jukeboxPlayEvents.playedAt));
+}
+
+/**
+ * Returns each creator's proportional earnings from jukebox offerings in rooms
+ * where their songs played. Earnings = (creatorPlayCount / totalPlays) * totalOfferings.
+ * Only counts completed offerings.
+ */
+export async function getJukeboxEarningsForCreator(creatorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Get all rooms where this creator's songs played
+  const playRows = await db
+    .select({
+      roomCode: jukeboxPlayEvents.roomCode,
+      songId: jukeboxPlayEvents.songId,
+    })
+    .from(jukeboxPlayEvents)
+    .where(eq(jukeboxPlayEvents.creatorId, creatorId));
+
+  if (playRows.length === 0) return [];
+
+  const roomCodes = Array.from(new Set(playRows.map((r: { roomCode: string }) => r.roomCode)));
+  const results: Array<{
+    roomCode: string;
+    creatorPlays: number;
+    totalPlays: number;
+    totalOfferingsCents: number;
+    earnedCents: number;
+  }> = [];
+
+  for (const roomCode of roomCodes) {
+    const rc = roomCode as string;
+    // Total plays in this room
+    const allPlays = await db
+      .select()
+      .from(jukeboxPlayEvents)
+      .where(eq(jukeboxPlayEvents.roomCode, rc));
+    // Creator's plays in this room
+    const creatorPlays = allPlays.filter(
+      (p: { creatorId: number }) => p.creatorId === creatorId
+    ).length;
+    // Total completed offerings in this room
+    const offerings = await db
+      .select()
+      .from(jukeboxOfferings)
+      .where(sql`${jukeboxOfferings.roomCode} = ${rc} AND ${jukeboxOfferings.status} = 'completed'`);
+    const totalOfferingsCents = offerings.reduce(
+      (sum: number, o: { amountCents: number }) => sum + o.amountCents,
+      0
+    );
+    const totalPlays = allPlays.length;
+    const earnedCents = totalPlays > 0
+      ? Math.floor((creatorPlays / totalPlays) * totalOfferingsCents)
+      : 0;
+    if (totalOfferingsCents > 0 || creatorPlays > 0) {
+      results.push({
+        roomCode: rc,
+        creatorPlays,
+        totalPlays,
+        totalOfferingsCents,
+        earnedCents,
+      });
+    }
+  }
+
+  return results.sort((a, b) => b.earnedCents - a.earnedCents);
 }

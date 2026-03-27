@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — TipModal
-   Divine tip/support modal for artists
+   LIVING NEXUS — GiftModal
+   Voluntary gift/support modal for artists
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
@@ -8,7 +8,7 @@ import { X, DollarSign } from "lucide-react";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
 
-const TIP_AMOUNTS = ["$1", "$5", "$10", "$25"];
+const GIFT_AMOUNTS = ["$1", "$5", "$10", "$25"];
 
 interface Props {
   track: Track | null;
@@ -24,10 +24,10 @@ export default function TipModal({ track, onClose }: Props) {
 
   const handleSend = () => {
     const amt = custom ? `$${parseFloat(custom).toFixed(2)}` : selected;
-    if (!amt) { toast.error("Select a tip amount"); return; }
+    if (!amt) { toast.error("Select a gift amount"); return; }
     const num = parseFloat((amt || "$0").replace("$", ""));
     addTip(num);
-    toast.success(`💸 Tip of ${amt} sent to ${track.artist}!`);
+    toast.success(`🎁 Gift of ${amt} sent to ${track.artist}!`);
     onClose();
   };
 
@@ -52,8 +52,8 @@ export default function TipModal({ track, onClose }: Props) {
           <X size={16} />
         </button>
 
-        <div className="font-heading text-xl text-white/90 mb-1 tracking-wide">Support Artist</div>
-        <div className="text-[13px] text-white/75 mb-5 font-body">Send a tip to show your appreciation</div>
+        <div className="font-heading text-xl text-white/90 mb-1 tracking-wide">Send a Gift</div>
+        <div className="text-[13px] text-white/75 mb-5 font-body">A voluntary gift to show your appreciation</div>
 
         {/* Artist info */}
         <div className="flex items-center gap-3 rounded-xl p-3 mb-5"
@@ -71,9 +71,9 @@ export default function TipModal({ track, onClose }: Props) {
           </div>
         </div>
 
-        {/* Tip amounts */}
+        {/* Gift amounts */}
         <div className="grid grid-cols-4 gap-2 mb-4">
-          {TIP_AMOUNTS.map(amt => (
+          {GIFT_AMOUNTS.map(amt => (
             <button
               key={amt}
               onClick={() => { setSelected(amt); setCustom(""); }}
@@ -108,7 +108,7 @@ export default function TipModal({ track, onClose }: Props) {
             transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(232,197,71,0.4)]"
           style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
         >
-          Send Tip
+          Send Gift
         </button>
       </div>
     </div>

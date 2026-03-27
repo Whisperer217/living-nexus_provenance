@@ -50,10 +50,10 @@ const UPDATES = [
     date: "March 2026",
     label: null,
     items: [
-      { icon: CreditCard, text: "Live Payments — Creator License ($88.88) and Fan Tips are now powered by real Stripe payments. Your money goes directly to creators." },
-      { icon: DollarSign, text: "Fan Tips — tip any creator directly from their song page. Choose $1, $2, $5, $10, $25, or a custom amount. Creators keep 90%." },
-      { icon: Download, text: "Tip-to-Download — creators can gate downloads behind a minimum tip. Pay once, download unlocks instantly." },
-      { icon: Zap, text: "Stripe Connect for Creators — go to Dashboard → Enable Tips to connect your Stripe account and start receiving tips directly to your bank." },
+      { icon: CreditCard, text: "Live Payments — Creator License ($88.88) and Fan Gifts are now powered by real Stripe payments. Your money goes directly to creators." },
+      { icon: DollarSign, text: "Fan Gifts — gift any creator directly from their song page. Choose $1, $2, $5, $10, $25, or a custom amount. Creators keep 90%." },
+      { icon: Download, text: "Gift-to-Download — creators can gate downloads behind a minimum tip. Pay once, download unlocks instantly." },
+      { icon: Zap, text: "Stripe Connect for Creators — go to Dashboard → Enable Gifts to connect your Stripe account and start receiving gifts directly to your bank." },
     ],
   },
   {
@@ -92,7 +92,7 @@ const UPDATES = [
     date: "February 2026",
     label: null,
     items: [
-      { icon: DollarSign, text: "Per-track download permissions — Free, Tip-to-Download, or No Downloads." },
+      { icon: DollarSign, text: "Per-track download permissions — Free, Gift-to-Download, or No Downloads." },
       { icon: Music, text: "Now Playing redesign — controls overlay cover art, more room for lyrics." },
       { icon: Users, text: "Listen Together rooms — play music live with fans in real time." },
     ],
@@ -116,7 +116,7 @@ const HOW_TO_STEPS = [
     step: "3",
     icon: DollarSign,
     title: "Get paid directly",
-    body: "Enable tips via Dashboard → Connect Stripe. Fans tip you directly — you keep 90%. Set download permissions per track.",
+    body: "Enable gifts via Dashboard → Connect Stripe. Fans gift you directly — you keep 90%. Set download permissions per track.",
   },
   {
     step: "4",

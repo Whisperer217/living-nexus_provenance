@@ -182,7 +182,7 @@ export default function SongDetailPage() {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("tip") === "success") {
-      toast.success("🙏 Your tip was sent! The creator receives 90% directly.");
+      toast.success("🙏 Your gift was sent! The creator receives 90% directly.");
       // Invalidate ticker so it refreshes with the new tip
       utils.tips.recentTips.invalidate();
       utils.events.getByWork.invalidate({ workId: songId });
@@ -276,7 +276,7 @@ export default function SongDetailPage() {
   const handleTip = () => {
     if (!song) return;
     const cents = Math.round(parseFloat(tipAmount) * 100);
-    if (!cents || cents < 100) { toast.error("Minimum tip is $1.00"); return; }
+    if (!cents || cents < 100) { toast.error("Minimum gift is $1.00"); return; }
     tipMutation.mutate({ songId: song.id, amountCents: cents, origin: window.location.origin });
   };
 
@@ -526,7 +526,7 @@ export default function SongDetailPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
                   <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>
-                    Tip {creator?.artistHandle || creator?.name}
+                    Gift {creator?.artistHandle || creator?.name}
                   </p>
                   <span className="text-xs ml-auto" style={{ color: "oklch(0.55 0.04 280)" }}>90% goes directly to the artist</span>
                 </div>
@@ -756,7 +756,7 @@ export default function SongDetailPage() {
                     );
                   })
                 ) : (
-                  <p className="text-xs text-center py-4" style={{ color: "oklch(0.4 0.03 280)" }}>Be the first to comment or tip</p>
+                  <p className="text-xs text-center py-4" style={{ color: "oklch(0.4 0.03 280)" }}>Be the first to comment or send a gift</p>
                 )}
               </div>
             </div>
@@ -774,12 +774,12 @@ export default function SongDetailPage() {
         </div>
       </div>
 
-      {/* Tip Modal */}
+      {/* Gift Modal */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
         <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
-              Tip {creator?.artistHandle || creator?.name}
+              Gift {creator?.artistHandle || creator?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -796,7 +796,7 @@ export default function SongDetailPage() {
               style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }} />
             <Button className="w-full" onClick={handleTip} disabled={tipMutation.isPending}
               style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
-              {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Tip`}
+              {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Gift`}
             </Button>
           </div>
         </DialogContent>

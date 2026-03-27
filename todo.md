@@ -894,3 +894,19 @@
 - [x] TogetherPage Jukebox: "Tip & Queue This Song" greyed out when currentCard.stripeAccountStatus !== 'enabled'
 - [x] TogetherPage Jukebox: multi-select Queue button blocked with message when any selected song's creator hasn't enabled tips
 - [x] All TS errors cleared (0 errors across entire codebase)
+
+## Phase 99: Gift Economy — Offerings Replace Tips
+- [x] Rename all "Tip" / "tip" language to "Gift" on song pages, creator profiles, PlayerBar, TrackPage, SongDetailPage, TipTicker
+- [x] Rename all "Tip" / "tip" language to "Offering" on TogetherPage jukebox room
+- [x] Remove all jukebox tip gating (every song is freely queueable regardless of creator Stripe status)
+- [x] Add jukeboxOfferings table to drizzle schema (id, roomCode, tipperId, amountCents, createdAt)
+- [x] Add jukeboxPlayEvents table to drizzle schema (id, roomCode, songId, creatorId, playedAt)
+- [x] Run db:push migration for new tables
+- [x] Add DB helpers: createJukeboxOffering, getOfferingsForRoom, recordPlayEvent, getPlayEventsForRoom, getJukeboxEarningsForCreator
+- [x] Add tRPC procedures: jukebox.leaveOffering (Stripe checkout, single charge), jukebox.getMyEarnings (creator dashboard)
+- [x] Add "Leave an Offering" jar UI to TogetherPage room (voluntary, non-blocking, amount selector $1/$3/$5/$10/$20)
+- [x] Add "Jukebox Earnings" tab to creator Dashboard showing proportional earnings from room offerings
+- [x] Queue panel shows "queued by [name]" with optional gift badge if gifted
+- [x] DashboardPage: Tips Received → Gifts Received, Tip Payments → Gift Payments, activity feed Tip → Gift
+- [ ] Record play events in TogetherPage when a song starts playing in a room (Phase 100)
+- [ ] Update WhatsNewModal to v2.4.0 with gift economy changes (Phase 100)

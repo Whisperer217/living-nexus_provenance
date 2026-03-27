@@ -311,9 +311,9 @@ export default function CreatorProfilePage() {
 
   const handleTip = () => {
     const cents = Math.round(parseFloat(tipAmount) * 100);
-    if (!cents || cents < 100) { toast.error("Minimum tip is $1.00"); return; }
+    if (!cents || cents < 100) { toast.error("Minimum gift is $1.00"); return; }
     const firstSong = songs[0];
-    if (!firstSong) { toast.error("No songs to tip on this profile"); return; }
+    if (!firstSong) { toast.error("No songs to gift on this profile"); return; }
     tipMutation.mutate({ songId: (firstSong as any).id, amountCents: cents, origin: window.location.origin });
   };
 
@@ -468,13 +468,13 @@ export default function CreatorProfilePage() {
                     disabled={connectMutation.isPending}
                     style={{ background: "oklch(0.65 0.18 145 / 0.2)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.4)" }}
                   >
-                    <DollarSign className="w-3.5 h-3.5 mr-1" /> Enable Tips
+                    <DollarSign className="w-3.5 h-3.5 mr-1" /> Enable Gifts
                   </Button>
                 )}
               </>
             ) : tipsEnabled && songs.length > 0 ? (
               <Button size="sm" onClick={() => setTipOpen(true)} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
-                <DollarSign className="w-3.5 h-3.5 mr-1" /> Tip Artist
+                <DollarSign className="w-3.5 h-3.5 mr-1" /> Send a Gift
               </Button>
             ) : null}
             {/* Witness button — only shown to logged-in non-owners */}
@@ -510,7 +510,7 @@ export default function CreatorProfilePage() {
           {[
             { label: "Songs", value: songs.length, icon: Music },
             { label: "Total Plays", value: totalPlays.toLocaleString(), icon: Headphones },
-            { label: "Tips Received", value: totalTips, icon: Heart },
+            { label: "Gifts Received", value: totalTips, icon: Heart },
             { label: "WID Protected", value: songs.filter((s: any) => s.witnessId).length, icon: Shield },
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="text-center">
@@ -636,7 +636,7 @@ export default function CreatorProfilePage() {
         <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
-              Tip {creator.artistHandle || creator.name}
+              Gift {creator.artistHandle || creator.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -674,7 +674,7 @@ export default function CreatorProfilePage() {
               disabled={tipMutation.isPending}
               style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
             >
-              {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Tip`}
+              {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Gift`}
             </Button>
           </div>
         </DialogContent>

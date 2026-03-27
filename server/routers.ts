@@ -36,6 +36,8 @@ import {
   createNotification, getNotifications, markNotificationRead, markAllNotificationsRead,
   archiveNotification, getUnreadNotificationCount,
   getWitnessRegistry,
+  createJukeboxOffering, updateJukeboxOfferingStatus,
+  getOfferingsForRoom, recordJukeboxPlayEvent, getJukeboxEarningsForCreator,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -877,6 +879,26 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         return { success: true };
       }),
 
+    // Free queue — add a song to the jukebox without payment
+    freeQueue: protectedProcedure
+      .input(z.object({
+        roomCode: z.string().min(1),
+        songId: z.number().int().positive(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const song = await getSongById(input.songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
+        const queuer = await getUserById(ctx.user.id);
+        const queuerName = queuer?.artistHandle || queuer?.name || "A listener";
+        await addToJukeboxQueue({
+          roomCode: input.roomCode,
+          songId: input.songId,
+          tipperId: ctx.user.id,
+          tipperName: queuerName,
+          tipAmountCents: 0,
+        });
+        return { success: true, songTitle: song.title, queuerName };
+      }),
     // Mark the current (first) item as played
     markPlayed: protectedProcedure
       .input(z.object({ itemId: z.number().int().positive() }))
@@ -891,6 +913,81 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .mutation(async ({ input }) => {
         await markJukeboxItemSkipped(input.itemId);
         return { success: true };
+      }),
+    // Leave a voluntary offering for the room — single Stripe charge, distributed proportionally to creators
+    leaveOffering: protectedProcedure
+      .input(z.object({
+        roomCode: z.string().min(1),
+        amountCents: z.number().int().min(100), // $1 minimum
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const gifter = await getUserById(ctx.user.id);
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card"],
+          customer_email: gifter?.email || undefined,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: `Jukebox Offering — Room ${input.roomCode}`,
+                description: `A voluntary offering for the creators playing in room ${input.roomCode}. Distributed proportionally by play count.`,
+              },
+              unit_amount: input.amountCents,
+            },
+            quantity: 1,
+          }],
+          payment_intent_data: {
+            metadata: {
+              type: "jukebox_offering",
+              roomCode: input.roomCode,
+              gifterId: ctx.user.id.toString(),
+              gifterName: gifter?.artistHandle || gifter?.name || "A listener",
+            },
+          },
+          client_reference_id: ctx.user.id.toString(),
+          metadata: {
+            type: "jukebox_offering",
+            roomCode: input.roomCode,
+            gifterId: ctx.user.id.toString(),
+          },
+          allow_promotion_codes: true,
+          success_url: `${input.origin}/together?room=${input.roomCode}&offering=success&amountCents=${input.amountCents}`,
+          cancel_url: `${input.origin}/together?room=${input.roomCode}`,
+        });
+        // Pre-create offering record as pending
+        await createJukeboxOffering({
+          roomCode: input.roomCode,
+          gifterId: ctx.user.id,
+          amountCents: input.amountCents,
+          status: "pending",
+        });
+        return { url: session.url, sessionId: session.id };
+      }),
+    // Record a play event when a song starts playing in a room
+    recordPlay: protectedProcedure
+      .input(z.object({
+        roomCode: z.string().min(1),
+        songId: z.number().int().positive(),
+        creatorId: z.number().int().positive(),
+      }))
+      .mutation(async ({ input }) => {
+        await recordJukeboxPlayEvent(input);
+        return { success: true };
+      }),
+    // Get offerings and earnings for a room
+    getRoomOfferings: publicProcedure
+      .input(z.object({ roomCode: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const offerings = await getOfferingsForRoom(input.roomCode);
+        const totalCents = offerings.reduce((sum: number, o: any) => sum + o.amountCents, 0);
+        return { offerings, totalCents };
+      }),
+    // Get jukebox earnings for the logged-in creator (dashboard)
+    getMyEarnings: protectedProcedure
+      .query(async ({ ctx }) => {
+        return getJukeboxEarningsForCreator(ctx.user.id);
       }),
   }),
 

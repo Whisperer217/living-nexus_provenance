@@ -8,10 +8,10 @@ import { toast } from "sonner";
 import {
   Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
-  XCircle, Download, Play, Activity, MessageCircle, Zap
+  XCircle, Download, Play, Activity, MessageCircle, Zap, Gift
 } from "lucide-react";
 
-type Tab = "songs" | "transforms" | "activity";
+type Tab = "songs" | "transforms" | "activity" | "earnings";
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
@@ -26,6 +26,10 @@ export default function DashboardPage() {
   );
   const { data: licenseData } = trpc.licenses.myStatus.useQuery(undefined, { enabled: isAuthenticated });
   const { data: connectData } = trpc.tips.connectStatus.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: earningsData, isLoading: earningsLoading } = trpc.jukebox.getMyEarnings.useQuery(
+    undefined,
+    { enabled: isAuthenticated && activeTab === "earnings" }
+  );
 
   const deleteMutation = trpc.songs.delete.useMutation({
     onSuccess: () => { toast.success("Song deleted"); refetchSongs(); setDeletingId(null); },
@@ -119,7 +123,7 @@ export default function DashboardPage() {
             { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "oklch(0.84 0.155 85)" },
             { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "oklch(0.65 0.2 300)" },
             { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "oklch(0.65 0.18 145)" },
-            { label: "Tips Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: DollarSign, color: "oklch(0.65 0.18 45)" },
+            { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "oklch(0.55 0.18 160)" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="rounded-xl p-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
               <div className="flex items-center gap-2 mb-2">
@@ -178,17 +182,17 @@ export default function DashboardPage() {
           <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="w-4 h-4" style={{ color: "oklch(0.65 0.18 45)" }} />
-              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Tip Payments</h3>
+              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Gift Payments</h3>
             </div>
             {tipsEnabled ? (
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
-                <span className="text-sm" style={{ color: "oklch(0.65 0.18 145)" }}>Tips Enabled — 90% to you</span>
+                <span className="text-sm" style={{ color: "oklch(0.65 0.18 145)" }}>Gifts Enabled — 90% to you</span>
               </div>
             ) : (
               <>
                 <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>
-                  {connectData?.status === "pending" ? "Stripe verification in progress. Complete your account setup." : "Enable tips to receive direct payments from fans. 90% goes to you, 10% to the platform."}
+                  {connectData?.status === "pending" ? "Stripe verification in progress. Complete your account setup." : "Enable gifts to receive direct payments from fans. 90% goes to you, 10% to the platform."}
                 </p>
                 {connectData?.status === "pending" && (
                   <div className="flex items-center gap-1 mb-2">
@@ -197,7 +201,7 @@ export default function DashboardPage() {
                   </div>
                 )}
                 <Button size="sm" className="w-full" variant="outline" onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })} disabled={connectMutation.isPending} style={{ borderColor: "oklch(0.65 0.18 145 / 0.5)", color: "oklch(0.65 0.18 145)" }}>
-                  {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Continue Setup" : "Enable Tips"}
+                  {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Continue Setup" : "Enable Gifts"}
                 </Button>
               </>
             )}
@@ -244,6 +248,18 @@ export default function DashboardPage() {
             <Activity className="w-4 h-4" />
             Activity
             {activityEvents?.length ? <span className="text-xs opacity-70">({activityEvents.length})</span> : null}
+          </button>
+          <button
+            onClick={() => setActiveTab("earnings")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "earnings" ? "oklch(0.55 0.18 160)" : "transparent",
+              color: activeTab === "earnings" ? "white" : "oklch(0.6 0.04 280)",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <Gift className="w-4 h-4" />
+            Jukebox Earnings
           </button>
         </div>
 
@@ -354,7 +370,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Activity Feed</h2>
-                <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>All interactions on your songs — tips, comments, and witnesses. Auto-refreshes every 30s.</p>
+                <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>All interactions on your songs — gifts, comments, and witnesses. Auto-refreshes every 30s.</p>
               </div>
             </div>
             {activityLoading ? (
@@ -365,7 +381,7 @@ export default function DashboardPage() {
               <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No activity yet.</p>
-                <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Tips, comments, and witnesses on your songs will appear here.</p>
+                <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Gifts, comments, and witnesses on your songs will appear here.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -396,7 +412,7 @@ export default function DashboardPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs font-semibold" style={{ color: accentColor }}>
-                            {isTip ? `$${((payload.amount ?? 0) / 100).toFixed(2)} Tip` :
+                            {isTip ? `$${((payload.amount ?? 0) / 100).toFixed(2)} Gift` :
                              isComment ? "Comment" : evt.type.replace(/_/g, " ")}
                           </span>
                           {evt.actorName && (
@@ -528,6 +544,72 @@ export default function DashboardPage() {
             )}
           </div>
         )}
+        {/* Jukebox Earnings Tab */}
+        {activeTab === "earnings" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Jukebox Earnings</h2>
+                <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>Your proportional share from offerings left in jukebox rooms where your songs played.</p>
+              </div>
+            </div>
+            {earningsLoading ? (
+              <div className="text-center py-16">
+                <div className="w-8 h-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mx-auto" />
+              </div>
+            ) : !earningsData?.length ? (
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+                <Gift className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.55 0.18 160)" }} />
+                <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No jukebox earnings yet.</p>
+                <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>When fans leave offerings in rooms where your songs play, your share appears here.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {/* Summary */}
+                <div className="rounded-xl p-4 mb-2" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.55 0.18 160 / 0.3)" }}>
+                  <div className="flex items-center gap-3">
+                    <Gift className="w-5 h-5" style={{ color: "oklch(0.55 0.18 160)" }} />
+                    <div>
+                      <p className="text-sm font-medium" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                        Total Earned: ${((earningsData as any[]).reduce((sum: number, r: any) => sum + r.earnedCents, 0) / 100).toFixed(2)}
+                      </p>
+                      <p className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>
+                        Across {(earningsData as any[]).length} room{(earningsData as any[]).length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {/* Per-room rows */}
+                {(earningsData as any[]).map((row: any) => (
+                  <div key={row.roomCode} className="rounded-xl p-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                          Room #{row.roomCode}
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: "oklch(0.6 0.04 280)" }}>
+                          {row.creatorPlays} of {row.totalPlays} plays · ${(row.totalOfferingsCents / 100).toFixed(2)} total offerings
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-base font-bold" style={{ color: "oklch(0.55 0.18 160)", fontFamily: "'Cinzel', serif" }}>
+                          +${(row.earnedCents / 100).toFixed(2)}
+                        </p>
+                        <p className="text-[10px]" style={{ color: "oklch(0.4 0.03 280)" }}>
+                          {row.totalPlays > 0 ? Math.round((row.creatorPlays / row.totalPlays) * 100) : 0}% of room
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <p className="text-[11px] text-center mt-4" style={{ color: "oklch(0.4 0.03 280)" }}>
+                  Payouts are processed monthly. Connect Stripe to receive direct transfers.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );

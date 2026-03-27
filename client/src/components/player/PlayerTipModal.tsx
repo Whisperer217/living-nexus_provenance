@@ -31,13 +31,13 @@ export default function PlayerTipModal({
   const tipMutation = trpc.tips.createTipCheckout.useMutation({
     onSuccess: (data) => {
       if (data.url) {
-        toast.success(`Tipping ${artistName}`, { description: "Redirecting to checkout…" });
+        toast.success(`Gifting ${artistName}`, { description: "Redirecting to checkout…" });
         window.open(data.url, "_blank");
         onClose();
       }
     },
     onError: (err) => {
-        toast.error("Tip failed", { description: err.message });
+        toast.error("Gift failed", { description: err.message });
     },
   });
 
@@ -48,7 +48,7 @@ export default function PlayerTipModal({
   const handleTip = () => {
     if (!stripeAccountId) return;
     if (amountCents < 100) {
-      toast.error("Minimum tip is $1.00");
+      toast.error("Minimum gift is $1.00");
       return;
     }
     tipMutation.mutate({ songId, amountCents, origin: window.location.origin });
@@ -77,7 +77,7 @@ export default function PlayerTipModal({
               className="text-[11px] font-bold tracking-widest uppercase"
               style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}
             >
-              Tip Creator
+              Send a Gift
             </p>
             <p className="text-sm text-white/60 mt-0.5">{artistName}</p>
           </div>
@@ -90,13 +90,13 @@ export default function PlayerTipModal({
         </div>
 
         {!tipsEnabled ? (
-          /* Tips not enabled */
+          /* Gifts not enabled */
           <div
             className="rounded-xl p-4 text-center"
             style={{ background: "oklch(0.14 0.02 275)", border: "1px solid oklch(0.22 0.02 275)" }}
           >
             <DollarSign size={24} className="mx-auto mb-2 opacity-30 text-white" />
-            <p className="text-sm text-white/40">Tips not enabled yet</p>
+            <p className="text-sm text-white/40">Gifts not enabled yet</p>
             <p className="text-xs text-white/25 mt-1">
               {artistName} hasn't connected their payment account.
             </p>
@@ -155,7 +155,7 @@ export default function PlayerTipModal({
               </div>
             )}
 
-            {/* Tip button */}
+            {/* Gift button */}
             <button
               onClick={handleTip}
               disabled={tipMutation.isPending || amountCents < 100}
@@ -172,7 +172,7 @@ export default function PlayerTipModal({
               ) : (
                 <>
                   <DollarSign size={14} />
-                  Tip {artistName} {amountCents >= 100 ? `$${(amountCents / 100).toFixed(0)}` : ""}
+                  Gift {artistName} {amountCents >= 100 ? `$${(amountCents / 100).toFixed(0)}` : ""}
                 </>
               )}
             </button>

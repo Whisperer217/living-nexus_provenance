@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — TrackPage
    Divine Noir: Individual song page with unique URL, comments,
-   tip jar, sharing, and full playback controls
+   gift jar, sharing, and full playback controls
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
@@ -125,7 +125,7 @@ export default function TrackPage() {
   };
 
   const sendTip = () => {
-    if (!tipsEnabled) { toast.error("This creator hasn't enabled tips yet"); return; }
+    if (!tipsEnabled) { toast.error("This creator hasn't enabled gifts yet"); return; }
     const amt = tipSelected ?? parseFloat(customTip);
     if (!amt || amt <= 0) { toast.error("Enter a valid amount"); return; }
     addTrackTip(track.id, amt);
@@ -280,7 +280,7 @@ export default function TrackPage() {
         </button>
       </div>
 
-      {/* ── Tip Jar ── */}
+      {/* ── Gift Jar ── */}
       <div className={`rounded-2xl border p-5 mb-5 ${tipsEnabled ? "border-[#D4AF37]/20 bg-[oklch(0.11_0.012_280)]" : "border-white/[0.06] bg-[oklch(0.10_0.008_280)]"}`}>
         <div className="flex items-center gap-2 mb-2">
           <DollarSign size={15} className={tipsEnabled ? "text-[#D4AF37]" : "text-white/20"} />
@@ -333,7 +333,7 @@ export default function TrackPage() {
           </>
         ) : (
           <p className="text-[12px] text-white/30 font-body">
-            {track.artist} hasn't enabled tips yet.
+            {track.artist} hasn't enabled gifts yet.
           </p>
         )}
       </div>

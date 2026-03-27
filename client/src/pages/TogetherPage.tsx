@@ -60,7 +60,6 @@ function SongBrowserModal({
 
   // Multi-select queue
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [tipAmount, setTipAmount] = useState("1");
   const [checkoutStep, setCheckoutStep] = useState(false);
 
   // Audio preview
@@ -72,13 +71,10 @@ function SongBrowserModal({
   const { data: songs } = trpc.songs.discover.useQuery({ limit: 100 });
   const { data: playlistItems } = trpc.playlist.get.useQuery(undefined, { enabled: !!user });
 
-  const tipToQueue = trpc.jukebox.tipToQueue.useMutation({
+  const freeQueueMutation = trpc.jukebox.freeQueue.useMutation({
     onSuccess: (data) => {
-      if (data.url) {
-        toast.info("Redirecting to checkout… your song will be queued after payment 🎵");
-        window.open(data.url, "_blank");
-        onClose();
-      }
+      toast.success(`🎵 "${data.songTitle}" added to the queue!`);
+      onClose();
     },
     onError: (err) => toast.error(err.message),
   });
@@ -201,20 +197,22 @@ function SongBrowserModal({
     setCheckoutStep(true);
   };
 
-  const handleTipAndQueue = () => {
+  const handleFreeQueue = () => {
     if (!user) {
       window.location.href = getLoginUrl("/together");
       return;
     }
-    const cents = Math.round(parseFloat(tipAmount) * 100);
-    if (isNaN(cents) || cents < 100) { toast.error("Minimum tip is $1.00"); return; }
     const ids = Array.from(selectedIds);
+    if (ids.length === 0 && currentCard) {
+      // Queue current card if nothing explicitly selected
+      stopPreview();
+      freeQueueMutation.mutate({ roomCode, songId: currentCard.id });
+      return;
+    }
     if (ids.length === 0) { toast.error("Select at least one song"); return; }
-    // Queue all selected songs — one checkout per song (Stripe limitation)
-    // For multi-song we queue the first and show a note
-    const songId = ids[0];
+    // Queue first selected song (multi-song: queue them sequentially)
     stopPreview();
-    tipToQueue.mutate({ roomCode, songId, amountCents: cents, origin: window.location.origin });
+    freeQueueMutation.mutate({ roomCode, songId: ids[0] });
   };
 
   const selectedSongs = activeSongs.filter(s => selectedIds.has(s.id));
@@ -291,56 +289,24 @@ function SongBrowserModal({
               )}
             </div>
 
-            {/* Tip amount */}
-            <div className="mb-5">
-              <label className="text-[11px] font-heading tracking-[0.1em] uppercase text-white/75 mb-2 block">
-                Tip Amount (min $1.00)
-              </label>
-              {/* Quick amounts */}
-              <div className="flex gap-2 mb-3 flex-wrap">
-                {["1", "2", "5", "10"].map(amt => (
-                  <button
-                    key={amt}
-                    onClick={() => setTipAmount(amt)}
-                    className={`px-3 py-1.5 rounded-lg text-[12px] font-body transition-all border
-                      ${tipAmount === amt
-                        ? "text-black border-[#D4AF37] bg-[#D4AF37]"
-                        : "text-white/60 border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08]"}`}
-                  >
-                    ${amt}
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.1] bg-white/[0.04]">
-                <DollarSign size={14} className="text-[#D4AF37]/70" />
-                <input
-                  type="number"
-                  min="1"
-                  step="0.50"
-                  value={tipAmount}
-                  onChange={e => setTipAmount(e.target.value)}
-                  className="flex-1 bg-transparent text-[14px] font-body text-white/85 outline-none"
-                />
-              </div>
-            </div>
-
             <p className="text-[12px] text-white/50 font-body text-center mb-4">
-              Tip goes directly to the creator. Song plays for everyone in the room.
+              Songs queue freely. Everyone in the room hears them.
             </p>
 
             {!user ? (
               <a href={getLoginUrl("/together")}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all"
                 style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}>
-                Sign in to Tip &amp; Queue
+                Sign in to Queue
               </a>
             ) : (
               <button
-                onClick={handleTipAndQueue}
-                disabled={tipToQueue.isPending}
+                onClick={handleFreeQueue}
+                disabled={freeQueueMutation.isPending}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}>
-                {tipToQueue.isPending ? "Opening checkout…" : `Tip $${tipAmount} & Queue`}
+                <ListMusic size={14} />
+                {freeQueueMutation.isPending ? "Queuing…" : `Queue ${selectedIds.size} Song${selectedIds.size > 1 ? "s" : ""}`}
               </button>
             )}
 
@@ -544,60 +510,32 @@ function SongBrowserModal({
                   </div>
 
                   {/* Selected count + checkout */}
-                  {selectedIds.size > 0 && (() => {
-                    const allTipsEnabled = selectedSongs.every(s => s.stripeAccountStatus === "enabled");
-                    return (
-                      <div className="px-4 pb-4 flex-shrink-0">
-                        {allTipsEnabled ? (
-                          <button
-                            onClick={handleCheckout}
-                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all hover:-translate-y-0.5"
-                            style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
-                          >
-                            <ShoppingCart size={14} />
-                            Queue {selectedIds.size} Song{selectedIds.size > 1 ? "s" : ""} →
-                          </button>
-                        ) : (
-                          <div className="space-y-2">
-                            <div className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px]
-                              text-white/20 border border-white/[0.04] cursor-not-allowed"
-                              style={{ background: "oklch(0.11 0.02 280)" }}
-                            >
-                              <DollarSign size={14} className="opacity-30" />
-                              Some creators haven't enabled tips
-                            </div>
-                            <p className="text-[11px] text-white/30 font-body text-center">
-                              Remove songs from creators without tips enabled
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  {/* Hint when nothing selected */}
-                  {selectedIds.size === 0 && (
+                  {selectedIds.size > 0 && (
                     <div className="px-4 pb-4 flex-shrink-0">
-                      {currentCard?.stripeAccountStatus === "enabled" ? (
-                        <button
-                          onClick={handleCheckout}
-                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium
-                            text-white/60 hover:text-white transition-all border border-white/[0.08] hover:border-[#D4AF37]/30"
-                          style={{ background: "oklch(0.13 0.04 278)" }}
-                        >
-                          <DollarSign size={14} />
-                          Tip &amp; Queue This Song
-                        </button>
-                      ) : (
-                        <div className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px]
-                          text-white/20 border border-white/[0.04] cursor-not-allowed"
-                          style={{ background: "oklch(0.11 0.02 280)" }}
-                          title="This creator hasn't enabled tips yet"
-                        >
-                          <DollarSign size={14} className="opacity-30" />
-                          Tips not enabled
-                        </div>
-                      )}
+                      <button
+                        onClick={handleCheckout}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all hover:-translate-y-0.5"
+                        style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
+                      >
+                        <ListMusic size={14} />
+                        Queue {selectedIds.size} Song{selectedIds.size > 1 ? "s" : ""} →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Queue current card button */}
+                  {selectedIds.size === 0 && currentCard && (
+                    <div className="px-4 pb-4 flex-shrink-0">
+                      <button
+                        onClick={handleFreeQueue}
+                        disabled={freeQueueMutation.isPending}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium
+                          text-white/60 hover:text-white transition-all border border-white/[0.08] hover:border-[#D4AF37]/30 disabled:opacity-50"
+                        style={{ background: "oklch(0.13 0.04 278)" }}
+                      >
+                        <ListMusic size={14} />
+                        {freeQueueMutation.isPending ? "Queuing…" : "Add to Queue"}
+                      </button>
                     </div>
                   )}
                 </>
@@ -608,6 +546,111 @@ function SongBrowserModal({
 
         {/* Hidden audio for preview */}
         <audio ref={audioRef} preload="none" className="hidden" />
+      </div>
+    </div>
+  );
+}
+
+// ── Leave an Offering Modal ─────────────────────────────────────────────────
+function OfferingModal({
+  roomCode,
+  onClose,
+}: {
+  roomCode: string;
+  onClose: () => void;
+}) {
+  const { user } = useAuth();
+  const [amount, setAmount] = useState("5");
+
+  const leaveOffering = trpc.jukebox.leaveOffering.useMutation({
+    onSuccess: (data) => {
+      if (data.url) {
+        toast.info("🎶 Redirecting to checkout… your offering will be shared among all creators in this room.");
+        window.open(data.url, "_blank");
+        onClose();
+      }
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleSubmit = () => {
+    if (!user) { window.location.href = getLoginUrl("/together"); return; }
+    const cents = Math.round(parseFloat(amount) * 100);
+    if (isNaN(cents) || cents < 100) { toast.error("Minimum offering is $1.00"); return; }
+    leaveOffering.mutate({ roomCode, amountCents: cents, origin: window.location.origin });
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.80)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl overflow-hidden border border-white/[0.1] p-6"
+        style={{ background: "oklch(0.115 0.055 278)" }}
+      >
+        <div className="text-center mb-5">
+          <div className="text-3xl mb-2">🎶</div>
+          <h3 className="font-heading text-[16px] text-white/90 tracking-wide mb-1">Leave an Offering</h3>
+          <p className="text-[12px] text-white/50 font-body">
+            A voluntary gift shared proportionally among all creators whose songs play in this room.
+          </p>
+        </div>
+
+        {/* Quick amounts */}
+        <div className="flex gap-2 mb-3 flex-wrap justify-center">
+          {["1", "3", "5", "10", "20"].map(amt => (
+            <button
+              key={amt}
+              onClick={() => setAmount(amt)}
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-body transition-all border
+                ${amount === amt
+                  ? "text-black border-[#D4AF37] bg-[#D4AF37]"
+                  : "text-white/60 border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08]"}`}
+            >
+              ${amt}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.1] bg-white/[0.04] mb-5">
+          <DollarSign size={14} className="text-[#D4AF37]/70" />
+          <input
+            type="number"
+            min="1"
+            step="0.50"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            className="flex-1 bg-transparent text-[14px] font-body text-white/85 outline-none"
+          />
+        </div>
+
+        {!user ? (
+          <a
+            href={getLoginUrl("/together")}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all"
+            style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
+          >
+            Sign in to Leave an Offering
+          </a>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={leaveOffering.isPending}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
+          >
+            {leaveOffering.isPending ? "Opening checkout…" : `Leave $${amount} Offering`}
+          </button>
+        )}
+
+        <button
+          onClick={onClose}
+          className="w-full mt-3 py-2 text-[12px] text-white/40 hover:text-white/60 font-body transition-colors"
+        >
+          Maybe later
+        </button>
       </div>
     </div>
   );
@@ -700,7 +743,7 @@ function QueuePanel({ items }: { items: any[] }) {
     <div className="rounded-xl p-4 border border-white/[0.06] text-center"
       style={{ background: "oklch(0.10 0.04 280)" }}>
       <ListMusic size={20} className="mx-auto mb-2 text-white/60" />
-      <p className="text-[12px] text-white/65 font-body">Queue is empty — tip a song to add it!</p>
+      <p className="text-[12px] text-white/65 font-body">Queue is empty — add a song to get started!</p>
     </div>
   );
 
@@ -724,7 +767,7 @@ function QueuePanel({ items }: { items: any[] }) {
             <div className="flex-1 min-w-0">
               <div className="text-[12px] font-body text-white/75 truncate">{item.songTitle}</div>
               <div className="text-[10px] text-white/70 font-body truncate">
-                by {item.tipperName} · <span className="text-[#D4AF37]/50">${(item.tipAmountCents / 100).toFixed(2)}</span>
+                queued by {item.tipperName}{item.tipAmountCents > 0 && <span className="text-[#D4AF37]/50"> · 🎶 ${(item.tipAmountCents / 100).toFixed(2)} gift</span>}
               </div>
             </div>
           </div>
@@ -742,6 +785,7 @@ export default function TogetherPage() {
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [showBrowser, setShowBrowser] = useState(false);
+  const [showOfferingModal, setShowOfferingModal] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
@@ -1030,18 +1074,32 @@ export default function TogetherPage() {
                 <QueuePanel items={upNext} />
               </div>
 
-              {/* Tip to queue button */}
+              {/* Add to Queue button */}
               <button
                 onClick={() => setShowBrowser(true)}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium
                   text-black transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(232,197,71,0.25)]"
                 style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
               >
-                <DollarSign size={14} />
-                Tip a Song into the Queue
+                <ListMusic size={14} />
+                Add a Song to the Queue
               </button>
               <p className="text-[11px] text-white/65 font-body text-center mt-2">
-                $1 minimum · tip goes to the creator
+                Free · browse &amp; queue any track
+              </p>
+
+              {/* Leave an Offering jar */}
+              <button
+                onClick={() => setShowOfferingModal(true)}
+                className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl font-body text-[13px]
+                  text-[#D4AF37]/70 hover:text-[#D4AF37] transition-all border border-[#D4AF37]/20 hover:border-[#D4AF37]/40"
+                style={{ background: "oklch(0.13 0.04 278)" }}
+              >
+                <span className="text-base">🎶</span>
+                Leave an Offering
+              </button>
+              <p className="text-[11px] text-white/40 font-body text-center mt-1">
+                Voluntary gift · shared among all creators in this room
               </p>
             </div>
           </div>
@@ -1092,6 +1150,14 @@ export default function TogetherPage() {
           roomCode={state.room.code}
           isHost={isHost}
           onClose={() => setShowBrowser(false)}
+        />
+      )}
+
+      {/* Offering modal */}
+      {showOfferingModal && state.room && (
+        <OfferingModal
+          roomCode={state.room.code}
+          onClose={() => setShowOfferingModal(false)}
         />
       )}
     </div>

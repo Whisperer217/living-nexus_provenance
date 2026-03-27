@@ -229,7 +229,7 @@ export const jukeboxQueue = mysqlTable("jukeboxQueue", {
   songId: int("songId").notNull(),
   tipperId: int("tipperId").notNull(),          // user who tipped
   tipperName: varchar("tipperName", { length: 128 }),
-  tipAmountCents: int("tipAmountCents").notNull(), // minimum 100 ($1)
+  tipAmountCents: int("tipAmountCents").notNull().default(0), // 0 = free queue, >0 = gifted
   stripeSessionId: varchar("stripeSessionId", { length: 128 }),
   position: int("position").notNull().default(0), // ordering within room
   playedAt: timestamp("playedAt"),               // null = not yet played
@@ -405,3 +405,30 @@ export const notifications = mysqlTable("notifications", {
 });
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+// ─── Jukebox Offerings ────────────────────────────────────────────────────────
+// A voluntary "offering" left by a listener for a jukebox room.
+// The platform distributes proportionally to creators whose songs played in that room.
+export const jukeboxOfferings = mysqlTable("jukeboxOfferings", {
+  id: int("id").autoincrement().primaryKey(),
+  roomCode: varchar("roomCode", { length: 32 }).notNull(),
+  gifterId: int("gifterId").notNull(),          // user who left the offering
+  amountCents: int("amountCents").notNull(),     // e.g. 500 = $5.00
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 128 }),
+  status: mysqlEnum("status", ["pending", "completed", "failed"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type JukeboxOffering = typeof jukeboxOfferings.$inferSelect;
+export type InsertJukeboxOffering = typeof jukeboxOfferings.$inferInsert;
+
+// ─── Jukebox Play Events ──────────────────────────────────────────────────────
+// Records each time a song plays in a jukebox room — used for proportional distribution.
+export const jukeboxPlayEvents = mysqlTable("jukeboxPlayEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  roomCode: varchar("roomCode", { length: 32 }).notNull(),
+  songId: int("songId").notNull(),
+  creatorId: int("creatorId").notNull(),        // song owner (for earnings calculation)
+  playedAt: timestamp("playedAt").defaultNow().notNull(),
+});
+export type JukeboxPlayEvent = typeof jukeboxPlayEvents.$inferSelect;
+export type InsertJukeboxPlayEvent = typeof jukeboxPlayEvents.$inferInsert;
