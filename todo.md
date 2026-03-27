@@ -838,3 +838,10 @@
 - [ ] Define full term mapping (standard → Living Nexus language)
 - [ ] Build /lexicon page with term cards in divine noir style
 - [ ] Add Lexicon link to sidebar SYSTEM section and footer
+
+## Phase 92: Background Video + Changelog v2.0
+- [x] PlayerBar expanded: cover art static until play, muted video fades in on play, fades out on pause
+- [x] MobilePlayerPanel: remove manual toggle, auto-show cover art, auto-fade to muted video when playing
+- [x] TheaterPlayer: cover art static until play, muted video fades in on play
+- [x] All players: video always forced muted (separate from audio stream)
+- [x] Update WhatsNewModal to v2.0 with background video, Witness Network, Field Notes, Lexicon, WID Spec entries

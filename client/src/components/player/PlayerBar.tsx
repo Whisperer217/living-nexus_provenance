@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — PlayerBar (The Altar)
-   v2.0 — Cinematic expansion: bar grows upward to 256px with
-   art/video panel, track info, and live comment feed.
-   Compact mode unchanged. Single audio source maintained.
+   v2.1 — Background video: cover art stays static until play,
+   muted looping video fades in behind the music on play.
+   Audio and video are completely separate streams.
 ═══════════════════════════════════════════════════════════════════ */
 
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -49,6 +49,26 @@ export default function PlayerBar() {
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
+
+  // Background video ref — always muted, synced to audio play state
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Sync background video to audio play/pause state
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !videoUrl) return;
+    if (state.isPlaying && isExpanded) {
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+    }
+  }, [state.isPlaying, isExpanded, videoUrl]);
+
+  // Reset video when track changes
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (vid) { vid.pause(); vid.currentTime = 0; }
+  }, [currentTrack?.id]);
 
   // Comments (only fetched when expanded, polled every 15 s for live feel)
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
@@ -169,26 +189,36 @@ export default function PlayerBar() {
         <div className="flex h-full overflow-hidden">
 
           {/* LEFT — Art / Video (256px wide) */}
+          {/* Cover art stays static until play; muted video fades in on play */}
           <div className="w-64 h-full flex-shrink-0 relative overflow-hidden">
-            {videoUrl ? (
+            {/* Background video — always muted, loops, fades in when playing */}
+            {videoUrl && (
               <video
+                ref={videoRef}
                 src={videoUrl}
-                className="w-full h-full object-cover"
-                autoPlay
-                muted={false}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                style={{ opacity: state.isPlaying ? 1 : 0 }}
+                muted
                 loop
                 playsInline
+                preload="metadata"
               />
-            ) : currentTrack.artUrl ? (
+            )}
+            {/* Cover art — sits on top, fades out when video is playing */}
+            {currentTrack.artUrl ? (
               <img
                 src={currentTrack.artUrl}
                 alt={currentTrack.title}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                style={{ opacity: (videoUrl && state.isPlaying) ? 0 : 1 }}
               />
             ) : (
               <div
-                className="w-full h-full flex items-center justify-center text-5xl"
-                style={{ background: currentTrack.bg || "oklch(0.12 0.06 270)" }}
+                className="absolute inset-0 w-full h-full flex items-center justify-center text-5xl transition-opacity duration-500"
+                style={{
+                  background: currentTrack.bg || "oklch(0.12 0.06 270)",
+                  opacity: (videoUrl && state.isPlaying) ? 0 : 1,
+                }}
               >
                 {currentTrack.emoji || "🎵"}
               </div>

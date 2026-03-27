@@ -4,7 +4,7 @@
    no independent audio elements. Single source of truth.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -66,6 +66,27 @@ export default function TheaterPlayer() {
 
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
+  const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
+
+  // Background video ref — always muted, synced to audio play state
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Sync background video to audio play/pause state
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !videoUrl) return;
+    if (state.isPlaying && isTheaterOpen) {
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+    }
+  }, [state.isPlaying, isTheaterOpen, videoUrl]);
+
+  // Reset video when track changes
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (vid) { vid.pause(); vid.currentTime = 0; }
+  }, [currentTrack?.id]);
 
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
 
@@ -113,25 +134,37 @@ export default function TheaterPlayer() {
             {/* Art / Video */}
             <div className="relative flex-1 min-h-0 flex items-center justify-center overflow-hidden"
               style={{ background: "oklch(0.09 0.04 268)" }}>
-              {currentTrack?.artUrl && currentTrack.artType === "video" ? (
+              {/* Background video — always muted, fades in when playing */}
+              {videoUrl && (
                 <video
-                  src={currentTrack.artUrl}
-                  className="w-full h-full object-cover"
+                  ref={videoRef}
+                  src={videoUrl}
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                  style={{ opacity: state.isPlaying ? 1 : 0 }}
                   muted
-                  autoPlay
                   loop
+                  playsInline
+                  preload="metadata"
                 />
-              ) : currentTrack?.artUrl ? (
+              )}
+              {/* Cover art — sits on top, fades out when video is playing */}
+              {currentTrack?.artUrl ? (
                 <img
                   src={currentTrack.artUrl}
                   alt={currentTrack.title}
-                  className="w-full h-full object-cover"
-                  style={{ maxHeight: "calc(100vh - 220px)" }}
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                  style={{
+                    maxHeight: "calc(100vh - 220px)",
+                    opacity: (videoUrl && state.isPlaying) ? 0 : 1,
+                  }}
                 />
               ) : (
                 <div
-                  className="w-full h-full flex items-center justify-center text-8xl"
-                  style={{ background: currentTrack?.bg || "oklch(0.12 0.06 270)" }}
+                  className="absolute inset-0 w-full h-full flex items-center justify-center text-8xl transition-opacity duration-500"
+                  style={{
+                    background: currentTrack?.bg || "oklch(0.12 0.06 270)",
+                    opacity: (videoUrl && state.isPlaying) ? 0 : 1,
+                  }}
                 >
                   {currentTrack?.emoji || "🎵"}
                 </div>

@@ -1,17 +1,34 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Shield, Upload, Music, Video, DollarSign, Users, BookOpen, ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard } from "lucide-react";
+import {
+  Shield, Upload, Music, Video, DollarSign, Users, BookOpen,
+  ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
+  Eye, Globe, FileText, Network, Scroll, Film,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v1.7.0";
+const CURRENT_VERSION = "v2.0.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v1.7.0",
+    version: "v2.0.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Film, text: "Background Video Playback — attach a muted looping video to any track. Cover art stays static until you press play, then the video fades in behind the music. Audio and video are completely separate streams." },
+      { icon: Network, text: "Witness Network — witness any creator to build a living network of creative relationships. View who witnesses you and who you witness from your profile." },
+      { icon: Scroll, text: "Field Notes — write doctrine, journals, updates, and concepts directly on the platform. Your ideas now have a home alongside your music." },
+      { icon: BookOpen, text: "Lexicon — the Living Nexus vocabulary legend. 28 terms translated from standard internet language into the platform's sovereign terminology." },
+      { icon: FileText, text: "WID Public Specification v1.0 — the full technical and philosophical specification for the Witness ID system is now published and downloadable." },
+      { icon: Globe, text: "Per-page link previews — every page on Living Nexus now shows its own title, description, and image when shared on Discord, iMessage, Twitter, or Slack." },
+    ],
+  },
+  {
+    version: "v1.7.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: CreditCard, text: "Live Payments — Creator License ($88.88) and Fan Tips are now powered by real Stripe payments. Your money goes directly to creators." },
       { icon: DollarSign, text: "Fan Tips — tip any creator directly from their song page. Choose $1, $2, $5, $10, $25, or a custom amount. Creators keep 90%." },
@@ -24,7 +41,7 @@ const UPDATES = [
     date: "March 2026",
     label: null,
     items: [
-      { icon: Maximize2, text: "Desktop Cinematic Bar — click \"expand player\" above the bottom bar. Full theater view opens with art or video, controls, WID, and a live comment feed. Leave a witness on any track." },
+      { icon: Maximize2, text: "Desktop Cinematic Bar — click \"expand player\" above the bottom bar. Full theater view opens with art or video, controls, WID, and a live comment feed." },
       { icon: MessageCircle, text: "Mobile Comments — Cinema Mode now has Lyrics and Comments tabs. Read the thread or leave your mark while the music plays." },
       { icon: MessageCircle, text: "Live Feed polling — the comment feed in the expanded bar refreshes automatically every 15 seconds so you see new witnesses in real time." },
     ],
@@ -34,7 +51,7 @@ const UPDATES = [
     date: "March 2026",
     label: null,
     items: [
-      { icon: Music, text: "Cinema Mode — tap the eye icon next to the heart button to hide all controls and focus on art + lyrics." },
+      { icon: Eye, text: "Cinema Mode — tap the eye icon next to the heart button to hide all controls and focus on art + lyrics." },
       { icon: Shield, text: "WID + AI tags row — your Witness ID and genre/AI disclosure now appear directly below the artist name." },
       { icon: Users, text: "Share button — share any track via native share sheet or copy link to clipboard." },
       { icon: BookOpen, text: "Grab handle — swipe down on the pill bar at the bottom of the player to close; no more accidental swipe-right dismissals." },
@@ -67,7 +84,7 @@ const HOW_TO_STEPS = [
     step: "1",
     icon: Upload,
     title: "Upload your track",
-    body: "Add audio, cover art, lyrics, and optionally a music video. A Witness ID is generated automatically — your cryptographic proof of creation.",
+    body: "Add audio, cover art, lyrics, and optionally a muted background video. A Witness ID is generated automatically — your cryptographic proof of creation.",
   },
   {
     step: "2",
@@ -83,9 +100,15 @@ const HOW_TO_STEPS = [
   },
   {
     step: "4",
+    icon: Network,
+    title: "Build your Witness Network",
+    body: "Witness other creators to build a living record of your creative relationships. Your network compounds over time — it cannot be replicated elsewhere.",
+  },
+  {
+    step: "5",
     icon: Music,
     title: "Manage your archive",
-    body: "Edit metadata, update lyrics, attach a video, change track status, or update download permissions at any time from Archive.",
+    body: "Edit metadata, update lyrics, attach a background video, change track status, or update download permissions at any time from Archive.",
   },
 ];
 

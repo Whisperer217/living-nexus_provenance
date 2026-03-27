@@ -21,7 +21,7 @@ import { useLocation } from "wouter";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, X,
-  Music, DollarSign, Users, Video, ImageIcon,
+  Music, DollarSign, Users, Video,
   Share2, ChevronDown, Eye, EyeOff, Check, MessageCircle,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
@@ -193,24 +193,24 @@ export default function MobilePlayerPanel() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Video/art toggle
-  const [showVideo, setShowVideo] = useState(false);
+  // Background video — always muted, auto-fades in when playing
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
 
+  // Sync background video to audio play/pause state
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid || !videoUrl) return;
-    if (state.isPlaying && showVideo) {
-      vid.currentTime = state.currentTime;
+    if (state.isPlaying && open) {
       vid.play().catch(() => {});
     } else {
       vid.pause();
     }
-  }, [state.isPlaying, showVideo, videoUrl]);
+  }, [state.isPlaying, open, videoUrl]);
 
   useEffect(() => {
-    setShowVideo(false);
+    const vid = videoRef.current;
+    if (vid) { vid.pause(); vid.currentTime = 0; }
     setCinemaMode(false);
     setCinemaTab("lyrics");
     setNewComment("");
@@ -408,41 +408,46 @@ export default function MobilePlayerPanel() {
                 animation: "panelArtFadeIn 0.4s ease",
               }}
             >
-              {/* Video player or cover art */}
-              {videoUrl && showVideo ? (
+              {/* Background video — always muted, fades in when playing */}
+              {videoUrl && (
                 <video
                   ref={videoRef}
                   src={videoUrl}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                  style={{ opacity: state.isPlaying ? 1 : 0 }}
                   playsInline
                   loop
-                  muted={state.isMuted}
+                  muted
+                  preload="metadata"
                 />
-              ) : currentTrack?.artUrl && currentTrack.artType !== "video" ? (
-                <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover object-top" />
-              ) : currentTrack?.artUrl && currentTrack.artType === "video" ? (
-                <video src={currentTrack.artUrl} className="w-full h-full object-cover object-top" muted />
-              ) : (
-                <Music className="w-1/2 h-1/2 opacity-30 text-white" />
               )}
-
-              {/* Video / Art toggle — top-left of art, only when video exists */}
-              {videoUrl && (
-                <button
-                  onClick={() => setShowVideo(v => !v)}
-                  className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold tracking-wide transition-all"
+              {/* Cover art — sits on top, fades out when video is playing */}
+              {currentTrack?.artUrl ? (
+                <img
+                  src={currentTrack.artUrl}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-500"
+                  style={{ opacity: (videoUrl && state.isPlaying) ? 0 : 1 }}
+                />
+              ) : (
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                  <Music className="w-1/2 h-1/2 opacity-30 text-white" />
+                </div>
+              )}
+              {/* Video indicator badge — shown when video is available and playing */}
+              {videoUrl && state.isPlaying && (
+                <div
+                  className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold tracking-wide"
                   style={{
-                    background: showVideo ? "oklch(0.84 0.155 85 / 0.9)" : "oklch(0 0 0 / 0.55)",
-                    color: showVideo ? "oklch(0.08 0.01 280)" : "oklch(0.9 0.02 85)",
-                    border: showVideo ? "none" : "1px solid oklch(0.84 0.155 85 / 0.4)",
+                    background: "oklch(0.84 0.155 85 / 0.85)",
+                    color: "oklch(0.08 0.01 280)",
                     backdropFilter: "blur(4px)",
                     zIndex: 20,
                   }}
-                  title={showVideo ? "Switch to cover art" : "Watch music video"}
                 >
-                  {showVideo ? <ImageIcon size={11} /> : <Video size={11} />}
-                  {showVideo ? "Art" : "Video"}
-                </button>
+                  <Video size={10} />
+                  Live
+                </div>
               )}
 
               {/* Vertical volume bar — right edge of art */}
