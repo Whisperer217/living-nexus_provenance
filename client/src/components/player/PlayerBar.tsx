@@ -11,7 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, Maximize2,
-  ChevronDown, ChevronUp, MessageCircle,
+  ChevronDown, ChevronUp, MessageCircle, LogOut,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { useLocation } from "wouter";
@@ -28,7 +28,7 @@ export default function PlayerBar() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-    openTheater,
+    openTheater, setRoom,
   } = usePlayer();
   const [, navigate] = useLocation();
   const { user } = useAuth();
@@ -680,17 +680,48 @@ export default function PlayerBar() {
               <AddToPlaylistButton songId={currentSongId} variant="compact" />
             )}
 
-            {/* Listen Together shortcut */}
-            <button
-              onClick={() => navigate("/together")}
-              className="p-1.5 transition-colors"
-              style={{ color: "oklch(0.68 0.02 280)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.82 0.155 175)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
-              title="Listen Together"
-            >
-              <Users size={14} />
-            </button>
+            {/* Session badge — shown when linked to a jukebox room */}
+            {state.room ? (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border flex-shrink-0"
+                style={{
+                  background: "oklch(0.14 0.06 280 / 80%)",
+                  border: "1px solid oklch(0.80 0.145 82 / 0.35)",
+                }}>
+                <Users size={11} style={{ color: "oklch(0.80 0.145 82)" }} />
+                <button
+                  onClick={() => navigate("/together")}
+                  className="text-[10px] font-heading tracking-wide max-w-[80px] truncate"
+                  style={{ color: "oklch(0.80 0.145 82)" }}
+                  title={`Room: ${state.room.name}`}
+                >
+                  {state.room.code}
+                </button>
+                <button
+                  onClick={() => {
+                    setRoom(null);
+                    sessionStorage.removeItem("lnx_room_code");
+                    sessionStorage.removeItem("lnx_room_host");
+                  }}
+                  className="p-0.5 rounded transition-opacity hover:opacity-80"
+                  style={{ color: "oklch(0.68 0.02 280)" }}
+                  title="Leave room"
+                >
+                  <LogOut size={10} />
+                </button>
+              </div>
+            ) : (
+              /* Listen Together shortcut — shown when not in a room */
+              <button
+                onClick={() => navigate("/together")}
+                className="p-1.5 transition-colors"
+                style={{ color: "oklch(0.68 0.02 280)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.82 0.155 175)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
+                title="Listen Together"
+              >
+                <Users size={14} />
+              </button>
+            )}
 
             {/* Volume */}
             <button

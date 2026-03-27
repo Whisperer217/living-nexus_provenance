@@ -936,3 +936,10 @@
 - [x] NowPlayingPanel: shows "gifted $X" only when tipAmountCents > 0
 - [x] freeQueue procedure confirmed working (live API returns songs, esbuild builds cleanly)
 - [x] Root cause of live "No tracks found": old deployed build lacks freeQueue procedure — fix is to Publish latest checkpoint
+
+## Phase 103: Global Player UX Fix + Session Integration
+- [ ] Fix expanded player "hide all" dead end — add toggle to switch back to full player view
+- [ ] Improve lyrics/comments panel layout — more breathing room, clearer tab switching
+- [x] Wire jukebox session into global player — NowPlayingPanel delegates to addAndPlay(), global audio onEnded advances queue
+- [x] Add session badge to PlayerBar — gold pill with room code + Leave button when state.room is set
+- [ ] Add quick comment shortcut in PlayerBar when session-linked

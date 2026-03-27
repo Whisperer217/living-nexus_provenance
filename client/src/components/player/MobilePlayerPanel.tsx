@@ -409,6 +409,19 @@ export default function MobilePlayerPanel() {
               )}
             </div>
             <div className="flex items-center gap-1">
+              {/* Cinema Mode toggle — always visible in header so user can exit */}
+              <button
+                onClick={() => setCinemaMode(v => !v)}
+                className="p-1.5 rounded-lg transition-all"
+                style={{
+                  color: cinemaMode ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)",
+                  background: cinemaMode ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
+                  border: cinemaMode ? "1px solid oklch(0.84 0.155 85 / 0.30)" : "1px solid transparent",
+                }}
+                title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — lyrics & comments"}
+              >
+                {cinemaMode ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
               {/* Hide Player (collapse) */}
               <button
                 onClick={closeNowPlayingPanel}
@@ -808,10 +821,10 @@ export default function MobilePlayerPanel() {
           )}
 
           {/* Lyrics / Comments tabs */}
-          <div className="px-0 pb-4 pt-0">
+          <div className="px-0 pb-6 pt-0">
             {/* Tab bar */}
             <div
-              className="flex mx-5 mb-3"
+              className="flex mx-5 mb-4"
               style={{ borderBottom: "1px solid oklch(0.22 0.04 270 / 60%)" }}
             >
               {(["lyrics", "comments"] as const).map(tab => (
@@ -841,22 +854,24 @@ export default function MobilePlayerPanel() {
                     style={{
                       fontFamily: "'Inter', Georgia, serif",
                       fontSize: "15px",
-                      lineHeight: "2",
-                      color: "oklch(0.88 0.02 280)",
-                      letterSpacing: "0.01em",
+                      lineHeight: "2.1",
+                      color: "oklch(0.90 0.02 280)",
+                      letterSpacing: "0.015em",
+                      paddingBottom: "2rem",
                     }}
                   >
                     {songDetail.song.lyricsText}
                   </pre>
                 ) : (
                   <div
-                    className="rounded-xl p-6 text-center"
+                    className="rounded-xl p-8 text-center mt-2"
                     style={{
                       background: "oklch(0.10 0.02 275)",
                       border: "1px dashed oklch(0.22 0.02 275)",
                     }}
                   >
-                    <p className="text-[13px] italic mb-1.5" style={{ color: "oklch(0.50 0.02 280)" }}>
+                    <Music size={28} className="mx-auto mb-3 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
+                    <p className="text-[14px] italic mb-2" style={{ color: "oklch(0.50 0.02 280)" }}>
                       No lyrics registered
                     </p>
                     <p className="text-[12px]" style={{ color: "oklch(0.84 0.155 85)" }}>

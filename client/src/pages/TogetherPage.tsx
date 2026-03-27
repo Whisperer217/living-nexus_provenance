@@ -662,42 +662,14 @@ function NowPlayingPanel({
   item,
   isHost,
   onSkip,
-  onEnded,
 }: {
   item: any;
   isHost: boolean;
   onSkip: () => void;
-  onEnded: () => void;
 }) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (!audioRef.current || !item?.songFileUrl) return;
-    // Clear any previous fallback timer
-    if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
-    audioRef.current.src = item.songFileUrl;
-    audioRef.current.currentTime = 0;
-    const playPromise = audioRef.current.play();
-    if (playPromise) playPromise.catch(() => {});
-    // Fallback: if audio duration is known, auto-advance after duration + 2s buffer
-    const handleLoadedMeta = () => {
-      if (!audioRef.current) return;
-      const dur = audioRef.current.duration;
-      if (dur && isFinite(dur)) {
-        if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
-        fallbackTimerRef.current = setTimeout(() => {
-          onEnded();
-        }, (dur + 2) * 1000);
-      }
-    };
-    audioRef.current.addEventListener("loadedmetadata", handleLoadedMeta);
-    return () => {
-      if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
-      audioRef.current?.removeEventListener("loadedmetadata", handleLoadedMeta);
-    };
-  }, [item?.id]);
-
+  // No local audio — the global PlayerContext handles playback.
+  // The parent component wires nowPlaying → addAndPlay() and listens
+  // to the global audio's 'ended' event to advance the queue.
   if (!item) return null;
 
   return (
@@ -756,8 +728,6 @@ function NowPlayingPanel({
         )}
       </div>
 
-      {/* Hidden audio element */}
-      <audio ref={audioRef} onEnded={onEnded} className="hidden" />
     </div>
   );
 }
@@ -804,7 +774,7 @@ function QueuePanel({ items }: { items: any[] }) {
 
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function TogetherPage() {
-  const { state, setRoom } = usePlayer();
+  const { state, setRoom, addAndPlay, audioRef: globalAudioRef } = usePlayer();
   const { user } = useAuth();
   const params = useParams<{ roomCode?: string }>();
   const [joinCode, setJoinCode] = useState("");
@@ -982,6 +952,35 @@ export default function TogetherPage() {
     if (nowPlaying) markPlayed.mutate({ itemId: nowPlaying.id });
   };
 
+  // ── Wire jukebox nowPlaying into the global player ──────────────────────────
+  // When the jukebox queue's nowPlaying changes, tell the global PlayerContext
+  // to play that song. This removes the need for a separate audio element in
+  // NowPlayingPanel — the jukebox is just a queue controller.
+  const prevNowPlayingId = useRef<number | null>(null);
+  useEffect(() => {
+    if (!nowPlaying || nowPlaying.id === prevNowPlayingId.current) return;
+    prevNowPlayingId.current = nowPlaying.id;
+    addAndPlay({
+      id: String(nowPlaying.songId ?? nowPlaying.id),
+      title: nowPlaying.songTitle ?? "Unknown",
+      audioUrl: nowPlaying.songFileUrl ?? "",
+      artUrl: nowPlaying.songCoverArtUrl ?? undefined,
+      artist: nowPlaying.creatorName ?? nowPlaying.creatorArtistHandle ?? "Unknown",
+      genre: "",
+      witnessId: nowPlaying.songWitnessId ?? undefined,
+    });
+  }, [nowPlaying?.id]);
+
+  // When the global player's audio ends, advance the jukebox queue
+  useEffect(() => {
+    if (!state.room) return;
+    const audio = globalAudioRef.current;
+    if (!audio) return;
+    const onGlobalEnded = () => handleEnded();
+    audio.addEventListener("ended", onGlobalEnded);
+    return () => audio.removeEventListener("ended", onGlobalEnded);
+  }, [state.room, nowPlaying?.id]);
+
   return (
     <div className="animate-fade-up">
       {/* Header image */}
@@ -1150,7 +1149,6 @@ export default function TogetherPage() {
                   item={nowPlaying}
                   isHost={isHost}
                   onSkip={handleSkip}
-                  onEnded={handleEnded}
                 />
               )}
 
