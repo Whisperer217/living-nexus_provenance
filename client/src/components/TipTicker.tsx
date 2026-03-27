@@ -13,7 +13,7 @@ export default function TipTicker() {
   const items: string[] =
     tips && tips.length > 0
       ? tips.map(
-          (t) =>
+          (t: any) =>
             `🔐 ${t.fanName} tipped ${t.creatorName} ${formatAmount(t.amountCents)} for "${t.songTitle}"`
         )
       : ["Be the first to tip a creator on Living Nexus 🎵"];

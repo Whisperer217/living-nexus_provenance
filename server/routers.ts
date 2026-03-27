@@ -35,6 +35,7 @@ import {
   isPlaylistMember,
   createNotification, getNotifications, markNotificationRead, markAllNotificationsRead,
   archiveNotification, getUnreadNotificationCount,
+  getWitnessRegistry,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -690,7 +691,7 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
     }),
     recentTips: publicProcedure.query(async () => {
       const rows = await getRecentTips(20);
-      return rows.map(r => ({
+      return rows.map((r: any) => ({
         id: r.id,
         amountCents: r.amountCents,
         songTitle: r.songTitle,
@@ -1256,6 +1257,26 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .mutation(async ({ ctx, input }) => {
         await archiveNotification(input.id, ctx.user.id);
         return { ok: true };
+      }),
+  }),
+
+  // ── Witness Registry ─────────────────────────────────────────────────────────
+  witnessRegistry: router({
+    /** Public ledger of all issued WIDs — paginated, filterable by asset type */
+    list: publicProcedure
+      .input(z.object({
+        type: z.enum(["all", "full_works", "lyrics"]).default("all"),
+        cursor: z.number().int().nonnegative().default(0),
+        limit: z.number().int().min(1).max(100).default(50),
+      }))
+      .query(async ({ input }) => {
+        const { type, cursor, limit } = input;
+        const rows = await getWitnessRegistry({ type, offset: cursor, limit: limit + 1 });
+        const hasMore = rows.length > limit;
+        return {
+          items: hasMore ? rows.slice(0, limit) : rows,
+          nextCursor: hasMore ? cursor + limit : null,
+        };
       }),
   }),
 });

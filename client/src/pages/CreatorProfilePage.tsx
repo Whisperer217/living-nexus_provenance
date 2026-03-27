@@ -291,7 +291,7 @@ export default function CreatorProfilePage() {
         witnessId: s.witnessId || undefined,
         aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
       }));
-      const startIdx = queue.findIndex(t => t.id === String(song.id));
+      const startIdx = queue.findIndex((t: any) => t.id === String(song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
     } else {
       addAndPlay({

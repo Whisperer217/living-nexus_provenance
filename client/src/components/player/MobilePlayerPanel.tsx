@@ -873,7 +873,7 @@ export default function MobilePlayerPanel() {
                 {/* Comment list */}
                 <div className="space-y-3 mb-4">
                   {commentsData && commentsData.length > 0 ? (
-                    commentsData.map(c => (
+                    commentsData.map((c: any) => (
                       <div key={c.id} className="flex gap-2.5">
                         <div
                           className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"

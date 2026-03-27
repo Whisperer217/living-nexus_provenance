@@ -92,7 +92,7 @@ export default function ArchivePage() {
     onMutate: async ({ songId, status }) => {
       await utils.songs.mySongs.cancel();
       const prev = utils.songs.mySongs.getData();
-      utils.songs.mySongs.setData(undefined, (old) =>
+      utils.songs.mySongs.setData(undefined, (old: any) =>
         old?.map((s: any) => s.id === songId ? { ...s, status } : s)
       );
       return { prev };

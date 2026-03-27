@@ -34,6 +34,7 @@ export interface Track {
   witnessId?: string;
   aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
   creatorHandle?: string; // used for background creator page routing on queue advance
+  tipsEnabled?: boolean; // true when creator has Stripe tips enabled
 }
 
 /** Describes WHERE the current queue was built from — controls shuffle/repeat scope */

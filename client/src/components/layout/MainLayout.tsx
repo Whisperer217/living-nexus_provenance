@@ -48,7 +48,7 @@ const NAV_ITEMS = [
   { label: "Verify WID",       icon: Fingerprint, path: "/verify",      group: "SYSTEM" },
   { label: "Upload",           icon: Upload,      path: "/upload",      group: "SYSTEM" },
   { label: "Batch Upload",     icon: Upload,      path: "/batch-upload",group: "SYSTEM" },
-  { label: "Witness Records",  icon: ScrollText,  path: "/archive",     group: "SYSTEM" },
+  { label: "Witness Records",  icon: ScrollText,  path: "/witness-registry", group: "SYSTEM", tooltip: "Public WID ledger" },
   { label: "WID Specification", icon: CheckCircle2, path: "/doctrine/wid-spec", group: "SYSTEM" },
   { label: "Lexicon",            icon: BookMarked,  path: "/lexicon",             group: "SYSTEM" },
 ];
@@ -138,6 +138,13 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: QuickRefPoint[] }>
     { label: "Creator sovereignty", path: "/manifesto" },
     { label: "WID provenance", path: "/manifesto" },
     { label: "Anti-extraction", path: "/manifesto" },
+    { label: "🔐 Verify WID", path: "/verify" },
+  ]},
+  "/witness-registry": { title: "Witness Registry", points: [
+    { label: "All WIDs issued", path: "/witness-registry" },
+    { label: "Full Works tab", path: "/witness-registry" },
+    { label: "Lyrics provenance", path: "/witness-registry" },
+    { label: "Route to creator", path: "/witness-registry" },
     { label: "🔐 Verify WID", path: "/verify" },
   ]},
   "/verify": { title: "Verify WID", points: [

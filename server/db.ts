@@ -196,7 +196,7 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
   }
   return db.select({
     song: songs,
-    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre },
+    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     .where(and(...conditions)).orderBy(desc(songs.createdAt)).limit(limit);
 }
@@ -839,10 +839,10 @@ export async function getAllUsersWithStats(): Promise<Array<{
     .where(and(isNotNull(songs.witnessId), ne(songs.status as any, "Deleted")))
     .groupBy(songs.userId);
 
-  const trackMap = new Map(trackCounts.map(r => [r.userId, Number(r.count)]));
-  const widMap = new Map(widCounts.map(r => [r.userId, Number(r.count)]));
+  const trackMap = new Map(trackCounts.map((r: { userId: number | null; count: number }) => [r.userId, Number(r.count)]));
+  const widMap = new Map(widCounts.map((r: { userId: number | null; count: number }) => [r.userId, Number(r.count)]));
 
-  return allUsers.map(u => ({
+  return allUsers.map((u: typeof allUsers[number]) => ({
     ...u,
     trackCount: trackMap.get(u.id) ?? 0,
     widCount: widMap.get(u.id) ?? 0,
@@ -1413,4 +1413,71 @@ export async function getUnreadNotificationCount(userId: number): Promise<number
       sql`${notifications.archivedAt} IS NULL`
     ));
   return Number(rows[0]?.count ?? 0);
+}
+
+// ─── Witness Registry ──────────────────────────────────────────────────────────
+/** Public ledger of all issued WIDs across the platform.
+ *  type: "all" | "full_works" (has audio) | "lyrics" (lyricsText only, no audio)
+ */
+export async function getWitnessRegistry({
+  type,
+  offset,
+  limit,
+}: {
+  type: "all" | "full_works" | "lyrics";
+  offset: number;
+  limit: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  const baseConditions = [
+    eq(songs.status, "Published"),
+    sql`${songs.witnessId} IS NOT NULL`,
+  ];
+  const typeCondition =
+    type === "full_works"
+      ? sql`${songs.fileUrl} IS NOT NULL AND ${songs.isLyricsOnly} = 0`
+      : type === "lyrics"
+      ? sql`${songs.isLyricsOnly} = 1 OR (${songs.lyricsText} IS NOT NULL AND ${songs.fileUrl} IS NULL)`
+      : undefined;
+  const whereClause = typeCondition
+    ? and(...baseConditions, typeCondition)
+    : and(...baseConditions);
+  const rows = await db
+    .select({
+      id: songs.id,
+      title: songs.title,
+      witnessId: songs.witnessId,
+      coverArtUrl: songs.coverArtUrl,
+      fileUrl: songs.fileUrl,
+      videoUrl: songs.videoUrl,
+      lyricsText: songs.lyricsText,
+      isLyricsOnly: songs.isLyricsOnly,
+      genre: songs.genre,
+      createdAt: songs.createdAt,
+      userId: songs.userId,
+      creatorName: users.name,
+      artistHandle: users.artistHandle,
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(whereClause)
+    .orderBy(desc(songs.createdAt))
+    .limit(limit)
+    .offset(offset);
+  return rows.map((r: any) => ({
+    id: r.id,
+    title: r.title,
+    witnessId: r.witnessId,
+    coverArtUrl: r.coverArtUrl,
+    hasAudio: !!r.fileUrl && !r.isLyricsOnly,
+    hasVideo: !!r.videoUrl,
+    hasLyrics: !!r.lyricsText,
+    isLyricsOnly: r.isLyricsOnly,
+    genre: r.genre,
+    createdAt: r.createdAt,
+    userId: r.userId,
+    creatorName: r.creatorName,
+    artistHandle: r.artistHandle,
+  }));
 }

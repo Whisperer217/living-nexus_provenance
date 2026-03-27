@@ -36,8 +36,8 @@ export default function DiscoverPage() {
     if (songs && songs.length > 0) {
       // Build full queue from current filtered results and play from the clicked track
       const queue = songs
-        .filter(s => !!s.song.fileUrl)
-        .map(s => ({
+        .filter((s: any) => !!s.song.fileUrl)
+        .map((s: any) => ({
           id: String(s.song.id),
           title: s.song.title,
           artist: s.creator?.artistHandle || s.creator?.name || "Unknown",
@@ -47,7 +47,7 @@ export default function DiscoverPage() {
           witnessId: s.song.witnessId || undefined,
           aiDisclosure: s.creator?.aiDisclosure || undefined,
         }));
-      const startIdx = queue.findIndex(t => t.id === String(clickedSong.song.id));
+      const startIdx = queue.findIndex((t: any) => t.id === String(clickedSong.song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "HOME");
     } else {
       addAndPlay({
@@ -164,7 +164,7 @@ export default function DiscoverPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {songs.map((item) => {
+              {songs.map((item: any) => {
                 const isActive = currentTrackId === String(item.song.id);
                 return (
                 <div
@@ -262,7 +262,7 @@ export default function DiscoverPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {creators.filter(c => c.name && c.name.trim().length > 0).slice(0, 12).map((creator) => {
+              {creators.filter((c: any) => c.name && c.name.trim().length > 0).slice(0, 12).map((creator: any) => {
                 const displayName = creator.artistHandle || creator.name || "Creator";
                 const initial = displayName.charAt(0).toUpperCase();
                 // Deterministic gradient color per creator based on id

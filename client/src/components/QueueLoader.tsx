@@ -19,8 +19,8 @@ export default function QueueLoader() {
   useEffect(() => {
     if (!data || data.length === 0) return;
     const tracks: Track[] = data
-      .filter(({ song }) => !!song.fileUrl)
-      .map(({ song, creator }) => ({
+      .filter(({ song }: any) => !!song.fileUrl)
+      .map(({ song, creator }: any) => ({
         id: String(song.id),
         title: song.title,
         artist: creator?.artistHandle || creator?.name || "Unknown Artist",

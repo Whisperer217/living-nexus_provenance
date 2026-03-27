@@ -58,7 +58,7 @@ export default function PlaylistPage() {
   const handlePlay = (songId: number) => {
     const tracks = buildTracks();
     if (tracks.length === 0) return;
-    const idx = tracks.findIndex((t) => t.id === String(songId));
+    const idx = tracks.findIndex((t: any) => t.id === String(songId));
     playQueueAt(tracks, idx >= 0 ? idx : 0, "PLAYLIST");
     playMutation.mutate({ songId });
     openNowPlayingPanel();

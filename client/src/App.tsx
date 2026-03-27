@@ -38,6 +38,7 @@ const WIDSpecPage = lazy(() => import("./pages/WIDSpecPage"));
 const LexiconPage = lazy(() => import("./pages/LexiconPage"));
 const PlaylistsPage = lazy(() => import("./pages/PlaylistsPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const WitnessRegistryPage = lazy(() => import("./pages/WitnessRegistryPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -87,6 +88,7 @@ function Router() {
                 <Route path="/lexicon" component={LexiconPage} />
                 <Route path="/playlists" component={PlaylistsPage} />
                 <Route path="/notifications" component={NotificationsPage} />
+                <Route path="/witness-registry" component={WitnessRegistryPage} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>

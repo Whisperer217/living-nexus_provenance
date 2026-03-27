@@ -159,7 +159,7 @@ export default function QuickRefSlider({ open, onToggle, summary, currentPath }:
               Recent Tracks
             </p>
             <div className="space-y-1 overflow-y-auto flex-1 min-h-0" style={{ maxHeight: "160px" }}>
-              {recentTracks.slice(0, 6).map((track) => (
+              {recentTracks.slice(0, 6).map((track: any) => (
                 <button
                   key={track.song.id}
                   onClick={() => handleTrackClick(track)}

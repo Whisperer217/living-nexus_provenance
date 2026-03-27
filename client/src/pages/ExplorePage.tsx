@@ -43,8 +43,8 @@ export default function ExplorePage() {
     if (!song.fileUrl) { toast.error("No audio file available for this track"); return; }
     if (songs.length > 0) {
       const queue = songs
-        .filter(s => !!s.song.fileUrl)
-        .map(s => ({
+        .filter((s: any) => !!s.song.fileUrl)
+        .map((s: any) => ({
           id: String(s.song.id),
           title: s.song.title,
           artist: s.creator?.artistHandle || s.creator?.name || "Unknown",
@@ -55,7 +55,7 @@ export default function ExplorePage() {
           aiDisclosure: s.creator?.aiDisclosure || undefined,
           creatorHandle: s.creator?.id ? String(s.creator.id) : undefined,
         }));
-      const startIdx = queue.findIndex(t => t.id === String(song.id));
+      const startIdx = queue.findIndex((t: any) => t.id === String(song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "EXPLORE");
     } else {
       addAndPlay({

@@ -37,6 +37,7 @@ interface SongCard {
   witnessId?: string | null;
   creatorName?: string | null;
   fileUrl?: string | null;
+  stripeAccountStatus?: string | null;
 }
 
 // ── Jukebox Song Browser Modal ──────────────────────────────────────────────
@@ -90,6 +91,7 @@ function SongBrowserModal({
     witnessId: s.song?.witnessId ?? s.witnessId ?? null,
     creatorName: s.creator?.name ?? s.creator?.artistHandle ?? s.creatorName ?? null,
     fileUrl: s.song?.fileUrl ?? s.fileUrl ?? null,
+    stripeAccountStatus: s.creator?.stripeAccountStatus ?? null,
   }));
 
   // Flatten playlist songs
@@ -542,31 +544,60 @@ function SongBrowserModal({
                   </div>
 
                   {/* Selected count + checkout */}
-                  {selectedIds.size > 0 && (
-                    <div className="px-4 pb-4 flex-shrink-0">
-                      <button
-                        onClick={handleCheckout}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all hover:-translate-y-0.5"
-                        style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
-                      >
-                        <ShoppingCart size={14} />
-                        Queue {selectedIds.size} Song{selectedIds.size > 1 ? "s" : ""} →
-                      </button>
-                    </div>
-                  )}
+                  {selectedIds.size > 0 && (() => {
+                    const allTipsEnabled = selectedSongs.every(s => s.stripeAccountStatus === "enabled");
+                    return (
+                      <div className="px-4 pb-4 flex-shrink-0">
+                        {allTipsEnabled ? (
+                          <button
+                            onClick={handleCheckout}
+                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all hover:-translate-y-0.5"
+                            style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
+                          >
+                            <ShoppingCart size={14} />
+                            Queue {selectedIds.size} Song{selectedIds.size > 1 ? "s" : ""} →
+                          </button>
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px]
+                              text-white/20 border border-white/[0.04] cursor-not-allowed"
+                              style={{ background: "oklch(0.11 0.02 280)" }}
+                            >
+                              <DollarSign size={14} className="opacity-30" />
+                              Some creators haven't enabled tips
+                            </div>
+                            <p className="text-[11px] text-white/30 font-body text-center">
+                              Remove songs from creators without tips enabled
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Hint when nothing selected */}
                   {selectedIds.size === 0 && (
                     <div className="px-4 pb-4 flex-shrink-0">
-                      <button
-                        onClick={handleCheckout}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium
-                          text-white/60 hover:text-white transition-all border border-white/[0.08] hover:border-[#D4AF37]/30"
-                        style={{ background: "oklch(0.13 0.04 278)" }}
-                      >
-                        <DollarSign size={14} />
-                        Tip &amp; Queue This Song
-                      </button>
+                      {currentCard?.stripeAccountStatus === "enabled" ? (
+                        <button
+                          onClick={handleCheckout}
+                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium
+                            text-white/60 hover:text-white transition-all border border-white/[0.08] hover:border-[#D4AF37]/30"
+                          style={{ background: "oklch(0.13 0.04 278)" }}
+                        >
+                          <DollarSign size={14} />
+                          Tip &amp; Queue This Song
+                        </button>
+                      ) : (
+                        <div className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px]
+                          text-white/20 border border-white/[0.04] cursor-not-allowed"
+                          style={{ background: "oklch(0.11 0.02 280)" }}
+                          title="This creator hasn't enabled tips yet"
+                        >
+                          <DollarSign size={14} className="opacity-30" />
+                          Tips not enabled
+                        </div>
+                      )}
                     </div>
                   )}
                 </>

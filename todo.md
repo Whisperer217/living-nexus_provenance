@@ -879,3 +879,18 @@
 - [x] Wire notifications into comment add (notify song owner on new comment)
 - [x] Add Playlists and Signals nav items to MainLayout sidebar
 - [x] Update WhatsNewModal to v2.2.0
+
+## Phase 97: Witness Registry (Public WID Ledger)
+- [x] Fix getWitnessRegistry export error in server/db.ts
+- [x] Add witnessRegistry.list tRPC procedure (public, paginated, filtered by type)
+- [x] Build WitnessRegistryPage with All / Full Works / Lyrics tabs
+- [x] Remove duplicate Witness Records nav link, update to point to new /witness-registry route
+- [x] Update changelog to v2.3.0
+
+## Phase 98: Tip Button Consistency
+- [x] Audit all tip button locations across the platform
+- [x] Grey out / disable tip buttons for creators who have not enabled tips (stripeAccountStatus !== 'enabled')
+- [x] TrackPage tip jar: greyed out with "hasn't enabled tips yet" message when tips not enabled
+- [x] TogetherPage Jukebox: "Tip & Queue This Song" greyed out when currentCard.stripeAccountStatus !== 'enabled'
+- [x] TogetherPage Jukebox: multi-select Queue button blocked with message when any selected song's creator hasn't enabled tips
+- [x] All TS errors cleared (0 errors across entire codebase)

@@ -435,7 +435,7 @@ export default function TheaterPlayer() {
               <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {commentsData && commentsData.length > 0 ? (
-                    commentsData.map((c) => (
+                    commentsData.map((c: any) => (
                       <div key={c.id} className="flex gap-2.5">
                         <div
                           className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"

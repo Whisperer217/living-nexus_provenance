@@ -157,7 +157,7 @@ function PlaylistDetail({
   playlistId, onBack,
 }: { playlistId: number; onBack: () => void }) {
   const { user } = useAuth();
-  const { dispatch } = usePlayer();
+  const { addAndPlay, playQueueAt, openNowPlayingPanel } = usePlayer();
   const utils = trpc.useUtils();
   const [inviteHandle, setInviteHandle] = useState("");
   const [showInvite, setShowInvite] = useState(false);
@@ -197,7 +197,12 @@ function PlaylistDetail({
       id: t.song.id, title: t.song.title, artist: t.song.userId,
       artUrl: t.song.coverArtUrl, audioUrl: t.song.fileUrl, witnessId: t.song.witnessId,
     }));
-    dispatch({ type: "PLAY_SONG", song: queue[0] });
+    const playerTracks = tracks.map((t: any) => ({
+      id: String(t.song.id), title: t.song.title, artist: t.creator?.artistHandle || t.creator?.name || String(t.song.userId),
+      genre: t.song.genre || "", audioUrl: t.song.fileUrl, artUrl: t.song.coverArtUrl, witnessId: t.song.witnessId,
+    }));
+    playQueueAt(playerTracks, 0, "PLAYLIST");
+    openNowPlayingPanel();
   };
 
   const handleInvite = () => {
@@ -337,13 +342,7 @@ function PlaylistDetail({
                 </p>
               </div>
               <button
-                onClick={() => dispatch({
-                  type: "PLAY_SONG",
-                  song: {
-                    id: t.song.id, title: t.song.title, artist: t.song.userId,
-                    artUrl: t.song.coverArtUrl, audioUrl: t.song.fileUrl, witnessId: t.song.witnessId,
-                  },
-                })}
+                onClick={() => { addAndPlay({ id: String(t.song.id), title: t.song.title, artist: t.creator?.artistHandle || t.creator?.name || String(t.song.userId), genre: t.song.genre || "", audioUrl: t.song.fileUrl, artUrl: t.song.coverArtUrl, witnessId: t.song.witnessId }); openNowPlayingPanel(); }}
                 className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
                   bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] transition-all"
               >
