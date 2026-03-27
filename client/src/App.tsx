@@ -67,6 +67,7 @@ function Router() {
                 <Route path="/home" component={HomePage} />
                 <Route path="/explore" component={ExplorePage} />
                 <Route path="/together" component={TogetherPage} />
+                <Route path="/together/:roomCode" component={TogetherPage} />
                 <Route path="/upload" component={UploadPage} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />

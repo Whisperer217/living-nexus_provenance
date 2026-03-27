@@ -910,3 +910,17 @@
 - [x] DashboardPage: Tips Received → Gifts Received, Tip Payments → Gift Payments, activity feed Tip → Gift
 - [ ] Record play events in TogetherPage when a song starts playing in a room (Phase 100)
 - [ ] Update WhatsNewModal to v2.4.0 with gift economy changes (Phase 100)
+
+## Phase 100: Jukebox Room Share Links
+- [x] Audit current /together route and room join flow in App.tsx and TogetherPage
+- [x] Add /together/:roomCode route so direct links auto-join the room
+- [x] Update TogetherPage to read roomCode from URL param and skip the code-entry screen
+- [x] Add Share button to room panel that copies the direct link to clipboard
+- [x] Show a toast "Link copied — share it with anyone" on copy
+- [x] createRoom auto-copies share link to clipboard on creation
+- [x] joinRoom + leaveRoom update URL to reflect current room code
+- [ ] Add OG meta tags for /together/:roomCode (Phase 101)
+- [ ] Update WhatsNewModal to v2.4.0 with share link + gift economy changes (Phase 101)
+
+## Phase 100b: Offering Placement Fix
+- [x] Move "Leave an Offering" to the top of the queue panel with a gold border (1.5px solid #D4AF37 border, gold glow)

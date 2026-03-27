@@ -7,6 +7,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePlayer, DEMO_ROOMS } from "@/contexts/PlayerContext";
+import { useParams } from "wouter";
 import {
   Plus, Send, Copy, LogOut, Music2, DollarSign,
   SkipForward, ListMusic, Search, X, Fingerprint, Play,
@@ -781,6 +782,7 @@ function QueuePanel({ items }: { items: any[] }) {
 export default function TogetherPage() {
   const { state, setRoom } = usePlayer();
   const { user } = useAuth();
+  const params = useParams<{ roomCode?: string }>();
   const [joinCode, setJoinCode] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -788,6 +790,7 @@ export default function TogetherPage() {
   const [showOfferingModal, setShowOfferingModal] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  const autoJoinedRef = useRef(false);
 
   // Poll queue every 5 seconds when in a room
   const { data: queueData, refetch: refetchQueue } = trpc.jukebox.getQueue.useQuery(
@@ -851,7 +854,9 @@ export default function TogetherPage() {
     setRoom({ code, name: "My Sanctuary", listeners: ["You"] });
     setIsHost(true);
     setMessages([]);
-    toast.success(`🎧 Room created! Share code: ${code}`);
+    window.history.replaceState({}, "", `/together/${code}`);
+    toast.success(`🎧 Room created! Share link copied to clipboard.`);
+    navigator.clipboard.writeText(`${window.location.origin}/together/${code}`).catch(() => {});
   };
 
   const joinRoom = (code?: string) => {
@@ -863,6 +868,7 @@ export default function TogetherPage() {
     setIsHost(false);
     setJoinCode("");
     setMessages([]);
+    window.history.replaceState({}, "", `/together/${c}`);
     toast.success(`✅ Joined room ${c}`);
     setTimeout(() => addMsg("Nova", "anyone know this track? 🔥"), 1200);
     setTimeout(() => addMsg("Kai", "yesss absolute banger 🙌"), 3000);
@@ -874,6 +880,36 @@ export default function TogetherPage() {
     setIsHost(false);
     prevQueueLen.current = 0;
     toast("Left the room");
+    // Clear the room code from URL
+    window.history.replaceState({}, "", "/together");
+  };
+
+  // Auto-join from URL param: /together/:roomCode
+  useEffect(() => {
+    if (autoJoinedRef.current) return;
+    const urlCode = params.roomCode;
+    if (urlCode && !state.room) {
+      autoJoinedRef.current = true;
+      const c = urlCode.trim().toUpperCase();
+      const demo = DEMO_ROOMS.find(r => r.code === c);
+      const names = demo ? ["You", "Nova", "Kai", "Mia"].slice(0, demo.listeners) : ["You"];
+      setRoom({ code: c, name: demo?.name || "Music Sanctuary", listeners: names });
+      setIsHost(false);
+      setMessages([]);
+      toast.success(`✅ Joined room ${c}`);
+      setTimeout(() => addMsg("Nova", "anyone know this track? 🔥"), 1200);
+      setTimeout(() => addMsg("Kai", "yesss absolute banger 🙌"), 3000);
+    }
+  }, [params.roomCode]);
+
+  const shareLink = () => {
+    if (!state.room) return;
+    const url = `${window.location.origin}/together/${state.room.code}`;
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("🔗 Link copied — share it with anyone!");
+    }).catch(() => {
+      toast.error("Could not copy link");
+    });
   };
 
   const addMsg = (user: string, text: string, isJukebox = false) => {
@@ -977,12 +1013,23 @@ export default function TogetherPage() {
                       <div className="pulse-dot flex-shrink-0" />
                       <span className="font-heading text-[15px] text-white/90 tracking-wide truncate">{state.room.name}</span>
                     </div>
-                    {/* Right: Copy + Leave */}
+                    {/* Right: Share + Copy + Leave */}
                     <div className="flex gap-2 flex-shrink-0">
+                      <button onClick={shareLink}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
+                          transition-all border"
+                        style={{
+                          color: "#D4AF37",
+                          background: "rgba(212,175,55,0.07)",
+                          borderColor: "rgba(212,175,55,0.30)",
+                        }}
+                        title="Copy shareable room link">
+                        <Globe size={11} /> Share Link
+                      </button>
                       <button onClick={copyCode}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
                           text-white/50 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-all border border-white/[0.08]">
-                        <Copy size={11} /> Copy
+                        <Copy size={11} /> Code
                       </button>
                       <button onClick={leaveRoom}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
@@ -1069,6 +1116,23 @@ export default function TogetherPage() {
                 />
               )}
 
+              {/* Leave an Offering — gold border, top of queue */}
+              <button
+                onClick={() => setShowOfferingModal(true)}
+                className="w-full mb-3 flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-semibold
+                  transition-all hover:-translate-y-0.5"
+                style={{
+                  background: "oklch(0.13 0.04 278)",
+                  border: "1.5px solid #D4AF37",
+                  color: "#D4AF37",
+                  boxShadow: "0 0 16px rgba(212,175,55,0.18), inset 0 0 24px rgba(212,175,55,0.05)",
+                }}
+              >
+                <span className="text-base">🎶</span>
+                Leave an Offering
+                <span className="text-[10px] font-body text-[#D4AF37]/50 ml-1">· shared with all creators</span>
+              </button>
+
               {/* Queue */}
               <div className="mb-3">
                 <QueuePanel items={upNext} />
@@ -1086,20 +1150,6 @@ export default function TogetherPage() {
               </button>
               <p className="text-[11px] text-white/65 font-body text-center mt-2">
                 Free · browse &amp; queue any track
-              </p>
-
-              {/* Leave an Offering jar */}
-              <button
-                onClick={() => setShowOfferingModal(true)}
-                className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl font-body text-[13px]
-                  text-[#D4AF37]/70 hover:text-[#D4AF37] transition-all border border-[#D4AF37]/20 hover:border-[#D4AF37]/40"
-                style={{ background: "oklch(0.13 0.04 278)" }}
-              >
-                <span className="text-base">🎶</span>
-                Leave an Offering
-              </button>
-              <p className="text-[11px] text-white/40 font-body text-center mt-1">
-                Voluntary gift · shared among all creators in this room
               </p>
             </div>
           </div>
