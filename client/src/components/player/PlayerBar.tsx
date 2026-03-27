@@ -49,9 +49,11 @@ export default function PlayerBar() {
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
+  const videoWitnessId = (songDetail?.song as any)?.videoWitnessId as string | null | undefined;
 
   // Background video ref — always muted, synced to audio play state
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoBuffering, setVideoBuffering] = useState(true);
 
   // Sync background video to audio play/pause state
   useEffect(() => {
@@ -64,11 +66,40 @@ export default function PlayerBar() {
     }
   }, [state.isPlaying, isExpanded, videoUrl]);
 
+  // Buffering event listeners — hold cover art while video loads
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !videoUrl) return;
+    const onWaiting  = () => setVideoBuffering(true);
+    const onStalled  = () => setVideoBuffering(true);
+    const onCanPlay  = () => setVideoBuffering(false);
+    const onPlaying  = () => setVideoBuffering(false);
+    const onError    = () => setVideoBuffering(false);
+    vid.addEventListener("waiting",  onWaiting);
+    vid.addEventListener("stalled",  onStalled);
+    vid.addEventListener("canplay",  onCanPlay);
+    vid.addEventListener("canplaythrough", onCanPlay);
+    vid.addEventListener("playing",  onPlaying);
+    vid.addEventListener("error",    onError);
+    return () => {
+      vid.removeEventListener("waiting",  onWaiting);
+      vid.removeEventListener("stalled",  onStalled);
+      vid.removeEventListener("canplay",  onCanPlay);
+      vid.removeEventListener("canplaythrough", onCanPlay);
+      vid.removeEventListener("playing",  onPlaying);
+      vid.removeEventListener("error",    onError);
+    };
+  }, [videoUrl]);
+
   // Reset video when track changes
   useEffect(() => {
     const vid = videoRef.current;
     if (vid) { vid.pause(); vid.currentTime = 0; }
+    setVideoBuffering(true);
   }, [currentTrack?.id]);
+
+  // Show video only when playing AND not buffering
+  const showVideo = state.isPlaying && !videoBuffering;
 
   // Comments (only fetched when expanded, polled every 15 s for live feel)
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
@@ -191,37 +222,53 @@ export default function PlayerBar() {
           {/* LEFT — Art / Video (256px wide) */}
           {/* Cover art stays static until play; muted video fades in on play */}
           <div className="w-64 h-full flex-shrink-0 relative overflow-hidden">
-            {/* Background video — always muted, loops, fades in when playing */}
+            {/* Background video — always muted, loops, fades in when playing + buffered */}
             {videoUrl && (
               <video
                 ref={videoRef}
                 src={videoUrl}
                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                style={{ opacity: state.isPlaying ? 1 : 0 }}
+                style={{ opacity: showVideo ? 1 : 0 }}
                 muted
                 loop
                 playsInline
                 preload="metadata"
               />
             )}
-            {/* Cover art — sits on top, fades out when video is playing */}
+            {/* Cover art — sits on top, fades out only when video is playing AND buffered */}
             {currentTrack.artUrl ? (
               <img
                 src={currentTrack.artUrl}
                 alt={currentTrack.title}
                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                style={{ opacity: (videoUrl && state.isPlaying) ? 0 : 1 }}
+                style={{ opacity: (videoUrl && showVideo) ? 0 : 1 }}
               />
             ) : (
               <div
                 className="absolute inset-0 w-full h-full flex items-center justify-center text-5xl transition-opacity duration-500"
                 style={{
                   background: currentTrack.bg || "oklch(0.12 0.06 270)",
-                  opacity: (videoUrl && state.isPlaying) ? 0 : 1,
+                  opacity: (videoUrl && showVideo) ? 0 : 1,
                 }}
               >
                 {currentTrack.emoji || "🎵"}
               </div>
+            )}
+            {/* Video WID badge — top-right, links to verify page */}
+            {videoWitnessId && (
+              <button
+                onClick={() => navigate(`/verify/${videoWitnessId}`)}
+                className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide transition-all z-20"
+                style={{
+                  background: "oklch(0.22 0.08 145 / 0.88)",
+                  border: "1px solid oklch(0.55 0.18 145 / 0.5)",
+                  color: "oklch(0.82 0.18 145)",
+                  backdropFilter: "blur(4px)",
+                }}
+                title="Video cryptographically witnessed — click to verify"
+              >
+                ✓ Video WID
+              </button>
             )}
             {/* Gold gradient fade to center */}
             <div

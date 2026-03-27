@@ -196,6 +196,8 @@ export default function MobilePlayerPanel() {
   // Background video — always muted, auto-fades in when playing
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
+  const videoWitnessId = (songDetail?.song as any)?.videoWitnessId as string | null | undefined;
+  const [videoBuffering, setVideoBuffering] = useState(true);
 
   // Sync background video to audio play/pause state
   useEffect(() => {
@@ -208,9 +210,38 @@ export default function MobilePlayerPanel() {
     }
   }, [state.isPlaying, open, videoUrl]);
 
+  // Buffering event listeners — hold cover art while video loads
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !videoUrl) return;
+    const onWaiting  = () => setVideoBuffering(true);
+    const onStalled  = () => setVideoBuffering(true);
+    const onCanPlay  = () => setVideoBuffering(false);
+    const onPlaying  = () => setVideoBuffering(false);
+    const onError    = () => setVideoBuffering(false);
+    vid.addEventListener("waiting",  onWaiting);
+    vid.addEventListener("stalled",  onStalled);
+    vid.addEventListener("canplay",  onCanPlay);
+    vid.addEventListener("canplaythrough", onCanPlay);
+    vid.addEventListener("playing",  onPlaying);
+    vid.addEventListener("error",    onError);
+    return () => {
+      vid.removeEventListener("waiting",  onWaiting);
+      vid.removeEventListener("stalled",  onStalled);
+      vid.removeEventListener("canplay",  onCanPlay);
+      vid.removeEventListener("canplaythrough", onCanPlay);
+      vid.removeEventListener("playing",  onPlaying);
+      vid.removeEventListener("error",    onError);
+    };
+  }, [videoUrl]);
+
+  // Show video only when playing AND not buffering
+  const showVideo = state.isPlaying && !videoBuffering;
+
   useEffect(() => {
     const vid = videoRef.current;
     if (vid) { vid.pause(); vid.currentTime = 0; }
+    setVideoBuffering(true);
     setCinemaMode(false);
     setCinemaTab("lyrics");
     setNewComment("");
@@ -408,34 +439,34 @@ export default function MobilePlayerPanel() {
                 animation: "panelArtFadeIn 0.4s ease",
               }}
             >
-              {/* Background video — always muted, fades in when playing */}
+              {/* Background video — always muted, fades in when playing + buffered */}
               {videoUrl && (
                 <video
                   ref={videoRef}
                   src={videoUrl}
                   className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                  style={{ opacity: state.isPlaying ? 1 : 0 }}
+                  style={{ opacity: showVideo ? 1 : 0 }}
                   playsInline
                   loop
                   muted
                   preload="metadata"
                 />
               )}
-              {/* Cover art — sits on top, fades out when video is playing */}
+              {/* Cover art — sits on top, fades out only when video is playing AND buffered */}
               {currentTrack?.artUrl ? (
                 <img
                   src={currentTrack.artUrl}
                   alt=""
                   className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-500"
-                  style={{ opacity: (videoUrl && state.isPlaying) ? 0 : 1 }}
+                  style={{ opacity: (videoUrl && showVideo) ? 0 : 1 }}
                 />
               ) : (
                 <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                   <Music className="w-1/2 h-1/2 opacity-30 text-white" />
                 </div>
               )}
-              {/* Video indicator badge — shown when video is available and playing */}
-              {videoUrl && state.isPlaying && (
+              {/* Video indicator badge — shown when video is active */}
+              {videoUrl && showVideo && (
                 <div
                   className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold tracking-wide"
                   style={{
@@ -448,6 +479,23 @@ export default function MobilePlayerPanel() {
                   <Video size={10} />
                   Live
                 </div>
+              )}
+              {/* Video WID badge — top-right, links to verify page */}
+              {videoWitnessId && (
+                <button
+                  onClick={() => navigate(`/verify/${videoWitnessId}`)}
+                  className="absolute top-2 right-12 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide transition-all"
+                  style={{
+                    background: "oklch(0.22 0.08 145 / 0.88)",
+                    border: "1px solid oklch(0.55 0.18 145 / 0.5)",
+                    color: "oklch(0.82 0.18 145)",
+                    backdropFilter: "blur(4px)",
+                    zIndex: 20,
+                  }}
+                  title="Video cryptographically witnessed"
+                >
+                  ✓ Video WID
+                </button>
               )}
 
               {/* Vertical volume bar — right edge of art */}

@@ -845,3 +845,8 @@
 - [x] TheaterPlayer: cover art static until play, muted video fades in on play
 - [x] All players: video always forced muted (separate from audio stream)
 - [x] Update WhatsNewModal to v2.0 with background video, Witness Network, Field Notes, Lexicon, WID Spec entries
+
+## Phase 93: Video Buffering Fallback + Video WID Badge
+- [x] PlayerBar expanded: hold cover art while video is buffering (waiting/canplay events), video WID badge pill
+- [x] TheaterPlayer: hold cover art while video is buffering, video WID badge pill
+- [x] MobilePlayerPanel: hold cover art while video is buffering, video WID badge pill
