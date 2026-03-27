@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
-  ChevronRight, Headphones, Twitter, Instagram, Youtube,
+  ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
 } from "lucide-react";
 import { usePlayer } from "@/contexts/PlayerContext";
 
@@ -319,6 +319,26 @@ export default function CreatorProfilePage() {
 
   const { creator, songs } = data;
   const isOwner = user?.id === creator.id;
+
+  // ── Witness Network ──────────────────────────────────────────────
+  const utils = trpc.useUtils();
+  const witnessStatusQuery = trpc.witness.status.useQuery(
+    { creatorId: creator.id },
+    { enabled: !!user && !isOwner }
+  );
+  const witnessToggle = trpc.witness.toggle.useMutation({
+    onSuccess: (result) => {
+      utils.witness.status.invalidate({ creatorId: creator.id });
+      utils.witness.count.invalidate({ creatorId: creator.id });
+      toast.success(result.witnessing
+        ? `You are now witnessing ${creator.artistHandle || creator.name}`
+        : "Witness removed from your network"
+      );
+    },
+  });
+  const witnessCount = witnessStatusQuery.data?.count ?? 0;
+  const isWitnessingCreator = witnessStatusQuery.data?.witnessing ?? false;
+
   const featuredSongs = songs.slice(0, 8);
   const totalPlays = songs.reduce((acc: number, s: any) => acc + (s.playCount || 0), 0);
   const totalTips = songs.reduce((acc: number, s: any) => acc + (s.tipCount || 0), 0);
@@ -455,6 +475,24 @@ export default function CreatorProfilePage() {
                 <DollarSign className="w-3.5 h-3.5 mr-1" /> Tip Artist
               </Button>
             ) : null}
+            {/* Witness button — only shown to logged-in non-owners */}
+            {user && !isOwner && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => witnessToggle.mutate({ creatorId: creator.id })}
+                disabled={witnessToggle.isPending}
+                style={isWitnessingCreator
+                  ? { background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", borderColor: "oklch(0.75 0.18 85 / 0.4)" }
+                  : { borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.7 0.04 280)" }
+                }
+              >
+                {isWitnessingCreator
+                  ? <><EyeOff className="w-3.5 h-3.5 mr-1" /> Witnessed ({witnessCount})</>
+                  : <><Eye className="w-3.5 h-3.5 mr-1" /> Witness ({witnessCount})</>
+                }
+              </Button>
+            )}
             <button
               onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Profile link copied!"); }}
               className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-white/[0.06] transition-colors"

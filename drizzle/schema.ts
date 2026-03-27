@@ -312,3 +312,26 @@ export const fieldNotes = mysqlTable("field_notes", {
 });
 export type FieldNote = typeof fieldNotes.$inferSelect;
 export type InsertFieldNote = typeof fieldNotes.$inferInsert;
+
+// ─── Witness Network ──────────────────────────────────────────────────────────
+// witnesses: "I Witness this creator's work" (directional, like follow but with meaning)
+export const witnesses = mysqlTable("witnesses", {
+  id: int("id").autoincrement().primaryKey(),
+  witnesserId: int("witnesserId").notNull(),   // the person doing the witnessing
+  witnessedId: int("witnessedId").notNull(),   // the creator being witnessed
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Witness = typeof witnesses.$inferSelect;
+export type InsertWitness = typeof witnesses.$inferInsert;
+
+// references: "I cite this creator/work in my creation" (documented lineage)
+export const creativeReferences = mysqlTable("creative_references", {
+  id: int("id").autoincrement().primaryKey(),
+  fromUserId: int("fromUserId").notNull(),     // creator making the reference
+  toUserId: int("toUserId"),                   // creator being referenced (optional)
+  toSongId: int("toSongId"),                   // song/WID being referenced (optional)
+  context: text("context"),                    // "This piece builds on ideas from..."
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type CreativeReference = typeof creativeReferences.$inferSelect;
+export type InsertCreativeReference = typeof creativeReferences.$inferInsert;

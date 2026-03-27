@@ -13,7 +13,7 @@ import {
   MapPin, Globe, Twitter, Instagram, Youtube, Share2,
   Play, ExternalLink, Copy, TrendingUp, Loader2,
   CheckCircle, AlertCircle, Zap, LogOut,
-  Fingerprint, ScrollText, Activity, Upload, Star, Layers,
+  Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -106,11 +106,12 @@ export default function ProfilePage() {
     enabled: !!user,
   });
 
-  const [activeTab, setActiveTab] = useState<"tracks" | "stats" | "activity" | "payments">("tracks");
+  const [activeTab, setActiveTab] = useState<"tracks" | "stats" | "activity" | "payments" | "network">("tracks");
 
   // ── Identity data ────────────────────────────────────────────────
   const { data: myStats } = trpc.profile.myStats.useQuery(undefined, { enabled: !!user });
   const { data: myActivity = [] } = trpc.profile.myActivity.useQuery({ limit: 20 }, { enabled: !!user && activeTab === "activity" });
+  const { data: witnessNetwork } = trpc.witness.network.useQuery(undefined, { enabled: !!user && activeTab === "network" });
 
   // ── Stripe Connect ───────────────────────────────────────────────
   const { data: connectData, refetch: refetchConnect } = trpc.tips.connectStatus.useQuery(
@@ -462,7 +463,7 @@ export default function ProfilePage() {
 
         {/* ── Tabs ── */}
         <div className="flex gap-1 mb-5 border-b border-white/[0.07]">
-          {(["tracks","activity","stats","payments"] as const).map(tab => (
+          {(["tracks","activity","network","stats","payments"] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -686,6 +687,77 @@ export default function ProfilePage() {
                   <div className="text-[11px] font-body text-white/65 mt-0.5">{s.sub}</div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Witness Network tab ── */}
+        {activeTab === "network" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
+                <div className="text-[22px] font-heading mb-1" style={{ color: "#D4AF37" }}>{witnessNetwork?.witnessing?.length ?? 0}</div>
+                <div className="text-[12px] font-body text-white/70">Witnessing</div>
+                <div className="text-[11px] font-body text-white/40 mt-0.5">creators you witness</div>
+              </div>
+              <div className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
+                <div className="text-[22px] font-heading mb-1" style={{ color: "#A78BFA" }}>{witnessNetwork?.witnessedBy?.length ?? 0}</div>
+                <div className="text-[12px] font-body text-white/70">Witnesses</div>
+                <div className="text-[11px] font-body text-white/40 mt-0.5">creators witnessing you</div>
+              </div>
+            </div>
+            <div>
+              <div className="text-[12px] font-heading tracking-wider text-white/40 mb-3 flex items-center gap-2">
+                <Eye size={12} /> WITNESSING
+              </div>
+              {!witnessNetwork?.witnessing?.length ? (
+                <div className="text-center py-8">
+                  <Users size={28} className="mx-auto mb-3 text-white/15" />
+                  <p className="text-white/40 font-body text-[13px]">You haven't witnessed any creators yet</p>
+                  <p className="text-white/25 font-body text-[11px] mt-1">Visit a creator's profile and click Witness to add them</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {(witnessNetwork?.witnessing ?? []).map((creator: any) => (
+                    <div key={creator.id} className="flex items-center gap-3 p-3 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
+                      <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold" style={{ background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))" }}>
+                        {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover object-top" /> : (creator.artistHandle || creator.name || "?")[0].toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-heading truncate" style={{ color: "oklch(0.9 0.02 85)" }}>{creator.artistHandle || creator.name}</p>
+                        <p className="text-[11px] font-body text-white/40">{creator.songCount ?? 0} tracks</p>
+                      </div>
+                      <a href={`/creator/${creator.id}`} className="text-[11px] font-body px-2 py-1 rounded-lg hover:bg-white/[0.06] transition-colors" style={{ color: "oklch(0.84 0.155 85)" }}>View</a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="mt-4">
+              <div className="text-[12px] font-heading tracking-wider text-white/40 mb-3 flex items-center gap-2">
+                <Users size={12} /> MY WITNESSES
+              </div>
+              {!witnessNetwork?.witnessedBy?.length ? (
+                <div className="text-center py-6">
+                  <p className="text-white/40 font-body text-[13px]">No witnesses yet</p>
+                  <p className="text-white/25 font-body text-[11px] mt-1">Share your profile to grow your witness network</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {(witnessNetwork?.witnessedBy ?? []).map((creator: any) => (
+                    <div key={creator.id} className="flex items-center gap-3 p-3 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
+                      <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold" style={{ background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))" }}>
+                        {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover object-top" /> : (creator.artistHandle || creator.name || "?")[0].toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-heading truncate" style={{ color: "oklch(0.9 0.02 85)" }}>{creator.artistHandle || creator.name}</p>
+                        <p className="text-[11px] font-body text-white/40">{creator.songCount ?? 0} tracks</p>
+                      </div>
+                      <a href={`/creator/${creator.id}`} className="text-[11px] font-body px-2 py-1 rounded-lg hover:bg-white/[0.06] transition-colors" style={{ color: "oklch(0.84 0.155 85)" }}>View</a>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

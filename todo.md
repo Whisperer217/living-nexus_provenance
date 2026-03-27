@@ -822,3 +822,14 @@
 - [x] Created /doctrine/wid-spec page with public download for WID Public Specification v1.0 PDF
 - [x] Added WID Specification nav item to SYSTEM group in MainLayout sidebar
 - [x] Wired CDN PDF download button — https://d2xsxph8kpxj0f.cloudfront.net/...WID_Public_Specification_v1.0.pdf
+
+## Phase 88: Witness Network
+- [ ] Add `witnesses` table to schema (witnesserId, witnessedId, createdAt)
+- [ ] Add `references` table to schema (fromUserId, toUserId, toSongId, context, createdAt)
+- [ ] Run db:push migration
+- [ ] Add db helpers: witnessCreator, unwatchCreator, isWitnessing, getWitnessCount, getWitnessedByCount, createReference, getReferencesForSong, getReferencesForUser
+- [ ] Add tRPC procedures: witness.toggle, witness.status, witness.network, reference.create, reference.list
+- [ ] Add Witness button to CreatorProfilePage (replaces generic follow)
+- [ ] Add Reference/Cite panel to SongDetailPage
+- [ ] Add Witness Network tab to ProfilePage showing who you witness + who witnesses you
+- [ ] Meaningful notifications: "You were referenced in a witness record", "Your work was cited in a derivation"

@@ -1002,3 +1002,151 @@ export async function deleteFieldNote(id: number, userId: number) {
     .set({ deletedAt: new Date() })
     .where(and(eq(fieldNotes.id, id), eq(fieldNotes.userId, userId)));
 }
+
+// ─── Witness Network ──────────────────────────────────────────────────────────
+
+export async function witnessCreator(witnesserId: number, witnessedId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { witnesses } = await import("../drizzle/schema");
+  try {
+    await (db as any).insert(witnesses).values({ witnesserId, witnessedId });
+  } catch (_e) { /* duplicate — already witnessing */ }
+}
+
+export async function unwatchCreator(witnesserId: number, witnessedId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { witnesses } = await import("../drizzle/schema");
+  await (db as any)
+    .delete(witnesses)
+    .where(and(eq(witnesses.witnesserId, witnesserId), eq(witnesses.witnessedId, witnessedId)));
+}
+
+export async function isWitnessing(witnesserId: number, witnessedId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const { witnesses } = await import("../drizzle/schema");
+  const rows = await (db as any)
+    .select({ id: witnesses.id })
+    .from(witnesses)
+    .where(and(eq(witnesses.witnesserId, witnesserId), eq(witnesses.witnessedId, witnessedId)))
+    .limit(1);
+  return rows.length > 0;
+}
+
+export async function getWitnessCount(witnessedId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const { witnesses } = await import("../drizzle/schema");
+  const rows = await (db as any)
+    .select({ id: witnesses.id })
+    .from(witnesses)
+    .where(eq(witnesses.witnessedId, witnessedId));
+  return rows.length;
+}
+
+export async function getWitnessedByCount(witnesserId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const { witnesses } = await import("../drizzle/schema");
+  const rows = await (db as any)
+    .select({ id: witnesses.id })
+    .from(witnesses)
+    .where(eq(witnesses.witnesserId, witnesserId));
+  return rows.length;
+}
+
+export async function getWitnessNetwork(userId: number) {
+  const db = await getDb();
+  if (!db) return { witnessing: [], witnessedBy: [] };
+  const { witnesses } = await import("../drizzle/schema");
+  const witnessing = await (db as any)
+    .select({
+      id: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      profilePhotoUrl: users.profilePhotoUrl,
+      licenseStatus: users.licenseStatus,
+      witnessedAt: witnesses.createdAt,
+    })
+    .from(witnesses)
+    .innerJoin(users, eq(users.id, witnesses.witnessedId))
+    .where(eq(witnesses.witnesserId, userId))
+    .orderBy(witnesses.createdAt);
+  const witnessedBy = await (db as any)
+    .select({
+      id: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      profilePhotoUrl: users.profilePhotoUrl,
+      licenseStatus: users.licenseStatus,
+      witnessedAt: witnesses.createdAt,
+    })
+    .from(witnesses)
+    .innerJoin(users, eq(users.id, witnesses.witnesserId))
+    .where(eq(witnesses.witnessedId, userId))
+    .orderBy(witnesses.createdAt);
+  return { witnessing, witnessedBy };
+}
+
+export async function createReference(
+  fromUserId: number,
+  opts: { toUserId?: number; toSongId?: number; context?: string }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { creativeReferences } = await import("../drizzle/schema");
+  const [result] = await (db as any).insert(creativeReferences).values({
+    fromUserId,
+    toUserId: opts.toUserId ?? null,
+    toSongId: opts.toSongId ?? null,
+    context: opts.context ?? null,
+  });
+  return result;
+}
+
+export async function getReferencesForSong(songId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { creativeReferences } = await import("../drizzle/schema");
+  return (db as any)
+    .select({
+      id: creativeReferences.id,
+      context: creativeReferences.context,
+      createdAt: creativeReferences.createdAt,
+      fromUser: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(creativeReferences)
+    .innerJoin(users, eq(users.id, creativeReferences.fromUserId))
+    .where(eq(creativeReferences.toSongId, songId))
+    .orderBy(creativeReferences.createdAt);
+}
+
+export async function getReferencesForUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { creativeReferences } = await import("../drizzle/schema");
+  return (db as any)
+    .select({
+      id: creativeReferences.id,
+      context: creativeReferences.context,
+      createdAt: creativeReferences.createdAt,
+      toSongId: creativeReferences.toSongId,
+      fromUser: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(creativeReferences)
+    .innerJoin(users, eq(users.id, creativeReferences.fromUserId))
+    .where(eq(creativeReferences.toUserId, userId))
+    .orderBy(creativeReferences.createdAt);
+}

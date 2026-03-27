@@ -27,6 +27,8 @@ import {
   getCreatorForOg,
   createFieldNote, getFieldNotesByUser, getPublicFieldNotes,
   updateFieldNote, deleteFieldNote,
+  witnessCreator, unwatchCreator, isWitnessing, getWitnessCount,
+  getWitnessNetwork, createReference, getReferencesForSong, getReferencesForUser,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -995,6 +997,69 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
     markWelcomeSeen: protectedProcedure.mutation(async ({ ctx }) => {
       await markWelcomeSeen(ctx.user.id);
       return { ok: true };
+    }),
+  }),
+
+  // ── Witness Network ────────────────────────────────────────────────────────
+  witness: router({
+    /** Toggle witnessing a creator — witness if not witnessing, unwitness if already witnessing */
+    toggle: protectedProcedure
+      .input(z.object({ creatorId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.id === input.creatorId) throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot witness yourself" });
+        const already = await isWitnessing(ctx.user.id, input.creatorId);
+        if (already) {
+          await unwatchCreator(ctx.user.id, input.creatorId);
+          return { witnessing: false };
+        } else {
+          await witnessCreator(ctx.user.id, input.creatorId);
+          return { witnessing: true };
+        }
+      }),
+    /** Check if the current user is witnessing a creator */
+    status: protectedProcedure
+      .input(z.object({ creatorId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const witnessing = await isWitnessing(ctx.user.id, input.creatorId);
+        const count = await getWitnessCount(input.creatorId);
+        return { witnessing, count };
+      }),
+    /** Public witness count for a creator (no auth required) */
+    count: publicProcedure
+      .input(z.object({ creatorId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const count = await getWitnessCount(input.creatorId);
+        return { count };
+      }),
+    /** Get the current user's witness network (who they witness + who witnesses them) */
+    network: protectedProcedure.query(async ({ ctx }) => {
+      return getWitnessNetwork(ctx.user.id);
+    }),
+  }),
+
+  // ── Creative References ────────────────────────────────────────────────────
+  reference: router({
+    /** Create a reference/citation linking a creator's work to another creator or song */
+    create: protectedProcedure
+      .input(z.object({
+        toUserId: z.number().int().positive().optional(),
+        toSongId: z.number().int().positive().optional(),
+        context: z.string().max(500).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!input.toUserId && !input.toSongId) throw new TRPCError({ code: "BAD_REQUEST", message: "Must reference a creator or a song" });
+        await createReference(ctx.user.id, input);
+        return { ok: true };
+      }),
+    /** Get all references made to a specific song */
+    forSong: publicProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return getReferencesForSong(input.songId);
+      }),
+    /** Get all references made to the current user's work */
+    forMe: protectedProcedure.query(async ({ ctx }) => {
+      return getReferencesForUser(ctx.user.id);
     }),
   }),
 });
