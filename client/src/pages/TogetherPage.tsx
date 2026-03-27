@@ -670,12 +670,32 @@ function NowPlayingPanel({
   onEnded: () => void;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (audioRef.current && item?.songFileUrl) {
-      audioRef.current.src = item.songFileUrl;
-      audioRef.current.play().catch(() => {});
-    }
+    if (!audioRef.current || !item?.songFileUrl) return;
+    // Clear any previous fallback timer
+    if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+    audioRef.current.src = item.songFileUrl;
+    audioRef.current.currentTime = 0;
+    const playPromise = audioRef.current.play();
+    if (playPromise) playPromise.catch(() => {});
+    // Fallback: if audio duration is known, auto-advance after duration + 2s buffer
+    const handleLoadedMeta = () => {
+      if (!audioRef.current) return;
+      const dur = audioRef.current.duration;
+      if (dur && isFinite(dur)) {
+        if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+        fallbackTimerRef.current = setTimeout(() => {
+          onEnded();
+        }, (dur + 2) * 1000);
+      }
+    };
+    audioRef.current.addEventListener("loadedmetadata", handleLoadedMeta);
+    return () => {
+      if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+      audioRef.current?.removeEventListener("loadedmetadata", handleLoadedMeta);
+    };
   }, [item?.id]);
 
   if (!item) return null;
@@ -714,11 +734,15 @@ function NowPlayingPanel({
             </div>
           )}
 
-          {/* Tipper */}
+          {/* Queuer + optional gift label */}
           <div className="text-[11px] text-white/75 font-body">
             Queued by <span className="text-[#A78BFA]/80">{item.tipperName}</span>
-            {" · "}
-            <span className="text-[#D4AF37]/60">${(item.tipAmountCents / 100).toFixed(2)} tip</span>
+            {item.tipAmountCents > 0 && (
+              <>
+                {" · "}
+                <span className="text-[#D4AF37]/60">gifted ${(item.tipAmountCents / 100).toFixed(2)}</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -836,9 +860,12 @@ export default function TogetherPage() {
     if (pending.length > prevQueueLen.current) {
       const newest = pending[pending.length - 1];
       if (newest) {
+        const giftLabel = newest.tipAmountCents > 0
+          ? ` · gifted $${(newest.tipAmountCents / 100).toFixed(2)}`
+          : "";
         addMsg(
           "🎵 Jukebox",
-          `${newest.tipperName} tipped $${(newest.tipAmountCents / 100).toFixed(2)} to ${newest.creatorName || "the creator"} — "${newest.songTitle}" is up next 🎵`,
+          `${newest.tipperName} queued "${newest.songTitle}"${giftLabel} 🎵`,
           true
         );
       }
@@ -854,6 +881,8 @@ export default function TogetherPage() {
     setRoom({ code, name: "My Sanctuary", listeners: ["You"] });
     setIsHost(true);
     setMessages([]);
+    sessionStorage.setItem("lnx_room_code", code);
+    sessionStorage.setItem("lnx_room_host", "1");
     window.history.replaceState({}, "", `/together/${code}`);
     toast.success(`🎧 Room created! Share link copied to clipboard.`);
     navigator.clipboard.writeText(`${window.location.origin}/together/${code}`).catch(() => {});
@@ -868,6 +897,8 @@ export default function TogetherPage() {
     setIsHost(false);
     setJoinCode("");
     setMessages([]);
+    sessionStorage.setItem("lnx_room_code", c);
+    sessionStorage.removeItem("lnx_room_host");
     window.history.replaceState({}, "", `/together/${c}`);
     toast.success(`✅ Joined room ${c}`);
     setTimeout(() => addMsg("Nova", "anyone know this track? 🔥"), 1200);
@@ -879,26 +910,33 @@ export default function TogetherPage() {
     setMessages([]);
     setIsHost(false);
     prevQueueLen.current = 0;
+    sessionStorage.removeItem("lnx_room_code");
+    sessionStorage.removeItem("lnx_room_host");
     toast("Left the room");
     // Clear the room code from URL
     window.history.replaceState({}, "", "/together");
   };
 
-  // Auto-join from URL param: /together/:roomCode
+  // Auto-join from URL param OR sessionStorage (persists across page reload)
   useEffect(() => {
     if (autoJoinedRef.current) return;
     const urlCode = params.roomCode;
-    if (urlCode && !state.room) {
+    const savedCode = sessionStorage.getItem("lnx_room_code");
+    const savedHost = sessionStorage.getItem("lnx_room_host") === "1";
+    const codeToUse = urlCode || savedCode;
+    if (codeToUse && !state.room) {
       autoJoinedRef.current = true;
-      const c = urlCode.trim().toUpperCase();
+      const c = codeToUse.trim().toUpperCase();
       const demo = DEMO_ROOMS.find(r => r.code === c);
       const names = demo ? ["You", "Nova", "Kai", "Mia"].slice(0, demo.listeners) : ["You"];
       setRoom({ code: c, name: demo?.name || "Music Sanctuary", listeners: names });
-      setIsHost(false);
+      setIsHost(savedHost || false);
       setMessages([]);
-      toast.success(`✅ Joined room ${c}`);
-      setTimeout(() => addMsg("Nova", "anyone know this track? 🔥"), 1200);
-      setTimeout(() => addMsg("Kai", "yesss absolute banger 🙌"), 3000);
+      // Update URL if we restored from sessionStorage without URL param
+      if (!urlCode && savedCode) {
+        window.history.replaceState({}, "", `/together/${c}`);
+      }
+      toast.success(`✅ Rejoined room ${c}`);
     }
   }, [params.roomCode]);
 

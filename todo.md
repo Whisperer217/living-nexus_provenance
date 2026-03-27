@@ -924,3 +924,15 @@
 
 ## Phase 100b: Offering Placement Fix
 - [x] Move "Leave an Offering" to the top of the queue panel with a gold border (1.5px solid #D4AF37 border, gold glow)
+
+## Phase 101: Jukebox Browser Bug Fix
+- [x] Root cause identified: live site running old build without freeQueue procedure — fix is to Publish latest checkpoint from Management UI
+
+## Phase 102: Jukebox Queue Persistence & Auto-Advance
+- [x] Fix queue not persisting — room code saved to sessionStorage, restored on reload/revisit
+- [x] Fix auto-advance — NowPlayingPanel now uses onEnded + duration-based fallback timer
+- [x] NowPlayingPanel: loadedmetadata event sets fallback timer (duration + 2s buffer)
+- [x] Chat message now says "queued" not "tipped $X" for free queue items
+- [x] NowPlayingPanel: shows "gifted $X" only when tipAmountCents > 0
+- [x] freeQueue procedure confirmed working (live API returns songs, esbuild builds cleanly)
+- [x] Root cause of live "No tracks found": old deployed build lacks freeQueue procedure — fix is to Publish latest checkpoint
