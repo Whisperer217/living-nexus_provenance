@@ -833,3 +833,8 @@
 - [ ] Add Reference/Cite panel to SongDetailPage
 - [ ] Add Witness Network tab to ProfilePage showing who you witness + who witnesses you
 - [ ] Meaningful notifications: "You were referenced in a witness record", "Your work was cited in a derivation"
+
+## Phase 90: Living Nexus Lexicon
+- [ ] Define full term mapping (standard → Living Nexus language)
+- [ ] Build /lexicon page with term cards in divine noir style
+- [ ] Add Lexicon link to sidebar SYSTEM section and footer

@@ -19,7 +19,7 @@ import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
   Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic,
   BookOpen, Shield, Fingerprint, ScrollText, CheckCircle2,
-  PenLine, Layers, Bell,
+  PenLine, Layers, Bell, BookMarked,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -48,6 +48,7 @@ const NAV_ITEMS = [
   { label: "Batch Upload",     icon: Upload,      path: "/batch-upload",group: "SYSTEM" },
   { label: "Witness Records",  icon: ScrollText,  path: "/archive",     group: "SYSTEM" },
   { label: "WID Specification", icon: CheckCircle2, path: "/doctrine/wid-spec", group: "SYSTEM" },
+  { label: "Lexicon",            icon: BookMarked,  path: "/lexicon",             group: "SYSTEM" },
 ];
 
 const GROUPS = ["DISCOVER", "MY COMMAND", "SYSTEM"];

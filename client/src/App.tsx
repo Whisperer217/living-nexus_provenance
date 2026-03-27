@@ -34,6 +34,7 @@ const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
 const PricingCovenantPage = lazy(() => import("./pages/PricingCovenantPage"));
 const FieldNotesPage = lazy(() => import("./pages/FieldNotesPage"));
 const WIDSpecPage = lazy(() => import("./pages/WIDSpecPage"));
+const LexiconPage = lazy(() => import("./pages/LexiconPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -80,6 +81,7 @@ function Router() {
                 <Route path="/pricing" component={PricingCovenantPage} />
                 <Route path="/field-notes" component={FieldNotesPage} />
                 <Route path="/doctrine/wid-spec" component={WIDSpecPage} />
+                <Route path="/lexicon" component={LexiconPage} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>
