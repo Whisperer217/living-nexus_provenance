@@ -675,6 +675,16 @@ export default function SongDetailPage() {
                 </div>
                 <div className="flex-1 space-y-2">
                   <Input placeholder="Write a comment..." value={commentText} onChange={(e) => setCommentText(e.target.value)}
+                    onPaste={(e) => {
+                      // Strip WID certificate block that gets appended when copying from the lyrics panel
+                      const raw = e.clipboardData.getData("text/plain");
+                      const widIdx = raw.indexOf("\n═══");
+                      if (widIdx !== -1) {
+                        e.preventDefault();
+                        const clean = raw.slice(0, widIdx).trim();
+                        setCommentText(prev => prev + clean);
+                      }
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey && commentText.trim()) {
                         e.preventDefault();

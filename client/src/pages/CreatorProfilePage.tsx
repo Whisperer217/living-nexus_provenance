@@ -403,7 +403,8 @@ export default function CreatorProfilePage() {
             }}
           >
             {creator.profilePhotoUrl
-              ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover" />
+              ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
+                  style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
               : <span style={{ color: "oklch(0.84 0.155 85)" }}>{(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}</span>}
           </div>
 

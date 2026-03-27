@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `avatarObjectPosition` varchar(32) DEFAULT '50% 50%';

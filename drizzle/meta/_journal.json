@@ -50,6 +50,13 @@
       "when": 1774580133761,
       "tag": "0006_normal_adam_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1774634770772,
+      "tag": "0007_misty_paper_doll",
+      "breakpoints": true
     }
   ]
 }

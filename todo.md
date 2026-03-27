@@ -859,3 +859,10 @@
 - [x] CommunityToastProvider — Discord-style toast, stacks up to 3, auto-dismiss 6s, slide-in animation
 - [x] Mount CommunityToastProvider in App.tsx
 - [x] WhatsNewModal updated to v2.1.0 with community notifications, video buffering, Video WID badge entries
+
+## Phase 95: Discord Bug Reports (March 27, 2026)
+- [x] Fix song titles missing on mobile profile view (genre moved to second line)
+- [x] Fix WID certificate bleeding into comment box when copying from lyric sheet
+- [x] Add avatar position/crop adjustment tool (Left/Right + Up/Down sliders)
+- [x] Apply avatarObjectPosition to CreatorProfilePage so visitors see correct crop
+- [x] Add avatarObjectPosition column to DB schema and push migration

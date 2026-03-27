@@ -23,6 +23,7 @@ export const users = mysqlTable("users", {
   instagramHandle: varchar("instagramHandle", { length: 64 }),
   youtubeHandle: varchar("youtubeHandle", { length: 64 }),
   bannerUrl: text("bannerUrl"),
+  avatarObjectPosition: varchar("avatarObjectPosition", { length: 32 }).default("50% 50%"),
 
   // Creator AI & genre defaults
   aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated"]).default("original"),

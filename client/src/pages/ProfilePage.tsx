@@ -154,6 +154,26 @@ export default function ProfilePage() {
   const avatarRef = useRef<HTMLInputElement>(null);
   const bannerRef = useRef<HTMLInputElement>(null);
 
+  // ── Avatar position state ─────────────────────────────────────────
+  const [showPositionControls, setShowPositionControls] = useState(false);
+  const [avatarPos, setAvatarPos] = useState({ x: 50, y: 50 });
+
+  // Sync position from DB on load
+  useEffect(() => {
+    if (profile?.avatarObjectPosition) {
+      const parts = profile.avatarObjectPosition.split(" ");
+      if (parts.length === 2) {
+        const x = parseInt(parts[0]);
+        const y = parseInt(parts[1]);
+        if (!isNaN(x) && !isNaN(y)) setAvatarPos({ x, y });
+      }
+    }
+  }, [profile?.avatarObjectPosition]);
+
+  const saveAvatarPosition = (pos: { x: number; y: number }) => {
+    updateProfile.mutate({ avatarObjectPosition: `${pos.x}% ${pos.y}%` });
+  };
+
   const toBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -239,26 +259,76 @@ export default function ProfilePage() {
       <div className="px-6">
         {/* ── Avatar + Name row ── */}
         <div className="flex items-end gap-4 -mt-12 mb-5">
-          <div className="relative group flex-shrink-0">
-            <div className="w-24 h-24 rounded-2xl border-2 border-[#D4AF37]/30 overflow-hidden
-              bg-[oklch(0.14_0.013_280)] flex items-center justify-center">
-              {profile?.profilePhotoUrl ? (
-                <img src={profile.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <img src={LOGO_URL} alt="LN" className="w-14 h-14 object-contain opacity-60" />
-              )}
+          <div className="flex-shrink-0">
+            <div className="relative group">
+              <div className="w-24 h-24 rounded-2xl border-2 border-[#D4AF37]/30 overflow-hidden
+                bg-[oklch(0.14_0.013_280)] flex items-center justify-center">
+                {profile?.profilePhotoUrl ? (
+                  <img
+                    src={profile.profilePhotoUrl}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                    style={{ objectPosition: `${avatarPos.x}% ${avatarPos.y}%` }}
+                  />
+                ) : (
+                  <img src={LOGO_URL} alt="LN" className="w-14 h-14 object-contain opacity-60" />
+                )}
+              </div>
+              {/* Hover overlay: camera + adjust buttons */}
+              <div className="absolute inset-0 rounded-2xl bg-black/60 flex flex-col items-center justify-center gap-1
+                opacity-0 group-hover:opacity-100 transition-all">
+                <button
+                  onClick={() => avatarRef.current?.click()}
+                  disabled={uploadAvatar.isPending}
+                  className="flex items-center gap-1 text-white text-[10px] font-body disabled:opacity-50"
+                >
+                  {uploadAvatar.isPending
+                    ? <Loader2 size={14} className="animate-spin" />
+                    : <Camera size={14} />}
+                  <span>Change</span>
+                </button>
+                {profile?.profilePhotoUrl && (
+                  <button
+                    onClick={() => setShowPositionControls(v => !v)}
+                    className="flex items-center gap-1 text-white/70 hover:text-[#D4AF37] text-[10px] font-body transition-colors"
+                  >
+                    <Edit2 size={12} />
+                    <span>Adjust</span>
+                  </button>
+                )}
+              </div>
+              <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
             </div>
-            <button
-              onClick={() => avatarRef.current?.click()}
-              disabled={uploadAvatar.isPending}
-              className="absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center
-                opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
-            >
-              {uploadAvatar.isPending
-                ? <Loader2 size={18} className="text-white animate-spin" />
-                : <Camera size={18} className="text-white" />}
-            </button>
-            <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
+
+            {/* Position sliders — shown when user clicks Adjust */}
+            {showPositionControls && profile?.profilePhotoUrl && (
+              <div className="mt-2 w-24 bg-[oklch(0.12_0.02_280)] border border-white/[0.08] rounded-xl p-2 space-y-2">
+                <div>
+                  <label className="text-[9px] text-white/40 font-body block mb-0.5">Left / Right</label>
+                  <input
+                    type="range" min={0} max={100} value={avatarPos.x}
+                    onChange={e => setAvatarPos(p => ({ ...p, x: Number(e.target.value) }))}
+                    onMouseUp={() => saveAvatarPosition(avatarPos)}
+                    onTouchEnd={() => saveAvatarPosition(avatarPos)}
+                    className="w-full h-1 accent-[#D4AF37] cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="text-[9px] text-white/40 font-body block mb-0.5">Up / Down</label>
+                  <input
+                    type="range" min={0} max={100} value={avatarPos.y}
+                    onChange={e => setAvatarPos(p => ({ ...p, y: Number(e.target.value) }))}
+                    onMouseUp={() => saveAvatarPosition(avatarPos)}
+                    onTouchEnd={() => saveAvatarPosition(avatarPos)}
+                    className="w-full h-1 accent-[#D4AF37] cursor-pointer"
+                  />
+                </div>
+                <button
+                  onClick={() => setShowPositionControls(false)}
+                  className="w-full text-[9px] text-white/40 hover:text-white/70 font-body transition-colors"
+                >Done</button>
+              </div>
+            )}
           </div>
 
           <div className="flex-1 pb-1">
@@ -502,25 +572,25 @@ export default function ProfilePage() {
                     }
                   </div>
                   <div className="flex-1 min-w-0">
+                    {/* Title + status on first line — genre removed so title never gets pushed off on mobile */}
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-body text-white/85 truncate">{song.title}</span>
-                      {song.genre && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.05] text-white/70 font-body flex-shrink-0">
-                          {song.genre}
-                        </span>
-                      )}
+                      <span className="text-[13px] font-body text-white/85 truncate flex-1 min-w-0">{song.title}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-body flex-shrink-0 ${
                         song.status === "Published" ? "bg-green-500/10 text-green-400" :
                         song.status === "Draft" ? "bg-amber-500/10 text-amber-400" :
                         "bg-white/[0.05] text-white/70"
                       }`}>{song.status || "Published"}</span>
                     </div>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-[11px] text-white/65 font-body">
+                    {/* Genre + plays + date on second line */}
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      {song.genre && (
+                        <span className="text-[10px] text-white/50 font-body truncate max-w-[160px]">{song.genre}</span>
+                      )}
+                      <span className="text-[10px] text-white/40 font-body flex-shrink-0">
                         {(song.playCount || 0).toLocaleString()} plays
                       </span>
                       {song.createdAt && (
-                        <span className="text-[11px] text-white/60 font-body">
+                        <span className="text-[10px] text-white/35 font-body flex-shrink-0">
                           {new Date(song.createdAt).toLocaleDateString()}
                         </span>
                       )}
