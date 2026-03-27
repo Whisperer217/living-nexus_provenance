@@ -336,3 +336,72 @@ export const creativeReferences = mysqlTable("creative_references", {
 });
 export type CreativeReference = typeof creativeReferences.$inferSelect;
 export type InsertCreativeReference = typeof creativeReferences.$inferInsert;
+
+// ─── Collaborative Playlists ──────────────────────────────────────────────────
+// Named playlists that can be shared/co-edited by multiple users
+export const playlists = mysqlTable("playlists", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(),           // creator who made the playlist
+  name: varchar("name", { length: 128 }).notNull(),
+  description: text("description"),
+  coverArtUrl: text("coverArtUrl"),
+  isPublic: boolean("isPublic").default(false).notNull(),
+  isCollaborative: boolean("isCollaborative").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Playlist = typeof playlists.$inferSelect;
+export type InsertPlaylist = typeof playlists.$inferInsert;
+
+// Tracks inside a named playlist (separate from the personal playlistItems queue)
+export const playlistTracks = mysqlTable("playlistTracks", {
+  id: int("id").autoincrement().primaryKey(),
+  playlistId: int("playlistId").notNull(),
+  songId: int("songId").notNull(),
+  addedByUserId: int("addedByUserId").notNull(),  // who added this track
+  position: int("position").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PlaylistTrack = typeof playlistTracks.$inferSelect;
+export type InsertPlaylistTrack = typeof playlistTracks.$inferInsert;
+
+// Collaborators on a playlist (invited users who can add/remove tracks)
+export const playlistCollaborators = mysqlTable("playlistCollaborators", {
+  id: int("id").autoincrement().primaryKey(),
+  playlistId: int("playlistId").notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["editor", "viewer"]).default("editor").notNull(),
+  invitedByUserId: int("invitedByUserId").notNull(),
+  acceptedAt: timestamp("acceptedAt"),          // null = pending invite
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PlaylistCollaborator = typeof playlistCollaborators.$inferSelect;
+export type InsertPlaylistCollaborator = typeof playlistCollaborators.$inferInsert;
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+// Per-user notification inbox — witness events, comments, playlist invites, etc.
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),              // recipient
+  type: mysqlEnum("type", [
+    "witness",           // someone witnessed you
+    "comment",           // someone commented on your track
+    "like",              // someone liked your track
+    "tip",               // someone tipped you
+    "playlist_invite",   // invited to collaborate on a playlist
+    "new_track",         // someone you witness dropped a new track
+    "system",            // platform announcement
+  ]).notNull(),
+  title: varchar("title", { length: 256 }).notNull(),
+  body: text("body"),
+  actorId: int("actorId"),                      // user who triggered the notification
+  actorName: varchar("actorName", { length: 128 }),
+  actorAvatarUrl: text("actorAvatarUrl"),
+  refId: int("refId"),                          // related entity id (songId, playlistId, etc.)
+  refType: varchar("refType", { length: 32 }),  // "song" | "playlist" | "user"
+  isRead: boolean("isRead").default(false).notNull(),
+  archivedAt: timestamp("archivedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

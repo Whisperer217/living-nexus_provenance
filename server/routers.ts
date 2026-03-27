@@ -29,6 +29,12 @@ import {
   updateFieldNote, deleteFieldNote,
   witnessCreator, unwatchCreator, isWitnessing, getWitnessCount,
   getWitnessNetwork, createReference, getReferencesForSong, getReferencesForUser,
+  createPlaylist, getPlaylistsByUser, getPlaylistById, updatePlaylist, deletePlaylist,
+  getPlaylistTracks, addTrackToPlaylist, removeTrackFromPlaylist,
+  getPlaylistCollaborators, inviteCollaborator, acceptPlaylistInvite, removeCollaborator,
+  isPlaylistMember,
+  createNotification, getNotifications, markNotificationRead, markAllNotificationsRead,
+  archiveNotification, getUnreadNotificationCount,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -613,6 +619,23 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       });
       // Secondary write: comments table for legacy queries
       await addComment({ songId: input.songId, userId: ctx.user?.id, authorName: actorName, content: input.content });
+      // Notify the song owner if commenter is a different user
+      if (ctx.user?.id) {
+        const song = await getSongById(input.songId);
+        if (song && song.userId && song.userId !== ctx.user.id) {
+          await createNotification({
+            userId: song.userId,
+            type: "comment",
+            title: `${actorName} commented on "${song.title}"`,
+            body: input.content.slice(0, 120),
+            actorId: ctx.user.id,
+            actorName,
+            actorAvatarUrl: undefined,
+            refId: input.songId,
+            refType: "song",
+          });
+        }
+      }
       return { success: true };
     }),
   }),
@@ -1014,6 +1037,22 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           return { witnessing: false };
         } else {
           await witnessCreator(ctx.user.id, input.creatorId);
+          // Notify the creator being witnessed
+          const actor = await getUserById(ctx.user.id);
+          await createNotification({
+            userId: input.creatorId,
+            type: "witness",
+            title: `${actor?.artistHandle || actor?.name || "Someone"} is now witnessing you`,
+            body: "A new creator has added you to their witness network.",
+            actorId: ctx.user.id,
+            actorName: actor?.artistHandle || actor?.name || undefined,
+            actorAvatarUrl: actor?.profilePhotoUrl || undefined,
+            refId: ctx.user.id,
+            refType: "user",
+          });
+          // SSE broadcast
+          const { broadcastEvent } = await import("./sse");
+          broadcastEvent("witness", { actorName: actor?.artistHandle || actor?.name || "Someone", targetUserId: input.creatorId });
           return { witnessing: true };
         }
       }),
@@ -1062,6 +1101,162 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
     forMe: protectedProcedure.query(async ({ ctx }) => {
       return getReferencesForUser(ctx.user.id);
     }),
+  }),
+
+  // ── Collaborative Playlists ────────────────────────────────────────────────
+  playlists: router({
+    /** Get all playlists owned or collaborated on by the current user */
+    mine: protectedProcedure.query(async ({ ctx }) => {
+      return getPlaylistsByUser(ctx.user.id);
+    }),
+    /** Get a single playlist with its tracks and collaborators */
+    getById: publicProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const playlist = await getPlaylistById(input.id);
+        if (!playlist) throw new TRPCError({ code: "NOT_FOUND" });
+        // Private playlists only visible to members
+        if (!playlist.isPublic) {
+          if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+          const isMember = await isPlaylistMember(input.id, ctx.user.id);
+          if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        const [tracks, collaborators] = await Promise.all([
+          getPlaylistTracks(input.id),
+          getPlaylistCollaborators(input.id),
+        ]);
+        return { playlist, tracks, collaborators };
+      }),
+    /** Create a new playlist */
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(128),
+        description: z.string().max(500).optional(),
+        isPublic: z.boolean().optional(),
+        isCollaborative: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const id = await createPlaylist({ ownerId: ctx.user.id, ...input });
+        return { id };
+      }),
+    /** Update playlist metadata */
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        name: z.string().min(1).max(128).optional(),
+        description: z.string().max(500).optional(),
+        isPublic: z.boolean().optional(),
+        isCollaborative: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const playlist = await getPlaylistById(input.id);
+        if (!playlist || playlist.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        const { id, ...data } = input;
+        await updatePlaylist(id, data);
+        return { ok: true };
+      }),
+    /** Delete a playlist (owner only) */
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const playlist = await getPlaylistById(input.id);
+        if (!playlist || playlist.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        await deletePlaylist(input.id);
+        return { ok: true };
+      }),
+    /** Add a track to a playlist */
+    addTrack: protectedProcedure
+      .input(z.object({ playlistId: z.number().int().positive(), songId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
+        if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
+        await addTrackToPlaylist(input.playlistId, input.songId, ctx.user.id);
+        return { ok: true };
+      }),
+    /** Remove a track from a playlist */
+    removeTrack: protectedProcedure
+      .input(z.object({ playlistTrackId: z.number().int().positive(), playlistId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
+        if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
+        await removeTrackFromPlaylist(input.playlistTrackId);
+        return { ok: true };
+      }),
+    /** Invite a collaborator by userId */
+    invite: protectedProcedure
+      .input(z.object({ playlistId: z.number().int().positive(), userId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const playlist = await getPlaylistById(input.playlistId);
+        if (!playlist || playlist.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        await inviteCollaborator(input.playlistId, input.userId, ctx.user.id);
+        // Notify the invited user
+        const inviter = await getUserById(ctx.user.id);
+        await createNotification({
+          userId: input.userId,
+          type: "playlist_invite",
+          title: `${inviter?.artistHandle || inviter?.name || "Someone"} invited you to collaborate`,
+          body: `You've been invited to co-edit "${playlist.name}"`,
+          actorId: ctx.user.id,
+          actorName: inviter?.artistHandle || inviter?.name || undefined,
+          actorAvatarUrl: inviter?.profilePhotoUrl || undefined,
+          refId: input.playlistId,
+          refType: "playlist",
+        });
+        return { ok: true };
+      }),
+    /** Accept a playlist collaboration invite */
+    acceptInvite: protectedProcedure
+      .input(z.object({ playlistId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await acceptPlaylistInvite(input.playlistId, ctx.user.id);
+        return { ok: true };
+      }),
+    /** Remove a collaborator (owner) or leave a playlist (collaborator) */
+    removeCollaborator: protectedProcedure
+      .input(z.object({ playlistId: z.number().int().positive(), userId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const playlist = await getPlaylistById(input.playlistId);
+        if (!playlist) throw new TRPCError({ code: "NOT_FOUND" });
+        // Owner can remove anyone; collaborator can only remove themselves
+        if (playlist.ownerId !== ctx.user.id && ctx.user.id !== input.userId) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        await removeCollaborator(input.playlistId, input.userId);
+        return { ok: true };
+      }),
+  }),
+
+  // ── Notifications ──────────────────────────────────────────────────────────
+  notifications: router({
+    /** Get the current user's notification inbox */
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().max(100).default(50) }).optional())
+      .query(async ({ ctx, input }) => {
+        return getNotifications(ctx.user.id, input?.limit ?? 50);
+      }),
+    /** Get unread count for badge */
+    unreadCount: protectedProcedure.query(async ({ ctx }) => {
+      return getUnreadNotificationCount(ctx.user.id);
+    }),
+    /** Mark a single notification as read */
+    markRead: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await markNotificationRead(input.id, ctx.user.id);
+        return { ok: true };
+      }),
+    /** Mark all notifications as read */
+    markAllRead: protectedProcedure.mutation(async ({ ctx }) => {
+      await markAllNotificationsRead(ctx.user.id);
+      return { ok: true };
+    }),
+    /** Archive a notification (removes from inbox, keeps history) */
+    archive: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await archiveNotification(input.id, ctx.user.id);
+        return { ok: true };
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

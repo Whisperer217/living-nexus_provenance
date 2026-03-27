@@ -1150,3 +1150,267 @@ export async function getReferencesForUser(userId: number) {
     .where(eq(creativeReferences.toUserId, userId))
     .orderBy(creativeReferences.createdAt);
 }
+
+// ─── Playlists ────────────────────────────────────────────────────────────────
+
+export async function createPlaylist(data: {
+  ownerId: number; name: string; description?: string;
+  isPublic?: boolean; isCollaborative?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  const { playlists } = await import("../drizzle/schema");
+  const [result] = await (db as any).insert(playlists).values({
+    ownerId: data.ownerId,
+    name: data.name,
+    description: data.description ?? null,
+    isPublic: data.isPublic ?? false,
+    isCollaborative: data.isCollaborative ?? false,
+  });
+  return result.insertId as number;
+}
+
+export async function getPlaylistsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { playlists, playlistCollaborators } = await import("../drizzle/schema");
+  // Own playlists
+  const owned = await (db as any)
+    .select().from(playlists)
+    .where(eq(playlists.ownerId, userId))
+    .orderBy(desc(playlists.updatedAt));
+  // Collaborated playlists
+  const collabRows = await (db as any)
+    .select({ playlist: playlists })
+    .from(playlistCollaborators)
+    .innerJoin(playlists, eq(playlists.id, playlistCollaborators.playlistId))
+    .where(and(eq(playlistCollaborators.userId, userId), isNotNull(playlistCollaborators.acceptedAt)));
+  const collab = collabRows.map((r: any) => r.playlist);
+  // Deduplicate
+  const seen = new Set(owned.map((p: any) => p.id));
+  const all = [...owned, ...collab.filter((p: any) => !seen.has(p.id))];
+  return all;
+}
+
+export async function getPlaylistById(playlistId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const { playlists } = await import("../drizzle/schema");
+  const rows = await (db as any).select().from(playlists).where(eq(playlists.id, playlistId)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function updatePlaylist(playlistId: number, data: {
+  name?: string; description?: string; isPublic?: boolean;
+  isCollaborative?: boolean; coverArtUrl?: string;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  const { playlists } = await import("../drizzle/schema");
+  await (db as any).update(playlists).set(data).where(eq(playlists.id, playlistId));
+}
+
+export async function deletePlaylist(playlistId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { playlists, playlistTracks, playlistCollaborators } = await import("../drizzle/schema");
+  await (db as any).delete(playlistTracks).where(eq(playlistTracks.playlistId, playlistId));
+  await (db as any).delete(playlistCollaborators).where(eq(playlistCollaborators.playlistId, playlistId));
+  await (db as any).delete(playlists).where(eq(playlists.id, playlistId));
+}
+
+export async function getPlaylistTracks(playlistId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { playlistTracks } = await import("../drizzle/schema");
+  const rows = await (db as any)
+    .select({
+      id: playlistTracks.id,
+      position: playlistTracks.position,
+      addedByUserId: playlistTracks.addedByUserId,
+      createdAt: playlistTracks.createdAt,
+      song: {
+        id: songs.id,
+        title: songs.title,
+        genre: songs.genre,
+        coverArtUrl: songs.coverArtUrl,
+        fileUrl: songs.fileUrl,
+        witnessId: songs.witnessId,
+        playCount: songs.playCount,
+        userId: songs.userId,
+      },
+      addedBy: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(playlistTracks)
+    .innerJoin(songs, eq(songs.id, playlistTracks.songId))
+    .innerJoin(users, eq(users.id, playlistTracks.addedByUserId))
+    .where(eq(playlistTracks.playlistId, playlistId))
+    .orderBy(playlistTracks.position);
+  return rows;
+}
+
+export async function addTrackToPlaylist(playlistId: number, songId: number, addedByUserId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { playlistTracks } = await import("../drizzle/schema");
+  // Get next position
+  const existing = await (db as any).select({ pos: playlistTracks.position })
+    .from(playlistTracks).where(eq(playlistTracks.playlistId, playlistId))
+    .orderBy(desc(playlistTracks.position)).limit(1);
+  const nextPos = existing.length > 0 ? existing[0].pos + 1 : 0;
+  await (db as any).insert(playlistTracks).values({ playlistId, songId, addedByUserId, position: nextPos });
+}
+
+export async function removeTrackFromPlaylist(playlistTrackId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { playlistTracks } = await import("../drizzle/schema");
+  await (db as any).delete(playlistTracks).where(eq(playlistTracks.id, playlistTrackId));
+}
+
+export async function getPlaylistCollaborators(playlistId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { playlistCollaborators } = await import("../drizzle/schema");
+  return (db as any)
+    .select({
+      id: playlistCollaborators.id,
+      role: playlistCollaborators.role,
+      acceptedAt: playlistCollaborators.acceptedAt,
+      createdAt: playlistCollaborators.createdAt,
+      user: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(playlistCollaborators)
+    .innerJoin(users, eq(users.id, playlistCollaborators.userId))
+    .where(eq(playlistCollaborators.playlistId, playlistId));
+}
+
+export async function inviteCollaborator(playlistId: number, userId: number, invitedByUserId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { playlistCollaborators } = await import("../drizzle/schema");
+  // Check not already invited
+  const existing = await (db as any).select().from(playlistCollaborators)
+    .where(and(eq(playlistCollaborators.playlistId, playlistId), eq(playlistCollaborators.userId, userId))).limit(1);
+  if (existing.length > 0) return;
+  await (db as any).insert(playlistCollaborators).values({ playlistId, userId, invitedByUserId, role: "editor" });
+}
+
+export async function acceptPlaylistInvite(playlistId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { playlistCollaborators } = await import("../drizzle/schema");
+  await (db as any).update(playlistCollaborators)
+    .set({ acceptedAt: new Date() })
+    .where(and(eq(playlistCollaborators.playlistId, playlistId), eq(playlistCollaborators.userId, userId)));
+}
+
+export async function removeCollaborator(playlistId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { playlistCollaborators } = await import("../drizzle/schema");
+  await (db as any).delete(playlistCollaborators)
+    .where(and(eq(playlistCollaborators.playlistId, playlistId), eq(playlistCollaborators.userId, userId)));
+}
+
+export async function isPlaylistMember(playlistId: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const { playlists, playlistCollaborators } = await import("../drizzle/schema");
+  const owned = await (db as any).select({ id: playlists.id }).from(playlists)
+    .where(and(eq(playlists.id, playlistId), eq(playlists.ownerId, userId))).limit(1);
+  if (owned.length > 0) return true;
+  const collab = await (db as any).select({ id: playlistCollaborators.id }).from(playlistCollaborators)
+    .where(and(
+      eq(playlistCollaborators.playlistId, playlistId),
+      eq(playlistCollaborators.userId, userId),
+      isNotNull(playlistCollaborators.acceptedAt)
+    )).limit(1);
+  return collab.length > 0;
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export async function createNotification(data: {
+  userId: number; type: string; title: string; body?: string;
+  actorId?: number; actorName?: string; actorAvatarUrl?: string;
+  refId?: number; refType?: string;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  const { notifications } = await import("../drizzle/schema");
+  await (db as any).insert(notifications).values({
+    userId: data.userId,
+    type: data.type as any,
+    title: data.title,
+    body: data.body ?? null,
+    actorId: data.actorId ?? null,
+    actorName: data.actorName ?? null,
+    actorAvatarUrl: data.actorAvatarUrl ?? null,
+    refId: data.refId ?? null,
+    refType: data.refType ?? null,
+  });
+}
+
+export async function getNotifications(userId: number, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  const { notifications } = await import("../drizzle/schema");
+  return (db as any)
+    .select().from(notifications)
+    .where(and(eq(notifications.userId, userId), sql`${notifications.archivedAt} IS NULL`))
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit);
+}
+
+export async function markNotificationRead(notificationId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { notifications } = await import("../drizzle/schema");
+  await (db as any).update(notifications)
+    .set({ isRead: true })
+    .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+}
+
+export async function markAllNotificationsRead(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { notifications } = await import("../drizzle/schema");
+  await (db as any).update(notifications)
+    .set({ isRead: true })
+    .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+}
+
+export async function archiveNotification(notificationId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const { notifications } = await import("../drizzle/schema");
+  await (db as any).update(notifications)
+    .set({ archivedAt: new Date() })
+    .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+}
+
+export async function getUnreadNotificationCount(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const { notifications } = await import("../drizzle/schema");
+  const rows = await (db as any)
+    .select({ count: sql<number>`count(*)` })
+    .from(notifications)
+    .where(and(
+      eq(notifications.userId, userId),
+      eq(notifications.isRead, false),
+      sql`${notifications.archivedAt} IS NULL`
+    ));
+  return Number(rows[0]?.count ?? 0);
+}

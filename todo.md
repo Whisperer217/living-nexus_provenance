@@ -866,3 +866,16 @@
 - [x] Add avatar position/crop adjustment tool (Left/Right + Up/Down sliders)
 - [x] Apply avatarObjectPosition to CreatorProfilePage so visitors see correct crop
 - [x] Add avatarObjectPosition column to DB schema and push migration
+
+## Phase 96: Collaborative Playlists + Notification Feed (v2.2.0)
+- [x] Add playlistCollaborators and notifications tables to drizzle schema
+- [x] Push new tables to database via pnpm db:push
+- [x] Add playlist and notification DB helpers to server/db.ts
+- [x] Add playlist tRPC router (create, list, addSong, invite, acceptInvite, getById)
+- [x] Add notifications tRPC router (list, markRead, markAllRead, archive, unreadCount)
+- [x] Build PlaylistsPage with create, invite, manage, and play functionality
+- [x] Build NotificationsPage (Signals inbox) with unread/all tabs and archive
+- [x] Wire notifications into witness toggle (notify creator when witnessed)
+- [x] Wire notifications into comment add (notify song owner on new comment)
+- [x] Add Playlists and Signals nav items to MainLayout sidebar
+- [x] Update WhatsNewModal to v2.2.0

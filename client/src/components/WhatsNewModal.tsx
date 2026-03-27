@@ -8,14 +8,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.1.0";
+const CURRENT_VERSION = "v2.2.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.1.0",
+    version: "v2.2.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Music, text: "Collaborative Playlists — create playlists and invite other creators to build them together. Invite by username, manage collaborators, and play the full queue from any device." },
+      { icon: MessageCircle, text: "Signals (Notification Feed) — every witness, comment, and playlist invite now lands in your personal Signals inbox. Archived forever, never lost. Access it from the sidebar." },
+      { icon: Eye, text: "Witness Notifications — when someone witnesses you, you receive an instant signal with their name and avatar. Your witness network is now a living, notified relationship." },
+    ],
+  },
+  {
+    version: "v2.1.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Users, text: "Community Notifications — when a new member joins Living Nexus, every logged-in user sees a live toast notification in real time. No refresh needed — the platform is always watching the door." },
       { icon: Video, text: "Background Video Buffering — cover art now holds steady while the background video loads. The fade only happens once the video is fully ready to play, so you never see a black frame on slow connections." },

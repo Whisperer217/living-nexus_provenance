@@ -40,6 +40,8 @@ const NAV_ITEMS = [
   { label: "LNA",              icon: Layers,      path: "/archive",     group: "MY COMMAND", tooltip: "Living Nexus Archive" },
   { label: "My Works",         icon: ListMusic,   path: "/playlist",    group: "MY COMMAND" },
   { label: "Liked Songs",      icon: Heart,       path: "/liked",       group: "MY COMMAND" },
+  { label: "Playlists",        icon: ListMusic,   path: "/playlists",   group: "MY COMMAND" },
+  { label: "Signals",          icon: Bell,        path: "/notifications",group: "MY COMMAND" },
   { label: "Field Notes",      icon: PenLine,     path: "/field-notes", group: "MY COMMAND" },
 
   // SYSTEM — tools + provenance
