@@ -217,6 +217,115 @@ export function registerOgRoutes(app: Express) {
     }
   });
 
+  // ── Static page OG routes ──────────────────────────────────────────────────
+  // Each static page gets its own specific title, description, and image so
+  // sharing any Living Nexus URL shows the right preview on Discord/iMessage/etc.
+  const STATIC_OG_ROUTES: Array<{
+    path: string;
+    title: string;
+    description: string;
+    image?: string;
+  }> = [
+    {
+      path: "/field-notes",
+      title: "Field Notes — Living Nexus",
+      description: "Doctrine, journals, and creative testimony from Living Nexus creators. The voice and authority layer of the platform.",
+    },
+    {
+      path: "/lexicon",
+      title: "Living Nexus Lexicon — Platform Language Guide",
+      description: "A legend that translates standard internet terms into Living Nexus language. Follow = Witness. Profile = Identity. Like = Acknowledge.",
+    },
+    {
+      path: "/doctrine/wid-spec",
+      title: "WID Public Specification v1.0 — Living Nexus",
+      description: "The public specification for the Witness Identity Document (WID) system — a sovereign creative registry that proves origin before a work touches any platform.",
+    },
+    {
+      path: "/together",
+      title: "Listen Together — Living Nexus Sanctuary",
+      description: "Host or join a live music sanctuary. Queue songs, tip creators, and vibe in real-time with your community.",
+    },
+    {
+      path: "/manifesto",
+      title: "The Manifesto — Living Nexus",
+      description: "The founding doctrine of Living Nexus. Why sovereign music provenance matters and what we are building to protect it.",
+    },
+    {
+      path: "/pricing",
+      title: "Creator License — Living Nexus ($88.88)",
+      description: "The Living Nexus Creator License. Protect your catalog, register your works, and own your provenance chain. $88.88 per year.",
+    },
+    {
+      path: "/verify",
+      title: "Verify a Witness ID — Living Nexus",
+      description: "Look up any Witness ID (WID) to verify the origin, creator, and provenance chain of a work registered on Living Nexus.",
+    },
+    {
+      path: "/explore",
+      title: "Explore Music — Living Nexus",
+      description: "Discover independent artists and WID-protected music on Living Nexus. Every track carries a Witness ID — proof of creation that belongs to the artist.",
+    },
+    {
+      path: "/",
+      title: "Living Nexus — Sovereign Music Platform",
+      description: "A platform that honors your work. Your lived witness. Your testimony. Every song carries a Witness ID — proof of origin that belongs to you before it belongs to anyone else.",
+    },
+    {
+      path: "/profile",
+      title: "My Identity — Living Nexus",
+      description: "Your sovereign creative identity on Living Nexus. Your works, your Witness records, your provenance chain.",
+    },
+    {
+      path: "/dashboard",
+      title: "Creator Dashboard — Living Nexus",
+      description: "Manage your catalog, track your earnings, and monitor your Witness ID records on Living Nexus.",
+    },
+    {
+      path: "/archive",
+      title: "My Archive (LNA) — Living Nexus",
+      description: "Your Living Nexus Archive — every work you have uploaded, protected, and registered with a Witness ID.",
+    },
+    {
+      path: "/upload",
+      title: "Upload & Register — Living Nexus",
+      description: "Upload your music and register it with a Witness ID on Living Nexus. Prove your origin before your work touches any other platform.",
+    },
+    {
+      path: "/my-works",
+      title: "My Works — Living Nexus",
+      description: "Your complete catalog of WID-protected works on Living Nexus.",
+    },
+    {
+      path: "/field-notes/new",
+      title: "New Field Note — Living Nexus",
+      description: "Write and publish a new Field Note — doctrine, journal entry, or creative testimony on Living Nexus.",
+    },
+  ];
+
+  for (const route of STATIC_OG_ROUTES) {
+    app.get(route.path, async (req, res, next) => {
+      const ua = req.headers["user-agent"] || "";
+      if (!isCrawler(ua)) return next();
+      try {
+        const ogBlock = buildSongOgTags({
+          title: route.title,
+          description: route.description,
+          image: route.image || FALLBACK_IMAGE,
+          url: `${CANONICAL_ORIGIN}${route.path}`,
+          siteName: "Living Nexus",
+        });
+        const html = await getHtmlTemplate(isDev);
+        if (!html) return next();
+        const page = injectOg(html, ogBlock, route.title);
+        res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      } catch (err) {
+        console.error("[OG] Error generating meta tags for", route.path, err);
+        next();
+      }
+    });
+  }
+
   // ── /creator/:id ───────────────────────────────────────────────────────────
   // Creator profile pages are PUBLIC NOMINATION CARDS.
   // When a fan shares a creator URL on X, Discord, iMessage, or any platform,
