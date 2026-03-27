@@ -9,6 +9,7 @@ import MainLayout from "./components/layout/MainLayout";
 import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
 import WelcomeModal from "./components/WelcomeModal";
+import { CommunityToastProvider } from "./components/CommunityToast";
 
 // Lazy-loaded page components — each becomes its own JS chunk
 // This cuts initial bundle size significantly; pages load on first visit only
@@ -102,6 +103,7 @@ export default function App() {
             <QueueLoader />
             <WhatsNewModal />
             <WelcomeModal />
+            <CommunityToastProvider />
             <Toaster
               theme="dark"
               toastOptions={{

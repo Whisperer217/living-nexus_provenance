@@ -6,6 +6,7 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerOgRoutes } from "../og";
+import { registerSseRoutes } from "../sse";
 import { appRouter, handleStripeWebhook } from "../routers";
 import { uploadRouter } from "../uploadRoute";
 import { createContext } from "./context";
@@ -53,6 +54,8 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "500mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Server-Sent Events for real-time community notifications
+  registerSseRoutes(app);
   // Multipart file upload endpoint (bypasses tRPC JSON body size limit)
   app.use(uploadRouter);
   // tRPC API

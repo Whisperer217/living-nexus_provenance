@@ -850,3 +850,12 @@
 - [x] PlayerBar expanded: hold cover art while video is buffering (waiting/canplay events), video WID badge pill
 - [x] TheaterPlayer: hold cover art while video is buffering, video WID badge pill
 - [x] MobilePlayerPanel: hold cover art while video is buffering, video WID badge pill
+
+## Phase 94: Community Notifications (SSE)
+- [x] SSE broadcast module (server/sse.ts) — manages client registry, heartbeat, broadcastEvent()
+- [x] Register /api/sse/events endpoint in server index
+- [x] Detect new vs returning user in OAuth callback, fire new_member SSE event on first login
+- [x] useCommunityEvents hook — SSE listener with exponential backoff reconnect
+- [x] CommunityToastProvider — Discord-style toast, stacks up to 3, auto-dismiss 6s, slide-in animation
+- [x] Mount CommunityToastProvider in App.tsx
+- [x] WhatsNewModal updated to v2.1.0 with community notifications, video buffering, Video WID badge entries

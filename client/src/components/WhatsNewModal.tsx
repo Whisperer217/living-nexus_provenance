@@ -8,14 +8,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.0.0";
+const CURRENT_VERSION = "v2.1.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.0.0",
+    version: "v2.1.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Users, text: "Community Notifications — when a new member joins Living Nexus, every logged-in user sees a live toast notification in real time. No refresh needed — the platform is always watching the door." },
+      { icon: Video, text: "Background Video Buffering — cover art now holds steady while the background video loads. The fade only happens once the video is fully ready to play, so you never see a black frame on slow connections." },
+      { icon: Shield, text: "Video WID Badge — any track with a witnessed video now shows a green \u2713 Video WID badge in the player. Tap it to verify the video's cryptographic certificate." },
+    ],
+  },
+  {
+    version: "v2.0.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Film, text: "Background Video Playback — attach a muted looping video to any track. Cover art stays static until you press play, then the video fades in behind the music. Audio and video are completely separate streams." },
       { icon: Network, text: "Witness Network — witness any creator to build a living network of creative relationships. View who witnesses you and who you witness from your profile." },
