@@ -256,12 +256,32 @@ export default function CreatorProfilePage() {
   });
   const playMutation = trpc.songs.play.useMutation();
 
+  // ── Witness Network — MUST be before any early returns (Rules of Hooks) ──────
+  const utils = trpc.useUtils();
+  const creatorIdForWitness = data?.creator?.id ?? 0;
+  const witnessStatusQuery = trpc.witness.status.useQuery(
+    { creatorId: creatorIdForWitness },
+    { enabled: !!user && !!data && user.id !== data?.creator?.id }
+  );
+  const witnessToggle = trpc.witness.toggle.useMutation({
+    onSuccess: (result) => {
+      utils.witness.status.invalidate({ creatorId: creatorIdForWitness });
+      utils.witness.count.invalidate({ creatorId: creatorIdForWitness });
+      toast.success(result.witnessing
+        ? `You are now witnessing ${data?.creator?.artistHandle || data?.creator?.name}`
+        : "Witness removed from your network"
+      );
+    },
+  });
+  const isWitnessingCreator = witnessStatusQuery.data?.witnessing ?? false;
+  const witnessCount = witnessStatusQuery.data?.count ?? 0;
+
   const handlePlay = (song: any) => {
     if (!song.fileUrl) { toast.error("No audio file available"); return; }
     // Build queue from all this creator's public songs so playback continues
     const creatorSongs = (data?.songs || []).filter((s: any) => !!s.fileUrl);
     if (creatorSongs.length > 1) {
-      const queue = creatorSongs.map((s: any) => ({
+      const queue = creatorSongs.map((s: { id: number; title: string; fileUrl: string; coverArtUrl?: string; genre?: string; witnessId?: string }) => ({
         id: String(s.id),
         title: s.title,
         artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
@@ -319,25 +339,6 @@ export default function CreatorProfilePage() {
 
   const { creator, songs } = data;
   const isOwner = user?.id === creator.id;
-
-  // ── Witness Network ──────────────────────────────────────────────
-  const utils = trpc.useUtils();
-  const witnessStatusQuery = trpc.witness.status.useQuery(
-    { creatorId: creator.id },
-    { enabled: !!user && !isOwner }
-  );
-  const witnessToggle = trpc.witness.toggle.useMutation({
-    onSuccess: (result) => {
-      utils.witness.status.invalidate({ creatorId: creator.id });
-      utils.witness.count.invalidate({ creatorId: creator.id });
-      toast.success(result.witnessing
-        ? `You are now witnessing ${creator.artistHandle || creator.name}`
-        : "Witness removed from your network"
-      );
-    },
-  });
-  const witnessCount = witnessStatusQuery.data?.count ?? 0;
-  const isWitnessingCreator = witnessStatusQuery.data?.witnessing ?? false;
 
   const featuredSongs = songs.slice(0, 8);
   const totalPlays = songs.reduce((acc: number, s: any) => acc + (s.playCount || 0), 0);
