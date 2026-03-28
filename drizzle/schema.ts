@@ -460,3 +460,18 @@ export const promoRedemptions = mysqlTable("promoRedemptions", {
 });
 export type PromoRedemption = typeof promoRedemptions.$inferSelect;
 export type InsertPromoRedemption = typeof promoRedemptions.$inferInsert;
+
+// ─── Name History (Audit Trail) ───────────────────────────────────────────────
+// Immutable log of every display name change. Used by the WID verify page to
+// show the original creator name at the time of witnessing for legal provenance.
+// "Truth enters through witnesses, survives through return, and collapses when
+// systems sever it from its origin." — Sovereign Shutter Doctrine
+export const nameHistory = mysqlTable("nameHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  oldName: varchar("oldName", { length: 128 }),          // null = initial registration record
+  newName: varchar("newName", { length: 128 }).notNull(),
+  changedAt: timestamp("changedAt").defaultNow().notNull(),
+});
+export type NameHistory = typeof nameHistory.$inferSelect;
+export type InsertNameHistory = typeof nameHistory.$inferInsert;

@@ -15,13 +15,13 @@ import { toast } from "sonner";
 import {
   Loader2, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Users, Shield, Tag, Plus, CheckCircle2, XCircle,
-  Gift, RotateCcw, Copy,
+  Gift, RotateCcw, Copy, CreditCard, ExternalLink, History,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
 type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus";
 type SortDir = "asc" | "desc";
-type Tab = "users" | "codes";
+type Tab = "users" | "codes" | "stripe";
 
 const GOLD = "oklch(0.84 0.155 85)";
 const BG = "oklch(0.08 0.015 280)";
@@ -445,6 +445,101 @@ function PromoCodesTab() {
   );
 }
 
+// ── Stripe Onboarding Recovery Tab ───────────────────────────────────────────
+function StripeRecoveryTab() {
+  const [userId, setUserId] = useState("");
+  const [returnUrl, setReturnUrl] = useState(window.location.origin + "/dashboard");
+  const [result, setResult] = useState<{ onboardingUrl: string; stripeAccountId: string } | null>(null);
+
+  const regenerate = trpc.admin.regenerateStripeOnboarding.useMutation({
+    onSuccess: (data) => {
+      setResult(data);
+      toast.success("Onboarding link generated successfully.");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  return (
+    <div className="max-w-xl">
+      <div className="rounded-xl border p-6 mb-6" style={{ background: CARD, borderColor: BORDER }}>
+        <div className="flex items-center gap-2 mb-4">
+          <CreditCard className="w-5 h-5" style={{ color: GOLD }} />
+          <h3 className="text-sm font-semibold" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>Regenerate Stripe Onboarding Link</h3>
+        </div>
+        <p className="text-xs mb-5" style={{ color: SUBTEXT }}>
+          Use this when a creator started Stripe KYC verification but never completed it.
+          This generates a fresh onboarding link for their existing Stripe account.
+          Share the link with the creator so they can complete verification.
+        </p>
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: SUBTEXT }}>User ID</label>
+            <Input
+              placeholder="e.g. 180001"
+              value={userId}
+              onChange={e => setUserId(e.target.value)}
+              className="font-mono"
+              style={{ background: "oklch(0.10 0.015 280)", borderColor: BORDER, color: TEXT }}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: SUBTEXT }}>Return URL (after onboarding)</label>
+            <Input
+              value={returnUrl}
+              onChange={e => setReturnUrl(e.target.value)}
+              style={{ background: "oklch(0.10 0.015 280)", borderColor: BORDER, color: TEXT }}
+            />
+          </div>
+          <Button
+            disabled={!userId.trim() || regenerate.isPending}
+            onClick={() => regenerate.mutate({ userId: parseInt(userId), returnUrl })}
+            style={{ background: GOLD, color: BG }}
+          >
+            {regenerate.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RotateCcw className="w-4 h-4 mr-2" />}
+            Generate Link
+          </Button>
+        </div>
+      </div>
+
+      {result && (
+        <div className="rounded-xl border p-6" style={{ background: "oklch(0.65 0.18 145 / 0.06)", borderColor: "oklch(0.65 0.18 145 / 0.35)" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <CheckCircle2 className="w-5 h-5" style={{ color: "oklch(0.65 0.18 145)" }} />
+            <span className="text-sm font-semibold" style={{ color: "oklch(0.65 0.18 145)" }}>Link Ready</span>
+          </div>
+          <p className="text-xs mb-2" style={{ color: SUBTEXT }}>Stripe Account: <span className="font-mono" style={{ color: TEXT }}>{result.stripeAccountId}</span></p>
+          <div className="flex items-center gap-2 mt-3">
+            <Input
+              readOnly
+              value={result.onboardingUrl}
+              className="font-mono text-xs flex-1"
+              style={{ background: "oklch(0.10 0.015 280)", borderColor: BORDER, color: TEXT }}
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => { navigator.clipboard.writeText(result.onboardingUrl); toast.success("Link copied to clipboard"); }}
+              style={{ borderColor: BORDER, color: SUBTEXT }}
+            >
+              <Copy className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => window.open(result.onboardingUrl, "_blank")}
+              style={{ background: GOLD, color: BG }}
+            >
+              <ExternalLink className="w-4 h-4" />
+            </Button>
+          </div>
+          <p className="text-xs mt-3" style={{ color: "oklch(0.45 0.03 280)" }}>
+            This link expires after one use or after ~24 hours. Regenerate if needed.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Admin Page ────────────────────────────────────────────────────────────
 export default function AdminUsersPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -481,6 +576,7 @@ export default function AdminUsersPage() {
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "users", label: "User Roster", icon: <Users className="w-4 h-4" /> },
     { id: "codes", label: "Promo Codes", icon: <Tag className="w-4 h-4" /> },
+    { id: "stripe", label: "Stripe Recovery", icon: <CreditCard className="w-4 h-4" /> },
   ];
 
   return (
@@ -522,7 +618,9 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Tab Content */}
-        {tab === "users" ? <UsersTab /> : <PromoCodesTab />}
+        {tab === "users" && <UsersTab />}
+        {tab === "codes" && <PromoCodesTab />}
+        {tab === "stripe" && <StripeRecoveryTab />}
 
       </div>
     </div>

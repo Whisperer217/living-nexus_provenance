@@ -7,6 +7,7 @@ import {
   slotPurchases, songs, tips, users, events,
   jukeboxOfferings, jukeboxPlayEvents,
   promoCodes, promoRedemptions,
+  nameHistory,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -75,6 +76,30 @@ export async function getUserById(id: number) {
   if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+// ─── Name History ────────────────────────────────────────────────────────────
+
+/** Record an initial registration name (oldName = null) or a name change. */
+export async function recordNameChange(userId: number, oldName: string | null, newName: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(nameHistory).values({ userId, oldName, newName });
+}
+
+/** Return the full name history for a user, newest first. */
+export async function getNameHistory(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(nameHistory).where(eq(nameHistory.userId, userId)).orderBy(desc(nameHistory.changedAt));
+}
+
+/** Return the earliest recorded name for a user (the name at WID issuance). */
+export async function getOriginalName(userId: number): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(nameHistory).where(eq(nameHistory.userId, userId)).orderBy(nameHistory.changedAt).limit(1);
+  return rows.length > 0 ? rows[0].newName : null;
 }
 
 export async function updateUserProfile(userId: number, data: {

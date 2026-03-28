@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import {
   ShieldCheck, ShieldX, Search, ExternalLink,
   Music, FileText, Copy, CheckCircle2, Loader2,
-  Calendar, Hash, Key, Fingerprint, Tag,
+  Calendar, Hash, Key, Fingerprint, Tag, History, UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -179,7 +179,15 @@ export default function VerifyPage() {
                 <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}>
                   {data.title}
                 </h2>
-                <p className="text-sm mb-3" style={{ color: "oklch(0.55 0.04 280)" }}>by {data.artistName}</p>
+                <p className="text-sm mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>by {data.artistName}</p>
+
+                {/* Name at time of witnessing — only shown when it differs from current */}
+                {data.nameAtWitnessing && data.nameAtWitnessing !== data.artistName && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs" style={{ background: "oklch(0.84 0.155 85 / 0.1)", border: "1px solid oklch(0.84 0.155 85 / 0.3)", color: "oklch(0.75 0.12 85)" }}>
+                    <UserCheck className="w-3 h-3" />
+                    <span>Registered as: <strong>{data.nameAtWitnessing}</strong></span>
+                  </div>
+                )}
 
                 {/* Audio / Lyrics indicator */}
                 <div className="flex items-center justify-center gap-2">
@@ -249,6 +257,33 @@ export default function VerifyPage() {
               {data.isrc && (
                 <Field icon={Tag} label="ISRC">
                   <p className="text-sm font-mono" style={{ color: "oklch(0.7 0.04 280)" }}>{data.isrc}</p>
+                </Field>
+              )}
+
+              {/* ── Name History (Provenance Audit Trail) ── */}
+              {data.nameHistory && data.nameHistory.length > 0 && (
+                <Field icon={History} label="Creator Name History">
+                  <div className="space-y-2">
+                    {data.nameHistory.map((entry: { oldName: string | null; newName: string; changedAt: Date }, i: number) => (
+                      <div key={i} className="flex items-start gap-2 text-xs">
+                        <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: i === 0 ? "oklch(0.65 0.18 145)" : "oklch(0.35 0.02 280)", marginTop: "5px" }} />
+                        <div className="flex-1">
+                          {entry.oldName ? (
+                            <span style={{ color: "oklch(0.6 0.04 280)" }}>
+                              <span style={{ color: "oklch(0.45 0.03 280)" }}>{entry.oldName}</span>
+                              {" → "}
+                              <span style={{ color: "oklch(0.78 0.03 280)", fontWeight: 600 }}>{entry.newName}</span>
+                            </span>
+                          ) : (
+                            <span style={{ color: "oklch(0.78 0.03 280)", fontWeight: 600 }}>Registered as: {entry.newName}</span>
+                          )}
+                          <span className="ml-2" style={{ color: "oklch(0.38 0.02 280)" }}>
+                            {new Date(entry.changedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </Field>
               )}
 

@@ -1010,3 +1010,15 @@
 - [x] Create BDDT-FREE promo code in DB (100 slots, unlimited uses, 30-day expiry, createdByUserId=1)
 - [x] Create Plex/Jellyfin Field Note post on platform (public, category=update, authored by Doc Seraph Mercer)
 - [x] TypeScript: 0 errors
+
+## Phase 112: Name Change Audit Trail + Stripe Connect Onboarding
+- [x] Add nameHistory table to schema (userId, oldName, newName, changedAt)
+- [x] Push DB migration (drizzle/0012_reflective_synch.sql applied)
+- [x] Log name change in profile.update procedure whenever name field changes
+- [x] verifyWid query returns nameAtWitnessing + full nameHistory array
+- [x] VerifyPage shows "Registered as: [original name]" badge when name has changed
+- [x] VerifyPage shows Creator Name History timeline when history records exist
+- [x] Admin panel: new Stripe Recovery tab with regenerateStripeOnboarding procedure
+- [x] Admin can enter User ID to generate fresh Stripe Connect onboarding link for pending accounts
+- [x] Link displayed with copy + open buttons; expires after one use or ~24h
+- [x] TypeScript: 0 errors | Vitest: 44/44 passing

@@ -40,6 +40,7 @@ import {
   getOfferingsForRoom, recordJukeboxPlayEvent, getJukeboxEarningsForCreator,
   adminSearchUsers, adminGrantLicense,
   createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode, redeemPromoCode,
+  recordNameChange, getNameHistory, getOriginalName,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -199,7 +200,17 @@ export const appRouter = router({
       aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated"]).optional(),
       primaryGenre: z.string().max(64).optional(),
       avatarObjectPosition: z.string().max(32).optional(),
-    })).mutation(async ({ ctx, input }) => { await updateUserProfile(ctx.user.id, input); return { success: true }; }),
+    })).mutation(async ({ ctx, input }) => {
+      if (input.name !== undefined) {
+        const current = await getUserById(ctx.user.id);
+        const oldName = current?.name ?? null;
+        if (oldName !== input.name) {
+          await recordNameChange(ctx.user.id, oldName, input.name);
+        }
+      }
+      await updateUserProfile(ctx.user.id, input);
+      return { success: true };
+    }),
     uploadAvatar: protectedProcedure.input(z.object({ base64: z.string(), mimeType: z.string() })).mutation(async ({ ctx, input }) => {
       const buffer = Buffer.from(input.base64, "base64");
       const { url } = await storagePut(`avatars/${ctx.user.id}-${Date.now()}.jpg`, buffer, input.mimeType);
@@ -246,10 +257,15 @@ export const appRouter = router({
       const result = await getSongByWitnessId(input.witnessId);
       if (!result) throw new TRPCError({ code: "NOT_FOUND", message: "No record found for this Witness ID" });
       const { song, creator } = result;
+      const creatorId = creator?.id;
+      const nameHistoryRows = creatorId ? await getNameHistory(creatorId) : [];
+      const currentArtistName = creator?.artistHandle || creator?.name || "Unknown Artist";
+      const originalName = creatorId ? await getOriginalName(creatorId) : null;
+      const nameAtWitnessing = originalName || currentArtistName;
       return {
         witnessId: song.witnessId,
         title: song.title,
-        artistName: creator?.artistHandle || creator?.name || "Unknown Artist",
+        artistName: currentArtistName,
         artistHandle: creator?.artistHandle,
         profilePhotoUrl: creator?.profilePhotoUrl,
         songId: song.id,
@@ -264,6 +280,8 @@ export const appRouter = router({
         aiConsent: song.aiConsent,
         genre: song.genre,
         isrc: song.isrc,
+        nameAtWitnessing,
+        nameHistory: nameHistoryRows.map((r: { oldName: string | null; newName: string; changedAt: Date }) => ({ oldName: r.oldName, newName: r.newName, changedAt: r.changedAt })),
       };
     }),
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
@@ -1158,6 +1176,46 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
         await reactivatePromoCode(input.id);
         return { success: true };
+      }),
+    /**
+     * Regenerate a Stripe Connect onboarding link for a user whose account is
+     * stuck in "pending" status (e.g. started KYC but never completed it).
+     * Returns the onboarding URL so the admin can share it with the creator.
+     */
+    regenerateStripeOnboarding: protectedProcedure
+      .input(z.object({
+        userId: z.number().int(),
+        returnUrl: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        const user = await getUserById(input.userId);
+        if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        if (!user.stripeAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "User has no Stripe account on record" });
+        // Verify the account still exists in Stripe
+        let account: Stripe.Account;
+        try {
+          account = await stripe.accounts.retrieve(user.stripeAccountId);
+        } catch (err: any) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: `Stripe account lookup failed: ${err.message}` });
+        }
+        if (account.charges_enabled) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "This account is already fully enabled — no onboarding needed." });
+        }
+        const accountLink = await stripe.accountLinks.create({
+          account: user.stripeAccountId,
+          refresh_url: input.returnUrl,
+          return_url: input.returnUrl,
+          type: "account_onboarding",
+        });
+        return { onboardingUrl: accountLink.url, stripeAccountId: user.stripeAccountId };
+      }),
+    /** Get name change history for a specific user */
+    getNameHistory: protectedProcedure
+      .input(z.object({ userId: z.number().int() }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        return getNameHistory(input.userId);
       }),
   }),
 

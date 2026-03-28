@@ -1,0 +1,55 @@
+{
+  "query": "SELECT id, name, artistHandle, stripeAccountId, stripeAccountStatus, licenseStatus, createdAt FROM users WHERE name LIKE '%Mannon%' OR artistHandle LIKE '%Mannon%' OR artistHandle LIKE '%mannon%' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT id, name, artistHandle, stripeAccountId, stripeAccountStatus, licenseStatus, createdAt FROM users WHERE name LIKE '%Mannon%' OR artistHandle LIKE '%Mannon%' OR artistHandle LIKE '%mannon%' LIMIT 5;",
+  "rows": [
+    {
+      "id": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "HlkngMniacNrdWrmngr",
+      "stripeAccountId": "acct_1TFO1ILdJ5vqIaYq",
+      "stripeAccountStatus": "pending",
+      "licenseStatus": "licensed",
+      "createdAt": "2026-03-17 23:24:30"
+    },
+    {
+      "id": "780040",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL",
+      "stripeAccountId": "NULL",
+      "stripeAccountStatus": "pending",
+      "licenseStatus": "free",
+      "createdAt": "2026-03-20 03:04:42"
+    },
+    {
+      "id": "2550204",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL",
+      "stripeAccountId": "NULL",
+      "stripeAccountStatus": "pending",
+      "licenseStatus": "free",
+      "createdAt": "2026-03-24 02:27:41"
+    },
+    {
+      "id": "2550307",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL",
+      "stripeAccountId": "NULL",
+      "stripeAccountStatus": "pending",
+      "licenseStatus": "free",
+      "createdAt": "2026-03-24 03:00:55"
+    },
+    {
+      "id": "3510001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "NULL",
+      "stripeAccountId": "NULL",
+      "stripeAccountStatus": "pending",
+      "licenseStatus": "free",
+      "createdAt": "2026-03-26 23:45:45"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tartistHandle\tstripeAccountId\tstripeAccountStatus\tlicenseStatus\tcreatedAt\n180001\tMannon The Conquerer\tHlkngMniacNrdWrmngr\tacct_1TFO1ILdJ5vqIaYq\tpending\tlicensed\t2026-03-17 23:24:30\n780040\tMannon The Conquerer\tNULL\tNULL\tpending\tfree\t2026-03-20 03:04:42\n2550204\tMannon The Conquerer\tNULL\tNULL\tpending\tfree\t2026-03-24 02:27:41\n2550307\tMannon The Conquerer\tNULL\tNULL\tpending\tfree\t2026-03-24 03:00:55\n3510001\tMannon The Conquerer\tNULL\tNULL\tpending\tfree\t2026-03-26 23:45:45\n",
+  "stderr": "",
+  "execution_time_ms": 166
+}
