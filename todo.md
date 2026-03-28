@@ -943,3 +943,9 @@
 - [x] Wire jukebox session into global player — NowPlayingPanel delegates to addAndPlay(), global audio onEnded advances queue
 - [x] Add session badge to PlayerBar — gold pill with room code + Leave button when state.room is set
 - [ ] Add quick comment shortcut in PlayerBar when session-linked
+
+## Phase 104: Large File Upload Fix (413 on Production)
+- [x] Replace multer memory-buffer approach with streaming relay to Forge API
+- [x] Browser uploads multipart to /api/upload-file; server streams directly to forge.manus.ai without buffering (busboy + form-data)
+- [x] Removed multer dependency from upload route (no more memory buffering)
+- [x] TypeScript: 0 errors, 50MB local test returns 401 (auth) not 413 (proxy)
