@@ -172,6 +172,8 @@ export default function UploadPage() {
   const [witnessData, setWitnessData] = useState<WitnessData | null>(null);
   const [generatingWid, setGeneratingWid] = useState(false);
   const [waveformActive, setWaveformActive] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "processing" | "done">("idle");
 
   // Load creator profile defaults (aiDisclosure, primaryGenre)
   const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
@@ -346,11 +348,47 @@ export default function UploadPage() {
   };
 
   // Helper: upload a single file via multipart POST to /api/upload-file
-  const uploadFileToS3 = async (file: File, type: "audio" | "cover" | "video"): Promise<{ url: string; key: string }> => {
+  // For audio files, uses XHR so we can track upload progress
+  const uploadFileToS3 = async (
+    file: File,
+    type: "audio" | "cover" | "video",
+    onProgress?: (pct: number) => void
+  ): Promise<{ url: string; key: string }> => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", type);
     formData.append("filename", file.name);
+
+    if (onProgress) {
+      // Use XHR for progress tracking
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/upload-file");
+        xhr.withCredentials = true;
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            onProgress(Math.round((e.loaded * 100) / e.total));
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { resolve(JSON.parse(xhr.responseText)); }
+            catch { reject(new Error("Invalid server response")); }
+          } else {
+            try {
+              const err = JSON.parse(xhr.responseText);
+              reject(new Error(err.error || `Upload failed (${xhr.status})`));
+            } catch {
+              reject(new Error(`Upload failed (${xhr.status})`));
+            }
+          }
+        };
+        xhr.onerror = () => reject(new Error("Network error during upload"));
+        xhr.send(formData);
+      });
+    }
+
+    // Fallback: plain fetch for cover art / video (no progress needed)
     const res = await fetch("/api/upload-file", {
       method: "POST",
       credentials: "include",
@@ -391,10 +429,13 @@ export default function UploadPage() {
     }
     if (!audioFile || !title) { toast.error("Audio file and title are required"); return; }
     try {
-      // Upload audio and cover via multipart — no base64 encoding
-      toast.loading("Uploading audio file…", { id: "upload-audio" });
-      const { url: fileUrl, key: fileKey } = await uploadFileToS3(audioFile, "audio");
-      toast.dismiss("upload-audio");
+      // Upload audio with progress tracking
+      setUploadProgress(0);
+      setUploadPhase("uploading");
+      const { url: fileUrl, key: fileKey } = await uploadFileToS3(audioFile, "audio", (pct) => {
+        setUploadProgress(pct);
+      });
+      setUploadPhase("processing");
       let coverArtUrl: string | undefined;
       if (coverFile) {
         const { url } = await uploadFileToS3(coverFile, "cover");
@@ -412,7 +453,11 @@ export default function UploadPage() {
         ecdsaSignature: witnessData?.signature,
         caption: caption || undefined,
       } as any);
-    } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
+    } catch (err: any) {
+      setUploadPhase("idle");
+      setUploadProgress(0);
+      toast.error(err.message || "Failed to prepare upload");
+    }
   };
 
   if (!isAuthenticated) return (
@@ -904,12 +949,38 @@ export default function UploadPage() {
                   <p className="text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>No Witness ID generated. Your track will be published without cryptographic provenance.</p>
                 </div>
               )}
+              {/* Upload progress bar — shown during audio upload */}
+              {(uploadPhase === "uploading" || uploadPhase === "processing") && (
+                <div className="rounded-xl p-4 space-y-2" style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+                  <div className="flex justify-between text-xs mb-1" style={{ color: "oklch(0.65 0.04 280)" }}>
+                    <span>{uploadPhase === "processing" ? "Processing Witness ID…" : "Uploading audio file…"}</span>
+                    <span style={{ color: "oklch(0.84 0.155 85)" }}>
+                      {uploadPhase === "processing" ? "100%" : `${uploadProgress}%`}
+                    </span>
+                  </div>
+                  <div className="w-full rounded-full h-2" style={{ background: "oklch(0.2 0.015 280)" }}>
+                    <div
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{
+                        width: uploadPhase === "processing" ? "100%" : `${uploadProgress}%`,
+                        background: "linear-gradient(90deg, oklch(0.75 0.18 85), oklch(0.84 0.155 85))",
+                      }}
+                    />
+                  </div>
+                  {uploadPhase === "processing" && (
+                    <p className="text-xs text-center" style={{ color: "oklch(0.65 0.18 180)" }}>
+                      ✦ Embedding Witness ID into file metadata…
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" onClick={() => setStep(3)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
+                <Button variant="outline" onClick={() => setStep(3)} disabled={uploadPhase === "uploading" || uploadPhase === "processing"} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
-                  {uploadMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Upload className="w-4 h-4 mr-2" /> Publish Track</>}
+                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                  {(uploadMutation.isPending || uploadPhase === "processing") ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Upload className="w-4 h-4 mr-2" /> Publish Track</>}
                 </Button>
               </div>
             </div>

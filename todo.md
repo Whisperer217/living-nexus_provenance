@@ -1004,3 +1004,9 @@
 - [x] GET /api/v1/jellyfin/catalog — Jellyfin-compatible metadata format
 - [x] Wired into server/_core/index.ts
 - [x] TypeScript: 0 errors
+
+## Phase 111: Upload Progress Bar + BDDT-FREE Code + Plex Field Note
+- [x] Add upload progress bar to UploadPage (XHR onprogress, gold gradient bar, "Processing WID..." state, Back button disabled during upload)
+- [x] Create BDDT-FREE promo code in DB (100 slots, unlimited uses, 30-day expiry, createdByUserId=1)
+- [x] Create Plex/Jellyfin Field Note post on platform (public, category=update, authored by Doc Seraph Mercer)
+- [x] TypeScript: 0 errors

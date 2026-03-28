@@ -1,0 +1,8 @@
+{
+  "query": "\nINSERT INTO promoCodes (code, description, slotsGranted, maxUses, usedCount, expiresAt, createdBy, isActive, createdAt, updatedAt)\nVALUES (\n  'BDDT-FREE',\n  'Free Creator License — BDDT Publishing / Command Domains LLC. Grants full Creator License with 100 upload slots. Share with artists ready to join the Sovereign Shutter Framework.',\n  100,\n  NULL,\n  0,\n  DATE_ADD(NOW(), INTERVAL 30 DAY),\n  1,\n  1,\n  NOW(),\n  NOW()\n);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute \nINSERT INTO promoCodes (code, description, slotsGranted, maxUses, usedCount, expiresAt, createdBy, isActive, createdAt, updatedAt)\nVALUES (\n  'BDDT-FREE',\n  'Free Creator License — BDDT Publishing / Command Domains LLC. Grants full Creator License with 100 upload slots. Share with artists ready to join the Sovereign Shutter Framework.',\n  100,\n  NULL,\n  0,\n  DATE_ADD(NOW(), INTERVAL 30 DAY),\n  1,\n  1,\n  NOW(),\n  NOW()\n);\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'createdBy' in 'field list'"
+  ]
+}
