@@ -162,8 +162,19 @@ export default function SongDetailPage() {
     onSuccess: () => { setCommentText(""); refetchComments(); refetchEvents(); toast.success("Comment posted!"); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
+  // WID-tagged download: permission check via tRPC, then trigger /api/download/:songId
+  function triggerTaggedDownload(id: number) {
+    const a = document.createElement("a");
+    a.href = `/api/download/${id}`;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
   const downloadMutation = trpc.songs.download.useMutation({
-    onSuccess: (d: { url: string }) => { if (d.url) window.open(d.url, "_blank"); },
+    onSuccess: (_d: { url: string }, vars: { songId: number }) => {
+      triggerTaggedDownload(vars.songId);
+    },
     onError: (e: { message: string }) => toast.error(e.message),
   });
   const updateLyricsMutation = trpc.songs.updateLyrics.useMutation({
@@ -205,11 +216,10 @@ export default function SongDetailPage() {
           // Force-refetch permission to bypass staleTime cache
           await utils.songDownload.getPermission.invalidate({ songId });
           // Attempt the download — will throw FORBIDDEN if tip not yet recorded
-          const d = await downloadMutation.mutateAsync({ songId });
+          await downloadMutation.mutateAsync({ songId });
           clearInterval(poll);
           toast.dismiss("download-unlock");
-          toast.success("✅ Download started!");
-          if (d.url) window.open(d.url, "_blank");
+          toast.success("✅ Download started! Your WID-tagged file is saving.");
           // Refresh ticker and activity thread
           utils.tips.recentTips.invalidate();
           utils.events.getByWork.invalidate({ workId: songId });

@@ -36,8 +36,16 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
     toast.success("Link copied!");
     onClose();
   };
+  function triggerTaggedDownload(id: number) {
+    const a = document.createElement("a");
+    a.href = `/api/download/${id}`;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
   const downloadMutation = trpc.songs.download.useMutation({
-    onSuccess: (data) => { if (data.url) window.open(data.url, "_blank"); onClose(); },
+    onSuccess: (_data: { url: string }, vars: { songId: number }) => { triggerTaggedDownload(vars.songId); onClose(); },
     onError: (e) => { toast.error(e.message); onClose(); },
   });
 

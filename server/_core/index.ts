@@ -9,6 +9,8 @@ import { registerOgRoutes } from "../og";
 import { registerSseRoutes } from "../sse";
 import { appRouter, handleStripeWebhook } from "../routers";
 import { uploadRouter } from "../uploadRoute";
+import { downloadRouter } from "../downloadRoute";
+import { publicApiRouter } from "../publicApiRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -58,6 +60,10 @@ async function startServer() {
   registerSseRoutes(app);
   // Multipart file upload endpoint (bypasses tRPC JSON body size limit)
   app.use(uploadRouter);
+  // WID-tagged audio download endpoint
+  app.use(downloadRouter);
+  // Public REST API v1 (Plex/Jellyfin/external clients)
+  app.use(publicApiRouter);
   // tRPC API
   app.use(
     "/api/trpc",

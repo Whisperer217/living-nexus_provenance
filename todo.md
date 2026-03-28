@@ -983,3 +983,24 @@
 - [x] Accept audio/*, audio/mpeg, audio/mp3, audio/wav, audio/x-wav, audio/flac, audio/aac, audio/ogg, audio/x-m4a, audio/mp4 + .mp3/.wav/.flac/.aac/.ogg/.m4a/.aiff
 - [x] Fix video file input accept attribute — added video/*, video/x-m4v, .m4v
 - [x] Added "On iPhone, use Safari for best file access" hint below the drop zone
+
+## Phase 109: WID Metadata in Downloads (ID3 Tags)
+- [x] Installed node-id3 package (built-in TypeScript types)
+- [x] Created server/downloadRoute.ts — fetches audio from S3, embeds full ID3 tag set
+- [x] Embeds: title, artist, album, year, comment (WID), LNWID, LN_CREATOR, LN_TIMESTAMP, LN_VERIFY_URL, LN_PLATFORM, LN_DOCTRINE
+- [x] Embeds cover art as ID3 APIC image tag (fetched from S3)
+- [x] Filename: "Title - Artist [WID-MUS-XXXXXXXX].mp3"
+- [x] Updated SongDetailPage, CreatorProfilePage, and poll-after-payment flow to use /api/download/:songId
+
+## Phase 110: Public REST API Foundation (Plex/Jellyfin)
+- [x] Created server/publicApiRoute.ts with rate limiting (100 req/min per IP)
+- [x] GET /api/v1/health — platform health check
+- [x] GET /api/v1/catalog — paginated public track listing with stream URLs
+- [x] GET /api/v1/track/:id — single track detail
+- [x] GET /api/v1/stream/:id — redirect to S3 audio URL for direct streaming
+- [x] GET /api/v1/verify/:witnessId — WID verification endpoint
+- [x] GET /api/v1/creator/:id — creator profile with track list
+- [x] GET /api/v1/plex/manifest — static XML manifest for Plex channel plugin
+- [x] GET /api/v1/jellyfin/catalog — Jellyfin-compatible metadata format
+- [x] Wired into server/_core/index.ts
+- [x] TypeScript: 0 errors
