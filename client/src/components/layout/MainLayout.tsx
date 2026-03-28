@@ -15,6 +15,7 @@ import MobilePlayerPanel from "@/components/player/MobilePlayerPanel";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import TipTicker from "@/components/TipTicker";
+import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
   Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic,
@@ -523,6 +524,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* Theater Player */}
       <TheaterPlayer />
+
+      {/* Scroll to top — top-right, visible on all screen sizes */}
+      <ScrollToTopButton />
     </div>
   );
 }

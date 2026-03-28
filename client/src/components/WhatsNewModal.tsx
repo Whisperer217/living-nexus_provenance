@@ -3,23 +3,43 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import {
   Shield, Upload, Music, Video, DollarSign, Users, BookOpen,
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
-  Eye, Globe, FileText, Network, Scroll, Film,
+  Eye, Globe, FileText, Network, Scroll, Film, Gift, Link2,
+  Radio, ArrowUpFromLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.2.0";
+const CURRENT_VERSION = "v2.4.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.2.0",
+    version: "v2.4.0",
     date: "March 2026",
     label: "Latest",
     items: [
+      { icon: Gift, text: "Gift Economy — offerings replace tips. Every song in the Jukebox is freely queueable. Leave a voluntary offering ($1–$20) to support the room's creators. No gates, no blocks — pure sovereign generosity." },
+      { icon: Link2, text: "Jukebox Share Links — every room now has a direct link. Share it and anyone who taps it lands straight in the room, no code entry needed. Room link auto-copies when you create a session." },
+      { icon: Radio, text: "Global Player Integration — the Jukebox now plays through the global player bar. Music follows you across every page while a session is active. A gold session badge in the player shows your room and a Leave button." },
+      { icon: ArrowUpFromLine, text: "Large File Upload Fix — WAV files of any size now upload reliably. The upload pipeline was rebuilt as a streaming relay, bypassing the platform's request-body limit entirely." },
+    ],
+  },
+  {
+    version: "v2.3.0",
+    date: "March 2026",
+    label: null,
+    items: [
+      { icon: Eye, text: "Witness Registry — a public ledger of all witnessed works on the platform. Browse by All, Full Works, or Lyrics. Every WID is permanently on record." },
+      { icon: Shield, text: "Witness Notifications — when someone witnesses you, you receive an instant signal with their name and avatar. Your witness network is now a living, notified relationship." },
+    ],
+  },
+  {
+    version: "v2.2.0",
+    date: "March 2026",
+    label: null,
+    items: [
       { icon: Music, text: "Collaborative Playlists — create playlists and invite other creators to build them together. Invite by username, manage collaborators, and play the full queue from any device." },
       { icon: MessageCircle, text: "Signals (Notification Feed) — every witness, comment, and playlist invite now lands in your personal Signals inbox. Archived forever, never lost. Access it from the sidebar." },
-      { icon: Eye, text: "Witness Notifications — when someone witnesses you, you receive an instant signal with their name and avatar. Your witness network is now a living, notified relationship." },
     ],
   },
   {
@@ -28,8 +48,8 @@ const UPDATES = [
     label: null,
     items: [
       { icon: Users, text: "Community Notifications — when a new member joins Living Nexus, every logged-in user sees a live toast notification in real time. No refresh needed — the platform is always watching the door." },
-      { icon: Video, text: "Background Video Buffering — cover art now holds steady while the background video loads. The fade only happens once the video is fully ready to play, so you never see a black frame on slow connections." },
-      { icon: Shield, text: "Video WID Badge — any track with a witnessed video now shows a green \u2713 Video WID badge in the player. Tap it to verify the video's cryptographic certificate." },
+      { icon: Video, text: "Background Video Buffering — cover art now holds steady while the background video loads. The fade only happens once the video is fully ready to play." },
+      { icon: Shield, text: "Video WID Badge — any track with a witnessed video now shows a green ✓ Video WID badge in the player. Tap it to verify the video's cryptographic certificate." },
     ],
   },
   {
@@ -37,7 +57,7 @@ const UPDATES = [
     date: "March 2026",
     label: null,
     items: [
-      { icon: Film, text: "Background Video Playback — attach a muted looping video to any track. Cover art stays static until you press play, then the video fades in behind the music. Audio and video are completely separate streams." },
+      { icon: Film, text: "Background Video Playback — attach a muted looping video to any track. Cover art stays static until you press play, then the video fades in behind the music." },
       { icon: Network, text: "Witness Network — witness any creator to build a living network of creative relationships. View who witnesses you and who you witness from your profile." },
       { icon: Scroll, text: "Field Notes — write doctrine, journals, updates, and concepts directly on the platform. Your ideas now have a home alongside your music." },
       { icon: BookOpen, text: "Lexicon — the Living Nexus vocabulary legend. 28 terms translated from standard internet language into the platform's sovereign terminology." },
@@ -169,7 +189,7 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
         <DialogDescription className="sr-only">
           Living Nexus platform updates and how-to guide for new features.
         </DialogDescription>
-        {/* Header — compact on mobile */}
+        {/* Header */}
         <div
           className="flex-shrink-0 px-4 pt-4 pb-3"
           style={{
@@ -248,7 +268,7 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
                     <div key={i} className="flex items-start gap-2.5">
                       <div
                         className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center mt-0.5"
-                        style={{ background: "oklch(0.84 0.155 85 / 0.08)", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}
+                        style={{ background: "oklch(0.84 0.155 85 / 0.1)", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}
                       >
                         <Icon size={11} style={{ color: "oklch(0.84 0.155 85)" }} />
                       </div>
@@ -300,7 +320,7 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
           )}
         </div>
 
-        {/* Footer — always visible */}
+        {/* Footer */}
         <div
           className="flex-shrink-0 px-4 py-3 flex items-center justify-between gap-3"
           style={{ borderTop: "1px solid oklch(0.84 0.155 85 / 0.1)" }}

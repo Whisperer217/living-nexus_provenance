@@ -949,3 +949,10 @@
 - [x] Browser uploads multipart to /api/upload-file; server streams directly to forge.manus.ai without buffering (busboy + form-data)
 - [x] Removed multer dependency from upload route (no more memory buffering)
 - [x] TypeScript: 0 errors, 50MB local test returns 401 (auth) not 413 (proxy)
+
+## Phase 105: WhatsNew v2.4.0 + Scroll-to-Top Button
+- [x] Update WhatsNewModal to v2.4.0 with gift economy, share links, global player, upload fix entries
+- [x] Added v2.3.0 Witness Registry entry between v2.2.0 and v2.1.0
+- [x] Add scroll-to-top button (top-right, visible on both mobile and desktop)
+- [x] Scroll-to-top button appears after scrolling down 300px, smooth scroll on click
+- [x] Gold gradient button with blur backdrop, positioned top-right clear of mobile header
