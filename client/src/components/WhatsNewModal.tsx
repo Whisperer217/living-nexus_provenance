@@ -9,14 +9,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.4.0";
+const CURRENT_VERSION = "v2.5.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.4.0",
+    version: "v2.5.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Shield, text: "Name Audit Trail — every WID certificate now shows the creator's original registered name at time of witnessing. If a creator changes their display name, a full name history timeline appears on the verify page. Your provenance is permanent and complete." },
+      { icon: CreditCard, text: "Stripe Recovery — creators who started but didn't finish Stripe onboarding can now complete it. Go to Dashboard to finish connecting your bank and start receiving gifts." },
+    ],
+  },
+  {
+    version: "v2.4.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Gift, text: "Gift Economy — offerings replace tips. Every song in the Jukebox is freely queueable. Leave a voluntary offering ($1–$20) to support the room's creators. No gates, no blocks — pure sovereign generosity." },
       { icon: Link2, text: "Jukebox Share Links — every room now has a direct link. Share it and anyone who taps it lands straight in the room, no code entry needed. Room link auto-copies when you create a session." },

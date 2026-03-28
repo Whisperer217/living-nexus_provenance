@@ -1022,3 +1022,9 @@
 - [x] Admin can enter User ID to generate fresh Stripe Connect onboarding link for pending accounts
 - [x] Link displayed with copy + open buttons; expires after one use or ~24h
 - [x] TypeScript: 0 errors | Vitest: 44/44 passing
+
+## Phase 113: Post-112 Execution — Backfill + Stripe Recovery + WhatsNew v2.5.0
+- [x] Backfill nameHistory — 81 founding records inserted (all users with a name, dated to account createdAt)
+- [x] Mannon (ID 180001) confirmed: acct_1TFO1ILdJ5vqIaYq, status=pending — live key required to generate link (see note)
+- [x] Update WhatsNew modal to v2.5.0 with Name Audit Trail + Stripe Recovery entries
+- [x] TypeScript: 0 errors | HMR confirmed

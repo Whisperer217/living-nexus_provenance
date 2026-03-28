@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, name, artistHandle, email, stripeAccountId, stripeAccountStatus, createdAt \nFROM users \nWHERE id = 180001;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT id, name, artistHandle, email, stripeAccountId, stripeAccountStatus, createdAt \nFROM users \nWHERE id = 180001;",
+  "rows": [
+    {
+      "id": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "HlkngMniacNrdWrmngr",
+      "email": "gradebbountyhunting@gmail.com",
+      "stripeAccountId": "acct_1TFO1ILdJ5vqIaYq",
+      "stripeAccountStatus": "pending",
+      "createdAt": "2026-03-17 23:24:30"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tartistHandle\temail\tstripeAccountId\tstripeAccountStatus\tcreatedAt\n180001\tMannon The Conquerer\tHlkngMniacNrdWrmngr\tgradebbountyhunting@gmail.com\tacct_1TFO1ILdJ5vqIaYq\tpending\t2026-03-17 23:24:30\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}
