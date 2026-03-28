@@ -977,3 +977,9 @@
 - [x] Add Redeem Code to sidebar nav (all authenticated users, SYSTEM group)
 - [x] Add Admin Panel to sidebar nav (role=admin only, both desktop + mobile)
 - [x] TypeScript: 0 errors
+
+## Phase 108: Mobile File Picker Fix (iOS Chrome MP3 grayed out)
+- [x] Fix audio file input accept attribute — expanded to include all explicit MIME types + extensions for iOS Chrome
+- [x] Accept audio/*, audio/mpeg, audio/mp3, audio/wav, audio/x-wav, audio/flac, audio/aac, audio/ogg, audio/x-m4a, audio/mp4 + .mp3/.wav/.flac/.aac/.ogg/.m4a/.aiff
+- [x] Fix video file input accept attribute — added video/*, video/x-m4v, .m4v
+- [x] Added "On iPhone, use Safari for best file access" hint below the drop zone

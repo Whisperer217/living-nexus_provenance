@@ -491,7 +491,7 @@ export default function UploadPage() {
                   onDrop={handleAudioDrop}
                   className="rounded-xl p-8 text-center cursor-pointer transition-all"
                   style={{ border: `2px dashed ${audioFile ? "oklch(0.65 0.18 145)" : audioDragging ? "oklch(0.84 0.155 85)" : "oklch(0.28 0.02 280)"}`, background: audioFile ? "oklch(0.65 0.18 145 / 0.05)" : audioDragging ? "oklch(0.75 0.18 85 / 0.05)" : "oklch(0.09 0.01 280)" }}>
-                  <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
+                  <input ref={audioInputRef} type="file" accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/flac,audio/x-flac,audio/aac,audio/ogg,audio/x-m4a,audio/mp4,.mp3,.wav,.flac,.aac,.ogg,.m4a,.aiff,.aif" className="hidden"
                     onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 375 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 375 MB. Consider converting WAV to MP3 first.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); } }} />
                   {audioFile ? (
                     <div className="flex flex-col items-center gap-2">
@@ -507,6 +507,7 @@ export default function UploadPage() {
                       <Music className="w-10 h-10 mx-auto mb-3" style={{ color: "oklch(0.84 0.155 85)", opacity: 0.4 }} />
                       <p className="font-medium text-sm mb-1" style={{ color: "oklch(0.7 0.04 280)" }}>{audioDragging ? "Drop it!" : "Drop audio file here or click to browse"}</p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>MP3, WAV, FLAC, M4A, OGG supported</p>
+                      <p className="text-xs mt-1" style={{ color: "oklch(0.55 0.04 280)" }}>On iPhone, use Safari for best file access</p>
                     </>
                   )}
                 </div>
@@ -552,7 +553,7 @@ export default function UploadPage() {
               {uploadMode === "audio" && (
                 <div onClick={() => videoInputRef.current?.click()} className="rounded-xl p-5 text-center cursor-pointer transition-all hover:bg-white/5"
                   style={{ border: `2px dashed ${videoFile ? "oklch(0.65 0.18 200)" : "oklch(0.22 0.015 280)"}`, background: videoFile ? "oklch(0.65 0.18 200 / 0.05)" : "oklch(0.09 0.01 280)" }}>
-                  <input ref={videoInputRef} type="file" accept="video/mp4,video/quicktime,video/mov,.mp4,.mov" className="hidden"
+                  <input ref={videoInputRef} type="file" accept="video/*,video/mp4,video/quicktime,video/mov,video/x-m4v,.mp4,.mov,.m4v" className="hidden"
                     onChange={e => {
                       const f = e.target.files?.[0];
                       if (f) {
