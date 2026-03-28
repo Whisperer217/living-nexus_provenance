@@ -432,3 +432,31 @@ export const jukeboxPlayEvents = mysqlTable("jukeboxPlayEvents", {
 });
 export type JukeboxPlayEvent = typeof jukeboxPlayEvents.$inferSelect;
 export type InsertJukeboxPlayEvent = typeof jukeboxPlayEvents.$inferInsert;
+
+// ─── Promo Codes ──────────────────────────────────────────────────────────────
+// Admin-created codes that grant a Creator License + slots to any user who redeems them.
+export const promoCodes = mysqlTable("promoCodes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 64 }).notNull().unique(),          // e.g. BDDT-FREE, VETERAN-2026
+  description: varchar("description", { length: 256 }),              // internal note
+  slotsGranted: int("slotsGranted").default(100).notNull(),          // slots to give on redemption
+  maxUses: int("maxUses"),                                            // null = unlimited
+  usedCount: int("usedCount").default(0).notNull(),
+  expiresAt: timestamp("expiresAt"),                                  // null = never expires
+  createdByUserId: int("createdByUserId").notNull(),                  // admin who created it
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = typeof promoCodes.$inferInsert;
+
+// ─── Promo Redemptions ────────────────────────────────────────────────────────
+// Tracks which user redeemed which code (prevents double-redemption).
+export const promoRedemptions = mysqlTable("promoRedemptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  promoCodeId: int("promoCodeId").notNull(),
+  redeemedAt: timestamp("redeemedAt").defaultNow().notNull(),
+});
+export type PromoRedemption = typeof promoRedemptions.$inferSelect;
+export type InsertPromoRedemption = typeof promoRedemptions.$inferInsert;

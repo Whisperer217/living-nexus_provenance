@@ -5,7 +5,8 @@ import mysql from "mysql2/promise";
 import {
   InsertUser, aiTransforms, comments, downloads, licenses,
   slotPurchases, songs, tips, users, events,
-  jukeboxOfferings, jukeboxPlayEvents
+  jukeboxOfferings, jukeboxPlayEvents,
+  promoCodes, promoRedemptions,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1617,4 +1618,116 @@ export async function getJukeboxEarningsForCreator(creatorId: number) {
   }
 
   return results.sort((a, b) => b.earnedCents - a.earnedCents);
+}
+
+// ─── Admin Helpers ────────────────────────────────────────────────────────────
+
+/** Search users by name, handle, or email (admin only) */
+export async function adminSearchUsers(query: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const q = `%${query}%`;
+  return db
+    .select({
+      id: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      email: users.email,
+      role: users.role,
+      licenseStatus: users.licenseStatus,
+      songSlotsTotal: users.songSlotsTotal,
+      songSlotsUsed: users.songSlotsUsed,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(or(like(users.name, q), like(users.artistHandle, q), like(users.email, q)))
+    .limit(20);
+}
+
+/** Directly grant a Creator License + slots to a user (admin only) */
+export async function adminGrantLicense(userId: number, slotsGranted: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.update(users).set({ licenseStatus: "licensed", songSlotsTotal: slotsGranted }).where(eq(users.id, userId));
+  await db.insert(licenses).values({
+    userId,
+    stripePaymentIntentId: `admin-grant-${Date.now()}`,
+    amountCents: 0,
+    slotsGranted,
+  });
+}
+
+// ─── Promo Code Helpers ───────────────────────────────────────────────────────
+
+/** Create a new promo code */
+export async function createPromoCode(data: {
+  code: string;
+  description?: string;
+  slotsGranted: number;
+  maxUses?: number | null;
+  expiresAt?: Date | null;
+  createdByUserId: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.insert(promoCodes).values({
+    code: data.code.toUpperCase().trim(),
+    description: data.description ?? null,
+    slotsGranted: data.slotsGranted,
+    maxUses: data.maxUses ?? null,
+    expiresAt: data.expiresAt ?? null,
+    createdByUserId: data.createdByUserId,
+    isActive: true,
+  });
+}
+
+/** List all promo codes */
+export async function listPromoCodes() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt));
+}
+
+/** Deactivate a promo code */
+export async function deactivatePromoCode(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(promoCodes).set({ isActive: false }).where(eq(promoCodes.id, id));
+}
+
+/** Reactivate a promo code */
+export async function reactivatePromoCode(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(promoCodes).set({ isActive: true }).where(eq(promoCodes.id, id));
+}
+
+/** Redeem a promo code for a user */
+export async function redeemPromoCode(userId: number, code: string): Promise<{
+  success: boolean;
+  message: string;
+  slotsGranted?: number;
+}> {
+  const db = await getDb();
+  if (!db) return { success: false, message: "Database unavailable." };
+  const upperCode = code.toUpperCase().trim();
+
+  const [promo] = await db.select().from(promoCodes).where(eq(promoCodes.code, upperCode)).limit(1);
+  if (!promo) return { success: false, message: "Code not found. Please check and try again." };
+  if (!promo.isActive) return { success: false, message: "This code has been deactivated." };
+  if (promo.expiresAt && promo.expiresAt < new Date()) return { success: false, message: "This code has expired." };
+  if (promo.maxUses !== null && promo.usedCount >= promo.maxUses) return { success: false, message: "This code has reached its maximum number of uses." };
+
+  const [existing] = await db
+    .select().from(promoRedemptions)
+    .where(and(eq(promoRedemptions.userId, userId), eq(promoRedemptions.promoCodeId, promo.id)))
+    .limit(1);
+  if (existing) return { success: false, message: "You have already redeemed this code." };
+
+  await db.update(users).set({ licenseStatus: "licensed", songSlotsTotal: promo.slotsGranted }).where(eq(users.id, userId));
+  await db.insert(licenses).values({ userId, stripePaymentIntentId: `promo-${promo.code}-${Date.now()}`, amountCents: 0, slotsGranted: promo.slotsGranted });
+  await db.insert(promoRedemptions).values({ userId, promoCodeId: promo.id });
+  await db.update(promoCodes).set({ usedCount: promo.usedCount + 1 }).where(eq(promoCodes.id, promo.id));
+
+  return { success: true, message: `License activated! You now have ${promo.slotsGranted} upload slots.`, slotsGranted: promo.slotsGranted };
 }

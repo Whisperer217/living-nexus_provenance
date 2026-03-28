@@ -32,6 +32,7 @@ const ContributorsPage = lazy(() => import("./pages/ContributorsPage"));
 const PlaylistPage = lazy(() => import("./pages/PlaylistPage"));
 const ManifestoPage = lazy(() => import("./pages/ManifestoPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
+const RedeemPage = lazy(() => import("./pages/RedeemPage"));
 const PricingCovenantPage = lazy(() => import("./pages/PricingCovenantPage"));
 const FieldNotesPage = lazy(() => import("./pages/FieldNotesPage"));
 const WIDSpecPage = lazy(() => import("./pages/WIDSpecPage"));
@@ -83,6 +84,8 @@ function Router() {
                 <Route path="/playlist" component={PlaylistPage} />
                 <Route path="/manifesto" component={ManifestoPage} />
                 <Route path="/admin/users" component={AdminUsersPage} />
+                <Route path="/admin" component={AdminUsersPage} />
+                <Route path="/redeem" component={RedeemPage} />
                 <Route path="/pricing" component={PricingCovenantPage} />
                 <Route path="/field-notes" component={FieldNotesPage} />
                 <Route path="/doctrine/wid-spec" component={WIDSpecPage} />

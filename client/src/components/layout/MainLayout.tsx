@@ -20,7 +20,7 @@ import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
   Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic,
   BookOpen, Shield, Fingerprint, ScrollText, CheckCircle2,
-  PenLine, Layers, Bell, BookMarked,
+  PenLine, Layers, Bell, BookMarked, Tag, ShieldCheck,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -52,6 +52,8 @@ const NAV_ITEMS = [
   { label: "Witness Records",  icon: ScrollText,  path: "/witness-registry", group: "SYSTEM", tooltip: "Public WID ledger" },
   { label: "WID Specification", icon: CheckCircle2, path: "/doctrine/wid-spec", group: "SYSTEM" },
   { label: "Lexicon",            icon: BookMarked,  path: "/lexicon",             group: "SYSTEM" },
+  { label: "Redeem Code",         icon: Tag,         path: "/redeem",              group: "SYSTEM" },
+  { label: "Admin Panel",         icon: ShieldCheck, path: "/admin",               group: "SYSTEM", adminOnly: true },
 ];
 
 const GROUPS = ["DISCOVER", "MY COMMAND", "SYSTEM"];
@@ -340,7 +342,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {/* Nav groups */}
           <nav className="flex-1 overflow-y-auto py-3">
             {GROUPS.map(group => {
-              const items = NAV_ITEMS.filter(n => n.group === group);
+              const allItems = NAV_ITEMS.filter(n => n.group === group);
+              // Filter adminOnly items — only show to admin users
+              const items = allItems.filter(n => !(n as { adminOnly?: boolean }).adminOnly || user?.role === "admin");
               // Hide MY COMMAND + SYSTEM groups if not authenticated
               if ((group === "MY COMMAND" || group === "SYSTEM") && !user) return null;
               return (
@@ -464,7 +468,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {/* Mobile nav groups */}
               <div className="flex-1 overflow-y-auto py-2">
                 {GROUPS.map(group => {
-                  const items = NAV_ITEMS.filter(n => n.group === group);
+                  const allItems = NAV_ITEMS.filter(n => n.group === group);
+                  const items = allItems.filter(n => !(n as { adminOnly?: boolean }).adminOnly || user?.role === "admin");
                   if ((group === "MY COMMAND" || group === "SYSTEM") && !user) return null;
                   return (
                     <div key={group} className="mb-1">

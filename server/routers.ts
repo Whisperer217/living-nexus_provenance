@@ -38,6 +38,8 @@ import {
   getWitnessRegistry,
   createJukeboxOffering, updateJukeboxOfferingStatus,
   getOfferingsForRoom, recordJukeboxPlayEvent, getJukeboxEarningsForCreator,
+  adminSearchUsers, adminGrantLicense,
+  createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode, redeemPromoCode,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -1082,7 +1084,7 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       }),
   }),
 
-  // ── Admin ──────────────────────────────────────────────────────────────────
+  // ── Admin ──────────────────────────────────────────────────────────
   admin: router({
     /** Return all users with stats. Only the platform owner may call this. */
     getUsers: protectedProcedure.query(async ({ ctx }) => {
@@ -1091,6 +1093,72 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       }
       return getAllUsersWithStats();
     }),
+
+    /** Search users by name, handle, or email */
+    searchUsers: protectedProcedure
+      .input(z.object({ query: z.string().min(1).max(128) }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        return adminSearchUsers(input.query);
+      }),
+
+    /** Directly grant a Creator License + slots to a user */
+    grantLicense: protectedProcedure
+      .input(z.object({
+        userId: z.number().int(),
+        slotsGranted: z.number().int().min(1).max(10000).default(100),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await adminGrantLicense(input.userId, input.slotsGranted);
+        return { success: true };
+      }),
+
+    /** Create a new promo code */
+    createPromoCode: protectedProcedure
+      .input(z.object({
+        code: z.string().min(3).max(64).regex(/^[A-Z0-9_-]+$/i, "Code must be alphanumeric with dashes/underscores"),
+        description: z.string().max(256).optional(),
+        slotsGranted: z.number().int().min(1).max(10000).default(100),
+        maxUses: z.number().int().min(1).optional().nullable(),
+        expiresAt: z.string().optional().nullable(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await createPromoCode({
+          code: input.code,
+          description: input.description,
+          slotsGranted: input.slotsGranted,
+          maxUses: input.maxUses ?? null,
+          expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
+          createdByUserId: ctx.user.id,
+        });
+        return { success: true };
+      }),
+
+    /** List all promo codes */
+    listCodes: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+      return listPromoCodes();
+    }),
+
+    /** Deactivate a promo code */
+    deactivateCode: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await deactivatePromoCode(input.id);
+        return { success: true };
+      }),
+
+    /** Reactivate a promo code */
+    reactivateCode: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await reactivatePromoCode(input.id);
+        return { success: true };
+      }),
   }),
 
   // ── Field Notes ────────────────────────────────────────────────────────────
@@ -1393,6 +1461,18 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           items: hasMore ? rows.slice(0, limit) : rows,
           nextCursor: hasMore ? cursor + limit : null,
         };
+      }),
+  }),
+
+  // ── Promo Code Redemption (any authenticated user) ────────────────────────────
+  promo: router({
+    /** Redeem a promo code to activate a Creator License */
+    redeem: protectedProcedure
+      .input(z.object({ code: z.string().min(1).max(64) }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await redeemPromoCode(ctx.user.id, input.code);
+        if (!result.success) throw new TRPCError({ code: "BAD_REQUEST", message: result.message });
+        return result;
       }),
   }),
 });

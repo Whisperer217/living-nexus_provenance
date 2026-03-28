@@ -963,3 +963,17 @@
 - [x] Fixed desktop video in expanded PlayerBar — show video when loaded (not just when playing)
 - [x] Fixed desktop video in TheaterPlayer — show video when loaded (not just when playing)
 - [x] TypeScript: 0 errors
+
+## Phase 107: Admin Panel + Promo Codes + License Grant
+- [x] Promote owner account to admin role in DB (Doc Seraph Mercer, ID 1 — already admin)
+- [x] Add promoCodes table to drizzle schema (code, description, slotsGranted, maxUses, usedCount, expiresAt, createdBy, isActive)
+- [x] Add promoRedemptions table (userId, promoCodeId, redeemedAt)
+- [x] Push DB migration (both tables live)
+- [x] Add admin DB helpers: getAdminUsers, adminGrantLicense, createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode
+- [x] Add admin tRPC procedures (adminProcedure guard): admin.getUsers, admin.grantLicense, admin.createPromoCode, admin.listCodes, admin.deactivateCode, admin.reactivateCode
+- [x] Add user tRPC procedure: promo.redeem (protected, validates + applies code, grants license + slots)
+- [x] Build /admin page: Users tab (search, sort, grant license) + Promo Codes tab (create, copy, deactivate/reactivate)
+- [x] Build /redeem page: code entry form, confirmation, success state, already-licensed state
+- [x] Add Redeem Code to sidebar nav (all authenticated users, SYSTEM group)
+- [x] Add Admin Panel to sidebar nav (role=admin only, both desktop + mobile)
+- [x] TypeScript: 0 errors
