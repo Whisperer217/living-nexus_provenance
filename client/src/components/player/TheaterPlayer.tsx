@@ -71,7 +71,7 @@ export default function TheaterPlayer() {
 
   // Background video ref — always muted, synced to audio play state
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoBuffering, setVideoBuffering] = useState(true);
+  const [videoReady, setVideoReady] = useState(false);
 
   // Sync background video to audio play/pause state
   useEffect(() => {
@@ -84,40 +84,34 @@ export default function TheaterPlayer() {
     }
   }, [state.isPlaying, isTheaterOpen, videoUrl]);
 
-  // Buffering event listeners — hold cover art while video loads
+  // Show video as soon as it's loaded — even when paused (shows first frame)
   useEffect(() => {
     const vid = videoRef.current;
-    if (!vid || !videoUrl) return;
-    const onWaiting  = () => setVideoBuffering(true);
-    const onStalled  = () => setVideoBuffering(true);
-    const onCanPlay  = () => setVideoBuffering(false);
-    const onPlaying  = () => setVideoBuffering(false);
-    const onError    = () => setVideoBuffering(false);
-    vid.addEventListener("waiting",  onWaiting);
-    vid.addEventListener("stalled",  onStalled);
-    vid.addEventListener("canplay",  onCanPlay);
-    vid.addEventListener("canplaythrough", onCanPlay);
-    vid.addEventListener("playing",  onPlaying);
-    vid.addEventListener("error",    onError);
+    if (!vid) return;
+    const onReady = () => setVideoReady(true);
+    const onError = () => setVideoReady(false);
+    vid.addEventListener("canplay", onReady);
+    vid.addEventListener("canplaythrough", onReady);
+    vid.addEventListener("loadeddata", onReady);
+    vid.addEventListener("error", onError);
+    // If already ready (e.g. cached), fire immediately
+    if (vid.readyState >= 2) setVideoReady(true);
     return () => {
-      vid.removeEventListener("waiting",  onWaiting);
-      vid.removeEventListener("stalled",  onStalled);
-      vid.removeEventListener("canplay",  onCanPlay);
-      vid.removeEventListener("canplaythrough", onCanPlay);
-      vid.removeEventListener("playing",  onPlaying);
-      vid.removeEventListener("error",    onError);
+      vid.removeEventListener("canplay", onReady);
+      vid.removeEventListener("canplaythrough", onReady);
+      vid.removeEventListener("loadeddata", onReady);
+      vid.removeEventListener("error", onError);
     };
   }, [videoUrl]);
 
   // Reset video when track changes
   useEffect(() => {
     const vid = videoRef.current;
-    if (vid) { vid.pause(); vid.currentTime = 0; }
-    setVideoBuffering(true);
+    if (vid) vid.currentTime = 0;
+    setVideoReady(false);
   }, [currentTrack?.id]);
-
-  // Show video only when playing AND not buffering
-  const showVideo = state.isPlaying && !videoBuffering;
+  // Show video as soon as it's loaded — even when paused (shows first frame)
+  const showVideo = videoReady;
 
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
 

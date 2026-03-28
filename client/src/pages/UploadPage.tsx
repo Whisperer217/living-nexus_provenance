@@ -215,28 +215,32 @@ export default function UploadPage() {
     setCaptionState("idle");
   };
 
-  const uploadVideoMutation = trpc.songs.uploadVideo.useMutation();
+  // uploadVideoByUrl: links a video that was already uploaded via the streaming relay
+  const uploadVideoByUrlMutation = trpc.songs.uploadVideoByUrl.useMutation();
 
   const uploadMutation = trpc.songs.upload.useMutation({
     onSuccess: async (data: any) => {
-      // If a video file was selected, upload it now that we have the song ID
+      // If a video file was selected, upload it via streaming relay then link by URL
       if (videoFile && data?.songId) {
         try {
-          toast.info("Uploading music video…");
-          const videoBase64 = await toBase64(videoFile);
+          toast.loading("Uploading music video…", { id: "upload-video" });
+          // Upload via streaming relay — avoids base64 encoding and proxy size limit
+          const { url: videoUrl, key: videoKey } = await uploadFileToS3(videoFile, "video");
+          toast.dismiss("upload-video");
           // Compute SHA-256 witness for the video file
           const videoBuf = await videoFile.arrayBuffer();
           const videoHash = await sha256Hex(videoBuf);
           const videoWitnessId = `WID-VID-${videoHash.slice(0, 8).toUpperCase()}-${videoHash.slice(8, 16).toUpperCase()}`;
-          await uploadVideoMutation.mutateAsync({
+          await uploadVideoByUrlMutation.mutateAsync({
             songId: data.songId,
-            videoBase64,
+            videoUrl,
+            videoKey,
             videoMimeType: videoFile.type || "video/mp4",
-            videoFileName: videoFile.name,
             videoWitnessId,
           });
           toast.success("Music video uploaded and witnessed!");
         } catch (err: any) {
+          toast.dismiss("upload-video");
           toast.error("Audio published but video upload failed: " + (err?.message || "Unknown error"));
         }
       } else {

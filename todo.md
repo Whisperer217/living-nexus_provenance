@@ -956,3 +956,10 @@
 - [x] Add scroll-to-top button (top-right, visible on both mobile and desktop)
 - [x] Scroll-to-top button appears after scrolling down 300px, smooth scroll on click
 - [x] Gold gradient button with blur backdrop, positioned top-right clear of mobile header
+
+## Phase 106: Video Upload Persistence + Desktop Video Playback
+- [x] Fix video upload in UploadPage — replaced base64 tRPC path with streaming relay (/api/upload-file)
+- [x] Added uploadVideoByUrl tRPC procedure (accepts URL+key from relay, no base64 encoding, no proxy limit)
+- [x] Fixed desktop video in expanded PlayerBar — show video when loaded (not just when playing)
+- [x] Fixed desktop video in TheaterPlayer — show video when loaded (not just when playing)
+- [x] TypeScript: 0 errors

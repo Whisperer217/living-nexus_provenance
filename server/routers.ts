@@ -468,6 +468,25 @@ export const appRouter = router({
       await updateSongVideo(input.songId, ctx.user.id, { videoUrl: null, videoKey: null, videoWitnessId: null });
       return { success: true };
     }),
+
+    // uploadVideoByUrl: links a video already uploaded via the /api/upload-file streaming relay
+    // Avoids base64 encoding and the platform proxy body-size limit
+    uploadVideoByUrl: protectedProcedure.input(z.object({
+      songId: z.number(),
+      videoUrl: z.string().url(),
+      videoKey: z.string(),
+      videoMimeType: z.string().optional(),
+      videoWitnessId: z.string().optional(),
+    })).mutation(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+      await updateSongVideo(input.songId, ctx.user.id, {
+        videoUrl: input.videoUrl,
+        videoKey: input.videoKey,
+        videoWitnessId: input.videoWitnessId ?? null,
+      });
+      return { videoUrl: input.videoUrl, videoKey: input.videoKey, videoWitnessId: input.videoWitnessId ?? null };
+    }),
     getRelated: publicProcedure.input(z.object({ songId: z.number(), genre: z.string().optional() })).query(async ({ input }) => {
       return getRelatedSongs(input.songId, input.genre, 6);
     }),
