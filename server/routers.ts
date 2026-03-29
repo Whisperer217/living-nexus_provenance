@@ -41,6 +41,8 @@ import {
   adminSearchUsers, adminGrantLicense,
   createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode, redeemPromoCode,
   recordNameChange, getNameHistory, getOriginalName,
+  createCollection, updateCollectionPdf, linkSongsToCollection,
+  getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -412,9 +414,94 @@ export const appRouter = router({
         });
         results.push({ title: track.title, witnessId: track.witnessId, fileUrl });
       }
-      return { success: true, trackCount: results.length, coverArtUrl, results };
-    }),
+      // ── Generate Collection WID (WID-ALB) ─────────────────────────────────────
+      // Collect all WIDs that were assigned, sort them, hash together
+      const allWids = results.map(r => r.witnessId).filter(Boolean) as string[];
+      let collectionWid: string | undefined;
+      let collectiveHash: string | undefined;
+      let collectionId: number | undefined;
 
+      if (allWids.length > 0) {
+        // Server-side SHA-256 of sorted WIDs joined by '|'
+        const { createHash } = await import("crypto");
+        const sortedWids = [...allWids].sort();
+        const hashInput = sortedWids.join("|");
+        collectiveHash = createHash("sha256").update(hashInput).digest("hex");
+        collectionWid = `WID-ALB-${collectiveHash.slice(0, 8).toUpperCase()}-${collectiveHash.slice(8, 16).toUpperCase()}`;
+
+        // Persist the collection record
+        const insertResult = await createCollection({
+          creatorId: ctx.user.id,
+          name: input.albumName,
+          collectionWid,
+          collectiveHash,
+          coverArtUrl,
+          trackCount: allWids.length,
+        });
+        collectionId = (insertResult as any).insertId as number;
+
+        // Back-link all newly created songs to this collection
+        // We need the song IDs — re-query songs by witnessId
+        const songIds: number[] = [];
+        for (const wid of allWids) {
+          const songRow = await getSongByWitnessId(wid);
+          if (songRow?.song?.id) songIds.push(songRow.song.id);
+        }
+        if (songIds.length > 0) await linkSongsToCollection(songIds, collectionId);
+      }
+
+      return {
+        success: true,
+        trackCount: results.length,
+        coverArtUrl,
+        results,
+        collectionWid,
+        collectiveHash,
+        collectionId,
+      };
+    }),
+    // ── Verify Collection WID (WID-ALB) ──────────────────────────────────────────
+    verifyCollection: publicProcedure.input(z.object({ collectionWid: z.string().min(1) })).query(async ({ input }) => {
+      const collection = await getCollectionByWid(input.collectionWid);
+      if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "No collection found for this WID-ALB" });
+      const tracks = await getSongsByCollectionId(collection.id);
+      const creator = await getUserById(collection.creatorId);
+      const creatorName = creator?.artistHandle || creator?.name || "Unknown Artist";
+      return {
+        collectionWid: collection.collectionWid,
+        collectiveHash: collection.collectiveHash,
+        name: collection.name,
+        creatorId: collection.creatorId,
+        creatorName,
+        creatorHandle: creator?.artistHandle,
+        creatorPhotoUrl: creator?.profilePhotoUrl,
+        coverArtUrl: collection.coverArtUrl,
+        trackCount: collection.trackCount,
+        pdfUrl: collection.pdfUrl,
+        createdAt: collection.createdAt,
+        tracks: tracks.map((t: typeof tracks[number]) => ({
+          id: t.id,
+          title: t.title,
+          witnessId: t.witnessId,
+          fileHash: t.fileHash,
+          coverArtUrl: t.coverArtUrl,
+          genre: t.genre,
+          aiConsent: t.aiConsent,
+          createdAt: t.createdAt,
+        })),
+      };
+    }),
+    // ── Get collection for a song ─────────────────────────────────────────────
+    getCollectionForSong: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => {
+      const collection = await getCollectionForSong(input.songId);
+      if (!collection) return null;
+      return {
+        collectionWid: collection.collectionWid,
+        name: collection.name,
+        trackCount: collection.trackCount,
+        coverArtUrl: collection.coverArtUrl,
+      };
+    }),
     delete: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => { await deleteSong(input.songId, ctx.user.id); return { success: true }; }),
     updateStatus: protectedProcedure.input(z.object({
       songId: z.number(),
@@ -646,6 +733,97 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         if (!caption) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Caption generation failed. Please try again." });
         return { caption };
       }),
+    // ── Generate Collection Certificate (HTML → S3) ────────────────────────────
+    generateCollectionCertificate: protectedProcedure
+      .input(z.object({ collectionWid: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        const collection = await getCollectionByWid(input.collectionWid);
+        if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Collection not found" });
+        if (collection.creatorId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your collection" });
+        const tracks = await getSongsByCollectionId(collection.id);
+        const creator = await getUserById(collection.creatorId);
+        const creatorName = creator?.artistHandle || creator?.name || "Unknown Artist";
+        const year = new Date().getFullYear();
+        const regDate = new Date(collection.createdAt).toLocaleString("en-US", {
+          year: "numeric", month: "long", day: "numeric",
+          hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+        });
+        const trackRows = tracks.map((t: typeof tracks[number], i: number) =>
+          `<tr>
+            <td style="padding:6px 8px;color:#6ee7f7;font-size:11px;">${String(i + 1).padStart(2, "0")}</td>
+            <td style="padding:6px 8px;color:#e2e8f0;font-size:12px;">${t.title.replace(/</g, "&lt;")}</td>
+            <td style="padding:6px 8px;color:#D4AF37;font-family:'Share Tech Mono',monospace;font-size:10px;">${t.witnessId ?? "\u2014"}</td>
+            <td style="padding:6px 8px;color:rgba(226,232,240,0.4);font-size:9px;font-family:'Share Tech Mono',monospace;">${t.fileHash ? t.fileHash.slice(0, 16) + "..." : "\u2014"}</td>
+          </tr>`
+        ).join("");
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Collection Certificate \u2014 ${collection.name.replace(/</g, "&lt;")}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+  body { background:#0a0a0a;color:#e2e8f0;font-family:'Share Tech Mono',monospace;margin:0;padding:40px; }
+  .cert { max-width:900px;margin:0 auto;border:1px solid #D4AF37;padding:40px;position:relative; }
+  .cert::before { content:'';position:absolute;inset:6px;border:1px solid rgba(201,168,76,0.2);pointer-events:none; }
+  h1 { font-family:'Orbitron',monospace;color:#D4AF37;font-size:20px;letter-spacing:4px;margin:0 0 4px; }
+  h2 { font-family:'Orbitron',monospace;color:#6ee7f7;font-size:11px;letter-spacing:3px;margin:0 0 28px; }
+  .divider { border:none;border-top:1px solid #D4AF37;margin:24px 0;opacity:0.4; }
+  .label { color:#6ee7f7;font-size:10px;letter-spacing:2px;margin-bottom:2px; }
+  .value { color:#e2e8f0;font-size:14px;margin-bottom:14px;word-break:break-all; }
+  .wid { font-family:'Orbitron',monospace;color:#D4AF37;font-size:20px;letter-spacing:3px; }
+  .hash { font-size:10px;color:rgba(226,232,240,0.5);word-break:break-all;line-height:1.6; }
+  .verified { color:#22c55e;font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px; }
+  table { width:100%;border-collapse:collapse;margin-top:8px; }
+  th { text-align:left;padding:6px 8px;color:#6ee7f7;font-size:10px;letter-spacing:1px;border-bottom:1px solid rgba(201,168,76,0.3); }
+  tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+  .footer { margin-top:32px;font-size:10px;color:rgba(226,232,240,0.35);line-height:1.8;text-align:center; }
+</style>
+</head>
+<body>
+<div class="cert">
+  <h1>COLLECTION WITNESS CERTIFICATE</h1>
+  <h2>Command Domains LLC / BDDT Publishing \u2014 Sovereign Shutter\u2122 Framework</h2>
+  <div class="verified">\u2713 VERIFIED \u2014 Living Nexus Collective Provenance Registry</div>
+  <hr class="divider">
+  <div class="label">COLLECTION NAME</div>
+  <div class="value" style="font-size:20px;color:#D4AF37;">${collection.name.replace(/</g, "&lt;")}</div>
+  <div class="label">CREATOR</div>
+  <div class="value">${creatorName.replace(/</g, "&lt;")}</div>
+  <div class="label">REGISTRATION DATE</div>
+  <div class="value">${regDate}</div>
+  <hr class="divider">
+  <div class="label">COLLECTION WITNESS ID (WID-ALB)</div>
+  <div class="value wid">${collection.collectionWid}</div>
+  <div class="label">COLLECTIVE HASH (SHA-256 of all sorted individual WIDs)</div>
+  <div class="value hash">sha256:${collection.collectiveHash}</div>
+  <hr class="divider">
+  <div class="label">INCLUDED WORKS (${tracks.length} tracks)</div>
+  <table>
+    <thead><tr><th>#</th><th>TITLE</th><th>WITNESS ID</th><th>FILE HASH (truncated)</th></tr></thead>
+    <tbody>${trackRows}</tbody>
+  </table>
+  <hr class="divider">
+  <div class="label">LEGAL NOTICE</div>
+  <div style="font-size:11px;color:rgba(226,232,240,0.4);line-height:1.8;">
+    This certificate establishes collective provenance of the above works under the Sovereign Shutter\u2122 framework, Command Domains LLC.<br>
+    Each individual track carries its own cryptographic Witness ID. The Collection WID binds them into a single origin record.<br>
+    Copyright &copy; ${year} ${creatorName.replace(/</g, "&lt;")}. Published under BDDT Publishing. All rights reserved.<br>
+    Verified via Living Nexus Provenance Registry \u2014 livingnexus.org/verify/${collection.collectionWid}
+  </div>
+  <div class="footer">
+    &ldquo;He is before all things, and in him all things hold together.&rdquo; \u2014 Colossians 1:17<br>
+    Living Nexus &bull; Sovereign Shutter\u2122 &bull; BDDT Publishing &bull; Command Domains LLC
+  </div>
+</div>
+</body>
+</html>`;
+        const htmlBuffer = Buffer.from(html, "utf-8");
+        const certKey = `certificates/collections/${collection.collectionWid}-${Date.now()}.html`;
+        const { url: pdfUrl } = await storagePut(certKey, htmlBuffer, "text/html;charset=utf-8");
+        await updateCollectionPdf(collection.id, pdfUrl, certKey);
+        return { pdfUrl, collectionWid: collection.collectionWid };
+      }),
   }),
   comments: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),
@@ -869,11 +1047,10 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         client_reference_id: ctx.user.id.toString(), allow_promotion_codes: true,
         success_url: `${input.origin}/dashboard?slots=success`, cancel_url: `${input.origin}/dashboard`,
       });
-      return { url: session.url };
+       return { url: session.url };
     }),
   }),
-
-  // ── Jukebox ──────────────────────────────────────────────────────────────────
+  // ── Jukebox ───────────────────────────────────────────────────────────────────────────────────────
   jukebox: router({
     // Get current queue (pending items) for a room
     getQueue: publicProcedure

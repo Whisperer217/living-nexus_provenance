@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — VerifyPage
-   Public provenance verification for Witness IDs.
+   Public provenance verification for Witness IDs (WID) and
+   Collection Witness IDs (WID-ALB-*).
    No authentication required — accessible to anyone with a WID.
 ═══════════════════════════════════════════════════════════════════ */
 
@@ -11,6 +12,7 @@ import {
   ShieldCheck, ShieldX, Search, ExternalLink,
   Music, FileText, Copy, CheckCircle2, Loader2,
   Calendar, Hash, Key, Fingerprint, Tag, History, UserCheck, Download,
+  Library, Link2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,37 +54,201 @@ function Field({ icon: Icon, label, children }: { icon: React.ElementType; label
   );
 }
 
-export default function VerifyPage() {
-  const params = useParams<{ witnessId?: string }>();
+// ─── Collection View ─────────────────────────────────────────────────────────
+
+function CollectionVerifyView({
+  collectionWid,
+  onVerifyAnother,
+}: {
+  collectionWid: string;
+  onVerifyAnother: () => void;
+}) {
   const [, navigate] = useLocation();
-  const [inputWid, setInputWid] = useState(params.witnessId ?? "");
-  const [queryWid, setQueryWid] = useState(params.witnessId ?? "");
+  const { data, isLoading, error } = trpc.songs.verifyCollection.useQuery(
+    { collectionWid },
+    { enabled: !!collectionWid, retry: false }
+  );
 
-  // Sync URL param → input when navigating directly
-  useEffect(() => {
-    if (params.witnessId) {
-      setInputWid(params.witnessId);
-      setQueryWid(params.witnessId);
-    }
-  }, [params.witnessId]);
+  if (isLoading) {
+    return (
+      <div className="text-center py-16">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "oklch(0.84 0.155 85)" }} />
+        <p className="text-sm" style={{ color: "oklch(0.48 0.03 280)" }}>Querying collection provenance ledger…</p>
+      </div>
+    );
+  }
 
+  if (error || !data) {
+    return (
+      <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
+        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "oklch(0.65 0.18 25)" }} />
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 25)" }}>
+          Collection Not Found
+        </h2>
+        <p className="text-sm mb-6" style={{ color: "oklch(0.5 0.03 280)" }}>
+          No collection found for this WID-ALB. The ID may be incorrect or the collection was not registered on Living Nexus.
+        </p>
+        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
+          Try Another WID
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── Verified badge ── */}
+      <div className="rounded-2xl p-6 text-center" style={{ background: "oklch(0.84 0.155 85 / 0.06)", border: "2px solid oklch(0.84 0.155 85 / 0.35)" }}>
+        <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "2px solid oklch(0.84 0.155 85 / 0.4)" }}>
+          <Library className="w-10 h-10" style={{ color: "oklch(0.84 0.155 85)" }} />
+        </div>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.5)" }}>
+          <CheckCircle2 className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
+          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "oklch(0.65 0.18 145)", fontFamily: "'Cinzel', serif" }}>Collection Verified</span>
+        </div>
+        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}>
+          {data.name}
+        </h2>
+        <p className="text-sm mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>by {data.creatorName}</p>
+        <p className="text-xs mt-2" style={{ color: "oklch(0.45 0.03 280)" }}>
+          {data.trackCount} {data.trackCount === 1 ? "work" : "works"} collectively witnessed
+        </p>
+      </div>
+
+      {/* ── Collection WID ── */}
+      <Field icon={Fingerprint} label="Collection Witness ID (WID-ALB)">
+        <TruncatedMono value={data.collectionWid} label="Collection WID" />
+      </Field>
+
+      {/* ── Registration date ── */}
+      <Field icon={Calendar} label="Registration Date">
+        <p className="text-sm font-medium" style={{ color: "oklch(0.78 0.03 280)" }}>
+          {new Date(data.createdAt).toLocaleString("en-US", {
+            year: "numeric", month: "long", day: "numeric",
+            hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+          })}
+        </p>
+      </Field>
+
+      {/* ── Collective Hash ── */}
+      <Field icon={Hash} label="Collective Hash (SHA-256 of all sorted WIDs)">
+        <TruncatedMono value={`sha256:${data.collectiveHash}`} label="Collective Hash" />
+        <p className="text-[10px] mt-1.5" style={{ color: "oklch(0.38 0.02 280)" }}>
+          Computed as SHA-256 of all individual Witness IDs sorted lexicographically and joined by '|'
+        </p>
+      </Field>
+
+      {/* ── Included tracks ── */}
+      <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+        <div className="flex items-center gap-1.5 mb-3">
+          <Music className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
+          <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>
+            Included Works ({data.tracks.length})
+          </p>
+        </div>
+        <div className="space-y-2">
+          {data.tracks.map((track: typeof data.tracks[number], i: number) => (
+            <div
+              key={track.id}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5"
+              style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}
+            >
+              <span className="text-[10px] font-mono w-5 text-right flex-shrink-0" style={{ color: "oklch(0.45 0.03 280)" }}>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" style={{ color: "oklch(0.82 0.03 280)" }}>{track.title}</p>
+                {track.witnessId && (
+                  <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>{track.witnessId}</p>
+                )}
+              </div>
+              {track.witnessId && (
+                <button
+                  onClick={() => navigate(`/verify/${encodeURIComponent(track.witnessId!)}`)}
+                  className="flex-shrink-0 p-1.5 rounded hover:opacity-80 transition-opacity"
+                  style={{ background: "oklch(0.84 0.155 85 / 0.1)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+                  title="Verify individual track"
+                >
+                  <Link2 className="w-3 h-3" style={{ color: "oklch(0.84 0.155 85)" }} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Actions ── */}
+      <div className="flex flex-col gap-2 pt-2">
+        <div className="flex gap-3">
+          {data.pdfUrl && (
+            <a
+              href={data.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-bold"
+              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
+            >
+              <Download className="w-4 h-4" /> Download Certificate
+            </a>
+          )}
+          <Button
+            variant="outline"
+            onClick={onVerifyAnother}
+            className={data.pdfUrl ? "" : "flex-1"}
+            style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}
+          >
+            <Search className="w-4 h-4 mr-2" /> Verify Another
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Covenant Declaration ── */}
+      <div className="rounded-2xl px-5 py-5" style={{ background: "oklch(0.12 0.04 85 / 0.10)", border: "1px solid oklch(0.75 0.18 85 / 0.15)" }}>
+        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "oklch(0.75 0.18 85 / 0.7)", fontFamily: "'Cinzel', serif" }}>
+          Covenant Declaration
+        </p>
+        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>
+          This collection record was sealed by Living Nexus at the moment of batch registration.
+          The Collection WID cryptographically binds all included works into a single origin record
+          under the Sovereign Shutter™ framework. The collective hash is immutable.
+        </p>
+        <p className="text-[11px] italic" style={{ color: "oklch(0.4 0.03 280)" }}>
+          "He is before all things, and in Him all things hold together." — Colossians 1:17
+        </p>
+      </div>
+
+      {/* ── Footer note ── */}
+      <p className="text-center text-xs pt-2" style={{ color: "oklch(0.35 0.02 280)" }}>
+        BDDT Publishing · Command Domains LLC · Living Nexus Witness Registry
+      </p>
+      <p className="text-center text-[10px] pb-2" style={{ color: "oklch(0.28 0.02 280)" }}>
+        Laminin/Logos Doctrine v0.1 · Sovereign Shutter™ Framework
+      </p>
+    </div>
+  );
+}
+
+// ─── Individual Track View (existing) ────────────────────────────────────────
+
+function TrackVerifyView({
+  queryWid,
+  onVerifyAnother,
+}: {
+  queryWid: string;
+  onVerifyAnother: () => void;
+}) {
+  const [, navigate] = useLocation();
   const { data, isLoading, error } = trpc.songs.verifyWid.useQuery(
     { witnessId: queryWid },
     { enabled: !!queryWid, retry: false }
   );
 
-  const handleSearch = () => {
-    const trimmed = inputWid.trim();
-    if (!trimmed) return;
-    setQueryWid(trimmed);
-    navigate(`/verify/${encodeURIComponent(trimmed)}`, { replace: true });
-  };
-
-  const handleVerifyAnother = () => {
-    setInputWid("");
-    setQueryWid("");
-    navigate("/verify", { replace: true });
-  };
+  // Collection back-reference
+  const { data: collectionData } = trpc.songs.getCollectionForSong.useQuery(
+    { songId: data?.songId ?? 0 },
+    { enabled: !!data?.songId, retry: false }
+  );
 
   const downloadCertificate = () => {
     if (!data) return;
@@ -198,6 +364,257 @@ export default function VerifyPage() {
 
   const consent = aiConsentLabel(data?.aiConsent ?? undefined);
 
+  if (isLoading) {
+    return (
+      <div className="text-center py-16">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "oklch(0.84 0.155 85)" }} />
+        <p className="text-sm" style={{ color: "oklch(0.48 0.03 280)" }}>Querying provenance ledger…</p>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
+        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "oklch(0.65 0.18 25)" }} />
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 25)" }}>
+          Not Verified
+        </h2>
+        <p className="text-sm mb-6" style={{ color: "oklch(0.5 0.03 280)" }}>
+          No record found for this Witness ID. The ID may be incorrect or the work was not registered on Living Nexus.
+        </p>
+        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
+          Try Another WID
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── Verified badge ── */}
+      <div className="rounded-2xl p-6 text-center" style={{ background: "oklch(0.65 0.18 145 / 0.07)", border: "2px solid oklch(0.65 0.18 145 / 0.4)" }}>
+        <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "2px solid oklch(0.65 0.18 145 / 0.5)" }}>
+          <ShieldCheck className="w-10 h-10" style={{ color: "oklch(0.65 0.18 145)" }} />
+        </div>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.5)" }}>
+          <CheckCircle2 className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
+          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "oklch(0.65 0.18 145)", fontFamily: "'Cinzel', serif" }}>Verified</span>
+        </div>
+        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}>
+          {data.title}
+        </h2>
+        <p className="text-sm mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>by {data.artistName}</p>
+
+        {/* Name at time of witnessing */}
+        {data.nameAtWitnessing && data.nameAtWitnessing !== data.artistName && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs" style={{ background: "oklch(0.84 0.155 85 / 0.1)", border: "1px solid oklch(0.84 0.155 85 / 0.3)", color: "oklch(0.75 0.12 85)" }}>
+            <UserCheck className="w-3 h-3" />
+            <span>Registered as: <strong>{data.nameAtWitnessing}</strong></span>
+          </div>
+        )}
+
+        {/* Audio / Lyrics indicator */}
+        <div className="flex items-center justify-center gap-2">
+          {data.isLyricsOnly ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}>
+              <FileText className="w-3.5 h-3.5" /> Lyrics Registration
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "oklch(0.65 0.2 300 / 0.15)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.4)" }}>
+              <Music className="w-3.5 h-3.5" /> Audio Registration
+            </span>
+          )}
+          {data.genre && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs" style={{ background: "oklch(0.14 0.015 280)", color: "oklch(0.5 0.03 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+              <Tag className="w-3 h-3" /> {data.genre}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ── Collection back-reference ── */}
+      {collectionData && (
+        <div className="rounded-xl p-4" style={{ background: "oklch(0.84 0.155 85 / 0.05)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Library className="w-3.5 h-3.5" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }} />
+            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.65 0.1 85)" }}>Part of Collection</p>
+          </div>
+          <button
+            onClick={() => navigate(`/verify/${encodeURIComponent(collectionData.collectionWid)}`)}
+            className="text-left hover:opacity-80 transition-opacity"
+          >
+            <p className="text-sm font-semibold" style={{ color: "oklch(0.84 0.155 85)" }}>{collectionData.name}</p>
+            <p className="text-[10px] font-mono mt-0.5" style={{ color: "oklch(0.75 0.12 85 / 0.7)" }}>{collectionData.collectionWid}</p>
+          </button>
+        </div>
+      )}
+
+      {/* ── WID ── */}
+      <Field icon={Fingerprint} label="Witness ID">
+        <TruncatedMono value={data.witnessId ?? ""} label="Witness ID" />
+      </Field>
+
+      {/* ── Registration date ── */}
+      <Field icon={Calendar} label="Registration Date">
+        <p className="text-sm font-medium" style={{ color: "oklch(0.78 0.03 280)" }}>
+          {data.registeredAt
+            ? new Date(data.registeredAt).toLocaleString("en-US", {
+                year: "numeric", month: "long", day: "numeric",
+                hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+              })
+            : "Unknown"}
+        </p>
+      </Field>
+
+      {/* ── Hash ── */}
+      {(data.fileHash || data.lyricsHash) && (
+        <Field icon={Hash} label={data.isLyricsOnly ? "SHA-256 Lyrics Hash" : "SHA-256 File Hash"}>
+          <TruncatedMono value={(data.isLyricsOnly ? data.lyricsHash : data.fileHash) ?? ""} label="Hash" />
+        </Field>
+      )}
+
+      {/* ── ECDSA Signature ── */}
+      {data.ecdsaSignature && (
+        <Field icon={Key} label="ECDSA P-256 Signature">
+          <TruncatedMono value={data.ecdsaSignature} label="ECDSA Signature" />
+        </Field>
+      )}
+
+      {/* ── ECDSA Public Key ── */}
+      {data.ecdsaPublicKey && (
+        <Field icon={Key} label="ECDSA Public Key (JWK)">
+          <TruncatedMono value={data.ecdsaPublicKey} label="Public Key" />
+        </Field>
+      )}
+
+      {/* ── AI Consent ── */}
+      <Field icon={ShieldCheck} label="AI Training Consent">
+        <Badge style={{ background: `${consent.color}22`, color: consent.color, border: `1px solid ${consent.color}55` }}>
+          {consent.text}
+        </Badge>
+      </Field>
+
+      {/* ── ISRC ── */}
+      {data.isrc && (
+        <Field icon={Tag} label="ISRC">
+          <p className="text-sm font-mono" style={{ color: "oklch(0.7 0.04 280)" }}>{data.isrc}</p>
+        </Field>
+      )}
+
+      {/* ── Name History (Provenance Audit Trail) ── */}
+      {data.nameHistory && data.nameHistory.length > 0 && (
+        <Field icon={History} label="Creator Name History">
+          <div className="space-y-2">
+            {data.nameHistory.map((entry: { oldName: string | null; newName: string; changedAt: Date }, i: number) => (
+              <div key={i} className="flex items-start gap-2 text-xs">
+                <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: i === 0 ? "oklch(0.65 0.18 145)" : "oklch(0.35 0.02 280)", marginTop: "5px" }} />
+                <div className="flex-1">
+                  {entry.oldName ? (
+                    <span style={{ color: "oklch(0.6 0.04 280)" }}>
+                      <span style={{ color: "oklch(0.45 0.03 280)" }}>{entry.oldName}</span>
+                      {" → "}
+                      <span style={{ color: "oklch(0.78 0.03 280)", fontWeight: 600 }}>{entry.newName}</span>
+                    </span>
+                  ) : (
+                    <span style={{ color: "oklch(0.78 0.03 280)", fontWeight: 600 }}>Registered as: {entry.newName}</span>
+                  )}
+                  <span className="ml-2" style={{ color: "oklch(0.38 0.02 280)" }}>
+                    {new Date(entry.changedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Field>
+      )}
+
+      {/* ── Actions ── */}
+      <div className="flex flex-col gap-2 pt-2">
+        <div className="flex gap-3">
+          <Button
+            className="flex-1"
+            onClick={() => navigate(`/songs/${data.songId}`)}
+            style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
+          >
+            <ExternalLink className="w-4 h-4 mr-2" /> View Track
+          </Button>
+          <Button
+            variant="outline"
+            onClick={onVerifyAnother}
+            style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}
+          >
+            <Search className="w-4 h-4 mr-2" /> Verify Another
+          </Button>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={downloadCertificate}
+          style={{ borderColor: "oklch(0.84 0.155 85 / 0.4)", color: "oklch(0.75 0.12 85)", fontFamily: "'Cinzel', serif" }}
+        >
+          <Download className="w-4 h-4 mr-2" /> Download Certificate
+        </Button>
+      </div>
+
+      {/* ── Covenant Declaration ── */}
+      <div className="rounded-2xl px-5 py-5" style={{ background: "oklch(0.12 0.04 85 / 0.10)", border: "1px solid oklch(0.75 0.18 85 / 0.15)" }}>
+        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "oklch(0.75 0.18 85 / 0.7)", fontFamily: "'Cinzel', serif" }}>
+          Covenant Declaration
+        </p>
+        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>
+          This record was sealed by Living Nexus at the moment of creation. The Witness ID is
+          cryptographically bound to the original file and cannot be transferred or reassigned.
+          The creator owns this proof. The platform hosts it.
+        </p>
+        <p className="text-[11px] italic" style={{ color: "oklch(0.4 0.03 280)" }}>
+          "He is before all things, and in Him all things hold together." — Colossians 1:17
+        </p>
+      </div>
+
+      {/* ── Footer note ── */}
+      <p className="text-center text-xs pt-2" style={{ color: "oklch(0.35 0.02 280)" }}>
+        BDDT Publishing · Command Domains LLC · Living Nexus Witness Registry
+      </p>
+      <p className="text-center text-[10px] pb-2" style={{ color: "oklch(0.28 0.02 280)" }}>
+        Laminin/Logos Doctrine v0.1 · Sovereign Shutter™ Framework
+      </p>
+    </div>
+  );
+}
+
+// ─── Main VerifyPage ──────────────────────────────────────────────────────────
+
+export default function VerifyPage() {
+  const params = useParams<{ witnessId?: string }>();
+  const [, navigate] = useLocation();
+  const [inputWid, setInputWid] = useState(params.witnessId ?? "");
+  const [queryWid, setQueryWid] = useState(params.witnessId ?? "");
+
+  // Sync URL param → input when navigating directly
+  useEffect(() => {
+    if (params.witnessId) {
+      setInputWid(params.witnessId);
+      setQueryWid(params.witnessId);
+    }
+  }, [params.witnessId]);
+
+  const isCollection = queryWid.startsWith("WID-ALB-");
+
+  const handleSearch = () => {
+    const trimmed = inputWid.trim();
+    if (!trimmed) return;
+    setQueryWid(trimmed);
+    navigate(`/verify/${encodeURIComponent(trimmed)}`, { replace: true });
+  };
+
+  const handleVerifyAnother = () => {
+    setInputWid("");
+    setQueryWid("");
+    navigate("/verify", { replace: true });
+  };
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "oklch(0.08 0.015 280)" }}>
 
@@ -221,7 +638,7 @@ export default function VerifyPage() {
               Verify Witness ID
             </h1>
             <p className="text-sm" style={{ color: "oklch(0.48 0.03 280)" }}>
-              Enter a Witness ID to verify cryptographic provenance of a registered work.
+              Enter a Witness ID (WID-…) or Collection ID (WID-ALB-…) to verify cryptographic provenance.
             </p>
           </div>
 
@@ -231,226 +648,34 @@ export default function VerifyPage() {
               value={inputWid}
               onChange={e => setInputWid(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSearch()}
-              placeholder="WID-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+              placeholder="WID-… or WID-ALB-…"
               className="font-mono text-sm flex-1"
               style={{ background: "oklch(0.12 0.015 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.88 0.01 280)" }}
             />
             <Button
               onClick={handleSearch}
-              disabled={!inputWid.trim() || isLoading}
+              disabled={!inputWid.trim()}
               style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
             >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              <Search className="w-4 h-4" />
             </Button>
           </div>
 
-          {/* Loading */}
-          {isLoading && (
-            <div className="text-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "oklch(0.84 0.155 85)" }} />
-              <p className="text-sm" style={{ color: "oklch(0.48 0.03 280)" }}>Querying provenance ledger…</p>
-            </div>
+          {/* Route to correct view */}
+          {queryWid && isCollection && (
+            <CollectionVerifyView collectionWid={queryWid} onVerifyAnother={handleVerifyAnother} />
           )}
 
-          {/* Not found */}
-          {!isLoading && error && (
-            <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
-              <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "oklch(0.65 0.18 25)" }} />
-              <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 25)" }}>
-                Not Verified
-              </h2>
-              <p className="text-sm mb-6" style={{ color: "oklch(0.5 0.03 280)" }}>
-                No record found for this Witness ID. The ID may be incorrect or the work was not registered on Living Nexus.
-              </p>
-              <Button variant="outline" onClick={handleVerifyAnother} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
-                Try Another WID
-              </Button>
-            </div>
-          )}
-
-          {/* Verified result */}
-          {!isLoading && data && (
-            <div className="space-y-5">
-
-              {/* ── Verified badge ── */}
-              <div className="rounded-2xl p-6 text-center" style={{ background: "oklch(0.65 0.18 145 / 0.07)", border: "2px solid oklch(0.65 0.18 145 / 0.4)" }}>
-                <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "2px solid oklch(0.65 0.18 145 / 0.5)" }}>
-                  <ShieldCheck className="w-10 h-10" style={{ color: "oklch(0.65 0.18 145)" }} />
-                </div>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.5)" }}>
-                  <CheckCircle2 className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
-                  <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "oklch(0.65 0.18 145)", fontFamily: "'Cinzel', serif" }}>Verified</span>
-                </div>
-                <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}>
-                  {data.title}
-                </h2>
-                <p className="text-sm mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>by {data.artistName}</p>
-
-                {/* Name at time of witnessing — only shown when it differs from current */}
-                {data.nameAtWitnessing && data.nameAtWitnessing !== data.artistName && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs" style={{ background: "oklch(0.84 0.155 85 / 0.1)", border: "1px solid oklch(0.84 0.155 85 / 0.3)", color: "oklch(0.75 0.12 85)" }}>
-                    <UserCheck className="w-3 h-3" />
-                    <span>Registered as: <strong>{data.nameAtWitnessing}</strong></span>
-                  </div>
-                )}
-
-                {/* Audio / Lyrics indicator */}
-                <div className="flex items-center justify-center gap-2">
-                  {data.isLyricsOnly ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}>
-                      <FileText className="w-3.5 h-3.5" /> Lyrics Registration
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "oklch(0.65 0.2 300 / 0.15)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.4)" }}>
-                      <Music className="w-3.5 h-3.5" /> Audio Registration
-                    </span>
-                  )}
-                  {data.genre && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs" style={{ background: "oklch(0.14 0.015 280)", color: "oklch(0.5 0.03 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
-                      <Tag className="w-3 h-3" /> {data.genre}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* ── WID ── */}
-              <Field icon={Fingerprint} label="Witness ID">
-                <TruncatedMono value={data.witnessId ?? ""} label="Witness ID" />
-              </Field>
-
-              {/* ── Registration date ── */}
-              <Field icon={Calendar} label="Registration Date">
-                <p className="text-sm font-medium" style={{ color: "oklch(0.78 0.03 280)" }}>
-                  {data.registeredAt
-                    ? new Date(data.registeredAt).toLocaleString("en-US", {
-                        year: "numeric", month: "long", day: "numeric",
-                        hour: "2-digit", minute: "2-digit", timeZoneName: "short",
-                      })
-                    : "Unknown"}
-                </p>
-              </Field>
-
-              {/* ── Hash ── */}
-              {(data.fileHash || data.lyricsHash) && (
-                <Field icon={Hash} label={data.isLyricsOnly ? "SHA-256 Lyrics Hash" : "SHA-256 File Hash"}>
-                  <TruncatedMono value={(data.isLyricsOnly ? data.lyricsHash : data.fileHash) ?? ""} label="Hash" />
-                </Field>
-              )}
-
-              {/* ── ECDSA Signature ── */}
-              {data.ecdsaSignature && (
-                <Field icon={Key} label="ECDSA P-256 Signature">
-                  <TruncatedMono value={data.ecdsaSignature} label="ECDSA Signature" />
-                </Field>
-              )}
-
-              {/* ── ECDSA Public Key ── */}
-              {data.ecdsaPublicKey && (
-                <Field icon={Key} label="ECDSA Public Key (JWK)">
-                  <TruncatedMono value={data.ecdsaPublicKey} label="Public Key" />
-                </Field>
-              )}
-
-              {/* ── AI Consent ── */}
-              <Field icon={ShieldCheck} label="AI Training Consent">
-                <Badge style={{ background: `${consent.color}22`, color: consent.color, border: `1px solid ${consent.color}55` }}>
-                  {consent.text}
-                </Badge>
-              </Field>
-
-              {/* ── ISRC ── */}
-              {data.isrc && (
-                <Field icon={Tag} label="ISRC">
-                  <p className="text-sm font-mono" style={{ color: "oklch(0.7 0.04 280)" }}>{data.isrc}</p>
-                </Field>
-              )}
-
-              {/* ── Name History (Provenance Audit Trail) ── */}
-              {data.nameHistory && data.nameHistory.length > 0 && (
-                <Field icon={History} label="Creator Name History">
-                  <div className="space-y-2">
-                    {data.nameHistory.map((entry: { oldName: string | null; newName: string; changedAt: Date }, i: number) => (
-                      <div key={i} className="flex items-start gap-2 text-xs">
-                        <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: i === 0 ? "oklch(0.65 0.18 145)" : "oklch(0.35 0.02 280)", marginTop: "5px" }} />
-                        <div className="flex-1">
-                          {entry.oldName ? (
-                            <span style={{ color: "oklch(0.6 0.04 280)" }}>
-                              <span style={{ color: "oklch(0.45 0.03 280)" }}>{entry.oldName}</span>
-                              {" → "}
-                              <span style={{ color: "oklch(0.78 0.03 280)", fontWeight: 600 }}>{entry.newName}</span>
-                            </span>
-                          ) : (
-                            <span style={{ color: "oklch(0.78 0.03 280)", fontWeight: 600 }}>Registered as: {entry.newName}</span>
-                          )}
-                          <span className="ml-2" style={{ color: "oklch(0.38 0.02 280)" }}>
-                            {new Date(entry.changedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Field>
-              )}
-
-              {/* ── Actions ── */}
-              <div className="flex flex-col gap-2 pt-2">
-                <div className="flex gap-3">
-                  <Button
-                    className="flex-1"
-                    onClick={() => navigate(`/songs/${data.songId}`)}
-                    style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" /> View Track
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleVerifyAnother}
-                    style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}
-                  >
-                    <Search className="w-4 h-4 mr-2" /> Verify Another
-                  </Button>
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={downloadCertificate}
-                  style={{ borderColor: "oklch(0.84 0.155 85 / 0.4)", color: "oklch(0.75 0.12 85)", fontFamily: "'Cinzel', serif" }}
-                >
-                  <Download className="w-4 h-4 mr-2" /> Download Certificate
-                </Button>
-              </div>
-
-              {/* ── Covenant Declaration ── */}
-              <div className="rounded-2xl px-5 py-5" style={{ background: "oklch(0.12 0.04 85 / 0.10)", border: "1px solid oklch(0.75 0.18 85 / 0.15)" }}>
-                <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "oklch(0.75 0.18 85 / 0.7)", fontFamily: "'Cinzel', serif" }}>
-                  Covenant Declaration
-                </p>
-                <p className="text-[12px] leading-relaxed mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>
-                  This record was sealed by Living Nexus at the moment of creation. The Witness ID is
-                  cryptographically bound to the original file and cannot be transferred or reassigned.
-                  The creator owns this proof. The platform hosts it.
-                </p>
-                <p className="text-[11px] italic" style={{ color: "oklch(0.4 0.03 280)" }}>
-                  "He is before all things, and in Him all things hold together." — Colossians 1:17
-                </p>
-              </div>
-
-              {/* ── Footer note ── */}
-              <p className="text-center text-xs pt-2" style={{ color: "oklch(0.35 0.02 280)" }}>
-                BDDT Publishing · Command Domains LLC · Living Nexus Witness Registry
-              </p>
-              <p className="text-center text-[10px] pb-2" style={{ color: "oklch(0.28 0.02 280)" }}>
-                Laminin/Logos Doctrine v0.1 · Sovereign Shutter™ Framework
-              </p>
-            </div>
+          {queryWid && !isCollection && (
+            <TrackVerifyView queryWid={queryWid} onVerifyAnother={handleVerifyAnother} />
           )}
 
           {/* Empty state — no query yet */}
-          {!isLoading && !error && !data && !queryWid && (
+          {!queryWid && (
             <div className="text-center py-12 rounded-2xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
               <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
               <p className="text-sm" style={{ color: "oklch(0.42 0.03 280)" }}>
-                Enter a Witness ID above to verify a registered work.
+                Enter a Witness ID or Collection ID above to verify a registered work.
               </p>
             </div>
           )}

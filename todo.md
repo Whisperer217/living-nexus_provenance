@@ -1095,3 +1095,19 @@
 - [x] Fix 3: admin.getUsers accepts { limit, offset } input; Admin Roster shows page X of Y + Prev/Next buttons
 - [x] Fix 4: console.log in Home.tsx was already removed; only remaining is ComponentShowcase (dev-only demo component)
 - [x] TypeScript: 0 errors | Server running on port 3000
+
+## Collection WID Layer (Batch Registration)
+- [x] Add `collections` table to drizzle schema (id, creatorId, name, collectionWid, collectiveHash, pdfUrl, pdfKey, trackCount, coverArtUrl, createdAt)
+- [x] Add `collectionId` column to `songs` table
+- [x] Run db:push migration (both columns live in DB)
+- [x] Add collection DB helpers to server/db.ts (createCollection, getCollectionByWid, getSongsByCollectionId, getCollectionForSong, linkSongsToCollection, updateCollectionPdf)
+- [x] Extend batchUpload tRPC procedure to generate WID-ALB after all tracks confirmed (SHA-256 of sorted WIDs, format WID-ALB-XXXXXXXX-XXXXXXXX)
+- [x] Add verifyCollection tRPC procedure (publicProcedure, returns collection + tracks + creator)
+- [x] Add getCollectionForSong tRPC procedure (publicProcedure, returns collection WID/name for a given songId)
+- [x] Add generateCollectionCertificate tRPC procedure (protectedProcedure, generates styled HTML cert, uploads to S3, returns pdfUrl)
+- [x] Extend /verify/:witnessId page to detect WID-ALB- prefix and render CollectionVerifyView (track list, collective hash, certificate download, covenant declaration)
+- [x] Add collection back-reference to TrackVerifyView (shows "Part of Collection" with WID-ALB link if track belongs to a collection)
+- [x] Update BatchUploadPage success state to show Collection Certificate block (Collection WID, collective hash, Download Certificate button, Verify Collection link)
+- [x] Auto-generate collection certificate HTML → S3 after batch upload completes
+- [x] Vitest: 7/7 collection tests passing (WID format, determinism, NOT_FOUND, getCollectionForSong null path)
+- [x] TypeScript: 0 errors

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Music, X, CheckCircle, Loader2, AlertCircle, Disc, ChevronRight } from "lucide-react";
+import { Upload, Music, X, CheckCircle, Loader2, AlertCircle, Disc, ChevronRight, Library, ExternalLink, Download } from "lucide-react";
 
 // ── WID helpers (same as UploadPage) ─────────────────────────────────────────
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
@@ -87,6 +87,17 @@ export default function BatchUploadPage() {
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const batchUpload = trpc.songs.batchUpload.useMutation();
+  const generateCollectionCert = trpc.songs.generateCollectionCertificate.useMutation();
+
+  // Collection result state
+  const [collectionResult, setCollectionResult] = useState<{
+    collectionId: number;
+    collectionWid: string;
+    collectiveHash: string;
+    trackCount: number;
+    pdfUrl?: string;
+  } | null>(null);
+  const [isGeneratingCert, setIsGeneratingCert] = useState(false);
 
   // ── Auth guard ────────────────────────────────────────────────────────────
   if (!authLoading && !isAuthenticated) {
@@ -219,6 +230,26 @@ export default function BatchUploadPage() {
       setTracks(prev => prev.map(t => t.status === "uploading" ? { ...t, status: "done" } : t));
       setUploadDone(true);
       toast.success(`Album uploaded! ${result.trackCount} track${result.trackCount !== 1 ? "s" : ""} with individual WIDs.`);
+
+      // Store collection info and auto-generate certificate
+      if (result.collectionWid && result.collectionId) {
+        setCollectionResult({
+          collectionId: result.collectionId,
+          collectionWid: result.collectionWid,
+          collectiveHash: result.collectiveHash ?? "",
+          trackCount: result.trackCount,
+        });
+        // Auto-generate the collection certificate HTML → S3
+        setIsGeneratingCert(true);
+        try {
+          const cert = await generateCollectionCert.mutateAsync({ collectionWid: result.collectionWid });
+          setCollectionResult(prev => prev ? { ...prev, pdfUrl: cert.pdfUrl } : null);
+        } catch {
+          // Certificate generation is non-blocking — collection WID still valid
+        } finally {
+          setIsGeneratingCert(false);
+        }
+      }
     } catch (err: any) {
       setTracks(prev => prev.map(t => t.status === "uploading" ? { ...t, status: "error", errorMsg: err.message } : t));
       toast.error(err.message || "Upload failed");
@@ -249,30 +280,86 @@ export default function BatchUploadPage() {
 
       {uploadDone ? (
         // ── Success state ──────────────────────────────────────────────────
-        <div className="rounded-2xl p-10 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.75 0.18 85 / 0.3)" }}>
-          <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: "oklch(0.84 0.155 85)" }} />
-          <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
-            Album Published
-          </h2>
-          <p className="mb-2" style={{ color: "oklch(0.65 0.04 280)" }}>
-            <strong style={{ color: "oklch(0.85 0.02 85)" }}>{albumName}</strong> — {doneCount} track{doneCount !== 1 ? "s" : ""} uploaded with individual Witness IDs
-          </p>
-          <div className="flex flex-col gap-2 mt-2 mb-6 max-w-sm mx-auto">
-            {tracks.filter(t => t.status === "done").map(t => (
-              <div key={t.id} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "oklch(0.14 0.04 280)" }}>
-                <span className="text-sm truncate" style={{ color: "oklch(0.8 0.02 85)" }}>{t.title}</span>
-                {t.wid && <Badge className="ml-2 shrink-0 text-xs" style={{ background: "oklch(0.75 0.18 85 / 0.2)", color: "oklch(0.84 0.155 85)", fontSize: "9px" }}>{t.wid.slice(0, 18)}…</Badge>}
+        <div className="space-y-5">
+          {/* ── Main success card ── */}
+          <div className="rounded-2xl p-10 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.75 0.18 85 / 0.3)" }}>
+            <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: "oklch(0.84 0.155 85)" }} />
+            <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+              Album Published
+            </h2>
+            <p className="mb-2" style={{ color: "oklch(0.65 0.04 280)" }}>
+              <strong style={{ color: "oklch(0.85 0.02 85)" }}>{albumName}</strong> — {doneCount} track{doneCount !== 1 ? "s" : ""} uploaded with individual Witness IDs
+            </p>
+            <div className="flex flex-col gap-2 mt-2 mb-6 max-w-sm mx-auto">
+              {tracks.filter(t => t.status === "done").map(t => (
+                <div key={t.id} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "oklch(0.14 0.04 280)" }}>
+                  <span className="text-sm truncate" style={{ color: "oklch(0.8 0.02 85)" }}>{t.title}</span>
+                  {t.wid && <Badge className="ml-2 shrink-0 text-xs" style={{ background: "oklch(0.75 0.18 85 / 0.2)", color: "oklch(0.84 0.155 85)", fontSize: "9px" }}>{t.wid.slice(0, 18)}…</Badge>}
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => navigate("/archive")} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.02 280)" }}>
+                View Archive <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+              <Button variant="outline" onClick={() => { setTracks([]); setAlbumName(""); setGenre(""); setCoverFile(null); setCoverPreview(null); setUploadDone(false); setCollectionResult(null); }} style={{ borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.7 0.04 280)" }}>
+                Upload Another Album
+              </Button>
+            </div>
+          </div>
+
+          {/* ── Collection Certificate block ── */}
+          {collectionResult && (
+            <div className="rounded-2xl p-6" style={{ background: "oklch(0.10 0.025 280)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
+              <div className="flex items-center gap-2 mb-3">
+                <Library className="w-5 h-5" style={{ color: "oklch(0.84 0.155 85)" }} />
+                <p className="font-bold text-sm" style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>
+                  Collection Certificate Generated
+                </p>
+                {isGeneratingCert && <Loader2 className="w-3.5 h-3.5 animate-spin ml-auto" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }} />}
               </div>
-            ))}
-          </div>
-          <div className="flex gap-3 justify-center">
-            <Button onClick={() => navigate("/archive")} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.02 280)" }}>
-              View Archive <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-            <Button variant="outline" onClick={() => { setTracks([]); setAlbumName(""); setGenre(""); setCoverFile(null); setCoverPreview(null); setUploadDone(false); }} style={{ borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.7 0.04 280)" }}>
-              Upload Another Album
-            </Button>
-          </div>
+              <p className="text-xs mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>
+                All {collectionResult.trackCount} works are now collectively witnessed as a single origin record.
+              </p>
+              {/* Collection WID */}
+              <div className="rounded-lg px-3 py-2 mb-2" style={{ background: "oklch(0.13 0.04 280)", border: "1px solid oklch(0.22 0.02 280)" }}>
+                <p className="text-[10px] uppercase tracking-widest mb-0.5" style={{ color: "oklch(0.5 0.03 280)" }}>Collection WID</p>
+                <p className="text-sm font-mono font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>{collectionResult.collectionWid}</p>
+              </div>
+              {/* Collective hash */}
+              <div className="rounded-lg px-3 py-2 mb-4" style={{ background: "oklch(0.13 0.04 280)", border: "1px solid oklch(0.22 0.02 280)" }}>
+                <p className="text-[10px] uppercase tracking-widest mb-0.5" style={{ color: "oklch(0.5 0.03 280)" }}>Collective Hash (SHA-256)</p>
+                <p className="text-[10px] font-mono break-all" style={{ color: "oklch(0.6 0.04 280)" }}>{collectionResult.collectiveHash}</p>
+              </div>
+              {/* Actions */}
+              <div className="flex gap-2 flex-wrap">
+                {collectionResult.pdfUrl ? (
+                  <a
+                    href={collectionResult.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-bold"
+                    style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.02 280)", fontFamily: "'Cinzel', serif" }}
+                  >
+                    <Download className="w-4 h-4" /> Download Certificate
+                  </a>
+                ) : isGeneratingCert ? (
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm" style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "oklch(0.84 0.155 85 / 0.6)" }}>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating certificate…
+                  </span>
+                ) : null}
+                <a
+                  href={`/verify/${encodeURIComponent(collectionResult.collectionWid)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-semibold"
+                  style={{ border: "1px solid oklch(0.84 0.155 85 / 0.5)", color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}
+                >
+                  <ExternalLink className="w-4 h-4" /> Verify Collection
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid lg:grid-cols-[1fr_320px] gap-6">

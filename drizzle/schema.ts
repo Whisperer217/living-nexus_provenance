@@ -103,6 +103,9 @@ export const songs = mysqlTable("songs", {
   downloadPermission: mysqlEnum("downloadPermission", ["none", "free", "tipped"]).default("none").notNull(),
   downloadTipThresholdCents: int("downloadTipThresholdCents").default(179).notNull(), // $1.79 default
 
+  // Collection membership (WID-ALB back-reference)
+  collectionId: int("collectionId"),  // FK → collections.id; null = not part of a collection
+
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
 
@@ -475,3 +478,23 @@ export const nameHistory = mysqlTable("nameHistory", {
 });
 export type NameHistory = typeof nameHistory.$inferSelect;
 export type InsertNameHistory = typeof nameHistory.$inferInsert;
+
+// ─── Collections (Album WID) ─────────────────────────────────────────────────
+// A Collection groups multiple individually-witnessed tracks under a single
+// album-level cryptographic identity: WID-ALB-XXXXXXXX-XXXXXXXX.
+// The collectiveHash is SHA-256 of all sorted individual WIDs joined by '|'.
+// Once created, a collection record is immutable — it is the origin record.
+export const collections = mysqlTable("collections", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),          // album/collection name
+  collectionWid: varchar("collectionWid", { length: 64 }).notNull().unique(), // WID-ALB-XXXXXXXX-XXXXXXXX
+  collectiveHash: varchar("collectiveHash", { length: 64 }).notNull(),        // SHA-256 of sorted WIDs
+  pdfUrl: text("pdfUrl"),                                    // S3 URL of generated PDF certificate
+  pdfKey: text("pdfKey"),
+  coverArtUrl: text("coverArtUrl"),
+  trackCount: int("trackCount").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Collection = typeof collections.$inferSelect;
+export type InsertCollection = typeof collections.$inferInsert;

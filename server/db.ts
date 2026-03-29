@@ -8,6 +8,7 @@ import {
   jukeboxOfferings, jukeboxPlayEvents,
   promoCodes, promoRedemptions,
   nameHistory,
+  collections,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1762,4 +1763,90 @@ export async function redeemPromoCode(userId: number, code: string): Promise<{
   await db.update(promoCodes).set({ usedCount: promo.usedCount + 1 }).where(eq(promoCodes.id, promo.id));
 
   return { success: true, message: `License activated! You now have ${promo.slotsGranted} upload slots.`, slotsGranted: promo.slotsGranted };
+}
+
+// ─── Collections (Album WID) ─────────────────────────────────────────────────
+
+/** Create a new collection record after a batch upload completes. */
+export async function createCollection(data: {
+  creatorId: number;
+  name: string;
+  collectionWid: string;
+  collectiveHash: string;
+  coverArtUrl?: string;
+  trackCount: number;
+  pdfUrl?: string;
+  pdfKey?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const result = await db.insert(collections).values({
+    creatorId: data.creatorId,
+    name: data.name,
+    collectionWid: data.collectionWid,
+    collectiveHash: data.collectiveHash,
+    coverArtUrl: data.coverArtUrl ?? null,
+    trackCount: data.trackCount,
+    pdfUrl: data.pdfUrl ?? null,
+    pdfKey: data.pdfKey ?? null,
+  });
+  return result;
+}
+
+/** Attach a PDF URL to an existing collection after generation. */
+export async function updateCollectionPdf(collectionId: number, pdfUrl: string, pdfKey: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(collections).set({ pdfUrl, pdfKey }).where(eq(collections.id, collectionId));
+}
+
+/** Set collectionId on a batch of song rows. */
+export async function linkSongsToCollection(songIds: number[], collectionId: number) {
+  const db = await getDb();
+  if (!db) return;
+  // Update each song row individually (MySQL IN clause with Drizzle)
+  for (const songId of songIds) {
+    await db.update(songs).set({ collectionId }).where(eq(songs.id, songId));
+  }
+}
+
+/** Get a collection by its WID-ALB identifier. */
+export async function getCollectionByWid(collectionWid: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(collections).where(eq(collections.collectionWid, collectionWid)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/** Get a collection by its numeric id. */
+export async function getCollectionById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(collections).where(eq(collections.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/** Get all songs that belong to a collection. */
+export async function getSongsByCollectionId(collectionId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(songs)
+    .where(eq(songs.collectionId, collectionId))
+    .orderBy(songs.createdAt);
+}
+
+/** Get the collection a song belongs to (if any). */
+export async function getCollectionForSong(songId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [song] = await db.select({ collectionId: songs.collectionId }).from(songs).where(eq(songs.id, songId)).limit(1);
+  if (!song?.collectionId) return undefined;
+  return getCollectionById(song.collectionId);
+}
+
+/** Get all collections by a creator. */
+export async function getCollectionsByCreator(creatorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(collections).where(eq(collections.creatorId, creatorId)).orderBy(desc(collections.createdAt));
 }
