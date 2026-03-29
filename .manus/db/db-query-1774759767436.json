@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, title, caption, genre, collectionTag, aiConsent FROM songs LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT id, title, caption, genre, collectionTag, aiConsent FROM songs LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Fix DA Server",
+      "caption": "NULL",
+      "genre": "NULL",
+      "collectionTag": "NULL",
+      "aiConsent": "permitted"
+    },
+    {
+      "id": "30001",
+      "title": "Ave,Ave!!! Christus Rex!!!👑",
+      "caption": "NULL",
+      "genre": "Other",
+      "collectionTag": "NULL",
+      "aiConsent": "permitted_attribution"
+    },
+    {
+      "id": "60001",
+      "title": "PUSH FORWARD",
+      "caption": "NULL",
+      "genre": "NULL",
+      "collectionTag": "NULL",
+      "aiConsent": "prohibited"
+    },
+    {
+      "id": "60002",
+      "title": "Anchor In The Dark",
+      "caption": "NULL",
+      "genre": "NULL",
+      "collectionTag": "NULL",
+      "aiConsent": "prohibited"
+    },
+    {
+      "id": "90001",
+      "title": "Jah Heal Me",
+      "caption": "NULL",
+      "genre": "NULL",
+      "collectionTag": "NULL",
+      "aiConsent": "prohibited"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcaption\tgenre\tcollectionTag\taiConsent\n1\tFix DA Server\tNULL\tNULL\tNULL\tpermitted\n30001\tAve,Ave!!! Christus Rex!!!👑\tNULL\tOther\tNULL\tpermitted_attribution\n60001\tPUSH FORWARD\tNULL\tNULL\tNULL\tprohibited\n60002\tAnchor In The Dark\tNULL\tNULL\tNULL\tprohibited\n90001\tJah Heal Me\tNULL\tNULL\tNULL\tprohibited\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

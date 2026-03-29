@@ -1,0 +1,42 @@
+{
+  "query": "SHOW COLUMNS FROM songs WHERE Field IN ('caption', 'genre', 'collectionTag', 'aiConsent');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SHOW COLUMNS FROM songs WHERE Field IN ('caption', 'genre', 'collectionTag', 'aiConsent');",
+  "rows": [
+    {
+      "Field": "genre",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "aiConsent",
+      "Type": "enum('prohibited','permitted_attribution','permitted')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "prohibited",
+      "Extra": ""
+    },
+    {
+      "Field": "caption",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "collectionTag",
+      "Type": "varchar(128)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\ngenre\tvarchar(64)\tYES\t\tNULL\t\naiConsent\tenum('prohibited','permitted_attribution','permitted')\tNO\t\tprohibited\t\ncaption\ttext\tYES\t\tNULL\t\ncollectionTag\tvarchar(128)\tYES\t\tNULL\t\n",
+  "stderr": "",
+  "execution_time_ms": 97
+}

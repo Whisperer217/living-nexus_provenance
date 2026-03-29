@@ -11,7 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, Maximize2,
-  ChevronDown, ChevronUp, MessageCircle, LogOut,
+  ChevronDown, ChevronUp, MessageCircle, LogOut, Share2,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { useLocation } from "wouter";
@@ -667,6 +667,34 @@ export default function PlayerBar() {
                 title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
               >
                 <DollarSign size={14} />
+              </button>
+            )}
+
+            {/* Share */}
+            {currentTrack && currentSongId && (
+              <button
+                onClick={async () => {
+                  const url = `${window.location.origin}/song/${currentSongId}`;
+                  const shareData = {
+                    title: currentTrack.title || "Track on Living Nexus",
+                    text: `${currentTrack.title} by ${currentTrack.artist} — Listen on Living Nexus — sovereign music with cryptographic provenance.`,
+                    url,
+                  };
+                  try {
+                    if (navigator.share) { await navigator.share(shareData); return; }
+                  } catch {}
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    // brief visual feedback via title attr — no toast dependency here
+                  } catch {}
+                }}
+                className="p-1.5 transition-colors"
+                style={{ color: "oklch(0.68 0.02 280)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
+                title={`Share: ${currentTrack.title}`}
+              >
+                <Share2 size={14} />
               </button>
             )}
 

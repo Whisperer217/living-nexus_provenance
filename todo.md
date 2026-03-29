@@ -1049,3 +1049,15 @@
 - [x] Generate 512x512 icon PNG (gold LN shield on black)
 - [x] Generate 1024x500 feature graphic PNG (LIVING NEXUS / Witness. Protect. Prove.)
 - [x] Package all deliverables — livingnexus-play-store-package.zip (13MB)
+
+## Phase 116: Track Metadata Persistence + Share URL Fix
+- [x] Fix 1: Audited full chain — EditTrackPanel, songs.updateMetadata procedure, updateSongMetadata helper all correct
+- [x] Fix 1: DB confirmed: caption, genre, collectionTag, aiConsent columns present and writable
+- [x] Fix 1: handleSave passes all four fields correctly; no code change needed (was already correct)
+- [x] Fix 2: SongDetailPage share modal — uses window.location.href (correct on /song/:id)
+- [x] Fix 2: MobilePlayerPanel — uses ${origin}/song/${currentSongId} (correct)
+- [x] Fix 2: CreatorProfilePage track share — uses ${origin}/song/${song.id} (correct)
+- [x] Fix 2: Desktop PlayerBar had NO share button — added Share2 with Web Share API + clipboard fallback
+- [x] Fix 2: PlayerBar share payload: title, text (title by artist — sovereign music with cryptographic provenance), url
+- [x] OG tags confirmed: /song/30001 returns og:title, og:description, og:image (cover art), og:url (canonical)
+- [x] TypeScript: 0 errors | HMR confirmed
