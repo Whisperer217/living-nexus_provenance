@@ -52,7 +52,12 @@ function UsersTab() {
   const [grantingId, setGrantingId] = useState<number | null>(null);
   const [grantSlots, setGrantSlots] = useState<Record<number, string>>({});
 
-  const { data: users, isLoading } = trpc.admin.getUsers.useQuery(undefined, { retry: false });
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 50;
+  const { data: usersData, isLoading } = trpc.admin.getUsers.useQuery({ limit: PAGE_SIZE, offset: page * PAGE_SIZE }, { retry: false });
+  const users = usersData?.users;
+  const totalUsers = usersData?.total ?? 0;
+  const totalPages = Math.ceil(totalUsers / PAGE_SIZE);
 
   const grantLicense = trpc.admin.grantLicense.useMutation({
     onSuccess: (_, vars) => {
@@ -102,7 +107,7 @@ function UsersTab() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Total Users", value: users?.length ?? "—" },
+          { label: "Total Users", value: totalUsers },
           { label: "Total Tracks", value: totalTracks },
           { label: "Total WIDs", value: totalWids },
           { label: "Licensed", value: licensed },
@@ -230,8 +235,14 @@ function UsersTab() {
             </table>
           </div>
           {sorted.length > 0 && (
-            <div className="px-4 py-3 text-xs border-t" style={{ color: MUTED, borderColor: BORDER, background: "oklch(0.10 0.015 280)" }}>
-              Showing {sorted.length} of {users?.length ?? 0} users
+            <div className="px-4 py-3 text-xs border-t flex items-center justify-between" style={{ color: MUTED, borderColor: BORDER, background: "oklch(0.10 0.015 280)" }}>
+              <span>Showing {sorted.length} of {totalUsers} users (page {page + 1} of {totalPages || 1})</span>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))} className="h-7 px-2 text-xs">Previous</Button>
+                  <Button size="sm" variant="outline" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)} className="h-7 px-2 text-xs">Next</Button>
+                </div>
+              )}
             </div>
           )}
         </div>

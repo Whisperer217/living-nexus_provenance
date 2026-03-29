@@ -288,7 +288,7 @@ export const appRouter = router({
     bySelf: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     upload: protectedProcedure.input(z.object({
       // Legacy base64 fields (still accepted for backward compat)
-      audioBase64: z.string().optional(), audioMimeType: z.string().optional(), audioFileName: z.string().optional(),
+      audioBase64: z.string().max(50_000_000).optional(), audioMimeType: z.string().optional(), audioFileName: z.string().optional(),
       coverBase64: z.string().optional(), coverMimeType: z.string().optional(),
       // Preferred: pre-uploaded S3 URLs from /api/upload-file
       fileUrl: z.string().url().optional(), fileKey: z.string().optional(),
@@ -358,7 +358,7 @@ export const appRouter = router({
         fileUrl: z.string().url().optional(),
         fileKey: z.string().optional(),
         // Legacy base64 fields (still accepted for backward compat)
-        audioBase64: z.string().optional(),
+        audioBase64: z.string().max(50_000_000).optional(),
         audioMimeType: z.string().optional(),
         audioFileName: z.string().optional(),
         title: z.string().min(1).max(255),
@@ -895,12 +895,12 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
         const creator = await getUserById(song.userId);
         if (!creator) throw new TRPCError({ code: "NOT_FOUND", message: "Creator not found" });
-        if (!creator.stripeAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "Creator has not enabled tips yet" });
-
+         if (!creator.stripeAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "Creator has not enabled tips yet" });
+        const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+        if (!acct.charges_enabled) throw new TRPCError({ code: "BAD_REQUEST", message: "Creator's Stripe account is still being verified. Gifts are not yet enabled." });
         const tipper = await getUserById(ctx.user.id);
         const tipperName = tipper?.artistHandle || tipper?.name || "A listener";
         const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
-
         const session = await stripe.checkout.sessions.create({
           mode: "payment",
           payment_method_types: ["card"],
@@ -1152,12 +1152,17 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
   // ── Admin ──────────────────────────────────────────────────────────
   admin: router({
     /** Return all users with stats. Only admins may call this. */
-    getUsers: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
-      }
-      return getAllUsersWithStats();
-    }),
+    getUsers: protectedProcedure
+      .input(z.object({
+        limit: z.number().int().min(10).max(200).default(50),
+        offset: z.number().int().min(0).default(0),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        }
+        return getAllUsersWithStats(input?.limit ?? 50, input?.offset ?? 0);
+      }),
 
     /** Search users by name, handle, or email */
     searchUsers: protectedProcedure

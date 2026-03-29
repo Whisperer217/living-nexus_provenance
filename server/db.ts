@@ -820,7 +820,7 @@ export async function updateSongDownloadPermission(
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
 /** Return all users with per-user track count and WID count (owner-only use). */
-export async function getAllUsersWithStats(): Promise<Array<{
+export async function getAllUsersWithStats(limit: number = 50, offset: number = 0): Promise<{ users: Array<{
   id: number;
   name: string | null;
   email: string | null;
@@ -833,7 +833,7 @@ export async function getAllUsersWithStats(): Promise<Array<{
   lastSignedIn: Date;
   trackCount: number;
   widCount: number;
-}>> {
+}>, total: number }> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
 
@@ -851,7 +851,11 @@ export async function getAllUsersWithStats(): Promise<Array<{
       lastSignedIn: users.lastSignedIn,
     })
     .from(users)
-    .orderBy(desc(users.createdAt));
+    .orderBy(desc(users.createdAt))
+    .limit(limit)
+    .offset(offset);
+  const totalResult = await db.select({ count: sql<number>`count(*)` }).from(users);
+  const total = Number(totalResult[0]?.count ?? 0);
 
   // Fetch per-user track and WID counts in two queries
   const trackCounts = await db
@@ -869,11 +873,14 @@ export async function getAllUsersWithStats(): Promise<Array<{
   const trackMap = new Map(trackCounts.map((r: { userId: number | null; count: number }) => [r.userId, Number(r.count)]));
   const widMap = new Map(widCounts.map((r: { userId: number | null; count: number }) => [r.userId, Number(r.count)]));
 
-  return allUsers.map((u: typeof allUsers[number]) => ({
-    ...u,
-    trackCount: trackMap.get(u.id) ?? 0,
-    widCount: widMap.get(u.id) ?? 0,
-  }));
+  return {
+    users: allUsers.map((u: typeof allUsers[number]) => ({
+      ...u,
+      trackCount: trackMap.get(u.id) ?? 0,
+      widCount: widMap.get(u.id) ?? 0,
+    })),
+    total,
+  };
 }
 
 // ─── Events (Unified Interaction Ledger) ─────────────────────────────────────

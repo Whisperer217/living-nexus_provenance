@@ -1086,3 +1086,12 @@
 - [x] Audit: Content — 0 critical | 0 medium | 1 low (console.log in Home.tsx)
 - [x] Report produced: living-nexus-audit-report.md — 0 critical, 5 medium, 5 low, all critical systems confirmed solid
 - [x] TypeScript: 0 errors | Vitest: 44/44 passing
+
+## Phase 119: Four Targeted Fixes (Audit Follow-up)
+- [x] Fix 1: charges_enabled check added to jukebox tipToQueue — throws BAD_REQUEST if Stripe account not verified
+- [x] Fix 2: audioBase64 capped at z.string().max(50_000_000) in both upload input schemas
+- [x] Fix 2: Express body limit reduced from 500mb to 50mb in server/_core/index.ts
+- [x] Fix 3: getAllUsersWithStats now accepts limit/offset, returns { users, total }
+- [x] Fix 3: admin.getUsers accepts { limit, offset } input; Admin Roster shows page X of Y + Prev/Next buttons
+- [x] Fix 4: console.log in Home.tsx was already removed; only remaining is ComponentShowcase (dev-only demo component)
+- [x] TypeScript: 0 errors | Server running on port 3000
