@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "org.livingnexus.app",
+    "sha256_cert_fingerprints": [
+      "EA:26:C3:57:D8:2A:71:B4:00:30:3C:3E:95:FD:EB:4C:A2:E4:36:BD:11:25:50:2E:36:8A:26:03:69:A9:68:63"
+    ]
+  }
+}]

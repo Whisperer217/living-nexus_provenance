@@ -1036,3 +1036,16 @@
 - [x] Fix 2: 'REGISTERED NAME AT TIME OF WITNESSING' field included when nameAtWitnessing differs from current name
 - [x] Fix 2: 'Download Certificate' button added below View Track / Verify Another in Actions row
 - [x] TypeScript: 0 errors
+
+## Phase 115: Play Store TWA Wrapper
+- [x] Verify PWA manifest at livingnexus.org (icons, start_url, display, theme_color)
+- [x] Install Bubblewrap CLI + JDK 17
+- [x] Generate keystore (livingnexus.keystore, alias: livingnexus, RSA 2048, 10000 days)
+- [x] SHA-256: EA:26:C3:57:D8:2A:71:B4:00:30:3C:3E:95:FD:EB:4C:A2:E4:36:BD:11:25:50:2E:36:8A:26:03:69:A9:68:63
+- [x] Add assetlinks.json to client/public/.well-known/ for TWA verification
+- [x] Initialize TWA project from manifest (package: org.livingnexus.app)
+- [x] Fix minSdkVersion 19→21, fix manifest XML, add splash + ic_maskable drawables
+- [x] BUILD SUCCESSFUL — LivingNexus-v1.0.0-release.apk (2.0MB, signed SHA256withRSA)
+- [x] Generate 512x512 icon PNG (gold LN shield on black)
+- [x] Generate 1024x500 feature graphic PNG (LIVING NEXUS / Witness. Protect. Prove.)
+- [x] Package all deliverables — livingnexus-play-store-package.zip (13MB)
