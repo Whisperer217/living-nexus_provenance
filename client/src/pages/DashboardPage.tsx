@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -13,10 +15,21 @@ import {
 
 type Tab = "songs" | "transforms" | "activity" | "earnings";
 
+// Pre-onboarding checklist items creators need to have ready
+const ONBOARDING_CHECKLIST = [
+  { icon: "🪪", label: "Government-issued photo ID", detail: "Passport, driver's license, or state ID" },
+  { icon: "🏦", label: "Bank account details", detail: "Routing number + checking account number" },
+  { icon: "🔢", label: "Last 4 digits of your SSN", detail: "Or full SSN/Tax ID for higher volume accounts" },
+  { icon: "📍", label: "Your home address", detail: "Street, city, state, ZIP" },
+  { icon: "📱", label: "Phone number", detail: "For identity verification" },
+  { icon: "📧", label: "Email address", detail: "Already pre-filled from your Living Nexus account" },
+];
+
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("songs");
+  const [showChecklist, setShowChecklist] = useState(false);
 
   const { data: songs, refetch: refetchSongs } = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated });
   const { data: transforms } = trpc.songs.getMyTransforms.useQuery(undefined, { enabled: isAuthenticated && activeTab === "transforms" });
@@ -117,30 +130,89 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stripe Setup Banner — shown when gifts account is pending */}
-        {connectData?.status === "pending" && (
-          <div
-            className="w-full flex items-center justify-between gap-4 px-4 py-3 rounded-xl mb-6"
-            style={{
-              background: "oklch(0.84 0.155 85)",
-              border: "1px solid oklch(0.75 0.18 85)",
-            }}
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.15 0.03 280)" }} />
-              <span className="text-sm font-semibold leading-snug" style={{ color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
-                Your gift account is incomplete. Finish setup to receive gifts.
-              </span>
+        {/* Pre-Onboarding Checklist Modal */}
+        <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
+          <DialogContent style={{ background: "oklch(0.1 0.03 280)", border: "1px solid oklch(0.25 0.03 280)", color: "oklch(0.95 0.02 85)" }}>
+            <DialogHeader>
+              <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>
+                Before You Start — Have These Ready
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm mb-4" style={{ color: "oklch(0.7 0.04 280)" }}>
+              Stripe's verification takes about 5 minutes. Having these items ready prevents interruptions.
+            </p>
+            <div className="space-y-3">
+              {ONBOARDING_CHECKLIST.map((item) => (
+                <div key={item.label} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: "oklch(0.13 0.04 280)" }}>
+                  <span className="text-xl flex-shrink-0">{item.icon}</span>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: "oklch(0.9 0.02 85)" }}>{item.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "oklch(0.6 0.04 280)" }}>{item.detail}</p>
+                  </div>
+                </div>
+              ))}
             </div>
+            <Separator className="my-4" style={{ background: "oklch(0.2 0.02 280)" }} />
+            <p className="text-xs mb-4" style={{ color: "oklch(0.55 0.04 280)" }}>
+              Living Nexus uses Stripe Connect for secure payouts. Your information goes directly to Stripe — we never store your SSN or bank details.
+            </p>
             <Button
-              size="sm"
-              onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
+              className="w-full font-bold"
+              onClick={() => { setShowChecklist(false); connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` }); }}
               disabled={connectMutation.isPending}
-              className="flex-shrink-0 font-bold text-sm"
-              style={{ background: "oklch(0.08 0.015 280)", color: "oklch(0.84 0.155 85)", border: "none" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
             >
-              {connectMutation.isPending ? "Loading..." : "Complete Setup"}
+              {connectMutation.isPending ? "Opening Stripe..." : "I'm Ready — Start Setup"}
             </Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* Stripe Setup Banner — shown when gifts account is pending or not connected */}
+        {(connectData?.status === "pending" || connectData?.status === "not_connected") && (
+          <div
+            className="w-full rounded-xl mb-6 overflow-hidden"
+            style={{ border: "1px solid oklch(0.75 0.18 85)" }}
+          >
+            {/* Top row: main call to action */}
+            <div
+              className="flex items-center justify-between gap-4 px-4 py-3"
+              style={{ background: "oklch(0.84 0.155 85)" }}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.15 0.03 280)" }} />
+                <span className="text-sm font-semibold leading-snug" style={{ color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                  {connectData?.status === "pending"
+                    ? "Your gift account is incomplete. Finish setup to receive gifts."
+                    : "Enable gifts to start receiving direct payments from fans."}
+                </span>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
+                disabled={connectMutation.isPending}
+                className="flex-shrink-0 font-bold text-sm"
+                style={{ background: "oklch(0.08 0.015 280)", color: "oklch(0.84 0.155 85)", border: "none" }}
+              >
+                {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Complete Setup" : "Enable Gifts"}
+              </Button>
+            </div>
+            {/* Bottom row: plain-English requirements when pending */}
+            {connectData?.status === "pending" && connectData?.requirementsLabels && connectData.requirementsLabels.length > 0 && (
+              <div className="px-4 py-3" style={{ background: "oklch(0.1 0.03 280)" }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: "oklch(0.65 0.18 45)" }}>Still needed to activate your account:</p>
+                <div className="flex flex-wrap gap-2">
+                  {(connectData.requirementsLabels as string[]).map((label: string) => (
+                    <span
+                      key={label}
+                      className="text-xs px-2 py-1 rounded-md"
+                      style={{ background: "oklch(0.65 0.18 45 / 0.15)", color: "oklch(0.75 0.15 45)", border: "1px solid oklch(0.65 0.18 45 / 0.3)" }}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -219,15 +291,32 @@ export default function DashboardPage() {
             ) : (
               <>
                 <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>
-                  {connectData?.status === "pending" ? "Stripe verification in progress. Complete your account setup." : "Enable gifts to receive direct payments from fans. 90% goes to you, 10% to the platform."}
+                  {connectData?.status === "pending"
+                    ? "Stripe verification in progress."
+                    : "Enable gifts to receive direct payments from fans. 90% goes to you, 10% to the platform."}
                 </p>
-                {connectData?.status === "pending" && (
-                  <div className="flex items-center gap-1 mb-2">
-                    <AlertCircle className="w-3 h-3" style={{ color: "oklch(0.65 0.18 45)" }} />
-                    <span className="text-xs" style={{ color: "oklch(0.65 0.18 45)" }}>Pending verification</span>
+                {/* Show specific missing requirements when pending */}
+                {connectData?.status === "pending" && connectData?.requirementsLabels && connectData.requirementsLabels.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold mb-1" style={{ color: "oklch(0.65 0.18 45)" }}>Still needed:</p>
+                    <ul className="space-y-0.5">
+                      {(connectData.requirementsLabels as string[]).slice(0, 3).map((label: string) => (
+                        <li key={label} className="text-xs flex items-center gap-1" style={{ color: "oklch(0.7 0.12 45)" }}>
+                          <AlertCircle className="w-3 h-3 flex-shrink-0" />{label}
+                        </li>
+                      ))}
+                      {(connectData.requirementsLabels as string[]).length > 3 && (
+                        <li className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>+{(connectData.requirementsLabels as string[]).length - 3} more</li>
+                      )}
+                    </ul>
                   </div>
                 )}
-                <Button size="sm" className="w-full" variant="outline" onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })} disabled={connectMutation.isPending} style={{ borderColor: "oklch(0.65 0.18 145 / 0.5)", color: "oklch(0.65 0.18 145)" }}>
+                <Button
+                  size="sm" className="w-full" variant="outline"
+                  onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
+                  disabled={connectMutation.isPending}
+                  style={{ borderColor: "oklch(0.65 0.18 145 / 0.5)", color: "oklch(0.65 0.18 145)" }}
+                >
                   {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Continue Setup" : "Enable Gifts"}
                 </Button>
               </>

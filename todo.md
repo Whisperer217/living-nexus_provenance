@@ -1061,3 +1061,15 @@
 - [x] Fix 2: PlayerBar share payload: title, text (title by artist — sovereign music with cryptographic provenance), url
 - [x] OG tags confirmed: /song/30001 returns og:title, og:description, og:image (cover art), og:url (canonical)
 - [x] TypeScript: 0 errors | HMR confirmed
+
+## Phase 117: Stripe Onboarding UX — Four Fixes
+- [x] Fix 1: Pre-fill business_type: 'individual' in Connect account creation
+- [x] Fix 1: Pre-fill business_profile.url with creator's website or /creator/:id fallback
+- [x] Fix 1: Pre-fill business_profile.mcc: '7929' (Bands, Orchestras, Entertainers)
+- [x] Fix 2: Pre-onboarding checklist Dialog modal — 6 items: ID, bank account, SSN, address, phone, email
+- [x] Fix 2: 'Enable Gifts' button opens checklist first; 'I'm Ready — Start Setup' proceeds to Stripe
+- [x] Fix 3: connectStatus returns requirementsDue + requirementsLabels (plain English, deduped)
+- [x] Fix 3: 15 Stripe requirement keys mapped to human-readable labels; DOB sub-fields normalized
+- [x] Fix 4: Banner expands to two rows when pending: gold CTA row + dark requirements row with amber chips
+- [x] Fix 4: Gifts card shows inline 'Still needed:' list (up to 3 items + overflow count)
+- [x] TypeScript: 0 errors | Server running on port 3000

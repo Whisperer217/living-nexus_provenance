@@ -700,7 +700,11 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       if (!user) throw new Error("User not found");
       let accountId = user.stripeAccountId;
       if (!accountId) {
-        // Use the new controller-based account creation (works with Connect platform setup)
+        // Build the creator's public profile URL for Stripe business_profile.url
+        const origin = input.returnUrl.replace(/\/dashboard.*$/, "");
+        const profileUrl = (user.website && user.website.startsWith("http"))
+          ? user.website
+          : `${origin}/creator/${ctx.user.id}`;
         const account = await stripe.accounts.create({
           controller: {
             stripe_dashboard: { type: "full" },
@@ -711,8 +715,13 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
             card_payments: { requested: true },
             transfers: { requested: true },
           },
+          business_type: "individual",
+          business_profile: {
+            url: profileUrl,
+            mcc: "7929", // Bands, Orchestras, Actors, and Other Entertainers
+          },
           email: user.email || undefined,
-          metadata: { userId: ctx.user.id.toString() },
+          metadata: { userId: ctx.user.id.toString(), artistHandle: user.artistHandle || "" },
         });
         accountId = account.id;
         await updateUserStripeAccount(ctx.user.id, { stripeAccountId: accountId, stripeAccountStatus: "pending" });
@@ -722,13 +731,51 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
     }),
     connectStatus: protectedProcedure.query(async ({ ctx }) => {
       const user = await getUserById(ctx.user.id);
-      if (!user?.stripeAccountId) return { status: "not_connected", accountId: null };
+      if (!user?.stripeAccountId) return { status: "not_connected", accountId: null, requirementsDue: [] as string[], requirementsLabels: [] as string[] };
       try {
         const account = await stripe.accounts.retrieve(user.stripeAccountId);
         const status = account.charges_enabled ? "enabled" : account.details_submitted ? "restricted" : "pending";
         await updateUserStripeAccount(ctx.user.id, { stripeAccountStatus: status as any });
-        return { status, accountId: user.stripeAccountId, chargesEnabled: account.charges_enabled };
-      } catch { return { status: "error", accountId: user.stripeAccountId }; }
+        // Translate Stripe requirement keys into plain English for the dashboard
+        const requirementsDue: string[] = [
+          ...(account.requirements?.currently_due ?? []),
+          ...(account.requirements?.past_due ?? []),
+        ];
+        const STRIPE_REQUIREMENT_LABELS: Record<string, string> = {
+          "individual.first_name": "Your first name",
+          "individual.last_name": "Your last name",
+          "individual.dob.day": "Your date of birth",
+          "individual.dob.month": "Your date of birth",
+          "individual.dob.year": "Your date of birth",
+          "individual.ssn_last_4": "Last 4 digits of your SSN",
+          "individual.id_number": "Your full SSN or Tax ID",
+          "individual.address.line1": "Your street address",
+          "individual.address.city": "Your city",
+          "individual.address.state": "Your state",
+          "individual.address.postal_code": "Your ZIP code",
+          "individual.email": "Your email address",
+          "individual.phone": "Your phone number",
+          "individual.verification.document": "A government-issued photo ID (passport or driver's license)",
+          "individual.verification.additional_document": "A secondary ID document",
+          "external_account": "Your bank account (routing + account number)",
+          "business_profile.url": "Your website or profile URL",
+          "business_profile.mcc": "Your business category",
+          "tos_acceptance.date": "Accept Stripe's Terms of Service",
+          "tos_acceptance.ip": "Accept Stripe's Terms of Service",
+        };
+        const seen = new Set<string>();
+        const requirementsLabels = requirementsDue
+          .map((key) => {
+            // Normalize dob sub-fields to a single label
+            const normalized = key.replace(/\.day$|\.month$|\.year$/, ".dob");
+            const label = STRIPE_REQUIREMENT_LABELS[key] ?? STRIPE_REQUIREMENT_LABELS[normalized] ?? key.replace(/_/g, " ").replace(/\./g, " → ");
+            if (seen.has(label)) return null;
+            seen.add(label);
+            return label;
+          })
+          .filter((l): l is string => l !== null);
+        return { status, accountId: user.stripeAccountId, chargesEnabled: account.charges_enabled, requirementsDue, requirementsLabels };
+      } catch { return { status: "error", accountId: user.stripeAccountId, requirementsDue: [] as string[], requirementsLabels: [] as string[] }; }
     }),
     recentTips: publicProcedure.query(async () => {
       const rows = await getRecentTips(20);
