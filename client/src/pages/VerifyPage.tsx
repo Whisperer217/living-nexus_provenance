@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import {
   ShieldCheck, ShieldX, Search, ExternalLink,
   Music, FileText, Copy, CheckCircle2, Loader2,
-  Calendar, Hash, Key, Fingerprint, Tag, History, UserCheck,
+  Calendar, Hash, Key, Fingerprint, Tag, History, UserCheck, Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +82,111 @@ export default function VerifyPage() {
     setInputWid("");
     setQueryWid("");
     navigate("/verify", { replace: true });
+  };
+
+  const downloadCertificate = () => {
+    if (!data) return;
+    const year = new Date().getFullYear();
+    const regDate = data.registeredAt
+      ? new Date(data.registeredAt).toLocaleString("en-US", {
+          year: "numeric", month: "long", day: "numeric",
+          hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+        })
+      : "Unknown";
+    const consentColor =
+      data.aiConsent === "prohibited" ? "#ef4444" :
+      data.aiConsent === "permitted_attribution" ? "#f59e0b" : "#22c55e";
+    const consentLabel =
+      data.aiConsent === "prohibited" ? "AI Training Prohibited" :
+      data.aiConsent === "permitted_attribution" ? "Permitted with Attribution" :
+      data.aiConsent === "permitted" ? "Freely Permitted" : "Not Specified";
+    const nameChanged = data.nameAtWitnessing && data.nameAtWitnessing !== data.artistName;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Witness ID Certificate — ${data.title}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+  body { background: #0a0a0a; color: #e2e8f0; font-family: 'Share Tech Mono', monospace; margin: 0; padding: 40px; }
+  .cert { max-width: 800px; margin: 0 auto; border: 1px solid #D4AF37; padding: 40px; position: relative; }
+  .cert::before { content: ''; position: absolute; inset: 6px; border: 1px solid rgba(201,168,76,0.2); pointer-events: none; }
+  h1 { font-family: 'Orbitron', monospace; color: #D4AF37; font-size: 22px; letter-spacing: 4px; margin: 0 0 4px; }
+  h2 { font-family: 'Orbitron', monospace; color: #6ee7f7; font-size: 13px; letter-spacing: 3px; margin: 0 0 32px; }
+  .divider { border: none; border-top: 1px solid #D4AF37; margin: 24px 0; opacity: 0.4; }
+  .label { color: #6ee7f7; font-size: 11px; letter-spacing: 2px; margin-bottom: 2px; }
+  .value { color: #e2e8f0; font-size: 14px; margin-bottom: 16px; word-break: break-all; }
+  .wid { font-family: 'Orbitron', monospace; color: #D4AF37; font-size: 18px; letter-spacing: 3px; }
+  .consent { display: inline-block; padding: 6px 16px; border: 1px solid ${consentColor}; color: ${consentColor}; font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 2px; margin-bottom: 16px; }
+  .sig { font-size: 10px; color: rgba(226,232,240,0.5); word-break: break-all; line-height: 1.6; }
+  .provenance-badge { display: inline-block; padding: 4px 12px; border: 1px solid rgba(201,168,76,0.4); color: #c9a84c; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; }
+  .verified-stamp { color: #22c55e; font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<div class="cert">
+  <h1>WITNESS ID CERTIFICATE</h1>
+  <h2>Command Domains LLC / BDDT Publishing — Sovereign Shutter™ Framework</h2>
+  <div class="verified-stamp">✓ VERIFIED — Living Nexus Provenance Registry</div>
+  <hr class="divider">
+
+  <div class="label">WORK TITLE</div>
+  <div class="value" style="font-size:18px;color:#D4AF37;">${data.title}</div>
+
+  <div class="label">CREATOR (CURRENT NAME)</div>
+  <div class="value">${data.artistName}</div>
+
+  ${nameChanged ? `<div class="label">REGISTERED NAME AT TIME OF WITNESSING</div>
+  <div class="provenance-badge">${data.nameAtWitnessing}</div>
+  <div class="value" style="font-size:11px;color:rgba(201,168,76,0.6);margin-top:-10px;">Creator's identity at moment of registration. Legally binding for provenance purposes.</div>` : ""}
+
+  ${data.genre ? `<div class="label">GENRE</div><div class="value">${data.genre}</div>` : ""}
+  ${data.isrc ? `<div class="label">ISRC</div><div class="value">${data.isrc}</div>` : ""}
+
+  <hr class="divider">
+
+  <div class="label">WITNESS ID</div>
+  <div class="value wid">${data.witnessId ?? ""}</div>
+
+  <div class="label">REGISTRATION DATE</div>
+  <div class="value">${regDate}</div>
+
+  ${(data.fileHash || data.lyricsHash) ? `<div class="label">${data.isLyricsOnly ? "LYRICS HASH (SHA-256)" : "FILE HASH (SHA-256)"}</div>
+  <div class="value sig">sha256:${data.isLyricsOnly ? data.lyricsHash : data.fileHash}</div>` : ""}
+
+  ${data.ecdsaSignature ? `<div class="label">ECDSA P-256 SIGNATURE</div>
+  <div class="value sig">${data.ecdsaSignature.slice(0, 80)}...</div>` : ""}
+
+  ${data.ecdsaPublicKey ? `<div class="label">PUBLIC KEY (JWK)</div>
+  <div class="value sig">${data.ecdsaPublicKey.slice(0, 80)}...</div>` : ""}
+
+  <hr class="divider">
+
+  <div class="label">AI TRAINING CONSENT</div>
+  <div class="consent">${consentLabel}</div>
+
+  <hr class="divider">
+
+  <div class="label">LEGAL NOTICE</div>
+  <div style="font-size:11px;color:rgba(226,232,240,0.4);line-height:1.8;">
+    This certificate establishes provenance of the above work under the Sovereign Shutter™ framework, Command Domains LLC.
+    Unauthorized AI training use is <strong style="color:${consentColor}">${consentLabel}</strong>.<br><br>
+    Copyright © ${year} ${data.artistName}. Published under BDDT Publishing. All rights reserved.<br>
+    This record was sealed by Living Nexus at the moment of creation. The Witness ID is cryptographically bound to the original file.<br>
+    Verified via Living Nexus Provenance Registry — livingnexus.org/verify/${data.witnessId ?? ""}
+  </div>
+</div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `WitnessID-${data.witnessId ?? "certificate"}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const aiConsentLabel = (v?: string) => {
@@ -288,20 +393,30 @@ export default function VerifyPage() {
               )}
 
               {/* ── Actions ── */}
-              <div className="flex gap-3 pt-2">
-                <Button
-                  className="flex-1"
-                  onClick={() => navigate(`/songs/${data.songId}`)}
-                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" /> View Track
-                </Button>
+              <div className="flex flex-col gap-2 pt-2">
+                <div className="flex gap-3">
+                  <Button
+                    className="flex-1"
+                    onClick={() => navigate(`/songs/${data.songId}`)}
+                    style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" /> View Track
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleVerifyAnother}
+                    style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}
+                  >
+                    <Search className="w-4 h-4 mr-2" /> Verify Another
+                  </Button>
+                </div>
                 <Button
                   variant="outline"
-                  onClick={handleVerifyAnother}
-                  style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}
+                  className="w-full"
+                  onClick={downloadCertificate}
+                  style={{ borderColor: "oklch(0.84 0.155 85 / 0.4)", color: "oklch(0.75 0.12 85)", fontFamily: "'Cinzel', serif" }}
                 >
-                  <Search className="w-4 h-4 mr-2" /> Verify Another
+                  <Download className="w-4 h-4 mr-2" /> Download Certificate
                 </Button>
               </div>
 

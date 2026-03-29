@@ -1028,3 +1028,11 @@
 - [x] Mannon (ID 180001) confirmed: acct_1TFO1ILdJ5vqIaYq, status=pending — live key required to generate link (see note)
 - [x] Update WhatsNew modal to v2.5.0 with Name Audit Trail + Stripe Recovery entries
 - [x] TypeScript: 0 errors | HMR confirmed
+
+## Phase 114: Dashboard Stripe Banner + WID PDF nameAtWitnessing
+- [x] Fix 1: Gold banner added to DashboardPage above Stats Cards — visible when connectData.status === 'pending'
+- [x] Fix 1: Banner uses existing connectMutation (Continue Setup flow), black button on gold background
+- [x] Fix 2: downloadCertificate() added to VerifyPage — generates HTML certificate from live DB data
+- [x] Fix 2: 'REGISTERED NAME AT TIME OF WITNESSING' field included when nameAtWitnessing differs from current name
+- [x] Fix 2: 'Download Certificate' button added below View Track / Verify Another in Actions row
+- [x] TypeScript: 0 errors

@@ -117,6 +117,33 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Stripe Setup Banner — shown when gifts account is pending */}
+        {connectData?.status === "pending" && (
+          <div
+            className="w-full flex items-center justify-between gap-4 px-4 py-3 rounded-xl mb-6"
+            style={{
+              background: "oklch(0.84 0.155 85)",
+              border: "1px solid oklch(0.75 0.18 85)",
+            }}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.15 0.03 280)" }} />
+              <span className="text-sm font-semibold leading-snug" style={{ color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                Your gift account is incomplete. Finish setup to receive gifts.
+              </span>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
+              disabled={connectMutation.isPending}
+              className="flex-shrink-0 font-bold text-sm"
+              style={{ background: "oklch(0.08 0.015 280)", color: "oklch(0.84 0.155 85)", border: "none" }}
+            >
+              {connectMutation.isPending ? "Loading..." : "Complete Setup"}
+            </Button>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
