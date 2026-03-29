@@ -1073,3 +1073,16 @@
 - [x] Fix 4: Banner expands to two rows when pending: gold CTA row + dark requirements row with amber chips
 - [x] Fix 4: Gifts card shows inline 'Still needed:' list (up to 3 items + overflow count)
 - [x] TypeScript: 0 errors | Server running on port 3000
+
+## Phase 118: Admin Roster Fix + Ticker Copy + Full Audit
+- [x] Fix 1: Root cause — admin.getUsers guarded by ownerOpenId (stricter than role===admin everywhere else)
+- [x] Fix 1: Changed to role === 'admin' — 13,237 users + 136 tracks now load in Admin Roster
+- [x] Fix 2: Ticker fallback updated to "Support creators directly on Living Nexus 🎵"
+- [x] Audit: Security — 0 critical | 2 medium (jukebox charges_enabled, 500MB body limit) | 1 low
+- [x] Audit: Payments — 0 critical | 1 medium (jukebox tip missing charges_enabled check) | 0 low
+- [x] Audit: Data integrity — 0 critical | 0 medium | 1 low (hard delete path for admin)
+- [x] Audit: Performance — 0 critical | 2 medium (no pagination on admin/explore) | 1 low (missing indexes)
+- [x] Audit: UX — 0 critical | 0 medium | 1 low (ComponentShowcase not routed)
+- [x] Audit: Content — 0 critical | 0 medium | 1 low (console.log in Home.tsx)
+- [x] Report produced: living-nexus-audit-report.md — 0 critical, 5 medium, 5 low, all critical systems confirmed solid
+- [x] TypeScript: 0 errors | Vitest: 44/44 passing

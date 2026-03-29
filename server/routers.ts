@@ -1151,10 +1151,10 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
 
   // ── Admin ──────────────────────────────────────────────────────────
   admin: router({
-    /** Return all users with stats. Only the platform owner may call this. */
+    /** Return all users with stats. Only admins may call this. */
     getUsers: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.openId !== ENV.ownerOpenId) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Owner access only" });
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
       }
       return getAllUsersWithStats();
     }),

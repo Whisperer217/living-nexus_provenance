@@ -16,7 +16,7 @@ export default function TipTicker() {
           (t: any) =>
             `🔐 ${t.fanName} tipped ${t.creatorName} ${formatAmount(t.amountCents)} for "${t.songTitle}"`
         )
-      : ["Be the first to tip a creator on Living Nexus 🎵"];
+      : ["Support creators directly on Living Nexus 🎵"];
 
   // Duplicate items so the marquee loops seamlessly
   const marqueeItems = [...items, ...items];
