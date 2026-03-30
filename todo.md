@@ -1118,3 +1118,12 @@
 - [x] What's New v2.6.0 entry for Collection Certificates (CURRENT_VERSION bumped to v2.6.0, new storage key, 2 items: Collection Certificates + Regenerate Certificate)
 - [x] Dashboard Collections tab added (My Collections view with track count, WID, Verify + Download + Regen buttons)
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Phase — v2.7.0 Collection Enhancements
+
+- [x] Batch upload: COLLECTION NAME field (renamed from ALBUM NAME, new placeholder text, helper copy added)
+- [x] Batch upload: Cover Art already wired end-to-end (coverArtUrl → batchUpload → createCollection → DB)
+- [x] Collection verify page: cover art displayed (28x28 rounded-xl with gold border + glow when present, icon fallback)
+- [x] server/og.ts: /verify/:witnessId route added — WID-ALB- prefix → collection OG card (title, description, cover art, canonical URL)
+- [x] WhatsNewModal: bumped to v2.7.0 (Collection Name field, Cover Art on verify page, Collection Share Cards)
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

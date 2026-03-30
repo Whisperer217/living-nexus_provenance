@@ -487,13 +487,14 @@ export default function BatchUploadPage() {
                 <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleCoverChange(e.target.files[0])} />
               </div>
 
-              {/* Album name */}
+              {/* Collection name */}
               <div className="mb-3">
-                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>ALBUM NAME <span style={{ color: "oklch(0.65 0.18 25)" }}>*</span></label>
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>COLLECTION NAME <span style={{ color: "oklch(0.65 0.18 25)" }}>*</span></label>
+                <p className="text-xs mb-1.5" style={{ color: "oklch(0.45 0.03 280)" }}>This name appears on your Collection Certificate and verify page.</p>
                 <Input
                   value={albumName}
                   onChange={e => setAlbumName(e.target.value)}
-                  placeholder="Enter album name"
+                  placeholder="e.g. Erasing The Witness, Vol. 1…"
                   style={{ background: "oklch(0.13 0.04 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.85 0.02 85)" }}
                 />
               </div>

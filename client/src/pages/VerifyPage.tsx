@@ -100,9 +100,15 @@ function CollectionVerifyView({
 
       {/* ── Verified badge ── */}
       <div className="rounded-2xl p-6 text-center" style={{ background: "oklch(0.84 0.155 85 / 0.06)", border: "2px solid oklch(0.84 0.155 85 / 0.35)" }}>
-        <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "2px solid oklch(0.84 0.155 85 / 0.4)" }}>
-          <Library className="w-10 h-10" style={{ color: "oklch(0.84 0.155 85)" }} />
-        </div>
+        {(data as any).coverArtUrl ? (
+          <div className="w-28 h-28 rounded-xl mx-auto mb-4 overflow-hidden" style={{ border: "2px solid oklch(0.84 0.155 85 / 0.5)", boxShadow: "0 0 20px oklch(0.84 0.155 85 / 0.15)" }}>
+            <img src={(data as any).coverArtUrl} alt={data.name} className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "2px solid oklch(0.84 0.155 85 / 0.4)" }}>
+            <Library className="w-10 h-10" style={{ color: "oklch(0.84 0.155 85)" }} />
+          </div>
+        )}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.5)" }}>
           <CheckCircle2 className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
           <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "oklch(0.65 0.18 145)", fontFamily: "'Cinzel', serif" }}>Collection Verified</span>

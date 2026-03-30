@@ -15,7 +15,7 @@
 import { type Express } from "express";
 import fs from "fs";
 import path from "path";
-import { getSongWithCreator, getCreatorForOg } from "./db";
+import { getSongWithCreator, getCreatorForOg, getCollectionByWid, getUserById } from "./db";
 
 /** Canonical production origin — always use this for og:url */
 const CANONICAL_ORIGIN = "https://www.livingnexus.org";
@@ -327,6 +327,62 @@ export function registerOgRoutes(app: Express) {
   }
 
   // ── /creator/:id ───────────────────────────────────────────────────────────
+  // Creator profile pages are PUBLIC NOMINATION CARDS.
+  // When a fan shares a creator URL on X, Discord, iMessage, or any platform,
+  // the unfurl shows the creator's banner, avatar, name, bio, genre, WID count,
+  // and track count — the link carries the creator's full visual identity and
+  // provenance chain of custody.
+  // ── /verify/:witnessId ──────────────────────────────────────────────────────────────────────────────
+  // Handles both WID-ALB-* (collection) and WID-MUS-* (individual track) verify pages.
+  // For WID-ALB- prefixes: query the collection and build a rich collection share card.
+  // For WID-MUS- prefixes: fall through to the React SPA (no server-side data needed
+  //   beyond what the static /verify OG route already provides).
+  app.get("/verify/:witnessId", async (req, res, next) => {
+    const witnessId = decodeURIComponent(req.params.witnessId || "").trim();
+    if (!witnessId) return next();
+
+    const ua = req.headers["user-agent"] || "";
+    if (!isCrawler(ua)) return next();
+
+    // Only handle WID-ALB- collection IDs here — individual WIDs fall through
+    if (!witnessId.startsWith("WID-ALB-")) return next();
+
+    try {
+      const collection = await getCollectionByWid(witnessId);
+      if (!collection) return next();
+
+      const creator = await getUserById(collection.creatorId);
+      const creatorName =
+        (creator as any)?.artistHandle?.trim() ||
+        (creator as any)?.name?.trim() ||
+        "Unknown Artist";
+
+      const ogTitle = `${collection.name} — ${creatorName} | Living Nexus Collection`;
+      const ogDescription = `${collection.trackCount} work${collection.trackCount !== 1 ? "s" : ""} collectively witnessed under one Collection WID. Sovereign Shutter™ — ${witnessId}`;
+      const coverArt = (collection as any).coverArtUrl?.trim();
+      const ogImage = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
+      const ogUrl = `${CANONICAL_ORIGIN}/verify/${encodeURIComponent(witnessId)}`;
+
+      const ogBlock = buildSongOgTags({
+        title: ogTitle,
+        description: ogDescription,
+        image: ogImage,
+        url: ogUrl,
+        siteName: "Living Nexus",
+      });
+
+      const html = await getHtmlTemplate(isDev);
+      if (!html) return next();
+
+      const page = injectOg(html, ogBlock, ogTitle);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (err) {
+      console.error("[OG] Error generating meta tags for collection", witnessId, err);
+      next();
+    }
+  });
+
+  // ── /creator/:id ──────────────────────────────────────────────────────────────────────────────
   // Creator profile pages are PUBLIC NOMINATION CARDS.
   // When a fan shares a creator URL on X, Discord, iMessage, or any platform,
   // the unfurl shows the creator's banner, avatar, name, bio, genre, WID count,
