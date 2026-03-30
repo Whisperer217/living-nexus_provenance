@@ -9,14 +9,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.7.3";
+const CURRENT_VERSION = "v2.8.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.7.3",
+    version: "v2.8.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Maximize2, text: "Drag to Reposition — Your banner, avatar, track cover art, and collection cover art can now be repositioned to show exactly what you want. Upload your image, drag to frame it perfectly, save. Your creative space. Your arrangement." },
+    ],
+  },
+  {
+    version: "v2.7.3",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Download, text: "Player Bar Download — every track now has a Download button in the global player bar. The file is ID3-tagged with your WID, the verify URL, cover art, AI consent flag, and Colossians 1:17. Your provenance travels with every file, everywhere." },
       { icon: FileArchive, text: "Download My Archive — Dashboard → Archive tab. See all your tracks grouped into batches of 10. Download any batch as a ZIP containing ID3-tagged audio and WID certificate PDFs. Your full catalog, offline, with provenance intact." },

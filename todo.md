@@ -1231,3 +1231,9 @@
 - [x] Wire into collection cover art upload flow
 - [x] Apply objectPosition on all render sites (profile page banner, song cards, collection cards, discover/explore/liked/archive/playlist/together/registry)
 - [x] tRPC mutations: updateBannerPosition, updateSongCoverPosition, updateCollectionCoverPosition
+
+## Feature — v2.8.0 Creator Control Suite [COMPLETE]
+- [x] Reposition button overlay on existing banners (ProfilePage + CreatorProfilePage owner view)
+- [x] Avatar position adjuster — wire ImagePositioner into avatar upload/reposition flow
+- [x] What's New modal v2.8.0 entry: Drag to Reposition feature announcement
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

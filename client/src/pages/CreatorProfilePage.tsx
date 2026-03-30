@@ -19,8 +19,9 @@ import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
-  Library,
+  Library, Move, X,
 } from "lucide-react";
+import { ImagePositioner } from "@/components/ImagePositioner";
 import { usePlayer } from "@/contexts/PlayerContext";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
@@ -240,6 +241,8 @@ export default function CreatorProfilePage() {
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
+  const [showBannerPositioner, setShowBannerPositioner] = useState(false);
+  const [bannerPos, setBannerPos] = useState({ x: 50, y: 50 });
   const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
   // Use currentTrackId (derived from currentIdx) — NOT tracks[0] which always points to the
   // first track in the queue regardless of which track is actively playing.
@@ -274,6 +277,12 @@ export default function CreatorProfilePage() {
     { creatorId: creatorIdForWitness },
     { enabled: !!user && !!data && user.id !== data?.creator?.id }
   );
+  // Banner reposition (must be before early returns — Rules of Hooks)
+  const bannerPosInitRef = useRef(false);
+  const updateBannerPosition = trpc.profile.update.useMutation({
+    onSuccess: () => { toast.success("Banner position saved"); refetch(); },
+    onError: (e: any) => toast.error(e.message),
+  });
   const witnessToggle = trpc.witness.toggle.useMutation({
     onSuccess: (result) => {
       utils.witness.status.invalidate({ creatorId: creatorIdForWitness });
@@ -354,6 +363,16 @@ export default function CreatorProfilePage() {
 
   const { creator, songs } = data;
   const isOwner = user?.id === creator.id;
+  // Sync bannerPos from loaded creator data (only once on load)
+  if (!bannerPosInitRef.current && (creator.bannerPositionX != null || creator.bannerPositionY != null)) {
+    bannerPosInitRef.current = true;
+    setBannerPos({ x: creator.bannerPositionX ?? 50, y: creator.bannerPositionY ?? 50 });
+  }
+  const saveBannerPosition = (pos: { x: number; y: number }) => {
+    setBannerPos(pos);
+    setShowBannerPositioner(false);
+    updateBannerPosition.mutate({ bannerPositionX: pos.x, bannerPositionY: pos.y });
+  };
 
   const featuredSongs = songs.slice(0, 8);
   const totalPlays = songs.reduce((acc: number, s: any) => acc + (s.playCount || 0), 0);
@@ -383,7 +402,7 @@ export default function CreatorProfilePage() {
         <meta name="twitter:image" content={profileImage} />
       </Helmet>
       {/* ── Banner ── */}
-      <div className="relative w-full" style={{ height: "240px" }}>
+      <div className="relative w-full group" style={{ height: "240px" }}>
         {creator.bannerUrl ? (
           <img src={creator.bannerUrl} alt="banner" className="w-full h-full object-cover" style={{ objectPosition: `${creator.bannerPositionX ?? 50}% ${creator.bannerPositionY ?? 50}%` }} />
         ) : (
@@ -401,8 +420,39 @@ export default function CreatorProfilePage() {
           </div>
         )}
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent" />
+        {/* Reposition button — owner only, visible on hover */}
+        {isOwner && creator.bannerUrl && (
+          <button
+            onClick={() => setShowBannerPositioner(true)}
+            className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+              bg-black/60 hover:bg-black/80 text-white text-[11px] font-body
+              opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          >
+            <Move size={12} />
+            Reposition
+          </button>
+        )}
       </div>
-
+      {/* ── Banner ImagePositioner modal ── */}
+      {showBannerPositioner && creator.bannerUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-white">Reposition Banner</h3>
+              <button onClick={() => setShowBannerPositioner(false)} className="text-white/40 hover:text-white/80 transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <ImagePositioner
+              imageUrl={creator.bannerUrl}
+              aspectClass="h-40"
+              initialPosition={bannerPos}
+              onSave={saveBannerPosition}
+              onCancel={() => setShowBannerPositioner(false)}
+            />
+          </div>
+        </div>
+      )}
       {/* ── Profile header ── */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div

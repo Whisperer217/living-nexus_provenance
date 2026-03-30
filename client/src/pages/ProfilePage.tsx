@@ -156,7 +156,7 @@ export default function ProfilePage() {
   const bannerRef = useRef<HTMLInputElement>(null);
 
   // ── Avatar position state ─────────────────────────────────────────
-  const [showPositionControls, setShowPositionControls] = useState(false);
+  const [showAvatarPositioner, setShowAvatarPositioner] = useState(false);
   const [avatarPos, setAvatarPos] = useState({ x: 50, y: 50 });
 
   // Sync position from DB on load
@@ -371,7 +371,7 @@ export default function ProfilePage() {
                 </button>
                 {profile?.profilePhotoUrl && (
                   <button
-                    onClick={() => setShowPositionControls(v => !v)}
+                    onClick={() => setShowAvatarPositioner(true)}
                     className="flex items-center gap-1 text-white/70 hover:text-[#D4AF37] text-[10px] font-body transition-colors"
                   >
                     <Edit2 size={12} />
@@ -382,33 +382,28 @@ export default function ProfilePage() {
               <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
             </div>
 
-            {/* Position sliders — shown when user clicks Adjust */}
-            {showPositionControls && profile?.profilePhotoUrl && (
-              <div className="mt-2 w-24 bg-[oklch(0.12_0.02_280)] border border-white/[0.08] rounded-xl p-2 space-y-2">
-                <div>
-                  <label className="text-[9px] text-white/40 font-body block mb-0.5">Left / Right</label>
-                  <input
-                    type="range" min={0} max={100} value={avatarPos.x}
-                    onChange={e => setAvatarPos(p => ({ ...p, x: Number(e.target.value) }))}
-                    onMouseUp={() => saveAvatarPosition(avatarPos)}
-                    onTouchEnd={() => saveAvatarPosition(avatarPos)}
-                    className="w-full h-1 accent-[#D4AF37] cursor-pointer"
+            {/* Avatar ImagePositioner modal */}
+            {showAvatarPositioner && profile?.profilePhotoUrl && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                <div className="w-full max-w-sm bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-white">Adjust Avatar Position</h3>
+                    <button onClick={() => setShowAvatarPositioner(false)} className="text-white/40 hover:text-white/80 transition-colors">
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <ImagePositioner
+                    imageUrl={profile.profilePhotoUrl}
+                    aspectClass="h-48"
+                    initialPosition={avatarPos}
+                    onSave={(pos) => {
+                      setAvatarPos(pos);
+                      setShowAvatarPositioner(false);
+                      saveAvatarPosition(pos);
+                    }}
+                    onCancel={() => setShowAvatarPositioner(false)}
                   />
                 </div>
-                <div>
-                  <label className="text-[9px] text-white/40 font-body block mb-0.5">Up / Down</label>
-                  <input
-                    type="range" min={0} max={100} value={avatarPos.y}
-                    onChange={e => setAvatarPos(p => ({ ...p, y: Number(e.target.value) }))}
-                    onMouseUp={() => saveAvatarPosition(avatarPos)}
-                    onTouchEnd={() => saveAvatarPosition(avatarPos)}
-                    className="w-full h-1 accent-[#D4AF37] cursor-pointer"
-                  />
-                </div>
-                <button
-                  onClick={() => setShowPositionControls(false)}
-                  className="w-full text-[9px] text-white/40 hover:text-white/70 font-body transition-colors"
-                >Done</button>
               </div>
             )}
           </div>
