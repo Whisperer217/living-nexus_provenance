@@ -61,7 +61,7 @@ function SongBrowserModal({
 
   // Multi-select queue
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [checkoutStep, setCheckoutStep] = useState(false);
+  const [queuedCount, setQueuedCount] = useState(0); // tracks how many songs were queued in the last batch
 
   // Audio preview — routed through the GLOBAL player audioRef.
   // One audio source. Always. No exceptions.
@@ -76,13 +76,8 @@ function SongBrowserModal({
   const { data: songs } = trpc.songs.discover.useQuery({ limit: 100 });
   const { data: playlistItems } = trpc.playlist.get.useQuery(undefined, { enabled: !!user });
 
-  const freeQueueMutation = trpc.jukebox.freeQueue.useMutation({
-    onSuccess: (data) => {
-      toast.success(`🎵 "${data.songTitle}" added to the queue!`);
-      onClose();
-    },
-    onError: (err) => toast.error(err.message),
-  });
+  // freeQueueMutation — callbacks handled per-call in handleQueueAll
+  const freeQueueMutation = trpc.jukebox.freeQueue.useMutation();
 
   // Flatten discover songs
   const flatSongs: SongCard[] = (songs ?? []).map((s: any) => ({
@@ -223,30 +218,43 @@ function SongBrowserModal({
     restoreGlobalPlayer();
   };
 
-  const handleCheckout = () => {
-    if (selectedIds.size === 0 && currentCard) {
-      // Queue current card if nothing explicitly selected
-      setSelectedIds(new Set([currentCard.id]));
-    }
-    setCheckoutStep(true);
-  };
-
-  const handleFreeQueue = () => {
+  // Queue all selected songs in sequence — no checkout step, no payment required.
+  // The Jukebox is free and communal. Gifting is a separate voluntary covenant.
+  const handleQueueAll = () => {
     if (!user) {
       window.location.href = getLoginUrl("/together");
       return;
     }
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0 && currentCard) {
-      // Queue current card if nothing explicitly selected
-      stopPreview();
-      freeQueueMutation.mutate({ roomCode, songId: currentCard.id });
-      return;
-    }
-    if (ids.length === 0) { toast.error("Select at least one song"); return; }
-    // Queue first selected song (multi-song: queue them sequentially)
     stopPreview();
-    freeQueueMutation.mutate({ roomCode, songId: ids[0] });
+    const ids = selectedIds.size > 0
+      ? Array.from(selectedIds)
+      : currentCard ? [currentCard.id] : [];
+    if (ids.length === 0) { toast.error("Select at least one song"); return; }
+
+    // Fire mutations sequentially with a 200ms stagger so the server
+    // doesn’t receive a burst of identical requests.
+    ids.forEach((songId, i) => {
+      setTimeout(() => {
+        freeQueueMutation.mutate(
+          { roomCode, songId },
+          {
+            onSuccess: (data) => {
+              if (i === ids.length - 1) {
+                // Last song — show a single summary toast
+                const label = ids.length > 1
+                  ? `${ids.length} songs added to the queue!`
+                  : `✨ “${data.songTitle}” added to the queue!`;
+                toast.success(`🎵 ${label}`);
+                setQueuedCount(ids.length);
+                setSelectedIds(new Set());
+                onClose();
+              }
+            },
+            onError: (err) => toast.error(err.message),
+          }
+        );
+      }, i * 200);
+    });
   };
 
   const selectedSongs = activeSongs.filter(s => selectedIds.has(s.id));
@@ -268,90 +276,24 @@ function SongBrowserModal({
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08] flex-shrink-0">
           <div className="flex items-center gap-2">
             <ListMusic size={16} className="text-[#D4AF37]" />
-            <span className="font-heading text-[14px] text-white/90 tracking-wide">
-              {checkoutStep ? "Confirm Queue" : "Jukebox Browser"}
-            </span>
+            <span className="font-heading text-[14px] text-white/90 tracking-wide">Jukebox Browser</span>
           </div>
           <div className="flex items-center gap-2">
-            {!checkoutStep && (
-              <button
-                onClick={toggleMute}
-                className="text-white/40 hover:text-white/70 transition-colors p-1"
-                title={isMuted ? "Unmute preview" : "Mute preview"}
-              >
-                {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-              </button>
-            )}
+            <button
+              onClick={toggleMute}
+              className="text-white/40 hover:text-white/70 transition-colors p-1"
+              title={isMuted ? "Unmute preview" : "Mute preview"}
+            >
+              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            </button>
             <button onClick={() => { stopPreview(); onClose(); }} className="text-white/40 hover:text-white/70 transition-colors">
               <X size={16} />
             </button>
           </div>
         </div>
 
-        {/* ── Checkout step ── */}
-        {checkoutStep ? (
-          <div className="flex-1 overflow-y-auto p-5">
-            {/* Selected songs list */}
-            <div className="mb-4">
-              <div className="text-[11px] font-heading tracking-[0.1em] uppercase text-white/60 mb-2">
-                Songs to Queue ({selectedSongs.length})
-              </div>
-              <div className="rounded-xl overflow-hidden border border-white/[0.08]" style={{ background: "oklch(0.10 0.04 280)" }}>
-                {selectedSongs.map((song) => (
-                  <div key={song.id} className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] last:border-0">
-                    <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
-                      style={{ background: "oklch(0.15 0.04 280)" }}>
-                      {song.coverArtUrl
-                        ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover object-top" />
-                        : <Music2 size={14} className="text-white/65" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-body text-white/85 truncate">{song.title}</div>
-                      <div className="text-[11px] text-white/50 font-body truncate">{song.creatorName || "Unknown"}</div>
-                    </div>
-                    <button onClick={() => { toggleSelect(song.id); if (selectedIds.size <= 1) setCheckoutStep(false); }}
-                      className="text-white/30 hover:text-red-400 transition-colors">
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {selectedSongs.length > 1 && (
-                <p className="text-[11px] text-[#D4AF37]/60 font-body mt-2 text-center">
-                  Multi-song queuing: each song requires a separate checkout. First song will open now.
-                </p>
-              )}
-            </div>
-
-            <p className="text-[12px] text-white/50 font-body text-center mb-4">
-              Songs queue freely. Everyone in the room hears them.
-            </p>
-
-            {!user ? (
-              <a href={getLoginUrl("/together")}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all"
-                style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}>
-                Sign in to Queue
-              </a>
-            ) : (
-              <button
-                onClick={handleFreeQueue}
-                disabled={freeQueueMutation.isPending}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}>
-                <ListMusic size={14} />
-                {freeQueueMutation.isPending ? "Queuing…" : `Queue ${selectedIds.size} Song${selectedIds.size > 1 ? "s" : ""}`}
-              </button>
-            )}
-
-            <button onClick={() => setCheckoutStep(false)}
-              className="w-full mt-3 py-2 text-[12px] text-white/40 hover:text-white/60 font-body transition-colors">
-              ← Back to Browser
-            </button>
-          </div>
-        ) : (
-          /* ── Jukebox Browser ── */
-          <>
+        {/* ── Jukebox Browser ── */}
+        <>
             {/* Tabs */}
             <div className="flex border-b border-white/[0.08] flex-shrink-0">
               <button
@@ -543,40 +485,26 @@ function SongBrowserModal({
                     })}
                   </div>
 
-                  {/* Selected count + checkout */}
-                  {selectedIds.size > 0 && (
-                    <div className="px-4 pb-4 flex-shrink-0">
-                      <button
-                        onClick={handleCheckout}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all hover:-translate-y-0.5"
-                        style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
-                      >
-                        <ListMusic size={14} />
-                        Queue {selectedIds.size} Song{selectedIds.size > 1 ? "s" : ""} →
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Queue current card button */}
-                  {selectedIds.size === 0 && currentCard && (
-                    <div className="px-4 pb-4 flex-shrink-0">
-                      <button
-                        onClick={handleFreeQueue}
-                        disabled={freeQueueMutation.isPending}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium
-                          text-white/60 hover:text-white transition-all border border-white/[0.08] hover:border-[#D4AF37]/30 disabled:opacity-50"
-                        style={{ background: "oklch(0.13 0.04 278)" }}
-                      >
-                        <ListMusic size={14} />
-                        {freeQueueMutation.isPending ? "Queuing…" : "Add to Queue"}
-                      </button>
-                    </div>
-                  )}
+                  {/* Add to Queue button — queues all selected songs freely, no checkout required */}
+                  <div className="px-4 pb-4 flex-shrink-0">
+                    <button
+                      onClick={handleQueueAll}
+                      disabled={freeQueueMutation.isPending}
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-medium text-black transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                      style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
+                    >
+                      <ListMusic size={14} />
+                      {freeQueueMutation.isPending
+                        ? "Queuing…"
+                        : selectedIds.size > 1
+                          ? `Add ${selectedIds.size} Songs to Queue`
+                          : "Add to Queue"}
+                    </button>
+                  </div>
                 </>
               )}
             </div>
-          </>
-        )}
+        </>
 
         {/* Audio preview routes through the global player — no separate <audio> element needed */}
       </div>

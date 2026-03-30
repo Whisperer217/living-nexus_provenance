@@ -1137,3 +1137,19 @@
 - [x] Root cause: SongBrowserModal had its own audioRef + hidden <audio> element — a separate audio source running in parallel with the global player
 - [x] Fix: removed standalone audioRef and <audio> element; imported global audioRef from usePlayer(); preview now pauses the global player, snapshots src+position, plays 30s preview, then restores on close/timeout
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Fix — Jukebox Multi-Song Free Queuing
+- [x] Removed checkout step framing from SongBrowserModal (no payment required to queue)
+- [x] Queue all selected songs in sequence (loop through selectedIds, 200ms stagger, summary toast)
+- [x] Button renamed to "Add X Songs to Queue" / "Add to Queue" (no checkout language)
+- [x] Offering modal kept as separate voluntary gifting covenant
+
+## Redesign — Home Page (DiscoverPage at /)
+- [x] Declaration header: "Living Nexus is on fire for Jesus"
+- [x] New headline: "A cryptographic provenance layer for creative works."
+- [x] #MainlyMusic tagline
+- [x] WID explanation block updated (two layers: individual WIDs + WID-ALB)
+- [x] Creator/Fan value split section added (two cards below hero)
+- [x] Genre discovery filter (kept, working)
+- [x] Latest Releases grid (kept, working)
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

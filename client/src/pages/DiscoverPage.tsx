@@ -74,18 +74,16 @@ export default function DiscoverPage() {
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 80% at 50% 50%, transparent 0%, oklch(0.09 0.04 265 / 0.3) 50%, oklch(0.07 0.08 290 / 0.6) 100%)" }} />
         <div className="relative container py-16 md:py-24">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
-              <span className="text-xs font-mono tracking-widest uppercase" style={{ color: "oklch(0.84 0.155 85)" }}>Command Domains LLC · BDDT Publishing</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)", textShadow: "0 0 40px oklch(0.75 0.18 85 / 0.4)" }}>
-              Living Nexus
-            </h1>
-            <p className="text-lg md:text-xl mb-2" style={{ color: "oklch(0.92 0.04 280)" }}>
-              Sovereign music. Cryptographic provenance. Creator-owned.
+            {/* Declaration */}
+            <p className="text-xs font-mono tracking-[0.25em] uppercase mb-3" style={{ color: "oklch(0.84 0.155 85 / 0.75)" }}>
+              Living Nexus is on fire for Jesus
             </p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)", textShadow: "0 0 40px oklch(0.75 0.18 85 / 0.4)" }}>
+              A cryptographic provenance layer<br className="hidden md:block" /> for creative works.
+            </h1>
+            <p className="text-sm font-mono tracking-[0.2em] uppercase mb-5" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}>#MainlyMusic</p>
             <p className="text-sm mb-8" style={{ color: "oklch(0.82 0.02 280)" }}>
-              Every song on this platform carries a Witness ID — a cryptographic proof of creation that belongs to the artist, not the algorithm.
+              Every song on this platform carries a <strong style={{ color: "oklch(0.84 0.155 85)" }}>Witness ID</strong> — a cryptographic proof of creation that belongs to the artist, not the algorithm. Two layers of protection: individual WIDs for every track, and collective WID-ALB certificates for entire albums.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/upload">
@@ -99,6 +97,36 @@ export default function DiscoverPage() {
                 </Button>
               </Link>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Creator / Fan Value Split ──────────────────────────────────── */}
+      <div className="container py-10">
+        <div className="grid sm:grid-cols-2 gap-5 max-w-3xl">
+          {/* For Creators */}
+          <div className="rounded-xl border p-5" style={{ background: "oklch(0.115 0.055 278)", borderColor: "oklch(0.84 0.155 85 / 0.2)" }}>
+            <p className="text-xs font-mono tracking-[0.2em] uppercase mb-4" style={{ color: "oklch(0.84 0.155 85)" }}>For Creators</p>
+            <ul className="space-y-2">
+              {["Upload your music. Get your WID.", "Keep 90% of every gift received.", "Own your catalog. Always.", "Batch upload entire albums at once."].map(t => (
+                <li key={t} className="flex items-start gap-2">
+                  <Shield size={12} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }} />
+                  <span className="text-[13px]" style={{ color: "#E2E8F0" }}>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {/* For Fans */}
+          <div className="rounded-xl border p-5" style={{ background: "oklch(0.115 0.055 278)", borderColor: "oklch(0.84 0.155 85 / 0.2)" }}>
+            <p className="text-xs font-mono tracking-[0.2em] uppercase mb-4" style={{ color: "oklch(0.84 0.155 85)" }}>For Fans</p>
+            <ul className="space-y-2">
+              {["Discover real music from real people.", "Gift creators directly. 90% reaches them.", "Verify any track's origin with its WID.", "No algorithm. No ads. No noise."].map(t => (
+                <li key={t} className="flex items-start gap-2">
+                  <Star size={12} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }} />
+                  <span className="text-[13px]" style={{ color: "#E2E8F0" }}>{t}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
