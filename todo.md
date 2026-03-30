@@ -1273,3 +1273,11 @@
 - [x] EditTrackPanel cover art: inline slider below the cover art thumbnail
 - [x] DashboardPage collection cover: inline slider below the collection cover thumbnail
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Bug Fix — ImagePositioner objectPosition & DB Persistence [COMPLETE]
+- [x] Verify objectPosition is applied as `${x}% ${y}%` (x=horizontal, y=vertical) in ImagePositioner preview — confirmed correct
+- [x] Verify all save mutations (banner, avatar, cover, collection) actually write to DB — confirmed writing (DB shows bannerPositionX:28, avatarObjectPosition:"7% 23%")
+- [x] Fix CreatorProfilePage banner render: was reading stale `creator.bannerPositionX` from cache, now uses `bannerPos` state
+- [x] Fix EditTrackPanel: saveCoverPosition now uses separate mutation that doesn't close the panel
+- [x] Add success toast to DashboardPage collection cover position save
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

@@ -100,7 +100,7 @@ export default function DashboardPage() {
     onError: (e: { message: string }) => toast.error(e.message),
   });
   const updateCollectionCoverPosition = trpc.songs.updateCollectionCoverPosition.useMutation({
-    onSuccess: () => { refetchCollections(); },
+    onSuccess: () => { refetchCollections(); toast.success("Collection cover position saved"); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
   async function handleCollectionCoverFile(e: React.ChangeEvent<HTMLInputElement>, collectionId: number, currentUrl: string | null, currentPos: { x: number; y: number }) {

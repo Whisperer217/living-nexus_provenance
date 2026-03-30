@@ -128,6 +128,17 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     },
   });
 
+  // Separate mutation for position-only saves — does NOT close the panel
+  const saveCoverPositionMutation = trpc.songs.updateMetadata.useMutation({
+    onSuccess: () => {
+      utils.songs.mySongs.invalidate();
+      toast.success("Cover position saved");
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err.message || "Failed to save position");
+    },
+  });
+
   // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -215,8 +226,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         coverBase64: base64,
         coverMimeType: file.type,
       });
-      // Also save the position
-      await updateMetadata.mutateAsync({
+      // Also save the position (use position-only mutation so panel stays open)
+      await saveCoverPositionMutation.mutateAsync({
         songId: song.id,
         coverPositionX: pos.x,
         coverPositionY: pos.y,
@@ -229,7 +240,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   async function saveCoverPosition(pos: { x: number; y: number }) {
     setCoverPos(pos);
     setShowCoverPositioner(false);
-    await updateMetadata.mutateAsync({
+    await saveCoverPositionMutation.mutateAsync({
       songId: song.id,
       coverPositionX: pos.x,
       coverPositionY: pos.y,

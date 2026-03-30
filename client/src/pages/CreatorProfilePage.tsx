@@ -411,7 +411,7 @@ export default function CreatorProfilePage() {
       {/* ── Banner ── */}
       <div className="relative w-full group" style={{ height: "240px" }}>
         {creator.bannerUrl ? (
-          <img src={creator.bannerUrl} alt="banner" className="w-full h-full object-cover" style={{ objectPosition: `${creator.bannerPositionX ?? 50}% ${creator.bannerPositionY ?? 50}%` }} />
+          <img src={creator.bannerUrl} alt="banner" className="w-full h-full object-cover" style={{ objectPosition: `${bannerPos.x}% ${bannerPos.y}%` }} />
         ) : (
           <div
             className="w-full h-full"
