@@ -19,7 +19,6 @@
 import { Router, Request, Response } from "express";
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url";
 import NodeID3 from "node-id3";
 import JSZip from "jszip";
 import { getSongWithCreator, getUserTipTotalForSong, recordDownload, getSongsByUser } from "./db";
@@ -355,8 +354,9 @@ downloadRouter.get("/api/download/batch-info", async (req: Request, res: Respons
 
 // ── APK Download Route ─────────────────────────────────────────────────────────────────────────────────
 // GET /apk/download  — serves the signed Android APK from server/assets/
-const __dirname_apk = path.dirname(fileURLToPath(import.meta.url));
-const APK_PATH = path.join(__dirname_apk, "assets", "LivingNexus-v1-release.apk");
+// Use process.cwd() so the path resolves correctly in both dev (cwd = project root)
+// and production (dist/index.js also runs with cwd = project root on Manus hosting).
+const APK_PATH = path.join(process.cwd(), "server", "assets", "LivingNexus-v1-release.apk");
 const APK_FILENAME = "LivingNexus-v1-release.apk";
 
 downloadRouter.get("/apk/download", (_req: Request, res: Response) => {
