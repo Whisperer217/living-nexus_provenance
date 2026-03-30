@@ -309,8 +309,8 @@ export default function ProfilePage() {
       </div>
       {/* ── Banner ImagePositioner modal ── */}
       {showBannerPositioner && (pendingBannerUrl || profile?.bannerUrl) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-lg bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4 my-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-white">
                 {pendingBannerUrl ? "Set Banner Position" : "Reposition Banner"}
@@ -385,8 +385,8 @@ export default function ProfilePage() {
 
             {/* Avatar ImagePositioner modal */}
             {showAvatarPositioner && profile?.profilePhotoUrl && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                <div className="w-full max-w-sm bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4">
+              <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+                <div className="w-full max-w-sm bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4 my-auto">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-white">Adjust Avatar Position</h3>
                     <button onClick={() => setShowAvatarPositioner(false)} className="text-white/40 hover:text-white/80 transition-colors">

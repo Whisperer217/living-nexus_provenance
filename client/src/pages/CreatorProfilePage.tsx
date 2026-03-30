@@ -442,8 +442,8 @@ export default function CreatorProfilePage() {
       </div>
       {/* ── Banner ImagePositioner modal ── */}
       {showBannerPositioner && creator.bannerUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-lg bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4 my-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-white">Reposition Banner</h3>
               <button onClick={() => setShowBannerPositioner(false)} className="text-white/40 hover:text-white/80 transition-colors">
