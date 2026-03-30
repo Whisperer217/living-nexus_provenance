@@ -1217,3 +1217,6 @@
 - [x] Explore page: Mode 1 — infinite scroll with IntersectionObserver, loads PAGE_SIZE*page records, sentinel at bottom
 - [x] Explore page: Mode 2 — Randomize button reshuffles grid with new seed on each click, scrolls to top, brief fade animation
 - [x] Mode toggle UI in Explore header (Infinite / Randomize pill toggle)
+
+## Bug — Explore Infinite Scroll Seizure
+- [x] Infinite scroll loops/seizures fixed — switched to offset-based pagination (offset += PAGE_SIZE per page), accumulate pages client-side, fetchedOffsetRef guards against double-fetching, sentinel only triggers when not already loading.

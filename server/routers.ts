@@ -254,7 +254,7 @@ export const appRouter = router({
   }),
 
   songs: router({
-    discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(100).optional(), randomize: z.boolean().optional(), seed: z.number().optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
+    discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(100).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
     getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => getSongWithCreator(input.id)),
     verifyWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
       const result = await getSongByWitnessId(input.witnessId);

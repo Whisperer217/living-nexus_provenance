@@ -210,10 +210,11 @@ export async function getSongsByUser(userId: number) {
   return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(desc(songs.createdAt));
 }
 
-export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; randomize?: boolean; seed?: number }) {
+export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 50;
+  const offset = opts?.offset ?? 0;
   const conditions: ReturnType<typeof eq>[] = [eq(songs.isPublic, true) as ReturnType<typeof eq>, eq(songs.status, "Published") as ReturnType<typeof eq>];
   if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
   if (opts?.search) {
@@ -229,7 +230,7 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
     song: songs,
     creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
-    .where(and(...conditions)).orderBy(orderExpr).limit(limit);
+    .where(and(...conditions)).orderBy(orderExpr).limit(limit).offset(offset);
 }
 
 export async function incrementPlayCount(songId: number) {

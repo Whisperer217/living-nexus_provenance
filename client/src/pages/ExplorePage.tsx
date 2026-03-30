@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — ExplorePage
-   Two modes: Infinite Scroll (chronological) + Randomize (seeded RAND)
+   Two modes: Infinite Scroll (offset pagination) + Randomize (seeded RAND)
    No algorithm. No "you might like." Just — here's what exists.
 ═══════════════════════════════════════════════════════════════════ */
 
@@ -34,32 +34,89 @@ export default function ExplorePage() {
   const [activeGenre, setActiveGenre] = useState("All");
   const [mode, setMode] = useState<ExploreMode>("infinite");
 
-  // Infinite scroll state
-  const [page, setPage] = useState(1);
+  // Infinite scroll state — accumulate pages client-side
+  const [offset, setOffset] = useState(0);
   const [allSongs, setAllSongs] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
+  // Track which offset we've already fetched to avoid double-fetching
+  const fetchedOffsetRef = useRef<number>(-1);
 
-  // Randomize state — new seed on each click
+  // Randomize state
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1_000_000));
   const [isShuffling, setIsShuffling] = useState(false);
 
-  // ── Infinite scroll query ─────────────────────────────────────────
-  const { data: infiniteData, isLoading: infiniteLoading, isFetching: infiniteFetching } = trpc.songs.discover.useQuery(
+  // ── Infinite scroll — fetch one page at a time ────────────────────
+  const { data: pageData, isLoading: pageLoading, isFetching: pageFetching } = trpc.songs.discover.useQuery(
     {
       genre: activeGenre === "All" ? undefined : activeGenre,
       search: query || undefined,
-      limit: PAGE_SIZE * page,
+      limit: PAGE_SIZE,
+      offset,
     },
     {
       enabled: mode === "infinite",
       refetchOnWindowFocus: false,
-      keepPreviousData: true,
-    } as any
+      staleTime: 60_000,
+    }
   );
 
+  // Append new page to accumulated list — only when offset changes
+  useEffect(() => {
+    if (mode !== "infinite" || !pageData || pageFetching) return;
+    if (fetchedOffsetRef.current === offset) return; // already processed this offset
+    fetchedOffsetRef.current = offset;
+
+    const newBatch = pageData as any[];
+    if (newBatch.length === 0) {
+      setHasMore(false);
+    } else {
+      setAllSongs(prev => {
+        // Deduplicate by song id
+        const existingIds = new Set(prev.map((s: any) => s.song.id));
+        const fresh = newBatch.filter((s: any) => !existingIds.has(s.song.id));
+        return [...prev, ...fresh];
+      });
+      if (newBatch.length < PAGE_SIZE) setHasMore(false);
+    }
+    setIsFetchingMore(false);
+  }, [pageData, pageFetching, mode, offset]);
+
+  // Reset on filter/mode change
+  useEffect(() => {
+    setOffset(0);
+    setAllSongs([]);
+    setHasMore(true);
+    setIsFetchingMore(false);
+    fetchedOffsetRef.current = -1;
+  }, [activeGenre, query, mode]);
+
+  // IntersectionObserver — only fires when not already loading
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const target = entries[0];
+    if (
+      target.isIntersecting &&
+      hasMore &&
+      !pageLoading &&
+      !pageFetching &&
+      !isFetchingMore &&
+      mode === "infinite"
+    ) {
+      setIsFetchingMore(true);
+      setOffset(prev => prev + PAGE_SIZE);
+    }
+  }, [hasMore, pageLoading, pageFetching, isFetchingMore, mode]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, { rootMargin: "300px" });
+    const el = loaderRef.current;
+    if (el) observer.observe(el);
+    return () => { if (el) observer.unobserve(el); };
+  }, [handleObserver]);
+
   // ── Randomize query ───────────────────────────────────────────────
-  const { data: randomData, isLoading: randomLoading, refetch: refetchRandom } = trpc.songs.discover.useQuery(
+  const { data: randomData, isLoading: randomLoading } = trpc.songs.discover.useQuery(
     {
       genre: activeGenre === "All" ? undefined : activeGenre,
       search: query || undefined,
@@ -73,46 +130,16 @@ export default function ExplorePage() {
     }
   );
 
-  // Sync infinite scroll data
-  useEffect(() => {
-    if (mode !== "infinite" || !infiniteData) return;
-    setAllSongs(infiniteData as any[]);
-    setHasMore((infiniteData as any[]).length >= PAGE_SIZE * page);
-  }, [infiniteData, mode, page]);
-
-  // Reset on filter/mode change
-  useEffect(() => {
-    setPage(1);
-    setAllSongs([]);
-    setHasMore(true);
-  }, [activeGenre, query, mode]);
-
-  // IntersectionObserver for infinite scroll
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const target = entries[0];
-    if (target.isIntersecting && hasMore && !infiniteLoading && !infiniteFetching && mode === "infinite") {
-      setPage(prev => prev + 1);
-    }
-  }, [hasMore, infiniteLoading, infiniteFetching, mode]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(handleObserver, { rootMargin: "200px" });
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [handleObserver]);
-
-  // Randomize handler
   const handleRandomize = useCallback(() => {
     setIsShuffling(true);
-    const newSeed = Math.floor(Math.random() * 1_000_000);
-    setSeed(newSeed);
+    setSeed(Math.floor(Math.random() * 1_000_000));
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setTimeout(() => setIsShuffling(false), 600);
+    setTimeout(() => setIsShuffling(false), 500);
   }, []);
 
   // Active songs list
   const songs = mode === "infinite" ? allSongs : (randomData || []);
-  const isLoading = mode === "infinite" ? (infiniteLoading && page === 1) : randomLoading;
+  const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : randomLoading;
 
   const handlePlay = (item: any) => {
     const song = item.song;
@@ -216,16 +243,14 @@ export default function ExplorePage() {
           </div>
         </div>
 
-        {/* Mode toggle + Randomize button */}
+        {/* Mode toggle + controls */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           {/* Mode pills */}
           <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.04 270 / 40%)" }}>
             <button
               onClick={() => setMode("infinite")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
-                mode === "infinite"
-                  ? "text-white"
-                  : "text-white/40 hover:text-white/70"
+                mode === "infinite" ? "" : "text-white/40 hover:text-white/70"
               }`}
               style={mode === "infinite" ? { background: "oklch(0.22 0.04 270)", color: "oklch(0.80 0.145 82)" } : {}}
             >
@@ -235,9 +260,7 @@ export default function ExplorePage() {
             <button
               onClick={() => setMode("randomize")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
-                mode === "randomize"
-                  ? "text-white"
-                  : "text-white/40 hover:text-white/70"
+                mode === "randomize" ? "" : "text-white/40 hover:text-white/70"
               }`}
               style={mode === "randomize" ? { background: "oklch(0.22 0.04 270)", color: "oklch(0.80 0.145 82)" } : {}}
             >
@@ -246,9 +269,9 @@ export default function ExplorePage() {
             </button>
           </div>
 
-          {/* Right side: count + randomize button */}
+          {/* Right side */}
           <div className="flex items-center gap-3">
-            <span className="text-[12px] font-body" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <span className="text-[12px] font-body" style={{ color: "rgba(255,255,255,0.45)" }}>
               {isLoading ? "Loading…" : `${songs.length} track${songs.length === 1 ? "" : "s"}`}
             </span>
             {mode === "randomize" && (
@@ -261,21 +284,15 @@ export default function ExplorePage() {
                   border: "1px solid oklch(0.80 0.145 82 / 0.35)",
                   color: "oklch(0.80 0.145 82)",
                 }}
-                onMouseEnter={e => (e.currentTarget.style.background = "oklch(0.80 0.145 82 / 0.22)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "oklch(0.80 0.145 82 / 0.12)")}
               >
-                <Shuffle
-                  size={14}
-                  className={isShuffling ? "animate-spin" : ""}
-                  style={{ animationDuration: "0.4s" }}
-                />
+                <Shuffle size={14} className={isShuffling ? "animate-spin" : ""} style={{ animationDuration: "0.4s" }} />
                 {isShuffling ? "Shuffling…" : "Shuffle Again"}
               </button>
             )}
           </div>
         </div>
 
-        {/* Loading skeleton */}
+        {/* Loading skeleton — first page only */}
         {isLoading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
@@ -302,7 +319,7 @@ export default function ExplorePage() {
               const isActive = currentTrackId === String(song.id);
               return (
                 <div
-                  key={`${song.id}-${seed}`}
+                  key={song.id}
                   className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
                     border bg-[oklch(0.115_0.055_278)]
                     ${isActive
@@ -314,18 +331,16 @@ export default function ExplorePage() {
                   {/* Artwork */}
                   <div className="relative overflow-hidden" style={{ height: "180px", background: "oklch(0.15 0.05 275)" }}>
                     {song.coverArtUrl ? (
-                      <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
+                      <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" loading="lazy" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Music className="w-10 h-10 opacity-20" style={{ color: "#D4AF37" }} />
                       </div>
                     )}
-                    {/* Overlay */}
                     <div className={`absolute inset-0 transition-opacity duration-200
                       bg-gradient-to-b from-transparent via-transparent to-black/70
                       ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                     />
-                    {/* Play button / Active waveform */}
                     {isActive && playerState.isPlaying ? (
                       <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center z-10 bg-[#D4AF37]">
                         <div className="flex items-end gap-[2px] h-4">
@@ -343,7 +358,6 @@ export default function ExplorePage() {
                         <Play size={14} fill="currentColor" className="text-black ml-0.5" />
                       </div>
                     )}
-                    {/* Witness badge */}
                     {song.witnessId && (
                       <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
                         bg-black/70 z-10 font-heading tracking-wider wid-glow"
@@ -383,10 +397,10 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Infinite scroll loader sentinel */}
-        {mode === "infinite" && (
+        {/* Infinite scroll sentinel — only rendered in infinite mode */}
+        {mode === "infinite" && !isLoading && (
           <div ref={loaderRef} className="py-8 flex justify-center">
-            {infiniteFetching && songs.length > 0 && (
+            {(isFetchingMore || pageFetching) && hasMore && (
               <div className="flex items-center gap-2 text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>
                 <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#D4AF37] animate-spin" />
                 Loading more…
@@ -400,7 +414,7 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Randomize mode — end note */}
+        {/* Randomize end note */}
         {mode === "randomize" && !randomLoading && songs.length > 0 && (
           <div className="py-8 text-center">
             <p className="text-[11px] font-body" style={{ color: "rgba(255,255,255,0.30)" }}>
