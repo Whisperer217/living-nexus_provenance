@@ -1000,36 +1000,20 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-            {/* Collection cover ImagePositioner modal */}
+            {/* Collection cover inline repositioner */}
             {collectionCoverState && (collectionCoverState.pendingUrl || collectionCoverState.currentUrl) && (
-              <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-                <div className="w-full max-w-md bg-[#0d1220] border border-white/10 rounded-2xl p-5 space-y-4 my-auto">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white">
-                      {collectionCoverState.pendingUrl ? "Set Collection Cover Position" : "Reposition Collection Cover"}
-                    </h3>
-                    <button
-                      onClick={() => {
-                        if (collectionCoverState.pendingUrl) URL.revokeObjectURL(collectionCoverState.pendingUrl);
-                        setCollectionCoverState(null);
-                      }}
-                      className="text-white/40 hover:text-white/80 transition-colors"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                  <ImagePositioner
-                    imageUrl={collectionCoverState.pendingUrl || collectionCoverState.currentUrl!}
-                    aspectClass="aspect-square"
-                    initialPosition={collectionCoverState.position}
-                    onSave={collectionCoverState.pendingUrl ? confirmCollectionCoverUpload : saveCollectionCoverPosition}
-                    onCancel={() => {
-                      if (collectionCoverState.pendingUrl) URL.revokeObjectURL(collectionCoverState.pendingUrl);
-                      setCollectionCoverState(null);
-                    }}
-                  />
-                </div>
-              </div>
+              <ImagePositioner
+                imageUrl={(collectionCoverState.pendingUrl || collectionCoverState.currentUrl)!}
+                initialX={collectionCoverState.position.x}
+                initialY={collectionCoverState.position.y}
+                previewHeight="12rem"
+                label={collectionCoverState.pendingUrl ? "Set Collection Cover Position" : "Reposition Collection Cover"}
+                onSave={collectionCoverState.pendingUrl ? confirmCollectionCoverUpload : saveCollectionCoverPosition}
+                onCancel={() => {
+                  if (collectionCoverState.pendingUrl) URL.revokeObjectURL(collectionCoverState.pendingUrl);
+                  setCollectionCoverState(null);
+                }}
+              />
             )}
           </div>
         )}

@@ -1,151 +1,165 @@
-import { useRef, useState, useCallback } from "react";
-import { Move } from "lucide-react";
+/**
+ * ImagePositioner — Inline slider repositioner (mobile-first)
+ *
+ * Renders INLINE — no modal, no portal, no drag.
+ * Shows a live preview strip above two range sliders (X/Y) plus quick presets.
+ * Parent controls show/hide; this component just renders in-place.
+ *
+ * Props:
+ *   imageUrl      — the image to preview
+ *   initialX      — starting horizontal position 0–100 (default 50)
+ *   initialY      — starting vertical position 0–100 (default 50)
+ *   previewHeight — CSS height string for the preview strip (default "12rem")
+ *   previewClass  — extra Tailwind classes on the preview container
+ *   roundedTop    — whether to round the top corners of the preview (default true)
+ *   onSave        — called with { x, y } when user confirms
+ *   onCancel      — called when user cancels
+ *   label         — badge text shown on the preview (default "Editing")
+ */
 
-interface Position {
-  x: number; // 0–100
-  y: number; // 0–100
-}
+import { useState } from "react";
 
 interface ImagePositionerProps {
   imageUrl: string;
-  initialPosition?: Position;
-  aspectClass?: string; // e.g. "h-48" for banner, "h-64 w-64" for square cover
-  onSave: (position: Position) => void;
+  initialX?: number;
+  initialY?: number;
+  previewHeight?: string;
+  previewClass?: string;
+  roundedTop?: boolean;
+  onSave: (pos: { x: number; y: number }) => void;
+  onCancel: () => void;
+  label?: string;
+}
+
+// Keep backward-compat with old { initialPosition: { x, y } } call sites
+interface LegacyProps {
+  imageUrl: string;
+  initialPosition?: { x: number; y: number };
+  aspectClass?: string;
+  onSave: (pos: { x: number; y: number }) => void;
   onCancel?: () => void;
   label?: string;
 }
 
-export function ImagePositioner({
-  imageUrl,
-  initialPosition = { x: 50, y: 50 },
-  aspectClass = "h-48",
-  onSave,
-  onCancel,
-  label = "Drag to reposition",
-}: ImagePositionerProps) {
-  const [position, setPosition] = useState<Position>(initialPosition);
-  const [isDragging, setIsDragging] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+const PRESETS = [
+  { label: "Top",    x: 50,  y: 0   },
+  { label: "Center", x: 50,  y: 50  },
+  { label: "Bottom", x: 50,  y: 100 },
+  { label: "Left",   x: 0,   y: 50  },
+  { label: "Right",  x: 100, y: 50  },
+];
 
-  const calcPosition = useCallback((clientX: number, clientY: number): Position => {
-    if (!containerRef.current) return position;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    return { x, y };
-  }, [position]);
+export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
+  // Normalise legacy vs new API
+  const imageUrl = props.imageUrl;
+  const initialX = "initialX" in props ? (props.initialX ?? 50) : ((props as LegacyProps).initialPosition?.x ?? 50);
+  const initialY = "initialY" in props ? (props.initialY ?? 50) : ((props as LegacyProps).initialPosition?.y ?? 50);
+  const previewHeight = "previewHeight" in props ? (props.previewHeight ?? "12rem") : "12rem";
+  const previewClass  = "previewClass"  in props ? (props.previewClass  ?? "") : "";
+  const roundedTop    = "roundedTop"    in props ? (props.roundedTop    ?? true) : true;
+  const onSave   = props.onSave;
+  const onCancel = props.onCancel ?? (() => {});
+  const label    = props.label ?? "Editing";
 
-  // Mouse handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    setPosition(calcPosition(e.clientX, e.clientY));
+  const [x, setX] = useState(initialX);
+  const [y, setY] = useState(initialY);
 
-    const onMove = (ev: MouseEvent) => {
-      setPosition(calcPosition(ev.clientX, ev.clientY));
-    };
-    const onUp = () => {
-      setIsDragging(false);
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-    };
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
-  };
-
-  // Touch handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    setIsDragging(true);
-    setPosition(calcPosition(touch.clientX, touch.clientY));
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    setPosition(calcPosition(touch.clientX, touch.clientY));
-  };
-  const handleTouchEnd = () => setIsDragging(false);
+  const topRadius = roundedTop ? "rounded-t-xl" : "";
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Preview container */}
+    <div className="w-full">
+      {/* ── Live preview strip ── */}
       <div
-        ref={containerRef}
-        className={`relative w-full ${aspectClass} overflow-hidden rounded-xl select-none ${
-          isDragging ? "cursor-grabbing" : "cursor-grab"
-        }`}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        className={`relative w-full overflow-hidden ${topRadius} ${previewClass}`}
+        style={{ height: previewHeight }}
       >
         <img
           src={imageUrl}
-          alt="Reposition preview"
+          alt="Position preview"
+          className="w-full h-full object-cover"
+          style={{ objectPosition: `${x}% ${y}%` }}
           draggable={false}
-          className="w-full h-full object-cover pointer-events-none"
-          style={{ objectPosition: `${position.x}% ${position.y}%` }}
         />
+        {/* Gold editing border */}
+        <div className={`absolute inset-0 border-2 border-[#c9a84c] pointer-events-none ${topRadius}`} />
+        {/* Editing badge */}
+        <div className="absolute top-2 left-2 bg-[#c9a84c] text-black text-xs font-bold px-2 py-1 rounded pointer-events-none select-none">
+          {label}
+        </div>
+      </div>
 
-        {/* Instruction overlay — fades out while dragging */}
-        <div
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 pointer-events-none ${
-            isDragging ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-xs text-white/90">
-            <Move size={12} />
-            {label}
+      {/* ── Controls panel ── */}
+      <div className="bg-[oklch(0.10_0.015_280)] border-x border-b border-[#c9a84c]/30 rounded-b-xl p-4 space-y-3">
+        {/* Horizontal slider */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-400 uppercase tracking-wider select-none">
+              Left ← Horizontal → Right
+            </label>
+            <span className="text-xs text-[#c9a84c] font-mono w-9 text-right">{x}%</span>
           </div>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={x}
+            onChange={(e) => setX(Number(e.target.value))}
+            className="w-full accent-[#c9a84c] cursor-pointer h-2"
+          />
         </div>
 
-        {/* Live crosshair */}
-        <div
-          className="absolute w-5 h-5 pointer-events-none transition-none"
-          style={{
-            left: `${position.x}%`,
-            top: `${position.y}%`,
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          <div className="w-full h-full rounded-full border-2 border-[#c9a84c] bg-[#c9a84c]/20 shadow-lg" />
+        {/* Vertical slider */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-400 uppercase tracking-wider select-none">
+              Top ↑ Vertical ↓ Bottom
+            </label>
+            <span className="text-xs text-[#c9a84c] font-mono w-9 text-right">{y}%</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={y}
+            onChange={(e) => setY(Number(e.target.value))}
+            className="w-full accent-[#c9a84c] cursor-pointer h-2"
+          />
         </div>
-      </div>
 
-      {/* Position readout */}
-      <div className="flex items-center justify-between text-xs text-gray-500 px-1">
-        <span>
-          Focal point: <span className="text-[#c9a84c] font-mono">{Math.round(position.x)}%</span> /{" "}
-          <span className="text-[#c9a84c] font-mono">{Math.round(position.y)}%</span>
-        </span>
-        <button
-          type="button"
-          onClick={() => setPosition({ x: 50, y: 50 })}
-          className="text-gray-500 hover:text-gray-300 transition-colors underline underline-offset-2"
-        >
-          Reset center
-        </button>
-      </div>
+        {/* Quick presets */}
+        <div className="flex gap-2 flex-wrap">
+          {PRESETS.map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => { setX(p.x); setY(p.y); }}
+              className="text-xs text-gray-400 hover:text-[#c9a84c] bg-white/5 hover:bg-[#c9a84c]/10 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => onSave(position)}
-          className="flex-1 bg-[#c9a84c] text-black font-bold py-2.5 rounded-xl text-sm hover:bg-[#d4b86a] transition-colors active:scale-95"
-        >
-          Save Position
-        </button>
-        {onCancel && (
+        {/* Save / Cancel */}
+        <div className="flex gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => onSave({ x, y })}
+            className="flex-1 bg-[#c9a84c] text-black font-bold py-2.5 rounded-xl text-sm hover:bg-[#d4b05a] transition-colors active:scale-95"
+          >
+            Save Position
+          </button>
           <button
             type="button"
             onClick={onCancel}
-            className="px-5 border border-white/10 text-gray-400 rounded-xl text-sm hover:text-white hover:border-white/20 transition-colors"
+            className="px-4 border border-white/10 text-gray-400 hover:text-white rounded-xl text-sm transition-colors"
           >
             Cancel
           </button>
-        )}
+        </div>
       </div>
     </div>
   );
 }
+
+export default ImagePositioner;

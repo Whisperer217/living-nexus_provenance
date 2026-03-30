@@ -19,7 +19,7 @@ import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
-  Library, Move, X,
+  Library, Move,
 } from "lucide-react";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
@@ -440,25 +440,18 @@ export default function CreatorProfilePage() {
           </button>
         )}
       </div>
-      {/* ── Banner ImagePositioner modal ── */}
+      {/* ── Banner inline repositioner ── */}
       {showBannerPositioner && creator.bannerUrl && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-lg bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4 my-auto">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Reposition Banner</h3>
-              <button onClick={() => setShowBannerPositioner(false)} className="text-white/40 hover:text-white/80 transition-colors">
-                <X size={16} />
-              </button>
-            </div>
-            <ImagePositioner
-              imageUrl={creator.bannerUrl}
-              aspectClass="h-40"
-              initialPosition={bannerPos}
-              onSave={saveBannerPosition}
-              onCancel={() => setShowBannerPositioner(false)}
-            />
-          </div>
-        </div>
+        <ImagePositioner
+          imageUrl={creator.bannerUrl}
+          initialX={bannerPos.x}
+          initialY={bannerPos.y}
+          previewHeight="10rem"
+          roundedTop={false}
+          label="Reposition Banner"
+          onSave={saveBannerPosition}
+          onCancel={() => setShowBannerPositioner(false)}
+        />
       )}
       {/* ── Profile header ── */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6">

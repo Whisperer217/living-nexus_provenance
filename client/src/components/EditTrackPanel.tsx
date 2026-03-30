@@ -383,36 +383,20 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               </div>
             </div>
           </div>
-          {/* Cover Art ImagePositioner modal */}
+          {/* Cover Art inline repositioner */}
           {showCoverPositioner && (pendingCoverUrl || coverArtUrl) && (
-            <div className="fixed inset-0 z-[200] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-              <div className="w-full max-w-md bg-[#0d1220] border border-white/10 rounded-2xl p-5 space-y-4 my-auto">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-white">
-                    {pendingCoverUrl ? "Set Cover Position" : "Reposition Cover Art"}
-                  </h3>
-                  <button
-                    onClick={() => {
-                      setShowCoverPositioner(false);
-                      if (pendingCoverUrl) { URL.revokeObjectURL(pendingCoverUrl); setPendingCoverUrl(null); }
-                    }}
-                    className="text-white/40 hover:text-white/80 transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                <ImagePositioner
-                  imageUrl={pendingCoverUrl || coverArtUrl}
-                  aspectClass="aspect-square"
-                  initialPosition={coverPos}
-                  onSave={pendingCoverUrl ? confirmCoverUpload : saveCoverPosition}
-                  onCancel={() => {
-                    setShowCoverPositioner(false);
-                    if (pendingCoverUrl) { URL.revokeObjectURL(pendingCoverUrl); setPendingCoverUrl(null); }
-                  }}
-                />
-              </div>
-            </div>
+            <ImagePositioner
+              imageUrl={(pendingCoverUrl || coverArtUrl)!}
+              initialX={coverPos.x}
+              initialY={coverPos.y}
+              previewHeight="12rem"
+              label={pendingCoverUrl ? "Set Cover Position" : "Reposition Cover Art"}
+              onSave={pendingCoverUrl ? confirmCoverUpload : saveCoverPosition}
+              onCancel={() => {
+                setShowCoverPositioner(false);
+                if (pendingCoverUrl) { URL.revokeObjectURL(pendingCoverUrl); setPendingCoverUrl(null); }
+              }}
+            />
           )}
 
           {/* Caption */}

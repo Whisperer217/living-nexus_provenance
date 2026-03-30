@@ -1264,3 +1264,12 @@
 - [ ] Fix: ensure fixed overlay uses `position: fixed; top: 0; left: 0; width: 100%; height: 100%` with `overflow-y: auto` and modal card centered with `margin: auto`
 - [ ] Fix all inline modal wrappers in ProfilePage (banner + avatar positioners) with same pattern
 - [ ] Verify on narrow viewport (375px) that modal is always visible without scrolling
+
+## Refactor — Inline Slider Repositioner (Replace Drag Modal) [COMPLETE]
+- [x] Rewrite ImagePositioner as inline slider component (X/Y range inputs, live preview, presets, Save/Cancel) — no modal, no drag
+- [x] ProfilePage banner: replace modal with inline BannerRepositioner rendering below the banner
+- [x] CreatorProfilePage banner: same inline pattern for owner view
+- [x] ProfilePage avatar: replace modal with inline slider below the avatar circle
+- [x] EditTrackPanel cover art: inline slider below the cover art thumbnail
+- [x] DashboardPage collection cover: inline slider below the collection cover thumbnail
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

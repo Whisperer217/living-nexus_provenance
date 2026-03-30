@@ -307,36 +307,21 @@ export default function ProfilePage() {
         )}
         <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={handleBanner} />
       </div>
-      {/* ── Banner ImagePositioner modal ── */}
+      {/* ── Banner inline repositioner ── */}
       {showBannerPositioner && (pendingBannerUrl || profile?.bannerUrl) && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-lg bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4 my-auto">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">
-                {pendingBannerUrl ? "Set Banner Position" : "Reposition Banner"}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowBannerPositioner(false);
-                  if (pendingBannerUrl) { URL.revokeObjectURL(pendingBannerUrl); setPendingBannerUrl(null); }
-                }}
-                className="text-white/40 hover:text-white/80 transition-colors"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <ImagePositioner
-              imageUrl={pendingBannerUrl || profile!.bannerUrl!}
-              aspectClass="h-40"
-              initialPosition={bannerPos}
-              onSave={pendingBannerUrl ? confirmBannerUpload : saveBannerPosition}
-              onCancel={() => {
-                setShowBannerPositioner(false);
-                if (pendingBannerUrl) { URL.revokeObjectURL(pendingBannerUrl); setPendingBannerUrl(null); }
-              }}
-            />
-          </div>
-        </div>
+        <ImagePositioner
+          imageUrl={pendingBannerUrl || profile!.bannerUrl!}
+          initialX={bannerPos.x}
+          initialY={bannerPos.y}
+          previewHeight="10rem"
+          roundedTop={false}
+          label={pendingBannerUrl ? "Set Banner Position" : "Reposition Banner"}
+          onSave={pendingBannerUrl ? confirmBannerUpload : saveBannerPosition}
+          onCancel={() => {
+            setShowBannerPositioner(false);
+            if (pendingBannerUrl) { URL.revokeObjectURL(pendingBannerUrl); setPendingBannerUrl(null); }
+          }}
+        />
       )}
 
       <div className="px-6">
@@ -383,28 +368,23 @@ export default function ProfilePage() {
               <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
             </div>
 
-            {/* Avatar ImagePositioner modal */}
+            {/* Avatar inline repositioner */}
             {showAvatarPositioner && profile?.profilePhotoUrl && (
-              <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-                <div className="w-full max-w-sm bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4 my-auto">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white">Adjust Avatar Position</h3>
-                    <button onClick={() => setShowAvatarPositioner(false)} className="text-white/40 hover:text-white/80 transition-colors">
-                      <X size={16} />
-                    </button>
-                  </div>
-                  <ImagePositioner
-                    imageUrl={profile.profilePhotoUrl}
-                    aspectClass="h-48"
-                    initialPosition={avatarPos}
-                    onSave={(pos) => {
-                      setAvatarPos(pos);
-                      setShowAvatarPositioner(false);
-                      saveAvatarPosition(pos);
-                    }}
-                    onCancel={() => setShowAvatarPositioner(false)}
-                  />
-                </div>
+              <div className="mt-2 w-64">
+                <ImagePositioner
+                  imageUrl={profile.profilePhotoUrl}
+                  initialX={avatarPos.x}
+                  initialY={avatarPos.y}
+                  previewHeight="8rem"
+                  previewClass="rounded-t-xl"
+                  label="Adjust Avatar"
+                  onSave={(pos) => {
+                    setAvatarPos(pos);
+                    setShowAvatarPositioner(false);
+                    saveAvatarPosition(pos);
+                  }}
+                  onCancel={() => setShowAvatarPositioner(false)}
+                />
               </div>
             )}
           </div>
