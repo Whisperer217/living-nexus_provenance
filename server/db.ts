@@ -9,6 +9,7 @@ import {
   promoCodes, promoRedemptions,
   nameHistory,
   collections,
+  platformSupporters,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1988,4 +1989,81 @@ export async function getCreatorAnalytics(creatorId: number) {
     downloadsByTrack,
     playTrend,
   };
+}
+
+// ─── Platform Supporters (Founder's Era) ─────────────────────────────────────
+
+/** Compute tier from total gifted amount */
+function computeTier(totalGifted: number): "supporter" | "patron" | "covenant" {
+  if (totalGifted >= 100) return "covenant";
+  if (totalGifted >= 25) return "patron";
+  return "supporter";
+}
+
+/** Get a single supporter record by userId */
+export async function getSupporterByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(platformSupporters).where(eq(platformSupporters.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/** Get all supporters ordered by totalGifted desc (for Supporters Wall) */
+export async function getAllSupporters() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: platformSupporters.id,
+      userId: platformSupporters.userId,
+      totalGifted: platformSupporters.totalGifted,
+      tier: platformSupporters.tier,
+      firstGiftAt: platformSupporters.firstGiftAt,
+      lastGiftAt: platformSupporters.lastGiftAt,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      avatarUrl: users.profilePhotoUrl,
+    })
+    .from(platformSupporters)
+    .leftJoin(users, eq(platformSupporters.userId, users.id))
+    .orderBy(desc(platformSupporters.totalGifted));
+}
+
+/**
+ * Upsert a supporter record after a successful platform gift payment.
+ * Adds the amount to totalGifted, recomputes tier, updates stripePaymentIntentId.
+ * Also denormalizes supporterTier onto the users table for fast badge rendering.
+ */
+export async function recordPlatformGift(userId: number, amountUsd: number, stripePaymentIntentId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  const existing = await getSupporterByUserId(userId);
+  const newTotal = (existing?.totalGifted ?? 0) + amountUsd;
+  const newTier = computeTier(newTotal);
+
+  if (existing) {
+    await db.update(platformSupporters)
+      .set({
+        totalGifted: newTotal,
+        tier: newTier,
+        lastGiftAt: new Date(),
+        stripePaymentIntentId,
+      })
+      .where(eq(platformSupporters.userId, userId));
+  } else {
+    await db.insert(platformSupporters).values({
+      userId,
+      totalGifted: newTotal,
+      tier: newTier,
+      firstGiftAt: new Date(),
+      lastGiftAt: new Date(),
+      stripePaymentIntentId,
+    });
+  }
+
+  // Denormalize tier onto users table for fast badge rendering
+  await db.update(users).set({ supporterTier: newTier }).where(eq(users.id, userId));
+
+  return { totalGifted: newTotal, tier: newTier };
 }

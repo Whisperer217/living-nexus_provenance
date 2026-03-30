@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { ImagePositioner } from "@/components/ImagePositioner";
+import SupporterBadge from "@/components/SupporterBadge";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
@@ -419,6 +420,9 @@ export default function ProfilePage() {
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-heading tracking-wider flex-shrink-0">
                 ARTIST
               </span>
+              {(profile as any)?.supporterTier && (
+                <SupporterBadge tier={(profile as any).supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
+              )}
             </div>
             <div className="flex items-center gap-3">
               {profile?.location && (

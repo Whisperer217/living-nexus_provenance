@@ -2,9 +2,12 @@
  * WelcomeModal — shown once to new users on their first login.
  * Dismissed by clicking "Get Started", which calls onboarding.markWelcomeSeen
  * so it never shows again.
+ *
+ * If the user is a Founder's Era supporter, shows a special recognition modal.
  */
 
 import { useEffect, useState } from "react";
+import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
@@ -18,11 +21,26 @@ import { ExternalLink, Music2, Shield, Users } from "lucide-react";
 
 const DISCORD_URL = "https://discord.com/channels/1459384199025918073/1459384202792276084";
 
+const TIER_LABEL: Record<string, string> = {
+  covenant: "Covenant Partner",
+  patron: "Patron",
+  supporter: "Supporter",
+};
+
+const TIER_ICON: Record<string, string> = {
+  covenant: "🔐",
+  patron: "⟡",
+  supporter: "✦",
+};
+
 export default function WelcomeModal() {
   const { user, isAuthenticated, loading } = useAuth();
   const [open, setOpen] = useState(false);
 
   const markSeen = trpc.onboarding.markWelcomeSeen.useMutation();
+  const { data: supporterStatus } = trpc.supporters.getMyStatus.useQuery(undefined, {
+    enabled: !!user && !(user as any).hasSeenWelcome,
+  });
 
   // Open the modal once we know the user hasn't seen it yet
   useEffect(() => {
@@ -38,6 +56,70 @@ export default function WelcomeModal() {
 
   if (!open) return null;
 
+  const isFounder = !!supporterStatus;
+  const tier = supporterStatus?.tier ?? "supporter";
+
+  // ── Founder recognition modal ─────────────────────────────────────────────
+  if (isFounder) {
+    return (
+      <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
+        <DialogContent
+          className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
+          style={{ background: "oklch(0.10 0.015 280)", borderColor: "oklch(0.84 0.155 85 / 0.4)" }}
+        >
+          <DialogDescription className="sr-only">
+            Welcome back, Founder's Era supporter.
+          </DialogDescription>
+
+          {/* Gold header band */}
+          <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid oklch(0.84 0.155 85 / 0.2)" }}>
+            <div className="text-4xl mb-3">{TIER_ICON[tier]}</div>
+            <DialogTitle className="text-xl font-bold mb-1"
+              style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+              Welcome back, {TIER_LABEL[tier]}.
+            </DialogTitle>
+            <p className="text-sm" style={{ color: "oklch(0.84 0.155 85)" }}>
+              You kept the light on.
+            </p>
+          </div>
+
+          {/* Body */}
+          <div className="px-6 py-5 text-center">
+            <p className="text-sm leading-relaxed" style={{ color: "#94A3B8" }}>
+              Your name is written in the story of Living Nexus. The sanctuary stands because you were here in the founding generation.
+            </p>
+            {supporterStatus && (
+              <p className="text-xs mt-3" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>
+                Total gifted: ${supporterStatus.totalGifted.toFixed(2)}
+              </p>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 pb-6 pt-2 flex flex-col sm:flex-row gap-3">
+            <Button
+              className="flex-1 font-semibold"
+              onClick={handleDismiss}
+              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+            >
+              Enter the Sanctuary
+            </Button>
+            <Link href="/founders" className="flex-1" onClick={handleDismiss}>
+              <Button
+                variant="outline"
+                className="w-full"
+                style={{ borderColor: "oklch(0.84 0.155 85 / 0.4)", color: "oklch(0.84 0.155 85)" }}
+              >
+                View Supporters Wall
+              </Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // ── Standard new-user welcome modal ──────────────────────────────────────
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
       <DialogContent
@@ -91,6 +173,17 @@ export default function WelcomeModal() {
               </div>
             </div>
           ))}
+
+          {/* Founder's Era CTA for new users */}
+          <div className="rounded-xl border px-4 py-3 mt-2" style={{ background: "oklch(0.115 0.055 278)", borderColor: "oklch(0.84 0.155 85 / 0.25)" }}>
+            <p className="text-xs font-bold mb-0.5" style={{ color: "oklch(0.84 0.155 85)" }}>✦ Founder's Era — Genesis Day, March 2026</p>
+            <p className="text-xs" style={{ color: "#94A3B8" }}>
+              Support the platform during its founding 90 days. Your name lives here forever.{" "}
+              <Link href="/founders" onClick={handleDismiss} className="underline" style={{ color: "oklch(0.84 0.155 85)" }}>
+                Learn more →
+              </Link>
+            </p>
+          </div>
         </div>
 
         {/* Footer */}

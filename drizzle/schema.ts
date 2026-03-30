@@ -41,6 +41,9 @@ export const users = mysqlTable("users", {
   stripeAccountId: varchar("stripeAccountId", { length: 64 }),
   stripeAccountStatus: mysqlEnum("stripeAccountStatus", ["pending", "restricted", "enabled", "disabled"]).default("pending"),
 
+  // Founder's Era supporter tier (denormalized from platformSupporters for fast badge rendering)
+  supporterTier: mysqlEnum("supporterTier", ["supporter", "patron", "covenant"]),
+
   // Onboarding
   hasSeenWelcome: boolean("hasSeenWelcome").default(false).notNull(),
 
@@ -506,3 +509,19 @@ export const collections = mysqlTable("collections", {
 });
 export type Collection = typeof collections.$inferSelect;
 export type InsertCollection = typeof collections.$inferInsert;
+
+// ─── Platform Supporters (Founder's Era) ─────────────────────────────────────
+// Records every platform-level gift made to Living Nexus itself (not to a creator).
+// Tier is computed from totalGifted: supporter=$1+, patron=$25+, covenant=$100+.
+// The Supporters Wall on /founders reads from this table.
+export const platformSupporters = mysqlTable("platformSupporters", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),               // one record per supporter (upserted on each gift)
+  totalGifted: float("totalGifted").notNull().default(0), // cumulative USD gifted to platform
+  tier: mysqlEnum("tier", ["supporter", "patron", "covenant"]).notNull().default("supporter"),
+  firstGiftAt: timestamp("firstGiftAt").defaultNow().notNull(),
+  lastGiftAt: timestamp("lastGiftAt").defaultNow().onUpdateNow().notNull(),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 64 }), // most recent payment intent
+});
+export type PlatformSupporter = typeof platformSupporters.$inferSelect;
+export type InsertPlatformSupporter = typeof platformSupporters.$inferInsert;

@@ -44,6 +44,7 @@ import {
   createCollection, updateCollectionPdf, linkSongsToCollection,
   getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
   getCollectionsByCreator, updateCollectionCover,
+  getAllSupporters, getSupporterByUserId, recordPlatformGift,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -130,6 +131,12 @@ export async function handleStripeWebhook(req: any, res: any) {
             amountCents,
             stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
           });
+        }
+        // Platform gift (Founder's Era): record supporter status
+        if (meta.type === "platform_gift" && meta.userId) {
+          const amountUsd = (session.amount_total ?? 0) / 100;
+          const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
+          await recordPlatformGift(parseInt(meta.userId), amountUsd, paymentIntentId);
         }
         // Jukebox tip: auto-queue song when payment completes (webhook path)
         if (meta.type === "jukebox_tip" && meta.roomCode && meta.songId && meta.tipperId) {
@@ -1799,6 +1806,54 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         const result = await redeemPromoCode(ctx.user.id, input.code);
         if (!result.success) throw new TRPCError({ code: "BAD_REQUEST", message: result.message });
         return result;
+      }),
+  }),
+
+  // ── Founder's Era Supporters ─────────────────────────────────────────────────
+  supporters: router({
+    /** Public Supporters Wall — all supporters ordered by totalGifted desc */
+    getAll: publicProcedure.query(async () => getAllSupporters()),
+
+    /** Get the current user's supporter status (null if not a supporter) */
+    getMyStatus: protectedProcedure.query(async ({ ctx }) => getSupporterByUserId(ctx.user.id)),
+
+    /** Create a Stripe Checkout Session for a platform gift */
+    createPlatformGiftCheckout: protectedProcedure
+      .input(z.object({
+        amountUsd: z.number().min(1).max(10000),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await getUserById(ctx.user.id);
+        if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        const amountCents = Math.round(input.amountUsd * 100);
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card"],
+          customer_email: user.email ?? undefined,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              unit_amount: amountCents,
+              product_data: {
+                name: "Living Nexus — Founder's Era Gift",
+                description: "Keep the light on. Your name lives here forever.",
+              },
+            },
+            quantity: 1,
+          }],
+          metadata: {
+            type: "platform_gift",
+            userId: ctx.user.id.toString(),
+            userName: user.name || "",
+            amountUsd: input.amountUsd.toString(),
+          },
+          client_reference_id: ctx.user.id.toString(),
+          success_url: `${input.origin}/founders?gift=success`,
+          cancel_url: `${input.origin}/founders`,
+          allow_promotion_codes: true,
+        });
+        return { url: session.url };
       }),
   }),
 });

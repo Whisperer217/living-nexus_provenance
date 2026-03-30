@@ -106,8 +106,25 @@ export default function DiscoverPage() {
           </div>
         </div>
       </div>
-
-      {/* ── Creator / Fan Value Split ──────────────────────────────────── */}
+      {/* ── Founder's Era Banner ─────────────────────────────────────────────── */}
+      <div className="container pt-8 pb-2">
+        <Link href="/founders">
+          <div
+            className="flex items-center justify-between rounded-xl border px-5 py-4 cursor-pointer hover:opacity-90 transition-opacity"
+            style={{ background: "oklch(0.115 0.055 278)", borderColor: "oklch(0.84 0.155 85 / 0.35)" }}
+          >
+            <div className="flex items-center gap-3">
+              <span style={{ color: "oklch(0.84 0.155 85)" }} className="text-lg">✦</span>
+              <div>
+                <p className="font-bold text-sm" style={{ color: "oklch(0.84 0.155 85)" }}>Founder's Era — Genesis Day, March 2026</p>
+                <p className="text-xs mt-0.5" style={{ color: "oklch(0.6 0.03 280)" }}>Keep the light on. Your name lives here forever.</p>
+              </div>
+            </div>
+            <span className="text-xs font-mono tracking-wider hidden sm:block" style={{ color: "oklch(0.84 0.155 85)" }}>SUPPORT →</span>
+          </div>
+        </Link>
+      </div>
+      {/* ── Creator / Fan Value Split ───────────────────────────────────────────────── */}
       <div className="container py-10">
         <div className="grid sm:grid-cols-2 gap-5 max-w-3xl">
           {/* For Creators */}

@@ -22,6 +22,7 @@ import {
   Library, Move, X,
 } from "lucide-react";
 import { ImagePositioner } from "@/components/ImagePositioner";
+import SupporterBadge from "@/components/SupporterBadge";
 import { usePlayer } from "@/contexts/PlayerContext";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
@@ -481,9 +482,14 @@ export default function CreatorProfilePage() {
 
           {/* Name + meta */}
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
-              {creator.artistHandle || creator.name}
-            </h1>
+            <div className="flex flex-wrap items-center gap-2 mb-0.5">
+              <h1 className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+                {creator.artistHandle || creator.name}
+              </h1>
+              {creator.supporterTier && (
+                <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
+              )}
+            </div>
             {creator.bio && (
               <p className="text-sm mt-1 line-clamp-2 max-w-xl" style={{ color: "oklch(0.6 0.04 280)" }}>{creator.bio}</p>
             )}

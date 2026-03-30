@@ -1183,7 +1183,7 @@
 - [ ] WID embedded in every filename: {trackNumber}_{title}_[{witnessId}].mp3
 - [ ] Certificate PDFs included in certificates/ subfolder when available
 - [ ] README.txt with title, WID, creator per track
-- [ ] TypeScript: 0 errors | Vitest: 51/51 passing
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing
 
 ## Feature — Batched Archive Download [COMPLETE]
 - [x] /api/download/batch/:batchIndex route in downloadRoute.ts — streams ZIP with ID3-tagged audio + WID certificate PDFs + README.txt
@@ -1244,3 +1244,17 @@
 - [x] Creator Analytics Dashboard — new Analytics tab: plays/likes/gifts/downloads summary cards + track performance table + 30-day plays trend chart (recharts BarChart)
 - [x] Three-zone track card interaction doctrine — cover art → loads player, title → /song/:id, artist → /creator/:id; creatorId + coverPositionX/Y propagated to all 7 track-building sites
 - [x] Session persistence — queue + currentIdx + queueContext saved to sessionStorage on every change, restored on reload (never auto-plays)
+
+## Feature — Founder's Era Supporter Recognition System [COMPLETE]
+- [x] DB: add platformSupporters table (userId, tier, totalGifted, firstGiftAt, stripePaymentIntentId)
+- [x] DB: add supporterTier enum (supporter=$1+, patron=$25+, covenant=$100+) to users table
+- [x] DB helper: getSupporter, upsertSupporter, getAllSupporters
+- [x] tRPC: supporters.getAll (public), supporters.getMyStatus (protected), supporters.createPlatformGiftCheckout (protected)
+- [x] Stripe: platform gift checkout session (no transfer_data — goes to platform), webhook writes to platformSupporters
+- [x] /founders page: header + countdown, tier info cards, gift amount buttons ($1/$5/$10/$25/$100), Supporters Wall
+- [x] SupporterBadge component (✓ Supporter / ⧡ Patron / 🔐 Covenant Partner)
+- [x] Founders Era banner on homepage (clickable → /founders, shows days remaining)
+- [x] Login welcome modal: Version A (existing founder — "Welcome back, Founder."), Version B (new user — "Keep The Light On" CTA)
+- [x] Wire SupporterBadge to CreatorProfilePage and ProfilePage
+- [x] Add /founders route to App.tsx
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing
