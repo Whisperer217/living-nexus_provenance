@@ -1164,3 +1164,13 @@
 - [x] Jukebox queue count badge: jukeboxQueueCount added to PlayerContext; TogetherPage syncs pending queue length every 5s; MainLayout renders gold solid badge replacing LIVE badge when count > 0; clears on room leave
 - [x] Creator/Fan value cards on Manifesto page — "The Covenant in Practice" section with gold-bordered Creator card and dark Fan card, above CTA row
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Feature — Track Download Button (Option A)
+- [x] Audited: /api/download/:songId already fully built in server/downloadRoute.ts with ID3 tags (LNWID, LN_VERIFY_URL, cover art, AI consent, Colossians 1:17 attribution)
+- [x] Download button added to PlayerBar compact bar (permission-aware: shows only when downloadPermission is 'free' or 'tipped'; routes through /api/download/:songId)
+- [x] Song detail page already had download button wired via triggerTaggedDownload helper
+- [x] Creator profile page already had download button wired via triggerTaggedDownload helper
+- [x] WID embedded in filename via server/downloadRoute.ts: {title} — {artist} [{witnessId}].mp3
+- [x] ID3 metadata: title, artist, comment (Living Nexus WID: ...), LNWID + LN_VERIFY_URL user-defined text fields
+- [x] Option B documented: in-app download library inside APK, My Downloads screen, offline playback
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

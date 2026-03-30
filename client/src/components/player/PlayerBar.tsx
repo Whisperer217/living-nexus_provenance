@@ -11,7 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, Maximize2,
-  ChevronDown, ChevronUp, MessageCircle, LogOut, Share2,
+  ChevronDown, ChevronUp, MessageCircle, LogOut, Share2, Download,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { useLocation } from "wouter";
@@ -697,6 +697,32 @@ export default function PlayerBar() {
                 <Share2 size={14} />
               </button>
             )}
+
+            {/* Download — permission-aware */}
+            {currentTrack && currentSongId && (() => {
+              const dlPerm = (songDetail?.song as any)?.downloadPermission as string | undefined;
+              if (!dlPerm || dlPerm === "none") return null;
+              const triggerDownload = () => {
+                const a = document.createElement("a");
+                a.href = `/api/download/${currentSongId}`;
+                a.style.display = "none";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              };
+              return (
+                <button
+                  onClick={triggerDownload}
+                  className="p-1.5 transition-colors"
+                  style={{ color: "oklch(0.68 0.02 280)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
+                  title={dlPerm === "tipped" ? "Download (tip required)" : "Download track — WID travels with the file 🔐"}
+                >
+                  <Download size={14} />
+                </button>
+              );
+            })()}
 
             {/* Add to Playlist */}
             {currentSongId && (
