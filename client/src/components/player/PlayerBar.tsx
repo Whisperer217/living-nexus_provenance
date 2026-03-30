@@ -131,43 +131,24 @@ export default function PlayerBar() {
     seek(((e.clientX - rect.left) / rect.width) * audioRef.current.duration);
   }, [audioRef, seek]);
 
-  // Volume drag — works for click AND drag on both collapsed and expanded bars
-  const volumeBarRef = useRef<HTMLDivElement>(null);
-  const volumeBarRefExpanded = useRef<HTMLDivElement>(null);
+  // Vertical volume popup
+  const [showVolume, setShowVolume] = useState(false);
+  const volumePopupRef = useRef<HTMLDivElement>(null);
 
-  const calcVolume = useCallback((clientX: number, barEl: HTMLDivElement) => {
-    const rect = barEl.getBoundingClientRect();
-    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-  }, []);
-
-  const makeVolumeDragHandlers = useCallback((barRef: React.RefObject<HTMLDivElement | null>) => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (barRef.current) setVolume(calcVolume(e.clientX, barRef.current));
+  useEffect(() => {
+    if (!showVolume) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (volumePopupRef.current && !volumePopupRef.current.contains(e.target as Node)) {
+        setShowVolume(false);
+      }
     };
-    const onMouseUp = (e: MouseEvent) => {
-      if (barRef.current) setVolume(calcVolume(e.clientX, barRef.current));
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
+    // Delay so the button click that opened it doesn't immediately close it
+    const timer = setTimeout(() => document.addEventListener("click", handleClickOutside), 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("click", handleClickOutside);
     };
-    const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      if (barRef.current) setVolume(calcVolume(e.clientX, barRef.current));
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
-    };
-    const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-      if (barRef.current) setVolume(calcVolume(e.touches[0].clientX, barRef.current));
-    };
-    return { onMouseDown, onTouchMove };
-  }, [calcVolume, setVolume]);
-
-  const collapsedVolumeDrag = makeVolumeDragHandlers(volumeBarRef);
-  const expandedVolumeDrag = makeVolumeDragHandlers(volumeBarRefExpanded);
-
-  const handleVolume = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setVolume(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)));
-  }, [setVolume]);
+  }, [showVolume]);
 
   // Navigate to song/creator pages
   const goToSong = useCallback(() => {
@@ -414,41 +395,56 @@ export default function PlayerBar() {
                   <Repeat size={14} />
                 </button>
               </div>
-              {/* Volume */}
+              {/* Volume + Theater */}
               <div className="flex items-center gap-2">
-                <button
-                  onClick={toggleMute}
-                  className="p-1 transition-colors"
-                  style={{ color: "oklch(0.68 0.02 280)" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.96 0.008 270)")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
-                >
-                  {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                </button>
-                <div
-                  ref={volumeBarRef}
-                  className="w-20 h-3 flex items-center cursor-pointer relative group select-none"
-                  onMouseDown={collapsedVolumeDrag.onMouseDown}
-                  onTouchMove={collapsedVolumeDrag.onTouchMove}
-                >
-                  {/* Track */}
-                  <div className="absolute inset-y-0 flex items-center w-full">
-                    <div className="w-full h-1.5 rounded-full" style={{ background: "oklch(0.28 0.04 270 / 80%)" }}>
-                      <div
-                        className="h-full rounded-full"
-                        style={{ width: state.isMuted ? "0%" : `${state.volume * 100}%`, background: "oklch(0.68 0.02 280)" }}
+                {/* Vertical volume popup */}
+                <div ref={volumePopupRef} className="relative">
+                  <button
+                    onClick={() => setShowVolume(v => !v)}
+                    className="p-1 transition-colors"
+                    style={{ color: state.isMuted ? "oklch(0.50 0.02 280)" : "oklch(0.68 0.02 280)" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.96 0.008 270)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "oklch(0.50 0.02 280)" : "oklch(0.68 0.02 280)")}
+                    title="Volume"
+                  >
+                    {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                  </button>
+                  {showVolume && (
+                    <div
+                      className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-xl p-3 shadow-xl z-50 flex flex-col items-center gap-2"
+                      style={{ background: "oklch(0.14 0.04 270)", border: "1px solid oklch(0.30 0.04 270 / 60%)" }}
+                    >
+                      <span className="text-xs font-mono" style={{ color: "oklch(0.80 0.145 82)" }}>
+                        {state.isMuted ? "0" : Math.round(state.volume * 100)}%
+                      </span>
+                      <input
+                        type="range"
+                        min="0" max="1" step="0.01"
+                        value={state.isMuted ? 0 : state.volume}
+                        onChange={e => { setVolume(parseFloat(e.target.value)); }}
+                        className="appearance-none cursor-pointer rounded-full"
+                        style={{
+                          writingMode: "vertical-lr" as React.CSSProperties["writingMode"],
+                          direction: "rtl" as React.CSSProperties["direction"],
+                          width: "6px",
+                          height: "96px",
+                          background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
+                            state.isMuted ? 0 : state.volume * 100
+                          }%, oklch(0.28 0.04 270 / 80%) ${
+                            state.isMuted ? 0 : state.volume * 100
+                          }%)`,
+                        }}
                       />
+                      <button
+                        onClick={toggleMute}
+                        className="p-1 transition-colors"
+                        style={{ color: state.isMuted ? "oklch(0.80 0.145 82)" : "oklch(0.50 0.02 280)" }}
+                        title={state.isMuted ? "Unmute" : "Mute"}
+                      >
+                        <VolumeX size={12} />
+                      </button>
                     </div>
-                  </div>
-                  {/* Thumb */}
-                  <div
-                    className="absolute w-3 h-3 rounded-full -translate-x-1/2 pointer-events-none"
-                    style={{
-                      left: state.isMuted ? "0%" : `${state.volume * 100}%`,
-                      background: "oklch(0.96 0.008 270)",
-                      boxShadow: "0 0 4px oklch(0.68 0.02 280 / 60%)",
-                    }}
-                  />
+                  )}
                 </div>
                 <button
                   onClick={openTheater}
@@ -820,43 +816,54 @@ export default function PlayerBar() {
               </button>
             )}
 
-            {/* Volume */}
-            <button
-              onClick={toggleMute}
-              className="p-1 transition-colors"
-              style={{ color: "oklch(0.68 0.02 280)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.96 0.008 270)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
-            >
-              {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            </button>
-            <div
-              ref={volumeBarRefExpanded}
-              className="w-20 h-4 flex items-center cursor-pointer relative group select-none"
-              onMouseDown={expandedVolumeDrag.onMouseDown}
-              onTouchMove={expandedVolumeDrag.onTouchMove}
-            >
-              {/* Track */}
-              <div className="absolute inset-y-0 flex items-center w-full">
-                <div className="w-full h-1.5 rounded-full" style={{ background: "oklch(0.28 0.04 270 / 80%)" }}>
-                  <div
-                    className="h-full rounded-full"
+            {/* Volume — vertical popup (shared state with collapsed bar) */}
+            <div className="relative">
+              <button
+                onClick={() => setShowVolume(v => !v)}
+                className="p-1 transition-colors"
+                style={{ color: state.isMuted ? "oklch(0.50 0.02 280)" : "oklch(0.68 0.02 280)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.96 0.008 270)")}
+                onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "oklch(0.50 0.02 280)" : "oklch(0.68 0.02 280)")}
+                title="Volume"
+              >
+                {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              </button>
+              {showVolume && (
+                <div
+                  className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-xl p-3 shadow-xl z-50 flex flex-col items-center gap-2"
+                  style={{ background: "oklch(0.14 0.04 270)", border: "1px solid oklch(0.30 0.04 270 / 60%)" }}
+                >
+                  <span className="text-xs font-mono" style={{ color: "oklch(0.80 0.145 82)" }}>
+                    {state.isMuted ? "0" : Math.round(state.volume * 100)}%
+                  </span>
+                  <input
+                    type="range"
+                    min="0" max="1" step="0.01"
+                    value={state.isMuted ? 0 : state.volume}
+                    onChange={e => { setVolume(parseFloat(e.target.value)); }}
+                    className="appearance-none cursor-pointer rounded-full"
                     style={{
-                      width: state.isMuted ? "0%" : `${state.volume * 100}%`,
-                      background: "oklch(0.68 0.02 280)",
+                      writingMode: "vertical-lr" as React.CSSProperties["writingMode"],
+                      direction: "rtl" as React.CSSProperties["direction"],
+                      width: "6px",
+                      height: "96px",
+                      background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
+                        state.isMuted ? 0 : state.volume * 100
+                      }%, oklch(0.28 0.04 270 / 80%) ${
+                        state.isMuted ? 0 : state.volume * 100
+                      }%)`,
                     }}
                   />
+                  <button
+                    onClick={toggleMute}
+                    className="p-1 transition-colors"
+                    style={{ color: state.isMuted ? "oklch(0.80 0.145 82)" : "oklch(0.50 0.02 280)" }}
+                    title={state.isMuted ? "Unmute" : "Mute"}
+                  >
+                    <VolumeX size={12} />
+                  </button>
                 </div>
-              </div>
-              {/* Thumb — always visible */}
-              <div
-                className="absolute w-3 h-3 rounded-full -translate-x-1/2 pointer-events-none"
-                style={{
-                  left: state.isMuted ? "0%" : `${state.volume * 100}%`,
-                  background: "oklch(0.96 0.008 270)",
-                  boxShadow: "0 0 4px oklch(0.68 0.02 280 / 60%)",
-                }}
-              />
+              )}
             </div>
 
             {/* Expand to Theater Player */}

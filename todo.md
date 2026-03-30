@@ -1207,3 +1207,7 @@
 - [x] DownloadPage.tsx created — standalone page (no MainLayout/PlayerBar), dark theme, gold icon glow, download button, install steps, iOS PWA note, doctrine tagline
 - [x] /download route registered in App.tsx as public standalone (same pattern as /verify)
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Feature — Vertical Volume Popup
+- [x] Replace horizontal volume slider with vertical popup (tap volume icon → popup with vertical range input, % label, mute icon, click-outside to close)
+- [x] Apply to both collapsed and expanded player bars
