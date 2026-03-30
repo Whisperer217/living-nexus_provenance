@@ -228,6 +228,7 @@ function IdentityHeader({
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { state } = usePlayer();
+  const jukeboxQueueCount = state.jukeboxQueueCount;
   const { user, loading: authLoading, logout } = useAuth();
 
   const handleLogout = useCallback(async () => {
@@ -258,6 +259,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const active = isActive(item.path);
     const isGold = item.badge === "$88.88";
     const isLive = item.badge === "LIVE";
+    // Dynamic queue count badge for Listen Together
+    const isJukebox = item.path === "/together";
+    const dynamicBadge = isJukebox && jukeboxQueueCount > 0 ? (jukeboxQueueCount > 9 ? "9+" : String(jukeboxQueueCount)) : null;
 
     return (
       <button
@@ -280,7 +284,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {(compact || sidebarOpen) && (
           <>
             <span className="font-body flex-1 text-left">{item.label}</span>
-            {item.badge && (
+            {item.badge && !dynamicBadge && (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto"
                 style={isGold
@@ -290,6 +294,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   : {}
                 }
               >{item.badge}</span>
+            )}
+            {dynamicBadge && (
+              <span
+                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center"
+                style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.15 0.01 280)" }}
+              >{dynamicBadge}</span>
             )}
           </>
         )}

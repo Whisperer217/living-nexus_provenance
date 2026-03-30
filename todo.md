@@ -1153,3 +1153,14 @@
 - [x] Genre discovery filter (kept, working)
 - [x] Latest Releases grid (kept, working)
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Phase — v2.7.2
+- [ ] What's New: bump to v2.7.1 with two entries (Jukebox Free Multi-Queue, Declaration-First Homepage)
+- [ ] Jukebox queue count badge on sidebar icon (live count, gold, 9+ cap)
+- [ ] Creator/Fan value cards on Manifesto page (reuse DiscoverPage component, "The Covenant in Practice" header)
+
+## Phase — v2.7.2 [COMPLETE]
+- [x] What's New v2.7.1 entries (Jukebox Free Multi-Queue, Declaration-First Homepage) — CURRENT_VERSION bumped to v2.7.1
+- [x] Jukebox queue count badge: jukeboxQueueCount added to PlayerContext; TogetherPage syncs pending queue length every 5s; MainLayout renders gold solid badge replacing LIVE badge when count > 0; clears on room leave
+- [x] Creator/Fan value cards on Manifesto page — "The Covenant in Practice" section with gold-bordered Creator card and dark Fan card, above CTA row
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

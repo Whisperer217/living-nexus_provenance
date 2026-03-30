@@ -229,6 +229,76 @@ export default function ManifestoPage() {
           />
         </div>
 
+        {/* Creator / Fan covenant in practice */}
+        <div className="mb-16">
+          <p
+            className="text-xs uppercase tracking-wider text-center mb-6 font-heading"
+            style={{ color: "oklch(0.80 0.145 82)" }}
+          >
+            The Covenant in Practice
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* For Creators */}
+            <div
+              className="rounded-2xl p-6"
+              style={{
+                background: "oklch(0.12 0.02 280 / 0.8)",
+                border: "1px solid oklch(0.80 0.145 82 / 0.25)",
+              }}
+            >
+              <p
+                className="text-xs uppercase tracking-wider font-heading mb-4"
+                style={{ color: "oklch(0.80 0.145 82)" }}
+              >
+                For Creators
+              </p>
+              <ul className="space-y-2.5">
+                {[
+                  "Upload your music. Get your WID.",
+                  "Keep 90% of every gift received.",
+                  "Own your catalog. No label. No contract.",
+                  "Collective Certificates for albums.",
+                  "Your name is on record — permanently.",
+                ].map((line) => (
+                  <li key={line} className="flex items-start gap-2 text-sm" style={{ color: "oklch(0.85 0.02 280)" }}>
+                    <span style={{ color: "oklch(0.80 0.145 82)" }} className="mt-0.5 flex-shrink-0">✓</span>
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* For Fans */}
+            <div
+              className="rounded-2xl p-6"
+              style={{
+                background: "oklch(0.12 0.02 280 / 0.8)",
+                border: "1px solid oklch(0.55 0.04 280 / 0.3)",
+              }}
+            >
+              <p
+                className="text-xs uppercase tracking-wider font-heading mb-4"
+                style={{ color: "oklch(0.75 0.04 280)" }}
+              >
+                For Fans
+              </p>
+              <ul className="space-y-2.5">
+                {[
+                  "Discover real music. No algorithm.",
+                  "Gift creators directly. 90% reaches them.",
+                  "Queue songs in the Jukebox — free.",
+                  "Verify any work's origin. Cryptographically.",
+                  "No ads. No data harvesting. No extraction.",
+                ].map((line) => (
+                  <li key={line} className="flex items-start gap-2 text-sm" style={{ color: "oklch(0.75 0.04 280)" }}>
+                    <span style={{ color: "oklch(0.65 0.18 160)" }} className="mt-0.5 flex-shrink-0">✓</span>
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
         {/* CTA row */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center pb-20">
           <Link href="/upload">

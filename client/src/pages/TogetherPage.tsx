@@ -734,7 +734,7 @@ function QueuePanel({ items }: { items: any[] }) {
 
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function TogetherPage() {
-  const { state, setRoom, addAndPlay, audioRef: globalAudioRef } = usePlayer();
+  const { state, setRoom, addAndPlay, audioRef: globalAudioRef, setJukeboxQueueCount } = usePlayer();
   const { user } = useAuth();
   const params = useParams<{ roomCode?: string }>();
   const [joinCode, setJoinCode] = useState("");
@@ -781,6 +781,18 @@ export default function TogetherPage() {
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages]);
+
+  // Sync queue count to global PlayerContext for sidebar badge
+  useEffect(() => {
+    if (!queueData) { setJukeboxQueueCount(0); return; }
+    const pending = queueData.filter((i: any) => !i.playedAt && !i.skippedAt);
+    setJukeboxQueueCount(pending.length);
+  }, [queueData, setJukeboxQueueCount]);
+
+  // Clear badge when leaving room
+  useEffect(() => {
+    if (!state.room) setJukeboxQueueCount(0);
+  }, [state.room, setJukeboxQueueCount]);
 
   // When a new item is queued, add a chat message
   const prevQueueLen = useRef(0);

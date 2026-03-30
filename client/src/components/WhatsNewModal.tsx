@@ -9,14 +9,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.6.0";
+const CURRENT_VERSION = "v2.7.1";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.6.0",
+    version: "v2.7.1",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Users, text: "Jukebox Free Multi-Queue — Songs now queue freely in sequence. No checkout required. Add as many as you want. The room hears them all." },
+      { icon: Globe, text: "Declaration-First Homepage — Living Nexus now opens with its declaration, doctrine, and the Creator/Fan value split front and center. This is what we are. No confusion." },
+    ],
+  },
+  {
+    version: "v2.6.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Library, text: "Collection Certificates — when you upload an album or batch of songs the platform now generates a Collection WID (WID-ALB-…) binding all works together as one origin record. Download a single certificate listing every track, every individual WID, and the collective cryptographic proof. Two layers of protection — individual and collective. Verify any collection at /verify/WID-ALB-…" },
       { icon: Shield, text: "Regenerate Certificate — creators can refresh their Collection Certificate at any time from Dashboard → Collections. Updates the PDF with the latest track metadata and re-uploads it to the archive." },

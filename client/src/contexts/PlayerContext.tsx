@@ -91,6 +91,7 @@ interface PlayerState {
   trackComments: Record<string, Comment[]>; // trackId -> comments
   trackTips: Record<string, number>; // trackId -> tip total
   room: { code: string; name: string; listeners: string[] } | null;
+  jukeboxQueueCount: number;
 }
 
 interface PlayerContextValue {
@@ -144,6 +145,8 @@ interface PlayerContextValue {
   addComment: (trackId: string, comment: Comment) => void;
   incrementShare: (trackId: string) => void;
   setRoom: (r: PlayerState["room"]) => void;
+  /** Update the live Jukebox queue count (set by TogetherPage, read by sidebar) */
+  setJukeboxQueueCount: (n: number) => void;
   /** The creator handle of the currently playing track — for background routing */
   backgroundCreatorHandle: string | null;
 }
@@ -181,6 +184,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     trackComments: {},
     trackTips: {},
     room: null,
+    jukeboxQueueCount: 0,
   });
 
   // Only real DB-sourced tracks — DEMO_TRACKS is empty, guard is here for safety
@@ -372,6 +376,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     return { ...s, tracks: updated };
   }), []);
   const setRoom = useCallback((r: PlayerState["room"]) => setState(s => ({ ...s, room: r })), []);
+  const setJukeboxQueueCount = useCallback((n: number) => setState(s => ({ ...s, jukeboxQueueCount: n })), []);
 
   /** Replace the entire queue without starting playback (used for initial DB seed) */
   const setQueue = useCallback((newTracks: Track[]) => {
@@ -454,7 +459,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       openTheater, isTheaterOpen, closeTheater,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
       setProfileAvatar, setProfileBanner,
-      addTip, addTrackTip, addComment, incrementShare, setRoom,
+      addTip, addTrackTip, addComment, incrementShare, setRoom, setJukeboxQueueCount,
       backgroundCreatorHandle,
     }}>
       {children}
