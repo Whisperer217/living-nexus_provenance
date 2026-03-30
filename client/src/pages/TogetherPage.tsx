@@ -63,8 +63,12 @@ function SongBrowserModal({
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [checkoutStep, setCheckoutStep] = useState(false);
 
-  // Audio preview
-  const audioRef = useRef<HTMLAudioElement>(null);
+  // Audio preview — routed through the GLOBAL player audioRef.
+  // One audio source. Always. No exceptions.
+  const { audioRef } = usePlayer();
+  const wasPlayingRef = useRef(false);   // track whether global player was playing before preview
+  const prevSrcRef = useRef<string>(""); // remember the global player's src to restore it
+  const prevTimeRef = useRef(0);         // remember the playback position to restore it
   const [previewingId, setPreviewingId] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const previewTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -111,34 +115,64 @@ function SongBrowserModal({
 
   const currentCard = activeSongs[cardIndex] ?? null;
 
-  // Auto-preview when card changes
+  // Auto-preview when card changes — routes through the global audioRef.
+  // Saves the current src + position, pauses the global player, plays the
+  // preview for 30 s, then restores the previous track.
   useEffect(() => {
     if (previewTimeout.current) clearTimeout(previewTimeout.current);
-    if (!currentCard?.fileUrl || !audioRef.current) return;
-    // Small delay so rapid flipping doesn't thrash
+    if (!currentCard?.fileUrl) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Small delay so rapid flipping doesn’t thrash the audio element
     previewTimeout.current = setTimeout(() => {
-      if (!audioRef.current || !currentCard.fileUrl) return;
-      audioRef.current.src = currentCard.fileUrl;
-      audioRef.current.currentTime = 0;
-      audioRef.current.muted = isMuted;
-      audioRef.current.play().catch(() => {});
+      const a = audioRef.current;
+      if (!a || !currentCard.fileUrl) return;
+
+      // Snapshot the global player state before hijacking it
+      wasPlayingRef.current = !a.paused;
+      prevSrcRef.current = a.src;
+      prevTimeRef.current = a.currentTime;
+
+      // Pause the global player (if it was playing)
+      if (!a.paused) a.pause();
+
+      // Load and play the preview
+      a.src = currentCard.fileUrl;
+      a.currentTime = 0;
+      a.muted = isMuted;
+      a.play().catch(() => {});
       setPreviewingId(currentCard.id);
-      // Stop after 30s
+
+      // Stop preview after 30 s and restore previous track
       previewTimeout.current = setTimeout(() => {
-        audioRef.current?.pause();
-        setPreviewingId(null);
+        restoreGlobalPlayer();
       }, 30000);
     }, 350);
+
     return () => { if (previewTimeout.current) clearTimeout(previewTimeout.current); };
   }, [cardIndex, activeTab, currentCard?.id]);
 
-  // Cleanup on unmount
+  // Restore the global player to its pre-preview state
+  const restoreGlobalPlayer = useCallback(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.pause();
+    setPreviewingId(null);
+    if (previewTimeout.current) clearTimeout(previewTimeout.current);
+    if (prevSrcRef.current) {
+      a.src = prevSrcRef.current;
+      a.currentTime = prevTimeRef.current;
+      if (wasPlayingRef.current) a.play().catch(() => {});
+    }
+  }, [audioRef]);
+
+  // Cleanup on unmount — restore the global player
   useEffect(() => {
     return () => {
-      audioRef.current?.pause();
-      if (previewTimeout.current) clearTimeout(previewTimeout.current);
+      restoreGlobalPlayer();
     };
-  }, []);
+  }, [restoreGlobalPlayer]);
 
   const goLeft = useCallback(() => {
     if (activeSongs.length === 0) return;
@@ -179,15 +213,14 @@ function SongBrowserModal({
 
   const toggleMute = () => {
     setIsMuted(m => {
-      if (audioRef.current) audioRef.current.muted = !m;
+      // Apply mute state to the global audioRef only while a preview is active
+      if (audioRef.current && previewingId !== null) audioRef.current.muted = !m;
       return !m;
     });
   };
 
   const stopPreview = () => {
-    audioRef.current?.pause();
-    setPreviewingId(null);
-    if (previewTimeout.current) clearTimeout(previewTimeout.current);
+    restoreGlobalPlayer();
   };
 
   const handleCheckout = () => {
@@ -545,8 +578,7 @@ function SongBrowserModal({
           </>
         )}
 
-        {/* Hidden audio for preview */}
-        <audio ref={audioRef} preload="none" className="hidden" />
+        {/* Audio preview routes through the global player — no separate <audio> element needed */}
       </div>
     </div>
   );

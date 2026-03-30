@@ -1132,3 +1132,8 @@
 - [x] Root cause: playingId used playerState.tracks[0].id (always first track in queue) instead of currentTrackId (tracks[currentIdx])
 - [x] Fix: replaced tracks[0] with currentTrackId from usePlayer() context — now correctly reflects the actively playing track
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Bug Fix — Jukebox Preview Dual Audio Source
+- [x] Root cause: SongBrowserModal had its own audioRef + hidden <audio> element — a separate audio source running in parallel with the global player
+- [x] Fix: removed standalone audioRef and <audio> element; imported global audioRef from usePlayer(); preview now pauses the global player, snapshots src+position, plays 30s preview, then restores on close/timeout
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing
