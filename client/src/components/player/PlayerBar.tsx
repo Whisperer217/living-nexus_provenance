@@ -131,6 +131,39 @@ export default function PlayerBar() {
     seek(((e.clientX - rect.left) / rect.width) * audioRef.current.duration);
   }, [audioRef, seek]);
 
+  // Volume drag — works for click AND drag on both collapsed and expanded bars
+  const volumeBarRef = useRef<HTMLDivElement>(null);
+  const volumeBarRefExpanded = useRef<HTMLDivElement>(null);
+
+  const calcVolume = useCallback((clientX: number, barEl: HTMLDivElement) => {
+    const rect = barEl.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  }, []);
+
+  const makeVolumeDragHandlers = useCallback((barRef: React.RefObject<HTMLDivElement | null>) => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (barRef.current) setVolume(calcVolume(e.clientX, barRef.current));
+    };
+    const onMouseUp = (e: MouseEvent) => {
+      if (barRef.current) setVolume(calcVolume(e.clientX, barRef.current));
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+    const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      if (barRef.current) setVolume(calcVolume(e.clientX, barRef.current));
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    };
+    const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+      if (barRef.current) setVolume(calcVolume(e.touches[0].clientX, barRef.current));
+    };
+    return { onMouseDown, onTouchMove };
+  }, [calcVolume, setVolume]);
+
+  const collapsedVolumeDrag = makeVolumeDragHandlers(volumeBarRef);
+  const expandedVolumeDrag = makeVolumeDragHandlers(volumeBarRefExpanded);
+
   const handleVolume = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setVolume(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)));
@@ -393,13 +426,28 @@ export default function PlayerBar() {
                   {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
                 </button>
                 <div
-                  className="w-20 h-1.5 rounded-full cursor-pointer"
-                  style={{ background: "oklch(0.28 0.04 270 / 80%)" }}
-                  onClick={handleVolume}
+                  ref={volumeBarRef}
+                  className="w-20 h-3 flex items-center cursor-pointer relative group select-none"
+                  onMouseDown={collapsedVolumeDrag.onMouseDown}
+                  onTouchMove={collapsedVolumeDrag.onTouchMove}
                 >
+                  {/* Track */}
+                  <div className="absolute inset-y-0 flex items-center w-full">
+                    <div className="w-full h-1.5 rounded-full" style={{ background: "oklch(0.28 0.04 270 / 80%)" }}>
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: state.isMuted ? "0%" : `${state.volume * 100}%`, background: "oklch(0.68 0.02 280)" }}
+                      />
+                    </div>
+                  </div>
+                  {/* Thumb */}
                   <div
-                    className="h-full rounded-full"
-                    style={{ width: state.isMuted ? "0%" : `${state.volume * 100}%`, background: "oklch(0.68 0.02 280)" }}
+                    className="absolute w-3 h-3 rounded-full -translate-x-1/2 pointer-events-none"
+                    style={{
+                      left: state.isMuted ? "0%" : `${state.volume * 100}%`,
+                      background: "oklch(0.96 0.008 270)",
+                      boxShadow: "0 0 4px oklch(0.68 0.02 280 / 60%)",
+                    }}
                   />
                 </div>
                 <button
@@ -783,23 +831,30 @@ export default function PlayerBar() {
               {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
             <div
-              className="w-20 h-1.5 rounded-full cursor-pointer relative group"
-              style={{ background: "oklch(0.28 0.04 270 / 80%)" }}
-              onClick={handleVolume}
+              ref={volumeBarRefExpanded}
+              className="w-20 h-4 flex items-center cursor-pointer relative group select-none"
+              onMouseDown={expandedVolumeDrag.onMouseDown}
+              onTouchMove={expandedVolumeDrag.onTouchMove}
             >
+              {/* Track */}
+              <div className="absolute inset-y-0 flex items-center w-full">
+                <div className="w-full h-1.5 rounded-full" style={{ background: "oklch(0.28 0.04 270 / 80%)" }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: state.isMuted ? "0%" : `${state.volume * 100}%`,
+                      background: "oklch(0.68 0.02 280)",
+                    }}
+                  />
+                </div>
+              </div>
+              {/* Thumb — always visible */}
               <div
-                className="h-full rounded-full transition-colors"
+                className="absolute w-3 h-3 rounded-full -translate-x-1/2 pointer-events-none"
                 style={{
-                  width: state.isMuted ? "0%" : `${state.volume * 100}%`,
-                  background: "oklch(0.68 0.02 280)",
-                }}
-              />
-              <div
-                className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full
-                  opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{
-                  right: state.isMuted ? "100%" : `${100 - state.volume * 100}%`,
+                  left: state.isMuted ? "0%" : `${state.volume * 100}%`,
                   background: "oklch(0.96 0.008 270)",
+                  boxShadow: "0 0 4px oklch(0.68 0.02 280 / 60%)",
                 }}
               />
             </div>
