@@ -60,6 +60,7 @@ function RegistryRow({ item }: { item: any }) {
               src={item.coverArtUrl}
               alt={item.title}
               className="w-full h-full object-cover"
+              style={{ objectPosition: `${item.coverPositionX ?? 50}% ${item.coverPositionY ?? 50}%` }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

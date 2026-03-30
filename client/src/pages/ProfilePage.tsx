@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { ImagePositioner } from "@/components/ImagePositioner";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
@@ -173,6 +174,16 @@ export default function ProfilePage() {
   const saveAvatarPosition = (pos: { x: number; y: number }) => {
     updateProfile.mutate({ avatarObjectPosition: `${pos.x}% ${pos.y}%` });
   };
+  // ── Banner position state ─────────────────────────────────────────
+  const [showBannerPositioner, setShowBannerPositioner] = useState(false);
+  const [pendingBannerUrl, setPendingBannerUrl] = useState<string | null>(null);
+  const [bannerPos, setBannerPos] = useState({ x: 50, y: 50 });
+  // Sync banner position from DB on load
+  useEffect(() => {
+    if (profile?.bannerPositionX !== undefined && profile?.bannerPositionY !== undefined) {
+      setBannerPos({ x: profile.bannerPositionX, y: profile.bannerPositionY });
+    }
+  }, [profile?.bannerPositionX, profile?.bannerPositionY]);
 
   const toBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -192,8 +203,30 @@ export default function ProfilePage() {
   const handleBanner = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
+    // Show a local preview URL so the user can reposition before uploading
+    const objectUrl = URL.createObjectURL(f);
+    setPendingBannerUrl(objectUrl);
+    setShowBannerPositioner(true);
+    // Store the file for later upload
+    (bannerRef.current as any)._pendingFile = f;
+  };
+  const confirmBannerUpload = async (pos: { x: number; y: number }) => {
+    const f = (bannerRef.current as any)?._pendingFile as File | undefined;
+    if (!f) return;
+    setBannerPos(pos);
+    setShowBannerPositioner(false);
     const base64 = await toBase64(f);
-    uploadBanner.mutate({ base64, mimeType: f.type });
+    uploadBanner.mutateAsync({ base64, mimeType: f.type }).then(() => {
+      // After URL is saved, also persist the position
+      updateProfile.mutate({ bannerPositionX: pos.x, bannerPositionY: pos.y });
+    });
+    if (pendingBannerUrl) URL.revokeObjectURL(pendingBannerUrl);
+    setPendingBannerUrl(null);
+  };
+  const saveBannerPosition = (pos: { x: number; y: number }) => {
+    setBannerPos(pos);
+    updateProfile.mutate({ bannerPositionX: pos.x, bannerPositionY: pos.y });
+    setShowBannerPositioner(false);
   };
 
   // ── Helpers ──────────────────────────────────────────────────────
@@ -234,7 +267,12 @@ export default function ProfilePage() {
       {/* ── Banner ── */}
       <div className="relative h-[200px] overflow-hidden group">
         {profile?.bannerUrl ? (
-          <img src={profile.bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+          <img
+            src={profile.bannerUrl}
+            alt="Banner"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: `${bannerPos.x}% ${bannerPos.y}%` }}
+          />
         ) : (
           <div className="w-full h-full"
             style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.15 0.05 275), oklch(0.14 0.013 295))" }}>
@@ -243,6 +281,7 @@ export default function ProfilePage() {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.08_0.01_280)] via-transparent to-transparent" />
+        {/* Change banner button */}
         <button
           onClick={() => bannerRef.current?.click()}
           disabled={uploadBanner.isPending}
@@ -253,8 +292,51 @@ export default function ProfilePage() {
           {uploadBanner.isPending ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
           {uploadBanner.isPending ? "Uploading…" : "Change Banner"}
         </button>
+        {/* Reposition existing banner button */}
+        {profile?.bannerUrl && (
+          <button
+            onClick={() => setShowBannerPositioner(true)}
+            className="absolute top-3 right-[130px] flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+              bg-black/50 backdrop-blur-sm border border-white/10 text-white/60 hover:text-white
+              text-[11px] font-body opacity-0 group-hover:opacity-100 transition-all"
+          >
+            <Edit2 size={12} />
+            Reposition
+          </button>
+        )}
         <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={handleBanner} />
       </div>
+      {/* ── Banner ImagePositioner modal ── */}
+      {showBannerPositioner && (pendingBannerUrl || profile?.bannerUrl) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg bg-[oklch(0.12_0.02_280)] border border-white/10 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-white">
+                {pendingBannerUrl ? "Set Banner Position" : "Reposition Banner"}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowBannerPositioner(false);
+                  if (pendingBannerUrl) { URL.revokeObjectURL(pendingBannerUrl); setPendingBannerUrl(null); }
+                }}
+                className="text-white/40 hover:text-white/80 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <ImagePositioner
+              imageUrl={pendingBannerUrl || profile!.bannerUrl!}
+              aspectClass="h-40"
+              initialPosition={bannerPos}
+              onSave={pendingBannerUrl ? confirmBannerUpload : saveBannerPosition}
+              onCancel={() => {
+                setShowBannerPositioner(false);
+                if (pendingBannerUrl) { URL.revokeObjectURL(pendingBannerUrl); setPendingBannerUrl(null); }
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="px-6">
         {/* ── Avatar + Name row ── */}
@@ -567,7 +649,7 @@ export default function ProfilePage() {
                 >
                   <div className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[oklch(0.15_0.05_275)]">
                     {song.coverArtUrl
-                      ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                      ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
                       : <div className="w-full h-full flex items-center justify-center text-white/60"><Music size={16} /></div>
                     }
                   </div>

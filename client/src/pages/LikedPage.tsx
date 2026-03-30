@@ -135,7 +135,8 @@ export default function LikedPage() {
                     style={{ background: "oklch(0.15 0.04 280)" }}>
                     {song.coverArtUrl ? (
                       <img src={song.coverArtUrl} alt={song.title}
-                        className="w-full h-full object-cover" />
+                        className="w-full h-full object-cover"
+                        style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Music className="w-5 h-5 opacity-30"

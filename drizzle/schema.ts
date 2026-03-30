@@ -24,6 +24,8 @@ export const users = mysqlTable("users", {
   youtubeHandle: varchar("youtubeHandle", { length: 64 }),
   bannerUrl: text("bannerUrl"),
   avatarObjectPosition: varchar("avatarObjectPosition", { length: 32 }).default("50% 50%"),
+  bannerPositionX: float("bannerPositionX").default(50).notNull(),
+  bannerPositionY: float("bannerPositionY").default(50).notNull(),
 
   // Creator AI & genre defaults
   aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated"]).default("original"),
@@ -105,6 +107,10 @@ export const songs = mysqlTable("songs", {
 
   // Collection membership (WID-ALB back-reference)
   collectionId: int("collectionId"),  // FK → collections.id; null = not part of a collection
+
+  // Image position
+  coverPositionX: float("coverPositionX").default(50).notNull(),
+  coverPositionY: float("coverPositionY").default(50).notNull(),
 
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
@@ -493,6 +499,8 @@ export const collections = mysqlTable("collections", {
   pdfUrl: text("pdfUrl"),                                    // S3 URL of generated PDF certificate
   pdfKey: text("pdfKey"),
   coverArtUrl: text("coverArtUrl"),
+  coverPositionX: float("coverPositionX").default(50).notNull(),
+  coverPositionY: float("coverPositionY").default(50).notNull(),
   trackCount: int("trackCount").notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

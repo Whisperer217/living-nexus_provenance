@@ -174,7 +174,7 @@ export default function PlaylistPage() {
                 <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
                   style={{ background: "oklch(0.15 0.05 275)" }}>
                   {song.coverArtUrl ? (
-                    <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
+                    <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Music size={14} style={{ color: "rgba(255,255,255,0.2)" }} />

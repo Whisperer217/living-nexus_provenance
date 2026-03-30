@@ -102,7 +102,7 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
         style={{ height: "180px", background: "oklch(0.14 0.015 280)" }}
       >
         {song.coverArtUrl ? (
-          <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
+          <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
         ) : (
           <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, oklch(0.14 0.02 280), oklch(0.18 0.04 300))" }}>
             <Music className="w-10 h-10 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
@@ -186,7 +186,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
         </div>
         <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
           {song.coverArtUrl
-            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" />
+            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
             : <Music className="w-4 h-4 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />}
         </div>
         <div className="flex-1 min-w-0">
@@ -385,7 +385,7 @@ export default function CreatorProfilePage() {
       {/* ── Banner ── */}
       <div className="relative w-full" style={{ height: "240px" }}>
         {creator.bannerUrl ? (
-          <img src={creator.bannerUrl} alt="banner" className="w-full h-full object-cover" />
+          <img src={creator.bannerUrl} alt="banner" className="w-full h-full object-cover" style={{ objectPosition: `${creator.bannerPositionX ?? 50}% ${creator.bannerPositionY ?? 50}%` }} />
         ) : (
           <div
             className="w-full h-full"
@@ -578,7 +578,7 @@ export default function CreatorProfilePage() {
                   <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
                     <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid oklch(0.16 0.01 280)" }}>
                       {albumSongs[0]?.coverArtUrl ? (
-                        <img src={albumSongs[0].coverArtUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                        <img src={albumSongs[0].coverArtUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" style={{ objectPosition: `${albumSongs[0].coverPositionX ?? 50}% ${albumSongs[0].coverPositionY ?? 50}%` }} />
                       ) : (
                         <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.75 0.18 85 / 0.15)" }}>
                           <Music className="w-6 h-6" style={{ color: "oklch(0.84 0.155 85)" }} />

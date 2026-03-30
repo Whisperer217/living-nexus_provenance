@@ -387,7 +387,7 @@ function SongBrowserModal({
                           {/* Cover art */}
                           <div className="relative w-full overflow-hidden" style={{ height: "220px", background: "oklch(0.10 0.04 270)" }}>
                             {currentCard.coverArtUrl
-                              ? <img src={currentCard.coverArtUrl} alt="" className="w-full h-full object-cover object-top" />
+                              ? <img src={currentCard.coverArtUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${(currentCard as any).coverPositionX ?? 50}% ${(currentCard as any).coverPositionY ?? 50}%` }} />
                               : (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <Music2 size={48} className="text-white/20" />

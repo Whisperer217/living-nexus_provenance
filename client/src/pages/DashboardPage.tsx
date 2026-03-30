@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { ImagePositioner } from "@/components/ImagePositioner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
@@ -11,7 +12,7 @@ import {
   Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
   XCircle, Download, Play, Activity, MessageCircle, Zap, Gift,
-  Library, RefreshCw, FileArchive, PackageOpen
+  Library, RefreshCw, FileArchive, PackageOpen, Camera, X
 } from "lucide-react";
 
 type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive";
@@ -78,6 +79,51 @@ export default function DashboardPage() {
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });
+
+  // ── Collection cover art state ──────────────────────────────────────────
+  const [collectionCoverState, setCollectionCoverState] = useState<{
+    collectionId: number;
+    currentUrl: string | null;
+    pendingUrl: string | null;
+    position: { x: number; y: number };
+  } | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const uploadCollectionCover = trpc.songs.uploadCollectionCover.useMutation({
+    onSuccess: () => { refetchCollections(); toast.success("Collection cover updated"); },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+  const updateCollectionCoverPosition = trpc.songs.updateCollectionCoverPosition.useMutation({
+    onSuccess: () => { refetchCollections(); },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+  async function handleCollectionCoverFile(e: React.ChangeEvent<HTMLInputElement>, collectionId: number, currentUrl: string | null, currentPos: { x: number; y: number }) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Cover must be under 5MB"); return; }
+    const objectUrl = URL.createObjectURL(file);
+    setCollectionCoverState({ collectionId, currentUrl, pendingUrl: objectUrl, position: currentPos });
+    (coverInputRef.current as any)._pendingFile = file;
+    (coverInputRef.current as any)._collectionId = collectionId;
+  }
+  async function confirmCollectionCoverUpload(pos: { x: number; y: number }) {
+    const file = (coverInputRef.current as any)?._pendingFile as File | undefined;
+    const colId = (coverInputRef.current as any)?._collectionId as number | undefined;
+    if (!file || !colId) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = (ev.target?.result as string).split(",")[1];
+      await uploadCollectionCover.mutateAsync({ collectionId: colId, base64, mimeType: file.type });
+      await updateCollectionCoverPosition.mutateAsync({ collectionId: colId, coverPositionX: pos.x, coverPositionY: pos.y });
+    };
+    reader.readAsDataURL(file);
+    if (collectionCoverState?.pendingUrl) URL.revokeObjectURL(collectionCoverState.pendingUrl);
+    setCollectionCoverState(null);
+  }
+  async function saveCollectionCoverPosition(pos: { x: number; y: number }) {
+    if (!collectionCoverState) return;
+    await updateCollectionCoverPosition.mutateAsync({ collectionId: collectionCoverState.collectionId, coverPositionX: pos.x, coverPositionY: pos.y });
+    setCollectionCoverState(null);
+  }
 
   const deleteMutation = trpc.songs.delete.useMutation({
     onSuccess: () => { toast.success("Song deleted"); refetchSongs(); setDeletingId(null); },
@@ -468,7 +514,7 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-3">
                       <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#E2E8F0", minWidth: "20px" }}>{idx + 1}</span>
                       <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
-                        {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover object-top" /> : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
+                        {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} /> : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif", fontSize: "13px" }}>{song.title}</p>
@@ -825,13 +871,57 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
+                {/* Hidden file input for collection cover upload */}
+                <input
+                  ref={coverInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const col = (coverInputRef.current as any)?._activeCol;
+                    if (col) handleCollectionCoverFile(e, col.id, col.coverArtUrl ?? null, { x: col.coverPositionX ?? 50, y: col.coverPositionY ?? 50 });
+                  }}
+                />
                 {(myCollections as any[]).map((col: any) => (
                   <div
                     key={col.id}
                     className="rounded-xl p-5"
                     style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      {/* Cover art thumbnail */}
+                      <div
+                        className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 group relative cursor-pointer"
+                        style={{ border: "1px solid oklch(0.84 0.155 85 / 0.3)", background: "oklch(0.09 0.02 280)" }}
+                        onClick={() => {
+                          if (col.coverArtUrl) {
+                            setCollectionCoverState({ collectionId: col.id, currentUrl: col.coverArtUrl, pendingUrl: null, position: { x: col.coverPositionX ?? 50, y: col.coverPositionY ?? 50 } });
+                          } else {
+                            (coverInputRef.current as any)._activeCol = col;
+                            coverInputRef.current?.click();
+                          }
+                        }}
+                      >
+                        {col.coverArtUrl ? (
+                          <>
+                            <img
+                              src={col.coverArtUrl}
+                              alt={col.name}
+                              className="w-full h-full object-cover"
+                              style={{ objectPosition: `${col.coverPositionX ?? 50}% ${col.coverPositionY ?? 50}%` }}
+                            />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-0.5">
+                              <Camera className="w-3.5 h-3.5 text-white" />
+                              <span className="text-white text-[8px]">Edit</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center gap-1">
+                            <Camera className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }} />
+                            <span className="text-[8px]" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }}>Add Cover</span>
+                          </div>
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-base mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
                           {col.name}
@@ -848,6 +938,15 @@ export default function DashboardPage() {
                       </div>
                       {/* Actions */}
                       <div className="flex flex-col gap-2 flex-shrink-0">
+                        {col.coverArtUrl && (
+                          <button
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
+                            style={{ border: "1px solid oklch(0.84 0.155 85 / 0.3)", color: "oklch(0.84 0.155 85 / 0.8)", background: "transparent" }}
+                            onClick={() => { (coverInputRef.current as any)._activeCol = col; coverInputRef.current?.click(); }}
+                          >
+                            <Camera className="w-3 h-3" /> Change Cover
+                          </button>
+                        )}
                         <a href={`/verify/${col.collectionWid}`} target="_blank" rel="noopener noreferrer">
                           <button
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
@@ -880,6 +979,37 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            {/* Collection cover ImagePositioner modal */}
+            {collectionCoverState && (collectionCoverState.pendingUrl || collectionCoverState.currentUrl) && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                <div className="w-full max-w-md bg-[#0d1220] border border-white/10 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-white">
+                      {collectionCoverState.pendingUrl ? "Set Collection Cover Position" : "Reposition Collection Cover"}
+                    </h3>
+                    <button
+                      onClick={() => {
+                        if (collectionCoverState.pendingUrl) URL.revokeObjectURL(collectionCoverState.pendingUrl);
+                        setCollectionCoverState(null);
+                      }}
+                      className="text-white/40 hover:text-white/80 transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <ImagePositioner
+                    imageUrl={collectionCoverState.pendingUrl || collectionCoverState.currentUrl!}
+                    aspectClass="aspect-square"
+                    initialPosition={collectionCoverState.position}
+                    onSave={collectionCoverState.pendingUrl ? confirmCollectionCoverUpload : saveCollectionCoverPosition}
+                    onCancel={() => {
+                      if (collectionCoverState.pendingUrl) URL.revokeObjectURL(collectionCoverState.pendingUrl);
+                      setCollectionCoverState(null);
+                    }}
+                  />
+                </div>
               </div>
             )}
           </div>

@@ -1220,3 +1220,14 @@
 
 ## Bug — Explore Infinite Scroll Seizure
 - [x] Infinite scroll loops/seizures fixed — switched to offset-based pagination (offset += PAGE_SIZE per page), accumulate pages client-side, fetchedOffsetRef guards against double-fetching, sentinel only triggers when not already loading.
+
+## Feature — Image Position Adjuster (Drag to Reposition) [COMPLETE]
+- [x] DB: add bannerPositionX/Y (default 50) to users table
+- [x] DB: add coverPositionX/Y (default 50) to songs table
+- [x] DB: add coverPositionX/Y (default 50) to collections table
+- [x] Build reusable ImagePositioner component (drag + touch, objectPosition preview, Save/Reset buttons)
+- [x] Wire into profile banner upload flow
+- [x] Wire into track cover art upload flow
+- [x] Wire into collection cover art upload flow
+- [x] Apply objectPosition on all render sites (profile page banner, song cards, collection cards, discover/explore/liked/archive/playlist/together/registry)
+- [x] tRPC mutations: updateBannerPosition, updateSongCoverPosition, updateCollectionCoverPosition

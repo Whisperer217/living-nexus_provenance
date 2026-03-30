@@ -109,6 +109,9 @@ export async function updateUserProfile(userId: number, data: {
   instagramHandle?: string; youtubeHandle?: string;
   aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
   primaryGenre?: string;
+  avatarObjectPosition?: string;
+  bannerPositionX?: number;
+  bannerPositionY?: number;
 }) {
   const db = await getDb();
   if (!db) return;
@@ -266,6 +269,8 @@ export async function updateSongMetadata(
     coverArtUrl?: string | null;
     aiConsent?: "prohibited" | "permitted_attribution" | "permitted";
     status?: "Draft" | "Published" | "Unlisted" | "Deleted";
+    coverPositionX?: number;
+    coverPositionY?: number;
   }
 ) {
   const db = await getDb();
@@ -277,6 +282,8 @@ export async function updateSongMetadata(
   if (fields.coverArtUrl !== undefined) updateSet.coverArtUrl = fields.coverArtUrl;
   if (fields.aiConsent !== undefined) updateSet.aiConsent = fields.aiConsent;
   if (fields.status !== undefined) updateSet.status = fields.status;
+  if (fields.coverPositionX !== undefined) updateSet.coverPositionX = fields.coverPositionX;
+  if (fields.coverPositionY !== undefined) updateSet.coverPositionY = fields.coverPositionY;
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
@@ -1853,4 +1860,17 @@ export async function getCollectionsByCreator(creatorId: number) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(collections).where(eq(collections.creatorId, creatorId)).orderBy(desc(collections.createdAt));
+}
+
+/** Update collection cover art URL and/or position. */
+export async function updateCollectionCover(
+  collectionId: number,
+  creatorId: number,
+  data: { coverArtUrl?: string; coverPositionX?: number; coverPositionY?: number }
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(collections).set(data).where(
+    and(eq(collections.id, collectionId), eq(collections.creatorId, creatorId))
+  );
 }

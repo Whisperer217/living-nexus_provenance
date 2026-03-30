@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
+import { ImagePositioner } from "@/components/ImagePositioner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,6 +48,8 @@ interface Song {
   caption?: string | null;
   collectionTag?: string | null;
   coverArtUrl?: string | null;
+  coverPositionX?: number | null;
+  coverPositionY?: number | null;
   aiConsent?: string | null;
   status: string;
   witnessId?: string | null;
@@ -68,6 +71,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [genre, setGenre] = useState(song.genre ?? "");
   const [collectionTag, setCollectionTag] = useState(song.collectionTag ?? "");
   const [coverArtUrl, setCoverArtUrl] = useState(song.coverArtUrl ?? "");
+  const [coverPos, setCoverPos] = useState({ x: song.coverPositionX ?? 50, y: song.coverPositionY ?? 50 });
+  const [showCoverPositioner, setShowCoverPositioner] = useState(false);
+  const [pendingCoverUrl, setPendingCoverUrl] = useState<string | null>(null);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">(
     (song.aiConsent as any) ?? "prohibited"
   );
@@ -189,6 +195,17 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { toast.error("Cover art must be under 5MB"); return; }
+    // Show local preview for repositioning before uploading
+    const objectUrl = URL.createObjectURL(file);
+    setPendingCoverUrl(objectUrl);
+    setShowCoverPositioner(true);
+    (coverInputRef.current as any)._pendingFile = file;
+  }
+  async function confirmCoverUpload(pos: { x: number; y: number }) {
+    const file = (coverInputRef.current as any)?._pendingFile as File | undefined;
+    if (!file) return;
+    setCoverPos(pos);
+    setShowCoverPositioner(false);
     setCoverUploading(true);
     const reader = new FileReader();
     reader.onload = async (ev) => {
@@ -198,8 +215,25 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         coverBase64: base64,
         coverMimeType: file.type,
       });
+      // Also save the position
+      await updateMetadata.mutateAsync({
+        songId: song.id,
+        coverPositionX: pos.x,
+        coverPositionY: pos.y,
+      });
     };
     reader.readAsDataURL(file);
+    if (pendingCoverUrl) URL.revokeObjectURL(pendingCoverUrl);
+    setPendingCoverUrl(null);
+  }
+  async function saveCoverPosition(pos: { x: number; y: number }) {
+    setCoverPos(pos);
+    setShowCoverPositioner(false);
+    await updateMetadata.mutateAsync({
+      songId: song.id,
+      coverPositionX: pos.x,
+      coverPositionY: pos.y,
+    });
   }
 
   async function handleSave() {
@@ -305,11 +339,22 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             <Label className="text-white text-sm font-medium">Cover Art</Label>
             <div className="flex flex-col items-start gap-3">
               <div
-                className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0"
+                className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 group relative cursor-pointer"
                 style={{ border: "1px solid rgba(212,175,55,0.3)", background: "#0a0f1a" }}
+                onClick={() => coverArtUrl && setShowCoverPositioner(true)}
               >
                 {coverArtUrl ? (
-                  <img src={coverArtUrl} alt="Cover" className="w-full h-full object-cover" />
+                  <>
+                    <img
+                      src={coverArtUrl}
+                      alt="Cover"
+                      className="w-full h-full object-cover"
+                      style={{ objectPosition: `${coverPos.x}% ${coverPos.y}%` }}
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-[9px] font-medium">Reposition</span>
+                    </div>
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Upload size={20} style={{ color: "#475569" }} />
@@ -327,7 +372,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 >
                   {coverUploading ? "Uploading…" : "Replace Cover Art"}
                 </Button>
-                <p className="text-xs mt-1.5" style={{ color: "#64748b" }}>JPG or PNG, max 5MB</p>
+                <p className="text-xs mt-1.5" style={{ color: "#64748b" }}>JPG or PNG, max 5MB • Click cover to reposition</p>
                 <input
                   ref={coverInputRef}
                   type="file"
@@ -338,6 +383,37 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               </div>
             </div>
           </div>
+          {/* Cover Art ImagePositioner modal */}
+          {showCoverPositioner && (pendingCoverUrl || coverArtUrl) && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+              <div className="w-full max-w-md bg-[#0d1220] border border-white/10 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-white">
+                    {pendingCoverUrl ? "Set Cover Position" : "Reposition Cover Art"}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setShowCoverPositioner(false);
+                      if (pendingCoverUrl) { URL.revokeObjectURL(pendingCoverUrl); setPendingCoverUrl(null); }
+                    }}
+                    className="text-white/40 hover:text-white/80 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <ImagePositioner
+                  imageUrl={pendingCoverUrl || coverArtUrl}
+                  aspectClass="aspect-square"
+                  initialPosition={coverPos}
+                  onSave={pendingCoverUrl ? confirmCoverUpload : saveCoverPosition}
+                  onCancel={() => {
+                    setShowCoverPositioner(false);
+                    if (pendingCoverUrl) { URL.revokeObjectURL(pendingCoverUrl); setPendingCoverUrl(null); }
+                  }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Caption */}
           <div className="space-y-2.5">

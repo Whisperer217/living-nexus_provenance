@@ -43,7 +43,7 @@ import {
   recordNameChange, getNameHistory, getOriginalName,
   createCollection, updateCollectionPdf, linkSongsToCollection,
   getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
-  getCollectionsByCreator,
+  getCollectionsByCreator, updateCollectionCover,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -203,6 +203,8 @@ export const appRouter = router({
       aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated"]).optional(),
       primaryGenre: z.string().max(64).optional(),
       avatarObjectPosition: z.string().max(32).optional(),
+      bannerPositionX: z.number().min(0).max(100).optional(),
+      bannerPositionY: z.number().min(0).max(100).optional(),
     })).mutation(async ({ ctx, input }) => {
       if (input.name !== undefined) {
         const current = await getUserById(ctx.user.id);
@@ -519,6 +521,8 @@ export const appRouter = router({
       coverArtUrl: z.string().url().nullable().optional(),
       aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]).optional(),
       status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]).optional(),
+      coverPositionX: z.number().min(0).max(100).optional(),
+      coverPositionY: z.number().min(0).max(100).optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, ...fields } = input;
       await updateSongMetadata(songId, ctx.user.id, fields);
@@ -835,6 +839,29 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .query(async ({ input }) => {
         return getCollectionsByCreator(input.creatorId);
       }),
+    // ── Update Collection Cover Position ─────────────────────────────────────────────────────
+    updateCollectionCoverPosition: protectedProcedure.input(z.object({
+      collectionId: z.number(),
+      coverPositionX: z.number().min(0).max(100),
+      coverPositionY: z.number().min(0).max(100),
+    })).mutation(async ({ ctx, input }) => {
+      await updateCollectionCover(input.collectionId, ctx.user.id, {
+        coverPositionX: input.coverPositionX,
+        coverPositionY: input.coverPositionY,
+      });
+      return { success: true };
+    }),
+    // ── Upload Collection Cover Art ──────────────────────────────────────────────────────────
+    uploadCollectionCover: protectedProcedure.input(z.object({
+      collectionId: z.number(),
+      base64: z.string(),
+      mimeType: z.string(),
+    })).mutation(async ({ ctx, input }) => {
+      const buffer = Buffer.from(input.base64, "base64");
+      const { url } = await storagePut(`collection-covers/${ctx.user.id}-${input.collectionId}-${Date.now()}.jpg`, buffer, input.mimeType);
+      await updateCollectionCover(input.collectionId, ctx.user.id, { coverArtUrl: url });
+      return { url };
+    }),
   }),
   comments: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),

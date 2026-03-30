@@ -173,6 +173,7 @@ export default function QuickRefSlider({ open, onToggle, summary, currentPath }:
                       src={track.song.coverArtUrl}
                       alt={track.song.title}
                       className="w-8 h-8 rounded object-cover flex-shrink-0"
+                      style={{ objectPosition: `${(track.song as any).coverPositionX ?? 50}% ${(track.song as any).coverPositionY ?? 50}%` }}
                     />
                   ) : (
                     <div className="w-8 h-8 rounded flex-shrink-0 flex items-center justify-center text-sm"
