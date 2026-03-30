@@ -43,6 +43,7 @@ import {
   recordNameChange, getNameHistory, getOriginalName,
   createCollection, updateCollectionPdf, linkSongsToCollection,
   getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
+  getCollectionsByCreator,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -823,6 +824,16 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         const { url: pdfUrl } = await storagePut(certKey, htmlBuffer, "text/html;charset=utf-8");
         await updateCollectionPdf(collection.id, pdfUrl, certKey);
         return { pdfUrl, collectionWid: collection.collectionWid };
+      }),
+    // ── Get My Collections (Dashboard) ─────────────────────────────────────────────────────────────────────────────────
+    getMyCollections: protectedProcedure.query(async ({ ctx }) => {
+      return getCollectionsByCreator(ctx.user.id);
+    }),
+    // ── Get Collections by Creator (public, for profile page) ───────────────────────────────
+    getCollectionsByCreator: publicProcedure
+      .input(z.object({ creatorId: z.number() }))
+      .query(async ({ input }) => {
+        return getCollectionsByCreator(input.creatorId);
       }),
   }),
   comments: router({

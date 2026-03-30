@@ -10,10 +10,11 @@ import { toast } from "sonner";
 import {
   Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
-  XCircle, Download, Play, Activity, MessageCircle, Zap, Gift
+  XCircle, Download, Play, Activity, MessageCircle, Zap, Gift,
+  Library, RefreshCw
 } from "lucide-react";
 
-type Tab = "songs" | "transforms" | "activity" | "earnings";
+type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections";
 
 // Pre-onboarding checklist items creators need to have ready
 const ONBOARDING_CHECKLIST = [
@@ -43,6 +44,18 @@ export default function DashboardPage() {
     undefined,
     { enabled: isAuthenticated && activeTab === "earnings" }
   );
+  const { data: myCollections, isLoading: collectionsLoading, refetch: refetchCollections } = trpc.songs.getMyCollections.useQuery(
+    undefined,
+    { enabled: isAuthenticated && activeTab === "collections" }
+  );
+  const regenCertMutation = trpc.songs.generateCollectionCertificate.useMutation({
+    onSuccess: (data: { pdfUrl: string; collectionWid: string }) => {
+      toast.success("Certificate regenerated!");
+      window.open(data.pdfUrl, "_blank");
+      refetchCollections();
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
 
   const deleteMutation = trpc.songs.delete.useMutation({
     onSuccess: () => { toast.success("Song deleted"); refetchSongs(); setDeletingId(null); },
@@ -376,6 +389,20 @@ export default function DashboardPage() {
           >
             <Gift className="w-4 h-4" />
             Jukebox Earnings
+          </button>
+          <button
+            onClick={() => setActiveTab("collections")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "collections" ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
+              color: activeTab === "collections" ? "oklch(0.84 0.155 85)" : "oklch(0.6 0.04 280)",
+              border: activeTab === "collections" ? "1px solid oklch(0.84 0.155 85 / 0.4)" : "1px solid transparent",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <Library className="w-4 h-4" />
+            Collections
+            {myCollections?.length ? <span className="text-xs opacity-70">({myCollections.length})</span> : null}
           </button>
         </div>
 
@@ -721,6 +748,103 @@ export default function DashboardPage() {
                 <p className="text-[11px] text-center mt-4" style={{ color: "oklch(0.4 0.03 280)" }}>
                   Payouts are processed monthly. Connect Stripe to receive direct transfers.
                 </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Collections Tab */}
+        {activeTab === "collections" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>My Collections</h2>
+                <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>Albums and batch-registered works with a collective Witness ID binding all tracks together.</p>
+              </div>
+              <Link href="/batch-upload">
+                <button
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
+                >
+                  <Upload className="w-3 h-3" /> New Collection
+                </button>
+              </Link>
+            </div>
+            {collectionsLoading ? (
+              <div className="text-center py-16">
+                <div className="w-8 h-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mx-auto" />
+              </div>
+            ) : !myCollections?.length ? (
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+                <Library className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
+                <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No collections yet.</p>
+                <p className="text-xs mb-4" style={{ color: "oklch(0.4 0.03 280)" }}>Upload an album or batch of songs to generate a Collection WID that binds all works into one origin record.</p>
+                <Link href="/batch-upload">
+                  <button
+                    className="px-4 py-2 rounded-lg text-sm font-semibold"
+                    style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
+                  >
+                    Upload Your First Collection
+                  </button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {(myCollections as any[]).map((col: any) => (
+                  <div
+                    key={col.id}
+                    className="rounded-xl p-5"
+                    style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-base mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                          {col.name}
+                        </p>
+                        <p className="text-xs font-mono mb-2" style={{ color: "oklch(0.84 0.155 85)" }}>
+                          {col.collectionWid}
+                        </p>
+                        <p className="text-xs mb-3" style={{ color: "oklch(0.5 0.04 280)" }}>
+                          {col.trackCount ?? "?"} tracks &middot; Registered {new Date(col.createdAt).toLocaleDateString()}
+                        </p>
+                        <p className="text-[10px] font-mono break-all" style={{ color: "oklch(0.38 0.02 280)" }}>
+                          Hash: {col.collectiveHash?.slice(0, 32)}…
+                        </p>
+                      </div>
+                      {/* Actions */}
+                      <div className="flex flex-col gap-2 flex-shrink-0">
+                        <a href={`/verify/${col.collectionWid}`} target="_blank" rel="noopener noreferrer">
+                          <button
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
+                            style={{ border: "1px solid oklch(0.84 0.155 85 / 0.5)", color: "oklch(0.84 0.155 85)", background: "transparent" }}
+                          >
+                            <ExternalLink className="w-3 h-3" /> Verify
+                          </button>
+                        </a>
+                        {col.pdfUrl && (
+                          <a href={col.pdfUrl} target="_blank" rel="noopener noreferrer">
+                            <button
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
+                              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+                            >
+                              <Download className="w-3 h-3" /> Certificate
+                            </button>
+                          </a>
+                        )}
+                        <button
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
+                          style={{ border: "1px solid oklch(0.3 0.02 280)", color: "oklch(0.55 0.04 280)", background: "transparent" }}
+                          onClick={() => regenCertMutation.mutate({ collectionWid: col.collectionWid })}
+                          disabled={regenCertMutation.isPending}
+                          title="Regenerate Certificate"
+                        >
+                          <RefreshCw className={`w-3 h-3 ${regenCertMutation.isPending ? 'animate-spin' : ''}`} />
+                          {regenCertMutation.isPending ? "Regenerating…" : "↻ Regen Cert"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

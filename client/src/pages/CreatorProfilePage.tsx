@@ -19,6 +19,7 @@ import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
+  Library,
 } from "lucide-react";
 import { usePlayer } from "@/contexts/PlayerContext";
 
@@ -283,6 +284,10 @@ export default function CreatorProfilePage() {
   });
   const isWitnessingCreator = witnessStatusQuery.data?.witnessing ?? false;
   const witnessCount = witnessStatusQuery.data?.count ?? 0;
+  const { data: creatorCollections } = trpc.songs.getCollectionsByCreator.useQuery(
+    { creatorId },
+    { enabled: !!creatorId }
+  );
 
   const handlePlay = (song: any) => {
     if (!song.fileUrl) { toast.error("No audio file available"); return; }
@@ -602,6 +607,46 @@ export default function CreatorProfilePage() {
           );
         })()}
 
+        {/* ── Registered Collections ── */}
+        {creatorCollections && creatorCollections.length > 0 && (
+          <section className="py-4">
+            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>
+              <Library className="inline w-4 h-4 mr-2 mb-0.5" />
+              Registered Collections
+            </h2>
+            <div className="space-y-3">
+              {(creatorCollections as any[]).map((col: any) => (
+                <a
+                  key={col.id}
+                  href={`/verify/${col.collectionWid}`}
+                  className="flex items-center gap-4 p-3 rounded-xl transition-colors hover:bg-white/5"
+                  style={{ border: "1px solid oklch(0.84 0.155 85 / 0.2)", background: "oklch(0.10 0.04 280)" }}
+                >
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: "oklch(0.84 0.155 85 / 0.12)" }}
+                  >
+                    <Library className="w-5 h-5" style={{ color: "oklch(0.84 0.155 85)" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                      {col.name}
+                    </p>
+                    <p className="text-xs font-mono truncate mt-0.5" style={{ color: "oklch(0.84 0.155 85)" }}>
+                      {col.collectionWid}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs" style={{ color: "oklch(0.5 0.04 280)" }}>
+                      {col.trackCount ?? "?"} tracks
+                    </p>
+                    <ExternalLink className="w-3.5 h-3.5 mt-1 ml-auto" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }} />
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
         {/* ── Full Song List (all songs in compact row format) ── */}
         {songs.length > 0 && (
           <section className="py-4 pb-32">

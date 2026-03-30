@@ -4,19 +4,28 @@ import {
   Shield, Upload, Music, Video, DollarSign, Users, BookOpen,
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
   Eye, Globe, FileText, Network, Scroll, Film, Gift, Link2,
-  Radio, ArrowUpFromLine,
+  Radio, ArrowUpFromLine, Library,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.5.0";
+const CURRENT_VERSION = "v2.6.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.5.0",
+    version: "v2.6.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Library, text: "Collection Certificates — when you upload an album or batch of songs the platform now generates a Collection WID (WID-ALB-…) binding all works together as one origin record. Download a single certificate listing every track, every individual WID, and the collective cryptographic proof. Two layers of protection — individual and collective. Verify any collection at /verify/WID-ALB-…" },
+      { icon: Shield, text: "Regenerate Certificate — creators can refresh their Collection Certificate at any time from Dashboard → Collections. Updates the PDF with the latest track metadata and re-uploads it to the archive." },
+    ],
+  },
+  {
+    version: "v2.5.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Shield, text: "Name Audit Trail — every WID certificate now shows the creator's original registered name at time of witnessing. If a creator changes their display name, a full name history timeline appears on the verify page. Your provenance is permanent and complete." },
       { icon: CreditCard, text: "Stripe Recovery — creators who started but didn't finish Stripe onboarding can now complete it. Go to Dashboard to finish connecting your bank and start receiving gifts." },

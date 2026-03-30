@@ -1111,3 +1111,10 @@
 - [x] Auto-generate collection certificate HTML → S3 after batch upload completes
 - [x] Vitest: 7/7 collection tests passing (WID format, determinism, NOT_FOUND, getCollectionForSong null path)
 - [x] TypeScript: 0 errors
+
+## Phase — Three Follow-Up Items (Collection WID v2.6.0)
+- [x] Regenerate Certificate button on Dashboard Collections tab (↻ Regen Cert, calls generateCollectionCertificate, opens new cert in tab)
+- [x] Registered Collections section on public creator profile page (below Albums, lists collections with WID-ALB links)
+- [x] What's New v2.6.0 entry for Collection Certificates (CURRENT_VERSION bumped to v2.6.0, new storage key, 2 items: Collection Certificates + Regenerate Certificate)
+- [x] Dashboard Collections tab added (My Collections view with track count, WID, Verify + Download + Regen buttons)
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing
