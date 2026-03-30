@@ -1,0 +1,70 @@
+{
+  "query": "SELECT s.title, s.playCount, s.tipCount, (SELECT COUNT(*) FROM likes l WHERE l.songId = s.id) as like_count FROM songs s WHERE s.userId = 780095 ORDER BY s.playCount DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT s.title, s.playCount, s.tipCount, (SELECT COUNT(*) FROM likes l WHERE l.songId = s.id) as like_count FROM songs s WHERE s.userId = 780095 ORDER BY s.playCount DESC LIMIT 10;",
+  "rows": [
+    {
+      "title": "Greater Than Any Part of Me (Symphonic Power Metal) (Remastered) (1)",
+      "playCount": "13",
+      "tipCount": "0",
+      "like_count": "1"
+    },
+    {
+      "title": "Security Blanket",
+      "playCount": "12",
+      "tipCount": "0",
+      "like_count": "1"
+    },
+    {
+      "title": "Titus 3 (Symphonic Power Metal)",
+      "playCount": "10",
+      "tipCount": "0",
+      "like_count": "1"
+    },
+    {
+      "title": "The Forgiven (Symphonic Power Metal)",
+      "playCount": "10",
+      "tipCount": "0",
+      "like_count": "1"
+    },
+    {
+      "title": "Greater Than Any Part of Me (Heavy Worship) v6",
+      "playCount": "8",
+      "tipCount": "0",
+      "like_count": "0"
+    },
+    {
+      "title": "Suit Up! (Symphonic Power Metal)",
+      "playCount": "8",
+      "tipCount": "0",
+      "like_count": "1"
+    },
+    {
+      "title": "Suit Up! (Arena Rock)",
+      "playCount": "7",
+      "tipCount": "0",
+      "like_count": "1"
+    },
+    {
+      "title": "Serenity Death (Metal)",
+      "playCount": "6",
+      "tipCount": "0",
+      "like_count": "1"
+    },
+    {
+      "title": "Like Peter (Rock)",
+      "playCount": "5",
+      "tipCount": "0",
+      "like_count": "1"
+    },
+    {
+      "title": "Bounce 'Em (A Cappella)",
+      "playCount": "5",
+      "tipCount": "0",
+      "like_count": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "title\tplayCount\ttipCount\tlike_count\nGreater Than Any Part of Me (Symphonic Power Metal) (Remastered) (1)\t13\t0\t1\nSecurity Blanket\t12\t0\t1\nTitus 3 (Symphonic Power Metal)\t10\t0\t1\nThe Forgiven (Symphonic Power Metal)\t10\t0\t1\nGreater Than Any Part of Me (Heavy Worship) v6\t8\t0\t0\nSuit Up! (Symphonic Power Metal)\t8\t0\t1\nSuit Up! (Arena Rock)\t7\t0\t1\nSerenity Death (Metal)\t6\t0\t1\nLike Peter (Rock)\t5\t0\t1\nBounce 'Em (A Cappella)\t5\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 67
+}

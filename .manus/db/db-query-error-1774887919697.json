@@ -1,0 +1,10 @@
+{
+  "query": "SELECT COUNT(*) as total_tips FROM tips; SELECT t.songId, t.amountCents, t.status, t.createdAt FROM tips t ORDER BY t.createdAt DESC LIMIT 10; SELECT s.title, COUNT(t.id) as tip_count, SUM(t.amountCents) as total_cents FROM songs s LEFT JOIN tips t ON s.id = t.songId WHERE s.userId = 780095 GROUP BY s.id, s.title ORDER BY tip_count DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT COUNT(*) as total_tips FROM tips; SELECT t.songId, t.amountCents, t.status, t.createdAt FROM tips t ORDER BY t.createdAt DESC LIMIT 10; SELECT s.title, COUNT(t.id) as tip_count, SUM(t.amountCents) as total_cents FROM songs s LEFT JOIN tips t ON s.id = t.songId WHERE s.userId = 780095 GROUP BY s.id, s.title ORDER BY tip_count DESC LIMIT 10;",
+  "returncode": 1,
+  "logs": [
+    "total_tips",
+    "0",
+    "ERROR 1054 (42S22) at line 1: Unknown column 't.status' in 'field list'"
+  ]
+}

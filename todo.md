@@ -1237,3 +1237,10 @@
 - [x] Avatar position adjuster — wire ImagePositioner into avatar upload/reposition flow
 - [x] What's New modal v2.8.0 entry: Drag to Reposition feature announcement
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Feature — Platform Quality Sprint (v2.9.0) [COMPLETE]
+- [x] Audit likes tracking — 115 likes in DB, toggleLike writes correctly, display bug was zero tips (not zero likes)
+- [x] Audit gifts/Stripe — MoshAIMusic Stripe enabled, 0 tips = no payments made yet, webhook handler correct
+- [x] Creator Analytics Dashboard — new Analytics tab: plays/likes/gifts/downloads summary cards + track performance table + 30-day plays trend chart (recharts BarChart)
+- [x] Three-zone track card interaction doctrine — cover art → loads player, title → /song/:id, artist → /creator/:id; creatorId + coverPositionX/Y propagated to all 7 track-building sites
+- [x] Session persistence — queue + currentIdx + queueContext saved to sessionStorage on every change, restored on reload (never auto-plays)

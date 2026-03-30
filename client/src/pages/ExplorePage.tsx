@@ -158,6 +158,9 @@ export default function ExplorePage() {
           witnessId: s.song.witnessId || undefined,
           aiDisclosure: s.creator?.aiDisclosure || undefined,
           creatorHandle: s.creator?.id ? String(s.creator.id) : undefined,
+          creatorId: s.creator?.id ?? undefined,
+          coverPositionX: s.song.coverPositionX ?? 50,
+          coverPositionY: s.song.coverPositionY ?? 50,
         }));
       const startIdx = queue.findIndex((t: any) => t.id === String(song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "EXPLORE");
@@ -171,6 +174,9 @@ export default function ExplorePage() {
         artUrl: song.coverArtUrl || undefined,
         witnessId: song.witnessId || undefined,
         aiDisclosure: creator?.aiDisclosure || undefined,
+        creatorId: creator?.id ?? undefined,
+        coverPositionX: song.coverPositionX ?? 50,
+        coverPositionY: song.coverPositionY ?? 50,
       });
     }
     openNowPlayingPanel();

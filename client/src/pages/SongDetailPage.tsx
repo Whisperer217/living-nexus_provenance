@@ -254,6 +254,9 @@ export default function SongDetailPage() {
         witnessId: song.witnessId || undefined,
         aiDisclosure: (creator?.aiDisclosure as any) || undefined,
         creatorHandle: creator?.artistHandle || creator?.name || undefined,
+        creatorId: creator?.id ?? undefined,
+        coverPositionX: song.coverPositionX ?? 50,
+        coverPositionY: song.coverPositionY ?? 50,
       });
     } else {
       // New track — load into global player and start playing
@@ -267,6 +270,9 @@ export default function SongDetailPage() {
         witnessId: song.witnessId || undefined,
         aiDisclosure: (creator?.aiDisclosure as any) || undefined,
         creatorHandle: creator?.artistHandle || creator?.name || undefined,
+        creatorId: creator?.id ?? undefined,
+        coverPositionX: song.coverPositionX ?? 50,
+        coverPositionY: song.coverPositionY ?? 50,
       });
       playMutation.mutate({ songId });
       openNowPlayingPanel();

@@ -12,10 +12,12 @@ import {
   Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
   XCircle, Download, Play, Activity, MessageCircle, Zap, Gift,
-  Library, RefreshCw, FileArchive, PackageOpen, Camera, X
+  Library, RefreshCw, FileArchive, PackageOpen, Camera, X,
+  TrendingUp, Heart, LineChart
 } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
-type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive";
+type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive" | "analytics";
 
 interface BatchTrack {
   id: number;
@@ -71,6 +73,11 @@ export default function DashboardPage() {
     undefined,
     { enabled: isAuthenticated && activeTab === "collections" }
   );
+  const { data: analyticsData, isLoading: analyticsLoading } = trpc.profile.myAnalytics.useQuery(
+    undefined,
+    { enabled: isAuthenticated && activeTab === "analytics" }
+  );
+
   const regenCertMutation = trpc.songs.generateCollectionCertificate.useMutation({
     onSuccess: (data: { pdfUrl: string; collectionWid: string }) => {
       toast.success("Certificate regenerated!");
@@ -482,11 +489,23 @@ export default function DashboardPage() {
               fontFamily: "'Cinzel', serif",
             }}
           >
-            <FileArchive className="w-4 h-4" />
+             <FileArchive className="w-4 h-4" />
             Archive
           </button>
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "analytics" ? "oklch(0.55 0.18 260 / 0.2)" : "transparent",
+              color: activeTab === "analytics" ? "oklch(0.75 0.15 260)" : "oklch(0.6 0.04 280)",
+              border: activeTab === "analytics" ? "1px solid oklch(0.55 0.18 260 / 0.4)" : "1px solid transparent",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <LineChart className="w-4 h-4" />
+            Analytics
+          </button>
         </div>
-
         {/* My Songs Tab */}
         {activeTab === "songs" && (
           <div>
@@ -1019,12 +1038,146 @@ export default function DashboardPage() {
         {activeTab === "archive" && (
           <ArchiveTab />
         )}
-
+        {/* Analytics Tab */}
+        {activeTab === "analytics" && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Creator Analytics</h2>
+              <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>All-time data · Updated in real time</p>
+            </div>
+            {analyticsLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "oklch(0.75 0.15 260)", borderTopColor: "transparent" }} />
+              </div>
+            ) : !analyticsData ? (
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+                <LineChart className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.15 260)" }} />
+                <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>No analytics data available yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Summary stat cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: "Total Plays", value: analyticsData.totalPlays, icon: Play, color: "oklch(0.84 0.155 85)" },
+                    { label: "Total Likes", value: analyticsData.totalLikes, icon: Heart, color: "oklch(0.65 0.2 25)" },
+                    { label: "Gifts Received", value: analyticsData.totalGiftsReceived, icon: Gift, color: "oklch(0.55 0.18 160)" },
+                    { label: "Downloads", value: analyticsData.totalDownloads, icon: Download, color: "oklch(0.65 0.18 220)" },
+                  ].map(({ label, value, icon: Icon, color }) => (
+                    <div key={label} className="rounded-xl p-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon className="w-4 h-4" style={{ color }} />
+                        <span className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{label}</span>
+                      </div>
+                      <p className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color }}>{value.toLocaleString()}</p>
+                    </div>
+                  ))}
+                </div>
+                {/* 30-day activity trend */}
+                <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="w-4 h-4" style={{ color: "oklch(0.75 0.15 260)" }} />
+                    <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>30-Day Activity Trend</h3>
+                    <span className="text-xs ml-auto" style={{ color: "oklch(0.5 0.03 280)" }}>Likes · Gifts · Comments · Witnesses</span>
+                  </div>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <AreaChart data={analyticsData.playTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="analyticsGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="oklch(0.75 0.15 260)" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="oklch(0.75 0.15 260)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.2 0.02 280)" />
+                      <XAxis dataKey="date" tick={{ fill: "oklch(0.45 0.03 280)", fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} />
+                      <YAxis tick={{ fill: "oklch(0.45 0.03 280)", fontSize: 10 }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "oklch(0.1 0.03 280)", border: "1px solid oklch(0.25 0.02 280)", borderRadius: "8px", color: "oklch(0.9 0.02 85)" }} />
+                      <Area type="monotone" dataKey="plays" stroke="oklch(0.75 0.15 260)" fill="url(#analyticsGrad)" strokeWidth={2} dot={false} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                {/* Plays by track */}
+                {analyticsData.playsByTrack.filter((t: { plays: number }) => t.plays > 0).length > 0 && (
+                  <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Play className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Plays by Track</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {[...analyticsData.playsByTrack].sort((a, b) => b.plays - a.plays).slice(0, 10).map((track) => (
+                        <div key={track.trackId} className="flex items-center gap-3">
+                          <span className="text-xs flex-1 truncate" style={{ color: "oklch(0.7 0.04 280)" }}>{track.title}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.plays / Math.max(...analyticsData.playsByTrack.map((t: { plays: number }) => t.plays), 1)) * 120))}px`, background: "oklch(0.84 0.155 85)" }} />
+                            <span className="text-xs font-mono w-8 text-right" style={{ color: "oklch(0.84 0.155 85)" }}>{track.plays}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Likes by track */}
+                {analyticsData.likesByTrack.filter((t: { likes: number }) => t.likes > 0).length > 0 && (
+                  <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Heart className="w-4 h-4" style={{ color: "oklch(0.65 0.2 25)" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Likes by Track</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {[...analyticsData.likesByTrack].sort((a, b) => b.likes - a.likes).slice(0, 10).map((track) => (
+                        <div key={track.trackId} className="flex items-center gap-3">
+                          <span className="text-xs flex-1 truncate" style={{ color: "oklch(0.7 0.04 280)" }}>{track.title}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.likes / Math.max(...analyticsData.likesByTrack.map((t: { likes: number }) => t.likes), 1)) * 120))}px`, background: "oklch(0.65 0.2 25)" }} />
+                            <span className="text-xs font-mono w-8 text-right" style={{ color: "oklch(0.65 0.2 25)" }}>{track.likes}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Gifts by track */}
+                {analyticsData.giftsByTrack.filter((t: { giftCount: number }) => t.giftCount > 0).length > 0 && (
+                  <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Gift className="w-4 h-4" style={{ color: "oklch(0.55 0.18 160)" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Gifts by Track</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {[...analyticsData.giftsByTrack].sort((a, b) => b.giftCount - a.giftCount).slice(0, 10).map((track) => (
+                        <div key={track.trackId} className="flex items-center gap-3">
+                          <span className="text-xs flex-1 truncate" style={{ color: "oklch(0.7 0.04 280)" }}>{track.title}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs" style={{ color: "oklch(0.55 0.18 160)" }}>{track.giftCount} gift{track.giftCount !== 1 ? 's' : ''}</span>
+                            <span className="text-xs font-mono" style={{ color: "oklch(0.65 0.18 145)" }}>${(track.totalAmount / 100).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Total gifts revenue */}
+                {analyticsData.totalAmountReceived > 0 && (
+                  <div className="rounded-xl p-4 flex items-center gap-4" style={{ background: "oklch(0.55 0.18 160 / 0.08)", border: "1px solid oklch(0.55 0.18 160 / 0.3)" }}>
+                    <DollarSign className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.55 0.18 160)" }} />
+                    <div>
+                      <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>Total Gift Revenue (gross)</p>
+                      <p className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 145)" }}>${(analyticsData.totalAmountReceived / 100).toFixed(2)}</p>
+                    </div>
+                    <div className="ml-auto text-right">
+                      <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>Your cut (90%)</p>
+                      <p className="text-lg font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>${(analyticsData.totalAmountReceived * 0.9 / 100).toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
-  );
+   );
 }
-
 // ─── Archive Tab Component ────────────────────────────────────────────────────
 function ArchiveTab() {
   const [batchInfo, setBatchInfo] = useState<BatchInfoResponse | null>(null);

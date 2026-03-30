@@ -1,12 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — TrackCard
-   Divine noir track card with hover glow and play button
+   Three-zone interaction doctrine:
+     Zone 1: Cover art  → loads track in global player (does NOT navigate)
+     Zone 2: Song title → navigates to /track/{id}
+     Zone 3: Artist     → navigates to /creator/{creatorId}
 ═══════════════════════════════════════════════════════════════════ */
 
 import { Play, Heart, DollarSign, ExternalLink } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useLike } from "@/hooks/useLike";
 import { trpc } from "@/lib/trpc";
 
@@ -22,12 +25,15 @@ export default function TrackCard({ track, index, onTip }: Props) {
   const isPlaying = state.currentIdx === index && state.isPlaying;
   const isActive = state.currentIdx === index;
 
-  const handlePlay = (e: React.MouseEvent) => {
+  // Zone 1: Cover art click — load into global player only, no navigation
+  const handleCoverClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     addAndPlay(track);
     openNowPlayingPanel();
   };
-  // Use DB-backed like state (falls back to unfilled for unauthenticated users)
+
+  // DB-backed like state
   const numericId = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
   const { liked: isLiked, toggle: toggleLike } = useLike(isNaN(numericId) ? 0 : numericId);
   const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
@@ -36,23 +42,41 @@ export default function TrackCard({ track, index, onTip }: Props) {
   );
   const likeCount = likeCountData?.count ?? 0;
 
+  // Derive cover object-position from track metadata
+  const coverPos = `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%`;
+
   return (
     <div
-      className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
+      className={`group relative rounded-xl overflow-hidden transition-all duration-200
         border bg-[oklch(0.095_0.028_275)] track-card-glow
         ${isActive
           ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
           : "border-white/[0.05] hover:border-[#A78BFA]/30"
         }`}
-      onClick={handlePlay}
     >
-      {/* Artwork */}
-      <div className="relative overflow-hidden" style={{ height: "180px", background: track.bg || "oklch(0.15 0.05 275)" }}>
+      {/* ── Zone 1: Cover Art — plays in global player ── */}
+      <div
+        className="relative overflow-hidden cursor-pointer"
+        style={{ height: "180px", background: track.bg || "oklch(0.15 0.05 275)" }}
+        onClick={handleCoverClick}
+        title="Play this track"
+      >
         {track.artUrl && track.artType !== "video" && (
-          <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover object-top" />
+          <img
+            src={track.artUrl}
+            alt={track.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            style={{ objectPosition: coverPos }}
+          />
         )}
         {track.artUrl && track.artType === "video" && (
-          <video src={track.artUrl} className="w-full h-full object-cover object-top" muted loop />
+          <video
+            src={track.artUrl}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: coverPos }}
+            muted
+            loop
+          />
         )}
         {!track.artUrl && (
           <div className="w-full h-full flex items-center justify-center text-5xl">
@@ -60,7 +84,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
           </div>
         )}
 
-        {/* Overlay */}
+        {/* Overlay gradient */}
         <div className={`absolute inset-0 transition-opacity duration-200
           bg-gradient-to-b from-transparent via-transparent to-black/70
           ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
@@ -77,7 +101,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
           }
         </div>
 
-        {/* Badge */}
+        {/* YOURS badge */}
         {track.isOwn && (
           <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
             bg-black/70 text-[#D4AF37] border border-[#D4AF37]/30 z-10 font-heading tracking-wider">
@@ -86,19 +110,41 @@ export default function TrackCard({ track, index, onTip }: Props) {
         )}
       </div>
 
-      {/* Info */}
+      {/* ── Info panel ── */}
       <div className="p-3">
-        <div className="text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide">
+        {/* Zone 2: Song title → song detail page */}
+        <Link
+          href={`/track/${track.id}`}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide
+            hover:text-[#D4AF37] transition-colors cursor-pointer"
+          title={`Open ${track.title}`}
+        >
           {track.title}
-        </div>
-        <div className="flex items-center gap-2 text-[11px] text-white/75">
+        </Link>
+
+        {/* Zone 3: Artist name → creator profile page */}
+        <div className="flex items-center gap-2 text-[11px] text-white/75 mb-2">
           <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold
             bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
             {track.artist.charAt(0)}
           </div>
-          <span className="truncate">{track.artist}</span>
+          {track.creatorId ? (
+            <Link
+              href={`/creator/${track.creatorId}`}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              className="truncate hover:text-[#D4AF37] transition-colors cursor-pointer"
+              title={`View ${track.artist}'s profile`}
+            >
+              {track.artist}
+            </Link>
+          ) : (
+            <span className="truncate">{track.artist}</span>
+          )}
         </div>
-        <div className="flex items-center justify-between mt-2">
+
+        {/* Actions row */}
+        <div className="flex items-center justify-between">
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 font-body">
             {track.genre}
           </span>
@@ -110,13 +156,16 @@ export default function TrackCard({ track, index, onTip }: Props) {
             >
               <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
               {likeCount > 0 && (
-                <span className="text-[10px] leading-none font-medium tabular-nums">{likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}</span>
+                <span className="text-[10px] leading-none font-medium tabular-nums">
+                  {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
+                </span>
               )}
             </button>
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(index); }}
                 className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+                title="Send a gift"
               >
                 <DollarSign size={12} />
               </button>

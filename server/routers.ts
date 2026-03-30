@@ -22,7 +22,7 @@ import {
   getSongByWitnessId, updateSongMetadata, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
   getUserTipTotalForSong, updateSongDownloadPermission,
-  getAllUsersWithStats, markWelcomeSeen,
+  getAllUsersWithStats, markWelcomeSeen, getCreatorAnalytics,
   createEvent, getEventsByWork, getEventsForCreator,
   getCreatorForOg,
   createFieldNote, getFieldNotesByUser, getPublicFieldNotes,
@@ -253,6 +253,7 @@ export const appRouter = router({
     myActivity: protectedProcedure
       .input(z.object({ limit: z.number().max(50).default(20) }))
       .query(async ({ ctx, input }) => getEventsForCreator(ctx.user.id, input.limit)),
+    myAnalytics: protectedProcedure.query(async ({ ctx }) => getCreatorAnalytics(ctx.user.id)),
   }),
 
   songs: router({

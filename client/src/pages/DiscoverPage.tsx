@@ -46,6 +46,9 @@ export default function DiscoverPage() {
           artUrl: s.song.coverArtUrl || undefined,
           witnessId: s.song.witnessId || undefined,
           aiDisclosure: s.creator?.aiDisclosure || undefined,
+          creatorId: s.creator?.id ?? undefined,
+          coverPositionX: s.song.coverPositionX ?? 50,
+          coverPositionY: s.song.coverPositionY ?? 50,
         }));
       const startIdx = queue.findIndex((t: any) => t.id === String(clickedSong.song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "HOME");
@@ -59,6 +62,9 @@ export default function DiscoverPage() {
         artUrl: clickedSong.song.coverArtUrl || undefined,
         witnessId: clickedSong.song.witnessId || undefined,
         aiDisclosure: clickedSong.creator?.aiDisclosure || undefined,
+        creatorId: clickedSong.creator?.id ?? undefined,
+        coverPositionX: clickedSong.song.coverPositionX ?? 50,
+        coverPositionY: clickedSong.song.coverPositionY ?? 50,
       });
     }
     playMutation.mutate({ songId: clickedSong.song.id });

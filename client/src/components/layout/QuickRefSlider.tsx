@@ -56,7 +56,7 @@ export default function QuickRefSlider({ open, onToggle, summary, currentPath }:
     }
   };
 
-  const handleTrackClick = (track: { song: { id: number; title: string; fileUrl: string | null; coverArtUrl: string | null; witnessId: string | null }; creator: { id: number; name: string | null; artistHandle: string | null } | null }) => {
+  const handleTrackClick = (track: { song: { id: number; title: string; fileUrl: string | null; coverArtUrl: string | null; witnessId: string | null; coverPositionX?: number | null; coverPositionY?: number | null }; creator: { id: number; name: string | null; artistHandle: string | null } | null }) => {
     onToggle();
     addAndPlay({
       id: String(track.song.id),
@@ -69,6 +69,9 @@ export default function QuickRefSlider({ open, onToggle, summary, currentPath }:
       genre: "",
       bg: "oklch(0.185 0.06 270)",
       emoji: "🎵",
+      creatorId: track.creator?.id ?? undefined,
+      coverPositionX: track.song.coverPositionX ?? 50,
+      coverPositionY: track.song.coverPositionY ?? 50,
     });
   };
 

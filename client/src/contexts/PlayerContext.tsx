@@ -35,6 +35,9 @@ export interface Track {
   aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
   creatorHandle?: string; // used for background creator page routing on queue advance
   tipsEnabled?: boolean; // true when creator has Stripe tips enabled
+  creatorId?: number; // numeric user ID for Zone 3 artist link
+  coverPositionX?: number; // objectPosition X (0-100)
+  coverPositionY?: number; // objectPosition Y (0-100)
 }
 
 /** Describes WHERE the current queue was built from — controls shuffle/repeat scope */
@@ -151,6 +154,24 @@ interface PlayerContextValue {
   backgroundCreatorHandle: string | null;
 }
 
+const PLAYER_SESSION_KEY = "ln_player_session";
+
+function loadSessionTracks(): { tracks: Track[]; currentIdx: number; queueContext: QueueContext } {
+  try {
+    const raw = sessionStorage.getItem(PLAYER_SESSION_KEY);
+    if (!raw) return { tracks: [], currentIdx: -1, queueContext: "NONE" };
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed.tracks) && typeof parsed.currentIdx === "number") {
+      return {
+        tracks: parsed.tracks as Track[],
+        currentIdx: parsed.currentIdx,
+        queueContext: (parsed.queueContext ?? "NONE") as QueueContext,
+      };
+    }
+  } catch { /* ignore */ }
+  return { tracks: [], currentIdx: -1, queueContext: "NONE" };
+}
+
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
@@ -161,34 +182,48 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
   const openTheater = useCallback(() => setIsTheaterOpen(true), []);
   const closeTheater = useCallback(() => setIsTheaterOpen(false), []);
-  const [state, setState] = useState<PlayerState>({
-    currentIdx: -1,
-    isPlaying: false,
-    isShuffle: false,
-    isRepeat: false,
-    isMuted: false,
-    volume: 0.75,
-    currentTime: 0,
-    duration: 0,
-    liked: new Set(),
-    tracks: [],
-    queueContext: "NONE",
-    profileName: "",
-    profileBio: "",
-    profileLocation: "",
-    profileWebsite: "",
-    profileSocials: { twitter: "", instagram: "", youtube: "", soundcloud: "" },
-    profileAvatar: null,
-    profileBanner: null,
-    tipsEarned: 0,
-    trackComments: {},
-    trackTips: {},
-    room: null,
-    jukeboxQueueCount: 0,
+  const [state, setState] = useState<PlayerState>(() => {
+    const session = loadSessionTracks();
+    return {
+      currentIdx: session.currentIdx,
+      isPlaying: false, // never auto-play on reload
+      isShuffle: false,
+      isRepeat: false,
+      isMuted: false,
+      volume: 0.75,
+      currentTime: 0,
+      duration: 0,
+      liked: new Set(),
+      tracks: session.tracks,
+      queueContext: session.queueContext,
+      profileName: "",
+      profileBio: "",
+      profileLocation: "",
+      profileWebsite: "",
+      profileSocials: { twitter: "", instagram: "", youtube: "", soundcloud: "" },
+      profileAvatar: null,
+      profileBanner: null,
+      tipsEarned: 0,
+      trackComments: {},
+      trackTips: {},
+      room: null,
+      jukeboxQueueCount: 0,
+    };
   });
 
   // Only real DB-sourced tracks — DEMO_TRACKS is empty, guard is here for safety
   const allTracks = useCallback(() => state.tracks.filter(t => !!t.audioUrl), [state.tracks]);
+
+  // Persist queue + currentIdx to sessionStorage so navigation doesn't lose the player state
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({
+        tracks: state.tracks,
+        currentIdx: state.currentIdx,
+        queueContext: state.queueContext,
+      }));
+    } catch { /* quota exceeded — ignore */ }
+  }, [state.tracks, state.currentIdx, state.queueContext]);
 
   useEffect(() => {
     const audio = audioRef.current;

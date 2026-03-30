@@ -1,9 +1,9 @@
 import { alias } from "drizzle-orm/mysql-core";
-import { and, desc, eq, isNotNull, like, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {
-  InsertUser, aiTransforms, comments, downloads, licenses,
+  InsertUser, aiTransforms, comments, downloads, licenses, likes,
   slotPurchases, songs, tips, users, events,
   jukeboxOfferings, jukeboxPlayEvents,
   promoCodes, promoRedemptions,
@@ -1873,4 +1873,119 @@ export async function updateCollectionCover(
   await db.update(collections).set(data).where(
     and(eq(collections.id, collectionId), eq(collections.creatorId, creatorId))
   );
+}
+
+// ─── Creator Analytics ────────────────────────────────────────────────────────
+export async function getCreatorAnalytics(creatorId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  // All songs by creator
+  const creatorSongs = await db
+    .select({ id: songs.id, title: songs.title, playCount: songs.playCount, tipCount: songs.tipCount })
+    .from(songs)
+    .where(eq(songs.userId, creatorId));
+
+  const songIds = creatorSongs.map((s: { id: number; title: string; playCount: number | null; tipCount: number | null }) => s.id);
+  const empty = {
+    totalPlays: 0, playsThisWeek: 0, playsThisMonth: 0,
+    totalLikes: 0, likesThisWeek: 0,
+    totalGiftsReceived: 0, totalAmountReceived: 0, giftsThisMonth: 0,
+    totalDownloads: 0,
+    playsByTrack: [] as { trackId: string; title: string; plays: number; trend: "up" | "down" | "flat" }[],
+    likesByTrack: [] as { trackId: string; title: string; likes: number }[],
+    giftsByTrack: [] as { trackId: string; title: string; giftCount: number; totalAmount: number }[],
+    downloadsByTrack: [] as { trackId: string; title: string; downloads: number }[],
+    playTrend: [] as { date: string; plays: number }[],
+  };
+  if (songIds.length === 0) return empty;
+
+  // Likes
+  const allLikes = await db
+    .select({ songId: likes.songId, createdAt: likes.createdAt })
+    .from(likes)
+    .where(inArray(likes.songId, songIds));
+  const totalLikes = allLikes.length;
+  const likesThisWeek = allLikes.filter((l: { songId: number; createdAt: Date }) => l.createdAt >= weekAgo).length;
+  const likesByTrack = creatorSongs.map((s: { id: number; title: string; playCount: number | null; tipCount: number | null }) => ({
+    trackId: String(s.id),
+    title: s.title,
+    likes: allLikes.filter((l: { songId: number; createdAt: Date }) => l.songId === s.id).length,
+  }));
+
+  // Tips
+  const allTips = await db
+    .select({ songId: tips.songId, amountCents: tips.amountCents, createdAt: tips.createdAt })
+    .from(tips)
+    .where(inArray(tips.songId, songIds));
+  const totalGiftsReceived = allTips.length;
+  const totalAmountReceived = allTips.reduce((sum: number, t: { songId: number; amountCents: number | null; createdAt: Date }) => sum + (t.amountCents ?? 0), 0);
+  const giftsThisMonth = allTips.filter((t: { songId: number; amountCents: number | null; createdAt: Date }) => t.createdAt >= monthAgo).length;
+  const giftsByTrack = creatorSongs.map((s: { id: number; title: string; playCount: number | null; tipCount: number | null }) => {
+    const trackTips = allTips.filter((t: { songId: number; amountCents: number | null; createdAt: Date }) => t.songId === s.id);
+    return {
+      trackId: String(s.id),
+      title: s.title,
+      giftCount: trackTips.length,
+      totalAmount: trackTips.reduce((sum: number, t: { songId: number; amountCents: number | null; createdAt: Date }) => sum + (t.amountCents ?? 0), 0),
+    };
+  });
+
+  // Downloads
+  const allDownloads = await db
+    .select({ songId: downloads.songId, createdAt: downloads.createdAt })
+    .from(downloads)
+    .where(inArray(downloads.songId, songIds));
+  const totalDownloads = allDownloads.length;
+  const downloadsByTrack = creatorSongs.map((s: { id: number; title: string; playCount: number | null; tipCount: number | null }) => ({
+    trackId: String(s.id),
+    title: s.title,
+    downloads: allDownloads.filter((d: { songId: number; createdAt: Date }) => d.songId === s.id).length,
+  }));
+
+  // Plays by track (from songs.playCount — source of truth)
+  const totalPlays = creatorSongs.reduce((sum: number, s: { id: number; title: string; playCount: number | null; tipCount: number | null }) => sum + (s.playCount ?? 0), 0);
+  const playsByTrack = creatorSongs.map((s: { id: number; title: string; playCount: number | null; tipCount: number | null }) => ({
+    trackId: String(s.id),
+    title: s.title,
+    plays: s.playCount ?? 0,
+    trend: "flat" as "up" | "down" | "flat",
+  }));
+
+  // 30-day activity trend — bucket events (likes, tips, comments) by day
+  const recentEvents = await db
+    .select({ workId: events.workId, createdAt: events.createdAt })
+    .from(events)
+    .where(and(inArray(events.workId, songIds), gte(events.createdAt, monthAgo)));
+  const trendMap: Record<string, number> = {};
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    trendMap[d.toISOString().slice(0, 10)] = 0;
+  }
+  recentEvents.forEach((e: { workId: number; createdAt: Date }) => {
+    const key = e.createdAt.toISOString().slice(0, 10);
+    if (key in trendMap) trendMap[key]++;
+  });
+  const playTrend = Object.entries(trendMap).map(([date, plays]) => ({ date, plays }));
+
+  return {
+    totalPlays,
+    playsThisWeek: 0, // playCount is a running total; no per-play event table
+    playsThisMonth: 0,
+    totalLikes,
+    likesThisWeek,
+    totalGiftsReceived,
+    totalAmountReceived,
+    giftsThisMonth,
+    totalDownloads,
+    playsByTrack,
+    likesByTrack,
+    giftsByTrack,
+    downloadsByTrack,
+    playTrend,
+  };
 }

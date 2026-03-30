@@ -53,6 +53,9 @@ export default function PlaylistPage() {
         witnessId: item.song.witnessId || undefined,
         aiDisclosure: item.creator?.aiDisclosure || undefined,
         creatorHandle: item.creator?.id ? String(item.creator.id) : undefined,
+        creatorId: item.creator?.id ?? undefined,
+        coverPositionX: item.song.coverPositionX ?? 50,
+        coverPositionY: item.song.coverPositionY ?? 50,
       }));
 
   const handlePlay = (songId: number) => {

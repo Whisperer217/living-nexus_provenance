@@ -47,6 +47,9 @@ export default function LikedPage() {
         artType: "image" as const,
         witnessId: item.song.witnessId || undefined,
         aiDisclosure: item.creator?.aiDisclosure || undefined,
+        creatorId: item.creator?.id ?? undefined,
+        coverPositionX: item.song.coverPositionX ?? 50,
+        coverPositionY: item.song.coverPositionY ?? 50,
       }));
 
   const handlePlay = (idx: number) => {

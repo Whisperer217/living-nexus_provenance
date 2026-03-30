@@ -305,7 +305,7 @@ export default function CreatorProfilePage() {
     // Build queue from all this creator's public songs so playback continues
     const creatorSongs = (data?.songs || []).filter((s: any) => !!s.fileUrl);
     if (creatorSongs.length > 1) {
-      const queue = creatorSongs.map((s: { id: number; title: string; fileUrl: string; coverArtUrl?: string; genre?: string; witnessId?: string }) => ({
+      const queue = creatorSongs.map((s: { id: number; title: string; fileUrl: string; coverArtUrl?: string; genre?: string; witnessId?: string; coverPositionX?: number; coverPositionY?: number }) => ({
         id: String(s.id),
         title: s.title,
         artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
@@ -314,6 +314,9 @@ export default function CreatorProfilePage() {
         artUrl: s.coverArtUrl || undefined,
         witnessId: s.witnessId || undefined,
         aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
+        creatorId: (data?.creator as any)?.id ?? undefined,
+        coverPositionX: s.coverPositionX ?? 50,
+        coverPositionY: s.coverPositionY ?? 50,
       }));
       const startIdx = queue.findIndex((t: any) => t.id === String(song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
@@ -326,6 +329,9 @@ export default function CreatorProfilePage() {
         artUrl: song.coverArtUrl || undefined,
         audioUrl: song.fileUrl || undefined,
         aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
+        creatorId: (data?.creator as any)?.id ?? undefined,
+        coverPositionX: song.coverPositionX ?? 50,
+        coverPositionY: song.coverPositionY ?? 50,
       });
     }
     playMutation.mutate({ songId: song.id });
