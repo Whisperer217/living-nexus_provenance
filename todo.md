@@ -1211,3 +1211,9 @@
 ## Feature — Vertical Volume Popup
 - [x] Replace horizontal volume slider with vertical popup (tap volume icon → popup with vertical range input, % label, mute icon, click-outside to close)
 - [x] Apply to both collapsed and expanded player bars
+
+## Feature — Explore Two Modes
+- [x] Server: add optional `randomize: boolean` + `seed: number` params to getPublicSongs, use ORDER BY RAND(seed) when randomize=true
+- [x] Explore page: Mode 1 — infinite scroll with IntersectionObserver, loads PAGE_SIZE*page records, sentinel at bottom
+- [x] Explore page: Mode 2 — Randomize button reshuffles grid with new seed on each click, scrolls to top, brief fade animation
+- [x] Mode toggle UI in Explore header (Infinite / Randomize pill toggle)

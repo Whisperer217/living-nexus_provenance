@@ -1,15 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — ExplorePage
-   Divine Noir: Full exploration grid with search
-   Loads real DB songs via tRPC; uses addAndPlay() for global player
+   Two modes: Infinite Scroll (chronological) + Randomize (seeded RAND)
+   No algorithm. No "you might like." Just — here's what exists.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
-import { Search, Music, Play } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity } from "lucide-react";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -20,22 +20,99 @@ const GENRE_CARDS = [
   { label: "Hip-Hop",   icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-eye_0e10b572.png",      color: "#fb923c" },
   { label: "Rock",      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#f87171" },
   { label: "R&B",       icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-feather_40dcaa6d.png",   color: "#a78bfa" },
+  { label: "Metal",     icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#f87171" },
 ];
 
 const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp";
+const PAGE_SIZE = 24;
+
+type ExploreMode = "infinite" | "randomize";
 
 export default function ExplorePage() {
   const { addAndPlay, playQueueAt, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
+  const [mode, setMode] = useState<ExploreMode>("infinite");
 
-  const { data: songsData, isLoading } = trpc.songs.discover.useQuery(
-    { genre: activeGenre === "All" ? undefined : activeGenre, search: query || undefined, limit: 48 },
-    { refetchOnWindowFocus: false }
+  // Infinite scroll state
+  const [page, setPage] = useState(1);
+  const [allSongs, setAllSongs] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  // Randomize state — new seed on each click
+  const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1_000_000));
+  const [isShuffling, setIsShuffling] = useState(false);
+
+  // ── Infinite scroll query ─────────────────────────────────────────
+  const { data: infiniteData, isLoading: infiniteLoading, isFetching: infiniteFetching } = trpc.songs.discover.useQuery(
+    {
+      genre: activeGenre === "All" ? undefined : activeGenre,
+      search: query || undefined,
+      limit: PAGE_SIZE * page,
+    },
+    {
+      enabled: mode === "infinite",
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    } as any
   );
-  const playMutation = trpc.songs.play.useMutation();
 
-  const songs = songsData || [];
+  // ── Randomize query ───────────────────────────────────────────────
+  const { data: randomData, isLoading: randomLoading, refetch: refetchRandom } = trpc.songs.discover.useQuery(
+    {
+      genre: activeGenre === "All" ? undefined : activeGenre,
+      search: query || undefined,
+      limit: PAGE_SIZE,
+      randomize: true,
+      seed,
+    },
+    {
+      enabled: mode === "randomize",
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  // Sync infinite scroll data
+  useEffect(() => {
+    if (mode !== "infinite" || !infiniteData) return;
+    setAllSongs(infiniteData as any[]);
+    setHasMore((infiniteData as any[]).length >= PAGE_SIZE * page);
+  }, [infiniteData, mode, page]);
+
+  // Reset on filter/mode change
+  useEffect(() => {
+    setPage(1);
+    setAllSongs([]);
+    setHasMore(true);
+  }, [activeGenre, query, mode]);
+
+  // IntersectionObserver for infinite scroll
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const target = entries[0];
+    if (target.isIntersecting && hasMore && !infiniteLoading && !infiniteFetching && mode === "infinite") {
+      setPage(prev => prev + 1);
+    }
+  }, [hasMore, infiniteLoading, infiniteFetching, mode]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, { rootMargin: "200px" });
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [handleObserver]);
+
+  // Randomize handler
+  const handleRandomize = useCallback(() => {
+    setIsShuffling(true);
+    const newSeed = Math.floor(Math.random() * 1_000_000);
+    setSeed(newSeed);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => setIsShuffling(false), 600);
+  }, []);
+
+  // Active songs list
+  const songs = mode === "infinite" ? allSongs : (randomData || []);
+  const isLoading = mode === "infinite" ? (infiniteLoading && page === 1) : randomLoading;
 
   const handlePlay = (item: any) => {
     const song = item.song;
@@ -69,7 +146,6 @@ export default function ExplorePage() {
         aiDisclosure: creator?.aiDisclosure || undefined,
       });
     }
-    playMutation.mutate({ songId: song.id });
     openNowPlayingPanel();
   };
 
@@ -87,7 +163,7 @@ export default function ExplorePage() {
 
       <div className="px-6 py-5">
         {/* Search */}
-        <div className="relative mb-6">
+        <div className="relative mb-5">
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/65" />
           <input
             type="text"
@@ -102,8 +178,8 @@ export default function ExplorePage() {
         </div>
 
         {/* Genre icon cards */}
-        <div className="mb-6">
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+        <div className="mb-5">
+          <div className="grid grid-cols-4 sm:grid-cols-9 gap-2">
             {GENRE_CARDS.map(g => (
               <button
                 key={g.label}
@@ -115,7 +191,7 @@ export default function ExplorePage() {
                   }`}
               >
                 {g.icon ? (
-                  <div className="w-10 h-10 flex items-center justify-center">
+                  <div className="w-9 h-9 flex items-center justify-center">
                     <img
                       src={g.icon}
                       alt={g.label}
@@ -124,9 +200,9 @@ export default function ExplorePage() {
                     />
                   </div>
                 ) : (
-                  <div className="w-10 h-10 flex items-center justify-center rounded-lg"
+                  <div className="w-9 h-9 flex items-center justify-center rounded-lg"
                     style={{ background: "linear-gradient(135deg, #D4AF37, #7C3AED)" }}>
-                    <span className="text-[11px] font-heading font-bold text-black">ALL</span>
+                    <span className="text-[10px] font-heading font-bold text-black">ALL</span>
                   </div>
                 )}
                 <span
@@ -140,17 +216,69 @@ export default function ExplorePage() {
           </div>
         </div>
 
-        {/* Results count */}
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-[13px] font-body" style={{ color: "#E2E8F0" }}>
-            {isLoading ? "Loading…" : `${songs.length} ${songs.length === 1 ? "track" : "tracks"} found`}
-          </span>
+        {/* Mode toggle + Randomize button */}
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          {/* Mode pills */}
+          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.04 270 / 40%)" }}>
+            <button
+              onClick={() => setMode("infinite")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
+                mode === "infinite"
+                  ? "text-white"
+                  : "text-white/40 hover:text-white/70"
+              }`}
+              style={mode === "infinite" ? { background: "oklch(0.22 0.04 270)", color: "oklch(0.80 0.145 82)" } : {}}
+            >
+              <Infinity size={12} />
+              Infinite
+            </button>
+            <button
+              onClick={() => setMode("randomize")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
+                mode === "randomize"
+                  ? "text-white"
+                  : "text-white/40 hover:text-white/70"
+              }`}
+              style={mode === "randomize" ? { background: "oklch(0.22 0.04 270)", color: "oklch(0.80 0.145 82)" } : {}}
+            >
+              <Shuffle size={12} />
+              Randomize
+            </button>
+          </div>
+
+          {/* Right side: count + randomize button */}
+          <div className="flex items-center gap-3">
+            <span className="text-[12px] font-body" style={{ color: "rgba(255,255,255,0.55)" }}>
+              {isLoading ? "Loading…" : `${songs.length} track${songs.length === 1 ? "" : "s"}`}
+            </span>
+            {mode === "randomize" && (
+              <button
+                onClick={handleRandomize}
+                disabled={isShuffling || randomLoading}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95 disabled:opacity-60"
+                style={{
+                  background: "oklch(0.80 0.145 82 / 0.12)",
+                  border: "1px solid oklch(0.80 0.145 82 / 0.35)",
+                  color: "oklch(0.80 0.145 82)",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "oklch(0.80 0.145 82 / 0.22)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "oklch(0.80 0.145 82 / 0.12)")}
+              >
+                <Shuffle
+                  size={14}
+                  className={isShuffling ? "animate-spin" : ""}
+                  style={{ animationDuration: "0.4s" }}
+                />
+                {isShuffling ? "Shuffling…" : "Shuffle Again"}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Loading skeleton */}
         {isLoading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {Array.from({ length: 10 }).map((_, i) => (
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
               <div key={i} className="rounded-xl overflow-hidden border border-white/[0.06] bg-[oklch(0.14_0.013_280)] animate-pulse">
                 <div className="bg-white/[0.04]" style={{ height: "180px" }} />
                 <div className="p-3 space-y-2">
@@ -164,14 +292,17 @@ export default function ExplorePage() {
 
         {/* Grid */}
         {!isLoading && songs.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+            style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
+          >
             {songs.map((item: any) => {
               const song = item.song;
               const creator = item.creator;
               const isActive = currentTrackId === String(song.id);
               return (
                 <div
-                  key={song.id}
+                  key={`${song.id}-${seed}`}
                   className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
                     border bg-[oklch(0.115_0.055_278)]
                     ${isActive
@@ -249,6 +380,32 @@ export default function ExplorePage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Infinite scroll loader sentinel */}
+        {mode === "infinite" && (
+          <div ref={loaderRef} className="py-8 flex justify-center">
+            {infiniteFetching && songs.length > 0 && (
+              <div className="flex items-center gap-2 text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>
+                <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#D4AF37] animate-spin" />
+                Loading more…
+              </div>
+            )}
+            {!hasMore && songs.length > 0 && (
+              <p className="text-[11px] font-body text-center" style={{ color: "rgba(255,255,255,0.25)" }}>
+                ✦ You've reached the end of the cosmos ✦
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Randomize mode — end note */}
+        {mode === "randomize" && !randomLoading && songs.length > 0 && (
+          <div className="py-8 text-center">
+            <p className="text-[11px] font-body" style={{ color: "rgba(255,255,255,0.30)" }}>
+              🎲 {PAGE_SIZE} tracks drawn at random · No algorithm · No "you might like"
+            </p>
           </div>
         )}
 

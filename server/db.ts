@@ -210,7 +210,7 @@ export async function getSongsByUser(userId: number) {
   return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(desc(songs.createdAt));
 }
 
-export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number }) {
+export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; randomize?: boolean; seed?: number }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 50;
@@ -222,11 +222,14 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
       like(songs.genre, `%${opts.search}%`),
     ) as unknown as ReturnType<typeof eq>);
   }
+  const orderExpr = opts?.randomize
+    ? (opts.seed !== undefined ? sql`RAND(${opts.seed})` : sql`RAND()`)
+    : desc(songs.createdAt);
   return db.select({
     song: songs,
     creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
-    .where(and(...conditions)).orderBy(desc(songs.createdAt)).limit(limit);
+    .where(and(...conditions)).orderBy(orderExpr).limit(limit);
 }
 
 export async function incrementPlayCount(songId: number) {
