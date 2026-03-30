@@ -353,13 +353,12 @@ downloadRouter.get("/api/download/batch-info", async (req: Request, res: Respons
 });
 
 // ── APK Download Route ─────────────────────────────────────────────────────────────────────────────────
-// GET /apk/download  — serves the signed Android APK from server/assets/
-// Use process.cwd() so the path resolves correctly in both dev (cwd = project root)
-// and production (dist/index.js also runs with cwd = project root on Manus hosting).
+// GET /api/apk/download  — serves the signed Android APK from server/assets/
+// Route is under /api/ prefix to ensure it's handled by Express before the SPA catch-all.
 const APK_PATH = path.join(process.cwd(), "server", "assets", "LivingNexus-v1-release.apk");
 const APK_FILENAME = "LivingNexus-v1-release.apk";
 
-downloadRouter.get("/apk/download", (_req: Request, res: Response) => {
+downloadRouter.get("/api/apk/download", (_req: Request, res: Response) => {
   if (!fs.existsSync(APK_PATH)) {
     res.status(404).json({ error: "APK not found on server." });
     return;

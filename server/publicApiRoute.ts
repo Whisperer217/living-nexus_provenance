@@ -345,20 +345,3 @@ publicApiRouter.get("/api/v1/jellyfin/catalog", async (req: Request, res: Respon
   }
 });
 
-// ── Temporary debug endpoint — remove after APK path is confirmed ──────────────
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-publicApiRouter.get("/api/v1/debug-apk-path", (_req: Request, res: Response) => {
-  const cwd = process.cwd();
-  const metaDirname = path.dirname(fileURLToPath(import.meta.url));
-  const paths = [
-    path.join(cwd, "server", "assets", "LivingNexus-v1-release.apk"),
-    path.join(metaDirname, "assets", "LivingNexus-v1-release.apk"),
-    path.join(metaDirname, "..", "server", "assets", "LivingNexus-v1-release.apk"),
-    "/app/server/assets/LivingNexus-v1-release.apk",
-    "/home/app/server/assets/LivingNexus-v1-release.apk",
-  ];
-  const results = paths.map(p => ({ path: p, exists: fs.existsSync(p) }));
-  res.json({ cwd, metaDirname, paths: results });
-});

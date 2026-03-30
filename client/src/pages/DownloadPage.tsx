@@ -44,7 +44,7 @@ export default function DownloadPage() {
 
       {/* Download Button */}
       <a
-        href="/apk/download"
+        href="/api/apk/download"
         download="LivingNexus-v1-release.apk"
         className="flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-bold transition-all mb-4 hover:scale-105 active:scale-95"
         style={{
