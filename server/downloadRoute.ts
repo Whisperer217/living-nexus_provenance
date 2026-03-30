@@ -17,6 +17,9 @@
  */
 
 import { Router, Request, Response } from "express";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import NodeID3 from "node-id3";
 import JSZip from "jszip";
 import { getSongWithCreator, getUserTipTotalForSong, recordDownload, getSongsByUser } from "./db";
@@ -348,4 +351,23 @@ downloadRouter.get("/api/download/batch-info", async (req: Request, res: Respons
   }
 
   res.json({ totalTracks: activeSongs.length, batchSize: BATCH_SIZE, batches });
+});
+
+// ── APK Download Route ─────────────────────────────────────────────────────────────────────────────────
+// GET /apk/download  — serves the signed Android APK from server/assets/
+const __dirname_apk = path.dirname(fileURLToPath(import.meta.url));
+const APK_PATH = path.join(__dirname_apk, "assets", "LivingNexus-v1-release.apk");
+const APK_FILENAME = "LivingNexus-v1-release.apk";
+
+downloadRouter.get("/apk/download", (_req: Request, res: Response) => {
+  if (!fs.existsSync(APK_PATH)) {
+    res.status(404).json({ error: "APK not found on server." });
+    return;
+  }
+  const stat = fs.statSync(APK_PATH);
+  res.setHeader("Content-Type", "application/vnd.android.package-archive");
+  res.setHeader("Content-Disposition", `attachment; filename="${APK_FILENAME}"`);
+  res.setHeader("Content-Length", String(stat.size));
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  fs.createReadStream(APK_PATH).pipe(res);
 });

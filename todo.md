@@ -1200,3 +1200,10 @@
 - [x] Download My Archive tab in Dashboard (batch ZIP downloads with WID certificates)
 - [x] What's New modal bumped to v2.7.3 with two new entries
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Feature — APK Download Page (/download)
+- [x] APK copied to server/assets/LivingNexus-v1-release.apk (served server-side, not in Vite build)
+- [x] GET /apk/download route added to downloadRoute.ts — streams APK with correct Content-Type, Content-Disposition, Content-Length headers
+- [x] DownloadPage.tsx created — standalone page (no MainLayout/PlayerBar), dark theme, gold icon glow, download button, install steps, iOS PWA note, doctrine tagline
+- [x] /download route registered in App.tsx as public standalone (same pattern as /verify)
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

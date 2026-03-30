@@ -40,6 +40,7 @@ const LexiconPage = lazy(() => import("./pages/LexiconPage"));
 const PlaylistsPage = lazy(() => import("./pages/PlaylistsPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const WitnessRegistryPage = lazy(() => import("./pages/WitnessRegistryPage"));
+const DownloadPage = lazy(() => import("./pages/DownloadPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -58,6 +59,7 @@ function Router() {
         {/* Public standalone pages — no MainLayout/PlayerBar */}
         <Route path="/verify" component={VerifyPage} />
         <Route path="/verify/:witnessId" component={VerifyPage} />
+        <Route path="/download" component={DownloadPage} />
 
         {/* App pages inside MainLayout */}
         <Route>
