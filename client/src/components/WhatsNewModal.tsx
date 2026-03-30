@@ -4,19 +4,28 @@ import {
   Shield, Upload, Music, Video, DollarSign, Users, BookOpen,
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
   Eye, Globe, FileText, Network, Scroll, Film, Gift, Link2,
-  Radio, ArrowUpFromLine, Library,
+  Radio, ArrowUpFromLine, Library, FileArchive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.7.1";
+const CURRENT_VERSION = "v2.7.3";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.7.1",
+    version: "v2.7.3",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Download, text: "Player Bar Download — every track now has a Download button in the global player bar. The file is ID3-tagged with your WID, the verify URL, cover art, AI consent flag, and Colossians 1:17. Your provenance travels with every file, everywhere." },
+      { icon: FileArchive, text: "Download My Archive — Dashboard → Archive tab. See all your tracks grouped into batches of 10. Download any batch as a ZIP containing ID3-tagged audio and WID certificate PDFs. Your full catalog, offline, with provenance intact." },
+    ],
+  },
+  {
+    version: "v2.7.1",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Users, text: "Jukebox Free Multi-Queue — Songs now queue freely in sequence. No checkout required. Add as many as you want. The room hears them all." },
       { icon: Globe, text: "Declaration-First Homepage — Living Nexus now opens with its declaration, doctrine, and the Creator/Fan value split front and center. This is what we are. No confusion." },

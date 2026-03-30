@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
@@ -11,10 +11,32 @@ import {
   Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
   XCircle, Download, Play, Activity, MessageCircle, Zap, Gift,
-  Library, RefreshCw
+  Library, RefreshCw, FileArchive, PackageOpen
 } from "lucide-react";
 
-type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections";
+type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive";
+
+interface BatchTrack {
+  id: number;
+  title: string;
+  witnessId: string | null;
+  hasCertificate: boolean;
+  hasAudio: boolean;
+}
+
+interface BatchInfo {
+  index: number;
+  start: number;
+  end: number;
+  trackCount: number;
+  tracks: BatchTrack[];
+}
+
+interface BatchInfoResponse {
+  totalTracks: number;
+  batchSize: number;
+  batches: BatchInfo[];
+}
 
 // Pre-onboarding checklist items creators need to have ready
 const ONBOARDING_CHECKLIST = [
@@ -403,6 +425,19 @@ export default function DashboardPage() {
             <Library className="w-4 h-4" />
             Collections
             {myCollections?.length ? <span className="text-xs opacity-70">({myCollections.length})</span> : null}
+          </button>
+          <button
+            onClick={() => setActiveTab("archive")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "archive" ? "oklch(0.55 0.18 220 / 0.2)" : "transparent",
+              color: activeTab === "archive" ? "oklch(0.7 0.15 220)" : "oklch(0.6 0.04 280)",
+              border: activeTab === "archive" ? "1px solid oklch(0.55 0.18 220 / 0.4)" : "1px solid transparent",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <FileArchive className="w-4 h-4" />
+            Archive
           </button>
         </div>
 
@@ -850,6 +885,207 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Archive Tab */}
+        {activeTab === "archive" && (
+          <ArchiveTab />
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+// ─── Archive Tab Component ────────────────────────────────────────────────────
+function ArchiveTab() {
+  const [batchInfo, setBatchInfo] = useState<BatchInfoResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<number | null>(null);
+  const [expandedBatch, setExpandedBatch] = useState<number | null>(null);
+
+  // Fetch batch info on mount
+  useEffect(() => {
+    fetch("/api/download/batch-info", { credentials: "include" })
+      .then((r) => {
+        if (!r.ok) return r.json().then((e) => Promise.reject(e.error ?? "Failed to load archive"));
+        return r.json();
+      })
+      .then((data: BatchInfoResponse) => { setBatchInfo(data); setLoading(false); })
+      .catch((e: string) => { setError(e); setLoading(false); });
+  });
+
+  const downloadBatch = async (batchIndex: number) => {
+    setDownloading(batchIndex);
+    try {
+      const resp = await fetch(`/api/download/batch/${batchIndex}`, { credentials: "include" });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: "Download failed" }));
+        throw new Error(err.error ?? "Download failed");
+      }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const cd = resp.headers.get("content-disposition") ?? "";
+      const match = cd.match(/filename="?([^"]+)"?/);
+      a.download = match?.[1] ?? `LivingNexus_Archive_Batch${batchIndex + 1}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Download failed";
+      alert(msg);
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  if (loading) return (
+    <div className="text-center py-16">
+      <div className="w-8 h-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mx-auto" />
+      <p className="text-sm mt-3" style={{ color: "oklch(0.6 0.04 280)" }}>Loading your archive…</p>
+    </div>
+  );
+
+  if (error) return (
+    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.65 0.18 25 / 0.4)" }}>
+      <FileArchive className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "oklch(0.65 0.18 25)" }} />
+      <p className="text-sm" style={{ color: "oklch(0.65 0.18 25)" }}>{error}</p>
+    </div>
+  );
+
+  if (!batchInfo || batchInfo.totalTracks === 0) return (
+    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+      <PackageOpen className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.7 0.15 220)" }} />
+      <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No tracks in your archive yet.</p>
+      <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Upload songs to build your archive. Each batch of up to 10 tracks can be downloaded as a ZIP with ID3-tagged audio and WID certificates.</p>
+    </div>
+  );
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Download My Archive</h2>
+          <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>
+            {batchInfo.totalTracks} track{batchInfo.totalTracks !== 1 ? "s" : ""} across {batchInfo.batches.length} batch{batchInfo.batches.length !== 1 ? "es" : ""}.
+            Each ZIP includes ID3-tagged audio with embedded WID metadata and provenance certificates.
+          </p>
+        </div>
+      </div>
+
+      {/* Info callout */}
+      <div
+        className="rounded-xl p-4 mb-6 flex gap-3 items-start"
+        style={{ background: "oklch(0.55 0.18 220 / 0.08)", border: "1px solid oklch(0.55 0.18 220 / 0.25)" }}
+      >
+        <FileArchive className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "oklch(0.7 0.15 220)" }} />
+        <div>
+          <p className="text-sm font-semibold mb-0.5" style={{ color: "oklch(0.85 0.08 220)", fontFamily: "'Cinzel', serif" }}>Your WID travels with every file</p>
+          <p className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>
+            Every downloaded MP3 has your Witness ID embedded in its ID3 tags (TXXX:LNWID, TXXX:LN_VERIFY_URL).
+            The ZIP also includes your WID certificate PDFs so provenance is always bundled with the music.
+          </p>
+        </div>
+      </div>
+
+      {/* Batch list */}
+      <div className="space-y-4">
+        {batchInfo.batches.map((batch) => (
+          <div
+            key={batch.index}
+            className="rounded-xl overflow-hidden"
+            style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}
+          >
+            {/* Batch header row */}
+            <div className="flex items-center justify-between gap-4 p-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: "oklch(0.55 0.18 220 / 0.15)", border: "1px solid oklch(0.55 0.18 220 / 0.3)" }}
+                >
+                  <FileArchive className="w-5 h-5" style={{ color: "oklch(0.7 0.15 220)" }} />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                    Batch {batch.index + 1}
+                  </p>
+                  <p className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>
+                    Tracks {batch.start}–{batch.end} &middot; {batch.trackCount} file{batch.trackCount !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  className="text-xs px-2 py-1 rounded transition-colors"
+                  style={{ color: "oklch(0.55 0.04 280)", background: "transparent" }}
+                  onClick={() => setExpandedBatch(expandedBatch === batch.index ? null : batch.index)}
+                >
+                  {expandedBatch === batch.index ? "▲ Hide" : "▼ Tracks"}
+                </button>
+                <button
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                  style={{
+                    background: downloading === batch.index ? "oklch(0.55 0.18 220 / 0.3)" : "oklch(0.55 0.18 220)",
+                    color: "white",
+                    fontFamily: "'Cinzel', serif",
+                    opacity: downloading !== null && downloading !== batch.index ? 0.5 : 1,
+                    cursor: downloading !== null && downloading !== batch.index ? "not-allowed" : "pointer",
+                  }}
+                  onClick={() => downloadBatch(batch.index)}
+                  disabled={downloading !== null}
+                >
+                  {downloading === batch.index ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Zipping…
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Download ZIP
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Expandable track list */}
+            {expandedBatch === batch.index && (
+              <div style={{ borderTop: "1px solid oklch(0.18 0.015 280)" }}>
+                {batch.tracks.map((track, ti) => (
+                  <div
+                    key={track.id}
+                    className="flex items-center gap-3 px-4 py-2.5"
+                    style={{
+                      borderBottom: ti < batch.tracks.length - 1 ? "1px solid oklch(0.15 0.01 280)" : "none",
+                    }}
+                  >
+                    <span className="text-xs w-5 text-right flex-shrink-0" style={{ color: "oklch(0.38 0.02 280)" }}>
+                      {batch.start + ti}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate" style={{ color: "oklch(0.85 0.02 85)" }}>{track.title}</p>
+                      {track.witnessId && (
+                        <p className="text-[10px] font-mono" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>{track.witnessId}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {track.hasAudio && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.55 0.18 145 / 0.15)", color: "oklch(0.65 0.18 145)" }}>MP3</span>
+                      )}
+                      {track.hasCertificate && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.84 0.155 85)" }}>WID</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -1174,3 +1174,29 @@
 - [x] ID3 metadata: title, artist, comment (Living Nexus WID: ...), LNWID + LN_VERIFY_URL user-defined text fields
 - [x] Option B documented: in-app download library inside APK, My Downloads screen, offline playback
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Feature — Batched Archive Download (Dashboard)
+- [ ] Install jszip dependency
+- [ ] Add /api/download/batch/:batchIndex route to downloadRoute.ts (streams ZIP with audio + certificates + README.txt)
+- [ ] Add songs.getMyBatchInfo tRPC query (returns batch metadata: count, titles, WIDs per batch)
+- [ ] Add "Download My Archive" section to Dashboard page with batch list and per-batch download buttons
+- [ ] WID embedded in every filename: {trackNumber}_{title}_[{witnessId}].mp3
+- [ ] Certificate PDFs included in certificates/ subfolder when available
+- [ ] README.txt with title, WID, creator per track
+- [ ] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Feature — Batched Archive Download [COMPLETE]
+- [x] /api/download/batch/:batchIndex route in downloadRoute.ts — streams ZIP with ID3-tagged audio + WID certificate PDFs + README.txt
+- [x] /api/download/batch-info route — returns batch metadata (count, titles, WIDs, hasCertificate, hasAudio per track)
+- [x] Archive tab added to Dashboard (6th tab, FileArchive icon, blue accent)
+- [x] ArchiveTab component: fetches /api/download/batch-info on mount, shows batch cards with track count, expand/collapse track list, Download ZIP button per batch
+- [x] Download ZIP triggers fetch → Blob → anchor click with correct filename from Content-Disposition header
+- [x] WID info callout explaining ID3 embedding and certificate bundling
+- [x] Empty state for creators with no tracks yet
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Phase — v2.7.3 [COMPLETE]
+- [x] Download button in PlayerBar compact bar (ID3-tagged, permission-aware)
+- [x] Download My Archive tab in Dashboard (batch ZIP downloads with WID certificates)
+- [x] What's New modal bumped to v2.7.3 with two new entries
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing
