@@ -240,8 +240,10 @@ export default function CreatorProfilePage() {
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
-  const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState } = usePlayer();
-  const playingId = playerState.isPlaying && playerState.tracks[0]?.id ? parseInt(playerState.tracks[0].id) : null;
+  const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
+  // Use currentTrackId (derived from currentIdx) — NOT tracks[0] which always points to the
+  // first track in the queue regardless of which track is actively playing.
+  const playingId = playerState.isPlaying && currentTrackId ? parseInt(currentTrackId) : null;
 
   const { data, isLoading, refetch } = trpc.profile.getCreator.useQuery(
     { creatorId },

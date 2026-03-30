@@ -1127,3 +1127,8 @@
 - [x] server/og.ts: /verify/:witnessId route added — WID-ALB- prefix → collection OG card (title, description, cover art, canonical URL)
 - [x] WhatsNewModal: bumped to v2.7.0 (Collection Name field, Cover Art on verify page, Collection Share Cards)
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Bug Fix — Now Playing Bars Not Syncing on Creator Profile
+- [x] Root cause: playingId used playerState.tracks[0].id (always first track in queue) instead of currentTrackId (tracks[currentIdx])
+- [x] Fix: replaced tracks[0] with currentTrackId from usePlayer() context — now correctly reflects the actively playing track
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing
