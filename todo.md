@@ -1462,3 +1462,11 @@
 - [x] Push profile content down (padding-top accounts for avatar overhang)
 - [x] Ensure z-index: avatar (z-20) > banner overlay (z-10) > banner image (z-0)
 - [x] Maintain responsive behavior across screen sizes
+
+## Phase AM: Fix Cover Art Zoom in Expanded Player
+- [x] Locate expanded player cover art img element
+- [x] Replace object-fit: cover with object-fit: contain
+- [x] Center image within its container
+- [x] Add dark background fill for letterbox/pillarbox empty space
+- [x] Apply max-width/max-height constraints to prevent oversized scaling
+- [x] Maintain responsive behavior across devices

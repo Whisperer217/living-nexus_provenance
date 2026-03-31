@@ -230,13 +230,28 @@ export default function PlayerBar() {
 
           {/* LEFT — Art / Video (256px wide) */}
           {/* Cover art stays static until play; muted video fades in on play */}
-          <div className="w-64 h-full flex-shrink-0 relative overflow-hidden">
+          <div className="w-64 h-full flex-shrink-0 relative overflow-hidden flex items-center justify-center"
+            style={{ background: "oklch(0.07 0.02 270)" }}
+          >
+            {/* Blurred background fill — prevents harsh letterbox bars */}
+            {currentTrack.artUrl && (
+              <div
+                className="absolute inset-0 z-0"
+                style={{
+                  backgroundImage: `url(${currentTrack.artUrl})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  filter: "blur(18px) brightness(0.35) saturate(1.2)",
+                  transform: "scale(1.1)", /* prevent blur edge bleed */
+                }}
+              />
+            )}
             {/* Background video — always muted, loops, fades in when playing + buffered */}
             {videoUrl && (
               <video
                 ref={videoRef}
                 src={videoUrl}
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10"
                 style={{ opacity: showVideo ? 1 : 0 }}
                 muted
                 loop
@@ -244,20 +259,24 @@ export default function PlayerBar() {
                 preload="metadata"
               />
             )}
-            {/* Cover art — sits on top, fades out only when video is playing AND buffered */}
+            {/* Cover art — object-contain so full artwork is always visible */}
             {currentTrack.artUrl ? (
               <img
                 src={currentTrack.artUrl}
                 alt={currentTrack.title}
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                className="relative z-10 transition-opacity duration-500"
                 style={{
+                  objectFit: "contain",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  width: "auto",
+                  height: "auto",
                   opacity: (videoUrl && showVideo) ? 0 : 1,
-                  objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
                 }}
               />
             ) : (
               <div
-                className="absolute inset-0 w-full h-full flex items-center justify-center text-5xl transition-opacity duration-500"
+                className="absolute inset-0 w-full h-full flex items-center justify-center text-5xl transition-opacity duration-500 z-10"
                 style={{
                   background: currentTrack.bg || "oklch(0.12 0.06 270)",
                   opacity: (videoUrl && showVideo) ? 0 : 1,

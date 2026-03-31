@@ -289,19 +289,38 @@ export default function MobilePlayerLayer() {
   // Don't render if no track
   if (!currentTrack) return null;
 
+  // artStyle is used ONLY in the expanded sheet ArtworkLayer (object-contain so full art is visible).
+  // Mini thumbnail and cinematic mode use their own inline styles (object-cover is intentional there).
   const artStyle: React.CSSProperties = {
-    objectFit: "cover",
-    objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
+    objectFit: "contain",
+    width: "100%",
+    height: "100%",
   };
 
   // ── Artwork/Video layer (shared across expanded + cinematic) ──
   const ArtworkLayer = ({ fill = false }: { fill?: boolean }) => (
-    <div className={`relative ${fill ? "absolute inset-0" : "w-full h-full"} overflow-hidden`}>
+    <div
+      className={`relative ${fill ? "absolute inset-0" : "w-full h-full"} overflow-hidden flex items-center justify-center`}
+      style={{ background: "oklch(0.07 0.02 270)" }}
+    >
+      {/* Blurred background fill — fills letterbox/pillarbox space aesthetically */}
+      {currentTrack.artUrl && (
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `url(${currentTrack.artUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "blur(20px) brightness(0.3) saturate(1.3)",
+            transform: "scale(1.12)",
+          }}
+        />
+      )}
       {videoUrl && (
         <video
           ref={videoRef}
           src={videoUrl}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10"
           style={{ opacity: showVideo ? 1 : 0 }}
           playsInline loop muted preload="metadata"
         />
@@ -310,17 +329,17 @@ export default function MobilePlayerLayer() {
         <img
           src={currentTrack.artUrl}
           alt=""
-          className="absolute inset-0 w-full h-full transition-opacity duration-500"
+          className="relative z-10 transition-opacity duration-500"
           style={{ ...artStyle, opacity: (videoUrl && showVideo) ? 0 : 1 }}
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center"
+        <div className="absolute inset-0 flex items-center justify-center z-10"
           style={{ background: currentTrack.bg || "oklch(0.15 0.05 275)" }}>
           <Music className="w-1/3 h-1/3 opacity-20 text-white" />
         </div>
       )}
       {videoUrl && showVideo && (
-        <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
+        <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
           style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "oklch(0.08 0.01 280)" }}>
           <Video size={9} /> Live
         </div>
