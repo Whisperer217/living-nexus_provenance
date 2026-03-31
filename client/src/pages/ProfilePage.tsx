@@ -6,6 +6,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import {
@@ -471,26 +472,39 @@ export default function ProfilePage() {
                 <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
               </div>
 
-              {/* Avatar inline repositioner */}
-              {showAvatarPositioner && profile?.profilePhotoUrl && (
-                <div className="mt-2 w-64">
-                  <ImagePositioner
-                    imageUrl={profile.profilePhotoUrl}
-                    initialX={avatarPos.x}
-                    initialY={avatarPos.y}
-                    initialZoom={110}
-                    previewHeight="8rem"
-                    previewClass="rounded-t-xl"
-                    roundedTop={true}
-                    label="Adjust Avatar"
-                    onSave={(pos: { x: number; y: number; zoom: number }) => {
-                      setAvatarPos(pos);
-                      setShowAvatarPositioner(false);
-                      saveAvatarPosition(pos);
-                    }}
-                    onCancel={() => setShowAvatarPositioner(false)}
+              {/* Avatar floating repositioner — portal-rendered, does not disrupt layout */}
+              {showAvatarPositioner && profile?.profilePhotoUrl && createPortal(
+                <>
+                  {/* Backdrop */}
+                  <div
+                    className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm"
+                    onClick={() => setShowAvatarPositioner(false)}
                   />
-                </div>
+                  {/* Floating panel */}
+                  <div
+                    className="fixed z-[9999] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                    style={{ width: "min(360px, 90vw)" }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <ImagePositioner
+                      imageUrl={profile.profilePhotoUrl}
+                      initialX={avatarPos.x}
+                      initialY={avatarPos.y}
+                      initialZoom={110}
+                      previewHeight="10rem"
+                      previewClass="rounded-t-xl"
+                      roundedTop={true}
+                      label="Adjust Avatar"
+                      onSave={(pos: { x: number; y: number; zoom: number }) => {
+                        setAvatarPos(pos);
+                        setShowAvatarPositioner(false);
+                        saveAvatarPosition(pos);
+                      }}
+                      onCancel={() => setShowAvatarPositioner(false)}
+                    />
+                  </div>
+                </>,
+                document.body
               )}
             </div>
 

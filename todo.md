@@ -1425,3 +1425,9 @@
 - [x] CreatorProfilePage: increase gold border weight and corner accent size
 - [x] ProfilePage: same banner/avatar/typography/spacing scale-up
 - [x] Both pages: ensure layout remains clean and non-cluttered at 100% zoom
+
+## Phase AH: Avatar Positioner Layout Fix
+- [x] Fix avatar ImagePositioner on ProfilePage: currently opens as full-width inline block breaking layout
+- [x] Convert to compact floating panel (fixed/absolute position) anchored near avatar, max-w ~320px
+- [x] Panel should not disrupt the header row layout when open
+- [x] Close on outside click or Esc
