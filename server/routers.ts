@@ -2212,5 +2212,113 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         return { url: session.url };
       }),
   }),
+
+  // ── External Playlists (Phase 7) ─────────────────────────────────────────────
+  externalPlaylists: router({
+    // Import a playlist from a URL (YouTube or Suno)
+    import: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(256),
+        sourceUrl: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        const { externalPlaylists } = await import("../drizzle/schema");
+
+        // Detect source type from URL
+        const sourceType = input.sourceUrl.includes("youtube.com") || input.sourceUrl.includes("youtu.be")
+          ? "youtube"
+          : input.sourceUrl.includes("suno.com")
+          ? "suno"
+          : "other";
+
+        // Fetch real metadata from YouTube oEmbed (no API key required)
+        // Falls back gracefully if the fetch fails
+        let tracksJson: Array<{
+          title: string;
+          artist: string;
+          url: string;
+          thumbnailUrl: string | null;
+          durationSec: number | null;
+        }> = [];
+
+        if (sourceType === "youtube") {
+          try {
+            const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(input.sourceUrl)}&format=json`;
+            const resp = await fetch(oembedUrl, { signal: AbortSignal.timeout(8000) });
+            if (resp.ok) {
+              const meta = await resp.json() as {
+                title?: string;
+                author_name?: string;
+                thumbnail_url?: string;
+              };
+              tracksJson = [{
+                title: meta.title ?? input.name,
+                artist: meta.author_name ?? "YouTube",
+                url: input.sourceUrl,
+                thumbnailUrl: meta.thumbnail_url ?? null,
+                durationSec: null,
+              }];
+            }
+          } catch {
+            // oEmbed failed — fall through to placeholder
+          }
+        }
+
+        // Fallback placeholder if metadata fetch failed or non-YouTube source
+        if (tracksJson.length === 0) {
+          tracksJson = [{
+            title: input.name,
+            artist: sourceType === "suno" ? "Suno" : "External",
+            url: input.sourceUrl,
+            thumbnailUrl: null,
+            durationSec: null,
+          }];
+        }
+
+        const [result] = await db.insert(externalPlaylists).values({
+          userId: ctx.user.id,
+          name: input.name,
+          sourceType,
+          sourceUrl: input.sourceUrl,
+          tracksJson,
+        });
+
+        return { id: result.insertId, name: input.name, sourceType, tracksJson };
+      }),
+
+    // List all external playlists for the current user
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const { getDb } = await import("./db");
+      const db = await getDb();
+      const { externalPlaylists } = await import("../drizzle/schema");
+      const { eq, desc } = await import("drizzle-orm");
+
+      return db
+        .select()
+        .from(externalPlaylists)
+        .where(eq(externalPlaylists.userId, ctx.user.id))
+        .orderBy(desc(externalPlaylists.createdAt));
+    }),
+
+    // Delete an external playlist
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        const { externalPlaylists } = await import("../drizzle/schema");
+        const { and, eq } = await import("drizzle-orm");
+
+        await db
+          .delete(externalPlaylists)
+          .where(and(
+            eq(externalPlaylists.id, input.id),
+            eq(externalPlaylists.userId, ctx.user.id),
+          ));
+        return { success: true };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

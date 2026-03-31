@@ -141,6 +141,13 @@
       "when": 1774992219478,
       "tag": "0019_next_thundra",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1774996680790,
+      "tag": "0020_light_malice",
+      "breakpoints": true
     }
   ]
 }

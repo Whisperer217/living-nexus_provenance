@@ -16,6 +16,7 @@ import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import MyListsTab from "@/components/MyListsTab";
+import ExternalPlaylistsTab from "@/components/ExternalPlaylistsTab";
 
 /* ── Status tag ─────────────────────────────────────────────────── */
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
@@ -48,7 +49,7 @@ export default function ArchivePage() {
   const [,] = useLocation();
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<"tracks" | "lists">("tracks");
+  const [activeTab, setActiveTab] = useState<"tracks" | "lists" | "external">("tracks");
   const { playQueueAt } = usePlayer();
 
   const buildTrack = (song: any) => ({
@@ -171,10 +172,22 @@ export default function ArchivePage() {
           >
             <ListMusic size={13} /> My Lists
           </button>
+          <button
+            onClick={() => setActiveTab("external")}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+            style={activeTab === "external"
+              ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
+              : { color: "oklch(0.6 0.03 280)" }}
+          >
+            <Globe size={13} /> External
+          </button>
         </div>
 
         {/* ── My Lists tab ───────────────────────────────────────────── */}
         {activeTab === "lists" && <MyListsTab />}
+
+        {/* ── External Playlists tab ─────────────────────────────────── */}
+        {activeTab === "external" && <ExternalPlaylistsTab />}
 
         {/* ── Track count ────────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && songs && (

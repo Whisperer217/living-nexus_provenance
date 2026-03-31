@@ -1555,3 +1555,15 @@
 - [x] Sidebar nav updated: Home (/), Discover (/discover) both present
 - [x] AddToPlaylistButton replaced with AddToMyListModal in PlayerBar (both compact + expanded modes)
 - [x] Inline witnessId text in MyListsTab replaced with canonical WIDPanel badge
+
+## Nav Cleanup + Build Order Phase 7 & 8
+- [x] Remove Discover nav item from sidebar (keep Home and Explore)
+- [x] Redirect /discover to / so old links still work
+- [x] Build Phase 7: External Playlists tab in Archive (YouTube/Suno URL import, read-only, labeled)
+- [x] Add externalPlaylists table to schema (userId, name, sourceType, sourceUrl, tracksJson, createdAt)
+- [x] Add externalPlaylists tRPC procedures (import, list, delete)
+- [x] Build Phase 8: Background Playback ambient mode (separate queue, ambient volume control)
+- [x] AmbientPlayerContext: isolated session-only state (track, isPlaying, volume, minimized)
+- [x] AmbientWidget: floating bottom-right widget with YouTube iframe embed, volume control, minimize/close
+- [x] ExternalPlaylistsTab: Play in Ambient button on each track row, ambient hint banner
+- [x] YouTube oEmbed metadata fetch on import (title, author, thumbnail — no API key required)

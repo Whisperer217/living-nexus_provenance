@@ -596,3 +596,18 @@ export const guildPlaylistTracks = mysqlTable("guildPlaylistTracks", {
 });
 export type GuildPlaylistTrack = typeof guildPlaylistTracks.$inferSelect;
 export type InsertGuildPlaylistTrack = typeof guildPlaylistTracks.$inferInsert;
+
+// ─── External Playlists ───────────────────────────────────────────────────────
+// Read-only imported playlists from YouTube, Suno, or other sources.
+// Tracks are stored as a JSON snapshot — no sync, no DB rows per track.
+export const externalPlaylists = mysqlTable("externalPlaylists", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  sourceType: mysqlEnum("sourceType", ["youtube", "suno", "other"]).notNull().default("other"),
+  sourceUrl: text("sourceUrl").notNull(),
+  tracksJson: json("tracksJson").notNull(), // array of { title, artist, url, thumbnailUrl, durationSec }
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ExternalPlaylist = typeof externalPlaylists.$inferSelect;
+export type InsertExternalPlaylist = typeof externalPlaylists.$inferInsert;

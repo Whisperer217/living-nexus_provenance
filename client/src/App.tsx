@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense } from "react";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PlayerProvider } from "./contexts/PlayerContext";
@@ -10,6 +10,8 @@ import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
 import WelcomeModal from "./components/WelcomeModal";
 import { CommunityToastProvider } from "./components/CommunityToast";
+import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
+import AmbientWidget from "./components/AmbientWidget";
 
 // Lazy-loaded page components — each becomes its own JS chunk
 // This cuts initial bundle size significantly; pages load on first visit only
@@ -72,7 +74,7 @@ function Router() {
               <Switch>
                 <Route path="/" component={HomePage} />
                 <Route path="/home" component={HomePage} />
-                <Route path="/discover" component={DiscoverPage} />
+                <Route path="/discover"><Redirect to="/" /></Route>
                 <Route path="/explore" component={ExplorePage} />
                 <Route path="/together" component={TogetherPage} />
                 <Route path="/together/:roomCode" component={TogetherPage} />
@@ -121,6 +123,7 @@ export default function App() {
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <PlayerProvider>
+            <AmbientPlayerProvider>
             <QueueLoader />
             <WhatsNewModal />
             <WelcomeModal />
@@ -136,7 +139,9 @@ export default function App() {
                 },
               }}
             />
+            <AmbientWidget />
             <Router />
+            </AmbientPlayerProvider>
           </PlayerProvider>
         </TooltipProvider>
       </ThemeProvider>

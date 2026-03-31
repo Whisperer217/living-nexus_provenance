@@ -30,7 +30,6 @@ const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkq
 const NAV_ITEMS = [
   // DISCOVER — public-facing
   { label: "Home",             icon: Home,        path: "/",            group: "DISCOVER" },
-  { label: "Discover",         icon: Compass,     path: "/discover",    group: "DISCOVER" },
   { label: "Explore",          icon: Compass,     path: "/explore",     group: "DISCOVER" },
   { label: "Listen Together",  icon: Users,       path: "/together",    group: "DISCOVER", badge: "LIVE" },
   { label: "Guilds",            icon: Shield,      path: "/guilds",      group: "DISCOVER" },
