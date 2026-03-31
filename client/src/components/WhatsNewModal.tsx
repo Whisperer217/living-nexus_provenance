@@ -9,14 +9,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.15.0";
+const CURRENT_VERSION = "v2.17.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.15.0",
+    version: "v2.17.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Maximize2, text: "Direct Manipulation — Every image editor on the platform now works the same way: drag to reposition, scroll to zoom, double-click to reset. Banner, cover art, avatar, collection cover — one interaction language across the entire system. No sliders. No panels on the canvas. Just you and your work." },
+      { icon: Zap, text: "Keyboard Layer — When the editor canvas is focused, a full keyboard shortcut layer activates: R to reset center, +/− to zoom, arrow keys to nudge (Shift for 5× step), Enter to save, Esc to cancel. The hints appear in the dock when active and disappear when not. Present when used, invisible otherwise." },
+      { icon: Shield, text: "AI Focal Point Detection — When you upload a banner, the platform's vision system analyzes the image and identifies the primary subject. The editor opens with the focal point pre-centered and marked with a gold AI badge. Override it by dragging. Your intent always wins." },
+    ],
+  },
+  {
+    version: "v2.15.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Maximize2, text: "Banner Positioning Modes — Three explicit modes now govern how your banner image is framed: Fit (full image visible, no crop), Crop (cover-style with a zoom slider), and Stretch (fills the frame completely, no letterbox). Creator-controlled visual framing, no guesswork." },
       { icon: Shield, text: "Gold Banner Frame — Every creator profile and owner profile now carries an elegant gold border on the banner. Corner accents, top and bottom gold lines. Visible authorship. Your space is framed, not ambient." },

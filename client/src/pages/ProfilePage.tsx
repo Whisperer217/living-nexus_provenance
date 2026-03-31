@@ -446,15 +446,17 @@ export default function ProfilePage() {
               <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
             </div>
 
-            {/* Avatar inline repositioner */}
+            {/* Avatar inline repositioner — direct manipulation: drag, scroll, double-click, keyboard */}
             {showAvatarPositioner && profile?.profilePhotoUrl && (
               <div className="mt-2 w-64">
                 <ImagePositioner
                   imageUrl={profile.profilePhotoUrl}
                   initialX={avatarPos.x}
                   initialY={avatarPos.y}
+                  initialZoom={110}
                   previewHeight="8rem"
                   previewClass="rounded-t-xl"
+                  roundedTop={true}
                   label="Adjust Avatar"
                   onSave={(pos: { x: number; y: number; zoom: number }) => {
                     setAvatarPos(pos);

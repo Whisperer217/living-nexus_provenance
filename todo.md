@@ -1368,3 +1368,11 @@
 - [x] Reduce visual weight in editing mode: muted colors, no thick borders on canvas, utility-first
 - [x] Stretch mode button visually de-emphasised (small, grey, ⚠ label) — never dominant
 - [x] Preserve AI focal badge in dock area (not on canvas)
+
+## Phase AC: Unified Direct-Manipulation Interaction Language
+- [x] Add keyboard shortcut layer to ImagePositioner: R=reset, +/-=zoom, Enter=save, Esc=cancel
+- [x] Keyboard hint strip appears in dock only when canvas is focused, invisible otherwise
+- [x] Update all cover art positioner call sites to use unified ImagePositioner (drag/scroll/double-click)
+- [x] Update avatar positioner call sites to use unified ImagePositioner
+- [x] Update What's New modal to v2.17.0 — system-wide interaction language shift entry
+- [x] Ensure all three editors (banner, cover art, avatar) share identical interaction model

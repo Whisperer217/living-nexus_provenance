@@ -1051,13 +1051,15 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-            {/* Collection cover inline repositioner */}
+            {/* Collection cover inline repositioner — direct manipulation: drag, scroll, double-click, keyboard */}
             {collectionCoverState && (collectionCoverState.pendingUrl || collectionCoverState.currentUrl) && (
               <ImagePositioner
                 imageUrl={(collectionCoverState.pendingUrl || collectionCoverState.currentUrl)!}
                 initialX={collectionCoverState.position.x}
                 initialY={collectionCoverState.position.y}
+                initialZoom={110}
                 previewHeight="12rem"
+                roundedTop={true}
                 label={collectionCoverState.pendingUrl ? "Set Collection Cover Position" : "Reposition Collection Cover"}
                 onSave={collectionCoverState.pendingUrl ? confirmCollectionCoverUpload : saveCollectionCoverPosition}
                 onCancel={() => {

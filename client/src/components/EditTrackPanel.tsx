@@ -394,13 +394,15 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               </div>
             </div>
           </div>
-          {/* Cover Art inline repositioner */}
+          {/* Cover Art inline repositioner — direct manipulation: drag, scroll, double-click, keyboard */}
           {showCoverPositioner && (pendingCoverUrl || coverArtUrl) && (
             <ImagePositioner
               imageUrl={(pendingCoverUrl || coverArtUrl)!}
               initialX={coverPos.x}
               initialY={coverPos.y}
+              initialZoom={110}
               previewHeight="12rem"
+              roundedTop={true}
               label={pendingCoverUrl ? "Set Cover Position" : "Reposition Cover Art"}
               onSave={pendingCoverUrl ? confirmCoverUpload : saveCoverPosition}
               onCancel={() => {

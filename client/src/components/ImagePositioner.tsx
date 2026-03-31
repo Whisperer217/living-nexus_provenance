@@ -1,13 +1,21 @@
 /**
- * ImagePositioner — Direct-manipulation banner editor
+ * ImagePositioner — Direct-manipulation image editor
  *
  * PRINCIPLE: The editing interface must disappear behind the work.
  *
  * INTERACTIONS (on the canvas itself):
- *   - Click + drag  → reposition (moves background-position)
- *   - Scroll wheel  → zoom in/out
- *   - Pinch (touch) → zoom in/out
- *   - Double-click  → reset to center (x=50, y=50, zoom=110)
+ *   - Click + drag    → reposition (moves background-position)
+ *   - Scroll wheel    → zoom in/out
+ *   - Pinch (touch)   → zoom in/out
+ *   - Double-click    → reset to center (x=50, y=50, zoom=110)
+ *
+ * KEYBOARD (active when canvas is focused — invisible otherwise):
+ *   - R               → reset center
+ *   - + / =           → zoom in
+ *   - - / _           → zoom out
+ *   - Arrow keys      → nudge position (1% per press, 5% with Shift)
+ *   - Enter           → save
+ *   - Esc             → cancel
  *
  * CONTROLS:
  *   - Thin 44px dock BELOW the image (never on the canvas)
@@ -15,24 +23,12 @@
  *   - Save button only highlights when changes exist
  *   - Contextual overlays: zoom % and crosshair guides appear during
  *     interaction and fade out after 1.5s
+ *   - Keyboard hint strip: appears in dock only when canvas is focused
  *
  * RENDERING:
  *   - Crop (default): background-size: cover, zoom=110
  *   - Fit: background-size: contain, letterbox visible
  *   - Stretch: background-size: 100% 100% — explicit override only
- *
- * Props:
- *   imageUrl      — the image to preview
- *   initialX      — starting horizontal position 0–100 (default 50)
- *   initialY      — starting vertical position 0–100 (default 50)
- *   initialZoom   — starting zoom 100–300 (default 110 = crop/cover)
- *   aiFocal       — true if initialX/Y came from AI detection
- *   previewHeight — CSS height string for the canvas (default "14rem")
- *   previewClass  — extra Tailwind classes on the canvas
- *   roundedTop    — whether to round the top corners (default true)
- *   onSave        — called with { x, y, zoom } when user confirms
- *   onCancel      — called when user cancels
- *   label         — small badge text on canvas (default "Editing")
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -65,27 +61,27 @@ interface LegacyProps {
 type Mode = "crop" | "fit" | "stretch";
 
 export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
-  const imageUrl    = props.imageUrl;
-  const initialX    = "initialX"    in props ? (props.initialX    ?? 50)  : ((props as LegacyProps).initialPosition?.x ?? 50);
-  const initialY    = "initialY"    in props ? (props.initialY    ?? 50)  : ((props as LegacyProps).initialPosition?.y ?? 50);
-  const initialZoom = "initialZoom" in props ? (props.initialZoom ?? 110) : 110;
-  const aiFocal     = "aiFocal"     in props ? (props.aiFocal     ?? false) : false;
+  const imageUrl      = props.imageUrl;
+  const initialX      = "initialX"      in props ? (props.initialX      ?? 50)  : ((props as LegacyProps).initialPosition?.x ?? 50);
+  const initialY      = "initialY"      in props ? (props.initialY      ?? 50)  : ((props as LegacyProps).initialPosition?.y ?? 50);
+  const initialZoom   = "initialZoom"   in props ? (props.initialZoom   ?? 110) : 110;
+  const aiFocal       = "aiFocal"       in props ? (props.aiFocal       ?? false) : false;
   const previewHeight = "previewHeight" in props ? (props.previewHeight ?? "14rem") : "14rem";
   const previewClass  = "previewClass"  in props ? (props.previewClass  ?? "") : "";
   const roundedTop    = "roundedTop"    in props ? (props.roundedTop    ?? true) : true;
-  const onSave   = props.onSave;
-  const onCancel = props.onCancel ?? (() => {});
-  const label    = props.label ?? "Editing";
+  const onSave        = props.onSave;
+  const onCancel      = props.onCancel ?? (() => {});
+  const label         = props.label ?? "Editing";
 
-  const [x, setX] = useState(initialX);
-  const [y, setY] = useState(initialY);
+  const [x, setX]       = useState(initialX);
+  const [y, setY]       = useState(initialY);
   const [zoom, setZoom] = useState(Math.max(100, Math.min(300, initialZoom)));
   const [mode, setMode] = useState<Mode>(initialZoom <= 100 ? "fit" : "crop");
 
   // Track whether anything changed from initial values
   const hasChanges = x !== initialX || y !== initialY || zoom !== initialZoom;
 
-  // Contextual overlay: show during interaction, fade after 1.5s
+  // ── Contextual overlay ────────────────────────────────────────────
   const [showOverlay, setShowOverlay] = useState(false);
   const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashOverlay = useCallback(() => {
@@ -98,31 +94,98 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
     if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
   }, []);
 
-  // ── Drag to reposition ────────────────────────────────────────────
+  // ── Canvas focus state (drives keyboard hint visibility) ──────────
+  const [canvasFocused, setCanvasFocused] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────
+  // Present when canvas is focused, invisible otherwise.
+  useEffect(() => {
+    if (!canvasFocused) return;
+    const handleKey = (e: KeyboardEvent) => {
+      // Don't intercept when typing in inputs
+      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA") return;
+
+      const step = e.shiftKey ? 5 : 1;
+
+      switch (e.key) {
+        case "r":
+        case "R":
+          e.preventDefault();
+          setX(50); setY(50); setZoom(110); setMode("crop");
+          flashOverlay();
+          break;
+        case "+":
+        case "=":
+          e.preventDefault();
+          if (mode === "fit") return;
+          setZoom(prev => Math.min(300, prev + 5));
+          flashOverlay();
+          break;
+        case "-":
+        case "_":
+          e.preventDefault();
+          if (mode === "fit") return;
+          setZoom(prev => Math.max(100, prev - 5));
+          flashOverlay();
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          if (mode === "fit") return;
+          setX(prev => Math.max(0, prev - step));
+          flashOverlay();
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          if (mode === "fit") return;
+          setX(prev => Math.min(100, prev + step));
+          flashOverlay();
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          if (mode === "fit") return;
+          setY(prev => Math.max(0, prev - step));
+          flashOverlay();
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          if (mode === "fit") return;
+          setY(prev => Math.min(100, prev + step));
+          flashOverlay();
+          break;
+        case "Enter":
+          e.preventDefault();
+          onSave({ x, y, zoom: mode === "fit" ? 100 : mode === "stretch" ? 100 : zoom });
+          break;
+        case "Escape":
+          e.preventDefault();
+          onCancel();
+          break;
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [canvasFocused, mode, x, y, zoom, flashOverlay, onSave, onCancel]);
+
+  // ── Drag to reposition ────────────────────────────────────────────
   const dragRef = useRef<{ startX: number; startY: number; startBgX: number; startBgY: number } | null>(null);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     if (mode === "fit") return;
     e.preventDefault();
+    canvasRef.current?.focus();
     dragRef.current = { startX: e.clientX, startY: e.clientY, startBgX: x, startBgY: y };
-    const el = canvasRef.current;
-    if (!el) return;
 
     const onMove = (ev: MouseEvent) => {
       if (!dragRef.current) return;
       const dx = ev.clientX - dragRef.current.startX;
       const dy = ev.clientY - dragRef.current.startY;
-      const rect = el.getBoundingClientRect();
-      // Sensitivity: 1px drag = 0.15% position change (feels natural)
       const sensitivity = 0.15;
       const newX = Math.max(0, Math.min(100, dragRef.current.startBgX - dx * sensitivity));
       const newY = Math.max(0, Math.min(100, dragRef.current.startBgY - dy * sensitivity));
       setX(Math.round(newX));
       setY(Math.round(newY));
       flashOverlay();
-      // Suppress unused var warning
-      void rect;
     };
     const onUp = () => {
       dragRef.current = null;
@@ -133,23 +196,20 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
     window.addEventListener("mouseup", onUp);
   }, [mode, x, y, flashOverlay]);
 
-  // ── Touch drag ───────────────────────────────────────────────────
-  const touchRef = useRef<{ startX: number; startY: number; startBgX: number; startBgY: number; dist?: number; startZoom?: number } | null>(null);
+  // ── Touch drag + pinch zoom ───────────────────────────────────────
+  const touchRef = useRef<{
+    startX: number; startY: number; startBgX: number; startBgY: number;
+    dist?: number; startZoom?: number;
+  } | null>(null);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     if (mode === "fit") return;
     if (e.touches.length === 1) {
-      touchRef.current = {
-        startX: e.touches[0].clientX,
-        startY: e.touches[0].clientY,
-        startBgX: x,
-        startBgY: y,
-      };
+      touchRef.current = { startX: e.touches[0].clientX, startY: e.touches[0].clientY, startBgX: x, startBgY: y };
     } else if (e.touches.length === 2) {
       const dx = e.touches[1].clientX - e.touches[0].clientX;
       const dy = e.touches[1].clientY - e.touches[0].clientY;
-      const dist = Math.hypot(dx, dy);
-      touchRef.current = { startX: 0, startY: 0, startBgX: x, startBgY: y, dist, startZoom: zoom };
+      touchRef.current = { startX: 0, startY: 0, startBgX: x, startBgY: y, dist: Math.hypot(dx, dy), startZoom: zoom };
     }
   }, [mode, x, y, zoom]);
 
@@ -159,17 +219,13 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
     if (e.touches.length === 1 && touchRef.current.dist === undefined) {
       const dx = e.touches[0].clientX - touchRef.current.startX;
       const dy = e.touches[0].clientY - touchRef.current.startY;
-      const sensitivity = 0.2;
-      const newX = Math.max(0, Math.min(100, touchRef.current.startBgX - dx * sensitivity));
-      const newY = Math.max(0, Math.min(100, touchRef.current.startBgY - dy * sensitivity));
-      setX(Math.round(newX));
-      setY(Math.round(newY));
+      setX(Math.round(Math.max(0, Math.min(100, touchRef.current.startBgX - dx * 0.2))));
+      setY(Math.round(Math.max(0, Math.min(100, touchRef.current.startBgY - dy * 0.2))));
       flashOverlay();
     } else if (e.touches.length === 2 && touchRef.current.dist !== undefined) {
       const dx = e.touches[1].clientX - e.touches[0].clientX;
       const dy = e.touches[1].clientY - e.touches[0].clientY;
-      const dist = Math.hypot(dx, dy);
-      const scale = dist / touchRef.current.dist!;
+      const scale = Math.hypot(dx, dy) / touchRef.current.dist!;
       const newZoom = Math.max(100, Math.min(300, Math.round((touchRef.current.startZoom ?? zoom) * scale)));
       setZoom(newZoom);
       if (newZoom > 100 && mode !== "crop") setMode("crop");
@@ -194,23 +250,14 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
 
   // ── Double-click to reset ─────────────────────────────────────────
   const onDoubleClick = useCallback(() => {
-    setX(50);
-    setY(50);
-    setZoom(110);
-    setMode("crop");
+    setX(50); setY(50); setZoom(110); setMode("crop");
     flashOverlay();
   }, [flashOverlay]);
 
-  // ── Background size ───────────────────────────────────────────────
-  const bgSize = mode === "stretch"
-    ? "100% 100%"
-    : mode === "fit"
-      ? "contain"
-      : "cover";
-
-  const bgPos = mode === "fit" ? "center center" : `${x}% ${y}%`;
-
-  const topRadius = roundedTop ? "rounded-t-xl" : "";
+  // ── Derived styles ────────────────────────────────────────────────
+  const bgSize = mode === "stretch" ? "100% 100%" : mode === "fit" ? "contain" : "cover";
+  const bgPos  = mode === "fit" ? "center center" : `${x}% ${y}%`;
+  const topRadius   = roundedTop ? "rounded-t-xl" : "";
   const cursorStyle = mode === "fit" ? "default" : "grab";
 
   return (
@@ -218,7 +265,8 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
       {/* ── Canvas — the work lives here ── */}
       <div
         ref={canvasRef}
-        className={`relative w-full overflow-hidden ${topRadius} ${previewClass}`}
+        tabIndex={0}
+        className={`relative w-full overflow-hidden outline-none ${topRadius} ${previewClass}`}
         style={{
           height: previewHeight,
           backgroundImage: `url(${imageUrl})`,
@@ -235,6 +283,8 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        onFocus={() => setCanvasFocused(true)}
+        onBlur={() => setCanvasFocused(false)}
       >
         {/* Thin gold frame — boundary only, no weight */}
         <div
@@ -245,11 +295,7 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
         {/* Small label badge — top-left, minimal */}
         <div
           className="absolute top-2 left-2 text-[10px] font-mono px-2 py-0.5 rounded pointer-events-none select-none"
-          style={{
-            background: "rgba(0,0,0,0.5)",
-            color: "rgba(201,168,76,0.7)",
-            backdropFilter: "blur(4px)",
-          }}
+          style={{ background: "rgba(0,0,0,0.5)", color: "rgba(201,168,76,0.7)", backdropFilter: "blur(4px)" }}
         >
           {label}
         </div>
@@ -258,11 +304,7 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
         {aiFocal && (
           <div
             className="absolute top-2 right-2 flex items-center gap-1 text-[10px] px-2 py-0.5 rounded pointer-events-none select-none"
-            style={{
-              background: "rgba(0,0,0,0.45)",
-              color: "rgba(201,168,76,0.65)",
-              backdropFilter: "blur(4px)",
-            }}
+            style={{ background: "rgba(0,0,0,0.45)", color: "rgba(201,168,76,0.65)", backdropFilter: "blur(4px)" }}
           >
             <Sparkles className="w-2.5 h-2.5" /> AI
           </div>
@@ -273,51 +315,29 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
           className="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500"
           style={{ opacity: showOverlay ? 1 : 0 }}
         >
-          {/* Crosshair alignment guides */}
           {mode !== "fit" && (
             <>
-              <div
-                className="absolute top-0 bottom-0 w-px"
-                style={{ left: `${x}%`, background: "rgba(255,255,255,0.12)" }}
-              />
-              <div
-                className="absolute left-0 right-0 h-px"
-                style={{ top: `${y}%`, background: "rgba(255,255,255,0.12)" }}
-              />
+              <div className="absolute top-0 bottom-0 w-px" style={{ left: `${x}%`, background: "rgba(255,255,255,0.12)" }} />
+              <div className="absolute left-0 right-0 h-px" style={{ top: `${y}%`, background: "rgba(255,255,255,0.12)" }} />
             </>
           )}
-          {/* Zoom indicator */}
           <div
             className="text-xs font-mono px-2.5 py-1 rounded"
-            style={{
-              background: "rgba(0,0,0,0.6)",
-              color: "rgba(255,255,255,0.7)",
-              backdropFilter: "blur(6px)",
-            }}
+            style={{ background: "rgba(0,0,0,0.6)", color: "rgba(255,255,255,0.7)", backdropFilter: "blur(6px)" }}
           >
             {mode === "fit" ? "FIT" : mode === "stretch" ? "STRETCH" : `${zoom}%`}
           </div>
         </div>
 
-        {/* Fit mode: subtle hint */}
-        {mode === "fit" && (
-          <div
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] px-2 py-0.5 rounded pointer-events-none select-none whitespace-nowrap"
-            style={{ background: "rgba(0,0,0,0.45)", color: "rgba(255,255,255,0.3)" }}
-          >
-            Full image — switch to Crop to reposition
-          </div>
-        )}
-
-        {/* Drag hint — only shown briefly on first render in crop mode */}
-        {mode !== "fit" && (
-          <div
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] px-2 py-0.5 rounded pointer-events-none select-none whitespace-nowrap"
-            style={{ background: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.2)" }}
-          >
-            drag · scroll to zoom · double-click to reset
-          </div>
-        )}
+        {/* Static hint — very low opacity, bottom center */}
+        <div
+          className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] px-2 py-0.5 rounded pointer-events-none select-none whitespace-nowrap"
+          style={{ background: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.18)" }}
+        >
+          {mode === "fit"
+            ? "Full image — switch to Crop to reposition"
+            : "drag · scroll to zoom · double-click to reset"}
+        </div>
       </div>
 
       {/* ── Thin bottom dock — 44px, outside the canvas ── */}
@@ -354,7 +374,7 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
         >
           Crop
         </button>
-        {/* Stretch — visually de-emphasised, small, ⚠ labelled */}
+        {/* Stretch — visually de-emphasised, ⚠ labelled */}
         <button
           type="button"
           onClick={() => setMode(mode === "stretch" ? "crop" : "stretch")}
@@ -370,6 +390,30 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
 
         {/* Spacer */}
         <div className="flex-1" />
+
+        {/* Keyboard hint strip — visible only when canvas is focused */}
+        <div
+          className="flex items-center gap-2 transition-opacity duration-300 mr-2"
+          style={{ opacity: canvasFocused ? 1 : 0, pointerEvents: "none" }}
+        >
+          {[
+            { key: "R", label: "reset" },
+            { key: "+/−", label: "zoom" },
+            { key: "↑↓←→", label: "nudge" },
+            { key: "↵", label: "save" },
+            { key: "⎋", label: "cancel" },
+          ].map(({ key, label }) => (
+            <span key={key} className="flex items-center gap-0.5 text-[9px]" style={{ color: "#374151" }}>
+              <kbd
+                className="px-1 py-0.5 rounded text-[9px] font-mono"
+                style={{ background: "rgba(255,255,255,0.06)", color: "#4b5563", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                {key}
+              </kbd>
+              <span style={{ color: "#2d3748" }}>{label}</span>
+            </span>
+          ))}
+        </div>
 
         {/* Cancel */}
         <button
@@ -389,16 +433,8 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
           onClick={() => onSave({ x, y, zoom: mode === "fit" ? 100 : mode === "stretch" ? 100 : zoom })}
           className="text-[11px] px-3 py-1 rounded font-semibold transition-all"
           style={hasChanges
-            ? {
-                background: "linear-gradient(135deg, #c9a84c, #e8c96a)",
-                color: "#0a0812",
-                boxShadow: "0 2px 8px rgba(201,168,76,0.25)",
-              }
-            : {
-                background: "rgba(255,255,255,0.06)",
-                color: "#6b7280",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }
+            ? { background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "#0a0812", boxShadow: "0 2px 8px rgba(201,168,76,0.25)" }
+            : { background: "rgba(255,255,255,0.06)", color: "#6b7280", border: "1px solid rgba(255,255,255,0.08)" }
           }
         >
           Save
