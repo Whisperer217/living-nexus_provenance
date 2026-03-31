@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { ImagePositioner } from "@/components/ImagePositioner";
+import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
@@ -13,7 +14,7 @@ import {
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
   XCircle, Download, Play, Activity, MessageCircle, Zap, Gift,
   Library, RefreshCw, FileArchive, PackageOpen, Camera, X,
-  TrendingUp, Heart, LineChart
+  TrendingUp, Heart, LineChart, Pencil
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
@@ -55,6 +56,7 @@ export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("songs");
+  const [editingSong, setEditingSong] = useState<any | null>(null);
   const [showChecklist, setShowChecklist] = useState(false);
 
   const { data: songs, refetch: refetchSongs } = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated });
@@ -548,6 +550,13 @@ export default function DashboardPage() {
                             <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
                           </button>
                         </Link>
+                        <button
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#D4AF37]/10"
+                          title="Edit track (cover art, metadata, position)"
+                          onClick={() => setEditingSong(song)}
+                        >
+                          <Pencil className="w-3 h-3" style={{ color: "oklch(0.84 0.155 85)" }} />
+                        </button>
                         <button
                           className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/10"
                           title="Delete song"
@@ -1159,6 +1168,17 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+      {/* ── Edit Track Panel ───────────────────────────────────────── */}
+      {editingSong && (
+        <EditTrackPanel
+          song={editingSong}
+          onClose={() => setEditingSong(null)}
+          onSaved={() => {
+            setEditingSong(null);
+            refetchSongs();
+          }}
+        />
+      )}
     </div>
    );
 }
@@ -1355,5 +1375,6 @@ function ArchiveTab() {
         ))}
       </div>
     </div>
-  );
+   );
 }
+// ─── Archive Tab Component

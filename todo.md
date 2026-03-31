@@ -1281,3 +1281,22 @@
 - [x] Fix EditTrackPanel: saveCoverPosition now uses separate mutation that doesn't close the panel
 - [x] Add success toast to DashboardPage collection cover position save
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Cover Art Positioner — Full System Rebuild [COMPLETE]
+- [x] Audit: schema coverPositionX/Y on songs table confirmed
+- [x] Audit: updateSongMetadata DB helper confirmed
+- [x] Audit: updateMetadata tRPC procedure confirmed
+- [x] Audit: EditTrackPanel cover positioner — full flow traced
+- [x] Audit: ArchivePage song card cover art display — fixed (was missing artUrl + coverPositionX/Y in buildTrack)
+- [x] Audit: ProfilePage My Songs tab cover art display — confirmed correct
+- [x] Audit: CreatorProfilePage song card cover art display — confirmed correct
+- [x] Audit: Player bar / Now Playing panel cover art display — fixed (was missing objectPosition on all 5 player surfaces)
+- [x] Audit: Home page / Explore page song card cover art display — confirmed correct
+- [x] Fix: ArchivePage buildTrack now includes artUrl + coverPositionX/Y
+- [x] Fix: PlayerBar desktop large art panel — objectPosition added
+- [x] Fix: PlayerBar mini 56px thumbnail — objectPosition added
+- [x] Fix: MobilePlayerPanel mini bar thumbnail — replaced hardcoded object-top with objectPosition
+- [x] Fix: MobilePlayerPanel expanded full-screen art — replaced hardcoded object-top with objectPosition
+- [x] Fix: TheaterPlayer full-width art panel — objectPosition added
+- [x] Fix: DashboardPage My Songs tab — added Edit button (pencil icon) that opens EditTrackPanel
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

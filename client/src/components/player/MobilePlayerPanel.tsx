@@ -320,9 +320,9 @@ export default function MobilePlayerPanel() {
           style={{ background: currentTrack?.bg || "oklch(0.18 0.04 275)" }}
         >
           {currentTrack?.artUrl && currentTrack.artType !== "video" ? (
-            <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover object-top" />
+            <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%` }} />
           ) : currentTrack?.artUrl && currentTrack.artType === "video" ? (
-            <video src={currentTrack.artUrl} className="w-full h-full object-cover object-top" muted />
+            <video src={currentTrack.artUrl} className="w-full h-full object-cover" muted />
           ) : (
             <Music className="w-4 h-4 opacity-40 text-white" />
           )}
@@ -470,8 +470,11 @@ export default function MobilePlayerPanel() {
                 <img
                   src={currentTrack.artUrl}
                   alt=""
-                  className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-500"
-                  style={{ opacity: (videoUrl && showVideo) ? 0 : 1 }}
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                  style={{
+                    opacity: (videoUrl && showVideo) ? 0 : 1,
+                    objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
+                  }}
                 />
               ) : (
                 <div className="absolute inset-0 w-full h-full flex items-center justify-center">

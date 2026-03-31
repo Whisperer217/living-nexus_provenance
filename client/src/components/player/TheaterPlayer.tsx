@@ -180,6 +180,7 @@ export default function TheaterPlayer() {
                   className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
                   style={{
                     opacity: (videoUrl && showVideo) ? 0 : 1,
+                    objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
                   }}
                 />
               ) : (

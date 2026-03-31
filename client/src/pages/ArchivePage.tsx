@@ -56,9 +56,12 @@ export default function ArchivePage() {
     artist: song.artistName ?? "Unknown Artist",
     audioUrl: song.audioUrl ?? "",
     coverArt: song.coverArtUrl ?? "",
+    artUrl: song.coverArtUrl ?? undefined,
     genre: song.genre ?? "",
     witnessId: song.witnessId ?? "",
     aiDisclosure: song.aiConsent ?? "original",
+    coverPositionX: song.coverPositionX ?? 50,
+    coverPositionY: song.coverPositionY ?? 50,
   });
 
   const handlePlay = (e: React.MouseEvent, songs: any[], idx: number) => {

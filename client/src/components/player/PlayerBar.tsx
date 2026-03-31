@@ -250,7 +250,10 @@ export default function PlayerBar() {
                 src={currentTrack.artUrl}
                 alt={currentTrack.title}
                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                style={{ opacity: (videoUrl && showVideo) ? 0 : 1 }}
+                style={{
+                  opacity: (videoUrl && showVideo) ? 0 : 1,
+                  objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
+                }}
               />
             ) : (
               <div
@@ -566,7 +569,7 @@ export default function PlayerBar() {
               title={currentTrack?.title || ""}
             >
               {currentTrack?.artUrl && currentTrack.artType !== "video"
-                ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
+                ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%` }} />
                 : currentTrack?.artUrl && currentTrack.artType === "video"
                 ? <video src={currentTrack.artUrl} className="w-full h-full object-cover" muted />
                 : <span>{currentTrack?.emoji || "🎵"}</span>
