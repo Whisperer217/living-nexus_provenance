@@ -1307,3 +1307,16 @@
 - [x] background-position always moves the focal point regardless of image aspect ratio
 - [x] Both horizontal AND vertical sliders now produce visible movement on all image types
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Living Pulse — Notification Badge System [COMPLETE]
+- [x] Audit: existing notifications, events, comments, tips schema — solid foundation confirmed
+- [x] DB: add lastVisitedActivityAt + lastVisitedDashboardAt to users table (db:push applied)
+- [x] DB helpers: getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas
+- [x] tRPC: notifications.newEventCount, notifications.touchActivity, notifications.touchDashboard, notifications.dashboardDeltas
+- [x] Auto-create notifications: tip webhook → notifies song owner on gift received
+- [x] Comment creation already notifies song owner (confirmed wired)
+- [x] Sidebar MainLayout: gold badge on Signals nav item (unread count), gold badge on Dashboard (total activity), polls every 60s
+- [x] Dashboard Activity tab: pulsing orange badge showing new event count since last visit, clears on click
+- [x] Dashboard stat cards: +N new delta badges for Total Plays and Gifts Received (TrendingUp icon, orange pill)
+- [x] NotificationsPage: auto-mark all read on mount (1.5s delay so user sees unread state first), invalidates sidebar badge
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

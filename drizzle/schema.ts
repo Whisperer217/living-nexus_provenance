@@ -47,6 +47,10 @@ export const users = mysqlTable("users", {
   // Onboarding
   hasSeenWelcome: boolean("hasSeenWelcome").default(false).notNull(),
 
+  // Activity delta tracking — used for "new since last visit" badges
+  lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),
+  lastVisitedDashboardAt: timestamp("lastVisitedDashboardAt"),
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),

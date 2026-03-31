@@ -80,6 +80,30 @@ export default function DashboardPage() {
     { enabled: isAuthenticated && activeTab === "analytics" }
   );
 
+  // Living Pulse — activity deltas and unread counts
+  const { data: dashboardDeltas, refetch: refetchDeltas } = trpc.notifications.dashboardDeltas.useQuery(
+    undefined, { enabled: isAuthenticated, staleTime: 30_000 }
+  );
+  const { data: newEventCount = 0, refetch: refetchEventCount } = trpc.notifications.newEventCount.useQuery(
+    undefined, { enabled: isAuthenticated, staleTime: 30_000 }
+  );
+  const touchActivityMutation = trpc.notifications.touchActivity.useMutation({
+    onSuccess: () => { refetchEventCount(); }
+  });
+  const touchDashboardMutation = trpc.notifications.touchDashboard.useMutation({
+    onSuccess: () => { refetchDeltas(); }
+  });
+
+  // Touch dashboard on first load to reset deltas (runs once when authenticated)
+  const dashboardTouchedRef = useRef(false);
+  useEffect(() => {
+    if (isAuthenticated && !dashboardTouchedRef.current) {
+      dashboardTouchedRef.current = true;
+      const t = setTimeout(() => touchDashboardMutation.mutate(), 800);
+      return () => clearTimeout(t);
+    }
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const regenCertMutation = trpc.songs.generateCollectionCertificate.useMutation({
     onSuccess: (data: { pdfUrl: string; collectionWid: string }) => {
       toast.success("Certificate regenerated!");
@@ -309,17 +333,28 @@ export default function DashboardPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "oklch(0.84 0.155 85)" },
-            { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "oklch(0.65 0.2 300)" },
-            { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "oklch(0.65 0.18 145)" },
-            { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "oklch(0.55 0.18 160)" },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="rounded-xl p-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+            { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "oklch(0.84 0.155 85)", delta: null },
+            { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "oklch(0.65 0.2 300)", delta: (dashboardDeltas as any)?.newPlays ?? 0 },
+            { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "oklch(0.65 0.18 145)", delta: null },
+            { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "oklch(0.55 0.18 160)", delta: (dashboardDeltas as any)?.newTips ?? 0 },
+          ].map(({ label, value, icon: Icon, color, delta }) => (
+            <div key={label} className="rounded-xl p-4 relative" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4" style={{ color }} />
                 <span className="text-xs" style={{ color: "#E2E8F0" }}>{label}</span>
               </div>
-              <p className="text-2xl font-bold" style={{ color, fontFamily: "'Cinzel', serif" }}>{value}</p>
+              <div className="flex items-end gap-2">
+                <p className="text-2xl font-bold" style={{ color, fontFamily: "'Cinzel', serif" }}>{value}</p>
+                {delta != null && delta > 0 && (
+                  <span
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded-full mb-0.5 flex items-center gap-0.5"
+                    style={{ background: "oklch(0.65 0.22 25 / 0.2)", color: "oklch(0.75 0.18 45)", border: "1px solid oklch(0.65 0.22 25 / 0.4)" }}
+                  >
+                    <TrendingUp className="w-2.5 h-2.5" />
+                    +{delta} new
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -443,8 +478,8 @@ export default function DashboardPage() {
             {transforms?.length ? <span className="text-xs opacity-70">({transforms.length})</span> : null}
           </button>
           <button
-            onClick={() => setActiveTab("activity")}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            onClick={() => { setActiveTab("activity"); touchActivityMutation.mutate(); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative"
             style={{
               background: activeTab === "activity" ? "oklch(0.65 0.18 45)" : "transparent",
               color: activeTab === "activity" ? "oklch(0.08 0.015 280)" : "oklch(0.6 0.04 280)",
@@ -453,7 +488,14 @@ export default function DashboardPage() {
           >
             <Activity className="w-4 h-4" />
             Activity
-            {activityEvents?.length ? <span className="text-xs opacity-70">({activityEvents.length})</span> : null}
+            {(newEventCount as number) > 0 && activeTab !== "activity" ? (
+              <span
+                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse"
+                style={{ background: "oklch(0.65 0.22 25)", color: "white" }}
+              >{(newEventCount as number) > 99 ? "99+" : String(newEventCount)}</span>
+            ) : activityEvents?.length ? (
+              <span className="text-xs opacity-70">({activityEvents.length})</span>
+            ) : null}
           </button>
           <button
             onClick={() => setActiveTab("earnings")}

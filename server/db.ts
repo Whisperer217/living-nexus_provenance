@@ -2067,3 +2067,74 @@ export async function recordPlatformGift(userId: number, amountUsd: number, stri
 
   return { totalGifted: newTotal, tier: newTier };
 }
+
+// ─── Activity Delta & Badge Helpers ──────────────────────────────────────────
+
+/** Count events created after the user's lastVisitedActivityAt timestamp.
+ *  Returns the number of new events since last visit (for the Activity tab badge). */
+export async function getNewEventCountForCreator(creatorId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const { inArray: inArr, isNull: isNl, gt } = await import("drizzle-orm");
+  const userRow = await db.select({ lastVisitedActivityAt: users.lastVisitedActivityAt })
+    .from(users).where(eq(users.id, creatorId)).limit(1);
+  const lastVisit = userRow[0]?.lastVisitedActivityAt;
+  const creatorSongs = await db.select({ id: songs.id }).from(songs).where(eq(songs.userId, creatorId));
+  if (!creatorSongs.length) return 0;
+  const songIds = creatorSongs.map((s: { id: number }) => s.id);
+  const conds: any[] = [inArr(events.workId, songIds), isNl(events.deletedAt)];
+  if (lastVisit) conds.push(gt(events.createdAt, lastVisit));
+  const rows = await db.select({ count: sql<number>`count(*)` }).from(events).where(and(...conds));
+  return Number(rows[0]?.count ?? 0);
+}
+
+/** Mark the user as having visited the Activity tab now. */
+export async function touchActivityVisit(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ lastVisitedActivityAt: new Date() }).where(eq(users.id, userId));
+}
+
+/** Mark the user as having visited the Dashboard now. */
+export async function touchDashboardVisit(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ lastVisitedDashboardAt: new Date() }).where(eq(users.id, userId));
+}
+
+/** Get aggregate activity counts for Dashboard stat card deltas.
+ *  Returns new plays, new tips, new comments, new witnesses since lastVisitedDashboardAt. */
+export async function getDashboardDeltas(creatorId: number): Promise<{
+  newPlays: number; newTips: number; newComments: number; newWitnesses: number;
+}> {
+  const db = await getDb();
+  if (!db) return { newPlays: 0, newTips: 0, newComments: 0, newWitnesses: 0 };
+  const { inArray: inArr2, isNull: isNl2, gt: gt2 } = await import("drizzle-orm");
+  const userRow = await db.select({ lastVisitedDashboardAt: users.lastVisitedDashboardAt })
+    .from(users).where(eq(users.id, creatorId)).limit(1);
+  const lastVisit = userRow[0]?.lastVisitedDashboardAt;
+  const creatorSongs = await db.select({ id: songs.id }).from(songs).where(eq(songs.userId, creatorId));
+  if (!creatorSongs.length) return { newPlays: 0, newTips: 0, newComments: 0, newWitnesses: 0 };
+  const songIds = creatorSongs.map((s: { id: number }) => s.id);
+  const buildCond = (type: string) => {
+    const conds: any[] = [inArr2(events.workId, songIds), isNl2(events.deletedAt), eq(events.type, type as any)];
+    if (lastVisit) conds.push(gt2(events.createdAt, lastVisit));
+    return and(...conds);
+  };
+  const [playsRow, tipsRow, commentsRow] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(events).where(buildCond("LIKE")),
+    db.select({ count: sql<number>`count(*)` }).from(events).where(buildCond("TIP")),
+    db.select({ count: sql<number>`count(*)` }).from(events).where(buildCond("COMMENT")),
+  ]);
+  const { witnesses } = await import("../drizzle/schema");
+  const witnessConds: any[] = [eq(witnesses.witnessedId, creatorId)];
+  if (lastVisit) witnessConds.push(gt2(witnesses.createdAt, lastVisit));
+  const witnessRow = await db.select({ count: sql<number>`count(*)` })
+    .from(witnesses).where(and(...witnessConds));
+  return {
+    newPlays: Number(playsRow[0]?.count ?? 0),
+    newTips: Number(tipsRow[0]?.count ?? 0),
+    newComments: Number(commentsRow[0]?.count ?? 0),
+    newWitnesses: Number(witnessRow[0]?.count ?? 0),
+  };
+}

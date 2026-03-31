@@ -45,6 +45,7 @@ import {
   getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
   getCollectionsByCreator, updateCollectionCover,
   getAllSupporters, getSupporterByUserId, recordPlatformGift,
+  getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -106,6 +107,21 @@ export async function handleStripeWebhook(req: any, res: any) {
             amountCents,
             stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
           });
+          // Living Pulse: notify the song owner
+          const song = await getSongById(songId);
+          if (song?.userId) {
+            const amountDollars = (amountCents / 100).toFixed(2);
+            const tipperName = meta.tipperName || meta.customer_name || "A supporter";
+            await createNotification({
+              userId: song.userId,
+              type: "tip",
+              title: `Gift received — $${amountDollars}`,
+              body: `${tipperName} gifted $${amountDollars} on "${song.title}"${meta.message ? `: "${meta.message}"` : ""}`,
+              actorName: tipperName,
+              refType: "song",
+              refId: songId,
+            });
+          }
         }
         // Tip-to-Download: record as a tip so getUserTipTotalForSong unlocks the download
         if (meta.type === "tip_download" && meta.songId) {
@@ -1775,6 +1791,24 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         await archiveNotification(input.id, ctx.user.id);
         return { ok: true };
       }),
+    /** Get count of new activity events since last visit (for Activity tab badge) */
+    newEventCount: protectedProcedure.query(async ({ ctx }) => {
+      return getNewEventCountForCreator(ctx.user.id);
+    }),
+    /** Mark Activity tab as visited — clears the Activity tab badge */
+    touchActivity: protectedProcedure.mutation(async ({ ctx }) => {
+      await touchActivityVisit(ctx.user.id);
+      return { ok: true };
+    }),
+    /** Mark Dashboard as visited — resets stat card deltas */
+    touchDashboard: protectedProcedure.mutation(async ({ ctx }) => {
+      await touchDashboardVisit(ctx.user.id);
+      return { ok: true };
+    }),
+    /** Get dashboard stat card deltas (new plays/tips/comments/witnesses since last visit) */
+    dashboardDeltas: protectedProcedure.query(async ({ ctx }) => {
+      return getDashboardDeltas(ctx.user.id);
+    }),
   }),
 
   // ── Witness Registry ─────────────────────────────────────────────────────────

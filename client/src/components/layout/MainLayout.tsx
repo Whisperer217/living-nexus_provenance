@@ -16,6 +16,7 @@ import TheaterPlayer from "@/components/player/TheaterPlayer";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import TipTicker from "@/components/TipTicker";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
+import { trpc } from "@/lib/trpc";
 import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
   Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic,
@@ -242,6 +243,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
 
+  // Live notification badges — poll every 60s when user is authenticated
+  const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, {
+    enabled: !!user,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+  const { data: newEventCount = 0 } = trpc.notifications.newEventCount.useQuery(undefined, {
+    enabled: !!user,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+  const totalActivityBadge = (unreadCount as number) + (newEventCount as number);
+
   const openMobileMenu = useCallback(() => { setQrOpen(false); setMobileMenuOpen(true); }, []);
   const toggleQr = useCallback(() => {
     if (!qrOpen) setMobileMenuOpen(false);
@@ -262,6 +276,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     // Dynamic queue count badge for Listen Together
     const isJukebox = item.path === "/together";
     const dynamicBadge = isJukebox && jukeboxQueueCount > 0 ? (jukeboxQueueCount > 9 ? "9+" : String(jukeboxQueueCount)) : null;
+    // Notification badges
+    const isSignals = item.path === "/notifications";
+    const isDashboard = item.path === "/dashboard";
+    const signalsBadge = isSignals && (unreadCount as number) > 0 ? ((unreadCount as number) > 99 ? "99+" : String(unreadCount)) : null;
+    const dashboardBadge = isDashboard && totalActivityBadge > 0 ? (totalActivityBadge > 99 ? "99+" : String(totalActivityBadge)) : null;
+    const livePulseBadge = signalsBadge || dashboardBadge;
 
     return (
       <button
@@ -276,15 +296,32 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           }`}
         style={active ? { background: "oklch(0.80 0.145 82 / 0.08)", borderColor: "oklch(0.80 0.145 82)" } : {}}
       >
-        <Icon
-          size={compact ? 16 : 15}
-          className="flex-shrink-0"
-          style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit", opacity: active ? 1 : 0.6 }}
-        />
+        {/* Icon with optional dot badge when sidebar is collapsed */}
+        <div className="relative flex-shrink-0">
+          <Icon
+            size={compact ? 16 : 15}
+            style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit", opacity: active ? 1 : 0.6 }}
+          />
+          {/* Collapsed sidebar: show dot badge on icon */}
+          {!compact && !sidebarOpen && livePulseBadge && (
+            <span
+              className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+              style={{ background: "oklch(0.65 0.22 25)" }}
+            />
+          )}
+        </div>
         {(compact || sidebarOpen) && (
           <>
             <span className="font-body flex-1 text-left">{item.label}</span>
-            {item.badge && !dynamicBadge && (
+            {/* Living Pulse notification badge */}
+            {livePulseBadge && (
+              <span
+                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center animate-pulse"
+                style={{ background: "oklch(0.65 0.22 25)", color: "white" }}
+              >{livePulseBadge}</span>
+            )}
+            {/* Static/dynamic badges (only when no pulse badge) */}
+            {!livePulseBadge && item.badge && !dynamicBadge && (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto"
                 style={isGold
@@ -295,7 +332,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 }
               >{item.badge}</span>
             )}
-            {dynamicBadge && (
+            {!livePulseBadge && dynamicBadge && (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center"
                 style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.15 0.01 280)" }}
