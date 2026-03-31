@@ -17,6 +17,7 @@ import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { useLocation } from "wouter";
 import { useState, useCallback, useRef, useEffect } from "react";
 import PlayerTipModal from "./PlayerTipModal";
+import { MediaAsset } from "@/components/MediaAsset";
 
 function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
@@ -228,63 +229,22 @@ export default function PlayerBar() {
       {isExpanded && currentTrack && (
         <div className="flex h-full overflow-hidden">
 
-          {/* LEFT — Art / Video (256px wide) */}
-          {/* Cover art stays static until play; muted video fades in on play */}
-          <div className="w-64 h-full flex-shrink-0 relative overflow-hidden flex items-center justify-center"
-            style={{ background: "oklch(0.07 0.02 270)" }}
-          >
-            {/* Blurred background fill — prevents harsh letterbox bars */}
-            {currentTrack.artUrl && (
-              <div
-                className="absolute inset-0 z-0"
-                style={{
-                  backgroundImage: `url(${currentTrack.artUrl})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  filter: "blur(18px) brightness(0.35) saturate(1.2)",
-                  transform: "scale(1.1)", /* prevent blur edge bleed */
-                }}
-              />
-            )}
-            {/* Background video — always muted, loops, fades in when playing + buffered */}
-            {videoUrl && (
-              <video
-                ref={videoRef}
-                src={videoUrl}
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10"
-                style={{ opacity: showVideo ? 1 : 0 }}
-                muted
-                loop
-                playsInline
-                preload="metadata"
-              />
-            )}
-            {/* Cover art — object-contain so full artwork is always visible */}
-            {currentTrack.artUrl ? (
-              <img
-                src={currentTrack.artUrl}
-                alt={currentTrack.title}
-                className="relative z-10 transition-opacity duration-500"
-                style={{
-                  objectFit: "contain",
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  width: "auto",
-                  height: "auto",
-                  opacity: (videoUrl && showVideo) ? 0 : 1,
-                }}
-              />
-            ) : (
-              <div
-                className="absolute inset-0 w-full h-full flex items-center justify-center text-5xl transition-opacity duration-500 z-10"
-                style={{
-                  background: currentTrack.bg || "oklch(0.12 0.06 270)",
-                  opacity: (videoUrl && showVideo) ? 0 : 1,
-                }}
-              >
-                {currentTrack.emoji || "🎵"}
-              </div>
-            )}
+          {/* LEFT — Art / Video (256px wide) — MRS player mode */}
+          <div className="w-64 h-full flex-shrink-0 relative overflow-hidden">
+            <MediaAsset
+              src={currentTrack.artUrl}
+              alt={currentTrack.title}
+              mode="player"
+              focalX={currentTrack.coverPositionX ?? 50}
+              focalY={currentTrack.coverPositionY ?? 50}
+              emoji={currentTrack.emoji}
+              bg={currentTrack.bg}
+              showGradient={false}
+              videoUrl={videoUrl}
+              showVideo={showVideo}
+              videoRef={videoRef}
+              className="absolute inset-0 w-full h-full"
+            />
             {/* Video WID badge — top-right, links to verify page */}
             {videoWitnessId && (
               <button
@@ -303,7 +263,7 @@ export default function PlayerBar() {
             )}
             {/* Gold gradient fade to center */}
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="absolute inset-0 pointer-events-none z-10"
               style={{ background: "linear-gradient(to right, transparent 60%, oklch(0.115 0.05 268))" }}
             />
           </div>

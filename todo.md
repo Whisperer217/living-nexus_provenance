@@ -1470,3 +1470,19 @@
 - [x] Add dark background fill for letterbox/pillarbox empty space
 - [x] Apply max-width/max-height constraints to prevent oversized scaling
 - [x] Maintain responsive behavior across devices
+
+## Phase AN: Unified Media Rendering System (MRS)
+- [x] Extend songs DB schema: add aspectRatio, focalPointX, focalPointY fields
+- [x] Run pnpm db:push to migrate schema
+- [x] Update server routers to expose/accept new fields
+- [x] Build MediaAsset component with card/player/cinematic render modes
+- [x] Implement Ken Burns zoom animation in cinematic mode
+- [x] Add dark gradient overlay in player/cinematic modes
+- [x] Add mouse parallax (desktop) and gyro tilt (mobile) in cinematic mode
+- [x] Replace cover art in ExplorePage with MediaAsset card mode
+- [x] Replace cover art in DiscoverPage with MediaAsset card mode
+- [x] Replace cover art in CreatorProfilePage with MediaAsset card mode
+- [x] Replace cover art in PlayerBar (desktop expanded) with MediaAsset player mode
+- [x] Replace cover art in MobilePlayerLayer (expanded sheet) with MediaAsset player mode
+- [x] Replace cover art in TrackCard with MediaAsset card mode
+- [x] Write Vitest tests for new schema fields

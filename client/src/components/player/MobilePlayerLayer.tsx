@@ -16,7 +16,7 @@
      landscape → reduced strip UI (play + scrubber + time only)
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
@@ -30,6 +30,7 @@ import {
   Volume2, VolumeX,
 } from "lucide-react";
 import PlayerTipModal from "./PlayerTipModal";
+import { MediaAsset } from "@/components/MediaAsset";
 
 // ── Helpers ────────────────────────────────────────────────────────
 function fmtTime(s: number) {
@@ -297,47 +298,23 @@ export default function MobilePlayerLayer() {
     height: "100%",
   };
 
-  // ── Artwork/Video layer (shared across expanded + cinematic) ──
+  // ── Artwork/Video layer (shared across expanded + cinematic) — MRS player mode ──
   const ArtworkLayer = ({ fill = false }: { fill?: boolean }) => (
-    <div
-      className={`relative ${fill ? "absolute inset-0" : "w-full h-full"} overflow-hidden flex items-center justify-center`}
-      style={{ background: "oklch(0.07 0.02 270)" }}
-    >
-      {/* Blurred background fill — fills letterbox/pillarbox space aesthetically */}
-      {currentTrack.artUrl && (
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: `url(${currentTrack.artUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: "blur(20px) brightness(0.3) saturate(1.3)",
-            transform: "scale(1.12)",
-          }}
-        />
-      )}
-      {videoUrl && (
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10"
-          style={{ opacity: showVideo ? 1 : 0 }}
-          playsInline loop muted preload="metadata"
-        />
-      )}
-      {currentTrack.artUrl ? (
-        <img
-          src={currentTrack.artUrl}
-          alt=""
-          className="relative z-10 transition-opacity duration-500"
-          style={{ ...artStyle, opacity: (videoUrl && showVideo) ? 0 : 1 }}
-        />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center z-10"
-          style={{ background: currentTrack.bg || "oklch(0.15 0.05 275)" }}>
-          <Music className="w-1/3 h-1/3 opacity-20 text-white" />
-        </div>
-      )}
+    <div className={`relative ${fill ? "absolute inset-0" : "w-full h-full"} overflow-hidden`}>
+      <MediaAsset
+        src={currentTrack.artUrl}
+        alt={currentTrack.title}
+        mode="player"
+        focalX={currentTrack.coverPositionX ?? 50}
+        focalY={currentTrack.coverPositionY ?? 50}
+        emoji={currentTrack.emoji}
+        bg={currentTrack.bg}
+        showGradient={false}
+        videoUrl={videoUrl}
+        showVideo={showVideo}
+        videoRef={videoRef as React.RefObject<HTMLVideoElement | null>}
+        className="absolute inset-0 w-full h-full"
+      />
       {videoUrl && showVideo && (
         <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
           style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "oklch(0.08 0.01 280)" }}>

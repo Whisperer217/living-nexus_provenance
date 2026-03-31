@@ -116,9 +116,13 @@ export const songs = mysqlTable("songs", {
   collectionId: int("collectionId"),  // FK → collections.id; null = not part of a collection
   trackOrder: int("trackOrder").default(0).notNull(), // position within collection (0-indexed); preserves batch upload sequence
 
-  // Image position
+  // Image position & aspect ratio (MRS — Media Rendering System)
+  // coverPositionX/Y = focal point as percentage (0–100), maps to objectPosition
   coverPositionX: float("coverPositionX").default(50).notNull(),
   coverPositionY: float("coverPositionY").default(50).notNull(),
+  // artAspectRatio: declared aspect ratio of the cover art; drives card/player/cinematic render decisions
+  // null = unknown (treated as 1:1 for safe fallback)
+  artAspectRatio: mysqlEnum("artAspectRatio", ["1:1", "4:5", "16:9"]),
 
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),

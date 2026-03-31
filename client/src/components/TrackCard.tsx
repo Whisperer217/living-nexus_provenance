@@ -14,6 +14,7 @@ import { Link, useLocation } from "wouter";
 import { useLike } from "@/hooks/useLike";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { MediaAsset } from "@/components/MediaAsset";
 
 interface Props {
   track: Track;
@@ -61,31 +62,30 @@ export default function TrackCard({ track, index, onTip }: Props) {
       {/* ── Zone 1: Cover Art — plays in global player ── */}
       <div
         className="relative overflow-hidden cursor-pointer"
-        style={{ height: "180px", background: track.bg || "oklch(0.15 0.05 275)" }}
+        style={{ height: "180px" }}
         onClick={handleCoverClick}
         title="Play this track"
       >
-        {track.artUrl && track.artType !== "video" && (
-          <img
-            src={track.artUrl}
-            alt={track.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            style={{ objectPosition: coverPos }}
-          />
-        )}
+        <MediaAsset
+          src={track.artType !== "video" ? track.artUrl : null}
+          alt={track.title}
+          mode="card"
+          aspectRatio="1:1"
+          focalX={track.coverPositionX ?? 50}
+          focalY={track.coverPositionY ?? 50}
+          emoji={track.emoji}
+          bg={track.bg}
+          className="w-full h-full transition-transform duration-300 group-hover:scale-105"
+        />
+        {/* Video cover art */}
         {track.artUrl && track.artType === "video" && (
           <video
             src={track.artUrl}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: coverPos }}
             muted
             loop
           />
-        )}
-        {!track.artUrl && (
-          <div className="w-full h-full flex items-center justify-center text-5xl">
-            {track.emoji || "🎵"}
-          </div>
         )}
 
         {/* Overlay gradient */}
