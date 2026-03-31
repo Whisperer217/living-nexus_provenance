@@ -1300,3 +1300,10 @@
 - [x] Fix: TheaterPlayer full-width art panel — objectPosition added
 - [x] Fix: DashboardPage My Songs tab — added Edit button (pencil icon) that opens EditTrackPanel
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Bug Fix — Horizontal Slider Non-Responsive in ImagePositioner [COMPLETE]
+- [x] Diagnose: objectPosition X has no effect when image fills container width (zero horizontal overflow)
+- [x] Fix: replaced <img object-cover> preview with background-image + background-size:cover + background-position:X% Y%
+- [x] background-position always moves the focal point regardless of image aspect ratio
+- [x] Both horizontal AND vertical sliders now produce visible movement on all image types
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

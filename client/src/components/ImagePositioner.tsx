@@ -5,6 +5,10 @@
  * Shows a live preview strip above two range sliders (X/Y) plus quick presets.
  * Parent controls show/hide; this component just renders in-place.
  *
+ * Uses background-image + background-position instead of <img objectPosition>
+ * so that BOTH horizontal and vertical movement are always visible regardless
+ * of the image's aspect ratio relative to the container.
+ *
  * Props:
  *   imageUrl      — the image to preview
  *   initialX      — starting horizontal position 0–100 (default 50)
@@ -68,18 +72,22 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
 
   return (
     <div className="w-full">
-      {/* ── Live preview strip ── */}
+      {/* ── Live preview strip ──
+          Uses background-image so BOTH X and Y sliders always produce visible
+          movement regardless of the image's native aspect ratio. With <img
+          object-cover w-full h-full>, a wide image fills the container width
+          and has zero horizontal overflow — making X appear frozen.
+          background-size:cover + background-position always shows the shift. */}
       <div
         className={`relative w-full overflow-hidden ${topRadius} ${previewClass}`}
-        style={{ height: previewHeight }}
+        style={{
+          height: previewHeight,
+          backgroundImage: `url(${imageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: `${x}% ${y}%`,
+          backgroundRepeat: "no-repeat",
+        }}
       >
-        <img
-          src={imageUrl}
-          alt="Position preview"
-          className="w-full h-full object-cover"
-          style={{ objectPosition: `${x}% ${y}%` }}
-          draggable={false}
-        />
         {/* Gold editing border */}
         <div className={`absolute inset-0 border-2 border-[#c9a84c] pointer-events-none ${topRadius}`} />
         {/* Editing badge */}
