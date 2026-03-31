@@ -616,6 +616,7 @@ export default function CreatorProfilePage() {
 
         {/* ── Albums (grouped by albumName) ── */}
         {(() => {
+          // Build albumMap keyed by albumName, sorted by trackOrder within each album
           const albumMap = new Map<string, any[]>();
           songs.forEach((song: any) => {
             if (song.albumName) {
@@ -623,17 +624,34 @@ export default function CreatorProfilePage() {
               albumMap.get(song.albumName)!.push(song);
             }
           });
+          // Sort each album's tracks by trackOrder (preserves batch upload sequence)
+          albumMap.forEach((albumSongs) => {
+            albumSongs.sort((a: any, b: any) => (a.trackOrder ?? 0) - (b.trackOrder ?? 0));
+          });
+          // Build a map from albumName → collection record so we use the collection's own coverArtUrl
+          const collectionByAlbum = new Map<string, any>();
+          if (creatorCollections) {
+            (creatorCollections as any[]).forEach((col: any) => {
+              if (col.name) collectionByAlbum.set(col.name, col);
+            });
+          }
           const albumEntries = Array.from(albumMap.entries());
           if (!albumEntries.length) return null;
           return (
             <section className="py-4">
               <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Albums</h2>
               <div className="space-y-5">
-                {albumEntries.map(([albumName, albumSongs]) => (
+                {albumEntries.map(([albumName, albumSongs]) => {
+                  // Prefer the collection's own cover art; fall back to first track's cover
+                  const collection = collectionByAlbum.get(albumName);
+                  const albumCoverUrl = collection?.coverArtUrl || albumSongs[0]?.coverArtUrl;
+                  const albumCoverX = collection?.coverPositionX ?? albumSongs[0]?.coverPositionX ?? 50;
+                  const albumCoverY = collection?.coverPositionY ?? albumSongs[0]?.coverPositionY ?? 50;
+                  return (
                   <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
                     <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid oklch(0.16 0.01 280)" }}>
-                      {albumSongs[0]?.coverArtUrl ? (
-                        <img src={albumSongs[0].coverArtUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" style={{ objectPosition: `${albumSongs[0].coverPositionX ?? 50}% ${albumSongs[0].coverPositionY ?? 50}%` }} />
+                      {albumCoverUrl ? (
+                        <img src={albumCoverUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" style={{ objectPosition: `${albumCoverX}% ${albumCoverY}%` }} />
                       ) : (
                         <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.75 0.18 85 / 0.15)" }}>
                           <Music className="w-6 h-6" style={{ color: "oklch(0.84 0.155 85)" }} />
@@ -658,7 +676,8 @@ export default function CreatorProfilePage() {
                       ))}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           );

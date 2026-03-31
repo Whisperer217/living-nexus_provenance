@@ -1320,3 +1320,12 @@
 - [x] Dashboard stat cards: +N new delta badges for Total Plays and Gifts Received (TrendingUp icon, orange pill)
 - [x] NotificationsPage: auto-mark all read on mount (1.5s delay so user sees unread state first), invalidates sidebar badge
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Bug Fix — Batch Upload Track Order + Collection Cover Art + Zoom [COMPLETE]
+- [x] ImagePositioner: added zoom slider (100–200%, background-size driven, shows Fit/N% label, Reset Zoom button appears when zoom > 100)
+- [x] Batch upload: added trackOrder column to songs schema (db:push applied)
+- [x] Batch upload: batchUpload procedure now passes song IDs in upload order to linkSongsToCollection
+- [x] Batch upload: linkSongsToCollection sets trackOrder 1-based per song; getSongsByCollectionId orders by trackOrder ASC
+- [x] Collection cover art: CreatorProfilePage Albums section now uses collection.coverArtUrl (not albumSongs[0].coverArtUrl)
+- [x] Collection cover art: tracks within each album sorted by trackOrder for correct display order
+- [x] TypeScript: 0 errors | Vitest: 51/51 passing

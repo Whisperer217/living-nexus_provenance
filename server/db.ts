@@ -1816,9 +1816,9 @@ export async function updateCollectionPdf(collectionId: number, pdfUrl: string, 
 export async function linkSongsToCollection(songIds: number[], collectionId: number) {
   const db = await getDb();
   if (!db) return;
-  // Update each song row individually (MySQL IN clause with Drizzle)
-  for (const songId of songIds) {
-    await db.update(songs).set({ collectionId }).where(eq(songs.id, songId));
+  // Update each song row individually, preserving upload order via trackOrder
+  for (let i = 0; i < songIds.length; i++) {
+    await db.update(songs).set({ collectionId, trackOrder: i }).where(eq(songs.id, songIds[i]));
   }
 }
 
@@ -1838,13 +1838,13 @@ export async function getCollectionById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-/** Get all songs that belong to a collection. */
+/** Get all songs that belong to a collection, ordered by trackOrder (upload sequence). */
 export async function getSongsByCollectionId(collectionId: number) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(songs)
     .where(eq(songs.collectionId, collectionId))
-    .orderBy(songs.createdAt);
+    .orderBy(songs.trackOrder, songs.createdAt); // trackOrder preserves batch upload sequence; createdAt as tiebreaker
 }
 
 /** Get the collection a song belongs to (if any). */

@@ -378,7 +378,7 @@ export default function ProfilePage() {
                   previewHeight="8rem"
                   previewClass="rounded-t-xl"
                   label="Adjust Avatar"
-                  onSave={(pos) => {
+                  onSave={(pos: { x: number; y: number; zoom: number }) => {
                     setAvatarPos(pos);
                     setShowAvatarPositioner(false);
                     saveAvatarPosition(pos);

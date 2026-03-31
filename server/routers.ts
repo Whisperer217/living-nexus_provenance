@@ -411,7 +411,8 @@ export const appRouter = router({
         coverArtUrl = url;
       }
       // Create song records (files already uploaded via /api/upload-file)
-      const results: { title: string; witnessId?: string; fileUrl: string }[] = [];
+      // Track insertId in upload order so linkSongsToCollection preserves sequence
+      const results: { title: string; witnessId?: string; fileUrl: string; songId?: number }[] = [];
       for (const track of input.tracks) {
         let fileUrl: string | undefined = track.fileUrl;
         let audioKey: string | undefined = track.fileKey;
@@ -424,7 +425,7 @@ export const appRouter = router({
           fileUrl = url;
         }
         if (!fileUrl) throw new Error(`No file URL for track: ${track.title}`);
-        await createSong({
+        const insertResult = await createSong({
           userId: ctx.user.id,
           title: track.title,
           genre: input.genre,
@@ -439,7 +440,9 @@ export const appRouter = router({
           ecdsaPublicKey: track.ecdsaPublicKey,
           ecdsaSignature: track.ecdsaSignature,
         });
-        results.push({ title: track.title, witnessId: track.witnessId, fileUrl });
+        // Capture the auto-increment ID directly from the insert result to preserve upload order
+        const songId = (insertResult as any).insertId as number | undefined;
+        results.push({ title: track.title, witnessId: track.witnessId, fileUrl, songId });
       }
       // ── Generate Collection WID (WID-ALB) ─────────────────────────────────────
       // Collect all WIDs that were assigned, sort them, hash together
@@ -468,11 +471,16 @@ export const appRouter = router({
         collectionId = (insertResult as any).insertId as number;
 
         // Back-link all newly created songs to this collection
-        // We need the song IDs — re-query songs by witnessId
+        // Use insertId from each createSong call (upload order preserved)
+        // Fall back to WID lookup only for tracks that didn't return an insertId
         const songIds: number[] = [];
-        for (const wid of allWids) {
-          const songRow = await getSongByWitnessId(wid);
-          if (songRow?.song?.id) songIds.push(songRow.song.id);
+        for (const r of results) {
+          if (r.songId) {
+            songIds.push(r.songId);
+          } else if (r.witnessId) {
+            const songRow = await getSongByWitnessId(r.witnessId);
+            if (songRow?.song?.id) songIds.push(songRow.song.id);
+          }
         }
         if (songIds.length > 0) await linkSongsToCollection(songIds, collectionId);
       }

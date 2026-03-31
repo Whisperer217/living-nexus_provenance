@@ -114,6 +114,7 @@ export const songs = mysqlTable("songs", {
 
   // Collection membership (WID-ALB back-reference)
   collectionId: int("collectionId"),  // FK → collections.id; null = not part of a collection
+  trackOrder: int("trackOrder").default(0).notNull(), // position within collection (0-indexed); preserves batch upload sequence
 
   // Image position
   coverPositionX: float("coverPositionX").default(50).notNull(),
