@@ -265,41 +265,102 @@ export default function ProfilePage() {
 
   return (
     <div className="animate-fade-up pb-4">
-      {/* ── Banner ── */}
-      <div className="relative h-[200px] overflow-hidden group">
+      {/* ── Banner wrapper with gold border ── */}
+      <div
+        className="relative h-[200px] group"
+        style={{
+          borderTop: "2px solid rgba(201,168,76,0.6)",
+          borderBottom: "2px solid #c9a84c",
+          boxShadow: "inset 0 0 0 1px rgba(201,168,76,0.2)",
+        }}
+      >
         {profile?.bannerUrl ? (
-          <img
-            src={profile.bannerUrl}
-            alt="Banner"
-            className="w-full h-full object-cover"
-            style={{ objectPosition: `${bannerPos.x}% ${bannerPos.y}%` }}
+          // Populated state: background-image for zoom support
+          <div
+            className="w-full h-full overflow-hidden"
+            style={{
+              backgroundImage: `url(${profile.bannerUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: `${bannerPos.x}% ${bannerPos.y}%`,
+              backgroundRepeat: "no-repeat",
+            }}
           />
         ) : (
-          <div className="w-full h-full"
-            style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.15 0.05 275), oklch(0.14 0.013 295))" }}>
-            <div className="absolute inset-0 opacity-20"
-              style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #D4AF37 0%, transparent 60%), radial-gradient(circle at 70% 30%, #7C3AED 0%, transparent 50%)" }} />
+          // Empty state: gold-framed Upload CTA — no plain gradient
+          <div
+            className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.10 0.03 270), oklch(0.12 0.04 280))",
+            }}
+            onClick={() => bannerRef.current?.click()}
+          >
+            {/* Subtle grid texture */}
+            <div
+              className="absolute inset-0 opacity-[0.06] pointer-events-none"
+              style={{
+                backgroundImage: "linear-gradient(rgba(201,168,76,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.5) 1px, transparent 1px)",
+                backgroundSize: "32px 32px",
+              }}
+            />
+            {/* Upload icon */}
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover/cta:scale-110"
+              style={{
+                background: "rgba(201,168,76,0.1)",
+                border: "1.5px solid rgba(201,168,76,0.4)",
+              }}
+            >
+              {uploadBanner.isPending
+                ? <Loader2 size={22} className="animate-spin" style={{ color: "#c9a84c" }} />
+                : <Upload size={22} style={{ color: "#c9a84c" }} />}
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold" style={{ color: "#c9a84c", fontFamily: "'Cinzel', serif" }}>
+                {uploadBanner.isPending ? "Uploading…" : "Upload Banner"}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                Define your profile presence
+              </p>
+            </div>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.08_0.01_280)] via-transparent to-transparent" />
-        {/* Change banner button */}
-        <button
-          onClick={() => bannerRef.current?.click()}
-          disabled={uploadBanner.isPending}
-          className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-            bg-black/50 backdrop-blur-sm border border-white/10 text-white/60 hover:text-white
-            text-[11px] font-body opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
-        >
-          {uploadBanner.isPending ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
-          {uploadBanner.isPending ? "Uploading…" : "Change Banner"}
-        </button>
+        {/* Bottom fade — only when banner is populated */}
+        {profile?.bannerUrl && (
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent pointer-events-none" />
+        )}
+        {/* Gold corner accents */}
+        <div className="absolute top-0 left-0 w-6 h-6 pointer-events-none" style={{ borderTop: "2px solid #c9a84c", borderLeft: "2px solid #c9a84c" }} />
+        <div className="absolute top-0 right-0 w-6 h-6 pointer-events-none" style={{ borderTop: "2px solid #c9a84c", borderRight: "2px solid #c9a84c" }} />
+        <div className="absolute bottom-0 left-0 w-6 h-6 pointer-events-none" style={{ borderBottom: "2px solid #c9a84c", borderLeft: "2px solid #c9a84c" }} />
+        <div className="absolute bottom-0 right-0 w-6 h-6 pointer-events-none" style={{ borderBottom: "2px solid #c9a84c", borderRight: "2px solid #c9a84c" }} />
+        {/* Change banner button — only shown when banner exists */}
+        {profile?.bannerUrl && (
+          <button
+            onClick={() => bannerRef.current?.click()}
+            disabled={uploadBanner.isPending}
+            className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+              text-[11px] font-body opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
+            style={{
+              background: "rgba(0,0,0,0.65)",
+              border: "1px solid rgba(201,168,76,0.4)",
+              color: "#c9a84c",
+            }}
+          >
+            {uploadBanner.isPending ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
+            {uploadBanner.isPending ? "Uploading…" : "Change Banner"}
+          </button>
+        )}
         {/* Reposition existing banner button */}
         {profile?.bannerUrl && (
           <button
             onClick={() => setShowBannerPositioner(true)}
-            className="absolute top-3 right-[130px] flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-              bg-black/50 backdrop-blur-sm border border-white/10 text-white/60 hover:text-white
+            className="absolute top-3 right-[140px] flex items-center gap-1.5 px-3 py-1.5 rounded-lg
               text-[11px] font-body opacity-0 group-hover:opacity-100 transition-all"
+            style={{
+              background: "rgba(0,0,0,0.65)",
+              border: "1px solid rgba(201,168,76,0.4)",
+              color: "#c9a84c",
+            }}
           >
             <Edit2 size={12} />
             Reposition
@@ -313,7 +374,7 @@ export default function ProfilePage() {
           imageUrl={pendingBannerUrl || profile!.bannerUrl!}
           initialX={bannerPos.x}
           initialY={bannerPos.y}
-          previewHeight="10rem"
+          previewHeight="16rem"
           roundedTop={false}
           label={pendingBannerUrl ? "Set Banner Position" : "Reposition Banner"}
           onSave={pendingBannerUrl ? confirmBannerUpload : saveBannerPosition}

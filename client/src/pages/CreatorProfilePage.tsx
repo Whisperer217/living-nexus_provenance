@@ -19,7 +19,7 @@ import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
-  Library, Move,
+  Library, Move, Upload, Loader2,
 } from "lucide-react";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
@@ -235,6 +235,61 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
   );
 }
 
+// ─── Banner Upload CTA (owner empty state) ───────────────────────────────────
+function BannerUploadCTA() {
+  const utils = trpc.useUtils();
+  const [uploading, setUploading] = useState(false);
+  const uploadBanner = trpc.profile.uploadBanner.useMutation({
+    onSuccess: () => { utils.profile.getCreator.invalidate(); toast.success("Banner uploaded"); },
+    onError: (e: any) => toast.error(e.message || "Upload failed"),
+  });
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setUploading(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((res, rej) => {
+        reader.onload = () => res((reader.result as string).split(",")[1]);
+        reader.onerror = rej;
+        reader.readAsDataURL(f);
+      });
+      await uploadBanner.mutateAsync({ base64, mimeType: f.type });
+    } finally {
+      setUploading(false);
+    }
+  };
+  return (
+    <label
+      className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
+      style={{ background: "linear-gradient(135deg, oklch(0.10 0.03 270), oklch(0.12 0.04 280))" }}
+    >
+      <div
+        className="absolute inset-0 opacity-[0.06] pointer-events-none"
+        style={{
+          backgroundImage: "linear-gradient(rgba(201,168,76,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.5) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+      <div
+        className="w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover/cta:scale-110"
+        style={{ background: "rgba(201,168,76,0.1)", border: "1.5px solid rgba(201,168,76,0.4)" }}
+      >
+        {uploading
+          ? <Loader2 size={22} className="animate-spin" style={{ color: "#c9a84c" }} />
+          : <Upload size={22} style={{ color: "#c9a84c" }} />}
+      </div>
+      <div className="text-center">
+        <p className="text-sm font-semibold" style={{ color: "#c9a84c", fontFamily: "'Cinzel', serif" }}>
+          {uploading ? "Uploading…" : "Upload Banner"}
+        </p>
+        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Define your profile presence</p>
+      </div>
+      <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+    </label>
+  );
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function CreatorProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -420,7 +475,7 @@ export default function CreatorProfilePage() {
         }}
       >
         {creator.bannerUrl ? (
-          // Use background-image so zoom (background-size) is honoured
+          // Populated state: background-image so zoom (background-size) is honoured
           <div
             className="w-full h-full"
             style={{
@@ -432,7 +487,11 @@ export default function CreatorProfilePage() {
               backgroundRepeat: "no-repeat",
             }}
           />
+        ) : isOwner ? (
+          // Empty state (owner view): gold-framed Upload CTA
+          <BannerUploadCTA />
         ) : (
+          // Empty state (visitor view): subtle gradient
           <div
             className="w-full h-full"
             style={{ background: "linear-gradient(135deg, oklch(0.12 0.04 280) 0%, oklch(0.1 0.03 300) 40%, oklch(0.08 0.02 85) 100%)" }}

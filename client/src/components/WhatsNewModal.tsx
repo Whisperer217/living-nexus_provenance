@@ -9,14 +9,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.8.0";
+const CURRENT_VERSION = "v2.15.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.8.0",
+    version: "v2.15.0",
     date: "March 2026",
     label: "Latest",
+    items: [
+      { icon: Maximize2, text: "Banner Positioning Modes — Three explicit modes now govern how your banner image is framed: Fit (full image visible, no crop), Crop (cover-style with a zoom slider), and Stretch (fills the frame completely, no letterbox). Creator-controlled visual framing, no guesswork." },
+      { icon: Shield, text: "Gold Banner Frame — Every creator profile and owner profile now carries an elegant gold border on the banner. Corner accents, top and bottom gold lines. Visible authorship. Your space is framed, not ambient." },
+      { icon: Upload, text: "Empty Banner Upload Prompt — Profiles without a banner no longer show a plain gradient. The empty state is now an active gold-framed upload CTA: 'Upload Banner — Define your profile presence.' Every profile should either show authorship or clearly invite it." },
+    ],
+  },
+  {
+    version: "v2.8.0",
+    date: "March 2026",
+    label: null,
     items: [
       { icon: Maximize2, text: "Drag to Reposition — Your banner, avatar, track cover art, and collection cover art can now be repositioned to show exactly what you want. Upload your image, drag to frame it perfectly, save. Your creative space. Your arrangement." },
     ],

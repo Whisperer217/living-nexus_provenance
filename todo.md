@@ -1340,3 +1340,10 @@
 - [x] Add hard boundary frame to ImagePositioner preview showing exact crop area
 - [x] Add stretch-to-fit mode: allow image to stretch to fill boundary without cropping
 - [x] Add elegant gold border to CreatorProfilePage banner
+
+## Phase Z: Profile Presence + What's New v2.15.0
+- [x] Apply gold border to ProfilePage banner (owner view) — parity with CreatorProfilePage
+- [x] Replace empty banner gradient with gold-framed Upload CTA on ProfilePage
+- [x] Replace empty banner gradient with gold-framed Upload CTA on CreatorProfilePage (owner view)
+- [x] Update What's New modal to v2.15.0 with entries: Banner Positioning Modes, Gold Banner Frame, Empty Banner Upload Prompt
+- [x] Persist version acknowledgment (user_seen_version = 2.15.0)
