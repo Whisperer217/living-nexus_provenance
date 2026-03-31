@@ -523,21 +523,32 @@ export default function CreatorProfilePage() {
         <meta name="twitter:description" content={profileDesc} />
         <meta name="twitter:image" content={profileImage} />
       </Helmet>
-      {/* ── Banner wrapper with elegant gold border ── */}
+      {/* ═══════════════════════════════════════════════════════════════
+           BANNER + AVATAR HERO SECTION
+           Structure:
+             • Outer wrapper: position:relative, holds banner + avatar
+             • Banner: absolute fill (z-0), responsive height via padding-bottom trick
+             • Bottom fade: absolute overlay (z-10)
+             • Gold corner accents + reposition button: z-10
+             • Avatar: absolute, bottom-0, translated down 50% (z-20)
+             • Profile content: separate div below, pt accounts for avatar overhang
+         ═══════════════════════════════════════════════════════════════ */}
+
+      {/* ── Hero: banner (bg) + avatar (absolute overlay) ── */}
       <div
         className="relative w-full group"
         style={{
-          height: "360px",
-          // Elegant gold border on all sides
-          boxShadow: "0 1px 0 0 #c9a84c, 0 -1px 0 0 #c9a84c, inset 0 0 0 1px rgba(201,168,76,0.35)",
-          borderBottom: "2px solid #c9a84c",
+          /* Responsive banner height: 180px mobile → 260px desktop */
+          height: "clamp(180px, 30vw, 260px)",
           borderTop: "2px solid rgba(201,168,76,0.6)",
+          borderBottom: "2px solid #c9a84c",
+          boxShadow: "0 1px 0 0 #c9a84c, 0 -1px 0 0 #c9a84c, inset 0 0 0 1px rgba(201,168,76,0.35)",
         }}
       >
+        {/* ── z-0: Banner image / empty state ── */}
         {creator.bannerUrl ? (
-          // Populated state: background-image so zoom (background-size) is honoured
           <div
-            className="w-full h-full"
+            className="absolute inset-0 z-0"
             style={{
               backgroundImage: `url(${creator.bannerUrl})`,
               backgroundSize: (creator as any).bannerZoom && (creator as any).bannerZoom > 100
@@ -548,12 +559,12 @@ export default function CreatorProfilePage() {
             }}
           />
         ) : isOwner ? (
-          // Empty state (owner view): gold-framed Upload CTA
-          <BannerUploadCTA onFocalDetected={(focal) => { setAiFocalPos(focal); setShowBannerPositioner(true); }} />
+          <div className="absolute inset-0 z-0">
+            <BannerUploadCTA onFocalDetected={(focal) => { setAiFocalPos(focal); setShowBannerPositioner(true); }} />
+          </div>
         ) : (
-          // Empty state (visitor view): subtle gradient
           <div
-            className="w-full h-full"
+            className="absolute inset-0 z-0"
             style={{ background: "linear-gradient(135deg, oklch(0.12 0.04 280) 0%, oklch(0.1 0.03 300) 40%, oklch(0.08 0.02 85) 100%)" }}
           >
             <div
@@ -565,14 +576,17 @@ export default function CreatorProfilePage() {
             />
           </div>
         )}
-        {/* Subtle bottom fade for profile header overlap */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent" />
-        {/* Gold corner accents */}
-        <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
-        <div className="absolute top-0 right-0 w-12 h-12 pointer-events-none" style={{ borderTop: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
-        <div className="absolute bottom-0 left-0 w-12 h-12 pointer-events-none" style={{ borderBottom: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
-        <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none" style={{ borderBottom: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
-        {/* Reposition button — owner only, visible on hover */}
+
+        {/* ── z-10: Bottom fade gradient ── */}
+        <div className="absolute inset-x-0 bottom-0 h-24 z-10 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent pointer-events-none" />
+
+        {/* ── z-10: Gold corner accents ── */}
+        <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none z-10" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
+        <div className="absolute top-0 right-0 w-12 h-12 pointer-events-none z-10" style={{ borderTop: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
+        <div className="absolute bottom-0 left-0 w-12 h-12 pointer-events-none z-10" style={{ borderBottom: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
+        <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none z-10" style={{ borderBottom: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
+
+        {/* ── z-10: Reposition button (owner only, hover) ── */}
         {isOwner && creator.bannerUrl && (
           <button
             onClick={() => setShowBannerPositioner(true)}
@@ -589,7 +603,34 @@ export default function CreatorProfilePage() {
             Reposition
           </button>
         )}
+
+        {/* ── z-20: Avatar — absolute, overlapping banner bottom by 50% ── */}
+        <div
+          className="absolute left-4 sm:left-6 bottom-0 translate-y-1/2 z-20"
+          style={{
+            width: "clamp(80px, 12vw, 128px)",
+            height: "clamp(80px, 12vw, 128px)",
+          }}
+        >
+          <div
+            className="w-full h-full rounded-2xl overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
+              /* Ring: dark bg outline so avatar pops off the banner */
+              outline: "4px solid oklch(0.09 0.04 265)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.25)",
+            }}
+          >
+            {creator.profilePhotoUrl
+              ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
+                  style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
+              : <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
+                  {(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}
+                </div>}
+          </div>
+        </div>
       </div>
+
       {/* ── Banner inline repositioner ── */}
       {showBannerPositioner && creator.bannerUrl && (
         <ImagePositioner
@@ -605,16 +646,8 @@ export default function CreatorProfilePage() {
           onCancel={() => setShowBannerPositioner(false)}
         />
       )}
-      {/* ── Profile header ── */}
-      {/*
-        LAYER SYSTEM:
-        1. Banner sits at natural height (240px)
-        2. Header panel uses a controlled backdrop — no -mt pull-up that bleeds into banner
-        3. A thin separator line sits between banner bottom edge and header top
-        4. Identity (avatar + name + handle) anchored left
-        5. Signals (track count, witness count, supporter badge) right-aligned, minimal
-        6. Actions (icon buttons) right-aligned below signals
-      */}
+
+      {/* ── Profile header (below banner) ── */}
       <div
         className="w-full"
         style={{
@@ -623,25 +656,18 @@ export default function CreatorProfilePage() {
         }}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          {/* ── Header panel ── */}
-          <div className="flex items-start gap-6 py-7">
-
-            {/* ── Avatar — anchored left, pulled up to overlap banner bottom edge ── */}
+          {/*
+            pt accounts for avatar overhang (50% of avatar height).
+            Avatar height is clamp(80px,12vw,128px) → max overhang = 64px.
+            We use pt-20 (80px) to give a comfortable 16px breathing room.
+          */}
+          <div className="flex items-start gap-4 sm:gap-6 pt-20 pb-7">
+            {/* Spacer column — same width as avatar so text starts to the right */}
             <div
-              className="-mt-20 flex-shrink-0 w-36 h-36 rounded-2xl overflow-hidden"
-              style={{
-                background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
-                outline: "3px solid oklch(0.09 0.04 265)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-              }}
-            >
-              {creator.profilePhotoUrl
-                ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
-                    style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
-                : <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
-                    {(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}
-                  </div>}
-            </div>
+              className="flex-shrink-0"
+              style={{ width: "clamp(80px, 12vw, 128px)" }}
+              aria-hidden="true"
+            />
 
             {/* ── Identity block — left-anchored ── */}
             <div className="flex-1 min-w-0 pt-1">

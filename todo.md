@@ -1453,3 +1453,12 @@
 - [x] Replace all "Add to Queue" labels with "Play Next" (queue) and "Add to My List" (collection)
 - [x] Update track context menus, player action rows, and any other queue action surfaces
 - [x] Write Vitest for addToMyList procedure
+
+## Phase AL: Fix Banner Overlap on Creator Profile
+- [x] Set banner as background layer (position: relative container, banner fills it absolutely)
+- [x] Fix banner height (responsive: 200px mobile, 280px desktop)
+- [x] Position avatar as absolute, overlapping bottom of banner (translateY 50%)
+- [x] Add ring border + dark background to avatar for visual separation
+- [x] Push profile content down (padding-top accounts for avatar overhang)
+- [x] Ensure z-index: avatar (z-20) > banner overlay (z-10) > banner image (z-0)
+- [x] Maintain responsive behavior across screen sizes
