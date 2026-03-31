@@ -2140,3 +2140,73 @@ export async function getDashboardDeltas(creatorId: number): Promise<{
     newWitnesses: Number(witnessRow[0]?.count ?? 0),
   };
 }
+
+// ─── Song Reactions ───────────────────────────────────────────────────────────
+
+/** Get reaction counts per emoji for a song, plus the current user's selections */
+export async function getSongReactions(songId: number, userId?: number) {
+  const db = await getDb();
+  if (!db) return { counts: {} as Record<string, number>, mine: [] as string[] };
+  const { songReactions } = await import("../drizzle/schema");
+
+  // All reactions for this song
+  const rows = await db
+    .select()
+    .from(songReactions)
+    .where(eq(songReactions.songId, songId));
+
+  // Aggregate counts
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    counts[row.type] = (counts[row.type] ?? 0) + 1;
+  }
+
+  // Current user's selected reactions
+  const mine: string[] = userId
+    ? rows.filter((r: any) => r.userId === userId).map((r: any) => r.type as string)
+    : [];
+
+  return { counts, mine };
+}
+
+/** Toggle a reaction: if the user already has it, remove it; otherwise add it */
+export async function toggleSongReaction(
+  songId: number,
+  userId: number,
+  type: string
+): Promise<"added" | "removed"> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { songReactions } = await import("../drizzle/schema");
+
+  // Check if reaction already exists
+  const existing = await db
+    .select({ id: songReactions.id })
+    .from(songReactions)
+    .where(
+      and(
+        eq(songReactions.userId, userId),
+        eq(songReactions.songId, songId),
+        eq(songReactions.type, type)
+      )
+    )
+    .limit(1);
+
+  if (existing.length > 0) {
+    // Remove it
+    await (db as any)
+      .delete(songReactions)
+      .where(
+        and(
+          eq(songReactions.userId, userId),
+          eq(songReactions.songId, songId),
+          eq(songReactions.type, type)
+        )
+      );
+    return "removed";
+  } else {
+    // Add it
+    await db.insert(songReactions).values({ userId, songId, type });
+    return "added";
+  }
+}

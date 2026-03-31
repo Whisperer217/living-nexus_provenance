@@ -67,8 +67,38 @@ export default function SongDetailPage() {
   const [showLyrics, setShowLyrics] = useState(true);
   const [editingLyrics, setEditingLyrics] = useState(false);
   const [lyricsEdit, setLyricsEdit] = useState("");
-  const [reactions, setReactions] = useState<Record<string, number>>({});
-  const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
+  // Persistent reactions — backed by DB via tRPC
+  const { data: reactionsData } = trpc.songs.getReactions.useQuery(
+    { songId },
+    { enabled: songId > 0 }
+  );
+  const reactionCounts: Record<string, number> = reactionsData?.counts ?? {};
+  const myReactionsSet = new Set<string>(reactionsData?.mine ?? []);
+  const toggleReactionMutation = trpc.songs.toggleReaction.useMutation({
+    onMutate: async ({ type }) => {
+      await utils.songs.getReactions.cancel({ songId });
+      const prev = utils.songs.getReactions.getData({ songId });
+      utils.songs.getReactions.setData({ songId }, (old) => {
+        if (!old) return old;
+        const counts = { ...old.counts };
+        const mine = [...old.mine];
+        if (mine.includes(type)) {
+          counts[type] = Math.max((counts[type] ?? 1) - 1, 0);
+          return { counts, mine: mine.filter((r) => r !== type) };
+        } else {
+          counts[type] = (counts[type] ?? 0) + 1;
+          return { counts, mine: [...mine, type] };
+        }
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx: any) => {
+      if (ctx?.prev) utils.songs.getReactions.setData({ songId }, ctx.prev);
+    },
+    onSettled: () => {
+      utils.songs.getReactions.invalidate({ songId });
+    },
+  });
   const [shareOpen, setShareOpen] = useState(false);
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === `song-${songId}`;
@@ -282,12 +312,8 @@ export default function SongDetailPage() {
 
   const handleReaction = (emoji: string) => {
     if (emoji === "+") { toast.info("More reactions coming soon!"); return; }
-    const newReactions = { ...reactions };
-    const newMy = new Set(myReactions);
-    if (newMy.has(emoji)) { newReactions[emoji] = (newReactions[emoji] || 1) - 1; newMy.delete(emoji); }
-    else { newReactions[emoji] = (newReactions[emoji] || 0) + 1; newMy.add(emoji); }
-    setReactions(newReactions);
-    setMyReactions(newMy);
+    if (!user) { toast.info("Sign in to react"); return; }
+    toggleReactionMutation.mutate({ songId, type: emoji });
   };
 
   const handleTip = () => {
@@ -669,11 +695,11 @@ export default function SongDetailPage() {
                   <button key={emoji} onClick={() => handleReaction(emoji)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all hover:scale-110 active:scale-95"
                     style={{
-                      background: myReactions.has(emoji) ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.16 0.02 280)",
-                      border: `1px solid ${myReactions.has(emoji) ? "oklch(0.75 0.18 85 / 0.4)" : "oklch(0.22 0.02 280)"}`,
+                      background: myReactionsSet.has(emoji) ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.16 0.02 280)",
+                      border: `1px solid ${myReactionsSet.has(emoji) ? "oklch(0.75 0.18 85 / 0.4)" : "oklch(0.22 0.02 280)"}`,
                     }}>
                     <span>{emoji}</span>
-                    {reactions[emoji] ? <span className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>{reactions[emoji]}</span> : null}
+                    {reactionCounts[emoji] ? <span className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>{reactionCounts[emoji]}</span> : null}
                   </button>
                 ))}
               </div>

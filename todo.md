@@ -1597,3 +1597,20 @@
 - [x] Remove: Quick Reference / Explore links / duplicate nav items
 - [x] Smooth slide-in/out animation
 - [x] Update MainLayout to use QuickAccessPanel
+
+## Task 17: Reactions + Signals + Safety Audit
+- [x] Add reactions table to schema (id, userId, songId, type, createdAt, unique userId+songId+type)
+- [x] Push migration: pnpm db:push
+- [x] Add songs.getReactions tRPC procedure (counts per emoji + user's selected reactions)
+- [x] Add songs.toggleReaction tRPC procedure (upsert/delete, one per type per user per song)
+- [x] Update SongDetailPage: optimistic UI for reactions, highlight user-selected, persist across sessions
+- [ ] Fix Signals: remove any time-based auto-read or auto-archive logic
+- [ ] Fix Signals: markAsRead only on user click/expand interaction
+- [ ] Fix Signals: add "Mark all as read" button
+- [ ] Safety audit: WID visible on every work, WIDPanel opens with metadata/provenance/verify
+- [ ] Safety audit: Upload (single) works, Batch Upload accessible inside UploadPage
+- [ ] Safety audit: Witness Records accessible via Profile → Works → View Records
+- [ ] Safety audit: AddToMyListModal works everywhere, no duplicate add systems
+- [ ] Safety audit: Admin Panel accessible via role-gated route only, not in UI
+- [ ] Safety audit: Redeem Code accessible via Profile → Settings
+- [ ] Safety audit: Search accessible via QuickAccessPanel

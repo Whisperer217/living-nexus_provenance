@@ -148,6 +148,13 @@
       "when": 1774996680790,
       "tag": "0020_light_malice",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1775000927545,
+      "tag": "0021_lyrical_puff_adder",
+      "breakpoints": true
     }
   ]
 }

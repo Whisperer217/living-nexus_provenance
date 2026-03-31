@@ -1,6 +1,6 @@
 import {
   int, mysqlEnum, mysqlTable, text, timestamp,
-  varchar, float, boolean, json
+  varchar, float, boolean, json, uniqueIndex
 } from "drizzle-orm/mysql-core";
 
 // ─── Users ────────────────────────────────────────────────────────────────────
@@ -611,3 +611,22 @@ export const externalPlaylists = mysqlTable("externalPlaylists", {
 });
 export type ExternalPlaylist = typeof externalPlaylists.$inferSelect;
 export type InsertExternalPlaylist = typeof externalPlaylists.$inferInsert;
+
+// ─── Song Reactions ───────────────────────────────────────────────────────────
+// Persistent emoji reactions on songs. One reaction per type per user per song.
+// Unique constraint on (userId, songId, type) enforces the upsert/toggle model.
+export const songReactions = mysqlTable(
+  "songReactions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    songId: int("songId").notNull(),
+    type: varchar("type", { length: 16 }).notNull(), // emoji string e.g. "🔥"
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (t) => ({
+    uniq: uniqueIndex("songReactions_user_song_type_idx").on(t.userId, t.songId, t.type),
+  })
+);
+export type SongReaction = typeof songReactions.$inferSelect;
+export type InsertSongReaction = typeof songReactions.$inferInsert;

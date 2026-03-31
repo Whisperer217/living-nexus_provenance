@@ -47,6 +47,7 @@ import {
   getCollectionsByCreator, updateCollectionCover,
   getAllSupporters, getSupporterByUserId, recordPlatformGift,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
+  getSongReactions, toggleSongReaction,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -825,7 +826,18 @@ export const appRouter = router({
       const count = await getLikeCount(input.songId);
       return { count };
     }),
-
+    // Persistent emoji reactions
+    getReactions: publicProcedure
+      .input(z.object({ songId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return getSongReactions(input.songId, ctx.user?.id);
+      }),
+    toggleReaction: protectedProcedure
+      .input(z.object({ songId: z.number(), type: z.string().min(1).max(16) }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await toggleSongReaction(input.songId, ctx.user.id, input.type);
+        return { result };
+      }),
     generateCaption: protectedProcedure
       .input(z.object({
         title: z.string().min(1).max(255),
