@@ -375,8 +375,8 @@ export default function CreatorProfilePage() {
     bannerPosInitRef.current = true;
     setBannerPos({ x: creator.bannerPositionX ?? 50, y: creator.bannerPositionY ?? 50 });
   }
-  const saveBannerPosition = (pos: { x: number; y: number }) => {
-    setBannerPos(pos);
+  const saveBannerPosition = (pos: { x: number; y: number; zoom?: number }) => {
+    setBannerPos({ x: pos.x, y: pos.y });
     setShowBannerPositioner(false);
     updateBannerPosition.mutate({ bannerPositionX: pos.x, bannerPositionY: pos.y });
   };
@@ -408,10 +408,30 @@ export default function CreatorProfilePage() {
         <meta name="twitter:description" content={profileDesc} />
         <meta name="twitter:image" content={profileImage} />
       </Helmet>
-      {/* ── Banner ── */}
-      <div className="relative w-full group" style={{ height: "240px" }}>
+      {/* ── Banner wrapper with elegant gold border ── */}
+      <div
+        className="relative w-full group"
+        style={{
+          height: "240px",
+          // Elegant gold border on all sides
+          boxShadow: "0 1px 0 0 #c9a84c, 0 -1px 0 0 #c9a84c, inset 0 0 0 1px rgba(201,168,76,0.35)",
+          borderBottom: "2px solid #c9a84c",
+          borderTop: "2px solid rgba(201,168,76,0.6)",
+        }}
+      >
         {creator.bannerUrl ? (
-          <img src={creator.bannerUrl} alt="banner" className="w-full h-full object-cover" style={{ objectPosition: `${bannerPos.x}% ${bannerPos.y}%` }} />
+          // Use background-image so zoom (background-size) is honoured
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage: `url(${creator.bannerUrl})`,
+              backgroundSize: (creator as any).bannerZoom && (creator as any).bannerZoom > 100
+                ? `${(creator as any).bannerZoom}%`
+                : "cover",
+              backgroundPosition: `${bannerPos.x}% ${bannerPos.y}%`,
+              backgroundRepeat: "no-repeat",
+            }}
+          />
         ) : (
           <div
             className="w-full h-full"
@@ -426,14 +446,25 @@ export default function CreatorProfilePage() {
             />
           </div>
         )}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent" />
+        {/* Subtle bottom fade for profile header overlap */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent" />
+        {/* Gold corner accents */}
+        <div className="absolute top-0 left-0 w-8 h-8 pointer-events-none" style={{ borderTop: "2px solid #c9a84c", borderLeft: "2px solid #c9a84c" }} />
+        <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none" style={{ borderTop: "2px solid #c9a84c", borderRight: "2px solid #c9a84c" }} />
+        <div className="absolute bottom-0 left-0 w-8 h-8 pointer-events-none" style={{ borderBottom: "2px solid #c9a84c", borderLeft: "2px solid #c9a84c" }} />
+        <div className="absolute bottom-0 right-0 w-8 h-8 pointer-events-none" style={{ borderBottom: "2px solid #c9a84c", borderRight: "2px solid #c9a84c" }} />
         {/* Reposition button — owner only, visible on hover */}
         {isOwner && creator.bannerUrl && (
           <button
             onClick={() => setShowBannerPositioner(true)}
             className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-              bg-black/60 hover:bg-black/80 text-white text-[11px] font-body
+              text-white text-[11px] font-body
               opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            style={{
+              background: "rgba(0,0,0,0.65)",
+              border: "1px solid rgba(201,168,76,0.4)",
+              color: "#c9a84c",
+            }}
           >
             <Move size={12} />
             Reposition
@@ -446,7 +477,8 @@ export default function CreatorProfilePage() {
           imageUrl={creator.bannerUrl}
           initialX={bannerPos.x}
           initialY={bannerPos.y}
-          previewHeight="10rem"
+          initialZoom={(creator as any).bannerZoom ?? 100}
+          previewHeight="16rem"
           roundedTop={false}
           label="Reposition Banner"
           onSave={saveBannerPosition}

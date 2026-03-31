@@ -1329,3 +1329,14 @@
 - [x] Collection cover art: CreatorProfilePage Albums section now uses collection.coverArtUrl (not albumSongs[0].coverArtUrl)
 - [x] Collection cover art: tracks within each album sorted by trackOrder for correct display order
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
+
+## Phase X: Banner Positioner Visual Fix
+- [x] Fix CreatorProfilePage banner positioner: increase preview height, add visual separator from actual banner, improve controls panel contrast and readability
+- [x] Ensure ImagePositioner preview accurately represents the actual banner (no extra dark overlay)
+- [x] Polish controls panel: better background contrast, clearer label hierarchy
+
+## Phase Y: ImagePositioner Overhaul + Banner Gold Border
+- [x] Fix auto-zoom bug: images start zoomed-in instead of fit — zoom=100 should mean true contain/fit not cover
+- [x] Add hard boundary frame to ImagePositioner preview showing exact crop area
+- [x] Add stretch-to-fit mode: allow image to stretch to fill boundary without cropping
+- [x] Add elegant gold border to CreatorProfilePage banner
