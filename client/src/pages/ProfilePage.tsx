@@ -109,12 +109,19 @@ export default function ProfilePage() {
     enabled: !!user,
   });
 
-  const [activeTab, setActiveTab] = useState<"tracks" | "stats" | "activity" | "payments" | "network">("tracks");
+  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes">("overview");
 
   // ── Identity data ────────────────────────────────────────────────
   const { data: myStats } = trpc.profile.myStats.useQuery(undefined, { enabled: !!user });
-  const { data: myActivity = [] } = trpc.profile.myActivity.useQuery({ limit: 20 }, { enabled: !!user && activeTab === "activity" });
-  const { data: witnessNetwork } = trpc.witness.network.useQuery(undefined, { enabled: !!user && activeTab === "network" });
+  const { data: myActivity = [] } = trpc.profile.myActivity.useQuery({ limit: 20 }, { enabled: !!user && activeTab === "overview" });
+  const { data: witnessNetwork } = trpc.witness.network.useQuery(undefined, { enabled: !!user && activeTab === "overview" });
+  // ── Command center tab data ───────────────────────────────────────
+  const { data: likedSongs = [] } = trpc.songs.getLiked.useQuery(undefined, { enabled: !!user && activeTab === "liked" });
+  const { data: myPlaylists = [] } = trpc.playlists.mine.useQuery(undefined, { enabled: !!user && activeTab === "collections" });
+  const { data: myFieldNotes = [] } = trpc.fieldNotes.mine.useQuery(undefined, { enabled: !!user && activeTab === "field-notes" });
+  const { data: notifications = [] } = trpc.notifications.list.useQuery(undefined, { enabled: !!user && activeTab === "signals" });
+  const markAllRead = trpc.notifications.markAllRead.useMutation({ onSuccess: () => utils.notifications.unreadCount.invalidate() });
+  const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, { enabled: !!user });
 
   // ── Stripe Connect ───────────────────────────────────────────────
   const { data: connectData, refetch: refetchConnect } = trpc.tips.connectStatus.useQuery(
@@ -677,89 +684,174 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* ── Tabs ── */}
-        <div className="flex gap-1 mb-5 border-b border-white/[0.07]">
-          {(["tracks","activity","network","stats","payments"] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2.5 text-[12px] font-heading tracking-wider capitalize transition-all border-b-2 -mb-px
-                ${activeTab === tab
-                  ? "border-[#D4AF37] text-[#D4AF37]"
-                  : "border-transparent text-white/75 hover:text-white/60"
-                }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* ── Tracks tab ── */}
-        {activeTab === "tracks" && (
-          <div className="space-y-3">
-            {dbSongs.length === 0 ? (
-              <div className="text-center py-12 text-white/65 font-body text-[13px]">
-                No tracks yet.{" "}
-                <button onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">
-                  Upload your first track
+        {/* ── Command Center Tabs ── */}
+        {(() => {
+          const tabs: { id: typeof activeTab; label: string; badge?: string | null }[] = [
+            { id: "overview",     label: "Overview" },
+            { id: "works",        label: "Works" },
+            { id: "collections",  label: "Collections" },
+            { id: "liked",        label: "Liked" },
+            { id: "signals",      label: "Signals", badge: (unreadCount as number) > 0 ? String(unreadCount) : null },
+            { id: "field-notes",  label: "Field Notes" },
+          ];
+          return (
+            <div className="flex gap-0 mb-5 border-b border-white/[0.07] overflow-x-auto scrollbar-none">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading tracking-wider whitespace-nowrap transition-all border-b-2 -mb-px flex-shrink-0
+                    ${activeTab === tab.id
+                      ? "border-[#D4AF37] text-[#D4AF37]"
+                      : "border-transparent text-white/40 hover:text-white/65"
+                    }`}
+                >
+                  {tab.label}
+                  {tab.badge && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center animate-pulse"
+                      style={{ background: "oklch(0.65 0.22 25)", color: "white" }}>
+                      {tab.badge}
+                    </span>
+                  )}
                 </button>
+              ))}
+            </div>
+          );
+        })()}
+
+        {/* ═══════════════════════════════════════════════════════════
+             OVERVIEW TAB — Stats + Activity + Witness Network
+        ═══════════════════════════════════════════════════════════ */}
+        {activeTab === "overview" && (
+          <div className="space-y-5">
+            {/* Stats grid */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Total Plays", value: totalPlays.toLocaleString(), sub: "across all tracks", color: "#D4AF37" },
+                { label: "Tracks Published", value: dbSongs.filter((s: any) => s.status === "Published").length, sub: "live on Explore", color: "#A78BFA" },
+                { label: "Witnessing", value: witnessNetwork?.witnessing?.length ?? 0, sub: "creators you witness", color: "#4ade80" },
+                { label: "Witnesses", value: witnessNetwork?.witnessedBy?.length ?? 0, sub: "creators witnessing you", color: "#fb923c" },
+              ].map(s => (
+                <div key={s.label} className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
+                  <div className="text-[22px] font-heading mb-1" style={{ color: s.color }}>{s.value}</div>
+                  <div className="text-[12px] font-body text-white/70">{s.label}</div>
+                  <div className="text-[11px] font-body text-white/40 mt-0.5">{s.sub}</div>
+                </div>
+              ))}
+            </div>
+            {/* Stripe Connect status card */}
+            <div className="p-4 rounded-xl border border-white/[0.07] bg-[oklch(0.11_0.012_280)]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <DollarSign size={14} className="text-[#D4AF37]" />
+                  <span className="font-heading text-[13px] text-white/80 tracking-wide">Stripe Connect</span>
+                </div>
+                {connectData?.status === "enabled" ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "oklch(0.65 0.18 145 / 0.12)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }}>Active</span>
+                ) : connectData?.status === "pending" ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "oklch(0.65 0.18 45 / 0.12)", color: "oklch(0.65 0.18 45)", border: "1px solid oklch(0.65 0.18 45 / 0.3)" }}>Pending</span>
+                ) : (
+                  <button
+                    onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` })}
+                    disabled={connectMutation.isPending}
+                    className="text-[11px] px-3 py-1 rounded-lg font-body text-black disabled:opacity-50"
+                    style={{ background: "#D4AF37" }}
+                  >
+                    {connectMutation.isPending ? "Connecting…" : "Connect Stripe"}
+                  </button>
+                )}
+              </div>
+              <p className="text-[11px] font-body text-white/30 mt-2">Receive tips and jukebox gifts — you keep 90%</p>
+            </div>
+            {/* Recent activity */}
+            <div>
+              <div className="text-[11px] font-heading tracking-widest text-white/30 mb-3">RECENT ACTIVITY</div>
+              {myActivity.length === 0 ? (
+                <div className="text-center py-8">
+                  <Activity size={24} className="mx-auto mb-2 text-white/15" />
+                  <p className="text-white/30 font-body text-[12px]">No activity yet</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {(myActivity as any[]).slice(0, 8).map((evt) => {
+                    const iconMap: Record<string, { icon: any; color: string; label: string }> = {
+                      TIP: { icon: DollarSign, color: "#4ade80", label: "Gift received" },
+                      COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Comment" },
+                      LIKE: { icon: Heart, color: "#f472b6", label: "Like" },
+                      WITNESS_REGISTERED: { icon: Fingerprint, color: "#D4AF37", label: "WID Registered" },
+                      WITNESS_VERIFIED: { icon: CheckCircle, color: "#D4AF37", label: "WID Verified" },
+                      WORK_REFERENCED: { icon: Layers, color: "#fb923c", label: "Work Referenced" },
+                      SYSTEM_UPDATE: { icon: Zap, color: "#60a5fa", label: "System Update" },
+                      PRESERVATION_MODE: { icon: Star, color: "#D4AF37", label: "Preservation Mode" },
+                    };
+                    const meta = iconMap[evt.type] ?? { icon: Activity, color: "#A78BFA", label: evt.type };
+                    const Icon = meta.icon;
+                    return (
+                      <div key={evt.id} className="flex items-center gap-3 p-2.5 rounded-xl border border-white/[0.04] bg-white/[0.02]">
+                        <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: `${meta.color}15` }}>
+                          <Icon size={12} style={{ color: meta.color }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[12px] font-body text-white/65">{meta.label}</span>
+                          {evt.songTitle && <span className="text-[11px] font-body text-white/35 ml-1 truncate">— {evt.songTitle}</span>}
+                        </div>
+                        <span className="text-[10px] font-body text-white/25 flex-shrink-0">
+                          {new Date(evt.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════
+             WORKS TAB — My uploaded tracks
+        ═══════════════════════════════════════════════════════════ */}
+        {activeTab === "works" && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-heading tracking-widest text-white/30">{dbSongs.length} TRACKS</span>
+              <button
+                onClick={() => navigate("/upload")}
+                className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
+                style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+              >
+                <Upload size={11} /> Upload
+              </button>
+            </div>
+            {dbSongs.length === 0 ? (
+              <div className="text-center py-12 text-white/40 font-body text-[13px]">
+                No tracks yet.{" "}
+                <button onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">Upload your first track</button>
               </div>
             ) : (
               (dbSongs as any[]).map((song) => (
-                <div
-                  key={song.id}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06]
-                    bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all group"
-                >
+                <div key={song.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all group">
                   <div className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[oklch(0.15_0.05_275)]">
                     {song.coverArtUrl
                       ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
-                      : <div className="w-full h-full flex items-center justify-center text-white/60"><Music size={16} /></div>
-                    }
+                      : <div className="w-full h-full flex items-center justify-center text-white/60"><Music size={16} /></div>}
                   </div>
                   <div className="flex-1 min-w-0">
-                    {/* Title + status on first line — genre removed so title never gets pushed off on mobile */}
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] font-body text-white/85 truncate flex-1 min-w-0">{song.title}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-body flex-shrink-0 ${
                         song.status === "Published" ? "bg-green-500/10 text-green-400" :
-                        song.status === "Draft" ? "bg-amber-500/10 text-amber-400" :
-                        "bg-white/[0.05] text-white/70"
+                        song.status === "Draft" ? "bg-amber-500/10 text-amber-400" : "bg-white/[0.05] text-white/70"
                       }`}>{song.status || "Published"}</span>
                     </div>
-                    {/* Genre + plays + date on second line */}
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      {song.genre && (
-                        <span className="text-[10px] text-white/50 font-body truncate max-w-[160px]">{song.genre}</span>
-                      )}
-                      <span className="text-[10px] text-white/40 font-body flex-shrink-0">
-                        {(song.playCount || 0).toLocaleString()} plays
-                      </span>
-                      {song.createdAt && (
-                        <span className="text-[10px] text-white/35 font-body flex-shrink-0">
-                          {new Date(song.createdAt).toLocaleDateString()}
-                        </span>
-                      )}
+                      {song.genre && <span className="text-[10px] text-white/50 font-body truncate max-w-[160px]">{song.genre}</span>}
+                      <span className="text-[10px] text-white/40 font-body flex-shrink-0">{(song.playCount || 0).toLocaleString()} plays</span>
+                      {song.createdAt && <span className="text-[10px] text-white/35 font-body flex-shrink-0">{new Date(song.createdAt).toLocaleDateString()}</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => navigate(`/song/${song.id}`)}
-                      className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#A78BFA] hover:bg-white/[0.1] transition-all"
-                      title="Open song page"
-                    >
-                      <ExternalLink size={12} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        const url = `${window.location.origin}/song/${song.id}`;
-                        navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!"));
-                      }}
-                      className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#D4AF37] hover:bg-white/[0.1] transition-all"
-                      title="Copy song link"
-                    >
-                      <Copy size={12} />
-                    </button>
+                    <button onClick={() => navigate(`/song/${song.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#A78BFA] hover:bg-white/[0.1] transition-all" title="Open song page"><ExternalLink size={12} /></button>
+                    <button onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#D4AF37] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
                   </div>
                 </div>
               ))
@@ -767,256 +859,193 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* ── Activity tab ── */}
-        {activeTab === "activity" && (
-          <div className="space-y-2">
-            {myActivity.length === 0 ? (
+        {/* ═══════════════════════════════════════════════════════════
+             COLLECTIONS TAB — Playlists
+        ═══════════════════════════════════════════════════════════ */}
+        {activeTab === "collections" && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-heading tracking-widest text-white/30">{(myPlaylists as any[]).length} PLAYLISTS</span>
+              <button
+                onClick={() => navigate("/archive")}
+                className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
+                style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+              >
+                Manage in Archive
+              </button>
+            </div>
+            {(myPlaylists as any[]).length === 0 ? (
               <div className="text-center py-12">
-                <Activity size={28} className="mx-auto mb-3 text-white/15" />
-                <p className="text-white/40 font-body text-[13px]">No activity yet</p>
-                <p className="text-white/25 font-body text-[11px] mt-1">Upload a track or register a WID to start your provenance record</p>
+                <Music size={24} className="mx-auto mb-2 text-white/15" />
+                <p className="text-white/30 font-body text-[12px]">No playlists yet</p>
+                <button onClick={() => navigate("/archive")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Create one in Archive</button>
               </div>
             ) : (
-              (myActivity as any[]).map((evt) => {
-                const iconMap: Record<string, { icon: any; color: string; label: string }> = {
-                  TIP: { icon: DollarSign, color: "#4ade80", label: "Gift received" },
-                  COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Comment" },
-                  LIKE: { icon: Heart, color: "#f472b6", label: "Like" },
-                  WITNESS_REGISTERED: { icon: Fingerprint, color: "#D4AF37", label: "WID Registered" },
-                  WITNESS_VERIFIED: { icon: CheckCircle, color: "#D4AF37", label: "WID Verified" },
-                  WORK_REFERENCED: { icon: Layers, color: "#fb923c", label: "Work Referenced" },
-                  SYSTEM_UPDATE: { icon: Zap, color: "#60a5fa", label: "System Update" },
-                  PRESERVATION_MODE: { icon: Star, color: "#D4AF37", label: "Preservation Mode" },
-                };
-                const meta = iconMap[evt.type] ?? { icon: Activity, color: "#A78BFA", label: evt.type };
-                const Icon = meta.icon;
-                return (
-                  <div key={evt.id} className="flex items-start gap-3 p-3 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04] transition-all">
-                    <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: `${meta.color}15`, border: `1px solid ${meta.color}30` }}>
-                      <Icon size={13} style={{ color: meta.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[12px] font-body text-white/75">{meta.label}</span>
-                        {evt.songTitle && (
-                          <span className="text-[11px] font-body text-white/40 truncate">— {evt.songTitle}</span>
-                        )}
-                      </div>
-                      {evt.actorName && (
-                        <span className="text-[11px] font-body text-white/35">by {evt.actorName}</span>
-                      )}
-                      {evt.payload?.amountCents && (
-                        <span className="text-[11px] font-body" style={{ color: "#4ade80" }}>
-                          {" "}${((evt.payload.amountCents as number) / 100).toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-shrink-0 text-right">
-                      {evt.songCoverArtUrl && (
-                        <div className="w-8 h-8 rounded-lg overflow-hidden mb-1">
-                          <img src={evt.songCoverArtUrl} alt="" className="w-full h-full object-cover object-top" />
-                        </div>
-                      )}
-                      <span className="text-[10px] font-body text-white/25">
-                        {new Date(evt.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </span>
-                    </div>
+              (myPlaylists as any[]).map((pl) => (
+                <div key={pl.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all">
+                  <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.18 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }}>
+                    <Music size={14} className="text-white/40" />
                   </div>
-                );
-              })
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-body text-white/80 truncate">{pl.name}</p>
+                    <p className="text-[11px] font-body text-white/35 mt-0.5">
+                      {pl.isPublic ? "Public" : "Private"}{pl.isCollaborative ? " · Collaborative" : ""}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-body text-white/30 flex-shrink-0">{pl.trackCount ?? 0} tracks</span>
+                </div>
+              ))
             )}
           </div>
         )}
 
-        {/* ── Payments / Stripe Connect tab ── */}
-        {activeTab === "payments" && (
-          <div className="space-y-4">
-            {/* Status card */}
-            <div className="p-5 rounded-2xl border" style={{ background: "oklch(0.12 0.055 280)", borderColor: "oklch(0.25 0.05 280)" }}>
-              <div className="flex items-center gap-2 mb-4">
-                <DollarSign size={16} className="text-[#D4AF37]" />
-                <span className="font-heading text-[14px] text-white/90 tracking-wide">Stripe Connect</span>
+        {/* ═══════════════════════════════════════════════════════════
+             LIKED TAB — Liked songs
+        ═══════════════════════════════════════════════════════════ */}
+        {activeTab === "liked" && (
+          <div className="space-y-3">
+            <span className="text-[11px] font-heading tracking-widest text-white/30 block mb-1">{(likedSongs as any[]).length} LIKED TRACKS</span>
+            {(likedSongs as any[]).length === 0 ? (
+              <div className="text-center py-12">
+                <Heart size={24} className="mx-auto mb-2 text-white/15" />
+                <p className="text-white/30 font-body text-[12px]">No liked tracks yet</p>
+                <button onClick={() => navigate("/explore")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Explore music</button>
               </div>
-
-              {/* Status badge */}
-              {connectData?.status === "enabled" && (
-                <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "oklch(0.65 0.18 145 / 0.12)", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }}>
-                  <CheckCircle size={14} style={{ color: "oklch(0.65 0.18 145)" }} />
-                  <span className="text-[13px] font-body" style={{ color: "oklch(0.65 0.18 145)" }}>Active — Tips &amp; Jukebox payments enabled</span>
+            ) : (
+              (likedSongs as any[]).map((song) => (
+                <div key={song.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all">
+                  <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-[oklch(0.15_0.05_275)]">
+                    {song.coverArtUrl
+                      ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center"><Music size={14} className="text-white/40" /></div>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-body text-white/80 truncate">{song.title}</p>
+                    <p className="text-[11px] font-body text-white/35 mt-0.5 truncate">{song.artistName || song.artistHandle || "Unknown Artist"}</p>
+                  </div>
+                  <button onClick={() => navigate(`/song/${song.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/40 hover:text-[#A78BFA] transition-all flex-shrink-0"><ExternalLink size={12} /></button>
                 </div>
-              )}
-              {connectData?.status === "pending" && (
-                <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "oklch(0.65 0.18 45 / 0.12)", border: "1px solid oklch(0.65 0.18 45 / 0.3)" }}>
-                  <AlertCircle size={14} style={{ color: "oklch(0.65 0.18 45)" }} />
-                  <span className="text-[13px] font-body" style={{ color: "oklch(0.65 0.18 45)" }}>Pending — Complete Stripe verification to activate</span>
-                </div>
-              )}
-              {(!connectData?.status || connectData.status === "not_connected" || connectData.status === "error") && (
-                <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "oklch(0.5 0.03 280 / 0.15)", border: "1px solid oklch(0.5 0.03 280 / 0.3)" }}>
-                  <Zap size={14} className="text-white/70" />
-                  <span className="text-[13px] font-body text-white/40">Not Connected</span>
-                </div>
-              )}
+              ))
+            )}
+          </div>
+        )}
 
-              <p className="text-[12px] font-body text-white/40 mb-4 leading-relaxed">
-                Connect your Stripe account to receive jukebox tips and direct fan tips.
-                You keep <strong className="text-white/70">90%</strong> of every gift — 10% goes to the platform.
-              </p>
-
-              {connectData?.status === "enabled" ? (
+        {/* ═══════════════════════════════════════════════════════════
+             SIGNALS TAB — Notifications inbox
+        ═══════════════════════════════════════════════════════════ */}
+        {activeTab === "signals" && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-heading tracking-widest text-white/30">{(notifications as any[]).length} SIGNALS</span>
+              {(notifications as any[]).some((n: any) => !n.isRead) && (
                 <button
-                  onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` })}
-                  disabled={connectMutation.isPending}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-body
-                    text-white/60 hover:text-white border border-white/[0.1] hover:border-white/[0.2] transition-all disabled:opacity-50"
+                  onClick={() => markAllRead.mutate()}
+                  className="text-[11px] font-body px-3 py-1 rounded-lg transition-all"
+                  style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
                 >
-                  {connectMutation.isPending ? <Loader2 size={13} className="animate-spin" /> : <ExternalLink size={13} />}
-                  Manage Stripe Account
-                </button>
-              ) : (
-                <button
-                  onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` })}
-                  disabled={connectMutation.isPending}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-body
-                    font-medium text-black transition-all hover:-translate-y-0.5 disabled:opacity-50
-                    hover:shadow-[0_4px_20px_rgba(232,197,71,0.25)]"
-                  style={{ background: "linear-gradient(135deg, #D4AF37, #D4AF37)" }}
-                >
-                  {connectMutation.isPending
-                    ? <><Loader2 size={13} className="animate-spin" /> Connecting…</>
-                    : connectData?.status === "pending"
-                      ? <><AlertCircle size={13} /> Continue Stripe Setup</>
-                      : <><Zap size={13} /> Connect Stripe</>}
+                  Mark all read
                 </button>
               )}
             </div>
-
-            {/* Fee breakdown */}
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Your Cut", value: "90%", sub: "of every gift", color: "#D4AF37" },
-                { label: "Platform Fee", value: "10%", sub: "keeps the lights on", color: "#A78BFA" },
-              ].map(s => (
-                <div key={s.label} className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
-                  <div className="text-[22px] font-heading mb-1" style={{ color: s.color }}>{s.value}</div>
-                  <div className="text-[12px] font-body text-white/70">{s.label}</div>
-                  <div className="text-[11px] font-body text-white/65 mt-0.5">{s.sub}</div>
+            {(notifications as any[]).length === 0 ? (
+              <div className="text-center py-12">
+                <Zap size={24} className="mx-auto mb-2 text-white/15" />
+                <p className="text-white/30 font-body text-[12px]">No signals yet</p>
+              </div>
+            ) : (
+              (notifications as any[]).map((n) => (
+                <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
+                  n.isRead ? "border-white/[0.04] bg-white/[0.01]" : "border-[#A78BFA]/20 bg-[#A78BFA]/[0.04]"
+                }`}>
+                  <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.isRead ? "bg-white/10" : "bg-[#A78BFA]"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-body text-white/75">{n.title}</p>
+                    {n.body && <p className="text-[11px] font-body text-white/40 mt-0.5 line-clamp-2">{n.body}</p>}
+                  </div>
+                  <span className="text-[10px] font-body text-white/25 flex-shrink-0">
+                    {new Date(n.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </span>
                 </div>
-              ))}
-            </div>
+              ))
+            )}
           </div>
         )}
 
-        {/* ── Witness Network tab ── */}
-        {activeTab === "network" && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
-                <div className="text-[22px] font-heading mb-1" style={{ color: "#D4AF37" }}>{witnessNetwork?.witnessing?.length ?? 0}</div>
-                <div className="text-[12px] font-body text-white/70">Witnessing</div>
-                <div className="text-[11px] font-body text-white/40 mt-0.5">creators you witness</div>
-              </div>
-              <div className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
-                <div className="text-[22px] font-heading mb-1" style={{ color: "#A78BFA" }}>{witnessNetwork?.witnessedBy?.length ?? 0}</div>
-                <div className="text-[12px] font-body text-white/70">Witnesses</div>
-                <div className="text-[11px] font-body text-white/40 mt-0.5">creators witnessing you</div>
-              </div>
+        {/* ═══════════════════════════════════════════════════════════
+             FIELD NOTES TAB — Creator journal / doctrine entries
+        ═══════════════════════════════════════════════════════════ */}
+        {activeTab === "field-notes" && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-heading tracking-widest text-white/30">{(myFieldNotes as any[]).length} NOTES</span>
+              <button
+                onClick={() => navigate("/field-notes")}
+                className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
+                style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+              >
+                Open Field Notes
+              </button>
             </div>
-            <div>
-              <div className="text-[12px] font-heading tracking-wider text-white/40 mb-3 flex items-center gap-2">
-                <Eye size={12} /> WITNESSING
+            {(myFieldNotes as any[]).length === 0 ? (
+              <div className="text-center py-12">
+                <ScrollText size={24} className="mx-auto mb-2 text-white/15" />
+                <p className="text-white/30 font-body text-[12px]">No field notes yet</p>
+                <button onClick={() => navigate("/field-notes")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Write your first note</button>
               </div>
-              {!witnessNetwork?.witnessing?.length ? (
-                <div className="text-center py-8">
-                  <Users size={28} className="mx-auto mb-3 text-white/15" />
-                  <p className="text-white/40 font-body text-[13px]">You haven't witnessed any creators yet</p>
-                  <p className="text-white/25 font-body text-[11px] mt-1">Visit a creator's profile and click Witness to add them</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {(witnessNetwork?.witnessing ?? []).map((creator: any) => (
-                    <div key={creator.id} className="flex items-center gap-3 p-3 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
-                      <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold" style={{ background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))" }}>
-                        {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover object-top" /> : (creator.artistHandle || creator.name || "?")[0].toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-heading truncate" style={{ color: "oklch(0.9 0.02 85)" }}>{creator.artistHandle || creator.name}</p>
-                        <p className="text-[11px] font-body text-white/40">{creator.songCount ?? 0} tracks</p>
-                      </div>
-                      <a href={`/creator/${creator.id}`} className="text-[11px] font-body px-2 py-1 rounded-lg hover:bg-white/[0.06] transition-colors" style={{ color: "oklch(0.84 0.155 85)" }}>View</a>
+            ) : (
+              (myFieldNotes as any[]).map((note: any) => (
+                <div key={note.id} className="p-3 rounded-xl border border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-body text-white/80 truncate">{note.title}</p>
+                      <p className="text-[11px] font-body text-white/35 mt-0.5 line-clamp-2">{note.body?.slice(0, 120)}{note.body?.length > 120 ? "…" : ""}</p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="mt-4">
-              <div className="text-[12px] font-heading tracking-wider text-white/40 mb-3 flex items-center gap-2">
-                <Users size={12} /> MY WITNESSES
-              </div>
-              {!witnessNetwork?.witnessedBy?.length ? (
-                <div className="text-center py-6">
-                  <p className="text-white/40 font-body text-[13px]">No witnesses yet</p>
-                  <p className="text-white/25 font-body text-[11px] mt-1">Share your profile to grow your witness network</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {(witnessNetwork?.witnessedBy ?? []).map((creator: any) => (
-                    <div key={creator.id} className="flex items-center gap-3 p-3 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
-                      <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold" style={{ background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))" }}>
-                        {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover object-top" /> : (creator.artistHandle || creator.name || "?")[0].toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-heading truncate" style={{ color: "oklch(0.9 0.02 85)" }}>{creator.artistHandle || creator.name}</p>
-                        <p className="text-[11px] font-body text-white/40">{creator.songCount ?? 0} tracks</p>
-                      </div>
-                      <a href={`/creator/${creator.id}`} className="text-[11px] font-body px-2 py-1 rounded-lg hover:bg-white/[0.06] transition-colors" style={{ color: "oklch(0.84 0.155 85)" }}>View</a>
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded font-body capitalize" style={{ background: "oklch(0.18 0.04 280)", color: "oklch(0.6 0.1 280)" }}>{note.category}</span>
+                      <span className="text-[10px] font-body text-white/25">{new Date(note.createdAt).toLocaleDateString()}</span>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
-            </div>
+              ))
+            )}
           </div>
         )}
 
-        {/* ── Stats tab ── */}
-        {activeTab === "stats" && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Total Plays", value: totalPlays.toLocaleString(), sub: "across all tracks", color: "#D4AF37" },
-                { label: "Tracks Published", value: dbSongs.filter((s: any) => s.status === "Published").length, sub: "live on Explore", color: "#A78BFA" },
-                { label: "Tracks in Draft", value: dbSongs.filter((s: any) => s.status === "Draft").length, sub: "not yet published", color: "#fb923c" },
-                { label: "Total Tracks", value: dbSongs.length, sub: "in your archive", color: "#4ade80" },
-              ].map(s => (
-                <div key={s.label} className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
-                  <div className="text-[22px] font-heading mb-1" style={{ color: s.color }}>{s.value}</div>
-                  <div className="text-[12px] font-body text-white/70">{s.label}</div>
-                  <div className="text-[11px] font-body text-white/65 mt-0.5">{s.sub}</div>
-                </div>
-              ))}
-            </div>
-            <div className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
-              <div className="text-[12px] font-heading tracking-wider text-white/40 mb-3">Top Tracks by Plays</div>
-              {[...(dbSongs as any[])].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5).map((s, i) => (
-                <div key={s.id} className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
-                  <span className="text-[12px] font-heading text-white/60 w-4">{i + 1}</span>
-                  <span className="flex-1 text-[12px] font-body text-white/60 truncate">{s.title}</span>
-                  <span className="text-[12px] font-body text-[#D4AF37]/60">{(s.playCount || 0).toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
+        {/* ── Settings utility bar ── */}
+        <div className="mt-8 pb-8">
+          <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">SETTINGS</div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => navigate("/redeem")}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
+              style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.65 0.12 85)" }}
+            >
+              <Zap size={11} /> Redeem Code
+            </button>
+            <button
+              onClick={() => navigate("/learn")}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
+              style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.03 280)" }}
+            >
+              <ScrollText size={11} /> WID Spec &amp; Lexicon
+            </button>
+            <button
+              onClick={() => navigate("/founders")}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
+              style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.03 280)" }}
+            >
+              <Star size={11} /> Founders
+            </button>
           </div>
-        )}
-
-        {/* Log Out — bottom of profile, subtle utility */}
-        <div className="mt-8 pb-8 flex justify-center">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-white/25 hover:text-white/50 hover:bg-white/[0.04] text-[13px] font-body"
-          >
-            <LogOut size={13} />
-            Log Out
-          </button>
+          <div className="flex justify-start mt-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-white/20 hover:text-white/45 hover:bg-white/[0.04] text-[12px] font-body"
+            >
+              <LogOut size={12} />
+              Log Out
+            </button>
+          </div>
         </div>
       </div>
     </div>

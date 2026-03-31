@@ -1567,3 +1567,21 @@
 - [x] AmbientWidget: floating bottom-right widget with YouTube iframe embed, volume control, minimize/close
 - [x] ExternalPlaylistsTab: Play in Ambient button on each track row, ambient hint banner
 - [x] YouTube oEmbed metadata fetch on import (title, author, thumbnail — no API key required)
+
+## System Isolation + Sidebar Refactor
+- [x] Sidebar simplified to exactly 6 primary items: Home, Explore, Listen Together, Guilds, Profile, Upload
+- [x] Avatar + username at top clickable, routes to /profile
+- [x] Active route: left accent bar + strong visual state
+- [x] Removed from sidebar: Dashboard, My Works, Playlists, Liked Songs, Signals, Field Notes, Verify WID, Batch Upload, Witness Records, WID Specification, Lexicon, Redeem Code, Admin Panel, Artwork Normalization, Founders, Manifesto, Creator License
+- [x] /learn page created combining WID Specification + Lexicon under one route
+- [x] ProfilePage rebuilt as creator command center with 6 tabs: Overview, Works, Collections, Liked, Signals, Field Notes
+- [x] Overview tab: stats grid, Stripe Connect status, recent activity feed
+- [x] Works tab: all uploaded tracks with status badges, play count, copy link, open song page
+- [x] Collections tab: playlists list with link to Archive for management
+- [x] Liked tab: liked songs with artist name and link to song page
+- [x] Signals tab: notifications inbox with unread badge + mark all read
+- [x] Field Notes tab: journal entries preview with link to full Field Notes page
+- [x] Settings utility bar added at bottom of Profile: Redeem Code, WID Spec & Lexicon, Founders, Log Out
+- [x] Batch Upload button added to UploadPage header (top-right)
+- [x] Admin Panel removed from UI; accessible via direct URL /admin (role-gated)
+- [x] No new navigation items introduced — all features live inside existing systems

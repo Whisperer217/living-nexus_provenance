@@ -482,8 +482,19 @@ export default function UploadPage() {
     <div className="min-h-screen" style={{ background: "oklch(0.08 0.015 280)" }}>
       <div className="container py-10 max-w-2xl">
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>Upload Track</h1>
-          <p className="text-sm" style={{ color: "#E2E8F0" }}>Publish your music with cryptographic provenance — BDDT Publishing / Command Domains LLC</p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>Upload Track</h1>
+              <p className="text-sm" style={{ color: "#E2E8F0" }}>Publish your music with cryptographic provenance — BDDT Publishing / Command Domains LLC</p>
+            </div>
+            <button
+              onClick={() => navigate("/batch-upload")}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body flex-shrink-0 transition-all"
+              style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.65 0.12 85)" }}
+            >
+              <Upload size={12} /> Batch Upload
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-1 mb-8">

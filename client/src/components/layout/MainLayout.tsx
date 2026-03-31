@@ -1,8 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MainLayout v2
-   Sovereign Identity Command Center
-   Identity-first sidebar: avatar → WID status → grouped command sections
-   Groups: DISCOVER / MY COMMAND / SYSTEM / ACCOUNT
+   LIVING NEXUS — MainLayout v3
+   Clean 6-item sidebar. Creator-centered. No system/dev items.
+
+   PRIMARY NAV (always visible):
+     Home · Explore · Listen Together · Guilds · Profile · Upload
+
+   System tools are accessible via contextual locations:
+     - Verify WID → WIDPanel component
+     - Batch Upload → UploadPage
+     - Witness Records → Profile → Works tab
+     - WID Spec + Lexicon → /learn
+     - Redeem Code → Profile → Settings
+     - Admin → direct URL only (role-gated)
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useCallback } from "react";
@@ -18,48 +27,30 @@ import TipTicker from "@/components/TipTicker";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import { trpc } from "@/lib/trpc";
 import {
-  Home, Compass, Users, User, Upload, Library, BarChart2,
-  Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic,
-  BookOpen, Shield, Fingerprint, ScrollText, CheckCircle2,
-  PenLine, Layers, Bell, BookMarked, Tag, ShieldCheck, ScanLine,
+  Home, Compass, Users, User, Upload, Shield,
+  Menu, X, ChevronRight, LogIn, LogOut,
+  CheckCircle2, Fingerprint, Bell,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
-// ── Nav structure ──────────────────────────────────────────────────
-const NAV_ITEMS = [
-  // DISCOVER — public-facing
-  { label: "Home",             icon: Home,        path: "/",            group: "DISCOVER" },
-  { label: "Explore",          icon: Compass,     path: "/explore",     group: "DISCOVER" },
-  { label: "Listen Together",  icon: Users,       path: "/together",    group: "DISCOVER", badge: "LIVE" },
-  { label: "Guilds",            icon: Shield,      path: "/guilds",      group: "DISCOVER" },
-  { label: "Founding Creators",icon: Star,        path: "/contributors",group: "DISCOVER" },
-  { label: "Manifesto",        icon: BookOpen,    path: "/manifesto",   group: "DISCOVER" },
-  { label: "Creator License",  icon: Shield,      path: "/pricing",     group: "DISCOVER", badge: "$88.88" },
+// ── 6 primary nav items ────────────────────────────────────────────
+interface NavItem {
+  label: string;
+  icon: React.ElementType;
+  path: string;
+  badge?: string;
+  notifKey?: "signals" | "jukebox";
+}
 
-  // MY COMMAND — identity + provenance
-  { label: "My Profile",       icon: User,        path: "/profile",     group: "MY COMMAND" },
-  { label: "Dashboard",        icon: BarChart2,   path: "/dashboard",   group: "MY COMMAND" },
-  { label: "LNA",              icon: Layers,      path: "/archive",     group: "MY COMMAND", tooltip: "Living Nexus Archive" },
-  { label: "My Works",         icon: ListMusic,   path: "/playlist",    group: "MY COMMAND" },
-  { label: "Liked Songs",      icon: Heart,       path: "/liked",       group: "MY COMMAND" },
-  { label: "Playlists",        icon: ListMusic,   path: "/playlists",   group: "MY COMMAND" },
-  { label: "Signals",          icon: Bell,        path: "/notifications",group: "MY COMMAND" },
-  { label: "Field Notes",      icon: PenLine,     path: "/field-notes", group: "MY COMMAND" },
-
-  // SYSTEM — tools + provenance
-  { label: "Verify WID",       icon: Fingerprint, path: "/verify",      group: "SYSTEM" },
-  { label: "Upload",           icon: Upload,      path: "/upload",      group: "SYSTEM" },
-  { label: "Batch Upload",     icon: Upload,      path: "/batch-upload",group: "SYSTEM" },
-  { label: "Witness Records",  icon: ScrollText,  path: "/witness-registry", group: "SYSTEM", tooltip: "Public WID ledger" },
-  { label: "WID Specification", icon: CheckCircle2, path: "/doctrine/wid-spec", group: "SYSTEM" },
-  { label: "Lexicon",            icon: BookMarked,  path: "/lexicon",             group: "SYSTEM" },
-  { label: "Redeem Code",         icon: Tag,         path: "/redeem",              group: "SYSTEM" },
-  { label: "Admin Panel",         icon: ShieldCheck, path: "/admin",               group: "SYSTEM", adminOnly: true },
-  { label: "Artwork Normalization", icon: ScanLine,    path: "/admin/normalization",  group: "SYSTEM", adminOnly: true },
+const PRIMARY_NAV: NavItem[] = [
+  { label: "Home",            icon: Home,    path: "/"         },
+  { label: "Explore",         icon: Compass, path: "/explore"  },
+  { label: "Listen Together", icon: Users,   path: "/together", badge: "LIVE", notifKey: "jukebox" },
+  { label: "Guilds",          icon: Shield,  path: "/guilds"   },
+  { label: "Profile",         icon: User,    path: "/profile", notifKey: "signals" },
+  { label: "Upload",          icon: Upload,  path: "/upload"   },
 ];
-
-const GROUPS = ["DISCOVER", "MY COMMAND", "SYSTEM"];
 
 // ── Quick-ref summaries ────────────────────────────────────────────
 interface QuickRefPoint { label: string; path?: string; scrollTo?: string; }
@@ -69,98 +60,49 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: QuickRefPoint[] }>
     { label: "Genre filters", scrollTo: "section-genres" },
     { label: "Trending artists", scrollTo: "section-trending" },
     { label: "New releases", scrollTo: "section-new-releases" },
-    { label: "🔐 Verify WID", path: "/verify" },
   ]},
   "/explore": { title: "Explore", points: [
     { label: "All genres", path: "/explore" },
     { label: "Search tracks", path: "/explore" },
     { label: "Discover artists", path: "/explore" },
-    { label: "🔐 Verify WID", path: "/verify" },
   ]},
   "/together": { title: "Listen Together", points: [
     { label: "Create a room", path: "/together" },
     { label: "Join by code", path: "/together" },
     { label: "Live chat", path: "/together" },
     { label: "Synced playback", path: "/together" },
-    { label: "🔐 Verify WID", path: "/verify" },
   ]},
-  "/profile": { title: "My Profile", points: [
-    { label: "Your tracks", path: "/profile" },
-    { label: "Activity feed", path: "/profile" },
-    { label: "Snapshot stats", path: "/profile" },
-    { label: "Featured works", path: "/profile" },
-    { label: "🔐 Verify WID", path: "/verify" },
+  "/guilds": { title: "Guilds", points: [
+    { label: "Browse guilds", path: "/guilds" },
+    { label: "Create a guild", path: "/guilds" },
+    { label: "Guild mixes", path: "/guilds" },
   ]},
-  "/dashboard": { title: "Dashboard", points: [
-    { label: "Song catalog", path: "/dashboard" },
-    { label: "Tips earned", path: "/dashboard" },
-    { label: "Enable tips", path: "/dashboard" },
-    { label: "🔐 Verify WID", path: "/verify" },
-  ]},
-  "/archive": { title: "LNA", points: [
-    { label: "Your songs", path: "/archive" },
-    { label: "Publish / unpublish", path: "/archive" },
-    { label: "Status filter", path: "/archive" },
-    { label: "Version history", path: "/archive" },
-    { label: "🔐 Verify WID", path: "/verify" },
+  "/profile": { title: "Profile", points: [
+    { label: "Your works", path: "/profile" },
+    { label: "Collections", path: "/profile" },
+    { label: "Liked tracks", path: "/profile" },
+    { label: "Signals", path: "/profile" },
+    { label: "Field Notes", path: "/profile" },
   ]},
   "/upload": { title: "Upload", points: [
-    { label: "Audio + artwork", path: "/upload" },
-    { label: "Track metadata", path: "/upload" },
+    { label: "Single track", path: "/upload" },
+    { label: "Batch album", path: "/batch-upload" },
     { label: "Witness ID provenance", path: "/upload" },
-    { label: "🔐 Verify WID", path: "/verify" },
   ]},
-  "/batch-upload": { title: "Batch Upload", points: [
-    { label: "Upload full album", path: "/batch-upload" },
-    { label: "One cover art", path: "/batch-upload" },
-    { label: "Per-track WIDs", path: "/batch-upload" },
-    { label: "🔐 Verify WID", path: "/verify" },
+  "/archive": { title: "Archive", points: [
+    { label: "Your songs", path: "/archive" },
+    { label: "Publish / unpublish", path: "/archive" },
+    { label: "My Lists", path: "/archive" },
+    { label: "External playlists", path: "/archive" },
   ]},
-  "/liked": { title: "Liked Songs", points: [
-    { label: "Songs you loved", path: "/liked" },
-    { label: "From other creators", path: "/explore" },
-    { label: "Heart to save", path: "/liked" },
-    { label: "🔐 Verify WID", path: "/verify" },
-  ]},
-  "/playlist": { title: "My Works", points: [
-    { label: "Saved tracks", path: "/playlist" },
-    { label: "Bookmark any song", path: "/playlist" },
-    { label: "Play as queue", path: "/playlist" },
-    { label: "🔐 Verify WID", path: "/verify" },
-  ]},
-  "/field-notes": { title: "Field Notes", points: [
-    { label: "Doctrine entries", path: "/field-notes" },
-    { label: "Videos & concepts", path: "/field-notes" },
-    { label: "System philosophy", path: "/field-notes" },
-    { label: "🔐 Verify WID", path: "/verify" },
-  ]},
-  "/contributors": { title: "Founding Creators", points: [
-    { label: "Genesis Day", path: "/contributors" },
-    { label: "March 20, 2026", path: "/contributors" },
-    { label: "Five founders", path: "/contributors" },
-    { label: "🔐 Verify WID", path: "/verify" },
-  ]},
-  "/manifesto": { title: "Manifesto", points: [
-    { label: "Creator sovereignty", path: "/manifesto" },
-    { label: "WID provenance", path: "/manifesto" },
-    { label: "Anti-extraction", path: "/manifesto" },
-    { label: "🔐 Verify WID", path: "/verify" },
-  ]},
-  "/witness-registry": { title: "Witness Registry", points: [
-    { label: "All WIDs issued", path: "/witness-registry" },
-    { label: "Full Works tab", path: "/witness-registry" },
-    { label: "Lyrics provenance", path: "/witness-registry" },
-    { label: "Route to creator", path: "/witness-registry" },
-    { label: "🔐 Verify WID", path: "/verify" },
-  ]},
-  "/verify": { title: "Verify WID", points: [
-    { label: "Enter a WID", path: "/verify" },
-    { label: "Check provenance", path: "/verify" },
-    { label: "View creator record", path: "/verify" },
+  "/learn": { title: "Learn", points: [
+    { label: "WID Specification", path: "/learn" },
+    { label: "Lexicon", path: "/learn" },
+    { label: "Verify a WID", path: "/verify" },
   ]},
 };
 
-// ── Identity header (shared desktop + mobile) ─────────────────────
+// ── Identity header ────────────────────────────────────────────────
 function IdentityHeader({
   user, profileAvatar, profileName, sidebarOpen, onProfileClick,
 }: {
@@ -185,7 +127,7 @@ function IdentityHeader({
       {/* Avatar */}
       <div className="relative flex-shrink-0">
         <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden flex-shrink-0"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden flex-shrink-0"
           style={{
             background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
             boxShadow: hasWid ? "0 0 0 2px #D4AF37, 0 0 12px oklch(0.80 0.145 82 / 0.35)" : "none",
@@ -196,7 +138,6 @@ function IdentityHeader({
             : displayName.charAt(0).toUpperCase()
           }
         </div>
-        {/* WID verified badge */}
         {hasWid && (
           <div
             className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
@@ -214,9 +155,7 @@ function IdentityHeader({
           {hasWid ? (
             <div className="flex items-center gap-1 mt-0.5">
               <Fingerprint size={9} style={{ color: "#D4AF37" }} />
-              <span className="text-[10px] font-heading tracking-wider" style={{ color: "#D4AF37" }}>
-                WITNESSED
-              </span>
+              <span className="text-[9px] font-heading tracking-wider" style={{ color: "#D4AF37" }}>WITNESSED</span>
             </div>
           ) : (
             <div className="text-[10px] text-white/30 font-body mt-0.5">Creator</div>
@@ -245,18 +184,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
 
-  // Live notification badges — poll every 60s when user is authenticated
+  // Notification badges
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, {
     enabled: !!user,
     refetchInterval: 60_000,
     staleTime: 30_000,
   });
-  const { data: newEventCount = 0 } = trpc.notifications.newEventCount.useQuery(undefined, {
-    enabled: !!user,
-    refetchInterval: 60_000,
-    staleTime: 30_000,
-  });
-  const totalActivityBadge = (unreadCount as number) + (newEventCount as number);
 
   const openMobileMenu = useCallback(() => { setQrOpen(false); setMobileMenuOpen(true); }, []);
   const toggleQr = useCallback(() => {
@@ -267,78 +200,85 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   const pageSummary = PAGE_SUMMARIES[location] || PAGE_SUMMARIES["/"];
 
-  // Active check — some items share a path (Witness Records → /archive)
-  const isActive = (path: string) => location === path;
+  // Active check — treat /home as / alias
+  const isActive = (path: string) => {
+    if (path === "/" && (location === "/" || location === "/home")) return true;
+    return location === path || (path !== "/" && location.startsWith(path + "/"));
+  };
 
-  const renderNavItem = (item: typeof NAV_ITEMS[0], compact: boolean) => {
+  const renderNavItem = (item: NavItem, compact: boolean) => {
     const Icon = item.icon;
     const active = isActive(item.path);
-    const isGold = item.badge === "$88.88";
     const isLive = item.badge === "LIVE";
-    // Dynamic queue count badge for Listen Together
-    const isJukebox = item.path === "/together";
-    const dynamicBadge = isJukebox && jukeboxQueueCount > 0 ? (jukeboxQueueCount > 9 ? "9+" : String(jukeboxQueueCount)) : null;
-    // Notification badges
-    const isSignals = item.path === "/notifications";
-    const isDashboard = item.path === "/dashboard";
+
+    // Dynamic badges
+    const isJukebox = item.notifKey === "jukebox";
+    const isSignals = item.notifKey === "signals";
+    const jukeboxBadge = isJukebox && jukeboxQueueCount > 0 ? (jukeboxQueueCount > 9 ? "9+" : String(jukeboxQueueCount)) : null;
     const signalsBadge = isSignals && (unreadCount as number) > 0 ? ((unreadCount as number) > 99 ? "99+" : String(unreadCount)) : null;
-    const dashboardBadge = isDashboard && totalActivityBadge > 0 ? (totalActivityBadge > 99 ? "99+" : String(totalActivityBadge)) : null;
-    const livePulseBadge = signalsBadge || dashboardBadge;
+    const pulseBadge = signalsBadge;
+    const staticBadge = !pulseBadge && !jukeboxBadge && item.badge && isLive ? item.badge : null;
+    const countBadge = jukeboxBadge;
 
     return (
       <button
         key={item.label}
         onClick={() => goTo(item.path)}
-        title={item.tooltip || item.label}
-        className={`w-full flex items-center gap-3 transition-all duration-150 rounded-none
-          ${compact ? "px-4 py-3 text-[14px]" : `px-4 py-2.5 text-[13.5px] ${sidebarOpen ? "" : "justify-center px-0"}`}
+        title={item.label}
+        className={`w-full flex items-center gap-3 transition-all duration-150 relative
+          ${compact ? "px-4 py-3 text-[14px]" : `py-2.5 text-[13.5px] ${sidebarOpen ? "px-4" : "justify-center px-0"}`}
           ${active
-            ? "text-[oklch(0.96_0.008_270)] border-r-2"
+            ? "text-white/95"
             : "text-white/40 hover:text-[oklch(0.82_0.155_175)] hover:bg-[oklch(0.82_0.155_175/0.06)]"
           }`}
-        style={active ? { background: "oklch(0.80 0.145 82 / 0.08)", borderColor: "oklch(0.80 0.145 82)" } : {}}
+        style={active ? { background: "oklch(0.80 0.145 82 / 0.08)" } : {}}
       >
-        {/* Icon with optional dot badge when sidebar is collapsed */}
+        {/* Left accent bar for active state */}
+        {active && !compact && (
+          <span
+            className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r-full"
+            style={{ background: "oklch(0.80 0.145 82)" }}
+          />
+        )}
+
+        {/* Icon */}
         <div className="relative flex-shrink-0">
           <Icon
             size={compact ? 16 : 15}
             style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit", opacity: active ? 1 : 0.6 }}
           />
-          {/* Collapsed sidebar: show dot badge on icon */}
-          {!compact && !sidebarOpen && livePulseBadge && (
+          {/* Collapsed sidebar: dot badge on icon */}
+          {!compact && !sidebarOpen && pulseBadge && (
             <span
               className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
               style={{ background: "oklch(0.65 0.22 25)" }}
             />
           )}
         </div>
+
         {(compact || sidebarOpen) && (
           <>
             <span className="font-body flex-1 text-left">{item.label}</span>
-            {/* Living Pulse notification badge */}
-            {livePulseBadge && (
+            {/* Pulse badge (signals) */}
+            {pulseBadge && (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center animate-pulse"
                 style={{ background: "oklch(0.65 0.22 25)", color: "white" }}
-              >{livePulseBadge}</span>
+              >{pulseBadge}</span>
             )}
-            {/* Static/dynamic badges (only when no pulse badge) */}
-            {!livePulseBadge && item.badge && !dynamicBadge && (
-              <span
-                className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto"
-                style={isGold
-                  ? { background: "oklch(0.80 0.145 82 / 0.15)", color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.35)" }
-                  : isLive
-                  ? { background: "oklch(0.65 0.18 160 / 0.20)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.30)" }
-                  : {}
-                }
-              >{item.badge}</span>
-            )}
-            {!livePulseBadge && dynamicBadge && (
+            {/* Count badge (jukebox queue) */}
+            {!pulseBadge && countBadge && (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center"
                 style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.15 0.01 280)" }}
-              >{dynamicBadge}</span>
+              >{countBadge}</span>
+            )}
+            {/* Static badge (LIVE) */}
+            {!pulseBadge && !countBadge && staticBadge && (
+              <span
+                className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto"
+                style={{ background: "oklch(0.65 0.18 160 / 0.20)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.30)" }}
+              >{staticBadge}</span>
             )}
           </>
         )}
@@ -375,7 +315,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             )}
           </div>
 
-          {/* Identity header — only when authenticated */}
+          {/* Identity header — clickable, routes to /profile */}
           {!authLoading && user && (
             <div className="px-2 pt-3 pb-2 border-b border-white/[0.05]">
               <IdentityHeader
@@ -388,26 +328,25 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </div>
           )}
 
-          {/* Nav groups */}
+          {/* Primary nav — 6 items */}
           <nav className="flex-1 overflow-y-auto py-3">
-            {GROUPS.map(group => {
-              const allItems = NAV_ITEMS.filter(n => n.group === group);
-              // Filter adminOnly items — only show to admin users
-              const items = allItems.filter(n => !(n as { adminOnly?: boolean }).adminOnly || user?.role === "admin");
-              // Hide MY COMMAND + SYSTEM groups if not authenticated
-              if ((group === "MY COMMAND" || group === "SYSTEM") && !user) return null;
-              return (
-                <div key={group} className="mb-1">
-                  {sidebarOpen && (
-                    <div className="px-4 py-1 text-[9.5px] font-heading tracking-[0.16em] uppercase text-white/20 mb-0.5">
-                      {group}
-                    </div>
-                  )}
-                  {items.map(item => renderNavItem(item, false))}
-                  {sidebarOpen && <div className="gold-divider mx-4 my-2 opacity-20" />}
-                </div>
-              );
-            })}
+            <div className="space-y-0.5">
+              {PRIMARY_NAV.map(item => renderNavItem(item, false))}
+            </div>
+
+            {/* Divider after Upload */}
+            {sidebarOpen && (
+              <div className="gold-divider mx-4 mt-3 mb-2 opacity-20" />
+            )}
+
+            {/* Unauthenticated discovery hint */}
+            {!authLoading && !user && sidebarOpen && (
+              <div className="px-4 py-2">
+                <p className="text-[10px] text-white/25 leading-relaxed">
+                  Sign in to upload, witness your work, and build your creator profile.
+                </p>
+              </div>
+            )}
           </nav>
 
           {/* Account footer */}
@@ -459,6 +398,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           >
             <ChevronRight size={16} className={`transition-transform ${qrOpen ? "rotate-180" : ""}`} />
           </button>
+          {/* Mobile signals badge */}
+          {!!user && (unreadCount as number) > 0 && (
+            <button
+              onClick={() => goTo("/profile")}
+              className="relative p-2 rounded-lg text-white/40 hover:text-white/70"
+            >
+              <Bell size={16} />
+              <span
+                className="absolute top-1 right-1 w-2 h-2 rounded-full animate-pulse"
+                style={{ background: "oklch(0.65 0.22 25)" }}
+              />
+            </button>
+          )}
         </div>
 
         {/* ── Mobile nav overlay ── */}
@@ -472,8 +424,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {/* Mobile identity header */}
               {!authLoading && user && (
                 <div className="px-3 pt-3 pb-3 border-b border-white/[0.07]">
-                  <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "oklch(0.14 0.04 270 / 60%)" }}>
-                    {/* Avatar */}
+                  <button
+                    className="flex items-center gap-3 p-3 rounded-xl w-full text-left"
+                    style={{ background: "oklch(0.14 0.04 270 / 60%)" }}
+                    onClick={() => goTo("/profile")}
+                  >
                     <div className="relative flex-shrink-0">
                       <div
                         className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold text-white overflow-hidden"
@@ -501,33 +456,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                           <span className="text-[10px] font-heading tracking-wider" style={{ color: "#D4AF37" }}>WITNESSED</span>
                         </div>
                       ) : (
-                        <div className="text-[11px] text-white/35 mt-0.5">Creator</div>
+                        <div className="text-[11px] text-white/35 mt-0.5">View Profile</div>
                       )}
                     </div>
-                    <button
-                      onClick={() => goTo("/profile")}
-                      className="flex-shrink-0 p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
-                    >
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
+                    <ChevronRight size={14} className="text-white/30 flex-shrink-0" />
+                  </button>
                 </div>
               )}
 
-              {/* Mobile nav groups */}
-              <div className="flex-1 overflow-y-auto py-2">
-                {GROUPS.map(group => {
-                  const allItems = NAV_ITEMS.filter(n => n.group === group);
-                  const items = allItems.filter(n => !(n as { adminOnly?: boolean }).adminOnly || user?.role === "admin");
-                  if ((group === "MY COMMAND" || group === "SYSTEM") && !user) return null;
-                  return (
-                    <div key={group} className="mb-1">
-                      <div className="px-4 py-1.5 text-[9.5px] font-heading tracking-[0.16em] uppercase text-white/20">{group}</div>
-                      {items.map(item => renderNavItem(item, true))}
-                      <div className="gold-divider mx-4 my-1.5 opacity-15" />
-                    </div>
-                  );
-                })}
+              {/* Mobile primary nav */}
+              <div className="flex-1 py-2">
+                {PRIMARY_NAV.map(item => renderNavItem(item, true))}
               </div>
 
               {/* Mobile account footer */}
@@ -582,7 +521,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* Theater Player */}
       <TheaterPlayer />
 
-      {/* Scroll to top — top-right, visible on all screen sizes */}
+      {/* Scroll to top */}
       <ScrollToTopButton />
     </div>
   );

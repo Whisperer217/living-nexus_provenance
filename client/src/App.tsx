@@ -47,6 +47,7 @@ const FoundersPage = lazy(() => import("./pages/FoundersPage"));
 const ArtworkNormalizationPage = lazy(() => import("./pages/ArtworkNormalizationPage"));
 const GuildPage = lazy(() => import("./pages/GuildPage"));
 const GuildsListPage = lazy(() => import("./pages/GuildsListPage"));
+const LearnPage = lazy(() => import("./pages/LearnPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -100,6 +101,7 @@ function Router() {
                 <Route path="/field-notes" component={FieldNotesPage} />
                 <Route path="/doctrine/wid-spec" component={WIDSpecPage} />
                 <Route path="/lexicon" component={LexiconPage} />
+                <Route path="/learn" component={LearnPage} />
                 <Route path="/playlists" component={PlaylistsPage} />
                 <Route path="/notifications" component={NotificationsPage} />
                 <Route path="/witness-registry" component={WitnessRegistryPage} />
