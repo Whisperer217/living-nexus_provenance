@@ -361,23 +361,23 @@ export default function HomePage() {
 
               {/* Three pillars */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
-                {[
+                {([
                   {
-                    icon: <ShieldCheck size={14} />,
+                    Icon: ShieldCheck,
                     title: "Immutable Proof",
                     desc: "Your WID is written to a permanent ledger. No platform, no algorithm, no third party can overwrite it.",
                   },
                   {
-                    icon: <Lock size={14} />,
+                    Icon: Lock,
                     title: "Ownership on Record",
                     desc: "Founding creators receive the earliest registry timestamps — the strongest possible claim to authorship.",
                   },
                   {
-                    icon: <Star size={14} />,
+                    Icon: Star,
                     title: "Founding Status",
                     desc: "Founder's Era creators are permanently distinguished in the registry as the builders of this platform's provenance foundation.",
                   },
-                ].map(p => (
+                ] as const).map(p => (
                   <div
                     key={p.title}
                     className="rounded-xl p-3"
@@ -387,7 +387,7 @@ export default function HomePage() {
                     }}
                   >
                     <div className="flex items-center gap-1.5 mb-1.5" style={{ color: "oklch(0.84 0.155 85)" }}>
-                      {p.icon}
+                      <p.Icon size={14} />
                       <span className="text-[11px] font-heading tracking-wide">{p.title}</span>
                     </div>
                     <p className="text-[11px] font-body leading-relaxed" style={{ color: "oklch(0.62 0.025 280)" }}>

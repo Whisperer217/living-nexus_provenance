@@ -52,55 +52,7 @@ const PRIMARY_NAV: NavItem[] = [
   { label: "Upload",          icon: Upload,  path: "/upload"   },
 ];
 
-// ── Quick-ref summaries ────────────────────────────────────────────
-interface QuickRefPoint { label: string; path?: string; scrollTo?: string; }
-const PAGE_SUMMARIES: Record<string, { title: string; points: QuickRefPoint[] }> = {
-  "/": { title: "Home", points: [
-    { label: "Featured tracks", scrollTo: "section-featured" },
-    { label: "Genre filters", scrollTo: "section-genres" },
-    { label: "Trending artists", scrollTo: "section-trending" },
-    { label: "New releases", scrollTo: "section-new-releases" },
-  ]},
-  "/explore": { title: "Explore", points: [
-    { label: "All genres", path: "/explore" },
-    { label: "Search tracks", path: "/explore" },
-    { label: "Discover artists", path: "/explore" },
-  ]},
-  "/together": { title: "Listen Together", points: [
-    { label: "Create a room", path: "/together" },
-    { label: "Join by code", path: "/together" },
-    { label: "Live chat", path: "/together" },
-    { label: "Synced playback", path: "/together" },
-  ]},
-  "/guilds": { title: "Guilds", points: [
-    { label: "Browse guilds", path: "/guilds" },
-    { label: "Create a guild", path: "/guilds" },
-    { label: "Guild mixes", path: "/guilds" },
-  ]},
-  "/profile": { title: "Profile", points: [
-    { label: "Your works", path: "/profile" },
-    { label: "Collections", path: "/profile" },
-    { label: "Liked tracks", path: "/profile" },
-    { label: "Signals", path: "/profile" },
-    { label: "Field Notes", path: "/profile" },
-  ]},
-  "/upload": { title: "Upload", points: [
-    { label: "Single track", path: "/upload" },
-    { label: "Batch album", path: "/batch-upload" },
-    { label: "Witness ID provenance", path: "/upload" },
-  ]},
-  "/archive": { title: "Archive", points: [
-    { label: "Your songs", path: "/archive" },
-    { label: "Publish / unpublish", path: "/archive" },
-    { label: "My Lists", path: "/archive" },
-    { label: "External playlists", path: "/archive" },
-  ]},
-  "/learn": { title: "Learn", points: [
-    { label: "WID Specification", path: "/learn" },
-    { label: "Lexicon", path: "/learn" },
-    { label: "Verify a WID", path: "/verify" },
-  ]},
-};
+// ── (PAGE_SUMMARIES removed — QuickAccessPanel is self-contained) ──
 
 // ── Identity header ────────────────────────────────────────────────
 function IdentityHeader({
@@ -198,8 +150,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }, [qrOpen]);
   const goTo = useCallback((path: string) => { navigate(path); setMobileMenuOpen(false); }, [navigate]);
 
-  const pageSummary = PAGE_SUMMARIES[location] || PAGE_SUMMARIES["/"];
-
   // Active check — treat /home as / alias
   const isActive = (path: string) => {
     if (path === "/" && (location === "/" || location === "/home")) return true;
@@ -289,7 +239,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.08_0.01_280)] relative">
       {/* Quick Reference Slider */}
-      <QuickRefSlider open={qrOpen} onToggle={toggleQr} summary={pageSummary} currentPath={location} />
+      <QuickRefSlider open={qrOpen} onToggle={toggleQr} />
 
       <div className="flex flex-1 overflow-hidden relative z-10">
 

@@ -1,182 +1,269 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — QuickRefSlider (Phase 65 upgrade)
-   - Glowing gold pulse tab trigger
-   - Clickable nav points with navigate+scroll
-   - Recent Tracks mini-feed (last 6 tracks, tap to play)
-   - Log Out button at bottom (visible when logged in)
+   LIVING NEXUS — QuickAccessPanel
+   - Collapsed by default (edge handle only)
+   - Overlay mode (no layout shift)
+   - Close on outside click
+   - Content: global search → quick genre filters → recently played
+   - Filters call the same DiscoveryFeed system as HomePage (no duplication)
 ═══════════════════════════════════════════════════════════════════ */
 
-import { ChevronRight, Play, LogOut } from "lucide-react";
+import { useRef, useEffect, useState, useMemo } from "react";
+import { ChevronRight, Search, Play, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 
-interface QuickRefPoint {
-  label: string;
-  path?: string;
-  scrollTo?: string;
-}
+// ── Genre filter chips (same set as HomePage) ─────────────────────
+const GENRE_FILTERS = [
+  { label: "All",        value: undefined },
+  { label: "Ambient",    value: "Ambient" },
+  { label: "Gospel",     value: "Gospel" },
+  { label: "Electronic", value: "Electronic" },
+  { label: "Hip-Hop",    value: "Hip-Hop" },
+  { label: "Jazz",       value: "Jazz" },
+  { label: "R&B",        value: "R&B" },
+];
 
 interface Props {
+  /** Whether the panel is open */
   open: boolean;
+  /** Toggle open/close */
   onToggle: () => void;
-  summary: { title: string; points: QuickRefPoint[] | string[] };
-  currentPath: string;
+  /** Unused legacy props kept for backward compat — ignored */
+  summary?: unknown;
+  currentPath?: string;
 }
 
-export default function QuickRefSlider({ open, onToggle, summary, currentPath }: Props) {
+export default function QuickAccessPanel({ open, onToggle }: Props) {
   const [, navigate] = useLocation();
   const { addAndPlay } = usePlayer();
-  const { user, logout } = useAuth();
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  // Fetch last 6 tracks for the mini-feed using the discover procedure
-  const { data: recentTracksData } = trpc.songs.discover.useQuery(
-    { limit: 6 },
-    { staleTime: 60_000 }
+  // ── Search state ──────────────────────────────────────────────────
+  const [query, setQuery] = useState("");
+  const [activeGenre, setActiveGenre] = useState<string | undefined>(undefined);
+
+  // ── Discovery feed — same procedure as HomePage ───────────────────
+  const discoverInput = useMemo(() => ({
+    genre: activeGenre,
+    limit: 12,
+    search: query.trim() || undefined,
+  }), [activeGenre, query]);
+
+  const { data: feedData, isLoading: feedLoading } = trpc.songs.discover.useQuery(
+    discoverInput,
+    { staleTime: 30_000, enabled: open }
   );
-  const recentTracks = recentTracksData ?? [];
 
-  const handlePointClick = (point: QuickRefPoint | string) => {
-    const p = typeof point === "string" ? { label: point } : point;
-    onToggle();
+  const tracks = feedData ?? [];
 
-    const doScroll = () => {
-      if (p.scrollTo) {
-        const el = document.getElementById(p.scrollTo);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  // ── Close on outside click ────────────────────────────────────────
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        onToggle();
       }
     };
+    // Small delay so the toggle click itself doesn't immediately close
+    const id = setTimeout(() => document.addEventListener("mousedown", handler), 100);
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener("mousedown", handler);
+    };
+  }, [open, onToggle]);
 
-    if (p.path && p.path !== currentPath) {
-      navigate(p.path);
-      setTimeout(doScroll, 350);
-    } else {
-      doScroll();
-    }
-  };
+  // ── Close on Escape ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onToggle(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, onToggle]);
 
-  const handleTrackClick = (track: { song: { id: number; title: string; fileUrl: string | null; coverArtUrl: string | null; witnessId: string | null; coverPositionX?: number | null; coverPositionY?: number | null }; creator: { id: number; name: string | null; artistHandle: string | null } | null }) => {
+  const handleTrackClick = (track: any) => {
     onToggle();
     addAndPlay({
-      id: String(track.song.id),
-      title: track.song.title,
-      artist: track.creator?.name ?? track.creator?.artistHandle ?? "Unknown",
-      artUrl: track.song.coverArtUrl ?? undefined,
+      id: String(track.id ?? track.song?.id),
+      title: track.title ?? track.song?.title,
+      artist: track.artistName ?? track.creator?.name ?? track.creator?.artistHandle ?? "Unknown",
+      artUrl: track.coverArtUrl ?? track.song?.coverArtUrl ?? undefined,
       artType: "image",
-      audioUrl: track.song.fileUrl ?? undefined,
-      witnessId: track.song.witnessId ?? undefined,
-      genre: "",
+      audioUrl: track.fileUrl ?? track.song?.fileUrl ?? undefined,
+      witnessId: track.witnessId ?? track.song?.witnessId ?? undefined,
+      genre: track.genre ?? "",
       bg: "oklch(0.185 0.06 270)",
       emoji: "🎵",
-      creatorId: track.creator?.id ?? undefined,
-      coverPositionX: track.song.coverPositionX ?? 50,
-      coverPositionY: track.song.coverPositionY ?? 50,
+      coverPositionX: track.coverPositionX ?? track.song?.coverPositionX ?? 50,
+      coverPositionY: track.coverPositionY ?? track.song?.coverPositionY ?? 50,
     });
   };
 
-  const handleLogout = async () => {
-    onToggle();
-    await logout();
-    navigate("/");
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      onToggle();
+      navigate(`/explore?q=${encodeURIComponent(query.trim())}`);
+    }
   };
 
   return (
     <>
-      {/* ── Glowing gold pulse tab trigger ── */}
+      {/* ── Edge handle tab — always visible ─────────────────────── */}
       <button
         onClick={onToggle}
-        className={`fixed left-0 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center
+        aria-label={open ? "Close quick access panel" : "Open quick access panel"}
+        className={`fixed left-0 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center
           w-5 h-16 rounded-r-lg transition-all duration-300
-          border border-l-0
-          qr-tab-glow
-          ${open ? "translate-x-[180px]" : "translate-x-0"}`}
+          border border-l-0 qr-tab-glow`}
         style={{
           background: "oklch(0.14 0.013 280)",
           borderColor: "oklch(0.80 0.145 82 / 0.4)",
+          transform: `translateY(-50%) translateX(${open ? "240px" : "0px"})`,
         }}
-        title="Quick Reference"
       >
         <ChevronRight
           size={12}
-          className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-          style={{ color: "oklch(0.80 0.145 82)" }}
+          className="transition-transform duration-300"
+          style={{
+            color: "oklch(0.80 0.145 82)",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+          }}
         />
       </button>
 
-      {/* ── Panel ── */}
+      {/* ── Backdrop overlay ─────────────────────────────────────── */}
+      {open && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-[1px]"
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ── Panel ────────────────────────────────────────────────── */}
       <div
-        className={`fixed left-0 top-0 bottom-0 z-20 flex flex-col
-          w-[180px] border-r border-white/[0.07]
-          transition-transform duration-300 ease-in-out
-          ${open ? "translate-x-0" : "-translate-x-full"}`}
-        style={{ background: "oklch(0.11 0.012 280)" }}
+        ref={panelRef}
+        className="fixed left-0 top-0 bottom-0 z-40 flex flex-col w-[240px]
+          border-r border-white/[0.08]
+          transition-transform duration-300 ease-in-out"
+        style={{
+          background: "oklch(0.10 0.018 278)",
+          transform: open ? "translateX(0)" : "translateX(-100%)",
+          boxShadow: open ? "4px 0 32px oklch(0 0 0 / 0.6)" : "none",
+        }}
+        aria-hidden={!open}
       >
-        {/* Header */}
-        <div className="px-4 pt-5 pb-3 border-b border-white/[0.07]">
-          <div className="text-[9px] font-heading tracking-[0.18em] uppercase mb-1"
-            style={{ color: "oklch(0.96 0.008 270 / 0.25)" }}>
-            Quick Reference
-          </div>
-          <div className="text-[13px] font-heading" style={{ color: "oklch(0.80 0.145 82)" }}>
-            {summary.title}
-          </div>
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between px-4 pt-5 pb-3 border-b border-white/[0.06]">
+          <span className="text-[11px] font-heading tracking-[0.18em] uppercase"
+            style={{ color: "oklch(0.80 0.145 82)" }}>
+            Quick Access
+          </span>
+          <button
+            onClick={onToggle}
+            className="p-1 rounded-md transition-colors hover:bg-white/[0.06]"
+            style={{ color: "oklch(0.55 0.03 280)" }}
+            aria-label="Close panel"
+          >
+            <X size={13} />
+          </button>
         </div>
 
-        {/* Nav points */}
-        <div className="overflow-y-auto flex-shrink-0 px-4 py-4 space-y-1" style={{ maxHeight: "160px" }}>
-          {summary.points.map((point, i) => {
-            const p = typeof point === "string" ? { label: point } : point;
-            const isLink = !!(p.path || p.scrollTo);
-            return (
-              <button
-                key={i}
-                onClick={() => handlePointClick(point)}
-                className={`w-full flex items-start gap-2 text-left rounded-md px-2 py-1.5 transition-all
-                  ${isLink
-                    ? "hover:bg-white/[0.05] cursor-pointer group"
-                    : "cursor-default"
-                  }`}
-              >
-                <div className={`w-1 h-1 rounded-full mt-1.5 flex-shrink-0 transition-colors
-                  ${isLink ? "group-hover:bg-[oklch(0.80_0.145_82)]" : ""}`}
-                  style={{ background: "oklch(0.80 0.145 82 / 0.4)" }}
-                />
-                <span className={`text-[12px] font-body leading-relaxed transition-colors
-                  ${isLink
-                    ? "group-hover:text-[oklch(0.80_0.145_82)]"
-                    : ""}`}
-                  style={{ color: "oklch(0.96 0.008 270 / 0.5)" }}>
-                  {p.label}
-                </span>
-              </button>
-            );
-          })}
+        {/* ── Search ─────────────────────────────────────────────── */}
+        <div className="px-3 pt-4 pb-3">
+          <form onSubmit={handleSearchSubmit}>
+            <div className="relative">
+              <Search
+                size={13}
+                className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ color: "oklch(0.50 0.03 280)" }}
+              />
+              <input
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search tracks, artists…"
+                className="w-full pl-8 pr-3 py-2 rounded-lg text-[12px] font-body outline-none transition-all"
+                style={{
+                  background: "oklch(0.14 0.02 278)",
+                  border: "1px solid oklch(0.22 0.03 278)",
+                  color: "oklch(0.88 0.01 280)",
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = "oklch(0.80 0.145 82 / 0.5)")}
+                onBlur={e => (e.currentTarget.style.borderColor = "oklch(0.22 0.03 278)")}
+              />
+            </div>
+          </form>
         </div>
 
-        {/* Recent Tracks mini-feed */}
-        {recentTracks.length > 0 && (
-          <div className="px-4 py-3 border-t border-white/[0.07] flex-1 min-h-0 flex flex-col">
-            <p className="text-[9px] font-heading tracking-[0.15em] uppercase mb-2"
-              style={{ color: "oklch(0.80 0.145 82)" }}>
-              Recent Tracks
-            </p>
-            <div className="space-y-1 overflow-y-auto flex-1 min-h-0" style={{ maxHeight: "160px" }}>
-              {recentTracks.slice(0, 6).map((track: any) => (
+        {/* ── Genre filter chips ──────────────────────────────────── */}
+        <div className="px-3 pb-3">
+          <p className="text-[9px] font-heading tracking-[0.15em] uppercase mb-2"
+            style={{ color: "oklch(0.45 0.02 280)" }}>
+            Filter
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {GENRE_FILTERS.map(g => {
+              const isActive = activeGenre === g.value;
+              return (
                 <button
-                  key={track.song.id}
+                  key={g.label}
+                  onClick={() => setActiveGenre(g.value)}
+                  className="px-2.5 py-1 rounded-full text-[10px] font-body transition-all"
+                  style={isActive
+                    ? { background: "oklch(0.80 0.145 82 / 0.18)", color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.35)" }
+                    : { background: "oklch(0.14 0.02 278)", color: "oklch(0.50 0.03 280)", border: "1px solid oklch(0.20 0.02 278)" }
+                  }
+                >
+                  {g.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Track results / recently played ────────────────────── */}
+        <div className="flex-1 min-h-0 flex flex-col px-3 pb-3 border-t border-white/[0.06] pt-3 overflow-hidden">
+          <p className="text-[9px] font-heading tracking-[0.15em] uppercase mb-2 flex-shrink-0"
+            style={{ color: "oklch(0.45 0.02 280)" }}>
+            {query.trim() ? "Results" : "Recently Added"}
+          </p>
+
+          {feedLoading ? (
+            <div className="space-y-2 flex-1">
+              {[0, 1, 2, 4].map(i => (
+                <div key={i} className="flex items-center gap-2 animate-pulse">
+                  <div className="w-8 h-8 rounded flex-shrink-0" style={{ background: "oklch(0.16 0.02 280)" }} />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-2 rounded" style={{ background: "oklch(0.16 0.02 280)", width: "70%" }} />
+                    <div className="h-2 rounded" style={{ background: "oklch(0.14 0.02 280)", width: "45%" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : tracks.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-[11px] text-center" style={{ color: "oklch(0.40 0.02 280)" }}>
+                {query.trim() ? "No results found" : "No tracks yet"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1 overflow-y-auto flex-1 min-h-0">
+              {tracks.slice(0, 10).map((track: any) => (
+                <button
+                  key={track.id ?? track.song?.id}
                   onClick={() => handleTrackClick(track)}
-                  className="w-full flex items-center gap-2 rounded-lg p-1.5 transition-colors group"
+                  className="w-full flex items-center gap-2 rounded-lg p-1.5 transition-colors group text-left"
                   style={{ background: "transparent" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "oklch(0.96 0.008 270 / 0.05)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 >
-                  {track.song.coverArtUrl ? (
+                  {(track.coverArtUrl ?? track.song?.coverArtUrl) ? (
                     <img
-                      src={track.song.coverArtUrl}
-                      alt={track.song.title}
+                      src={track.coverArtUrl ?? track.song?.coverArtUrl}
+                      alt={track.title ?? track.song?.title}
                       className="w-8 h-8 rounded object-cover flex-shrink-0"
-                      style={{ objectPosition: `${(track.song as any).coverPositionX ?? 50}% ${(track.song as any).coverPositionY ?? 50}%` }}
+                      style={{ objectPosition: `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%` }}
                     />
                   ) : (
                     <div className="w-8 h-8 rounded flex-shrink-0 flex items-center justify-center text-sm"
@@ -184,58 +271,36 @@ export default function QuickRefSlider({ open, onToggle, summary, currentPath }:
                       🎵
                     </div>
                   )}
-                  <div className="flex-1 min-w-0 text-left">
+                  <div className="flex-1 min-w-0">
                     <p className="text-[11px] truncate transition-colors group-hover:text-[oklch(0.80_0.145_82)]"
-                      style={{ color: "oklch(0.96 0.008 270)" }}>
-                      {track.song.title}
+                      style={{ color: "oklch(0.88 0.01 280)" }}>
+                      {track.title ?? track.song?.title}
                     </p>
-                    <p className="text-[10px] truncate"
-                      style={{ color: "oklch(0.68 0.02 280)" }}>
-                      {track.creator?.name ?? track.creator?.artistHandle ?? "Unknown"}
+                    <p className="text-[10px] truncate" style={{ color: "oklch(0.55 0.02 280)" }}>
+                      {track.artistName ?? track.creator?.name ?? track.creator?.artistHandle ?? "Unknown"}
                     </p>
                   </div>
-                  <Play size={10} className="flex-shrink-0 transition-colors group-hover:text-[oklch(0.80_0.145_82)]"
-                    style={{ color: "oklch(0.68 0.02 280)" }} />
+                  <Play size={10} className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: "oklch(0.80 0.145 82)" }} />
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Log Out — visible only when logged in */}
-        {user && (
-          <div className="px-4 py-3 border-t border-white/[0.07] mt-auto">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 text-left transition-colors rounded-md px-2 py-1.5"
-              style={{ color: "oklch(0.68 0.02 280)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.96 0.008 270)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
-            >
-              <LogOut size={12} />
-              <span className="text-[12px] font-body">Log Out</span>
-            </button>
-          </div>
-        )}
-
-        {/* Footer */}
-        {!user && (
-          <div className="px-4 py-4 border-t border-white/[0.07] mt-auto">
-            <div className="text-[9px] font-heading tracking-[0.12em] uppercase text-center"
-              style={{ color: "oklch(0.96 0.008 270 / 0.15)" }}>
-              Living Nexus
-            </div>
-          </div>
-        )}
+        {/* ── Footer hint ─────────────────────────────────────────── */}
+        <div className="px-4 py-3 border-t border-white/[0.05]">
+          <button
+            onClick={() => { onToggle(); navigate("/explore"); }}
+            className="w-full text-[10px] font-body text-center transition-colors"
+            style={{ color: "oklch(0.40 0.02 280)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.40 0.02 280)")}
+          >
+            Open full Explore →
+          </button>
+        </div>
       </div>
-
-      {/* Backdrop on mobile */}
-      {open && (
-        <div
-          className="fixed inset-0 z-10 bg-black/40 md:hidden"
-          onClick={onToggle}
-        />
-      )}
     </>
   );
 }

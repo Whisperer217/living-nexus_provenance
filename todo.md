@@ -1585,3 +1585,15 @@
 - [x] Batch Upload button added to UploadPage header (top-right)
 - [x] Admin Panel removed from UI; accessible via direct URL /admin (role-gated)
 - [x] No new navigation items introduced — all features live inside existing systems
+
+## Task 16: Convert to Quick Access Panel
+- [x] Rename QuickRefSlider to QuickAccessPanel
+- [x] Panel collapsed by default (edge handle only on load)
+- [x] Panel is overlay (no layout shift)
+- [x] Close on outside click
+- [x] Content: global search input (primary)
+- [x] Content: quick genre filters (calls DiscoveryFeed, same as homepage)
+- [x] Content: recently played tracks (keep existing)
+- [x] Remove: Quick Reference / Explore links / duplicate nav items
+- [x] Smooth slide-in/out animation
+- [x] Update MainLayout to use QuickAccessPanel
