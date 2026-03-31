@@ -324,7 +324,7 @@ export default function DiscoverPage() {
                     <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
                       <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden flex items-center justify-center" style={{ background: creator.profilePhotoUrl ? undefined : `oklch(0.22 0.08 ${hue})`, border: "2px solid oklch(0.75 0.18 85 / 0.4)" }}>
                         {creator.profilePhotoUrl ? (
-                          <img src={creator.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" />
+                          <img src={creator.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
                         ) : (
                           <span className="text-2xl font-bold" style={{ color: `oklch(0.85 0.18 ${hue})`, fontFamily: "'Cinzel', serif" }}>{initial}</span>
                         )}

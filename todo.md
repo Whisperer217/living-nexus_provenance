@@ -1388,3 +1388,18 @@
 - [x] ProfilePage: identity anchored left, signals right-aligned
 - [x] ProfilePage: remove redundant metric sections
 - [x] Both pages: header must not compete visually with creator content below
+
+## Phase AE: System-Wide Artwork Normalization (v2.17.0 aligned)
+- [x] Audit all image rendering sites: songs cover art, collection covers, avatars, banners, explore cards, track players
+- [x] Identify all object-fit:fill/stretch/contain usages that cause distortion
+- [x] Map all records missing coverPositionX/Y, bannerPositionX/Y, avatarPositionX/Y
+- [x] Server: snapshot current position metadata to normalization_audit table before any changes
+- [x] Server: apply cover+focal defaults (x=50, y=50, zoom=110) to all records missing position data
+- [x] Server: flag records with unusual aspect ratios or missing artwork as edge cases for creator review
+- [x] Frontend: enforce object-fit:cover on all song cover art render sites
+- [x] Frontend: enforce object-fit:cover on all collection cover render sites
+- [x] Frontend: enforce object-fit:cover on all avatar render sites
+- [x] Frontend: enforce object-fit:cover on all banner render sites
+- [x] Frontend: apply objectPosition from DB fields consistently across all render sites
+- [x] Admin: add edge-case review panel surfacing flagged records
+- [x] Normalization report: document all changes made, records updated, edge cases flagged

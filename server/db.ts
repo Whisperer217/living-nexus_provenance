@@ -945,13 +945,13 @@ export async function getEventsForCreator(creatorId: number, limit = 200) {
   const { isNull, inArray } = await import("drizzle-orm");
   // First get all song IDs for this creator
   const creatorSongs = await db
-    .select({ id: songs.id, title: songs.title, coverArtUrl: songs.coverArtUrl })
+    .select({ id: songs.id, title: songs.title, coverArtUrl: songs.coverArtUrl, coverPositionX: songs.coverPositionX, coverPositionY: songs.coverPositionY })
     .from(songs)
     .where(eq(songs.userId, creatorId));
   if (!creatorSongs.length) return [];
-  const songIds = creatorSongs.map((s: { id: number; title: string | null; coverArtUrl: string | null }) => s.id);
-  const songMap: Record<number, { id: number; title: string | null; coverArtUrl: string | null }> = Object.fromEntries(
-    creatorSongs.map((s: { id: number; title: string | null; coverArtUrl: string | null }) => [s.id, s])
+  const songIds = creatorSongs.map((s: { id: number; title: string | null; coverArtUrl: string | null; coverPositionX: number; coverPositionY: number }) => s.id);
+  const songMap: Record<number, { id: number; title: string | null; coverArtUrl: string | null; coverPositionX: number; coverPositionY: number }> = Object.fromEntries(
+    creatorSongs.map((s: { id: number; title: string | null; coverArtUrl: string | null; coverPositionX: number; coverPositionY: number }) => [s.id, s])
   );
   const evts = await db
     .select()
@@ -964,6 +964,8 @@ export async function getEventsForCreator(creatorId: number, limit = 200) {
     ...e,
     songTitle: songMap[e.workId]?.title ?? null,
     songCoverArtUrl: songMap[e.workId]?.coverArtUrl ?? null,
+    songCoverPositionX: songMap[e.workId]?.coverPositionX ?? 50,
+    songCoverPositionY: songMap[e.workId]?.coverPositionY ?? 50,
   }));
 }
 

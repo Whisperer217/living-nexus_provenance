@@ -730,7 +730,7 @@ export default function DashboardPage() {
                       {/* Cover art thumbnail */}
                       {evt.songCoverArtUrl && (
                         <div className="flex-shrink-0 w-8 h-8 rounded-md overflow-hidden">
-                          <img src={evt.songCoverArtUrl} alt="" className="w-full h-full object-cover" />
+                          <img src={evt.songCoverArtUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${(evt as any).songCoverPositionX ?? 50}% ${(evt as any).songCoverPositionY ?? 50}%` }} />
                         </div>
                       )}
                     </div>

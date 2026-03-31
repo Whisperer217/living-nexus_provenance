@@ -3,6 +3,7 @@ import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
+import { normalizationRouter } from "./routers/normalization";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { storagePut } from "./storage";
@@ -1903,6 +1904,9 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         return result;
       }),
   }),
+
+  // ── Artwork Normalization (admin) ─────────────────────────────────────────
+  normalization: normalizationRouter,
 
   // ── Founder's Era Supporters ─────────────────────────────────────────────────
   supporters: router({

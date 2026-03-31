@@ -21,7 +21,7 @@ import {
   Home, Compass, Users, User, Upload, Library, BarChart2,
   Menu, X, ChevronRight, LogIn, LogOut, Heart, Star, ListMusic,
   BookOpen, Shield, Fingerprint, ScrollText, CheckCircle2,
-  PenLine, Layers, Bell, BookMarked, Tag, ShieldCheck,
+  PenLine, Layers, Bell, BookMarked, Tag, ShieldCheck, ScanLine,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -55,6 +55,7 @@ const NAV_ITEMS = [
   { label: "Lexicon",            icon: BookMarked,  path: "/lexicon",             group: "SYSTEM" },
   { label: "Redeem Code",         icon: Tag,         path: "/redeem",              group: "SYSTEM" },
   { label: "Admin Panel",         icon: ShieldCheck, path: "/admin",               group: "SYSTEM", adminOnly: true },
+  { label: "Artwork Normalization", icon: ScanLine,    path: "/admin/normalization",  group: "SYSTEM", adminOnly: true },
 ];
 
 const GROUPS = ["DISCOVER", "MY COMMAND", "SYSTEM"];
@@ -162,7 +163,7 @@ const PAGE_SUMMARIES: Record<string, { title: string; points: QuickRefPoint[] }>
 function IdentityHeader({
   user, profileAvatar, profileName, sidebarOpen, onProfileClick,
 }: {
-  user: { name?: string | null; profilePhotoUrl?: string | null; licenseStatus?: string | null } | null;
+  user: { name?: string | null; profilePhotoUrl?: string | null; licenseStatus?: string | null; avatarObjectPosition?: string | null } | null;
   profileAvatar?: string;
   profileName?: string;
   sidebarOpen: boolean;
@@ -190,7 +191,7 @@ function IdentityHeader({
           }}
         >
           {avatar
-            ? <img src={avatar} alt="avatar" className="w-full h-full object-cover rounded-full" />
+            ? <img src={avatar} alt="avatar" className="w-full h-full object-cover rounded-full" style={{ objectPosition: user?.avatarObjectPosition ?? "50% 50%" }} />
             : displayName.charAt(0).toUpperCase()
           }
         </div>
@@ -481,7 +482,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         }}
                       >
                         {user?.profilePhotoUrl || state.profileAvatar
-                          ? <img src={user?.profilePhotoUrl ?? state.profileAvatar ?? ""} alt="avatar" className="w-full h-full object-cover rounded-full" />
+                          ? <img src={user?.profilePhotoUrl ?? state.profileAvatar ?? ""} alt="avatar" className="w-full h-full object-cover rounded-full" style={{ objectPosition: user?.avatarObjectPosition ?? "50% 50%" }} />
                           : (user?.name || state.profileName || "?").charAt(0).toUpperCase()
                         }
                       </div>

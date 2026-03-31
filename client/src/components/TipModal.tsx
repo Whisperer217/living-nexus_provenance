@@ -61,7 +61,7 @@ export default function TipModal({ track, onClose }: Props) {
           <div className="w-11 h-11 rounded-full flex items-center justify-center text-lg overflow-hidden flex-shrink-0"
             style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}>
             {track.artUrl && track.artType !== "video"
-              ? <img src={track.artUrl} alt="" className="w-full h-full object-cover rounded-full" />
+              ? <img src={track.artUrl} alt="" className="w-full h-full object-cover rounded-full" style={{ objectPosition: `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%` }} />
               : track.emoji || "🎵"
             }
           </div>

@@ -42,6 +42,7 @@ const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const WitnessRegistryPage = lazy(() => import("./pages/WitnessRegistryPage"));
 const DownloadPage = lazy(() => import("./pages/DownloadPage"));
 const FoundersPage = lazy(() => import("./pages/FoundersPage"));
+const ArtworkNormalizationPage = lazy(() => import("./pages/ArtworkNormalizationPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -87,6 +88,7 @@ function Router() {
                 <Route path="/playlist" component={PlaylistPage} />
                 <Route path="/manifesto" component={ManifestoPage} />
                 <Route path="/admin/users" component={AdminUsersPage} />
+                <Route path="/admin/normalization" component={ArtworkNormalizationPage} />
                 <Route path="/admin" component={AdminUsersPage} />
                 <Route path="/redeem" component={RedeemPage} />
                 <Route path="/pricing" component={PricingCovenantPage} />
