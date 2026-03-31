@@ -1403,3 +1403,15 @@
 - [x] Frontend: apply objectPosition from DB fields consistently across all render sites
 - [x] Admin: add edge-case review panel surfacing flagged records
 - [x] Normalization report: document all changes made, records updated, edge cases flagged
+
+## Phase AF: Mobile Global Player — Full-Viewport Layer
+- [x] Audit MobilePlayerPanel, PlayerBar, PlayerContext — map state, props, layout coupling
+- [x] Build MobilePlayerLayer as a React portal (fixed, z-[9999], detached from sidebar/layout)
+- [x] Implement three-state machine: mini → expanded → cinematic
+- [x] Mini state: 64px bottom bar, artwork thumbnail, title/artist, play/pause, tap to expand
+- [x] Expanded state: full-screen sheet, large artwork, scrubber, controls, queue, lyrics toggle, swipe-down to mini
+- [x] Cinematic state: edge-to-edge artwork/video, no container constraints, minimal overlay controls (fade in on tap)
+- [x] Landscape orientation: detect and reduce UI to essential controls only
+- [x] Gesture layer: swipe-up to expand, swipe-down to mini/close, tap-artwork to cinematic
+- [x] Remove old MobilePlayerPanel from MainLayout, inject MobilePlayerLayer as portal sibling
+- [x] Preserve all PlayerContext state (currentTrack, isPlaying, queue, progress, volume)

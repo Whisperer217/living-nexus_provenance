@@ -11,7 +11,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import PlayerBar from "@/components/player/PlayerBar";
-import MobilePlayerPanel from "@/components/player/MobilePlayerPanel";
+import MobilePlayerLayer from "@/components/player/MobilePlayerLayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import TipTicker from "@/components/TipTicker";
@@ -560,7 +560,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* ── Page content ── */}
         <main className="flex-1 flex flex-col overflow-hidden md:pt-0 pt-14">
           <TipTicker />
-          <style>{`@media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } }`}</style>
+          <style>{`
+            @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } }
+            @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } }
+          `}</style>
           <div className="flex-1 overflow-y-auto player-scroll-area">
             {children}
           </div>
@@ -572,8 +575,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <PlayerBar />
       </div>
 
-      {/* Mobile Player Panel */}
-      <MobilePlayerPanel />
+      {/* Mobile Player Layer — portal-based, full-viewport, detached from layout */}
+      <MobilePlayerLayer />
 
       {/* Theater Player */}
       <TheaterPlayer />
