@@ -1541,3 +1541,6 @@
 - [x] Register /guilds and /guild/:slug routes in App.tsx
 - [x] Add Guilds nav item to sidebar DISCOVER group
 - [x] "added by" attribution on every guild mix track row
+
+## Bug Fix: PlaylistManagePanel Infinite Re-render
+- [x] Fix "Too many re-renders" in PlaylistManagePanel — setState called during render phase

@@ -8,7 +8,7 @@
  *  - Version history panel shows up to 20 past versions with timestamps
  */
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -34,12 +34,13 @@ function useDragReorder<T extends { id: number }>(
   const dragIdx = useRef<number | null>(null);
   const dragOverIdx = useRef<number | null>(null);
 
-  // Sync when initial changes (e.g. after server refetch)
-  const prevInitialRef = useRef(initial);
-  if (prevInitialRef.current !== initial) {
-    prevInitialRef.current = initial;
+  // Sync when initial changes (e.g. after server refetch).
+  // Use useEffect (not inline during render) to avoid infinite re-render loop.
+  const initialKey = initial.map((t) => t.id).join(",");
+  useEffect(() => {
     setItems(initial);
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialKey]);
 
   function handleDragStart(idx: number) {
     dragIdx.current = idx;
