@@ -1376,3 +1376,15 @@
 - [x] Update avatar positioner call sites to use unified ImagePositioner
 - [x] Update What's New modal to v2.17.0 — system-wide interaction language shift entry
 - [x] Ensure all three editors (banner, cover art, avatar) share identical interaction model
+
+## Phase AD: Profile Header Recomposition
+- [x] Audit CreatorProfilePage header — map all elements, identify bleed sources and redundant metrics
+- [x] Audit ProfilePage header — map all elements, identify bleed sources and redundant metrics
+- [x] CreatorProfilePage: controlled backdrop layer prevents banner bleed into header zone
+- [x] CreatorProfilePage: avatar + name + WID anchored left, no float
+- [x] CreatorProfilePage: signals (follower count, track count, supporter badge) minimal, right-aligned
+- [x] CreatorProfilePage: remove all redundant metric sections below the header
+- [x] ProfilePage: same controlled backdrop layer system
+- [x] ProfilePage: identity anchored left, signals right-aligned
+- [x] ProfilePage: remove redundant metric sections
+- [x] Both pages: header must not compete visually with creator content below

@@ -555,144 +555,194 @@ export default function CreatorProfilePage() {
         />
       )}
       {/* ── Profile header ── */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div
-          className="relative -mt-16 flex flex-col sm:flex-row sm:items-end gap-4 pb-6 border-b"
-          style={{ borderColor: "oklch(0.15 0.015 280)" }}
-        >
-          {/* Avatar */}
-          <div
-            className="w-28 h-28 rounded-2xl flex-shrink-0 flex items-center justify-center text-3xl font-bold overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
-              outline: "4px solid oklch(0.09 0.04 265)",
-            }}
-          >
-            {creator.profilePhotoUrl
-              ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
-                  style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
-              : <span style={{ color: "oklch(0.84 0.155 85)" }}>{(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}</span>}
-          </div>
+      {/*
+        LAYER SYSTEM:
+        1. Banner sits at natural height (240px)
+        2. Header panel uses a controlled backdrop — no -mt pull-up that bleeds into banner
+        3. A thin separator line sits between banner bottom edge and header top
+        4. Identity (avatar + name + handle) anchored left
+        5. Signals (track count, witness count, supporter badge) right-aligned, minimal
+        6. Actions (icon buttons) right-aligned below signals
+      */}
+      <div
+        className="w-full"
+        style={{
+          background: "oklch(0.09 0.04 265)",
+          borderBottom: "1px solid oklch(0.15 0.015 280)",
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          {/* ── Header panel ── */}
+          <div className="flex items-start gap-5 py-5">
 
-          {/* Name + meta */}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-0.5">
-              <h1 className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
-                {creator.artistHandle || creator.name}
-              </h1>
-              {creator.supporterTier && (
-                <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
-              )}
-            </div>
-            {creator.bio && (
-              <p className="text-sm mt-1 line-clamp-2 max-w-xl" style={{ color: "oklch(0.6 0.04 280)" }}>{creator.bio}</p>
-            )}
-            <div className="flex flex-wrap gap-3 mt-2">
-              {creator.website && (
-                <a href={creator.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
-                  <Globe className="w-3 h-3" />{creator.website.replace(/^https?:\/\//, "")}
-                </a>
-              )}
-              {creator.twitterHandle && (
-                <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
-                  <Twitter className="w-3 h-3" />@{creator.twitterHandle}
-                </a>
-              )}
-              {creator.instagramHandle && (
-                <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
-                  <Instagram className="w-3 h-3" />@{creator.instagramHandle}
-                </a>
-              )}
-              {creator.youtubeHandle && (
-                <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
-                  <Youtube className="w-3 h-3" />@{creator.youtubeHandle}
-                </a>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {creator.licenseStatus === "licensed" && (
-                <Badge style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", fontSize: "10px" }}>
-                  LICENSED CREATOR
-                </Badge>
-              )}
-              {tipsEnabled && (
-                <Badge style={{ background: "oklch(0.65 0.18 145 / 0.15)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.3)", fontSize: "10px" }}>
-                  TIPS ENABLED
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {isOwner ? (
-              <>
-                <Link href="/dashboard">
-                  <Button size="sm" variant="outline" style={{ borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.7 0.04 280)" }}>
-                    Edit Profile
-                  </Button>
-                </Link>
-                {!creator.stripeAccountId && (
-                  <Button
-                    size="sm"
-                    onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
-                    disabled={connectMutation.isPending}
-                    style={{ background: "oklch(0.65 0.18 145 / 0.2)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.4)" }}
-                  >
-                    <DollarSign className="w-3.5 h-3.5 mr-1" /> Enable Gifts
-                  </Button>
-                )}
-              </>
-            ) : tipsEnabled && songs.length > 0 ? (
-              <Button size="sm" onClick={() => setTipOpen(true)} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
-                <DollarSign className="w-3.5 h-3.5 mr-1" /> Send a Gift
-              </Button>
-            ) : null}
-            {/* Witness button — only shown to logged-in non-owners */}
-            {user && !isOwner && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => witnessToggle.mutate({ creatorId: creator.id })}
-                disabled={witnessToggle.isPending}
-                style={isWitnessingCreator
-                  ? { background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", borderColor: "oklch(0.75 0.18 85 / 0.4)" }
-                  : { borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.7 0.04 280)" }
-                }
-              >
-                {isWitnessingCreator
-                  ? <><EyeOff className="w-3.5 h-3.5 mr-1" /> Witnessed ({witnessCount})</>
-                  : <><Eye className="w-3.5 h-3.5 mr-1" /> Witness ({witnessCount})</>
-                }
-              </Button>
-            )}
-            <button
-              onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Profile link copied!"); }}
-              className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-white/[0.06] transition-colors"
-              style={{ border: "1px solid oklch(0.2 0.015 280)" }}
+            {/* ── Avatar — anchored left, pulled up to overlap banner bottom edge ── */}
+            <div
+              className="-mt-14 flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
+                outline: "3px solid oklch(0.09 0.04 265)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+              }}
             >
-              <Share2 className="w-4 h-4" style={{ color: "oklch(0.6 0.04 280)" }} />
-            </button>
+              {creator.profilePhotoUrl
+                ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
+                    style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
+                : <div className="w-full h-full flex items-center justify-center text-2xl font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
+                    {(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}
+                  </div>}
+            </div>
+
+            {/* ── Identity block — left-anchored ── */}
+            <div className="flex-1 min-w-0 pt-1">
+              {/* Name row */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1
+                  className="text-xl sm:text-2xl font-bold leading-tight"
+                  style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}
+                >
+                  {creator.artistHandle || creator.name}
+                </h1>
+                {creator.licenseStatus === "licensed" && (
+                  <span
+                    className="text-[9px] px-1.5 py-0.5 rounded tracking-widest font-mono"
+                    style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+                  >
+                    LICENSED
+                  </span>
+                )}
+              </div>
+
+              {/* Bio — single line, muted */}
+              {creator.bio && (
+                <p
+                  className="text-[13px] mt-1 line-clamp-1"
+                  style={{ color: "oklch(0.55 0.03 280)" }}
+                >
+                  {creator.bio}
+                </p>
+              )}
+
+              {/* Social links — icon-only, minimal */}
+              {(creator.website || creator.twitterHandle || creator.instagramHandle || creator.youtubeHandle) && (
+                <div className="flex items-center gap-2 mt-2">
+                  {creator.website && (
+                    <a href={creator.website} target="_blank" rel="noreferrer"
+                      className="opacity-40 hover:opacity-80 transition-opacity"
+                      style={{ color: "oklch(0.75 0.03 280)" }}
+                      title={creator.website}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {creator.twitterHandle && (
+                    <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer"
+                      className="opacity-40 hover:opacity-80 transition-opacity"
+                      style={{ color: "oklch(0.75 0.03 280)" }}
+                    >
+                      <Twitter className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {creator.instagramHandle && (
+                    <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer"
+                      className="opacity-40 hover:opacity-80 transition-opacity"
+                      style={{ color: "oklch(0.75 0.03 280)" }}
+                    >
+                      <Instagram className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {creator.youtubeHandle && (
+                    <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer"
+                      className="opacity-40 hover:opacity-80 transition-opacity"
+                      style={{ color: "oklch(0.75 0.03 280)" }}
+                    >
+                      <Youtube className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* ── Right column: signals + actions ── */}
+            <div className="flex-shrink-0 flex flex-col items-end gap-3 pt-1">
+
+              {/* Signals — minimal, right-aligned */}
+              <div className="flex items-center gap-3">
+                {creator.supporterTier && (
+                  <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
+                )}
+                <span className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                  <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>
+                  {" "}tracks
+                </span>
+                {witnessCount > 0 && (
+                  <span className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                    <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>
+                    {" "}witnesses
+                  </span>
+                )}
+              </div>
+
+              {/* Actions — icon row */}
+              <div className="flex items-center gap-1.5">
+                {isOwner ? (
+                  <>
+                    <Link href="/dashboard">
+                      <button
+                        className="px-3 py-1.5 rounded-lg text-[11px] transition-colors"
+                        style={{ border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.6 0.03 280)", background: "transparent" }}
+                      >
+                        Edit Profile
+                      </button>
+                    </Link>
+                    {!creator.stripeAccountId && (
+                      <button
+                        onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
+                        disabled={connectMutation.isPending}
+                        className="px-3 py-1.5 rounded-lg text-[11px] transition-colors"
+                        style={{ border: "1px solid oklch(0.65 0.18 145 / 0.3)", color: "oklch(0.65 0.18 145)", background: "oklch(0.65 0.18 145 / 0.08)" }}
+                      >
+                        <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
+                      </button>
+                    )}
+                  </>
+                ) : tipsEnabled && songs.length > 0 ? (
+                  <button
+                    onClick={() => setTipOpen(true)}
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
+                    style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "oklch(0.08 0.015 280)" }}
+                  >
+                    <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
+                  </button>
+                ) : null}
+                {user && !isOwner && (
+                  <button
+                    onClick={() => witnessToggle.mutate({ creatorId: creator.id })}
+                    disabled={witnessToggle.isPending}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                    style={isWitnessingCreator
+                      ? { background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "oklch(0.84 0.155 85)" }
+                      : { border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }
+                    }
+                    title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
+                  >
+                    {isWitnessingCreator ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                )}
+                <button
+                  onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Profile link copied!"); }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                  style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
+                  title="Copy profile link"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* ── Stats row ── */}
-        <div className="grid grid-cols-4 gap-4 py-5 border-b" style={{ borderColor: "oklch(0.15 0.015 280)" }}>
-          {[
-            { label: "Songs", value: songs.length, icon: Music },
-            { label: "Total Plays", value: totalPlays.toLocaleString(), icon: Headphones },
-            { label: "Gifts Received", value: totalTips, icon: Heart },
-            { label: "WID Protected", value: songs.filter((s: any) => s.witnessId).length, icon: Shield },
-          ].map(({ label, value, icon: Icon }) => (
-            <div key={label} className="text-center">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <Icon className="w-3.5 h-3.5 opacity-50" style={{ color: "oklch(0.84 0.155 85)" }} />
-                <span className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{label}</span>
-              </div>
-              <p className="text-xl font-bold" style={{ fontFamily: "'Orbitron', monospace", color: "oklch(0.9 0.02 85)" }}>{value}</p>
-            </div>
-          ))}
-        </div>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
 
         {/* ── Featured Songs Grid ── */}
         {featuredSongs.length > 0 && (

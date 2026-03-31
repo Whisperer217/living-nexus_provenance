@@ -402,136 +402,180 @@ export default function ProfilePage() {
         />
       )}
 
-      <div className="px-6">
-        {/* ── Avatar + Name row ── */}
-        <div className="flex items-end gap-4 -mt-12 mb-5">
-          <div className="flex-shrink-0">
-            <div className="relative group">
-              <div className="w-24 h-24 rounded-2xl border-2 border-[#D4AF37]/30 overflow-hidden
-                bg-[oklch(0.14_0.013_280)] flex items-center justify-center">
-                {profile?.profilePhotoUrl ? (
-                  <img
-                    src={profile.profilePhotoUrl}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                    style={{ objectPosition: `${avatarPos.x}% ${avatarPos.y}%` }}
-                  />
-                ) : (
-                  <img src={LOGO_URL} alt="LN" className="w-14 h-14 object-contain opacity-60" />
-                )}
-              </div>
-              {/* Hover overlay: camera + adjust buttons */}
-              <div className="absolute inset-0 rounded-2xl bg-black/60 flex flex-col items-center justify-center gap-1
-                opacity-0 group-hover:opacity-100 transition-all">
-                <button
-                  onClick={() => avatarRef.current?.click()}
-                  disabled={uploadAvatar.isPending}
-                  className="flex items-center gap-1 text-white text-[10px] font-body disabled:opacity-50"
-                >
-                  {uploadAvatar.isPending
-                    ? <Loader2 size={14} className="animate-spin" />
-                    : <Camera size={14} />}
-                  <span>Change</span>
-                </button>
-                {profile?.profilePhotoUrl && (
-                  <button
-                    onClick={() => setShowAvatarPositioner(true)}
-                    className="flex items-center gap-1 text-white/70 hover:text-[#D4AF37] text-[10px] font-body transition-colors"
-                  >
-                    <Edit2 size={12} />
-                    <span>Adjust</span>
-                  </button>
-                )}
-              </div>
-              <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-            </div>
+      {/*
+        LAYER SYSTEM — ProfilePage:
+        1. Banner at natural height (220px)
+        2. Header panel: controlled backdrop, no -mt bleed
+        3. Avatar pulled up slightly with -mt, outline seals the gap
+        4. Identity (avatar + name + handle + bio) anchored left
+        5. Signals (track count, supporter badge) right-aligned, minimal
+        6. Actions (copy link, logout) right-aligned below signals
+        7. Edit fields (handle, bio, defaults, socials) in a clean section below the header panel
+      */}
+      {/* ── Header panel ── */}
+      <div
+        className="w-full"
+        style={{
+          background: "oklch(0.09 0.04 265)",
+          borderBottom: "1px solid oklch(0.14 0.012 280)",
+        }}
+      >
+        <div className="px-6">
+          <div className="flex items-start gap-5 py-5">
 
-            {/* Avatar inline repositioner — direct manipulation: drag, scroll, double-click, keyboard */}
-            {showAvatarPositioner && profile?.profilePhotoUrl && (
-              <div className="mt-2 w-64">
-                <ImagePositioner
-                  imageUrl={profile.profilePhotoUrl}
-                  initialX={avatarPos.x}
-                  initialY={avatarPos.y}
-                  initialZoom={110}
-                  previewHeight="8rem"
-                  previewClass="rounded-t-xl"
-                  roundedTop={true}
-                  label="Adjust Avatar"
-                  onSave={(pos: { x: number; y: number; zoom: number }) => {
-                    setAvatarPos(pos);
-                    setShowAvatarPositioner(false);
-                    saveAvatarPosition(pos);
+            {/* ── Avatar — anchored left, slight pull-up ── */}
+            <div className="-mt-12 flex-shrink-0">
+              <div className="relative group">
+                <div
+                  className="w-24 h-24 rounded-2xl overflow-hidden bg-[oklch(0.14_0.013_280)] flex items-center justify-center"
+                  style={{
+                    outline: "3px solid oklch(0.09 0.04 265)",
+                    border: "1.5px solid rgba(212,175,55,0.25)",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                   }}
-                  onCancel={() => setShowAvatarPositioner(false)}
-                />
+                >
+                  {profile?.profilePhotoUrl ? (
+                    <img
+                      src={profile.profilePhotoUrl}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                      style={{ objectPosition: `${avatarPos.x}% ${avatarPos.y}%` }}
+                    />
+                  ) : (
+                    <img src={LOGO_URL} alt="LN" className="w-14 h-14 object-contain opacity-60" />
+                  )}
+                </div>
+                {/* Hover overlay: camera + adjust buttons */}
+                <div className="absolute inset-0 rounded-2xl bg-black/60 flex flex-col items-center justify-center gap-1
+                  opacity-0 group-hover:opacity-100 transition-all">
+                  <button
+                    onClick={() => avatarRef.current?.click()}
+                    disabled={uploadAvatar.isPending}
+                    className="flex items-center gap-1 text-white text-[10px] font-body disabled:opacity-50"
+                  >
+                    {uploadAvatar.isPending
+                      ? <Loader2 size={14} className="animate-spin" />
+                      : <Camera size={14} />}
+                    <span>Change</span>
+                  </button>
+                  {profile?.profilePhotoUrl && (
+                    <button
+                      onClick={() => setShowAvatarPositioner(true)}
+                      className="flex items-center gap-1 text-white/70 hover:text-[#D4AF37] text-[10px] font-body transition-colors"
+                    >
+                      <Edit2 size={12} />
+                      <span>Adjust</span>
+                    </button>
+                  )}
+                </div>
+                <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
               </div>
-            )}
-          </div>
 
-          <div className="flex-1 pb-1">
-            <div className="flex items-center gap-2 mb-1">
-              <EditableField
-                label="Artist Name"
-                value={profile?.name || ""}
-                onSave={v => save({ name: v })}
-                placeholder="Your artist name"
-              />
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-heading tracking-wider flex-shrink-0">
-                ARTIST
-              </span>
-              {(profile as any)?.supporterTier && (
-                <SupporterBadge tier={(profile as any).supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              {profile?.location && (
-                <div className="flex items-center gap-1 text-[11px] text-white/70">
-                  <MapPin size={10} />
-                  <span>{profile.location}</span>
+              {/* Avatar inline repositioner */}
+              {showAvatarPositioner && profile?.profilePhotoUrl && (
+                <div className="mt-2 w-64">
+                  <ImagePositioner
+                    imageUrl={profile.profilePhotoUrl}
+                    initialX={avatarPos.x}
+                    initialY={avatarPos.y}
+                    initialZoom={110}
+                    previewHeight="8rem"
+                    previewClass="rounded-t-xl"
+                    roundedTop={true}
+                    label="Adjust Avatar"
+                    onSave={(pos: { x: number; y: number; zoom: number }) => {
+                      setAvatarPos(pos);
+                      setShowAvatarPositioner(false);
+                      saveAvatarPosition(pos);
+                    }}
+                    onCancel={() => setShowAvatarPositioner(false)}
+                  />
                 </div>
               )}
-              <button
-                onClick={copyProfileLink}
-                className="flex items-center gap-1 text-[11px] text-[#A78BFA]/60 hover:text-[#A78BFA] transition-colors"
-              >
-                <Share2 size={10} />
-                <span>Share Profile</span>
-              </button>
+            </div>
+
+            {/* ── Identity block — left-anchored ── */}
+            <div className="flex-1 min-w-0 pt-1">
+              {/* Name + ARTIST tag */}
+              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                <EditableField
+                  label="Artist Name"
+                  value={profile?.name || ""}
+                  onSave={v => save({ name: v })}
+                  placeholder="Your artist name"
+                />
+                <span className="text-[9px] px-1.5 py-0.5 rounded tracking-widest font-mono flex-shrink-0"
+                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)", color: "#D4AF37" }}
+                >
+                  ARTIST
+                </span>
+              </div>
+              {/* Handle */}
+              <div className="flex items-center gap-1 mb-1">
+                <span className="text-[11px] text-white/40 font-body">@</span>
+                <EditableField
+                  label="Artist Handle"
+                  value={profile?.artistHandle || ""}
+                  onSave={v => save({ artistHandle: v })}
+                  placeholder="artist-handle"
+                />
+              </div>
+              {/* Bio — inline edit, single line preview */}
+              <EditableField
+                label="Bio"
+                value={profile?.bio || ""}
+                onSave={v => save({ bio: v })}
+                multiline
+                placeholder="Tell the world about your music…"
+              />
+            </div>
+
+            {/* ── Right column: signals + actions ── */}
+            <div className="flex-shrink-0 flex flex-col items-end gap-3 pt-1">
+              {/* Signals */}
+              <div className="flex items-center gap-3">
+                {(profile as any)?.supporterTier && (
+                  <SupporterBadge tier={(profile as any).supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
+                )}
+                <span className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                  <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{dbSongs.length}</span>
+                  {" "}tracks
+                </span>
+                {totalPlays > 0 && (
+                  <span className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                    <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>
+                      {totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays}
+                    </span>
+                    {" "}plays
+                  </span>
+                )}
+              </div>
+              {/* Actions */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={copyProfileLink}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                  style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
+                  title="Copy profile link"
+                >
+                  <Copy size={13} />
+                </button>
+                <button
+                  onClick={copyProfileLink}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                  style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
+                  title="Share profile"
+                >
+                  <Share2 size={13} />
+                </button>
+              </div>
             </div>
           </div>
-
-          <button
-            onClick={copyProfileLink}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-body
-              bg-[oklch(0.14_0.013_280)] border border-white/[0.08] text-white/50
-              hover:border-[#D4AF37]/30 hover:text-[#D4AF37] transition-all"
-          >
-            <Copy size={12} /> Copy Link
-          </button>
         </div>
+      </div>
 
-        {/* ── Artist Handle ── */}
-        <div className="mb-3 flex items-center gap-1.5">
-          <span className="text-[11px] text-white/65 font-body">@</span>
-          <EditableField
-            label="Artist Handle"
-            value={profile?.artistHandle || ""}
-            onSave={v => save({ artistHandle: v })}
-            placeholder="artist-handle"
-          />
-        </div>
-
-        {/* ── Bio ── */}
-        <div className="mb-4">
-          <EditableField
-            label="Bio"
-            value={profile?.bio || ""}
-            onSave={v => save({ bio: v })}
-            multiline
-            placeholder="Tell the world about your music…"
-          />
-        </div>
+      {/* ── Edit fields section — below header, inside page body ── */}
+      <div className="px-6 pt-5">
 
         {/* ── Creator Defaults: AI Disclosure + Primary Genre ── */}
         <div className="mb-4 p-4 rounded-xl border border-white/[0.07] bg-[oklch(0.11_0.012_280)]">
@@ -617,59 +661,6 @@ export default function ProfilePage() {
             youtube={profile?.youtubeHandle || ""}
             onSave={(t, i, y) => save({ twitterHandle: t, instagramHandle: i, youtubeHandle: y })}
           />
-        </div>
-
-        {/* ── Stats row ── */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          {[
-            { label: "Tracks", value: dbSongs.length, icon: Music, color: "#A78BFA" },
-            { label: "Plays", value: totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays, icon: TrendingUp, color: "#D4AF37" },
-            { label: "Gifts", value: `$0`, icon: DollarSign, color: "#4ade80" },
-          ].map(s => {
-            const Icon = s.icon;
-            return (
-              <div key={s.label} className="flex flex-col items-center gap-1 p-3 rounded-xl
-                bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
-                <Icon size={14} style={{ color: s.color }} />
-                <span className="text-[15px] font-heading text-white/90">{s.value}</span>
-                <span className="text-[10px] font-body text-white/70">{s.label}</span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ── Sovereign Identity Card ── */}
-        <div className="mb-5 p-4 rounded-2xl border" style={{ background: "oklch(0.11 0.04 270 / 70%)", borderColor: "oklch(0.28 0.04 270 / 50%)" }}>
-          <div className="flex items-center gap-2 mb-3">
-            <Fingerprint size={13} style={{ color: "#D4AF37" }} />
-            <span className="text-[10px] font-heading tracking-[0.16em] uppercase" style={{ color: "#D4AF37" }}>Sovereign Identity</span>
-            {myStats?.licenseStatus === "licensed" && (
-              <span className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.145 82 / 0.15)", color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.35)" }}>LICENSED</span>
-            )}
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            {[
-              { label: "Total Works", value: myStats?.totalWorks ?? dbSongs.length, icon: Layers, color: "#A78BFA" },
-              { label: "Published", value: myStats?.publishedWorks ?? dbSongs.filter((s: any) => s.status === "Published").length, icon: Upload, color: "#4ade80" },
-              { label: "Witnessed", value: myStats?.witnessedWorks ?? 0, icon: ScrollText, color: "#D4AF37" },
-              { label: "Plays", value: totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays, icon: TrendingUp, color: "#fb923c" },
-            ].map(s => {
-              const Icon = s.icon;
-              return (
-                <div key={s.label} className="flex flex-col items-center gap-1 p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05]">
-                  <Icon size={12} style={{ color: s.color }} />
-                  <span className="text-[14px] font-heading" style={{ color: s.color }}>{s.value}</span>
-                  <span className="text-[9px] font-body text-white/40 text-center leading-tight">{s.label}</span>
-                </div>
-              );
-            })}
-          </div>
-          {myStats?.memberSince && (
-            <div className="mt-3 pt-3 border-t border-white/[0.05] flex items-center gap-1.5">
-              <Star size={9} className="text-white/25" />
-              <span className="text-[10px] font-body text-white/25">Member since {new Date(myStats.memberSince).toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
-            </div>
-          )}
         </div>
 
         {/* ── Tabs ── */}
