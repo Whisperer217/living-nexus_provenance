@@ -145,9 +145,14 @@ export default function ProfilePage() {
   });
 
   const uploadBanner = trpc.profile.uploadBanner.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.profile.me.invalidate();
       toast.success("Banner updated");
+      // If AI detected a focal point, persist it automatically
+      if (data?.focalX !== undefined && data?.focalY !== undefined) {
+        updateProfile.mutate({ bannerPositionX: data.focalX, bannerPositionY: data.focalY });
+        setBannerPos({ x: data.focalX, y: data.focalY });
+      }
     },
     onError: () => toast.error("Failed to upload banner"),
   });
@@ -179,6 +184,8 @@ export default function ProfilePage() {
   const [showBannerPositioner, setShowBannerPositioner] = useState(false);
   const [pendingBannerUrl, setPendingBannerUrl] = useState<string | null>(null);
   const [bannerPos, setBannerPos] = useState({ x: 50, y: 50 });
+  // AI focal point returned from uploadBanner — auto-populates position sliders
+  const [aiFocalPos, setAiFocalPos] = useState<{ x: number; y: number } | null>(null);
   // Sync banner position from DB on load
   useEffect(() => {
     if (profile?.bannerPositionX !== undefined && profile?.bannerPositionY !== undefined) {
@@ -207,19 +214,27 @@ export default function ProfilePage() {
     // Show a local preview URL so the user can reposition before uploading
     const objectUrl = URL.createObjectURL(f);
     setPendingBannerUrl(objectUrl);
+    setAiFocalPos(null); // reset until AI responds
     setShowBannerPositioner(true);
     // Store the file for later upload
     (bannerRef.current as any)._pendingFile = f;
   };
-  const confirmBannerUpload = async (pos: { x: number; y: number }) => {
+  const confirmBannerUpload = async (pos: { x: number; y: number; zoom?: number }) => {
     const f = (bannerRef.current as any)?._pendingFile as File | undefined;
     if (!f) return;
     setBannerPos(pos);
     setShowBannerPositioner(false);
+    setAiFocalPos(null);
     const base64 = await toBase64(f);
-    uploadBanner.mutateAsync({ base64, mimeType: f.type }).then(() => {
-      // After URL is saved, also persist the position
+    // Upload and let onSuccess handle AI focal point persistence
+    uploadBanner.mutateAsync({ base64, mimeType: f.type }).then((data) => {
+      // Use user-chosen position (overrides AI focal if user moved sliders)
       updateProfile.mutate({ bannerPositionX: pos.x, bannerPositionY: pos.y });
+      setBannerPos({ x: pos.x, y: pos.y });
+      // Surface AI focal point for next reposition session
+      if (data?.focalX !== undefined && data?.focalY !== undefined) {
+        setAiFocalPos({ x: data.focalX, y: data.focalY });
+      }
     });
     if (pendingBannerUrl) URL.revokeObjectURL(pendingBannerUrl);
     setPendingBannerUrl(null);
@@ -372,8 +387,10 @@ export default function ProfilePage() {
       {showBannerPositioner && (pendingBannerUrl || profile?.bannerUrl) && (
         <ImagePositioner
           imageUrl={pendingBannerUrl || profile!.bannerUrl!}
-          initialX={bannerPos.x}
-          initialY={bannerPos.y}
+          initialX={aiFocalPos?.x ?? bannerPos.x}
+          initialY={aiFocalPos?.y ?? bannerPos.y}
+          initialZoom={110}
+          aiFocal={!!aiFocalPos}
           previewHeight="16rem"
           roundedTop={false}
           label={pendingBannerUrl ? "Set Banner Position" : "Reposition Banner"}

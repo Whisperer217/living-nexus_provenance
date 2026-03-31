@@ -1347,3 +1347,13 @@
 - [x] Replace empty banner gradient with gold-framed Upload CTA on CreatorProfilePage (owner view)
 - [x] Update What's New modal to v2.15.0 with entries: Banner Positioning Modes, Gold Banner Frame, Empty Banner Upload Prompt
 - [x] Persist version acknowledgment (user_seen_version = 2.15.0)
+
+## Phase AA: Smart Banner Normalization (AI-Assisted)
+- [x] Remove Stretch as default — Stretch is explicit override only, never auto-applied
+- [x] Fix all banner rendering to use object-fit: cover (never fill/stretch)
+- [x] Auto-select mode on upload based on aspect ratio: wide→crop, tall→crop, square→crop (stretch only on explicit user choice)
+- [x] Add server-side AI focal point detection: LLM vision call on banner upload, returns {x, y} focal point percentage
+- [x] Wire focal point result into initialX/initialY of ImagePositioner so image auto-centers on subject
+- [x] Update ImagePositioner default mode to "crop" (not "fit"), position sliders active by default
+- [x] Add "Auto" badge to position sliders when focal point was AI-detected
+- [x] Ensure banner on CreatorProfilePage and ProfilePage never distorts — only crops or fits

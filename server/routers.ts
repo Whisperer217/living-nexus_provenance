@@ -249,7 +249,60 @@ export const appRouter = router({
       const buffer = Buffer.from(input.base64, "base64");
       const { url } = await storagePut(`banners/${ctx.user.id}-${Date.now()}.jpg`, buffer, input.mimeType);
       await updateUserProfile(ctx.user.id, { bannerUrl: url });
-      return { url };
+
+      // ── AI Focal Point Detection ─────────────────────────────────────
+      // Ask the vision LLM to identify the primary subject's focal point
+      // so the banner auto-centers on the most meaningful part of the image.
+      let focalX = 50;
+      let focalY = 50;
+      try {
+        const mimeType = input.mimeType as "image/jpeg" | "image/png" | "image/webp" | "image/gif";
+        const dataUrl = `data:${mimeType};base64,${input.base64}`;
+        const result = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: "You are an image composition analyst. Analyze the image and identify the primary focal point — the most visually important subject (face, architectural center, horizon, object). Return ONLY a JSON object with x and y as percentages (0–100) representing the focal point position within the image. 0,0 is top-left. 50,50 is center. Example: {\"x\":52,\"y\":38}",
+            },
+            {
+              role: "user",
+              content: [
+                { type: "image_url", image_url: { url: dataUrl, detail: "low" } },
+                { type: "text", text: "Identify the primary focal point of this banner image. Return only JSON: {\"x\": number, \"y\": number}" },
+              ],
+            },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "focal_point",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  x: { type: "number", description: "Horizontal focal point 0-100" },
+                  y: { type: "number", description: "Vertical focal point 0-100" },
+                },
+                required: ["x", "y"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const content = result?.choices?.[0]?.message?.content;
+        if (content) {
+          const parsed = typeof content === "string" ? JSON.parse(content) : content;
+          if (typeof parsed.x === "number" && typeof parsed.y === "number") {
+            focalX = Math.max(0, Math.min(100, Math.round(parsed.x)));
+            focalY = Math.max(0, Math.min(100, Math.round(parsed.y)));
+          }
+        }
+      } catch (e) {
+        // Focal detection is non-critical — fall back to center
+        console.warn("[uploadBanner] Focal point detection failed, using center:", e);
+      }
+
+      return { url, focalX, focalY };
     }),
     allCreators: publicProcedure.query(async () => getAllCreators()),
     getCreator: publicProcedure.input(z.object({ creatorId: z.number() })).query(async ({ input }) => {

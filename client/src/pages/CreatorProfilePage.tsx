@@ -236,11 +236,18 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
 }
 
 // ─── Banner Upload CTA (owner empty state) ───────────────────────────────────
-function BannerUploadCTA() {
+function BannerUploadCTA({ onFocalDetected }: { onFocalDetected?: (focal: { x: number; y: number }) => void }) {
   const utils = trpc.useUtils();
   const [uploading, setUploading] = useState(false);
   const uploadBanner = trpc.profile.uploadBanner.useMutation({
-    onSuccess: () => { utils.profile.getCreator.invalidate(); toast.success("Banner uploaded"); },
+    onSuccess: (data) => {
+      utils.profile.getCreator.invalidate();
+      toast.success("Banner uploaded");
+      // Pass AI focal point back to parent so positioner auto-centers
+      if (data?.focalX !== undefined && data?.focalY !== undefined && onFocalDetected) {
+        onFocalDetected({ x: data.focalX, y: data.focalY });
+      }
+    },
     onError: (e: any) => toast.error(e.message || "Upload failed"),
   });
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,6 +306,8 @@ export default function CreatorProfilePage() {
   const [tipAmount, setTipAmount] = useState("5");
   const [showBannerPositioner, setShowBannerPositioner] = useState(false);
   const [bannerPos, setBannerPos] = useState({ x: 50, y: 50 });
+  // AI focal point — set when a new banner is uploaded via the BannerUploadCTA
+  const [aiFocalPos, setAiFocalPos] = useState<{ x: number; y: number } | null>(null);
   const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
   // Use currentTrackId (derived from currentIdx) — NOT tracks[0] which always points to the
   // first track in the queue regardless of which track is actively playing.
@@ -489,7 +498,7 @@ export default function CreatorProfilePage() {
           />
         ) : isOwner ? (
           // Empty state (owner view): gold-framed Upload CTA
-          <BannerUploadCTA />
+          <BannerUploadCTA onFocalDetected={(focal) => { setAiFocalPos(focal); setShowBannerPositioner(true); }} />
         ) : (
           // Empty state (visitor view): subtle gradient
           <div
@@ -534,13 +543,14 @@ export default function CreatorProfilePage() {
       {showBannerPositioner && creator.bannerUrl && (
         <ImagePositioner
           imageUrl={creator.bannerUrl}
-          initialX={bannerPos.x}
-          initialY={bannerPos.y}
-          initialZoom={(creator as any).bannerZoom ?? 100}
+          initialX={aiFocalPos?.x ?? bannerPos.x}
+          initialY={aiFocalPos?.y ?? bannerPos.y}
+          initialZoom={110}
+          aiFocal={!!aiFocalPos}
           previewHeight="16rem"
           roundedTop={false}
           label="Reposition Banner"
-          onSave={saveBannerPosition}
+          onSave={(pos: { x: number; y: number; zoom: number }) => { setAiFocalPos(null); saveBannerPosition(pos); }}
           onCancel={() => setShowBannerPositioner(false)}
         />
       )}
