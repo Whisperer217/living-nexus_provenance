@@ -12,6 +12,7 @@ import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { WIDPanel } from "@/components/WIDPanel";
 import {
   GripVertical,
   ChevronDown,
@@ -138,9 +139,10 @@ function ManageTrackRow({
           {track.title}
         </p>
         {track.witnessId && (
-          <p className="text-[10px] truncate font-mono" style={{ color: "oklch(0.5 0.03 280)" }}>
-            {track.witnessId}
-          </p>
+          <WIDPanel
+            witnessId={track.witnessId}
+            songTitle={track.title}
+          />
         )}
       </div>
 

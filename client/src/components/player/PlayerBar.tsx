@@ -13,11 +13,12 @@ import {
   Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, Maximize2,
   ChevronDown, ChevronUp, MessageCircle, LogOut, Share2, Download,
 } from "lucide-react";
-import AddToPlaylistButton from "@/components/AddToPlaylistButton";
+import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLocation } from "wouter";
 import { useState, useCallback, useRef, useEffect } from "react";
 import PlayerTipModal from "./PlayerTipModal";
 import { MediaAsset } from "@/components/MediaAsset";
+import { ListPlus } from "lucide-react";
 
 function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
@@ -34,6 +35,7 @@ export default function PlayerBar() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [tipOpen, setTipOpen] = useState(false);
+  const [addToListOpen, setAddToListOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [newComment, setNewComment] = useState("");
   const commentListRef = useRef<HTMLDivElement>(null);
@@ -317,7 +319,15 @@ export default function PlayerBar() {
                     <DollarSign size={15} />
                   </button>
                 )}
-                {currentSongId && <AddToPlaylistButton songId={currentSongId} variant="compact" />}
+                {currentSongId && (
+                  <button
+                    onClick={() => setAddToListOpen(true)}
+                    className="p-1.5 transition-colors text-white/50 hover:text-[oklch(0.80_0.145_82)]"
+                    title="Add to My List"
+                  >
+                    <ListPlus size={15} />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -750,9 +760,16 @@ export default function PlayerBar() {
               );
             })()}
 
-            {/* Add to Playlist */}
+            {/* Add to My List */}
             {currentSongId && (
-              <AddToPlaylistButton songId={currentSongId} variant="compact" />
+              <button
+                onClick={() => setAddToListOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-heading tracking-wide transition-all hover:brightness-110 active:scale-95"
+                style={{ background: "oklch(0.16 0.06 280 / 0.7)", color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.25)" }}
+                title="Add to My List"
+              >
+                <ListPlus size={12} /> My List
+              </button>
             )}
 
             {/* Session badge — shown when linked to a jukebox room */}
@@ -870,6 +887,13 @@ export default function PlayerBar() {
           artistName={currentTrack?.artist || "this creator"}
           stripeAccountId={creatorStripeAccountId}
           onClose={() => setTipOpen(false)}
+        />
+      )}
+      {addToListOpen && currentSongId && (
+        <AddToMyListModal
+          songId={currentSongId}
+          songTitle={currentTrack?.title ?? ""}
+          onClose={() => setAddToListOpen(false)}
         />
       )}
     </div>

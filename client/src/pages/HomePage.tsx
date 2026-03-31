@@ -9,7 +9,7 @@
      6. Genre filters + track grid (unchanged)
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TrackCard from "@/components/TrackCard";
@@ -148,20 +148,48 @@ const GENRE_CARDS = [
   { label: "Hip-Hop",   icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-eye_0e10b572.png",      color: "#fb923c" },
   { label: "Rock",      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#f87171" },
   { label: "R&B",       icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-feather_40dcaa6d.png",   color: "#a78bfa" },
+  { label: "Metal",     icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#ef4444" },
 ];
 
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-hero-76TJneE6NXajYSDJWHEXPg.webp";
 
 export default function HomePage() {
-  const { state, allTracks, addAndPlay, openNowPlayingPanel } = usePlayer();
+  const { state, addAndPlay, openNowPlayingPanel } = usePlayer();
   const { isAuthenticated } = useAuth();
   const [activeGenre, setActiveGenre] = useState("All");
   const [tipTarget, setTipTarget] = useState<number | null>(null);
 
-  const tracks = allTracks();
-  const filtered = activeGenre === "All"
-    ? tracks
-    : tracks.filter(t => t.genre === activeGenre);
+  // Stable query input — avoids infinite re-render from new object on every render
+  const discoverInput = useMemo(() => ({
+    genre: activeGenre === "All" ? undefined : activeGenre,
+    limit: 48,
+  }), [activeGenre]);
+
+  const { data: discoverData, isLoading: discoverLoading } = trpc.songs.discover.useQuery(
+    discoverInput,
+    { staleTime: 30_000 }
+  );
+
+  // Map server songs to the Track shape expected by TrackCard / PlayerContext
+  const tracks = useMemo(() => {
+    if (!discoverData) return [];
+    return discoverData.map((s: any) => ({
+      id: s.id,
+      title: s.title,
+      artist: s.artistName ?? s.userName ?? "Unknown",
+      artUrl: s.coverArtUrl ?? undefined,
+      audioSrc: s.fileUrl ?? "",
+      genre: s.genre ?? undefined,
+      plays: s.playCount ?? 0,
+      witnessId: s.witnessId ?? undefined,
+      coverPositionX: s.coverPositionX ?? 50,
+      coverPositionY: s.coverPositionY ?? 50,
+      artAspectRatio: s.artAspectRatio ?? "1:1",
+      userId: s.userId,
+      artistHandle: s.artistHandle ?? undefined,
+      profilePhotoUrl: s.profilePhotoUrl ?? undefined,
+    }));
+  }, [discoverData]);
 
   const tipTrack = tipTarget !== null ? tracks[tipTarget] : null;
 
@@ -450,13 +478,19 @@ export default function HomePage() {
         </div>
 
         {/* ── Track grid ── */}
-        {filtered.length > 0 ? (
+        {discoverLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5 mb-8">
-            {filtered.map((track) => (
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="aspect-square rounded-2xl animate-pulse" style={{ background: "oklch(0.115 0.055 278)" }} />
+            ))}
+          </div>
+        ) : tracks.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5 mb-8">
+            {tracks.map((track: typeof tracks[number], idx: number) => (
               <TrackCard
                 key={track.id}
                 track={track}
-                index={tracks.indexOf(track)}
+                index={idx}
                 onTip={setTipTarget}
               />
             ))}
@@ -483,7 +517,7 @@ export default function HomePage() {
               <h2 className="font-heading text-[16px] tracking-wider text-white">Trending Now</h2>
             </div>
             <div className="space-y-2">
-              {tracks.slice(0, 5).map((track, i) => {
+              {tracks.slice(0, 5).map((track: typeof tracks[number], i: number) => {
                 const idx = tracks.indexOf(track);
                 const isActive = state.currentIdx === idx;
                 return (

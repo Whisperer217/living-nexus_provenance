@@ -1544,3 +1544,14 @@
 
 ## Bug Fix: PlaylistManagePanel Infinite Re-render
 - [x] Fix "Too many re-renders" in PlaylistManagePanel — setState called during render phase
+
+## System Constraint: Eliminate Duplication + Homepage Merge
+- [x] Audit all Collection models (playlists, guildPlaylistTracks, liked, archive) — identify duplicates
+- [x] Audit all WID components — identify duplicates vs canonical WIDPanel
+- [x] Audit all "add to" handlers — identify duplicates vs canonical AddToMyListModal
+- [x] Audit all Work/Song model usages — confirm single canonical type
+- [x] Merge DiscoverPage track grid into HomePage with genre pill row (All, Ambient, Gospel, Jazz, Electronic, Hip-Hop, Rock, R&B, Metal)
+- [x] /discover kept as deep-link target; / routes to HomePage with embedded genre grid
+- [x] Sidebar nav updated: Home (/), Discover (/discover) both present
+- [x] AddToPlaylistButton replaced with AddToMyListModal in PlayerBar (both compact + expanded modes)
+- [x] Inline witnessId text in MyListsTab replaced with canonical WIDPanel badge
