@@ -33,6 +33,7 @@ const NAV_ITEMS = [
   { label: "Discover",         icon: Compass,     path: "/discover",    group: "DISCOVER" },
   { label: "Explore",          icon: Compass,     path: "/explore",     group: "DISCOVER" },
   { label: "Listen Together",  icon: Users,       path: "/together",    group: "DISCOVER", badge: "LIVE" },
+  { label: "Guilds",            icon: Shield,      path: "/guilds",      group: "DISCOVER" },
   { label: "Founding Creators",icon: Star,        path: "/contributors",group: "DISCOVER" },
   { label: "Manifesto",        icon: BookOpen,    path: "/manifesto",   group: "DISCOVER" },
   { label: "Creator License",  icon: Shield,      path: "/pricing",     group: "DISCOVER", badge: "$88.88" },

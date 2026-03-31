@@ -1516,3 +1516,28 @@
 - [x] Add songs.getWitnessedVoices public procedure (6 most recent)
 - [x] Build AnimatedCounter component
 - [x] Build WIDTrustLayer section in HomePage (counter + Witnessed Voices strip)
+
+## Build Order Phase 4 — WID Social Proof
+- [x] Add Share button to WIDPanel (tweet pre-fill with WID + verify link)
+- [x] Add Copy Link button to WIDPanel (copies verify URL)
+
+## Build Order Phase 5 — My Lists Manage Mode
+- [x] Add playlistVersions table to schema (playlistId, versionNum, widArray JSON, savedAt)
+- [x] Run db:push for new table
+- [x] Add playlists.saveVersion tRPC procedure
+- [x] Add playlists.getVersions tRPC procedure
+- [x] Add playlists.reorder tRPC procedure
+- [x] Build MyListsTab component with drag-to-reorder and version history panel
+- [x] Add My Lists tab to ArchivePage with tab switcher
+
+## Build Order Phase 6 — Guild System Scaffold
+- [x] Add guilds table (id, name, slug, description, bannerUrl, createdBy, isPublic, createdAt)
+- [x] Add guildMembers table (guildId, userId, role: owner/admin/member, joinedAt)
+- [x] Add guildPlaylistTracks table (guildId, songId, addedByUserId, position, addedAt)
+- [x] Run db:push for guild tables
+- [x] Add guilds tRPC router (list, getBySlug, create, getMix, addToMix, join, mine)
+- [x] Build GuildPage (/guild/:slug) with hero, guild mix, members list, join button
+- [x] Build GuildsListPage (/guilds) with create guild modal
+- [x] Register /guilds and /guild/:slug routes in App.tsx
+- [x] Add Guilds nav item to sidebar DISCOVER group
+- [x] "added by" attribution on every guild mix track row

@@ -31,6 +31,8 @@ import {
   ExternalLink,
   CheckCircle2,
   Fingerprint,
+  Share2,
+  Link2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -99,6 +101,25 @@ export function WIDPanel({
       setCopied(true);
       toast.success("Witness ID copied");
       setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function handleShare() {
+    const verifyUrl = `https://www.livingnexus.org/verify/${witnessId}`;
+    const text = songTitle
+      ? `"${songTitle}" by ${creatorName || "an artist"} is permanently witnessed on @LivingNexus. Witness ID: ${witnessId} — ${verifyUrl}`
+      : `Witness ID ${witnessId} is permanently registered on @LivingNexus — ${verifyUrl}`;
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
+  function handleCopyLink() {
+    const verifyUrl = `https://www.livingnexus.org/verify/${witnessId}`;
+    navigator.clipboard.writeText(verifyUrl).then(() => {
+      toast.success("Verify link copied");
     });
   }
 
@@ -266,7 +287,40 @@ export function WIDPanel({
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-2 mt-2">
+          <div className="flex flex-wrap gap-2 mt-2">
+            {/* Share on X/Twitter */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="flex-1"
+              style={{
+                borderColor: "oklch(0.65 0.2 300 / 0.3)",
+                color: "oklch(0.65 0.2 300)",
+                background: "transparent",
+              }}
+            >
+              <Share2 className="w-3.5 h-3.5 mr-1.5" />
+              Share WID
+            </Button>
+
+            {/* Copy verify link */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyLink}
+              className="flex-1"
+              style={{
+                borderColor: "oklch(0.65 0.2 300 / 0.3)",
+                color: "oklch(0.65 0.2 300)",
+                background: "transparent",
+              }}
+            >
+              <Link2 className="w-3.5 h-3.5 mr-1.5" />
+              Copy Link
+            </Button>
+
+            {/* Download provenance */}
             <Button
               variant="outline"
               size="sm"

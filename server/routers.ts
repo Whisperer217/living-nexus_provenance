@@ -1854,6 +1854,96 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         await removeCollaborator(input.playlistId, input.userId);
         return { ok: true };
       }),
+    /** Reorder tracks in a playlist (owner/collaborator) */
+    reorder: protectedProcedure
+      .input(z.object({
+        playlistId: z.number().int().positive(),
+        orderedSongIds: z.array(z.number().int().positive()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
+        if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
+        const { getDb } = await import("./db");
+        const { playlistTracks: pt } = await import("../drizzle/schema");
+        const { eq: eqOp } = await import("drizzle-orm");
+        const db = await getDb();
+        // Update position for each songId in the new order
+        await Promise.all(
+          input.orderedSongIds.map((songId, idx) =>
+            db.update(pt)
+              .set({ position: idx })
+              .where(eqOp(pt.playlistId, input.playlistId))
+              .where(eqOp(pt.songId, songId))
+          )
+        );
+        return { ok: true };
+      }),
+    /** Save a version snapshot of the current playlist ordering */
+    saveVersion: protectedProcedure
+      .input(z.object({
+        playlistId: z.number().int().positive(),
+        note: z.string().max(256).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
+        if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
+        const { getDb } = await import("./db");
+        const { playlistVersions, playlistTracks: pt, songs: songsTable } = await import("../drizzle/schema");
+        const { eq: eqOp, asc, max } = await import("drizzle-orm");
+        const db = await getDb();
+        // Get current ordered tracks
+        const tracks = await db
+          .select({ songId: pt.songId, witnessId: songsTable.witnessId, position: pt.position })
+          .from(pt)
+          .leftJoin(songsTable, eqOp(pt.songId, songsTable.id))
+          .where(eqOp(pt.playlistId, input.playlistId))
+          .orderBy(asc(pt.position));
+        // Get next version number
+        const [{ maxVer }] = await db
+          .select({ maxVer: max(playlistVersions.versionNum) })
+          .from(playlistVersions)
+          .where(eqOp(playlistVersions.playlistId, input.playlistId));
+        const nextVer = (maxVer ?? 0) + 1;
+        const widArray = tracks.map((t: typeof tracks[number]) => t.witnessId).filter(Boolean);
+        const songIdArray = tracks.map((t: typeof tracks[number]) => t.songId);
+        await db.insert(playlistVersions).values({
+          playlistId: input.playlistId,
+          versionNum: nextVer,
+          widArray,
+          songIdArray,
+          savedByUserId: ctx.user.id,
+          note: input.note,
+        });
+        return { versionNum: nextVer, trackCount: tracks.length };
+      }),
+    /** Get version history for a playlist */
+    getVersions: protectedProcedure
+      .input(z.object({ playlistId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
+        if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
+        const { getDb } = await import("./db");
+        const { playlistVersions, users: usersTable } = await import("../drizzle/schema");
+        const { eq: eqOp, desc: descOp } = await import("drizzle-orm");
+        const db = await getDb();
+        const rows = await db
+          .select({
+            id: playlistVersions.id,
+            versionNum: playlistVersions.versionNum,
+            widArray: playlistVersions.widArray,
+            songIdArray: playlistVersions.songIdArray,
+            note: playlistVersions.note,
+            savedAt: playlistVersions.savedAt,
+            savedByName: usersTable.name,
+            savedByHandle: usersTable.artistHandle,
+          })
+          .from(playlistVersions)
+          .leftJoin(usersTable, eqOp(playlistVersions.savedByUserId, usersTable.id))
+          .where(eqOp(playlistVersions.playlistId, input.playlistId))
+          .orderBy(descOp(playlistVersions.versionNum))
+          .limit(20);
+        return rows;
+      }),
   }),
 
   // ── Notifications ──────────────────────────────────────────────────────────
@@ -1937,11 +2027,144 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         if (!result.success) throw new TRPCError({ code: "BAD_REQUEST", message: result.message });
         return result;
       }),
+  }),  // ── Guilds ───────────────────────────────────────────────────────────────────────────────────
+  guilds: router({
+    /** List all public guilds */
+    list: publicProcedure.query(async () => {
+      const { getDb } = await import("./db");
+      const { guilds } = await import("../drizzle/schema");
+      const { eq: eqOp, desc: descOp } = await import("drizzle-orm");
+      const db = await getDb();
+      return db.select().from(guilds).where(eqOp(guilds.isPublic, true)).orderBy(descOp(guilds.createdAt)).limit(50);
+    }),
+    /** Get a single guild by slug */
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string().min(1).max(64) }))
+      .query(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const { guilds, guildMembers, users: usersTable } = await import("../drizzle/schema");
+        const { eq: eqOp } = await import("drizzle-orm");
+        const db = await getDb();
+        const [guild] = await db.select().from(guilds).where(eqOp(guilds.slug, input.slug)).limit(1);
+        if (!guild) throw new TRPCError({ code: "NOT_FOUND" });
+        const members = await db
+          .select({ userId: guildMembers.userId, role: guildMembers.role, joinedAt: guildMembers.joinedAt,
+            name: usersTable.name, handle: usersTable.artistHandle, avatar: usersTable.profilePhotoUrl })
+          .from(guildMembers)
+          .leftJoin(usersTable, eqOp(guildMembers.userId, usersTable.id))
+          .where(eqOp(guildMembers.guildId, guild.id));
+        return { guild, members };
+      }),
+    /** Create a guild */
+    create: protectedProcedure
+      .input(z.object({
+        slug: z.string().min(2).max(64).regex(/^[a-z0-9-]+$/),
+        name: z.string().min(1).max(128),
+        description: z.string().max(1000).optional(),
+        isPublic: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { getDb } = await import("./db");
+        const { guilds, guildMembers } = await import("../drizzle/schema");
+        const db = await getDb();
+        const [existing] = await db.select({ id: guilds.id }).from(guilds).where(
+          (await import("drizzle-orm")).eq(guilds.slug, input.slug)
+        ).limit(1);
+        if (existing) throw new TRPCError({ code: "CONFLICT", message: "Slug already taken" });
+        const [result] = await db.insert(guilds).values({
+          ...input,
+          isPublic: input.isPublic ?? true,
+          createdByUserId: ctx.user.id,
+        });
+        const guildId = (result as any).insertId as number;
+        // Creator becomes owner
+        await db.insert(guildMembers).values({ guildId, userId: ctx.user.id, role: "owner" });
+        return { guildId };
+      }),
+    /** Get guild mix tracks */
+    getMix: publicProcedure
+      .input(z.object({ guildId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const { guildPlaylistTracks, songs: songsTable, users: usersTable } = await import("../drizzle/schema");
+        const { eq: eqOp, asc } = await import("drizzle-orm");
+        const db = await getDb();
+        return db
+          .select({
+            id: guildPlaylistTracks.id,
+            songId: guildPlaylistTracks.songId,
+            position: guildPlaylistTracks.position,
+            addedAt: guildPlaylistTracks.addedAt,
+            title: songsTable.title,
+            coverArtUrl: songsTable.coverArtUrl,
+            witnessId: songsTable.witnessId,
+            fileUrl: songsTable.fileUrl,
+            addedByName: usersTable.name,
+            addedByHandle: usersTable.artistHandle,
+            addedByAvatar: usersTable.profilePhotoUrl,
+          })
+          .from(guildPlaylistTracks)
+          .leftJoin(songsTable, eqOp(guildPlaylistTracks.songId, songsTable.id))
+          .leftJoin(usersTable, eqOp(guildPlaylistTracks.addedByUserId, usersTable.id))
+          .where(eqOp(guildPlaylistTracks.guildId, input.guildId))
+          .orderBy(asc(guildPlaylistTracks.position));
+      }),
+    /** Add a track to the guild mix */
+    addToMix: protectedProcedure
+      .input(z.object({ guildId: z.number().int().positive(), songId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const { getDb } = await import("./db");
+        const { guildMembers, guildPlaylistTracks } = await import("../drizzle/schema");
+        const { eq: eqOp, and, max } = await import("drizzle-orm");
+        const db = await getDb();
+        const [membership] = await db.select().from(guildMembers)
+          .where(and(eqOp(guildMembers.guildId, input.guildId), eqOp(guildMembers.userId, ctx.user.id)))
+          .limit(1);
+        if (!membership) throw new TRPCError({ code: "FORBIDDEN", message: "Not a guild member" });
+        const [{ maxPos }] = await db.select({ maxPos: max(guildPlaylistTracks.position) })
+          .from(guildPlaylistTracks).where(eqOp(guildPlaylistTracks.guildId, input.guildId));
+        await db.insert(guildPlaylistTracks).values({
+          guildId: input.guildId,
+          songId: input.songId,
+          addedByUserId: ctx.user.id,
+          position: (maxPos ?? -1) + 1,
+        });
+        return { ok: true };
+      }),
+    /** Join a public guild */
+    join: protectedProcedure
+      .input(z.object({ guildId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const { getDb } = await import("./db");
+        const { guilds, guildMembers } = await import("../drizzle/schema");
+        const { eq: eqOp, and } = await import("drizzle-orm");
+        const db = await getDb();
+        const [guild] = await db.select().from(guilds).where(eqOp(guilds.id, input.guildId)).limit(1);
+        if (!guild || !guild.isPublic) throw new TRPCError({ code: "FORBIDDEN" });
+        const [existing] = await db.select().from(guildMembers)
+          .where(and(eqOp(guildMembers.guildId, input.guildId), eqOp(guildMembers.userId, ctx.user.id)))
+          .limit(1);
+        if (existing) return { ok: true }; // already a member
+        await db.insert(guildMembers).values({ guildId: input.guildId, userId: ctx.user.id, role: "member" });
+        return { ok: true };
+      }),
+    /** My guilds */
+    mine: protectedProcedure.query(async ({ ctx }) => {
+      const { getDb } = await import("./db");
+      const { guilds, guildMembers } = await import("../drizzle/schema");
+      const { eq: eqOp } = await import("drizzle-orm");
+      const db = await getDb();
+      return db
+        .select({ id: guilds.id, slug: guilds.slug, name: guilds.name, avatarUrl: guilds.avatarUrl,
+          role: guildMembers.role, joinedAt: guildMembers.joinedAt })
+        .from(guildMembers)
+        .leftJoin(guilds, eqOp(guildMembers.guildId, guilds.id))
+        .where(eqOp(guildMembers.userId, ctx.user.id));
+    }),
   }),
 
-  // ── Artwork Normalization (admin) ─────────────────────────────────────────
+  // ── Artwork Normalization (admin) ────────────────────────────────────────────
   normalization: normalizationRouter,
-
   // ── Founder's Era Supporters ─────────────────────────────────────────────────
   supporters: router({
     /** Public Supporters Wall — all supporters ordered by totalGifted desc */

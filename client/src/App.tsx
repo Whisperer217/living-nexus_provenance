@@ -43,6 +43,8 @@ const WitnessRegistryPage = lazy(() => import("./pages/WitnessRegistryPage"));
 const DownloadPage = lazy(() => import("./pages/DownloadPage"));
 const FoundersPage = lazy(() => import("./pages/FoundersPage"));
 const ArtworkNormalizationPage = lazy(() => import("./pages/ArtworkNormalizationPage"));
+const GuildPage = lazy(() => import("./pages/GuildPage"));
+const GuildsListPage = lazy(() => import("./pages/GuildsListPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -100,6 +102,8 @@ function Router() {
                 <Route path="/notifications" component={NotificationsPage} />
                 <Route path="/witness-registry" component={WitnessRegistryPage} />
                 <Route path="/founders" component={FoundersPage} />
+                <Route path="/guilds" component={GuildsListPage} />
+                <Route path="/guild/:slug" component={GuildPage} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>

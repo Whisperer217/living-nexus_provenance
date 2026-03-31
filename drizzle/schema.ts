@@ -534,3 +534,65 @@ export const platformSupporters = mysqlTable("platformSupporters", {
 });
 export type PlatformSupporter = typeof platformSupporters.$inferSelect;
 export type InsertPlatformSupporter = typeof platformSupporters.$inferInsert;
+
+// ─── Playlist Versions (My Lists Manage Mode) ────────────────────────────────
+// Every time a user saves a new version of their playlist ordering, a snapshot
+// is written here. widArray stores the ordered array of song WIDs at that moment.
+// This gives each playlist an immutable version history — the ordering itself
+// becomes a provenance artifact.
+export const playlistVersions = mysqlTable("playlistVersions", {
+  id: int("id").autoincrement().primaryKey(),
+  playlistId: int("playlistId").notNull(),         // FK → playlists.id
+  versionNum: int("versionNum").notNull(),          // 1, 2, 3 … (auto-incremented per playlist)
+  widArray: json("widArray").notNull(),             // string[] — ordered WIDs at this version
+  songIdArray: json("songIdArray").notNull(),       // int[] — ordered songIds (for fast joins)
+  savedByUserId: int("savedByUserId").notNull(),    // who triggered the save
+  note: varchar("note", { length: 256 }),           // optional version note
+  savedAt: timestamp("savedAt").defaultNow().notNull(),
+});
+export type PlaylistVersion = typeof playlistVersions.$inferSelect;
+export type InsertPlaylistVersion = typeof playlistVersions.$inferInsert;
+
+// ─── Guilds ───────────────────────────────────────────────────────────────────
+// A Guild is a multi-creator collective that shares a channel page, a guild mix
+// playlist, and a versioned track ordering. Guilds are the social layer of LN.
+export const guilds = mysqlTable("guilds", {
+  id: int("id").autoincrement().primaryKey(),
+  slug: varchar("slug", { length: 64 }).notNull().unique(),   // URL-safe identifier
+  name: varchar("name", { length: 128 }).notNull(),
+  description: text("description"),
+  bannerUrl: text("bannerUrl"),
+  avatarUrl: text("avatarUrl"),
+  isPublic: boolean("isPublic").default(true).notNull(),
+  createdByUserId: int("createdByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Guild = typeof guilds.$inferSelect;
+export type InsertGuild = typeof guilds.$inferInsert;
+
+// ─── Guild Members ────────────────────────────────────────────────────────────
+export const guildMembers = mysqlTable("guildMembers", {
+  id: int("id").autoincrement().primaryKey(),
+  guildId: int("guildId").notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["owner", "admin", "member"]).default("member").notNull(),
+  joinedAt: timestamp("joinedAt").defaultNow().notNull(),
+});
+export type GuildMember = typeof guildMembers.$inferSelect;
+export type InsertGuildMember = typeof guildMembers.$inferInsert;
+
+// ─── Guild Playlists ──────────────────────────────────────────────────────────
+// The guild mix — a shared, versioned playlist where each entry records who
+// added the track. The full version history is stored in playlistVersions
+// (linked via playlistId when a guild playlist is backed by a named playlist).
+export const guildPlaylistTracks = mysqlTable("guildPlaylistTracks", {
+  id: int("id").autoincrement().primaryKey(),
+  guildId: int("guildId").notNull(),
+  songId: int("songId").notNull(),
+  addedByUserId: int("addedByUserId").notNull(),   // "added by" attribution
+  position: int("position").notNull().default(0),
+  addedAt: timestamp("addedAt").defaultNow().notNull(),
+});
+export type GuildPlaylistTrack = typeof guildPlaylistTracks.$inferSelect;
+export type InsertGuildPlaylistTrack = typeof guildPlaylistTracks.$inferInsert;

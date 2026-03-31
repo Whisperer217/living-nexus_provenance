@@ -5,17 +5,17 @@
              publish toggle (Draft ↔ Published).
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Music, Upload, Globe, EyeOff, Pencil, ExternalLink, Play } from "lucide-react";
-import { useState } from "react";
+import { Music, Upload, Globe, EyeOff, Pencil, ExternalLink, Play, ListMusic } from "lucide-react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
+import MyListsTab from "@/components/MyListsTab";
 
 /* ── Status tag ─────────────────────────────────────────────────── */
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
@@ -48,6 +48,7 @@ export default function ArchivePage() {
   const [,] = useLocation();
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
+  const [activeTab, setActiveTab] = useState<"tracks" | "lists">("tracks");
   const { playQueueAt } = usePlayer();
 
   const buildTrack = (song: any) => ({
@@ -150,15 +151,40 @@ export default function ArchivePage() {
           </Link>
         </div>
 
+        {/* ── Tab switcher ───────────────────────────────────────── */}
+        <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "oklch(0.115 0.055 278)" }}>
+          <button
+            onClick={() => setActiveTab("tracks")}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+            style={activeTab === "tracks"
+              ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
+              : { color: "oklch(0.6 0.03 280)" }}
+          >
+            <Music size={13} /> My Tracks
+          </button>
+          <button
+            onClick={() => setActiveTab("lists")}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+            style={activeTab === "lists"
+              ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
+              : { color: "oklch(0.6 0.03 280)" }}
+          >
+            <ListMusic size={13} /> My Lists
+          </button>
+        </div>
+
+        {/* ── My Lists tab ───────────────────────────────────────────── */}
+        {activeTab === "lists" && <MyListsTab />}
+
         {/* ── Track count ────────────────────────────────────────── */}
-        {!songsLoading && songs && (
+        {activeTab === "tracks" && !songsLoading && songs && (
           <p className="text-xs mb-4" style={{ color: "#E2E8F0" }}>
             {songs.length} {songs.length === 1 ? "track" : "tracks"}
           </p>
         )}
 
-        {/* ── Loading skeleton ───────────────────────────────────── */}
-        {songsLoading && (
+        {/* ── Loading skeleton ────────────────────────────────────────── */}
+        {activeTab === "tracks" && songsLoading && (
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-16 rounded-xl animate-pulse"
@@ -168,7 +194,7 @@ export default function ArchivePage() {
         )}
 
         {/* ── Empty state ────────────────────────────────────────── */}
-        {!songsLoading && (!songs || songs.length === 0) && (
+        {activeTab === "tracks" && !songsLoading && (!songs || songs.length === 0) && (
           <div className="text-center py-20 rounded-xl"
             style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
             <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
@@ -183,8 +209,8 @@ export default function ArchivePage() {
           </div>
         )}
 
-        {/* ── Track list ─────────────────────────────────────────── */}
-        {!songsLoading && songs && songs.length > 0 && (
+        {/* ── Track list ────────────────────────────────────────── */}
+        {activeTab === "tracks" && !songsLoading && songs && songs.length > 0 && (
           <div className="space-y-2">
             {songs.map((song: any, idx: number) => {
               const isPublished = song.status === "Published";
