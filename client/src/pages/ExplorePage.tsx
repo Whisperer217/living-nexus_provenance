@@ -10,6 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import { Search, Music, Play, Shuffle, Infinity, MoreHorizontal } from "lucide-react";
+import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 
 const GENRE_CARDS = [
@@ -372,15 +373,17 @@ export default function ExplorePage() {
                   onClick={() => handlePlay(item)}
                   onContextMenu={(e) => openMenu(e, item)}
                 >
-                  {/* Artwork */}
-                  <div className="relative overflow-hidden" style={{ height: "240px", background: "oklch(0.15 0.05 275)" }}>
-                    {song.coverArtUrl ? (
-                      <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} loading="lazy" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Music className="w-10 h-10 opacity-20" style={{ color: "#D4AF37" }} />
-                      </div>
-                    )}
+                  {/* Artwork — MRS card mode */}
+                  <div className="relative overflow-hidden" style={{ height: "240px" }}>
+                    <MediaAsset
+                      src={song.coverArtUrl}
+                      alt={song.title}
+                      mode="card"
+                      aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+                      focalX={song.coverPositionX ?? 50}
+                      focalY={song.coverPositionY ?? 50}
+                      className="absolute inset-0 w-full h-full"
+                    />
                     <div className={`absolute inset-0 transition-opacity duration-200
                       bg-gradient-to-b from-transparent via-transparent to-black/70
                       ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}

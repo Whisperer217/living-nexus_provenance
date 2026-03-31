@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, Search, Music, Users, Shield, ChevronRight, Star, MoreHorizontal } from "lucide-react";
+import { MediaAsset } from "@/components/MediaAsset";
 import { toast } from "sonner";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -262,14 +263,16 @@ export default function DiscoverPage() {
                     outlineOffset: "1px"
                   }}
                 >
-                  <div className="relative overflow-hidden" style={{ height: "180px", background: item.song.coverArtUrl ? undefined : "linear-gradient(135deg, oklch(0.11 0.03 275), oklch(0.15 0.05 290))" }}>
-                    {item.song.coverArtUrl ? (
-                      <img src={item.song.coverArtUrl} alt={item.song.title} className="w-full h-full object-cover" style={{ objectPosition: `${item.song.coverPositionX ?? 50}% ${item.song.coverPositionY ?? 50}%` }} />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Music className="w-10 h-10 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />
-                      </div>
-                    )}
+                  <div className="relative overflow-hidden" style={{ height: "180px" }}>
+                    <MediaAsset
+                      src={item.song.coverArtUrl}
+                      alt={item.song.title}
+                      mode="card"
+                      aspectRatio={(item.song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+                      focalX={item.song.coverPositionX ?? 50}
+                      focalY={item.song.coverPositionY ?? 50}
+                      className="absolute inset-0 w-full h-full"
+                    />
                     {/* Dark overlay on hover */}
                     <div className={`absolute inset-0 transition-opacity duration-200 bg-black/50 ${
                       isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"

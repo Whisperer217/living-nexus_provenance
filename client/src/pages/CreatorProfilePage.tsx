@@ -25,6 +25,7 @@ import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
+import { MediaAsset } from "@/components/MediaAsset";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -154,13 +155,15 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
         className="relative rounded-xl overflow-hidden cursor-pointer group"
         style={{ height: "180px", background: "oklch(0.14 0.015 280)" }}
       >
-        {song.coverArtUrl ? (
-          <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, oklch(0.14 0.02 280), oklch(0.18 0.04 300))" }}>
-            <Music className="w-10 h-10 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
-          </div>
-        )}
+        <MediaAsset
+          src={song.coverArtUrl}
+          alt={song.title}
+          mode="card"
+          aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+          focalX={song.coverPositionX ?? 50}
+          focalY={song.coverPositionY ?? 50}
+          className="absolute inset-0 w-full h-full"
+        />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center">
           <button
             onClick={(e) => { e.preventDefault(); onPlay(); }}
@@ -237,10 +240,16 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
             </>
           )}
         </div>
-        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
-          {song.coverArtUrl
-            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-            : <Music className="w-4 h-4 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />}
+        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 relative">
+          <MediaAsset
+            src={song.coverArtUrl}
+            alt={song.title}
+            mode="card"
+            aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+            focalX={song.coverPositionX ?? 50}
+            focalY={song.coverPositionY ?? 50}
+            className="absolute inset-0 w-full h-full"
+          />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate" style={{ color: isPlaying ? "oklch(0.84 0.155 85)" : "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
