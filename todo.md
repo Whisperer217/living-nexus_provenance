@@ -1443,3 +1443,13 @@
 - [x] HomePage track grid: apply same column reduction
 - [x] CreatorProfilePage track grid: apply same column reduction
 - [x] Any other track card grid surfaces: apply same reduction
+
+## Phase AK: Queue vs Collection Separation
+- [x] Audit all "Add to Queue" call sites across the codebase
+- [x] Add playNext() to PlayerContext — inserts track after current position, session-only
+- [x] Verify queue state is never persisted to localStorage or DB
+- [x] Add addToMyList server procedure: accepts songId, optional playlistId, stores WID in user collection
+- [x] Build AddToMyListModal: shows user's playlists, create new list option, confirm button
+- [x] Replace all "Add to Queue" labels with "Play Next" (queue) and "Add to My List" (collection)
+- [x] Update track context menus, player action rows, and any other queue action surfaces
+- [x] Write Vitest for addToMyList procedure

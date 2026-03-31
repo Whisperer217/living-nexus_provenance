@@ -24,6 +24,7 @@ import {
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
 import { usePlayer } from "@/contexts/PlayerContext";
+import { AddToMyListModal } from "@/components/AddToMyListModal";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -34,6 +35,9 @@ interface ContextMenuProps {
   position: { x: number; y: number };
 }
 function SongContextMenu({ song, isOwner, onClose, onDelete, position }: ContextMenuProps) {
+  const { playNext } = usePlayer();
+  const [showAddToList, setShowAddToList] = useState(false);
+
   const copyLink = () => {
     navigator.clipboard.writeText(`${window.location.origin}/song/${song.id}`);
     toast.success("Link copied!");
@@ -52,46 +56,93 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
     onError: (e) => { toast.error(e.message); onClose(); },
   });
 
+  const handlePlayNext = () => {
+    playNext({
+      id: String(song.id),
+      title: song.title,
+      artist: song.creatorName || song.artistHandle || "",
+      genre: song.genre || "",
+      artUrl: song.coverArtUrl || undefined,
+      audioUrl: song.audioUrl || undefined,
+      witnessId: song.witnessId || undefined,
+      coverPositionX: song.coverPositionX ?? 50,
+      coverPositionY: song.coverPositionY ?? 50,
+      creatorHandle: song.creatorHandle || undefined,
+    });
+    toast.success(`"${song.title}" plays next`);
+    onClose();
+  };
+
   return (
-    <div
-      className="fixed z-50 min-w-[200px] rounded-xl overflow-hidden shadow-2xl py-1"
-      style={{ top: position.y, left: position.x, background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}
-    >
-      <Link href={`/song/${song.id}`} onClick={onClose}>
-        <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
-          <ExternalLink className="w-4 h-4 opacity-60" /> Song Page
-        </button>
-      </Link>
-      <button onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
-        <Copy className="w-4 h-4 opacity-60" /> Copy Link
-      </button>
-      <button
-        onClick={() => { downloadMutation.mutate({ songId: song.id }); }}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-        style={{ color: "oklch(0.85 0.02 280)" }}
+    <>
+      <div
+        className="fixed z-50 min-w-[200px] rounded-xl overflow-hidden shadow-2xl py-1"
+        style={{ top: position.y, left: position.x, background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}
       >
-        <Download className="w-4 h-4 opacity-60" /> Download
-      </button>
-      {song.witnessId && (
         <Link href={`/song/${song.id}`} onClick={onClose}>
-          <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.65 0.2 300)" }}>
-            <Shield className="w-4 h-4" /> View Witness ID
+          <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
+            <ExternalLink className="w-4 h-4 opacity-60" /> Song Page
           </button>
         </Link>
-      )}
-      {isOwner && (
-        <>
-          <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
+
+        {/* ── Queue / Collection actions ── */}
+        <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
+        {song.audioUrl && (
           <button
-            onClick={() => { onDelete?.(song.id); onClose(); }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-500/10 transition-colors text-left"
-            style={{ color: "oklch(0.65 0.18 25)" }}
+            onClick={handlePlayNext}
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+            style={{ color: "oklch(0.85 0.02 280)" }}
           >
-            <Trash2 className="w-4 h-4" /> Delete Song
+            <Play className="w-4 h-4 opacity-60" /> Play Next
           </button>
-        </>
+        )}
+        <button
+          onClick={() => setShowAddToList(true)}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+          style={{ color: "oklch(0.85 0.02 280)" }}
+        >
+          <Library className="w-4 h-4 opacity-60" /> Add to My List
+        </button>
+
+        <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
+        <button onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
+          <Copy className="w-4 h-4 opacity-60" /> Copy Link
+        </button>
+        <button
+          onClick={() => { downloadMutation.mutate({ songId: song.id }); }}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+          style={{ color: "oklch(0.85 0.02 280)" }}
+        >
+          <Download className="w-4 h-4 opacity-60" /> Download
+        </button>
+        {song.witnessId && (
+          <Link href={`/song/${song.id}`} onClick={onClose}>
+            <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.65 0.2 300)" }}>
+              <Shield className="w-4 h-4" /> View Witness ID
+            </button>
+          </Link>
+        )}
+        {isOwner && (
+          <>
+            <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
+            <button
+              onClick={() => { onDelete?.(song.id); onClose(); }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-500/10 transition-colors text-left"
+              style={{ color: "oklch(0.65 0.18 25)" }}
+            >
+              <Trash2 className="w-4 h-4" /> Delete Song
+            </button>
+          </>
+        )}
+      </div>
+      {showAddToList && (
+        <AddToMyListModal
+          songId={song.id}
+          songTitle={song.title}
+          onClose={() => { setShowAddToList(false); onClose(); }}
+        />
       )}
-    </div>
+    </>
   );
 }
 

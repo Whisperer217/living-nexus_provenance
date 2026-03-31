@@ -9,7 +9,8 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, MoreHorizontal } from "lucide-react";
+import { AddToMyListModal } from "@/components/AddToMyListModal";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -29,7 +30,7 @@ const PAGE_SIZE = 24;
 type ExploreMode = "infinite" | "randomize";
 
 export default function ExplorePage() {
-  const { addAndPlay, playQueueAt, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, playNext, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
   const [mode, setMode] = useState<ExploreMode>("infinite");
@@ -140,6 +141,42 @@ export default function ExplorePage() {
   // Active songs list
   const songs = mode === "infinite" ? allSongs : (randomData || []);
   const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : randomLoading;
+
+  // ── Track context menu state ──────────────────────────────────────
+  const [menuSong, setMenuSong] = useState<any | null>(null);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+  const [showAddToList, setShowAddToList] = useState(false);
+
+  const openMenu = (e: React.MouseEvent, item: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const x = Math.min(e.clientX, window.innerWidth - 220);
+    const y = Math.min(e.clientY, window.innerHeight - 200);
+    setMenuSong(item);
+    setMenuPos({ x, y });
+  };
+
+  const closeMenu = () => setMenuSong(null);
+
+  const handlePlayNextFromMenu = () => {
+    if (!menuSong) return;
+    const { song, creator } = menuSong;
+    playNext({
+      id: String(song.id),
+      title: song.title,
+      artist: creator?.artistHandle || creator?.name || "Unknown",
+      genre: song.genre || "",
+      audioUrl: song.fileUrl || undefined,
+      artUrl: song.coverArtUrl || undefined,
+      witnessId: song.witnessId || undefined,
+      creatorHandle: creator?.id ? String(creator.id) : undefined,
+      creatorId: creator?.id ?? undefined,
+      coverPositionX: song.coverPositionX ?? 50,
+      coverPositionY: song.coverPositionY ?? 50,
+    });
+    toast.success(`"${song.title}" plays next`);
+    closeMenu();
+  };
 
   const handlePlay = (item: any) => {
     const song = item.song;
@@ -333,6 +370,7 @@ export default function ExplorePage() {
                       : "border-white/[0.06] hover:border-[#A78BFA]/30 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
                     }`}
                   onClick={() => handlePlay(item)}
+                  onContextMenu={(e) => openMenu(e, item)}
                 >
                   {/* Artwork */}
                   <div className="relative overflow-hidden" style={{ height: "240px", background: "oklch(0.15 0.05 275)" }}>
@@ -374,11 +412,20 @@ export default function ExplorePage() {
                   </div>
                   {/* Info */}
                   <div className="p-3">
-                    <Link href={`/song/${song.id}`} onClick={e => e.stopPropagation()}>
-                      <div className="text-[13px] font-heading text-white truncate mb-1 tracking-wide hover:text-[#D4AF37] transition-colors">
-                        {song.title}
-                      </div>
-                    </Link>
+                    <div className="flex items-start justify-between gap-1 mb-1">
+                      <Link href={`/song/${song.id}`} onClick={e => e.stopPropagation()} className="flex-1 min-w-0">
+                        <div className="text-[13px] font-heading text-white truncate tracking-wide hover:text-[#D4AF37] transition-colors">
+                          {song.title}
+                        </div>
+                      </Link>
+                      <button
+                        onClick={(e) => openMenu(e, item)}
+                        className="shrink-0 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/[0.08]"
+                        style={{ color: "rgba(255,255,255,0.55)" }}
+                      >
+                        <MoreHorizontal size={13} />
+                      </button>
+                    </div>
                     <div className="flex items-center gap-2 text-[11px]" style={{ color: "#E2E8F0" }}>
                       <Link href={`/creator/${creator?.id}`} onClick={e => e.stopPropagation()}>
                         <span className="truncate hover:text-white/60 transition-colors">
@@ -418,6 +465,63 @@ export default function ExplorePage() {
               </p>
             )}
           </div>
+        )}
+
+        {/* Track context menu */}
+        {menuSong && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={closeMenu} />
+            <div
+              className="fixed z-50 min-w-[190px] rounded-xl overflow-hidden shadow-2xl py-1"
+              style={{ top: menuPos.y, left: menuPos.x, background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}
+            >
+              {menuSong.song.fileUrl && (
+                <button
+                  onClick={handlePlayNextFromMenu}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+                  style={{ color: "oklch(0.85 0.02 280)" }}
+                >
+                  <Play className="w-4 h-4 opacity-60" /> Play Next
+                </button>
+              )}
+              <button
+                onClick={() => { setShowAddToList(true); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+                style={{ color: "oklch(0.85 0.02 280)" }}
+              >
+                <svg className="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Add to My List
+              </button>
+              <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
+              <Link href={`/song/${menuSong.song.id}`} onClick={closeMenu}>
+                <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
+                  <svg className="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Song Page
+                </button>
+              </Link>
+              <button
+                onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/song/${menuSong.song.id}`); toast.success("Link copied!"); closeMenu(); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+                style={{ color: "oklch(0.85 0.02 280)" }}
+              >
+                <svg className="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Copy Link
+              </button>
+            </div>
+          </>
+        )}
+        {showAddToList && menuSong && (
+          <AddToMyListModal
+            songId={menuSong.song.id}
+            songTitle={menuSong.song.title}
+            onClose={() => { setShowAddToList(false); closeMenu(); }}
+          />
         )}
 
         {/* Randomize end note */}

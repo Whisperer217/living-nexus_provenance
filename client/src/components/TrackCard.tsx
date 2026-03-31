@@ -6,12 +6,14 @@
      Zone 3: Artist     → navigates to /creator/{creatorId}
 ═══════════════════════════════════════════════════════════════════ */
 
-import { Play, Heart, DollarSign, ExternalLink } from "lucide-react";
-import AddToPlaylistButton from "@/components/AddToPlaylistButton";
+import { useState } from "react";
+import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward } from "lucide-react";
+import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { Link, useLocation } from "wouter";
 import { useLike } from "@/hooks/useLike";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 interface Props {
   track: Track;
@@ -20,7 +22,8 @@ interface Props {
 }
 
 export default function TrackCard({ track, index, onTip }: Props) {
-  const { state, addAndPlay, openNowPlayingPanel } = usePlayer();
+  const { state, addAndPlay, playNext, openNowPlayingPanel } = usePlayer();
+  const [showAddToList, setShowAddToList] = useState(false);
   const [, navigate] = useLocation();
   const isPlaying = state.currentIdx === index && state.isPlaying;
   const isActive = state.currentIdx === index;
@@ -46,6 +49,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
   const coverPos = `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%`;
 
   return (
+    <>
     <div
       className={`group relative rounded-xl overflow-hidden transition-all duration-200
         border bg-[oklch(0.095_0.028_275)] track-card-glow
@@ -171,7 +175,26 @@ export default function TrackCard({ track, index, onTip }: Props) {
               </button>
             )}
             {!isNaN(numericId) && numericId > 0 && (
-              <AddToPlaylistButton songId={numericId} variant="compact" className="w-6 h-6" />
+              <>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    playNext(track);
+                    toast.success(`"${track.title}" plays next`);
+                  }}
+                  className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+                  title="Play next"
+                >
+                  <SkipForward size={12} />
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); setShowAddToList(true); }}
+                  className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+                  title="Add to my list"
+                >
+                  <ListPlus size={12} />
+                </button>
+              </>
             )}
             <button
               onClick={e => { e.stopPropagation(); navigate(`/track/${track.id}`); }}
@@ -184,5 +207,13 @@ export default function TrackCard({ track, index, onTip }: Props) {
         </div>
       </div>
     </div>
+    {showAddToList && !isNaN(numericId) && numericId > 0 && (
+      <AddToMyListModal
+        songId={numericId}
+        songTitle={track.title}
+        onClose={() => setShowAddToList(false)}
+      />
+    )}
+  </>
   );
 }

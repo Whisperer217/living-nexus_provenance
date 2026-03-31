@@ -117,6 +117,12 @@ interface PlayerContextValue {
   addTrack: (t: Track) => void;
   /** Add a single track and play it immediately (context = NONE) */
   addAndPlay: (t: Track) => void;
+  /**
+   * Insert a track immediately after the current position in the session queue.
+   * Does NOT start playback. Does NOT persist to DB or localStorage.
+   * If the queue is empty, the track becomes the first item (but does not auto-play).
+   */
+  playNext: (t: Track) => void;
   /** Open the Now Playing side panel (mobile) */
   openNowPlayingPanel: () => void;
   /** Whether the Now Playing side panel is open */
@@ -369,6 +375,25 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setState(s => ({ ...s, tracks: [t, ...s.tracks] }));
   }, []);
 
+  /**
+   * Insert a track immediately after the current position in the session queue.
+   * Session-only — never written to DB or localStorage.
+   * If the track is already in the queue, it is moved to the next position.
+   */
+  const playNext = useCallback((t: Track) => {
+    setState(s => {
+      // Remove the track if it already exists to avoid duplicates
+      const withoutTrack = s.tracks.filter(tr => tr.id !== t.id);
+      const insertAt = s.currentIdx >= 0 ? s.currentIdx + 1 : 0;
+      const newTracks = [
+        ...withoutTrack.slice(0, insertAt),
+        t,
+        ...withoutTrack.slice(insertAt),
+      ];
+      return { ...s, tracks: newTracks };
+    });
+  }, []);
+
   // Add a single track and immediately play it — context is NONE (no queue context)
   // Guard: silently reject tracks without a real audio URL
   const addAndPlay = useCallback((t: Track) => {
@@ -489,7 +514,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       state, audioRef, allTracks, currentTrackId, queueContextLabel,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-      toggleLike, addTrack, addAndPlay, setQueue, playQueueAt,
+      toggleLike, addTrack, addAndPlay, playNext, setQueue, playQueueAt,
       openNowPlayingPanel, isNowPlayingPanelOpen, closeNowPlayingPanel,
       openTheater, isTheaterOpen, closeTheater,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
