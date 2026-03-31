@@ -1,0 +1,309 @@
+/**
+ * WIDPanel — Clickable WID badge + full provenance record modal
+ *
+ * Usage:
+ *   <WIDPanel
+ *     witnessId="LN-2026-..."
+ *     songTitle="My Track"
+ *     creatorName="Artist Name"
+ *     registeredAt={new Date("2026-03-01")}
+ *     coverArtUrl="https://..."
+ *     certificateUrl="https://..."   // optional
+ *   />
+ *
+ * The badge is inline and clickable. On click it opens a Dialog with the
+ * full provenance record and a "Download Provenance" button that saves a
+ * plain-text certificate to the user's device.
+ */
+
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Shield,
+  Copy,
+  Download,
+  ExternalLink,
+  CheckCircle2,
+  Fingerprint,
+} from "lucide-react";
+import { toast } from "sonner";
+
+interface WIDPanelProps {
+  witnessId: string;
+  songTitle?: string;
+  creatorName?: string;
+  registeredAt?: Date | string | number | null;
+  coverArtUrl?: string | null;
+  certificateUrl?: string | null;
+  /** If true, renders only the badge text (no icon), useful in compact rows */
+  compact?: boolean;
+  className?: string;
+}
+
+function formatDate(d: Date | string | number | null | undefined): string {
+  if (!d) return "Unknown";
+  const date = d instanceof Date ? d : new Date(d);
+  if (isNaN(date.getTime())) return "Unknown";
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function buildCertificate(props: WIDPanelProps): string {
+  const lines = [
+    "╔══════════════════════════════════════════════════╗",
+    "║        LIVING NEXUS — WITNESS ID CERTIFICATE      ║",
+    "╚══════════════════════════════════════════════════╝",
+    "",
+    `Work Title : ${props.songTitle || "Untitled"}`,
+    `Creator    : ${props.creatorName || "Unknown Artist"}`,
+    `Witness ID : ${props.witnessId}`,
+    `Registered : ${formatDate(props.registeredAt)}`,
+    "",
+    "Verify at  : https://www.livingnexus.org/verify/" + props.witnessId,
+    "",
+    "──────────────────────────────────────────────────",
+    "This certificate is cryptographically bound to the",
+    "work above. The Witness ID is immutable and cannot",
+    "be transferred, revoked, or reassigned.",
+    "──────────────────────────────────────────────────",
+    "",
+    `Generated  : ${new Date().toISOString()}`,
+  ];
+  return lines.join("\n");
+}
+
+export function WIDPanel({
+  witnessId,
+  songTitle,
+  creatorName,
+  registeredAt,
+  coverArtUrl,
+  certificateUrl,
+  compact = false,
+  className = "",
+}: WIDPanelProps) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(witnessId).then(() => {
+      setCopied(true);
+      toast.success("Witness ID copied");
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function handleDownload() {
+    const cert = buildCertificate({
+      witnessId,
+      songTitle,
+      creatorName,
+      registeredAt,
+    });
+    const blob = new Blob([cert], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `wid-${witnessId.replace(/[^a-zA-Z0-9-]/g, "_")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Provenance certificate downloaded");
+  }
+
+  return (
+    <>
+      {/* ── Inline Badge (clickable) ─────────────────────────────── */}
+      <button
+        onClick={() => setOpen(true)}
+        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-mono transition-all
+          hover:scale-105 active:scale-95 cursor-pointer select-none ${className}`}
+        style={{
+          background: "oklch(0.65 0.2 300 / 0.12)",
+          border: "1px solid oklch(0.65 0.2 300 / 0.35)",
+          color: "oklch(0.75 0.18 300)",
+        }}
+        title="View Witness ID provenance record"
+      >
+        <Fingerprint className="w-3 h-3 flex-shrink-0" />
+        {compact ? (
+          <span>{witnessId.slice(0, 14)}…</span>
+        ) : (
+          <span>WID · {witnessId.slice(0, 18)}…</span>
+        )}
+      </button>
+
+      {/* ── Full Provenance Modal ────────────────────────────────── */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          className="max-w-lg"
+          style={{
+            background: "oklch(0.09 0.025 278)",
+            border: "1px solid oklch(0.65 0.2 300 / 0.3)",
+            color: "oklch(0.92 0.02 85)",
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle
+              className="flex items-center gap-2"
+              style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.2 300)" }}
+            >
+              <Shield className="w-5 h-5" />
+              Witness ID Record
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Cover art + title */}
+          {(coverArtUrl || songTitle) && (
+            <div className="flex items-center gap-3 mb-4">
+              {coverArtUrl && (
+                <img
+                  src={coverArtUrl}
+                  alt={songTitle || "Cover art"}
+                  className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                  style={{ border: "1px solid oklch(0.65 0.2 300 / 0.2)" }}
+                />
+              )}
+              <div className="min-w-0">
+                {songTitle && (
+                  <p
+                    className="font-semibold text-sm truncate"
+                    style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}
+                  >
+                    {songTitle}
+                  </p>
+                )}
+                {creatorName && (
+                  <p className="text-xs mt-0.5" style={{ color: "oklch(0.6 0.04 280)" }}>
+                    {creatorName}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Provenance record table */}
+          <div
+            className="rounded-xl p-4 space-y-3 text-xs font-mono"
+            style={{ background: "oklch(0.065 0.02 278)", border: "1px solid oklch(0.65 0.2 300 / 0.15)" }}
+          >
+            {/* WID */}
+            <div>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "oklch(0.5 0.03 280)" }}>
+                Witness ID
+              </p>
+              <div className="flex items-center gap-2">
+                <p className="break-all flex-1" style={{ color: "oklch(0.75 0.18 300)" }}>
+                  {witnessId}
+                </p>
+                <button
+                  onClick={handleCopy}
+                  className="flex-shrink-0 p-1 rounded hover:bg-white/5 transition-colors"
+                  title="Copy WID"
+                >
+                  {copied ? (
+                    <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "oklch(0.65 0.18 145)" }} />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" style={{ color: "oklch(0.5 0.03 280)" }} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div style={{ borderTop: "1px solid oklch(0.65 0.2 300 / 0.1)" }} />
+
+            {/* Registration date */}
+            <div>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "oklch(0.5 0.03 280)" }}>
+                Registered
+              </p>
+              <p style={{ color: "#E2E8F0" }}>{formatDate(registeredAt)}</p>
+            </div>
+
+            {/* Divider */}
+            <div style={{ borderTop: "1px solid oklch(0.65 0.2 300 / 0.1)" }} />
+
+            {/* Verify URL */}
+            <div>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "oklch(0.5 0.03 280)" }}>
+                Verify
+              </p>
+              <a
+                href={`/verify/${witnessId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 hover:underline"
+                style={{ color: "oklch(0.65 0.2 300)" }}
+              >
+                livingnexus.org/verify/{witnessId.slice(0, 20)}…
+                <ExternalLink className="w-3 h-3 flex-shrink-0" />
+              </a>
+            </div>
+          </div>
+
+          {/* Status badge */}
+          <div className="flex items-center gap-2 mt-1">
+            <div
+              className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs"
+              style={{
+                background: "oklch(0.65 0.18 145 / 0.12)",
+                border: "1px solid oklch(0.65 0.18 145 / 0.3)",
+                color: "oklch(0.65 0.18 145)",
+              }}
+            >
+              <CheckCircle2 className="w-3 h-3" />
+              Immutable · Cannot be revoked or transferred
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-2 mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              className="flex-1"
+              style={{
+                borderColor: "oklch(0.65 0.2 300 / 0.3)",
+                color: "oklch(0.65 0.2 300)",
+                background: "transparent",
+              }}
+            >
+              <Download className="w-3.5 h-3.5 mr-1.5" />
+              Download Provenance
+            </Button>
+
+            {certificateUrl && (
+              <a href={certificateUrl} target="_blank" rel="noreferrer" className="flex-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  style={{
+                    borderColor: "oklch(0.65 0.2 300 / 0.3)",
+                    color: "oklch(0.65 0.2 300)",
+                    background: "transparent",
+                  }}
+                >
+                  <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+                  View Certificate
+                </Button>
+              </a>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+export default WIDPanel;

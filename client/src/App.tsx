@@ -68,8 +68,9 @@ function Router() {
           <MainLayout>
             <Suspense fallback={<PageLoader />}>
               <Switch>
-                <Route path="/" component={DiscoverPage} />
+                <Route path="/" component={HomePage} />
                 <Route path="/home" component={HomePage} />
+                <Route path="/discover" component={DiscoverPage} />
                 <Route path="/explore" component={ExplorePage} />
                 <Route path="/together" component={TogetherPage} />
                 <Route path="/together/:roomCode" component={TogetherPage} />

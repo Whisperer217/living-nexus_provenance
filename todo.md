@@ -1494,3 +1494,25 @@
 - [x] Update CTA button 1: "Upload & Witness Your Work"
 - [x] Update CTA button 2: "Explore Witnessed Creations"
 - [x] Expand Founder's Era description to explain significance of early registry participation
+
+## Build Order Phase 1 — Stability
+- [x] Add try/catch to all dashboard data loads
+- [x] Replace generic error with "We couldn't load your dashboard right now"
+- [x] Add Retry, Go to My Works, Report Issue actions on dashboard error
+- [x] Implement partial rendering (no full crash)
+- [x] Add error logging (userId, route, error)
+- [x] Detect users with no works — show "Upload your first piece and get your WID" empty state
+
+## Build Order Phase 3 — Homepage Routing
+- [x] Route / → HomePage
+- [x] Route /discover → DiscoverPage
+- [x] Update sidebar nav accordingly
+
+## Build Order Phase 2 — WID Interactive Panel & Trust Layer
+- [x] Build WIDPanel component (clickable badge + full provenance modal + download)
+- [x] Replace static WID badges in SongDetailPage with WIDPanel
+- [x] Replace static WID badges in DashboardPage with WIDPanel
+- [x] Add songs.getWitnessedCount public procedure (cached)
+- [x] Add songs.getWitnessedVoices public procedure (6 most recent)
+- [x] Build AnimatedCounter component
+- [x] Build WIDTrustLayer section in HomePage (counter + Witnessed Voices strip)

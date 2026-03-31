@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { notifyOwner } from "./notification";
-import { adminProcedure, publicProcedure, router } from "./trpc";
+import { adminProcedure, protectedProcedure, publicProcedure, router } from "./trpc";
 
 export const systemRouter = router({
   health: publicProcedure
@@ -25,5 +25,25 @@ export const systemRouter = router({
       return {
         success: delivered,
       } as const;
+    }),
+  /**
+   * Client-side error logging — called by the dashboard when a data load fails.
+   * Logs to server console with userId, route, and error message for debugging.
+   */
+  logClientError: protectedProcedure
+    .input(
+      z.object({
+        route: z.string(),
+        error: z.string(),
+        context: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      console.error(
+        `[ClientError] userId=${ctx.user.id} route=${input.route} error=${input.error}${
+          input.context ? ` context=${input.context}` : ""
+        }`
+      );
+      return { logged: true };
     }),
 });

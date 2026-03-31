@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
+import { WIDPanel } from "@/components/WIDPanel";
 import { safeAudioUrl } from "@shared/const";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
@@ -443,9 +444,14 @@ export default function SongDetailPage() {
                     {song.bpm && <Badge style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.6 0.04 280)", border: "1px solid oklch(0.22 0.02 280)", fontSize: "11px" }}>{song.bpm} BPM</Badge>}
                     {song.keySignature && <Badge style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.6 0.04 280)", border: "1px solid oklch(0.22 0.02 280)", fontSize: "11px" }}>{song.keySignature}</Badge>}
                     {song.witnessId && (
-                      <Badge className="wid-glow" style={{ background: "oklch(0.65 0.2 300 / 0.15)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)", fontSize: "11px" }}>
-                        <Shield className="w-3 h-3 mr-1" />WID Protected
-                      </Badge>
+                      <WIDPanel
+                        witnessId={song.witnessId}
+                        songTitle={song.title}
+                        creatorName={creator?.artistHandle || creator?.name}
+                        registeredAt={song.createdAt}
+                        coverArtUrl={song.coverArtUrl}
+                        certificateUrl={song.certificateUrl}
+                      />
                     )}
                     {creator?.aiDisclosure && creator.aiDisclosure !== "original" && (
                       <Badge style={{

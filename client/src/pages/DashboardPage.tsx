@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { DashboardErrorCard } from "@/components/DashboardErrorCard";
+import { WIDPanel } from "@/components/WIDPanel";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -59,25 +61,25 @@ export default function DashboardPage() {
   const [editingSong, setEditingSong] = useState<any | null>(null);
   const [showChecklist, setShowChecklist] = useState(false);
 
-  const { data: songs, refetch: refetchSongs } = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated });
-  const { data: transforms } = trpc.songs.getMyTransforms.useQuery(undefined, { enabled: isAuthenticated && activeTab === "transforms" });
-  const { data: activityEvents, isLoading: activityLoading } = trpc.events.getForCreator.useQuery(
+  const { data: songs, refetch: refetchSongs, error: songsError } = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
+  const { data: transforms, error: transformsError, refetch: refetchTransforms } = trpc.songs.getMyTransforms.useQuery(undefined, { enabled: isAuthenticated && activeTab === "transforms", retry: 1 });
+  const { data: activityEvents, isLoading: activityLoading, error: activityError, refetch: refetchActivity } = trpc.events.getForCreator.useQuery(
     { limit: 200 },
-    { enabled: isAuthenticated && activeTab === "activity", refetchInterval: 30_000 }
+    { enabled: isAuthenticated && activeTab === "activity", refetchInterval: 30_000, retry: 1 }
   );
-  const { data: licenseData } = trpc.licenses.myStatus.useQuery(undefined, { enabled: isAuthenticated });
-  const { data: connectData } = trpc.tips.connectStatus.useQuery(undefined, { enabled: isAuthenticated });
-  const { data: earningsData, isLoading: earningsLoading } = trpc.jukebox.getMyEarnings.useQuery(
+  const { data: licenseData, error: licenseError, refetch: refetchLicense } = trpc.licenses.myStatus.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
+  const { data: connectData, error: connectError, refetch: refetchConnect } = trpc.tips.connectStatus.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
+  const { data: earningsData, isLoading: earningsLoading, error: earningsError, refetch: refetchEarnings } = trpc.jukebox.getMyEarnings.useQuery(
     undefined,
-    { enabled: isAuthenticated && activeTab === "earnings" }
+    { enabled: isAuthenticated && activeTab === "earnings", retry: 1 }
   );
-  const { data: myCollections, isLoading: collectionsLoading, refetch: refetchCollections } = trpc.songs.getMyCollections.useQuery(
+  const { data: myCollections, isLoading: collectionsLoading, refetch: refetchCollections, error: collectionsError } = trpc.songs.getMyCollections.useQuery(
     undefined,
-    { enabled: isAuthenticated && activeTab === "collections" }
+    { enabled: isAuthenticated && activeTab === "collections", retry: 1 }
   );
-  const { data: analyticsData, isLoading: analyticsLoading } = trpc.profile.myAnalytics.useQuery(
+  const { data: analyticsData, isLoading: analyticsLoading, error: analyticsError, refetch: refetchAnalytics } = trpc.profile.myAnalytics.useQuery(
     undefined,
-    { enabled: isAuthenticated && activeTab === "analytics" }
+    { enabled: isAuthenticated && activeTab === "analytics", retry: 1 }
   );
 
   // Living Pulse — activity deltas and unread counts
@@ -197,6 +199,10 @@ export default function DashboardPage() {
     </div>
   );
 
+  // Top-level no-works onboarding: songs loaded (not undefined) and is empty
+  const songsLoaded = songs !== undefined && !songsError;
+  const hasNoWorks = songsLoaded && songs.length === 0;
+
   const slotsUsed = licenseData?.songSlotsUsed ?? 0;
   const slotsTotal = licenseData?.songSlotsTotal ?? 1;
   const slotsPercent = Math.min(100, Math.round((slotsUsed / slotsTotal) * 100));
@@ -224,6 +230,49 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen" style={{ background: "oklch(0.08 0.015 280)" }}>
       <div className="container py-10" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
+
+        {/* ── No-Works Onboarding Banner ─────────────────────────────────────── */}
+        {hasNoWorks && (
+          <div
+            className="mb-8 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-6"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.11 0.04 280), oklch(0.09 0.025 270))",
+              border: "1px solid oklch(0.84 0.155 85 / 0.25)",
+            }}
+          >
+            {/* Icon */}
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+            >
+              <Shield size={28} style={{ color: "oklch(0.84 0.155 85)" }} />
+            </div>
+            {/* Copy */}
+            <div className="flex-1 text-center md:text-left">
+              <p
+                className="text-lg font-bold mb-1"
+                style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}
+              >
+                Upload your first piece and get your WID
+              </p>
+              <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>
+                Every work you upload receives a cryptographic Witness ID — your permanent, immutable proof of origin.
+                No algorithms. No ownership loss. Just creation, proven.
+              </p>
+            </div>
+            {/* CTA */}
+            <Link href="/upload">
+              <Button
+                className="flex-shrink-0"
+                style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Upload &amp; Witness Your Work
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -561,12 +610,20 @@ export default function DashboardPage() {
                 </Button>
               </Link>
             </div>
-            {!songs?.length ? (
+            {songsError ? (
+              <DashboardErrorCard
+                section="your songs"
+                error={songsError}
+                onRetry={() => refetchSongs()}
+                route="/dashboard#songs"
+              />
+            ) : !songs?.length ? (
               <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
-                <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>No songs yet. Upload your first track to get started.</p>
+                <p className="text-sm mb-2" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>Upload your first piece and get your WID</p>
+                <p className="text-xs mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>Every work you upload receives a cryptographic Witness ID — your permanent proof of origin.</p>
                 <Link href="/upload">
-                  <Button style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Upload Your First Track</Button>
+                  <Button style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Upload &amp; Witness Your Work</Button>
                 </Link>
               </div>
             ) : (
@@ -620,10 +677,17 @@ export default function DashboardPage() {
                       <span style={{ color: "#E2E8F0", fontSize: "12px", whiteSpace: "nowrap" }}>
                         {song.tipCount || 0} tips
                       </span>
-                      {/* WID badge */}
-                      {song.witnessId && (
-                        <Badge className="px-1.5 py-0" style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", fontSize: "10px" }}>WID</Badge>
-                      )}
+                       {/* WID badge */}
+                       {song.witnessId && (
+                         <WIDPanel
+                           witnessId={song.witnessId}
+                           songTitle={song.title}
+                           creatorName={user?.name ?? undefined}
+                           registeredAt={song.createdAt}
+                           coverArtUrl={song.coverArtUrl ?? undefined}
+                           compact
+                         />
+                       )}
                       {/* AI badge */}
                       {song.aiConsent === "prohibited" && (
                         <Badge className="px-1.5 py-0" style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: "oklch(0.65 0.18 25)", fontSize: "10px" }}>AI OFF</Badge>
@@ -667,7 +731,14 @@ export default function DashboardPage() {
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>All interactions on your songs — gifts, comments, and witnesses. Auto-refreshes every 30s.</p>
               </div>
             </div>
-            {activityLoading ? (
+            {activityError ? (
+              <DashboardErrorCard
+                section="your activity feed"
+                error={activityError}
+                onRetry={() => refetchActivity()}
+                route="/dashboard#activity"
+              />
+            ) : activityLoading ? (
               <div className="text-center py-16">
                 <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
               </div>
@@ -750,7 +821,14 @@ export default function DashboardPage() {
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>AI-generated derivatives of your songs, linked to their original Witness IDs.</p>
               </div>
             </div>
-            {!transforms?.length ? (
+            {transformsError ? (
+              <DashboardErrorCard
+                section="your AI transforms"
+                error={transformsError}
+                onRetry={() => refetchTransforms()}
+                route="/dashboard#transforms"
+              />
+            ) : !transforms?.length ? (
               <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No AI transforms yet.</p>
@@ -847,7 +925,14 @@ export default function DashboardPage() {
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>Your proportional share from offerings left in jukebox rooms where your songs played.</p>
               </div>
             </div>
-            {earningsLoading ? (
+            {earningsError ? (
+              <DashboardErrorCard
+                section="your jukebox earnings"
+                error={earningsError}
+                onRetry={() => refetchEarnings()}
+                route="/dashboard#earnings"
+              />
+            ) : earningsLoading ? (
               <div className="text-center py-16">
                 <div className="w-8 h-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mx-auto" />
               </div>
@@ -921,7 +1006,14 @@ export default function DashboardPage() {
                 </button>
               </Link>
             </div>
-            {collectionsLoading ? (
+            {collectionsError ? (
+              <DashboardErrorCard
+                section="your collections"
+                error={collectionsError}
+                onRetry={() => refetchCollections()}
+                route="/dashboard#collections"
+              />
+            ) : collectionsLoading ? (
               <div className="text-center py-16">
                 <div className="w-8 h-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mx-auto" />
               </div>
@@ -1082,7 +1174,14 @@ export default function DashboardPage() {
               <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Creator Analytics</h2>
               <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>All-time data · Updated in real time</p>
             </div>
-            {analyticsLoading ? (
+            {analyticsError ? (
+              <DashboardErrorCard
+                section="your analytics"
+                error={analyticsError}
+                onRetry={() => refetchAnalytics()}
+                route="/dashboard#analytics"
+              />
+            ) : analyticsLoading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "oklch(0.75 0.15 260)", borderTopColor: "transparent" }} />
               </div>

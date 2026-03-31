@@ -367,6 +367,40 @@ export const appRouter = router({
         nameHistory: nameHistoryRows.map((r: { oldName: string | null; newName: string; changedAt: Date }) => ({ oldName: r.oldName, newName: r.newName, changedAt: r.changedAt })),
       };
     }),
+    // Public counters for homepage trust layer
+    getWitnessedCount: publicProcedure.query(async () => {
+      const { getDb } = await import("./db");
+      const { songs: songsTable } = await import("../drizzle/schema");
+      const { count, isNotNull } = await import("drizzle-orm");
+      const db = await getDb();
+      const [row] = await db.select({ total: count() }).from(songsTable).where(isNotNull(songsTable.witnessId));
+      return { count: row?.total ?? 0 };
+    }),
+    getWitnessedVoices: publicProcedure.query(async () => {
+      const { getDb } = await import("./db");
+      const { songs: songsTable, users: usersTable } = await import("../drizzle/schema");
+      const { isNotNull, desc: descOp, eq: eqOp } = await import("drizzle-orm");
+      const db = await getDb();
+      // Grab up to 6 most recent publicly-visible witnessed songs with creator info
+      const rows = await db
+        .select({
+          songId: songsTable.id,
+          title: songsTable.title,
+          witnessId: songsTable.witnessId,
+          coverArtUrl: songsTable.coverArtUrl,
+          createdAt: songsTable.createdAt,
+          userId: usersTable.id,
+          userName: usersTable.name,
+          artistHandle: usersTable.artistHandle,
+          profilePhotoUrl: usersTable.profilePhotoUrl,
+        })
+        .from(songsTable)
+        .innerJoin(usersTable, eqOp(songsTable.userId, usersTable.id))
+        .where(isNotNull(songsTable.witnessId))
+        .orderBy(descOp(songsTable.createdAt))
+        .limit(6);
+      return rows;
+    }),
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     bySelf: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     upload: protectedProcedure.input(z.object({
