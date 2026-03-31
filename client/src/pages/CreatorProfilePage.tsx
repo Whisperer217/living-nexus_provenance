@@ -476,7 +476,7 @@ export default function CreatorProfilePage() {
       <div
         className="relative w-full group"
         style={{
-          height: "240px",
+          height: "360px",
           // Elegant gold border on all sides
           boxShadow: "0 1px 0 0 #c9a84c, 0 -1px 0 0 #c9a84c, inset 0 0 0 1px rgba(201,168,76,0.35)",
           borderBottom: "2px solid #c9a84c",
@@ -517,10 +517,10 @@ export default function CreatorProfilePage() {
         {/* Subtle bottom fade for profile header overlap */}
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent" />
         {/* Gold corner accents */}
-        <div className="absolute top-0 left-0 w-8 h-8 pointer-events-none" style={{ borderTop: "2px solid #c9a84c", borderLeft: "2px solid #c9a84c" }} />
-        <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none" style={{ borderTop: "2px solid #c9a84c", borderRight: "2px solid #c9a84c" }} />
-        <div className="absolute bottom-0 left-0 w-8 h-8 pointer-events-none" style={{ borderBottom: "2px solid #c9a84c", borderLeft: "2px solid #c9a84c" }} />
-        <div className="absolute bottom-0 right-0 w-8 h-8 pointer-events-none" style={{ borderBottom: "2px solid #c9a84c", borderRight: "2px solid #c9a84c" }} />
+        <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
+        <div className="absolute top-0 right-0 w-12 h-12 pointer-events-none" style={{ borderTop: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
+        <div className="absolute bottom-0 left-0 w-12 h-12 pointer-events-none" style={{ borderBottom: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
+        <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none" style={{ borderBottom: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
         {/* Reposition button — owner only, visible on hover */}
         {isOwner && creator.bannerUrl && (
           <button
@@ -573,11 +573,11 @@ export default function CreatorProfilePage() {
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           {/* ── Header panel ── */}
-          <div className="flex items-start gap-5 py-5">
+          <div className="flex items-start gap-6 py-7">
 
             {/* ── Avatar — anchored left, pulled up to overlap banner bottom edge ── */}
             <div
-              className="-mt-14 flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden"
+              className="-mt-20 flex-shrink-0 w-36 h-36 rounded-2xl overflow-hidden"
               style={{
                 background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
                 outline: "3px solid oklch(0.09 0.04 265)",
@@ -587,7 +587,7 @@ export default function CreatorProfilePage() {
               {creator.profilePhotoUrl
                 ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
                     style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
-                : <div className="w-full h-full flex items-center justify-center text-2xl font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
+                : <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
                     {(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}
                   </div>}
             </div>
@@ -597,14 +597,14 @@ export default function CreatorProfilePage() {
               {/* Name row */}
               <div className="flex items-center gap-2 flex-wrap">
                 <h1
-                  className="text-xl sm:text-2xl font-bold leading-tight"
+                  className="text-3xl sm:text-4xl font-bold leading-tight"
                   style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}
                 >
                   {creator.artistHandle || creator.name}
                 </h1>
                 {creator.licenseStatus === "licensed" && (
                   <span
-                    className="text-[9px] px-1.5 py-0.5 rounded tracking-widest font-mono"
+                    className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
                     style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
                   >
                     LICENSED
@@ -615,7 +615,7 @@ export default function CreatorProfilePage() {
               {/* Bio — single line, muted */}
               {creator.bio && (
                 <p
-                  className="text-[13px] mt-1 line-clamp-1"
+                  className="text-sm mt-2 line-clamp-2"
                   style={{ color: "oklch(0.55 0.03 280)" }}
                 >
                   {creator.bio}
@@ -624,14 +624,14 @@ export default function CreatorProfilePage() {
 
               {/* Social links — icon-only, minimal */}
               {(creator.website || creator.twitterHandle || creator.instagramHandle || creator.youtubeHandle) && (
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-3 mt-3">
                   {creator.website && (
                     <a href={creator.website} target="_blank" rel="noreferrer"
                       className="opacity-40 hover:opacity-80 transition-opacity"
                       style={{ color: "oklch(0.75 0.03 280)" }}
                       title={creator.website}
                     >
-                      <Globe className="w-3.5 h-3.5" />
+                      <Globe className="w-4 h-4" />
                     </a>
                   )}
                   {creator.twitterHandle && (
@@ -639,7 +639,7 @@ export default function CreatorProfilePage() {
                       className="opacity-40 hover:opacity-80 transition-opacity"
                       style={{ color: "oklch(0.75 0.03 280)" }}
                     >
-                      <Twitter className="w-3.5 h-3.5" />
+                      <Twitter className="w-4 h-4" />
                     </a>
                   )}
                   {creator.instagramHandle && (
@@ -647,7 +647,7 @@ export default function CreatorProfilePage() {
                       className="opacity-40 hover:opacity-80 transition-opacity"
                       style={{ color: "oklch(0.75 0.03 280)" }}
                     >
-                      <Instagram className="w-3.5 h-3.5" />
+                      <Instagram className="w-4 h-4" />
                     </a>
                   )}
                   {creator.youtubeHandle && (
@@ -655,7 +655,7 @@ export default function CreatorProfilePage() {
                       className="opacity-40 hover:opacity-80 transition-opacity"
                       style={{ color: "oklch(0.75 0.03 280)" }}
                     >
-                      <Youtube className="w-3.5 h-3.5" />
+                      <Youtube className="w-4 h-4" />
                     </a>
                   )}
                 </div>
@@ -670,12 +670,12 @@ export default function CreatorProfilePage() {
                 {creator.supporterTier && (
                   <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
                 )}
-                <span className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
                   <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>
                   {" "}tracks
                 </span>
                 {witnessCount > 0 && (
-                  <span className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                  <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
                     <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>
                     {" "}witnesses
                   </span>
@@ -688,7 +688,7 @@ export default function CreatorProfilePage() {
                   <>
                     <Link href="/dashboard">
                       <button
-                        className="px-3 py-1.5 rounded-lg text-[11px] transition-colors"
+                        className="px-4 py-2 rounded-lg text-xs transition-colors"
                         style={{ border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.6 0.03 280)", background: "transparent" }}
                       >
                         Edit Profile
@@ -698,7 +698,7 @@ export default function CreatorProfilePage() {
                       <button
                         onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
                         disabled={connectMutation.isPending}
-                        className="px-3 py-1.5 rounded-lg text-[11px] transition-colors"
+                        className="px-4 py-2 rounded-lg text-xs transition-colors"
                         style={{ border: "1px solid oklch(0.65 0.18 145 / 0.3)", color: "oklch(0.65 0.18 145)", background: "oklch(0.65 0.18 145 / 0.08)" }}
                       >
                         <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
@@ -708,7 +708,7 @@ export default function CreatorProfilePage() {
                 ) : tipsEnabled && songs.length > 0 ? (
                   <button
                     onClick={() => setTipOpen(true)}
-                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
+                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
                     style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "oklch(0.08 0.015 280)" }}
                   >
                     <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
@@ -718,23 +718,23 @@ export default function CreatorProfilePage() {
                   <button
                     onClick={() => witnessToggle.mutate({ creatorId: creator.id })}
                     disabled={witnessToggle.isPending}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
                     style={isWitnessingCreator
                       ? { background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "oklch(0.84 0.155 85)" }
                       : { border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }
                     }
                     title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
                   >
-                    {isWitnessingCreator ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    {isWitnessingCreator ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 )}
                 <button
                   onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Profile link copied!"); }}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
                   style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
                   title="Copy profile link"
                 >
-                  <Share2 className="w-3.5 h-3.5" />
+                  <Share2 className="w-4 h-4" />
                 </button>
               </div>
             </div>

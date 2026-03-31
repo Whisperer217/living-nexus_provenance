@@ -282,7 +282,7 @@ export default function ProfilePage() {
     <div className="animate-fade-up pb-4">
       {/* ── Banner wrapper with gold border ── */}
       <div
-        className="relative h-[200px] group"
+        className="relative h-[360px] group"
         style={{
           borderTop: "2px solid rgba(201,168,76,0.6)",
           borderBottom: "2px solid #c9a84c",
@@ -344,10 +344,10 @@ export default function ProfilePage() {
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent pointer-events-none" />
         )}
         {/* Gold corner accents */}
-        <div className="absolute top-0 left-0 w-6 h-6 pointer-events-none" style={{ borderTop: "2px solid #c9a84c", borderLeft: "2px solid #c9a84c" }} />
-        <div className="absolute top-0 right-0 w-6 h-6 pointer-events-none" style={{ borderTop: "2px solid #c9a84c", borderRight: "2px solid #c9a84c" }} />
-        <div className="absolute bottom-0 left-0 w-6 h-6 pointer-events-none" style={{ borderBottom: "2px solid #c9a84c", borderLeft: "2px solid #c9a84c" }} />
-        <div className="absolute bottom-0 right-0 w-6 h-6 pointer-events-none" style={{ borderBottom: "2px solid #c9a84c", borderRight: "2px solid #c9a84c" }} />
+        <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
+        <div className="absolute top-0 right-0 w-12 h-12 pointer-events-none" style={{ borderTop: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
+        <div className="absolute bottom-0 left-0 w-12 h-12 pointer-events-none" style={{ borderBottom: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
+        <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none" style={{ borderBottom: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
         {/* Change banner button — only shown when banner exists */}
         {profile?.bannerUrl && (
           <button
@@ -421,13 +421,13 @@ export default function ProfilePage() {
         }}
       >
         <div className="px-6">
-          <div className="flex items-start gap-5 py-5">
+          <div className="flex items-start gap-6 py-7">
 
             {/* ── Avatar — anchored left, slight pull-up ── */}
-            <div className="-mt-12 flex-shrink-0">
+            <div className="-mt-20 flex-shrink-0">
               <div className="relative group">
                 <div
-                  className="w-24 h-24 rounded-2xl overflow-hidden bg-[oklch(0.14_0.013_280)] flex items-center justify-center"
+                  className="w-36 h-36 rounded-2xl overflow-hidden bg-[oklch(0.14_0.013_280)] flex items-center justify-center"
                   style={{
                     outline: "3px solid oklch(0.09 0.04 265)",
                     border: "1.5px solid rgba(212,175,55,0.25)",
@@ -504,7 +504,7 @@ export default function ProfilePage() {
                   onSave={v => save({ name: v })}
                   placeholder="Your artist name"
                 />
-                <span className="text-[9px] px-1.5 py-0.5 rounded tracking-widest font-mono flex-shrink-0"
+                <span className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono flex-shrink-0"
                   style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)", color: "#D4AF37" }}
                 >
                   ARTIST
@@ -512,7 +512,7 @@ export default function ProfilePage() {
               </div>
               {/* Handle */}
               <div className="flex items-center gap-1 mb-1">
-                <span className="text-[11px] text-white/40 font-body">@</span>
+                <span className="text-sm text-white/40 font-body">@</span>
                 <EditableField
                   label="Artist Handle"
                   value={profile?.artistHandle || ""}
@@ -537,12 +537,12 @@ export default function ProfilePage() {
                 {(profile as any)?.supporterTier && (
                   <SupporterBadge tier={(profile as any).supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
                 )}
-                <span className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
                   <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{dbSongs.length}</span>
                   {" "}tracks
                 </span>
                 {totalPlays > 0 && (
-                  <span className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                  <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
                     <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>
                       {totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays}
                     </span>
@@ -554,19 +554,19 @@ export default function ProfilePage() {
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={copyProfileLink}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
                   style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
                   title="Copy profile link"
                 >
-                  <Copy size={13} />
+                  <Copy size={15} />
                 </button>
                 <button
                   onClick={copyProfileLink}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
                   style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
                   title="Share profile"
                 >
-                  <Share2 size={13} />
+                  <Share2 size={15} />
                 </button>
               </div>
             </div>

@@ -1415,3 +1415,13 @@
 - [x] Gesture layer: swipe-up to expand, swipe-down to mini/close, tap-artwork to cinematic
 - [x] Remove old MobilePlayerPanel from MainLayout, inject MobilePlayerLayer as portal sibling
 - [x] Preserve all PlayerContext state (currentTrack, isPlaying, queue, progress, volume)
+
+## Phase AG: Profile Header Scale-Up (100% zoom parity with 200%)
+- [x] CreatorProfilePage: increase banner height from h-48 to h-64 or h-72
+- [x] CreatorProfilePage: increase avatar size from w-28/h-28 to w-40/h-40 or larger
+- [x] CreatorProfilePage: scale up name typography (text-2xl → text-4xl or larger)
+- [x] CreatorProfilePage: scale up handle, bio, and signal text sizes
+- [x] CreatorProfilePage: increase header section padding and spacing
+- [x] CreatorProfilePage: increase gold border weight and corner accent size
+- [x] ProfilePage: same banner/avatar/typography/spacing scale-up
+- [x] Both pages: ensure layout remains clean and non-cluttered at 100% zoom
