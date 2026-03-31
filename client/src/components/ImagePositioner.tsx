@@ -340,105 +340,101 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
         </div>
       </div>
 
-      {/* ── Thin bottom dock — 44px, outside the canvas ── */}
+      {/* ── Bottom dock — two rows, outside the canvas ── */}
       <div
-        className="flex items-center gap-1.5 px-3 rounded-b-xl"
+        className="flex flex-col rounded-b-xl"
         style={{
-          height: "44px",
           background: "oklch(0.11 0.015 280)",
           borderLeft: "1px solid rgba(201,168,76,0.15)",
           borderRight: "1px solid rgba(201,168,76,0.15)",
           borderBottom: "1px solid rgba(201,168,76,0.15)",
         }}
       >
-        {/* Mode buttons — low contrast, utility-first */}
-        <button
-          type="button"
-          onClick={() => setMode("fit")}
-          className="text-[11px] px-2.5 py-1 rounded transition-all"
-          style={mode === "fit"
-            ? { background: "rgba(110,231,183,0.1)", color: "#6ee7b7", border: "1px solid rgba(110,231,183,0.2)" }
-            : { background: "transparent", color: "#4b5563", border: "1px solid transparent" }
-          }
-        >
-          Fit
-        </button>
-        <button
-          type="button"
-          onClick={() => { setMode("crop"); if (zoom <= 100) setZoom(110); }}
-          className="text-[11px] px-2.5 py-1 rounded transition-all"
-          style={mode === "crop"
-            ? { background: "rgba(167,139,250,0.1)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.2)" }
-            : { background: "transparent", color: "#4b5563", border: "1px solid transparent" }
-          }
-        >
-          Crop
-        </button>
-        {/* Stretch — visually de-emphasised, ⚠ labelled */}
-        <button
-          type="button"
-          onClick={() => setMode(mode === "stretch" ? "crop" : "stretch")}
-          className="text-[10px] px-2 py-1 rounded transition-all"
-          style={mode === "stretch"
-            ? { background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }
-            : { background: "transparent", color: "#374151", border: "1px solid transparent" }
-          }
-          title="Stretch distorts original pixels — explicit override only"
-        >
-          ⚠ Str
-        </button>
+        {/* Row 1: Mode buttons */}
+        <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
+          <button
+            type="button"
+            onClick={() => setMode("fit")}
+            className="text-[11px] px-3 py-1 rounded transition-all"
+            style={mode === "fit"
+              ? { background: "rgba(110,231,183,0.1)", color: "#6ee7b7", border: "1px solid rgba(110,231,183,0.2)" }
+              : { background: "transparent", color: "#4b5563", border: "1px solid transparent" }
+            }
+          >
+            Fit
+          </button>
+          <button
+            type="button"
+            onClick={() => { setMode("crop"); if (zoom <= 100) setZoom(110); }}
+            className="text-[11px] px-3 py-1 rounded transition-all"
+            style={mode === "crop"
+              ? { background: "rgba(167,139,250,0.1)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.2)" }
+              : { background: "transparent", color: "#4b5563", border: "1px solid transparent" }
+            }
+          >
+            Crop
+          </button>
+          {/* Stretch — visually de-emphasised */}
+          <button
+            type="button"
+            onClick={() => setMode(mode === "stretch" ? "crop" : "stretch")}
+            className="text-[10px] px-2 py-1 rounded transition-all"
+            style={mode === "stretch"
+              ? { background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }
+              : { background: "transparent", color: "#374151", border: "1px solid transparent" }
+            }
+            title="Stretch distorts original pixels — explicit override only"
+          >
+            ⚠ Str
+          </button>
 
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Keyboard hint strip — visible only when canvas is focused */}
-        <div
-          className="flex items-center gap-2 transition-opacity duration-300 mr-2"
-          style={{ opacity: canvasFocused ? 1 : 0, pointerEvents: "none" }}
-        >
-          {[
-            { key: "R", label: "reset" },
-            { key: "+/−", label: "zoom" },
-            { key: "↑↓←→", label: "nudge" },
-            { key: "↵", label: "save" },
-            { key: "⎋", label: "cancel" },
-          ].map(({ key, label }) => (
-            <span key={key} className="flex items-center gap-0.5 text-[9px]" style={{ color: "#374151" }}>
-              <kbd
-                className="px-1 py-0.5 rounded text-[9px] font-mono"
-                style={{ background: "rgba(255,255,255,0.06)", color: "#4b5563", border: "1px solid rgba(255,255,255,0.08)" }}
-              >
-                {key}
-              </kbd>
-              <span style={{ color: "#2d3748" }}>{label}</span>
-            </span>
-          ))}
+          {/* Keyboard hint strip — only when canvas is focused */}
+          <div
+            className="flex items-center gap-1.5 ml-2 transition-opacity duration-300"
+            style={{ opacity: canvasFocused ? 1 : 0, pointerEvents: "none" }}
+          >
+            {[
+              { key: "R", label: "reset" },
+              { key: "+/−", label: "zoom" },
+              { key: "↵", label: "save" },
+            ].map(({ key, label }) => (
+              <span key={key} className="flex items-center gap-0.5 text-[9px]" style={{ color: "#374151" }}>
+                <kbd
+                  className="px-1 py-0.5 rounded text-[9px] font-mono"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "#4b5563", border: "1px solid rgba(255,255,255,0.08)" }}
+                >
+                  {key}
+                </kbd>
+                <span style={{ color: "#2d3748" }}>{label}</span>
+              </span>
+            ))}
+          </div>
         </div>
 
-        {/* Cancel */}
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-[11px] px-3 py-1 rounded transition-colors"
-          style={{ color: "#4b5563", background: "transparent" }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#9ca3af"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
-        >
-          Cancel
-        </button>
-
-        {/* Save — only gold when changes exist */}
-        <button
-          type="button"
-          onClick={() => onSave({ x, y, zoom: mode === "fit" ? 100 : mode === "stretch" ? 100 : zoom })}
-          className="text-[11px] px-3 py-1 rounded font-semibold transition-all"
-          style={hasChanges
-            ? { background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "#0a0812", boxShadow: "0 2px 8px rgba(201,168,76,0.25)" }
-            : { background: "rgba(255,255,255,0.06)", color: "#6b7280", border: "1px solid rgba(255,255,255,0.08)" }
-          }
-        >
-          Save
-        </button>
+        {/* Row 2: Cancel + Save */}
+        <div className="flex items-center justify-end gap-2 px-3 pb-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-[11px] px-3 py-1 rounded transition-colors"
+            style={{ color: "#4b5563", background: "transparent" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#9ca3af"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => onSave({ x, y, zoom: mode === "fit" ? 100 : mode === "stretch" ? 100 : zoom })}
+            className="text-[11px] px-4 py-1 rounded font-semibold transition-all"
+            style={hasChanges
+              ? { background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "#0a0812", boxShadow: "0 2px 8px rgba(201,168,76,0.25)" }
+              : { background: "rgba(255,255,255,0.06)", color: "#6b7280", border: "1px solid rgba(255,255,255,0.08)" }
+            }
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );

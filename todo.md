@@ -1431,3 +1431,9 @@
 - [x] Convert to compact floating panel (fixed/absolute position) anchored near avatar, max-w ~320px
 - [x] Panel should not disrupt the header row layout when open
 - [x] Close on outside click or Esc
+
+## Phase AI: ImagePositioner Dock Layout Fix
+- [x] Fix dock overflow: mode buttons and Save/Cancel cramming into one unreadable row
+- [x] Restructure dock: row 1 = Fit/Crop/Str mode buttons; row 2 = Cancel + Save
+- [x] Keyboard hint strip only visible when canvas is focused, hidden otherwise
+- [x] Dock total height should not exceed 80px
