@@ -1437,3 +1437,9 @@
 - [x] Restructure dock: row 1 = Fit/Crop/Str mode buttons; row 2 = Cancel + Save
 - [x] Keyboard hint strip only visible when canvas is focused, hidden otherwise
 - [x] Dock total height should not exceed 80px
+
+## Phase AJ: Explore Grid Column Reduction
+- [x] DiscoverPage/ExplorePage: reduce grid from 5-col to 3-col at xl, 4-col at 2xl
+- [x] HomePage track grid: apply same column reduction
+- [x] CreatorProfilePage track grid: apply same column reduction
+- [x] Any other track card grid surfaces: apply same reduction

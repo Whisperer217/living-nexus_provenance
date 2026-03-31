@@ -757,7 +757,7 @@ export default function CreatorProfilePage() {
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
               {featuredSongs.map((song: any) => (
                 <FeaturedCard key={song.id} song={song} onPlay={() => handlePlay(song)} isPlaying={playingId === song.id} />
               ))}

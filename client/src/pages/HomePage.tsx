@@ -115,7 +115,7 @@ export default function HomePage() {
         </div>
 
         {/* ── Track grid ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5 mb-8">
           {filtered.map((track, i) => (
             <TrackCard
               key={track.id}

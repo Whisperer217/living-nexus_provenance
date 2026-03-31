@@ -300,10 +300,10 @@ export default function ExplorePage() {
 
         {/* Loading skeleton — first page only */}
         {isLoading && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
               <div key={i} className="rounded-xl overflow-hidden border border-white/[0.06] bg-[oklch(0.14_0.013_280)] animate-pulse">
-                <div className="bg-white/[0.04]" style={{ height: "180px" }} />
+                <div className="bg-white/[0.04]" style={{ height: "240px" }} />
                 <div className="p-3 space-y-2">
                   <div className="h-3 bg-white/[0.06] rounded w-3/4" />
                   <div className="h-2.5 bg-white/[0.04] rounded w-1/2" />
@@ -316,7 +316,7 @@ export default function ExplorePage() {
         {/* Grid */}
         {!isLoading && songs.length > 0 && (
           <div
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5"
             style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
           >
             {songs.map((item: any) => {
@@ -335,7 +335,7 @@ export default function ExplorePage() {
                   onClick={() => handlePlay(item)}
                 >
                   {/* Artwork */}
-                  <div className="relative overflow-hidden" style={{ height: "180px", background: "oklch(0.15 0.05 275)" }}>
+                  <div className="relative overflow-hidden" style={{ height: "240px", background: "oklch(0.15 0.05 275)" }}>
                     {song.coverArtUrl ? (
                       <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} loading="lazy" />
                     ) : (
