@@ -1486,3 +1486,11 @@
 - [x] Replace cover art in MobilePlayerLayer (expanded sheet) with MediaAsset player mode
 - [x] Replace cover art in TrackCard with MediaAsset card mode
 - [x] Write Vitest tests for new schema fields
+
+## Phase AO: Homepage Messaging Hierarchy
+- [x] Replace main headline with "Your work deserves to be witnessed, not lost"
+- [x] Add micro-support line: "No algorithms. No ownership loss. Just creation, proven."
+- [x] Move Witness ID / cryptographic explanation to subtext below headline
+- [x] Update CTA button 1: "Upload & Witness Your Work"
+- [x] Update CTA button 2: "Explore Witnessed Creations"
+- [x] Expand Founder's Era description to explain significance of early registry participation
