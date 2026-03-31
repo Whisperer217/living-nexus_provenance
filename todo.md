@@ -1357,3 +1357,14 @@
 - [x] Update ImagePositioner default mode to "crop" (not "fit"), position sliders active by default
 - [x] Add "Auto" badge to position sliders when focal point was AI-detected
 - [x] Ensure banner on CreatorProfilePage and ProfilePage never distorts — only crops or fits
+
+## Phase AB: Direct-Manipulation Banner Editor
+- [x] Replace slider-based ImagePositioner with drag-to-reposition (mousedown+move, touch support)
+- [x] Add scroll-to-zoom on the canvas (wheel event, pinch on mobile)
+- [x] Add double-click to reset center (x=50, y=50, zoom=110)
+- [x] Move all mode buttons + save/cancel to a thin bottom dock (40-48px, outside the image)
+- [x] Remove heavy gold "Save Position" bar — replace with small Save button in dock, only highlighted when changes exist
+- [x] Contextual overlays only: zoom % indicator and crosshair alignment guides appear during drag/scroll and fade out after 1.5s
+- [x] Reduce visual weight in editing mode: muted colors, no thick borders on canvas, utility-first
+- [x] Stretch mode button visually de-emphasised (small, grey, ⚠ label) — never dominant
+- [x] Preserve AI focal badge in dock area (not on canvas)
