@@ -170,26 +170,62 @@ export default function HomePage() {
     { staleTime: 30_000 }
   );
 
+  const { data: trendingRaw } = trpc.songs.trending.useQuery(
+    { limit: 5 },
+    { staleTime: 60_000, refetchOnWindowFocus: false }
+  );
+
   // Map server songs to the Track shape expected by TrackCard / PlayerContext
+  // getPublicSongs returns { song: {...}, creator: {...} } nested shape
   const tracks = useMemo(() => {
     if (!discoverData) return [];
-    return discoverData.map((s: any) => ({
-      id: s.id,
-      title: s.title,
-      artist: s.artistName ?? s.userName ?? "Unknown",
-      artUrl: s.coverArtUrl ?? undefined,
-      audioSrc: s.fileUrl ?? "",
-      genre: s.genre ?? undefined,
-      plays: s.playCount ?? 0,
-      witnessId: s.witnessId ?? undefined,
-      coverPositionX: s.coverPositionX ?? 50,
-      coverPositionY: s.coverPositionY ?? 50,
-      artAspectRatio: s.artAspectRatio ?? "1:1",
-      userId: s.userId,
-      artistHandle: s.artistHandle ?? undefined,
-      profilePhotoUrl: s.profilePhotoUrl ?? undefined,
-    }));
+    return discoverData.map((s: any) => {
+      const song = s.song ?? s;
+      const creator = s.creator ?? null;
+      return {
+        id: song.id,
+        title: song.title ?? "Untitled Work",
+        artist: creator?.artistHandle || creator?.name || "Unknown Creator",
+        artUrl: song.coverArtUrl ?? undefined,
+        audioSrc: song.fileUrl ?? "",
+        genre: song.genre ?? undefined,
+        plays: song.playCount ?? 0,
+        witnessId: song.witnessId ?? undefined,
+        coverPositionX: song.coverPositionX ?? 50,
+        coverPositionY: song.coverPositionY ?? 50,
+        artAspectRatio: song.artAspectRatio ?? "1:1",
+        userId: song.userId,
+        artistHandle: creator?.artistHandle ?? undefined,
+        profilePhotoUrl: creator?.profilePhotoUrl ?? undefined,
+        creatorId: creator?.id ?? undefined,
+      };
+    });
   }, [discoverData]);
+
+  const trendingTracks = useMemo(() => {
+    if (!trendingRaw) return [];
+    return trendingRaw.map((s: any) => {
+      const song = s.song ?? s;
+      const creator = s.creator ?? null;
+      return {
+        id: song.id,
+        title: song.title ?? "Untitled Work",
+        artist: creator?.artistHandle || creator?.name || "Unknown Creator",
+        artUrl: song.coverArtUrl ?? undefined,
+        audioSrc: song.fileUrl ?? "",
+        genre: song.genre ?? undefined,
+        plays: song.playCount ?? 0,
+        witnessId: song.witnessId ?? undefined,
+        coverPositionX: song.coverPositionX ?? 50,
+        coverPositionY: song.coverPositionY ?? 50,
+        artAspectRatio: song.artAspectRatio ?? "1:1",
+        userId: song.userId,
+        artistHandle: creator?.artistHandle ?? undefined,
+        profilePhotoUrl: creator?.profilePhotoUrl ?? undefined,
+        creatorId: creator?.id ?? undefined,
+      };
+    });
+  }, [trendingRaw]);
 
   const tipTrack = tipTarget !== null ? tracks[tipTarget] : null;
 
@@ -510,16 +546,16 @@ export default function HomePage() {
         )}
 
         {/* ── Trending section ── */}
-        {tracks.length > 0 && (
+        {trendingTracks.length > 0 && (
           <>
             <div className="gold-divider mb-6" />
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-heading text-[16px] tracking-wider text-white">Trending Now</h2>
+              <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "oklch(0.55 0.03 280)" }}>By plays + likes + recency</span>
             </div>
             <div className="space-y-2">
-              {tracks.slice(0, 5).map((track: typeof tracks[number], i: number) => {
-                const idx = tracks.indexOf(track);
-                const isActive = state.currentIdx === idx;
+              {trendingTracks.map((track, i) => {
+                const isActive = state.tracks[state.currentIdx]?.id === track.id;
                 return (
                   <div
                     key={track.id}
@@ -531,7 +567,7 @@ export default function HomePage() {
                     <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
                       style={{ background: "oklch(0.16 0.02 280)" }}>
                       {track.artUrl
-                        ? <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" style={{ objectPosition: `${(track as any).coverPositionX ?? 50}% ${(track as any).coverPositionY ?? 50}%` }} />
+                        ? <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" style={{ objectPosition: `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%` }} />
                         : <div className="w-full h-full flex items-center justify-center text-white/60 text-lg">🎵</div>}
                     </div>
                     <div className="flex-1 min-w-0">

@@ -105,7 +105,7 @@ export default function ProfilePage() {
   });
 
   // Load user's songs from DB
-  const { data: dbSongs = [] } = trpc.songs.mySongs.useQuery(undefined, {
+  const { data: dbSongs = [], isLoading: songsLoading } = trpc.songs.mySongs.useQuery(undefined, {
     enabled: !!user,
   });
 
@@ -115,6 +115,7 @@ export default function ProfilePage() {
   const { data: myStats } = trpc.profile.myStats.useQuery(undefined, { enabled: !!user });
   const { data: myActivity = [] } = trpc.profile.myActivity.useQuery({ limit: 20 }, { enabled: !!user && activeTab === "overview" });
   const { data: witnessNetwork } = trpc.witness.network.useQuery(undefined, { enabled: !!user && activeTab === "overview" });
+  const { data: analytics } = trpc.profile.myAnalytics.useQuery(undefined, { enabled: !!user && activeTab === "overview", staleTime: 60_000 });
   // ── Command center tab data ───────────────────────────────────────
   const { data: likedSongs = [] } = trpc.songs.getLiked.useQuery(undefined, { enabled: !!user && activeTab === "liked" });
   const { data: myPlaylists = [] } = trpc.playlists.mine.useQuery(undefined, { enabled: !!user && activeTab === "collections" });
@@ -727,9 +728,11 @@ export default function ProfilePage() {
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Total Plays", value: totalPlays.toLocaleString(), sub: "across all tracks", color: "#D4AF37" },
+                { label: "Total Plays", value: (analytics?.totalPlays ?? totalPlays).toLocaleString(), sub: analytics?.playsThisWeek ? `+${analytics.playsThisWeek} this week` : "across all tracks", color: "#D4AF37" },
+                { label: "Total Likes", value: (analytics?.totalLikes ?? 0).toLocaleString(), sub: analytics?.likesThisWeek ? `+${analytics.likesThisWeek} this week` : "across all tracks", color: "#f472b6" },
                 { label: "Tracks Published", value: dbSongs.filter((s: any) => s.status === "Published").length, sub: "live on Explore", color: "#A78BFA" },
-                { label: "Witnessing", value: witnessNetwork?.witnessing?.length ?? 0, sub: "creators you witness", color: "#4ade80" },
+                { label: "Gifts Received", value: analytics?.totalGiftsReceived ?? 0, sub: analytics?.totalAmountReceived ? `$${((analytics.totalAmountReceived) / 100).toFixed(2)} total` : "tip income", color: "#4ade80" },
+                { label: "Witnessing", value: witnessNetwork?.witnessing?.length ?? 0, sub: "creators you witness", color: "#60a5fa" },
                 { label: "Witnesses", value: witnessNetwork?.witnessedBy?.length ?? 0, sub: "creators witnessing you", color: "#fb923c" },
               ].map(s => (
                 <div key={s.label} className="p-4 rounded-xl bg-[oklch(0.14_0.013_280)] border border-white/[0.06]">
@@ -822,7 +825,19 @@ export default function ProfilePage() {
                 <Upload size={11} /> Upload
               </button>
             </div>
-            {dbSongs.length === 0 ? (
+            {songsLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.04] bg-[oklch(0.14_0.013_280)] animate-pulse">
+                    <div className="w-11 h-11 rounded-lg flex-shrink-0 bg-white/[0.06]" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 rounded bg-white/[0.06] w-2/3" />
+                      <div className="h-2.5 rounded bg-white/[0.04] w-1/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : dbSongs.length === 0 ? (
               <div className="text-center py-12 text-white/40 font-body text-[13px]">
                 No tracks yet.{" "}
                 <button onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">Upload your first track</button>
@@ -844,8 +859,26 @@ export default function ProfilePage() {
                       }`}>{song.status || "Published"}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      {song.genre && <span className="text-[10px] text-white/50 font-body truncate max-w-[160px]">{song.genre}</span>}
-                      <span className="text-[10px] text-white/40 font-body flex-shrink-0">{(song.playCount || 0).toLocaleString()} plays</span>
+                      {song.genre && <span className="text-[10px] text-white/50 font-body truncate max-w-[100px]">{song.genre}</span>}
+                      <span className="text-[10px] text-white/40 font-body flex-shrink-0 flex items-center gap-0.5">
+                        <Play size={8} className="inline" />{(song.playCount || 0).toLocaleString()}
+                      </span>
+                      {analytics && (() => {
+                        const likeEntry = analytics.likesByTrack?.find((l: any) => l.trackId === String(song.id));
+                        return likeEntry && likeEntry.likes > 0 ? (
+                          <span className="text-[10px] text-pink-400/60 font-body flex-shrink-0 flex items-center gap-0.5">
+                            <Heart size={8} className="inline" />{likeEntry.likes}
+                          </span>
+                        ) : null;
+                      })()}
+                      {analytics && (() => {
+                        const giftEntry = analytics.giftsByTrack?.find((g: any) => g.trackId === String(song.id));
+                        return giftEntry && giftEntry.giftCount > 0 ? (
+                          <span className="text-[10px] text-green-400/60 font-body flex-shrink-0 flex items-center gap-0.5">
+                            <DollarSign size={8} className="inline" />{giftEntry.giftCount}
+                          </span>
+                        ) : null;
+                      })()}
                       {song.createdAt && <span className="text-[10px] text-white/35 font-body flex-shrink-0">{new Date(song.createdAt).toLocaleDateString()}</span>}
                     </div>
                   </div>
@@ -921,7 +954,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-body text-white/80 truncate">{song.title}</p>
-                    <p className="text-[11px] font-body text-white/35 mt-0.5 truncate">{song.artistName || song.artistHandle || "Unknown Artist"}</p>
+                    <p className="text-[11px] font-body text-white/35 mt-0.5 truncate">{artistName}</p>
                   </div>
                   <button onClick={() => navigate(`/song/${song.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/40 hover:text-[#A78BFA] transition-all flex-shrink-0"><ExternalLink size={12} /></button>
                 </div>

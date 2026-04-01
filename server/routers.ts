@@ -48,6 +48,7 @@ import {
   getAllSupporters, getSupporterByUserId, recordPlatformGift,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
   getSongReactions, toggleSongReaction,
+  getTrendingWorks,
 } from "./db";
 import { ENV } from "./_core/env";
 
@@ -336,6 +337,7 @@ export const appRouter = router({
 
   songs: router({
     discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(100).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
+    trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(50).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
     getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => getSongWithCreator(input.id)),
     verifyWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
       const result = await getSongByWitnessId(input.witnessId);

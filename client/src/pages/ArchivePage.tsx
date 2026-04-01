@@ -51,12 +51,14 @@ export default function ArchivePage() {
   const [editingSong, setEditingSong] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<"tracks" | "lists" | "external">("tracks");
   const { playQueueAt } = usePlayer();
+  const { user } = useAuth();
+  const myArtistName = user?.artistHandle || user?.name || "Unknown Creator";
 
   const buildTrack = (song: any) => ({
     id: String(song.id),
-    title: song.title,
-    artist: song.artistName ?? "Unknown Artist",
-    audioUrl: song.audioUrl ?? "",
+    title: song.title ?? "Untitled Work",
+    artist: myArtistName,
+    audioUrl: song.fileUrl ?? "",
     coverArt: song.coverArtUrl ?? "",
     artUrl: song.coverArtUrl ?? undefined,
     genre: song.genre ?? "",
@@ -69,9 +71,9 @@ export default function ArchivePage() {
   const handlePlay = (e: React.MouseEvent, songs: any[], idx: number) => {
     e.preventDefault();
     e.stopPropagation();
-    const playable = songs.filter((s: any) => s.audioUrl);
+    const playable = songs.filter((s: any) => s.fileUrl);
     const clickedTrack = songs[idx];
-    if (!clickedTrack?.audioUrl) {
+    if (!clickedTrack?.fileUrl) {
       toast.error("This track has no audio file attached.");
       return;
     }
@@ -228,7 +230,7 @@ export default function ArchivePage() {
             {songs.map((song: any, idx: number) => {
               const isPublished = song.status === "Published";
               const isPending = updateStatus.isPending && updateStatus.variables?.songId === song.id;
-              const hasAudio = !!song.audioUrl;
+              const hasAudio = !!song.fileUrl;
 
               return (
                 <div key={song.id}

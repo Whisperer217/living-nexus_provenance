@@ -1626,3 +1626,15 @@
 - [x] Tap artwork to toggle UI visibility (cinematic mode, auto-restores after 4s)
 - [x] Floating heart pulse animation on Love tap (heartFloat keyframe)
 - [x] Remove clutter from main view (Cinema Mode toggle, volume bar, tip button moved to Details/functional row)
+
+## Task 19: Platform Audit + Data Restoration
+- [x] Audit: trace all "Unknown" in song cards, profile, works tab to source queries
+- [x] Fix: creator name/title/artwork binding in getSongs, getById, discover queries (nested creator object)
+- [x] Fix: ArchivePage uses song.fileUrl (not audioUrl) and user profile name (not song.artistName)
+- [x] Fix: ProfilePage Works tab uses user profile name instead of non-existent song.artistName
+- [x] Restore: getTrendingWorks (score = plays + likes*3 + recency decay), wire to HomePage Trending Now
+- [x] Add: myAnalytics query to ProfilePage Overview tab (totalPlays, totalLikes, totalGifts, week deltas)
+- [x] Expand: Overview stats grid to 6 cards (Plays, Likes, Tracks, Gifts, Witnessing, Witnesses)
+- [x] Add: per-work stats (plays ▶, likes ♥, gifts $) to Works tab song rows
+- [x] Add: skeleton loading states to Works tab (5-row pulse skeleton)
+- [x] All 95 tests passing, TypeScript 0 errors

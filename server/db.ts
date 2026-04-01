@@ -2210,3 +2210,47 @@ export async function toggleSongReaction(
     return "added";
   }
 }
+
+// ── Trending Works ─────────────────────────────────────────────────────────
+// Score: playCount * 1 + likeCount * 3 + recency bonus (7d=+50, 30d=+20)
+export async function getTrendingWorks(opts?: { genre?: string; limit?: number }) {
+  const db = await getDb();
+  if (!db) return [];
+  const limit = opts?.limit ?? 20;
+  const conditions: ReturnType<typeof eq>[] = [
+    eq(songs.isPublic, true) as ReturnType<typeof eq>,
+    eq(songs.status, "Published") as ReturnType<typeof eq>,
+  ];
+  if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
+
+  const rows = await db.select({
+    song: songs,
+    creator: {
+      id: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      profilePhotoUrl: users.profilePhotoUrl,
+      aiDisclosure: users.aiDisclosure,
+      primaryGenre: users.primaryGenre,
+      stripeAccountStatus: users.stripeAccountStatus,
+    },
+    likeCount: sql<number>`(SELECT COUNT(*) FROM likes WHERE likes.songId = ${songs.id})`,
+  })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(...conditions))
+    .limit(limit * 5);
+
+  const now = Date.now();
+  const DAY = 86_400_000;
+  type RowType = (typeof rows)[number];
+  type ScoredRow = RowType & { score: number };
+  const scored: ScoredRow[] = rows.map((r: RowType) => {
+    const age = now - new Date(r.song.createdAt).getTime();
+    const recency = age < 7 * DAY ? 50 : age < 30 * DAY ? 20 : 0;
+    const score = (r.song.playCount ?? 0) * 1 + (Number(r.likeCount) ?? 0) * 3 + recency;
+    return { ...r, score };
+  });
+  scored.sort((a: ScoredRow, b: ScoredRow) => b.score - a.score);
+  return scored.slice(0, limit).map(({ score: _score, ...rest }: ScoredRow) => rest);
+}
