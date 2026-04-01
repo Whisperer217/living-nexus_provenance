@@ -235,11 +235,14 @@ export function registerOgRoutes(app: Express) {
   const isDev = process.env.NODE_ENV === "development";
 
   // ── /song/:id ──────────────────────────────────────────────────────────────
+  // NOTE: We serve OG-injected HTML for ALL requests (not just crawlers) because
+  // the Manus platform CDN intercepts bot requests at the Cloudflare layer and
+  // generates its own OG tags from whatever HTML the page returns for normal
+  // browser requests. By always injecting OG tags server-side, the CDN picks up
+  // the song-specific metadata regardless of the User-Agent it uses.
   app.get("/song/:id", async (req, res, next) => {
     const songId = parseInt(req.params.id, 10);
     if (isNaN(songId)) return next();
-    const ua = req.headers["user-agent"] || "";
-    if (!isCrawler(ua)) return next();
 
     try {
       const result = await getSongWithCreator(songId);
@@ -430,9 +433,6 @@ export function registerOgRoutes(app: Express) {
     const witnessId = decodeURIComponent(req.params.witnessId || "").trim();
     if (!witnessId) return next();
 
-    const ua = req.headers["user-agent"] || "";
-    if (!isCrawler(ua)) return next();
-
     // Only handle WID-ALB- collection IDs here — individual WIDs fall through
     if (!witnessId.startsWith("WID-ALB-")) return next();
 
@@ -480,9 +480,6 @@ export function registerOgRoutes(app: Express) {
   app.get("/creator/:id", async (req, res, next) => {
     const creatorId = parseInt(req.params.id, 10);
     if (isNaN(creatorId)) return next();
-
-    const ua = req.headers["user-agent"] || "";
-    if (!isCrawler(ua)) return next();
 
     try {
       const result = await getCreatorForOg(creatorId);

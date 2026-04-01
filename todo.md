@@ -1803,4 +1803,8 @@
   - og:url uses canonical https://www.livingnexus.org/song/:id
   - twitter:card switches to "player" when embedVideoUrl present
   - twitter:player, twitter:player:stream tags added
+- [x] Root cause confirmed: Manus Cloudflare CDN intercepts ALL requests (not just bots) and generates its own OG tags from whatever HTML the page returns for normal browser requests — Express server OG route was never reached
+- [x] Fix: Removed isCrawler UA gate from /song/:id and /creator/:id routes in server/og.ts so ALL requests get OG-injected HTML from Express server
+- [x] Verified: Regular browser requests to /song/:id now return song-specific OG tags (og:title includes artist name, og:image is cover art, og:audio/og:video present)
+- [x] React SPA still loads correctly — HTML structure intact with #root div and module scripts
 - [ ] Test with real Discord paste after publish (requires new deployment)
