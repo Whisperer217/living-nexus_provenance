@@ -13,6 +13,7 @@ import { uploadRouter } from "../uploadRoute";
 import { downloadRouter } from "../downloadRoute";
 import { publicApiRouter } from "../publicApiRoute";
 import { oembedRouter } from "../oembedRoute";
+import { shareRouter } from "../shareRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -45,6 +46,10 @@ async function startServer() {
   // Embed iframe routes MUST be registered BEFORE the X-Frame-Options header
   // so Discord can load /embed/song/:id inside an iframe for inline playback.
   registerEmbedRoutes(app);
+  // PDL Share Surface — /share/:wid must be registered BEFORE X-Frame-Options header
+  // The Manus CDN forwards /share/* to Express (not a known static page route)
+  // This is the canonical share URL for Discord, Twitter, Slack, iMessage, etc.
+  app.use(shareRouter);
 
   // Security headers (applied to all routes EXCEPT /embed/* which overrides below)
   app.use((_req, res, next) => {

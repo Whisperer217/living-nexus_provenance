@@ -278,7 +278,10 @@ export default function MobilePlayerLayer() {
   // Share
   const handleShare = useCallback(async () => {
     if (!currentTrack) return;
-    const url = currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
+    // PDL: use /share/:wid when available so Discord/social embeds get song-specific metadata
+    const url = currentTrack?.witnessId
+      ? `${window.location.origin}/share/${encodeURIComponent(currentTrack.witnessId)}`
+      : currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
     try {
       if (navigator.share) { await navigator.share({ title: currentTrack.title ?? "", url }); return; }
     } catch {}

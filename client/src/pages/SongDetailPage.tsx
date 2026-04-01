@@ -324,7 +324,11 @@ export default function SongDetailPage() {
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    // PDL: copy /share/:wid when available — this URL carries song-specific OG tags for Discord/social
+    const shareUrl = song?.witnessId
+      ? `https://www.livingnexus.org/share/${encodeURIComponent(song.witnessId)}`
+      : window.location.href;
+    navigator.clipboard.writeText(shareUrl);
     toast.success("Link copied!");
     setShareOpen(false);
   };

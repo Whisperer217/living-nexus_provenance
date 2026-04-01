@@ -30,8 +30,64 @@ export const oembedRouter = Router();
  */
 oembedRouter.get("/api/oembed", async (req, res) => {
   const url = req.query.url as string;
-  if (!url) {
-    return res.status(400).json({ error: "url parameter required" });
+  const wid = req.query.wid as string;
+
+  // Support both ?wid=WID-XXX (PDL share surface) and ?url=https://... (legacy)
+  if (!url && !wid) {
+    return res.status(400).json({ error: "url or wid parameter required" });
+  }
+
+  // If wid= is provided directly, look up the song by WID
+  if (wid) {
+    try {
+      const { getSongByWitnessId } = await import("./db");
+      const songResult = await getSongByWitnessId(wid);
+
+      if (!songResult) {
+        return res.status(404).json({ error: "WID not found" });
+      }
+
+      const { song, creator } = songResult;
+      const artistName =
+        (creator as any)?.artistHandle?.trim() ||
+        (creator as any)?.name?.trim() ||
+        "Unknown Artist";
+
+      const title = `${song.title} \u2014 ${artistName}`;
+      const genrePart = (song as any).genre ? ` \u00b7 ${(song as any).genre}` : "";
+      const description = `\uD83C\uDFB5 ${song.title} by ${artistName}${genrePart} \u00b7 WID: ${wid} \u2014 Listen on Living Nexus`;
+
+      const coverArt = (song as any).coverArtUrl?.trim();
+      const thumbnailUrl = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
+      const embedIframeUrl = `${CANONICAL_ORIGIN}/embed/song/${song.id}`;
+      const songUrl = `${CANONICAL_ORIGIN}/song/${song.id}`;
+      const shareUrl = `${CANONICAL_ORIGIN}/share/${encodeURIComponent(wid)}`;
+
+      const response = {
+        version: "1.0",
+        type: "rich",
+        title,
+        author_name: artistName,
+        author_url: `${CANONICAL_ORIGIN}/creator/${(creator as any)?.id || ""}`,
+        provider_name: "Living Nexus",
+        provider_url: CANONICAL_ORIGIN,
+        thumbnail_url: thumbnailUrl,
+        thumbnail_width: 1200,
+        thumbnail_height: 630,
+        url: shareUrl,
+        description,
+        html: `<iframe width="480" height="270" src="${embedIframeUrl}" frameborder="0" allowfullscreen allow="autoplay"></iframe>`,
+        width: 480,
+        height: 270,
+      };
+
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Content-Type", "application/json+oembed");
+      return res.json(response);
+    } catch (err) {
+      console.error("[oEmbed] WID lookup error:", err);
+      return res.status(500).json({ error: "internal server error" });
+    }
   }
 
   try {

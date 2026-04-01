@@ -1849,3 +1849,30 @@
 - [x] Verified: /song/1380002 HTML contains per-page oEmbed link with encoded song URL
 - [x] 95 tests passing, 0 TypeScript errors
 - [ ] Publish and test Discord embed shows song title + cover art (requires new deployment)
+
+## Phase 63: Provenance Distribution Layer (PDL)
+- [x] Built /share/:wid — server-rendered Express route (server/shareRoute.ts)
+  - Looks up song by WID from database via getSongByWitnessId()
+  - Returns 200 HTML with correct og:title, og:image, og:audio, og:description, og:video
+  - Injects per-page oEmbed discovery link: /api/oembed?wid=:wid
+  - Browser redirect via <meta http-equiv="refresh"> + JS to /song/:id
+  - Served under /share/* — Manus CDN does NOT override (not a known static page route)
+  - Sets X-Frame-Options: ALLOWALL, Cache-Control: no-cache
+- [x] Updated /api/oembed to accept wid= parameter (alongside url=)
+  - Returns: title, author_name, thumbnail_url, html (iframe), provider_name, url, description
+- [x] Registered shareRouter in server/_core/index.ts BEFORE X-Frame-Options middleware
+- [x] Updated share buttons across the app to use /share/:wid when WID is available:
+  - MobilePlayerPanel.tsx handleShare()
+  - MobilePlayerLayer.tsx handleShare()
+  - PlayerBar.tsx share button onClick
+  - SongDetailPage.tsx copyLink()
+- [x] Verified: /share/WID-MUS-20035929-B62A482B returns HTTP 200 with all correct OG/Twitter tags
+- [x] Verified: og:title = "Titus 3 (Stripped Down) — MoshAIMusic"
+- [x] Verified: og:image = actual cover art URL
+- [x] Verified: og:video = /embed/song/1380002 (iframe, text/html)
+- [x] Verified: twitter:player:stream = direct MP4 URL
+- [x] Verified: oEmbed discovery link present in HTML
+- [x] Verified: /api/oembed?wid=WID-MUS-20035929-B62A482B returns correct JSON
+- [x] Verified: browser redirect to /song/1380002 via meta refresh + JS
+- [x] 95 tests passing, 0 TypeScript errors
+- [ ] Publish and test Discord embed shows song title + cover art using /share/:wid URL
