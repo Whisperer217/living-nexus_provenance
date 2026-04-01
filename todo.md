@@ -1652,3 +1652,12 @@
 - [x] Video + audio sync: video.muted=true, audio.play(), video.loop=true, robust play/pause
 - [x] All player interactions use one unified PlayerController (no duplicate logic)
 - [x] 95 tests passing, TypeScript 0 errors
+
+## Session: Bug Fixes + Feature Additions (Apr 1 2026)
+- [x] Fix: Liked tab React key warning — getLikedSongs returns nested {song, creator} shape, map now uses item.song.id as key
+- [x] Signals tab: mark individual notification as read on click (markOneRead mutation + invalidate)
+- [x] Signals tab: markAllRead now also invalidates notifications.list (not just unreadCount)
+- [x] Works tab: View Witness Records button (Shield icon) per track — navigates to /song/:id#witness-records
+- [x] SongDetailPage: Added id="witness-records" anchor to Witness ID section for deep-link scrolling
+- [x] ExplorePage: Added "Trending" mode pill — uses songs.trending procedure (score = plays + likes*3 + recency)
+- [x] Branding: Removed all "Suno-inspired" references from code comments (CreatorProfilePage, SongDetailPage)

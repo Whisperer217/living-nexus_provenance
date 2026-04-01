@@ -9,7 +9,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, MoreHorizontal } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, MoreHorizontal, TrendingUp } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 
@@ -28,7 +28,7 @@ const GENRE_CARDS = [
 const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp";
 const PAGE_SIZE = 24;
 
-type ExploreMode = "infinite" | "randomize";
+type ExploreMode = "infinite" | "randomize" | "trending";
 
 export default function ExplorePage() {
   const { addAndPlay, playQueueAt, playNext, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
@@ -48,6 +48,12 @@ export default function ExplorePage() {
   // Randomize state
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1_000_000));
   const [isShuffling, setIsShuffling] = useState(false);
+
+  // Trending query
+  const { data: trendingData, isLoading: trendingLoading } = trpc.songs.trending.useQuery(
+    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 50 },
+    { enabled: mode === "trending", refetchOnWindowFocus: false, staleTime: 120_000 }
+  );
 
   // ── Infinite scroll — fetch one page at a time ────────────────────
   const { data: pageData, isLoading: pageLoading, isFetching: pageFetching } = trpc.songs.discover.useQuery(
@@ -140,8 +146,8 @@ export default function ExplorePage() {
   }, []);
 
   // Active songs list
-  const songs = mode === "infinite" ? allSongs : (randomData || []);
-  const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : randomLoading;
+  const songs = mode === "infinite" ? allSongs : mode === "trending" ? (trendingData || []) : (randomData || []);
+  const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : mode === "trending" ? trendingLoading : randomLoading;
 
   // ── Track context menu state ──────────────────────────────────────
   const [menuSong, setMenuSong] = useState<any | null>(null);
@@ -310,6 +316,16 @@ export default function ExplorePage() {
             >
               <Shuffle size={12} />
               Randomize
+            </button>
+            <button
+              onClick={() => setMode("trending")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
+                mode === "trending" ? "" : "text-white/40 hover:text-white/70"
+              }`}
+              style={mode === "trending" ? { background: "oklch(0.22 0.04 270)", color: "#fb923c" } : {}}
+            >
+              <TrendingUp size={12} />
+              Trending
             </button>
           </div>
 

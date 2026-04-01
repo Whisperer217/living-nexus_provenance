@@ -14,7 +14,7 @@ import {
   MapPin, Globe, Twitter, Instagram, Youtube, Share2,
   Play, ExternalLink, Copy, TrendingUp, Loader2,
   CheckCircle, AlertCircle, Zap, LogOut,
-  Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users,
+  Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users, Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -121,7 +121,18 @@ export default function ProfilePage() {
   const { data: myPlaylists = [] } = trpc.playlists.mine.useQuery(undefined, { enabled: !!user && activeTab === "collections" });
   const { data: myFieldNotes = [] } = trpc.fieldNotes.mine.useQuery(undefined, { enabled: !!user && activeTab === "field-notes" });
   const { data: notifications = [] } = trpc.notifications.list.useQuery(undefined, { enabled: !!user && activeTab === "signals" });
-  const markAllRead = trpc.notifications.markAllRead.useMutation({ onSuccess: () => utils.notifications.unreadCount.invalidate() });
+  const markAllRead = trpc.notifications.markAllRead.useMutation({
+    onSuccess: () => {
+      utils.notifications.unreadCount.invalidate();
+      utils.notifications.list.invalidate();
+    }
+  });
+  const markOneRead = trpc.notifications.markRead.useMutation({
+    onSuccess: () => {
+      utils.notifications.unreadCount.invalidate();
+      utils.notifications.list.invalidate();
+    }
+  });
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, { enabled: !!user });
 
   // ── Stripe Connect ───────────────────────────────────────────────
@@ -884,6 +895,15 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => navigate(`/song/${song.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#A78BFA] hover:bg-white/[0.1] transition-all" title="Open song page"><ExternalLink size={12} /></button>
+                    {song.witnessId && (
+                      <button
+                        onClick={() => navigate(`/song/${song.id}#witness-records`)}
+                        className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[oklch(0.65_0.2_300)] hover:bg-white/[0.1] transition-all"
+                        title="View Witness Records"
+                      >
+                        <Shield size={12} />
+                      </button>
+                    )}
                     <button onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#D4AF37] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
                   </div>
                 </div>
@@ -945,20 +965,24 @@ export default function ProfilePage() {
                 <button onClick={() => navigate("/explore")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Explore music</button>
               </div>
             ) : (
-              (likedSongs as any[]).map((song) => (
-                <div key={song.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all">
-                  <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-[oklch(0.15_0.05_275)]">
-                    {song.coverArtUrl
-                      ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center"><Music size={14} className="text-white/40" /></div>}
+              (likedSongs as any[]).map((item) => {
+                const s = item.song ?? item;
+                const creatorName = item.creator?.artistHandle || item.creator?.name || artistName;
+                return (
+                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all">
+                    <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-[oklch(0.15_0.05_275)]">
+                      {s.coverArtUrl
+                        ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center"><Music size={14} className="text-white/40" /></div>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-body text-white/80 truncate">{s.title}</p>
+                      <p className="text-[11px] font-body text-white/35 mt-0.5 truncate">{creatorName}</p>
+                    </div>
+                    <button onClick={() => navigate(`/song/${s.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/40 hover:text-[#A78BFA] transition-all flex-shrink-0"><ExternalLink size={12} /></button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-body text-white/80 truncate">{song.title}</p>
-                    <p className="text-[11px] font-body text-white/35 mt-0.5 truncate">{artistName}</p>
-                  </div>
-                  <button onClick={() => navigate(`/song/${song.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/40 hover:text-[#A78BFA] transition-all flex-shrink-0"><ExternalLink size={12} /></button>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}
@@ -987,13 +1011,20 @@ export default function ProfilePage() {
               </div>
             ) : (
               (notifications as any[]).map((n) => (
-                <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
-                  n.isRead ? "border-white/[0.04] bg-white/[0.01]" : "border-[#A78BFA]/20 bg-[#A78BFA]/[0.04]"
-                }`}>
+                <div
+                  key={n.id}
+                  onClick={() => { if (!n.isRead) markOneRead.mutate({ id: n.id }); }}
+                  className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
+                    n.isRead
+                      ? "border-white/[0.04] bg-white/[0.01] cursor-default"
+                      : "border-[#A78BFA]/20 bg-[#A78BFA]/[0.04] cursor-pointer hover:border-[#A78BFA]/40 hover:bg-[#A78BFA]/[0.07]"
+                  }`}
+                >
                   <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.isRead ? "bg-white/10" : "bg-[#A78BFA]"}`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-body text-white/75">{n.title}</p>
+                    <p className={`text-[13px] font-body truncate ${n.isRead ? "text-white/50" : "text-white/80"}`}>{n.title}</p>
                     {n.body && <p className="text-[11px] font-body text-white/40 mt-0.5 line-clamp-2">{n.body}</p>}
+                    {!n.isRead && <p className="text-[10px] font-body text-[#A78BFA]/60 mt-1">Click to mark as read</p>}
                   </div>
                   <span className="text-[10px] font-body text-white/25 flex-shrink-0">
                     {new Date(n.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}

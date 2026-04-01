@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — CreatorProfilePage (v2)
-   Suno-inspired: full-bleed banner, avatar overlay, stats row,
+   Living Nexus: full-bleed banner, avatar overlay, stats row,
    featured songs grid (8-up), full song list with context menu,
    tip jar, social links. Divine Noir aesthetic.
 ═══════════════════════════════════════════════════════════════════ */
