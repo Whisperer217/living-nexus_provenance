@@ -1693,3 +1693,9 @@
 
 ## ExploreCard Redesign (2026-04-01)
 - [x] Rewrite ExploreCard to match TrackCard architecture (avatar, artist row, genre pill, full action bar)
+
+## Contextual Modal System (2026-04-01)
+- [ ] Build ContextualModal primitive (anchor-based, edge-flip, mobile bottom sheet)
+- [ ] Refactor AddToMyListModal to use ContextualModal with originRect
+- [ ] Refactor TipModal to use ContextualModal with originRect
+- [ ] Wire originRect capture in TrackCard, ExploreCard, and all card call sites

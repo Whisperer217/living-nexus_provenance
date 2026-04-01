@@ -5,6 +5,7 @@
      Zone 2: Song title → navigates to /track/{id}
      Zone 3: Artist     → navigates to /creator/{creatorId}
    Badges: WID (clickable → /verify/:id), AI disclosure, YOURS
+   Modal: AddToMyListModal uses ContextualModal — anchored to origin button
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
@@ -67,6 +68,7 @@ function AiDisclosureBadge({ value }: { value: string }) {
 export default function TrackCard({ track, index, onTip }: Props) {
   const { state, addAndPlay, playNext, openNowPlayingPanel } = usePlayer();
   const [showAddToList, setShowAddToList] = useState(false);
+  const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
   const [, navigate] = useLocation();
   const isPlaying = state.currentIdx === index && state.isPlaying;
   const isActive = state.currentIdx === index;
@@ -91,8 +93,6 @@ export default function TrackCard({ track, index, onTip }: Props) {
   // Derive cover object-position from track metadata
   const coverPos = `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%`;
 
-  // Determine badge stacking: YOURS takes top-left, WID takes bottom-left of artwork
-  // AI disclosure takes top-right (only if no YOURS badge conflict)
   const hasWid = !!track.witnessId;
   const hasAiDisclosure = !!track.aiDisclosure;
 
@@ -174,7 +174,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
           </Link>
         )}
 
-        {/* AI Disclosure badge — top-right (only when not conflicting) */}
+        {/* AI Disclosure badge — top-right */}
         {hasAiDisclosure && (
           <AiDisclosureBadge value={track.aiDisclosure!} />
         )}
@@ -254,7 +254,11 @@ export default function TrackCard({ track, index, onTip }: Props) {
                   <SkipForward size={12} />
                 </button>
                 <button
-                  onClick={e => { e.stopPropagation(); setShowAddToList(true); }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
+                    setShowAddToList(true);
+                  }}
                   className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
                   title="Add to my list"
                 >
@@ -273,13 +277,15 @@ export default function TrackCard({ track, index, onTip }: Props) {
         </div>
       </div>
     </div>
-    {showAddToList && !isNaN(numericId) && numericId > 0 && (
-      <AddToMyListModal
-        songId={numericId}
-        songTitle={track.title}
-        onClose={() => setShowAddToList(false)}
-      />
-    )}
+
+    {/* Contextual modal — anchored to the ListPlus button that triggered it */}
+    <AddToMyListModal
+      open={showAddToList && !isNaN(numericId) && numericId > 0}
+      songId={numericId}
+      songTitle={track.title}
+      onClose={() => setShowAddToList(false)}
+      originRect={addToListRect}
+    />
   </>
   );
 }

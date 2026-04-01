@@ -38,6 +38,7 @@ interface ContextMenuProps {
 function SongContextMenu({ song, isOwner, onClose, onDelete, position }: ContextMenuProps) {
   const { playNext } = usePlayer();
   const [showAddToList, setShowAddToList] = useState(false);
+  const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
 
   const copyLink = () => {
     navigator.clipboard.writeText(`${window.location.origin}/song/${song.id}`);
@@ -98,7 +99,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
           </button>
         )}
         <button
-          onClick={() => setShowAddToList(true)}
+          onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
           style={{ color: "oklch(0.85 0.02 280)" }}
         >
@@ -136,13 +137,13 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
           </>
         )}
       </div>
-      {showAddToList && (
-        <AddToMyListModal
-          songId={song.id}
-          songTitle={song.title}
-          onClose={() => { setShowAddToList(false); onClose(); }}
-        />
-      )}
+      <AddToMyListModal
+        open={showAddToList}
+        songId={song.id}
+        songTitle={song.title}
+        onClose={() => { setShowAddToList(false); onClose(); }}
+        originRect={addToListRect}
+      />
     </>
   );
 }

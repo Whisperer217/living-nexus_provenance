@@ -27,6 +27,7 @@ export default function DiscoverPage() {
   const [menuSong, setMenuSong] = useState<any | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [showAddToList, setShowAddToList] = useState(false);
+  const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
 
   const openMenu = (e: React.MouseEvent, item: any) => {
     e.preventDefault();
@@ -353,7 +354,7 @@ export default function DiscoverPage() {
                   <Play className="w-4 h-4 opacity-60" /> Play Next
                 </button>
               )}
-              <button onClick={() => setShowAddToList(true)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
+              <button onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
                 <svg className="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
@@ -377,13 +378,13 @@ export default function DiscoverPage() {
             </div>
           </>
         )}
-        {showAddToList && menuSong && (
-          <AddToMyListModal
-            songId={menuSong.song.id}
-            songTitle={menuSong.song.title}
-            onClose={() => { setShowAddToList(false); closeMenu(); }}
-          />
-        )}
+        <AddToMyListModal
+          open={!!(showAddToList && menuSong)}
+          songId={menuSong?.song.id ?? 0}
+          songTitle={menuSong?.song.title ?? ""}
+          onClose={() => { setShowAddToList(false); closeMenu(); }}
+          originRect={addToListRect}
+        />
 
         {/* Creators Gallery */}
         <div>

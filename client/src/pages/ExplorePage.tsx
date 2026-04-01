@@ -72,6 +72,7 @@ function ExploreCard({
   const { playNext } = usePlayer();
   const [, navigate] = useLocation();
   const [showAddToList, setShowAddToList] = useState(false);
+  const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
   const { liked, toggle: toggleLike } = useLike(song.id);
   const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
     { songId: song.id },
@@ -222,7 +223,7 @@ function ExploreCard({
             </button>
             {/* Add to list */}
             <button
-              onClick={e => { e.stopPropagation(); setShowAddToList(true); }}
+              onClick={e => { e.stopPropagation(); setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
               className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
               title="Add to my list"
             >
@@ -240,13 +241,13 @@ function ExploreCard({
         </div>
       </div>
     </div>
-    {showAddToList && (
-      <AddToMyListModal
-        songId={song.id}
-        songTitle={song.title}
-        onClose={() => setShowAddToList(false)}
-      />
-    )}
+    <AddToMyListModal
+      open={showAddToList}
+      songId={song.id}
+      songTitle={song.title}
+      onClose={() => setShowAddToList(false)}
+      originRect={addToListRect}
+    />
     </>
   );
 }
@@ -386,6 +387,7 @@ export default function ExplorePage() {
   const [menuSong, setMenuSong] = useState<any | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [showAddToList, setShowAddToList] = useState(false);
+  const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
 
   const openMenu = (e: React.MouseEvent, item: any) => {
     e.preventDefault();
@@ -680,7 +682,7 @@ export default function ExplorePage() {
                 </button>
               )}
               <button
-                onClick={() => { setShowAddToList(true); }}
+                onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
                 style={{ color: "oklch(0.85 0.02 280)" }}
               >
@@ -711,13 +713,13 @@ export default function ExplorePage() {
             </div>
           </>
         )}
-        {showAddToList && menuSong && (
-          <AddToMyListModal
-            songId={menuSong.song.id}
-            songTitle={menuSong.song.title}
-            onClose={() => { setShowAddToList(false); closeMenu(); }}
-          />
-        )}
+        <AddToMyListModal
+          open={!!(showAddToList && menuSong)}
+          songId={menuSong?.song.id ?? 0}
+          songTitle={menuSong?.song.title ?? ""}
+          onClose={() => { setShowAddToList(false); closeMenu(); }}
+          originRect={addToListRect}
+        />
 
         {/* Randomize end note */}
         {mode === "randomize" && !randomLoading && songs.length > 0 && (

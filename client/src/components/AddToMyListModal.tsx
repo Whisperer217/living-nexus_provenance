@@ -4,24 +4,34 @@
  * Allows the user to add a track to one of their existing playlists,
  * or create a new playlist and add the track to it in one step.
  *
- * This is the ONLY entry point for persisting a track to a user collection.
- * It is completely separate from the session-based queue (playNext / addAndPlay).
+ * Uses ContextualModal — spawns anchored to the triggering element.
+ * Preserves UI lineage: origin → intent → render position.
  */
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Plus, ListMusic, Check, Loader2, X } from "lucide-react";
+import { Plus, ListMusic, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { ContextualModal } from "@/components/ContextualModal";
 
 interface AddToMyListModalProps {
+  open: boolean;
   songId: number;
   songTitle: string;
   onClose: () => void;
+  /** DOMRect of the button that triggered this modal */
+  originRect?: DOMRect | null;
 }
 
-export function AddToMyListModal({ songId, songTitle, onClose }: AddToMyListModalProps) {
+export function AddToMyListModal({
+  open,
+  songId,
+  songTitle,
+  onClose,
+  originRect,
+}: AddToMyListModalProps) {
   const { user } = useAuth();
   const [newListName, setNewListName] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -29,12 +39,10 @@ export function AddToMyListModal({ songId, songTitle, onClose }: AddToMyListModa
 
   const utils = trpc.useUtils();
 
-  // Fetch user's playlists
   const { data: playlists, isLoading: loadingPlaylists } = trpc.playlists.mine.useQuery(undefined, {
-    enabled: !!user,
+    enabled: !!user && open,
   });
 
-  // Add track to existing playlist
   const addTrackMutation = trpc.playlists.addTrack.useMutation({
     onSuccess: (_data, vars) => {
       setAddedToId(vars.playlistId);
@@ -47,13 +55,9 @@ export function AddToMyListModal({ songId, songTitle, onClose }: AddToMyListModa
     },
   });
 
-  // Create new playlist then add track
   const createMutation = trpc.playlists.create.useMutation({
     onSuccess: (data) => {
-      if (data.id == null) {
-        toast.error("Failed to create list");
-        return;
-      }
+      if (data.id == null) { toast.error("Failed to create list"); return; }
       addTrackMutation.mutate({ playlistId: data.id, songId });
       utils.playlists.mine.invalidate();
     },
@@ -69,26 +73,26 @@ export function AddToMyListModal({ songId, songTitle, onClose }: AddToMyListModa
 
   const handleCreateAndAdd = () => {
     const name = newListName.trim();
-    if (!name) {
-      toast.error("Please enter a list name");
-      return;
-    }
+    if (!name) { toast.error("Please enter a list name"); return; }
     createMutation.mutate({ name, isPublic: false });
   };
 
+  const isBusy = addTrackMutation.isPending || createMutation.isPending;
+
+  // Not-logged-in state — use overlay (centered) since there's no track origin
   if (!user) {
     return (
-      <div
-        className="fixed inset-0 z-[200] flex items-center justify-center"
-        style={{ background: "rgba(0,0,0,0.7)" }}
-        onClick={onClose}
+      <ContextualModal
+        open={open}
+        onClose={onClose}
+        intent="sign-in-prompt"
+        renderMode="overlay"
+        width={340}
+        maxHeight={200}
+        showClose
       >
-        <div
-          className="relative rounded-2xl p-6 max-w-sm w-full mx-4 text-center"
-          style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <p className="text-sm mb-4" style={{ color: "oklch(0.7 0.02 280)" }}>
+        <div className="px-5 py-5 text-center">
+          <p className="text-sm mb-4 text-white/60">
             Sign in to save tracks to your lists.
           </p>
           <a
@@ -99,135 +103,118 @@ export function AddToMyListModal({ songId, songTitle, onClose }: AddToMyListModa
             Sign In
           </a>
         </div>
-      </div>
+      </ContextualModal>
     );
   }
 
-  const isBusy = addTrackMutation.isPending || createMutation.isPending;
-
   return (
-    <div
-      className="fixed inset-0 z-[200] flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.7)" }}
-      onClick={onClose}
+    <ContextualModal
+      open={open}
+      onClose={onClose}
+      originRect={originRect}
+      intent="add_to_playlist"
+      renderMode="contextual"
+      width={300}
+      maxHeight={420}
     >
-      <div
-        className="relative rounded-2xl overflow-hidden max-w-sm w-full mx-4"
-        style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: "1px solid oklch(0.2 0.015 280)" }}
+      {/* Header */}
+      <div className="flex flex-col px-4 pt-3 pb-2 border-b border-white/[0.08]">
+        <span
+          className="text-[11px] font-semibold tracking-widest uppercase"
+          style={{ fontFamily: "Cinzel, serif", color: "oklch(0.75 0.15 85)" }}
         >
-          <div>
-            <h3
-              className="text-sm font-semibold tracking-wide"
-              style={{ fontFamily: "Cinzel, serif", color: "oklch(0.75 0.15 85)" }}
-            >
-              Add to My List
-            </h3>
-            <p className="text-xs mt-0.5 truncate max-w-[220px]" style={{ color: "oklch(0.55 0.02 280)" }}>
-              {songTitle}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
-            style={{ color: "oklch(0.55 0.02 280)" }}
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Playlist list */}
-        <div className="max-h-64 overflow-y-auto">
-          {loadingPlaylists ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: "oklch(0.55 0.02 280)" }} />
-            </div>
-          ) : playlists && playlists.length > 0 ? (
-            playlists.map((pl) => {
-              const isAdded = addedToId === pl.id;
-              const isAdding = addTrackMutation.isPending && addTrackMutation.variables?.playlistId === pl.id;
-              return (
-                <button
-                  key={pl.id}
-                  onClick={() => handleAddToExisting(pl.id)}
-                  disabled={isBusy || isAdded}
-                  className="w-full flex items-center gap-3 px-5 py-3 text-sm transition-colors text-left hover:bg-white/[0.05] disabled:opacity-60"
-                  style={{ color: "oklch(0.85 0.02 280)" }}
-                >
-                  {isAdded ? (
-                    <Check className="w-4 h-4 shrink-0" style={{ color: "oklch(0.75 0.15 85)" }} />
-                  ) : isAdding ? (
-                    <Loader2 className="w-4 h-4 shrink-0 animate-spin" style={{ color: "oklch(0.75 0.15 85)" }} />
-                  ) : (
-                    <ListMusic className="w-4 h-4 shrink-0 opacity-50" />
-                  )}
-                  <span className="truncate">{pl.name}</span>
-                  <span className="ml-auto text-xs shrink-0" style={{ color: "oklch(0.45 0.015 280)" }}>
-                    {pl.trackCount ?? 0} tracks
-                  </span>
-                </button>
-              );
-            })
-          ) : (
-            <p className="text-xs text-center py-6" style={{ color: "oklch(0.45 0.015 280)" }}>
-              No lists yet. Create one below.
-            </p>
-          )}
-        </div>
-
-        {/* Create new list */}
-        <div style={{ borderTop: "1px solid oklch(0.2 0.015 280)" }}>
-          {showCreateForm ? (
-            <div className="px-5 py-4 flex gap-2">
-              <input
-                autoFocus
-                type="text"
-                placeholder="List name…"
-                value={newListName}
-                onChange={(e) => setNewListName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleCreateAndAdd();
-                  if (e.key === "Escape") setShowCreateForm(false);
-                }}
-                maxLength={128}
-                className="flex-1 bg-transparent text-sm rounded-lg px-3 py-2 outline-none focus:ring-1"
-                style={{
-                  color: "oklch(0.85 0.02 280)",
-                  border: "1px solid oklch(0.3 0.02 280)",
-                  // @ts-ignore
-                  "--tw-ring-color": "oklch(0.75 0.15 85)",
-                }}
-              />
-              <button
-                onClick={handleCreateAndAdd}
-                disabled={isBusy || !newListName.trim()}
-                className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
-                style={{ background: "oklch(0.75 0.15 85)", color: "oklch(0.1 0.02 280)" }}
-              >
-                {createMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Create"
-                )}
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="w-full flex items-center gap-3 px-5 py-3.5 text-sm transition-colors hover:bg-white/[0.05]"
-              style={{ color: "oklch(0.75 0.15 85)" }}
-            >
-              <Plus className="w-4 h-4" />
-              New list
-            </button>
-          )}
-        </div>
+          Add to My List
+        </span>
+        <span className="text-[11px] truncate mt-0.5 text-white/40">{songTitle}</span>
       </div>
-    </div>
+
+      {/* Playlist list */}
+      <div className="max-h-52 overflow-y-auto">
+        {loadingPlaylists ? (
+          <div className="flex items-center justify-center py-6">
+            <Loader2 className="w-4 h-4 animate-spin text-white/40" />
+          </div>
+        ) : playlists && playlists.length > 0 ? (
+          playlists.map((pl) => {
+            const isAdded = addedToId === pl.id;
+            const isAdding =
+              addTrackMutation.isPending &&
+              addTrackMutation.variables?.playlistId === pl.id;
+            return (
+              <button
+                key={pl.id}
+                onClick={() => handleAddToExisting(pl.id)}
+                disabled={isBusy || isAdded}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] transition-colors text-left hover:bg-white/[0.06] disabled:opacity-60"
+                style={{ color: "oklch(0.85 0.02 280)" }}
+              >
+                {isAdded ? (
+                  <Check className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.75 0.15 85)" }} />
+                ) : isAdding ? (
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" style={{ color: "oklch(0.75 0.15 85)" }} />
+                ) : (
+                  <ListMusic className="w-3.5 h-3.5 shrink-0 opacity-40" />
+                )}
+                <span className="truncate">{pl.name}</span>
+                <span className="ml-auto text-[11px] shrink-0 text-white/30">
+                  {pl.trackCount ?? 0}
+                </span>
+              </button>
+            );
+          })
+        ) : (
+          <p className="text-[12px] text-center py-5 text-white/30">
+            No lists yet — create one below.
+          </p>
+        )}
+      </div>
+
+      {/* Create new list */}
+      <div className="border-t border-white/[0.08]">
+        {showCreateForm ? (
+          <div className="px-4 py-3 flex gap-2">
+            <input
+              autoFocus
+              type="text"
+              placeholder="List name…"
+              value={newListName}
+              onChange={(e) => setNewListName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreateAndAdd();
+                if (e.key === "Escape") setShowCreateForm(false);
+              }}
+              maxLength={128}
+              className="flex-1 bg-transparent text-[13px] rounded-lg px-3 py-1.5 outline-none focus:ring-1 text-white/90"
+              style={{
+                border: "1px solid oklch(0.3 0.02 280)",
+                // @ts-ignore
+                "--tw-ring-color": "oklch(0.75 0.15 85)",
+              }}
+            />
+            <button
+              onClick={handleCreateAndAdd}
+              disabled={isBusy || !newListName.trim()}
+              className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors disabled:opacity-50"
+              style={{ background: "oklch(0.75 0.15 85)", color: "oklch(0.1 0.02 280)" }}
+            >
+              {createMutation.isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                "Create"
+              )}
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 text-[13px] transition-colors hover:bg-white/[0.05]"
+            style={{ color: "oklch(0.75 0.15 85)" }}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            New list
+          </button>
+        )}
+      </div>
+    </ContextualModal>
   );
 }
