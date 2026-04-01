@@ -1773,3 +1773,7 @@
 - [x] Gift button in mobile expanded player does nothing — implement creative gift/tip modal with emoji appreciation + Stripe tip tabs
 - [x] Details button in mobile expanded player does nothing — now collapses to mini and navigates to song page
 - [x] Mobile mini player bar invisible at bottom of screen — increased height, added max(safe-area, 8px) padding for Android browser chrome
+
+## Phase 56: Cinematic View Fix
+- [x] Cinematic view shows blank black screen — fixed by using MediaAsset mode="cinematic" directly in CinematicLayer (was using mode="player" via ArtworkLayer)
+- [x] Video load error fallback — added onError handler to both PlayerMedia and CinematicMedia so cover art shows if video fails to load on mobile

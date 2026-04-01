@@ -662,10 +662,21 @@ export default function MobilePlayerLayer() {
       onTouchEnd={onCinematicTouchEnd}
       onClick={showOverlay}
     >
-      {/* Full-bleed artwork/video — no container, no padding */}
-      <div className="absolute inset-0">
-        <ArtworkLayer fill />
-      </div>
+      {/* Full-bleed artwork/video — cinematic mode with Ken Burns + parallax */}
+      <MediaAsset
+        src={currentTrack.artUrl}
+        alt={currentTrack.title}
+        mode="cinematic"
+        focalX={currentTrack.coverPositionX ?? 50}
+        focalY={currentTrack.coverPositionY ?? 50}
+        emoji={currentTrack.emoji}
+        bg={currentTrack.bg}
+        showGradient={false}
+        videoUrl={videoUrl}
+        showVideo={showVideo}
+        videoRef={videoRef as React.RefObject<HTMLVideoElement | null>}
+        className="absolute inset-0 w-full h-full"
+      />
 
       {/* Ambient gradient — bottom fade for controls legibility */}
       <div

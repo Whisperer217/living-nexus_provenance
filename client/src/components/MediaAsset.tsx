@@ -115,13 +115,14 @@ function CardMedia({
   );
 }
 
-// ── Player Mode ───────────────────────────────────────────────────────────────
+// ── Player Mode ─────────────────────────────────────────────────────────────────────────────────
 function PlayerMedia({
   src, alt, focalX, focalY, emoji, bg, showGradient, children,
   videoUrl, showVideo, videoRef,
 }: Pick<MediaAssetProps, "src" | "alt" | "focalX" | "focalY" | "emoji" | "bg" | "showGradient" | "children" | "videoUrl" | "showVideo" | "videoRef">) {
   const vRef = videoRef as React.RefObject<HTMLVideoElement> | undefined;
   const objectPosition = `${focalX ?? 50}% ${focalY ?? 50}%`;
+  const [videoError, setVideoError] = useState(false);
 
   return (
     <div
@@ -142,13 +143,14 @@ function PlayerMedia({
         />
       )}
       {/* Video layer */}
-      {videoUrl && (
+      {videoUrl && !videoError && (
         <video
           ref={vRef}
           src={videoUrl}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10"
           style={{ opacity: showVideo ? 1 : 0 }}
           muted loop playsInline preload="metadata"
+          onError={() => setVideoError(true)}
         />
       )}
       {/* Cover art — contain so full artwork is always visible */}
@@ -163,7 +165,7 @@ function PlayerMedia({
             maxHeight: "100%",
             width: "auto",
             height: "auto",
-            opacity: videoUrl && showVideo ? 0 : 1,
+            opacity: videoUrl && showVideo && !videoError ? 0 : 1,
           }}
           draggable={false}
         />
@@ -196,6 +198,8 @@ function CinematicMedia({
   const containerRef = useRef<HTMLDivElement>(null);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const gyroRef = useRef<{ beta: number; gamma: number }>({ beta: 0, gamma: 0 });
+  // Track video load error — fall back to cover art if video fails
+  const [videoError, setVideoError] = useState(false);
 
   // Ken Burns keyframes
   useEffect(() => {
@@ -245,17 +249,19 @@ function CinematicMedia({
       style={{ background: bg ?? "oklch(0.05 0.02 270)" }}
     >
       {/* Video layer — full bleed, always cover */}
-      {videoUrl && (
+      {videoUrl && !videoError && (
         <video
           ref={vRef}
           src={videoUrl}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 z-10"
           style={{ opacity: showVideo ? 1 : 0 }}
           muted loop playsInline preload="metadata"
+          onError={() => setVideoError(true)}
         />
       )}
 
       {/* Cover art — full bleed with Ken Burns + parallax */}
+      {/* Always visible if no video, or if video failed to load */}
       {src ? (
         <img
           src={src}
@@ -263,7 +269,7 @@ function CinematicMedia({
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 z-0"
           style={{
             objectPosition,
-            opacity: videoUrl && showVideo ? 0 : 1,
+            opacity: videoUrl && showVideo && !videoError ? 0 : 1,
             animation: kbAnimation,
             transform: `translate(${parallax.x}px, ${parallax.y}px)`,
             transition: "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.7s ease",
