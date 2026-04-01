@@ -110,14 +110,58 @@ function WIDTrustLayer() {
           </div>
           <div className="grid grid-cols-4 gap-2">
             {voices.slice(0, 8).map((v: any) => (
-              <WIDPanel
-                key={v.songId}
-                witnessId={v.witnessId ?? ""}
-                songTitle={v.title}
-                creatorName={v.artistHandle || v.userName}
-                registeredAt={v.createdAt}
-                coverArtUrl={v.coverArtUrl}
-              />
+              <Link key={v.songId} href={`/song/${v.songId}`}>
+                <div
+                  className="relative rounded-xl overflow-hidden cursor-pointer group transition-all hover:scale-[1.03]"
+                  style={{ aspectRatio: "1/1", background: "oklch(0.09 0.03 270)" }}
+                >
+                  {/* Cover art */}
+                  {v.coverArtUrl ? (
+                    <img
+                      src={v.coverArtUrl}
+                      alt={v.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center"
+                      style={{ background: "oklch(0.12 0.04 270)" }}>
+                      <Fingerprint size={20} style={{ color: "oklch(0.65 0.2 300 / 0.4)" }} />
+                    </div>
+                  )}
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  {/* WID badge — top left */}
+                  <div
+                    className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[7px] font-mono font-bold z-10"
+                    style={{
+                      background: "oklch(0.65 0.2 300 / 0.18)",
+                      border: "1px solid oklch(0.65 0.2 300 / 0.45)",
+                      color: "oklch(0.75 0.18 300)",
+                    }}
+                  >
+                    <Fingerprint size={7} />
+                    WID
+                  </div>
+                  {/* Creator avatar — top right */}
+                  {v.profilePhotoUrl && (
+                    <img
+                      src={v.profilePhotoUrl}
+                      alt={v.artistHandle || v.userName}
+                      className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full object-cover z-10"
+                      style={{ border: "1px solid oklch(0.84 0.155 85 / 0.5)" }}
+                    />
+                  )}
+                  {/* Title + creator name — bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 px-2 pb-2 z-10">
+                    <p className="font-heading text-[9px] leading-tight truncate text-white">
+                      {v.title}
+                    </p>
+                    <p className="font-body text-[8px] truncate mt-0.5" style={{ color: "oklch(0.75 0.025 280)" }}>
+                      {v.artistHandle || v.userName}
+                    </p>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -178,7 +222,7 @@ function FeaturedCreatorsCarousel() {
                   {creator.artistHandle || creator.name}
                 </p>
                 <p className="font-body text-[9px] mt-0.5" style={{ color: "oklch(0.55 0.03 280)" }}>
-                  {creator.songCount ?? 0} tracks
+                  {creator.publishedCount ?? 0} tracks
                 </p>
               </div>
             </div>
@@ -367,11 +411,11 @@ export default function HomePage() {
     const song = s.song ?? s;
     const creator = s.creator ?? null;
     return {
-      id: song.id,
+      id: String(song.id),
       title: song.title ?? "Untitled Work",
       artist: creator?.artistHandle || creator?.name || "Unknown Creator",
       artUrl: song.coverArtUrl ?? undefined,
-      audioSrc: song.fileUrl ?? "",
+      audioUrl: song.fileUrl ?? "",
       genre: song.genre ?? undefined,
       plays: song.playCount ?? 0,
       witnessId: song.witnessId ?? undefined,

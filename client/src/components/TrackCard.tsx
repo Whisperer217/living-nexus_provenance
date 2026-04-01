@@ -71,12 +71,12 @@ function AiDisclosureBadge({ value }: { value: string }) {
 }
 
 export default function TrackCard({ track, index, onTip, prefetchedLikeCount, prefetchedLiked }: Props) {
-  const { state, addAndPlay, playNext, openNowPlayingPanel } = usePlayer();
+  const { state, addAndPlay, playNext, openNowPlayingPanel, currentTrackId } = usePlayer();
   const [showAddToList, setShowAddToList] = useState(false);
   const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
   const [, navigate] = useLocation();
-  const isPlaying = state.currentIdx === index && state.isPlaying;
-  const isActive = state.currentIdx === index;
+  const isActive = currentTrackId === String(track.id);
+  const isPlaying = isActive && state.isPlaying;
 
   // Zone 1: Cover art click — load into global player only, no navigation
   const handleCoverClick = (e: React.MouseEvent) => {

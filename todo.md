@@ -1761,3 +1761,10 @@
 - [x] Song detail page: Share button — copies canonical URL to clipboard
 - [x] Song detail page: Share modal — shows embed preview card (Discord/iMessage style) so creator can verify before sharing
 - [ ] Trigger embed video generation on song publish (hook into upload/publish flow)
+
+## Phase 54: HomePage Regression Fixes
+- [x] WID panels: fix data shape — show song title, creator name, and avatar instead of raw hash IDs
+- [x] Creators carousel: fix featuredCreators procedure returning 0 tracks for all creators
+- [x] HorizontalTrackGrid: wire track card clicks to global PlayerContext (addAndPlay)
+- [x] TrackCard: fix isActive check to use currentTrackId instead of index-based comparison
+- [x] HomePage mapSong: convert song.id to string for Track interface compatibility
