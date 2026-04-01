@@ -1,16 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MobilePlayerPanel
-   v1.5.0 — two UX fixes applied on top of v1.4.0 baseline:
-     • Cinema Mode eye icon moved from header → next to heart/like button
-     • Swipe-right-to-close removed; replaced with grab handle at bottom
-       of lyrics section (swipe down ≥ 60 px closes, swipe up ≥ 60 px expands)
-   v1.4.0 baseline + 4 additions:
-     1. Share button (Web Share API + clipboard fallback) in action row
-     2. Hide Player button (ChevronDown) in header alongside X
-     3. WID badge + AI/genre tags on their own row below artist name
-     4. Cinema Mode toggle (Eye icon) — now next to heart button
-   Cover art: rounded square, padded, unchanged from v1.4.0.
-   Controls overlay: bottom of art, unchanged from v1.4.0.
+   LIVING NEXUS — MobilePlayerPanel v2.0 (Cinematic Mode)
+   Structure:
+   • Full-bleed artwork as background (dominant, immersive)
+   • Right-side emotional action stack: Love ❤️ | Share 🔁 | Comment 💬
+   • Functional row below controls: Gift | Details | Sound
+   • WID badge always visible, directly under title
+   • Details slide-up panel: WID, Creator, License, Provenance, Tags
+   • Tap artwork to toggle UI visibility (true cinematic mode)
+   • Floating heart pulse animation on Love tap
+   • Gradient fade behind controls
+   Divine Noir — Orbitron/Cinzel, gold/cyan palette
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -20,9 +19,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import {
   Play, Pause, SkipBack, SkipForward,
-  Shuffle, Repeat, Volume2, VolumeX, Heart, X,
-  Music, DollarSign, Users, Video,
-  Share2, ChevronDown, Eye, EyeOff, Check, MessageCircle,
+  Shuffle, Repeat, Volume2, VolumeX,
+  Heart, X, Music, DollarSign, Users,
+  Share2, ChevronDown, MessageCircle, Info,
+  Check, Shield, Tag, FileText, User,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import PlayerTipModal from "./PlayerTipModal";
@@ -31,6 +31,28 @@ function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
   const m = Math.floor(s / 60);
   return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
+}
+
+// Floating heart particle
+function HeartParticle({ id, onDone }: { id: number; onDone: (id: number) => void }) {
+  useEffect(() => {
+    const t = setTimeout(() => onDone(id), 900);
+    return () => clearTimeout(t);
+  }, [id, onDone]);
+  const left = 30 + Math.random() * 40;
+  return (
+    <div
+      className="absolute pointer-events-none select-none text-xl"
+      style={{
+        left: `${left}%`,
+        bottom: "20%",
+        animation: "heartFloat 0.9s ease-out forwards",
+        zIndex: 60,
+      }}
+    >
+      ❤️
+    </div>
+  );
 }
 
 export default function MobilePlayerPanel() {
@@ -43,38 +65,36 @@ export default function MobilePlayerPanel() {
     queueContextLabel,
   } = usePlayer();
   const { user } = useAuth();
+  const [, navigate] = useLocation();
 
   const open = isNowPlayingPanelOpen;
   const togglePanel = () => isNowPlayingPanelOpen ? closeNowPlayingPanel() : openNowPlayingPanel();
-  const [tipOpen, setTipOpen] = useState(false);
 
-  // Cinema Mode
-  const [cinemaMode, setCinemaMode] = useState(false);
-  // Lyrics/Comments tab in Cinema Mode
-  const [cinemaTab, setCinemaTab] = useState<"lyrics" | "comments">("lyrics");
+  // UI visibility (cinematic tap-to-hide)
+  const [uiVisible, setUiVisible] = useState(true);
+  const uiHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Details panel
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  // Comment panel
+  const [commentOpen, setCommentOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
 
-  // Share copied state
+  // Tip modal
+  const [tipOpen, setTipOpen] = useState(false);
+
+  // Share copied
   const [copied, setCopied] = useState(false);
 
-  // Panel ref (no swipe-right gesture — removed)
-  const panelRef = useRef<HTMLDivElement>(null);
+  // Heart particles
+  const [hearts, setHearts] = useState<number[]>([]);
+  const heartCounter = useRef(0);
 
-  // Grab-handle swipe state (swipe down ≥ 60 px closes, swipe up ≥ 60 px expands)
-  const grabTouchStartY = useRef<number | null>(null);
+  // Volume
+  const [volOpen, setVolOpen] = useState(false);
 
-  const onGrabTouchStart = (e: React.TouchEvent) => {
-    grabTouchStartY.current = e.touches[0].clientY;
-  };
-  const onGrabTouchEnd = (e: React.TouchEvent) => {
-    if (grabTouchStartY.current === null) return;
-    const delta = e.changedTouches[0].clientY - grabTouchStartY.current;
-    if (delta > 60) closeNowPlayingPanel();
-    else if (delta < -60 && !open) openNowPlayingPanel();
-    grabTouchStartY.current = null;
-  };
-
-  // ── Draggable floating tab ──────────────────────────────────────────
+  // Draggable floating tab
   const STORAGE_KEY = "ln_player_tab_top";
   const DEFAULT_TOP = () => Math.max(0, window.innerHeight - 220);
   const [tabTop, setTabTop] = useState<number>(() => {
@@ -112,36 +132,34 @@ export default function MobilePlayerPanel() {
     isDragging.current = false;
   }, [tabTop]);
 
-  const { backgroundCreatorHandle } = usePlayer();
-  const [, navigate] = useLocation();
-
-  const prevCreatorHandle = useRef<string | null>(null);
-  useEffect(() => {
-    if (!open) return;
-    if (!backgroundCreatorHandle) return;
-    if (backgroundCreatorHandle === prevCreatorHandle.current) return;
-    prevCreatorHandle.current = backgroundCreatorHandle;
-    if (prevCreatorHandle.current !== null) {
-      navigate(`/creator/${backgroundCreatorHandle}`);
-    }
-  }, [backgroundCreatorHandle, open, navigate]);
+  // Grab-handle swipe
+  const grabTouchStartY = useRef<number | null>(null);
+  const onGrabTouchStart = (e: React.TouchEvent) => { grabTouchStartY.current = e.touches[0].clientY; };
+  const onGrabTouchEnd = (e: React.TouchEvent) => {
+    if (grabTouchStartY.current === null) return;
+    const delta = e.changedTouches[0].clientY - grabTouchStartY.current;
+    if (delta > 60) closeNowPlayingPanel();
+    grabTouchStartY.current = null;
+  };
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
   const currentSongId = currentTrack?.id ? parseInt(currentTrack.id, 10) : null;
 
-  // Song detail (for tip status, lyrics, video)
+  // Song detail
   const { data: songDetail } = trpc.songs.getById.useQuery(
     { id: currentSongId! },
     { enabled: !!currentSongId && !isNaN(currentSongId), staleTime: 60_000 }
   );
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
+  const song = songDetail?.song as any;
+  const creator = songDetail?.creator as any;
 
-  // Comments (only fetched when Comments tab is active in Cinema Mode)
+  // Comments
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
     { songId: currentSongId! },
-    { enabled: cinemaMode && cinemaTab === "comments" && !!currentSongId && !isNaN(currentSongId), staleTime: 30_000 }
+    { enabled: commentOpen && !!currentSongId && !isNaN(currentSongId), staleTime: 30_000 }
   );
   const addCommentMutation = trpc.comments.add.useMutation({
     onSuccess: () => { refetchComments(); setNewComment(""); },
@@ -155,21 +173,27 @@ export default function MobilePlayerPanel() {
     });
   }, [newComment, currentSongId, addCommentMutation, user]);
 
-  // DB-backed like state
+  // DB-backed like
   const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(
     { songId: currentSongId! },
     { enabled: !!user && !!currentSongId && !isNaN(currentSongId) }
   );
   const isLiked = !!likeStatusData?.liked;
-
   const toggleLikeMutation = trpc.songs.toggleLike.useMutation({
-    onSuccess: () => { refetchLikeStatus(); },
+    onSuccess: () => refetchLikeStatus(),
   });
 
-  const handleToggleLike = useCallback(() => {
+  const handleLove = useCallback(() => {
     if (!user || !currentSongId || isNaN(currentSongId)) return;
     toggleLikeMutation.mutate({ songId: currentSongId });
+    // Spawn heart particle
+    const id = heartCounter.current++;
+    setHearts(h => [...h, id]);
   }, [user, currentSongId, toggleLikeMutation]);
+
+  const removeHeart = useCallback((id: number) => {
+    setHearts(h => h.filter(x => x !== id));
+  }, []);
 
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
 
@@ -182,9 +206,42 @@ export default function MobilePlayerPanel() {
   const handleSeekTouch = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (!audioRef.current?.duration) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const touch = e.touches[0];
-    seek(((touch.clientX - rect.left) / rect.width) * audioRef.current.duration);
+    seek(((e.touches[0].clientX - rect.left) / rect.width) * audioRef.current.duration);
   }, [audioRef, seek]);
+
+  const handleShare = useCallback(async () => {
+    if (!currentTrack) return;
+    const url = currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
+    try {
+      if (navigator.share) { await navigator.share({ title: currentTrack.title || "", url }); return; }
+    } catch {}
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  }, [currentTrack, currentSongId]);
+
+  // Tap artwork to toggle UI
+  const handleArtTap = useCallback(() => {
+    if (detailsOpen || commentOpen) return;
+    setUiVisible(v => !v);
+  }, [detailsOpen, commentOpen]);
+
+  // Auto-show UI after 4s of hiding
+  useEffect(() => {
+    if (!uiVisible) {
+      uiHideTimer.current = setTimeout(() => setUiVisible(true), 4000);
+    }
+    return () => { if (uiHideTimer.current) clearTimeout(uiHideTimer.current); };
+  }, [uiVisible]);
+
+  // Reset on track change
+  useEffect(() => {
+    setUiVisible(true);
+    setDetailsOpen(false);
+    setCommentOpen(false);
+  }, [currentTrack?.id]);
 
   // Close on Escape
   useEffect(() => {
@@ -193,102 +250,45 @@ export default function MobilePlayerPanel() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Background video — always muted, auto-fades in when playing
+  // Background video
   const videoRef = useRef<HTMLVideoElement>(null);
-  const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
-  const videoWitnessId = (songDetail?.song as any)?.videoWitnessId as string | null | undefined;
+  const videoUrl = song?.videoUrl as string | null | undefined;
+  const videoWitnessId = song?.videoWitnessId as string | null | undefined;
   const [videoBuffering, setVideoBuffering] = useState(true);
 
-  // Sync background video to audio play/pause state
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid || !videoUrl) return;
-    if (state.isPlaying && open) {
-      vid.play().catch(() => {});
-    } else {
-      vid.pause();
-    }
+    if (state.isPlaying && open) vid.play().catch(() => {});
+    else vid.pause();
   }, [state.isPlaying, open, videoUrl]);
 
-  // Buffering event listeners — hold cover art while video loads
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid || !videoUrl) return;
     const onWaiting  = () => setVideoBuffering(true);
-    const onStalled  = () => setVideoBuffering(true);
     const onCanPlay  = () => setVideoBuffering(false);
     const onPlaying  = () => setVideoBuffering(false);
     const onError    = () => setVideoBuffering(false);
     vid.addEventListener("waiting",  onWaiting);
-    vid.addEventListener("stalled",  onStalled);
     vid.addEventListener("canplay",  onCanPlay);
-    vid.addEventListener("canplaythrough", onCanPlay);
     vid.addEventListener("playing",  onPlaying);
     vid.addEventListener("error",    onError);
     return () => {
       vid.removeEventListener("waiting",  onWaiting);
-      vid.removeEventListener("stalled",  onStalled);
       vid.removeEventListener("canplay",  onCanPlay);
-      vid.removeEventListener("canplaythrough", onCanPlay);
       vid.removeEventListener("playing",  onPlaying);
       vid.removeEventListener("error",    onError);
     };
   }, [videoUrl]);
 
-  // Show video only when playing AND not buffering
-  const showVideo = state.isPlaying && !videoBuffering;
+  const showVideo = state.isPlaying && !videoBuffering && !!videoUrl;
 
   useEffect(() => {
     const vid = videoRef.current;
     if (vid) { vid.pause(); vid.currentTime = 0; }
     setVideoBuffering(true);
-    setCinemaMode(false);
-    setCinemaTab("lyrics");
-    setNewComment("");
   }, [currentTrack?.id]);
-
-  // Vertical volume bar
-  const [volBarActive, setVolBarActive] = useState(false);
-  const volBarRef = useRef<HTMLDivElement>(null);
-
-  const handleVolBarTouch = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const touch = e.touches[0];
-    const ratio = 1 - Math.max(0, Math.min(1, (touch.clientY - rect.top) / rect.height));
-    setVolume(ratio);
-  }, [setVolume]);
-
-  const handleVolBarClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    setVolume(ratio);
-  }, [setVolume]);
-
-  // Share handler
-  const handleShare = useCallback(async () => {
-    if (!currentTrack) return;
-    const url = currentSongId
-      ? `${window.location.origin}/song/${currentSongId}`
-      : window.location.href;
-    const shareData = {
-      title: currentTrack.title || "Track on Living Nexus",
-      text: `${currentTrack.title} by ${currentTrack.artist} — Listen on Living Nexus`,
-      url,
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
-      }
-    } catch {}
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
-  }, [currentTrack, currentSongId]);
 
   return (
     <>
@@ -314,662 +314,596 @@ export default function MobilePlayerPanel() {
           boxShadow: "-4px 0 24px oklch(0 0 0 / 0.5), -2px 0 8px oklch(0.55 0.22 295 / 0.15)",
         }}
       >
-        {/* Thumbnail */}
         <div
           className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center"
           style={{ background: currentTrack?.bg || "oklch(0.18 0.04 275)" }}
         >
           {currentTrack?.artUrl && currentTrack.artType !== "video" ? (
-            <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%` }} />
+            <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover"
+              style={{ objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%` }} />
           ) : currentTrack?.artUrl && currentTrack.artType === "video" ? (
             <video src={currentTrack.artUrl} className="w-full h-full object-cover" muted />
           ) : (
             <Music className="w-4 h-4 opacity-40 text-white" />
           )}
         </div>
-        {/* Playing indicator dots */}
         {state.isPlaying && (
           <div className="flex items-end gap-[2px] h-3">
             {[0, 1, 2].map(i => (
-              <div
-                key={i}
-                className="w-[3px] rounded-full"
-                style={{
-                  background: "#D4AF37",
-                  animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`,
-                  height: "6px",
-                }}
-              />
+              <div key={i} className="w-[3px] rounded-full"
+                style={{ background: "#D4AF37", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
             ))}
           </div>
         )}
-        {/* Chevron */}
-        <div
-          className="text-white/30 transition-transform duration-300"
-          style={{ transform: open ? "rotate(0deg)" : "rotate(180deg)", fontSize: "10px", lineHeight: 1 }}
-        >
+        <div className="text-white/30 transition-transform duration-300"
+          style={{ transform: open ? "rotate(0deg)" : "rotate(180deg)", fontSize: "10px", lineHeight: 1 }}>
           ›
         </div>
       </button>
 
       {/* ── Backdrop ── */}
       {open && (
-        <div
-          className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-          onClick={closeNowPlayingPanel}
-        />
+        <div className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={closeNowPlayingPanel} />
       )}
 
       {/* ══════════════════════════════════════════════════════════════
-          SIDE PANEL  (no swipe-right-to-close — use grab handle below)
+          CINEMATIC PANEL — full-height, right-side drawer
       ══════════════════════════════════════════════════════════════ */}
       <div
-        ref={panelRef}
         className="md:hidden fixed top-0 right-0 h-full z-50 flex flex-col
-          transition-transform duration-300 ease-in-out"
+          transition-transform duration-300 ease-in-out overflow-hidden"
         style={{
-          width: "min(320px, 88vw)",
-          background: "oklch(0.10 0.022 275)",
-          borderLeft: "1px solid oklch(0.20 0.02 275)",
-          boxShadow: "-8px 0 48px oklch(0 0 0 / 0.7)",
+          width: "min(340px, 92vw)",
+          background: "oklch(0.07 0.02 275)",
+          borderLeft: "1px solid oklch(0.18 0.02 275)",
+          boxShadow: "-8px 0 48px oklch(0 0 0 / 0.8)",
           transform: open ? "translateX(0)" : "translateX(100%)",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        {/* ══ FIXED TOP SECTION ══ */}
-        <div className="flex-shrink-0">
+        {/* ══ ARTWORK SECTION — full-bleed, dominant ══ */}
+        <div
+          className="relative flex-shrink-0"
+          style={{ height: "56vw", maxHeight: "280px", minHeight: "200px" }}
+        >
+          {/* Background video */}
+          {videoUrl && (
+            <video ref={videoRef} src={videoUrl}
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+              style={{ opacity: showVideo ? 1 : 0 }}
+              playsInline loop muted preload="metadata" />
+          )}
+          {/* Cover art */}
+          {currentTrack?.artUrl ? (
+            <img src={currentTrack.artUrl} alt=""
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+              style={{
+                opacity: showVideo ? 0 : 1,
+                objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
+              }} />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center"
+              style={{ background: currentTrack?.bg || "oklch(0.14 0.04 275)" }}>
+              <Music className="w-16 h-16 opacity-20 text-white" />
+            </div>
+          )}
 
-          {/* ── Header: Now Playing label + Hide + Close — always visible ── */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          {/* Gradient fade — bottom of artwork into controls */}
+          <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
+            style={{ background: "linear-gradient(to bottom, transparent, oklch(0.07 0.02 275))" }} />
+
+          {/* Tap zone — toggle UI visibility */}
+          <div className="absolute inset-0 z-10 cursor-pointer" onClick={handleArtTap} />
+
+          {/* Heart particles */}
+          {hearts.map(id => <HeartParticle key={id} id={id} onDone={removeHeart} />)}
+
+          {/* ── Header controls (always visible) ── */}
+          <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-4 z-20">
             <div className="flex flex-col gap-0.5">
-              {!cinemaMode && (
-                <>
-                  <span
-                    className="text-[10px] font-bold tracking-widest uppercase"
-                    style={{ color: "oklch(0.45 0.03 280)", fontFamily: "'Cinzel', serif" }}
-                  >
-                    Now Playing
-                  </span>
-                  <span
-                    className="text-[9px] tracking-wider"
-                    style={{ color: "oklch(0.84 0.155 85 / 0.70)", fontFamily: "'Cinzel', serif" }}
-                  >
-                    {queueContextLabel}
-                  </span>
-                </>
-              )}
-              {cinemaMode && (
-                <span
-                  className="text-[9px] tracking-widest uppercase"
-                  style={{ color: "oklch(0.84 0.155 85 / 0.45)", fontFamily: "'Cinzel', serif" }}
-                >
-                  Cinema
+              <span className="text-[9px] font-bold tracking-widest uppercase"
+                style={{ color: "oklch(0.84 0.155 85 / 0.6)", fontFamily: "'Cinzel', serif" }}>
+                Now Playing
+              </span>
+              {queueContextLabel && (
+                <span className="text-[8px] tracking-wider"
+                  style={{ color: "oklch(0.84 0.155 85 / 0.35)", fontFamily: "'Cinzel', serif" }}>
+                  {queueContextLabel}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-1">
-              {/* Cinema Mode toggle — always visible in header so user can exit */}
-              <button
-                onClick={() => setCinemaMode(v => !v)}
-                className="p-1.5 rounded-lg transition-all"
-                style={{
-                  color: cinemaMode ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)",
-                  background: cinemaMode ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
-                  border: cinemaMode ? "1px solid oklch(0.84 0.155 85 / 0.30)" : "1px solid transparent",
-                }}
-                title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — lyrics & comments"}
-              >
-                {cinemaMode ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-              {/* Hide Player (collapse) */}
-              <button
-                onClick={closeNowPlayingPanel}
-                className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
-                title="Hide player"
-              >
+              <button onClick={closeNowPlayingPanel}
+                className="p-1.5 rounded-lg text-white/30 hover:text-white/70 transition-all"
+                style={{ background: "oklch(0 0 0 / 0.35)", backdropFilter: "blur(4px)" }}>
                 <ChevronDown size={16} />
               </button>
-              {/* Close (X) */}
-              <button
-                onClick={closeNowPlayingPanel}
-                className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
-                title="Close"
-              >
+              <button onClick={closeNowPlayingPanel}
+                className="p-1.5 rounded-lg text-white/30 hover:text-white transition-all"
+                style={{ background: "oklch(0 0 0 / 0.35)", backdropFilter: "blur(4px)" }}>
                 <X size={16} />
               </button>
             </div>
           </div>
 
-          {/* ── Cover art: rounded square, padded (v1.4.0 baseline) ── */}
-          <div className="px-5 pb-3">
-            <div
-              key={currentTrack?.id || "empty"}
-              className="w-full rounded-xl overflow-hidden relative flex items-center justify-center"
-              style={{
-                height: "280px",
-                background: currentTrack?.bg || "oklch(0.15 0.05 275)",
-                animation: "panelArtFadeIn 0.4s ease",
-              }}
+          {/* ── RIGHT-SIDE EMOTIONAL ACTION STACK ── */}
+          <div
+            className="absolute right-3 bottom-16 flex flex-col items-center gap-4 z-20 transition-opacity duration-300"
+            style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
+          >
+            {/* Love ❤️ */}
+            <button
+              onClick={handleLove}
+              disabled={!user}
+              className="flex flex-col items-center gap-1 group"
+              title={!user ? "Sign in to love" : isLiked ? "Loved" : "Love"}
             >
-              {/* Background video — always muted, fades in when playing + buffered */}
-              {videoUrl && (
-                <video
-                  ref={videoRef}
-                  src={videoUrl}
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                  style={{ opacity: showVideo ? 1 : 0 }}
-                  playsInline
-                  loop
-                  muted
-                  preload="metadata"
-                />
-              )}
-              {/* Cover art — sits on top, fades out only when video is playing AND buffered */}
-              {currentTrack?.artUrl ? (
-                <img
-                  src={currentTrack.artUrl}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                  style={{
-                    opacity: (videoUrl && showVideo) ? 0 : 1,
-                    objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
-                  }}
-                />
-              ) : (
-                <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                  <Music className="w-1/2 h-1/2 opacity-30 text-white" />
-                </div>
-              )}
-              {/* Video indicator badge — shown when video is active */}
-              {videoUrl && showVideo && (
-                <div
-                  className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold tracking-wide"
-                  style={{
-                    background: "oklch(0.84 0.155 85 / 0.85)",
-                    color: "oklch(0.08 0.01 280)",
-                    backdropFilter: "blur(4px)",
-                    zIndex: 20,
-                  }}
-                >
-                  <Video size={10} />
-                  Live
-                </div>
-              )}
-              {/* Video WID badge — top-right, links to verify page */}
-              {videoWitnessId && (
-                <button
-                  onClick={() => navigate(`/verify/${videoWitnessId}`)}
-                  className="absolute top-2 right-12 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide transition-all"
-                  style={{
-                    background: "oklch(0.22 0.08 145 / 0.88)",
-                    border: "1px solid oklch(0.55 0.18 145 / 0.5)",
-                    color: "oklch(0.82 0.18 145)",
-                    backdropFilter: "blur(4px)",
-                    zIndex: 20,
-                  }}
-                  title="Video cryptographically witnessed"
-                >
-                  ✓ Video WID
-                </button>
-              )}
-
-              {/* Vertical volume bar — right edge of art */}
               <div
-                className="absolute top-0 right-0 h-full flex flex-col items-center justify-end"
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  width: "44px",
-                  paddingBottom: "80px",
-                  paddingTop: "8px",
-                  zIndex: 10,
-                  transition: "opacity 0.2s",
-                  opacity: volBarActive ? 1 : 0,
-                  pointerEvents: volBarActive ? "auto" : "none",
+                  background: isLiked ? "oklch(0.65 0.22 10 / 0.25)" : "oklch(0 0 0 / 0.45)",
+                  backdropFilter: "blur(8px)",
+                  border: isLiked ? "1px solid oklch(0.65 0.22 10 / 0.5)" : "1px solid oklch(1 0 0 / 0.12)",
+                  boxShadow: isLiked ? "0 0 12px oklch(0.65 0.22 10 / 0.3)" : "none",
                 }}
               >
-                <div
-                  ref={volBarRef}
-                  className="relative flex-1 w-2 rounded-full cursor-pointer"
-                  style={{ background: "oklch(1 0 0 / 0.15)", maxHeight: "100%" }}
-                  onClick={handleVolBarClick}
-                  onTouchMove={handleVolBarTouch}
-                >
-                  <div
-                    className="absolute bottom-0 left-0 right-0 rounded-full"
-                    style={{
-                      height: state.isMuted ? "0%" : `${state.volume * 100}%`,
-                      background: "linear-gradient(to top, #D4AF37, #7C3AED)",
-                      transition: "height 0.1s linear",
-                    }}
-                  />
-                  <div
-                    className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white shadow-lg"
-                    style={{
-                      bottom: `calc(${state.isMuted ? 0 : state.volume * 100}% - 8px)`,
-                      transition: "bottom 0.1s linear",
-                    }}
-                  />
-                </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); toggleMute(); }}
-                  className="mt-2 mb-1 text-white/60 hover:text-white transition-colors"
-                >
-                  {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                </button>
+                <Heart size={18} fill={isLiked ? "oklch(0.75 0.22 10)" : "none"}
+                  style={{ color: isLiked ? "oklch(0.75 0.22 10)" : "oklch(1 0 0 / 0.7)" }} />
               </div>
+              <span className="text-[9px]" style={{ color: "oklch(1 0 0 / 0.45)" }}>Love</span>
+            </button>
 
-              {/* Controls overlay — bottom of art (v1.4.0 baseline) */}
+            {/* Share 🔁 */}
+            <button
+              onClick={handleShare}
+              className="flex flex-col items-center gap-1"
+              title="Share"
+            >
               <div
-                className="absolute bottom-0 left-0 right-0 flex flex-col"
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  background: "linear-gradient(to top, oklch(0 0 0 / 0.82) 0%, oklch(0 0 0 / 0.55) 60%, transparent 100%)",
-                  paddingBottom: "12px",
+                  background: copied ? "oklch(0.84 0.155 85 / 0.2)" : "oklch(0 0 0 / 0.45)",
+                  backdropFilter: "blur(8px)",
+                  border: copied ? "1px solid oklch(0.84 0.155 85 / 0.4)" : "1px solid oklch(1 0 0 / 0.12)",
                 }}
               >
-                {/* Progress bar */}
-                <div className="px-4 pt-3 pb-1">
-                  <div
-                    className="w-full h-1 rounded-full bg-white/20 cursor-pointer relative group"
-                    onClick={handleSeek}
-                    onTouchMove={handleSeekTouch}
-                  >
-                    <div
-                      className="h-full rounded-full relative"
-                      style={{
-                        width: `${progress}%`,
-                        background: "linear-gradient(90deg, #7C3AED, #D4AF37)",
-                        transition: "width 0.25s linear",
-                      }}
-                    >
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white
-                        opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
-                    </div>
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-[10px] text-white/50 tabular-nums">{fmtTime(state.currentTime)}</span>
-                    <span className="text-[10px] text-white/50 tabular-nums">{fmtTime(state.duration)}</span>
-                  </div>
-                </div>
-                {/* Playback controls */}
-                <div
-                  className="px-4 flex items-center justify-between"
-                  style={{ paddingRight: volBarActive ? "48px" : "16px", transition: "padding 0.2s" }}
-                >
-                  <button
-                    onClick={toggleShuffle}
-                    className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#D4AF37]" : "text-white/40 hover:text-white/70"}`}
-                  >
-                    <Shuffle size={16} />
-                  </button>
-                  <button onClick={prevTrack} className="p-1.5 text-white/70 hover:text-white transition-colors">
-                    <SkipBack size={22} />
-                  </button>
-                  <button
-                    onClick={togglePlay}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-lg"
-                    style={{ background: "oklch(0.94 0.006 280)", color: "oklch(0.08 0.01 280)" }}
-                  >
-                    {state.isPlaying
-                      ? <Pause size={20} fill="currentColor" />
-                      : <Play size={20} fill="currentColor" className="ml-0.5" />
-                    }
-                  </button>
-                  <button onClick={nextTrack} className="p-1.5 text-white/70 hover:text-white transition-colors">
-                    <SkipForward size={22} />
-                  </button>
-                  <button
-                    onClick={toggleRepeat}
-                    className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#D4AF37]" : "text-white/40 hover:text-white/70"}`}
-                  >
-                    <Repeat size={16} />
-                  </button>
-                </div>
+                {copied
+                  ? <Check size={18} style={{ color: "oklch(0.84 0.155 85)" }} />
+                  : <Share2 size={18} style={{ color: "oklch(1 0 0 / 0.7)" }} />}
               </div>
-            </div>
+              <span className="text-[9px]" style={{ color: "oklch(1 0 0 / 0.45)" }}>
+                {copied ? "Copied!" : "Share"}
+              </span>
+            </button>
+
+            {/* Comment 💬 */}
+            <button
+              onClick={() => { setCommentOpen(v => !v); setDetailsOpen(false); }}
+              className="flex flex-col items-center gap-1"
+              title="Comment"
+            >
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+                style={{
+                  background: commentOpen ? "oklch(0.55 0.18 220 / 0.25)" : "oklch(0 0 0 / 0.45)",
+                  backdropFilter: "blur(8px)",
+                  border: commentOpen ? "1px solid oklch(0.55 0.18 220 / 0.4)" : "1px solid oklch(1 0 0 / 0.12)",
+                }}
+              >
+                <MessageCircle size={18} style={{ color: commentOpen ? "oklch(0.72 0.18 220)" : "oklch(1 0 0 / 0.7)" }} />
+              </div>
+              <span className="text-[9px]" style={{ color: "oklch(1 0 0 / 0.45)" }}>
+                {commentsData?.length ? commentsData.length : ""}Comment
+              </span>
+            </button>
           </div>
 
-          {/* ── Content below art — hidden in Cinema Mode except lyrics ── */}
-          {!cinemaMode && (
-            <>
-              {/* Track title + artist + Cinema Mode toggle + heart/like */}
-              <div className="px-5 pb-2 flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  {/* Title — clickable → song page */}
-                  <button
-                    onClick={() => { if (currentSongId) navigate(`/song/${currentSongId}`); }}
-                    disabled={!currentSongId}
-                    className="text-[15px] font-semibold font-body leading-snug line-clamp-2 text-left w-full
-                      transition-colors hover:opacity-80 disabled:cursor-default"
-                    style={{ color: "oklch(0.96 0.008 270)" }}
-                  >
-                    {currentTrack?.title || "No track selected"}
-                  </button>
-                  {/* Artist — clickable → creator page */}
-                  <button
-                    onClick={() => { if (songDetail?.creator?.id) navigate(`/creator/${songDetail.creator.id}`); }}
-                    disabled={!songDetail?.creator?.id}
-                    className="text-sm truncate font-body mt-0.5 text-left w-full
-                      transition-colors hover:opacity-80 disabled:cursor-default"
-                    style={{ color: "oklch(0.82 0.155 175)" }}
-                  >
-                    {currentTrack?.artist || "—"}
-                  </button>
-                  {/* WID badge + genre/AI tags — own row below artist */}
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    {currentTrack?.witnessId && (
-                      <button
-                        onClick={() => navigate(`/verify/${currentTrack.witnessId}`)}
-                        className="inline-flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full
-                          transition-opacity hover:opacity-80"
-                        style={{
-                          background: "oklch(0.80 0.145 82 / 0.12)",
-                          color: "oklch(0.80 0.145 82)",
-                          border: "1px solid oklch(0.80 0.145 82 / 0.3)",
-                        }}
-                        title="View Witness Certificate"
-                      >
-                        🔐 WID: {currentTrack.witnessId.slice(0, 12)}…
-                      </button>
-                    )}
-                    {currentTrack?.genre && (
-                      <span
-                        className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
-                        style={{
-                          background: "oklch(0.16 0.02 280)",
-                          color: "oklch(0.55 0.04 280)",
-                          border: "1px solid oklch(0.22 0.02 280)",
-                        }}
-                      >
-                        {currentTrack.genre}
-                      </span>
-                    )}
-                    {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
-                      <span
-                        className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
-                        style={{
-                          background: currentTrack.aiDisclosure === "ai_generated"
-                            ? "oklch(0.55 0.18 25 / 0.2)"
-                            : "oklch(0.60 0.18 55 / 0.2)",
-                          color: currentTrack.aiDisclosure === "ai_generated"
-                            ? "oklch(0.80 0.18 25)"
-                            : "oklch(0.85 0.18 55)",
-                          border: `1px solid ${currentTrack.aiDisclosure === "ai_generated"
-                            ? "oklch(0.55 0.18 25 / 0.4)"
-                            : "oklch(0.60 0.18 55 / 0.4)"}`,
-                        }}
-                      >
-                        {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {/* Heart/like — leftmost of the two icon buttons */}
-                <button
-                  onClick={handleToggleLike}
-                  disabled={!user || toggleLikeMutation.isPending}
-                  className={`p-2 flex-shrink-0 transition-colors ${isLiked ? "text-[#A78BFA]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
-                  title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
-                >
-                  <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
-                </button>
-                {/* Cinema Mode toggle — sits directly next to the heart button */}
-                <button
-                  onClick={() => setCinemaMode(v => !v)}
-                  className="p-2 flex-shrink-0 rounded-lg transition-all"
-                  style={{
-                    color: cinemaMode ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)",
-                    background: cinemaMode ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
-                    border: cinemaMode ? "1px solid oklch(0.84 0.155 85 / 0.35)" : "1px solid transparent",
-                  }}
-                  title={cinemaMode ? "Exit Cinema Mode" : "Cinema Mode — art + lyrics only"}
-                >
-                  {cinemaMode ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-
-              {/* Tip button */}
-              {currentTrack && (
-                <div className="px-5 pb-3">
-                  <button
-                    onClick={() => setTipOpen(true)}
-                    disabled={!tipsEnabled}
-                    className="w-full py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all
-                      flex items-center justify-center gap-2
-                      disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{
-                      background: tipsEnabled ? "oklch(0.84 0.155 85)" : "oklch(0.18 0.02 275)",
-                      color: tipsEnabled ? "oklch(0.08 0.01 280)" : "oklch(0.45 0.03 280)",
-                      border: tipsEnabled ? "none" : "1px solid oklch(0.24 0.02 275)",
-                      fontFamily: "'Cinzel', serif",
-                    }}
-                    title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
-                  >
-                    <DollarSign size={14} />
-                    {tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
-                  </button>
-                </div>
-              )}
-
-              {/* Action buttons — Playlist + Room + Share */}
-              {currentTrack && currentSongId && (
-                <div className="px-5 pb-3 flex items-center gap-2">
-                  <AddToPlaylistButton songId={currentSongId} variant="full" className="flex-1" />
-                  <button
-                    onClick={() => { closeNowPlayingPanel(); navigate("/together"); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-body transition-all
-                      bg-white/[0.06] text-white/70 border border-white/[0.12] hover:bg-white/[0.10] hover:text-white flex-1 justify-center"
-                    title="Take to Sanctuary room"
-                  >
-                    <Users size={13} />
-                    Room
-                  </button>
-                  <button
-                    onClick={handleShare}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-body transition-all border justify-center"
-                    style={{
-                      background: copied ? "oklch(0.84 0.155 85 / 0.12)" : "oklch(0.12 0.02 275 / 0.0)",
-                      color: copied ? "oklch(0.84 0.155 85)" : "oklch(0.65 0.03 280)",
-                      border: copied
-                        ? "1px solid oklch(0.84 0.155 85 / 0.35)"
-                        : "1px solid oklch(0.22 0.02 275)",
-                      minWidth: "60px",
-                    }}
-                    title="Share this track"
-                  >
-                    {copied ? <Check size={13} /> : <Share2 size={13} />}
-                    {copied ? "Copied!" : "Share"}
-                  </button>
-                </div>
-              )}
-
-              {/* Divider */}
-              <div className="mx-5 mb-1" style={{ height: "1px", background: "oklch(0.84 0.155 85 / 0.10)" }} />
-            </>
+          {/* Video WID badge */}
+          {videoWitnessId && (
+            <button
+              onClick={() => navigate(`/verify/${videoWitnessId}`)}
+              className="absolute top-12 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide z-20"
+              style={{
+                background: "oklch(0.22 0.08 145 / 0.88)",
+                border: "1px solid oklch(0.55 0.18 145 / 0.5)",
+                color: "oklch(0.82 0.18 145)",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              ✓ Video WID
+            </button>
           )}
         </div>
 
-        {/* ══ SCROLLABLE SECTION — volume + lyrics + grab handle ══ */}
+        {/* ══ TRACK INFO — title + WID badge ══ */}
         <div
-          className="flex-1 overflow-y-auto"
-          style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}
+          className="flex-shrink-0 px-5 pt-3 pb-2 transition-opacity duration-300"
+          style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
         >
-          {/* Volume row — hidden in Cinema Mode */}
-          {!cinemaMode && (
-            <div className="px-5 pt-3 pb-2 flex items-center gap-3">
-              <button
-                onClick={() => setVolBarActive(v => !v)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-body transition-all ${
-                  volBarActive
-                    ? "text-[#D4AF37] border border-[#D4AF37]/30 bg-[#D4AF37]/08"
-                    : "text-white/35 hover:text-white/65 border border-white/10"
-                }`}
-                style={{ background: volBarActive ? "oklch(0.84 0.155 85 / 0.08)" : "transparent" }}
-                title={volBarActive ? "Hide volume bar" : "Show volume bar on art"}
-              >
-                {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                <span>{state.isMuted ? "Muted" : `${Math.round(state.volume * 100)}%`}</span>
-              </button>
-              <button
-                onClick={toggleMute}
-                className="ml-auto text-[10px] font-body px-2.5 py-1.5 rounded-lg transition-all"
-                style={{
-                  color: state.isMuted ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
-                  background: state.isMuted ? "oklch(0.84 0.155 85 / 0.1)" : "transparent",
-                  border: `1px solid ${state.isMuted ? "oklch(0.84 0.155 85 / 0.3)" : "oklch(0.22 0.02 275)"}`,
-                }}
-              >
-                {state.isMuted ? "Unmute" : "Mute"}
-              </button>
-            </div>
-          )}
-
-          {/* Lyrics / Comments tabs */}
-          <div className="px-0 pb-6 pt-0">
-            {/* Tab bar */}
-            <div
-              className="flex mx-5 mb-4"
-              style={{ borderBottom: "1px solid oklch(0.22 0.04 270 / 60%)" }}
+          {/* Title */}
+          <button
+            onClick={() => { if (currentSongId) navigate(`/song/${currentSongId}`); }}
+            disabled={!currentSongId}
+            className="text-[16px] font-semibold leading-snug line-clamp-1 text-left w-full
+              transition-opacity hover:opacity-75 disabled:cursor-default"
+            style={{ color: "oklch(0.96 0.008 270)", fontFamily: "'Cinzel', serif" }}
+          >
+            {currentTrack?.title || "No track selected"}
+          </button>
+          {/* Artist */}
+          <button
+            onClick={() => { if (creator?.id) navigate(`/creator/${creator.id}`); }}
+            disabled={!creator?.id}
+            className="text-sm truncate mt-0.5 text-left w-full transition-opacity hover:opacity-75 disabled:cursor-default"
+            style={{ color: "oklch(0.72 0.155 175)" }}
+          >
+            {currentTrack?.artist || "—"}
+          </button>
+          {/* WID badge — always visible, directly under title */}
+          {currentTrack?.witnessId && (
+            <button
+              onClick={() => navigate(`/verify/${currentTrack.witnessId}`)}
+              className="mt-1.5 inline-flex items-center gap-1.5 text-[9px] font-mono px-2.5 py-1 rounded-full
+                transition-opacity hover:opacity-80"
+              style={{
+                background: "oklch(0.80 0.145 82 / 0.12)",
+                color: "oklch(0.80 0.145 82)",
+                border: "1px solid oklch(0.80 0.145 82 / 0.3)",
+              }}
+              title="View Witness Certificate"
             >
-              {(["lyrics", "comments"] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setCinemaTab(tab)}
-                  className="flex-1 py-2 text-[12px] font-medium capitalize transition-colors flex items-center justify-center gap-1.5"
-                  style={{
-                    color: cinemaTab === tab ? "oklch(0.80 0.145 82)" : "oklch(0.45 0.02 280)",
-                    borderBottom: cinemaTab === tab ? "2px solid oklch(0.80 0.145 82)" : "2px solid transparent",
-                    fontFamily: "'Cinzel', serif",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {tab === "lyrics" ? <Music size={11} /> : <MessageCircle size={11} />}
-                  {tab}
-                </button>
-              ))}
-            </div>
+              <Shield size={10} />
+              WID: {currentTrack.witnessId.slice(0, 14)}…
+            </button>
+          )}
+        </div>
 
-            {/* Lyrics panel */}
-            {cinemaTab === "lyrics" && (
-              <div className="px-5">
-                {songDetail?.song?.lyricsText ? (
-                  <pre
-                    className="whitespace-pre-wrap"
-                    style={{
-                      fontFamily: "'Inter', Georgia, serif",
-                      fontSize: "15px",
-                      lineHeight: "2.1",
-                      color: "oklch(0.90 0.02 280)",
-                      letterSpacing: "0.015em",
-                      paddingBottom: "2rem",
-                    }}
-                  >
-                    {songDetail.song.lyricsText}
-                  </pre>
-                ) : (
-                  <div
-                    className="rounded-xl p-8 text-center mt-2"
-                    style={{
-                      background: "oklch(0.10 0.02 275)",
-                      border: "1px dashed oklch(0.22 0.02 275)",
-                    }}
-                  >
-                    <Music size={28} className="mx-auto mb-3 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
-                    <p className="text-[14px] italic mb-2" style={{ color: "oklch(0.50 0.02 280)" }}>
-                      No lyrics registered
-                    </p>
-                    <p className="text-[12px]" style={{ color: "oklch(0.84 0.155 85)" }}>
-                      Upload lyrics to protect your words.
-                    </p>
+        {/* ══ PROGRESS BAR ══ */}
+        <div
+          className="flex-shrink-0 px-5 pb-2 transition-opacity duration-300"
+          style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
+        >
+          <div
+            className="relative h-1 rounded-full cursor-pointer"
+            style={{ background: "oklch(1 0 0 / 0.1)" }}
+            onClick={handleSeek}
+            onTouchMove={handleSeekTouch}
+          >
+            <div
+              className="absolute top-0 left-0 h-full rounded-full transition-all"
+              style={{ width: `${progress}%`, background: "oklch(0.84 0.155 85)" }}
+            />
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+              {fmtTime(state.currentTime)}
+            </span>
+            <span className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+              {fmtTime(state.duration)}
+            </span>
+          </div>
+        </div>
+
+        {/* ══ PLAYER CONTROLS — clean, dominant play button ══ */}
+        <div
+          className="flex-shrink-0 px-5 pb-3 transition-opacity duration-300"
+          style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
+        >
+          <div className="flex items-center justify-between">
+            <button
+              onClick={toggleShuffle}
+              className="p-2 transition-colors"
+              style={{ color: state.isShuffle ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)" }}
+            >
+              <Shuffle size={18} />
+            </button>
+            <button onClick={prevTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
+              <SkipBack size={24} />
+            </button>
+            {/* Dominant play button */}
+            <button
+              onClick={togglePlay}
+              className="w-14 h-14 rounded-full flex items-center justify-center transition-transform
+                hover:scale-105 active:scale-95 shadow-xl"
+              style={{
+                background: "oklch(0.94 0.006 280)",
+                color: "oklch(0.08 0.01 280)",
+                boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.25)",
+              }}
+            >
+              {state.isPlaying
+                ? <Pause size={22} fill="currentColor" />
+                : <Play size={22} fill="currentColor" className="ml-0.5" />}
+            </button>
+            <button onClick={nextTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
+              <SkipForward size={24} />
+            </button>
+            <button
+              onClick={toggleRepeat}
+              className="p-2 transition-colors"
+              style={{ color: state.isRepeat ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)" }}
+            >
+              <Repeat size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* ══ FUNCTIONAL ROW — Gift | Details | Sound ══ */}
+        <div
+          className="flex-shrink-0 px-5 pb-4 transition-opacity duration-300"
+          style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
+        >
+          <div className="flex items-center gap-2">
+            {/* Gift */}
+            <button
+              onClick={() => { if (tipsEnabled) setTipOpen(true); }}
+              disabled={!tipsEnabled || !currentTrack}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold
+                transition-all disabled:opacity-35 disabled:cursor-not-allowed"
+              style={{
+                background: tipsEnabled ? "oklch(0.84 0.155 85 / 0.12)" : "oklch(0.12 0.02 275)",
+                color: tipsEnabled ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)",
+                border: tipsEnabled ? "1px solid oklch(0.84 0.155 85 / 0.25)" : "1px solid oklch(0.20 0.02 275)",
+                fontFamily: "'Cinzel', serif",
+              }}
+              title={tipsEnabled ? "Gift creator" : "Tips not enabled"}
+            >
+              <DollarSign size={13} />
+              Gift
+            </button>
+
+            {/* Details */}
+            <button
+              onClick={() => { setDetailsOpen(v => !v); setCommentOpen(false); }}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold transition-all"
+              style={{
+                background: detailsOpen ? "oklch(0.55 0.18 220 / 0.15)" : "oklch(0.12 0.02 275)",
+                color: detailsOpen ? "oklch(0.72 0.18 220)" : "oklch(0.55 0.03 280)",
+                border: detailsOpen ? "1px solid oklch(0.55 0.18 220 / 0.35)" : "1px solid oklch(0.20 0.02 275)",
+                fontFamily: "'Cinzel', serif",
+              }}
+            >
+              <Info size={13} />
+              Details
+            </button>
+
+            {/* Sound */}
+            <button
+              onClick={toggleMute}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold transition-all"
+              style={{
+                background: state.isMuted ? "oklch(0.55 0.18 25 / 0.12)" : "oklch(0.12 0.02 275)",
+                color: state.isMuted ? "oklch(0.75 0.18 25)" : "oklch(0.55 0.03 280)",
+                border: state.isMuted ? "1px solid oklch(0.55 0.18 25 / 0.3)" : "1px solid oklch(0.20 0.02 275)",
+                fontFamily: "'Cinzel', serif",
+              }}
+            >
+              {state.isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              Sound
+            </button>
+          </div>
+        </div>
+
+        {/* ══ DETAILS SLIDE-UP PANEL ══ */}
+        <div
+          className="flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            maxHeight: detailsOpen ? "320px" : "0px",
+            opacity: detailsOpen ? 1 : 0,
+          }}
+        >
+          <div
+            className="mx-4 mb-4 rounded-2xl p-4 space-y-3"
+            style={{
+              background: "oklch(0.11 0.025 275)",
+              border: "1px solid oklch(0.20 0.02 275)",
+            }}
+          >
+            <h3 className="text-[11px] font-bold tracking-widest uppercase mb-3"
+              style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>
+              Track Details
+            </h3>
+
+            {/* WID */}
+            {currentTrack?.witnessId && (
+              <div className="flex items-start gap-2.5">
+                <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.80 0.145 82)" }} />
+                <div className="min-w-0">
+                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    Witness ID
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Comments panel */}
-            {cinemaTab === "comments" && (
-              <div className="px-5">
-                {/* Comment list */}
-                <div className="space-y-3 mb-4">
-                  {commentsData && commentsData.length > 0 ? (
-                    commentsData.map((c: any) => (
-                      <div key={c.id} className="flex gap-2.5">
-                        <div
-                          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                          style={{ background: "oklch(0.22 0.08 270)", color: "oklch(0.80 0.145 82)" }}
-                        >
-                          {(c.authorName ?? "?")[0].toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-baseline gap-2 mb-0.5">
-                            <span className="text-[12px] font-semibold" style={{ color: "oklch(0.82 0.155 175)" }}>
-                              {c.authorName ?? "Anonymous"}
-                            </span>
-                            <span className="text-[10px]" style={{ color: "oklch(0.45 0.02 280)" }}>
-                              {new Date(c.createdAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <p className="text-[13px] leading-relaxed" style={{ color: "oklch(0.80 0.02 280)" }}>
-                            {c.content}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-6">
-                      <MessageCircle size={24} className="mx-auto mb-2 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
-                      <p className="text-[13px] italic" style={{ color: "oklch(0.45 0.02 280)" }}>
-                        No comments yet. Be the first.
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {/* Comment input */}
-                <div className="flex gap-2">
-                  <input
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
-                    placeholder={user ? "Leave a witness..." : "Sign in to comment"}
-                    disabled={!user || addCommentMutation.isPending}
-                    maxLength={1000}
-                    className="flex-1 rounded-lg px-3 py-2 text-[13px] outline-none transition-colors disabled:opacity-50"
-                    style={{
-                      background: "oklch(0.12 0.04 270)",
-                      border: "1px solid oklch(0.22 0.04 270)",
-                      color: "oklch(0.88 0.02 280)",
-                    }}
-                    onFocus={e => (e.currentTarget.style.borderColor = "oklch(0.80 0.145 82 / 0.5)")}
-                    onBlur={e => (e.currentTarget.style.borderColor = "oklch(0.22 0.04 270)")}
-                  />
                   <button
-                    onClick={submitComment}
-                    disabled={!user || !newComment.trim() || addCommentMutation.isPending}
-                    className="px-3 py-2 rounded-lg text-[12px] font-semibold transition-colors disabled:opacity-40"
-                    style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.08 0.01 280)" }}
+                    onClick={() => navigate(`/verify/${currentTrack.witnessId}`)}
+                    className="text-[11px] font-mono break-all text-left hover:opacity-75 transition-opacity"
+                    style={{ color: "oklch(0.80 0.145 82)" }}
                   >
-                    Post
+                    {currentTrack.witnessId}
                   </button>
                 </div>
               </div>
             )}
-          </div>
 
-          {/* ── Grab handle — swipe down to close, swipe up to expand ── */}
-          <div
-            className="flex flex-col items-center pb-6 pt-3 cursor-grab active:cursor-grabbing select-none"
-            onTouchStart={onGrabTouchStart}
-            onTouchEnd={onGrabTouchEnd}
-            title="Swipe down to close"
-          >
-            <div
-              className="rounded-full"
+            {/* Creator */}
+            {creator && (
+              <div className="flex items-start gap-2.5">
+                <User size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.72 0.155 175)" }} />
+                <div className="min-w-0">
+                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    Creator
+                  </div>
+                  <button
+                    onClick={() => { if (creator.id) navigate(`/creator/${creator.id}`); }}
+                    className="text-[12px] font-semibold hover:opacity-75 transition-opacity"
+                    style={{ color: "oklch(0.88 0.02 280)", fontFamily: "'Cinzel', serif" }}
+                  >
+                    {creator.artistHandle || creator.name || "Unknown"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* License */}
+            {song?.licenseStatus && (
+              <div className="flex items-start gap-2.5">
+                <FileText size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 55)" }} />
+                <div className="min-w-0">
+                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    License
+                  </div>
+                  <span className="text-[12px] capitalize" style={{ color: "oklch(0.80 0.02 280)" }}>
+                    {song.licenseStatus}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Provenance / AI Disclosure */}
+            {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
+              <div className="flex items-start gap-2.5">
+                <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 25)" }} />
+                <div className="min-w-0">
+                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    Provenance
+                  </div>
+                  <span className="text-[12px]" style={{ color: "oklch(0.80 0.02 280)" }}>
+                    {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Tags / Genre */}
+            {currentTrack?.genre && (
+              <div className="flex items-start gap-2.5">
+                <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 280)" }} />
+                <div className="min-w-0">
+                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    Genre / Tags
+                  </div>
+                  <span className="text-[12px]" style={{ color: "oklch(0.80 0.02 280)" }}>
+                    {currentTrack.genre}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Open full song page */}
+            {currentSongId && (
+              <button
+                onClick={() => { navigate(`/song/${currentSongId}`); closeNowPlayingPanel(); }}
+                className="w-full mt-1 py-2 rounded-xl text-[11px] font-semibold tracking-wide transition-all"
+                style={{
+                  background: "oklch(0.84 0.155 85 / 0.10)",
+                  color: "oklch(0.84 0.155 85)",
+                  border: "1px solid oklch(0.84 0.155 85 / 0.20)",
+                  fontFamily: "'Cinzel', serif",
+                }}
+              >
+                Open Full Song Page →
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ══ COMMENT PANEL ══ */}
+        <div
+          className="flex-1 overflow-hidden transition-all duration-300 ease-in-out flex flex-col"
+          style={{
+            maxHeight: commentOpen ? "400px" : "0px",
+            opacity: commentOpen ? 1 : 0,
+          }}
+        >
+          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-2 space-y-3"
+            style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}>
+            <h3 className="text-[11px] font-bold tracking-widest uppercase"
+              style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>
+              Activity
+            </h3>
+            {commentsData && commentsData.length > 0 ? (
+              commentsData.map((c: any) => (
+                <div key={c.id} className="flex gap-2.5">
+                  <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
+                    style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "oklch(0.84 0.155 85)" }}>
+                    {(c.authorName ?? "A")[0].toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2 mb-0.5">
+                      <span className="text-[11px] font-semibold" style={{ color: "oklch(0.82 0.155 175)" }}>
+                        {c.authorName ?? "Anonymous"}
+                      </span>
+                      <span className="text-[9px]" style={{ color: "oklch(0.40 0.02 280)" }}>
+                        {new Date(c.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-[12px] leading-relaxed" style={{ color: "oklch(0.78 0.02 280)" }}>
+                      {c.content}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <MessageCircle size={20} className="mx-auto mb-1.5 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
+                <p className="text-[12px] italic" style={{ color: "oklch(0.40 0.02 280)" }}>
+                  No comments yet. Be the first.
+                </p>
+              </div>
+            )}
+          </div>
+          {/* Comment input */}
+          <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2"
+            style={{ borderTop: "1px solid oklch(0.18 0.02 275)" }}>
+            <input
+              value={newComment}
+              onChange={e => setNewComment(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
+              placeholder={user ? "Leave a witness..." : "Sign in to comment"}
+              disabled={!user || addCommentMutation.isPending}
+              maxLength={1000}
+              className="flex-1 rounded-xl px-3 py-2 text-[12px] outline-none transition-colors disabled:opacity-50"
               style={{
-                width: "48px",
-                height: "5px",
-                background: "oklch(0.28 0.02 275)",
+                background: "oklch(0.12 0.04 270)",
+                border: "1px solid oklch(0.22 0.04 270)",
+                color: "oklch(0.88 0.02 280)",
               }}
             />
+            <button
+              onClick={submitComment}
+              disabled={!user || !newComment.trim() || addCommentMutation.isPending}
+              className="px-3 py-2 rounded-xl text-[12px] font-semibold transition-colors disabled:opacity-40"
+              style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.08 0.01 280)" }}
+            >
+              Post
+            </button>
           </div>
+        </div>
+
+        {/* ══ QUEUE CONTEXT + GRAB HANDLE ══ */}
+        <div
+          className="flex-shrink-0 flex flex-col items-center pb-5 pt-2 cursor-grab active:cursor-grabbing select-none"
+          onTouchStart={onGrabTouchStart}
+          onTouchEnd={onGrabTouchEnd}
+        >
+          <div className="rounded-full" style={{ width: "48px", height: "4px", background: "oklch(0.24 0.02 275)" }} />
+          {currentTrack && (
+            <div className="flex items-center gap-2 mt-3 px-4">
+              <AddToPlaylistButton songId={currentSongId!} variant="full" className="flex-1" />
+              <button
+                onClick={() => { closeNowPlayingPanel(); navigate("/together"); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-body transition-all"
+                style={{
+                  background: "oklch(0.12 0.02 275)",
+                  color: "oklch(0.50 0.03 280)",
+                  border: "1px solid oklch(0.20 0.02 275)",
+                }}
+              >
+                <Users size={12} />
+                Room
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -979,9 +913,10 @@ export default function MobilePlayerPanel() {
           from { height: 3px; }
           to   { height: 10px; }
         }
-        @keyframes panelArtFadeIn {
-          from { opacity: 0; transform: scale(0.97); }
-          to   { opacity: 1; transform: scale(1); }
+        @keyframes heartFloat {
+          0%   { opacity: 1; transform: translateY(0) scale(1); }
+          60%  { opacity: 0.8; transform: translateY(-40px) scale(1.3); }
+          100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
         }
       `}</style>
 

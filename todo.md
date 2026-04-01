@@ -1614,3 +1614,15 @@
 - [ ] Safety audit: Admin Panel accessible via role-gated route only, not in UI
 - [ ] Safety audit: Redeem Code accessible via Profile → Settings
 - [ ] Safety audit: Search accessible via QuickAccessPanel
+
+## Task 18: Mobile Player Restructure (Cinematic Mode + Action Layer)
+- [x] Audit MobilePlayerPanel / NowPlayingPanel component structure
+- [x] Right-side emotional action stack: Love (❤️), Share (🔁), Comment (💬) — vertical, floating
+- [x] Functional row below player: Gift, Details, Sound — smaller, utility-focused
+- [x] WID badge directly under track title — always visible, clickable, routes to /song/:id
+- [x] Details slide-up panel: WID, Creator, License, Provenance, Tags
+- [x] Dominant artwork: centered, full-bleed, gradient fade behind controls
+- [x] Clean player controls: Shuffle, Prev, Play/Pause, Next, Repeat — more spacing, dominant play button
+- [x] Tap artwork to toggle UI visibility (cinematic mode, auto-restores after 4s)
+- [x] Floating heart pulse animation on Love tap (heartFloat keyframe)
+- [x] Remove clutter from main view (Cinema Mode toggle, volume bar, tip button moved to Details/functional row)
