@@ -88,9 +88,14 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
 
   // DB-backed like state
   const numericId = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
-  const { liked: isLikedFromHook, toggle: toggleLike } = useLike(isNaN(numericId) ? 0 : numericId);
-  // Use pre-fetched values when available (avoids per-card queries that cause HTTP 414 on large lists)
-  const isLiked = prefetchedLiked !== undefined ? prefetchedLiked : isLikedFromHook;
+  // When prefetchedLiked is provided (e.g. from getBulkLikeStatuses on HomePage),
+  // pass skipQuery=true so useLike does NOT fire an individual getLikeStatus query.
+  // Without this, 48 cards × 1 query each = HTTP 414 URI Too Long on the batch GET.
+  const hasPrefetch = prefetchedLiked !== undefined;
+  const { liked: isLiked, toggle: toggleLike } = useLike(
+    isNaN(numericId) ? 0 : numericId,
+    { skipQuery: hasPrefetch, initialLiked: prefetchedLiked ?? false }
+  );
   const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
     { songId: isNaN(numericId) ? 0 : numericId },
     { enabled: prefetchedLikeCount === undefined && !isNaN(numericId) && numericId > 0 }

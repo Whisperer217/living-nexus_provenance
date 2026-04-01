@@ -1739,3 +1739,9 @@
 - [x] Update HomePage to fetch all like statuses in one bulk call after songs load
 - [ ] Update ExplorePage similarly (deferred — explore page has its own pagination)
 - [x] Add JSON error handler in Express for 414/4xx/5xx so HTML is never returned to tRPC clients
+
+## Phase 51: Fix 414 Persistent (useLike still fires per-card)
+- [x] Update useLike hook to accept optional skipQuery param so TrackCard can suppress individual getLikeStatus when prefetch data is available
+- [x] Update TrackCard to pass skipQuery=true to useLike when prefetchedLiked is provided
+- [ ] Increase Express server maxHeaderSize / URL limit to handle edge-case large batch requests (deferred - not needed now that queries are suppressed)
+- [ ] Verify fix on production domain after publish
