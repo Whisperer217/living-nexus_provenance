@@ -1690,3 +1690,6 @@
 
 ## Bug Fixes (2026-04-01 session 2)
 - [x] Fix ExplorePage three-dot context menu offset/clipping on first card (smart positioning)
+
+## ExploreCard Redesign (2026-04-01)
+- [x] Rewrite ExploreCard to match TrackCard architecture (avatar, artist row, genre pill, full action bar)

@@ -8,8 +8,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Link } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, MoreHorizontal, TrendingUp, Heart, DollarSign, Shield, Bot, Sparkles, Fingerprint } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, Bot, Sparkles, Fingerprint, SkipForward, ListPlus, ExternalLink } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLike } from "@/hooks/useLike";
@@ -58,39 +58,46 @@ function AiDisclosureBadge({ value }: { value: string }) {
   return null;
 }
 
-/** ExploreCard — extracted so each card can use hooks (useLike) independently */
+/** ExploreCard — mirrors TrackCard architecture exactly */
 function ExploreCard({
-  item, isActive, isPlaying, onPlay, onMenu, onTip,
+  item, isActive, isPlaying, onPlay, onTip,
 }: {
   item: any;
   isActive: boolean;
   isPlaying: boolean;
   onPlay: (item: any) => void;
-  onMenu: (e: React.MouseEvent, item: any) => void;
   onTip: (item: any) => void;
 }) {
   const { song, creator } = item;
+  const { playNext } = usePlayer();
+  const [, navigate] = useLocation();
+  const [showAddToList, setShowAddToList] = useState(false);
   const { liked, toggle: toggleLike } = useLike(song.id);
   const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
     { songId: song.id },
     { enabled: !!song.id }
   );
   const likeCount = likeCountData?.count ?? 0;
+  const artistName = creator?.artistHandle || creator?.name || "Unknown";
 
   return (
+    <>
     <div
-      key={song.id}
       className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
-        border bg-[oklch(0.115_0.055_278)]
+        border bg-[oklch(0.095_0.028_275)] track-card-glow
         ${isActive
-          ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6)]"
-          : "border-white/[0.06] hover:border-[#A78BFA]/30 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
+          ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
+          : "border-white/[0.05] hover:border-[#A78BFA]/30"
         }`}
       onClick={() => onPlay(item)}
-      onContextMenu={(e) => onMenu(e, item)}
+      onContextMenu={e => { e.preventDefault(); }}
     >
-      {/* Artwork */}
-      <div className="relative overflow-hidden" style={{ height: "240px" }}>
+      {/* ── Zone 1: Cover Art ── */}
+      <div
+        className="relative overflow-hidden cursor-pointer"
+        style={{ height: "180px" }}
+        onClick={e => { e.stopPropagation(); onPlay(item); }}
+      >
         <MediaAsset
           src={song.coverArtUrl}
           alt={song.title}
@@ -98,80 +105,78 @@ function ExploreCard({
           aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
           focalX={song.coverPositionX ?? 50}
           focalY={song.coverPositionY ?? 50}
-          className="absolute inset-0 w-full h-full"
+          className="w-full h-full transition-transform duration-300 group-hover:scale-105"
         />
+        {/* Overlay gradient */}
         <div className={`absolute inset-0 transition-opacity duration-200
           bg-gradient-to-b from-transparent via-transparent to-black/70
           ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
         />
-        {/* Play / wave indicator */}
-        {isActive && isPlaying ? (
-          <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center z-10 bg-[#D4AF37]">
-            <div className="flex items-end gap-[2px] h-4">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="w-[3px] rounded-full bg-black"
-                  style={{ height: "40%", animation: `waveBar 0.8s ease-in-out ${i * 0.15}s infinite alternate` }} />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
-            transition-all duration-200 z-10
-            ${isActive ? "opacity-100 bg-[#D4AF37]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
-          >
-            <Play size={14} fill="currentColor" className="text-black ml-0.5" />
-          </div>
-        )}
-        {/* WID badge — clickable */}
+        {/* Play / wave button */}
+        <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
+          transition-all duration-200 z-10
+          ${isActive ? "opacity-100 bg-[#D4AF37]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+        >
+          {isActive && isPlaying
+            ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
+            : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
+          }
+        </div>
+        {/* WID badge — clickable → /verify/:witnessId */}
         {song.witnessId && (
           <Link
             href={`/verify/${song.witnessId}`}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow opacity-80 hover:opacity-100 transition-opacity"
+            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-80 hover:opacity-100"
             style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}
             title={`Verified Witness ID: ${song.witnessId}`}
           >
             <Shield size={8} /><span>WID</span>
           </Link>
         )}
-        {/* AI disclosure badge */}
+        {/* AI disclosure badge — top-right */}
         {creator?.aiDisclosure && <AiDisclosureBadge value={creator.aiDisclosure} />}
       </div>
-      {/* Info */}
+
+      {/* ── Info panel ── */}
       <div className="p-3">
-        <div className="flex items-start justify-between gap-1 mb-1">
-          <Link href={`/song/${song.id}`} onClick={e => e.stopPropagation()} className="flex-1 min-w-0">
-            <div className="text-[13px] font-heading text-white truncate tracking-wide hover:text-[#D4AF37] transition-colors">
-              {song.title}
-            </div>
-          </Link>
-          <button
-            onClick={(e) => onMenu(e, item)}
-            className="shrink-0 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/[0.08]"
-            style={{ color: "rgba(255,255,255,0.55)" }}
-          >
-            <MoreHorizontal size={13} />
-          </button>
-        </div>
-        <div className="flex items-center gap-2 text-[11px] mb-2" style={{ color: "#E2E8F0" }}>
-          <Link href={`/creator/${creator?.id}`} onClick={e => e.stopPropagation()}>
-            <span className="truncate hover:text-white/60 transition-colors">
-              {creator?.artistHandle || creator?.name || "Unknown"}
-            </span>
-          </Link>
-          {song.genre && (
-            <>
-              <span style={{ color: "rgba(255,255,255,0.35)" }}>·</span>
-              <span className="truncate" style={{ color: "oklch(0.84 0.155 85 / 0.80)" }}>{song.genre}</span>
-            </>
+        {/* Song title → song detail page */}
+        <Link
+          href={`/song/${song.id}`}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#D4AF37] transition-colors cursor-pointer"
+          title={`Open ${song.title}`}
+        >
+          {song.title}
+        </Link>
+
+        {/* Artist row — avatar initial + name → creator profile */}
+        <div className="flex items-center gap-2 text-[11px] text-white/75 mb-2">
+          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold
+            bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
+            {artistName.charAt(0).toUpperCase()}
+          </div>
+          {creator?.id ? (
+            <Link
+              href={`/creator/${creator.id}`}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              className="truncate hover:text-[#D4AF37] transition-colors cursor-pointer"
+              title={`View ${artistName}'s profile`}
+            >
+              {artistName}
+            </Link>
+          ) : (
+            <span className="truncate">{artistName}</span>
           )}
         </div>
-        {/* Action row: plays + heart + gift */}
+
+        {/* Actions row — genre pill + full action bar */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-[11px]" style={{ color: "rgba(255,255,255,0.55)" }}>
-            <span>▶ {song.playCount || 0}</span>
-          </div>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 font-body">
+            {song.genre || "Other"}
+          </span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Heart / like */}
             <button
               onClick={e => { e.stopPropagation(); toggleLike(e); }}
               className={`flex items-center gap-0.5 p-1 transition-colors ${liked ? "text-pink-400" : "text-white/70 hover:text-pink-400"}`}
@@ -184,6 +189,7 @@ function ExploreCard({
                 </span>
               )}
             </button>
+            {/* Gift */}
             <button
               onClick={e => { e.stopPropagation(); onTip(item); }}
               className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
@@ -191,10 +197,57 @@ function ExploreCard({
             >
               <DollarSign size={12} />
             </button>
+            {/* Play next */}
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                playNext({
+                  id: String(song.id),
+                  title: song.title,
+                  artist: artistName,
+                  genre: song.genre || "",
+                  audioUrl: song.fileUrl || undefined,
+                  artUrl: song.coverArtUrl || undefined,
+                  witnessId: song.witnessId || undefined,
+                  creatorId: creator?.id ?? undefined,
+                  coverPositionX: song.coverPositionX ?? 50,
+                  coverPositionY: song.coverPositionY ?? 50,
+                });
+                toast.success(`"${song.title}" plays next`);
+              }}
+              className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+              title="Play next"
+            >
+              <SkipForward size={12} />
+            </button>
+            {/* Add to list */}
+            <button
+              onClick={e => { e.stopPropagation(); setShowAddToList(true); }}
+              className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+              title="Add to my list"
+            >
+              <ListPlus size={12} />
+            </button>
+            {/* Open song page */}
+            <button
+              onClick={e => { e.stopPropagation(); navigate(`/song/${song.id}`); }}
+              className="p-1 text-white/70 hover:text-[#A78BFA] transition-colors"
+              title="Open song page"
+            >
+              <ExternalLink size={12} />
+            </button>
           </div>
         </div>
       </div>
     </div>
+    {showAddToList && (
+      <AddToMyListModal
+        songId={song.id}
+        songTitle={song.title}
+        onClose={() => setShowAddToList(false)}
+      />
+    )}
+    </>
   );
 }
 
@@ -586,7 +639,6 @@ export default function ExplorePage() {
                 isActive={currentTrackId === String(item.song.id)}
                 isPlaying={playerState.isPlaying}
                 onPlay={handlePlay}
-                onMenu={openMenu}
                 onTip={setTipItem}
               />
             ))}
