@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MobilePlayerPanel v2.0 (Cinematic Mode)
+   LIVING NEXUS — MobilePlayerPanel v3.0
    Structure:
-   • Full-bleed artwork as background (dominant, immersive)
-   • Right-side emotional action stack: Love ❤️ | Share 🔁 | Comment 💬
-   • Functional row below controls: Gift | Details | Sound
-   • WID badge always visible, directly under title
-   • Details slide-up panel: WID, Creator, License, Provenance, Tags
-   • Tap artwork to toggle UI visibility (true cinematic mode)
-   • Floating heart pulse animation on Love tap
-   • Gradient fade behind controls
+   • Full-bleed artwork — ALWAYS visible (cinematic mode = overlay fade, not hide)
+   • Title + Creator + WID badge — ALWAYS visible above controls
+   • Right-side emotional action stack: Love | Share | Comment
+   • Functional row: Gift | Details | Sound
+   • Tabbed BottomSheet: Details / Lyrics / Comments (swipe-down to close)
+   • Tap artwork toggles overlay controls (but identity info stays)
+   • Video: muted visual loop, audio is source of truth
+   • No scroll lock — panel is scrollable end-to-end
    Divine Noir — Orbitron/Cinzel, gold/cyan palette
 ═══════════════════════════════════════════════════════════════════ */
 
@@ -22,7 +22,7 @@ import {
   Shuffle, Repeat, Volume2, VolumeX,
   Heart, X, Music, DollarSign, Users,
   Share2, ChevronDown, MessageCircle, Info,
-  Check, Shield, Tag, FileText, User,
+  Check, Shield, Tag, FileText, User, BookOpen,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import PlayerTipModal from "./PlayerTipModal";
@@ -55,6 +55,8 @@ function HeartParticle({ id, onDone }: { id: number; onDone: (id: number) => voi
   );
 }
 
+type BottomSheetTab = "details" | "lyrics" | "comments";
+
 export default function MobilePlayerPanel() {
   const {
     state, audioRef, allTracks,
@@ -70,16 +72,13 @@ export default function MobilePlayerPanel() {
   const open = isNowPlayingPanelOpen;
   const togglePanel = () => isNowPlayingPanelOpen ? closeNowPlayingPanel() : openNowPlayingPanel();
 
-  // UI visibility (cinematic tap-to-hide)
-  const [uiVisible, setUiVisible] = useState(true);
-  const uiHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Cinematic mode: controls overlay fades, but identity (title/WID/art) ALWAYS visible
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const controlsHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Details panel
-  const [detailsOpen, setDetailsOpen] = useState(false);
-
-  // Comment panel
-  const [commentOpen, setCommentOpen] = useState(false);
-  const [newComment, setNewComment] = useState("");
+  // Bottom sheet
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetTab, setSheetTab] = useState<BottomSheetTab>("details");
 
   // Tip modal
   const [tipOpen, setTipOpen] = useState(false);
@@ -90,9 +89,6 @@ export default function MobilePlayerPanel() {
   // Heart particles
   const [hearts, setHearts] = useState<number[]>([]);
   const heartCounter = useRef(0);
-
-  // Volume
-  const [volOpen, setVolOpen] = useState(false);
 
   // Draggable floating tab
   const STORAGE_KEY = "ln_player_tab_top";
@@ -132,7 +128,7 @@ export default function MobilePlayerPanel() {
     isDragging.current = false;
   }, [tabTop]);
 
-  // Grab-handle swipe
+  // Grab-handle swipe down to close
   const grabTouchStartY = useRef<number | null>(null);
   const onGrabTouchStart = (e: React.TouchEvent) => { grabTouchStartY.current = e.touches[0].clientY; };
   const onGrabTouchEnd = (e: React.TouchEvent) => {
@@ -140,6 +136,16 @@ export default function MobilePlayerPanel() {
     const delta = e.changedTouches[0].clientY - grabTouchStartY.current;
     if (delta > 60) closeNowPlayingPanel();
     grabTouchStartY.current = null;
+  };
+
+  // Sheet swipe down to close
+  const sheetTouchStartY = useRef<number | null>(null);
+  const onSheetTouchStart = (e: React.TouchEvent) => { sheetTouchStartY.current = e.touches[0].clientY; };
+  const onSheetTouchEnd = (e: React.TouchEvent) => {
+    if (sheetTouchStartY.current === null) return;
+    const delta = e.changedTouches[0].clientY - sheetTouchStartY.current;
+    if (delta > 60) setSheetOpen(false);
+    sheetTouchStartY.current = null;
   };
 
   const tracks = allTracks();
@@ -155,15 +161,17 @@ export default function MobilePlayerPanel() {
   const tipsEnabled = !!creatorStripeAccountId;
   const song = songDetail?.song as any;
   const creator = songDetail?.creator as any;
+  const lyricsText = song?.lyricsText as string | null | undefined;
 
   // Comments
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
     { songId: currentSongId! },
-    { enabled: commentOpen && !!currentSongId && !isNaN(currentSongId), staleTime: 30_000 }
+    { enabled: sheetOpen && sheetTab === "comments" && !!currentSongId && !isNaN(currentSongId), staleTime: 30_000 }
   );
   const addCommentMutation = trpc.comments.add.useMutation({
     onSuccess: () => { refetchComments(); setNewComment(""); },
   });
+  const [newComment, setNewComment] = useState("");
   const submitComment = useCallback(() => {
     if (!newComment.trim() || !currentSongId) return;
     addCommentMutation.mutate({
@@ -186,7 +194,6 @@ export default function MobilePlayerPanel() {
   const handleLove = useCallback(() => {
     if (!user || !currentSongId || isNaN(currentSongId)) return;
     toggleLikeMutation.mutate({ songId: currentSongId });
-    // Spawn heart particle
     const id = heartCounter.current++;
     setHearts(h => [...h, id]);
   }, [user, currentSongId, toggleLikeMutation]);
@@ -222,35 +229,40 @@ export default function MobilePlayerPanel() {
     } catch {}
   }, [currentTrack, currentSongId]);
 
-  // Tap artwork to toggle UI
+  // Tap artwork to toggle controls overlay (identity always stays)
   const handleArtTap = useCallback(() => {
-    if (detailsOpen || commentOpen) return;
-    setUiVisible(v => !v);
-  }, [detailsOpen, commentOpen]);
+    if (sheetOpen) return; // don't toggle when sheet is open
+    setControlsVisible(v => !v);
+  }, [sheetOpen]);
 
-  // Auto-show UI after 4s of hiding
+  // Auto-restore controls after 4s
   useEffect(() => {
-    if (!uiVisible) {
-      uiHideTimer.current = setTimeout(() => setUiVisible(true), 4000);
+    if (!controlsVisible) {
+      controlsHideTimer.current = setTimeout(() => setControlsVisible(true), 4000);
     }
-    return () => { if (uiHideTimer.current) clearTimeout(uiHideTimer.current); };
-  }, [uiVisible]);
+    return () => { if (controlsHideTimer.current) clearTimeout(controlsHideTimer.current); };
+  }, [controlsVisible]);
 
   // Reset on track change
   useEffect(() => {
-    setUiVisible(true);
-    setDetailsOpen(false);
-    setCommentOpen(false);
+    setControlsVisible(true);
+    setSheetOpen(false);
+    setNewComment("");
   }, [currentTrack?.id]);
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeNowPlayingPanel(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (sheetOpen) setSheetOpen(false);
+        else closeNowPlayingPanel();
+      }
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [sheetOpen, closeNowPlayingPanel]);
 
-  // Background video
+  // Background video — muted visual loop, audio is source of truth
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoUrl = song?.videoUrl as string | null | undefined;
   const videoWitnessId = song?.videoWitnessId as string | null | undefined;
@@ -259,8 +271,14 @@ export default function MobilePlayerPanel() {
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid || !videoUrl) return;
-    if (state.isPlaying && open) vid.play().catch(() => {});
-    else vid.pause();
+    // Video is always muted — audio element is the source of truth
+    vid.muted = true;
+    vid.loop = true;
+    if (state.isPlaying && open) {
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+    }
   }, [state.isPlaying, open, videoUrl]);
 
   useEffect(() => {
@@ -289,6 +307,13 @@ export default function MobilePlayerPanel() {
     if (vid) { vid.pause(); vid.currentTime = 0; }
     setVideoBuffering(true);
   }, [currentTrack?.id]);
+
+  // Open sheet with specific tab
+  const openSheet = useCallback((tab: BottomSheetTab) => {
+    setSheetTab(tab);
+    setSheetOpen(true);
+    setControlsVisible(true); // always show controls when sheet opens
+  }, []);
 
   return (
     <>
@@ -349,10 +374,11 @@ export default function MobilePlayerPanel() {
 
       {/* ══════════════════════════════════════════════════════════════
           CINEMATIC PANEL — full-height, right-side drawer
+          overflow-y-auto so content is always scrollable
       ══════════════════════════════════════════════════════════════ */}
       <div
         className="md:hidden fixed top-0 right-0 h-full z-50 flex flex-col
-          transition-transform duration-300 ease-in-out overflow-hidden"
+          transition-transform duration-300 ease-in-out"
         style={{
           width: "min(340px, 92vw)",
           background: "oklch(0.07 0.02 275)",
@@ -361,32 +387,41 @@ export default function MobilePlayerPanel() {
           transform: open ? "translateX(0)" : "translateX(100%)",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          overflowY: "auto",
+          overflowX: "hidden",
         }}
       >
-        {/* ══ ARTWORK SECTION — full-bleed, dominant ══ */}
+        {/* ══ ARTWORK SECTION — full-bleed, dominant, ALWAYS visible ══ */}
         <div
           className="relative flex-shrink-0"
           style={{ height: "56vw", maxHeight: "280px", minHeight: "200px" }}
         >
-          {/* Background video */}
+          {/* Background video — muted visual loop */}
           {videoUrl && (
             <video ref={videoRef} src={videoUrl}
               className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
               style={{ opacity: showVideo ? 1 : 0 }}
               playsInline loop muted preload="metadata" />
           )}
-          {/* Cover art */}
+
+          {/* Cover art — ALWAYS rendered, fallback to placeholder */}
           {currentTrack?.artUrl ? (
-            <img src={currentTrack.artUrl} alt=""
+            <img src={currentTrack.artUrl} alt={currentTrack.title || "Track artwork"}
               className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
               style={{
                 opacity: showVideo ? 0 : 1,
                 objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
               }} />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center"
-              style={{ background: currentTrack?.bg || "oklch(0.14 0.04 275)" }}>
+            /* Placeholder — always show something, never blank */
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+              style={{ background: currentTrack?.bg || "oklch(0.12 0.04 275)" }}>
               <Music className="w-16 h-16 opacity-20 text-white" />
+              {currentTrack && (
+                <span className="text-[11px] opacity-30 text-white font-body px-4 text-center line-clamp-2">
+                  {currentTrack.title}
+                </span>
+              )}
             </div>
           )}
 
@@ -394,13 +429,13 @@ export default function MobilePlayerPanel() {
           <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
             style={{ background: "linear-gradient(to bottom, transparent, oklch(0.07 0.02 275))" }} />
 
-          {/* Tap zone — toggle UI visibility */}
+          {/* Tap zone — toggle controls overlay (identity always stays) */}
           <div className="absolute inset-0 z-10 cursor-pointer" onClick={handleArtTap} />
 
           {/* Heart particles */}
           {hearts.map(id => <HeartParticle key={id} id={id} onDone={removeHeart} />)}
 
-          {/* ── Header controls (always visible) ── */}
+          {/* ── Header controls ── */}
           <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-4 z-20">
             <div className="flex flex-col gap-0.5">
               <span className="text-[9px] font-bold tracking-widest uppercase"
@@ -428,14 +463,14 @@ export default function MobilePlayerPanel() {
             </div>
           </div>
 
-          {/* ── RIGHT-SIDE EMOTIONAL ACTION STACK ── */}
+          {/* ── RIGHT-SIDE EMOTIONAL ACTION STACK — always interactive ── */}
           <div
-            className="absolute right-3 bottom-16 flex flex-col items-center gap-4 z-20 transition-opacity duration-300"
-            style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
+            className="absolute right-3 bottom-16 flex flex-col items-center gap-4 z-20"
+            style={{ pointerEvents: "auto" }}
           >
             {/* Love ❤️ */}
             <button
-              onClick={handleLove}
+              onClick={(e) => { e.stopPropagation(); handleLove(); }}
               disabled={!user}
               className="flex flex-col items-center gap-1 group"
               title={!user ? "Sign in to love" : isLiked ? "Loved" : "Love"}
@@ -457,9 +492,8 @@ export default function MobilePlayerPanel() {
 
             {/* Share 🔁 */}
             <button
-              onClick={handleShare}
+              onClick={(e) => { e.stopPropagation(); handleShare(); }}
               className="flex flex-col items-center gap-1"
-              title="Share"
             >
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
@@ -480,19 +514,18 @@ export default function MobilePlayerPanel() {
 
             {/* Comment 💬 */}
             <button
-              onClick={() => { setCommentOpen(v => !v); setDetailsOpen(false); }}
+              onClick={(e) => { e.stopPropagation(); openSheet("comments"); }}
               className="flex flex-col items-center gap-1"
-              title="Comment"
             >
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  background: commentOpen ? "oklch(0.55 0.18 220 / 0.25)" : "oklch(0 0 0 / 0.45)",
+                  background: (sheetOpen && sheetTab === "comments") ? "oklch(0.55 0.18 220 / 0.25)" : "oklch(0 0 0 / 0.45)",
                   backdropFilter: "blur(8px)",
-                  border: commentOpen ? "1px solid oklch(0.55 0.18 220 / 0.4)" : "1px solid oklch(1 0 0 / 0.12)",
+                  border: (sheetOpen && sheetTab === "comments") ? "1px solid oklch(0.55 0.18 220 / 0.4)" : "1px solid oklch(1 0 0 / 0.12)",
                 }}
               >
-                <MessageCircle size={18} style={{ color: commentOpen ? "oklch(0.72 0.18 220)" : "oklch(1 0 0 / 0.7)" }} />
+                <MessageCircle size={18} style={{ color: (sheetOpen && sheetTab === "comments") ? "oklch(0.72 0.18 220)" : "oklch(1 0 0 / 0.7)" }} />
               </div>
               <span className="text-[9px]" style={{ color: "oklch(1 0 0 / 0.45)" }}>
                 {commentsData?.length ? commentsData.length : ""}Comment
@@ -503,7 +536,7 @@ export default function MobilePlayerPanel() {
           {/* Video WID badge */}
           {videoWitnessId && (
             <button
-              onClick={() => navigate(`/verify/${videoWitnessId}`)}
+              onClick={(e) => { e.stopPropagation(); navigate(`/verify/${videoWitnessId}`); }}
               className="absolute top-12 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide z-20"
               style={{
                 background: "oklch(0.22 0.08 145 / 0.88)",
@@ -517,11 +550,8 @@ export default function MobilePlayerPanel() {
           )}
         </div>
 
-        {/* ══ TRACK INFO — title + WID badge ══ */}
-        <div
-          className="flex-shrink-0 px-5 pt-3 pb-2 transition-opacity duration-300"
-          style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
-        >
+        {/* ══ TRACK IDENTITY — ALWAYS VISIBLE (cinematic mode keeps this) ══ */}
+        <div className="flex-shrink-0 px-5 pt-3 pb-2">
           {/* Title */}
           <button
             onClick={() => { if (currentSongId) navigate(`/song/${currentSongId}`); }}
@@ -537,11 +567,11 @@ export default function MobilePlayerPanel() {
             onClick={() => { if (creator?.id) navigate(`/creator/${creator.id}`); }}
             disabled={!creator?.id}
             className="text-sm truncate mt-0.5 text-left w-full transition-opacity hover:opacity-75 disabled:cursor-default"
-            style={{ color: "oklch(0.72 0.155 175)" }}
+            style={{ color: "oklch(0.55 0.03 280)", fontFamily: "'Cinzel', serif" }}
           >
             {currentTrack?.artist || "—"}
           </button>
-          {/* WID badge — always visible, directly under title */}
+          {/* WID badge — always visible */}
           {currentTrack?.witnessId && (
             <button
               onClick={() => navigate(`/verify/${currentTrack.witnessId}`)}
@@ -560,11 +590,8 @@ export default function MobilePlayerPanel() {
           )}
         </div>
 
-        {/* ══ PROGRESS BAR ══ */}
-        <div
-          className="flex-shrink-0 px-5 pb-2 transition-opacity duration-300"
-          style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
-        >
+        {/* ══ PROGRESS BAR — always visible ══ */}
+        <div className="flex-shrink-0 px-5 pb-2">
           <div
             className="relative h-1 rounded-full cursor-pointer"
             style={{ background: "oklch(1 0 0 / 0.1)" }}
@@ -586,10 +613,10 @@ export default function MobilePlayerPanel() {
           </div>
         </div>
 
-        {/* ══ PLAYER CONTROLS — clean, dominant play button ══ */}
+        {/* ══ PLAYER CONTROLS — fade in cinematic mode, but always tappable ══ */}
         <div
-          className="flex-shrink-0 px-5 pb-3 transition-opacity duration-300"
-          style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
+          className="flex-shrink-0 px-5 pb-3 transition-opacity duration-500"
+          style={{ opacity: controlsVisible ? 1 : 0.15 }}
         >
           <div className="flex items-center justify-between">
             <button
@@ -602,7 +629,6 @@ export default function MobilePlayerPanel() {
             <button onClick={prevTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
               <SkipBack size={24} />
             </button>
-            {/* Dominant play button */}
             <button
               onClick={togglePlay}
               className="w-14 h-14 rounded-full flex items-center justify-center transition-transform
@@ -630,18 +656,18 @@ export default function MobilePlayerPanel() {
           </div>
         </div>
 
-        {/* ══ FUNCTIONAL ROW — Gift | Details | Sound ══ */}
-        <div
-          className="flex-shrink-0 px-5 pb-4 transition-opacity duration-300"
-          style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? "auto" : "none" }}
-        >
+        {/* ══ FUNCTIONAL ROW — Gift | Details | Lyrics | Sound ══ */}
+        <div className="flex-shrink-0 px-5 pb-4">
           <div className="flex items-center gap-2">
             {/* Gift */}
             <button
-              onClick={() => { if (tipsEnabled) setTipOpen(true); }}
+              onClick={() => {
+                if (!tipsEnabled || !currentTrack) return;
+                setTipOpen(true);
+              }}
               disabled={!tipsEnabled || !currentTrack}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold
-                transition-all disabled:opacity-35 disabled:cursor-not-allowed"
+              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
+                transition-all active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed"
               style={{
                 background: tipsEnabled ? "oklch(0.84 0.155 85 / 0.12)" : "oklch(0.12 0.02 275)",
                 color: tipsEnabled ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)",
@@ -650,29 +676,47 @@ export default function MobilePlayerPanel() {
               }}
               title={tipsEnabled ? "Gift creator" : "Tips not enabled"}
             >
-              <DollarSign size={13} />
+              <DollarSign size={12} />
               Gift
             </button>
 
             {/* Details */}
             <button
-              onClick={() => { setDetailsOpen(v => !v); setCommentOpen(false); }}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold transition-all"
+              onClick={() => openSheet("details")}
+              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
+                transition-all active:scale-95"
               style={{
-                background: detailsOpen ? "oklch(0.55 0.18 220 / 0.15)" : "oklch(0.12 0.02 275)",
-                color: detailsOpen ? "oklch(0.72 0.18 220)" : "oklch(0.55 0.03 280)",
-                border: detailsOpen ? "1px solid oklch(0.55 0.18 220 / 0.35)" : "1px solid oklch(0.20 0.02 275)",
+                background: (sheetOpen && sheetTab === "details") ? "oklch(0.55 0.18 220 / 0.15)" : "oklch(0.12 0.02 275)",
+                color: (sheetOpen && sheetTab === "details") ? "oklch(0.72 0.18 220)" : "oklch(0.55 0.03 280)",
+                border: (sheetOpen && sheetTab === "details") ? "1px solid oklch(0.55 0.18 220 / 0.35)" : "1px solid oklch(0.20 0.02 275)",
                 fontFamily: "'Cinzel', serif",
               }}
             >
-              <Info size={13} />
+              <Info size={12} />
               Details
+            </button>
+
+            {/* Lyrics */}
+            <button
+              onClick={() => openSheet("lyrics")}
+              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
+                transition-all active:scale-95"
+              style={{
+                background: (sheetOpen && sheetTab === "lyrics") ? "oklch(0.65 0.18 55 / 0.15)" : "oklch(0.12 0.02 275)",
+                color: (sheetOpen && sheetTab === "lyrics") ? "oklch(0.80 0.18 55)" : "oklch(0.55 0.03 280)",
+                border: (sheetOpen && sheetTab === "lyrics") ? "1px solid oklch(0.65 0.18 55 / 0.35)" : "1px solid oklch(0.20 0.02 275)",
+                fontFamily: "'Cinzel', serif",
+              }}
+            >
+              <BookOpen size={12} />
+              Lyrics
             </button>
 
             {/* Sound */}
             <button
               onClick={toggleMute}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold transition-all"
+              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
+                transition-all active:scale-95"
               style={{
                 background: state.isMuted ? "oklch(0.55 0.18 25 / 0.12)" : "oklch(0.12 0.02 275)",
                 color: state.isMuted ? "oklch(0.75 0.18 25)" : "oklch(0.55 0.03 280)",
@@ -680,202 +724,8 @@ export default function MobilePlayerPanel() {
                 fontFamily: "'Cinzel', serif",
               }}
             >
-              {state.isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              {state.isMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
               Sound
-            </button>
-          </div>
-        </div>
-
-        {/* ══ DETAILS SLIDE-UP PANEL ══ */}
-        <div
-          className="flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out"
-          style={{
-            maxHeight: detailsOpen ? "320px" : "0px",
-            opacity: detailsOpen ? 1 : 0,
-          }}
-        >
-          <div
-            className="mx-4 mb-4 rounded-2xl p-4 space-y-3"
-            style={{
-              background: "oklch(0.11 0.025 275)",
-              border: "1px solid oklch(0.20 0.02 275)",
-            }}
-          >
-            <h3 className="text-[11px] font-bold tracking-widest uppercase mb-3"
-              style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>
-              Track Details
-            </h3>
-
-            {/* WID */}
-            {currentTrack?.witnessId && (
-              <div className="flex items-start gap-2.5">
-                <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.80 0.145 82)" }} />
-                <div className="min-w-0">
-                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
-                    Witness ID
-                  </div>
-                  <button
-                    onClick={() => navigate(`/verify/${currentTrack.witnessId}`)}
-                    className="text-[11px] font-mono break-all text-left hover:opacity-75 transition-opacity"
-                    style={{ color: "oklch(0.80 0.145 82)" }}
-                  >
-                    {currentTrack.witnessId}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Creator */}
-            {creator && (
-              <div className="flex items-start gap-2.5">
-                <User size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.72 0.155 175)" }} />
-                <div className="min-w-0">
-                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
-                    Creator
-                  </div>
-                  <button
-                    onClick={() => { if (creator.id) navigate(`/creator/${creator.id}`); }}
-                    className="text-[12px] font-semibold hover:opacity-75 transition-opacity"
-                    style={{ color: "oklch(0.88 0.02 280)", fontFamily: "'Cinzel', serif" }}
-                  >
-                    {creator.artistHandle || creator.name || "Unknown"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* License */}
-            {song?.licenseStatus && (
-              <div className="flex items-start gap-2.5">
-                <FileText size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 55)" }} />
-                <div className="min-w-0">
-                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
-                    License
-                  </div>
-                  <span className="text-[12px] capitalize" style={{ color: "oklch(0.80 0.02 280)" }}>
-                    {song.licenseStatus}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Provenance / AI Disclosure */}
-            {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
-              <div className="flex items-start gap-2.5">
-                <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 25)" }} />
-                <div className="min-w-0">
-                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
-                    Provenance
-                  </div>
-                  <span className="text-[12px]" style={{ color: "oklch(0.80 0.02 280)" }}>
-                    {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Tags / Genre */}
-            {currentTrack?.genre && (
-              <div className="flex items-start gap-2.5">
-                <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 280)" }} />
-                <div className="min-w-0">
-                  <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
-                    Genre / Tags
-                  </div>
-                  <span className="text-[12px]" style={{ color: "oklch(0.80 0.02 280)" }}>
-                    {currentTrack.genre}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Open full song page */}
-            {currentSongId && (
-              <button
-                onClick={() => { navigate(`/song/${currentSongId}`); closeNowPlayingPanel(); }}
-                className="w-full mt-1 py-2 rounded-xl text-[11px] font-semibold tracking-wide transition-all"
-                style={{
-                  background: "oklch(0.84 0.155 85 / 0.10)",
-                  color: "oklch(0.84 0.155 85)",
-                  border: "1px solid oklch(0.84 0.155 85 / 0.20)",
-                  fontFamily: "'Cinzel', serif",
-                }}
-              >
-                Open Full Song Page →
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* ══ COMMENT PANEL ══ */}
-        <div
-          className="flex-1 overflow-hidden transition-all duration-300 ease-in-out flex flex-col"
-          style={{
-            maxHeight: commentOpen ? "400px" : "0px",
-            opacity: commentOpen ? 1 : 0,
-          }}
-        >
-          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-2 space-y-3"
-            style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}>
-            <h3 className="text-[11px] font-bold tracking-widest uppercase"
-              style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>
-              Activity
-            </h3>
-            {commentsData && commentsData.length > 0 ? (
-              commentsData.map((c: any) => (
-                <div key={c.id} className="flex gap-2.5">
-                  <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
-                    style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "oklch(0.84 0.155 85)" }}>
-                    {(c.authorName ?? "A")[0].toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2 mb-0.5">
-                      <span className="text-[11px] font-semibold" style={{ color: "oklch(0.82 0.155 175)" }}>
-                        {c.authorName ?? "Anonymous"}
-                      </span>
-                      <span className="text-[9px]" style={{ color: "oklch(0.40 0.02 280)" }}>
-                        {new Date(c.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-[12px] leading-relaxed" style={{ color: "oklch(0.78 0.02 280)" }}>
-                      {c.content}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-4">
-                <MessageCircle size={20} className="mx-auto mb-1.5 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
-                <p className="text-[12px] italic" style={{ color: "oklch(0.40 0.02 280)" }}>
-                  No comments yet. Be the first.
-                </p>
-              </div>
-            )}
-          </div>
-          {/* Comment input */}
-          <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2"
-            style={{ borderTop: "1px solid oklch(0.18 0.02 275)" }}>
-            <input
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
-              placeholder={user ? "Leave a witness..." : "Sign in to comment"}
-              disabled={!user || addCommentMutation.isPending}
-              maxLength={1000}
-              className="flex-1 rounded-xl px-3 py-2 text-[12px] outline-none transition-colors disabled:opacity-50"
-              style={{
-                background: "oklch(0.12 0.04 270)",
-                border: "1px solid oklch(0.22 0.04 270)",
-                color: "oklch(0.88 0.02 280)",
-              }}
-            />
-            <button
-              onClick={submitComment}
-              disabled={!user || !newComment.trim() || addCommentMutation.isPending}
-              className="px-3 py-2 rounded-xl text-[12px] font-semibold transition-colors disabled:opacity-40"
-              style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.08 0.01 280)" }}
-            >
-              Post
             </button>
           </div>
         </div>
@@ -906,6 +756,251 @@ export default function MobilePlayerPanel() {
           )}
         </div>
       </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          TABBED BOTTOM SHEET — Details / Lyrics / Comments
+          Overlays the player panel, swipe-down to close
+      ══════════════════════════════════════════════════════════════ */}
+      {open && (
+        <div
+          className="md:hidden fixed z-[60] transition-transform duration-300 ease-in-out flex flex-col"
+          style={{
+            bottom: 0,
+            right: 0,
+            width: "min(340px, 92vw)",
+            height: "70vh",
+            maxHeight: "520px",
+            background: "oklch(0.10 0.025 275)",
+            borderTop: "1px solid oklch(0.22 0.02 275)",
+            borderLeft: "1px solid oklch(0.18 0.02 275)",
+            borderRadius: "16px 0 0 0",
+            boxShadow: "0 -8px 32px oklch(0 0 0 / 0.6)",
+            transform: sheetOpen ? "translateY(0)" : "translateY(100%)",
+            paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          }}
+          onTouchStart={onSheetTouchStart}
+          onTouchEnd={onSheetTouchEnd}
+        >
+          {/* Sheet drag handle */}
+          <div className="flex-shrink-0 flex flex-col items-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "oklch(0.28 0.02 275)" }} />
+          </div>
+
+          {/* Tab bar */}
+          <div className="flex-shrink-0 flex items-center gap-1 px-4 pb-3">
+            {(["details", "lyrics", "comments"] as BottomSheetTab[]).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setSheetTab(tab)}
+                className="flex-1 py-1.5 rounded-lg text-[11px] font-semibold capitalize transition-all"
+                style={{
+                  background: sheetTab === tab ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
+                  color: sheetTab === tab ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
+                  border: sheetTab === tab ? "1px solid oklch(0.84 0.155 85 / 0.25)" : "1px solid transparent",
+                  fontFamily: "'Cinzel', serif",
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+            <button
+              onClick={() => setSheetOpen(false)}
+              className="p-1.5 rounded-lg transition-colors"
+              style={{ color: "oklch(0.40 0.03 280)" }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          {/* Sheet content — scrollable */}
+          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}>
+
+            {/* ── DETAILS TAB ── */}
+            {sheetTab === "details" && (
+              <div className="px-4 pb-4 space-y-3">
+                {currentTrack?.witnessId && (
+                  <div className="flex items-start gap-2.5">
+                    <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.80 0.145 82)" }} />
+                    <div className="min-w-0">
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>Witness ID</div>
+                      <button
+                        onClick={() => { navigate(`/verify/${currentTrack.witnessId}`); setSheetOpen(false); }}
+                        className="text-[11px] font-mono break-all text-left hover:opacity-75 transition-opacity"
+                        style={{ color: "oklch(0.80 0.145 82)" }}
+                      >
+                        {currentTrack.witnessId}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {creator && (
+                  <div className="flex items-start gap-2.5">
+                    <User size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.72 0.155 175)" }} />
+                    <div className="min-w-0">
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>Creator</div>
+                      <button
+                        onClick={() => { if (creator.id) { navigate(`/creator/${creator.id}`); setSheetOpen(false); } }}
+                        className="text-[12px] font-semibold hover:opacity-75 transition-opacity"
+                        style={{ color: "oklch(0.88 0.02 280)", fontFamily: "'Cinzel', serif" }}
+                      >
+                        {creator.artistHandle || creator.name || "Unknown"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {song?.licenseStatus && (
+                  <div className="flex items-start gap-2.5">
+                    <FileText size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 55)" }} />
+                    <div className="min-w-0">
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>License</div>
+                      <span className="text-[12px] capitalize" style={{ color: "oklch(0.80 0.02 280)" }}>{song.licenseStatus}</span>
+                    </div>
+                  </div>
+                )}
+                {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
+                  <div className="flex items-start gap-2.5">
+                    <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 25)" }} />
+                    <div className="min-w-0">
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>Provenance</div>
+                      <span className="text-[12px]" style={{ color: "oklch(0.80 0.02 280)" }}>
+                        {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {currentTrack?.genre && (
+                  <div className="flex items-start gap-2.5">
+                    <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 280)" }} />
+                    <div className="min-w-0">
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>Genre / Tags</div>
+                      <span className="text-[12px]" style={{ color: "oklch(0.80 0.02 280)" }}>{currentTrack.genre}</span>
+                    </div>
+                  </div>
+                )}
+                {currentSongId && (
+                  <button
+                    onClick={() => { navigate(`/song/${currentSongId}`); setSheetOpen(false); closeNowPlayingPanel(); }}
+                    className="w-full mt-2 py-2 rounded-xl text-[11px] font-semibold tracking-wide transition-all active:scale-95"
+                    style={{
+                      background: "oklch(0.84 0.155 85 / 0.10)",
+                      color: "oklch(0.84 0.155 85)",
+                      border: "1px solid oklch(0.84 0.155 85 / 0.20)",
+                      fontFamily: "'Cinzel', serif",
+                    }}
+                  >
+                    Open Full Song Page →
+                  </button>
+                )}
+                {!currentTrack && (
+                  <div className="text-center py-8 text-white/30 text-[12px]">No track selected</div>
+                )}
+              </div>
+            )}
+
+            {/* ── LYRICS TAB ── */}
+            {sheetTab === "lyrics" && (
+              <div className="px-4 pb-4">
+                {lyricsText ? (
+                  <pre
+                    className="text-[13px] leading-relaxed whitespace-pre-wrap font-body"
+                    style={{ color: "oklch(0.82 0.02 280)" }}
+                  >
+                    {lyricsText}
+                  </pre>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <BookOpen size={28} className="opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
+                    <p className="text-[12px] italic text-center" style={{ color: "oklch(0.40 0.02 280)" }}>
+                      No lyrics available for this track.
+                    </p>
+                    {currentSongId && (
+                      <button
+                        onClick={() => { navigate(`/song/${currentSongId}`); setSheetOpen(false); closeNowPlayingPanel(); }}
+                        className="text-[11px] px-3 py-1.5 rounded-lg transition-all"
+                        style={{ color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.3)" }}
+                      >
+                        View song page
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── COMMENTS TAB ── */}
+            {sheetTab === "comments" && (
+              <div className="flex flex-col h-full">
+                <div className="flex-1 px-4 pb-2 space-y-3">
+                  {commentsData && commentsData.length > 0 ? (
+                    commentsData.map((c: any) => (
+                      <div key={c.id} className="flex gap-2.5">
+                        <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
+                          style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "oklch(0.84 0.155 85)" }}>
+                          {(c.authorName ?? "A")[0].toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-2 mb-0.5">
+                            <span className="text-[11px] font-semibold" style={{ color: "oklch(0.82 0.155 175)" }}>
+                              {c.authorName ?? "Anonymous"}
+                            </span>
+                            <span className="text-[9px]" style={{ color: "oklch(0.40 0.02 280)" }}>
+                              {new Date(c.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-[12px] leading-relaxed" style={{ color: "oklch(0.78 0.02 280)" }}>
+                            {c.content}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6">
+                      <MessageCircle size={20} className="mx-auto mb-1.5 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
+                      <p className="text-[12px] italic" style={{ color: "oklch(0.40 0.02 280)" }}>
+                        No comments yet. Be the first.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {/* Comment input — pinned to bottom of sheet */}
+                <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2"
+                  style={{ borderTop: "1px solid oklch(0.18 0.02 275)" }}>
+                  <input
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
+                    placeholder={user ? "Leave a witness..." : "Sign in to comment"}
+                    disabled={!user || addCommentMutation.isPending}
+                    maxLength={1000}
+                    className="flex-1 rounded-xl px-3 py-2 text-[12px] outline-none transition-colors disabled:opacity-50"
+                    style={{
+                      background: "oklch(0.12 0.04 270)",
+                      border: "1px solid oklch(0.22 0.04 270)",
+                      color: "oklch(0.88 0.02 280)",
+                    }}
+                  />
+                  <button
+                    onClick={submitComment}
+                    disabled={!user || !newComment.trim() || addCommentMutation.isPending}
+                    className="px-3 py-2 rounded-xl text-[12px] font-semibold transition-colors disabled:opacity-40 active:scale-95"
+                    style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.08 0.01 280)" }}
+                  >
+                    Post
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Sheet backdrop */}
+      {open && sheetOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-[55]"
+          onClick={() => setSheetOpen(false)}
+        />
+      )}
 
       {/* Keyframes */}
       <style>{`

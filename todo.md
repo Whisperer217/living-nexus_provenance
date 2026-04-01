@@ -1638,3 +1638,17 @@
 - [x] Add: per-work stats (plays ▶, likes ♥, gifts $) to Works tab song rows
 - [x] Add: skeleton loading states to Works tab (5-row pulse skeleton)
 - [x] All 95 tests passing, TypeScript 0 errors
+
+## Task 20: Mobile Player Critical Fixes
+- [x] Fix Details button handler — wire to openTrackDetailsDrawer(trackId) with tap feedback
+- [x] Fix Gift button handler — wire to openGiftModal(trackId) with tap feedback
+- [x] Fix mobile scroll lock — panel uses overflow-y-auto, no overflow:hidden trapping
+- [x] Build reusable BottomSheet component (swipe-down to close, scroll inside, safe area aware)
+- [x] Replace stuck Lyrics panel with BottomSheet (tap Lyrics → slide up full panel)
+- [x] Add tabbed BottomSheet: Details / Lyrics / Comments tabs
+- [x] Comments tab: input box visible, existing comments render, emoji reactions persist
+- [x] Cinematic mode: NEVER empty — always shows title, creator, WID badge, cover art (controls fade to 0.15 opacity)
+- [x] Cover art: MediaRenderer fallback chain (video → artwork → Music icon placeholder)
+- [x] Video + audio sync: video.muted=true, audio.play(), video.loop=true, robust play/pause
+- [x] All player interactions use one unified PlayerController (no duplicate logic)
+- [x] 95 tests passing, TypeScript 0 errors
