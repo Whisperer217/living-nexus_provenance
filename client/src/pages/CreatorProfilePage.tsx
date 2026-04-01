@@ -672,16 +672,14 @@ export default function CreatorProfilePage() {
             We use pt-20 (80px) to give a comfortable 16px breathing room.
           */}
           {/* Responsive header: stacks on mobile, side-by-side on sm+ */}
-          <div className="flex items-start gap-4 sm:gap-6 pt-20 pb-7">
-            {/* Spacer column — same width as avatar so text starts to the right */}
-            <div
-              className="flex-shrink-0"
-              style={{ width: "clamp(80px, 12vw, 128px)" }}
-              aria-hidden="true"
-            />
-
-            {/* Identity + right-col: stacks vertically on mobile, row on sm+ */}
-            <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-start sm:gap-4">
+          {/* Mobile: pt-24 gives space for avatar overhang (80px) + breathing room */}
+          <div className="pt-24 sm:pt-20 pb-7">
+            {/* Desktop: spacer + identity side-by-side; Mobile: full-width stacked */}
+            <div className="hidden sm:flex items-start gap-6">
+              {/* Desktop spacer column */}
+              <div className="flex-shrink-0" style={{ width: "clamp(80px, 12vw, 128px)" }} aria-hidden="true" />
+              {/* Desktop identity + right-col */}
+              <div className="flex-1 min-w-0 flex flex-row items-start gap-4">
 
               {/* ── Identity block ── */}
               <div className="flex-1 min-w-0 pt-1">
@@ -830,8 +828,135 @@ export default function CreatorProfilePage() {
                 </div>
               </div>{/* end right column */}
 
-            </div>{/* end identity + right-col wrapper */}
-          </div>{/* end header flex row */}
+              </div>{/* end desktop identity + right-col wrapper */}
+            </div>{/* end desktop flex row */}
+
+            {/* Mobile-only: full-width stacked layout */}
+            <div className="sm:hidden flex flex-col gap-3">
+              {/* Name row */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1
+                  className="text-2xl font-bold leading-tight"
+                  style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}
+                >
+                  {creator.artistHandle || creator.name}
+                </h1>
+                {creator.licenseStatus === "licensed" && (
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
+                    style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+                  >
+                    LICENSED
+                  </span>
+                )}
+              </div>
+
+              {/* Stats row */}
+              <div className="flex items-center gap-3 flex-wrap">
+                {creator.supporterTier && (
+                  <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
+                )}
+                <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
+                  <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}tracks
+                </span>
+                {witnessCount > 0 && (
+                  <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
+                    <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
+                  </span>
+                )}
+              </div>
+
+              {/* Bio */}
+              {creator.bio && (
+                <p className="text-sm leading-relaxed" style={{ color: "oklch(0.55 0.03 280)" }}>
+                  {creator.bio}
+                </p>
+              )}
+
+              {/* Social links */}
+              {(creator.website || creator.twitterHandle || creator.instagramHandle || creator.youtubeHandle) && (
+                <div className="flex items-center gap-3">
+                  {creator.website && (
+                    <a href={creator.website} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "oklch(0.75 0.03 280)" }}>
+                      <Globe className="w-4 h-4" />
+                    </a>
+                  )}
+                  {creator.twitterHandle && (
+                    <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "oklch(0.75 0.03 280)" }}>
+                      <Twitter className="w-4 h-4" />
+                    </a>
+                  )}
+                  {creator.instagramHandle && (
+                    <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "oklch(0.75 0.03 280)" }}>
+                      <Instagram className="w-4 h-4" />
+                    </a>
+                  )}
+                  {creator.youtubeHandle && (
+                    <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "oklch(0.75 0.03 280)" }}>
+                      <Youtube className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {isOwner ? (
+                  <>
+                    <Link href="/dashboard">
+                      <button
+                        className="px-4 py-2 rounded-lg text-xs transition-colors"
+                        style={{ border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.6 0.03 280)", background: "transparent" }}
+                      >
+                        Edit Profile
+                      </button>
+                    </Link>
+                    {!creator.stripeAccountId && (
+                      <button
+                        onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
+                        disabled={connectMutation.isPending}
+                        className="px-4 py-2 rounded-lg text-xs transition-colors"
+                        style={{ border: "1px solid oklch(0.65 0.18 145 / 0.3)", color: "oklch(0.65 0.18 145)", background: "oklch(0.65 0.18 145 / 0.08)" }}
+                      >
+                        <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
+                      </button>
+                    )}
+                  </>
+                ) : tipsEnabled && songs.length > 0 ? (
+                  <button
+                    onClick={() => setTipOpen(true)}
+                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                    style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "oklch(0.08 0.015 280)" }}
+                  >
+                    <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
+                  </button>
+                ) : null}
+                {user && !isOwner && (
+                  <button
+                    onClick={() => witnessToggle.mutate({ creatorId: creator.id })}
+                    disabled={witnessToggle.isPending}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
+                    style={isWitnessingCreator
+                      ? { background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "oklch(0.84 0.155 85)" }
+                      : { border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }
+                    }
+                    title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
+                  >
+                    {isWitnessingCreator ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                )}
+                <button
+                  onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Profile link copied!"); }}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
+                  style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
+                  title="Copy profile link"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>{/* end mobile stacked layout */}
+
+          </div>{/* end header wrapper */}
         </div>{/* end max-w-5xl */}
       </div>{/* end profile header bg */}
 
