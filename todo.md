@@ -1822,3 +1822,12 @@
 - [x] Verified: embed page renders title/artist/audio correctly, X-Frame-Options: ALLOWALL confirmed
 - [x] 95 tests passing, 0 TypeScript errors
 - [ ] Test Discord embed shows inline player after publish
+
+## Phase 61: Fix Gift/Tip Button - Require Proper Checkout Flow
+- [x] Diagnosed: TipModal.tsx on Explore page was using addTip() (local state only) — no Stripe, no payment, fake success toast
+- [x] Fixed: TipModal.tsx now uses trpc.tips.createTipCheckout.useMutation() — real Stripe Checkout
+- [x] Fixed: Send button opens Stripe checkout in new tab, no success state until user completes payment on Stripe
+- [x] Added disclaimer: "You'll be redirected to Stripe's secure checkout. No charge until you confirm."
+- [x] Button shows "Opening Checkout…" loading state while mutation is pending
+- [x] Minimum $1.00 validation enforced before calling Stripe
+- [x] 95 tests passing, 0 TypeScript errors

@@ -1,14 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — TipModal (ContextualModal edition)
-   Voluntary gift/support modal — anchors to the triggering gift button,
-   same pattern as AddToMyListModal.
+   Voluntary gift/support modal — anchors to the triggering gift button.
+   Routes to Stripe Checkout for real payment processing.
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { DollarSign } from "lucide-react";
-import { Track, usePlayer } from "@/contexts/PlayerContext";
+import { DollarSign, ExternalLink } from "lucide-react";
+import { Track } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
 import { ContextualModal } from "@/components/ContextualModal";
+import { trpc } from "@/lib/trpc";
 
 const GIFT_AMOUNTS = ["$1", "$5", "$10", "$25"];
 
@@ -20,20 +21,55 @@ interface Props {
 }
 
 export default function TipModal({ track, onClose, originRect }: Props) {
-  const { addTip } = usePlayer();
-  const [selected, setSelected] = useState("$10");
+  const [selected, setSelected] = useState("$5");
   const [custom, setCustom] = useState("");
+
+  const tipMutation = trpc.tips.createTipCheckout.useMutation({
+    onSuccess: (data) => {
+      if (data?.url) {
+        toast.info("Redirecting to secure checkout…");
+        window.open(data.url, "_blank", "noopener,noreferrer");
+        onClose();
+      }
+    },
+    onError: (err) => {
+      toast.error(err.message || "Could not start checkout. Please try again.");
+    },
+  });
 
   if (!track) return null;
 
   const handleSend = () => {
-    const amt = custom ? `$${parseFloat(custom).toFixed(2)}` : selected;
-    if (!amt) { toast.error("Select a gift amount"); return; }
-    const num = parseFloat((amt || "$0").replace("$", ""));
-    addTip(num);
-    toast.success(`🎁 Gift of ${amt} sent to ${track.artist}!`);
-    onClose();
+    const rawAmt = custom
+      ? parseFloat(custom)
+      : parseFloat((selected || "$0").replace("$", ""));
+
+    if (!rawAmt || isNaN(rawAmt)) {
+      toast.error("Select a gift amount");
+      return;
+    }
+    const amountCents = Math.round(rawAmt * 100);
+    if (amountCents < 100) {
+      toast.error("Minimum gift is $1.00");
+      return;
+    }
+
+    const songId = track.id ? parseInt(String(track.id), 10) : null;
+    if (!songId || isNaN(songId)) {
+      toast.error("Unable to identify song. Please try again.");
+      return;
+    }
+
+    tipMutation.mutate({
+      songId,
+      amountCents,
+      origin: window.location.origin,
+    });
   };
+
+  const displayAmt = custom
+    ? `$${parseFloat(custom || "0").toFixed(2)}`
+    : selected;
 
   return (
     <ContextualModal
@@ -43,7 +79,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
       intent="send_gift"
       renderMode="contextual"
       width={320}
-      maxHeight={480}
+      maxHeight={520}
       title="Send a Gift"
       showClose
     >
@@ -106,6 +142,8 @@ export default function TipModal({ track, onClose, originRect }: Props) {
         <input
           type="number"
           placeholder="Custom amount"
+          min="1"
+          step="0.01"
           value={custom}
           onChange={e => { setCustom(e.target.value); setSelected(""); }}
           className="w-full pl-7 pr-4 py-2.5 rounded-lg text-[13px] font-body text-white/80
@@ -114,15 +152,27 @@ export default function TipModal({ track, onClose, originRect }: Props) {
         />
       </div>
 
+      {/* Stripe disclaimer */}
+      <div className="px-4 mb-3 flex items-center gap-1.5">
+        <ExternalLink size={10} className="text-white/30 flex-shrink-0" />
+        <p className="text-[10px] font-body" style={{ color: "oklch(0.50 0.02 280)" }}>
+          You'll be redirected to Stripe's secure checkout to complete payment. No charge until you confirm.
+        </p>
+      </div>
+
       {/* Send button */}
       <div className="px-4 pb-4">
         <button
           onClick={handleSend}
+          disabled={tipMutation.isPending}
           className="w-full py-2.5 rounded-xl font-heading text-[13px] tracking-wider text-black font-bold
-            transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(232,197,71,0.4)]"
+            transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(232,197,71,0.4)]
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           style={{ background: "linear-gradient(135deg, #D4AF37, #c9a227)" }}
         >
-          Send Gift
+          {tipMutation.isPending
+            ? "Opening Checkout…"
+            : `Send ${displayAmt} Gift →`}
         </button>
       </div>
     </ContextualModal>
