@@ -1831,3 +1831,21 @@
 - [x] Button shows "Opening Checkout…" loading state while mutation is pending
 - [x] Minimum $1.00 validation enforced before calling Stripe
 - [x] 95 tests passing, 0 TypeScript errors
+
+## Phase 62: Discord Embed Fix via oEmbed + Direct MP4
+- [x] Implemented /api/oembed endpoint (server/oembedRoute.ts) returning song-specific JSON:
+  - title: "Titus 3 (Stripped Down) — MoshAIMusic"
+  - author_name: artist name
+  - thumbnail_url: cover art URL
+  - description: genre + WID + play count
+  - html: iframe embed player at /embed/song/:id
+  - provider_name: "Living Nexus"
+- [x] Registered oembedRouter in server/_core/index.ts before tRPC middleware
+- [x] Added generic oEmbed discovery <link> to client/index.html:
+  - href="https://www.livingnexus.org/api/oembed?url=https://www.livingnexus.org/"
+  - Discord reads this from whatever HTML the Manus CDN serves
+- [x] Updated injectOg() in og.ts to also inject per-page oEmbed discovery link with exact song URL
+- [x] Verified: /api/oembed?url=.../song/1380002 returns correct JSON with song title, artist, cover art
+- [x] Verified: /song/1380002 HTML contains per-page oEmbed link with encoded song URL
+- [x] 95 tests passing, 0 TypeScript errors
+- [ ] Publish and test Discord embed shows song title + cover art (requires new deployment)

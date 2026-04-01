@@ -185,13 +185,21 @@ const DEFAULT_OG = buildSongOgTags({
 });
 
 /** Inject OG tags into an HTML string, replacing the <title> and adding meta tags. */
-function injectOg(html: string, ogBlock: string, pageTitle: string): string {
+function injectOg(html: string, ogBlock: string, pageTitle: string, canonicalUrl?: string): string {
   // Replace <title>
   let out = html.replace(/<title>[^<]*<\/title>/, `<title>${escAttr(pageTitle)}</title>`);
   // Remove any existing og: / twitter: meta tags to avoid duplicates
   out = out.replace(/<meta\s+(property|name)="(og:|twitter:)[^"]*"[^>]*\/?>/gi, "");
+  // If we have a canonical URL, also inject a per-page oEmbed discovery link
+  // This overrides the generic one in index.html with the exact song/creator URL
+  // Discord reads this and calls /api/oembed?url={canonicalUrl} directly on the Express server
+  let extraLinks = "";
+  if (canonicalUrl) {
+    const oembedUrl = `${CANONICAL_ORIGIN}/api/oembed?url=${encodeURIComponent(canonicalUrl)}`;
+    extraLinks = `\n    <link rel="alternate" type="application/json+oembed" href="${escAttr(oembedUrl)}" title="Living Nexus oEmbed" />`;
+  }
   // Inject before </head>
-  out = out.replace("</head>", `    ${ogBlock}\n  </head>`);
+  out = out.replace("</head>", `    ${ogBlock}${extraLinks}\n  </head>`);
   return out;
 }
 
@@ -318,7 +326,7 @@ export function registerOgRoutes(app: Express) {
       const html = await getHtmlTemplate(isDev);
       if (!html) return next();
 
-      const page = injectOg(html, ogBlock, ogTitle);
+      const page = injectOg(html, ogBlock, ogTitle, ogUrl);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
       console.error("[OG] Error generating meta tags for song", songId, err);
@@ -480,7 +488,7 @@ export function registerOgRoutes(app: Express) {
       const html = await getHtmlTemplate(isDev);
       if (!html) return next();
 
-      const page = injectOg(html, ogBlock, ogTitle);
+      const page = injectOg(html, ogBlock, ogTitle, ogUrl);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
       console.error("[OG] Error generating meta tags for collection", witnessId, err);
@@ -550,7 +558,7 @@ export function registerOgRoutes(app: Express) {
       const html = await getHtmlTemplate(isDev);
       if (!html) return next();
 
-      const page = injectOg(html, ogBlock, ogTitle);
+      const page = injectOg(html, ogBlock, ogTitle, ogUrl);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
       console.error("[OG] Error generating meta tags for creator", creatorId, err);

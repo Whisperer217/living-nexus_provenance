@@ -12,6 +12,7 @@ import { appRouter, handleStripeWebhook } from "../routers";
 import { uploadRouter } from "../uploadRoute";
 import { downloadRouter } from "../downloadRoute";
 import { publicApiRouter } from "../publicApiRoute";
+import { oembedRouter } from "../oembedRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -69,6 +70,9 @@ async function startServer() {
   app.use(downloadRouter);
   // Public REST API v1 (Plex/Jellyfin/external clients)
   app.use(publicApiRouter);
+  // oEmbed discovery endpoint — Discord reads this to get song-specific metadata
+  // Must be under /api/* so the Manus CDN forwards it to the Express server
+  app.use(oembedRouter);
   // tRPC API
   app.use(
     "/api/trpc",

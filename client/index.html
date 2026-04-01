@@ -25,6 +25,19 @@
     <!-- SEO / social -->
     <meta name="description" content="Sovereign music. Cryptographic provenance. Creator-owned." />
 
+    <!--
+      oEmbed discovery — Discord, Slack, and other platforms read this link tag
+      and call /api/oembed?url={page_url} to get song/creator-specific metadata.
+      This bypasses the Manus CDN's generic OG tag override because /api/* routes
+      are forwarded directly to the Express server.
+    -->
+    <link
+      rel="alternate"
+      type="application/json+oembed"
+      href="https://www.livingnexus.org/api/oembed?url=https://www.livingnexus.org/"
+      title="Living Nexus oEmbed"
+    />
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
