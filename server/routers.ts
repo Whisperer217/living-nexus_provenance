@@ -308,6 +308,11 @@ export const appRouter = router({
       return { url, focalX, focalY };
     }),
     allCreators: publicProcedure.query(async () => getAllCreators()),
+    featuredCreators: publicProcedure.query(async () => {
+      // Return up to 12 creators with most published tracks for the homepage carousel
+      const all = await getAllCreators();
+      return all.slice(0, 12);
+    }),
     getCreator: publicProcedure.input(z.object({ creatorId: z.number() })).query(async ({ input }) => {
       const creator = await getUserById(input.creatorId);
       if (!creator) return null;
@@ -337,7 +342,7 @@ export const appRouter = router({
 
   songs: router({
     discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(100).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
-    trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(50).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
+    trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
     getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => getSongWithCreator(input.id)),
     verifyWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
       const result = await getSongByWitnessId(input.witnessId);
@@ -384,7 +389,7 @@ export const appRouter = router({
       const { songs: songsTable, users: usersTable } = await import("../drizzle/schema");
       const { isNotNull, desc: descOp, eq: eqOp } = await import("drizzle-orm");
       const db = await getDb();
-      // Grab up to 6 most recent publicly-visible witnessed songs with creator info
+      // Grab up to 8 most recent publicly-visible witnessed songs with creator info
       const rows = await db
         .select({
           songId: songsTable.id,
@@ -401,7 +406,7 @@ export const appRouter = router({
         .innerJoin(usersTable, eqOp(songsTable.userId, usersTable.id))
         .where(isNotNull(songsTable.witnessId))
         .orderBy(descOp(songsTable.createdAt))
-        .limit(6);
+        .limit(8);
       return rows;
     }),
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),

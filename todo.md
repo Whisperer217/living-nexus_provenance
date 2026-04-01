@@ -1708,3 +1708,10 @@
 - [ ] NowPlayingPanel: add comments section
 - [ ] CreatorProfilePage: fix mobile name truncation (Nero's Shadow cut off)
 - [ ] CreatorProfilePage: fix mobile stats/button layout overflow
+
+## Phase 47: HomePage Layout Redesign
+- [x] Witnessed Voices: expand from 6 to 8 panels (update server limit to 8, grid to 2×4)
+- [x] Add Creators section: horizontal panning row of creator profile cards below Witnessed Voices
+- [x] Discover Tracks: convert from 2-row grid to side-pane horizontal scroll (2 rows × 12 cards = 24 tracks)
+- [x] Trending Now: convert from vertical list to same side-pane horizontal scroll (2 rows × 12 cards = 24 tracks)
+- [x] Increase trending query limit from 5 to 24
