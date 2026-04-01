@@ -105,6 +105,10 @@ export const songs = mysqlTable("songs", {
   videoKey: text("videoKey"),
   videoWitnessId: varchar("videoWitnessId", { length: 64 }),
 
+  // Embed video (og:video MP4 for Discord/iMessage/Telegram rich embeds)
+  // Generated on-demand by ffmpeg (cover art loop + audio), cached on S3
+  embedVideoUrl: text("embedVideoUrl"),
+
   // Download permissions
   // "none"   = downloads disabled (default — auto-off on every upload)
   // "free"   = anyone can download at no cost

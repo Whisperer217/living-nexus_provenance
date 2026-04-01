@@ -155,6 +155,13 @@
       "when": 1775000927545,
       "tag": "0021_lyrical_puff_adder",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1775024905271,
+      "tag": "0022_windy_zaladane",
+      "breakpoints": true
     }
   ]
 }

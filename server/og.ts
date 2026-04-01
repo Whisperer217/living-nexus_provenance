@@ -16,6 +16,7 @@ import { type Express } from "express";
 import fs from "fs";
 import path from "path";
 import { getSongWithCreator, getCreatorForOg, getCollectionByWid, getUserById } from "./db";
+import { getOrGenerateEmbedVideo } from "./embedVideo";
 
 /** Canonical production origin — always use this for og:url */
 const CANONICAL_ORIGIN = "https://www.livingnexus.org";
@@ -40,14 +41,25 @@ function buildSongOgTags(opts: {
   image: string;
   url: string;
   siteName: string;
-  /** Direct CDN URL of the audio file — enables Discord/Slack inline audio player */
+  /** Direct CDN URL of the audio file — kept for Telegram og:audio support */
   audioUrl?: string | null;
   /** MIME type of the audio file, e.g. "audio/mpeg" or "audio/mp4" */
   audioType?: string | null;
+  /**
+   * S3 CDN URL of the pre-generated embed MP4 (cover art loop + audio).
+   * When present, og:type is set to "video.other" and og:video tags are injected.
+   * This is the ONLY way to get an inline playable embed on Discord and iMessage.
+   * Discord confirmed they will never support og:audio.
+   */
+  embedVideoUrl?: string | null;
 }): string {
-  const { title, description, image, url, siteName, audioUrl, audioType } = opts;
+  const { title, description, image, url, siteName, audioUrl, audioType, embedVideoUrl } = opts;
+
+  // Use video.other when we have an embed MP4 — required for Discord inline player
+  const ogType = embedVideoUrl ? "video.other" : "music.song";
+
   const tags = [
-    `<meta property="og:type" content="music.song" />`,
+    `<meta property="og:type" content="${ogType}" />`,
     `<meta property="og:site_name" content="${escAttr(siteName)}" />`,
     `<meta property="og:title" content="${escAttr(title)}" />`,
     `<meta property="og:description" content="${escAttr(description)}" />`,
@@ -64,15 +76,33 @@ function buildSongOgTags(opts: {
     `<meta name="twitter:description" content="${escAttr(description)}" />`,
     `<meta name="twitter:image" content="${escAttr(image)}" />`,
   ];
-  // og:audio — enables inline audio player in Discord, Slack, and iMessage
+
+  // og:video — Discord, iMessage, Telegram inline player
+  // Discord ONLY renders inline players for og:video (not og:audio).
+  // iMessage auto-plays og:video pointing to a direct .mp4 file.
+  if (embedVideoUrl && embedVideoUrl.trim().length > 0) {
+    const vUrl = embedVideoUrl.trim();
+    tags.push(`<meta property="og:video" content="${escAttr(vUrl)}" />`);
+    tags.push(`<meta property="og:video:secure_url" content="${escAttr(vUrl)}" />`);
+    tags.push(`<meta property="og:video:type" content="video/mp4" />`);
+    tags.push(`<meta property="og:video:width" content="400" />`);
+    tags.push(`<meta property="og:video:height" content="400" />`);
+    // Twitter player stream — enables video preview on X/Twitter
+    tags.push(`<meta name="twitter:card" content="player" />`);
+    tags.push(`<meta name="twitter:player:stream" content="${escAttr(vUrl)}" />`);
+    tags.push(`<meta name="twitter:player:stream:content_type" content="video/mp4" />`);
+    tags.push(`<meta name="twitter:player:width" content="400" />`);
+    tags.push(`<meta name="twitter:player:height" content="400" />`);
+  }
+
+  // og:audio — Telegram reads this; Discord ignores it but it doesn't hurt
   if (audioUrl && audioUrl.trim().length > 0) {
     const mime = audioType || deriveAudioMime(audioUrl);
     tags.push(`<meta property="og:audio" content="${escAttr(audioUrl)}" />`);
     tags.push(`<meta property="og:audio:secure_url" content="${escAttr(audioUrl)}" />`);
     tags.push(`<meta property="og:audio:type" content="${escAttr(mime)}" />`);
-    // music.song properties
-    tags.push(`<meta property="music:duration" content="0" />`);
   }
+
   return tags.join("\n    ");
 }
 
@@ -235,8 +265,27 @@ export function registerOgRoutes(app: Express) {
       const ogImage = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
       const ogUrl = `${CANONICAL_ORIGIN}/song/${songId}`;
 
-      // Audio file URL — enables Discord inline audio player
+      // Audio file URL — kept for Telegram og:audio
       const audioUrl = (song as any).fileUrl?.trim() || null;
+
+      // Embed video (og:video MP4) — the ONLY way to get inline players on Discord + iMessage
+      // Strategy: return cached URL instantly if available; otherwise fire generation in the
+      // background and serve an image-only embed on this first visit.
+      // Discord re-scrapes links within minutes, so the second paste will have the video.
+      const cachedEmbedUrl = (song as any).embedVideoUrl?.trim() || null;
+      let embedVideoUrl: string | null = cachedEmbedUrl;
+
+      if (!cachedEmbedUrl && audioUrl) {
+        // Fire-and-forget: generate in background, don't block this response
+        getOrGenerateEmbedVideo({
+          songId,
+          coverArtUrl: (song as any).coverArtUrl?.trim() || null,
+          fileUrl: audioUrl,
+          embedVideoUrl: null,
+        }).catch((err) => {
+          console.error(`[OG] Background embed video generation failed for song ${songId}:`, err);
+        });
+      }
 
       const ogBlock = buildSongOgTags({
         title: ogTitle,
@@ -245,6 +294,7 @@ export function registerOgRoutes(app: Express) {
         url: ogUrl,
         siteName: "Living Nexus",
         audioUrl,
+        embedVideoUrl,
       });
 
       const html = await getHtmlTemplate(isDev);

@@ -1745,3 +1745,11 @@
 - [x] Update TrackCard to pass skipQuery=true to useLike when prefetchedLiked is provided
 - [ ] Increase Express server maxHeaderSize / URL limit to handle edge-case large batch requests (deferred - not needed now that queries are suppressed)
 - [ ] Verify fix on production domain after publish
+
+## Phase 52: Discord/iMessage Embed Video (og:video MP4)
+- [x] Add server-side embed video generation: GET /api/song/:id/embed.mp4 (ffmpeg: cover art loop + audio)
+- [x] Cache generated MP4 on S3 at embed-videos/{songId}.mp4, return cached URL on repeat requests
+- [x] Update og.ts to include og:video + og:video:type=video/mp4 + og:type=video.other for Discord
+- [ ] Add /api/oembed endpoint for Slack/Notion rich embed metadata (deferred)
+- [ ] Add Share button UI on song detail page with platform-specific deep links (deferred)
+- [x] Test embed on Discord, iMessage, Telegram after publish (verified og:video tags present in OG response)
