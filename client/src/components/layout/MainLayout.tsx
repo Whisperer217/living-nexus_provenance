@@ -480,8 +480,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1 flex flex-col overflow-hidden md:pt-0 pt-14">
           <TipTicker />
           <style>{`
-            @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } }
-            @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } }
+            @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
+            @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(80px + max(env(safe-area-inset-bottom, 0px), 8px)) !important; } }
           `}</style>
           <div className="flex-1 overflow-y-auto player-scroll-area">
             {children}

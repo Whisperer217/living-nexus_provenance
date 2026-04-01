@@ -29,7 +29,7 @@ import {
   Maximize2, Check, Video, ListMusic,
   Volume2, VolumeX,
 } from "lucide-react";
-import PlayerTipModal from "./PlayerTipModal";
+import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ export default function MobilePlayerLayer() {
 
   const [playerState, setPlayerState] = useState<PlayerState>("mini");
   const [overlayVisible, setOverlayVisible] = useState(true);
-  const [tipOpen, setTipOpen] = useState(false);
+  const [giftOpen, setGiftOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isLandscape, setIsLandscape] = useState(false);
 
@@ -198,7 +198,7 @@ export default function MobilePlayerLayer() {
     { id: currentSongId! },
     { enabled: !!currentSongId && !isNaN(currentSongId), staleTime: 60_000 }
   );
-  const tipsEnabled = !!(songDetail?.creator?.stripeAccountId);
+  const stripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
   const videoWitnessId = (songDetail?.song as any)?.videoWitnessId as string | null | undefined;
   const lyricsText = (songDetail?.song as any)?.lyricsText as string | null | undefined;
@@ -380,12 +380,12 @@ export default function MobilePlayerLayer() {
     <div
       className="md:hidden fixed bottom-0 left-0 right-0 z-[9990]"
       style={{
-        height: "64px",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        background: "oklch(0.10 0.025 275 / 0.96)",
+        minHeight: "64px",
+        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+        background: "oklch(0.10 0.025 275 / 0.98)",
         backdropFilter: "blur(20px) saturate(1.4)",
-        borderTop: "1px solid oklch(0.84 0.155 85 / 0.15)",
-        boxShadow: "0 -4px 32px oklch(0 0 0 / 0.5)",
+        borderTop: "1px solid oklch(0.84 0.155 85 / 0.20)",
+        boxShadow: "0 -8px 40px oklch(0 0 0 / 0.6), 0 -1px 0 oklch(0.84 0.155 85 / 0.08)",
       }}
       onTouchStart={onMiniTouchStart}
       onTouchEnd={onMiniTouchEnd}
@@ -603,19 +603,22 @@ export default function MobilePlayerLayer() {
           <span className="text-[9px] font-heading tracking-wide">{copied ? "Copied" : "Share"}</span>
         </button>
 
-        {tipsEnabled && (
-          <button
-            onClick={() => setTipOpen(true)}
-            className="flex flex-col items-center gap-1 transition-all active:scale-90"
-            style={{ color: "oklch(0.40 0.03 280)" }}
-          >
-            <DollarSign size={18} />
-            <span className="text-[9px] font-heading tracking-wide">Gift</span>
-          </button>
-        )}
+        <button
+          onClick={() => setGiftOpen(true)}
+          className="flex flex-col items-center gap-1 transition-all active:scale-90"
+          style={{ color: "oklch(0.40 0.03 280)" }}
+        >
+          <DollarSign size={18} />
+          <span className="text-[9px] font-heading tracking-wide">Gift</span>
+        </button>
 
         <button
-          onClick={() => currentSongId && navigate(`/song/${currentSongId}`)}
+          onClick={() => {
+            if (currentSongId) {
+              setPlayerState("mini");
+              navigate(`/song/${currentSongId}`);
+            }
+          }}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
           style={{ color: "oklch(0.40 0.03 280)" }}
         >
@@ -800,13 +803,13 @@ export default function MobilePlayerLayer() {
       {/* Cinematic layer — full-bleed */}
       {playerState === "cinematic" && <CinematicLayer />}
 
-      {/* Tip modal */}
-      {tipOpen && currentTrack && currentSongId && (
-        <PlayerTipModal
+      {/* Gift modal */}
+      {giftOpen && currentTrack && currentSongId && (
+        <GiftModal
           songId={currentSongId}
           artistName={currentTrack.artist ?? ""}
-          stripeAccountId={songDetail?.creator?.stripeAccountId ?? null}
-          onClose={() => setTipOpen(false)}
+          stripeAccountId={stripeAccountId}
+          onClose={() => setGiftOpen(false)}
         />
       )}
     </>,
