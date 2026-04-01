@@ -15,13 +15,13 @@ import { toast } from "sonner";
 import {
   Loader2, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Users, Shield, Tag, Plus, CheckCircle2, XCircle,
-  Gift, RotateCcw, Copy, CreditCard, ExternalLink, History,
+  Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
 type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus";
 type SortDir = "asc" | "desc";
-type Tab = "users" | "codes" | "stripe";
+type Tab = "users" | "codes" | "stripe" | "embed";
 
 const GOLD = "oklch(0.84 0.155 85)";
 const BG = "oklch(0.08 0.015 280)";
@@ -457,6 +457,95 @@ function PromoCodesTab() {
 }
 
 // ── Stripe Onboarding Recovery Tab ───────────────────────────────────────────
+function EmbedVideoTab() {
+  const [progress, setProgress] = useState<{ total: number; done: number; failed: number; running: boolean; log: string[] }>({
+    total: 0, done: 0, failed: 0, running: false, log: [],
+  });
+
+  const countQuery = trpc.admin.embedVideoStatus.useQuery(undefined, { retry: false });
+
+  const preGenMutation = trpc.admin.preGenerateEmbedVideos.useMutation({
+    onSuccess: (result: { queued: number; message: string }) => {
+      setProgress(p => ({ ...p, running: false, total: result.queued, done: result.queued, log: [...p.log, result.message] }));
+      toast.success(result.message);
+      countQuery.refetch();
+    },
+    onError: (e: { message: string }) => {
+      setProgress(p => ({ ...p, running: false, log: [...p.log, `Error: ${e.message}`] }));
+      toast.error(e.message);
+    },
+    onMutate: () => {
+      setProgress({ total: 0, done: 0, failed: 0, running: true, log: ["Starting background generation..."] });
+    },
+  });
+
+  const stats = countQuery.data;
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Total Published", value: stats?.total ?? "—", color: GOLD },
+          { label: "Embed Ready", value: stats?.withEmbed ?? "—", color: "oklch(0.65 0.18 145)" },
+          { label: "Pending Generation", value: stats?.pending ?? "—", color: "oklch(0.65 0.18 25)" },
+        ].map(s => (
+          <div key={s.label} className="rounded-xl p-4 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            <p className="text-2xl font-bold" style={{ color: s.color, fontFamily: "'Orbitron', sans-serif" }}>{s.value}</p>
+            <p className="text-xs mt-1" style={{ color: SUBTEXT }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Action card */}
+      <div className="rounded-xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h3 className="font-semibold mb-1" style={{ color: TEXT, fontFamily: "'Cinzel', serif" }}>Pre-Generate Embed Videos</h3>
+            <p className="text-sm" style={{ color: SUBTEXT }}>Generates a 30-second MP4 (cover art + audio) for every published song that doesn't have one yet. Videos are cached on S3 and enable Discord's inline video player when links are shared.</p>
+          </div>
+          <Button
+            onClick={() => preGenMutation.mutate()}
+            disabled={progress.running || preGenMutation.isPending}
+            style={{ background: GOLD, color: BG, flexShrink: 0 }}
+          >
+            {progress.running ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+            {progress.running ? "Running..." : "Start Generation"}
+          </Button>
+        </div>
+
+        {/* Progress log */}
+        {progress.log.length > 0 && (
+          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "oklch(0.08 0.01 280)", border: `1px solid ${BORDER}` }}>
+            {progress.log.map((line, i) => (
+              <p key={i} style={{ color: line.startsWith("Error") ? "oklch(0.65 0.18 25)" : "oklch(0.65 0.18 145)" }}>
+                {line.startsWith("Error") ? "✗" : "✓"} {line}
+              </p>
+            ))}
+            {progress.running && (
+              <p style={{ color: GOLD }} className="flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" /> Background generation in progress — check back in a few minutes
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="rounded-xl p-4" style={{ background: "oklch(0.10 0.015 280)", border: `1px solid ${BORDER}` }}>
+        <div className="flex items-start gap-3">
+          <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.65 0.18 145)" }} />
+          <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
+            <p>Generation runs in the background — the page doesn't need to stay open.</p>
+            <p>Each video takes ~30–60 seconds to generate. For 38 tracks, expect ~20–30 minutes total.</p>
+            <p>Once generated, Discord will show the inline video player on the second scrape (usually within minutes of sharing).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StripeRecoveryTab() {
   const [userId, setUserId] = useState("");
   const [returnUrl, setReturnUrl] = useState(window.location.origin + "/dashboard");
@@ -588,6 +677,7 @@ export default function AdminUsersPage() {
     { id: "users", label: "User Roster", icon: <Users className="w-4 h-4" /> },
     { id: "codes", label: "Promo Codes", icon: <Tag className="w-4 h-4" /> },
     { id: "stripe", label: "Stripe Recovery", icon: <CreditCard className="w-4 h-4" /> },
+    { id: "embed", label: "Embed Videos", icon: <Video className="w-4 h-4" /> },
   ];
 
   return (
@@ -632,6 +722,7 @@ export default function AdminUsersPage() {
         {tab === "users" && <UsersTab />}
         {tab === "codes" && <PromoCodesTab />}
         {tab === "stripe" && <StripeRecoveryTab />}
+        {tab === "embed" && <EmbedVideoTab />}
 
       </div>
     </div>

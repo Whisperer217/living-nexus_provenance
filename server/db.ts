@@ -2295,3 +2295,15 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number }
   scored.sort((a: ScoredRow, b: ScoredRow) => b.score - a.score);
   return scored.slice(0, limit).map(({ score: _score, ...rest }: ScoredRow) => rest);
 }
+
+/** Returns all published songs that don't yet have an embedVideoUrl, for batch pre-generation. */
+export async function getSongsWithoutEmbedVideo(): Promise<Array<{ id: number; coverArtUrl: string | null; fileUrl: string | null; embedVideoUrl: string | null }>> {
+  const db = await getDb();
+  if (!db) return [];
+  const { isNull } = await import("drizzle-orm");
+  const rows = await db
+    .select({ id: songs.id, coverArtUrl: songs.coverArtUrl, fileUrl: songs.fileUrl, embedVideoUrl: songs.embedVideoUrl })
+    .from(songs)
+    .where(and(eq(songs.status, "Published"), eq(songs.isPublic, true), isNull(songs.embedVideoUrl)));
+  return rows;
+}

@@ -1753,3 +1753,11 @@
 - [ ] Add /api/oembed endpoint for Slack/Notion rich embed metadata (deferred)
 - [ ] Add Share button UI on song detail page with platform-specific deep links (deferred)
 - [x] Test embed on Discord, iMessage, Telegram after publish (verified og:video tags present in OG response)
+
+## Phase 53: Three Feature Batch
+- [x] ExplorePage: bulk like fix — replace per-card getLikeStatus/getLikeCount with getBulkLikeStatuses (same pattern as HomePage)
+- [x] Admin: pre-generate embed videos mutation — iterates all songs without embedVideoUrl, queues background generation with progress tracking
+- [x] Admin: trigger UI for pre-generate (button in admin panel with live progress counter)
+- [x] Song detail page: Share button — copies canonical URL to clipboard
+- [x] Song detail page: Share modal — shows embed preview card (Discord/iMessage style) so creator can verify before sharing
+- [ ] Trigger embed video generation on song publish (hook into upload/publish flow)

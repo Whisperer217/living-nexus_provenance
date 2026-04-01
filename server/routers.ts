@@ -49,8 +49,10 @@ import {
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
   getSongReactions, toggleSongReaction,
   getTrendingWorks,
+  getSongsWithoutEmbedVideo,
 } from "./db";
 import { ENV } from "./_core/env";
+import { getOrGenerateEmbedVideo } from "./embedVideo";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
 const PLATFORM_FEE_PERCENT = 10;
@@ -1633,6 +1635,64 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .query(async ({ ctx, input }) => {
         if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
         return getNameHistory(input.userId);
+      }),
+
+    /**
+     * Pre-generate embed videos for all songs that don’t have one yet.
+     * Runs in the background — returns immediately with a count of songs queued.
+     * Admin only.
+     */
+    preGenerateEmbedVideos: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        const pending = await getSongsWithoutEmbedVideo();
+        const count = pending.length;
+        if (count === 0) return { queued: 0, message: "All songs already have embed videos." };
+
+        // Fire-and-forget: generate in background, don’t block the response
+        (async () => {
+          let done = 0;
+          let failed = 0;
+          for (const song of pending) {
+            try {
+              await getOrGenerateEmbedVideo({
+                songId: song.id,
+                coverArtUrl: song.coverArtUrl,
+                fileUrl: song.fileUrl,
+                embedVideoUrl: null,
+              });
+              done++;
+              console.log(`[Admin/EmbedVideo] ${done}/${count} done (song ${song.id})`);
+            } catch (err) {
+              failed++;
+              console.error(`[Admin/EmbedVideo] Failed for song ${song.id}:`, err);
+            }
+          }
+          console.log(`[Admin/EmbedVideo] Batch complete: ${done} succeeded, ${failed} failed out of ${count}`);
+        })();
+
+        return { queued: count, message: `Queued ${count} song${count === 1 ? "" : "s"} for embed video generation. Check server logs for progress.` };
+      }),
+
+    /**
+     * Returns how many songs still need an embed video generated.
+     * Admin only.
+     */
+    embedVideoStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        const db = await (await import("./db")).getDb();
+        const { sql: sqlFn, eq: eqFn, and: andFn, isNotNull: isNotNullFn } = await import("drizzle-orm");
+        const { songs: songsTable } = await import("../drizzle/schema");
+        const pending = await getSongsWithoutEmbedVideo();
+        let total = 0;
+        if (db) {
+          const rows = await db.select({ count: sqlFn<number>`count(*)` }).from(songsTable)
+            .where(andFn(eqFn(songsTable.status, "Published"), eqFn(songsTable.isPublic, true)));
+          total = Number(rows[0]?.count ?? 0);
+        }
+        const withEmbed = total - pending.length;
+        return { pending: pending.length, total, withEmbed };
       }),
   }),
 

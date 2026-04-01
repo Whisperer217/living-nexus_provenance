@@ -4,7 +4,7 @@
    No algorithm. No "you might like." Just — here's what exists.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -60,25 +60,25 @@ function AiDisclosureBadge({ value }: { value: string }) {
 
 /** ExploreCard — mirrors TrackCard architecture exactly */
 function ExploreCard({
-  item, isActive, isPlaying, onPlay, onTip,
+  item, isActive, isPlaying, onPlay, onTip, prefetchedLiked, prefetchedLikeCount,
 }: {
   item: any;
   isActive: boolean;
   isPlaying: boolean;
   onPlay: (item: any) => void;
   onTip: (item: any, rect: DOMRect) => void;
+  prefetchedLiked?: boolean;
+  prefetchedLikeCount?: number;
 }) {
   const { song, creator } = item;
   const { playNext } = usePlayer();
   const [, navigate] = useLocation();
   const [showAddToList, setShowAddToList] = useState(false);
   const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
-  const { liked, toggle: toggleLike } = useLike(song.id);
-  const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
-    { songId: song.id },
-    { enabled: !!song.id }
-  );
-  const likeCount = likeCountData?.count ?? 0;
+  // Skip individual queries when bulk prefetch data is available
+  const hasPrefetch = prefetchedLiked !== undefined;
+  const { liked, toggle: toggleLike } = useLike(song.id, { skipQuery: hasPrefetch, initialLiked: prefetchedLiked });
+  const likeCount = prefetchedLikeCount ?? 0;
   const artistName = creator?.artistHandle || creator?.name || "Unknown";
 
   return (
@@ -384,6 +384,14 @@ export default function ExplorePage() {
   const songs = mode === "infinite" ? allSongs : mode === "trending" ? (trendingData || []) : (randomData || []);
   const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : mode === "trending" ? trendingLoading : randomLoading;
 
+  // Bulk like status — one query for all visible songs instead of per-card queries
+  const songIds = useMemo(() => songs.map((s: any) => s.song.id as number), [songs]);
+  const { data: bulkLikeData } = trpc.songs.getBulkLikeStatuses.useQuery(
+    { songIds },
+    { enabled: songIds.length > 0, staleTime: 30_000 }
+  );
+  const likeMap = bulkLikeData ?? {};
+
   // ── Track context menu state ──────────────────────────────────────
   const [menuSong, setMenuSong] = useState<any | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
@@ -635,16 +643,21 @@ export default function ExplorePage() {
             className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5"
             style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
           >
-            {songs.map((item: any) => (
-              <ExploreCard
-                key={item.song.id}
-                item={item}
-                isActive={currentTrackId === String(item.song.id)}
-                isPlaying={playerState.isPlaying}
-                onPlay={handlePlay}
-                onTip={(item, rect) => { setTipItem(item); setTipRect(rect); }}
-              />
-            ))}
+            {songs.map((item: any) => {
+              const likeEntry = (likeMap as any)[item.song.id];
+              return (
+                <ExploreCard
+                  key={item.song.id}
+                  item={item}
+                  isActive={currentTrackId === String(item.song.id)}
+                  isPlaying={playerState.isPlaying}
+                  onPlay={handlePlay}
+                  onTip={(item, rect) => { setTipItem(item); setTipRect(rect); }}
+                  prefetchedLiked={likeEntry?.liked}
+                  prefetchedLikeCount={likeEntry?.count}
+                />
+              );
+            })}
           </div>
         )}
 
