@@ -1699,3 +1699,12 @@
 - [ ] Refactor AddToMyListModal to use ContextualModal with originRect
 - [ ] Refactor TipModal to use ContextualModal with originRect
 - [ ] Wire originRect capture in TrackCard, ExploreCard, and all card call sites
+
+## Session: Mobile Bug Fixes (Apr 1 2026)
+- [ ] NowPlayingPanel: fix cinematic artwork (full-screen blurred bg + centered art)
+- [ ] NowPlayingPanel: fix Details button (navigate to song page)
+- [ ] NowPlayingPanel: fix Share button (copy link / share sheet)
+- [ ] NowPlayingPanel: fix queue icon on artwork (open queue panel)
+- [ ] NowPlayingPanel: add comments section
+- [ ] CreatorProfilePage: fix mobile name truncation (Nero's Shadow cut off)
+- [ ] CreatorProfilePage: fix mobile stats/button layout overflow

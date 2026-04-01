@@ -366,25 +366,19 @@ export default function MobilePlayerPanel() {
         </div>
       </button>
 
-      {/* ── Backdrop ── */}
-      {open && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-          onClick={closeNowPlayingPanel} />
-      )}
+      {/* ── Backdrop ── (only when panel is closed, to dim behind mini-player) */}
 
       {/* ══════════════════════════════════════════════════════════════
-          CINEMATIC PANEL — full-height, right-side drawer
+          CINEMATIC PANEL — full-screen, slides up from bottom
           overflow-y-auto so content is always scrollable
       ══════════════════════════════════════════════════════════════ */}
       <div
-        className="md:hidden fixed top-0 right-0 h-full z-50 flex flex-col
-          transition-transform duration-300 ease-in-out"
+        className="md:hidden fixed inset-0 z-50 flex flex-col
+          transition-transform duration-500 ease-in-out"
         style={{
-          width: "min(340px, 92vw)",
           background: "oklch(0.07 0.02 275)",
-          borderLeft: "1px solid oklch(0.18 0.02 275)",
-          boxShadow: "-8px 0 48px oklch(0 0 0 / 0.8)",
-          transform: open ? "translateX(0)" : "translateX(100%)",
+          boxShadow: "0 -8px 48px oklch(0 0 0 / 0.8)",
+          transform: open ? "translateY(0)" : "translateY(100%)",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
           overflowY: "auto",
@@ -394,7 +388,7 @@ export default function MobilePlayerPanel() {
         {/* ══ ARTWORK SECTION — full-bleed, dominant, ALWAYS visible ══ */}
         <div
           className="relative flex-shrink-0"
-          style={{ height: "56vw", maxHeight: "280px", minHeight: "200px" }}
+          style={{ height: "55vh", minHeight: "220px", maxHeight: "480px" }}
         >
           {/* Background video — muted visual loop */}
           {videoUrl && (
@@ -435,8 +429,13 @@ export default function MobilePlayerPanel() {
           {/* Heart particles */}
           {hearts.map(id => <HeartParticle key={id} id={id} onDone={removeHeart} />)}
 
+          {/* ── Swipe-down handle ── */}
+          <div className="absolute top-2 inset-x-0 flex justify-center z-20 pointer-events-none">
+            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "oklch(1 0 0 / 0.25)" }} />
+          </div>
+
           {/* ── Header controls ── */}
-          <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-4 z-20">
+          <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-8 z-20">
             <div className="flex flex-col gap-0.5">
               <span className="text-[9px] font-bold tracking-widest uppercase"
                 style={{ color: "oklch(0.84 0.155 85 / 0.6)", fontFamily: "'Cinzel', serif" }}>
@@ -465,7 +464,7 @@ export default function MobilePlayerPanel() {
 
           {/* ── RIGHT-SIDE EMOTIONAL ACTION STACK — always interactive ── */}
           <div
-            className="absolute right-3 bottom-16 flex flex-col items-center gap-4 z-20"
+            className="absolute right-4 bottom-20 flex flex-col items-center gap-5 z-20"
             style={{ pointerEvents: "auto" }}
           >
             {/* Love ❤️ */}
@@ -551,12 +550,12 @@ export default function MobilePlayerPanel() {
         </div>
 
         {/* ══ TRACK IDENTITY — ALWAYS VISIBLE (cinematic mode keeps this) ══ */}
-        <div className="flex-shrink-0 px-5 pt-3 pb-2">
+        <div className="flex-shrink-0 px-6 pt-4 pb-2">
           {/* Title */}
           <button
             onClick={() => { if (currentSongId) navigate(`/song/${currentSongId}`); }}
             disabled={!currentSongId}
-            className="text-[16px] font-semibold leading-snug line-clamp-1 text-left w-full
+            className="text-xl font-semibold leading-snug line-clamp-1 text-left w-full
               transition-opacity hover:opacity-75 disabled:cursor-default"
             style={{ color: "oklch(0.96 0.008 270)", fontFamily: "'Cinzel', serif" }}
           >
@@ -591,7 +590,7 @@ export default function MobilePlayerPanel() {
         </div>
 
         {/* ══ PROGRESS BAR — always visible ══ */}
-        <div className="flex-shrink-0 px-5 pb-2">
+        <div className="flex-shrink-0 px-6 pb-2">
           <div
             className="relative h-1 rounded-full cursor-pointer"
             style={{ background: "oklch(1 0 0 / 0.1)" }}
@@ -615,7 +614,7 @@ export default function MobilePlayerPanel() {
 
         {/* ══ PLAYER CONTROLS — fade in cinematic mode, but always tappable ══ */}
         <div
-          className="flex-shrink-0 px-5 pb-3 transition-opacity duration-500"
+          className="flex-shrink-0 px-6 pb-3 transition-opacity duration-500"
           style={{ opacity: controlsVisible ? 1 : 0.15 }}
         >
           <div className="flex items-center justify-between">
@@ -657,7 +656,7 @@ export default function MobilePlayerPanel() {
         </div>
 
         {/* ══ FUNCTIONAL ROW — Gift | Details | Lyrics | Sound ══ */}
-        <div className="flex-shrink-0 px-5 pb-4">
+        <div className="flex-shrink-0 px-6 pb-4">
           <div className="flex items-center gap-2">
             {/* Gift */}
             <button
@@ -732,11 +731,10 @@ export default function MobilePlayerPanel() {
 
         {/* ══ QUEUE CONTEXT + GRAB HANDLE ══ */}
         <div
-          className="flex-shrink-0 flex flex-col items-center pb-5 pt-2 cursor-grab active:cursor-grabbing select-none"
+          className="flex-shrink-0 flex flex-col items-center pb-6 pt-2 cursor-grab active:cursor-grabbing select-none"
           onTouchStart={onGrabTouchStart}
           onTouchEnd={onGrabTouchEnd}
         >
-          <div className="rounded-full" style={{ width: "48px", height: "4px", background: "oklch(0.24 0.02 275)" }} />
           {currentTrack && (
             <div className="flex items-center gap-2 mt-3 px-4">
               <AddToPlaylistButton songId={currentSongId!} variant="full" className="flex-1" />
@@ -766,14 +764,14 @@ export default function MobilePlayerPanel() {
           className="md:hidden fixed z-[60] transition-transform duration-300 ease-in-out flex flex-col"
           style={{
             bottom: 0,
+            left: 0,
             right: 0,
-            width: "min(340px, 92vw)",
-            height: "70vh",
-            maxHeight: "520px",
+            width: "100vw",
+            height: "72vh",
+            maxHeight: "600px",
             background: "oklch(0.10 0.025 275)",
             borderTop: "1px solid oklch(0.22 0.02 275)",
-            borderLeft: "1px solid oklch(0.18 0.02 275)",
-            borderRadius: "16px 0 0 0",
+            borderRadius: "20px 20px 0 0",
             boxShadow: "0 -8px 32px oklch(0 0 0 / 0.6)",
             transform: sheetOpen ? "translateY(0)" : "translateY(100%)",
             paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -994,10 +992,10 @@ export default function MobilePlayerPanel() {
         </div>
       )}
 
-      {/* Sheet backdrop */}
+      {/* Sheet backdrop — dims the player panel behind the sheet */}
       {open && sheetOpen && (
         <div
-          className="md:hidden fixed inset-0 z-[55]"
+          className="md:hidden fixed inset-0 z-[55] bg-black/40"
           onClick={() => setSheetOpen(false)}
         />
       )}
