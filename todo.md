@@ -1728,3 +1728,14 @@
 - [x] Inject twitter:card = player for Twitter/X embed with audio
 - [x] Ensure /index.html fallback still serves the SPA for real browsers
 - [x] Test with Discord embed scraper (discordapp.com/api/oembed and opengraph.io)
+
+## Phase 50: Fix OG Middleware HTML/JSON Collision
+- [ ] OG middleware on / route returns HTML to logged-in users whose UA matches crawler patterns (curl, wget, etc.) — fix to only intercept when UA is a known bot and request is not an API call
+- [ ] Verify no /api/trpc requests are intercepted by OG middleware
+
+## Phase 50: Fix HTTP 414 URI Too Long (tRPC batch GET overflow)
+- [x] Add bulk getLikeStatuses procedure: accepts array of songIds, returns map of {songId -> {liked, count}}
+- [x] Update TrackCard to accept pre-fetched likeStatus/count props instead of firing individual queries
+- [x] Update HomePage to fetch all like statuses in one bulk call after songs load
+- [ ] Update ExplorePage similarly (deferred — explore page has its own pagination)
+- [x] Add JSON error handler in Express for 414/4xx/5xx so HTML is never returned to tRPC clients

@@ -18,7 +18,7 @@ import {
   updateUserProfile, updateUserStripeAccount,
   createAiTransform, updateAiTransform, getAiTransformById,
   getAiTransformsBySong, getAiTransformsByUser,
-  getLikedSongs, toggleLike, getLikeStatus, getLikeCount,
+  getLikedSongs, toggleLike, getLikeStatus, getLikeCount, getBulkLikeStatuses,
   getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped,
   getSongByWitnessId, updateSongMetadata, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
@@ -833,6 +833,17 @@ export const appRouter = router({
       const count = await getLikeCount(input.songId);
       return { count };
     }),
+    /**
+     * Bulk fetch like statuses + counts for up to 100 songs in 2 DB queries.
+     * Use this instead of batching individual getLikeStatus/getLikeCount calls
+     * to avoid HTTP 414 URI Too Long errors on large track lists.
+     */
+    getBulkLikeStatuses: publicProcedure
+      .input(z.object({ songIds: z.array(z.number()).max(100) }))
+      .query(async ({ ctx, input }) => {
+        const userId = ctx.user?.id ?? null;
+        return getBulkLikeStatuses(userId, input.songIds);
+      }),
     // Persistent emoji reactions
     getReactions: publicProcedure
       .input(z.object({ songId: z.number() }))

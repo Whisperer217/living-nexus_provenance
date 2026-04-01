@@ -556,6 +556,46 @@ export async function getLikeCount(songId: number): Promise<number> {
   return Number(result[0]?.count ?? 0);
 }
 
+/**
+ * Bulk fetch like statuses and counts for multiple songs in two queries.
+ * Returns a map of songId -> { liked: boolean; count: number }.
+ */
+export async function getBulkLikeStatuses(
+  userId: number | null,
+  songIds: number[]
+): Promise<Record<number, { liked: boolean; count: number }>> {
+  if (songIds.length === 0) return {};
+  const db = await getDb();
+  if (!db) return {};
+  const { likes } = await import("../drizzle/schema");
+
+  // One query for all counts
+  const countRows = await db
+    .select({ songId: likes.songId, count: sql<number>`count(*)` })
+    .from(likes)
+    .where(inArray(likes.songId, songIds))
+    .groupBy(likes.songId);
+
+  // One query for user's liked songs (only if logged in)
+  const likedSet = new Set<number>();
+  if (userId !== null) {
+    const likedRows = await db
+      .select({ songId: likes.songId })
+      .from(likes)
+      .where(and(eq(likes.userId, userId), inArray(likes.songId, songIds)));
+    likedRows.forEach((r: { songId: number }) => likedSet.add(r.songId));
+  }
+
+  const countMap: Record<number, number> = {};
+  countRows.forEach((r: { songId: number; count: number }) => { countMap[r.songId] = Number(r.count); });
+
+  const result: Record<number, { liked: boolean; count: number }> = {};
+  for (const id of songIds) {
+    result[id] = { liked: likedSet.has(id), count: countMap[id] ?? 0 };
+  }
+  return result;
+}
+
 // ─── Jukebox Queue ────────────────────────────────────────────────────────────
 
 export async function getJukeboxQueue(roomCode: string) {

@@ -23,6 +23,10 @@ interface Props {
   index: number;
   /** Called when user clicks the gift button. Receives the index and the button's DOMRect for contextual modal anchoring. */
   onTip?: (index: number, rect: DOMRect) => void;
+  /** Pre-fetched like count — skips the individual getLikeCount query when provided */
+  prefetchedLikeCount?: number;
+  /** Pre-fetched liked status — skips the individual getLikeStatus query when provided */
+  prefetchedLiked?: boolean;
 }
 
 /** Map aiDisclosure value to a compact badge label + color */
@@ -66,7 +70,7 @@ function AiDisclosureBadge({ value }: { value: string }) {
   return null;
 }
 
-export default function TrackCard({ track, index, onTip }: Props) {
+export default function TrackCard({ track, index, onTip, prefetchedLikeCount, prefetchedLiked }: Props) {
   const { state, addAndPlay, playNext, openNowPlayingPanel } = usePlayer();
   const [showAddToList, setShowAddToList] = useState(false);
   const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
@@ -84,12 +88,14 @@ export default function TrackCard({ track, index, onTip }: Props) {
 
   // DB-backed like state
   const numericId = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
-  const { liked: isLiked, toggle: toggleLike } = useLike(isNaN(numericId) ? 0 : numericId);
+  const { liked: isLikedFromHook, toggle: toggleLike } = useLike(isNaN(numericId) ? 0 : numericId);
+  // Use pre-fetched values when available (avoids per-card queries that cause HTTP 414 on large lists)
+  const isLiked = prefetchedLiked !== undefined ? prefetchedLiked : isLikedFromHook;
   const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
     { songId: isNaN(numericId) ? 0 : numericId },
-    { enabled: !isNaN(numericId) && numericId > 0 }
+    { enabled: prefetchedLikeCount === undefined && !isNaN(numericId) && numericId > 0 }
   );
-  const likeCount = likeCountData?.count ?? 0;
+  const likeCount = prefetchedLikeCount !== undefined ? prefetchedLikeCount : (likeCountData?.count ?? 0);
 
   // Derive cover object-position from track metadata
   const coverPos = `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%`;
