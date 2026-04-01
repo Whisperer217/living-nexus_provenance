@@ -204,7 +204,8 @@ export async function getSongWithCreator(id: number) {
       stripeAccountId: users.stripeAccountId, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre,
     },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
-    .where(and(eq(songs.id, id), eq(songs.isPublic, true), eq(songs.status, "Published"))).limit(1);
+    // Allow published OR public songs — OG tags should work for any accessible song
+    .where(and(eq(songs.id, id), eq(songs.isPublic, true))).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 

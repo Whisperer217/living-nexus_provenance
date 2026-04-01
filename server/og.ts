@@ -40,22 +40,53 @@ function buildSongOgTags(opts: {
   image: string;
   url: string;
   siteName: string;
+  /** Direct CDN URL of the audio file — enables Discord/Slack inline audio player */
+  audioUrl?: string | null;
+  /** MIME type of the audio file, e.g. "audio/mpeg" or "audio/mp4" */
+  audioType?: string | null;
 }): string {
-  const { title, description, image, url, siteName } = opts;
-  return [
+  const { title, description, image, url, siteName, audioUrl, audioType } = opts;
+  const tags = [
     `<meta property="og:type" content="music.song" />`,
     `<meta property="og:site_name" content="${escAttr(siteName)}" />`,
     `<meta property="og:title" content="${escAttr(title)}" />`,
     `<meta property="og:description" content="${escAttr(description)}" />`,
     `<meta property="og:image" content="${escAttr(image)}" />`,
+    `<meta property="og:image:secure_url" content="${escAttr(image)}" />`,
     `<meta property="og:image:width" content="1200" />`,
     `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="${escAttr(title)}" />`,
     `<meta property="og:url" content="${escAttr(url)}" />`,
+    // Discord embed accent color — Living Nexus gold
+    `<meta name="theme-color" content="#D4AF37" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escAttr(title)}" />`,
     `<meta name="twitter:description" content="${escAttr(description)}" />`,
     `<meta name="twitter:image" content="${escAttr(image)}" />`,
-  ].join("\n    ");
+  ];
+  // og:audio — enables inline audio player in Discord, Slack, and iMessage
+  if (audioUrl && audioUrl.trim().length > 0) {
+    const mime = audioType || deriveAudioMime(audioUrl);
+    tags.push(`<meta property="og:audio" content="${escAttr(audioUrl)}" />`);
+    tags.push(`<meta property="og:audio:secure_url" content="${escAttr(audioUrl)}" />`);
+    tags.push(`<meta property="og:audio:type" content="${escAttr(mime)}" />`);
+    // music.song properties
+    tags.push(`<meta property="music:duration" content="0" />`);
+  }
+  return tags.join("\n    ");
+}
+
+/** Derive a MIME type from a file URL extension. */
+function deriveAudioMime(url: string): string {
+  const lower = url.toLowerCase().split("?")[0];
+  if (lower.endsWith(".mp3")) return "audio/mpeg";
+  if (lower.endsWith(".m4a") || lower.endsWith(".mp4")) return "audio/mp4";
+  if (lower.endsWith(".ogg") || lower.endsWith(".oga")) return "audio/ogg";
+  if (lower.endsWith(".wav")) return "audio/wav";
+  if (lower.endsWith(".flac")) return "audio/flac";
+  if (lower.endsWith(".webm")) return "audio/webm";
+  if (lower.endsWith(".aac")) return "audio/aac";
+  return "audio/mpeg"; // safe default
 }
 
 /**
@@ -193,10 +224,19 @@ export function registerOgRoutes(app: Express) {
         "Unknown Artist";
 
       const ogTitle = `${song.title} — ${artistName} | Living Nexus`;
-      const ogDescription = `Listen to ${song.title} by ${artistName} on Living Nexus — WID Protected`;
+
+      // Richer description: genre + WID status + play count
+      const genrePart = (song as any).genre ? ` · ${(song as any).genre}` : "";
+      const widPart = (song as any).witnessId ? ` · WID: ${(song as any).witnessId}` : " · WID Protected";
+      const playPart = (song as any).playCount > 0 ? ` · ${(song as any).playCount} plays` : "";
+      const ogDescription = `🎵 ${song.title} by ${artistName}${genrePart}${widPart}${playPart} — Listen on Living Nexus`;
+
       const coverArt = (song as any).coverArtUrl?.trim();
       const ogImage = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
       const ogUrl = `${CANONICAL_ORIGIN}/song/${songId}`;
+
+      // Audio file URL — enables Discord inline audio player
+      const audioUrl = (song as any).fileUrl?.trim() || null;
 
       const ogBlock = buildSongOgTags({
         title: ogTitle,
@@ -204,6 +244,7 @@ export function registerOgRoutes(app: Express) {
         image: ogImage,
         url: ogUrl,
         siteName: "Living Nexus",
+        audioUrl,
       });
 
       const html = await getHtmlTemplate(isDev);

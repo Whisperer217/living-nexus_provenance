@@ -1720,3 +1720,11 @@
 - [x] TipModal: convert from centered overlay to origin-anchored ContextualModal (same pattern as AddToMyListModal)
 - [x] TipModal: all call sites must pass originRect from the triggering gift button
 - [x] PlayerBar: fix "Add to My List" button clipping/overlapping with volume and expand controls on right edge
+
+## Phase 49: Discord Rich Embeds for /song/:id
+- [x] Add server-side OG meta injection endpoint at GET /song/:id (SSR HTML with og:title, og:description, og:image, og:audio, twitter:card)
+- [x] Serve cover art via a proxied/CDN URL that Discord's scraper can access (must be absolute HTTPS)
+- [x] Add og:audio and og:audio:type for Discord audio player embed
+- [x] Inject twitter:card = player for Twitter/X embed with audio
+- [x] Ensure /index.html fallback still serves the SPA for real browsers
+- [x] Test with Discord embed scraper (discordapp.com/api/oembed and opengraph.io)
