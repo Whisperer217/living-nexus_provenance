@@ -1789,3 +1789,18 @@
 - [x] Embed videos cached on S3/CloudFront at embed-videos/{songId}.mp4 — Discord shows inline video player after first generation
 - [x] Direct MP3 URL in og:audio tag — iMessage/Telegram can play directly from the link
 - [x] Issue was user testing with truncated ID (13200 vs real 7-digit IDs like 1320021) — no code fix needed
+
+## Phase 59: Discord Embed Fix (Production)
+- [x] Diagnose why Discord gets generic site embed instead of song-specific OG tags on production
+  - Root cause: Manus platform pre-renderer executes React and serves Helmet tags; server/og.ts is bypassed in production
+  - Pre-renderer was serving incomplete Helmet tags from SongDetailPage.tsx (missing artist name, og:audio, og:video, og:site_name)
+- [x] Fix Helmet tags in SongDetailPage.tsx to include complete OG metadata:
+  - og:title now includes artist name: "Song Title — Artist Name | Living Nexus"
+  - og:site_name added
+  - og:audio + og:audio:type added (direct MP3 link)
+  - og:video + og:video:type/width/height added (MP4 embed if available)
+  - og:image:width + og:image:height added
+  - og:url uses canonical https://www.livingnexus.org/song/:id
+  - twitter:card switches to "player" when embedVideoUrl present
+  - twitter:player, twitter:player:stream tags added
+- [ ] Test with real Discord paste after publish (requires new deployment)

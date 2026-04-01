@@ -348,27 +348,47 @@ export default function SongDetailPage() {
   );
 
   const tipsEnabled = creator?.stripeAccountStatus === "enabled";
-  const pageTitle = `${song.title} — Living Nexus`;
+  const artistName = creator?.artistHandle || creator?.name || "Unknown Artist";
+  const pageTitle = `${song.title} — ${artistName} | Living Nexus`;
   const pageDesc = song.genre
-    ? `${song.genre} track by ${creator?.artistHandle || creator?.name || "Unknown Artist"}${song.witnessId ? " · Witness ID protected" : ""}`
-    : `Listen on Living Nexus`;
+    ? `${song.genre} · ${artistName}${song.witnessId ? " · WID Verified" : ""}${(song as any).bpm ? ` · ${(song as any).bpm} BPM` : ""} — Listen on Living Nexus`
+    : `Listen to ${song.title} by ${artistName} on Living Nexus`;
   const pageImage = song.coverArtUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
-  const pageUrl = typeof window !== "undefined" ? window.location.href : "";
+  const pageUrl = `https://www.livingnexus.org/song/${songId}`;
+  const audioFileUrl = song.fileUrl ? safeAudioUrl(song.fileUrl) : undefined;
+  const embedVideoUrl = (song as any).embedVideoUrl as string | undefined;
 
   return (
     <div className="min-h-screen pb-8" style={{ background: "oklch(0.09 0.04 265)" }}>
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
+        {/* Open Graph — Discord, Facebook, iMessage, Telegram, Slack */}
+        <meta property="og:site_name" content="Living Nexus" />
+        <meta property="og:type" content="music.song" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDesc} />
         <meta property="og:image" content={pageImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="1200" />
         <meta property="og:url" content={pageUrl} />
-        <meta property="og:type" content="music.song" />
-        <meta name="twitter:card" content="summary_large_image" />
+        {audioFileUrl && <meta property="og:audio" content={audioFileUrl} />}
+        {audioFileUrl && <meta property="og:audio:type" content="audio/mpeg" />}
+        {embedVideoUrl && <meta property="og:video" content={embedVideoUrl} />}
+        {embedVideoUrl && <meta property="og:video:type" content="video/mp4" />}
+        {embedVideoUrl && <meta property="og:video:width" content="1280" />}
+        {embedVideoUrl && <meta property="og:video:height" content="720" />}
+        {/* Twitter / X */}
+        <meta name="twitter:card" content={embedVideoUrl ? "player" : "summary_large_image"} />
+        <meta name="twitter:site" content="@LivingNexus" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDesc} />
         <meta name="twitter:image" content={pageImage} />
+        {embedVideoUrl && <meta name="twitter:player" content={embedVideoUrl} />}
+        {embedVideoUrl && <meta name="twitter:player:width" content="1280" />}
+        {embedVideoUrl && <meta name="twitter:player:height" content="720" />}
+        {audioFileUrl && <meta name="twitter:player:stream" content={audioFileUrl} />}
+        {audioFileUrl && <meta name="twitter:player:stream:content_type" content="audio/mpeg" />}
       </Helmet>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
         <Link href={creator ? `/creator/${creator.id}` : "/"}>
