@@ -30,6 +30,7 @@ import {
   Home, Compass, Users, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
   CheckCircle2, Fingerprint, Bell,
+  BookOpen, Star, Eye,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -295,6 +296,34 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <p className="text-[10px] text-white/25 leading-relaxed">
                   Sign in to upload, witness your work, and build your creator profile.
                 </p>
+              </div>
+            )}
+            {/* Secondary: Lore & Discover links */}
+            {sidebarOpen && (
+              <div className="px-4 pt-2 pb-2 space-y-0.5">
+                <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase mb-1.5">Discover</p>
+                {([
+                  { label: "Manifesto", icon: BookOpen, path: "/manifesto" },
+                  { label: "Founding Creators", icon: Star, path: "/founders" },
+                  { label: "Witness Registry", icon: Eye, path: "/witness-registry" },
+                ] as { label: string; icon: React.ElementType; path: string }[]).map(item => {
+                  const Icon = item.icon;
+                  const active = location === item.path;
+                  return (
+                    <button
+                      key={item.label}
+                      onClick={() => goTo(item.path)}
+                      className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg text-left transition-colors"
+                      style={{
+                        background: active ? "oklch(0.75 0.18 85 / 0.10)" : "transparent",
+                        color: active ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.02 280)",
+                      }}
+                    >
+                      <Icon size={12} className="flex-shrink-0" />
+                      <span className="text-[11px] font-body">{item.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </nav>

@@ -9,9 +9,11 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, MoreHorizontal, TrendingUp } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, MoreHorizontal, TrendingUp, Heart, DollarSign, Shield, Bot, Sparkles, Fingerprint } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
+import { useLike } from "@/hooks/useLike";
+import TipModal from "@/components/TipModal";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -29,6 +31,172 @@ const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7
 const PAGE_SIZE = 24;
 
 type ExploreMode = "infinite" | "randomize" | "trending";
+
+/** AI disclosure badge — same design as TrackCard */
+function AiDisclosureBadge({ value }: { value: string }) {
+  if (value === "original") return (
+    <div className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
+      style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.45)" }}
+      title="Original human creation">
+      <Fingerprint size={8} /><span>ORIG</span>
+    </div>
+  );
+  if (value === "ai_assisted") return (
+    <div className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
+      style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.45)" }}
+      title="AI-assisted creation">
+      <Sparkles size={8} /><span>AI+</span>
+    </div>
+  );
+  if (value === "ai_generated") return (
+    <div className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
+      style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.45)" }}
+      title="AI-generated content">
+      <Bot size={8} /><span>AI</span>
+    </div>
+  );
+  return null;
+}
+
+/** ExploreCard — extracted so each card can use hooks (useLike) independently */
+function ExploreCard({
+  item, isActive, isPlaying, onPlay, onMenu, onTip,
+}: {
+  item: any;
+  isActive: boolean;
+  isPlaying: boolean;
+  onPlay: (item: any) => void;
+  onMenu: (e: React.MouseEvent, item: any) => void;
+  onTip: (item: any) => void;
+}) {
+  const { song, creator } = item;
+  const { liked, toggle: toggleLike } = useLike(song.id);
+  const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
+    { songId: song.id },
+    { enabled: !!song.id }
+  );
+  const likeCount = likeCountData?.count ?? 0;
+
+  return (
+    <div
+      key={song.id}
+      className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
+        border bg-[oklch(0.115_0.055_278)]
+        ${isActive
+          ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6)]"
+          : "border-white/[0.06] hover:border-[#A78BFA]/30 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
+        }`}
+      onClick={() => onPlay(item)}
+      onContextMenu={(e) => onMenu(e, item)}
+    >
+      {/* Artwork */}
+      <div className="relative overflow-hidden" style={{ height: "240px" }}>
+        <MediaAsset
+          src={song.coverArtUrl}
+          alt={song.title}
+          mode="card"
+          aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+          focalX={song.coverPositionX ?? 50}
+          focalY={song.coverPositionY ?? 50}
+          className="absolute inset-0 w-full h-full"
+        />
+        <div className={`absolute inset-0 transition-opacity duration-200
+          bg-gradient-to-b from-transparent via-transparent to-black/70
+          ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+        />
+        {/* Play / wave indicator */}
+        {isActive && isPlaying ? (
+          <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center z-10 bg-[#D4AF37]">
+            <div className="flex items-end gap-[2px] h-4">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="w-[3px] rounded-full bg-black"
+                  style={{ height: "40%", animation: `waveBar 0.8s ease-in-out ${i * 0.15}s infinite alternate` }} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
+            transition-all duration-200 z-10
+            ${isActive ? "opacity-100 bg-[#D4AF37]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+          >
+            <Play size={14} fill="currentColor" className="text-black ml-0.5" />
+          </div>
+        )}
+        {/* WID badge — clickable */}
+        {song.witnessId && (
+          <Link
+            href={`/verify/${song.witnessId}`}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow opacity-80 hover:opacity-100 transition-opacity"
+            style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}
+            title={`Verified Witness ID: ${song.witnessId}`}
+          >
+            <Shield size={8} /><span>WID</span>
+          </Link>
+        )}
+        {/* AI disclosure badge */}
+        {creator?.aiDisclosure && <AiDisclosureBadge value={creator.aiDisclosure} />}
+      </div>
+      {/* Info */}
+      <div className="p-3">
+        <div className="flex items-start justify-between gap-1 mb-1">
+          <Link href={`/song/${song.id}`} onClick={e => e.stopPropagation()} className="flex-1 min-w-0">
+            <div className="text-[13px] font-heading text-white truncate tracking-wide hover:text-[#D4AF37] transition-colors">
+              {song.title}
+            </div>
+          </Link>
+          <button
+            onClick={(e) => onMenu(e, item)}
+            className="shrink-0 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/[0.08]"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+          >
+            <MoreHorizontal size={13} />
+          </button>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] mb-2" style={{ color: "#E2E8F0" }}>
+          <Link href={`/creator/${creator?.id}`} onClick={e => e.stopPropagation()}>
+            <span className="truncate hover:text-white/60 transition-colors">
+              {creator?.artistHandle || creator?.name || "Unknown"}
+            </span>
+          </Link>
+          {song.genre && (
+            <>
+              <span style={{ color: "rgba(255,255,255,0.35)" }}>·</span>
+              <span className="truncate" style={{ color: "oklch(0.84 0.155 85 / 0.80)" }}>{song.genre}</span>
+            </>
+          )}
+        </div>
+        {/* Action row: plays + heart + gift */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-[11px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <span>▶ {song.playCount || 0}</span>
+          </div>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={e => { e.stopPropagation(); toggleLike(e); }}
+              className={`flex items-center gap-0.5 p-1 transition-colors ${liked ? "text-pink-400" : "text-white/70 hover:text-pink-400"}`}
+              title={liked ? "Unlike" : "Like"}
+            >
+              <Heart size={12} fill={liked ? "currentColor" : "none"} />
+              {likeCount > 0 && (
+                <span className="text-[10px] leading-none font-medium tabular-nums">
+                  {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); onTip(item); }}
+              className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+              title="Send a gift"
+            >
+              <DollarSign size={12} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ExplorePage() {
   const { addAndPlay, playQueueAt, playNext, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
@@ -48,6 +216,18 @@ export default function ExplorePage() {
   // Randomize state
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1_000_000));
   const [isShuffling, setIsShuffling] = useState(false);
+
+  // Tip/gift modal state
+  const [tipItem, setTipItem] = useState<any | null>(null);
+  const tipTrack = tipItem ? {
+    id: String(tipItem.song.id),
+    title: tipItem.song.title,
+    artist: tipItem.creator?.artistHandle || tipItem.creator?.name || "Unknown",
+    genre: tipItem.song.genre || "",
+    artUrl: tipItem.song.coverArtUrl || undefined,
+    coverPositionX: tipItem.song.coverPositionX ?? 50,
+    coverPositionY: tipItem.song.coverPositionY ?? 50,
+  } : null;
 
   // Trending query
   const { data: trendingData, isLoading: trendingLoading } = trpc.songs.trending.useQuery(
@@ -373,99 +553,17 @@ export default function ExplorePage() {
             className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5"
             style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
           >
-            {songs.map((item: any) => {
-              const song = item.song;
-              const creator = item.creator;
-              const isActive = currentTrackId === String(song.id);
-              return (
-                <div
-                  key={song.id}
-                  className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
-                    border bg-[oklch(0.115_0.055_278)]
-                    ${isActive
-                      ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6)]"
-                      : "border-white/[0.06] hover:border-[#A78BFA]/30 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
-                    }`}
-                  onClick={() => handlePlay(item)}
-                  onContextMenu={(e) => openMenu(e, item)}
-                >
-                  {/* Artwork — MRS card mode */}
-                  <div className="relative overflow-hidden" style={{ height: "240px" }}>
-                    <MediaAsset
-                      src={song.coverArtUrl}
-                      alt={song.title}
-                      mode="card"
-                      aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
-                      focalX={song.coverPositionX ?? 50}
-                      focalY={song.coverPositionY ?? 50}
-                      className="absolute inset-0 w-full h-full"
-                    />
-                    <div className={`absolute inset-0 transition-opacity duration-200
-                      bg-gradient-to-b from-transparent via-transparent to-black/70
-                      ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-                    />
-                    {isActive && playerState.isPlaying ? (
-                      <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center z-10 bg-[#D4AF37]">
-                        <div className="flex items-end gap-[2px] h-4">
-                          {[1,2,3,4].map(i => (
-                            <div key={i} className="w-[3px] rounded-full bg-black"
-                              style={{ height: "40%", animation: `waveBar 0.8s ease-in-out ${i * 0.15}s infinite alternate` }} />
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
-                        transition-all duration-200 z-10
-                        ${isActive ? "opacity-100 bg-[#D4AF37]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
-                      >
-                        <Play size={14} fill="currentColor" className="text-black ml-0.5" />
-                      </div>
-                    )}
-                    {song.witnessId && (
-                      <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
-                        bg-black/70 z-10 font-heading tracking-wider wid-glow"
-                        style={{ color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}>
-                        WID
-                      </div>
-                    )}
-                  </div>
-                  {/* Info */}
-                  <div className="p-3">
-                    <div className="flex items-start justify-between gap-1 mb-1">
-                      <Link href={`/song/${song.id}`} onClick={e => e.stopPropagation()} className="flex-1 min-w-0">
-                        <div className="text-[13px] font-heading text-white truncate tracking-wide hover:text-[#D4AF37] transition-colors">
-                          {song.title}
-                        </div>
-                      </Link>
-                      <button
-                        onClick={(e) => openMenu(e, item)}
-                        className="shrink-0 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/[0.08]"
-                        style={{ color: "rgba(255,255,255,0.55)" }}
-                      >
-                        <MoreHorizontal size={13} />
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-2 text-[11px]" style={{ color: "#E2E8F0" }}>
-                      <Link href={`/creator/${creator?.id}`} onClick={e => e.stopPropagation()}>
-                        <span className="truncate hover:text-white/60 transition-colors">
-                          {creator?.artistHandle || creator?.name || "Unknown"}
-                        </span>
-                      </Link>
-                      {song.genre && (
-                        <>
-                          <span style={{ color: "rgba(255,255,255,0.35)" }}>·</span>
-                          <span className="truncate" style={{ color: "oklch(0.84 0.155 85 / 0.80)" }}>{song.genre}</span>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 mt-2 text-[11px]" style={{ color: "rgba(255,255,255,0.55)" }}>
-                      <span>▶ {song.playCount || 0}</span>
-                      {song.tipCount > 0 && <span>💰 {song.tipCount}</span>}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {songs.map((item: any) => (
+              <ExploreCard
+                key={item.song.id}
+                item={item}
+                isActive={currentTrackId === String(item.song.id)}
+                isPlaying={playerState.isPlaying}
+                onPlay={handlePlay}
+                onMenu={openMenu}
+                onTip={setTipItem}
+              />
+            ))}
           </div>
         )}
 
@@ -563,6 +661,10 @@ export default function ExplorePage() {
           </div>
         )}
       </div>
+      {/* Gift modal */}
+      {tipItem && (
+        <TipModal track={tipTrack as any} onClose={() => setTipItem(null)} />
+      )}
     </div>
   );
 }

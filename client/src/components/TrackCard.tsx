@@ -4,10 +4,11 @@
      Zone 1: Cover art  → loads track in global player (does NOT navigate)
      Zone 2: Song title → navigates to /track/{id}
      Zone 3: Artist     → navigates to /creator/{creatorId}
+   Badges: WID (clickable → /verify/:id), AI disclosure, YOURS
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward } from "lucide-react";
+import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward, Shield, Bot, Sparkles, Fingerprint } from "lucide-react";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { Link, useLocation } from "wouter";
@@ -20,6 +21,47 @@ interface Props {
   track: Track;
   index: number;
   onTip?: (index: number) => void;
+}
+
+/** Map aiDisclosure value to a compact badge label + color */
+function AiDisclosureBadge({ value }: { value: string }) {
+  if (value === "original") {
+    return (
+      <div
+        className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
+        style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.45)" }}
+        title="Original human creation — no AI generation"
+      >
+        <Fingerprint size={8} />
+        <span>ORIG</span>
+      </div>
+    );
+  }
+  if (value === "ai_assisted") {
+    return (
+      <div
+        className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
+        style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.45)" }}
+        title="AI-assisted creation"
+      >
+        <Sparkles size={8} />
+        <span>AI+</span>
+      </div>
+    );
+  }
+  if (value === "ai_generated") {
+    return (
+      <div
+        className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
+        style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.45)" }}
+        title="AI-generated content"
+      >
+        <Bot size={8} />
+        <span>AI</span>
+      </div>
+    );
+  }
+  return null;
 }
 
 export default function TrackCard({ track, index, onTip }: Props) {
@@ -48,6 +90,11 @@ export default function TrackCard({ track, index, onTip }: Props) {
 
   // Derive cover object-position from track metadata
   const coverPos = `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%`;
+
+  // Determine badge stacking: YOURS takes top-left, WID takes bottom-left of artwork
+  // AI disclosure takes top-right (only if no YOURS badge conflict)
+  const hasWid = !!track.witnessId;
+  const hasAiDisclosure = !!track.aiDisclosure;
 
   return (
     <>
@@ -105,12 +152,31 @@ export default function TrackCard({ track, index, onTip }: Props) {
           }
         </div>
 
-        {/* YOURS badge */}
+        {/* YOURS badge — top-left */}
         {track.isOwn && (
           <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
             bg-black/70 text-[#D4AF37] border border-[#D4AF37]/30 z-10 font-heading tracking-wider">
             YOURS
           </div>
+        )}
+
+        {/* WID badge — bottom-left, clickable → /verify/:witnessId */}
+        {hasWid && (
+          <Link
+            href={`/verify/${track.witnessId}`}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-80 hover:opacity-100"
+            style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}
+            title={`Verified Witness ID: ${track.witnessId}`}
+          >
+            <Shield size={8} />
+            <span>WID</span>
+          </Link>
+        )}
+
+        {/* AI Disclosure badge — top-right (only when not conflicting) */}
+        {hasAiDisclosure && (
+          <AiDisclosureBadge value={track.aiDisclosure!} />
         )}
       </div>
 

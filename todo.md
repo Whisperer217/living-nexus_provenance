@@ -1661,3 +1661,29 @@
 - [x] SongDetailPage: Added id="witness-records" anchor to Witness ID section for deep-link scrolling
 - [x] ExplorePage: Added "Trending" mode pill — uses songs.trending procedure (score = plays + likes*3 + recency)
 - [x] Branding: Removed all "Suno-inspired" references from code comments (CreatorProfilePage, SongDetailPage)
+
+## Full Platform Audit (Apr 1 2026)
+- [ ] TrackCard: Add WID badge (clickable → /verify/:witnessId) when track.witnessId exists
+- [ ] TrackCard: Add AI disclosure badge (original/ai_assisted/ai_generated) when track.aiDisclosure exists
+- [ ] ExplorePage: Add heart/like button (useLike hook) to each song card
+- [ ] ExplorePage: Add gift/tip button to each song card (opens tip modal or navigates to song page)
+- [ ] ExplorePage: Make WID badge clickable → /verify/:witnessId
+- [ ] ExplorePage: Add AI disclosure badge to each song card
+- [ ] Global: Verify all nav items link correctly (Guilds, Manifesto, Founders, Witness Registry)
+- [ ] Global: Confirm Guilds page is functional (not placeholder) — it is built
+- [ ] Global: Upload page caption/WID order confirmed correct — no fix needed
+- [ ] Global: Profile stats confirmed working — no fix needed
+- [ ] Global: Listen Together rooms/jukebox/gift confirmed working — no fix needed
+
+## Platform Audit Session (2026-04-01)
+- [x] Audit all pages for consistency and missing features
+- [x] TrackCard: Add WID badge (clickable → /verify/:id) and AI disclosure badge
+- [x] ExplorePage: Add ExploreCard sub-component with heart (useLike), gift button (TipModal), clickable WID badge, AI disclosure badge
+- [x] ExplorePage: Verify genre filter pills and search working
+- [x] Listen Together: Verified rooms, jukebox freeQueue, leaveOffering gift flow all working
+- [x] Guilds: Verified fully built (list, create, join, posts) - not a placeholder
+- [x] Profile: Verified all 6 stats, Stripe Connect card, witness network all wired
+- [x] Upload: Verified caption only shows after WID generated, AI disclosure warning present, progress bar present
+- [x] Navigation: Added Discover section to sidebar (Manifesto, Founding Creators, Witness Registry)
+- [x] Mobile nav: Verified PRIMARY_NAV renders in mobile drawer
+- [x] All routes verified: /guilds, /manifesto, /founders, /witness-registry all registered
