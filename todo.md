@@ -1687,3 +1687,6 @@
 - [x] Navigation: Added Discover section to sidebar (Manifesto, Founding Creators, Witness Registry)
 - [x] Mobile nav: Verified PRIMARY_NAV renders in mobile drawer
 - [x] All routes verified: /guilds, /manifesto, /founders, /witness-registry all registered
+
+## Bug Fixes (2026-04-01 session 2)
+- [x] Fix ExplorePage three-dot context menu offset/clipping on first card (smart positioning)

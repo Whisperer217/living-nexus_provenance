@@ -337,8 +337,34 @@ export default function ExplorePage() {
   const openMenu = (e: React.MouseEvent, item: any) => {
     e.preventDefault();
     e.stopPropagation();
-    const x = Math.min(e.clientX, window.innerWidth - 220);
-    const y = Math.min(e.clientY, window.innerHeight - 200);
+    const menuWidth = 200;
+    const menuHeight = 180;
+    const btn = e.currentTarget as HTMLElement;
+    // If triggered from a small button (three-dot), anchor below it
+    // If triggered from right-click on card div, use cursor position
+    const isSmallButton = btn.tagName === 'BUTTON' && btn.offsetWidth < 60;
+    let x: number, y: number;
+    if (isSmallButton) {
+      const rect = btn.getBoundingClientRect();
+      x = rect.left;
+      y = rect.bottom + 4;
+    } else {
+      x = e.clientX;
+      y = e.clientY + 4;
+    }
+    // Flip left if near right edge, flip up if near bottom
+    if (x + menuWidth > window.innerWidth - 8) {
+      x = isSmallButton
+        ? (e.currentTarget as HTMLElement).getBoundingClientRect().right - menuWidth
+        : e.clientX - menuWidth;
+    }
+    if (y + menuHeight > window.innerHeight - 8) {
+      y = isSmallButton
+        ? (e.currentTarget as HTMLElement).getBoundingClientRect().top - menuHeight - 4
+        : e.clientY - menuHeight;
+    }
+    x = Math.max(8, x);
+    y = Math.max(8, y);
     setMenuSong(item);
     setMenuPos({ x, y });
   };
