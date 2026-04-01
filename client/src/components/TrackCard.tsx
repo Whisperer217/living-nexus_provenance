@@ -21,7 +21,8 @@ import { MediaAsset } from "@/components/MediaAsset";
 interface Props {
   track: Track;
   index: number;
-  onTip?: (index: number) => void;
+  /** Called when user clicks the gift button. Receives the index and the button's DOMRect for contextual modal anchoring. */
+  onTip?: (index: number, rect: DOMRect) => void;
 }
 
 /** Map aiDisclosure value to a compact badge label + color */
@@ -233,7 +234,7 @@ export default function TrackCard({ track, index, onTip }: Props) {
             </button>
             {onTip && (
               <button
-                onClick={e => { e.stopPropagation(); onTip(index); }}
+                onClick={e => { e.stopPropagation(); onTip(index, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
                 className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
                 title="Send a gift"
               >

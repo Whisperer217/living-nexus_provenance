@@ -1715,3 +1715,8 @@
 - [x] Discover Tracks: convert from 2-row grid to side-pane horizontal scroll (2 rows × 12 cards = 24 tracks)
 - [x] Trending Now: convert from vertical list to same side-pane horizontal scroll (2 rows × 12 cards = 24 tracks)
 - [x] Increase trending query limit from 5 to 24
+
+## Phase 48: Modal + PlayerBar Fixes
+- [x] TipModal: convert from centered overlay to origin-anchored ContextualModal (same pattern as AddToMyListModal)
+- [x] TipModal: all call sites must pass originRect from the triggering gift button
+- [x] PlayerBar: fix "Add to My List" button clipping/overlapping with volume and expand controls on right edge

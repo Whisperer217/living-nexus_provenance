@@ -66,7 +66,7 @@ function ExploreCard({
   isActive: boolean;
   isPlaying: boolean;
   onPlay: (item: any) => void;
-  onTip: (item: any) => void;
+  onTip: (item: any, rect: DOMRect) => void;
 }) {
   const { song, creator } = item;
   const { playNext } = usePlayer();
@@ -192,9 +192,9 @@ function ExploreCard({
             </button>
             {/* Gift */}
             <button
-              onClick={e => { e.stopPropagation(); onTip(item); }}
-              className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
-              title="Send a gift"
+              onClick={e => { e.stopPropagation(); onTip(item, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
+               className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+               title="Send a gift"
             >
               <DollarSign size={12} />
             </button>
@@ -273,6 +273,7 @@ export default function ExplorePage() {
 
   // Tip/gift modal state
   const [tipItem, setTipItem] = useState<any | null>(null);
+  const [tipRect, setTipRect] = useState<DOMRect | null>(null);
   const tipTrack = tipItem ? {
     id: String(tipItem.song.id),
     title: tipItem.song.title,
@@ -641,7 +642,7 @@ export default function ExplorePage() {
                 isActive={currentTrackId === String(item.song.id)}
                 isPlaying={playerState.isPlaying}
                 onPlay={handlePlay}
-                onTip={setTipItem}
+                onTip={(item, rect) => { setTipItem(item); setTipRect(rect); }}
               />
             ))}
           </div>
@@ -743,7 +744,7 @@ export default function ExplorePage() {
       </div>
       {/* Gift modal */}
       {tipItem && (
-        <TipModal track={tipTrack as any} onClose={() => setTipItem(null)} />
+        <TipModal track={tipTrack as any} onClose={() => { setTipItem(null); setTipRect(null); }} originRect={tipRect} />
       )}
     </div>
   );

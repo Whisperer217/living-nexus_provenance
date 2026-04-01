@@ -683,7 +683,7 @@ export default function PlayerBar() {
           </div>
 
           {/* ── Right controls ── */}
-          <div className="flex items-center gap-2.5 w-[220px] justify-end flex-shrink-0">
+          <div className="flex items-center gap-1.5 w-[240px] justify-end flex-shrink-0 overflow-hidden">
             {/* Live wave */}
             {state.isPlaying && (
               <div className="live-wave">
@@ -765,11 +765,13 @@ export default function PlayerBar() {
             {currentSongId && (
               <button
                 onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setAddToListOpen(true); }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-heading tracking-wide transition-all hover:brightness-110 active:scale-95"
-                style={{ background: "oklch(0.16 0.06 280 / 0.7)", color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.25)" }}
+                className="p-1.5 transition-colors flex-shrink-0"
+                style={{ color: "oklch(0.80 0.145 82)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.92 0.16 85)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
                 title="Add to My List"
               >
-                <ListPlus size={12} /> My List
+                <ListPlus size={15} />
               </button>
             )}
 

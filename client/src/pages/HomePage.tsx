@@ -222,7 +222,7 @@ function HorizontalTrackGrid({
 }: {
   tracks: any[];
   loading?: boolean;
-  onTip?: (index: number) => void;
+  onTip?: (index: number, rect: DOMRect) => void;
   emptyMessage?: string;
 }) {
   if (loading) {
@@ -296,7 +296,7 @@ function TrendingHorizontalGrid({
   onTip,
 }: {
   tracks: any[];
-  onTip?: (index: number) => void;
+  onTip?: (index: number, rect: DOMRect) => void;
 }) {
   if (tracks.length === 0) return null;
 
@@ -349,6 +349,7 @@ export default function HomePage() {
   const { isAuthenticated } = useAuth();
   const [activeGenre, setActiveGenre] = useState("All");
   const [tipTarget, setTipTarget] = useState<number | null>(null);
+  const [tipRect, setTipRect] = useState<DOMRect | null>(null);
 
   const discoverInput = useMemo(() => ({
     genre: activeGenre === "All" ? undefined : activeGenre,
@@ -392,6 +393,7 @@ export default function HomePage() {
   const trendingTracks = useMemo(() => (trendingRaw ?? []).map(mapSong), [trendingRaw]);
 
   const tipTrack = tipTarget !== null ? tracks[tipTarget] ?? trendingTracks[tipTarget] : null;
+  const handleTip = (index: number, rect: DOMRect) => { setTipTarget(index); setTipRect(rect); };
 
   return (
     <div className="animate-fade-up cosmic-bg min-h-screen">
@@ -676,7 +678,7 @@ export default function HomePage() {
           <HorizontalTrackGrid
             tracks={tracks}
             loading={discoverLoading}
-            onTip={setTipTarget}
+            onTip={handleTip}
             emptyMessage="Be the first to upload a witnessed creation."
           />
         </div>
@@ -694,7 +696,7 @@ export default function HomePage() {
             <div className="mb-8">
               <TrendingHorizontalGrid
                 tracks={trendingTracks}
-                onTip={setTipTarget}
+                onTip={handleTip}
               />
             </div>
           </>
@@ -703,7 +705,7 @@ export default function HomePage() {
 
       {/* Tip modal */}
       {tipTarget !== null && (
-        <TipModal track={tipTrack} onClose={() => setTipTarget(null)} />
+        <TipModal track={tipTrack} onClose={() => { setTipTarget(null); setTipRect(null); }} originRect={tipRect} />
       )}
     </div>
   );
