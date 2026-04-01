@@ -391,13 +391,15 @@ export const appRouter = router({
       const { songs: songsTable, users: usersTable } = await import("../drizzle/schema");
       const { isNotNull, desc: descOp, eq: eqOp } = await import("drizzle-orm");
       const db = await getDb();
-      // Grab up to 8 most recent publicly-visible witnessed songs with creator info
+      // Grab up to 10 most recent publicly-visible witnessed songs with creator info
       const rows = await db
         .select({
           songId: songsTable.id,
           title: songsTable.title,
           witnessId: songsTable.witnessId,
           coverArtUrl: songsTable.coverArtUrl,
+          fileUrl: songsTable.fileUrl,
+          genre: songsTable.genre,
           createdAt: songsTable.createdAt,
           userId: usersTable.id,
           userName: usersTable.name,
@@ -408,7 +410,7 @@ export const appRouter = router({
         .innerJoin(usersTable, eqOp(songsTable.userId, usersTable.id))
         .where(isNotNull(songsTable.witnessId))
         .orderBy(descOp(songsTable.createdAt))
-        .limit(8);
+        .limit(10);
       return rows;
     }),
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
@@ -856,6 +858,31 @@ export const appRouter = router({
       .input(z.object({ songId: z.number(), type: z.string().min(1).max(16) }))
       .mutation(async ({ ctx, input }) => {
         const result = await toggleSongReaction(input.songId, ctx.user.id, input.type);
+        // When a reaction is added (not removed), notify the song's creator
+        if (result === "added") {
+          try {
+            const song = await getSongById(input.songId);
+            if (song?.userId && song.userId !== ctx.user.id) {
+              const EMOJI_MAP: Record<string, string> = {
+                fire: "🔥", love: "❤️", grateful: "🙏", magic: "✨", gem: "💎", vibe: "🎵",
+              };
+              const emoji = EMOJI_MAP[input.type] || "✨";
+              const senderName = ctx.user.artistHandle || ctx.user.name || "A listener";
+              await createNotification({
+                userId: song.userId,
+                type: "reaction",
+                title: `${emoji} Appreciation received`,
+                body: `${senderName} sent ${emoji} on "${song.title}"`,
+                actorName: senderName,
+                refType: "song",
+                refId: input.songId,
+              });
+            }
+          } catch (notifyErr) {
+            // Non-critical — don't fail the reaction if notification fails
+            console.error("[toggleReaction] Notification failed:", notifyErr);
+          }
+        }
         return { result };
       }),
     generateCaption: protectedProcedure

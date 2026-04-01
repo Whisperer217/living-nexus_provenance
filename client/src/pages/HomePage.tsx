@@ -42,7 +42,7 @@ function AnimatedCounter({ target }: { target: number }) {
   return <span>{display.toLocaleString()}</span>;
 }
 
-/** WID Trust Layer — animated counter + Witnessed Voices (8 panels, 2×4) */
+/** WID Trust Layer — animated counter + Witnessed Voices (horizontal scroll) */
 function WIDTrustLayer() {
   const { data: countData } = trpc.songs.getWitnessedCount.useQuery(undefined, {
     staleTime: 60_000,
@@ -52,6 +52,7 @@ function WIDTrustLayer() {
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
+  const { addAndPlay } = usePlayer();
 
   const total = countData?.count ?? 0;
 
@@ -95,7 +96,7 @@ function WIDTrustLayer() {
         </Link>
       </div>
 
-      {/* ── Witnessed Voices — 2×4 grid ── */}
+      {/* ── Witnessed Voices — horizontal scroll row ── */}
       {voices && voices.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -108,60 +109,114 @@ function WIDTrustLayer() {
               </span>
             </Link>
           </div>
-          <div className="grid grid-cols-4 gap-2">
-            {voices.slice(0, 8).map((v: any) => (
-              <Link key={v.songId} href={`/song/${v.songId}`}>
+          {/* Horizontal scroll container — negative margin to break out of px-6 padding */}
+          <div
+            className="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {voices.slice(0, 10).map((v: any) => (
+              <div
+                key={v.songId}
+                className="relative flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group"
+                style={{
+                  width: "148px",
+                  height: "196px",
+                  background: "oklch(0.09 0.03 270)",
+                  boxShadow: "0 4px 24px oklch(0 0 0 / 0.5)",
+                }}
+              >
+                {/* Cover art */}
+                {v.coverArtUrl ? (
+                  <img
+                    src={v.coverArtUrl}
+                    alt={v.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center"
+                    style={{ background: "oklch(0.12 0.04 270)" }}>
+                    <Fingerprint size={28} style={{ color: "oklch(0.65 0.2 300 / 0.35)" }} />
+                  </div>
+                )}
+
+                {/* Gradient overlay — bottom 65% */}
+                <div className="absolute inset-0"
+                  style={{ background: "linear-gradient(to top, oklch(0 0 0 / 0.88) 0%, oklch(0 0 0 / 0.3) 50%, transparent 100%)" }}
+                />
+
+                {/* WID badge — top left */}
                 <div
-                  className="relative rounded-xl overflow-hidden cursor-pointer group transition-all hover:scale-[1.03]"
-                  style={{ aspectRatio: "1/1", background: "oklch(0.09 0.03 270)" }}
+                  className="absolute top-2 left-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold z-10"
+                  style={{
+                    background: "oklch(0.65 0.2 300 / 0.2)",
+                    border: "1px solid oklch(0.65 0.2 300 / 0.5)",
+                    color: "oklch(0.78 0.18 300)",
+                    backdropFilter: "blur(6px)",
+                  }}
                 >
-                  {/* Cover art */}
-                  {v.coverArtUrl ? (
-                    <img
-                      src={v.coverArtUrl}
-                      alt={v.title}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center"
-                      style={{ background: "oklch(0.12 0.04 270)" }}>
-                      <Fingerprint size={20} style={{ color: "oklch(0.65 0.2 300 / 0.4)" }} />
-                    </div>
-                  )}
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  {/* WID badge — top left */}
+                  <Fingerprint size={8} />
+                  WID
+                </div>
+
+                {/* Creator avatar — top right */}
+                {v.profilePhotoUrl && (
+                  <img
+                    src={v.profilePhotoUrl}
+                    alt={v.artistHandle || v.userName}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full object-cover z-10"
+                    style={{ border: "1.5px solid oklch(0.84 0.155 85 / 0.6)" }}
+                  />
+                )}
+
+                {/* Play button — center, appears on hover/tap */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    addAndPlay({
+                      id: String(v.songId),
+                      title: v.title,
+                      artist: v.artistHandle || v.userName,
+                      artUrl: v.coverArtUrl || undefined,
+                      audioUrl: v.fileUrl || "",
+                      witnessId: v.witnessId || undefined,
+                      genre: v.genre || "",
+                    });
+                  }}
+                  className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: "oklch(0 0 0 / 0.15)" }}
+                >
                   <div
-                    className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[7px] font-mono font-bold z-10"
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
                     style={{
-                      background: "oklch(0.65 0.2 300 / 0.18)",
-                      border: "1px solid oklch(0.65 0.2 300 / 0.45)",
-                      color: "oklch(0.75 0.18 300)",
+                      background: "oklch(0.84 0.155 85)",
+                      boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.5)",
                     }}
                   >
-                    <Fingerprint size={7} />
-                    WID
+                    <Play size={20} fill="oklch(0.08 0.01 280)" style={{ color: "oklch(0.08 0.01 280)", marginLeft: "2px" }} />
                   </div>
-                  {/* Creator avatar — top right */}
-                  {v.profilePhotoUrl && (
-                    <img
-                      src={v.profilePhotoUrl}
-                      alt={v.artistHandle || v.userName}
-                      className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full object-cover z-10"
-                      style={{ border: "1px solid oklch(0.84 0.155 85 / 0.5)" }}
-                    />
-                  )}
-                  {/* Title + creator name — bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 px-2 pb-2 z-10">
-                    <p className="font-heading text-[9px] leading-tight truncate text-white">
-                      {v.title}
-                    </p>
-                    <p className="font-body text-[8px] truncate mt-0.5" style={{ color: "oklch(0.75 0.025 280)" }}>
+                </button>
+
+                {/* Navigate to song page on card tap */}
+                <Link href={`/song/${v.songId}`}>
+                  <div className="absolute inset-0 z-10" />
+                </Link>
+
+                {/* Title + creator name — bottom */}
+                <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 z-20 pointer-events-none">
+                  <p className="font-heading text-[11px] leading-tight truncate text-white">
+                    {v.title}
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    {!v.profilePhotoUrl && (
+                      <div className="w-4 h-4 rounded-full flex-shrink-0"
+                        style={{ background: "oklch(0.65 0.2 300 / 0.3)" }} />
+                    )}
+                    <p className="font-body text-[9px] truncate" style={{ color: "oklch(0.65 0.025 280)" }}>
                       {v.artistHandle || v.userName}
                     </p>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>

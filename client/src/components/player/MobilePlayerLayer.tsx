@@ -152,7 +152,9 @@ export default function MobilePlayerLayer() {
   const onMiniTouchEnd = (e: React.TouchEvent) => {
     if (miniTouchStartY.current === null) return;
     const delta = miniTouchStartY.current - e.changedTouches[0].clientY;
-    if (delta > 40) setPlayerState("expanded");
+    // Long swipe (>120px) goes directly to cinematic; short swipe (>40px) goes to expanded
+    if (delta > 120) setPlayerState("cinematic");
+    else if (delta > 40) setPlayerState("expanded");
     miniTouchStartY.current = null;
   };
 
@@ -788,6 +790,43 @@ export default function MobilePlayerLayer() {
 
             {/* Controls */}
             <ControlsRow large overlay />
+
+            {/* Action tray — Gift / Share / Details */}
+            <div className="flex items-center justify-around pt-1">
+              <button
+                onClick={(e) => { e.stopPropagation(); setGiftOpen(true); }}
+                className="flex flex-col items-center gap-1 transition-all active:scale-90"
+                style={{ color: "rgba(255,255,255,0.55)" }}
+              >
+                <div className="w-9 h-9 flex items-center justify-center rounded-xl"
+                  style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
+                  <DollarSign size={16} />
+                </div>
+                <span className="text-[9px] font-heading tracking-widest uppercase">Gift</span>
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleShare(); }}
+                className="flex flex-col items-center gap-1 transition-all active:scale-90"
+                style={{ color: "rgba(255,255,255,0.55)" }}
+              >
+                <div className="w-9 h-9 flex items-center justify-center rounded-xl"
+                  style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
+                  {copied ? <Check size={16} style={{ color: "oklch(0.84 0.155 85)" }} /> : <Share2 size={16} />}
+                </div>
+                <span className="text-[9px] font-heading tracking-widest uppercase">{copied ? "Copied" : "Share"}</span>
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setPlayerState("mini"); navigate(`/song/${currentSongId}`); }}
+                className="flex flex-col items-center gap-1 transition-all active:scale-90"
+                style={{ color: "rgba(255,255,255,0.55)" }}
+              >
+                <div className="w-9 h-9 flex items-center justify-center rounded-xl"
+                  style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
+                  <ListMusic size={16} />
+                </div>
+                <span className="text-[9px] font-heading tracking-widest uppercase">Details</span>
+              </button>
+            </div>
           </div>
         )}
       </div>

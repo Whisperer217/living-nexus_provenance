@@ -1777,3 +1777,8 @@
 ## Phase 56: Cinematic View Fix
 - [x] Cinematic view shows blank black screen — fixed by using MediaAsset mode="cinematic" directly in CinematicLayer (was using mode="player" via ArtworkLayer)
 - [x] Video load error fallback — added onError handler to both PlayerMedia and CinematicMedia so cover art shows if video fails to load on mobile
+
+## Phase 57: UX Polish Sprint
+- [x] Cinematic overlay: long swipe-up from mini bar (>120px) goes directly to cinematic; action tray (Gift/Share/Details) added to cinematic portrait controls
+- [x] WID panels: redesigned as horizontal scroll row with 148×196px portrait cards, large cover art, WID badge, creator avatar, play button overlay, one-tap play via addAndPlay
+- [x] Creator appreciation notifications: toggleReaction now sends in-app notification to creator when reaction is added (not removed), with emoji + sender name
