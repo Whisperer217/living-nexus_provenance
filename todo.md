@@ -1782,3 +1782,10 @@
 - [x] Cinematic overlay: long swipe-up from mini bar (>120px) goes directly to cinematic; action tray (Gift/Share/Details) added to cinematic portrait controls
 - [x] WID panels: redesigned as horizontal scroll row with 148×196px portrait cards, large cover art, WID badge, creator avatar, play button overlay, one-tap play via addAndPlay
 - [x] Creator appreciation notifications: toggleReaction now sends in-app notification to creator when reaction is added (not removed), with emoji + sender name
+
+## Phase 58: Social Sharing Embeds
+- [x] Audited OG meta tags — fully implemented in server/og.ts (Phase 19 + Phase 52)
+- [x] Confirmed: og:title, og:description, og:image, og:video (MP4 embed), og:audio (MP3), twitter:card, twitter:player:stream all present for real song IDs
+- [x] Embed videos cached on S3/CloudFront at embed-videos/{songId}.mp4 — Discord shows inline video player after first generation
+- [x] Direct MP3 URL in og:audio tag — iMessage/Telegram can play directly from the link
+- [x] Issue was user testing with truncated ID (13200 vs real 7-digit IDs like 1320021) — no code fix needed

@@ -238,14 +238,12 @@ export function registerOgRoutes(app: Express) {
   app.get("/song/:id", async (req, res, next) => {
     const songId = parseInt(req.params.id, 10);
     if (isNaN(songId)) return next();
-
     const ua = req.headers["user-agent"] || "";
     if (!isCrawler(ua)) return next();
 
     try {
       const result = await getSongWithCreator(songId);
       if (!result) return next();
-
       const { song, creator } = result;
 
       const artistName =
