@@ -47,16 +47,26 @@ function buildSongOgTags(opts: {
   audioType?: string | null;
   /**
    * S3 CDN URL of the pre-generated embed MP4 (cover art loop + audio).
-   * When present, og:type is set to "video.other" and og:video tags are injected.
-   * This is the ONLY way to get an inline playable embed on Discord and iMessage.
-   * Discord confirmed they will never support og:audio.
+   * Kept for iMessage inline playback (iMessage reads og:video pointing to .mp4 directly).
    */
   embedVideoUrl?: string | null;
+  /**
+   * Song ID — used to build the /embed/song/:id iframe URL for Discord inline player.
+   * Discord requires og:video:url pointing to an iframe page with og:video:type="text/html"
+   * (the YouTube pattern). Raw .mp4 URLs do NOT trigger inline playback in Discord.
+   */
+  songId?: number | null;
 }): string {
-  const { title, description, image, url, siteName, audioUrl, audioType, embedVideoUrl } = opts;
+  const { title, description, image, url, siteName, audioUrl, audioType, embedVideoUrl, songId } = opts;
 
-  // Use video.other when we have an embed MP4 — required for Discord inline player
-  const ogType = embedVideoUrl ? "video.other" : "music.song";
+  // Always use video.other when we have an embed iframe — required for Discord inline player
+  const hasEmbed = !!songId;
+  const ogType = hasEmbed ? "video.other" : "music.song";
+
+  // The iframe embed URL — Discord renders this as an inline player
+  const embedIframeUrl = songId
+    ? `${CANONICAL_ORIGIN}/embed/song/${songId}`
+    : null;
 
   const tags = [
     `<meta property="og:type" content="${ogType}" />`,
@@ -71,29 +81,35 @@ function buildSongOgTags(opts: {
     `<meta property="og:url" content="${escAttr(url)}" />`,
     // Discord embed accent color — Living Nexus gold
     `<meta name="theme-color" content="#D4AF37" />`,
-    `<meta name="twitter:card" content="summary_large_image" />`,
-    `<meta name="twitter:title" content="${escAttr(title)}" />`,
-    `<meta name="twitter:description" content="${escAttr(description)}" />`,
-    `<meta name="twitter:image" content="${escAttr(image)}" />`,
   ];
 
-  // og:video — Discord, iMessage, Telegram inline player
-  // Discord ONLY renders inline players for og:video (not og:audio).
-  // iMessage auto-plays og:video pointing to a direct .mp4 file.
-  if (embedVideoUrl && embedVideoUrl.trim().length > 0) {
-    const vUrl = embedVideoUrl.trim();
-    tags.push(`<meta property="og:video" content="${escAttr(vUrl)}" />`);
-    tags.push(`<meta property="og:video:secure_url" content="${escAttr(vUrl)}" />`);
-    tags.push(`<meta property="og:video:type" content="video/mp4" />`);
-    tags.push(`<meta property="og:video:width" content="400" />`);
-    tags.push(`<meta property="og:video:height" content="400" />`);
-    // Twitter player stream — enables video preview on X/Twitter
+  // og:video pointing to the iframe embed page — the YouTube/Discord pattern
+  // Discord renders this as an inline player when og:video:type="text/html"
+  if (embedIframeUrl) {
+    tags.push(`<meta property="og:video" content="${escAttr(embedIframeUrl)}" />`);
+    tags.push(`<meta property="og:video:secure_url" content="${escAttr(embedIframeUrl)}" />`);
+    tags.push(`<meta property="og:video:type" content="text/html" />`);
+    tags.push(`<meta property="og:video:width" content="480" />`);
+    tags.push(`<meta property="og:video:height" content="270" />`);
+    // Twitter player card — enables inline player on X/Twitter and Discord
     tags.push(`<meta name="twitter:card" content="player" />`);
-    tags.push(`<meta name="twitter:player:stream" content="${escAttr(vUrl)}" />`);
-    tags.push(`<meta name="twitter:player:stream:content_type" content="video/mp4" />`);
-    tags.push(`<meta name="twitter:player:width" content="400" />`);
-    tags.push(`<meta name="twitter:player:height" content="400" />`);
+    tags.push(`<meta name="twitter:player" content="${escAttr(embedIframeUrl)}" />`);
+    tags.push(`<meta name="twitter:player:width" content="480" />`);
+    tags.push(`<meta name="twitter:player:height" content="270" />`);
+    // Also include the raw MP4 stream for iMessage / Telegram direct video playback
+    if (embedVideoUrl && embedVideoUrl.trim().length > 0) {
+      const vUrl = embedVideoUrl.trim();
+      tags.push(`<meta name="twitter:player:stream" content="${escAttr(vUrl)}" />`);
+      tags.push(`<meta name="twitter:player:stream:content_type" content="video/mp4" />`);
+    }
+  } else {
+    // No song ID — fall back to summary_large_image
+    tags.push(`<meta name="twitter:card" content="summary_large_image" />`);
   }
+
+  tags.push(`<meta name="twitter:title" content="${escAttr(title)}" />`);
+  tags.push(`<meta name="twitter:description" content="${escAttr(description)}" />`);
+  tags.push(`<meta name="twitter:image" content="${escAttr(image)}" />`);
 
   // og:audio — Telegram reads this; Discord ignores it but it doesn't hurt
   if (audioUrl && audioUrl.trim().length > 0) {
@@ -296,6 +312,7 @@ export function registerOgRoutes(app: Express) {
         siteName: "Living Nexus",
         audioUrl,
         embedVideoUrl,
+        songId, // enables /embed/song/:id iframe URL for Discord inline player
       });
 
       const html = await getHtmlTemplate(isDev);

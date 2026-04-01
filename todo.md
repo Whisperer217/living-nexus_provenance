@@ -1808,3 +1808,17 @@
 - [x] Verified: Regular browser requests to /song/:id now return song-specific OG tags (og:title includes artist name, og:image is cover art, og:audio/og:video present)
 - [x] React SPA still loads correctly — HTML structure intact with #root div and module scripts
 - [ ] Test with real Discord paste after publish (requires new deployment)
+
+## Phase 60: Discord Inline Audio Player Embed
+- [x] Build /embed/song/:id — standalone iframe player page (dark bg, blurred cover art, title, artist, HTML5 audio with play/pause/progress)
+- [x] Register /embed/song/:id as an Express route in server/embedRoute.ts (pure HTML/CSS/JS, no React)
+- [x] Register embed route BEFORE X-Frame-Options header middleware in server/_core/index.ts
+- [x] Embed route sets X-Frame-Options: ALLOWALL and Content-Security-Policy: frame-ancestors * so Discord can iframe it
+- [x] Update server/og.ts: og:video now points to /embed/song/:id with og:video:type="text/html" (YouTube pattern)
+- [x] og:video:width=480, og:video:height=270 (Discord's preferred embed player dimensions)
+- [x] twitter:player points to /embed/song/:id, twitter:player:stream still carries raw MP4 for iMessage/Telegram
+- [x] Added songId param to buildSongOgTags() — embed iframe URL auto-generated for all song pages
+- [x] Verified: og:video = https://www.livingnexus.org/embed/song/1320021, type=text/html
+- [x] Verified: embed page renders title/artist/audio correctly, X-Frame-Options: ALLOWALL confirmed
+- [x] 95 tests passing, 0 TypeScript errors
+- [ ] Test Discord embed shows inline player after publish

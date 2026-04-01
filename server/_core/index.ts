@@ -6,6 +6,7 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerOgRoutes } from "../og";
+import { registerEmbedRoutes } from "../embedRoute";
 import { registerSseRoutes } from "../sse";
 import { appRouter, handleStripeWebhook } from "../routers";
 import { uploadRouter } from "../uploadRoute";
@@ -40,7 +41,11 @@ async function startServer() {
   // Gzip compression — saves 60-80% on JSON/HTML payloads
   app.use(compression({ level: 6, threshold: 1024 }));
 
-  // Security headers
+  // Embed iframe routes MUST be registered BEFORE the X-Frame-Options header
+  // so Discord can load /embed/song/:id inside an iframe for inline playback.
+  registerEmbedRoutes(app);
+
+  // Security headers (applied to all routes EXCEPT /embed/* which overrides below)
   app.use((_req, res, next) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "SAMEORIGIN");
