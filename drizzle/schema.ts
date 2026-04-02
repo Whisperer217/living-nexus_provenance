@@ -134,6 +134,13 @@ export const songs = mysqlTable("songs", {
   // null = unknown (treated as 1:1 for safe fallback)
   artAspectRatio: mysqlEnum("artAspectRatio", ["1:1", "4:5", "16:9"]),
 
+  // Content type — determines which Explore tab this work appears in
+  // "audio"      = music track (default, covers existing records)
+  // "lyrics"     = standalone lyric sheet (WID-LYR only, no audio)
+  // "manuscript" = novel, short story, essay, academic paper
+  // "comic"      = comic book, graphic novel, illustrated story
+  contentType: mysqlEnum("contentType", ["audio", "lyrics", "manuscript", "comic"]).default("audio").notNull(),
+
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
 

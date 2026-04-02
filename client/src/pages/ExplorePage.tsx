@@ -31,6 +31,14 @@ const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7
 const PAGE_SIZE = 24;
 
 type ExploreMode = "infinite" | "randomize" | "trending";
+type ContentType = "audio" | "lyrics" | "manuscript" | "comic";
+
+const CONTENT_TABS: { id: ContentType; label: string; icon: string; color: string }[] = [
+  { id: "audio",      label: "Music",       icon: "🎵", color: "oklch(0.65 0.2 300)" },
+  { id: "lyrics",     label: "Lyrics",      icon: "✍️", color: "oklch(0.75 0.18 85)" },
+  { id: "manuscript", label: "Manuscripts", icon: "📖", color: "oklch(0.65 0.18 145)" },
+  { id: "comic",      label: "Comics",      icon: "🎨", color: "oklch(0.65 0.18 25)" },
+];
 
 /** AI disclosure badge — same design as TrackCard */
 function AiDisclosureBadge({ value }: { value: string }) {
@@ -274,6 +282,7 @@ export default function ExplorePage() {
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
   const [mode, setMode] = useState<ExploreMode>("infinite");
+  const [contentType, setContentType] = useState<ContentType>("audio");
 
   // Infinite scroll state — accumulate pages client-side
   const [offset, setOffset] = useState(0);
@@ -314,6 +323,7 @@ export default function ExplorePage() {
       search: query || undefined,
       limit: PAGE_SIZE,
       offset,
+      contentType,
     },
     {
       enabled: mode === "infinite",
@@ -343,14 +353,14 @@ export default function ExplorePage() {
     setIsFetchingMore(false);
   }, [pageData, pageFetching, mode, offset]);
 
-  // Reset on filter/mode change
+  // Reset on filter/mode/contentType change
   useEffect(() => {
     setOffset(0);
     setAllSongs([]);
     setHasMore(true);
     setIsFetchingMore(false);
     fetchedOffsetRef.current = -1;
-  }, [activeGenre, query, mode]);
+  }, [activeGenre, query, mode, contentType]);
 
   // IntersectionObserver — only fires when not already loading
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -383,6 +393,7 @@ export default function ExplorePage() {
       limit: PAGE_SIZE,
       randomize: true,
       seed,
+      contentType,
     },
     {
       enabled: mode === "randomize",
@@ -521,7 +532,7 @@ export default function ExplorePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.08_0.01_280)] via-[oklch(0.08_0.01_280)/50] to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-5">
           <h1 className="font-heading text-2xl text-white tracking-wider">Explore the Cosmos</h1>
-          <p className="text-[12px] font-body mt-1" style={{ color: "#E2E8F0" }}>Every sound in the universe, at your fingertips</p>
+          <p className="text-[12px] font-body mt-1" style={{ color: "#E2E8F0" }}>Music, lyrics, manuscripts, comics — every witnessed work, at your fingertips</p>
         </div>
       </div>
 
@@ -539,6 +550,24 @@ export default function ExplorePage() {
               focus:border-[#A78BFA]/50 transition-colors placeholder:text-white/60
               max-w-[480px]"
           />
+        </div>
+
+        {/* Content-type tab bar */}
+        <div className="flex gap-1 mb-5 p-1 rounded-xl" style={{ background: "oklch(0.12 0.02 280)", border: "1px solid oklch(0.22 0.04 270 / 40%)" }}>
+          {CONTENT_TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setContentType(tab.id)}
+              className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] font-heading font-bold tracking-wide transition-all"
+              style={contentType === tab.id
+                ? { background: "oklch(0.18 0.04 270)", color: tab.color, boxShadow: `0 0 12px ${tab.color}33` }
+                : { color: "oklch(0.45 0.02 280)" }
+              }
+            >
+              <span className="text-[13px] leading-none">{tab.icon}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Genre icon cards */}

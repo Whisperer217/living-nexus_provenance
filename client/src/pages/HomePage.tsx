@@ -96,6 +96,31 @@ function WIDTrustLayer() {
         </Link>
       </div>
 
+      {/* ── Witnessed Works by Medium ── */}
+      <div className="rounded-2xl px-5 py-4" style={{ background: "oklch(0.10 0.04 270 / 0.7)", border: "1px solid oklch(0.84 0.155 85 / 0.12)" }}>
+        <p className="text-[11px] uppercase tracking-widest mb-3 font-heading" style={{ color: "oklch(0.55 0.03 280)" }}>Witnessed Works</p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { label: "Music",       icon: "🎵", color: "oklch(0.65 0.2 300)",  desc: "Audio tracks & recordings" },
+            { label: "Lyrics",      icon: "✍️", color: "oklch(0.75 0.18 85)",  desc: "Standalone lyric sheets" },
+            { label: "Manuscripts", icon: "📖", color: "oklch(0.65 0.18 145)", desc: "Novels & written works" },
+            { label: "Comics",      icon: "🎨", color: "oklch(0.65 0.18 25)",  desc: "Comics & graphic novels" },
+          ].map(m => (
+            <div key={m.label} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5"
+              style={{ background: "oklch(0.07 0.02 280)", border: `1px solid ${m.color}22` }}>
+              <span className="text-base leading-none flex-shrink-0">{m.icon}</span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-heading font-semibold leading-none" style={{ color: m.color }}>{m.label}</p>
+                <p className="text-[9px] mt-0.5 truncate" style={{ color: "oklch(0.42 0.02 280)" }}>{m.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] mt-3" style={{ color: "oklch(0.38 0.02 280)" }}>
+          Every medium. One registry. Your proof of origin — sealed at the moment of creation.
+        </p>
+      </div>
+
       {/* ── Witnessed Voices — horizontal scroll row ── */}
       {voices && voices.length > 0 && (
         <div>
@@ -529,7 +554,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2 mb-4">
             <Sparkles size={13} className="text-[#D4AF37]" />
             <span className="text-[10px] font-heading tracking-[0.22em] uppercase text-[#D4AF37]">
-              Living Nexus — Audio Provenance Platform
+              Living Nexus — Creative Provenance Platform
             </span>
           </div>
 
@@ -546,7 +571,7 @@ export default function HomePage() {
           </h1>
 
           <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "oklch(0.75 0.025 280)" }}>
-            Every track carries a Witness ID — proof of origin that belongs to you before it belongs to anyone else.
+            Every work — music, lyrics, manuscripts, comics, video — carries a Witness ID. Cryptographic proof of origin that belongs to you before it belongs to anyone else.
           </p>
 
           <div className="flex flex-wrap gap-3">
@@ -572,7 +597,7 @@ export default function HomePage() {
                 }}
               >
                 <Compass size={13} />
-                Explore Music
+                Explore Works
               </button>
             </Link>
           </div>

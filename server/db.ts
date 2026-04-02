@@ -173,6 +173,7 @@ export async function createSong(data: {
   durationSeconds?: number; witnessId?: string; harmonicSignature?: number[];
   ecdsaPublicKey?: string; ecdsaSignature?: string; certificateUrl?: string; certificateKey?: string;
   isLyricsOnly?: boolean;
+  contentType?: "audio" | "lyrics" | "manuscript" | "comic";
   caption?: string;
 }) {
   const db = await getDb();
@@ -216,12 +217,13 @@ export async function getSongsByUser(userId: number) {
   return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(desc(songs.createdAt));
 }
 
-export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number }) {
+export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 50;
   const offset = opts?.offset ?? 0;
   const conditions: ReturnType<typeof eq>[] = [eq(songs.isPublic, true) as ReturnType<typeof eq>, eq(songs.status, "Published") as ReturnType<typeof eq>];
+  if (opts?.contentType) conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
   if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
   if (opts?.search) {
     conditions.push(or(

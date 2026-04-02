@@ -1976,3 +1976,18 @@
 - [x] Add Replace Audio UI section to EditTrackPanel (file drop zone, version note, SHA-256 hash, mutation, version history list)
 - [x] Add Audio Version History section to VerifyPage (shows archived WID-MUS proofs with version notes and dates)
 - [x] TypeScript: 0 errors | Vitest: 95 tests passing
+
+## Phase 72: Multi-Medium Expansion — Homepage + Explore + Upload
+- [x] Update homepage hero badge from "Audio Provenance Platform" to "Creative Provenance Platform"
+- [x] Update homepage hero tagline from music-only copy to multi-medium copy
+- [x] Update homepage Explore CTA button from "Explore Music" to "Explore Works"
+- [x] Add "Witnessed Works by Medium" stat block to WIDTrustLayer (below Witnessed Voices)
+- [x] Add contentType enum column to songs schema: audio | lyrics | manuscript | comic
+- [x] Push DB migration (pnpm db:push)
+- [x] Add contentType filter to getPublicSongs DB helper
+- [x] Add contentType param to songs.discover tRPC procedure
+- [x] Add content-type tab bar to ExplorePage: Audio · Lyrics · Manuscripts · Comics
+- [x] Add content-type selector (4-card picker) before Step 1 on UploadPage
+- [x] Add Manuscript upload flow to UploadPage (PDF file drop + title + WID generation)
+- [x] Add Comic/Novel upload flow to UploadPage (PDF/image + title + WID generation)
+- [x] TypeScript: 0 errors | Vitest: all passing

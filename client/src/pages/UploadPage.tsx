@@ -168,7 +168,9 @@ export default function UploadPage() {
   const [captionSuggestion, setCaptionSuggestion] = useState<string | null>(null);
   const [captionState, setCaptionState] = useState<"idle" | "loading" | "suggested" | "accepted">("idle");
 
-  const [uploadMode, setUploadMode] = useState<"audio" | "lyrics">("audio");
+  const [uploadMode, setUploadMode] = useState<"audio" | "lyrics" | "manuscript" | "comic">("audio");
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const [witnessData, setWitnessData] = useState<WitnessData | null>(null);
   const [generatingWid, setGeneratingWid] = useState(false);
   const [waveformActive, setWaveformActive] = useState(false);
@@ -277,6 +279,31 @@ export default function UploadPage() {
   }, [title]);
 
   const handleGenerateWid = async () => {
+    if (uploadMode === "manuscript" || uploadMode === "comic") {
+      // Hash the document file for manuscript/comic
+      if (!documentFile) { toast.error("Please select a file first"); return; }
+      setGeneratingWid(true);
+      try {
+        const buffer = await documentFile.arrayBuffer();
+        const fileHash = await sha256Hex(buffer);
+        const prefix = uploadMode === "manuscript" ? "WID-MAN" : "WID-CMX";
+        const wid = `${prefix}-${fileHash.slice(0, 8).toUpperCase()}-${fileHash.slice(8, 16).toUpperCase()}`;
+        const frequencies = deriveHarmonicFrequencies(fileHash);
+        const keypair = await generateECDSAKeypair();
+        const payload = `${wid}|${title || documentFile.name}|${user?.name || ""}|${Date.now()}`;
+        const signature = await signPayload(keypair.privateKey, payload);
+        const publicKeyJWK = await exportPublicKeyJWK(keypair.publicKey);
+        const timestamp = new Date().toISOString();
+        setWitnessData({ wid, fileHash, frequencies, publicKeyJWK, signature, timestamp });
+        setWaveformActive(true);
+        toast.success(`Witness ID generated — ${uploadMode === "manuscript" ? "manuscript" : "comic"} provenance established`);
+      } catch {
+        toast.error("Failed to generate Witness ID");
+      } finally {
+        setGeneratingWid(false);
+      }
+      return;
+    }
     if (uploadMode === "lyrics") {
       if (!lyrics.trim()) { toast.error("Please enter lyrics text first"); return; }
       setGeneratingWid(true);
@@ -402,6 +429,33 @@ export default function UploadPage() {
   };
 
   const handlePublish = async () => {
+    if (uploadMode === "manuscript" || uploadMode === "comic") {
+      if (!title || !documentFile) { toast.error("Title and file are required"); return; }
+      try {
+        let fileUrl: string | undefined;
+        let fileKey: string | undefined;
+        let coverArtUrl: string | undefined;
+        // Upload the document file as a generic file
+        const { url: docUrl, key: docKey } = await uploadFileToS3(documentFile, "audio");
+        fileUrl = docUrl;
+        fileKey = docKey;
+        if (coverFile) {
+          const { url } = await uploadFileToS3(coverFile, "cover");
+          coverArtUrl = url;
+        }
+        uploadMutation.mutate({
+          fileUrl, fileKey, coverArtUrl, title, genre: genre || undefined,
+          albumName: albumName || undefined, releaseDate: releaseDate || undefined,
+          isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+          caption: caption || undefined,
+          contentType: uploadMode,
+          fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
+          harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
+          ecdsaSignature: witnessData?.signature,
+        } as any);
+      } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
+      return;
+    }
     if (uploadMode === "lyrics") {
       if (!title || !lyrics.trim()) { toast.error("Title and lyrics are required"); return; }
       try {
@@ -419,6 +473,7 @@ export default function UploadPage() {
           lyricsText: lyrics,
           lyricsHash: witnessData?.fileHash,
           isLyricsOnly: true,
+          contentType: "lyrics",
           fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
           harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
           ecdsaSignature: witnessData?.signature,
@@ -524,22 +579,34 @@ export default function UploadPage() {
               <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Select Files</h2>
 
               {/* Mode Toggle */}
-              <div className="flex rounded-xl overflow-hidden" style={{ border: "1px solid oklch(0.22 0.015 280)" }}>
+              <div className="grid grid-cols-2 gap-1 p-1 rounded-xl" style={{ background: "oklch(0.10 0.015 280)", border: "1px solid oklch(0.22 0.015 280)" }}>
                 <button
-                  onClick={() => { setUploadMode("audio"); setWitnessData(null); }}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all"
-                  style={uploadMode === "audio" ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" } : { background: "oklch(0.12 0.015 280)", color: "#E2E8F0" }}>
-                  <Music className="w-4 h-4" /> Upload Audio
+                  onClick={() => { setUploadMode("audio"); setWitnessData(null); setDocumentFile(null); }}
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all"
+                  style={uploadMode === "audio" ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" } : { color: "oklch(0.55 0.03 280)" }}>
+                  <Music className="w-4 h-4" /> Music / Audio
                 </button>
                 <button
-                  onClick={() => { setUploadMode("lyrics"); setAudioFile(null); setWitnessData(null); }}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all"
-                  style={uploadMode === "lyrics" ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" } : { background: "oklch(0.12 0.015 280)", color: "#E2E8F0" }}>
-                  <Shield className="w-4 h-4" /> Protect Lyrics Only
+                  onClick={() => { setUploadMode("lyrics"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all"
+                  style={uploadMode === "lyrics" ? { background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" } : { color: "oklch(0.55 0.03 280)" }}>
+                  <Shield className="w-4 h-4" /> Lyrics Only
+                </button>
+                <button
+                  onClick={() => { setUploadMode("manuscript"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all"
+                  style={uploadMode === "manuscript" ? { background: "oklch(0.65 0.18 145)", color: "oklch(0.08 0.015 280)" } : { color: "oklch(0.55 0.03 280)" }}>
+                  <span className="text-base leading-none">📖</span> Manuscript
+                </button>
+                <button
+                  onClick={() => { setUploadMode("comic"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all"
+                  style={uploadMode === "comic" ? { background: "oklch(0.65 0.18 25)", color: "oklch(0.08 0.015 280)" } : { color: "oklch(0.55 0.03 280)" }}>
+                  <span className="text-base leading-none">🎨</span> Comic / Novel
                 </button>
               </div>
 
-              {uploadMode === "audio" ? (
+              {uploadMode === "audio" && (
                 <div
                   onClick={() => audioInputRef.current?.click()}
                   onDragOver={e => { e.preventDefault(); setAudioDragging(true); }}
@@ -567,7 +634,9 @@ export default function UploadPage() {
                     </>
                   )}
                 </div>
-              ) : (
+              )}
+
+              {uploadMode === "lyrics" && (
                 <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.75 0.18 85 / 0.3)" }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Shield className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
@@ -584,6 +653,44 @@ export default function UploadPage() {
                   />
                   {lyrics.trim() && (
                     <p className="text-xs mt-2" style={{ color: "#E2E8F0" }}>{lyrics.trim().split(/\s+/).length} words · {lyrics.length} characters</p>
+                  )}
+                </div>
+              )}
+
+              {(uploadMode === "manuscript" || uploadMode === "comic") && (
+                <div
+                  onClick={() => documentInputRef.current?.click()}
+                  className="rounded-xl p-8 text-center cursor-pointer transition-all"
+                  style={{ border: `2px dashed ${documentFile ? (uploadMode === "manuscript" ? "oklch(0.65 0.18 145)" : "oklch(0.65 0.18 25)") : "oklch(0.28 0.02 280)"}`, background: documentFile ? "oklch(0.65 0.18 145 / 0.05)" : "oklch(0.09 0.01 280)" }}>
+                  <input
+                    ref={documentInputRef}
+                    type="file"
+                    accept={uploadMode === "manuscript" ? ".pdf,.doc,.docx,.txt,.rtf,.epub" : ".pdf,.cbz,.cbr,.zip,.jpg,.jpeg,.png,.webp"}
+                    className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 200 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum 200 MB.`); e.target.value = ""; return; } setDocumentFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); } }}
+                  />
+                  {documentFile ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: uploadMode === "manuscript" ? "oklch(0.65 0.18 145 / 0.2)" : "oklch(0.65 0.18 25 / 0.2)" }}>
+                        <Check className="w-5 h-5" style={{ color: uploadMode === "manuscript" ? "oklch(0.65 0.18 145)" : "oklch(0.65 0.18 25)" }} />
+                      </div>
+                      <p className="font-medium text-sm" style={{ color: uploadMode === "manuscript" ? "oklch(0.65 0.18 145)" : "oklch(0.65 0.18 25)" }}>{documentFile.name}</p>
+                      <p className="text-xs" style={{ color: "#E2E8F0" }}>{(documentFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <button onClick={e => { e.stopPropagation(); setDocumentFile(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-4xl block mb-3">{uploadMode === "manuscript" ? "📖" : "🎨"}</span>
+                      <p className="font-medium text-sm mb-1" style={{ color: "oklch(0.7 0.04 280)" }}>
+                        {uploadMode === "manuscript" ? "Drop your manuscript here or click to browse" : "Drop your comic/novel file here or click to browse"}
+                      </p>
+                      <p className="text-xs" style={{ color: "#E2E8F0" }}>
+                        {uploadMode === "manuscript" ? "PDF, DOCX, TXT, EPUB — max 200 MB" : "PDF, CBZ, CBR, ZIP, or image files — max 200 MB"}
+                      </p>
+                      <p className="text-xs mt-2 px-4" style={{ color: "oklch(0.45 0.03 280)" }}>
+                        Your file will be SHA-256 hashed and registered with a Witness ID. The original file is stored privately.
+                      </p>
+                    </>
                   )}
                 </div>
               )}
@@ -636,7 +743,11 @@ export default function UploadPage() {
 
               <Button
                 className="w-full"
-                disabled={uploadMode === "audio" ? !audioFile : !lyrics.trim()}
+                disabled={
+                  uploadMode === "audio" ? !audioFile :
+                  uploadMode === "lyrics" ? !lyrics.trim() :
+                  !documentFile
+                }
                 onClick={() => setStep(2)}
                 style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
                 Next: Metadata <ChevronRight className="w-4 h-4 ml-1" />
@@ -795,6 +906,16 @@ export default function UploadPage() {
                         <Shield className="w-3 h-3" /> LYRICS PROTECTED
                       </div>
                     )}
+                    {uploadMode === "manuscript" && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-semibold" style={{ background: "oklch(0.65 0.18 145 / 0.15)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.4)", letterSpacing: "0.08em" }}>
+                        📖 MANUSCRIPT WITNESSED
+                      </div>
+                    )}
+                    {uploadMode === "comic" && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-semibold" style={{ background: "oklch(0.65 0.18 25 / 0.15)", color: "oklch(0.65 0.18 25)", border: "1px solid oklch(0.65 0.18 25 / 0.4)", letterSpacing: "0.08em" }}>
+                        🎨 COMIC / NOVEL WITNESSED
+                      </div>
+                    )}
                     <p className="text-xs mb-2 font-medium" style={{ color: "#E2E8F0", letterSpacing: "0.12em" }}>WITNESS ID</p>
                     <p className="text-xl font-bold font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>{witnessData.wid}</p>
                     <div className="flex items-center justify-center gap-2 mt-2">
@@ -933,6 +1054,10 @@ export default function UploadPage() {
                 {[
                   uploadMode === "lyrics"
                     ? { label: "Mode", value: "LYRICS ONLY — Audio Not Attached" }
+                    : uploadMode === "manuscript"
+                    ? { label: "Manuscript File", value: documentFile?.name }
+                    : uploadMode === "comic"
+                    ? { label: "Comic / Novel File", value: documentFile?.name }
                     : { label: "Audio File", value: audioFile?.name },
                   uploadMode === "lyrics"
                     ? { label: "Lyrics", value: `${lyrics.trim().split(/\s+/).length} words protected` }
@@ -991,7 +1116,7 @@ export default function UploadPage() {
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
                 <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
-                  {(uploadMutation.isPending || uploadPhase === "processing") ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Upload className="w-4 h-4 mr-2" /> Publish Track</>}
+                  {(uploadMutation.isPending || uploadPhase === "processing") ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Upload className="w-4 h-4 mr-2" /> {uploadMode === "manuscript" || uploadMode === "comic" ? "Publish Work" : "Publish Track"}</>}
                 </Button>
               </div>
             </div>
