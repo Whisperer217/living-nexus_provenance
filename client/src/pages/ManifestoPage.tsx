@@ -5,22 +5,22 @@ const TENETS = [
   {
     icon: Shield,
     title: "Your words are your property.",
-    body: "Every lyric, every melody, every vocal performance carries the weight of the person who made it. Living Nexus does not own your music. Your label does not own your music. The algorithm does not own your music. You do. The moment you upload, a Witness ID — a cryptographic hash of your file, your identity, and the timestamp — is generated and permanently recorded. That hash is yours. It cannot be altered, transferred, or erased.",
+    body: "Every lyric, every melody, every vocal performance, every manuscript page, every panel of a graphic novel carries the weight of the person who made it. Living Nexus does not own your work. Your label does not own your work. The algorithm does not own your work. You do. The moment you upload, a Witness ID — a cryptographic hash of your file, your identity, and the timestamp — is generated and permanently recorded. That hash is yours. It cannot be altered, transferred, or erased.",
   },
   {
     icon: Lock,
     title: "Provenance is protection.",
-    body: "The music industry has spent decades separating creators from the proof of their creation. Contracts strip rights. Platforms strip metadata. AI companies strip context. Living Nexus does the opposite. Every track carries a chain of custody from the moment it enters the archive. If your music is ever used without permission — in a film, an ad, a training dataset — the Witness ID is the timestamp that proves you were first.",
+    body: "The creative industry has spent decades separating creators from the proof of their creation. Contracts strip rights. Platforms strip metadata. AI companies strip context. Living Nexus does the opposite. Every work carries a chain of custody from the moment it enters the registry. If your music, manuscript, or artwork is ever used without permission — in a film, an ad, a training dataset — the Witness ID is the timestamp that proves you were first.",
   },
   {
     icon: Music,
     title: "The archive is not a streaming service.",
-    body: "Spotify pays fractions of a cent per stream and calls it fair. We call it extraction. Living Nexus is an archive — a sovereign record of creation. Fans who love your work can tip you directly. Listeners who want to own it can download it. Supervisors who want to license it can negotiate directly with you. The platform takes 10%. You keep 90%. That is not a feature. That is a principle.",
+    body: "Streaming platforms pay fractions of a cent and call it fair. We call it extraction. Living Nexus is an archive — a sovereign record of creation across every medium. Fans who love your work can tip you directly. Listeners who want to own it can download it. Supervisors who want to license it can negotiate directly with you. The platform takes 10%. You keep 90%. That is not a feature. That is a principle.",
   },
   {
     icon: Users,
     title: "Community over algorithm.",
-    body: "No recommendation engine decides who gets heard. No engagement metric determines whose music surfaces. Living Nexus is a room where creators and listeners find each other honestly — through genre, through search, through word of mouth, through the Listen Together rooms where music plays live. The platform does not amplify the loudest. It protects the real.",
+    body: "No recommendation engine decides who gets heard. No engagement metric determines whose work surfaces. Living Nexus is a room where creators and listeners find each other honestly — through medium, through genre, through search, through word of mouth, through the Listen Together rooms where music plays live. The platform does not amplify the loudest. It protects the real.",
   },
 ];
 
@@ -28,8 +28,9 @@ const TIMELINE = [
   { date: "July 2025", event: "BDDT Publishing established — born from a personal reckoning. A combat medic watched his own testimony get trapped in the artificial realm and moved to protect it. The mission: help creators protect their work, AI-generated or straight real, on the way out." },
   { date: "December 2025", event: "Witness Identification born — first as a moral witness engine, then refined into a Witness ID system for creators. The core principle: protect the witness behind the system, not just the file." },
   { date: "December 2025", event: "Testimonial Completion doctrine published on Figshare — a combat medic's framework for healing thirteen-year wounds. This doctrine spawned the Sacred Witness Authority engine and the Epistemic Shock Index." },
-  { date: "Early 2026", event: "Living Nexus activated — born directly from the Testimonial Completion doctrine. What began as a GitHub repository became a sovereign music archive: upload, witness, protect, get paid. Zero VC funding. Zero label partnerships. Creator-owned from day one." },
+  { date: "Early 2026", event: "Living Nexus activated — born directly from the Testimonial Completion doctrine. What began as a GitHub repository became a sovereign creative archive: upload, witness, protect, get paid. Zero VC funding. Zero label partnerships. Creator-owned from day one." },
   { date: "March 2026", event: "Music video support added. Every video gets its own Witness ID alongside the audio. The archive grows." },
+  { date: "April 2026", event: "Multi-medium expansion. The registry now witnesses Music, Lyrics, Manuscripts, and Comics/Graphic Novels. Every creative medium. One cryptographic standard. The Witness ID is no longer a music tool — it is a universal proof of origin for human creativity." },
 ];
 
 export default function ManifestoPage() {
@@ -85,8 +86,8 @@ export default function ManifestoPage() {
             className="text-lg leading-relaxed max-w-xl mx-auto"
             style={{ color: "oklch(0.65 0.04 280)", fontFamily: "'Inter', sans-serif" }}
           >
-            Sovereign music. Cryptographic provenance. Creator-owned, fan-supported, algorithm-free.
-            This is what we believe and why we built it.
+            Sovereign creativity. Cryptographic provenance. Creator-owned, fan-supported, algorithm-free.
+            Music, lyrics, manuscripts, comics — every medium. One registry. This is what we believe and why we built it.
           </p>
         </div>
       </div>
@@ -105,10 +106,10 @@ export default function ManifestoPage() {
         </blockquote>
 
         <p className="text-base leading-relaxed mb-6" style={{ color: "oklch(0.72 0.03 280)" }}>
-          Music has always been testimony. A song is a witness statement — to love, to loss, to faith, to survival. For most of recorded history, the people who created that testimony were the last to benefit from it. Labels owned the masters. Platforms owned the metadata. Algorithms owned the audience relationship. Creators owned nothing but the memory of making it.
+          Creative work has always been testimony. A song is a witness statement — to love, to loss, to faith, to survival. A manuscript is a witness statement — to truth, to imagination, to history, to vision. A graphic novel is a witness statement — to narrative, to culture, to identity. For most of recorded history, the people who created that testimony were the last to benefit from it. Labels owned the masters. Publishers owned the rights. Platforms owned the metadata. Algorithms owned the audience relationship. Creators owned nothing but the memory of making it.
         </p>
         <p className="text-base leading-relaxed mb-16" style={{ color: "oklch(0.72 0.03 280)" }}>
-          Living Nexus was built to change that arithmetic. Not by disrupting the industry — by stepping outside it entirely. This is an archive, not a label. A provenance registry, not a streaming service. A direct payment rail between creators and the people who value their work, not a royalty pool managed by intermediaries who take the majority before passing on the remainder.
+          Living Nexus was built to change that arithmetic. Not by disrupting the industry — by stepping outside it entirely. This is an archive, not a label. A provenance registry, not a streaming service. A direct payment rail between creators and the people who value their work, not a royalty pool managed by intermediaries who take the majority before passing on the remainder. Music, lyrics, manuscripts, comics — every medium. One cryptographic standard.
         </p>
 
         {/* Tenets */}
@@ -189,7 +190,7 @@ export default function ManifestoPage() {
             This is not a platform feature.<br />This is a position.
           </h2>
           <p className="text-base leading-relaxed mb-6 max-w-lg mx-auto" style={{ color: "oklch(0.65 0.03 280)" }}>
-            We are not neutral. We believe creators deserve proof of what they made, payment for what they share, and protection from systems that profit from their work without their consent. If you make music, your words have power. Power has meaning. Meaning is what changes the internal state of the witness.
+            We are not neutral. We believe creators deserve proof of what they made, payment for what they share, and protection from systems that profit from their work without their consent. Whether you make music, write manuscripts, draw comics, or craft lyrics — your work has weight. Your words have power. Power has meaning. Meaning is what changes the internal state of the witness.
           </p>
           <p
             className="text-sm font-bold tracking-widest uppercase"
