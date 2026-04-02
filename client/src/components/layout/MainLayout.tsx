@@ -506,11 +506,38 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               )}
 
               {/* Mobile primary nav */}
-              <div className="flex-1 py-2">
+              <div className="flex-1 py-2 overflow-y-auto">
                 {PRIMARY_NAV.map(item => renderNavItem(item, true))}
                 {/* Creator nav — authenticated only */}
                 {!authLoading && user && renderNavItem(DASHBOARD_NAV_ITEM, true)}
                 {!authLoading && user && renderNavItem(ARCHIVE_NAV_ITEM, true)}
+
+                {/* DISCOVER section */}
+                <div className="px-4 pt-4 pb-2">
+                  <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase mb-2">Discover</p>
+                  {([
+                    { label: "Manifesto", icon: BookOpen, path: "/manifesto" },
+                    { label: "Founding Creators", icon: Star, path: "/founders" },
+                    { label: "Witness Registry", icon: Eye, path: "/witness-registry" },
+                  ] as { label: string; icon: React.ElementType; path: string }[]).map(item => {
+                    const Icon = item.icon;
+                    const active = location === item.path;
+                    return (
+                      <button
+                        key={item.label}
+                        onClick={() => goTo(item.path)}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors"
+                        style={{
+                          background: active ? "oklch(0.75 0.18 85 / 0.10)" : "transparent",
+                          color: active ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.02 280)",
+                        }}
+                      >
+                        <Icon size={14} className="flex-shrink-0" />
+                        <span className="text-[13px] font-body">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Mobile account footer */}
