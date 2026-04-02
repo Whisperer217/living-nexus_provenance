@@ -1931,3 +1931,8 @@
 - [x] ArchivePage: drag handles hidden in batch mode, checkboxes shown instead
 - [x] ArchivePage: page header updated to "LNA — Archive"
 - [x] Auth guard confirmed: useEffect redirects to login if not authenticated
+
+## Phase 67: Dashboard Sidebar Nav Fix
+- [x] Add "Dashboard" nav item to MainLayout sidebar (authenticated only, LayoutDashboard icon)
+- [x] Dashboard nav item appears above LNA — Archive in the creator nav section
+- [x] Mobile nav overlay also shows Dashboard link

@@ -6,7 +6,7 @@
      Home · Explore · Listen Together · Guilds · Profile · Upload
 
    CREATOR NAV (authenticated only):
-     LNA — Archive (with song count badge)
+     Dashboard · LNA — Archive (with song count badge)
 
    System tools are accessible via contextual locations:
      - Verify WID → WIDPanel component
@@ -33,7 +33,7 @@ import {
   Home, Compass, Users, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
   CheckCircle2, Fingerprint, Bell,
-  BookOpen, Star, Eye, Archive,
+  BookOpen, Star, Eye, Archive, LayoutDashboard,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -56,6 +56,13 @@ const PRIMARY_NAV: NavItem[] = [
   { label: "Profile",         icon: User,    path: "/profile", notifKey: "signals" },
   { label: "Upload",          icon: Upload,  path: "/upload"   },
 ];
+
+// Dashboard nav item — only rendered when authenticated
+const DASHBOARD_NAV_ITEM: NavItem = {
+  label: "Dashboard",
+  icon: LayoutDashboard,
+  path: "/dashboard",
+};
 
 // Archive nav item — only rendered when authenticated
 const ARCHIVE_NAV_ITEM: NavItem = {
@@ -332,9 +339,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {PRIMARY_NAV.map(item => renderNavItem(item, false))}
             </div>
 
-            {/* Archive nav item — authenticated only */}
+            {/* Creator nav items — authenticated only */}
             {!authLoading && user && (
               <div className="space-y-0.5 mt-0.5">
+                {renderNavItem(DASHBOARD_NAV_ITEM, false)}
                 {renderNavItem(ARCHIVE_NAV_ITEM, false)}
               </div>
             )}
@@ -500,7 +508,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {/* Mobile primary nav */}
               <div className="flex-1 py-2">
                 {PRIMARY_NAV.map(item => renderNavItem(item, true))}
-                {/* Archive — authenticated only */}
+                {/* Creator nav — authenticated only */}
+                {!authLoading && user && renderNavItem(DASHBOARD_NAV_ITEM, true)}
                 {!authLoading && user && renderNavItem(ARCHIVE_NAV_ITEM, true)}
               </div>
 
