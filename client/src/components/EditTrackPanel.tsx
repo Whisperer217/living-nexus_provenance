@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Shield, Lock, Download, FileText, Video } from "lucide-react";
+import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 const GENRES = [
@@ -56,6 +56,9 @@ interface Song {
   downloadPermission?: string | null;
   downloadTipThresholdCents?: number | null;
   lyricsText?: string | null;
+  lyricsWid?: string | null;
+  lyricsFileName?: string | null;
+  lyricsAddedAt?: Date | string | null;
   videoUrl?: string | null;
   videoWitnessId?: string | null;
 }
@@ -95,6 +98,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [dlSaving, setDlSaving] = useState(false);
   const [lyrics, setLyrics] = useState(song.lyricsText ?? "");
   const [lyricsSaving, setLyricsSaving] = useState(false);
+  const [lyricsFile, setLyricsFile] = useState<File | null>(null);
+  const [lyricsWid, setLyricsWid] = useState<string | null>(song.lyricsWid ?? null);
+  const [lyricsFileName, setLyricsFileName] = useState<string | null>(song.lyricsFileName ?? null);
+  const [lyricsAddedAt, setLyricsAddedAt] = useState<Date | string | null>(song.lyricsAddedAt ?? null);
+  const [lyricsWidLoading, setLyricsWidLoading] = useState(false);
+  const lyricsFileInputRef = useRef<HTMLInputElement>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUploading, setVideoUploading] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(song.videoUrl ?? null);
@@ -259,6 +268,45 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       status,
     });
     setSaving(false);
+  }
+
+  const addLyricsWithWid = trpc.songs.addLyricsWithWid.useMutation({
+    onSuccess: (data: { lyricsWid: string; lyricsAddedAt: Date }) => {
+      setLyricsWid(data.lyricsWid);
+      setLyricsAddedAt(data.lyricsAddedAt);
+      setLyricsFile(null);
+      setLyricsWidLoading(false);
+      toast.success("Lyrics witnessed — WID-LYR generated!");
+      utils.songs.mySongs.invalidate();
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err.message || "Failed to witness lyrics");
+      setLyricsWidLoading(false);
+    },
+  });
+
+  async function handleWitnessLyrics() {
+    if (!lyricsFile) return;
+    setLyricsWidLoading(true);
+    try {
+      // Read file as text
+      const text = await lyricsFile.text();
+      // Compute SHA-256 of the raw file bytes
+      const buf = await lyricsFile.arrayBuffer();
+      const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+      const hashArr = Array.from(new Uint8Array(hashBuf));
+      const hashHex = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
+      setLyricsFileName(lyricsFile.name);
+      await addLyricsWithWid.mutateAsync({
+        songId: song.id,
+        lyricsText: text,
+        lyricsFileName: lyricsFile.name,
+        lyricsFileHash: hashHex,
+      });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to read lyrics file");
+      setLyricsWidLoading(false);
+    }
   }
 
   const updateLyrics = trpc.songs.updateLyrics.useMutation({
@@ -661,6 +709,83 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 {lyricsSaving ? "Saving…" : "Save Lyrics"}
               </Button>
             </div>
+          </div>
+
+          {/* ── Lyrics WID (WID-LYR) ─────────────────────────────────────────────────────────────────────────────── */}
+          <div
+            className="space-y-3 rounded-xl p-4"
+            style={{ background: "rgba(212,175,55,0.04)", border: "1px solid rgba(212,175,55,0.18)" }}
+          >
+            <Label className="text-white text-sm font-medium flex items-center gap-2">
+              <BookOpen size={14} style={{ color: "#D4AF37" }} />
+              Lyrics Witness ID <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.12)", color: "#D4AF37" }}>WID-LYR</span>
+            </Label>
+            <p className="text-xs" style={{ color: "#64748b" }}>
+              Upload your lyrics as a <strong style={{ color: "#94a3b8" }}>.txt</strong> file to generate a cryptographic Witness ID (WID-LYR) — a separate provenance proof for your words, independent of the audio WID.
+            </p>
+
+            {/* Existing WID-LYR badge */}
+            {lyricsWid && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono"
+                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.3)", color: "#D4AF37" }}>
+                  <span>🔐</span>
+                  <span className="flex-1 break-all">{lyricsWid}</span>
+                </div>
+                {lyricsFileName && (
+                  <p className="text-xs" style={{ color: "#475569" }}>File: {lyricsFileName}{lyricsAddedAt ? ` · ${new Date(lyricsAddedAt).toLocaleDateString()}` : ""}</p>
+                )}
+              </div>
+            )}
+
+            {/* File drop zone */}
+            <div
+              onClick={() => lyricsFileInputRef.current?.click()}
+              className="rounded-xl p-4 text-center cursor-pointer transition-all hover:bg-white/5"
+              style={{
+                border: `2px dashed ${lyricsFile ? "#D4AF37" : "rgba(212,175,55,0.2)"}`,
+                background: lyricsFile ? "rgba(212,175,55,0.05)" : "transparent",
+              }}
+            >
+              <input
+                ref={lyricsFileInputRef}
+                type="file"
+                accept=".txt,text/plain"
+                className="hidden"
+                onChange={e => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  if (f.size > 500 * 1024) { toast.error("Lyrics file must be under 500 KB"); e.target.value = ""; return; }
+                  setLyricsFile(f);
+                }}
+              />
+              {lyricsFile ? (
+                <div className="flex items-center justify-center gap-2">
+                  <FileText size={14} style={{ color: "#D4AF37" }} />
+                  <span className="text-sm" style={{ color: "#D4AF37" }}>{lyricsFile.name}</span>
+                  <span className="text-xs" style={{ color: "#94a3b8" }}>({(lyricsFile.size / 1024).toFixed(1)} KB)</span>
+                  <button onClick={e => { e.stopPropagation(); setLyricsFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
+                </div>
+              ) : (
+                <>
+                  <BookOpen size={20} className="mx-auto mb-1" style={{ color: "#D4AF37", opacity: 0.4 }} />
+                  <p className="text-sm" style={{ color: "#94a3b8" }}>{lyricsWid ? "Replace lyrics file" : "Upload lyrics .txt file"}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "#475569" }}>.txt — max 500 KB</p>
+                </>
+              )}
+            </div>
+
+            {lyricsFile && (
+              <Button
+                size="sm"
+                onClick={handleWitnessLyrics}
+                disabled={lyricsWidLoading}
+                className="w-full text-sm font-semibold"
+                style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.4)" }}
+              >
+                {lyricsWidLoading ? "Witnessing…" : "Witness Lyrics & Generate WID-LYR"}
+              </Button>
+            )}
           </div>
 
           {/* ── Music Video Upload ──────────────────────────────────────────────────────────────────────────────────── */}

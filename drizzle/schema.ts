@@ -105,6 +105,12 @@ export const songs = mysqlTable("songs", {
   videoKey: text("videoKey"),
   videoWitnessId: varchar("videoWitnessId", { length: 64 }),
 
+  // Lyrics provenance — WID-LYR (separate from audio WID-MUS)
+  lyricsWid: varchar("lyricsWid", { length: 64 }),
+  lyricsFileName: varchar("lyricsFileName", { length: 255 }),
+  lyricsFileHash: varchar("lyricsFileHash", { length: 64 }),
+  lyricsAddedAt: timestamp("lyricsAddedAt"),
+
   // Embed video (og:video MP4 for Discord/iMessage/Telegram rich embeds)
   // Generated on-demand by ffmpeg (cover art loop + audio), cached on S3
   embedVideoUrl: text("embedVideoUrl"),

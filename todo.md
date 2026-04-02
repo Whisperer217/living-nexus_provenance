@@ -1957,3 +1957,12 @@
 - [ ] TipModal: show genre pills + WID badge in artist info block
 - [ ] PlayerTipModal: show genre pills + WID badge in header
 - [ ] Actions row never contested by genre overflow
+
+## Phase 70: Lyrics WID (WID-LYR) Feature
+- [x] Add lyricsWid, lyricsFileName, lyricsFileHash, lyricsAddedAt columns to songs schema
+- [x] Push DB migration (pnpm db:push)
+- [x] Add updateSongLyricsWithWid helper to db.ts
+- [x] Add addLyricsWithWid tRPC procedure to routers.ts
+- [x] Add WID-LYR upload UI to EditTrackPanel (file drop zone, SHA-256 hash, witness button, badge)
+- [x] Add lyricsWid/lyricsFileName/lyricsAddedAt to verifyWid return value
+- [x] Add WID-LYR Field block to VerifyPage

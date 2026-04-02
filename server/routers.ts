@@ -14,7 +14,7 @@ import {
   getSongsByUser, getSongWithCreator, getTipsBySong,
   getUserById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
-  updateSongLyrics, updateSongStatus, getRelatedSongs, updateSongVideo,
+  updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
   createAiTransform, updateAiTransform, getAiTransformById,
   getAiTransformsBySong, getAiTransformsByUser,
@@ -376,6 +376,9 @@ export const appRouter = router({
         isrc: song.isrc,
         nameAtWitnessing,
         nameHistory: nameHistoryRows.map((r: { oldName: string | null; newName: string; changedAt: Date }) => ({ oldName: r.oldName, newName: r.newName, changedAt: r.changedAt })),
+        lyricsWid: song.lyricsWid ?? null,
+        lyricsFileName: song.lyricsFileName ?? null,
+        lyricsAddedAt: song.lyricsAddedAt ?? null,
       };
     }),
     // Public counters for homepage trust layer
@@ -689,8 +692,33 @@ export const appRouter = router({
       await updateSongLyrics(input.songId, ctx.user.id, input.lyricsText);
       return { success: true };
     }),
-
-    // ── Video Upload ──────────────────────────────────────────────────────────
+    // ── Lyrics WID (WID-LYR) ─────────────────────────────────────────────────
+    addLyricsWithWid: protectedProcedure.input(z.object({
+      songId: z.number(),
+      lyricsText: z.string().max(50000),
+      lyricsFileName: z.string().max(255),
+      lyricsFileHash: z.string().length(64), // SHA-256 hex
+    })).mutation(async ({ ctx, input }) => {
+      // Ownership check
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+      // Generate WID-LYR from the file hash
+      const { createHash } = await import("crypto");
+      const combinedHash = createHash("sha256")
+        .update(`${input.lyricsFileHash}:${song.witnessId ?? song.id}:${ctx.user.id}`)
+        .digest("hex");
+      const lyricsWid = `WID-LYR-${combinedHash.slice(0, 8).toUpperCase()}-${combinedHash.slice(8, 16).toUpperCase()}`;
+      const lyricsAddedAt = new Date();
+      await updateSongLyricsWithWid(input.songId, ctx.user.id, {
+        lyricsText: input.lyricsText,
+        lyricsWid,
+        lyricsFileName: input.lyricsFileName,
+        lyricsFileHash: input.lyricsFileHash,
+        lyricsAddedAt,
+      });
+      return { success: true, lyricsWid, lyricsAddedAt };
+    }),
+    // ── Video Upload ───────────────────────────────────────────────────────────
     uploadVideo: protectedProcedure.input(z.object({
       songId: z.number(),
       videoBase64: z.string(),

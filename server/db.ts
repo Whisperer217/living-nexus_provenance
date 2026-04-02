@@ -362,7 +362,15 @@ export async function updateSongLyrics(songId: number, userId: number, lyricsTex
   if (!db) return;
   await db.update(songs).set({ lyricsText, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
-
+export async function updateSongLyricsWithWid(
+  songId: number,
+  userId: number,
+  fields: { lyricsText: string; lyricsWid: string; lyricsFileName: string; lyricsFileHash: string; lyricsAddedAt: Date }
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ ...fields, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+}
 export async function updateSongVideo(
   songId: number,
   userId: number,

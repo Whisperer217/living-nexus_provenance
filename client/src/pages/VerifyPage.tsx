@@ -12,7 +12,7 @@ import {
   ShieldCheck, ShieldX, Search, ExternalLink,
   Music, FileText, Copy, CheckCircle2, Loader2,
   Calendar, Hash, Key, Fingerprint, Tag, History, UserCheck, Download,
-  Library, Link2,
+  Library, Link2, BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -461,6 +461,26 @@ function TrackVerifyView({
       <Field icon={Fingerprint} label="Witness ID">
         <TruncatedMono value={data.witnessId ?? ""} label="Witness ID" />
       </Field>
+
+      {/* ── Lyrics WID (WID-LYR) ── */}
+      {(data as any).lyricsWid && (
+        <Field icon={BookOpen} label="Lyrics Witness ID (WID-LYR)">
+          <div className="space-y-1.5">
+            <TruncatedMono value={(data as any).lyricsWid} label="WID-LYR" />
+            {(data as any).lyricsFileName && (
+              <p className="text-xs" style={{ color: "oklch(0.7 0.04 280)" }}>
+                File: {(data as any).lyricsFileName}
+                {(data as any).lyricsAddedAt
+                  ? ` · ${new Date((data as any).lyricsAddedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`
+                  : ""}
+              </p>
+            )}
+            <p className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+              Separate cryptographic proof for the lyrical content of this work.
+            </p>
+          </div>
+        </Field>
+      )}
 
       {/* ── Registration date ── */}
       <Field icon={Calendar} label="Registration Date">
