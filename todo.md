@@ -1966,3 +1966,13 @@
 - [x] Add WID-LYR upload UI to EditTrackPanel (file drop zone, SHA-256 hash, witness button, badge)
 - [x] Add lyricsWid/lyricsFileName/lyricsAddedAt to verifyWid return value
 - [x] Add WID-LYR Field block to VerifyPage
+
+## Phase 71: Audio Version History (Replace Audio)
+- [x] Add audioVersions table to drizzle schema (songId, witnessId, audioUrl, fileKey, fileHash, versionNote, replacedAt)
+- [x] Push DB migration (pnpm db:push)
+- [x] Add archiveAudioVersion, replaceAudioFile, getAudioVersions helpers to db.ts
+- [x] Add replaceAudio (protected) and getAudioVersions (protected) tRPC procedures to routers.ts
+- [x] Add getAudioVersionsByWid (public) tRPC procedure for VerifyPage
+- [x] Add Replace Audio UI section to EditTrackPanel (file drop zone, version note, SHA-256 hash, mutation, version history list)
+- [x] Add Audio Version History section to VerifyPage (shows archived WID-MUS proofs with version notes and dates)
+- [x] TypeScript: 0 errors | Vitest: 95 tests passing

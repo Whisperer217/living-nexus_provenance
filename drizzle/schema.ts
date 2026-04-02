@@ -640,3 +640,20 @@ export const songReactions = mysqlTable(
 );
 export type SongReaction = typeof songReactions.$inferSelect;
 export type InsertSongReaction = typeof songReactions.$inferInsert;
+
+// ─── Audio Version History ────────────────────────────────────────────────────
+// Every time a creator replaces the audio file on a track, the superseded
+// version is archived here permanently. The current WID-MUS lives on songs.witnessId;
+// all previous WIDs live in this table. The creative process is fully witnessed.
+export const audioVersions = mysqlTable("audioVersions", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("songId").notNull(),
+  witnessId: varchar("witnessId", { length: 64 }).notNull(),   // WID-MUS of the superseded version
+  audioUrl: text("audioUrl").notNull(),                         // S3 URL of the superseded audio file
+  fileKey: varchar("fileKey", { length: 512 }),                 // S3 key of the superseded file
+  fileHash: varchar("fileHash", { length: 128 }),               // SHA-256 of the superseded file
+  versionNote: varchar("versionNote", { length: 255 }),         // e.g. "Rough mix", "Final master"
+  replacedAt: timestamp("replacedAt").defaultNow().notNull(),   // when this version was superseded
+});
+export type AudioVersion = typeof audioVersions.$inferSelect;
+export type InsertAudioVersion = typeof audioVersions.$inferInsert;

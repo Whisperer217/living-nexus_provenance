@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen } from "lucide-react";
+import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History } from "lucide-react";
 import { toast } from "sonner";
 
 const GENRES = [
@@ -111,6 +111,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  // Replace Audio state
+  const [replaceAudioFile, setReplaceAudioFile] = useState<File | null>(null);
+  const [replaceAudioNote, setReplaceAudioNote] = useState("");
+  const [replaceAudioLoading, setReplaceAudioLoading] = useState(false);
+  const [currentWitnessId, setCurrentWitnessId] = useState<string | null>(song.witnessId ?? null);
+  const replaceAudioInputRef = useRef<HTMLInputElement>(null);
 
   const utils = trpc.useUtils();
   const updateDownloadPermission = trpc.songDownload.updatePermission.useMutation({
@@ -324,6 +330,53 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   async function handleSaveLyrics() {
     setLyricsSaving(true);
     await updateLyrics.mutateAsync({ songId: song.id, lyricsText: lyrics });
+  }
+
+  const replaceAudioMutation = trpc.songs.replaceAudio.useMutation({
+    onSuccess: (data: { fileUrl: string; witnessId: string }) => {
+      setCurrentWitnessId(data.witnessId);
+      setReplaceAudioFile(null);
+      setReplaceAudioNote("");
+      setReplaceAudioLoading(false);
+      toast.success("Audio replaced — new WID-MUS generated!");
+      utils.songs.mySongs.invalidate();
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err.message || "Failed to replace audio");
+      setReplaceAudioLoading(false);
+    },
+  });
+
+  const { data: audioVersions } = trpc.songs.getAudioVersions.useQuery(
+    { songId: song.id },
+    { staleTime: 30_000 }
+  );
+
+  async function handleReplaceAudio() {
+    if (!replaceAudioFile) return;
+    setReplaceAudioLoading(true);
+    try {
+      const buf = await replaceAudioFile.arrayBuffer();
+      const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+      const hashArr = Array.from(new Uint8Array(hashBuf));
+      const hashHex = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const base64 = (ev.target?.result as string).split(",")[1];
+        await replaceAudioMutation.mutateAsync({
+          songId: song.id,
+          audioBase64: base64,
+          audioMimeType: replaceAudioFile.type || "audio/mpeg",
+          audioFileName: replaceAudioFile.name,
+          fileHash: hashHex,
+          versionNote: replaceAudioNote.trim() || undefined,
+        });
+      };
+      reader.readAsDataURL(replaceAudioFile);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to read audio file");
+      setReplaceAudioLoading(false);
+    }
   }
 
   async function handleSaveDownloadPermission() {
@@ -784,6 +837,121 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.4)" }}
               >
                 {lyricsWidLoading ? "Witnessing…" : "Witness Lyrics & Generate WID-LYR"}
+              </Button>
+            )}
+          </div>
+
+          {/* ── Replace Audio (Version History) ──────────────────────────────────────────────────────────────────── */}
+          <div
+            className="space-y-3 rounded-xl p-4"
+            style={{ background: "rgba(212,175,55,0.04)", border: "1px solid rgba(212,175,55,0.18)" }}
+          >
+            <Label className="text-white text-sm font-medium flex items-center gap-2">
+              <RotateCcw size={14} style={{ color: "#D4AF37" }} />
+              Replace Audio
+              <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.12)", color: "#D4AF37" }}>WID-MUS</span>
+            </Label>
+            <p className="text-xs" style={{ color: "#64748b" }}>
+              Upload a new master or mix. The current audio is archived with its WID-MUS intact — nothing is lost. A new Witness ID is generated for the replacement.
+            </p>
+
+            {/* Current WID badge */}
+            {currentWitnessId && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono"
+                style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.25)", color: "#D4AF37" }}>
+                <span>🔐</span>
+                <span className="flex-1 break-all">Current: {currentWitnessId}</span>
+              </div>
+            )}
+
+            {/* Version history */}
+            {audioVersions && audioVersions.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs" style={{ color: "#94a3b8" }}>
+                  <History size={12} />
+                  <span>{audioVersions.length} archived version{audioVersions.length !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
+                  {audioVersions.map((v: any, i: number) => (
+                    <div key={v.id} className="flex items-start gap-2 px-2.5 py-2 rounded-lg"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <span className="text-xs font-mono flex-shrink-0 mt-0.5" style={{ color: "#475569" }}>v{audioVersions.length - i}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-mono truncate" style={{ color: "#64748b" }}>{v.witnessId}</p>
+                        {v.versionNote && <p className="text-xs mt-0.5" style={{ color: "#94a3b8" }}>{v.versionNote}</p>}
+                        <p className="text-xs mt-0.5" style={{ color: "#475569" }}>{new Date(v.replacedAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Version note */}
+            <div className="space-y-1">
+              <Label className="text-xs" style={{ color: "#94a3b8" }}>Version note (optional)</Label>
+              <input
+                type="text"
+                placeholder="e.g. Rough mix, Final master, Radio edit…"
+                value={replaceAudioNote}
+                onChange={e => setReplaceAudioNote(e.target.value)}
+                maxLength={255}
+                className="w-full rounded-md px-3 py-1.5 text-sm"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(212,175,55,0.2)",
+                  color: "#f1f5f9",
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            {/* File drop zone */}
+            <div
+              onClick={() => replaceAudioInputRef.current?.click()}
+              className="rounded-xl p-4 text-center cursor-pointer transition-all hover:bg-white/5"
+              style={{
+                border: `2px dashed ${replaceAudioFile ? "#D4AF37" : "rgba(212,175,55,0.2)"}`,
+                background: replaceAudioFile ? "rgba(212,175,55,0.05)" : "transparent",
+              }}
+            >
+              <input
+                ref={replaceAudioInputRef}
+                type="file"
+                accept="audio/*,.mp3,.wav,.flac,.aac,.ogg,.m4a"
+                className="hidden"
+                onChange={e => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  if (f.size > 200 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Max 200 MB.`); e.target.value = ""; return; }
+                  setReplaceAudioFile(f);
+                }}
+              />
+              {replaceAudioFile ? (
+                <div className="flex items-center justify-center gap-2">
+                  <RotateCcw size={14} style={{ color: "#D4AF37" }} />
+                  <span className="text-sm" style={{ color: "#D4AF37" }}>{replaceAudioFile.name}</span>
+                  <span className="text-xs" style={{ color: "#94a3b8" }}>({(replaceAudioFile.size/1024/1024).toFixed(1)} MB)</span>
+                  <button onClick={e => { e.stopPropagation(); setReplaceAudioFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
+                </div>
+              ) : (
+                <>
+                  <RotateCcw size={20} className="mx-auto mb-1" style={{ color: "#D4AF37", opacity: 0.4 }} />
+                  <p className="text-sm" style={{ color: "#94a3b8" }}>Upload replacement audio file</p>
+                  <p className="text-xs mt-0.5" style={{ color: "#475569" }}>MP3, WAV, FLAC, AAC — max 200 MB</p>
+                </>
+              )}
+            </div>
+
+            {replaceAudioFile && (
+              <Button
+                size="sm"
+                onClick={handleReplaceAudio}
+                disabled={replaceAudioLoading}
+                className="w-full text-sm font-semibold"
+                style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.4)" }}
+              >
+                {replaceAudioLoading ? "Replacing & Witnessing…" : "Replace Audio & Generate New WID-MUS"}
               </Button>
             )}
           </div>

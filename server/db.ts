@@ -10,6 +10,7 @@ import {
   nameHistory,
   collections,
   platformSupporters,
+  audioVersions,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -371,6 +372,59 @@ export async function updateSongLyricsWithWid(
   if (!db) return;
   await db.update(songs).set({ ...fields, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
+// ─── Audio Version History ────────────────────────────────────────────────────
+
+/** Archive the current audio file as a historical version before replacing it. */
+export async function archiveAudioVersion(data: {
+  songId: number;
+  witnessId: string;
+  audioUrl: string;
+  fileKey?: string | null;
+  fileHash?: string | null;
+  versionNote?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(audioVersions).values({
+    songId: data.songId,
+    witnessId: data.witnessId,
+    audioUrl: data.audioUrl,
+    fileKey: data.fileKey ?? null,
+    fileHash: data.fileHash ?? null,
+    versionNote: data.versionNote ?? null,
+  });
+}
+
+/** Update the songs row with the new audio file and new WID-MUS. */
+export async function replaceAudioFile(
+  songId: number,
+  userId: number,
+  fields: {
+    fileUrl: string;
+    fileKey: string;
+    fileHash: string;
+    witnessId: string;
+    durationSeconds?: number;
+    sampleRate?: number;
+    bitDepth?: number;
+  }
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs)
+    .set({ ...fields, updatedAt: new Date() })
+    .where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+}
+
+/** Return all archived audio versions for a song, newest first. */
+export async function getAudioVersions(songId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(audioVersions)
+    .where(eq(audioVersions.songId, songId))
+    .orderBy(desc(audioVersions.replacedAt));
+}
+
 export async function updateSongVideo(
   songId: number,
   userId: number,

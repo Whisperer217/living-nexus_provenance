@@ -256,6 +256,12 @@ function TrackVerifyView({
     { enabled: !!data?.songId, retry: false }
   );
 
+  // Audio version history (public)
+  const { data: audioVersionHistory } = trpc.songs.getAudioVersionsByWid.useQuery(
+    { witnessId: queryWid },
+    { enabled: !!queryWid && !data?.isLyricsOnly, staleTime: 60_000 }
+  );
+
   const downloadCertificate = () => {
     if (!data) return;
     const year = new Date().getFullYear();
@@ -461,6 +467,42 @@ function TrackVerifyView({
       <Field icon={Fingerprint} label="Witness ID">
         <TruncatedMono value={data.witnessId ?? ""} label="Witness ID" />
       </Field>
+
+      {/* ── Audio Version History ── */}
+      {audioVersionHistory && audioVersionHistory.length > 0 && (
+        <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          <div className="flex items-center gap-1.5 mb-3">
+            <History className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
+            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>Audio Version History</p>
+            <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.1)", color: "oklch(0.75 0.12 85)" }}>
+              {audioVersionHistory.length} archived version{audioVersionHistory.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+          <p className="text-[10px] mb-3" style={{ color: "oklch(0.4 0.03 280)" }}>
+            Each version below was superseded by a new upload. All WID-MUS proofs are permanently preserved.
+          </p>
+          <div className="space-y-2">
+            {audioVersionHistory.map((v: any, i: number) => (
+              <div key={v.id} className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg"
+                style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+                <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5"
+                  style={{ background: "oklch(0.84 0.155 85 / 0.1)", color: "oklch(0.75 0.12 85)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+                  v{audioVersionHistory.length - i}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-mono break-all" style={{ color: "oklch(0.6 0.04 280)" }}>{v.witnessId}</p>
+                  {v.versionNote && (
+                    <p className="text-xs mt-0.5 font-medium" style={{ color: "oklch(0.78 0.03 280)" }}>{v.versionNote}</p>
+                  )}
+                  <p className="text-[10px] mt-0.5" style={{ color: "oklch(0.38 0.02 280)" }}>
+                    Archived {new Date(v.replacedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Lyrics WID (WID-LYR) ── */}
       {(data as any).lyricsWid && (

@@ -51,6 +51,7 @@ import {
   getTrendingWorks,
   getSongsWithoutEmbedVideo,
   reorderMySongs,
+  archiveAudioVersion, replaceAudioFile, getAudioVersions,
 } from "./db";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
@@ -718,6 +719,62 @@ export const appRouter = router({
       });
       return { success: true, lyricsWid, lyricsAddedAt };
     }),
+    // ── Audio Replace ──────────────────────────────────────────────────────────
+    replaceAudio: protectedProcedure.input(z.object({
+      songId: z.number(),
+      audioBase64: z.string(),
+      audioMimeType: z.string(),
+      audioFileName: z.string(),
+      fileHash: z.string().length(64), // SHA-256 hex computed on client
+      versionNote: z.string().max(500).optional(),
+    })).mutation(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+      // 1. Archive the current audio as a historical version
+      if (song.fileUrl && song.witnessId) {
+        await archiveAudioVersion({
+          songId: input.songId,
+          witnessId: song.witnessId,
+          audioUrl: song.fileUrl,
+          fileKey: song.fileKey ?? null,
+          fileHash: song.fileHash ?? null,
+          versionNote: input.versionNote ?? null,
+        });
+      }
+      // 2. Upload new audio to S3
+      const audioBuffer = Buffer.from(input.audioBase64, "base64");
+      const safeFileName = input.audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const fileKey = `audio/${ctx.user.id}/${Date.now()}-${safeFileName}`;
+      const { url: fileUrl } = await storagePut(fileKey, audioBuffer, input.audioMimeType);
+      // 3. Generate new WID-MUS bound to the new file hash
+      const { createHash } = await import("crypto");
+      const combinedHash = createHash("sha256")
+        .update(`${input.fileHash}:${ctx.user.id}:${Date.now()}`)
+        .digest("hex");
+      const newWitnessId = `WID-MUS-${combinedHash.slice(0, 8).toUpperCase()}-${combinedHash.slice(8, 16).toUpperCase()}`;
+      // 4. Update the songs row with new audio + new WID
+      await replaceAudioFile(input.songId, ctx.user.id, {
+        fileUrl,
+        fileKey,
+        fileHash: input.fileHash,
+        witnessId: newWitnessId,
+      });
+      return { success: true, fileUrl, witnessId: newWitnessId };
+    }),
+
+    getAudioVersions: protectedProcedure.input(z.object({ songId: z.number() })).query(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+      return getAudioVersions(input.songId);
+    }),
+
+    // Public — used by VerifyPage to show version history for any WID
+    getAudioVersionsByWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
+      const result = await getSongByWitnessId(input.witnessId);
+      if (!result) return [];
+      return getAudioVersions(result.song.id);
+    }),
+
     // ── Video Upload ───────────────────────────────────────────────────────────
     uploadVideo: protectedProcedure.input(z.object({
       songId: z.number(),
