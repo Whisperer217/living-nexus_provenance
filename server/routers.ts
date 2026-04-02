@@ -50,6 +50,7 @@ import {
   getSongReactions, toggleSongReaction,
   getTrendingWorks,
   getSongsWithoutEmbedVideo,
+  reorderMySongs,
 } from "./db";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
@@ -638,6 +639,12 @@ export const appRouter = router({
       };
     }),
     delete: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => { await deleteSong(input.songId, ctx.user.id); return { success: true }; }),
+    reorderMySongs: protectedProcedure
+      .input(z.object({ songIds: z.array(z.number()) }))
+      .mutation(async ({ ctx, input }) => {
+        await reorderMySongs(ctx.user.id, input.songIds);
+        return { success: true };
+      }),
     updateStatus: protectedProcedure.input(z.object({
       songId: z.number(),
       status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]),

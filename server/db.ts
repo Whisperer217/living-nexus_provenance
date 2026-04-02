@@ -247,8 +247,23 @@ export async function incrementPlayCount(songId: number) {
 export async function deleteSong(songId: number, userId: number) {
   const db = await getDb();
   if (!db) return;
-  await db.delete(songs).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+  // Soft delete — WID record is NEVER hard-deleted. Sets status='Deleted', isPublic=false.
+  await db.update(songs)
+    .set({ status: "Deleted", isPublic: false, updatedAt: new Date() })
+    .where(and(eq(songs.id, songId), eq(songs.userId, userId)));
   await db.execute(sql`UPDATE users SET songSlotsUsed = GREATEST(songSlotsUsed - 1, 0) WHERE id = ${userId}`);
+}
+
+export async function reorderMySongs(userId: number, songIds: number[]) {
+  const db = await getDb();
+  if (!db) return;
+  await Promise.all(
+    songIds.map((id, index) =>
+      db.update(songs)
+        .set({ trackOrder: index, updatedAt: new Date() })
+        .where(and(eq(songs.id, id), eq(songs.userId, userId)))
+    )
+  );
 }
 
 export async function updateSongStatus(

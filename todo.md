@@ -1890,3 +1890,21 @@
 - [x] Verified: CORS headers present, X-WID-Protocol: 1.0 present
 - [x] Verified: 404 returns structured error with protocol field
 - [x] 95 tests passing, 0 TypeScript errors
+
+## Phase 65: Archive/Dashboard Improvements
+- [x] Fix 1: Added Edit / Delete action buttons to each track row in ArchivePage
+  - Edit button — navigates to /edit/:id
+  - Delete button (trash icon) — opens confirm-delete modal
+  - Drag handle (☰) visible on left side of each row for reordering
+- [x] Fix 2: Confirm-delete modal with WID preservation notice
+  - Modal text: "This track will be removed from your public archive. Your WID record is permanent and cannot be deleted."
+  - Cancel / Confirm Delete buttons
+  - Soft delete: sets status='Deleted', isPublic=false in db.ts — WID record preserved forever
+- [x] Fix 3: Drag-to-reorder track list
+  - HTML5 drag API on track rows (no external library)
+  - Persists order to DB via reorderMySongs() in db.ts + songs.reorderMySongs tRPC procedure
+  - Visual drag indicator (opacity change + cursor change on dragged item)
+- [x] reorderMySongs added to server/db.ts (exported) and server/routers.ts (imported + procedure)
+- [x] deleteSong() in db.ts converted to soft delete (status='Deleted', isPublic=false)
+- [x] 95 tests passing, 0 TypeScript errors
+- [x] Server running cleanly after all changes

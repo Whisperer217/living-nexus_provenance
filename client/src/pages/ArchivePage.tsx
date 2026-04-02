@@ -1,17 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — Archive Page
    Authenticated users only. Shows all of the user's own tracks.
-   Displays: cover art, title, genre, upload date, status tag,
-             publish toggle (Draft ↔ Published).
+   Phase 65: Added Delete button + confirm modal (WID preserved),
+             drag-to-reorder with DB persistence, /dashboard/archive alias.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Music, Upload, Globe, EyeOff, Pencil, ExternalLink, Play, ListMusic } from "lucide-react";
+import {
+  Music, Upload, Globe, EyeOff, Pencil, ExternalLink,
+  Play, ListMusic, Trash2, GripVertical, Shield,
+} from "lucide-react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -43,16 +46,105 @@ function formatDate(date: Date | string | null | undefined): string {
   return new Date(date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
+/* ── Confirm Delete Modal ───────────────────────────────────────── */
+function ConfirmDeleteModal({
+  song,
+  onConfirm,
+  onCancel,
+  isPending,
+}: {
+  song: any;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isPending: boolean;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ background: "rgba(0,0,0,0.85)" }}
+      onClick={onCancel}
+    >
+      <div
+        className="rounded-2xl p-6 max-w-sm w-full"
+        style={{
+          background: "oklch(0.09 0.04 265)",
+          border: "1px solid oklch(0.65 0.18 25 / 0.35)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="font-bold text-lg mb-1" style={{ color: "oklch(0.75 0.18 25)", fontFamily: "'Cinzel', serif" }}>
+          Delete Track
+        </p>
+        <p className="text-sm mb-1" style={{ color: "#E2E8F0" }}>
+          Are you sure you want to delete:
+        </p>
+        <p className="font-semibold mb-4 truncate" style={{ color: "oklch(0.95 0.02 85)" }}>
+          "{song.title}"
+        </p>
+
+        {/* WID Preservation Notice */}
+        <div
+          className="rounded-xl p-3 mb-5"
+          style={{
+            background: "oklch(0.84 0.155 85 / 0.08)",
+            border: "1px solid oklch(0.84 0.155 85 / 0.25)",
+          }}
+        >
+          <div className="flex items-center gap-1.5 mb-1">
+            <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "oklch(0.84 0.155 85)" }} />
+            <p className="text-xs font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
+              WID Preserved
+            </p>
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: "#E2E8F0" }}>
+            Your Witness ID <span className="font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>{song.witnessId}</span> remains
+            on record permanently. The cryptographic proof of origin is never deleted — only the track is removed from public view.
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={onConfirm}
+            disabled={isPending}
+            className="flex-1 font-bold py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50"
+            style={{
+              background: "oklch(0.65 0.18 25 / 0.2)",
+              border: "1px solid oklch(0.65 0.18 25 / 0.5)",
+              color: "oklch(0.75 0.18 25)",
+            }}
+          >
+            {isPending ? "Deleting…" : "Delete Track"}
+          </button>
+          <button
+            onClick={onCancel}
+            disabled={isPending}
+            className="flex-1 py-2.5 rounded-xl text-sm"
+            style={{ border: "1px solid oklch(0.25 0.02 280)", color: "#E2E8F0" }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Page ───────────────────────────────────────────────────────── */
 export default function ArchivePage() {
   const { isAuthenticated, loading } = useAuth();
   const [,] = useLocation();
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
+  const [deletingSong, setDeletingSong] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<"tracks" | "lists" | "external">("tracks");
   const { playQueueAt } = usePlayer();
   const { user } = useAuth();
   const myArtistName = user?.artistHandle || user?.name || "Unknown Creator";
+
+  // Drag-to-reorder state
+  const [localSongs, setLocalSongs] = useState<any[]>([]);
+  const draggedId = useRef<number | null>(null);
+  const dragOverId = useRef<number | null>(null);
 
   const buildTrack = (song: any) => ({
     id: String(song.id),
@@ -68,16 +160,15 @@ export default function ArchivePage() {
     coverPositionY: song.coverPositionY ?? 50,
   });
 
-  const handlePlay = (e: React.MouseEvent, songs: any[], idx: number) => {
+  const handlePlay = (e: React.MouseEvent, songList: any[], idx: number) => {
     e.preventDefault();
     e.stopPropagation();
-    const playable = songs.filter((s: any) => s.fileUrl);
-    const clickedTrack = songs[idx];
+    const playable = songList.filter((s: any) => s.fileUrl);
+    const clickedTrack = songList[idx];
     if (!clickedTrack?.fileUrl) {
       toast.error("This track has no audio file attached.");
       return;
     }
-    // Build queue starting from clicked song, then remaining
     const tracks = playable.map(buildTrack);
     const startIdx = tracks.findIndex((t) => t.id === String(clickedTrack.id));
     playQueueAt(tracks, startIdx >= 0 ? startIdx : 0, "PLAYLIST");
@@ -93,6 +184,11 @@ export default function ArchivePage() {
   const { data: songs, isLoading: songsLoading } = trpc.songs.mySongs.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
+  // Sync localSongs when server data arrives
+  useEffect(() => {
+    if (songs) setLocalSongs(songs);
+  }, [songs]);
 
   /* Optimistic publish toggle */
   const updateStatus = trpc.songs.updateStatus.useMutation({
@@ -115,11 +211,62 @@ export default function ArchivePage() {
     onSettled: () => utils.songs.mySongs.invalidate(),
   });
 
+  /* Delete (soft) */
+  const deleteSong = trpc.songs.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Track removed. Your WID record is preserved permanently.");
+      setDeletingSong(null);
+      utils.songs.mySongs.invalidate();
+    },
+    onError: () => toast.error("Failed to delete track"),
+  });
+
+  /* Reorder */
+  const reorderMySongs = trpc.songs.reorderMySongs.useMutation({
+    onError: () => {
+      toast.error("Failed to save order");
+      if (songs) setLocalSongs(songs); // rollback
+    },
+  });
+
   const handleToggle = (e: React.MouseEvent, song: any) => {
     e.preventDefault();
     e.stopPropagation();
     const next = song.status === "Published" ? "Draft" : "Published";
     updateStatus.mutate({ songId: song.id, status: next });
+  };
+
+  /* ── Drag handlers ─────────────────────────────────────────────── */
+  const handleDragStart = (e: React.DragEvent, id: number) => {
+    draggedId.current = id;
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    dragOverId.current = id;
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: number) => {
+    e.preventDefault();
+    if (draggedId.current === null || draggedId.current === targetId) return;
+    const from = localSongs.findIndex((s) => s.id === draggedId.current);
+    const to = localSongs.findIndex((s) => s.id === targetId);
+    if (from === -1 || to === -1) return;
+    const reordered = [...localSongs];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(to, 0, moved);
+    setLocalSongs(reordered);
+    reorderMySongs.mutate({ songIds: reordered.map((s) => s.id) });
+    toast.success("Track order saved");
+    draggedId.current = null;
+    dragOverId.current = null;
+  };
+
+  const handleDragEnd = () => {
+    draggedId.current = null;
+    dragOverId.current = null;
   };
 
   if (loading || !isAuthenticated) {
@@ -131,10 +278,21 @@ export default function ArchivePage() {
     );
   }
 
+  const displaySongs = localSongs.length > 0 ? localSongs : (songs ?? []);
+
   return (
     <>
     <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
       <div className="container py-10 max-w-4xl mx-auto px-4" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
+
+        {/* ── Breadcrumb ──────────────────────────────────────────── */}
+        <nav className="flex items-center gap-1.5 text-xs mb-5" style={{ color: "#E2E8F0" }}>
+          <Link href="/dashboard">
+            <span className="hover:underline cursor-pointer" style={{ color: "oklch(0.84 0.155 85)" }}>Dashboard</span>
+          </Link>
+          <span>/</span>
+          <span style={{ color: "oklch(0.95 0.02 85)" }}>Archive</span>
+        </nav>
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-8">
@@ -156,46 +314,35 @@ export default function ArchivePage() {
 
         {/* ── Tab switcher ───────────────────────────────────────── */}
         <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "oklch(0.115 0.055 278)" }}>
-          <button
-            onClick={() => setActiveTab("tracks")}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
-            style={activeTab === "tracks"
-              ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
-              : { color: "oklch(0.6 0.03 280)" }}
-          >
-            <Music size={13} /> My Tracks
-          </button>
-          <button
-            onClick={() => setActiveTab("lists")}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
-            style={activeTab === "lists"
-              ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
-              : { color: "oklch(0.6 0.03 280)" }}
-          >
-            <ListMusic size={13} /> My Lists
-          </button>
-          <button
-            onClick={() => setActiveTab("external")}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
-            style={activeTab === "external"
-              ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
-              : { color: "oklch(0.6 0.03 280)" }}
-          >
-            <Globe size={13} /> External
-          </button>
+          {(["tracks", "lists", "external"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+              style={activeTab === tab
+                ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
+                : { color: "oklch(0.6 0.03 280)" }}
+            >
+              {tab === "tracks" && <><Music size={13} /> My Tracks</>}
+              {tab === "lists"  && <><ListMusic size={13} /> My Lists</>}
+              {tab === "external" && <><Globe size={13} /> External</>}
+            </button>
+          ))}
         </div>
 
-        {/* ── My Lists tab ───────────────────────────────────────────── */}
-        {activeTab === "lists" && <MyListsTab />}
-
-        {/* ── External Playlists tab ─────────────────────────────────── */}
+        {activeTab === "lists"    && <MyListsTab />}
         {activeTab === "external" && <ExternalPlaylistsTab />}
 
         {/* ── Track count ────────────────────────────────────────── */}
-        {activeTab === "tracks" && !songsLoading && songs && (
-          <p className="text-xs mb-4" style={{ color: "#E2E8F0" }}>
-            {songs.length} {songs.length === 1 ? "track" : "tracks"}
-          </p>
+        {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs" style={{ color: "#E2E8F0" }}>
+              {displaySongs.length} {displaySongs.length === 1 ? "track" : "tracks"}
+            </p>
+            <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
+              Drag <GripVertical className="inline w-3 h-3" /> to reorder
+            </p>
+          </div>
         )}
 
         {/* ── Loading skeleton ────────────────────────────────────────── */}
@@ -209,7 +356,7 @@ export default function ArchivePage() {
         )}
 
         {/* ── Empty state ────────────────────────────────────────── */}
-        {activeTab === "tracks" && !songsLoading && (!songs || songs.length === 0) && (
+        {activeTab === "tracks" && !songsLoading && displaySongs.length === 0 && (
           <div className="text-center py-20 rounded-xl"
             style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
             <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
@@ -225,73 +372,89 @@ export default function ArchivePage() {
         )}
 
         {/* ── Track list ────────────────────────────────────────── */}
-        {activeTab === "tracks" && !songsLoading && songs && songs.length > 0 && (
+        {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
           <div className="space-y-2">
-            {songs.map((song: any, idx: number) => {
+            {displaySongs.map((song: any, idx: number) => {
               const isPublished = song.status === "Published";
               const isPending = updateStatus.isPending && updateStatus.variables?.songId === song.id;
               const hasAudio = !!song.fileUrl;
+              const isDeleted = song.status === "Deleted";
 
               return (
-                <div key={song.id}
-                  onClick={(e) => hasAudio && handlePlay(e, songs, idx)}
-                  className="flex items-center gap-4 p-3 rounded-xl transition-colors hover:brightness-110"
+                <div
+                  key={song.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, song.id)}
+                  onDragOver={(e) => handleDragOver(e, song.id)}
+                  onDrop={(e) => handleDrop(e, song.id)}
+                  onDragEnd={handleDragEnd}
+                  onClick={(e) => hasAudio && !isDeleted && handlePlay(e, displaySongs, idx)}
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:brightness-110"
                   style={{
-                    background: "oklch(0.115 0.055 278)",
-                    border: "1px solid oklch(0.18 0.015 280)",
-                    cursor: hasAudio ? "pointer" : "default",
+                    background: isDeleted ? "oklch(0.09 0.02 265)" : "oklch(0.115 0.055 278)",
+                    border: `1px solid ${isDeleted ? "oklch(0.65 0.18 25 / 0.2)" : "oklch(0.18 0.015 280)"}`,
+                    cursor: hasAudio && !isDeleted ? "pointer" : "default",
+                    opacity: isDeleted ? 0.6 : 1,
                   }}
                 >
-                    {/* Row number */}
-                    <span className="text-xs w-5 text-center flex-shrink-0"
-                      style={{ color: "#E2E8F0" }}>
-                      {idx + 1}
-                    </span>
+                  {/* Drag handle */}
+                  <div
+                    className="flex-shrink-0 cursor-grab active:cursor-grabbing"
+                    onClick={(e) => e.stopPropagation()}
+                    title="Drag to reorder"
+                  >
+                    <GripVertical className="w-4 h-4" style={{ color: "oklch(0.4 0.02 280)" }} />
+                  </div>
 
-                    {/* Cover art */}
-                    <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
-                      style={{ background: "oklch(0.11 0.025 270)" }}>
-                      {song.coverArtUrl
-                        ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
-                        : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
-                    </div>
+                  {/* Row number */}
+                  <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#E2E8F0" }}>
+                    {idx + 1}
+                  </span>
 
-                    {/* Title + genre */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate"
-                        style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
-                        {song.title}
+                  {/* Cover art */}
+                  <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
+                    style={{ background: "oklch(0.11 0.025 270)" }}>
+                    {song.coverArtUrl
+                      ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover"
+                          style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
+                      : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
+                  </div>
+
+                  {/* Title + genre */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate"
+                      style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+                      {song.title}
+                    </p>
+                    {song.genre && (
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "#E2E8F0" }}>
+                        {song.genre}
                       </p>
-                      {song.genre && (
-                        <p className="text-xs mt-0.5 truncate" style={{ color: "#E2E8F0" }}>
-                          {song.genre}
-                        </p>
-                      )}
-                    </div>
+                    )}
+                  </div>
 
-                    {/* Upload date */}
-                    <span className="text-xs flex-shrink-0 hidden sm:block"
-                      style={{ color: "#E2E8F0" }}>
-                      {formatDate(song.createdAt)}
-                    </span>
+                  {/* Upload date */}
+                  <span className="text-xs flex-shrink-0 hidden sm:block" style={{ color: "#E2E8F0" }}>
+                    {formatDate(song.createdAt)}
+                  </span>
 
-                    {/* Status tag */}
-                    <div className="flex-shrink-0">
-                      <StatusTag status={song.status ?? "Draft"} />
-                    </div>
+                  {/* Status tag */}
+                  <div className="flex-shrink-0">
+                    <StatusTag status={song.status ?? "Draft"} />
+                  </div>
 
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                      {/* Play indicator */}
-                      {hasAudio && (
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center"
-                          style={{ color: "oklch(0.84 0.155 85)" }}
-                          title="Click row to play">
-                          <Play className="w-3 h-3" />
-                        </div>
-                      )}
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                    {/* Play indicator */}
+                    {hasAudio && !isDeleted && (
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center"
+                        style={{ color: "oklch(0.84 0.155 85)" }} title="Click row to play">
+                        <Play className="w-3 h-3" />
+                      </div>
+                    )}
 
-                      {/* View song page */}
+                    {/* View song page */}
+                    {!isDeleted && (
                       <Link href={`/song/${song.id}`}>
                         <button
                           className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
@@ -300,8 +463,10 @@ export default function ArchivePage() {
                           <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
                         </button>
                       </Link>
+                    )}
 
-                      {/* Edit */}
+                    {/* Edit */}
+                    {!isDeleted && (
                       <button
                         onClick={(e) => { e.stopPropagation(); setEditingSong(song); }}
                         title="Edit track metadata"
@@ -314,24 +479,18 @@ export default function ArchivePage() {
                       >
                         <Pencil className="w-3 h-3" /> Edit
                       </button>
+                    )}
 
-                      {/* Publish toggle */}
+                    {/* Publish toggle */}
+                    {!isDeleted && (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleToggle(e, song); }}
                         disabled={isPending}
                         title={isPublished ? "Unpublish (set to Draft)" : "Publish"}
                         className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all disabled:opacity-50"
                         style={isPublished
-                          ? {
-                              background: "oklch(0.65 0.18 145 / 0.15)",
-                              color: "oklch(0.65 0.18 145)",
-                              border: "1px solid oklch(0.65 0.18 145 / 0.35)",
-                            }
-                          : {
-                              background: "oklch(0.75 0.18 85 / 0.15)",
-                              color: "oklch(0.84 0.155 85)",
-                              border: "1px solid oklch(0.75 0.18 85 / 0.35)",
-                            }
+                          ? { background: "oklch(0.65 0.18 145 / 0.15)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.35)" }
+                          : { background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.35)" }
                         }
                       >
                         {isPending ? (
@@ -343,8 +502,21 @@ export default function ArchivePage() {
                           <><Globe className="w-3 h-3" /> Publish</>
                         )}
                       </button>
-                    </div>
+                    )}
+
+                    {/* Delete */}
+                    {!isDeleted && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeletingSong(song); }}
+                        title="Delete track (WID preserved)"
+                        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/20"
+                        style={{ color: "oklch(0.65 0.18 25)" }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
+                </div>
               );
             })}
           </div>
@@ -361,6 +533,16 @@ export default function ArchivePage() {
           setEditingSong(null);
           utils.songs.mySongs.invalidate();
         }}
+      />
+    )}
+
+    {/* Confirm Delete Modal */}
+    {deletingSong && (
+      <ConfirmDeleteModal
+        song={deletingSong}
+        onConfirm={() => deleteSong.mutate({ songId: deletingSong.id })}
+        onCancel={() => setDeletingSong(null)}
+        isPending={deleteSong.isPending}
       />
     )}
   </>);
