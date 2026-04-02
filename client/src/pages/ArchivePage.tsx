@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — Archive Page
    Authenticated users only. Shows all of the user's own tracks.
-   Phase 65: Added Delete button + confirm modal (WID preserved),
-             drag-to-reorder with DB persistence, /dashboard/archive alias.
+   Phase 66: Batch-select checkboxes, WID monospace under title,
+             improved track numbers, drag handles, auth guard.
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState, useRef } from "react";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   Music, Upload, Globe, EyeOff, Pencil, ExternalLink,
-  Play, ListMusic, Trash2, GripVertical, Shield,
+  Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
 } from "lucide-react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
@@ -97,8 +97,11 @@ function ConfirmDeleteModal({
             </p>
           </div>
           <p className="text-xs leading-relaxed" style={{ color: "#E2E8F0" }}>
-            Your Witness ID <span className="font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>{song.witnessId}</span> remains
-            on record permanently. The cryptographic proof of origin is never deleted — only the track is removed from public view.
+            Your Witness ID{" "}
+            <span className="font-mono text-[10px]" style={{ color: "oklch(0.84 0.155 85)" }}>
+              {song.witnessId}
+            </span>{" "}
+            remains on record permanently. The cryptographic proof of origin is never deleted — only the track is removed from public view.
           </p>
         </div>
 
@@ -141,6 +144,10 @@ export default function ArchivePage() {
   const { user } = useAuth();
   const myArtistName = user?.artistHandle || user?.name || "Unknown Creator";
 
+  // Batch selection state
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [batchMode, setBatchMode] = useState(false);
+
   // Drag-to-reorder state
   const [localSongs, setLocalSongs] = useState<any[]>([]);
   const draggedId = useRef<number | null>(null);
@@ -175,6 +182,7 @@ export default function ArchivePage() {
     toast.success(`Now playing: ${clickedTrack.title}`);
   };
 
+  // Auth guard
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       window.location.href = getLoginUrl();
@@ -189,6 +197,11 @@ export default function ArchivePage() {
   useEffect(() => {
     if (songs) setLocalSongs(songs);
   }, [songs]);
+
+  // Clear selection when exiting batch mode
+  useEffect(() => {
+    if (!batchMode) setSelectedIds(new Set());
+  }, [batchMode]);
 
   /* Optimistic publish toggle */
   const updateStatus = trpc.songs.updateStatus.useMutation({
@@ -236,6 +249,23 @@ export default function ArchivePage() {
     updateStatus.mutate({ songId: song.id, status: next });
   };
 
+  /* ── Batch selection helpers ───────────────────────────────────── */
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    const nonDeleted = displaySongs.filter((s: any) => s.status !== "Deleted").map((s: any) => s.id);
+    setSelectedIds(new Set(nonDeleted));
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
   /* ── Drag handlers ─────────────────────────────────────────────── */
   const handleDragStart = (e: React.DragEvent, id: number) => {
     draggedId.current = id;
@@ -279,6 +309,7 @@ export default function ArchivePage() {
   }
 
   const displaySongs = localSongs.length > 0 ? localSongs : (songs ?? []);
+  const nonDeletedCount = displaySongs.filter((s: any) => s.status !== "Deleted").length;
 
   return (
     <>
@@ -299,7 +330,7 @@ export default function ArchivePage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold"
               style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
-              My Archive
+              LNA — Archive
             </h1>
             <p className="text-sm mt-1" style={{ color: "#E2E8F0" }}>
               All tracks you have uploaded to Living Nexus
@@ -333,15 +364,52 @@ export default function ArchivePage() {
         {activeTab === "lists"    && <MyListsTab />}
         {activeTab === "external" && <ExternalPlaylistsTab />}
 
-        {/* ── Track count ────────────────────────────────────────── */}
+        {/* ── Track toolbar ──────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs" style={{ color: "#E2E8F0" }}>
-              {displaySongs.length} {displaySongs.length === 1 ? "track" : "tracks"}
-            </p>
-            <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
-              Drag <GripVertical className="inline w-3 h-3" /> to reorder
-            </p>
+          <div className="flex items-center justify-between mb-3">
+            {/* Left: count + batch toggle */}
+            <div className="flex items-center gap-3">
+              <p className="text-xs" style={{ color: "#E2E8F0" }}>
+                {nonDeletedCount} {nonDeletedCount === 1 ? "track" : "tracks"}
+              </p>
+              <button
+                onClick={() => setBatchMode(b => !b)}
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-all"
+                style={batchMode
+                  ? { background: "oklch(0.84 0.155 85 / 0.15)", color: "#D4AF37", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }
+                  : { color: "oklch(0.5 0.03 280)", border: "1px solid oklch(0.22 0.02 280)" }
+                }
+              >
+                <CheckSquare className="w-3 h-3" />
+                {batchMode ? "Exit Select" : "Select"}
+              </button>
+              {batchMode && (
+                <>
+                  <button
+                    onClick={selectAll}
+                    className="text-xs px-2 py-1 rounded-lg transition-all"
+                    style={{ color: "oklch(0.5 0.03 280)", border: "1px solid oklch(0.22 0.02 280)" }}
+                  >
+                    All
+                  </button>
+                  {selectedIds.size > 0 && (
+                    <button
+                      onClick={clearSelection}
+                      className="text-xs px-2 py-1 rounded-lg transition-all"
+                      style={{ color: "oklch(0.5 0.03 280)", border: "1px solid oklch(0.22 0.02 280)" }}
+                    >
+                      Clear ({selectedIds.size})
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+            {/* Right: drag hint */}
+            {!batchMode && (
+              <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
+                Drag <GripVertical className="inline w-3 h-3" /> to reorder
+              </p>
+            )}
           </div>
         )}
 
@@ -379,35 +447,58 @@ export default function ArchivePage() {
               const isPending = updateStatus.isPending && updateStatus.variables?.songId === song.id;
               const hasAudio = !!song.fileUrl;
               const isDeleted = song.status === "Deleted";
+              const isSelected = selectedIds.has(song.id);
 
               return (
                 <div
                   key={song.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, song.id)}
-                  onDragOver={(e) => handleDragOver(e, song.id)}
-                  onDrop={(e) => handleDrop(e, song.id)}
+                  draggable={!batchMode && !isDeleted}
+                  onDragStart={(e) => !batchMode && handleDragStart(e, song.id)}
+                  onDragOver={(e) => !batchMode && handleDragOver(e, song.id)}
+                  onDrop={(e) => !batchMode && handleDrop(e, song.id)}
                   onDragEnd={handleDragEnd}
-                  onClick={(e) => hasAudio && !isDeleted && handlePlay(e, displaySongs, idx)}
+                  onClick={(e) => {
+                    if (batchMode && !isDeleted) { toggleSelect(song.id); return; }
+                    if (hasAudio && !isDeleted) handlePlay(e, displaySongs, idx);
+                  }}
                   className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:brightness-110"
                   style={{
-                    background: isDeleted ? "oklch(0.09 0.02 265)" : "oklch(0.115 0.055 278)",
-                    border: `1px solid ${isDeleted ? "oklch(0.65 0.18 25 / 0.2)" : "oklch(0.18 0.015 280)"}`,
-                    cursor: hasAudio && !isDeleted ? "pointer" : "default",
+                    background: isSelected
+                      ? "oklch(0.84 0.155 85 / 0.08)"
+                      : isDeleted ? "oklch(0.09 0.02 265)" : "oklch(0.115 0.055 278)",
+                    border: isSelected
+                      ? "1px solid oklch(0.84 0.155 85 / 0.35)"
+                      : `1px solid ${isDeleted ? "oklch(0.65 0.18 25 / 0.2)" : "oklch(0.18 0.015 280)"}`,
+                    cursor: batchMode ? (isDeleted ? "default" : "pointer") : (hasAudio && !isDeleted ? "pointer" : "default"),
                     opacity: isDeleted ? 0.6 : 1,
                   }}
                 >
-                  {/* Drag handle */}
-                  <div
-                    className="flex-shrink-0 cursor-grab active:cursor-grabbing"
-                    onClick={(e) => e.stopPropagation()}
-                    title="Drag to reorder"
-                  >
-                    <GripVertical className="w-4 h-4" style={{ color: "oklch(0.4 0.02 280)" }} />
-                  </div>
+                  {/* Batch checkbox OR drag handle */}
+                  {batchMode ? (
+                    <div
+                      className="flex-shrink-0"
+                      onClick={(e) => { e.stopPropagation(); if (!isDeleted) toggleSelect(song.id); }}
+                    >
+                      {isSelected
+                        ? <CheckSquare className="w-4 h-4" style={{ color: "#D4AF37" }} />
+                        : <Square className="w-4 h-4" style={{ color: "oklch(0.4 0.02 280)" }} />
+                      }
+                    </div>
+                  ) : (
+                    <div
+                      className="flex-shrink-0 cursor-grab active:cursor-grabbing"
+                      onClick={(e) => e.stopPropagation()}
+                      title="Drag to reorder"
+                    >
+                      <GripVertical className="w-4 h-4" style={{ color: "oklch(0.4 0.02 280)" }} />
+                    </div>
+                  )}
 
-                  {/* Row number */}
-                  <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#E2E8F0" }}>
+                  {/* Track number */}
+                  <span
+                    className="text-xs w-5 text-center flex-shrink-0 font-mono tabular-nums"
+                    style={{ color: "oklch(0.45 0.03 280)" }}
+                  >
                     {idx + 1}
                   </span>
 
@@ -420,13 +511,24 @@ export default function ArchivePage() {
                       : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
                   </div>
 
-                  {/* Title + genre */}
+                  {/* Title + WID + genre */}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate"
                       style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
                       {song.title}
                     </p>
-                    {song.genre && (
+                    {/* WID in monospace — always shown if present */}
+                    {song.witnessId && (
+                      <p
+                        className="font-mono text-[10px] truncate mt-0.5 tracking-tight"
+                        style={{ color: "oklch(0.72 0.12 82 / 0.65)" }}
+                        title={`Witness ID: ${song.witnessId}`}
+                      >
+                        {song.witnessId}
+                      </p>
+                    )}
+                    {/* Genre — only if no WID shown */}
+                    {!song.witnessId && song.genre && (
                       <p className="text-xs mt-0.5 truncate" style={{ color: "#E2E8F0" }}>
                         {song.genre}
                       </p>
@@ -443,79 +545,81 @@ export default function ArchivePage() {
                     <StatusTag status={song.status ?? "Draft"} />
                   </div>
 
-                  {/* Action buttons */}
-                  <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                    {/* Play indicator */}
-                    {hasAudio && !isDeleted && (
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center"
-                        style={{ color: "oklch(0.84 0.155 85)" }} title="Click row to play">
-                        <Play className="w-3 h-3" />
-                      </div>
-                    )}
+                  {/* Action buttons — hidden in batch mode */}
+                  {!batchMode && (
+                    <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      {/* Play indicator */}
+                      {hasAudio && !isDeleted && (
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center"
+                          style={{ color: "oklch(0.84 0.155 85)" }} title="Click row to play">
+                          <Play className="w-3 h-3" />
+                        </div>
+                      )}
 
-                    {/* View song page */}
-                    {!isDeleted && (
-                      <Link href={`/song/${song.id}`}>
+                      {/* View song page */}
+                      {!isDeleted && (
+                        <Link href={`/song/${song.id}`}>
+                          <button
+                            className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                            title="View song page"
+                          >
+                            <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                          </button>
+                        </Link>
+                      )}
+
+                      {/* Edit */}
+                      {!isDeleted && (
                         <button
-                          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
-                          title="View song page"
+                          onClick={(e) => { e.stopPropagation(); setEditingSong(song); }}
+                          title="Edit track metadata"
+                          className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all"
+                          style={{
+                            background: "rgba(212,175,55,0.1)",
+                            color: "#D4AF37",
+                            border: "1px solid rgba(212,175,55,0.3)",
+                          }}
                         >
-                          <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                          <Pencil className="w-3 h-3" /> Edit
                         </button>
-                      </Link>
-                    )}
+                      )}
 
-                    {/* Edit */}
-                    {!isDeleted && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setEditingSong(song); }}
-                        title="Edit track metadata"
-                        className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all"
-                        style={{
-                          background: "rgba(212,175,55,0.1)",
-                          color: "#D4AF37",
-                          border: "1px solid rgba(212,175,55,0.3)",
-                        }}
-                      >
-                        <Pencil className="w-3 h-3" /> Edit
-                      </button>
-                    )}
+                      {/* Publish toggle */}
+                      {!isDeleted && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleToggle(e, song); }}
+                          disabled={isPending}
+                          title={isPublished ? "Unpublish (set to Draft)" : "Publish"}
+                          className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all disabled:opacity-50"
+                          style={isPublished
+                            ? { background: "oklch(0.65 0.18 145 / 0.15)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.35)" }
+                            : { background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.35)" }
+                          }
+                        >
+                          {isPending ? (
+                            <span className="w-3 h-3 rounded-full border border-t-transparent animate-spin"
+                              style={{ borderColor: "currentColor", borderTopColor: "transparent" }} />
+                          ) : isPublished ? (
+                            <><EyeOff className="w-3 h-3" /> Unpublish</>
+                          ) : (
+                            <><Globe className="w-3 h-3" /> Publish</>
+                          )}
+                        </button>
+                      )}
 
-                    {/* Publish toggle */}
-                    {!isDeleted && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleToggle(e, song); }}
-                        disabled={isPending}
-                        title={isPublished ? "Unpublish (set to Draft)" : "Publish"}
-                        className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all disabled:opacity-50"
-                        style={isPublished
-                          ? { background: "oklch(0.65 0.18 145 / 0.15)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.35)" }
-                          : { background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.35)" }
-                        }
-                      >
-                        {isPending ? (
-                          <span className="w-3 h-3 rounded-full border border-t-transparent animate-spin"
-                            style={{ borderColor: "currentColor", borderTopColor: "transparent" }} />
-                        ) : isPublished ? (
-                          <><EyeOff className="w-3 h-3" /> Unpublish</>
-                        ) : (
-                          <><Globe className="w-3 h-3" /> Publish</>
-                        )}
-                      </button>
-                    )}
-
-                    {/* Delete */}
-                    {!isDeleted && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setDeletingSong(song); }}
-                        title="Delete track (WID preserved)"
-                        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/20"
-                        style={{ color: "oklch(0.65 0.18 25)" }}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
+                      {/* Delete */}
+                      {!isDeleted && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setDeletingSong(song); }}
+                          title="Delete track (WID preserved)"
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/20"
+                          style={{ color: "oklch(0.65 0.18 25)" }}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

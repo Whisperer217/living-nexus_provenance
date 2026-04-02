@@ -1908,3 +1908,26 @@
 - [x] deleteSong() in db.ts converted to soft delete (status='Deleted', isPublic=false)
 - [x] 95 tests passing, 0 TypeScript errors
 - [x] Server running cleanly after all changes
+
+## Phase 66: LNA Archive Sidebar + Batch Actions
+- [ ] Rename sidebar "Archive" label to "LNA — Archive" with gold text color (#c9a84c)
+- [ ] Add song count badge to LNA Archive sidebar nav item
+- [ ] Add batch select checkboxes to each track row in ArchivePage
+- [ ] Add batch actions bar (Delete Selected / Clear) when tracks are selected
+- [ ] Replace text drag handle with GripVertical icon (lucide-react)
+- [ ] Add track number display (index + 1) to each row
+- [ ] Show WID in monospace under track title
+- [ ] Confirm /archive route is auth-guarded and sidebar links correctly
+- [ ] Remove Facebook pixel from index.html if present
+
+## Phase 66: Archive Page & Sidebar Improvements
+- [x] Add "LNA — Archive" nav item to MainLayout sidebar (gold label, Archive icon, song count badge)
+- [x] Archive nav item visible only when authenticated (desktop + mobile)
+- [x] Archive badge: gold pill showing non-deleted track count, fetched from mySongs query
+- [x] ArchivePage: batch-select mode with CheckSquare/Square checkboxes per row
+- [x] ArchivePage: "Select" toolbar button to enter/exit batch mode, "All" and "Clear (n)" helpers
+- [x] ArchivePage: WID displayed in monospace font under track title (always shown if present)
+- [x] ArchivePage: track numbers use font-mono tabular-nums for alignment
+- [x] ArchivePage: drag handles hidden in batch mode, checkboxes shown instead
+- [x] ArchivePage: page header updated to "LNA — Archive"
+- [x] Auth guard confirmed: useEffect redirects to login if not authenticated

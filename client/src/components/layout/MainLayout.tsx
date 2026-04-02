@@ -5,6 +5,9 @@
    PRIMARY NAV (always visible):
      Home · Explore · Listen Together · Guilds · Profile · Upload
 
+   CREATOR NAV (authenticated only):
+     LNA — Archive (with song count badge)
+
    System tools are accessible via contextual locations:
      - Verify WID → WIDPanel component
      - Batch Upload → UploadPage
@@ -30,18 +33,19 @@ import {
   Home, Compass, Users, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
   CheckCircle2, Fingerprint, Bell,
-  BookOpen, Star, Eye,
+  BookOpen, Star, Eye, Archive,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
-// ── 6 primary nav items ────────────────────────────────────────────
+// ── Nav item types ─────────────────────────────────────────────────
 interface NavItem {
   label: string;
   icon: React.ElementType;
   path: string;
   badge?: string;
   notifKey?: "signals" | "jukebox";
+  goldLabel?: boolean;
 }
 
 const PRIMARY_NAV: NavItem[] = [
@@ -52,6 +56,14 @@ const PRIMARY_NAV: NavItem[] = [
   { label: "Profile",         icon: User,    path: "/profile", notifKey: "signals" },
   { label: "Upload",          icon: Upload,  path: "/upload"   },
 ];
+
+// Archive nav item — only rendered when authenticated
+const ARCHIVE_NAV_ITEM: NavItem = {
+  label: "LNA — Archive",
+  icon: Archive,
+  path: "/archive",
+  goldLabel: true,
+};
 
 // ── (PAGE_SUMMARIES removed — QuickAccessPanel is self-contained) ──
 
@@ -144,6 +156,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     staleTime: 30_000,
   });
 
+  // Song count for Archive badge — only fetch when authenticated
+  const { data: mySongs } = trpc.songs.mySongs.useQuery(undefined, {
+    enabled: !!user,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const archiveSongCount = mySongs ? mySongs.filter((s: any) => s.status !== "Deleted").length : 0;
+
   const openMobileMenu = useCallback(() => { setQrOpen(false); setMobileMenuOpen(true); }, []);
   const toggleQr = useCallback(() => {
     if (!qrOpen) setMobileMenuOpen(false);
@@ -161,15 +181,22 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const Icon = item.icon;
     const active = isActive(item.path);
     const isLive = item.badge === "LIVE";
+    const isArchive = item.path === "/archive";
 
     // Dynamic badges
     const isJukebox = item.notifKey === "jukebox";
     const isSignals = item.notifKey === "signals";
     const jukeboxBadge = isJukebox && jukeboxQueueCount > 0 ? (jukeboxQueueCount > 9 ? "9+" : String(jukeboxQueueCount)) : null;
     const signalsBadge = isSignals && (unreadCount as number) > 0 ? ((unreadCount as number) > 99 ? "99+" : String(unreadCount)) : null;
+    const archiveBadge = isArchive && archiveSongCount > 0 ? (archiveSongCount > 99 ? "99+" : String(archiveSongCount)) : null;
     const pulseBadge = signalsBadge;
-    const staticBadge = !pulseBadge && !jukeboxBadge && item.badge && isLive ? item.badge : null;
-    const countBadge = jukeboxBadge;
+    const staticBadge = !pulseBadge && !jukeboxBadge && !archiveBadge && item.badge && isLive ? item.badge : null;
+    const countBadge = jukeboxBadge || archiveBadge;
+
+    // Gold label for Archive
+    const labelColor = item.goldLabel
+      ? (active ? "#D4AF37" : "oklch(0.72 0.12 82 / 0.7)")
+      : undefined;
 
     return (
       <button
@@ -188,7 +215,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {active && !compact && (
           <span
             className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r-full"
-            style={{ background: "oklch(0.80 0.145 82)" }}
+            style={{ background: item.goldLabel ? "#D4AF37" : "oklch(0.80 0.145 82)" }}
           />
         )}
 
@@ -196,7 +223,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <div className="relative flex-shrink-0">
           <Icon
             size={compact ? 16 : 15}
-            style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit", opacity: active ? 1 : 0.6 }}
+            style={{
+              color: active
+                ? (item.goldLabel ? "#D4AF37" : "oklch(0.80 0.145 82)")
+                : (item.goldLabel ? "oklch(0.72 0.12 82 / 0.6)" : "inherit"),
+              opacity: active ? 1 : (item.goldLabel ? 1 : 0.6),
+            }}
           />
           {/* Collapsed sidebar: dot badge on icon */}
           {!compact && !sidebarOpen && pulseBadge && (
@@ -205,11 +237,23 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               style={{ background: "oklch(0.65 0.22 25)" }}
             />
           )}
+          {/* Collapsed sidebar: count dot for archive */}
+          {!compact && !sidebarOpen && archiveBadge && (
+            <span
+              className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+              style={{ background: "#D4AF37" }}
+            />
+          )}
         </div>
 
         {(compact || sidebarOpen) && (
           <>
-            <span className="font-body flex-1 text-left">{item.label}</span>
+            <span
+              className="font-body flex-1 text-left truncate"
+              style={labelColor ? { color: labelColor } : undefined}
+            >
+              {item.label}
+            </span>
             {/* Pulse badge (signals) */}
             {pulseBadge && (
               <span
@@ -217,11 +261,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 style={{ background: "oklch(0.65 0.22 25)", color: "white" }}
               >{pulseBadge}</span>
             )}
-            {/* Count badge (jukebox queue) */}
+            {/* Count badge (jukebox queue or archive count) */}
             {!pulseBadge && countBadge && (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center"
-                style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.15 0.01 280)" }}
+                style={isArchive
+                  ? { background: "oklch(0.84 0.155 85 / 0.18)", color: "#D4AF37", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }
+                  : { background: "oklch(0.80 0.145 82)", color: "oklch(0.15 0.01 280)" }
+                }
               >{countBadge}</span>
             )}
             {/* Static badge (LIVE) */}
@@ -285,7 +332,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {PRIMARY_NAV.map(item => renderNavItem(item, false))}
             </div>
 
-            {/* Divider after Upload */}
+            {/* Archive nav item — authenticated only */}
+            {!authLoading && user && (
+              <div className="space-y-0.5 mt-0.5">
+                {renderNavItem(ARCHIVE_NAV_ITEM, false)}
+              </div>
+            )}
+
+            {/* Divider after Upload / Archive */}
             {sidebarOpen && (
               <div className="gold-divider mx-4 mt-3 mb-2 opacity-20" />
             )}
@@ -446,6 +500,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {/* Mobile primary nav */}
               <div className="flex-1 py-2">
                 {PRIMARY_NAV.map(item => renderNavItem(item, true))}
+                {/* Archive — authenticated only */}
+                {!authLoading && user && renderNavItem(ARCHIVE_NAV_ITEM, true)}
               </div>
 
               {/* Mobile account footer */}
