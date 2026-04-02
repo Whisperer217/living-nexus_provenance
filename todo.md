@@ -1876,3 +1876,17 @@
 - [x] Verified: browser redirect to /song/1380002 via meta refresh + JS
 - [x] 95 tests passing, 0 TypeScript errors
 - [ ] Publish and test Discord embed shows song title + cover art using /share/:wid URL
+
+## Phase 64: Canonical Work API Layer — WID Protocol
+- [x] Built GET /api/work/:wid in server/workRoute.ts — read-only, immutable canonical provenance endpoint
+- [x] Returns full provenance record: protocol, wid, title, creator, registeredAt, genre, bpm, keySignature, moodTags, aiDisclosure, hash (fileHash, lyricsHash, ecdsaPublicKey, ecdsaSignature, harmonicSignature), media (coverArtUrl, audioUrl, videoUrl, embedPlayerUrl, certificateUrl), license (downloadPermission, aiConsent, coWriters), stats (playCount, tipCount), lineage (ai_transform derivatives)
+- [x] 404 with WID/1.0 error envelope if WID not found
+- [x] 405 Method Not Allowed for POST, PUT, PATCH, DELETE — mutation explicitly blocked
+- [x] CORS: Access-Control-Allow-Origin: * — open for external consumers
+- [x] Cache-Control: public, max-age=300, stale-while-revalidate=60
+- [x] X-WID-Protocol: 1.0 response header on all responses
+- [x] Registered app.use("/api/work", workRouter) in server/_core/index.ts
+- [x] Verified: GET /api/work/WID-MUS-20035929-B62A482B returns full record with title, creator, hash, media, lineage
+- [x] Verified: CORS headers present, X-WID-Protocol: 1.0 present
+- [x] Verified: 404 returns structured error with protocol field
+- [x] 95 tests passing, 0 TypeScript errors

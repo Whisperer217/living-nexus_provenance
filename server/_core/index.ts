@@ -14,6 +14,7 @@ import { downloadRouter } from "../downloadRoute";
 import { publicApiRouter } from "../publicApiRoute";
 import { oembedRouter } from "../oembedRoute";
 import { shareRouter } from "../shareRoute";
+import { workRouter } from "../workRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -78,6 +79,10 @@ async function startServer() {
   // oEmbed discovery endpoint — Discord reads this to get song-specific metadata
   // Must be under /api/* so the Manus CDN forwards it to the Express server
   app.use(oembedRouter);
+  // WID Protocol — Canonical Work API
+  // GET /api/work/:wid — read-only, immutable provenance record for any registered work
+  // CORS open, external apps can call this directly
+  app.use("/api/work", workRouter);
   // tRPC API
   app.use(
     "/api/trpc",
