@@ -895,6 +895,7 @@ export default function PlayerBar() {
           genre={currentTrack?.genre}
           witnessId={currentTrack?.witnessId}
           artUrl={currentTrack?.artUrl}
+          artType={currentTrack?.artType}
           coverPositionX={currentTrack?.coverPositionX}
           coverPositionY={currentTrack?.coverPositionY}
           stripeAccountId={creatorStripeAccountId}
