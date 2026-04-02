@@ -5,6 +5,7 @@
      Zone 2: Song title → navigates to /track/{id}
      Zone 3: Artist     → navigates to /creator/{creatorId}
    Badges: WID (clickable → /verify/:id), AI disclosure, YOURS
+   Genre: split on comma → individual pill tags (max 4 + overflow)
    Modal: AddToMyListModal uses ContextualModal — anchored to origin button
 ═══════════════════════════════════════════════════════════════════ */
 
@@ -27,6 +28,49 @@ interface Props {
   prefetchedLikeCount?: number;
   /** Pre-fetched liked status — skips the individual getLikeStatus query when provided */
   prefetchedLiked?: boolean;
+}
+
+/** Split a comma-separated genre string into trimmed, non-empty tags */
+function parseGenreTags(genre: string | undefined | null): string[] {
+  if (!genre) return [];
+  return genre.split(",").map(t => t.trim()).filter(Boolean);
+}
+
+/** Render genre tags as individual pills. Shows max `maxVisible` with an overflow count. */
+function GenrePills({ genre, maxVisible = 4 }: { genre: string | undefined | null; maxVisible?: number }) {
+  const tags = parseGenreTags(genre);
+  if (tags.length === 0) return null;
+  const visible = tags.slice(0, maxVisible);
+  const overflow = tags.length - visible.length;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {visible.map(tag => (
+        <span
+          key={tag}
+          className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
+          style={{
+            background: "oklch(0.18 0.04 275 / 0.8)",
+            color: "oklch(0.72 0.06 280)",
+            border: "1px solid oklch(0.30 0.04 275 / 0.6)",
+          }}
+        >
+          {tag}
+        </span>
+      ))}
+      {overflow > 0 && (
+        <span
+          className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
+          style={{
+            background: "oklch(0.14 0.03 275 / 0.6)",
+            color: "oklch(0.55 0.04 280)",
+            border: "1px solid oklch(0.25 0.03 275 / 0.4)",
+          }}
+        >
+          +{overflow}
+        </span>
+      )}
+    </div>
+  );
 }
 
 /** Map aiDisclosure value to a compact badge label + color */
@@ -88,9 +132,6 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
 
   // DB-backed like state
   const numericId = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
-  // When prefetchedLiked is provided (e.g. from getBulkLikeStatuses on HomePage),
-  // pass skipQuery=true so useLike does NOT fire an individual getLikeStatus query.
-  // Without this, 48 cards × 1 query each = HTTP 414 URI Too Long on the batch GET.
   const hasPrefetch = prefetchedLiked !== undefined;
   const { liked: isLiked, toggle: toggleLike } = useLike(
     isNaN(numericId) ? 0 : numericId,
@@ -193,12 +234,12 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
       </div>
 
       {/* ── Info panel ── */}
-      <div className="p-3">
+      <div className="p-3 flex flex-col gap-2">
         {/* Zone 2: Song title → song detail page */}
         <Link
           href={`/track/${track.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide
+          className="block text-[13px] font-heading text-white/90 truncate tracking-wide
             hover:text-[#D4AF37] transition-colors cursor-pointer"
           title={`Open ${track.title}`}
         >
@@ -206,7 +247,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         </Link>
 
         {/* Zone 3: Artist name → creator profile page */}
-        <div className="flex items-center gap-2 text-[11px] text-white/75 mb-2">
+        <div className="flex items-center gap-2 text-[11px] text-white/75">
           <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold
             bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
             {track.artist.charAt(0)}
@@ -225,28 +266,31 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           )}
         </div>
 
-        {/* Actions row */}
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 font-body">
-            {track.genre}
-          </span>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={e => toggleLike(e)}
-              className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-white/70 hover:text-pink-400"}`}
-              title={isLiked ? "Unlike" : "Like"}
-            >
-              <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
-              {likeCount > 0 && (
-                <span className="text-[10px] leading-none font-medium tabular-nums">
-                  {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
-                </span>
-              )}
-            </button>
+        {/* Genre pills — own row, always visible */}
+        <GenrePills genre={track.genre} maxVisible={4} />
+
+        {/* Actions row — always visible, no opacity-0 hiding */}
+        <div className="flex items-center justify-between pt-0.5">
+          {/* Like button */}
+          <button
+            onClick={e => toggleLike(e)}
+            className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-white/50 hover:text-pink-400"}`}
+            title={isLiked ? "Unlike" : "Like"}
+          >
+            <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
+            {likeCount > 0 && (
+              <span className="text-[10px] leading-none font-medium tabular-nums">
+                {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
+              </span>
+            )}
+          </button>
+
+          {/* Right-side action cluster */}
+          <div className="flex items-center gap-1">
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(index, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
-                className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+                className="p-1 text-white/50 hover:text-[#D4AF37] transition-colors"
                 title="Send a gift"
               >
                 <DollarSign size={12} />
@@ -260,7 +304,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                     playNext(track);
                     toast.success(`"${track.title}" plays next`);
                   }}
-                  className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+                  className="p-1 text-white/50 hover:text-[#D4AF37] transition-colors"
                   title="Play next"
                 >
                   <SkipForward size={12} />
@@ -271,7 +315,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                     setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
                     setShowAddToList(true);
                   }}
-                  className="p-1 text-white/70 hover:text-[#D4AF37] transition-colors"
+                  className="p-1 text-white/50 hover:text-[#D4AF37] transition-colors"
                   title="Add to my list"
                 >
                   <ListPlus size={12} />
@@ -280,7 +324,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             )}
             <button
               onClick={e => { e.stopPropagation(); navigate(`/track/${track.id}`); }}
-              className="p-1 text-white/70 hover:text-[#A78BFA] transition-colors"
+              className="p-1 text-white/50 hover:text-[#A78BFA] transition-colors"
               title="Open track page"
             >
               <ExternalLink size={12} />

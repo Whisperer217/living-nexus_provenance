@@ -890,7 +890,13 @@ export default function PlayerBar() {
       {tipOpen && currentSongId && (
         <PlayerTipModal
           songId={currentSongId}
+          songTitle={currentTrack?.title}
           artistName={currentTrack?.artist || "this creator"}
+          genre={currentTrack?.genre}
+          witnessId={currentTrack?.witnessId}
+          artUrl={currentTrack?.artUrl}
+          coverPositionX={currentTrack?.coverPositionX}
+          coverPositionY={currentTrack?.coverPositionY}
           stripeAccountId={creatorStripeAccountId}
           onClose={() => setTipOpen(false)}
         />

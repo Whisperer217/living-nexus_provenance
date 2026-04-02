@@ -2,14 +2,16 @@
    LIVING NEXUS — TipModal (ContextualModal edition)
    Voluntary gift/support modal — anchors to the triggering gift button.
    Routes to Stripe Checkout for real payment processing.
+   Enhanced: genre pills, WID badge, fully dissected style info.
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { DollarSign, ExternalLink } from "lucide-react";
+import { DollarSign, ExternalLink, Shield } from "lucide-react";
 import { Track } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
 import { ContextualModal } from "@/components/ContextualModal";
 import { trpc } from "@/lib/trpc";
+import { Link } from "wouter";
 
 const GIFT_AMOUNTS = ["$1", "$5", "$10", "$25"];
 
@@ -18,6 +20,12 @@ interface Props {
   onClose: () => void;
   /** DOMRect of the button that triggered this modal — enables contextual anchoring */
   originRect?: DOMRect | null;
+}
+
+/** Split comma/slash/pipe-separated genre string into individual tags */
+function parseGenreTags(genre: string): string[] {
+  if (!genre) return [];
+  return genre.split(/[,/|]+/).map(t => t.trim()).filter(Boolean);
 }
 
 export default function TipModal({ track, onClose, originRect }: Props) {
@@ -71,6 +79,8 @@ export default function TipModal({ track, onClose, originRect }: Props) {
     ? `$${parseFloat(custom || "0").toFixed(2)}`
     : selected;
 
+  const genreTags = parseGenreTags(track.genre || "");
+
   return (
     <ContextualModal
       open={!!track}
@@ -78,8 +88,8 @@ export default function TipModal({ track, onClose, originRect }: Props) {
       originRect={originRect}
       intent="send_gift"
       renderMode="contextual"
-      width={320}
-      maxHeight={520}
+      width={340}
+      maxHeight={580}
       title="Send a Gift"
       showClose
     >
@@ -90,32 +100,90 @@ export default function TipModal({ track, onClose, originRect }: Props) {
         </p>
       </div>
 
-      {/* Artist info */}
+      {/* Track info card — fully dissected */}
       <div
-        className="mx-4 mb-4 flex items-center gap-3 rounded-xl p-3"
-        style={{ background: "oklch(0.15 0.05 275)" }}
+        className="mx-4 mb-4 rounded-xl overflow-hidden"
+        style={{ background: "oklch(0.13 0.04 275)", border: "1px solid oklch(0.22 0.04 275)" }}
       >
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-base overflow-hidden flex-shrink-0"
-          style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}
-        >
-          {track.artUrl && track.artType !== "video"
-            ? <img
-                src={track.artUrl}
-                alt=""
-                className="w-full h-full object-cover rounded-full"
-                style={{ objectPosition: `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%` }}
-              />
-            : track.emoji || "🎵"
-          }
+        {/* Cover + title row */}
+        <div className="flex items-center gap-3 p-3">
+          <div
+            className="w-12 h-12 rounded-lg flex items-center justify-center text-lg overflow-hidden flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}
+          >
+            {track.artUrl && track.artType !== "video"
+              ? <img
+                  src={track.artUrl}
+                  alt=""
+                  className="w-full h-full object-cover rounded-lg"
+                  style={{ objectPosition: `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%` }}
+                />
+              : <span>{track.emoji || "🎵"}</span>
+            }
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[13px] font-semibold font-body truncate" style={{ color: "oklch(0.92 0.01 80)" }}>
+              {track.title}
+            </div>
+            <div className="text-[11px] font-body truncate mt-0.5" style={{ color: "oklch(0.65 0.03 280)" }}>
+              {track.artist}
+            </div>
+          </div>
         </div>
-        <div className="min-w-0">
-          <div className="text-[13px] font-medium font-body truncate" style={{ color: "oklch(0.90 0.01 80)" }}>
-            {track.artist}
-          </div>
-          <div className="text-[11px] font-body truncate" style={{ color: "oklch(0.65 0.03 280)" }}>
-            {track.title}
-          </div>
+
+        {/* Divider */}
+        <div style={{ height: "1px", background: "oklch(0.20 0.03 275)" }} />
+
+        {/* Style metadata row */}
+        <div className="px-3 py-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          {/* Genre pills */}
+          {genreTags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {genreTags.slice(0, 4).map(tag => (
+                <span
+                  key={tag}
+                  className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
+                  style={{
+                    background: "oklch(0.18 0.05 275)",
+                    color: "oklch(0.70 0.08 280)",
+                    border: "1px solid oklch(0.28 0.05 275)",
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+              {genreTags.length > 4 && (
+                <span
+                  className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
+                  style={{
+                    background: "oklch(0.16 0.03 275)",
+                    color: "oklch(0.50 0.04 280)",
+                    border: "1px solid oklch(0.24 0.03 275)",
+                  }}
+                >
+                  +{genreTags.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* WID badge */}
+          {track.witnessId && (
+            <Link
+              href={`/verify/${track.witnessId}`}
+              onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClose(); }}
+              className="flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded font-heading tracking-wider transition-opacity opacity-80 hover:opacity-100"
+              style={{
+                background: "oklch(0.15 0.04 85)",
+                color: "oklch(0.84 0.155 85)",
+                border: "1px solid oklch(0.84 0.155 85 / 0.45)",
+              }}
+              title={`Verified Witness ID: ${track.witnessId}`}
+            >
+              <Shield size={8} />
+              <span>WID</span>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -156,7 +224,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
       <div className="px-4 mb-3 flex items-center gap-1.5">
         <ExternalLink size={10} className="text-white/30 flex-shrink-0" />
         <p className="text-[10px] font-body" style={{ color: "oklch(0.50 0.02 280)" }}>
-          You'll be redirected to Stripe's secure checkout to complete payment. No charge until you confirm.
+          You'll be redirected to Stripe's secure checkout. No charge until you confirm.
         </p>
       </div>
 

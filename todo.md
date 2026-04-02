@@ -1936,3 +1936,24 @@
 - [x] Add "Dashboard" nav item to MainLayout sidebar (authenticated only, LayoutDashboard icon)
 - [x] Dashboard nav item appears above LNA — Archive in the creator nav section
 - [x] Mobile nav overlay also shows Dashboard link
+
+## Phase 69: Genre Pills & Pay Modal Enhancement
+- [ ] TrackCard: split genre string into individual pills, own row above actions
+- [ ] TrackCard: action buttons always visible (not hidden behind genre blob)
+- [ ] MobilePlayerPanel: genre pills in now-playing info sheet
+- [ ] TipModal: add genre pills to track info block
+- [ ] PlayerTipModal: add genre pills to track info block
+
+## Phase 69: Genre Pills & Pay Modal Enhancement
+- [ ] TrackCard: split genre string into individual pills, own row above actions
+- [ ] TrackCard: action buttons always visible (not hidden behind genre blob)
+- [ ] MobilePlayerPanel: genre pills in now-playing info sheet
+- [ ] TipModal: add genre pills to track info block
+- [ ] PlayerTipModal: add genre pills to track info block
+
+## Phase 69: Track Card Genre & Tip Modal Enhancement
+- [ ] TrackCard: split genre string into pills, max 3 visible + overflow badge, own row above actions
+- [ ] ExplorePage inline card: same genre pill treatment
+- [ ] TipModal: show genre pills + WID badge in artist info block
+- [ ] PlayerTipModal: show genre pills + WID badge in header
+- [ ] Actions row never contested by genre overflow

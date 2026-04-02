@@ -171,12 +171,30 @@ function ExploreCard({
           )}
         </div>
 
-        {/* Actions row — genre pill + full action bar */}
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 font-body">
-            {song.genre || "Other"}
-          </span>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Genre pills — own row, never competes with actions */}
+        {song.genre && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {(song.genre as string).split(/[,/|]+/).map((t: string) => t.trim()).filter(Boolean).slice(0, 3).map((tag: string) => (
+              <span
+                key={tag}
+                className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
+                style={{ background: "oklch(0.18 0.04 275)", color: "oklch(0.68 0.06 280)", border: "1px solid oklch(0.28 0.04 275)" }}
+              >
+                {tag}
+              </span>
+            ))}
+            {(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length > 3 && (
+              <span
+                className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
+                style={{ background: "oklch(0.16 0.03 275)", color: "oklch(0.50 0.04 280)", border: "1px solid oklch(0.24 0.03 275)" }}
+              >
+                +{(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length - 3}
+              </span>
+            )}
+          </div>
+        )}
+        {/* Actions row — always on its own line, never contested */}
+        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {/* Heart / like */}
             <button
               onClick={e => { e.stopPropagation(); toggleLike(e); }}
@@ -238,7 +256,6 @@ function ExploreCard({
               <ExternalLink size={12} />
             </button>
           </div>
-        </div>
       </div>
     </div>
     <AddToMyListModal

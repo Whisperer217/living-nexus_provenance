@@ -2,25 +2,82 @@
  * PlayerTipModal
  * Reusable tip sheet used by both MobilePlayerPanel and PlayerBar.
  * Opens inline (no navigation) — fan picks amount, confirms, done.
+ * Genre tags are split and shown as individual pills.
  */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { X, DollarSign, Loader2 } from "lucide-react";
+import { X, DollarSign, Loader2, Tag } from "lucide-react";
 
 const PRESET_AMOUNTS = [100, 200, 500, 1000, 2500]; // cents
 
 interface PlayerTipModalProps {
   songId: number;
+  songTitle?: string;
   artistName: string;
+  genre?: string | null;
+  artUrl?: string | null;
+  artType?: string | null;
+  coverPositionX?: number;
+  coverPositionY?: number;
+  witnessId?: string | null;
   /** If undefined or null, tips are not enabled for this creator */
   stripeAccountId?: string | null;
   onClose: () => void;
 }
 
+/** Split a comma-separated genre string into trimmed, non-empty tags */
+function parseGenreTags(genre: string | undefined | null): string[] {
+  if (!genre) return [];
+  return genre.split(",").map(t => t.trim()).filter(Boolean);
+}
+
+function GenrePillRow({ genre }: { genre: string | undefined | null }) {
+  const tags = parseGenreTags(genre);
+  if (tags.length === 0) return null;
+  const visible = tags.slice(0, 5);
+  const overflow = tags.length - visible.length;
+  return (
+    <div className="flex flex-wrap gap-1 mt-1.5">
+      {visible.map(tag => (
+        <span
+          key={tag}
+          className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
+          style={{
+            background: "oklch(0.20 0.05 275 / 0.8)",
+            color: "oklch(0.75 0.08 280)",
+            border: "1px solid oklch(0.32 0.05 275 / 0.6)",
+          }}
+        >
+          <Tag size={7} />
+          {tag}
+        </span>
+      ))}
+      {overflow > 0 && (
+        <span
+          className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
+          style={{
+            background: "oklch(0.14 0.03 275 / 0.6)",
+            color: "oklch(0.55 0.04 280)",
+            border: "1px solid oklch(0.25 0.03 275 / 0.4)",
+          }}
+        >
+          +{overflow}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function PlayerTipModal({
   songId,
+  songTitle,
   artistName,
+  genre,
+  artUrl,
+  artType,
+  coverPositionX = 50,
+  coverPositionY = 50,
   stripeAccountId,
   onClose,
 }: PlayerTipModalProps) {
@@ -72,21 +129,53 @@ export default function PlayerTipModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <p
-              className="text-[11px] font-bold tracking-widest uppercase"
-              style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}
-            >
-              Send a Gift
-            </p>
-            <p className="text-sm text-white/60 mt-0.5">{artistName}</p>
-          </div>
+          <p
+            className="text-[11px] font-bold tracking-widest uppercase"
+            style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}
+          >
+            Send a Gift
+          </p>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
           >
             <X size={16} />
           </button>
+        </div>
+
+        {/* Track info block — cover + title + artist + genre pills */}
+        <div
+          className="flex items-start gap-3 rounded-xl p-3"
+          style={{ background: "oklch(0.15 0.04 275)" }}
+        >
+          {/* Cover thumbnail */}
+          <div
+            className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)" }}
+          >
+            {artUrl && artType !== "video"
+              ? <img
+                  src={artUrl}
+                  alt=""
+                  className="w-full h-full object-cover rounded-lg"
+                  style={{ objectPosition: `${coverPositionX}% ${coverPositionY}%` }}
+                />
+              : <span className="text-xl">🎵</span>
+            }
+          </div>
+
+          {/* Title + artist + genre */}
+          <div className="min-w-0 flex-1">
+            {songTitle && (
+              <div className="text-[13px] font-semibold font-body truncate" style={{ color: "oklch(0.92 0.01 80)" }}>
+                {songTitle}
+              </div>
+            )}
+            <div className={`font-body truncate ${songTitle ? "text-[11px] mt-0.5" : "text-[13px]"}`} style={{ color: "oklch(0.65 0.03 280)" }}>
+              {artistName}
+            </div>
+            <GenrePillRow genre={genre} />
+          </div>
         </div>
 
         {!tipsEnabled ? (

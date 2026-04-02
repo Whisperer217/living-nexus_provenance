@@ -869,15 +869,47 @@ export default function MobilePlayerPanel() {
                     </div>
                   </div>
                 )}
-                {currentTrack?.genre && (
-                  <div className="flex items-start gap-2.5">
-                    <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 280)" }} />
-                    <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>Genre / Tags</div>
-                      <span className="text-[12px]" style={{ color: "oklch(0.80 0.02 280)" }}>{currentTrack.genre}</span>
+                {currentTrack?.genre && (() => {
+                  const tags = currentTrack.genre.split(',').map((t: string) => t.trim()).filter(Boolean);
+                  if (tags.length === 0) return null;
+                  const visible = tags.slice(0, 6);
+                  const overflow = tags.length - visible.length;
+                  return (
+                    <div className="flex items-start gap-2.5">
+                      <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 280)" }} />
+                      <div className="min-w-0">
+                        <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "oklch(0.45 0.03 280)" }}>Genre / Tags</div>
+                        <div className="flex flex-wrap gap-1">
+                          {visible.map((tag: string) => (
+                            <span
+                              key={tag}
+                              className="text-[10px] px-2 py-0.5 rounded-full font-body leading-none"
+                              style={{
+                                background: "oklch(0.18 0.04 275 / 0.8)",
+                                color: "oklch(0.75 0.08 280)",
+                                border: "1px solid oklch(0.30 0.04 275 / 0.6)",
+                              }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {overflow > 0 && (
+                            <span
+                              className="text-[10px] px-2 py-0.5 rounded-full font-body leading-none"
+                              style={{
+                                background: "oklch(0.14 0.03 275 / 0.6)",
+                                color: "oklch(0.55 0.04 280)",
+                                border: "1px solid oklch(0.25 0.03 275 / 0.4)",
+                              }}
+                            >
+                              +{overflow}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
                 {currentSongId && (
                   <button
                     onClick={() => { navigate(`/song/${currentSongId}`); setSheetOpen(false); closeNowPlayingPanel(); }}
@@ -1020,7 +1052,13 @@ export default function MobilePlayerPanel() {
       {tipOpen && currentSongId && (
         <PlayerTipModal
           songId={currentSongId}
+          songTitle={currentTrack?.title}
           artistName={currentTrack?.artist || "this creator"}
+          genre={currentTrack?.genre}
+          witnessId={currentTrack?.witnessId}
+          artUrl={currentTrack?.artUrl}
+          coverPositionX={currentTrack?.coverPositionX}
+          coverPositionY={currentTrack?.coverPositionY}
           stripeAccountId={creatorStripeAccountId}
           onClose={() => setTipOpen(false)}
         />
