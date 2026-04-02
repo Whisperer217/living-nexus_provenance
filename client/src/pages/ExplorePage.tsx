@@ -88,24 +88,29 @@ function ExploreCard({
   const { liked, toggle: toggleLike } = useLike(song.id, { skipQuery: hasPrefetch, initialLiked: prefetchedLiked });
   const likeCount = prefetchedLikeCount ?? 0;
   const artistName = creator?.artistHandle || creator?.name || "Unknown";
+  // Non-audio types navigate to song detail page instead of playing audio
+  const isNonAudio = song.contentType === "manuscript" || song.contentType === "comic";
+  const handleCardClick = () => {
+    if (isNonAudio) { navigate(`/song/${song.id}`); } else { onPlay(item); }
+  };
 
   return (
     <>
     <div
       className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
         border bg-[oklch(0.095_0.028_275)] track-card-glow
-        ${isActive
+        ${isActive && !isNonAudio
           ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
           : "border-white/[0.05] hover:border-[#A78BFA]/30"
         }`}
-      onClick={() => onPlay(item)}
+      onClick={handleCardClick}
       onContextMenu={e => { e.preventDefault(); }}
     >
       {/* ── Zone 1: Cover Art ── */}
       <div
         className="relative overflow-hidden cursor-pointer"
         style={{ height: "180px" }}
-        onClick={e => { e.stopPropagation(); onPlay(item); }}
+        onClick={e => { e.stopPropagation(); handleCardClick(); }}
       >
         <MediaAsset
           src={song.coverArtUrl}
@@ -121,14 +126,18 @@ function ExploreCard({
           bg-gradient-to-b from-transparent via-transparent to-black/70
           ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
         />
-        {/* Play / wave button */}
+        {/* Play / wave / read button */}
         <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
           transition-all duration-200 z-10
-          ${isActive ? "opacity-100 bg-[#D4AF37]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+          ${isNonAudio
+            ? "opacity-0 group-hover:opacity-100 bg-[oklch(0.65_0.18_145)]"
+            : isActive ? "opacity-100 bg-[#D4AF37]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
         >
-          {isActive && isPlaying
-            ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
-            : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
+          {isNonAudio
+            ? <ExternalLink size={14} className="text-white" />
+            : isActive && isPlaying
+              ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
+              : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
           }
         </div>
         {/* WID badge — clickable → /verify/:witnessId */}

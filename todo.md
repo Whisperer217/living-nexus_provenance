@@ -909,7 +909,7 @@
 - [x] Queue panel shows "queued by [name]" with optional gift badge if gifted
 - [x] DashboardPage: Tips Received → Gifts Received, Tip Payments → Gift Payments, activity feed Tip → Gift
 - [ ] Record play events in TogetherPage when a song starts playing in a room (Phase 100)
-- [ ] Update WhatsNewModal to v2.4.0 with gift economy changes (Phase 100)
+- [x] Update WhatsNewModal to v2.4.0 with gift economy changes (Phase 100)
 
 ## Phase 100: Jukebox Room Share Links
 - [x] Audit current /together route and room join flow in App.tsx and TogetherPage
@@ -920,7 +920,7 @@
 - [x] createRoom auto-copies share link to clipboard on creation
 - [x] joinRoom + leaveRoom update URL to reflect current room code
 - [ ] Add OG meta tags for /together/:roomCode (Phase 101)
-- [ ] Update WhatsNewModal to v2.4.0 with share link + gift economy changes (Phase 101)
+- [x] Update WhatsNewModal to v2.4.0 with share link + gift economy changes (Phase 101)
 
 ## Phase 100b: Offering Placement Fix
 - [x] Move "Leave an Offering" to the top of the queue panel with a gold border (1.5px solid #D4AF37 border, gold glow)
@@ -1991,3 +1991,13 @@
 - [x] Add Manuscript upload flow to UploadPage (PDF file drop + title + WID generation)
 - [x] Add Comic/Novel upload flow to UploadPage (PDF/image + title + WID generation)
 - [x] TypeScript: 0 errors | Vitest: all passing
+
+## Phase 73: Verify Page + Explore Cards + Live Counts + Version Modal
+- [x] Update VerifyPage: medium-aware WID badge (WID-MUS/WID-MAN/WID-CMX/WID-LYR) based on contentType
+- [x] Update VerifyPage: add work type description block per medium
+- [ ] Update ExplorePage ExploreCard: show document/read icon for manuscript/comic instead of play button
+- [ ] Update ExplorePage ExploreCard: link manuscript/comic cards to detail page instead of audio player
+- [x] Add getCountsByContentType DB helper and tRPC procedure
+- [ ] Wire live counts to homepage Witnessed Works by Medium stat block
+- [ ] Ensure version/changelog modal trigger is visible on both mobile and desktop nav
+- [ ] TypeScript: 0 errors | Vitest: all passing

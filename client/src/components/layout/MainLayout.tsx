@@ -28,12 +28,13 @@ import TheaterPlayer from "@/components/player/TheaterPlayer";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
 import TipTicker from "@/components/TipTicker";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
+import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import {
   Home, Compass, Users, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
   CheckCircle2, Fingerprint, Bell,
-  BookOpen, Star, Eye, Archive, LayoutDashboard,
+  BookOpen, Star, Eye, Archive, LayoutDashboard, Sparkles,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -155,6 +156,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
   // Notification badges
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, {
@@ -392,6 +394,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
           {/* Account footer */}
           <div className={`p-3 border-t border-white/[0.07] ${!sidebarOpen && "flex flex-col items-center gap-2"}`}>
+            {/* What's New trigger */}
+            <button
+              onClick={() => setWhatsNewOpen(true)}
+              title="What's New"
+              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md w-full mb-1.5 transition-all
+                text-white/30 hover:text-[#D4AF37] hover:bg-[oklch(0.84_0.155_85/0.06)]
+                ${!sidebarOpen && "justify-center"}`}
+            >
+              <Sparkles size={13} className="flex-shrink-0" />
+              {sidebarOpen && <span className="text-[11px] font-body">What's New</span>}
+              {sidebarOpen && <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.18</span>}
+            </button>
             {!authLoading && !user ? (
               <a
                 href={getLoginUrl()}
@@ -542,6 +556,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
               {/* Mobile account footer */}
               <div className="px-4 pb-4 border-t border-white/[0.07] pt-3">
+                {/* What's New trigger */}
+                <button
+                  onClick={() => { setWhatsNewOpen(true); setMobileMenuOpen(false); }}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#D4AF37] hover:bg-[oklch(0.84_0.155_85/0.06)]"
+                >
+                  <Sparkles size={15} className="flex-shrink-0" />
+                  <span className="text-[13px] font-body">What's New</span>
+                  <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.18</span>
+                </button>
                 {!authLoading && !user ? (
                   <a
                     href={getLoginUrl()}
@@ -594,6 +617,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* Scroll to top */}
       <ScrollToTopButton />
+
+      {/* What's New Modal — triggered from sidebar/mobile footer */}
+      {whatsNewOpen && (
+        <WhatsNewModal forceOpen={true} onClose={() => setWhatsNewOpen(false)} />
+      )}
     </div>
   );
 }

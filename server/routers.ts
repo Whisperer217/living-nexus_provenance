@@ -380,6 +380,7 @@ export const appRouter = router({
         lyricsWid: song.lyricsWid ?? null,
         lyricsFileName: song.lyricsFileName ?? null,
         lyricsAddedAt: song.lyricsAddedAt ?? null,
+        contentType: (song.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
       };
     }),
     // Public counters for homepage trust layer
@@ -390,6 +391,24 @@ export const appRouter = router({
       const db = await getDb();
       const [row] = await db.select({ total: count() }).from(songsTable).where(isNotNull(songsTable.witnessId));
       return { count: row?.total ?? 0 };
+    }),
+    getCountsByContentType: publicProcedure.query(async () => {
+      const { getDb } = await import("./db");
+      const { songs: songsTable } = await import("../drizzle/schema");
+      const { count, eq: eqOp, or, isNull } = await import("drizzle-orm");
+      const db = await getDb();
+      const countFor = async (ct: string) => {
+        const [row] = await db.select({ total: count() }).from(songsTable)
+          .where(eqOp(songsTable.contentType as any, ct));
+        return row?.total ?? 0;
+      };
+      const [audio, lyrics, manuscript, comic] = await Promise.all([
+        countFor("audio"),
+        countFor("lyrics"),
+        countFor("manuscript"),
+        countFor("comic"),
+      ]);
+      return { audio, lyrics, manuscript, comic };
     }),
     getWitnessedVoices: publicProcedure.query(async () => {
       const { getDb } = await import("./db");

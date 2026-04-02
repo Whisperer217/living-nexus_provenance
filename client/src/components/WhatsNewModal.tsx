@@ -9,14 +9,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.17.0";
+const CURRENT_VERSION = "v2.18.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.18.0",
+    date: "April 2026",
+    label: "Latest",
+    items: [
+      { icon: BookOpen, text: "Multi-Medium Registry — Living Nexus now witnesses Music, Lyrics, Manuscripts, and Comics/Graphic Novels. Every medium. One registry." },
+      { icon: Shield, text: "Medium-Aware WID Badges — Verify page now shows WID-MUS, WID-LYR, WID-MAN, or WID-CMX with a description of the work type." },
+      { icon: Upload, text: "Expanded Upload — Choose your content type (Audio, Lyrics, Manuscript, Comic) before uploading. Each medium has its own WID prefix and flow." },
+      { icon: Globe, text: "Explore Tabs — Filter the Explore page by medium: Music · Lyrics · Manuscripts · Comics." },
+      { icon: Network, text: "Live Registry Counts — The homepage now shows real-time witnessed work counts per medium, updated with every new upload." },
+    ],
+  },
+  {
     version: "v2.17.0",
     date: "March 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Maximize2, text: "Direct Manipulation — Every image editor on the platform now works the same way: drag to reposition, scroll to zoom, double-click to reset. Banner, cover art, avatar, collection cover — one interaction language across the entire system. No sliders. No panels on the canvas. Just you and your work." },
       { icon: Zap, text: "Keyboard Layer — When the editor canvas is focused, a full keyboard shortcut layer activates: R to reset center, +/− to zoom, arrow keys to nudge (Shift for 5× step), Enter to save, Esc to cancel. The hints appear in the dock when active and disappear when not. Present when used, invisible otherwise." },

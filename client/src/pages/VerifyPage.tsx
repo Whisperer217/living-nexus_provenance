@@ -427,23 +427,35 @@ function TrackVerifyView({
           </div>
         )}
 
-        {/* Audio / Lyrics indicator */}
-        <div className="flex items-center justify-center gap-2">
-          {data.isLyricsOnly ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}>
-              <FileText className="w-3.5 h-3.5" /> Lyrics Registration
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: "oklch(0.65 0.2 300 / 0.15)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.4)" }}>
-              <Music className="w-3.5 h-3.5" /> Audio Registration
-            </span>
-          )}
-          {data.genre && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs" style={{ background: "oklch(0.14 0.015 280)", color: "oklch(0.5 0.03 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
-              <Tag className="w-3 h-3" /> {data.genre}
-            </span>
-          )}
-        </div>
+        {/* Medium-aware WID badge */}
+        {(() => {
+          const ct = data.contentType ?? (data.isLyricsOnly ? "lyrics" : "audio");
+          const mediumMap: Record<string, { label: string; wid: string; desc: string; icon: React.ReactNode; bg: string; color: string; border: string }> = {
+            audio:      { label: "Audio Registration",      wid: "WID-MUS", desc: "Cryptographic proof of origin for an audio recording.",           icon: <Music className="w-3.5 h-3.5" />,    bg: "oklch(0.65 0.2 300 / 0.15)",  color: "oklch(0.65 0.2 300)",  border: "oklch(0.65 0.2 300 / 0.4)" },
+            lyrics:     { label: "Lyrics Registration",     wid: "WID-LYR", desc: "Standalone lyric sheet — words witnessed before the music.",     icon: <FileText className="w-3.5 h-3.5" />, bg: "oklch(0.75 0.18 85 / 0.15)",   color: "oklch(0.84 0.155 85)",  border: "oklch(0.75 0.18 85 / 0.4)" },
+            manuscript: { label: "Manuscript Registration", wid: "WID-MAN", desc: "Novel, screenplay, or written work — sealed at first draft.",    icon: <BookOpen className="w-3.5 h-3.5" />, bg: "oklch(0.65 0.18 145 / 0.15)",  color: "oklch(0.65 0.18 145)",  border: "oklch(0.65 0.18 145 / 0.4)" },
+            comic:      { label: "Comic / Graphic Novel",   wid: "WID-CMX", desc: "Sequential art — pages, script, and cover witnessed together.",  icon: <FileText className="w-3.5 h-3.5" />, bg: "oklch(0.65 0.18 25 / 0.15)",   color: "oklch(0.75 0.18 25)",   border: "oklch(0.65 0.18 25 / 0.4)" },
+          };
+          const m = mediumMap[ct] ?? mediumMap.audio;
+          return (
+            <div className="space-y-2">
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: m.bg, color: m.color, border: `1px solid ${m.border}` }}>
+                  {m.icon} {m.label}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold" style={{ background: "oklch(0.84 0.155 85 / 0.08)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+                  {m.wid}
+                </span>
+                {data.genre && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs" style={{ background: "oklch(0.14 0.015 280)", color: "oklch(0.5 0.03 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+                    <Tag className="w-3 h-3" /> {data.genre}
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-center" style={{ color: "oklch(0.45 0.03 280)" }}>{m.desc}</p>
+            </div>
+          );
+        })()}
       </div>
 
       {/* ── Collection back-reference ── */}
