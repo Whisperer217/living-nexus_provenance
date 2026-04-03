@@ -35,7 +35,7 @@ import {
   Home, Compass, Users, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
   CheckCircle2, Fingerprint, Bell,
-  BookOpen, Star, Eye, Archive, LayoutDashboard, Sparkles,
+  BookOpen, Star, Eye, Archive, LayoutDashboard, Sparkles, Terminal,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -352,6 +352,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               </div>
             )}
 
+            {/* Admin nav item — only for admin role */}
+            {!authLoading && (user as any)?.role === "admin" && (
+              <div className="space-y-0.5 mt-0.5">
+                {renderNavItem({ label: "LN Command", icon: Terminal, path: "/admin", goldLabel: false }, false)}
+              </div>
+            )}
+
             {/* Divider after Upload / Archive */}
             {sidebarOpen && (
               <div className="gold-divider mx-4 mt-3 mb-2 opacity-20" />
@@ -528,6 +535,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 {/* Creator nav — authenticated only */}
                 {!authLoading && user && renderNavItem(DASHBOARD_NAV_ITEM, true)}
                 {!authLoading && user && renderNavItem(ARCHIVE_NAV_ITEM, true)}
+                {/* Admin nav — role-gated */}
+                {!authLoading && (user as any)?.role === "admin" && renderNavItem({ label: "LN Command", icon: Terminal, path: "/admin", goldLabel: false }, true)}
 
                 {/* DISCOVER section */}
                 <div className="px-4 pt-4 pb-2">

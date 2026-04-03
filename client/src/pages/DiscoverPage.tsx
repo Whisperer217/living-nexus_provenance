@@ -4,11 +4,17 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Play, Pause, Search, Music, Users, Shield, ChevronRight, Star, MoreHorizontal } from "lucide-react";
+import { Play, Pause, Search, Music, Users, Shield, ChevronRight, Star, MoreHorizontal, FileText, BookOpen, Layers } from "lucide-react";
+import { WorkCarousel } from "@/components/WorkCarousel";
 import { MediaAsset } from "@/components/MediaAsset";
 import { toast } from "sonner";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
+
+// Extended genre categories with WID type indicators
+const MUSIC_GENRES = ["Gospel", "Classical", "Rock", "Hip-Hop", "Electronic", "R&B", "Ambient"];
+const MANUSCRIPT_CATEGORIES = ["Doctrine", "Policy", "Narrative"];
+const LYRICS_CATEGORIES = ["Worship", "Spoken", "Poetic"];
 
 const GENRE_ICONS: Record<string, string> = {
   "Gospel": "https://cdn.manus.space/icons/icon-cross.png",
@@ -188,6 +194,41 @@ export default function DiscoverPage() {
         </div>
       </div>
 
+      {/* ── Creation Type Overview ─────────────────────────────────────────── */}
+      <div className="container pt-8 pb-0">
+        <div className="mb-2">
+          <p className="text-[10px] font-mono tracking-[0.25em] uppercase mb-3" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }}>CREATION TYPE OVERVIEW</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { type: "audio" as const, label: "Music", icon: Music, widLabel: "WID-MUS", color: "oklch(0.84 0.155 85)", href: "/discover?type=music" },
+            { type: "lyrics" as const, label: "Lyrics", icon: FileText, widLabel: "WID-LYR", color: "oklch(0.75 0.18 300)", href: "/discover?type=lyrics" },
+            { type: "manuscript" as const, label: "Manuscripts", icon: BookOpen, widLabel: "WID-MAN", color: "oklch(0.65 0.18 145)", href: "/discover?type=manuscripts" },
+            { type: "comic" as const, label: "Comics", icon: Layers, widLabel: "WID-COM", color: "oklch(0.70 0.18 220)", href: "/discover?type=comics" },
+          ].map(({ type: ct, label, icon: Icon, widLabel, color, href }) => {
+            const { data: countData } = trpc.songs.getCountsByContentType.useQuery(undefined, { staleTime: 300_000 });
+            const count = countData ? (countData as any)[ct] ?? 0 : null;
+            return (
+              <Link key={ct} href={href}>
+                <div
+                  className="rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] hover:opacity-90"
+                  style={{ background: "oklch(0.115 0.055 278)", border: `1px solid ${color}33` }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <Icon size={18} style={{ color }} />
+                    <span className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: `${color}22`, color, border: `1px solid ${color}55` }}>{widLabel}</span>
+                  </div>
+                  <p className="text-sm font-bold" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{label}</p>
+                  {count !== null && (
+                    <p className="text-[11px] mt-0.5" style={{ color: "oklch(0.55 0.04 280)" }}>{count.toLocaleString()} witnessed</p>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="container py-10 space-y-12">
         {/* Search */}
         <div className="relative max-w-xl">
@@ -201,27 +242,87 @@ export default function DiscoverPage() {
           />
         </div>
 
-        {/* Genre Filter */}
+        {/* ── Witnessed Voices (Music) ── */}
+        <WorkCarousel type="audio" title="Witnessed Voices" viewAllHref="/explore" />
+
+        {/* ── Witnessed Manuscripts ── */}
+        <WorkCarousel type="manuscript" title="Witnessed Manuscripts" viewAllHref="/explore?type=manuscript" />
+
+        {/* ── Witnessed Lyrics ── */}
+        <WorkCarousel type="lyrics" title="Witnessed Lyrics" viewAllHref="/explore?type=lyrics" />
+
+        {/* ── Witnessed Comics ── */}
+        <WorkCarousel type="comic" title="Witnessed Comics" viewAllHref="/explore?type=comic" />
+
+        {/* Genre Filter — extended with non-music categories */}
         <div id="section-genres">
           <h2 className="text-sm font-mono tracking-widest uppercase mb-4" style={{ color: "oklch(0.80 0.04 280)" }}>Browse by Genre</h2>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setActiveGenre(undefined)}
-              className="px-4 py-2 rounded-full text-sm font-medium transition-all"
-              style={{ background: !activeGenre ? "oklch(0.84 0.155 85)" : "oklch(0.115 0.055 278)", color: !activeGenre ? "oklch(0.09 0.04 265)" : "#E2E8F0", border: `1px solid ${!activeGenre ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.30)"}` }}
-            >
-              All
-            </button>
-            {Object.keys(GENRE_ICONS).map(genre => (
+
+          {/* Music genres */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Music size={11} style={{ color: "oklch(0.84 0.155 85)" }} />
+              <span className="text-[9px] font-mono tracking-widest uppercase" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}>WID-MUS</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
               <button
-                key={genre}
-                onClick={() => setActiveGenre(genre === activeGenre ? undefined : genre)}
-                className="px-4 py-2 rounded-full text-sm font-medium transition-all"
-                style={{ background: activeGenre === genre ? "oklch(0.84 0.155 85)" : "oklch(0.115 0.055 278)", color: activeGenre === genre ? "oklch(0.09 0.04 265)" : "#E2E8F0", border: `1px solid ${activeGenre === genre ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.30)"}` }}
+                onClick={() => setActiveGenre(undefined)}
+                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                style={{ background: !activeGenre ? "oklch(0.84 0.155 85)" : "oklch(0.115 0.055 278)", color: !activeGenre ? "oklch(0.09 0.04 265)" : "#E2E8F0", border: `1px solid ${!activeGenre ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.30)"}` }}
               >
-                {genre}
+                All Music
               </button>
-            ))}
+              {MUSIC_GENRES.map(genre => (
+                <button
+                  key={genre}
+                  onClick={() => setActiveGenre(genre === activeGenre ? undefined : genre)}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                  style={{ background: activeGenre === genre ? "oklch(0.84 0.155 85)" : "oklch(0.115 0.055 278)", color: activeGenre === genre ? "oklch(0.09 0.04 265)" : "#E2E8F0", border: `1px solid ${activeGenre === genre ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.30)"}` }}
+                >
+                  {genre}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Manuscript categories */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen size={11} style={{ color: "oklch(0.65 0.18 145)" }} />
+              <span className="text-[9px] font-mono tracking-widest uppercase" style={{ color: "oklch(0.65 0.18 145 / 0.7)" }}>WID-MAN</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {MANUSCRIPT_CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => toast.info(`Filtering by ${cat} coming soon`)}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                  style={{ background: "oklch(0.115 0.055 278)", color: "#E2E8F0", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Lyrics categories */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <FileText size={11} style={{ color: "oklch(0.75 0.18 300)" }} />
+              <span className="text-[9px] font-mono tracking-widest uppercase" style={{ color: "oklch(0.75 0.18 300 / 0.7)" }}>WID-LYR</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {LYRICS_CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => toast.info(`Filtering by ${cat} coming soon`)}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                  style={{ background: "oklch(0.115 0.055 278)", color: "#E2E8F0", border: "1px solid oklch(0.75 0.18 300 / 0.3)" }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -386,15 +487,26 @@ export default function DiscoverPage() {
           originRect={addToListRect}
         />
 
-        {/* Creators Gallery */}
+        {/* ── Discover Works (manuscripts + comics) ── */}
         <div>
-          <div id="section-featured" className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Discover Works</h2>
+          </div>
+          <div className="space-y-6">
+            <WorkCarousel type="manuscript" title="Manuscripts" viewAllHref="/explore?type=manuscript" />
+            <WorkCarousel type="comic" title="Comics" viewAllHref="/explore?type=comic" />
+          </div>
+        </div>
+
+        {/* Creators Gallery — horizontal scroll with snap */}
+        <div>
+          <div id="section-featured" className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Featured Creators</h2>
           </div>
           {creatorsLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="flex gap-3 overflow-hidden">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="rounded-xl animate-pulse" style={{ background: "oklch(0.115 0.055 278)", height: 140 }} />
+                <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: 120, height: 160, background: "oklch(0.115 0.055 278)" }} />
               ))}
             </div>
           ) : !creators?.length ? (
@@ -403,16 +515,19 @@ export default function DiscoverPage() {
               <p className="text-sm">No creators yet. Sign in and upload to join the roster.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {creators.filter((c: any) => c.name && c.name.trim().length > 0).slice(0, 12).map((creator: any) => {
+            <div
+              className="flex gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {creators.filter((c: any) => c.name && c.name.trim().length > 0).slice(0, 24).map((creator: any) => {
                 const displayName = creator.artistHandle || creator.name || "Creator";
                 const initial = displayName.charAt(0).toUpperCase();
                 // Deterministic gradient color per creator based on id
                 const hues = [30, 200, 280, 120, 340, 60];
                 const hue = hues[creator.id % hues.length];
                 return (
-                  <Link key={creator.id} href={`/creator/${creator.id}`}>
-                    <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+                  <Link key={creator.id} href={`/creator/${creator.id}`} className="flex-shrink-0 snap-start">
+                    <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ width: 120, background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
                       <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden flex items-center justify-center" style={{ background: creator.profilePhotoUrl ? undefined : `oklch(0.22 0.08 ${hue})`, border: "2px solid oklch(0.75 0.18 85 / 0.4)" }}>
                         {creator.profilePhotoUrl ? (
                           <img src={creator.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />

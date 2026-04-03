@@ -2106,3 +2106,27 @@
 - [x] Add Witness Flow button to WIDPanel action buttons (links to /witness-flow/:witnessId)
 - [x] Write 15 trust layer tests (trust.layer.test.ts)
 - [x] All 123 tests passing across 13 test files, TypeScript: 0 errors
+
+## Phase 81: Witness Testimony System + Homepage Refactor
+- [x] witnessTestimonies DB table (id, wid, creatorId, content, linkedWorks, createdAt)
+- [x] DB migration pushed (TiDB JSON default fix applied)
+- [x] testimony.create tRPC procedure (immutable, WID-TST prefix)
+- [x] testimony.getByCreator tRPC procedure (public)
+- [x] testimony.getByWid tRPC procedure (public)
+- [x] testimony.count tRPC procedure (public)
+- [x] testimony.mine tRPC procedure (protected)
+- [x] verifyWid procedure updated to handle WID-TST lookups
+- [x] Testimony tab added to ProfilePage (my testimonies + add flow)
+- [x] Testimony section added to CreatorProfilePage (public view)
+- [x] WorkCarousel shared component (audio/lyrics/manuscript/comic)
+- [x] Creation Type Overview block on homepage (Music/Lyrics/Manuscripts/Comics with counts)
+- [x] Witnessed Voices section (WorkCarousel type=audio)
+- [x] Witnessed Manuscripts section (WorkCarousel type=manuscript)
+- [x] Witnessed Lyrics section (WorkCarousel type=lyrics)
+- [x] Witnessed Comics section (WorkCarousel type=comic)
+- [x] Extended Genre section (WID-MUS, WID-LYR, WID-MAN categories)
+- [x] Discover Works block (manuscripts + comics rows)
+- [x] Creators section updated to horizontal scroll with snap
+- [x] Admin nav link (LN Command) added to sidebar — role-gated (admin only)
+- [x] TypeScript: 0 errors
+- [x] Vitest: 123 tests passing (13 test files)

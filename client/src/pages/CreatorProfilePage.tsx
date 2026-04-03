@@ -421,6 +421,10 @@ export default function CreatorProfilePage() {
   });
   const isWitnessingCreator = witnessStatusQuery.data?.witnessing ?? false;
   const witnessCount = witnessStatusQuery.data?.count ?? 0;
+  const { data: creatorTestimonies = [] } = trpc.testimony.getByCreator.useQuery(
+    { creatorId, limit: 10 },
+    { enabled: creatorId > 0, staleTime: 60_000 }
+  );
   const { data: creatorCollections } = trpc.songs.getCollectionsByCreator.useQuery(
     { creatorId },
     { enabled: !!creatorId }
@@ -1126,6 +1130,44 @@ export default function CreatorProfilePage() {
               </Link>
             )}
           </div>
+        )}
+
+        {/* ── Witness Testimonies ── */}
+        {(creatorTestimonies as any[]).length > 0 && (
+          <section className="py-6 pb-12">
+            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+              Testimonies
+            </h2>
+            <div className="space-y-3">
+              {(creatorTestimonies as any[]).map((t: any) => (
+                <div key={t.id} className="p-4 rounded-xl" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span
+                      className="font-mono text-[10px] px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
+                      style={{ background: "oklch(0.18 0.04 80)", color: "#D4AF37", border: "1px solid oklch(0.28 0.08 80)" }}
+                      onClick={() => { navigator.clipboard.writeText(t.wid); toast.success("WID-TST copied!"); }}
+                      title="Click to copy WID"
+                    >
+                      {t.wid}
+                    </span>
+                    <span className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>{new Date(t.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "oklch(0.75 0.03 280)" }}>{t.content}</p>
+                  {t.linkedWorks && (t.linkedWorks as string[]).length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {(t.linkedWorks as string[]).map((wid: string) => (
+                        <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.14 0.02 280)", color: "oklch(0.5 0.06 280)", border: "1px solid oklch(0.2 0.03 280)" }}>{wid}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-2 flex items-center gap-1">
+                    <Shield className="w-3 h-3" style={{ color: "oklch(0.4 0.03 280)" }} />
+                    <span className="text-[9px]" style={{ color: "oklch(0.4 0.03 280)" }}>Immutable — sealed at creation</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
       </div>
 

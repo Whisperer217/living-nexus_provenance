@@ -715,3 +715,18 @@ export const playEvents = mysqlTable("playEvents", {
 });
 export type PlayEvent = typeof playEvents.$inferSelect;
 export type InsertPlayEvent = typeof playEvents.$inferInsert;
+
+// ─── Witness Testimonies ──────────────────────────────────────────────────────
+// A Testimony is an immutable, WID-linked statement of creator intent.
+// Once created it cannot be edited or deleted — it is a permanent record.
+// WID prefix: WID-TST (Witness ID — Testimony)
+export const witnessTestimonies = mysqlTable("witnessTestimonies", {
+  id: int("id").autoincrement().primaryKey(),
+  wid: varchar("wid", { length: 64 }).notNull().unique(),          // WID-TST-XXXXXXXX-YYYYYYYY
+  creatorId: int("creatorId").notNull(),                            // FK → users.id
+  content: text("content").notNull(),                               // The testimony text (immutable)
+  linkedWorks: json("linkedWorks").$type<string[]>(),              // Array of WIDs this testimony references (null = none)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type WitnessTestimony = typeof witnessTestimonies.$inferSelect;
+export type InsertWitnessTestimony = typeof witnessTestimonies.$inferInsert;

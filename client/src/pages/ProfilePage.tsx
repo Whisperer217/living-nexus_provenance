@@ -109,7 +109,10 @@ export default function ProfilePage() {
     enabled: !!user,
   });
 
-  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony">("overview");
+  const [showAddTestimony, setShowAddTestimony] = useState(false);
+  const [testimonyContent, setTestimonyContent] = useState("");
+  const [testimonyLinkedWorks, setTestimonyLinkedWorks] = useState<string[]>([]);
 
   // ── Identity data ────────────────────────────────────────────────
   const { data: myStats } = trpc.profile.myStats.useQuery(undefined, { enabled: !!user });
@@ -120,6 +123,17 @@ export default function ProfilePage() {
   const { data: likedSongs = [] } = trpc.songs.getLiked.useQuery(undefined, { enabled: !!user && activeTab === "liked" });
   const { data: myPlaylists = [] } = trpc.playlists.mine.useQuery(undefined, { enabled: !!user && activeTab === "collections" });
   const { data: myFieldNotes = [] } = trpc.fieldNotes.mine.useQuery(undefined, { enabled: !!user && activeTab === "field-notes" });
+  const { data: myTestimonies = [] } = trpc.testimony.mine.useQuery(undefined, { enabled: !!user && activeTab === "testimony" });
+  const createTestimonyMutation = trpc.testimony.create.useMutation({
+    onSuccess: () => {
+      utils.testimony.mine.invalidate();
+      setShowAddTestimony(false);
+      setTestimonyContent("");
+      setTestimonyLinkedWorks([]);
+      toast.success("Testimony witnessed — WID-TST generated!");
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const { data: notifications = [] } = trpc.notifications.list.useQuery(undefined, { enabled: !!user && activeTab === "signals" });
   const markAllRead = trpc.notifications.markAllRead.useMutation({
     onSuccess: () => {
@@ -705,6 +719,7 @@ export default function ProfilePage() {
             { id: "liked",        label: "Liked" },
             { id: "signals",      label: "Signals", badge: (unreadCount as number) > 0 ? String(unreadCount) : null },
             { id: "field-notes",  label: "Field Notes" },
+            { id: "testimony",     label: "Testimony" },
           ];
           return (
             <div className="flex gap-0 mb-5 border-b border-white/[0.07] overflow-x-auto scrollbar-none">
@@ -1071,6 +1086,149 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════
+             TESTIMONY TAB — Immutable WID-TST creator statements
+        ═══════════════════════════════════════════════════════════ */}
+        {activeTab === "testimony" && (
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[11px] font-heading tracking-widest text-white/30">{(myTestimonies as any[]).length} TESTIMONIES</span>
+                <p className="text-[10px] font-body text-white/20 mt-0.5">Permanent, immutable statements of creator intent — each sealed with a WID-TST</p>
+              </div>
+              <button
+                onClick={() => setShowAddTestimony(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body transition-all"
+                style={{ background: "oklch(0.18 0.04 80)", border: "1px solid oklch(0.28 0.08 80)", color: "#D4AF37" }}
+              >
+                <Fingerprint size={11} /> Add Testimony
+              </button>
+            </div>
+
+            {/* Add Testimony Modal */}
+            {showAddTestimony && createPortal(
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
+                <div className="w-full max-w-lg rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.013 280)", border: "1px solid oklch(0.22 0.02 280)" }}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-[16px] font-heading text-white">Add Testimony</h3>
+                      <p className="text-[11px] font-body text-white/40 mt-0.5">This statement is permanent and cannot be edited after creation.</p>
+                    </div>
+                    <button onClick={() => setShowAddTestimony(false)} className="text-white/30 hover:text-white/70 transition-colors"><X size={18} /></button>
+                  </div>
+
+                  {/* Content */}
+                  <div>
+                    <label className="text-[10px] font-heading tracking-widest text-white/40 block mb-1.5">YOUR TESTIMONY</label>
+                    <textarea
+                      value={testimonyContent}
+                      onChange={e => setTestimonyContent(e.target.value)}
+                      placeholder="State why this work exists, what it means, or what you want the world to know about your creation..."
+                      rows={6}
+                      maxLength={5000}
+                      className="w-full rounded-xl px-3 py-2.5 text-[13px] font-body text-white/85 resize-none focus:outline-none focus:ring-1"
+                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid oklch(0.25 0.02 280)", caretColor: "#D4AF37" }}
+                    />
+                    <div className="text-right text-[10px] font-body text-white/25 mt-1">{testimonyContent.length}/5000</div>
+                  </div>
+
+                  {/* Linked Works */}
+                  <div>
+                    <label className="text-[10px] font-heading tracking-widest text-white/40 block mb-1.5">LINKED WORK WIDs (optional)</label>
+                    <input
+                      type="text"
+                      placeholder="WID-MUS-XXXXXXXX-YYYYYYYY (comma-separated)"
+                      className="w-full rounded-xl px-3 py-2 text-[12px] font-body text-white/70 focus:outline-none focus:ring-1"
+                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid oklch(0.25 0.02 280)" }}
+                      onChange={e => {
+                        const wids = e.target.value.split(",").map(w => w.trim()).filter(Boolean);
+                        setTestimonyLinkedWorks(wids);
+                      }}
+                    />
+                    <p className="text-[10px] font-body text-white/25 mt-1">Link this testimony to specific works by their Witness IDs</p>
+                  </div>
+
+                  {/* WID preview */}
+                  <div className="rounded-xl p-3" style={{ background: "oklch(0.14 0.02 80)", border: "1px solid oklch(0.22 0.05 80)" }}>
+                    <div className="text-[10px] font-heading tracking-widest text-white/30 mb-1">WILL GENERATE</div>
+                    <div className="font-mono text-[13px]" style={{ color: "#D4AF37" }}>WID-TST-XXXXXXXX-YYYYYYYY</div>
+                    <div className="text-[10px] font-body text-white/30 mt-0.5">A unique Witness ID sealed to your identity and this content</div>
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => setShowAddTestimony(false)}
+                      className="flex-1 py-2 rounded-xl text-[13px] font-body text-white/40 transition-all"
+                      style={{ border: "1px solid oklch(0.22 0.02 280)" }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => createTestimonyMutation.mutate({ content: testimonyContent, linkedWorks: testimonyLinkedWorks.length > 0 ? testimonyLinkedWorks : undefined })}
+                      disabled={testimonyContent.length < 10 || createTestimonyMutation.isPending}
+                      className="flex-1 py-2 rounded-xl text-[13px] font-heading tracking-wide transition-all disabled:opacity-40"
+                      style={{ background: "oklch(0.55 0.15 80)", color: "oklch(0.1 0.02 80)" }}
+                    >
+                      {createTestimonyMutation.isPending ? "Witnessing…" : "Seal Testimony"}
+                    </button>
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )}
+
+            {/* Testimony list */}
+            {(myTestimonies as any[]).length === 0 ? (
+              <div className="text-center py-14">
+                <Fingerprint size={28} className="mx-auto mb-3 text-white/15" />
+                <p className="text-white/30 font-body text-[13px] mb-1">No testimonies yet</p>
+                <p className="text-[11px] font-body text-white/20 mb-4 max-w-xs mx-auto">A testimony is a permanent statement of why your work exists. It cannot be changed — only added to.</p>
+                <button
+                  onClick={() => setShowAddTestimony(true)}
+                  className="text-[#D4AF37] hover:underline text-[12px] font-body"
+                >
+                  Add your first testimony
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {(myTestimonies as any[]).map((t: any) => (
+                  <div key={t.id} className="p-4 rounded-xl border border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.12] transition-all">
+                    {/* WID badge */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span
+                        className="font-mono text-[10px] px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
+                        style={{ background: "oklch(0.18 0.04 80)", color: "#D4AF37", border: "1px solid oklch(0.28 0.08 80)" }}
+                        onClick={() => { navigator.clipboard.writeText(t.wid); toast.success("WID-TST copied!"); }}
+                        title="Click to copy WID"
+                      >
+                        {t.wid}
+                      </span>
+                      <span className="text-[10px] font-body text-white/25">{new Date(t.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    {/* Content */}
+                    <p className="text-[13px] font-body text-white/75 leading-relaxed whitespace-pre-wrap">{t.content}</p>
+                    {/* Linked works */}
+                    {t.linkedWorks && (t.linkedWorks as string[]).length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {(t.linkedWorks as string[]).map((wid: string) => (
+                          <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.16 0.02 280)", color: "oklch(0.55 0.08 280)", border: "1px solid oklch(0.22 0.03 280)" }}>{wid}</span>
+                        ))}
+                      </div>
+                    )}
+                    {/* Immutability notice */}
+                    <div className="mt-2 flex items-center gap-1">
+                      <Shield size={9} className="text-white/20" />
+                      <span className="text-[9px] font-body text-white/20">Immutable — sealed at creation</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}

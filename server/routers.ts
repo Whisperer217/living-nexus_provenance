@@ -57,6 +57,7 @@ import {
   getAllSystemConfig, getSystemConfigValue, setSystemConfigValue,
   resetUserBilling, getAllUsersAdmin,
   recordPlayEvent, getPlayAuditStats, MIN_PLAY_SECONDS,
+  createTestimony, getTestimoniesByCreator, getTestimonyByWid, getTestimonyCount,
 } from "./db";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
@@ -211,6 +212,50 @@ export async function handleStripeWebhook(req: any, res: any) {
 export const appRouter = router({
   system: systemRouter,
 
+  // ─── Witness Testimony ────────────────────────────────────────────────────────
+  testimony: router({
+    /** Create an immutable testimony. Generates a WID-TST automatically. */
+    create: protectedProcedure
+      .input(z.object({
+        content: z.string().min(10).max(5000),
+        linkedWorks: z.array(z.string()).max(20).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Generate WID-TST from content hash
+        const { createHash } = await import("crypto");
+        const hash = createHash("sha256")
+          .update(`${ctx.user.id}:${input.content}:${Date.now()}`)
+          .digest("hex");
+        const wid = `WID-TST-${hash.slice(0, 8).toUpperCase()}-${hash.slice(8, 16).toUpperCase()}`;
+        const testimony = await createTestimony({
+          wid,
+          creatorId: ctx.user.id,
+          content: input.content,
+          linkedWorks: input.linkedWorks,
+        });
+        return testimony;
+      }),
+
+    /** Get all testimonies for a creator (public). */
+    getByCreator: publicProcedure
+      .input(z.object({ creatorId: z.number(), limit: z.number().max(100).optional() }))
+      .query(async ({ input }) => getTestimoniesByCreator(input.creatorId, input.limit ?? 50)),
+
+    /** Get a single testimony by its WID (public). */
+    getByWid: publicProcedure
+      .input(z.object({ wid: z.string() }))
+      .query(async ({ input }) => getTestimonyByWid(input.wid)),
+
+    /** Get testimony count for a creator (public, for profile stats). */
+    count: publicProcedure
+      .input(z.object({ creatorId: z.number() }))
+      .query(async ({ input }) => getTestimonyCount(input.creatorId)),
+
+    /** Get the current user's own testimonies. */
+    mine: protectedProcedure
+      .query(async ({ ctx }) => getTestimoniesByCreator(ctx.user.id, 100)),
+  }),
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -354,6 +399,39 @@ export const appRouter = router({
     trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
     getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => getSongWithCreator(input.id)),
     verifyWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
+      // Handle WID-TST (testimony) lookups
+      if (input.witnessId.startsWith("WID-TST-")) {
+        const testimony = await getTestimonyByWid(input.witnessId);
+        if (!testimony) throw new TRPCError({ code: "NOT_FOUND", message: "No testimony found for this Witness ID" });
+        const creator = await getUserById(testimony.creatorId);
+        return {
+          witnessId: testimony.wid,
+          title: `Testimony by ${creator?.artistHandle || creator?.name || "Creator"}`,
+          artistName: creator?.artistHandle || creator?.name || "Unknown",
+          artistHandle: creator?.artistHandle ?? null,
+          profilePhotoUrl: creator?.profilePhotoUrl ?? null,
+          songId: null,
+          registeredAt: testimony.createdAt,
+          fileHash: null,
+          lyricsHash: null,
+          isLyricsOnly: false,
+          ecdsaSignature: null,
+          ecdsaPublicKey: null,
+          harmonicSignature: null,
+          coverArtUrl: null,
+          aiConsent: false,
+          genre: null,
+          isrc: null,
+          nameAtWitnessing: creator?.artistHandle || creator?.name || "Unknown",
+          nameHistory: [],
+          lyricsWid: null,
+          lyricsFileName: null,
+          lyricsAddedAt: null,
+          contentType: "testimony" as any,
+          testimonyContent: testimony.content,
+          testimonyLinkedWorks: (testimony.linkedWorks as string[] | null) ?? [],
+        };
+      }
       const result = await getSongByWitnessId(input.witnessId);
       if (!result) throw new TRPCError({ code: "NOT_FOUND", message: "No record found for this Witness ID" });
       const { song, creator } = result;

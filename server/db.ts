@@ -12,6 +12,7 @@ import {
   platformSupporters,
   audioVersions,
   playEvents,
+  witnessTestimonies,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -2615,3 +2616,56 @@ export async function getAllUsersAdmin(limit = 50, offset = 0) {
   if (!db) return [];
   return db.select().from(users).orderBy(desc(users.createdAt)).limit(limit).offset(offset);
 }
+
+// ─── Witness Testimony Helpers ────────────────────────────────────────────────
+
+/** Create an immutable witness testimony. Returns the inserted row. */
+export async function createTestimony(data: {
+  wid: string;
+  creatorId: number;
+  content: string;
+  linkedWorks?: string[];
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.insert(witnessTestimonies).values({
+    wid: data.wid,
+    creatorId: data.creatorId,
+    content: data.content,
+    linkedWorks: (data.linkedWorks ?? null) as unknown as string[],
+  });
+  // Return the newly created testimony
+  const rows = await db.select().from(witnessTestimonies)
+    .where(eq(witnessTestimonies.wid, data.wid)).limit(1);
+  return rows[0] ?? null;
+}
+
+/** Get all testimonies for a creator, newest first. */
+export async function getTestimoniesByCreator(creatorId: number, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(witnessTestimonies)
+    .where(eq(witnessTestimonies.creatorId, creatorId))
+    .orderBy(desc(witnessTestimonies.createdAt))
+    .limit(limit);
+}
+
+/** Get a single testimony by its WID. */
+export async function getTestimonyByWid(wid: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(witnessTestimonies)
+    .where(eq(witnessTestimonies.wid, wid)).limit(1);
+  return rows[0] ?? null;
+}
+
+/** Get testimony count for a creator (for profile stats). */
+export async function getTestimonyCount(creatorId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(witnessTestimonies)
+    .where(eq(witnessTestimonies.creatorId, creatorId));
+  return Number(result[0]?.count ?? 0);
+}
+
