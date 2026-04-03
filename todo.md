@@ -2016,4 +2016,19 @@
 - [x] Add WID Witness Cache Layer (offline proof memory, 24h TTL)
 - [x] Add lightweight explore results cache (5-15 min TTL, max 20 items, slim payload)
 - [x] Add creator profile cache (1h TTL, basic info only)
-- [ ] TypeScript: 0 errors | Vitest: all passing
+- [x] TypeScript: 0 errors | Vitest: all passing
+
+## Phase 77: WID Cache Panel + PWA + Cover Art Compression
+
+- [x] Add WID Witness Cache panel to Dashboard (reads lnxCache snapshots, shows WID, title, type, timestamp, verify link)
+- [x] Add PWA manifest.json and service worker (sw.js) — already existed (v5) for static asset caching and offline shell
+- [x] Register service worker in main.tsx — already registered
+- [ ] Add client-side cover art compression to WebP (max 400x400, canvas resize) before S3 upload in UploadPage
+- [x] TypeScript: 0 errors | Vitest: all passing
+
+## Phase 77: WID Cache Panel + PWA + Cover Art Compression
+- [x] Add WID Witness Cache panel to Dashboard
+- [x] Add PWA manifest.json and service worker (sw.js) — already existed (v5)
+- [x] Register service worker in main.tsx — already registered
+- [x] Add client-side cover art compression to WebP before S3 upload
+- [x] TypeScript: 0 errors

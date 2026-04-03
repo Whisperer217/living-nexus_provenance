@@ -386,6 +386,43 @@ export default function UploadPage() {
     URL.revokeObjectURL(url);
   };
 
+  // Helper: compress cover art to WebP (max 400x400) before upload
+  // Reduces file size by ~70-90% vs original JPEG/PNG — safe for Safari 16.4+, Brave, Chrome
+  const compressCoverArt = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      // If already small or not an image, skip compression
+      if (file.size < 50_000 || !file.type.startsWith("image/")) {
+        resolve(file);
+        return;
+      }
+      const img = new window.Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const MAX = 400;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { resolve(file); return; }
+            const compressed = new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), { type: "image/webp" });
+            resolve(compressed);
+          },
+          "image/webp",
+          0.82 // quality 82% — good balance of size vs fidelity
+        );
+      };
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+      img.src = objectUrl;
+    });
+  };
+
   // Helper: upload a single file via multipart POST to /api/upload-file
   // For audio files, uses XHR so we can track upload progress
   const uploadFileToS3 = async (
@@ -452,7 +489,8 @@ export default function UploadPage() {
         fileUrl = docUrl;
         fileKey = docKey;
         if (coverFile) {
-          const { url } = await uploadFileToS3(coverFile, "cover");
+          const compressed = await compressCoverArt(coverFile);
+          const { url } = await uploadFileToS3(compressed, "cover");
           coverArtUrl = url;
         }
         uploadMutation.mutate({
@@ -474,7 +512,8 @@ export default function UploadPage() {
         // Lyrics-only: cover art may still be an image, upload via multipart
         let coverArtUrl: string | undefined;
         if (coverFile) {
-          const { url } = await uploadFileToS3(coverFile, "cover");
+          const compressed = await compressCoverArt(coverFile);
+          const { url } = await uploadFileToS3(compressed, "cover");
           coverArtUrl = url;
         }
         uploadMutation.mutate({
@@ -505,7 +544,8 @@ export default function UploadPage() {
       setUploadPhase("processing");
       let coverArtUrl: string | undefined;
       if (coverFile) {
-        const { url } = await uploadFileToS3(coverFile, "cover");
+        const compressed = await compressCoverArt(coverFile);
+        const { url } = await uploadFileToS3(compressed, "cover");
         coverArtUrl = url;
       }
       uploadMutation.mutate({

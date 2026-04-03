@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { getWIDSnapshots, clearWIDSnapshots, type WIDSnapshot } from "@/lib/lnxCache";
 import { DashboardErrorCard } from "@/components/DashboardErrorCard";
 import { WIDPanel } from "@/components/WIDPanel";
 import { ImagePositioner } from "@/components/ImagePositioner";
@@ -16,11 +17,11 @@ import {
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
   XCircle, Download, Play, Activity, MessageCircle, Zap, Gift,
   Library, RefreshCw, FileArchive, PackageOpen, Camera, X,
-  TrendingUp, Heart, LineChart, Pencil
+  TrendingUp, Heart, LineChart, Pencil, Fingerprint, BookOpen, FileText, Image
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
-type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive" | "analytics";
+type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive" | "analytics" | "widcache";
 
 interface BatchTrack {
   id: number;
@@ -597,6 +598,19 @@ export default function DashboardPage() {
           >
             <LineChart className="w-4 h-4" />
             Analytics
+          </button>
+          <button
+            onClick={() => setActiveTab("widcache")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "widcache" ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
+              color: activeTab === "widcache" ? "oklch(0.84 0.155 85)" : "oklch(0.6 0.04 280)",
+              border: activeTab === "widcache" ? "1px solid oklch(0.84 0.155 85 / 0.35)" : "1px solid transparent",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <Fingerprint className="w-4 h-4" />
+            Witness Cache
           </button>
         </div>
         {/* My Songs Tab */}
@@ -1310,6 +1324,8 @@ export default function DashboardPage() {
             )}
           </div>
         )}
+      {/* WID Witness Cache Tab */}
+      {activeTab === "widcache" && <WIDCacheTab />}
       </div>
       {/* ── Edit Track Panel ───────────────────────────────────────── */}
       {editingSong && (
@@ -1521,3 +1537,128 @@ function ArchiveTab() {
    );
 }
 // ─── Archive Tab Component
+// ─── WID Witness Cache Tab ────────────────────────────────────────────────────
+function WIDCacheTab() {
+  const [snapshots, setSnapshots] = useState<WIDSnapshot[]>(() => getWIDSnapshots());
+
+  const handleClear = () => {
+    clearWIDSnapshots();
+    setSnapshots([]);
+    toast.success("Local witness cache cleared");
+  };
+
+  const MEDIUM_ICON: Record<string, React.ElementType> = {
+    audio: Music,
+    lyrics: FileText,
+    manuscript: BookOpen,
+    comic: Image,
+  };
+
+  const MEDIUM_LABEL: Record<string, string> = {
+    audio: "WID-MUS",
+    lyrics: "WID-LYR",
+    manuscript: "WID-MAN",
+    comic: "WID-CMX",
+  };
+
+  const MEDIUM_COLOR: Record<string, string> = {
+    audio: "oklch(0.84 0.155 85)",
+    lyrics: "oklch(0.65 0.2 300)",
+    manuscript: "oklch(0.65 0.18 45)",
+    comic: "oklch(0.65 0.18 220)",
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+            Witness Cache
+          </h2>
+          <p className="text-xs mt-0.5" style={{ color: "oklch(0.5 0.03 280)" }}>
+            Local offline proof memory · Stored on this device · 24-hour TTL · Max 50 entries
+          </p>
+        </div>
+        {snapshots.length > 0 && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleClear}
+            className="text-xs"
+            style={{ borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.5 0.03 280)" }}
+          >
+            <Trash2 className="w-3 h-3 mr-1" /> Clear Cache
+          </Button>
+        )}
+      </div>
+
+      {snapshots.length === 0 ? (
+        <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+          <Fingerprint className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
+          <p className="text-sm mb-1" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>No witness records cached</p>
+          <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
+            After you publish a work, its WID will appear here as an offline proof record.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {snapshots.map((snap) => {
+            const Icon = MEDIUM_ICON[snap.contentType] ?? Fingerprint;
+            const label = MEDIUM_LABEL[snap.contentType] ?? "WID";
+            const color = MEDIUM_COLOR[snap.contentType] ?? "oklch(0.84 0.155 85)";
+            return (
+              <div
+                key={snap.wid}
+                className="flex items-start gap-4 p-4 rounded-xl"
+                style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}
+              >
+                {/* Medium icon */}
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${color}18`, border: `1px solid ${color}44` }}
+                >
+                  <Icon className="w-5 h-5" style={{ color }} />
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span
+                      className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded"
+                      style={{ background: `${color}18`, color, fontFamily: "'Cinzel', serif" }}
+                    >
+                      {label}
+                    </span>
+                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "oklch(0.65 0.18 145)" }} />
+                    <span className="text-[10px]" style={{ color: "oklch(0.65 0.18 145)" }}>Verified</span>
+                  </div>
+                  <p className="text-sm font-semibold truncate mb-1" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+                    {snap.title}
+                  </p>
+                  <p className="text-[10px] font-mono break-all mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>
+                    {snap.wid}
+                  </p>
+                  <p className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+                    Witnessed {new Date(snap.timestamp).toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Verify link */}
+                <a
+                  href={`/verify/${snap.wid}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
+                  style={{ background: `${color}18`, color, border: `1px solid ${color}44`, fontFamily: "'Cinzel', serif" }}
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Verify
+                </a>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -122,6 +122,11 @@ export function getWIDSnapshots(): WIDSnapshot[] {
   return getCache<WIDSnapshot[]>(CACHE_KEYS.WID_SNAPSHOTS) ?? [];
 }
 
+/** Clear all locally cached WID snapshots. */
+export function clearWIDSnapshots(): void {
+  removeCache(CACHE_KEYS.WID_SNAPSHOTS);
+}
+
 // ── Explore results cache ─────────────────────────────────────────────────
 export interface ExploreResultSlim {
   id: number;
