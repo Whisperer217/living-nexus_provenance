@@ -1622,12 +1622,40 @@ export async function createNotification(data: {
 export async function getNotifications(userId: number, limit = 50) {
   const db = await getDb();
   if (!db) return [];
-  const { notifications } = await import("../drizzle/schema");
-  return (db as any)
-    .select().from(notifications)
+  const { notifications, songs, users } = await import("../drizzle/schema");
+  const rows = await (db as any)
+    .select({
+      // notification fields
+      id: notifications.id,
+      userId: notifications.userId,
+      type: notifications.type,
+      title: notifications.title,
+      body: notifications.body,
+      actorId: notifications.actorId,
+      actorName: notifications.actorName,
+      actorAvatarUrl: notifications.actorAvatarUrl,
+      refId: notifications.refId,
+      refType: notifications.refType,
+      isRead: notifications.isRead,
+      archivedAt: notifications.archivedAt,
+      createdAt: notifications.createdAt,
+      // song metadata (only populated for comment/like/tip signals with refType=song)
+      songTitle: songs.title,
+      songCoverArtUrl: songs.coverArtUrl,
+      songFileUrl: songs.fileUrl,
+      songArtistName: users.name,
+      songCreatorId: songs.userId,
+    })
+    .from(notifications)
+    .leftJoin(songs, and(
+      eq(notifications.refId, songs.id),
+      sql`${notifications.refType} = 'song'`
+    ))
+    .leftJoin(users, eq(songs.userId, users.id))
     .where(and(eq(notifications.userId, userId), sql`${notifications.archivedAt} IS NULL`))
     .orderBy(desc(notifications.createdAt))
     .limit(limit);
+  return rows;
 }
 
 export async function markNotificationRead(notificationId: number, userId: number) {

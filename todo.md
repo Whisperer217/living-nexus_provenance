@@ -2041,7 +2041,7 @@
 - [ ] Standardize ExplorePage and VerifyPage to token system
 - [ ] Standardize DashboardPage and ArchivePage to token system
 - [ ] Standardize UploadPage and modals to token system
-- [ ] TypeScript: 0 errors | Visual: consistent across all pages
+- [x] TypeScript: 0 errors | Visual: consistent across all pages
 
 ## Phase 78: Color Provenance Standardization
 - [x] Define semantic color token system in index.css
@@ -2204,5 +2204,12 @@
 - [x] Reply textarea expands on click, collapses after submit
 - [x] Reply posts to the same song comment thread
 - [x] Success toast after reply submitted
+- [x] TypeScript: 0 errors
+- [x] Vitest: all tests passing
+## Phase 86: Signal Track Card
+- [x] Extend notifications.list to include song metadata (title, artist, coverUrl, slug/id) for comment signals
+- [x] Add inline track card to each comment signal showing cover art, title, artist
+- [x] Play button on track card loads song into global player
+- [x] Track title/cover links to /song/:id page
 - [x] TypeScript: 0 errors
 - [x] Vitest: all tests passing

@@ -8,7 +8,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import {
   Camera, Edit2, Check, X, Music, Heart, DollarSign,
   MapPin, Globe, Twitter, Instagram, Youtube, Share2,
@@ -21,6 +21,7 @@ import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
+import { usePlayer, Track } from "@/contexts/PlayerContext";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
@@ -90,6 +91,7 @@ export default function ProfilePage() {
   const { user, loading: authLoading, logout } = useAuth();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
+  const { addAndPlay } = usePlayer();
 
   const handleLogout = async () => {
     try {
@@ -1055,6 +1057,56 @@ export default function ProfilePage() {
                     <div className="flex-1 min-w-0">
                       <p className={`text-[13px] font-body truncate ${n.isRead ? "text-white/50" : "text-white/80"}`}>{n.title}</p>
                       {n.body && <p className="text-[11px] font-body text-white/40 mt-0.5 line-clamp-2">{n.body}</p>}
+                      {/* Track card — shown for any signal with a referenced song */}
+                      {n.refId && n.refType === "song" && n.songTitle && (
+                        <div
+                          className="mt-2 flex items-center gap-2 rounded-lg overflow-hidden"
+                          style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.03 280)" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {/* Cover art — links to song page */}
+                          <Link href={`/song/${n.refId}`} className="flex-shrink-0 relative group">
+                            <div className="w-10 h-10 bg-white/5 flex items-center justify-center overflow-hidden">
+                              {n.songCoverArtUrl ? (
+                                <img src={n.songCoverArtUrl} alt={n.songTitle} className="w-full h-full object-cover" />
+                              ) : (
+                                <Music size={14} className="text-white/30" />
+                              )}
+                            </div>
+                          </Link>
+                          {/* Title + artist */}
+                          <div className="flex-1 min-w-0 py-1">
+                            <Link href={`/song/${n.refId}`}>
+                              <p className="text-[11px] font-body text-white/80 truncate hover:text-[#A78BFA] transition-colors leading-tight">{n.songTitle}</p>
+                            </Link>
+                            {n.songArtistName && (
+                              <p className="text-[10px] font-body text-white/35 truncate leading-tight">{n.songArtistName}</p>
+                            )}
+                          </div>
+                          {/* Play button */}
+                          {n.songFileUrl && (
+                            <button
+                              onClick={() => {
+                                const track: Track = {
+                                  id: String(n.refId),
+                                  title: n.songTitle!,
+                                  artist: n.songArtistName || "Unknown",
+                                  genre: "",
+                                  audioUrl: n.songFileUrl!,
+                                  artUrl: n.songCoverArtUrl || undefined,
+                                  creatorId: n.songCreatorId || undefined,
+                                };
+                                addAndPlay(track);
+                              }}
+                              className="flex-shrink-0 w-8 h-8 mr-1 flex items-center justify-center rounded-full transition-all hover:scale-105"
+                              style={{ background: "oklch(0.28 0.06 280)", border: "1px solid oklch(0.38 0.1 280)" }}
+                              title="Play track"
+                            >
+                              <Play size={12} className="text-[#A78BFA] ml-0.5" fill="#A78BFA" />
+                            </button>
+                          )}
+                        </div>
+                      )}
                       {/* Reply button — only for comment signals that have a refId */}
                       {n.type === "comment" && n.refId && (
                         <button
