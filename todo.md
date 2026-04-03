@@ -2156,3 +2156,11 @@
 - [x] Fix "Track title" input placeholder text
 - [x] Fix Genre dropdown placeholder
 - [x] Fix sticky bar secondary text
+
+## Phase 83: LNA Inline Track Management
+- [x] Add download permission toggle (none/free/tipped) inline on each track row in ArchivePage
+- [x] Add updateDownloadPermission mutation with optimistic update in ArchivePage
+- [x] Show current download permission as inline button (No DL / Free DL / Tip DL) per track
+- [x] Clicking download button cycles through none → free → tipped → none
+- [x] TypeScript: 0 errors
+- [x] Vitest: 123 tests passing (13 test files)

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import {
   Music, Upload, Globe, EyeOff, Pencil, ExternalLink,
   Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
+  Download, Lock, Coins,
 } from "lucide-react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
@@ -233,6 +234,36 @@ export default function ArchivePage() {
     },
     onError: () => toast.error("Failed to delete track"),
   });
+
+  /* Download permission — optimistic cycle: none → free → tipped → none */
+  const updateDownload = trpc.songDownload.updatePermission.useMutation({
+    onMutate: async ({ songId, permission }) => {
+      await utils.songs.mySongs.cancel();
+      const prev = utils.songs.mySongs.getData();
+      utils.songs.mySongs.setData(undefined, (old: any) =>
+        old?.map((s: any) => s.id === songId ? { ...s, downloadPermission: permission } : s)
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) utils.songs.mySongs.setData(undefined, ctx.prev);
+      toast.error("Failed to update download setting");
+    },
+    onSuccess: (_data, vars) => {
+      const labels: Record<string, string> = { none: "Downloads off", free: "Free downloads on", tipped: "Tip-gated downloads on" };
+      toast.success(labels[vars.permission] ?? "Download setting updated");
+    },
+    onSettled: () => utils.songs.mySongs.invalidate(),
+  });
+
+  const cycleDownload = (e: React.MouseEvent, song: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const cycle: Record<string, "none" | "free" | "tipped"> = { none: "free", free: "tipped", tipped: "none" };
+    const current = (song.downloadPermission ?? "none") as string;
+    const next = cycle[current] ?? "none";
+    updateDownload.mutate({ songId: song.id, permission: next, tipThresholdCents: song.downloadTipThresholdCents ?? 179 });
+  };
 
   /* Reorder */
   const reorderMySongs = trpc.songs.reorderMySongs.useMutation({
@@ -583,6 +614,51 @@ export default function ArchivePage() {
                           <Pencil className="w-3 h-3" /> Edit
                         </button>
                       )}
+
+                      {/* Download permission cycle button */}
+                      {!isDeleted && (() => {
+                        const dlPerm = (song.downloadPermission ?? "none") as string;
+                        const dlPending = updateDownload.isPending && updateDownload.variables?.songId === song.id;
+                        const dlConfig: Record<string, { icon: React.ReactNode; label: string; bg: string; color: string; border: string }> = {
+                          none: {
+                            icon: <Lock className="w-3 h-3" />,
+                            label: "No DL",
+                            bg: "oklch(0.18 0.015 280 / 0.6)",
+                            color: "oklch(0.72 0.04 280)",
+                            border: "1px solid oklch(0.32 0.02 280)",
+                          },
+                          free: {
+                            icon: <Download className="w-3 h-3" />,
+                            label: "Free DL",
+                            bg: "oklch(0.65 0.18 145 / 0.12)",
+                            color: "oklch(0.65 0.18 145)",
+                            border: "1px solid oklch(0.65 0.18 145 / 0.35)",
+                          },
+                          tipped: {
+                            icon: <Coins className="w-3 h-3" />,
+                            label: "Tip DL",
+                            bg: "oklch(0.84 0.155 85 / 0.12)",
+                            color: "oklch(0.84 0.155 85)",
+                            border: "1px solid oklch(0.84 0.155 85 / 0.35)",
+                          },
+                        };
+                        const cfg = dlConfig[dlPerm] ?? dlConfig.none;
+                        return (
+                          <button
+                            onClick={(e) => cycleDownload(e, song)}
+                            disabled={dlPending}
+                            title={`Download: ${dlPerm} — click to cycle`}
+                            className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all disabled:opacity-50"
+                            style={{ background: cfg.bg, color: cfg.color, border: cfg.border }}
+                          >
+                            {dlPending
+                              ? <span className="w-3 h-3 rounded-full border border-t-transparent animate-spin" style={{ borderColor: "currentColor", borderTopColor: "transparent" }} />
+                              : cfg.icon
+                            }
+                            {cfg.label}
+                          </button>
+                        );
+                      })()}
 
                       {/* Publish toggle */}
                       {!isDeleted && (
