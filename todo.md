@@ -2146,3 +2146,13 @@
 - [x] Collection result screen — shows Collection WID, collective hash, track count
 - [x] TypeScript: 0 errors
 - [x] Vitest: 123 tests passing
+
+## Phase 82b: Batch Upload Page Readability Fix
+- [x] Increase contrast on all muted text, labels, placeholders on BatchUploadPage
+- [x] Fix "Collection / Album" section label, helper text, input placeholders
+- [x] Fix "Batch Fill" description text
+- [x] Fix "Tracks — 1 Card" section label
+- [x] Fix track card: "Untitled Track" placeholder, "Drop audio", "Cover Art" label, "Falls back to album art" hint
+- [x] Fix "Track title" input placeholder text
+- [x] Fix Genre dropdown placeholder
+- [x] Fix sticky bar secondary text
