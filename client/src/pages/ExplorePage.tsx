@@ -5,6 +5,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { getCache, setCache, CACHE_KEYS, TTL, setExploreCache, getExploreCache } from "@/lib/lnxCache";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -291,7 +292,9 @@ export default function ExplorePage() {
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
   const [mode, setMode] = useState<ExploreMode>("infinite");
-  const [contentType, setContentType] = useState<ContentType>("audio");
+  const [contentType, setContentType] = useState<ContentType>(
+    () => (getCache<string>(CACHE_KEYS.EXPLORE_TAB) as ContentType) ?? "audio"
+  );
 
   // Infinite scroll state — accumulate pages client-side
   const [offset, setOffset] = useState(0);
@@ -566,7 +569,7 @@ export default function ExplorePage() {
           {CONTENT_TABS.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setContentType(tab.id)}
+              onClick={() => { setContentType(tab.id); setCache(CACHE_KEYS.EXPLORE_TAB, tab.id, TTL.UI_STATE); }}
               className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] font-heading font-bold tracking-wide transition-all"
               style={contentType === tab.id
                 ? { background: "oklch(0.18 0.04 270)", color: tab.color, boxShadow: `0 0 12px ${tab.color}33` }

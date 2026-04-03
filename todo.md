@@ -2007,3 +2007,13 @@
 - [x] Add vertical volume slider to mobile full-screen player (MobilePlayerLayer)
 - [x] Add cinematic inline expand mode to desktop PlayerBar (full-bleed artwork + controls overlay)
 - [x] TypeScript: 0 errors | Vitest: all passing
+
+## Phase 76: localStorage Optimization + Browser Compatibility
+- [x] Build lnxCache TTL utility (setCache/getCache/clearExpired) with Safari/Brave/mobile guards
+- [x] Persist volume level to localStorage (survives page reload)
+- [x] Persist sidebar open/collapsed state to localStorage
+- [x] Persist last active Explore content-type tab to localStorage
+- [x] Add WID Witness Cache Layer (offline proof memory, 24h TTL)
+- [x] Add lightweight explore results cache (5-15 min TTL, max 20 items, slim payload)
+- [x] Add creator profile cache (1h TTL, basic info only)
+- [ ] TypeScript: 0 errors | Vitest: all passing

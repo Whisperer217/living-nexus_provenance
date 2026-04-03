@@ -18,6 +18,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useCallback } from "react";
+import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -153,7 +154,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     }
   }, [logout, navigate]);
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(
+    () => getCache<boolean>(CACHE_KEYS.SIDEBAR) ?? true
+  );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
@@ -311,7 +314,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <div className={`flex items-center gap-3 px-4 py-4 border-b border-white/[0.07] ${!sidebarOpen && "justify-center px-0"}`}>
             <div
               className="w-9 h-9 flex items-center justify-center flex-shrink-0 cursor-pointer"
-              onClick={() => setSidebarOpen(o => !o)}
+              onClick={() => setSidebarOpen(o => { const next = !o; setCache(CACHE_KEYS.SIDEBAR, next, TTL.UI_STATE); return next; })}
             >
               <img src={LOGO_URL} alt="Living Nexus" className="w-full h-full object-contain" />
             </div>

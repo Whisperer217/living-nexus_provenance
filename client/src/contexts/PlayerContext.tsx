@@ -5,6 +5,7 @@
 
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
 import { safeAudioUrl } from "@shared/const";
+import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
 
 export interface Comment {
   id: string;
@@ -196,7 +197,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       isShuffle: false,
       isRepeat: false,
       isMuted: false,
-      volume: 0.75,
+      volume: getCache<number>(CACHE_KEYS.VOLUME) ?? 0.75,
       currentTime: 0,
       duration: 0,
       liked: new Set(),
@@ -356,6 +357,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (!audio) return;
     audio.volume = v;
     setState(s => ({ ...s, volume: v, isMuted: false }));
+    setCache(CACHE_KEYS.VOLUME, v, TTL.UI_STATE); // persist across page reloads
   }, []);
 
   const seek = useCallback((t: number) => {

@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
+import { addWIDSnapshot } from "@/lib/lnxCache";
 
 const GENRES = [
   "Ambient / Lo-fi", "Electronic / House", "Gospel / Worship",
@@ -249,6 +250,17 @@ export default function UploadPage() {
         }
       } else {
         toast.success("Track published to Living Nexus!");
+      }
+      // Cache WID snapshot locally (offline proof memory, 24h TTL)
+      if (data?.witnessId && title) {
+        addWIDSnapshot({
+          wid: data.witnessId,
+          title,
+          creator: "", // filled from auth context on read
+          contentType: uploadMode,
+          timestamp: Date.now(),
+          verified: true,
+        });
       }
       navigate("/dashboard");
     },
