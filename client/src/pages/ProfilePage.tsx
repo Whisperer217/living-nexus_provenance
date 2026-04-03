@@ -91,7 +91,7 @@ export default function ProfilePage() {
   const { user, loading: authLoading, logout } = useAuth();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
-  const { addAndPlay } = usePlayer();
+  const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
 
   const handleLogout = async () => {
     try {
@@ -1083,28 +1083,45 @@ export default function ProfilePage() {
                               <p className="text-[10px] font-body text-white/35 truncate leading-tight">{n.songArtistName}</p>
                             )}
                           </div>
-                          {/* Play button */}
-                          {n.songFileUrl && (
-                            <button
-                              onClick={() => {
-                                const track: Track = {
-                                  id: String(n.refId),
-                                  title: n.songTitle!,
-                                  artist: n.songArtistName || "Unknown",
-                                  genre: "",
-                                  audioUrl: n.songFileUrl!,
-                                  artUrl: n.songCoverArtUrl || undefined,
-                                  creatorId: n.songCreatorId || undefined,
-                                };
-                                addAndPlay(track);
-                              }}
-                              className="flex-shrink-0 w-8 h-8 mr-1 flex items-center justify-center rounded-full transition-all hover:scale-105"
-                              style={{ background: "oklch(0.28 0.06 280)", border: "1px solid oklch(0.38 0.1 280)" }}
-                              title="Play track"
-                            >
-                              <Play size={12} className="text-[#A78BFA] ml-0.5" fill="#A78BFA" />
-                            </button>
-                          )}
+                          {/* Play / Now-Playing indicator */}
+                          {n.songFileUrl && (() => {
+                            const isSignalActive = currentTrackId === String(n.refId);
+                            const isSignalPlaying = isSignalActive && playerState.isPlaying;
+                            return (
+                              <button
+                                onClick={() => {
+                                  const track: Track = {
+                                    id: String(n.refId),
+                                    title: n.songTitle!,
+                                    artist: n.songArtistName || "Unknown",
+                                    genre: "",
+                                    audioUrl: n.songFileUrl!,
+                                    artUrl: n.songCoverArtUrl || undefined,
+                                    creatorId: n.songCreatorId || undefined,
+                                  };
+                                  addAndPlay(track);
+                                }}
+                                className="flex-shrink-0 w-8 h-8 mr-1 flex items-center justify-center rounded-full transition-all hover:scale-105"
+                                style={{
+                                  background: isSignalActive ? "oklch(0.22 0.04 85)" : "oklch(0.28 0.06 280)",
+                                  border: `1px solid ${isSignalActive ? "oklch(0.55 0.12 85)" : "oklch(0.38 0.1 280)"}`,
+                                }}
+                                title={isSignalActive ? "Now playing" : "Play track"}
+                              >
+                                {isSignalPlaying ? (
+                                  <div className="live-wave scale-75" style={{ "--gold": "#D4AF37" } as React.CSSProperties}>
+                                    <span /><span /><span /><span /><span />
+                                  </div>
+                                ) : isSignalActive ? (
+                                  <div className="live-wave paused scale-75" style={{ "--gold": "#D4AF37" } as React.CSSProperties}>
+                                    <span /><span /><span /><span /><span />
+                                  </div>
+                                ) : (
+                                  <Play size={12} className="text-[#A78BFA] ml-0.5" fill="#A78BFA" />
+                                )}
+                              </button>
+                            );
+                          })()}
                         </div>
                       )}
                       {/* Reply button — only for comment signals that have a refId */}

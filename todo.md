@@ -2213,3 +2213,10 @@
 - [x] Track title/cover links to /song/:id page
 - [x] TypeScript: 0 errors
 - [x] Vitest: all tests passing
+## Phase 87: Signal Track Card — Now Playing Indicator
+- [x] Read currentTrackId and state.isPlaying from usePlayer in ProfilePage
+- [x] Signal track card play button swaps to animated gold waveform when song is active + playing
+- [x] Signal track card shows paused waveform (frozen bars) when song is active but paused
+- [x] Button background/border shifts from violet to gold-tinted when active
+- [x] TypeScript: 0 errors
+- [x] Vitest: 123/123 passing (13 test files)
