@@ -2068,3 +2068,41 @@
 - [x] Wire admin action logging to all mutations
 - [x] TypeScript: 0 errors
 - [x] Vitest: 108 tests passing (13 new Command Center tests)
+
+## Phase 80: Trust Layer Integration
+- [ ] Add playEvents table to schema (songId, witnessId, sessionId, durationSeconds, completed, ipHash, userId)
+- [ ] Push DB migration for playEvents
+- [ ] Add recordPlayEvent db helper with 30s threshold + session dedup
+- [ ] Replace songs.play procedure with songs.recordPlay (sessionId, elapsed, witnessId)
+- [ ] Update PlayerContext to send play events with elapsed time + session ID
+- [ ] Add upload pipeline: document page-count extraction (PDF/DOCX)
+- [ ] Add upload pipeline: comic preview thumbnail generation
+- [ ] Add shared UploadMetadata type normalized across all 4 content types
+- [ ] Build WitnessFlowStepper component (4 steps: Identity → Work → Contribution → Certificate)
+- [ ] Wire WitnessFlowStepper into UploadPage post-witness step
+- [ ] Wire plays to WID (playEvents.witnessId references songs.witnessId)
+- [ ] Wire certificates to share pages (certificate download links to /share/:wid)
+- [ ] Add play audit stats to Dashboard (plays with threshold met vs raw)
+- [ ] TypeScript: 0 errors
+- [ ] Vitest: all tests passing
+
+## Phase 80: Trust Layer Integration
+- [x] Add playEvents table to DB schema (songId, witnessId, sessionId, userId, durationSeconds, completed, ipHash)
+- [x] Push DB migration for playEvents table
+- [x] Add MIN_PLAY_SECONDS = 30 constant to db.ts
+- [x] Add recordPlayEvent helper with 30s threshold, 80% completion detection, session deduplication
+- [x] Add getPlayAuditStats helper (total, completions, avgDuration)
+- [x] Add songs.recordPlay tRPC procedure (replaces fire-and-forget play mutation)
+- [x] Add songs.playAuditStats tRPC procedure
+- [x] Update PlayerContext to generate session IDs, track elapsed time, and call recordPlay with duration
+- [x] Create uploadPipeline.ts with UploadMetadata interface, sha256Hex, extractAudioMetadata, extractPdfMetadata, extractDocumentMetadata, extractComicMetadata, runUploadPipeline
+- [x] Install pdfjs-dist for PDF preview generation
+- [x] Add durationSeconds, sampleRate, bitDepth to songs.upload tRPC input schema
+- [x] Add sampleRate, bitDepth to createSong db.ts function signature
+- [x] Integrate runUploadPipeline into UploadPage handleGenerateWid (audio path)
+- [x] Wire pipelineMeta (durationSeconds, sampleRate, bitDepth) into upload mutation
+- [x] Create WitnessFlowPage with 4-step stepper: Identity → Work → Contribution → Certificate
+- [x] Register /witness-flow/:witnessId and /witness-flow/song/:songId routes in App.tsx
+- [x] Add Witness Flow button to WIDPanel action buttons (links to /witness-flow/:witnessId)
+- [x] Write 15 trust layer tests (trust.layer.test.ts)
+- [x] All 123 tests passing across 13 test files, TypeScript: 0 errors

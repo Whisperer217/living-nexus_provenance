@@ -6,6 +6,15 @@
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
 import { safeAudioUrl } from "@shared/const";
 import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
+import { trpc } from "@/lib/trpc";
+
+/** Generate a stable UUID v4 for this listening session */
+function generateSessionId(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+const MIN_PLAY_SECONDS = 30; // must match server constant
 
 export interface Comment {
   id: string;
@@ -469,6 +478,77 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const currentTrackId = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.id ?? null) : null;
   const backgroundCreatorHandle = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.creatorHandle ?? null) : null;
   const queueContextLabel = QUEUE_CONTEXT_LABELS[state.queueContext] ?? "Now Playing";
+
+  // ── Play Audit (Trust Layer) ─────────────────────────────────────────────────
+  // Each track gets a fresh sessionId when it starts playing.
+  // After MIN_PLAY_SECONDS (30 s) of continuous listening, we fire recordPlay once.
+  const playSessionRef = useRef<{ sessionId: string; songId: number; witnessId?: string; reported: boolean } | null>(null);
+  const recordPlayMutation = trpc.songs.recordPlay.useMutation();
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const onPlay = () => {
+      const tracks = state.tracks.filter(t => !!t.audioUrl);
+      const track = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
+      if (!track?.id) return;
+      const songId = parseInt(track.id, 10);
+      if (isNaN(songId)) return;
+      // Start a new session if the track changed or no session exists
+      if (!playSessionRef.current || playSessionRef.current.songId !== songId) {
+        playSessionRef.current = {
+          sessionId: generateSessionId(),
+          songId,
+          witnessId: track.witnessId,
+          reported: false,
+        };
+      }
+    };
+
+    const onTimeUpdate = () => {
+      const session = playSessionRef.current;
+      if (!session || session.reported) return;
+      const elapsed = audio.currentTime;
+      if (elapsed >= MIN_PLAY_SECONDS) {
+        session.reported = true; // prevent duplicate fires
+        recordPlayMutation.mutate({
+          songId: session.songId,
+          witnessId: session.witnessId,
+          sessionId: session.sessionId,
+          durationSeconds: Math.floor(elapsed),
+          totalDurationSeconds: audio.duration > 0 ? Math.floor(audio.duration) : undefined,
+        });
+      }
+    };
+
+    const onEnded = () => {
+      // On natural end, fire a final play event if not already reported
+      const session = playSessionRef.current;
+      if (session && !session.reported && audio.currentTime >= MIN_PLAY_SECONDS) {
+        session.reported = true;
+        recordPlayMutation.mutate({
+          songId: session.songId,
+          witnessId: session.witnessId,
+          sessionId: session.sessionId,
+          durationSeconds: Math.floor(audio.currentTime),
+          totalDurationSeconds: audio.duration > 0 ? Math.floor(audio.duration) : undefined,
+        });
+      }
+      // Reset session for next track
+      playSessionRef.current = null;
+    };
+
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", onEnded);
+    return () => {
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("ended", onEnded);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.currentIdx, state.tracks]);
 
   // ── MediaSession API: lock screen / notification shade controls ──
   useEffect(() => {

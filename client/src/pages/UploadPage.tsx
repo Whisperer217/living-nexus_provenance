@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { addWIDSnapshot } from "@/lib/lnxCache";
+import { runUploadPipeline, type UploadMetadata } from "@/lib/uploadPipeline";
 
 const GENRES = [
   "Ambient / Lo-fi", "Electronic / House", "Gospel / Worship",
@@ -177,6 +178,7 @@ export default function UploadPage() {
   const [waveformActive, setWaveformActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "processing" | "done">("idle");
+  const [pipelineMeta, setPipelineMeta] = useState<UploadMetadata | null>(null);
 
   // Load creator profile defaults (aiDisclosure, primaryGenre)
   const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
@@ -343,8 +345,10 @@ export default function UploadPage() {
     if (!audioFile) { toast.error("Please select an audio file first"); return; }
     setGeneratingWid(true);
     try {
-      const buffer = await audioFile.arrayBuffer();
-      const fileHash = await sha256Hex(buffer);
+      // Run the full upload pipeline: SHA-256 + audio metadata extraction
+      const meta = await runUploadPipeline(audioFile, "audio");
+      setPipelineMeta(meta);
+      const fileHash = meta.fileHash;
       const wid = formatWID(fileHash);
       const frequencies = deriveHarmonicFrequencies(fileHash);
       const keypair = await generateECDSAKeypair();
@@ -354,7 +358,13 @@ export default function UploadPage() {
       const timestamp = new Date().toISOString();
       setWitnessData({ wid, fileHash, frequencies, publicKeyJWK, signature, timestamp });
       setWaveformActive(true);
-      toast.success("Witness ID generated — cryptographic provenance established");
+      // Auto-fill BPM duration hint if not already set
+      if (meta.durationSeconds && !bpm) {
+        // Just a hint in the toast — user sets BPM manually
+        toast.success(`Witness ID generated — ${Math.floor(meta.durationSeconds / 60)}:${String(Math.floor(meta.durationSeconds % 60)).padStart(2, "0")} · ${(meta.sampleRate ?? 0) / 1000} kHz · cryptographic provenance established`);
+      } else {
+        toast.success("Witness ID generated — cryptographic provenance established");
+      }
     } catch {
       toast.error("Failed to generate Witness ID");
     } finally {
@@ -559,6 +569,10 @@ export default function UploadPage() {
         harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
         ecdsaSignature: witnessData?.signature,
         caption: caption || undefined,
+        // Audio metadata from upload pipeline
+        durationSeconds: pipelineMeta?.durationSeconds,
+        sampleRate: pipelineMeta?.sampleRate,
+        bitDepth: pipelineMeta?.bitDepth,
       } as any);
     } catch (err: any) {
       setUploadPhase("idle");

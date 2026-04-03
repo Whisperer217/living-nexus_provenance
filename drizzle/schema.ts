@@ -696,3 +696,22 @@ export const audioVersions = mysqlTable("audioVersions", {
 });
 export type AudioVersion = typeof audioVersions.$inferSelect;
 export type InsertAudioVersion = typeof audioVersions.$inferInsert;
+
+// ─── Play Audit Events ────────────────────────────────────────────────────────
+// Every qualifying play is recorded here for trust-layer analytics.
+// A play is "qualified" only when the listener has heard at least MIN_PLAY_SECONDS
+// (30 s) of the track. Duplicate sessions are rejected server-side.
+// The witnessId column links every play event back to the WID provenance chain.
+export const playEvents = mysqlTable("playEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("songId").notNull(),
+  witnessId: varchar("witnessId", { length: 64 }),         // WID of the track at time of play
+  sessionId: varchar("sessionId", { length: 64 }).notNull(), // client-generated UUID per listening session
+  userId: int("userId"),                                    // null for anonymous listeners
+  durationSeconds: int("durationSeconds").default(0).notNull(), // how long they listened
+  completed: boolean("completed").default(false).notNull(), // did they hear >= 80% of the track?
+  ipHash: varchar("ipHash", { length: 64 }),               // SHA-256 of IP for dedup (not stored raw)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PlayEvent = typeof playEvents.$inferSelect;
+export type InsertPlayEvent = typeof playEvents.$inferInsert;

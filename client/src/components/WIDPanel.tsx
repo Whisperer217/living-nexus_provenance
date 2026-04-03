@@ -33,8 +33,10 @@ import {
   Fingerprint,
   Share2,
   Link2,
+  GitBranch,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "wouter";
 
 interface WIDPanelProps {
   witnessId: string;
@@ -353,6 +355,22 @@ export function WIDPanel({
                 </Button>
               </a>
             )}
+            {/* Witness Flow — full provenance chain visualization */}
+            <Link href={`/witness-flow/${witnessId}`} className="flex-1" onClick={() => setOpen(false)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                style={{
+                  borderColor: "oklch(0.65 0.18 145 / 0.4)",
+                  color: "oklch(0.65 0.18 145)",
+                  background: "oklch(0.65 0.18 145 / 0.05)",
+                }}
+              >
+                <GitBranch className="w-3.5 h-3.5 mr-1.5" />
+                Witness Flow
+              </Button>
+            </Link>
           </div>
         </DialogContent>
       </Dialog>

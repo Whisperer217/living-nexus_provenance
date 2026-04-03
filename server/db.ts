@@ -11,6 +11,7 @@ import {
   collections,
   platformSupporters,
   audioVersions,
+  playEvents,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -170,7 +171,8 @@ export async function createSong(data: {
   releaseDate?: string; isrc?: string;
   aiConsent: "prohibited" | "permitted_attribution" | "permitted";
   fileUrl?: string; fileKey?: string; coverArtUrl?: string; fileHash?: string;
-  durationSeconds?: number; witnessId?: string; harmonicSignature?: number[];
+  durationSeconds?: number; sampleRate?: number; bitDepth?: number;
+  witnessId?: string; harmonicSignature?: number[];
   ecdsaPublicKey?: string; ecdsaSignature?: string; certificateUrl?: string; certificateKey?: string;
   isLyricsOnly?: boolean;
   contentType?: "audio" | "lyrics" | "manuscript" | "comic";
@@ -245,6 +247,91 @@ export async function incrementPlayCount(songId: number) {
   const db = await getDb();
   if (!db) return;
   await db.execute(sql`UPDATE songs SET playCount = playCount + 1 WHERE id = ${songId}`);
+}
+
+// ─── Play Audit ──────────────────────────────────────────────────────────────
+// Minimum seconds a listener must hear before the play is counted as qualified.
+export const MIN_PLAY_SECONDS = 30;
+
+export interface RecordPlayEventInput {
+  songId: number;
+  witnessId?: string | null;
+  sessionId: string;          // client-generated UUID, stable per listening session
+  userId?: number | null;
+  durationSeconds: number;    // how long they have listened so far
+  totalDurationSeconds?: number; // full track length (for completed calculation)
+  ipHash?: string | null;     // SHA-256 of IP address (never raw IP)
+}
+
+/**
+ * Record a qualified play event.
+ * Rules:
+ *   1. durationSeconds must be >= MIN_PLAY_SECONDS (30 s) to count.
+ *   2. Each sessionId is only recorded once — duplicate calls are ignored.
+ *   3. If the play qualifies, songs.playCount is also incremented.
+ * Returns { recorded: boolean; reason?: string }
+ */
+export async function recordPlayEvent(input: RecordPlayEventInput): Promise<{ recorded: boolean; reason?: string }> {
+  const db = await getDb();
+  if (!db) return { recorded: false, reason: "db_unavailable" };
+
+  // Rule 1: minimum threshold
+  if (input.durationSeconds < MIN_PLAY_SECONDS) {
+    return { recorded: false, reason: "below_threshold" };
+  }
+
+  // Rule 2: session deduplication — check if this sessionId was already recorded
+  const [existing] = await db
+    .select({ id: playEvents.id })
+    .from(playEvents)
+    .where(eq(playEvents.sessionId, input.sessionId))
+    .limit(1);
+  if (existing) {
+    return { recorded: false, reason: "duplicate_session" };
+  }
+
+  // Rule 3: record the event
+  const completed =
+    input.totalDurationSeconds != null && input.totalDurationSeconds > 0
+      ? input.durationSeconds >= input.totalDurationSeconds * 0.8
+      : false;
+
+  await db.insert(playEvents).values({
+    songId: input.songId,
+    witnessId: input.witnessId ?? null,
+    sessionId: input.sessionId,
+    userId: input.userId ?? null,
+    durationSeconds: Math.floor(input.durationSeconds),
+    completed,
+    ipHash: input.ipHash ?? null,
+  });
+
+  // Increment the denormalized playCount on songs
+  await db.execute(sql`UPDATE songs SET playCount = playCount + 1 WHERE id = ${input.songId}`);
+
+  return { recorded: true };
+}
+
+/**
+ * Get play audit stats for a song (total qualified plays, completions, avg duration).
+ */
+export async function getPlayAuditStats(songId: number) {
+  const db = await getDb();
+  if (!db) return { total: 0, completions: 0, avgDuration: 0 };
+  const [row] = await db.execute(sql`
+    SELECT
+      COUNT(*) as total,
+      SUM(completed) as completions,
+      AVG(durationSeconds) as avgDuration
+    FROM playEvents
+    WHERE songId = ${songId}
+  `) as any;
+  const r = Array.isArray(row) ? row[0] : row;
+  return {
+    total: Number(r?.total ?? 0),
+    completions: Number(r?.completions ?? 0),
+    avgDuration: Math.round(Number(r?.avgDuration ?? 0)),
+  };
 }
 
 export async function deleteSong(songId: number, userId: number) {

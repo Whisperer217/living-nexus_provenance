@@ -56,6 +56,7 @@ import {
   flagSong, unflagSong, adminRemoveSong, adminRestoreSong, adminSearchWorks,
   getAllSystemConfig, getSystemConfigValue, setSystemConfigValue,
   resetUserBilling, getAllUsersAdmin,
+  recordPlayEvent, getPlayAuditStats, MIN_PLAY_SECONDS,
 } from "./db";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
@@ -462,6 +463,10 @@ export const appRouter = router({
       fileHash: z.string().optional(), witnessId: z.string().optional(),
       harmonicSignature: z.array(z.number()).optional(), ecdsaPublicKey: z.string().optional(), ecdsaSignature: z.string().optional(),
       caption: z.string().max(2000).optional(),
+      // Audio metadata from upload pipeline
+      durationSeconds: z.number().optional(),
+      sampleRate: z.number().optional(),
+      bitDepth: z.number().optional(),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
@@ -483,7 +488,7 @@ export const appRouter = router({
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.jpg`, coverBuffer, input.coverMimeType);
         coverArtUrl = url;
       }
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption });
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth });
       const songId = (insertResult as any).insertId as number;
       return { success: true, fileUrl, coverArtUrl, songId };
     }),
@@ -696,7 +701,42 @@ export const appRouter = router({
       return { success: true };
     }),
 
+    // Legacy play counter — kept for backward compatibility (PlayerBar still calls this)
     play: publicProcedure.input(z.object({ songId: z.number() })).mutation(async ({ input }) => { await incrementPlayCount(input.songId); return { success: true }; }),
+    // Trust-layer play audit — replaces legacy play for qualified tracking
+    recordPlay: publicProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        witnessId: z.string().optional(),
+        sessionId: z.string().min(8).max(64),   // client UUID, stable per listening session
+        durationSeconds: z.number().min(0),      // elapsed seconds heard
+        totalDurationSeconds: z.number().min(0).optional(), // full track length
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Hash the IP for dedup (never store raw IP)
+        const ip = (ctx.req as any)?.ip ?? (ctx.req as any)?.socket?.remoteAddress ?? "";
+        let ipHash: string | null = null;
+        if (ip) {
+          const { createHash } = await import("crypto");
+          ipHash = createHash("sha256").update(ip).digest("hex");
+        }
+        const result = await recordPlayEvent({
+          songId: input.songId,
+          witnessId: input.witnessId ?? null,
+          sessionId: input.sessionId,
+          userId: ctx.user?.id ?? null,
+          durationSeconds: input.durationSeconds,
+          totalDurationSeconds: input.totalDurationSeconds,
+          ipHash,
+        });
+        return { ...result, minThreshold: MIN_PLAY_SECONDS };
+      }),
+    // Get play audit stats for a song
+    playAuditStats: publicProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return getPlayAuditStats(input.songId);
+      }),
     download: publicProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);
       if (!song?.fileUrl) throw new Error("Song file not found");
