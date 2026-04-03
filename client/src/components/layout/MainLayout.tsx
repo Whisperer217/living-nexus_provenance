@@ -408,9 +408,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <button
               onClick={() => setWhatsNewOpen(true)}
               title="What's New"
-              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md w-full mb-1.5 transition-all
+              className={`flex items-center gap-2 rounded-md mb-1.5 transition-all
                 text-white/30 hover:text-[#D4AF37] hover:bg-[oklch(0.84_0.155_85/0.06)]
                 ${!sidebarOpen && "justify-center"}`}
+              style={{ paddingRight: "40px", paddingLeft: "8px", marginTop: "6px", width: "180px" }}
             >
               <Sparkles size={13} className="flex-shrink-0" />
               {sidebarOpen && <span className="text-[11px] font-body">What's New</span>}

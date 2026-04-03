@@ -645,8 +645,8 @@ export default function PlayerBar() {
       {/* ══ COMPACT BAR (always visible, overlays bottom of expanded) ══ */}
       {!isExpanded && (
         <div
-          className="flex items-center px-4 gap-4"
-          style={{ height: "68px" }}
+          className="flex items-center gap-4"
+          style={{ height: "68px", backgroundColor: "#282020", borderRadius: "55px", paddingRight: "20px", paddingLeft: "20px", marginRight: "5px", marginLeft: "10px" }}
         >
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
