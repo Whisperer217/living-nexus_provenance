@@ -598,11 +598,16 @@ export const appRouter = router({
         // Preferred: pre-uploaded S3 URL from /api/upload-file
         fileUrl: z.string().url().optional(),
         fileKey: z.string().optional(),
+        // Per-track cover art (overrides album-level cover)
+        coverArtUrl: z.string().url().optional(),
         // Legacy base64 fields (still accepted for backward compat)
         audioBase64: z.string().max(50_000_000).optional(),
         audioMimeType: z.string().optional(),
         audioFileName: z.string().optional(),
         title: z.string().min(1).max(255),
+        genre: z.string().optional(),
+        albumName: z.string().optional(),
+        aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]).optional(),
         fileHash: z.string().optional(),
         witnessId: z.string().optional(),
         harmonicSignature: z.array(z.number()).optional(),
@@ -640,12 +645,12 @@ export const appRouter = router({
         const insertResult = await createSong({
           userId: ctx.user.id,
           title: track.title,
-          genre: input.genre,
-          albumName: input.albumName,
-          aiConsent: input.aiConsent,
+          genre: track.genre ?? input.genre,
+          albumName: track.albumName ?? input.albumName,
+          aiConsent: track.aiConsent ?? input.aiConsent,
           fileUrl,
           fileKey: audioKey,
-          coverArtUrl,
+          coverArtUrl: track.coverArtUrl ?? coverArtUrl,
           fileHash: track.fileHash,
           witnessId: track.witnessId,
           harmonicSignature: track.harmonicSignature,

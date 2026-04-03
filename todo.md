@@ -2130,3 +2130,19 @@
 - [x] Admin nav link (LN Command) added to sidebar — role-gated (admin only)
 - [x] TypeScript: 0 errors
 - [x] Vitest: 123 tests passing (13 test files)
+
+## Phase 82: Batch Upload Mechanics
+- [x] Per-track upload cards — each with own audio drop zone, cover art, title, genre, AI consent
+- [x] Individual WID generation per card (SHA-256 + ECDSA, shown inline on card)
+- [x] Cover art per track — falls back to album art if not set
+- [x] Global drag-and-drop — drop multiple audio files anywhere to auto-fill cards
+- [x] Add Track button — add one card at a time with + button
+- [x] Remove card — X button on each card header (disabled when only 1 card)
+- [x] Collapse/expand each card — click header to toggle
+- [x] Batch Fill panel — set genre + AI consent once, apply to all cards at once
+- [x] Album/collection info panel — shared name + album cover art
+- [x] Sticky submit bar — shows ready count, collection name, Witness button
+- [x] Per-track S3 upload — each track's audio and cover uploaded separately
+- [x] Collection result screen — shows Collection WID, collective hash, track count
+- [x] TypeScript: 0 errors
+- [x] Vitest: 123 tests passing
