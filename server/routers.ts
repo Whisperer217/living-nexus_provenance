@@ -35,7 +35,7 @@ import {
   getPlaylistCollaborators, inviteCollaborator, acceptPlaylistInvite, removeCollaborator,
   isPlaylistMember,
   createNotification, getNotifications, markNotificationRead, markAllNotificationsRead,
-  archiveNotification, getUnreadNotificationCount,
+  archiveNotification, getUnreadNotificationCount, getNotificationById,
   getWitnessRegistry,
   createJukeboxOffering, updateJukeboxOfferingStatus,
   getOfferingsForRoom, recordJukeboxPlayEvent, getJukeboxEarningsForCreator,
@@ -2541,6 +2541,49 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
     dashboardDeltas: protectedProcedure.query(async ({ ctx }) => {
       return getDashboardDeltas(ctx.user.id);
     }),
+    /** Reply to a comment signal — posts a comment on the referenced song and notifies the original commenter */
+    reply: protectedProcedure
+      .input(z.object({
+        notificationId: z.number().int().positive(),
+        content: z.string().min(1).max(1000),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Fetch the notification to get the referenced song and original commenter
+        const notif = await getNotificationById(input.notificationId, ctx.user.id);
+        if (!notif) throw new TRPCError({ code: "NOT_FOUND", message: "Signal not found" });
+        if (notif.type !== "comment") throw new TRPCError({ code: "BAD_REQUEST", message: "Can only reply to comment signals" });
+        const songId = notif.refId;
+        if (!songId) throw new TRPCError({ code: "BAD_REQUEST", message: "Signal has no referenced work" });
+        // Fetch the song to confirm it exists and get the title
+        const song = await getSongById(songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Referenced work not found" });
+        const replierName = ctx.user.name || "Creator";
+        // Post the reply as a comment on the song
+        await createEvent({
+          type: "COMMENT",
+          workId: songId,
+          actorId: ctx.user.id,
+          actorName: replierName,
+          payload: { content: input.content, isReply: true, replyToActorId: notif.actorId },
+        });
+        await addComment({ songId, userId: ctx.user.id, authorName: replierName, content: input.content });
+        // Mark the original notification as read
+        await markNotificationRead(input.notificationId, ctx.user.id);
+        // Notify the original commenter (if we know who they are and they're not the same user)
+        if (notif.actorId && notif.actorId !== ctx.user.id) {
+          await createNotification({
+            userId: notif.actorId,
+            type: "comment",
+            title: `${replierName} replied to your comment on "${song.title}"`,
+            body: input.content.slice(0, 120),
+            actorId: ctx.user.id,
+            actorName: replierName,
+            refId: songId,
+            refType: "song",
+          });
+        }
+        return { ok: true };
+      }),
   }),
 
   // ── Witness Registry ─────────────────────────────────────────────────────────

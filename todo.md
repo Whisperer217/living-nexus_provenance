@@ -2083,8 +2083,8 @@
 - [ ] Wire plays to WID (playEvents.witnessId references songs.witnessId)
 - [ ] Wire certificates to share pages (certificate download links to /share/:wid)
 - [ ] Add play audit stats to Dashboard (plays with threshold met vs raw)
-- [ ] TypeScript: 0 errors
-- [ ] Vitest: all tests passing
+- [x] TypeScript: 0 errors
+- [x] Vitest: all tests passing
 
 ## Phase 80: Trust Layer Integration
 - [x] Add playEvents table to DB schema (songId, witnessId, sessionId, userId, durationSeconds, completed, ipHash)
@@ -2176,8 +2176,8 @@
 - [ ] Add slot enforcement: warn at 90%, block at 100% with upgrade prompt
 - [ ] Add Living Archive upgrade prompt on upload page when near/at slot limit
 - [ ] Add billing management page showing current plan + slot usage
-- [ ] TypeScript: 0 errors
-- [ ] Vitest: all tests passing
+- [x] TypeScript: 0 errors
+- [x] Vitest: all tests passing
 
 ## Phase 84: Living Archive Subscription + Redeem Bug Fix
 - [x] Fix redeemPromoCode — ADD slots to existing total instead of overwriting
@@ -2197,3 +2197,12 @@
 - [x] Add Founder Free Tier grant section to BillingResetTab in LN Command Center
 - [x] TypeScript: 0 errors
 - [x] Vitest: 123 tests passing (13 test files)
+
+## Phase 85: Signal Reply Flow
+- [x] Audit Signals tab and comment/reply tRPC procedures
+- [x] Add inline reply UI to each signal notification on the Signals tab
+- [x] Reply textarea expands on click, collapses after submit
+- [x] Reply posts to the same song comment thread
+- [x] Success toast after reply submitted
+- [x] TypeScript: 0 errors
+- [x] Vitest: all tests passing

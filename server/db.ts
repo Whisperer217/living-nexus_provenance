@@ -1672,6 +1672,17 @@ export async function getUnreadNotificationCount(userId: number): Promise<number
   return Number(rows[0]?.count ?? 0);
 }
 
+export async function getNotificationById(notificationId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const { notifications } = await import("../drizzle/schema");
+  const rows = await (db as any)
+    .select().from(notifications)
+    .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 // ─── Witness Registry ──────────────────────────────────────────────────────────
 /** Public ledger of all issued WIDs across the platform.
  *  type: "all" | "full_works" (has audio) | "lyrics" (lyricsText only, no audio)

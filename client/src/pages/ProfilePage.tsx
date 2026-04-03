@@ -148,6 +148,18 @@ export default function ProfilePage() {
     }
   });
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, { enabled: !!user });
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const replyMutation = trpc.notifications.reply.useMutation({
+    onSuccess: () => {
+      utils.notifications.list.invalidate();
+      utils.notifications.unreadCount.invalidate();
+      setReplyingTo(null);
+      setReplyText("");
+      toast.success("Reply sent!");
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   // ── Stripe Connect ───────────────────────────────────────────────
   const { data: connectData, refetch: refetchConnect } = trpc.tips.connectStatus.useQuery(
@@ -1028,22 +1040,87 @@ export default function ProfilePage() {
               (notifications as any[]).map((n) => (
                 <div
                   key={n.id}
-                  onClick={() => { if (!n.isRead) markOneRead.mutate({ id: n.id }); }}
-                  className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
+                  className={`rounded-xl border transition-all ${
                     n.isRead
-                      ? "border-white/[0.04] bg-white/[0.01] cursor-default"
-                      : "border-[#A78BFA]/20 bg-[#A78BFA]/[0.04] cursor-pointer hover:border-[#A78BFA]/40 hover:bg-[#A78BFA]/[0.07]"
+                      ? "border-white/[0.04] bg-white/[0.01]"
+                      : "border-[#A78BFA]/20 bg-[#A78BFA]/[0.04]"
                   }`}
                 >
-                  <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.isRead ? "bg-white/10" : "bg-[#A78BFA]"}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-[13px] font-body truncate ${n.isRead ? "text-white/50" : "text-white/80"}`}>{n.title}</p>
-                    {n.body && <p className="text-[11px] font-body text-white/40 mt-0.5 line-clamp-2">{n.body}</p>}
-                    {!n.isRead && <p className="text-[10px] font-body text-[#A78BFA]/60 mt-1">Click to mark as read</p>}
+                  {/* Signal row */}
+                  <div
+                    className="flex items-start gap-3 p-3"
+                    onClick={() => { if (!n.isRead) markOneRead.mutate({ id: n.id }); }}
+                  >
+                    <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.isRead ? "bg-white/10" : "bg-[#A78BFA]"}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-[13px] font-body truncate ${n.isRead ? "text-white/50" : "text-white/80"}`}>{n.title}</p>
+                      {n.body && <p className="text-[11px] font-body text-white/40 mt-0.5 line-clamp-2">{n.body}</p>}
+                      {/* Reply button — only for comment signals that have a refId */}
+                      {n.type === "comment" && n.refId && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setReplyingTo(replyingTo === n.id ? null : n.id);
+                            setReplyText("");
+                          }}
+                          className="mt-1.5 text-[10px] font-body px-2 py-0.5 rounded-md transition-all"
+                          style={{
+                            background: replyingTo === n.id ? "oklch(0.22 0.04 280)" : "oklch(0.16 0.02 280)",
+                            border: "1px solid oklch(0.28 0.04 280)",
+                            color: replyingTo === n.id ? "#A78BFA" : "oklch(0.65 0.05 280)",
+                          }}
+                        >
+                          {replyingTo === n.id ? "Cancel" : "Reply"}
+                        </button>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-body text-white/25 flex-shrink-0">
+                      {new Date(n.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-body text-white/25 flex-shrink-0">
-                    {new Date(n.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                  </span>
+                  {/* Inline reply box — expands when Reply is clicked */}
+                  {replyingTo === n.id && (
+                    <div
+                      className="px-3 pb-3 flex flex-col gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <textarea
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder={`Reply to ${n.actorName || "this comment"}…`}
+                        rows={3}
+                        className="w-full px-3 py-2 rounded-xl text-[12px] font-body text-white/80 resize-none outline-none placeholder:text-white/40"
+                        style={{
+                          background: "oklch(0.12 0.012 280)",
+                          border: "1px solid oklch(0.26 0.04 280)",
+                        }}
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                            if (replyText.trim()) replyMutation.mutate({ notificationId: n.id, content: replyText.trim() });
+                          }
+                          if (e.key === "Escape") { setReplyingTo(null); setReplyText(""); }
+                        }}
+                      />
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-body text-white/25">Cmd+Enter to send</span>
+                        <button
+                          onClick={() => {
+                            if (replyText.trim()) replyMutation.mutate({ notificationId: n.id, content: replyText.trim() });
+                          }}
+                          disabled={!replyText.trim() || replyMutation.isPending}
+                          className="text-[11px] font-body px-3 py-1 rounded-lg transition-all disabled:opacity-40"
+                          style={{
+                            background: "oklch(0.22 0.06 280)",
+                            border: "1px solid oklch(0.32 0.08 280)",
+                            color: "#A78BFA",
+                          }}
+                        >
+                          {replyMutation.isPending ? "Sending…" : "Send Reply"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))
             )}
