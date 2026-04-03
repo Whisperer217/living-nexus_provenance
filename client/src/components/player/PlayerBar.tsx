@@ -646,7 +646,7 @@ export default function PlayerBar() {
       {!isExpanded && (
         <div
           className="flex items-center gap-4"
-          style={{ height: "68px", backgroundColor: "#282020", borderRadius: "55px", paddingRight: "20px", paddingLeft: "20px", marginRight: "5px", marginLeft: "10px" }}
+          style={{ height: "68px", backgroundColor: "#282020", borderRadius: "55px", paddingRight: "20px", paddingLeft: "20px", marginRight: "5px", marginLeft: "10px", border: "1px solid #050505" }}
         >
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
@@ -714,7 +714,7 @@ export default function PlayerBar() {
 
           {/* ── Controls (center) ── */}
           <div className="flex-1 flex flex-col items-center gap-1.5">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4" style={{ marginTop: "6px" }}>
               <button
                 onClick={toggleShuffle}
                 className={`p-1.5 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}
