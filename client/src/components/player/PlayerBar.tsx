@@ -201,6 +201,7 @@ export default function PlayerBar() {
           : isCinematic ? "none" : "1px solid oklch(0.28 0.04 270 / 60%)",
         boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.7), 0 -4px 32px oklch(0.82 0.155 175 / 0.06), 0 -1px 8px oklch(0.80 0.145 82 / 0.08)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        paddingLeft: "44px",
         zIndex: isCinematic ? 9999 : 50,
       }}
     >
@@ -646,7 +647,7 @@ export default function PlayerBar() {
       {!isExpanded && (
         <div
           className="flex items-center gap-4"
-          style={{ height: "68px", backgroundColor: "#282020", borderRadius: "55px", paddingRight: "20px", paddingLeft: "20px", marginRight: "5px", marginLeft: "10px", border: "1px solid #050505" }}
+          style={{ height: "68px", backgroundColor: "#282020", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px" }}
         >
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
