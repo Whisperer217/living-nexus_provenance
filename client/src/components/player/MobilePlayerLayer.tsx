@@ -222,6 +222,7 @@ export default function MobilePlayerLayer() {
   // Video ref
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoBuffering, setVideoBuffering] = useState(true);
+  const [showMobileVolume, setShowMobileVolume] = useState(false);
   const showVideo = state.isPlaying && !videoBuffering;
 
   useEffect(() => {
@@ -631,14 +632,48 @@ export default function MobilePlayerLayer() {
           <span className="text-[9px] font-heading tracking-wide">Details</span>
         </button>
 
-        <button
-          onClick={toggleMute}
-          className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: state.isMuted ? "oklch(0.65 0.22 15)" : "oklch(0.40 0.03 280)" }}
-        >
-          {state.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          <span className="text-[9px] font-heading tracking-wide">{state.isMuted ? "Muted" : "Sound"}</span>
-        </button>
+        {/* Volume — tap icon to toggle slider popup, long-press to mute */}
+        <div className="relative flex flex-col items-center">
+          {showMobileVolume && (
+            <div
+              className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-2xl p-3 shadow-2xl z-50 flex flex-col items-center gap-2"
+              style={{ background: "oklch(0.12 0.03 275)", border: "1px solid oklch(0.30 0.04 270 / 60%)" }}
+            >
+              <span className="text-[10px] font-mono" style={{ color: "oklch(0.80 0.145 82)" }}>
+                {state.isMuted ? "0" : Math.round(state.volume * 100)}%
+              </span>
+              <input
+                type="range"
+                min="0" max="1" step="0.01"
+                value={state.isMuted ? 0 : state.volume}
+                onChange={e => { setVolume(parseFloat(e.target.value)); }}
+                className="volume-slider-vertical"
+                style={{
+                  background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
+                    state.isMuted ? 0 : state.volume * 100
+                  }%, oklch(0.28 0.04 270 / 80%) ${
+                    state.isMuted ? 0 : state.volume * 100
+                  }%)`,
+                }}
+              />
+              <button
+                onClick={toggleMute}
+                className="p-1 transition-colors"
+                style={{ color: state.isMuted ? "oklch(0.80 0.145 82)" : "oklch(0.50 0.02 280)" }}
+              >
+                <VolumeX size={12} />
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => setShowMobileVolume(v => !v)}
+            className="flex flex-col items-center gap-1 transition-all active:scale-90"
+            style={{ color: state.isMuted ? "oklch(0.65 0.22 15)" : "oklch(0.40 0.03 280)" }}
+          >
+            {state.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+            <span className="text-[9px] font-heading tracking-wide">{state.isMuted ? "Muted" : "Vol"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Lyrics strip (if available) */}

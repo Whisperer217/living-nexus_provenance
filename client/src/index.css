@@ -423,3 +423,53 @@
     background: oklch(0.84 0.155 85 / 0.12);
   }
 }
+
+/* ── Vertical range slider (volume) ─────────────────────────────────────── */
+/* Used by PlayerBar and MobilePlayerLayer vertical volume controls          */
+input[type="range"].volume-slider-vertical {
+  -webkit-appearance: slider-vertical;
+  appearance: auto; /* fallback for non-webkit */
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 6px;
+  height: 96px;
+  cursor: pointer;
+  border-radius: 9999px;
+  outline: none;
+  padding: 0;
+}
+
+/* Webkit track */
+input[type="range"].volume-slider-vertical::-webkit-slider-runnable-track {
+  width: 6px;
+  border-radius: 9999px;
+}
+
+/* Webkit thumb */
+input[type="range"].volume-slider-vertical::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: oklch(0.80 0.145 82);
+  border: 2px solid oklch(0.97 0.03 85 / 0.9);
+  margin-left: -4px;
+  cursor: pointer;
+  box-shadow: 0 0 6px oklch(0.80 0.145 82 / 0.5);
+}
+
+/* Firefox */
+input[type="range"].volume-slider-vertical::-moz-range-track {
+  width: 6px;
+  border-radius: 9999px;
+  background: oklch(0.28 0.04 270 / 80%);
+}
+input[type="range"].volume-slider-vertical::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: oklch(0.80 0.145 82);
+  border: 2px solid oklch(0.97 0.03 85 / 0.9);
+  cursor: pointer;
+}

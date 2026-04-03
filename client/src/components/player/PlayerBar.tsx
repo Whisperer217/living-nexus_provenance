@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Play, Pause, SkipBack, SkipForward,
-  Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, Maximize2,
+  Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, Maximize2, Minimize2,
   ChevronDown, ChevronUp, MessageCircle, LogOut, Share2, Download,
 } from "lucide-react";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -135,6 +135,9 @@ export default function PlayerBar() {
     seek(((e.clientX - rect.left) / rect.width) * audioRef.current.duration);
   }, [audioRef, seek]);
 
+  // Cinematic inline mode
+  const [isCinematic, setIsCinematic] = useState(false);
+
   // Vertical volume popup
   const [showVolume, setShowVolume] = useState(false);
   const volumePopupRef = useRef<HTMLDivElement>(null);
@@ -180,6 +183,7 @@ export default function PlayerBar() {
   // Collapse expanded bar when track changes
   useEffect(() => {
     setIsExpanded(false);
+    setIsCinematic(false);
   }, [currentTrack?.id]);
 
   return (
@@ -190,13 +194,14 @@ export default function PlayerBar() {
         bottom: 0,
         left: "164px",
         right: 0,
-        height: isExpanded ? "256px" : "68px",
-        background: "oklch(0.115 0.05 268)",
-        borderTop: isExpanded
+        height: isCinematic ? "100dvh" : isExpanded ? "256px" : "68px",
+        background: isCinematic ? "#000" : "oklch(0.115 0.05 268)",
+        borderTop: isExpanded && !isCinematic
           ? "1px solid oklch(0.80 0.145 82 / 0.20)"
-          : "1px solid oklch(0.28 0.04 270 / 60%)",
-        boxShadow: "0 -4px 40px rgba(0,0,0,0.7), 0 -4px 32px oklch(0.82 0.155 175 / 0.06), 0 -1px 8px oklch(0.80 0.145 82 / 0.08)",
+          : isCinematic ? "none" : "1px solid oklch(0.28 0.04 270 / 60%)",
+        boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.7), 0 -4px 32px oklch(0.82 0.155 175 / 0.06), 0 -1px 8px oklch(0.80 0.145 82 / 0.08)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        zIndex: isCinematic ? 9999 : 50,
       }}
     >
       {/* ── Expand / Collapse tab — sits on top of bar, centered ── */}
@@ -226,6 +231,106 @@ export default function PlayerBar() {
             </span>
           )}
         </button>
+      )}
+
+      {/* ══ INLINE CINEMATIC MODE (full-viewport) ══ */}
+      {isCinematic && currentTrack && (
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          {/* Full-bleed artwork / video */}
+          <MediaAsset
+            src={currentTrack.artUrl}
+            alt={currentTrack.title}
+            mode="cinematic"
+            focalX={currentTrack.coverPositionX ?? 50}
+            focalY={currentTrack.coverPositionY ?? 50}
+            emoji={currentTrack.emoji}
+            bg={currentTrack.bg}
+            showGradient={false}
+            videoUrl={videoUrl}
+            showVideo={showVideo}
+            videoRef={videoRef}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          {/* Dark gradient at bottom for controls legibility */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 70%)" }}
+          />
+          {/* Exit cinematic button — top right */}
+          <button
+            onClick={() => setIsCinematic(false)}
+            className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+            style={{
+              background: "oklch(0.10 0.04 270 / 80%)",
+              border: "1px solid oklch(0.40 0.04 270 / 60%)",
+              color: "oklch(0.80 0.145 82)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <Minimize2 size={12} /> Exit Cinematic
+          </button>
+          {/* Track info — top left */}
+          <div className="absolute top-4 left-4 z-20">
+            <div className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.97 0.008 270)" }}>
+              {currentTrack.title}
+            </div>
+            <div className="text-sm mt-1" style={{ color: "oklch(0.82 0.155 175)" }}>
+              {currentTrack.artist}
+            </div>
+            {currentTrack.witnessId && (
+              <button
+                onClick={goToVerify}
+                className="text-[9px] font-mono mt-1 block transition-opacity hover:opacity-80"
+                style={{ color: "oklch(0.80 0.145 82 / 0.7)" }}
+              >
+                WID: {currentTrack.witnessId.slice(0, 24)}…
+              </button>
+            )}
+          </div>
+          {/* Controls overlay — bottom center */}
+          <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center gap-4 px-8">
+            {/* Progress bar */}
+            <div className="w-full flex items-center gap-3">
+              <span className="text-[11px] tabular-nums w-8" style={{ color: "oklch(0.68 0.02 280)" }}>{fmtTime(state.currentTime)}</span>
+              <div
+                className="flex-1 h-1 rounded-full cursor-pointer group relative"
+                style={{ background: "oklch(0.28 0.04 270 / 60%)" }}
+                onClick={handleSeek}
+              >
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${progress}%`,
+                    background: "linear-gradient(90deg, oklch(0.50 0.20 295), oklch(0.80 0.145 82))",
+                  }}
+                />
+              </div>
+              <span className="text-[11px] tabular-nums w-8" style={{ color: "oklch(0.68 0.02 280)" }}>{fmtTime(state.duration)}</span>
+            </div>
+            {/* Playback controls */}
+            <div className="flex items-center gap-6">
+              <button onClick={toggleShuffle} className={`p-2 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/40 hover:text-white/80"}`}>
+                <Shuffle size={18} />
+              </button>
+              <button onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
+                <SkipBack size={22} />
+              </button>
+              <button
+                onClick={togglePlay}
+                className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-105"
+                style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.08 0.01 280)" }}
+              >
+                {state.isPlaying ? <Pause size={24} /> : <Play size={24} fill="currentColor" />}
+              </button>
+              <button onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
+                <SkipForward size={22} />
+              </button>
+              <button onClick={toggleRepeat} className={`p-2 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/40 hover:text-white/80"}`}>
+                <Repeat size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ══ EXPANDED CINEMATIC VIEW ══ */}
@@ -415,12 +520,8 @@ export default function PlayerBar() {
                         min="0" max="1" step="0.01"
                         value={state.isMuted ? 0 : state.volume}
                         onChange={e => { setVolume(parseFloat(e.target.value)); }}
-                        className="appearance-none cursor-pointer rounded-full"
+                        className="volume-slider-vertical"
                         style={{
-                          writingMode: "vertical-lr" as React.CSSProperties["writingMode"],
-                          direction: "rtl" as React.CSSProperties["direction"],
-                          width: "6px",
-                          height: "96px",
                           background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
                             state.isMuted ? 0 : state.volume * 100
                           }%, oklch(0.28 0.04 270 / 80%) ${
@@ -846,18 +947,14 @@ export default function PlayerBar() {
                     min="0" max="1" step="0.01"
                     value={state.isMuted ? 0 : state.volume}
                     onChange={e => { setVolume(parseFloat(e.target.value)); }}
-                    className="appearance-none cursor-pointer rounded-full"
-                    style={{
-                      writingMode: "vertical-lr" as React.CSSProperties["writingMode"],
-                      direction: "rtl" as React.CSSProperties["direction"],
-                      width: "6px",
-                      height: "96px",
-                      background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
-                        state.isMuted ? 0 : state.volume * 100
-                      }%, oklch(0.28 0.04 270 / 80%) ${
-                        state.isMuted ? 0 : state.volume * 100
-                      }%)`,
-                    }}
+                    className="volume-slider-vertical"
+                        style={{
+                          background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
+                            state.isMuted ? 0 : state.volume * 100
+                          }%, oklch(0.28 0.04 270 / 80%) ${
+                            state.isMuted ? 0 : state.volume * 100
+                          }%)`,
+                        }}
                   />
                   <button
                     onClick={toggleMute}
@@ -871,16 +968,16 @@ export default function PlayerBar() {
               )}
             </div>
 
-            {/* Expand to Theater Player */}
+            {/* Cinematic / Theater toggle */}
             <button
-              onClick={openTheater}
+              onClick={() => { setIsCinematic(c => !c); setIsExpanded(false); }}
               className="p-1.5 transition-colors ml-1"
-              style={{ color: "oklch(0.68 0.02 280)" }}
+              style={{ color: isCinematic ? "oklch(0.80 0.145 82)" : "oklch(0.68 0.02 280)" }}
               onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
-              title="Open Theater Player"
+              onMouseLeave={e => (e.currentTarget.style.color = isCinematic ? "oklch(0.80 0.145 82)" : "oklch(0.68 0.02 280)")}
+              title={isCinematic ? "Exit Cinematic View" : "Cinematic View"}
             >
-              <Maximize2 size={16} />
+              {isCinematic ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </button>
           </div>
         </div>

@@ -2000,4 +2000,10 @@
 - [x] Add getCountsByContentType DB helper and tRPC procedure
 - [ ] Wire live counts to homepage Witnessed Works by Medium stat block
 - [ ] Ensure version/changelog modal trigger is visible on both mobile and desktop nav
-- [ ] TypeScript: 0 errors | Vitest: all passing
+- [x] TypeScript: 0 errors | Vitest: all passing
+
+## Phase 75: Global Player — Vertical Volume + Cinematic Expand
+- [x] Fix desktop PlayerBar vertical volume slider (appearance-none strips native vertical; add explicit CSS fix)
+- [x] Add vertical volume slider to mobile full-screen player (MobilePlayerLayer)
+- [x] Add cinematic inline expand mode to desktop PlayerBar (full-bleed artwork + controls overlay)
+- [x] TypeScript: 0 errors | Vitest: all passing
