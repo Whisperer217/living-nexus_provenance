@@ -23,10 +23,10 @@ import ExternalPlaylistsTab from "@/components/ExternalPlaylistsTab";
 
 /* ── Status tag ─────────────────────────────────────────────────── */
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  Published: { bg: "oklch(0.65 0.18 145 / 0.18)", text: "oklch(0.65 0.18 145)" },
-  Draft:     { bg: "oklch(0.65 0.18 45 / 0.18)",  text: "oklch(0.65 0.18 45)"  },
-  Unlisted:  { bg: "oklch(0.65 0.2 300 / 0.18)",  text: "oklch(0.65 0.2 300)"  },
-  Deleted:   { bg: "oklch(0.65 0.18 25 / 0.18)",  text: "oklch(0.65 0.18 25)"  },
+  Published: { bg: "color-mix(in srgb, var(--lnx-green) 15%, transparent)",  text: "var(--lnx-green-soft)"  },
+  Draft:     { bg: "color-mix(in srgb, var(--lnx-orange) 15%, transparent)", text: "var(--lnx-orange-soft)" },
+  Unlisted:  { bg: "oklch(0.65 0.2 300 / 0.18)",                             text: "oklch(0.65 0.2 300)"   },
+  Deleted:   { bg: "color-mix(in srgb, var(--lnx-red) 15%, transparent)",    text: "var(--lnx-red-soft)"   },
 };
 
 function StatusTag({ status }: { status: string }) {
@@ -68,7 +68,7 @@ function ConfirmDeleteModal({
         className="rounded-2xl p-6 max-w-sm w-full"
         style={{
           background: "oklch(0.09 0.04 265)",
-          border: "1px solid oklch(0.65 0.18 25 / 0.35)",
+          border: "1px solid color-mix(in srgb, var(--lnx-red) 35%, transparent)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -111,8 +111,8 @@ function ConfirmDeleteModal({
             disabled={isPending}
             className="flex-1 font-bold py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50"
             style={{
-              background: "oklch(0.65 0.18 25 / 0.2)",
-              border: "1px solid oklch(0.65 0.18 25 / 0.5)",
+              background: "color-mix(in srgb, var(--lnx-red) 20%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--lnx-red) 50%, transparent)",
               color: "oklch(0.75 0.18 25)",
             }}
           >
@@ -468,7 +468,7 @@ export default function ArchivePage() {
                       : isDeleted ? "oklch(0.09 0.02 265)" : "oklch(0.115 0.055 278)",
                     border: isSelected
                       ? "1px solid oklch(0.84 0.155 85 / 0.35)"
-                      : `1px solid ${isDeleted ? "oklch(0.65 0.18 25 / 0.2)" : "oklch(0.18 0.015 280)"}`,
+                      : `1px solid ${isDeleted ? "color-mix(in srgb, var(--lnx-red) 20%, transparent)" : "oklch(0.18 0.015 280)"}`,
                     cursor: batchMode ? (isDeleted ? "default" : "pointer") : (hasAudio && !isDeleted ? "pointer" : "default"),
                     opacity: isDeleted ? 0.6 : 1,
                   }}
@@ -612,8 +612,8 @@ export default function ArchivePage() {
                         <button
                           onClick={(e) => { e.stopPropagation(); setDeletingSong(song); }}
                           title="Delete track (WID preserved)"
-                          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/20"
-                          style={{ color: "oklch(0.65 0.18 25)" }}
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:badge-error"
+                          style={{ color: "var(--lnx-red)" }}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

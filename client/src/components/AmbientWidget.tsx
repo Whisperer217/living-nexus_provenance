@@ -41,7 +41,7 @@ function getYouTubeEmbedUrl(url: string): string | null {
 
 // ── Source icon ────────────────────────────────────────────────────────────────
 function SourceIcon({ type }: { type: string }) {
-  if (type === "youtube") return <Youtube className="w-3.5 h-3.5 text-red-400" />;
+  if (type === "youtube") return <Youtube className="w-3.5 h-3.5 text-lnx-red" />;
   if (type === "suno") return <Music2 className="w-3.5 h-3.5 text-purple-400" />;
   return <Music2 className="w-3.5 h-3.5 text-white/40" />;
 }
@@ -141,7 +141,7 @@ export default function AmbientWidget() {
           <Button
             size="icon"
             variant="ghost"
-            className="w-6 h-6 text-white/40 hover:text-red-400"
+            className="w-6 h-6 text-white/40 hover:text-lnx-red"
             onClick={stop}
             title="Stop ambient"
           >

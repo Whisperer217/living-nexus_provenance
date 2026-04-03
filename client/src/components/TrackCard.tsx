@@ -155,7 +155,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
       className={`group relative rounded-xl overflow-hidden transition-all duration-200
         border bg-[oklch(0.095_0.028_275)] track-card-glow
         ${isActive
-          ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
+          ? "border-[#D4AF37]/40 track-active-glow shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
           : "border-white/[0.05] hover:border-[#A78BFA]/30"
         }`}
     >
@@ -218,7 +218,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           <Link
             href={`/verify/${track.witnessId}`}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-80 hover:opacity-100"
+            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow wid-origin-glow transition-opacity opacity-90 hover:opacity-100"
             style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}
             title={`Verified Witness ID: ${track.witnessId}`}
           >

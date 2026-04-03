@@ -1042,7 +1042,7 @@ export default function TogetherPage() {
                       </button>
                       <button onClick={leaveRoom}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
-                          text-red-400/70 hover:text-red-400 bg-red-500/5 hover:bg-red-500/10 transition-all border border-red-500/10">
+                          text-lnx-red/70 hover:text-lnx-red bg-red-500/5 hover:bg-red-500/10 transition-all border border-red-500/10">
                         <LogOut size={11} /> Leave
                       </button>
                     </div>

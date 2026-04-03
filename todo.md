@@ -2032,3 +2032,19 @@
 - [x] Register service worker in main.tsx — already registered
 - [x] Add client-side cover art compression to WebP before S3 upload
 - [x] TypeScript: 0 errors
+
+## Phase 78: Color Provenance Standardization
+- [x] Define semantic color token system in index.css (foundation, gold, green, orange, red, elevation)
+- [x] Add Origin Glow CSS utility classes (gold pulse, active glow, hover elevation)
+- [ ] Standardize MainLayout sidebar and PlayerBar to token system
+- [ ] Standardize HomePage and ManifestoPage to token system
+- [ ] Standardize ExplorePage and VerifyPage to token system
+- [ ] Standardize DashboardPage and ArchivePage to token system
+- [ ] Standardize UploadPage and modals to token system
+- [ ] TypeScript: 0 errors | Visual: consistent across all pages
+
+## Phase 78: Color Provenance Standardization
+- [x] Define semantic color token system in index.css
+- [x] Add Origin Glow CSS utility classes
+- [x] Standardize all major components to token system
+- [x] TypeScript: 0 errors

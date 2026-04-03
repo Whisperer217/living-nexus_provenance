@@ -170,10 +170,10 @@ export default function DashboardPage() {
     onError: (e: { message: string }) => toast.error(e.message),
   });
   const statusColor = (s: string) => ({
-    Draft: "oklch(0.65 0.18 45)",
-    Published: "oklch(0.65 0.18 145)",
+    Draft: "var(--lnx-orange)",
+    Published: "var(--lnx-green)",
     Unlisted: "oklch(0.65 0.2 300)",
-    Deleted: "oklch(0.65 0.18 25)",
+    Deleted: "var(--lnx-red)",
   }[s] ?? "oklch(0.5 0.03 280)");
   const licenseMutation = trpc.licenses.purchaseLicense.useMutation({
     onSuccess: (data: { url: string | null }) => { if (data.url) window.open(data.url, "_blank"); toast.info("Redirecting to checkout..."); },
@@ -212,18 +212,18 @@ export default function DashboardPage() {
 
   const transformStatusIcon = (status: string) => {
     switch (status) {
-      case "success": return <CheckCircle2 className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />;
-      case "failed": return <XCircle className="w-4 h-4" style={{ color: "oklch(0.65 0.18 25)" }} />;
-      case "processing": return <Clock className="w-4 h-4" style={{ color: "oklch(0.65 0.18 45)" }} />;
+      case "success": return <CheckCircle2 className="w-4 h-4" style={{ color: "var(--lnx-green)" }} />;
+      case "failed": return <XCircle className="w-4 h-4" style={{ color: "var(--lnx-red)" }} />;
+      case "processing": return <Clock className="w-4 h-4" style={{ color: "var(--lnx-orange)" }} />;
       default: return <Clock className="w-4 h-4" style={{ color: "#E2E8F0" }} />;
     }
   };
 
   const transformStatusLabel = (status: string) => {
     switch (status) {
-      case "success": return { label: "Complete", color: "oklch(0.65 0.18 145)" };
-      case "failed": return { label: "Failed", color: "oklch(0.65 0.18 25)" };
-      case "processing": return { label: "Processing", color: "oklch(0.65 0.18 45)" };
+      case "success": return { label: "Complete", color: "var(--lnx-green)" };
+      case "failed": return { label: "Failed", color: "var(--lnx-red)" };
+      case "processing": return { label: "Processing", color: "var(--lnx-orange)" };
       default: return { label: "Pending", color: "#E2E8F0" };
     }
   };
@@ -363,13 +363,13 @@ export default function DashboardPage() {
             {/* Bottom row: plain-English requirements when pending */}
             {connectData?.status === "pending" && connectData?.requirementsLabels && connectData.requirementsLabels.length > 0 && (
               <div className="px-4 py-3" style={{ background: "oklch(0.1 0.03 280)" }}>
-                <p className="text-xs font-semibold mb-2" style={{ color: "oklch(0.65 0.18 45)" }}>Still needed to activate your account:</p>
+                <p className="text-xs font-semibold mb-2" style={{ color: "var(--lnx-orange)" }}>Still needed to activate your account:</p>
                 <div className="flex flex-wrap gap-2">
                   {(connectData.requirementsLabels as string[]).map((label: string) => (
                     <span
                       key={label}
                       className="text-xs px-2 py-1 rounded-md"
-                      style={{ background: "oklch(0.65 0.18 45 / 0.15)", color: "oklch(0.75 0.15 45)", border: "1px solid oklch(0.65 0.18 45 / 0.3)" }}
+                      style={{ background: "color-mix(in srgb, var(--lnx-orange) 15%, transparent)", color: "var(--lnx-orange-soft)", border: "1px solid color-mix(in srgb, var(--lnx-orange) 30%, transparent)" }}
                     >
                       {label}
                     </span>
@@ -385,7 +385,7 @@ export default function DashboardPage() {
           {[
             { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "oklch(0.84 0.155 85)", delta: null },
             { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "oklch(0.65 0.2 300)", delta: (dashboardDeltas as any)?.newPlays ?? 0 },
-            { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "oklch(0.65 0.18 145)", delta: null },
+            { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "var(--lnx-green)", delta: null },
             { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "oklch(0.55 0.18 160)", delta: (dashboardDeltas as any)?.newTips ?? 0 },
           ].map(({ label, value, icon: Icon, color, delta }) => (
             <div key={label} className="rounded-xl p-4 relative" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
@@ -398,7 +398,7 @@ export default function DashboardPage() {
                 {delta != null && delta > 0 && (
                   <span
                     className="text-[10px] font-bold px-1.5 py-0.5 rounded-full mb-0.5 flex items-center gap-0.5"
-                    style={{ background: "oklch(0.65 0.22 25 / 0.2)", color: "oklch(0.75 0.18 45)", border: "1px solid oklch(0.65 0.22 25 / 0.4)" }}
+                    style={{ background: "color-mix(in srgb, var(--lnx-red) 20%, transparent)", color: "var(--lnx-orange-soft)", border: "1px solid color-mix(in srgb, var(--lnx-red) 40%, transparent)" }}
                   >
                     <TrendingUp className="w-2.5 h-2.5" />
                     +{delta} new
@@ -418,8 +418,8 @@ export default function DashboardPage() {
             </div>
             {isLicensed ? (
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
-                <span className="text-sm" style={{ color: "oklch(0.65 0.18 145)" }}>Licensed — Commercial Rights Active</span>
+                <CheckCircle className="w-4 h-4" style={{ color: "var(--lnx-green)" }} />
+                <span className="text-sm" style={{ color: "var(--lnx-green)" }}>Licensed — Commercial Rights Active</span>
               </div>
             ) : (
               <>
@@ -443,7 +443,7 @@ export default function DashboardPage() {
                 <span>{slotsUsed} used</span><span>{slotsTotal} total</span>
               </div>
               <div className="h-2 rounded-full overflow-hidden" style={{ background: "oklch(0.15 0.05 275)" }}>
-                <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "oklch(0.65 0.18 25)" : "oklch(0.65 0.2 300)" }} />
+                <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "var(--lnx-red)" : "oklch(0.65 0.2 300)" }} />
               </div>
             </div>
             <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Need more? Add slots at $0.99 each.</p>
@@ -455,13 +455,13 @@ export default function DashboardPage() {
           {/* Tips / Stripe Connect */}
           <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <DollarSign className="w-4 h-4" style={{ color: "oklch(0.65 0.18 45)" }} />
+              <DollarSign className="w-4 h-4" style={{ color: "var(--lnx-orange)" }} />
               <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Gift Payments</h3>
             </div>
             {tipsEnabled ? (
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
-                <span className="text-sm" style={{ color: "oklch(0.65 0.18 145)" }}>Gifts Enabled — 90% to you</span>
+                <CheckCircle className="w-4 h-4" style={{ color: "var(--lnx-green)" }} />
+                <span className="text-sm" style={{ color: "var(--lnx-green)" }}>Gifts Enabled — 90% to you</span>
               </div>
             ) : (
               <>
@@ -473,7 +473,7 @@ export default function DashboardPage() {
                 {/* Show specific missing requirements when pending */}
                 {connectData?.status === "pending" && connectData?.requirementsLabels && connectData.requirementsLabels.length > 0 && (
                   <div className="mb-3">
-                    <p className="text-xs font-semibold mb-1" style={{ color: "oklch(0.65 0.18 45)" }}>Still needed:</p>
+                    <p className="text-xs font-semibold mb-1" style={{ color: "var(--lnx-orange)" }}>Still needed:</p>
                     <ul className="space-y-0.5">
                       {(connectData.requirementsLabels as string[]).slice(0, 3).map((label: string) => (
                         <li key={label} className="text-xs flex items-center gap-1" style={{ color: "oklch(0.7 0.12 45)" }}>
@@ -490,7 +490,7 @@ export default function DashboardPage() {
                   size="sm" className="w-full" variant="outline"
                   onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
                   disabled={connectMutation.isPending}
-                  style={{ borderColor: "oklch(0.65 0.18 145 / 0.5)", color: "oklch(0.65 0.18 145)" }}
+                  style={{ borderColor: "oklch(0.65 0.18 145 / 0.5)", color: "var(--lnx-green)" }}
                 >
                   {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Continue Setup" : "Enable Gifts"}
                 </Button>
@@ -531,7 +531,7 @@ export default function DashboardPage() {
             onClick={() => { setActiveTab("activity"); touchActivityMutation.mutate(); }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative"
             style={{
-              background: activeTab === "activity" ? "oklch(0.65 0.18 45)" : "transparent",
+              background: activeTab === "activity" ? "var(--lnx-orange)" : "transparent",
               color: activeTab === "activity" ? "oklch(0.08 0.015 280)" : "oklch(0.6 0.04 280)",
               fontFamily: "'Cinzel', serif",
             }}
@@ -676,7 +676,7 @@ export default function DashboardPage() {
                           onClick={() => { setDeletingId(song.id); deleteMutation.mutate({ songId: song.id }); }}
                           disabled={deletingId === song.id}
                         >
-                          <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "oklch(0.5 0.03 280)" : "oklch(0.65 0.18 25)" }} />
+                          <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "oklch(0.5 0.03 280)" : "var(--lnx-red)" }} />
                         </button>
                       </div>
                     </div>
@@ -704,7 +704,7 @@ export default function DashboardPage() {
                        )}
                       {/* AI badge */}
                       {song.aiConsent === "prohibited" && (
-                        <Badge className="px-1.5 py-0" style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: "oklch(0.65 0.18 25)", fontSize: "10px" }}>AI OFF</Badge>
+                        <Badge className="px-1.5 py-0" style={{ background: "color-mix(in srgb, var(--lnx-red) 20%, transparent)", color: "var(--lnx-red)", fontSize: "10px" }}>AI OFF</Badge>
                       )}
                       {/* Status dropdown */}
                       <select
@@ -768,7 +768,7 @@ export default function DashboardPage() {
                   const isTip = evt.type === "TIP";
                   const isComment = evt.type === "COMMENT";
                   const payload = evt.payload as any ?? {};
-                  const accentColor = isTip ? "oklch(0.84 0.155 85)" : isComment ? "oklch(0.65 0.2 300)" : "oklch(0.65 0.18 145)";
+                  const accentColor = isTip ? "oklch(0.84 0.155 85)" : isComment ? "oklch(0.65 0.2 300)" : "var(--lnx-green)";
                   return (
                     <div
                       key={evt.id}
@@ -888,7 +888,7 @@ export default function DashboardPage() {
                             </span>
                           </div>
                           {t.status === "failed" && t.errorMessage && (
-                            <p className="text-xs mt-1" style={{ color: "oklch(0.65 0.18 25)" }}>Error: {t.errorMessage}</p>
+                            <p className="text-xs mt-1" style={{ color: "var(--lnx-red)" }}>Error: {t.errorMessage}</p>
                           )}
                         </div>
                         {/* Actions */}
@@ -1299,7 +1299,7 @@ export default function DashboardPage() {
                           <span className="text-xs flex-1 truncate" style={{ color: "oklch(0.7 0.04 280)" }}>{track.title}</span>
                           <div className="flex items-center gap-2">
                             <span className="text-xs" style={{ color: "oklch(0.55 0.18 160)" }}>{track.giftCount} gift{track.giftCount !== 1 ? 's' : ''}</span>
-                            <span className="text-xs font-mono" style={{ color: "oklch(0.65 0.18 145)" }}>${(track.totalAmount / 100).toFixed(2)}</span>
+                            <span className="text-xs font-mono" style={{ color: "var(--lnx-green)" }}>${(track.totalAmount / 100).toFixed(2)}</span>
                           </div>
                         </div>
                       ))}
@@ -1312,7 +1312,7 @@ export default function DashboardPage() {
                     <DollarSign className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.55 0.18 160)" }} />
                     <div>
                       <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>Total Gift Revenue (gross)</p>
-                      <p className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 145)" }}>${(analyticsData.totalAmountReceived / 100).toFixed(2)}</p>
+                      <p className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--lnx-green)" }}>${(analyticsData.totalAmountReceived / 100).toFixed(2)}</p>
                     </div>
                     <div className="ml-auto text-right">
                       <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>Your cut (90%)</p>
@@ -1396,8 +1396,8 @@ function ArchiveTab() {
 
   if (error) return (
     <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.65 0.18 25 / 0.4)" }}>
-      <FileArchive className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "oklch(0.65 0.18 25)" }} />
-      <p className="text-sm" style={{ color: "oklch(0.65 0.18 25)" }}>{error}</p>
+      <FileArchive className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--lnx-red)" }} />
+      <p className="text-sm" style={{ color: "var(--lnx-red)" }}>{error}</p>
     </div>
   );
 
@@ -1520,7 +1520,7 @@ function ArchiveTab() {
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       {track.hasAudio && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.55 0.18 145 / 0.15)", color: "oklch(0.65 0.18 145)" }}>MP3</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.55 0.18 145 / 0.15)", color: "var(--lnx-green)" }}>MP3</span>
                       )}
                       {track.hasCertificate && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.84 0.155 85)" }}>WID</span>
@@ -1564,7 +1564,7 @@ function WIDCacheTab() {
   const MEDIUM_COLOR: Record<string, string> = {
     audio: "oklch(0.84 0.155 85)",
     lyrics: "oklch(0.65 0.2 300)",
-    manuscript: "oklch(0.65 0.18 45)",
+    manuscript: "var(--lnx-orange)",
     comic: "oklch(0.65 0.18 220)",
   };
 
@@ -1629,8 +1629,8 @@ function WIDCacheTab() {
                     >
                       {label}
                     </span>
-                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "oklch(0.65 0.18 145)" }} />
-                    <span className="text-[10px]" style={{ color: "oklch(0.65 0.18 145)" }}>Verified</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--lnx-green)" }} />
+                    <span className="text-[10px]" style={{ color: "var(--lnx-green)" }}>Verified</span>
                   </div>
                   <p className="text-sm font-semibold truncate mb-1" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
                     {snap.title}

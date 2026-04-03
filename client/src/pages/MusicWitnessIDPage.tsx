@@ -603,7 +603,7 @@ export default function MusicWitnessIDPage() {
               {meta.coWriters.filter(c => c).map((cw, i) => (
                 <span key={i} className="flex items-center gap-1 px-2 py-1 text-xs border border-[#6ee7f7]/20 text-[#6ee7f7]">
                   {cw}
-                  <button onClick={() => removeCoWriter(i)} className="hover:text-red-400 transition-colors"><X size={10} /></button>
+                  <button onClick={() => removeCoWriter(i)} className="hover:text-lnx-red transition-colors"><X size={10} /></button>
                 </span>
               ))}
             </div>

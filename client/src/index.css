@@ -77,6 +77,27 @@
   --violet:     oklch(0.50 0.20 295); /* #7b5ea7 gunmetal purple */
   --violet-dim: oklch(0.65 0.16 292); /* soft purple */
 
+  /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
+  /* Gold = Authority / WID / Primary actions */
+  --lnx-gold:       #F5C451;   /* oklch(0.82 0.155 85) */
+  --lnx-gold-glow:  #FACC15;   /* brighter for glows */
+  --lnx-gold-muted: #B8962E;   /* secondary gold */
+  /* Green = Verified / Published / Alive */
+  --lnx-green:      #22C55E;   /* oklch(0.70 0.20 145) */
+  --lnx-green-soft: #4ADE80;
+  /* Orange = Draft / In Progress / Transition */
+  --lnx-orange:     #F97316;   /* oklch(0.70 0.20 40) */
+  --lnx-orange-soft:#FB923C;
+  /* Red = Destructive / Warning / Irreversible */
+  --lnx-red:        #EF4444;   /* oklch(0.65 0.22 25) */
+  --lnx-red-soft:   #F87171;
+  /* Foundation — never changes */
+  --lnx-bg:         #05070D;
+  --lnx-bg-2:       #0B0F1A;
+  --lnx-bg-3:       #111827;
+  --lnx-text:       #E5E7EB;
+  --lnx-text-muted: #9CA3AF;
+
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
   --background: var(--void);
@@ -405,6 +426,94 @@
       0 4px 16px oklch(0.68 0.18 295 / 0.20);
     transform: translateY(-1px);
   }
+
+  /* ── ORIGIN GLOW BEHAVIOR — WID badge pulse + active state glow — */
+  /* WID badge: soft gold pulse animation */
+  @keyframes widPulse {
+    0%, 100% { box-shadow: 0 0 10px 2px color-mix(in srgb, var(--lnx-gold) 35%, transparent), 0 0 4px 0px color-mix(in srgb, var(--lnx-gold-glow) 25%, transparent); }
+    50% { box-shadow: 0 0 18px 5px color-mix(in srgb, var(--lnx-gold) 50%, transparent), 0 0 8px 2px color-mix(in srgb, var(--lnx-gold-glow) 35%, transparent); }
+  }
+  .wid-origin-glow {
+    border-color: color-mix(in srgb, var(--lnx-gold) 55%, transparent) !important;
+    animation: widPulse 3s ease-in-out infinite;
+  }
+  /* Mobile: reduced glow intensity */
+  @media (max-width: 768px) {
+    .wid-origin-glow {
+      animation: none;
+      box-shadow: 0 0 8px 2px color-mix(in srgb, var(--lnx-gold) 30%, transparent);
+    }
+  }
+
+  /* Active track: faint gold edge glow */
+  .track-active-glow {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--lnx-gold) 30%, transparent), 0 4px 20px color-mix(in srgb, var(--lnx-gold) 12%, transparent);
+    transition: box-shadow 0.3s ease;
+  }
+
+  /* Hover: subtle elevation + light */
+  .hover-elevate {
+    transition: box-shadow 0.2s ease, transform 0.15s ease, background 0.2s ease;
+  }
+  .hover-elevate:hover {
+    box-shadow: 0 6px 24px oklch(0 0 0 / 0.4), 0 0 12px color-mix(in srgb, var(--lnx-gold) 10%, transparent);
+    transform: translateY(-1px);
+  }
+
+  /* ── SEMANTIC STATUS BADGES — enforcing color meaning ── */
+  .badge-published, .badge-verified {
+    background: color-mix(in srgb, var(--lnx-green) 15%, transparent);
+    color: var(--lnx-green-soft);
+    border: 1px solid color-mix(in srgb, var(--lnx-green) 35%, transparent);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .badge-draft, .badge-processing {
+    background: color-mix(in srgb, var(--lnx-orange) 15%, transparent);
+    color: var(--lnx-orange-soft);
+    border: 1px solid color-mix(in srgb, var(--lnx-orange) 35%, transparent);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .badge-error, .badge-destructive {
+    background: color-mix(in srgb, var(--lnx-red) 15%, transparent);
+    color: var(--lnx-red-soft);
+    border: 1px solid color-mix(in srgb, var(--lnx-red) 35%, transparent);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .badge-wid {
+    background: color-mix(in srgb, var(--lnx-gold) 12%, transparent);
+    color: var(--lnx-gold);
+    border: 1px solid color-mix(in srgb, var(--lnx-gold) 40%, transparent);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── ELEVATION LAYERS — consistent surface depth ── */
+  .surface-base     { background: var(--lnx-bg); }
+  .surface-raised   { background: var(--lnx-bg-2); }
+  .surface-elevated { background: var(--lnx-bg-3); }
+  .surface-modal    { background: oklch(0.185 0.06 270); backdrop-filter: blur(12px); }
+
+  /* ── SEMANTIC TEXT COLORS — use these instead of hardcoded values ── */
+  .text-lnx-gold   { color: var(--lnx-gold); }
+  .text-lnx-green  { color: var(--lnx-green); }
+  .text-lnx-orange { color: var(--lnx-orange); }
+  .text-lnx-red    { color: var(--lnx-red); }
+  .text-lnx-muted  { color: var(--lnx-text-muted); }
 
   /* ── Genre pill ── */
   .genre-pill {

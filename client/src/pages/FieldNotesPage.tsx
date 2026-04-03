@@ -108,7 +108,7 @@ function NoteCard({
               </button>
               <button
                 onClick={() => onDelete(note.id)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-red-400 hover:bg-white/[0.06] transition-all"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-lnx-red hover:bg-white/[0.06] transition-all"
               >
                 <Trash2 size={12} />
               </button>

@@ -89,7 +89,7 @@ function CreatePlaylistDialog({
           <Button
             onClick={() => create.mutate({ name, description, isPublic, isCollaborative })}
             disabled={!name.trim() || create.isPending}
-            className="bg-[#D4AF37] hover:bg-[#B8962E] text-black font-heading"
+            className="bg-[#D4AF37] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
           >
             {create.isPending ? <Loader2 size={14} className="animate-spin" /> : "Create"}
           </Button>
@@ -141,7 +141,7 @@ function PlaylistCard({
         {isOwner && (
           <button
             onClick={e => { e.stopPropagation(); onDelete(); }}
-            className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-lnx-red transition-colors"
           >
             <Trash2 size={13} />
           </button>
@@ -246,7 +246,7 @@ function PlaylistDetail({
           onClick={playAll}
           disabled={!tracks.length}
           size="sm"
-          className="bg-[#D4AF37] hover:bg-[#B8962E] text-black font-heading text-xs"
+          className="bg-[#D4AF37] hover:bg-[var(--lnx-gold-muted)] text-black font-heading text-xs"
         >
           <Play size={12} className="mr-1" /> Play All
         </Button>
@@ -303,7 +303,7 @@ function PlaylistDetail({
                 {isOwner && (
                   <button
                     onClick={() => removeCollab.mutate({ playlistId, userId: c.user.id })}
-                    className="text-white/20 hover:text-red-400 transition-colors"
+                    className="text-white/20 hover:text-lnx-red transition-colors"
                   >
                     <X size={10} />
                   </button>
@@ -352,7 +352,7 @@ function PlaylistDetail({
                 <button
                   onClick={() => removeTrack.mutate({ playlistTrackId: t.id, playlistId })}
                   className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
-                    hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-all"
+                    hover:bg-red-500/10 text-white/20 hover:text-lnx-red transition-all"
                 >
                   <X size={12} />
                 </button>
@@ -418,7 +418,7 @@ export default function PlaylistsPage() {
             <Button
               onClick={() => setShowCreate(true)}
               size="sm"
-              className="bg-[#D4AF37] hover:bg-[#B8962E] text-black font-heading"
+              className="bg-[#D4AF37] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
             >
               <Plus size={14} className="mr-1" /> New
             </Button>
@@ -439,7 +439,7 @@ export default function PlaylistsPage() {
             <p className="text-sm text-white/25 mb-6">Create one and invite collaborators to build it together</p>
             <Button
               onClick={() => setShowCreate(true)}
-              className="bg-[#D4AF37] hover:bg-[#B8962E] text-black font-heading"
+              className="bg-[#D4AF37] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
             >
               <Plus size={14} className="mr-1" /> Create Your First Playlist
             </Button>

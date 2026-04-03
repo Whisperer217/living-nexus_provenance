@@ -56,7 +56,7 @@ const FOUNDERS: Founder[] = [
     discordName: "Randall Smith",
     emoji: "🙏",
     tags: ["Founding Creator", "Rock Witness", "Father", "First Prayer"],
-    gradient: ["#7F1D1D", "#F87171"],
+    gradient: ["#7F1D1D", "var(--lnx-red-soft)"],
   },
 ];
 

@@ -149,7 +149,7 @@ function ManageTrackRow({
       {/* Remove button */}
       <button
         onClick={() => onRemove(track.playlistTrackId)}
-        className="w-6 h-6 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/20 flex-shrink-0"
+        className="w-6 h-6 rounded-full flex items-center justify-center transition-colors hover:badge-error flex-shrink-0"
         title="Remove from list"
       >
         <Trash2 size={11} style={{ color: "oklch(0.65 0.18 25)" }} />
@@ -547,7 +547,7 @@ export default function MyListsTab() {
                     deletePlaylist.mutate({ id: pl.id });
                   }
                 }}
-                className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/20 flex-shrink-0"
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:badge-error flex-shrink-0"
                 title="Delete list"
               >
                 <Trash2 size={12} style={{ color: "oklch(0.65 0.18 25 / 0.7)" }} />

@@ -218,7 +218,7 @@ export default function PlaylistPage() {
                   }}
                   title="Remove from playlist"
                   className="w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all
-                    bg-white/[0.06] text-white/40 hover:bg-red-500/15 hover:text-red-400 border border-white/[0.08]"
+                    bg-white/[0.06] text-white/40 hover:bg-red-500/15 hover:text-lnx-red border border-white/[0.08]"
                 >
                   <Trash2 size={13} />
                 </button>

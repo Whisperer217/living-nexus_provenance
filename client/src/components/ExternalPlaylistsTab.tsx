@@ -257,7 +257,7 @@ function PlaylistCard({
           <Button
             size="icon"
             variant="ghost"
-            className="w-8 h-8 text-white/40 hover:text-red-400"
+            className="w-8 h-8 text-white/40 hover:text-lnx-red"
             onClick={() => deleteMutation.mutate({ id: playlist.id })}
             disabled={deleteMutation.isPending}
             title="Remove"

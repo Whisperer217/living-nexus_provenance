@@ -865,7 +865,7 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] font-body text-white/85 truncate flex-1 min-w-0">{song.title}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-body flex-shrink-0 ${
-                        song.status === "Published" ? "bg-green-500/10 text-green-400" :
+                        song.status === "Published" ? "bg-green-500/10 text-lnx-green" :
                         song.status === "Draft" ? "bg-amber-500/10 text-amber-400" : "bg-white/[0.05] text-white/70"
                       }`}>{song.status || "Published"}</span>
                     </div>
@@ -885,7 +885,7 @@ export default function ProfilePage() {
                       {analytics && (() => {
                         const giftEntry = analytics.giftsByTrack?.find((g: any) => g.trackId === String(song.id));
                         return giftEntry && giftEntry.giftCount > 0 ? (
-                          <span className="text-[10px] text-green-400/60 font-body flex-shrink-0 flex items-center gap-0.5">
+                          <span className="text-[10px] text-lnx-green/60 font-body flex-shrink-0 flex items-center gap-0.5">
                             <DollarSign size={8} className="inline" />{giftEntry.giftCount}
                           </span>
                         ) : null;

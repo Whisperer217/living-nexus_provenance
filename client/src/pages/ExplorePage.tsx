@@ -146,7 +146,7 @@ function ExploreCard({
           <Link
             href={`/verify/${song.witnessId}`}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-80 hover:opacity-100"
+            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow wid-origin-glow transition-opacity opacity-90 hover:opacity-100"
             style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}
             title={`Verified Witness ID: ${song.witnessId}`}
           >
