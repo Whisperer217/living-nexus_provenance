@@ -1962,6 +1962,7 @@ export async function redeemPromoCode(userId: number, code: string): Promise<{
   success: boolean;
   message: string;
   slotsGranted?: number;
+  totalSlots?: number;
 }> {
   const db = await getDb();
   if (!db) return { success: false, message: "Database unavailable." };
@@ -1979,12 +1980,21 @@ export async function redeemPromoCode(userId: number, code: string): Promise<{
     .limit(1);
   if (existing) return { success: false, message: "You have already redeemed this code." };
 
-  await db.update(users).set({ licenseStatus: "licensed", songSlotsTotal: promo.slotsGranted }).where(eq(users.id, userId));
+  // Get current user to calculate new slot total (ADD to existing, never overwrite)
+  const [currentUser] = await db.select({ songSlotsTotal: users.songSlotsTotal, licenseStatus: users.licenseStatus }).from(users).where(eq(users.id, userId)).limit(1);
+  const currentSlots = currentUser?.songSlotsTotal ?? 0;
+  const newSlots = currentSlots + promo.slotsGranted;
+  const alreadyLicensed = currentUser?.licenseStatus === "licensed";
+  // Always set to licensed; if already licensed this is a slot top-up
+  await db.update(users).set({ licenseStatus: "licensed", songSlotsTotal: newSlots }).where(eq(users.id, userId));
   await db.insert(licenses).values({ userId, stripePaymentIntentId: `promo-${promo.code}-${Date.now()}`, amountCents: 0, slotsGranted: promo.slotsGranted });
   await db.insert(promoRedemptions).values({ userId, promoCodeId: promo.id });
   await db.update(promoCodes).set({ usedCount: promo.usedCount + 1 }).where(eq(promoCodes.id, promo.id));
 
-  return { success: true, message: `License activated! You now have ${promo.slotsGranted} upload slots.`, slotsGranted: promo.slotsGranted };
+  const message = alreadyLicensed
+    ? `${promo.slotsGranted} slots added! You now have ${newSlots} total upload slots.`
+    : `License activated! You now have ${newSlots} upload slots.`;
+  return { success: true, message, slotsGranted: promo.slotsGranted, totalSlots: newSlots };
 }
 
 // ─── Collections (Album WID) ─────────────────────────────────────────────────
@@ -2669,3 +2679,86 @@ export async function getTestimonyCount(creatorId: number): Promise<number> {
   return Number(result[0]?.count ?? 0);
 }
 
+
+// ─── Living Archive Subscription Helpers ─────────────────────────────────────
+
+/** Activate a Living Archive subscription for a user.
+ *  Adds slotsPerPeriod to their total and sets subscription metadata.
+ */
+export async function activateLivingArchive(userId: number, opts: {
+  plan: "quarterly" | "annual" | "founder_free";
+  stripeSubscriptionId?: string;
+  expiresAt: Date;
+  slotsToAdd: number;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const [current] = await db.select({ songSlotsTotal: users.songSlotsTotal })
+    .from(users).where(eq(users.id, userId)).limit(1);
+  const newTotal = (current?.songSlotsTotal ?? 0) + opts.slotsToAdd;
+  await db.update(users).set({
+    livingArchivePlan: opts.plan,
+    livingArchiveActive: true,
+    livingArchiveExpiresAt: opts.expiresAt,
+    stripeSubscriptionId: opts.stripeSubscriptionId ?? null,
+    songSlotsTotal: newTotal,
+    licenseStatus: "licensed",
+  } as any).where(eq(users.id, userId));
+}
+
+/** Deactivate a Living Archive subscription (on cancellation / expiry).
+ *  Does NOT remove slots already granted — they remain permanently.
+ */
+export async function deactivateLivingArchive(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({
+    livingArchivePlan: "none",
+    livingArchiveActive: false,
+    livingArchiveExpiresAt: null,
+    stripeSubscriptionId: null,
+  } as any).where(eq(users.id, userId));
+}
+
+/** Grant a Founder Free Tier — 100 slots, no expiry, no Stripe subscription. */
+export async function grantFounderFreeTier(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const [current] = await db.select({ songSlotsTotal: users.songSlotsTotal })
+    .from(users).where(eq(users.id, userId)).limit(1);
+  const newTotal = (current?.songSlotsTotal ?? 0) + 100;
+  // Set expiry 100 years in the future (effectively permanent)
+  const farFuture = new Date();
+  farFuture.setFullYear(farFuture.getFullYear() + 100);
+  await db.update(users).set({
+    livingArchivePlan: "founder_free",
+    livingArchiveActive: true,
+    livingArchiveExpiresAt: farFuture,
+    songSlotsTotal: newTotal,
+    licenseStatus: "licensed",
+  } as any).where(eq(users.id, userId));
+}
+
+/** Get Living Archive status for a user. */
+export async function getLivingArchiveStatus(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const [row] = await db.select({
+    livingArchivePlan: users.livingArchivePlan,
+    livingArchiveActive: users.livingArchiveActive,
+    livingArchiveExpiresAt: users.livingArchiveExpiresAt,
+    stripeSubscriptionId: users.stripeSubscriptionId,
+    songSlotsTotal: users.songSlotsTotal,
+    songSlotsUsed: users.songSlotsUsed,
+  }).from(users).where(eq(users.id, userId)).limit(1);
+  return row ?? null;
+}
+
+/** Find a user by their Stripe subscription ID (for webhook handling). */
+export async function getUserByStripeSubscriptionId(subscriptionId: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const [row] = await db.select().from(users)
+    .where(eq(users.stripeSubscriptionId as any, subscriptionId)).limit(1);
+  return row ?? null;
+}

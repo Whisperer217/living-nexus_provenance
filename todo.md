@@ -2164,3 +2164,36 @@
 - [x] Clicking download button cycles through none → free → tipped → none
 - [x] TypeScript: 0 errors
 - [x] Vitest: 123 tests passing (13 test files)
+
+## Phase 84: Redeem Bug Fix + Living Archive Subscription
+- [ ] Fix backend: redeemPromoCode should ADD slots to existing total, not overwrite
+- [ ] Fix frontend: remove "Already Licensed" gate that blocks licensed users from redeeming
+- [ ] Add promo code type field (license / slot_pack / discount) to distinguish code types
+- [ ] Design Living Archive subscription model ($4.99/mo, unlimited slots beyond 100)
+- [ ] Add livingArchiveSubscription field to users table (stripe sub ID)
+- [ ] Add Stripe product/price for Living Archive subscription
+- [ ] Add subscription checkout + webhook handler
+- [ ] Add slot enforcement: warn at 90%, block at 100% with upgrade prompt
+- [ ] Add Living Archive upgrade prompt on upload page when near/at slot limit
+- [ ] Add billing management page showing current plan + slot usage
+- [ ] TypeScript: 0 errors
+- [ ] Vitest: all tests passing
+
+## Phase 84: Living Archive Subscription + Redeem Bug Fix
+- [x] Fix redeemPromoCode — ADD slots to existing total instead of overwriting
+- [x] Remove "Already Licensed" frontend gate that blocked licensed users from redeeming
+- [x] Add licensed status banner to RedeemPage showing current slot count
+- [x] Update success message to show slot top-up vs new license messaging
+- [x] Add livingArchivePlan, livingArchiveExpiresAt, livingArchiveActive, stripeSubscriptionId fields to users table
+- [x] DB migration applied
+- [x] Create livingArchiveProducts.ts with quarterly ($12.99) and annual ($44.99) Stripe products
+- [x] Add Living Archive DB helpers (activateLivingArchive, deactivateLivingArchive, grantFounderFreeTier)
+- [x] Add Stripe webhook handlers for subscription.created, subscription.updated, subscription.deleted
+- [x] Add livingArchive tRPC router with checkout, status, cancel, grantFounderFree procedures
+- [x] Add slot consumption check to replaceAudio procedure (audio swaps consume a slot)
+- [x] Create LivingArchiveBillingPage with quarterly/annual plan cards, slot counter, upgrade prompts
+- [x] Add /settings/billing route to App.tsx
+- [x] Add slot usage bar to ArchivePage header (links to billing, shows 90%/100% warnings)
+- [x] Add Founder Free Tier grant section to BillingResetTab in LN Command Center
+- [x] TypeScript: 0 errors
+- [x] Vitest: 123 tests passing (13 test files)

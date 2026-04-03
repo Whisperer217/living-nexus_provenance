@@ -26,12 +26,19 @@ export default function RedeemPage() {
   const [code, setCode] = useState("");
   const [redeemed, setRedeemed] = useState(false);
   const [slotsGranted, setSlotsGranted] = useState(0);
+  const [totalSlots, setTotalSlots] = useState(0);
+  const [wasAlreadyLicensed, setWasAlreadyLicensed] = useState(false);
 
   const redeemMutation = trpc.promo.redeem.useMutation({
     onSuccess: (data) => {
       setRedeemed(true);
       setSlotsGranted(data.slotsGranted ?? 0);
-      toast.success("Access granted! Your Creator License is now active.");
+      setTotalSlots(data.totalSlots ?? data.slotsGranted ?? 0);
+      setWasAlreadyLicensed(user?.licenseStatus === "licensed");
+      const msg = user?.licenseStatus === "licensed"
+        ? `${data.slotsGranted} slots added to your account!`
+        : "Access granted! Your Creator License is now active.";
+      toast.success(msg);
     },
     onError: (e) => {
       toast.error(e.message || "Invalid or expired code. Please try again.");
@@ -65,14 +72,16 @@ export default function RedeemPage() {
                 <CheckCircle2 className="w-8 h-8" style={{ color: "oklch(0.75 0.18 145)" }} />
               </div>
               <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
-                License Activated
+                {wasAlreadyLicensed ? "Slots Added" : "License Activated"}
               </h1>
               <p className="text-sm mb-2" style={{ color: SUBTEXT }}>
-                Your Creator License is now active.
+                {wasAlreadyLicensed
+                  ? `${slotsGranted} upload slots have been added to your archive.`
+                  : "Your Creator License is now active."}
               </p>
-              {slotsGranted > 0 && (
-                <p className="text-sm mb-6" style={{ color: GOLD }}>
-                  {slotsGranted} upload slots added to your account.
+              {totalSlots > 0 && (
+                <p className="text-sm mb-6 font-semibold" style={{ color: GOLD }}>
+                  Total slots: {totalSlots}
                 </p>
               )}
               <div className="flex flex-col gap-3">
@@ -111,39 +120,34 @@ export default function RedeemPage() {
                 Sign In to Continue
               </Button>
             </div>
-          ) : user?.licenseStatus === "licensed" ? (
-            /* ── Already Licensed ── */
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-                style={{ background: "oklch(0.75 0.18 145 / 0.15)", border: "1px solid oklch(0.75 0.18 145 / 0.3)" }}>
-                <CheckCircle2 className="w-8 h-8" style={{ color: "oklch(0.75 0.18 145)" }} />
-              </div>
-              <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
-                Already Licensed
-              </h1>
-              <p className="text-sm mb-6" style={{ color: SUBTEXT }}>
-                Your account already has an active Creator License.
-              </p>
-              <Button
-                style={{ background: GOLD, color: BG }}
-                onClick={() => navigate("/upload")}
-              >
-                Go to Upload <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
           ) : (
             /* ── Redeem Form ── */
             <>
+              {/* Licensed user banner */}
+              {user?.licenseStatus === "licensed" && (
+                <div className="rounded-xl p-3 mb-6 flex items-center gap-3"
+                  style={{ background: "oklch(0.75 0.18 145 / 0.08)", border: "1px solid oklch(0.75 0.18 145 / 0.25)" }}>
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.75 0.18 145)" }} />
+                  <div>
+                    <p className="text-xs font-semibold" style={{ color: "oklch(0.75 0.18 145)" }}>Creator License Active</p>
+                    <p className="text-xs" style={{ color: SUBTEXT }}>
+                      {user.songSlotsTotal ?? 0} slots in your archive. Redeem a slot pack code to add more.
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="text-center mb-8">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
                   style={{ background: `${GOLD}20`, border: `1px solid ${GOLD}40` }}>
                   <Tag className="w-8 h-8" style={{ color: GOLD }} />
                 </div>
                 <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
-                  Redeem Access Code
+                  {user?.licenseStatus === "licensed" ? "Redeem Slot Pack" : "Redeem Access Code"}
                 </h1>
                 <p className="text-sm" style={{ color: SUBTEXT }}>
-                  Enter your code below to activate a free Creator License and start uploading your music.
+                  {user?.licenseStatus === "licensed"
+                    ? "Enter a slot pack code to add more upload slots to your archive."
+                    : "Enter your code below to activate a free Creator License and start uploading your music."}
                 </p>
               </div>
 

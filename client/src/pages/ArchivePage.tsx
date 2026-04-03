@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   Music, Upload, Globe, EyeOff, Pencil, ExternalLink,
   Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
-  Download, Lock, Coins,
+  Download, Lock, Coins, Layers, AlertTriangle,
 } from "lucide-react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
@@ -357,7 +357,7 @@ export default function ArchivePage() {
         </nav>
 
         {/* ── Header ─────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold"
               style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
@@ -367,12 +367,60 @@ export default function ArchivePage() {
               All tracks you have uploaded to Living Nexus
             </p>
           </div>
-          <Link href="/upload">
-            <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
-              <Upload className="w-3 h-3 mr-1" /> Upload New
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/upload">
+              <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
+                <Upload className="w-3 h-3 mr-1" /> Upload New
+              </Button>
+            </Link>
+          </div>
         </div>
+
+        {/* ── Slot Usage Bar ─────────────────────────────────────────── */}
+        {(() => {
+          const slotsUsed = (songs as any)?.[0]?.slotsUsed ?? nonDeletedCount;
+          const slotsTotal = (user as any)?.songSlotsTotal ?? 100;
+          const slotPct = slotsTotal > 0 ? Math.round((nonDeletedCount / slotsTotal) * 100) : 0;
+          const isNear = slotPct >= 90;
+          const isFull = nonDeletedCount >= slotsTotal;
+          return (
+            <Link href="/settings/billing">
+              <div
+                className="flex items-center gap-3 mb-6 px-4 py-3 rounded-xl border cursor-pointer hover:border-amber-500/50 transition-colors"
+                style={{
+                  background: isFull ? "oklch(0.12 0.04 25 / 0.4)" : isNear ? "oklch(0.12 0.04 85 / 0.3)" : "oklch(0.115 0.055 278)",
+                  borderColor: isFull ? "oklch(0.55 0.2 25 / 0.4)" : isNear ? "oklch(0.75 0.15 85 / 0.4)" : "oklch(0.3 0.03 280 / 0.4)",
+                }}
+              >
+                {isFull ? (
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.65 0.2 25)" }} />
+                ) : (
+                  <Layers className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.75 0.15 85)" }} />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium" style={{ color: isFull ? "oklch(0.65 0.2 25)" : isNear ? "oklch(0.82 0.15 85)" : "oklch(0.75 0.03 280)" }}>
+                      {isFull ? "Archive Full" : isNear ? "Approaching Slot Limit" : "Archive Slots"}
+                    </span>
+                    <span className="text-xs" style={{ color: "oklch(0.65 0.03 280)" }}>
+                      {nonDeletedCount} / {slotsTotal}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full" style={{ background: "oklch(0.2 0.02 280)" }}>
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(slotPct, 100)}%`,
+                        background: isFull ? "oklch(0.55 0.2 25)" : isNear ? "oklch(0.75 0.15 85)" : "oklch(0.65 0.15 150)",
+                      }}
+                    />
+                  </div>
+                </div>
+                <span className="text-xs flex-shrink-0" style={{ color: "oklch(0.55 0.03 280)" }}>Manage →</span>
+              </div>
+            </Link>
+          );
+        })()}
 
         {/* ── Tab switcher ───────────────────────────────────────── */}
         <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "oklch(0.115 0.055 278)" }}>

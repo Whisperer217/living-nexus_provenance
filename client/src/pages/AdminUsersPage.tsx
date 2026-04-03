@@ -956,6 +956,8 @@ function BillingResetTab() {
   const [search, setSearch] = useState("");
   const [confirmReset, setConfirmReset] = useState<number | null>(null);
   const [resetReason, setResetReason] = useState("");
+  const [founderSearch, setFounderSearch] = useState("");
+  const [confirmFounder, setConfirmFounder] = useState<number | null>(null);
 
   const { data: usersData, isLoading } = trpc.admin.getAllUsers.useQuery({ limit: 100 }, { retry: false });
   const users = usersData?.users ?? [];
@@ -970,8 +972,64 @@ function BillingResetTab() {
     return (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q);
   });
 
+  const grantFounderFree = trpc.livingArchive.grantFounderFree.useMutation({
+    onSuccess: (data) => { toast.success(data.message); setConfirmFounder(null); utils.admin.getAllUsers.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const { data: founderUsersData } = trpc.admin.getAllUsers.useQuery({ limit: 200 }, { retry: false });
+  const founderUsers = founderUsersData?.users ?? [];
+  const filteredFounder = founderUsers.filter((u: any) => {
+    const q = founderSearch.toLowerCase();
+    return (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q);
+  });
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+
+      {/* ── Founder Free Tier Grant ── */}
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "oklch(0.12 0.03 85 / 0.4)", border: "1px solid oklch(0.4 0.1 85 / 0.4)" }}>
+        <div>
+          <p className="text-sm font-semibold mb-0.5" style={{ color: GOLD }}>👑 Grant Founder Free Tier</p>
+          <p className="text-xs" style={{ color: SUBTEXT }}>Grants 100 permanent archive slots and Living Archive access at no charge. Use for founders, partners, and platform contributors. Logged to audit trail.</p>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: MUTED }} />
+          <Input value={founderSearch} onChange={e => setFounderSearch(e.target.value)} placeholder="Search users to grant…"
+            className="pl-9" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
+        </div>
+        {founderSearch.length > 1 && (
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {filteredFounder.slice(0, 10).map((u: any) => (
+              <div key={u.id} className="rounded-lg p-3 flex items-center justify-between" style={{ background: BG, border: `1px solid ${BORDER}` }}>
+                <div>
+                  <div className="text-sm font-medium" style={{ color: TEXT }}>{u.name ?? "—"}</div>
+                  <div className="text-xs" style={{ color: SUBTEXT }}>{u.email ?? "no email"} · ID: {u.id}</div>
+                  {(u as any).livingArchivePlan && (
+                    <div className="text-xs mt-0.5" style={{ color: GOLD }}>Plan: {(u as any).livingArchivePlan}</div>
+                  )}
+                </div>
+                {confirmFounder === u.id ? (
+                  <div className="flex gap-2">
+                    <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: "oklch(0.08 0.015 280)" }}
+                      onClick={() => grantFounderFree.mutate({ userId: u.id })}>
+                      Confirm Grant
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 text-xs" style={{ color: SUBTEXT }}
+                      onClick={() => setConfirmFounder(null)}>Cancel</Button>
+                  </div>
+                ) : (
+                  <Button size="sm" className="h-7 text-xs gap-1" style={{ background: "oklch(0.22 0.04 85)", border: `1px solid ${GOLD}`, color: GOLD }}
+                    onClick={() => setConfirmFounder(u.id)}>
+                    <Gift className="w-3 h-3" /> Grant Free Tier
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="rounded-xl p-4" style={{ background: "oklch(0.12 0.03 25)", border: "1px solid oklch(0.3 0.1 25)" }}>
         <p className="text-sm font-semibold mb-1" style={{ color: "oklch(0.75 0.15 25)" }}>⚠ Destructive Action</p>
         <p className="text-xs" style={{ color: SUBTEXT }}>Billing reset cancels the user's active Stripe subscription and clears their local Stripe customer/subscription IDs. The WID registry is never modified. Use only for refunds, fraud, or test account cleanup.</p>

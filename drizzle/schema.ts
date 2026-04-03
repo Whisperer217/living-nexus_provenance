@@ -40,6 +40,12 @@ export const users = mysqlTable("users", {
   stripeCustomerId: varchar("stripeCustomerId", { length: 64 }),
   stripeAccountId: varchar("stripeAccountId", { length: 64 }),
   stripeAccountStatus: mysqlEnum("stripeAccountStatus", ["pending", "restricted", "enabled", "disabled"]).default("pending"),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 128 }),
+
+  // Living Archive subscription
+  livingArchivePlan: mysqlEnum("livingArchivePlan", ["none", "quarterly", "annual", "founder_free"]).default("none").notNull(),
+  livingArchiveExpiresAt: timestamp("livingArchiveExpiresAt"),
+  livingArchiveActive: boolean("livingArchiveActive").default(false).notNull(),
 
   // Founder's Era supporter tier (denormalized from platformSupporters for fast badge rendering)
   supporterTier: mysqlEnum("supporterTier", ["supporter", "patron", "covenant"]),

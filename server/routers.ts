@@ -58,7 +58,10 @@ import {
   resetUserBilling, getAllUsersAdmin,
   recordPlayEvent, getPlayAuditStats, MIN_PLAY_SECONDS,
   createTestimony, getTestimoniesByCreator, getTestimonyByWid, getTestimonyCount,
+  activateLivingArchive, deactivateLivingArchive, grantFounderFreeTier,
+  getLivingArchiveStatus, getUserByStripeSubscriptionId,
 } from "./db";
+import { LIVING_ARCHIVE_PRODUCTS, SLOTS_PER_PERIOD } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
 
@@ -198,6 +201,63 @@ export async function handleStripeWebhook(req: any, res: any) {
         const creator = allCreators.find((c: any) => c.stripeAccountId === account.id);
         if (creator) {
           await updateUserStripeAccount(creator.id, { stripeAccountId: undefined, stripeAccountStatus: "disabled" });
+        }
+        break;
+      }
+      // ─── Living Archive Subscription Events ───────────────────────────────────
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+        const meta = sub.metadata || {};
+        const userId = meta.userId ? parseInt(meta.userId) : null;
+        if (!userId) break;
+        const planKey = meta.plan as "quarterly" | "annual" | null;
+        if (!planKey || !(planKey in LIVING_ARCHIVE_PRODUCTS)) break;
+        const product = LIVING_ARCHIVE_PRODUCTS[planKey];
+        const isActive = sub.status === "active" || sub.status === "trialing";
+        if (isActive) {
+          const periodEnd = new Date((sub as any).current_period_end * 1000);
+          // Only add slots on creation (not on every update)
+          const isNew = event.type === "customer.subscription.created";
+          await activateLivingArchive(userId, {
+            plan: planKey,
+            stripeSubscriptionId: sub.id,
+            expiresAt: periodEnd,
+            slotsToAdd: isNew ? SLOTS_PER_PERIOD[planKey] : 0,
+          });
+          console.log(`[LivingArchive] ${isNew ? "Activated" : "Updated"} ${planKey} for user ${userId}`);
+        }
+        break;
+      }
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        const user = await getUserByStripeSubscriptionId(sub.id);
+        if (user) {
+          await deactivateLivingArchive(user.id);
+          console.log(`[LivingArchive] Deactivated subscription for user ${user.id}`);
+        }
+        break;
+      }
+      case "invoice.paid": {
+        // Renewal: add slots for each new billing period
+        const invoice = event.data.object as any;
+        if (!invoice.subscription) break;
+        const sub = await stripe.subscriptions.retrieve(invoice.subscription as string);
+        const meta = sub.metadata || {};
+        const userId = meta.userId ? parseInt(meta.userId) : null;
+        const planKey = meta.plan as "quarterly" | "annual" | null;
+        if (!userId || !planKey || !(planKey in LIVING_ARCHIVE_PRODUCTS)) break;
+        // Only add slots on renewal (not the first invoice — that's handled by subscription.created)
+        const billingReason = (invoice as any).billing_reason;
+        if (billingReason === "subscription_cycle") {
+          const periodEnd = new Date((sub as any).current_period_end * 1000);
+          await activateLivingArchive(userId, {
+            plan: planKey,
+            stripeSubscriptionId: sub.id,
+            expiresAt: periodEnd,
+            slotsToAdd: SLOTS_PER_PERIOD[planKey],
+          });
+          console.log(`[LivingArchive] Renewal: added ${SLOTS_PER_PERIOD[planKey]} slots for user ${userId} (${planKey})`);
         }
         break;
       }
@@ -877,6 +937,17 @@ export const appRouter = router({
     })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);
       if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+      // 0. Check slot availability — audio replacement generates a new WID and consumes a slot
+      const userForSlots = await getUserById(ctx.user.id);
+      if (!userForSlots) throw new TRPCError({ code: "UNAUTHORIZED" });
+      const slotsUsed = userForSlots.songSlotsUsed ?? 0;
+      const slotsTotal = userForSlots.songSlotsTotal ?? 0;
+      if (slotsUsed >= slotsTotal) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You have used all your upload slots. Audio replacement generates a new WID and requires an available slot. Upgrade your Living Archive to continue.",
+        });
+      }
       // 1. Archive the current audio as a historical version
       if (song.fileUrl && song.witnessId) {
         await archiveAudioVersion({
@@ -2793,6 +2864,105 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
             eq(externalPlaylists.userId, ctx.user.id),
           ));
         return { success: true };
+      }),
+  }),
+
+  // ── Living Archive Subscription ──────────────────────────────────────────
+  livingArchive: router({
+    /** Get current subscription status + slot counts for the logged-in user */
+    status: protectedProcedure.query(async ({ ctx }) => {
+      return getLivingArchiveStatus(ctx.user.id);
+    }),
+
+    /** Create a Stripe Checkout Session for a Living Archive subscription */
+    checkout: protectedProcedure
+      .input(z.object({
+        plan: z.enum(["quarterly", "annual"]),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await getUserById(ctx.user.id);
+        if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        const product = LIVING_ARCHIVE_PRODUCTS[input.plan];
+
+        // Ensure Stripe customer exists
+        let customerId = user.stripeCustomerId ?? undefined;
+        if (!customerId) {
+          const customer = await stripe.customers.create({
+            email: user.email ?? undefined,
+            name: user.name ?? undefined,
+            metadata: { userId: ctx.user.id.toString() },
+          });
+          customerId = customer.id;
+          await updateUserStripeAccount(ctx.user.id, { stripeCustomerId: customerId } as any);
+        }
+
+        // Build price inline (no pre-created Stripe price required)
+        const session = await stripe.checkout.sessions.create({
+          mode: "subscription",
+          customer: customerId,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              unit_amount: product.priceCents,
+              recurring: {
+                interval: product.interval,
+                interval_count: product.intervalCount,
+              },
+              product_data: {
+                name: product.name,
+                description: product.description,
+              },
+            },
+            quantity: 1,
+          }],
+          subscription_data: {
+            metadata: {
+              userId: ctx.user.id.toString(),
+              plan: input.plan,
+              userName: user.name || "",
+            },
+          },
+          metadata: {
+            type: "living_archive_subscription",
+            userId: ctx.user.id.toString(),
+            plan: input.plan,
+          },
+          client_reference_id: ctx.user.id.toString(),
+          success_url: `${input.origin}/settings/billing?subscription=success&plan=${input.plan}`,
+          cancel_url: `${input.origin}/settings/billing`,
+          allow_promotion_codes: true,
+        });
+        return { url: session.url };
+      }),
+
+    /** Cancel the current Living Archive subscription */
+    cancel: protectedProcedure.mutation(async ({ ctx }) => {
+      const status = await getLivingArchiveStatus(ctx.user.id);
+      if (!status?.stripeSubscriptionId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "No active subscription found" });
+      }
+      // Cancel at period end (not immediately — user keeps access until expiry)
+      await stripe.subscriptions.update(status.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+      return { success: true, message: "Subscription will cancel at end of current period. Your slots remain permanently." };
+    }),
+
+    /** Admin: grant Founder Free Tier to a user */
+    grantFounderFree: protectedProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        await grantFounderFreeTier(input.userId);
+        await logAdminAction({
+          adminId: ctx.user.id,
+          action: "GRANT_FOUNDER_FREE",
+          targetType: "user",
+          targetId: String(input.userId),
+          details: { grantedBy: ctx.user.name || String(ctx.user.id) },
+        });
+        return { success: true, message: "Founder Free Tier granted — 100 slots added" };
       }),
   }),
 });
