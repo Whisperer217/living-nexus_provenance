@@ -183,6 +183,13 @@
       "when": 1775114793474,
       "tag": "0025_sharp_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1775199191978,
+      "tag": "0026_material_shinobi_shaw",
+      "breakpoints": true
     }
   ]
 }

@@ -2048,3 +2048,23 @@
 - [x] Add Origin Glow CSS utility classes
 - [x] Standardize all major components to token system
 - [x] TypeScript: 0 errors
+
+## Phase 79: LN Command Center (Admin System)
+- [x] Add admin_logs table to schema
+- [x] Add system_config table to schema
+- [x] Add isFlagged, flagReason, moderationStatus columns to songs table
+- [x] Add stripeSubscriptionId column to users table
+- [x] Push DB migration
+- [x] Add admin procedures: Works/WIDs search, flag, unflag, unpublish
+- [x] Add admin procedures: system_config get/set
+- [x] Add admin procedures: Stripe billing reset
+- [x] Add admin procedures: logAdminAction helper
+- [x] Add Works/WIDs tab to AdminUsersPage
+- [x] Add Moderation Queue tab to AdminUsersPage (merged into Works/WIDs tab)
+- [x] Add System Control tab to AdminUsersPage
+- [x] Add Stripe Billing Reset tab (standalone Billing Reset tab)
+- [x] Add Admin Logs tab to AdminUsersPage
+- [x] Rebrand to LN Command Center
+- [x] Wire admin action logging to all mutations
+- [x] TypeScript: 0 errors
+- [x] Vitest: 108 tests passing (13 new Command Center tests)

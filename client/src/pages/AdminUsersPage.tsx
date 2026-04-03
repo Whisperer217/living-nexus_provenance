@@ -21,7 +21,7 @@ import { getLoginUrl } from "@/const";
 
 type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus";
 type SortDir = "asc" | "desc";
-type Tab = "users" | "codes" | "stripe" | "embed";
+type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing";
 
 const GOLD = "oklch(0.84 0.155 85)";
 const BG = "oklch(0.08 0.015 280)";
@@ -676,8 +676,12 @@ export default function AdminUsersPage() {
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "users", label: "User Roster", icon: <Users className="w-4 h-4" /> },
     { id: "codes", label: "Promo Codes", icon: <Tag className="w-4 h-4" /> },
-    { id: "stripe", label: "Stripe Recovery", icon: <CreditCard className="w-4 h-4" /> },
+    { id: "works", label: "Works / WIDs", icon: <Shield className="w-4 h-4" /> },
+    { id: "config", label: "System Control", icon: <CheckCircle className="w-4 h-4" /> },
+    { id: "billing", label: "Billing Reset", icon: <CreditCard className="w-4 h-4" /> },
+    { id: "stripe", label: "Stripe Recovery", icon: <RotateCcw className="w-4 h-4" /> },
     { id: "embed", label: "Embed Videos", icon: <Video className="w-4 h-4" /> },
+    { id: "logs", label: "Audit Log", icon: <History className="w-4 h-4" /> },
   ];
 
   return (
@@ -690,10 +694,10 @@ export default function AdminUsersPage() {
             <div className="flex items-center gap-3 mb-1">
               <Shield className="w-6 h-6" style={{ color: GOLD }} />
               <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
-                Admin Panel
+                LN Command Center
               </h1>
             </div>
-            <p className="text-sm" style={{ color: SUBTEXT }}>Manage users, grant licenses, and create access codes.</p>
+            <p className="text-sm" style={{ color: SUBTEXT }}>Full platform governance — users, works, billing, system config, and audit trail.</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => navigate("/")}
             style={{ borderColor: BORDER, color: SUBTEXT }}>
@@ -721,10 +725,347 @@ export default function AdminUsersPage() {
         {/* Tab Content */}
         {tab === "users" && <UsersTab />}
         {tab === "codes" && <PromoCodesTab />}
+        {tab === "works" && <WorksModerationTab />}
+        {tab === "config" && <SystemConfigTab />}
+        {tab === "billing" && <BillingResetTab />}
         {tab === "stripe" && <StripeRecoveryTab />}
         {tab === "embed" && <EmbedVideoTab />}
+        {tab === "logs" && <AuditLogTab />}
 
       </div>
+    </div>
+  );
+}
+
+// ── Works / WIDs Moderation Tab ───────────────────────────────────────────────
+function WorksModerationTab() {
+  const utils = trpc.useUtils();
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"" | "clear" | "flagged" | "removed">("");
+  const [flagReason, setFlagReason] = useState<Record<number, string>>({});
+  const [confirmRemove, setConfirmRemove] = useState<number | null>(null);
+
+  const { data: works, isLoading } = trpc.admin.searchWorks.useQuery(
+    { query: search || undefined, moderationStatus: filter || undefined, limit: 50 },
+    { retry: false }
+  );
+
+  const flagWork = trpc.admin.flagWork.useMutation({
+    onSuccess: () => { toast.success("Work flagged"); utils.admin.searchWorks.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const unflagWork = trpc.admin.unflagWork.useMutation({
+    onSuccess: () => { toast.success("Flag cleared"); utils.admin.searchWorks.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const removeWork = trpc.admin.removeWork.useMutation({
+    onSuccess: () => { toast.success("Work removed (WID preserved)"); setConfirmRemove(null); utils.admin.searchWorks.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const restoreWork = trpc.admin.restoreWork.useMutation({
+    onSuccess: () => { toast.success("Work restored"); utils.admin.searchWorks.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: MUTED }} />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by title, WID, or creator…"
+            className="pl-9" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
+        </div>
+        <select value={filter} onChange={e => setFilter(e.target.value as any)}
+          className="px-3 py-2 rounded-md text-sm" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }}>
+          <option value="">All</option>
+          <option value="clear">Clear</option>
+          <option value="flagged">Flagged</option>
+          <option value="removed">Removed</option>
+        </select>
+      </div>
+
+      {isLoading && <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin" style={{ color: GOLD }} /></div>}
+
+      <div className="space-y-2">
+        {(works ?? []).map((w: any) => (
+          <div key={w.id} className="rounded-xl p-4 flex gap-4 items-start" style={{ background: CARD, border: `1px solid ${w.isFlagged ? "oklch(0.65 0.18 45)" : w.moderationStatus === "removed" ? "oklch(0.55 0.2 25)" : BORDER}` }}>
+            {w.coverArtUrl && <img src={w.coverArtUrl} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-semibold text-sm" style={{ color: TEXT }}>{w.title}</span>
+                <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.15 0.04 85)", color: GOLD }}>{w.witnessId ?? "—"}</span>
+                {w.isFlagged && <span className="text-xs px-2 py-0.5 rounded" style={{ background: "oklch(0.2 0.05 45)", color: "oklch(0.75 0.15 45)" }}>FLAGGED</span>}
+                {w.moderationStatus === "removed" && <span className="text-xs px-2 py-0.5 rounded" style={{ background: "oklch(0.18 0.05 25)", color: "oklch(0.7 0.18 25)" }}>REMOVED</span>}
+              </div>
+              <div className="text-xs mt-1" style={{ color: SUBTEXT }}>
+                {w.contentType?.toUpperCase()} · {w.status} · {w.playCount ?? 0} plays
+                {w.flagReason && <span className="ml-2" style={{ color: "oklch(0.75 0.15 45)" }}>Reason: {w.flagReason}</span>}
+              </div>
+            </div>
+            <div className="flex gap-2 shrink-0 flex-wrap">
+              {!w.isFlagged && w.moderationStatus !== "removed" && (
+                <div className="flex gap-1">
+                  <Input value={flagReason[w.id] ?? ""} onChange={e => setFlagReason(r => ({ ...r, [w.id]: e.target.value }))}
+                    placeholder="Flag reason…" className="w-32 h-7 text-xs" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+                  <Button size="sm" variant="outline" className="h-7 text-xs"
+                    style={{ borderColor: "oklch(0.65 0.18 45)", color: "oklch(0.75 0.15 45)" }}
+                    disabled={!flagReason[w.id]}
+                    onClick={() => flagWork.mutate({ songId: w.id, reason: flagReason[w.id] })}>
+                    Flag
+                  </Button>
+                </div>
+              )}
+              {w.isFlagged && (
+                <Button size="sm" variant="outline" className="h-7 text-xs"
+                  style={{ borderColor: BORDER, color: SUBTEXT }}
+                  onClick={() => unflagWork.mutate({ songId: w.id })}>
+                  Clear Flag
+                </Button>
+              )}
+              {w.moderationStatus !== "removed" ? (
+                confirmRemove === w.id ? (
+                  <div className="flex gap-1">
+                    <Button size="sm" className="h-7 text-xs" style={{ background: "oklch(0.55 0.2 25)", color: "#fff" }}
+                      onClick={() => removeWork.mutate({ songId: w.id })}>Confirm Remove</Button>
+                    <Button size="sm" variant="outline" className="h-7 text-xs" style={{ borderColor: BORDER, color: SUBTEXT }}
+                      onClick={() => setConfirmRemove(null)}>Cancel</Button>
+                  </div>
+                ) : (
+                  <Button size="sm" variant="outline" className="h-7 text-xs"
+                    style={{ borderColor: "oklch(0.55 0.2 25)", color: "oklch(0.7 0.18 25)" }}
+                    onClick={() => setConfirmRemove(w.id)}>
+                    Remove
+                  </Button>
+                )
+              ) : (
+                <Button size="sm" variant="outline" className="h-7 text-xs"
+                  style={{ borderColor: BORDER, color: SUBTEXT }}
+                  onClick={() => restoreWork.mutate({ songId: w.id })}>
+                  Restore
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+        {!isLoading && (works ?? []).length === 0 && (
+          <p className="text-center py-10 text-sm" style={{ color: SUBTEXT }}>No works found.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── System Config Tab ──────────────────────────────────────────────────────────
+function SystemConfigTab() {
+  const utils = trpc.useUtils();
+  const [editKey, setEditKey] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [newKey, setNewKey] = useState("");
+  const [newValue, setNewValue] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+
+  const { data: configs, isLoading } = trpc.admin.getSystemConfig.useQuery(undefined, { retry: false });
+
+  const setConfig = trpc.admin.setSystemConfig.useMutation({
+    onSuccess: () => { toast.success("Config updated"); utils.admin.getSystemConfig.invalidate(); setEditKey(null); setNewKey(""); setNewValue(""); setNewDesc(""); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const DEFAULT_FLAGS = [
+    { key: "feature.manuscript_upload", value: "true", description: "Enable manuscript upload flow" },
+    { key: "feature.comic_upload", value: "true", description: "Enable comic/novel upload flow" },
+    { key: "feature.ai_transforms", value: "true", description: "Enable AI transform feature" },
+    { key: "feature.jukebox", value: "true", description: "Enable Jukebox mode" },
+    { key: "feature.tips", value: "true", description: "Enable tip/gift payments" },
+    { key: "platform.maintenance_mode", value: "false", description: "Put platform in maintenance mode" },
+    { key: "platform.registration_open", value: "true", description: "Allow new user registrations" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Quick-seed default flags */}
+      <div className="rounded-xl p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <p className="text-xs font-semibold mb-3" style={{ color: GOLD }}>QUICK SEED DEFAULT FLAGS</p>
+        <div className="flex flex-wrap gap-2">
+          {DEFAULT_FLAGS.map(f => (
+            <Button key={f.key} size="sm" variant="outline" className="text-xs h-7"
+              style={{ borderColor: BORDER, color: SUBTEXT }}
+              onClick={() => setConfig.mutate({ key: f.key, value: f.value, description: f.description })}>
+              + {f.key}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Add new config */}
+      <div className="rounded-xl p-4 space-y-3" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <p className="text-xs font-semibold" style={{ color: GOLD }}>ADD / UPDATE CONFIG KEY</p>
+        <div className="flex gap-2 flex-wrap">
+          <Input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="config.key"
+            className="flex-1 min-w-[160px]" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+          <Input value={newValue} onChange={e => setNewValue(e.target.value)} placeholder="value"
+            className="w-32" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+          <Input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="description (optional)"
+            className="flex-1 min-w-[160px]" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+          <Button size="sm" disabled={!newKey || !newValue} style={{ background: GOLD, color: BG }}
+            onClick={() => setConfig.mutate({ key: newKey, value: newValue, description: newDesc || undefined })}>
+            Save
+          </Button>
+        </div>
+      </div>
+
+      {/* Existing configs */}
+      {isLoading && <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin" style={{ color: GOLD }} /></div>}
+      <div className="space-y-2">
+        {(configs ?? []).map((c: any) => (
+          <div key={c.key} className="rounded-xl p-4 flex items-center gap-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            <div className="flex-1 min-w-0">
+              <div className="font-mono text-sm" style={{ color: GOLD }}>{c.key}</div>
+              {c.description && <div className="text-xs mt-0.5" style={{ color: SUBTEXT }}>{c.description}</div>}
+            </div>
+            {editKey === c.key ? (
+              <div className="flex gap-2">
+                <Input value={editValue} onChange={e => setEditValue(e.target.value)} className="w-32 h-7 text-xs"
+                  style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+                <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: BG }}
+                  onClick={() => setConfig.mutate({ key: c.key, value: editValue, description: editDesc || c.description })}>Save</Button>
+                <Button size="sm" variant="outline" className="h-7 text-xs" style={{ borderColor: BORDER, color: SUBTEXT }}
+                  onClick={() => setEditKey(null)}>Cancel</Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-sm px-3 py-1 rounded" style={{ background: BG, color: c.value === "true" ? "var(--lnx-green)" : c.value === "false" ? "var(--lnx-red)" : TEXT }}>{c.value}</span>
+                <Button size="sm" variant="outline" className="h-7 text-xs" style={{ borderColor: BORDER, color: SUBTEXT }}
+                  onClick={() => { setEditKey(c.key); setEditValue(c.value); setEditDesc(c.description ?? ""); }}>Edit</Button>
+              </div>
+            )}
+          </div>
+        ))}
+        {!isLoading && (configs ?? []).length === 0 && (
+          <p className="text-center py-10 text-sm" style={{ color: SUBTEXT }}>No config keys yet. Seed defaults above.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Billing Reset Tab ──────────────────────────────────────────────────────────
+function BillingResetTab() {
+  const utils = trpc.useUtils();
+  const [search, setSearch] = useState("");
+  const [confirmReset, setConfirmReset] = useState<number | null>(null);
+  const [resetReason, setResetReason] = useState("");
+
+  const { data: usersData, isLoading } = trpc.admin.getAllUsers.useQuery({ limit: 100 }, { retry: false });
+  const users = usersData?.users ?? [];
+
+  const resetBilling = trpc.admin.resetBilling.useMutation({
+    onSuccess: () => { toast.success("Billing reset — Stripe subscription cancelled and local IDs cleared"); setConfirmReset(null); setResetReason(""); utils.admin.getAllUsers.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const filtered = users.filter((u: any) => {
+    const q = search.toLowerCase();
+    return (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q);
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl p-4" style={{ background: "oklch(0.12 0.03 25)", border: "1px solid oklch(0.3 0.1 25)" }}>
+        <p className="text-sm font-semibold mb-1" style={{ color: "oklch(0.75 0.15 25)" }}>⚠ Destructive Action</p>
+        <p className="text-xs" style={{ color: SUBTEXT }}>Billing reset cancels the user's active Stripe subscription and clears their local Stripe customer/subscription IDs. The WID registry is never modified. Use only for refunds, fraud, or test account cleanup.</p>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: MUTED }} />
+        <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users…"
+          className="pl-9" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
+      </div>
+
+      {isLoading && <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin" style={{ color: GOLD }} /></div>}
+
+      <div className="space-y-2">
+        {filtered.map((u: any) => (
+          <div key={u.id} className="rounded-xl p-4 flex items-center gap-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-sm" style={{ color: TEXT }}>{u.name ?? "—"}</div>
+              <div className="text-xs" style={{ color: SUBTEXT }}>ID: {u.id} · {u.email ?? "no email"}</div>
+              {(u as any).stripeCustomerId && (
+                <div className="text-xs font-mono mt-0.5" style={{ color: MUTED }}>Stripe: {(u as any).stripeCustomerId}</div>
+              )}
+            </div>
+            {confirmReset === u.id ? (
+              <div className="flex gap-2 flex-wrap">
+                <Input value={resetReason} onChange={e => setResetReason(e.target.value)} placeholder="Reason (optional)"
+                  className="w-40 h-7 text-xs" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+                <Button size="sm" className="h-7 text-xs" style={{ background: "oklch(0.55 0.2 25)", color: "#fff" }}
+                  onClick={() => resetBilling.mutate({ userId: u.id, reason: resetReason || undefined })}>
+                  Confirm Reset
+                </Button>
+                <Button size="sm" variant="outline" className="h-7 text-xs" style={{ borderColor: BORDER, color: SUBTEXT }}
+                  onClick={() => setConfirmReset(null)}>Cancel</Button>
+              </div>
+            ) : (
+              <Button size="sm" variant="outline" className="h-7 text-xs"
+                style={{ borderColor: "oklch(0.55 0.2 25)", color: "oklch(0.7 0.18 25)" }}
+                onClick={() => setConfirmReset(u.id)}>
+                Reset Billing
+              </Button>
+            )}
+          </div>
+        ))}
+        {!isLoading && filtered.length === 0 && (
+          <p className="text-center py-10 text-sm" style={{ color: SUBTEXT }}>No users found.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Audit Log Tab ──────────────────────────────────────────────────────────────
+function AuditLogTab() {
+  const { data: logs, isLoading } = trpc.admin.getLogs.useQuery({ limit: 200 }, { retry: false });
+
+  const ACTION_COLOR: Record<string, string> = {
+    flag_work: "oklch(0.75 0.15 45)",
+    unflag_work: "oklch(0.65 0.15 145)",
+    remove_work: "oklch(0.7 0.18 25)",
+    restore_work: "oklch(0.65 0.15 145)",
+    set_system_config: GOLD,
+    reset_billing: "oklch(0.7 0.18 25)",
+    set_user_role: GOLD,
+    grant_license: "oklch(0.65 0.15 145)",
+    deactivate_code: "oklch(0.75 0.15 45)",
+    reactivate_code: "oklch(0.65 0.15 145)",
+  };
+
+  return (
+    <div className="space-y-2">
+      {isLoading && <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin" style={{ color: GOLD }} /></div>}
+      {(logs ?? []).map((log: any) => (
+        <div key={log.id} className="rounded-xl px-4 py-3 flex items-start gap-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <div className="shrink-0 w-2 h-2 rounded-full mt-1.5" style={{ background: ACTION_COLOR[log.action] ?? MUTED }} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-mono font-semibold" style={{ color: ACTION_COLOR[log.action] ?? TEXT }}>{log.action}</span>
+              <span className="text-xs" style={{ color: SUBTEXT }}>by {log.adminName ?? `Admin #${log.adminId}`}</span>
+              {log.targetType && <span className="text-xs" style={{ color: MUTED }}>{log.targetType}:{log.targetId}</span>}
+            </div>
+            {log.details && Object.keys(log.details).length > 0 && (
+              <div className="text-xs font-mono mt-0.5 truncate" style={{ color: MUTED }}>
+                {JSON.stringify(log.details)}
+              </div>
+            )}
+          </div>
+          <div className="text-xs shrink-0" style={{ color: MUTED }}>
+            {new Date(log.createdAt).toLocaleString()}
+          </div>
+        </div>
+      ))}
+      {!isLoading && (logs ?? []).length === 0 && (
+        <p className="text-center py-10 text-sm" style={{ color: SUBTEXT }}>No admin actions logged yet.</p>
+      )}
     </div>
   );
 }

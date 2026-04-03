@@ -2386,3 +2386,145 @@ export async function getSongsWithoutEmbedVideo(): Promise<Array<{ id: number; c
     .where(and(eq(songs.status, "Published"), eq(songs.isPublic, true), isNull(songs.embedVideoUrl)));
   return rows;
 }
+
+// ─── Admin Helpers ────────────────────────────────────────────────────────────
+
+/** Write an immutable admin action log entry. Never throws — failures are silently swallowed. */
+export async function logAdminAction(data: {
+  adminId: number;
+  adminName?: string | null;
+  action: string;
+  targetType?: string | null;
+  targetId?: string | null;
+  details?: Record<string, unknown> | null;
+}): Promise<void> {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    const { adminLogs } = await import("../drizzle/schema");
+    await db.insert(adminLogs).values({
+      adminId: data.adminId,
+      adminName: data.adminName ?? null,
+      action: data.action,
+      targetType: data.targetType ?? null,
+      targetId: data.targetId ?? null,
+      details: data.details ? JSON.stringify(data.details) : null,
+    });
+  } catch {
+    // Audit log failures must never crash the main operation
+  }
+}
+
+/** Fetch the most recent admin log entries. */
+export async function getAdminLogs(limit = 200) {
+  const db = await getDb();
+  if (!db) return [];
+  const { adminLogs } = await import("../drizzle/schema");
+  return db.select().from(adminLogs).orderBy(desc(adminLogs.createdAt)).limit(limit);
+}
+
+/** Flag a song for moderation without touching its WID or provenance. */
+export async function flagSong(songId: number, reason: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ isFlagged: true, flagReason: reason, moderationStatus: "flagged" }).where(eq(songs.id, songId));
+}
+
+/** Clear a flag from a song. */
+export async function unflagSong(songId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ isFlagged: false, flagReason: null, moderationStatus: "clear" }).where(eq(songs.id, songId));
+}
+
+/** Admin-remove a song from public visibility. NEVER deletes the WID — provenance is preserved. */
+export async function adminRemoveSong(songId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ moderationStatus: "removed", isPublic: false, status: "Unlisted" }).where(eq(songs.id, songId));
+}
+
+/** Restore a previously removed song to public visibility. */
+export async function adminRestoreSong(songId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ moderationStatus: "clear", isPublic: true, status: "Published", isFlagged: false, flagReason: null }).where(eq(songs.id, songId));
+}
+
+/** Search works for the admin panel — returns songs with creator info. */
+export async function adminSearchWorks(opts: {
+  query?: string;
+  moderationStatus?: "clear" | "flagged" | "removed";
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  const limit = opts.limit ?? 50;
+  const offset = opts.offset ?? 0;
+  const conditions: any[] = [];
+  if (opts.query) {
+    conditions.push(or(
+      like(songs.title, `%${opts.query}%`),
+      like(songs.witnessId, `%${opts.query}%`),
+    ));
+  }
+  if (opts.moderationStatus) {
+    conditions.push(eq(songs.moderationStatus, opts.moderationStatus));
+  }
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+  return db
+    .select({
+      id: songs.id, title: songs.title, witnessId: songs.witnessId,
+      contentType: songs.contentType, status: songs.status, isPublic: songs.isPublic,
+      isFlagged: songs.isFlagged, flagReason: songs.flagReason, moderationStatus: songs.moderationStatus,
+      createdAt: songs.createdAt,
+      creatorId: users.id, creatorName: users.name, creatorHandle: users.artistHandle,
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(whereClause)
+    .orderBy(desc(songs.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+/** Get all system config entries. */
+export async function getAllSystemConfig() {
+  const db = await getDb();
+  if (!db) return [];
+  const { systemConfig } = await import("../drizzle/schema");
+  return db.select().from(systemConfig);
+}
+
+/** Get a single system config value by key. Returns null if not found. */
+export async function getSystemConfigValue(key: string): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const { systemConfig } = await import("../drizzle/schema");
+  const rows = await db.select({ value: systemConfig.value }).from(systemConfig).where(eq(systemConfig.key, key)).limit(1);
+  return rows[0]?.value ?? null;
+}
+
+/** Upsert a system config key-value pair. */
+export async function setSystemConfigValue(key: string, value: string, description?: string, updatedByUserId?: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const { systemConfig } = await import("../drizzle/schema");
+  await db.insert(systemConfig).values({ key, value, description: description ?? null, updatedByUserId: updatedByUserId ?? null })
+    .onDuplicateKeyUpdate({ set: { value, updatedByUserId: updatedByUserId ?? null } });
+}
+
+/** Reset a user's Stripe billing state — clears stripeCustomerId. */
+export async function resetUserBilling(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ stripeCustomerId: null } as any).where(eq(users.id, userId));
+}
+
+/** Get all users for admin panel — ordered by newest first. */
+export async function getAllUsersAdmin(limit = 50, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(users).orderBy(desc(users.createdAt)).limit(limit).offset(offset);
+}

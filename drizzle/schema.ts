@@ -151,6 +151,11 @@ export const songs = mysqlTable("songs", {
 
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+
+  // Moderation (admin-controlled; never touches WID/provenance)
+  isFlagged: boolean("isFlagged").default(false).notNull(),
+  flagReason: varchar("flagReason", { length: 512 }),
+  moderationStatus: mysqlEnum("moderationStatus", ["clear", "flagged", "removed"]).default("clear").notNull(),
 });
 
 export type Song = typeof songs.$inferSelect;
@@ -647,6 +652,33 @@ export const songReactions = mysqlTable(
 );
 export type SongReaction = typeof songReactions.$inferSelect;
 export type InsertSongReaction = typeof songReactions.$inferInsert;
+
+// ─── Admin Logs ──────────────────────────────────────────────────────────────
+// Immutable audit trail of every admin action. Never deleted.
+export const adminLogs = mysqlTable("adminLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  adminId: int("adminId").notNull(),              // user.id of the admin who acted
+  adminName: varchar("adminName", { length: 128 }),
+  action: varchar("action", { length: 128 }).notNull(), // e.g. "flag_song", "grant_license"
+  targetType: varchar("targetType", { length: 64 }),    // "song" | "user" | "code" | "config"
+  targetId: varchar("targetId", { length: 128 }),       // string ID of the affected entity
+  details: text("details"),                             // JSON string with extra context
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AdminLog = typeof adminLogs.$inferSelect;
+export type InsertAdminLog = typeof adminLogs.$inferInsert;
+
+// ─── System Config ────────────────────────────────────────────────────────────
+// Key-value store for feature flags and platform configuration.
+export const systemConfig = mysqlTable("systemConfig", {
+  key: varchar("key", { length: 128 }).primaryKey(),
+  value: text("value").notNull(),                  // JSON-encoded value
+  description: varchar("description", { length: 512 }),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedByUserId: int("updatedByUserId"),
+});
+export type SystemConfig = typeof systemConfig.$inferSelect;
+export type InsertSystemConfig = typeof systemConfig.$inferInsert;
 
 // ─── Audio Version History ────────────────────────────────────────────────────
 // Every time a creator replaces the audio file on a track, the superseded

@@ -52,6 +52,10 @@ import {
   getSongsWithoutEmbedVideo,
   reorderMySongs,
   archiveAudioVersion, replaceAudioFile, getAudioVersions,
+  logAdminAction, getAdminLogs,
+  flagSong, unflagSong, adminRemoveSong, adminRestoreSong, adminSearchWorks,
+  getAllSystemConfig, getSystemConfigValue, setSystemConfigValue,
+  resetUserBilling, getAllUsersAdmin,
 } from "./db";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
@@ -1821,7 +1825,7 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .query(async ({ ctx }) => {
         if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
         const db = await (await import("./db")).getDb();
-        const { sql: sqlFn, eq: eqFn, and: andFn, isNotNull: isNotNullFn } = await import("drizzle-orm");
+        const { sql: sqlFn, eq: eqFn, and: andFn } = await import("drizzle-orm");
         const { songs: songsTable } = await import("../drizzle/schema");
         const pending = await getSongsWithoutEmbedVideo();
         let total = 0;
@@ -1832,6 +1836,125 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         }
         const withEmbed = total - pending.length;
         return { pending: pending.length, total, withEmbed };
+      }),
+
+    // ── Works / WIDs Moderation ───────────────────────────────────────────────
+    searchWorks: protectedProcedure
+      .input(z.object({
+        query: z.string().optional(),
+        moderationStatus: z.enum(["clear", "flagged", "removed"]).optional(),
+        limit: z.number().max(100).default(50),
+        offset: z.number().default(0),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        return adminSearchWorks(input);
+      }),
+
+    flagWork: protectedProcedure
+      .input(z.object({ songId: z.number().int(), reason: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await flagSong(input.songId, input.reason);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "flag_work", targetType: "song", targetId: String(input.songId), details: { reason: input.reason } });
+        return { ok: true };
+      }),
+
+    unflagWork: protectedProcedure
+      .input(z.object({ songId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await unflagSong(input.songId);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "unflag_work", targetType: "song", targetId: String(input.songId) });
+        return { ok: true };
+      }),
+
+    removeWork: protectedProcedure
+      .input(z.object({ songId: z.number().int(), reason: z.string().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await adminRemoveSong(input.songId);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "remove_work", targetType: "song", targetId: String(input.songId), details: { reason: input.reason } });
+        return { ok: true };
+      }),
+
+    restoreWork: protectedProcedure
+      .input(z.object({ songId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await adminRestoreSong(input.songId);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "restore_work", targetType: "song", targetId: String(input.songId) });
+        return { ok: true };
+      }),
+
+    // ── System Config ─────────────────────────────────────────────────────────
+    getSystemConfig: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        return getAllSystemConfig();
+      }),
+
+    setSystemConfig: protectedProcedure
+      .input(z.object({ key: z.string().min(1), value: z.string(), description: z.string().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await setSystemConfigValue(input.key, input.value, input.description, ctx.user.id);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "set_system_config", targetType: "config", targetId: input.key, details: { value: input.value } });
+        return { ok: true };
+      }),
+
+    // ── Admin Logs ────────────────────────────────────────────────────────────
+    getLogs: protectedProcedure
+      .input(z.object({ limit: z.number().max(500).default(200) }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        return getAdminLogs(input.limit);
+      }),
+
+    // ── Stripe Billing Reset ──────────────────────────────────────────────────
+    resetBilling: protectedProcedure
+      .input(z.object({ userId: z.number().int(), reason: z.string().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        const user = await getUserById(input.userId);
+        if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        // Cancel Stripe subscription if one exists
+        const stripeCustomerId = (user as any).stripeCustomerId;
+        if (stripeCustomerId) {
+          try {
+            const subs = await stripe.subscriptions.list({ customer: stripeCustomerId, status: "active", limit: 10 });
+            for (const sub of subs.data) {
+              await stripe.subscriptions.cancel(sub.id);
+            }
+          } catch (err: any) {
+            console.warn("[Admin/resetBilling] Stripe cancel error:", err.message);
+          }
+        }
+        await resetUserBilling(input.userId);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "reset_billing", targetType: "user", targetId: String(input.userId), details: { reason: input.reason, stripeCustomerId } });
+        return { ok: true };
+      }),
+
+    // ── All Users (admin view) ────────────────────────────────────────────────
+    getAllUsers: protectedProcedure
+      .input(z.object({ limit: z.number().max(200).default(50), offset: z.number().default(0) }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        return getAllUsersAdmin(input.limit, input.offset);
+      }),
+
+    // ── Update User Role ──────────────────────────────────────────────────────
+    setUserRole: protectedProcedure
+      .input(z.object({ userId: z.number().int(), role: z.enum(["admin", "user"]) }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        if (input.userId === ctx.user.id) throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot change your own role" });
+        const db = await (await import("./db")).getDb();
+        const { users: usersTable } = await import("../drizzle/schema");
+        const { eq: eqFn } = await import("drizzle-orm");
+        await db.update(usersTable).set({ role: input.role }).where(eqFn(usersTable.id, input.userId));
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "set_user_role", targetType: "user", targetId: String(input.userId), details: { role: input.role } });
+        return { ok: true };
       }),
   }),
 
