@@ -2421,3 +2421,6 @@
 - [ ] UI: Lineage history tab in Provenance Prompt Generator modal
 - [ ] UI: Add "My Profile" nav link to sidebar
 - [ ] UI: Sidebar collapse toggle button (left sidebar collapsible)
+
+## Mobile Player Scroll Fix (Apr 4 2026)
+- [x] Fix mobile expanded player panel scroll — ORIGIN PROOF / WID section content not scrollable

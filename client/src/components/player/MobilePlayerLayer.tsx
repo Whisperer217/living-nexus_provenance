@@ -597,16 +597,15 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   const ExpandedSheet = () => (
     <div
-      className="md:hidden fixed inset-0 z-[9995] flex flex-col overflow-y-auto"
+      className="md:hidden fixed inset-0 z-[9995] flex flex-col"
       style={{
         background: "oklch(0.08 0.02 275)",
         transform: `translateY(${expandedDragOffset}px)`,
         transition: expandedDragOffset === 0 ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "none",
         paddingTop: "env(safe-area-inset-top, 0px)",
-        paddingBottom: "env(safe-area-inset-bottom, 12px)",
       }}
     >
-      {/* Drag handle */}
+      {/* Drag handle — ONLY this element triggers swipe-to-dismiss */}
       <div
         className="flex-shrink-0 flex flex-col items-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
         onTouchStart={onExpandedTouchStart}
@@ -615,6 +614,16 @@ export default function MobilePlayerLayer() {
       >
         <div className="w-10 h-1 rounded-full" style={{ background: "oklch(1 0 0 / 0.15)" }} />
       </div>
+
+      {/* Scrollable content area — everything below the drag handle scrolls freely */}
+      <div
+        className="flex-1 overflow-y-auto"
+        style={{
+          WebkitOverflowScrolling: "touch",
+          touchAction: "pan-y",
+          paddingBottom: "env(safe-area-inset-bottom, 12px)",
+        }}
+      >
 
       {/* Header */}
       <div className="flex-shrink-0 flex items-center justify-between px-5 pb-3">
@@ -1084,6 +1093,8 @@ export default function MobilePlayerLayer() {
 
       {/* Bottom padding spacer */}
       <div className="flex-shrink-0 h-6" />
+
+      </div>{/* end scrollable content area */}
     </div>
   );
 
