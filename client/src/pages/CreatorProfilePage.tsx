@@ -376,7 +376,8 @@ export default function CreatorProfilePage() {
   // Prompt Studio (auto-generate from profile)
   const [showPromptStudio, setShowPromptStudio] = useState(false);
   const [psPlatform, setPsPlatform] = useState<"suno" | "udio" | "general">("suno");
-  const [psResult, setPsResult] = useState<{ expressionId: string | null; expressionPrompt: string | null; expressionStyleTags: string | null; expressionComposerNote: string | null; expressionGeneratedAt: Date | null } | null>(null);
+  const [psResult, setPsResult] = useState<{ expressionId: string | null; expressionPrompt: string | null; expressionStyleTags: string | null; expressionComposerNote: string | null; expressionGeneratedAt: Date | null; toneFrequencyNote?: string | null; dominantKey?: string | null; tempoRange?: string | null; energyProfile?: string | null; lineageVersion?: number } | null>(null);
+  const [showLineage, setShowLineage] = useState(false);
   const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
   // Use currentTrackId (derived from currentIdx) — NOT tracks[0] which always points to the
   // first track in the queue regardless of which track is actively playing.
@@ -433,6 +434,10 @@ export default function CreatorProfilePage() {
   const { data: existingExpression, refetch: refetchExpression } = trpc.promptStudio.getProfileExpression.useQuery(
     { creatorId },
     { enabled: creatorId > 0, staleTime: 60_000 }
+  );
+  const { data: lineageHistory = [] } = trpc.promptStudio.getLineageHistory.useQuery(
+    { creatorId },
+    { enabled: creatorId > 0 && showLineage, staleTime: 30_000 }
   );
   const generateExpressionMutation = trpc.promptStudio.generateFromProfile.useMutation({
     onSuccess: (result) => { setPsResult(result); refetchExpression(); },
@@ -784,6 +789,24 @@ export default function CreatorProfilePage() {
                       >
                         <Youtube className="w-4 h-4" />
                       </a>
+                    )}
+                  </div>
+                )}
+                {/* EID badge — show on profile header if creator has one */}
+                {existingExpression?.expressionId && (
+                  <div
+                    className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-lg cursor-pointer"
+                    style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)", maxWidth: "fit-content" }}
+                    onClick={() => { setPsResult(null); setShowPromptStudio(true); }}
+                    title="View Expression Identity"
+                  >
+                    <Shield className="w-3 h-3 flex-shrink-0" style={{ color: "#a78bfa" }} />
+                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>EID</span>
+                    <span className="font-mono text-[11px] font-bold" style={{ color: "#a78bfa" }}>{existingExpression.expressionId}</span>
+                    {existingExpression.toneFrequencyNote && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(245,196,81,0.08)", color: "rgba(245,196,81,0.6)", border: "1px solid rgba(245,196,81,0.15)" }}>
+                        {existingExpression.toneFrequencyNote}
+                      </span>
                     )}
                   </div>
                 )}
@@ -1312,7 +1335,32 @@ export default function CreatorProfilePage() {
             </p>
           </DialogHeader>
 
-          <div className="space-y-4 mt-2">
+          {/* Tab switcher: Current Identity vs Lineage Archive */}
+          <div className="flex gap-1 mt-3 mb-4">
+            <button
+              onClick={() => setShowLineage(false)}
+              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={!showLineage
+                ? { background: "rgba(139,92,246,0.2)", border: "1px solid rgba(139,92,246,0.4)", color: "#a78bfa" }
+                : { background: "transparent", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(156,163,175,0.5)" }
+              }
+            >
+              Current Identity
+            </button>
+            <button
+              onClick={() => setShowLineage(true)}
+              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={showLineage
+                ? { background: "rgba(139,92,246,0.2)", border: "1px solid rgba(139,92,246,0.4)", color: "#a78bfa" }
+                : { background: "transparent", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(156,163,175,0.5)" }
+              }
+            >
+              Lineage Archive {lineageHistory.length > 0 && `(${lineageHistory.length})`}
+            </button>
+          </div>
+
+          {!showLineage ? (
+          <div className="space-y-4">
             {/* EID badge — show if already generated */}
             {(existingExpression?.expressionId || psResult?.expressionId) && (
               <div
@@ -1325,6 +1373,11 @@ export default function CreatorProfilePage() {
                   <div className="font-mono text-sm font-bold truncate" style={{ color: "#a78bfa" }}>
                     {psResult?.expressionId || existingExpression?.expressionId}
                   </div>
+                  {(psResult?.lineageVersion || (lineageHistory.length > 0)) && (
+                    <div className="text-[10px] mt-0.5" style={{ color: "rgba(167,139,250,0.4)" }}>
+                      Version {psResult?.lineageVersion ?? lineageHistory.length} of lineage
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={() => {
@@ -1340,7 +1393,43 @@ export default function CreatorProfilePage() {
               </div>
             )}
 
+            {/* Tone / Frequency identity row */}
+            {(() => {
+              const display = psResult || existingExpression;
+              const hasTone = display?.toneFrequencyNote || display?.dominantKey || display?.tempoRange || display?.energyProfile;
+              if (!hasTone) return null;
+              return (
+                <div className="grid grid-cols-2 gap-2">
+                  {display?.toneFrequencyNote && (
+                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(245,196,81,0.05)", border: "1px solid rgba(245,196,81,0.12)" }}>
+                      <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(245,196,81,0.45)" }}>TONE / FREQUENCY</div>
+                      <div className="text-xs font-semibold" style={{ color: "rgba(245,196,81,0.8)" }}>{display.toneFrequencyNote}</div>
+                    </div>
+                  )}
+                  {display?.dominantKey && (
+                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(52,211,153,0.05)", border: "1px solid rgba(52,211,153,0.12)" }}>
+                      <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(52,211,153,0.45)" }}>DOMINANT KEY</div>
+                      <div className="text-xs font-semibold" style={{ color: "rgba(52,211,153,0.8)" }}>{display.dominantKey}</div>
+                    </div>
+                  )}
+                  {display?.tempoRange && (
+                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.12)" }}>
+                      <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(96,165,250,0.45)" }}>TEMPO RANGE</div>
+                      <div className="text-xs font-semibold" style={{ color: "rgba(96,165,250,0.8)" }}>{display.tempoRange}</div>
+                    </div>
+                  )}
+                  {display?.energyProfile && (
+                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(251,113,133,0.05)", border: "1px solid rgba(251,113,133,0.12)" }}>
+                      <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(251,113,133,0.45)" }}>ENERGY PROFILE</div>
+                      <div className="text-xs font-semibold" style={{ color: "rgba(251,113,133,0.8)" }}>{display.energyProfile}</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Platform selector */}
+            {isOwner && (
             <div className="flex items-center gap-2">
               <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Target platform:</span>
               {(["suno", "udio", "general"] as const).map((p) => (
@@ -1357,8 +1446,10 @@ export default function CreatorProfilePage() {
                 </button>
               ))}
             </div>
+            )}
 
-            {/* Generate / Regenerate button */}
+            {/* Generate / Regenerate button — only for the creator themselves */}
+            {isOwner && (
             <button
               onClick={() => generateExpressionMutation.mutate({ targetPlatform: psPlatform, forceRegenerate: !!(psResult || existingExpression) })}
               disabled={generateExpressionMutation.isPending}
@@ -1372,6 +1463,7 @@ export default function CreatorProfilePage() {
                   : <><Wand2 className="w-4 h-4" /> Generate Expression Identity</>
               }
             </button>
+            )}
 
             {/* Results — show psResult (freshly generated) or existingExpression (saved) */}
             {(() => {
@@ -1438,6 +1530,49 @@ export default function CreatorProfilePage() {
               );
             })()}
           </div>
+          ) : (
+          /* Lineage Archive tab */
+          <div className="space-y-3">
+            <p className="text-xs" style={{ color: "rgba(156,163,175,0.5)" }}>
+              Every Expression Identity ever generated for this creator is permanently archived here. This is the spiritual and creative lineage of their sonic identity.
+            </p>
+            {lineageHistory.length === 0 ? (
+              <div className="text-center py-8" style={{ color: "rgba(156,163,175,0.35)" }}>
+                <Shield className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                <p className="text-xs">No lineage records yet. Generate an Expression Identity to begin the archive.</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                {lineageHistory.map((entry: any, idx: number) => (
+                  <div
+                    key={entry.id ?? idx}
+                    className="rounded-lg p-3"
+                    style={{ background: idx === 0 ? "rgba(139,92,246,0.08)" : "rgba(255,255,255,0.02)", border: idx === 0 ? "1px solid rgba(139,92,246,0.25)" : "1px solid rgba(255,255,255,0.06)" }}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div>
+                        <span className="font-mono text-[10px] font-bold" style={{ color: idx === 0 ? "#a78bfa" : "rgba(167,139,250,0.5)" }}>{entry.eid}</span>
+                        <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.5)" }}>v{entry.version}</span>
+                        {idx === 0 && <span className="ml-1 text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(52,211,153,0.1)", color: "rgba(52,211,153,0.7)" }}>CURRENT</span>}
+                      </div>
+                      <span className="text-[9px] flex-shrink-0" style={{ color: "rgba(156,163,175,0.3)" }}>
+                        {new Date(entry.generatedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {entry.prompt && <p className="text-[11px] leading-relaxed mb-1" style={{ color: "rgba(229,231,235,0.7)" }}>{entry.prompt}</p>}
+                    {entry.composerNote && <p className="text-[10px] italic" style={{ color: "rgba(229,231,235,0.4)" }}>{entry.composerNote}</p>}
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {entry.dominantKey && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(52,211,153,0.08)", color: "rgba(52,211,153,0.6)" }}>{entry.dominantKey}</span>}
+                      {entry.tempoRange && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(96,165,250,0.08)", color: "rgba(96,165,250,0.6)" }}>{entry.tempoRange}</span>}
+                      {entry.energyProfile && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(251,113,133,0.08)", color: "rgba(251,113,133,0.6)" }}>{entry.energyProfile}</span>}
+                      {entry.songCount > 0 && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(156,163,175,0.5)" }}>{entry.songCount} works at generation</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

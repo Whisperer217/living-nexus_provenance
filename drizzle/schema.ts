@@ -59,6 +59,12 @@ export const users = mysqlTable("users", {
   expressionComposerNote: text("expressionComposerNote"),
   expressionGeneratedAt: timestamp("expressionGeneratedAt"),
 
+  // Tone & frequency identity — used by Provenance Prompt Generator
+  toneFrequencyNote: varchar("toneFrequencyNote", { length: 128 }), // e.g. "432Hz, Solfeggio Mi (528Hz)"
+  dominantKey: varchar("dominantKey", { length: 32 }),              // e.g. "D Minor", "E Major"
+  tempoRange: varchar("tempoRange", { length: 64 }),                 // e.g. "80-120 BPM"
+  energyProfile: varchar("energyProfile", { length: 128 }),          // e.g. "Epic, Triumphant, Meditative"
+
   // Onboarding
   hasSeenWelcome: boolean("hasSeenWelcome").default(false).notNull(),
 
@@ -808,3 +814,26 @@ export const featureAttributions = mysqlTable("featureAttributions", {
 });
 export type FeatureAttribution = typeof featureAttributions.$inferSelect;
 export type InsertFeatureAttribution = typeof featureAttributions.$inferInsert;
+
+// ── Expression Lineage ────────────────────────────────────────────────────────
+// Permanent archive of every EID ever generated for a creator.
+// Tracks spiritual and creative evolution over time — each generation is a
+// versioned record of the creator's sonic identity at that moment.
+export const expressionLineage = mysqlTable("expressionLineage", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  eid: varchar("eid", { length: 32 }).notNull(),
+  version: int("version").default(1).notNull(),
+  prompt: text("prompt").notNull(),
+  styleTags: text("styleTags"),
+  composerNote: text("composerNote"),
+  toneFrequencyNote: varchar("toneFrequencyNote", { length: 128 }),
+  dominantKey: varchar("dominantKey", { length: 32 }),
+  tempoRange: varchar("tempoRange", { length: 64 }),
+  energyProfile: varchar("energyProfile", { length: 128 }),
+  lyricsSnapshot: text("lyricsSnapshot"), // first 1000 chars of lyrics used at generation time
+  songCount: int("songCount").default(0).notNull(), // how many songs the creator had at generation time
+  generatedAt: timestamp("generatedAt").defaultNow().notNull(),
+});
+export type ExpressionLineage = typeof expressionLineage.$inferSelect;
+export type InsertExpressionLineage = typeof expressionLineage.$inferInsert;

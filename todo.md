@@ -2409,3 +2409,15 @@
 - [ ] Rebuild Prompt Studio modal: auto-generate on open from profile metadata, no manual upload step
 - [ ] Display EID badge on creator profile page (like WID badge on songs)
 - [ ] Show generated prompt text + EID in modal with copy/regenerate buttons
+
+## Provenance Prompt Generator v2 + Navigation (Apr 4 2026)
+- [ ] Add expressionLineage table to schema (EID history archive)
+- [ ] Add tone/frequency fields to users table (toneFrequencyNote, dominantKey, tempoRange, energyProfile)
+- [ ] Backend: generateFromProfile pulls creator's own lyrics from registered songs
+- [ ] Backend: generateFromProfile uses tone/frequency metadata in LLM prompt
+- [ ] Backend: save EID lineage record on every generation
+- [ ] Backend: getLineageHistory procedure (public, returns all past EIDs)
+- [ ] UI: EID badge on public creator profile header (always visible)
+- [ ] UI: Lineage history tab in Provenance Prompt Generator modal
+- [ ] UI: Add "My Profile" nav link to sidebar
+- [ ] UI: Sidebar collapse toggle button (left sidebar collapsible)

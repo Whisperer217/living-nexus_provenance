@@ -319,9 +319,30 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <img src={LOGO_URL} alt="Living Nexus" className="w-full h-full object-contain" />
             </div>
             {sidebarOpen && (
-              <span className="font-display text-lg gold-shimmer cursor-pointer select-none" onClick={() => goTo("/")}>
-                Living Nexus
-              </span>
+              <>
+                <span className="font-display text-lg gold-shimmer cursor-pointer select-none flex-1" onClick={() => goTo("/")}>
+                  Living Nexus
+                </span>
+                {/* Collapse button */}
+                <button
+                  onClick={() => setSidebarOpen(o => { const next = !o; setCache(CACHE_KEYS.SIDEBAR, next, TTL.UI_STATE); return next; })}
+                  className="flex-shrink-0 p-1 rounded transition-all opacity-30 hover:opacity-80"
+                  style={{ color: "oklch(0.75 0.03 280)" }}
+                  title="Collapse sidebar"
+                >
+                  <ChevronRight className="w-4 h-4 rotate-180" />
+                </button>
+              </>
+            )}
+            {!sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(o => { const next = !o; setCache(CACHE_KEYS.SIDEBAR, next, TTL.UI_STATE); return next; })}
+                className="absolute right-0 top-[52px] translate-x-1/2 z-50 w-5 h-5 rounded-full flex items-center justify-center"
+                style={{ background: "oklch(0.115 0.05 268)", border: "1px solid oklch(0.28 0.04 270 / 60%)", color: "oklch(0.75 0.03 280)" }}
+                title="Expand sidebar"
+              >
+                <ChevronRight className="w-3 h-3" />
+              </button>
             )}
           </div>
 
@@ -349,6 +370,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <div className="space-y-0.5 mt-0.5">
                 {renderNavItem(DASHBOARD_NAV_ITEM, false)}
                 {renderNavItem(ARCHIVE_NAV_ITEM, false)}
+                {renderNavItem({ label: "My Profile", icon: Fingerprint, path: `/creator/${(user as any).id}`, goldLabel: false }, false)}
               </div>
             )}
 

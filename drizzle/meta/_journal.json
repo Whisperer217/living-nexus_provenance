@@ -253,6 +253,13 @@
       "when": 1775319555150,
       "tag": "0035_nostalgic_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1775324025012,
+      "tag": "0036_brave_wolverine",
+      "breakpoints": true
     }
   ]
 }

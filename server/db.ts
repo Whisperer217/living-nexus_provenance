@@ -13,6 +13,7 @@ import {
   audioVersions,
   playEvents,
   witnessTestimonies,
+  expressionLineage,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -128,10 +129,57 @@ export async function updateUserExpression(userId: number, data: {
   expressionStyleTags: string;
   expressionComposerNote: string;
   expressionGeneratedAt: Date;
+  toneFrequencyNote?: string;
+  dominantKey?: string;
+  tempoRange?: string;
+  energyProfile?: string;
 }) {
   const db = await getDb();
   if (!db) return;
   await db.update(users).set(data).where(eq(users.id, userId));
+}
+
+export async function insertExpressionLineage(data: {
+  userId: number;
+  eid: string;
+  version: number;
+  prompt: string;
+  styleTags?: string;
+  composerNote?: string;
+  toneFrequencyNote?: string;
+  dominantKey?: string;
+  tempoRange?: string;
+  energyProfile?: string;
+  lyricsSnapshot?: string;
+  songCount: number;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(expressionLineage).values({
+    userId: data.userId,
+    eid: data.eid,
+    version: data.version,
+    prompt: data.prompt,
+    styleTags: data.styleTags ?? null,
+    composerNote: data.composerNote ?? null,
+    toneFrequencyNote: data.toneFrequencyNote ?? null,
+    dominantKey: data.dominantKey ?? null,
+    tempoRange: data.tempoRange ?? null,
+    energyProfile: data.energyProfile ?? null,
+    lyricsSnapshot: data.lyricsSnapshot ?? null,
+    songCount: data.songCount,
+    generatedAt: new Date(),
+  });
+}
+
+export async function getExpressionLineageByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(expressionLineage)
+    .where(eq(expressionLineage.userId, userId))
+    .orderBy(desc(expressionLineage.generatedAt));
 }
 
 export async function updateUserStripeAccount(userId: number, data: {

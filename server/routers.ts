@@ -59,6 +59,8 @@ import {
   resetUserBilling, getAllUsersAdmin,
   recordPlayEvent, getPlayAuditStats, MIN_PLAY_SECONDS,
   updateUserExpression,
+  insertExpressionLineage,
+  getExpressionLineageByUser,
   getDb,
   createTestimony, getTestimoniesByCreator, getTestimonyByWid, getTestimonyCount,
   activateLivingArchive, deactivateLivingArchive, grantFounderFreeTier,
@@ -3229,6 +3231,10 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
             expressionStyleTags: usersTable.expressionStyleTags,
             expressionComposerNote: usersTable.expressionComposerNote,
             expressionGeneratedAt: usersTable.expressionGeneratedAt,
+            toneFrequencyNote: usersTable.toneFrequencyNote,
+            dominantKey: usersTable.dominantKey,
+            tempoRange: usersTable.tempoRange,
+            energyProfile: usersTable.energyProfile,
           })
           .from(usersTable)
           .where(eqFn(usersTable.id, input.creatorId))
@@ -3237,7 +3243,14 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         return creator;
       }),
 
-    /** Auto-generate a style prompt + EID from the creator's profile metadata and save it */
+    /** Return the full EID lineage history for any creator (public) */
+    getLineageHistory: publicProcedure
+      .input(z.object({ creatorId: z.number() }))
+      .query(async ({ input }) => {
+        return getExpressionLineageByUser(input.creatorId);
+      }),
+
+    /** Auto-generate a composer-grade style prompt + EID from profile metadata, own lyrics, and tone data */
     generateFromProfile: protectedProcedure
       .input(z.object({
         targetPlatform: z.enum(["suno", "udio", "general"]).default("suno"),
@@ -3258,18 +3271,25 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
               expressionStyleTags: usersTable.expressionStyleTags,
               expressionComposerNote: usersTable.expressionComposerNote,
               expressionGeneratedAt: usersTable.expressionGeneratedAt,
+              toneFrequencyNote: usersTable.toneFrequencyNote,
+              dominantKey: usersTable.dominantKey,
+              tempoRange: usersTable.tempoRange,
+              energyProfile: usersTable.energyProfile,
             })
             .from(usersTable)
             .where(eqFn(usersTable.id, ctx.user.id))
             .limit(1);
-          if (existing?.expressionId) return existing;
+          if (existing?.expressionId) {
+            const lineage = await getExpressionLineageByUser(ctx.user.id);
+            return { ...existing, lineageVersion: lineage.length };
+          }
         }
 
         // Fetch full creator profile
         const creator = await getUserById(ctx.user.id);
         if (!creator) throw new TRPCError({ code: "NOT_FOUND", message: "Creator not found" });
 
-        // Gather profile metadata for the LLM
+        // Gather profile metadata for the LLM (including tone/frequency fields)
         const profileContext = [
           creator.name ? `Artist Name: ${creator.name}` : "",
           creator.artistHandle ? `Handle: @${creator.artistHandle}` : "",
@@ -3277,14 +3297,39 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           creator.primaryGenre ? `Primary Genre: ${creator.primaryGenre}` : "",
           creator.location ? `Location: ${creator.location}` : "",
           creator.aiDisclosure ? `AI Disclosure: ${creator.aiDisclosure.replace(/_/g, " ")}` : "",
+          (creator as any).toneFrequencyNote ? `Tone/Frequency: ${(creator as any).toneFrequencyNote}` : "",
+          (creator as any).dominantKey ? `Dominant Key: ${(creator as any).dominantKey}` : "",
+          (creator as any).tempoRange ? `Tempo Range: ${(creator as any).tempoRange}` : "",
+          (creator as any).energyProfile ? `Energy Profile: ${(creator as any).energyProfile}` : "",
         ].filter(Boolean).join("\n");
 
-        // Fetch their top songs for additional context
+        // Fetch ALL of the creator's own registered songs (lyrics + metadata)
         const creatorSongs = await getSongsByUser(creator.id);
-        const topSongs = creatorSongs.slice(0, 5);
-        const songContext = topSongs.length > 0
-          ? `\nRegistered Works (sample):\n${topSongs.map((s: { title: string; genre?: string | null; mood?: string | null }) => `- "${s.title}"${s.genre ? ` [${s.genre}]` : ""}${s.mood ? ` / ${s.mood}` : ""}`).join("\n")}`
+        const publishedSongs = creatorSongs.filter((s: any) => s.status !== "Deleted");
+        const songCount = publishedSongs.length;
+
+        // Build song context: title, genre, mood, and first 200 chars of lyrics for each song
+        const songLines = publishedSongs.map((s: any) => {
+          const meta = `"${s.title}"${s.genre ? ` [${s.genre}]` : ""}${s.mood ? ` / ${s.mood}` : ""}`;
+          const lyricSnippet = s.lyricsText
+            ? ` — Lyrics: "${String(s.lyricsText).slice(0, 200).replace(/\n/g, " ")}..."`
+            : "";
+          return `- ${meta}${lyricSnippet}`;
+        });
+        const songContext = songLines.length > 0
+          ? `\n\nRegistered Works (${songCount} total — full lyric lineage included):\n${songLines.join("\n")}`
           : "";
+
+        // Build a combined lyrics snapshot for the lineage record (first 1000 chars total)
+        const allLyrics = publishedSongs
+          .filter((s: any) => s.lyricsText)
+          .map((s: any) => `[${s.title}]: ${s.lyricsText}`)
+          .join(" | ")
+          .slice(0, 1000);
+
+        // Get prior lineage to determine version number
+        const priorLineage = await getExpressionLineageByUser(ctx.user.id);
+        const nextVersion = priorLineage.length + 1;
 
         const platformNote = input.targetPlatform === "suno"
           ? "Format style tags as a comma-separated list for Suno AI (e.g. 'cinematic, orchestral, epic, male vocals'). Keep the full prompt under 200 characters."
@@ -3296,26 +3341,30 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           messages: [
             {
               role: "system",
-              content: `You are a music AI prompt engineer and creative identity specialist. Your job is to distill a creator's entire artistic identity — their genre, tone, lyrical themes, and sonic fingerprint — into a precise, evocative AI music generation prompt. ${platformNote}`,
+              content: `You are a master composer and sonic identity architect. Your role is to distill a creator's entire artistic lineage — their genre, lyrical themes, tone frequencies, key signatures, tempo range, energy profile, and sonic fingerprint — into a precise, evocative AI music generation prompt. You are building a COMPOSER'S TOOL, not a marketing tagline. Be specific about musical elements: keys, modes, BPM ranges, frequency characteristics, harmonic tension, lyrical motifs. ${platformNote}`,
             },
             {
               role: "user",
-              content: `Based on the following creator profile, generate their unique Expression Identity prompt:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A complete music AI prompt that captures this creator's sonic identity (style tags + sonic description, max 200 characters)\n2. A list of 8-12 style tags (comma-separated) that define their sound\n3. A brief composer's note (1-2 sentences) describing their sonic vision\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote }`,
+              content: `Based on the following creator profile and their complete registered works, generate their Expression Identity — a composer-grade sonic formation prompt:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A complete composer-grade music AI prompt capturing this creator's sonic identity (style tags + sonic description, max 200 characters)\n2. A list of 8-12 style tags (comma-separated) that define their sound — include musical keys, modes, BPM range, and frequency characteristics if available\n3. A composer's note (2-3 sentences) describing their sonic vision, lyrical themes, and the emotional/spiritual frequency of their work\n4. Inferred tone frequency note (e.g. '432Hz, Solfeggio Mi 528Hz') if discernible from their work, or null\n5. Inferred dominant key (e.g. 'D Minor') if discernible, or null\n6. Inferred tempo range (e.g. '80-120 BPM') if discernible, or null\n7. Inferred energy profile (e.g. 'Epic, Triumphant, Meditative') if discernible, or null\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNote, dominantKey, tempoRange, energyProfile }`,
             },
           ],
           response_format: {
             type: "json_schema",
             json_schema: {
-              name: "expression_identity_result",
+              name: "expression_identity_result_v2",
               strict: true,
               schema: {
                 type: "object",
                 properties: {
                   prompt: { type: "string", description: "The complete music AI prompt" },
                   styleTags: { type: "string", description: "Comma-separated style tags" },
-                  composerNote: { type: "string", description: "Brief sonic vision note" },
+                  composerNote: { type: "string", description: "Composer's sonic vision note" },
+                  toneFrequencyNote: { type: ["string", "null"], description: "Tone/frequency note or null" },
+                  dominantKey: { type: ["string", "null"], description: "Dominant key or null" },
+                  tempoRange: { type: ["string", "null"], description: "Tempo range or null" },
+                  energyProfile: { type: ["string", "null"], description: "Energy profile or null" },
                 },
-                required: ["prompt", "styleTags", "composerNote"],
+                required: ["prompt", "styleTags", "composerNote", "toneFrequencyNote", "dominantKey", "tempoRange", "energyProfile"],
                 additionalProperties: false,
               },
             },
@@ -3325,7 +3374,7 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         const content = response.choices?.[0]?.message?.content;
         if (!content) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "No response from AI" });
 
-        let parsed: { prompt: string; styleTags: string; composerNote: string };
+        let parsed: { prompt: string; styleTags: string; composerNote: string; toneFrequencyNote: string | null; dominantKey: string | null; tempoRange: string | null; energyProfile: string | null };
         try {
           parsed = typeof content === "string" ? JSON.parse(content) : content;
         } catch {
@@ -3338,12 +3387,33 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         const expressionId = `EID-EXP-${creator.id}-${suffix}`;
         const generatedAt = new Date();
 
+        // Save to user profile (current active EID)
         await updateUserExpression(creator.id, {
           expressionId,
           expressionPrompt: String(parsed.prompt),
           expressionStyleTags: String(parsed.styleTags),
           expressionComposerNote: String(parsed.composerNote),
           expressionGeneratedAt: generatedAt,
+          toneFrequencyNote: parsed.toneFrequencyNote ?? undefined,
+          dominantKey: parsed.dominantKey ?? undefined,
+          tempoRange: parsed.tempoRange ?? undefined,
+          energyProfile: parsed.energyProfile ?? undefined,
+        });
+
+        // Archive to lineage history (permanent record of this generation)
+        await insertExpressionLineage({
+          userId: creator.id,
+          eid: expressionId,
+          version: nextVersion,
+          prompt: String(parsed.prompt),
+          styleTags: String(parsed.styleTags),
+          composerNote: String(parsed.composerNote),
+          toneFrequencyNote: parsed.toneFrequencyNote ?? undefined,
+          dominantKey: parsed.dominantKey ?? undefined,
+          tempoRange: parsed.tempoRange ?? undefined,
+          energyProfile: parsed.energyProfile ?? undefined,
+          lyricsSnapshot: allLyrics || undefined,
+          songCount,
         });
 
         return {
@@ -3352,6 +3422,11 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           expressionStyleTags: String(parsed.styleTags),
           expressionComposerNote: String(parsed.composerNote),
           expressionGeneratedAt: generatedAt,
+          toneFrequencyNote: parsed.toneFrequencyNote,
+          dominantKey: parsed.dominantKey,
+          tempoRange: parsed.tempoRange,
+          energyProfile: parsed.energyProfile,
+          lineageVersion: nextVersion,
         };
       }),
   }),
