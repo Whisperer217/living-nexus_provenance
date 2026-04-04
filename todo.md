@@ -2459,3 +2459,9 @@
 - [ ] Add Save as Draft button to Studio tab result
 - [ ] Add Share button to Studio tab result
 - [ ] Show saved drafts list in Studio tab
+
+## Three Feature Build (Apr 4 2026)
+- [x] Add CREATOR TOOLS section header to mobile nav in MainLayout
+- [x] Add Saved Drafts panel to Archive tab in Provenance Prompt Generator modal
+- [ ] Build public /prompt/:token shared prompt landing page
+- [ ] Register /prompt/:token route in App.tsx

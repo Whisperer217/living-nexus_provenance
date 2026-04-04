@@ -475,6 +475,10 @@ export default function CreatorProfilePage() {
     onSuccess: (d) => { navigator.clipboard.writeText(d.shareUrl); toast.success("Share link copied!"); },
     onError: (e: any) => toast.error(e.message),
   });
+  const deleteDraftMutation = trpc.promptStudio.deleteDraft.useMutation({
+    onSuccess: () => { refetchDrafts(); toast.success("Draft deleted."); },
+    onError: (e: any) => toast.error(e.message),
+  });
   const { data: myDrafts = [], refetch: refetchDrafts } = trpc.promptStudio.getDrafts.useQuery(
     undefined,
     { enabled: !!user, staleTime: 30_000 }
@@ -1620,6 +1624,57 @@ export default function CreatorProfilePage() {
             <p className="text-xs" style={{ color: "rgba(156,163,175,0.5)" }}>
               Every Identity Regen and Style Prompt generation is permanently archived here — the full spiritual and creative lineage of this creator's sonic identity.
             </p>
+            {/* Saved Drafts sub-section — owner only */}
+            {isOwner && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-heading tracking-widest uppercase" style={{ color: "rgba(96,165,250,0.5)" }}>Saved Drafts</p>
+                  {myDrafts.length > 0 && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(96,165,250,0.1)", color: "rgba(96,165,250,0.6)" }}>{myDrafts.length}</span>}
+                </div>
+                {myDrafts.length === 0 ? (
+                  <div className="text-center py-4 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    <p className="text-[10px]" style={{ color: "rgba(156,163,175,0.3)" }}>No saved drafts yet. Save a Studio result to store it here.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {myDrafts.map((draft: any) => (
+                      <div key={draft.id} className="rounded-lg p-3" style={{ background: "rgba(96,165,250,0.04)", border: "1px solid rgba(96,165,250,0.12)" }}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                              <span className="text-[11px] font-medium" style={{ color: "rgba(229,231,235,0.85)" }}>{draft.name}</span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(96,165,250,0.1)", color: "rgba(96,165,250,0.6)" }}>{draft.promptType?.replace(/_/g, " ")}</span>
+                              {draft.targetPlatform && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(156,163,175,0.5)" }}>{draft.targetPlatform}</span>}
+                            </div>
+                            {draft.prompt && <p className="text-[10px] leading-relaxed line-clamp-2" style={{ color: "rgba(229,231,235,0.55)" }}>{draft.prompt}</p>}
+                            <p className="text-[9px] mt-1" style={{ color: "rgba(156,163,175,0.3)" }}>{new Date(draft.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <button
+                              onClick={() => { navigator.clipboard.writeText(draft.prompt || ""); toast.success("Copied!"); }}
+                              className="text-[9px] px-2 py-1 rounded" style={{ background: "rgba(96,165,250,0.1)", color: "rgba(96,165,250,0.7)" }}
+                            >Copy</button>
+                            <button
+                              onClick={() => shareMutation.mutate({ draftId: draft.id, origin: window.location.origin })}
+                              className="text-[9px] px-2 py-1 rounded" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.7)" }}
+                            >Share</button>
+                            <button
+                              onClick={() => { if (confirm("Delete this draft?")) deleteDraftMutation.mutate({ id: draft.id }); }}
+                              className="text-[9px] px-2 py-1 rounded" style={{ background: "rgba(239,68,68,0.08)", color: "rgba(239,68,68,0.5)" }}
+                            >Del</button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Lineage History sub-section */}
+            <div className="mb-2">
+              <p className="text-[9px] font-heading tracking-widest uppercase mb-2" style={{ color: "rgba(139,92,246,0.5)" }}>Generation Lineage</p>
+            </div>
             {lineageHistory.length === 0 ? (
               <div className="text-center py-8" style={{ color: "rgba(156,163,175,0.35)" }}>
                 <Shield className="w-8 h-8 mx-auto mb-2 opacity-20" />

@@ -557,10 +557,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {/* Mobile primary nav */}
               <div className="flex-1 py-2 overflow-y-auto">
                 {PRIMARY_NAV.map(item => renderNavItem(item, true))}
-                {/* Creator nav — authenticated only */}
+                {/* CREATOR TOOLS section — authenticated only */}
+                {!authLoading && user && (
+                  <div className="px-4 pt-4 pb-1">
+                    <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase">Creator Tools</p>
+                  </div>
+                )}
+                {!authLoading && user && renderNavItem({ label: "Upload", icon: Upload, path: "/upload", goldLabel: false }, true)}
                 {!authLoading && user && renderNavItem(DASHBOARD_NAV_ITEM, true)}
                 {!authLoading && user && renderNavItem(ARCHIVE_NAV_ITEM, true)}
-                {/* My Profile + Prompt Generator — authenticated only */}
                 {!authLoading && user && renderNavItem({ label: "My Profile", icon: Fingerprint, path: `/creator/${(user as any).id}`, goldLabel: false }, true)}
                 {!authLoading && user && renderNavItem({ label: "Prompt Generator", icon: Sparkles, path: `/creator/${(user as any).id}?openPromptStudio=1`, goldLabel: false }, true)}
                 {/* Admin nav — role-gated */}
