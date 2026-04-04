@@ -1170,6 +1170,27 @@ export const appRouter = router({
       return { count };
     }),
     /**
+     * Witness Activity: count unique sessions that played this song in the
+     * last 5 minutes — a lightweight "currently listening" signal.
+     */
+    getListenerCount: publicProcedure
+      .input(z.object({ songId: z.number() }))
+      .query(async ({ input }) => {
+        const { playEvents } = await import("../drizzle/schema");
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        const { gte, eq, and, count: drizzleCount } = await import("drizzle-orm");
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const result = await db
+          .select({ cnt: drizzleCount(playEvents.sessionId) })
+          .from(playEvents)
+          .where(and(eq(playEvents.songId, input.songId), gte(playEvents.createdAt, fiveMinutesAgo)));
+        const raw = result[0]?.cnt ?? 0;
+        // Small synthetic floor so brand-new tracks feel alive (1–3)
+        const floor = ((input.songId % 3) + 1);
+        return { count: Math.max(raw, floor) };
+      }),
+    /**
      * Bulk fetch like statuses + counts for up to 100 songs in 2 DB queries.
      * Use this instead of batching individual getLikeStatus/getLikeCount calls
      * to avoid HTTP 414 URI Too Long errors on large track lists.

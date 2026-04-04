@@ -14,7 +14,7 @@ import {
   X, Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, DollarSign,
   ChevronDown, MessageCircle, Music, Shield, Fingerprint,
-  ExternalLink, Users,
+  ExternalLink, Users, Crown,
 } from "lucide-react";
 import PlayerTipModal from "./PlayerTipModal";
 
@@ -108,6 +108,13 @@ export default function TheaterPlayer() {
     if (!user || !currentSongId) return;
     toggleReactionMutation.mutate({ songId: currentSongId, type });
   };
+  // Witness Activity — live listener count (poll every 30s)
+  const { data: listenerData } = trpc.songs.getListenerCount.useQuery(
+    { songId: currentSongId! },
+    { enabled: !!currentSongId && !isNaN(currentSongId), refetchInterval: 30_000, staleTime: 25_000 }
+  );
+  const listenerCount = (listenerData as any)?.count ?? 0;
+
 
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
@@ -332,9 +339,12 @@ export default function TheaterPlayer() {
                   <button
                     onClick={goToCreator}
                     disabled={!songDetail?.creator?.id}
-                    className="text-sm transition-opacity hover:opacity-80 disabled:cursor-default"
+                    className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80 disabled:cursor-default"
                     style={{ color: "oklch(0.82 0.155 175)" }}
                   >
+                    {currentTrack?.creatorRole === "founder" && (
+                      <Crown size={11} style={{ color: "oklch(0.84 0.155 85)", flexShrink: 0 }} />
+                    )}
                     {currentTrack?.artist || "—"}
                   </button>
                   {currentTrack?.witnessId && (
@@ -536,6 +546,26 @@ export default function TheaterPlayer() {
             {/* Signals panel */}
             {activeTab === "signals" && (
               <div className="flex-1 overflow-y-auto p-5">
+                {/* Witness Activity Strip */}
+                {listenerCount > 0 && (
+                  <div
+                    className="mb-4 flex items-center justify-center gap-2 py-2 px-4 rounded-full animate-fade-in"
+                    style={{
+                      background: "oklch(0.10 0.02 275 / 0.5)",
+                      border: "1px solid oklch(0.22 0.03 275 / 0.4)",
+                    }}
+                  >
+                    <span className="text-[13px]">🎧</span>
+                    <span
+                      className="text-[12px] font-medium tracking-wide"
+                      style={{ color: "oklch(0.65 0.06 280)" }}
+                    >
+                      {listenerCount === 1
+                        ? "1 person currently listening"
+                        : `${listenerCount} people currently listening`}
+                    </span>
+                  </div>
+                )}
                 {/* Emoji reactions grid */}
                 <div className="mb-5">
                   <div className="text-[10px] font-heading tracking-[0.15em] uppercase mb-3" style={{ color: "oklch(0.40 0.03 280)" }}>
@@ -596,6 +626,26 @@ export default function TheaterPlayer() {
             {/* Comments panel */}
             {activeTab === "comments" && (
               <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Witness Activity Strip */}
+                {listenerCount > 0 && (
+                  <div
+                    className="mx-4 mt-4 flex items-center justify-center gap-2 py-2 px-4 rounded-full animate-fade-in"
+                    style={{
+                      background: "oklch(0.10 0.02 275 / 0.5)",
+                      border: "1px solid oklch(0.22 0.03 275 / 0.4)",
+                    }}
+                  >
+                    <span className="text-[13px]">🎧</span>
+                    <span
+                      className="text-[12px] font-medium tracking-wide"
+                      style={{ color: "oklch(0.65 0.06 280)" }}
+                    >
+                      {listenerCount === 1
+                        ? "1 person currently listening"
+                        : `${listenerCount} people currently listening`}
+                    </span>
+                  </div>
+                )}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {commentsData && commentsData.length > 0 ? (
                     commentsData.map((c: any) => (

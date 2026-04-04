@@ -2314,3 +2314,10 @@
 - [x] Bulk-requeue failed jobs button (already existed in admin panel — confirmed)
 - [x] Cover art required validation on upload flow (client-side block for audio uploads)
 - [x] Daily midnight digest replacing per-failure notifyOwner
+
+## Player & TrackCard Improvements (Apr 4 — Round 2)
+- [ ] Founder crown badge in MobilePlayerLayer creator name during playback
+- [ ] Founder crown badge in TheaterPlayer creator name during playback
+- [ ] visualReady shimmer on TrackCard cover art thumbnails
+- [x] Witness Activity strip: live listener count polling endpoint
+- [x] Witness Activity strip: player UI above comments panel

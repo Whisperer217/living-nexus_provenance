@@ -231,6 +231,52 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {hasAiDisclosure && (
           <AiDisclosureBadge value={track.aiDisclosure!} />
         )}
+
+        {/* visualReady shimmer — pulsing overlay while auto-video is being generated */}
+        {track.visualReady === false && (
+          <div
+            className="absolute inset-0 z-20 pointer-events-none overflow-hidden"
+            style={{ borderRadius: "inherit" }}
+          >
+            {/* Sweep shimmer */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(105deg, transparent 35%, oklch(0.84 0.155 85 / 0.09) 50%, transparent 65%)",
+                backgroundSize: "200% 100%",
+                animation: "trackCardShimmer 2.2s ease-in-out infinite",
+              }}
+            />
+            {/* Bottom label */}
+            <div
+              className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-1.5"
+              style={{
+                background: "linear-gradient(to top, oklch(0 0 0 / 0.6), transparent)",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 4,
+                  height: 4,
+                  borderRadius: "50%",
+                  background: "oklch(0.84 0.155 85 / 0.7)",
+                  animation: "trackCardDot 1.1s ease-in-out infinite",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "8px",
+                  color: "oklch(0.84 0.155 85 / 0.75)",
+                  letterSpacing: "0.12em",
+                  fontFamily: "'Cinzel', serif",
+                }}
+              >
+                generating visual
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Info panel ── */}

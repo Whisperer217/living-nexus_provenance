@@ -31,7 +31,7 @@ import {
   Maximize2, Check, Video, ListMusic,
   Volume2, VolumeX, Shield, MessageCircle,
   ChevronRight, Send, Users, Fingerprint,
-  ExternalLink,
+  ExternalLink, Crown,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -281,6 +281,13 @@ export default function MobilePlayerLayer() {
     if (!user || !currentSongId) return;
     toggleReactionMutation.mutate({ songId: currentSongId, type });
   }, [user, currentSongId, toggleReactionMutation]);
+
+  // Witness Activity — live listener count (poll every 30s)
+  const { data: listenerData } = trpc.songs.getListenerCount.useQuery(
+    { songId: currentSongId! },
+    { enabled: !!currentSongId && !isNaN(currentSongId), refetchInterval: 30_000, staleTime: 25_000 }
+  );
+  const listenerCount = (listenerData as any)?.count ?? 0;
 
   // Comments
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
@@ -674,17 +681,23 @@ export default function MobilePlayerLayer() {
           <div className="text-[18px] font-heading text-white truncate leading-tight">
             {currentTrack.title || "Unknown Track"}
           </div>
-          {/* Creator name — clickable */}
+          {/* Creator name — clickable, with founder crown badge */}
           {creatorId ? (
             <button
               onClick={() => { setPlayerState("mini"); navigate(`/creator/${creatorId}`); }}
-              className="text-[13px] mt-1 truncate transition-colors hover:text-white text-left"
+              className="flex items-center gap-1.5 text-[13px] mt-1 truncate transition-colors hover:text-white text-left"
               style={{ color: "oklch(0.55 0.04 280)" }}
             >
+              {currentTrack.creatorRole === "founder" && (
+                <Crown size={11} style={{ color: "oklch(0.84 0.155 85)", flexShrink: 0 }} />
+              )}
               {currentTrack.artist || "Unknown Artist"}
             </button>
           ) : (
-            <div className="text-[13px] mt-1 truncate" style={{ color: "oklch(0.55 0.04 280)" }}>
+            <div className="flex items-center gap-1.5 text-[13px] mt-1 truncate" style={{ color: "oklch(0.55 0.04 280)" }}>
+              {currentTrack.creatorRole === "founder" && (
+                <Crown size={11} style={{ color: "oklch(0.84 0.155 85)", flexShrink: 0 }} />
+              )}
               {currentTrack.artist || "Unknown Artist"}
             </div>
           )}
@@ -924,6 +937,27 @@ export default function MobilePlayerLayer() {
           })}
         </div>
       </div>
+
+      {/* Witness Activity Strip */}
+      {listenerCount > 0 && (
+        <div
+          className="flex-shrink-0 mx-8 mb-3 flex items-center justify-center gap-2 py-2 px-4 rounded-full animate-fade-in"
+          style={{
+            background: "oklch(0.10 0.02 275 / 0.5)",
+            border: "1px solid oklch(0.22 0.03 275 / 0.4)",
+          }}
+        >
+          <span className="text-[13px]">🎧</span>
+          <span
+            className="text-[12px] font-medium tracking-wide"
+            style={{ color: "oklch(0.65 0.06 280)" }}
+          >
+            {listenerCount === 1
+              ? "1 person currently listening"
+              : `${listenerCount} people currently listening`}
+          </span>
+        </div>
+      )}
 
       {/* Comments Panel */}
       <div className="flex-shrink-0 mx-8 mb-4 rounded-2xl overflow-hidden"
