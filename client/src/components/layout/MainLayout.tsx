@@ -371,6 +371,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 {renderNavItem(DASHBOARD_NAV_ITEM, false)}
                 {renderNavItem(ARCHIVE_NAV_ITEM, false)}
                 {renderNavItem({ label: "My Profile", icon: Fingerprint, path: `/creator/${(user as any).id}`, goldLabel: false }, false)}
+                {renderNavItem({ label: "Prompt Generator", icon: Sparkles, path: `/creator/${(user as any).id}?openPromptStudio=1`, goldLabel: false }, false)}
               </div>
             )}
 

@@ -67,6 +67,9 @@ import {
   getLivingArchiveStatus, getUserByStripeSubscriptionId,
   countFounders, grantFounder, revokeFounder, listFounders, searchUsersForFounderPanel, MAX_FOUNDERS,
   getSongsNeedingAutoVideo, cacheAutoVideoUrl, getAutoVideoStats,
+  savePromptDraft, getPromptDraftsByUser, getPromptDraftById,
+  getPromptDraftByShareToken, updatePromptDraftShare, deletePromptDraft,
+  updateUserToneFrequency,
 } from "./db";
 import { LIVING_ARCHIVE_PRODUCTS, SLOTS_PER_PERIOD } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -3622,11 +3625,99 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           tempoRange: parsed.tempoRange,
           energyProfile: parsed.energyProfile,
           lineageVersion: nextVersion,
-          promptMode: "style_prompt" as const,
+           promptMode: "style_prompt" as const,
           promptType: input.promptType,
         };
       }),
-  }),
 
+    // ── Save a named draft ────────────────────────────────────────────────────
+    saveDraft: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(256),
+        promptMode: z.enum(["identity_regen", "style_prompt"]).default("style_prompt"),
+        promptType: z.string(),
+        targetPlatform: z.string().optional(),
+        expressionId: z.string().optional(),
+        prompt: z.string(),
+        styleTags: z.string().optional(),
+        composerNote: z.string().optional(),
+        userInputBlocks: z.array(z.object({ label: z.string(), content: z.string() })).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id } = await savePromptDraft({
+          userId: ctx.user.id,
+          name: input.name,
+          promptMode: input.promptMode,
+          promptType: input.promptType,
+          targetPlatform: input.targetPlatform,
+          expressionId: input.expressionId,
+          prompt: input.prompt,
+          styleTags: input.styleTags,
+          composerNote: input.composerNote,
+          userInputBlocks: input.userInputBlocks ? JSON.stringify(input.userInputBlocks) : undefined,
+        });
+        return { id };
+      }),
+
+    // ── Get all drafts for the current user ───────────────────────────────────
+    getDrafts: protectedProcedure
+      .query(async ({ ctx }) => {
+        const drafts = await getPromptDraftsByUser(ctx.user.id);
+        return drafts.map((d: any) => ({
+          ...d,
+          userInputBlocks: d.userInputBlocks ? JSON.parse(d.userInputBlocks) : [],
+        }));
+      }),
+
+    // ── Delete a draft ────────────────────────────────────────────────────────
+    deleteDraft: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await deletePromptDraft(input.id, ctx.user.id);
+        return { success: true };
+      }),
+
+    // ── Generate a share link for a draft ────────────────────────────────────
+    sharePrompt: protectedProcedure
+      .input(z.object({ draftId: z.number(), origin: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const draft = await getPromptDraftById(input.draftId);
+        if (!draft || draft.userId !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND" });
+        // Reuse existing share token if already generated
+        if (draft.shareToken && draft.shareUrl) {
+          return { shareUrl: draft.shareUrl, shareToken: draft.shareToken };
+        }
+        const { randomBytes } = await import("crypto");
+        const shareToken = randomBytes(16).toString("hex");
+        const shareUrl = `${input.origin}/prompt/${shareToken}`;
+        await updatePromptDraftShare(input.draftId, shareToken, shareUrl);
+        return { shareUrl, shareToken };
+      }),
+
+    // ── View a shared prompt (public) ─────────────────────────────────────────
+    getSharedPrompt: publicProcedure
+      .input(z.object({ shareToken: z.string() }))
+      .query(async ({ input }) => {
+        const draft = await getPromptDraftByShareToken(input.shareToken);
+        if (!draft) throw new TRPCError({ code: "NOT_FOUND" });
+        return {
+          ...draft,
+          userInputBlocks: draft.userInputBlocks ? JSON.parse(draft.userInputBlocks) : [],
+        };
+      }),
+
+    // ── Update tone/frequency profile ────────────────────────────────────────
+    updateToneFrequency: protectedProcedure
+      .input(z.object({
+        toneFrequencyNote: z.string().optional(),
+        dominantKey: z.string().optional(),
+        tempoRange: z.string().optional(),
+        energyProfile: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await updateUserToneFrequency(ctx.user.id, input);
+        return { success: true };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

@@ -3019,3 +3019,75 @@ export async function getAutoVideoStats(): Promise<{ total: number; withAutoVide
   const withAutoVideo = Number(withRow?.count ?? 0);
   return { total, withAutoVideo, pending: total - withAutoVideo };
 }
+
+// ── Prompt Drafts ─────────────────────────────────────────────────────────────
+/** Save a new prompt draft for a user. */
+export async function savePromptDraft(data: {
+  userId: number;
+  name: string;
+  promptMode: "identity_regen" | "style_prompt";
+  promptType: string;
+  targetPlatform?: string;
+  expressionId?: string;
+  prompt: string;
+  styleTags?: string;
+  composerNote?: string;
+  userInputBlocks?: string;
+  shareToken?: string;
+  shareUrl?: string;
+}): Promise<{ id: number }> {
+  const db = await getDb();
+  const { promptDrafts } = await import("../drizzle/schema");
+  const [result] = await db.insert(promptDrafts).values(data);
+  return { id: (result as any).insertId };
+}
+
+/** Get all prompt drafts for a user, newest first. */
+export async function getPromptDraftsByUser(userId: number) {
+  const db = await getDb();
+  const { promptDrafts } = await import("../drizzle/schema");
+  return db.select().from(promptDrafts)
+    .where(eq(promptDrafts.userId, userId))
+    .orderBy(desc(promptDrafts.createdAt));
+}
+
+/** Get a single prompt draft by ID. */
+export async function getPromptDraftById(id: number) {
+  const db = await getDb();
+  const { promptDrafts } = await import("../drizzle/schema");
+  const [row] = await db.select().from(promptDrafts).where(eq(promptDrafts.id, id));
+  return row ?? null;
+}
+
+/** Get a prompt draft by share token (public). */
+export async function getPromptDraftByShareToken(shareToken: string) {
+  const db = await getDb();
+  const { promptDrafts } = await import("../drizzle/schema");
+  const [row] = await db.select().from(promptDrafts).where(eq(promptDrafts.shareToken, shareToken));
+  return row ?? null;
+}
+
+/** Update share token and URL on a draft. */
+export async function updatePromptDraftShare(id: number, shareToken: string, shareUrl: string): Promise<void> {
+  const db = await getDb();
+  const { promptDrafts } = await import("../drizzle/schema");
+  await db.update(promptDrafts).set({ shareToken, shareUrl }).where(eq(promptDrafts.id, id));
+}
+
+/** Delete a prompt draft (owner only — caller must verify ownership). */
+export async function deletePromptDraft(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  const { promptDrafts } = await import("../drizzle/schema");
+  await db.delete(promptDrafts).where(and(eq(promptDrafts.id, id), eq(promptDrafts.userId, userId)));
+}
+
+/** Update tone/frequency profile fields on a user. */
+export async function updateUserToneFrequency(userId: number, data: {
+  toneFrequencyNote?: string;
+  dominantKey?: string;
+  tempoRange?: string;
+  energyProfile?: string;
+}): Promise<void> {
+  const db = await getDb();
+  await db.update(users).set(data).where(eq(users.id, userId));
+}

@@ -5,7 +5,7 @@
    tip jar, social links. Divine Noir aesthetic.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -19,7 +19,7 @@ import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
-  Library, Move, Upload, Loader2, Crown, Sparkles, Wand2, ClipboardCopy, ChevronDown,
+  Library, Move, Upload, Loader2, Crown, Sparkles, Wand2, ClipboardCopy, ChevronDown, BookOpen,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePositioner } from "@/components/ImagePositioner";
@@ -384,6 +384,17 @@ export default function CreatorProfilePage() {
     { label: "Lyrics / Inspiration", content: "" },
   ]);
   const [showLineage, setShowLineage] = useState(false);
+
+  // Auto-open Prompt Studio when navigated via sidebar ?openPromptStudio=1
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("openPromptStudio") === "1") {
+      setShowPromptStudio(true);
+      // Clean the query param from the URL without reload
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, "", cleanUrl);
+    }
+  }, []);
   const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
   // Use currentTrackId (derived from currentIdx) — NOT tracks[0] which always points to the
   // first track in the queue regardless of which track is actively playing.
@@ -453,6 +464,21 @@ export default function CreatorProfilePage() {
     onSuccess: (result) => { setPsResult({ ...result, promptMode: "style_prompt" }); refetchExpression(); },
     onError: (e: any) => toast.error(e.message),
   });
+  const [savedDraftId, setSavedDraftId] = useState<number | null>(null);
+  const [draftName, setDraftName] = useState("");
+  const [showDraftNameInput, setShowDraftNameInput] = useState(false);
+  const saveDraftMutation = trpc.promptStudio.saveDraft.useMutation({
+    onSuccess: (d) => { setSavedDraftId(d.id); setShowDraftNameInput(false); toast.success("Draft saved!"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const shareMutation = trpc.promptStudio.sharePrompt.useMutation({
+    onSuccess: (d) => { navigator.clipboard.writeText(d.shareUrl); toast.success("Share link copied!"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const { data: myDrafts = [], refetch: refetchDrafts } = trpc.promptStudio.getDrafts.useQuery(
+    undefined,
+    { enabled: !!user, staleTime: 30_000 }
+  );
   const { data: creatorTestimonies = [] } = trpc.testimony.getByCreator.useQuery(
     { creatorId, limit: 10 },
     { enabled: creatorId > 0, staleTime: 60_000 }
@@ -1549,6 +1575,39 @@ export default function CreatorProfilePage() {
                     style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(167,139,250,0.8)" }}>
                     <ClipboardCopy className="w-3.5 h-3.5" /> Copy Full Output
                   </button>
+                  {isOwner && (
+                    <div className="flex gap-2">
+                      {!showDraftNameInput ? (
+                        <button onClick={() => { setShowDraftNameInput(true); setDraftName(""); setSavedDraftId(null); }}
+                          className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all"
+                          style={{ background: "rgba(245,196,81,0.08)", border: "1px solid rgba(245,196,81,0.2)", color: "rgba(245,196,81,0.8)" }}>
+                          <BookOpen className="w-3.5 h-3.5" /> Save Draft
+                        </button>
+                      ) : (
+                        <div className="flex-1 flex gap-2">
+                          <input value={draftName} onChange={(e) => setDraftName(e.target.value)} placeholder="Draft name…"
+                            className="flex-1 rounded-lg px-3 py-1.5 text-xs bg-transparent outline-none"
+                            style={{ border: "1px solid rgba(245,196,81,0.3)", color: "rgba(229,231,235,0.9)", caretColor: "#f5c451" }}
+                            onKeyDown={(e) => { if (e.key === "Enter" && draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "style_prompt", promptType: psPromptType, targetPlatform: psPlatform, expressionId: display.expressionId ?? undefined, prompt: display.expressionPrompt ?? "", styleTags: display.expressionStyleTags ?? undefined, composerNote: display.expressionComposerNote ?? undefined, userInputBlocks: psInputBlocks.filter(b => b.content.trim()) }); }} />
+                          <button onClick={() => { if (draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "style_prompt", promptType: psPromptType, targetPlatform: psPlatform, expressionId: display.expressionId ?? undefined, prompt: display.expressionPrompt ?? "", styleTags: display.expressionStyleTags ?? undefined, composerNote: display.expressionComposerNote ?? undefined, userInputBlocks: psInputBlocks.filter(b => b.content.trim()) }); }}
+                            disabled={!draftName.trim() || saveDraftMutation.isPending}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                            style={{ background: "rgba(245,196,81,0.15)", color: "rgba(245,196,81,0.9)" }}>
+                            {saveDraftMutation.isPending ? "Saving…" : "Save"}
+                          </button>
+                          <button onClick={() => setShowDraftNameInput(false)} className="px-2 py-1.5 rounded-lg text-xs opacity-40 hover:opacity-70" style={{ color: "rgba(156,163,175,0.8)" }}>✕</button>
+                        </div>
+                      )}
+                      {savedDraftId && (
+                        <button onClick={() => shareMutation.mutate({ draftId: savedDraftId, origin: window.location.origin })}
+                          disabled={shareMutation.isPending}
+                          className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                          style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)", color: "rgba(167,139,250,0.8)" }}>
+                          <Share2 className="w-3.5 h-3.5" /> {shareMutation.isPending ? "Copying…" : "Share"}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })()}

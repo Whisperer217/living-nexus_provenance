@@ -2437,3 +2437,25 @@
 - [ ] UI: rebuild modal as 3-tab tool (Identity Regen / Style Prompt Studio / Archive)
 - [ ] UI: Style Prompt Studio tab has free-form input blocks (lyrics, style ideas, mood, etc.)
 - [ ] UI: Archive tab shows unified history of both modes with mode badge
+
+## Provenance Prompt Generator v3 + Sidebar (Apr 4 2026)
+- [ ] Add Provenance Prompt Generator nav link under My Profile in sidebar
+- [ ] Add promptDrafts table to schema for saving named Studio outputs
+- [ ] Add saveDraft/getDrafts/deleteDraft tRPC procedures
+- [ ] Add sharePrompt procedure (returns public share URL tied to EID)
+- [ ] Add tone/frequency editor to Profile Settings page
+- [ ] Add updateToneFrequency tRPC procedure
+- [ ] Add Save as Draft button to Studio tab result
+- [ ] Add Share button to Studio tab result
+- [ ] Show saved drafts list in Studio tab
+
+## Provenance Prompt Generator v3 + Sidebar (Apr 4 2026)
+- [ ] Add Provenance Prompt Generator nav link under My Profile in sidebar
+- [ ] Add promptDrafts table to schema for saving named Studio outputs
+- [ ] Add saveDraft/getDrafts/deleteDraft tRPC procedures
+- [ ] Add sharePrompt procedure (returns public share URL tied to EID)
+- [ ] Add tone/frequency editor to Profile Settings page
+- [ ] Add updateToneFrequency tRPC procedure
+- [ ] Add Save as Draft button to Studio tab result
+- [ ] Add Share button to Studio tab result
+- [ ] Show saved drafts list in Studio tab

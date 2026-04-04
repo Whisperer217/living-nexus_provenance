@@ -840,3 +840,26 @@ export const expressionLineage = mysqlTable("expressionLineage", {
 });
 export type ExpressionLineage = typeof expressionLineage.$inferSelect;
 export type InsertExpressionLineage = typeof expressionLineage.$inferInsert;
+
+// ── Prompt Drafts ─────────────────────────────────────────────────────────────
+// Named drafts saved from the Provenance Prompt Generator Studio tab.
+// Each draft is a standalone saved output tied to the creator's EID lineage.
+export const promptDrafts = mysqlTable("promptDrafts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  promptMode: mysqlEnum("promptMode", ["identity_regen", "style_prompt"]).default("style_prompt").notNull(),
+  promptType: varchar("promptType", { length: 32 }).notNull(),
+  targetPlatform: varchar("targetPlatform", { length: 32 }),
+  expressionId: varchar("expressionId", { length: 32 }),
+  prompt: text("prompt").notNull(),
+  styleTags: text("styleTags"),
+  composerNote: text("composerNote"),
+  userInputBlocks: text("userInputBlocks"),
+  shareToken: varchar("shareToken", { length: 64 }),
+  shareUrl: varchar("shareUrl", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PromptDraft = typeof promptDrafts.$inferSelect;
+export type InsertPromptDraft = typeof promptDrafts.$inferInsert;
