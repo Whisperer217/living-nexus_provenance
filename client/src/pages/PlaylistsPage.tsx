@@ -198,12 +198,14 @@ function PlaylistDetail({
       artUrl: t.song.coverArtUrl, audioUrl: t.song.fileUrl, witnessId: t.song.witnessId,
       visualReady: t.song.visualReady ?? false,
       autoVideoUrl: t.song.autoVideoUrl ?? undefined,
+      creatorRole: t.creator?.role ?? undefined,
     }));
     const playerTracks = tracks.map((t: any) => ({
       id: String(t.song.id), title: t.song.title, artist: t.creator?.artistHandle || t.creator?.name || String(t.song.userId),
       genre: t.song.genre || "", audioUrl: t.song.fileUrl, artUrl: t.song.coverArtUrl, witnessId: t.song.witnessId,
       visualReady: t.song.visualReady ?? false,
       autoVideoUrl: t.song.autoVideoUrl ?? undefined,
+      creatorRole: t.creator?.role ?? undefined,
     }));
     playQueueAt(playerTracks, 0, "PLAYLIST");
     openNowPlayingPanel();

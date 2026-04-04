@@ -33,7 +33,7 @@ const MAX_ATTEMPTS = 3;
 const BATCH_SIZE = 5;
 
 /** Worker poll interval in ms. */
-const WORKER_INTERVAL_MS = 15_000; // 15 seconds
+const WORKER_INTERVAL_MS = 10_000; // 10 seconds (reduced from 15s for higher throughput)
 
 /** Priority assigned to founder works. */
 const FOUNDER_PRIORITY = 10;

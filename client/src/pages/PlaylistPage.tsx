@@ -58,6 +58,7 @@ export default function PlaylistPage() {
         coverPositionY: item.song.coverPositionY ?? 50,
         visualReady: item.song.visualReady ?? false,
         autoVideoUrl: item.song.autoVideoUrl ?? undefined,
+        creatorRole: item.creator?.role ?? undefined,
       }));
 
   const handlePlay = (songId: number) => {

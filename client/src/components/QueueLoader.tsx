@@ -32,6 +32,7 @@ export default function QueueLoader() {
         aiDisclosure: (song.aiConsent as Track["aiDisclosure"]) ?? undefined,
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
+        creatorRole: song.creator?.role ?? undefined,
       }));
     setQueue(tracks);
   }, [data, setQueue]);

@@ -61,6 +61,7 @@ export default function DiscoverPage() {
       coverPositionY: song.coverPositionY ?? 50,
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
+        creatorRole: song.creator?.role ?? undefined,
     });
     toast.success(`"${song.title}" plays next`);
     closeMenu();
@@ -93,6 +94,7 @@ export default function DiscoverPage() {
           coverPositionY: s.song.coverPositionY ?? 50,
           visualReady: s.song.visualReady ?? false,
           autoVideoUrl: s.song.autoVideoUrl ?? undefined,
+          creatorRole: s.creator?.role ?? undefined,
         }));
       const startIdx = queue.findIndex((t: any) => t.id === String(clickedSong.song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "HOME");

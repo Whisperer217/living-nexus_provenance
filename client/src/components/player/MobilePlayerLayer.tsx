@@ -115,6 +115,7 @@ export default function MobilePlayerLayer() {
     toggleShuffle, toggleRepeat, toggleMute,
     setVolume, seek,
     queueContextLabel,
+    patchTrack,
   } = usePlayer();
   const { user } = useAuth();
   const [, navigate] = useLocation();
@@ -219,11 +220,30 @@ export default function MobilePlayerLayer() {
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
   const currentSongId = currentTrack?.id ? parseInt(currentTrack.id, 10) : null;
 
-  // Song detail
+  // Song detail — poll every 30s while visualReady is false so the shimmer
+  // disappears and the video fades in automatically once the worker finishes.
+  const isTrackVisualPending = currentTrack?.visualReady === false;
   const { data: songDetail } = trpc.songs.getById.useQuery(
     { id: currentSongId! },
-    { enabled: !!currentSongId && !isNaN(currentSongId), staleTime: 60_000 }
+    {
+      enabled: !!currentSongId && !isNaN(currentSongId),
+      staleTime: 60_000,
+      refetchInterval: isTrackVisualPending ? 30_000 : false,
+    }
   );
+  // When the 30s poll returns visualReady:true, patch the track in the queue so
+  // the shimmer clears and the video fades in without a page reload.
+  const songDetailVisualReady = (songDetail?.song as any)?.visualReady as boolean | undefined;
+  const songDetailAutoVideoUrl = (songDetail?.song as any)?.autoVideoUrl as string | null | undefined;
+  useEffect(() => {
+    if (!currentTrack || !songDetailVisualReady) return;
+    if (currentTrack.visualReady === true) return; // already patched
+    patchTrack(currentTrack.id, {
+      visualReady: true,
+      autoVideoUrl: songDetailAutoVideoUrl ?? currentTrack.autoVideoUrl,
+    });
+  }, [songDetailVisualReady, songDetailAutoVideoUrl, currentTrack, patchTrack]);
+
   const stripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
   const videoWitnessId = (songDetail?.song as any)?.videoWitnessId as string | null | undefined;

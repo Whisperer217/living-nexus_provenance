@@ -39,6 +39,7 @@ export default function TheaterPlayer() {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
     isTheaterOpen, closeTheater,
+    patchTrack,
   } = usePlayer();
   const { user } = useAuth();
   const [, navigate] = useLocation();
@@ -52,10 +53,27 @@ export default function TheaterPlayer() {
   const currentSongId = currentTrack?.id ? parseInt(currentTrack.id, 10) : null;
 
   // Song detail for lyrics, video, tip status
+  // Poll every 30s while visualReady is false so the shimmer clears automatically.
+  const isTrackVisualPending = currentTrack?.visualReady === false;
   const { data: songDetail } = trpc.songs.getById.useQuery(
     { id: currentSongId! },
-    { enabled: !!currentSongId && !isNaN(currentSongId), staleTime: 60_000 }
+    {
+      enabled: !!currentSongId && !isNaN(currentSongId),
+      staleTime: 60_000,
+      refetchInterval: isTrackVisualPending ? 30_000 : false,
+    }
   );
+  // When poll returns visualReady:true, patch the track in the queue so shimmer clears
+  const theaterVisualReady = (songDetail?.song as any)?.visualReady as boolean | undefined;
+  const theaterAutoVideoUrl = (songDetail?.song as any)?.autoVideoUrl as string | null | undefined;
+  useEffect(() => {
+    if (!currentTrack || !theaterVisualReady) return;
+    if (currentTrack.visualReady === true) return;
+    patchTrack(currentTrack.id, {
+      visualReady: true,
+      autoVideoUrl: theaterAutoVideoUrl ?? currentTrack.autoVideoUrl,
+    });
+  }, [theaterVisualReady, theaterAutoVideoUrl, currentTrack, patchTrack]);
 
   // Comments
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(

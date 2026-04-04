@@ -10,7 +10,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward, Shield, Bot, Sparkles, Fingerprint } from "lucide-react";
+import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward, Shield, Bot, Sparkles, Fingerprint, Crown } from "lucide-react";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { Link, useLocation } from "wouter";
@@ -263,6 +263,15 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             </Link>
           ) : (
             <span className="truncate">{track.artist}</span>
+          )}
+          {track.creatorRole === "founder" && (
+            <span
+              title="Founding Creator"
+              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold tracking-widest flex-shrink-0"
+              style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.35)" }}
+            >
+              <Crown className="w-2.5 h-2.5" />
+            </span>
           )}
         </div>
 

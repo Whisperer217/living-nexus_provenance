@@ -290,6 +290,7 @@ export default function SongDetailPage() {
         coverPositionY: song.coverPositionY ?? 50,
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
+        creatorRole: song.creator?.role ?? undefined,
       });
     } else {
       // New track — load into global player and start playing
@@ -308,6 +309,7 @@ export default function SongDetailPage() {
         coverPositionY: song.coverPositionY ?? 50,
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
+        creatorRole: song.creator?.role ?? undefined,
       });
       playMutation.mutate({ songId });
       openNowPlayingPanel();

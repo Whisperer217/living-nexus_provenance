@@ -50,6 +50,7 @@ export interface Track {
   coverPositionY?: number; // objectPosition Y (0-100)
   visualReady?: boolean; // true once auto-video MP4 is generated and stored
   autoVideoUrl?: string; // S3 CDN URL of the looping MP4 visual
+  creatorRole?: string; // user role of the creator (e.g. "founder", "admin", "user")
 }
 
 /** Describes WHERE the current queue was built from — controls shuffle/repeat scope */
@@ -149,6 +150,8 @@ interface PlayerContextValue {
   closeTheater: () => void;
   /** Replace the entire queue without starting playback (used for initial DB seed) */
   setQueue: (tracks: Track[]) => void;
+  /** Patch fields on a single track in the queue by track id (e.g. update visualReady after worker finishes) */
+  patchTrack: (trackId: string, patch: Partial<Track>) => void;
   /**
    * Replace the entire queue with a context-tagged set and immediately play startIdx.
    * Shuffle and repeat will operate ONLY within this queue.
@@ -451,6 +454,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const setRoom = useCallback((r: PlayerState["room"]) => setState(s => ({ ...s, room: r })), []);
   const setJukeboxQueueCount = useCallback((n: number) => setState(s => ({ ...s, jukeboxQueueCount: n })), []);
 
+  /** Patch a single track's fields in the queue by id */
+  const patchTrack = useCallback((trackId: string, patch: Partial<Track>) => {
+    setState(s => ({
+      ...s,
+      tracks: s.tracks.map(t => t.id === trackId ? { ...t, ...patch } : t),
+    }));
+  }, []);
+
   /** Replace the entire queue without starting playback (used for initial DB seed) */
   const setQueue = useCallback((newTracks: Track[]) => {
     const validTracks = newTracks.filter(t => !!t.audioUrl);
@@ -598,7 +609,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       state, audioRef, allTracks, currentTrackId, queueContextLabel,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-      toggleLike, addTrack, addAndPlay, playNext, setQueue, playQueueAt,
+      toggleLike, addTrack, addAndPlay, playNext, setQueue, playQueueAt, patchTrack,
       openNowPlayingPanel, isNowPlayingPanelOpen, closeNowPlayingPanel,
       openTheater, isTheaterOpen, closeTheater,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,

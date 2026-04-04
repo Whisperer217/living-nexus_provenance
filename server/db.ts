@@ -239,7 +239,7 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
     : desc(songs.createdAt);
   return db.select({
     song: songs,
-    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus },
+    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus, role: users.role },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     .where(and(...conditions)).orderBy(orderExpr).limit(limit).offset(offset);
 }

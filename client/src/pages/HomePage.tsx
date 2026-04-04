@@ -510,6 +510,7 @@ export default function HomePage() {
       coverPositionY: song.coverPositionY ?? 50,
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
+        creatorRole: song.creator?.role ?? undefined,
       artAspectRatio: song.artAspectRatio ?? "1:1",
       userId: song.userId,
       artistHandle: creator?.artistHandle ?? undefined,

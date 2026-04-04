@@ -168,6 +168,7 @@ export default function ArchivePage() {
     coverPositionY: song.coverPositionY ?? 50,
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
+        creatorRole: song.creator?.role ?? undefined,
   });
 
   const handlePlay = (e: React.MouseEvent, songList: any[], idx: number) => {

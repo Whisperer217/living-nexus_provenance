@@ -19,7 +19,7 @@ import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
-  Library, Move, Upload, Loader2,
+  Library, Move, Upload, Loader2, Crown,
 } from "lucide-react";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
@@ -451,6 +451,7 @@ export default function CreatorProfilePage() {
         coverPositionY: s.coverPositionY ?? 50,
           visualReady: s.visualReady ?? false,
           autoVideoUrl: s.autoVideoUrl ?? undefined,
+          creatorRole: (data?.creator as any)?.role ?? undefined,
       }));
       const startIdx = queue.findIndex((t: any) => t.id === String(song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
@@ -468,6 +469,7 @@ export default function CreatorProfilePage() {
         coverPositionY: song.coverPositionY ?? 50,
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
+        creatorRole: (data?.creator as any)?.role ?? undefined,
       });
     }
     playMutation.mutate({ songId: song.id });
@@ -701,6 +703,16 @@ export default function CreatorProfilePage() {
                   >
                     {creator.artistHandle || creator.name}
                   </h1>
+                  {(creator as any).role === "founder" && (
+                    <span
+                      title="Founding Creator"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
+                      style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}
+                    >
+                      <Crown className="w-3 h-3" />
+                      FOUNDER
+                    </span>
+                  )}
                   {creator.licenseStatus === "licensed" && (
                     <span
                       className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"

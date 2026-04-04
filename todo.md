@@ -2288,3 +2288,14 @@
 - [x] visualReady gate: shimmer "generating visual…" overlay in TheaterPlayer
 - [x] Worker throughput: BATCH_SIZE increased from 2 → 5 per tick
 - [x] Failed job alerting: notifyOwner fires when a job exhausts MAX_ATTEMPTS (3)
+
+## Follow-up Improvements (Apr 4 — batch 2)
+- [ ] Auto-refresh visualReady in player: poll every 30s while shimmer active, fade in video on ready
+- [ ] Founder crown badge on creator profile pages and song cards
+- [ ] Worker interval: reduce from 15s to 10s
+
+## Visual Pipeline Improvements (Follow-up)
+- [x] Auto-refresh visualReady in player: poll getById every 30s while pending, patchTrack on flip
+- [x] Founder crown badge on TrackCard and CreatorProfilePage
+- [x] creatorRole propagated through all 12 track-mapping sites + getPublicSongs DB query
+- [x] Worker interval reduced from 15s to 10s in visualQueue.ts
