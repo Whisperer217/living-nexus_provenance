@@ -52,6 +52,13 @@ export const users = mysqlTable("users", {
   // Founder's Era supporter tier (denormalized from platformSupporters for fast badge rendering)
   supporterTier: mysqlEnum("supporterTier", ["supporter", "patron", "covenant"]),
 
+  // Expression ID (EID) — auto-generated style identity from profile metadata
+  expressionId: varchar("expressionId", { length: 32 }).unique(),
+  expressionPrompt: text("expressionPrompt"),
+  expressionStyleTags: text("expressionStyleTags"),
+  expressionComposerNote: text("expressionComposerNote"),
+  expressionGeneratedAt: timestamp("expressionGeneratedAt"),
+
   // Onboarding
   hasSeenWelcome: boolean("hasSeenWelcome").default(false).notNull(),
 

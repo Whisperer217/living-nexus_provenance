@@ -2401,3 +2401,11 @@
 
 ## Prompt Studio Visibility Fix (Apr 2026)
 - [x] Move Prompt Studio button outside isOwner gate — visible to ALL visitors on every creator profile page
+
+## Prompt Studio Redesign — Auto-Generate + EID (Apr 2026)
+- [ ] Add expressionId (EID) column to users table and migrate
+- [ ] Add promptStudio.generateFromProfile tRPC procedure (auto-reads profile metadata, calls LLM, returns prompt + EID)
+- [ ] Add promptStudio.getProfilePrompt tRPC procedure (returns saved EID + prompt for a creator)
+- [ ] Rebuild Prompt Studio modal: auto-generate on open from profile metadata, no manual upload step
+- [ ] Display EID badge on creator profile page (like WID badge on songs)
+- [ ] Show generated prompt text + EID in modal with copy/regenerate buttons

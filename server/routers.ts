@@ -58,6 +58,8 @@ import {
   getAllSystemConfig, getSystemConfigValue, setSystemConfigValue,
   resetUserBilling, getAllUsersAdmin,
   recordPlayEvent, getPlayAuditStats, MIN_PLAY_SECONDS,
+  updateUserExpression,
+  getDb,
   createTestimony, getTestimoniesByCreator, getTestimonyByWid, getTestimonyCount,
   activateLivingArchive, deactivateLivingArchive, grantFounderFreeTier,
   getLivingArchiveStatus, getUserByStripeSubscriptionId,
@@ -3212,24 +3214,77 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
 
   // ─── Prompt Studio ────────────────────────────────────────────────────────
   promptStudio: router({
-    /** Generate a music AI prompt from lyrics/theme, style, and mood inputs */
-    generate: protectedProcedure
+    /** Return the saved EID + expression prompt for any creator (public) */
+    getProfileExpression: publicProcedure
+      .input(z.object({ creatorId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const { users: usersTable } = await import("../drizzle/schema");
+        const { eq: eqFn } = await import("drizzle-orm");
+        const [creator] = await db
+          .select({
+            expressionId: usersTable.expressionId,
+            expressionPrompt: usersTable.expressionPrompt,
+            expressionStyleTags: usersTable.expressionStyleTags,
+            expressionComposerNote: usersTable.expressionComposerNote,
+            expressionGeneratedAt: usersTable.expressionGeneratedAt,
+          })
+          .from(usersTable)
+          .where(eqFn(usersTable.id, input.creatorId))
+          .limit(1);
+        if (!creator || !creator.expressionId) return null;
+        return creator;
+      }),
+
+    /** Auto-generate a style prompt + EID from the creator's profile metadata and save it */
+    generateFromProfile: protectedProcedure
       .input(z.object({
-        lyrics: z.string().max(2000).optional(),
-        theme: z.string().max(500).optional(),
-        genre: z.string().max(200).optional(),
-        mood: z.string().max(200).optional(),
-        instrumentation: z.string().max(300).optional(),
         targetPlatform: z.enum(["suno", "udio", "general"]).default("suno"),
+        forceRegenerate: z.boolean().default(false),
       }))
-      .mutation(async ({ input }) => {
-        const contextParts = [
-          input.lyrics ? `Lyrics/Theme:\n${input.lyrics}` : input.theme ? `Theme: ${input.theme}` : "",
-          input.genre ? `Genre: ${input.genre}` : "",
-          input.mood ? `Mood: ${input.mood}` : "",
-          input.instrumentation ? `Instrumentation: ${input.instrumentation}` : "",
-        ].filter(Boolean);
-        const context = contextParts.join("\n");
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+        const { users: usersTable } = await import("../drizzle/schema");
+        const { eq: eqFn } = await import("drizzle-orm");
+
+        // If EID already exists and not forcing regeneration, return existing
+        if (!input.forceRegenerate) {
+          const [existing] = await db
+            .select({
+              expressionId: usersTable.expressionId,
+              expressionPrompt: usersTable.expressionPrompt,
+              expressionStyleTags: usersTable.expressionStyleTags,
+              expressionComposerNote: usersTable.expressionComposerNote,
+              expressionGeneratedAt: usersTable.expressionGeneratedAt,
+            })
+            .from(usersTable)
+            .where(eqFn(usersTable.id, ctx.user.id))
+            .limit(1);
+          if (existing?.expressionId) return existing;
+        }
+
+        // Fetch full creator profile
+        const creator = await getUserById(ctx.user.id);
+        if (!creator) throw new TRPCError({ code: "NOT_FOUND", message: "Creator not found" });
+
+        // Gather profile metadata for the LLM
+        const profileContext = [
+          creator.name ? `Artist Name: ${creator.name}` : "",
+          creator.artistHandle ? `Handle: @${creator.artistHandle}` : "",
+          creator.bio ? `Bio: ${creator.bio}` : "",
+          creator.primaryGenre ? `Primary Genre: ${creator.primaryGenre}` : "",
+          creator.location ? `Location: ${creator.location}` : "",
+          creator.aiDisclosure ? `AI Disclosure: ${creator.aiDisclosure.replace(/_/g, " ")}` : "",
+        ].filter(Boolean).join("\n");
+
+        // Fetch their top songs for additional context
+        const creatorSongs = await getSongsByUser(creator.id);
+        const topSongs = creatorSongs.slice(0, 5);
+        const songContext = topSongs.length > 0
+          ? `\nRegistered Works (sample):\n${topSongs.map((s: { title: string; genre?: string | null; mood?: string | null }) => `- "${s.title}"${s.genre ? ` [${s.genre}]` : ""}${s.mood ? ` / ${s.mood}` : ""}`).join("\n")}`
+          : "";
 
         const platformNote = input.targetPlatform === "suno"
           ? "Format style tags as a comma-separated list for Suno AI (e.g. 'cinematic, orchestral, epic, male vocals'). Keep the full prompt under 200 characters."
@@ -3241,27 +3296,26 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           messages: [
             {
               role: "system",
-              content: `You are a music AI prompt engineer who specializes in crafting precise, evocative prompts for AI music generation tools. You understand music theory, genre conventions, and how to translate lyrical themes into sonic descriptions. ${platformNote}`,
+              content: `You are a music AI prompt engineer and creative identity specialist. Your job is to distill a creator's entire artistic identity — their genre, tone, lyrical themes, and sonic fingerprint — into a precise, evocative AI music generation prompt. ${platformNote}`,
             },
             {
               role: "user",
-              content: `Based on the following creative input, generate:\n1. A complete music AI prompt (style tags + sonic description, max 200 characters)\n2. A list of 8-12 style tags (comma-separated)\n3. Three compelling song title suggestions that fit the theme\n4. A brief composer's note (1-2 sentences) explaining the sonic vision\n\nCreative input:\n${context || "No specific input — create something powerful and original."}\n\nRespond ONLY with valid JSON matching this exact schema: { prompt, styleTags, titleSuggestions, composerNote }`,
+              content: `Based on the following creator profile, generate their unique Expression Identity prompt:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A complete music AI prompt that captures this creator's sonic identity (style tags + sonic description, max 200 characters)\n2. A list of 8-12 style tags (comma-separated) that define their sound\n3. A brief composer's note (1-2 sentences) describing their sonic vision\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote }`,
             },
           ],
           response_format: {
             type: "json_schema",
             json_schema: {
-              name: "music_prompt_result",
+              name: "expression_identity_result",
               strict: true,
               schema: {
                 type: "object",
                 properties: {
                   prompt: { type: "string", description: "The complete music AI prompt" },
                   styleTags: { type: "string", description: "Comma-separated style tags" },
-                  titleSuggestions: { type: "array", items: { type: "string" }, description: "Three song title suggestions" },
                   composerNote: { type: "string", description: "Brief sonic vision note" },
                 },
-                required: ["prompt", "styleTags", "titleSuggestions", "composerNote"],
+                required: ["prompt", "styleTags", "composerNote"],
                 additionalProperties: false,
               },
             },
@@ -3270,17 +3324,35 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
 
         const content = response.choices?.[0]?.message?.content;
         if (!content) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "No response from AI" });
+
+        let parsed: { prompt: string; styleTags: string; composerNote: string };
         try {
-          const parsed = typeof content === "string" ? JSON.parse(content) : content;
-          return {
-            prompt: String(parsed.prompt),
-            styleTags: String(parsed.styleTags),
-            titleSuggestions: (Array.isArray(parsed.titleSuggestions) ? parsed.titleSuggestions : []).slice(0, 3).map(String),
-            composerNote: String(parsed.composerNote),
-          };
+          parsed = typeof content === "string" ? JSON.parse(content) : content;
         } catch {
           throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to parse AI response" });
         }
+
+        // Generate EID: EID-EXP-{userId}-{timestamp suffix}
+        const timestamp = Date.now();
+        const suffix = timestamp.toString(36).toUpperCase().slice(-6);
+        const expressionId = `EID-EXP-${creator.id}-${suffix}`;
+        const generatedAt = new Date();
+
+        await updateUserExpression(creator.id, {
+          expressionId,
+          expressionPrompt: String(parsed.prompt),
+          expressionStyleTags: String(parsed.styleTags),
+          expressionComposerNote: String(parsed.composerNote),
+          expressionGeneratedAt: generatedAt,
+        });
+
+        return {
+          expressionId,
+          expressionPrompt: String(parsed.prompt),
+          expressionStyleTags: String(parsed.styleTags),
+          expressionComposerNote: String(parsed.composerNote),
+          expressionGeneratedAt: generatedAt,
+        };
       }),
   }),
 

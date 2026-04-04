@@ -122,6 +122,18 @@ export async function updateUserProfile(userId: number, data: {
   await db.update(users).set(data).where(eq(users.id, userId));
 }
 
+export async function updateUserExpression(userId: number, data: {
+  expressionId: string;
+  expressionPrompt: string;
+  expressionStyleTags: string;
+  expressionComposerNote: string;
+  expressionGeneratedAt: Date;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set(data).where(eq(users.id, userId));
+}
+
 export async function updateUserStripeAccount(userId: number, data: {
   stripeAccountId?: string;
   stripeAccountStatus?: "pending" | "restricted" | "enabled" | "disabled";
