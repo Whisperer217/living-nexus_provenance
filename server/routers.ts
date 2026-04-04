@@ -60,6 +60,8 @@ import {
   createTestimony, getTestimoniesByCreator, getTestimonyByWid, getTestimonyCount,
   activateLivingArchive, deactivateLivingArchive, grantFounderFreeTier,
   getLivingArchiveStatus, getUserByStripeSubscriptionId,
+  countFounders, grantFounder, revokeFounder, listFounders, searchUsersForFounderPanel, MAX_FOUNDERS,
+  getSongsNeedingAutoVideo, cacheAutoVideoUrl, getAutoVideoStats,
 } from "./db";
 import { LIVING_ARCHIVE_PRODUCTS, SLOTS_PER_PERIOD } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -612,7 +614,9 @@ export const appRouter = router({
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
-      if (user.songSlotsUsed >= user.songSlotsTotal) throw new Error("No song slots available. Please purchase more slots.");
+      // Founders have slotLimit = null (infinite). Regular users are capped by songSlotsTotal.
+      const isFounder = user.role === "founder" || user.slotLimit === null;
+      if (!isFounder && user.songSlotsUsed >= user.songSlotsTotal) throw new Error("No song slots available. Please purchase more slots.");
       let fileUrl: string | undefined = input.fileUrl;
       let audioKey: string | undefined = input.fileKey;
       // Fallback: legacy base64 path (for backward compat)
@@ -681,7 +685,8 @@ export const appRouter = router({
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
-      if (user.songSlotsUsed + input.tracks.length > user.songSlotsTotal) {
+      const isFounderBatch = user.role === "founder" || user.slotLimit === null;
+      if (!isFounderBatch && user.songSlotsUsed + input.tracks.length > user.songSlotsTotal) {
         throw new Error(`Not enough song slots. You have ${user.songSlotsTotal - user.songSlotsUsed} slot(s) remaining but are trying to upload ${input.tracks.length} track(s).`);
       }
       // Resolve cover art URL (prefer pre-uploaded, fallback to base64)
@@ -946,7 +951,8 @@ export const appRouter = router({
       if (!userForSlots) throw new TRPCError({ code: "UNAUTHORIZED" });
       const slotsUsed = userForSlots.songSlotsUsed ?? 0;
       const slotsTotal = userForSlots.songSlotsTotal ?? 0;
-      if (slotsUsed >= slotsTotal) {
+      const isFounderReplace = userForSlots.role === "founder" || userForSlots.slotLimit === null;
+      if (!isFounderReplace && slotsUsed >= slotsTotal) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You have used all your upload slots. Audio replacement generates a new WID and requires an available slot. Upgrade your Living Archive to continue.",
@@ -1892,6 +1898,38 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         return { success: true };
       }),
 
+    // ── Founder Control ──────────────────────────────────────────────────────
+    /** Get current founder count and list */
+    getFounders: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+      const founders = await listFounders();
+      return { founders, count: founders.length, max: MAX_FOUNDERS };
+    }),
+    /** Search users for the Founder Control panel */
+    searchUsersForFounder: protectedProcedure
+      .input(z.object({ query: z.string().default("") }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        return searchUsersForFounderPanel(input.query);
+      }),
+    /** Grant founder status to a user */
+    grantFounderRole: protectedProcedure
+      .input(z.object({ userId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await grantFounder(input.userId);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "grant_founder", targetType: "user", targetId: String(input.userId) });
+        return { success: true };
+      }),
+    /** Revoke founder status from a user */
+    revokeFounderRole: protectedProcedure
+      .input(z.object({ userId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await revokeFounder(input.userId);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "revoke_founder", targetType: "user", targetId: String(input.userId) });
+        return { success: true };
+      }),
     /** Create a new promo code */
     createPromoCode: protectedProcedure
       .input(z.object({
@@ -2036,6 +2074,53 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         return { pending: pending.length, total, withEmbed };
       }),
 
+    // ── Auto Video Engine ─────────────────────────────────────────────────────
+    /** Get auto video generation stats (total, with video, pending) */
+    autoVideoStats: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+      return getAutoVideoStats();
+    }),
+    /** Trigger background auto video generation for all pending songs (founder-priority queue) */
+    generateAutoVideos: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(500).default(100) }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        const pending = await getSongsNeedingAutoVideo(input.limit);
+        const count = pending.length;
+        if (count === 0) return { queued: 0, message: "All songs already have auto videos.", founderCount: 0 };
+        const founderCount = pending.filter(s => s.isFounder).length;
+        // Fire-and-forget background generation
+        (async () => {
+          let done = 0;
+          let failed = 0;
+          for (const song of pending) {
+            try {
+              const url = await getOrGenerateEmbedVideo({
+                songId: song.id,
+                coverArtUrl: song.coverArtUrl,
+                fileUrl: song.fileUrl,
+                embedVideoUrl: null,
+              });
+              if (url) {
+                // Also store in autoVideoUrl field
+                const s3Key = `auto-videos/${song.id}.mp4`;
+                await cacheAutoVideoUrl(song.id, url, s3Key);
+              }
+              done++;
+              console.log(`[AutoVideo] ${done}/${count} done (song ${song.id}${song.isFounder ? " [FOUNDER]" : ""})`);
+            } catch (err) {
+              failed++;
+              console.error(`[AutoVideo] Failed for song ${song.id}:`, err);
+            }
+          }
+          console.log(`[AutoVideo] Batch complete: ${done} succeeded, ${failed} failed out of ${count}`);
+        })();
+        return {
+          queued: count,
+          founderCount,
+          message: `Queued ${count} song${count === 1 ? "" : "s"} for auto video generation. ${founderCount > 0 ? `${founderCount} founder work${founderCount === 1 ? "" : "s"} processed first.` : ""} Check server logs for progress.`,
+        };
+      }),
     // ── Works / WIDs Moderation ───────────────────────────────────────────────
     searchWorks: protectedProcedure
       .input(z.object({

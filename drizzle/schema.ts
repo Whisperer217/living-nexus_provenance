@@ -10,7 +10,9 @@ export const users = mysqlTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: mysqlEnum("role", ["user", "founder", "admin"]).default("user").notNull(),
+  // Founder system: null = infinite slots (founders only); max 10 founders enforced in application logic
+  slotLimit: int("slotLimit"), // null = ∞ (founders), number = hard cap (regular users)
 
   // Creator profile fields
   artistHandle: varchar("artistHandle", { length: 64 }),
@@ -110,6 +112,11 @@ export const songs = mysqlTable("songs", {
   videoUrl: text("videoUrl"),
   videoKey: text("videoKey"),
   videoWitnessId: varchar("videoWitnessId", { length: 64 }),
+  // Auto-generated micro video (loop video for works without a manual video upload)
+  // Generated on publish or via admin Media Generation panel, stored in S3
+  // Separate from embedVideoUrl (which is the og:video embed layer)
+  autoVideoUrl: text("autoVideoUrl"),
+  autoVideoKey: text("autoVideoKey"),
 
   // Lyrics provenance — WID-LYR (separate from audio WID-MUS)
   lyricsWid: varchar("lyricsWid", { length: 64 }),

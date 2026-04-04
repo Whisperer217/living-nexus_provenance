@@ -15,13 +15,13 @@ import { toast } from "sonner";
 import {
   Loader2, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Users, Shield, Tag, Plus, CheckCircle2, XCircle,
-  Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle,
+  Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle, Crown, UserX,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
 type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus";
 type SortDir = "asc" | "desc";
-type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing";
+type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media";
 
 const GOLD = "oklch(0.84 0.155 85)";
 const BG = "oklch(0.08 0.015 280)";
@@ -682,6 +682,8 @@ export default function AdminUsersPage() {
     { id: "stripe", label: "Stripe Recovery", icon: <RotateCcw className="w-4 h-4" /> },
     { id: "embed", label: "Embed Videos", icon: <Video className="w-4 h-4" /> },
     { id: "logs", label: "Audit Log", icon: <History className="w-4 h-4" /> },
+    { id: "founders", label: "Founder Control", icon: <Crown className="w-4 h-4" /> },
+    { id: "media", label: "Media Generation", icon: <Video className="w-4 h-4" /> },
   ];
 
   return (
@@ -731,6 +733,8 @@ export default function AdminUsersPage() {
         {tab === "stripe" && <StripeRecoveryTab />}
         {tab === "embed" && <EmbedVideoTab />}
         {tab === "logs" && <AuditLogTab />}
+        {tab === "founders" && <FounderControlTab />}
+        {tab === "media" && <MediaGenerationTab />}
 
       </div>
     </div>
@@ -1124,6 +1128,370 @@ function AuditLogTab() {
       {!isLoading && (logs ?? []).length === 0 && (
         <p className="text-center py-10 text-sm" style={{ color: SUBTEXT }}>No admin actions logged yet.</p>
       )}
+    </div>
+  );
+}
+
+// ── Founder Control Tab ───────────────────────────────────────────────────────
+function FounderControlTab() {
+  const utils = trpc.useUtils();
+  const [search, setSearch] = useState("");
+
+  const { data: foundersData, isLoading: loadingFounders } = trpc.admin.getFounders.useQuery(undefined, { retry: false });
+  const { data: searchResults, isLoading: loadingSearch } = trpc.admin.searchUsersForFounder.useQuery(
+    { query: search },
+    { retry: false }
+  );
+
+  const grantFounder = trpc.admin.grantFounderRole.useMutation({
+    onSuccess: (_, vars) => {
+      toast.success(`Founder status granted — User ID ${vars.userId}`);
+      utils.admin.getFounders.invalidate();
+      utils.admin.searchUsersForFounder.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const revokeFounder = trpc.admin.revokeFounderRole.useMutation({
+    onSuccess: (_, vars) => {
+      toast.success(`Founder status revoked — User ID ${vars.userId}`);
+      utils.admin.getFounders.invalidate();
+      utils.admin.searchUsersForFounder.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const founderIds = new Set((foundersData?.founders ?? []).map((f: any) => f.id));
+  const count = foundersData?.count ?? 0;
+  const max = foundersData?.max ?? 10;
+  const slotsLeft = max - count;
+
+  return (
+    <div className="space-y-8">
+      {/* Header + Capacity */}
+      <div className="rounded-xl p-6 border" style={{ background: CARD, borderColor: BORDER }}>
+        <div className="flex items-center gap-3 mb-4">
+          <Crown className="w-6 h-6" style={{ color: GOLD }} />
+          <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+            Founder Control
+          </h2>
+        </div>
+        <p className="text-sm mb-6" style={{ color: SUBTEXT }}>
+          Founders have <strong style={{ color: GOLD }}>infinite upload slots</strong> and are exempt from all slot enforcement.
+          Maximum <strong style={{ color: GOLD }}>10 founders</strong> allowed on the platform at any time.
+        </p>
+
+        {/* Capacity bar */}
+        <div className="mb-2 flex items-center justify-between text-xs" style={{ color: SUBTEXT }}>
+          <span>Founder Seats Filled</span>
+          <span style={{ color: slotsLeft === 0 ? "oklch(0.65 0.18 25)" : GOLD }}>{count} / {max}</span>
+        </div>
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
+          <div
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${(count / max) * 100}%`,
+              background: slotsLeft === 0 ? "oklch(0.65 0.18 25)" : GOLD,
+            }}
+          />
+        </div>
+        {slotsLeft === 0 && (
+          <p className="text-xs mt-2" style={{ color: "oklch(0.65 0.18 25)" }}>
+            All founder seats are filled. Revoke a founder before granting a new one.
+          </p>
+        )}
+      </div>
+
+      {/* Current Founders */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: SUBTEXT }}>
+          Current Founders ({count})
+        </h3>
+        {loadingFounders ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: GOLD }} />
+          </div>
+        ) : (foundersData?.founders ?? []).length === 0 ? (
+          <div className="rounded-xl border p-8 text-center" style={{ borderColor: BORDER }}>
+            <Crown className="w-8 h-8 mx-auto mb-3 opacity-30" style={{ color: GOLD }} />
+            <p className="text-sm" style={{ color: SUBTEXT }}>No founders yet. Grant founder status below.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {(foundersData?.founders ?? []).map((f: any) => (
+              <div key={f.id} className="flex items-center justify-between gap-4 rounded-xl p-4 border"
+                style={{ background: "oklch(0.10 0.015 280)", borderColor: "oklch(0.25 0.12 85 / 0.4)" }}>
+                <div className="flex items-center gap-3 min-w-0">
+                  {f.profilePhotoUrl ? (
+                    <img src={f.profilePhotoUrl} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: "oklch(0.25 0.12 85 / 0.3)" }}>
+                      <Crown className="w-4 h-4" style={{ color: GOLD }} />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="font-medium truncate" style={{ color: TEXT }}>{f.name ?? "—"}</div>
+                    {f.email && <div className="text-xs truncate" style={{ color: MUTED }}>{f.email}</div>}
+                    <div className="text-xs font-mono" style={{ color: "oklch(0.5 0.02 280)" }}>
+                      ID: {f.id} · {f.songSlotsUsed ?? 0} works uploaded
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 flex items-center gap-1.5 text-xs"
+                  style={{ borderColor: "oklch(0.65 0.18 25 / 0.5)", color: "oklch(0.65 0.18 25)" }}
+                  disabled={revokeFounder.isPending}
+                  onClick={() => revokeFounder.mutate({ userId: f.id })}
+                >
+                  {revokeFounder.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserX className="w-3 h-3" />}
+                  Revoke
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Grant Founder — Search */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: SUBTEXT }}>
+          Grant Founder Status
+        </h3>
+        <div className="relative mb-4 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: MUTED }} />
+          <Input
+            placeholder="Search users by name, handle, or email…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="pl-9"
+            style={{ background: CARD, borderColor: BORDER, color: TEXT }}
+          />
+        </div>
+        {loadingSearch ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-5 h-5 animate-spin" style={{ color: GOLD }} />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {(searchResults ?? []).map((u: any) => {
+              const isFounder = founderIds.has(u.id);
+              return (
+                <div key={u.id} className="flex items-center justify-between gap-4 rounded-xl p-4 border"
+                  style={{ background: CARD, borderColor: isFounder ? "oklch(0.25 0.12 85 / 0.4)" : BORDER }}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {u.profilePhotoUrl ? (
+                      <img src={u.profilePhotoUrl} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                        style={{ background: "oklch(0.2 0.02 280)" }}>
+                        <Users className="w-4 h-4" style={{ color: MUTED }} />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium truncate" style={{ color: TEXT }}>
+                          {u.artistHandle ? `@${u.artistHandle}` : u.name ?? "—"}
+                        </span>
+                        {isFounder && (
+                          <span className="text-xs px-1.5 py-0.5 rounded font-semibold"
+                            style={{ background: "oklch(0.25 0.12 85 / 0.3)", color: GOLD }}>
+                            Founder
+                          </span>
+                        )}
+                        {u.role === "admin" && (
+                          <span className="text-xs px-1.5 py-0.5 rounded font-semibold"
+                            style={{ background: "oklch(0.25 0.18 25 / 0.3)", color: "oklch(0.65 0.18 25)" }}>
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                      {u.email && <div className="text-xs truncate" style={{ color: MUTED }}>{u.email}</div>}
+                      <div className="text-xs font-mono" style={{ color: "oklch(0.5 0.02 280)" }}>
+                        ID: {u.id} · {u.songSlotsUsed ?? 0}/{u.songSlotsTotal ?? 1} slots used
+                      </div>
+                    </div>
+                  </div>
+                  {isFounder ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0 flex items-center gap-1.5 text-xs"
+                      style={{ borderColor: "oklch(0.65 0.18 25 / 0.5)", color: "oklch(0.65 0.18 25)" }}
+                      disabled={revokeFounder.isPending}
+                      onClick={() => revokeFounder.mutate({ userId: u.id })}
+                    >
+                      {revokeFounder.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserX className="w-3 h-3" />}
+                      Revoke
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="shrink-0 flex items-center gap-1.5 text-xs"
+                      style={{ background: GOLD, color: BG }}
+                      disabled={grantFounder.isPending || slotsLeft === 0 || u.role === "admin"}
+                      onClick={() => grantFounder.mutate({ userId: u.id })}
+                    >
+                      {grantFounder.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Crown className="w-3 h-3" />}
+                      Grant
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+            {(searchResults ?? []).length === 0 && search.trim().length > 0 && (
+              <p className="text-sm text-center py-6" style={{ color: SUBTEXT }}>No users found for "{search}"</p>
+            )}
+            {(searchResults ?? []).length === 0 && search.trim().length === 0 && (
+              <p className="text-sm text-center py-6" style={{ color: SUBTEXT }}>Type a name, handle, or email to search users.</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Media Generation Tab ──────────────────────────────────────────────────────
+function MediaGenerationTab() {
+  const utils = trpc.useUtils();
+  const [limit, setLimit] = useState("100");
+  const [log, setLog] = useState<string[]>([]);
+  const [running, setRunning] = useState(false);
+
+  const statsQuery = trpc.admin.autoVideoStats.useQuery(undefined, { retry: false });
+  const stats = statsQuery.data;
+
+  const generateMutation = trpc.admin.generateAutoVideos.useMutation({
+    onMutate: () => {
+      setRunning(true);
+      setLog(["Starting background auto video generation..."]);
+    },
+    onSuccess: (result) => {
+      setRunning(false);
+      setLog(prev => [
+        ...prev,
+        result.message,
+        ...(result.founderCount > 0 ? [`★ ${result.founderCount} founder work(s) queued first`] : []),
+      ]);
+      toast.success(result.message);
+      statsQuery.refetch();
+      utils.admin.autoVideoStats.invalidate();
+    },
+    onError: (e) => {
+      setRunning(false);
+      setLog(prev => [...prev, `Error: ${e.message}`]);
+      toast.error(e.message);
+    },
+  });
+
+  const FOUNDER_GOLD = "oklch(0.84 0.155 85)";
+  const GREEN = "oklch(0.65 0.18 145)";
+  const RED = "oklch(0.65 0.18 25)";
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Total Published", value: stats?.total ?? "—", color: FOUNDER_GOLD },
+          { label: "Auto Video Ready", value: stats?.withAutoVideo ?? "—", color: GREEN },
+          { label: "Pending Generation", value: stats?.pending ?? "—", color: RED },
+        ].map(s => (
+          <div key={s.label} className="rounded-xl p-4 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            <p className="text-2xl font-bold" style={{ color: s.color, fontFamily: "'Orbitron', sans-serif" }}>{s.value}</p>
+            <p className="text-xs mt-1" style={{ color: SUBTEXT }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Action card */}
+      <div className="rounded-xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold mb-1" style={{ color: TEXT, fontFamily: "'Cinzel', serif" }}>
+              Auto Video Generation
+            </h3>
+            <p className="text-sm mb-3" style={{ color: SUBTEXT }}>
+              Generates a 30-second looping MP4 (cover art + audio) for every published song that doesn't have one yet.
+              Videos are stored on S3 and linked to the work's <code className="text-xs px-1 rounded" style={{ background: "oklch(0.15 0.02 280)" }}>autoVideoUrl</code> field.
+            </p>
+            <div className="flex items-center gap-2 p-3 rounded-lg mb-3" style={{ background: "oklch(0.25 0.12 85 / 0.15)", border: "1px solid oklch(0.25 0.12 85 / 0.3)" }}>
+              <Crown className="w-4 h-4 shrink-0" style={{ color: FOUNDER_GOLD }} />
+              <p className="text-xs" style={{ color: "oklch(0.9 0.08 85)" }}>
+                <strong>Founder Priority Queue:</strong> Works by founders are processed first, ensuring their content is always at the front of the generation queue.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <label className="text-xs" style={{ color: SUBTEXT }}>Batch limit:</label>
+            <Input
+              type="number"
+              min={1}
+              max={500}
+              value={limit}
+              onChange={e => setLimit(e.target.value)}
+              className="w-24 h-8 text-xs"
+              style={{ background: "oklch(0.15 0.015 280)", borderColor: BORDER, color: TEXT }}
+            />
+          </div>
+          <Button
+            onClick={() => generateMutation.mutate({ limit: parseInt(limit) || 100 })}
+            disabled={running || generateMutation.isPending}
+            style={{ background: FOUNDER_GOLD, color: BG }}
+          >
+            {running ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+            {running ? "Running..." : "Start Generation"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => statsQuery.refetch()}
+            style={{ borderColor: BORDER, color: SUBTEXT }}
+          >
+            <RotateCcw className="w-3 h-3 mr-1" />
+            Refresh Stats
+          </Button>
+        </div>
+
+        {/* Progress log */}
+        {log.length > 0 && (
+          <div className="mt-4 rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto"
+            style={{ background: "oklch(0.08 0.01 280)", border: `1px solid ${BORDER}` }}>
+            {log.map((line, i) => (
+              <p key={i} style={{
+                color: line.startsWith("Error") ? RED
+                  : line.startsWith("★") ? FOUNDER_GOLD
+                  : GREEN,
+              }}>
+                {line.startsWith("Error") ? "✗" : line.startsWith("★") ? "★" : "✓"} {line}
+              </p>
+            ))}
+            {running && (
+              <p style={{ color: FOUNDER_GOLD }} className="flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" /> Background generation in progress — check server logs for progress
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="rounded-xl p-4" style={{ background: "oklch(0.10 0.015 280)", border: `1px solid ${BORDER}` }}>
+        <div className="flex items-start gap-3">
+          <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: GREEN }} />
+          <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
+            <p>Generation runs in the background — the page doesn't need to stay open.</p>
+            <p>Each video takes ~30–60 seconds to generate. Plan for ~30 minutes per 50 tracks.</p>
+            <p>Generated videos are stored at <code className="text-xs px-1 rounded" style={{ background: "oklch(0.15 0.02 280)" }}>auto-videos/{"{"}songId{"}"}.mp4</code> on S3.</p>
+            <p>Founder works are always processed first regardless of upload order.</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

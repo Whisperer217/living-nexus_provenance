@@ -2261,3 +2261,14 @@
 - [x] TheaterPlayer — Reactions/signals grid with emoji breakdown and user state
 - [x] TheaterPlayer — "Take to Room" button in controls area
 - [x] TheaterPlayer — widBadge unified (audio WID + video WID fallback)
+
+## Founder System + Micro Video Engine (Apr 4, 2026)
+- [x] Schema migration: founder role enum, slotLimit on users, autoVideoUrl/Key on songs
+- [x] DB helpers: grantFounder, revokeFounder, listFounders, countFounders, searchUsersForFounderPanel, MAX_FOUNDERS
+- [x] Slot enforcement: founders (slotLimit=null) bypass all slot checks in upload, batch upload, and audio replacement
+- [x] Admin tRPC: grantFounderRole, revokeFounderRole, getFounders, searchUsersForFounder
+- [x] Admin UI: Founder Control tab (capacity bar, current founders list, grant/revoke by search)
+- [x] DB helpers: getSongsNeedingAutoVideo (founder-priority sort), cacheAutoVideoUrl, getAutoVideoStats
+- [x] Admin tRPC: autoVideoStats, generateAutoVideos (founder-priority queue, fire-and-forget)
+- [x] Admin UI: Media Generation tab (stats, batch limit input, progress log, founder priority badge)
+- [x] All 123 tests passing

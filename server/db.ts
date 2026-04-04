@@ -2801,3 +2801,155 @@ export async function getUserByStripeSubscriptionId(subscriptionId: string) {
     .where(eq(users.stripeSubscriptionId as any, subscriptionId)).limit(1);
   return row ?? null;
 }
+
+// ─── Founder System ───────────────────────────────────────────────────────────
+/** Maximum number of founders allowed on the platform. Hard enforced. */
+export const MAX_FOUNDERS = 10;
+
+/** Count current founders (role = "founder"). */
+export async function countFounders(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db.select({ count: sql`count(*)` })
+    .from(users)
+    .where(eq(users.role, "founder" as any));
+  return Number(rows[0]?.count ?? 0);
+}
+
+/** Grant founder status to a user. Throws if MAX_FOUNDERS would be exceeded. */
+export async function grantFounder(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const current = await countFounders();
+  if (current >= MAX_FOUNDERS) {
+    throw new Error(`Max founders reached (${MAX_FOUNDERS}). Revoke a founder first.`);
+  }
+  await db.update(users)
+    .set({ role: "founder" as any, slotLimit: null })
+    .where(eq(users.id, userId));
+}
+
+/** Revoke founder status — demotes back to "user" and restores default slot cap. */
+export async function revokeFounder(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [user] = await db.select({ songSlotsTotal: users.songSlotsTotal })
+    .from(users).where(eq(users.id, userId)).limit(1);
+  const restoredLimit = user?.songSlotsTotal ?? 1;
+  await db.update(users)
+    .set({ role: "user" as any, slotLimit: restoredLimit })
+    .where(eq(users.id, userId));
+}
+
+/** List all current founders. */
+export async function listFounders() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: users.id,
+    name: users.name,
+    email: users.email,
+    artistHandle: users.artistHandle,
+    profilePhotoUrl: users.profilePhotoUrl,
+    createdAt: users.createdAt,
+    songSlotsUsed: users.songSlotsUsed,
+  }).from(users).where(eq(users.role, "founder" as any));
+}
+
+/** Search users for the Founder Control panel (any role). */
+export async function searchUsersForFounderPanel(query: string, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const q = `%${query}%`;
+  return db.select({
+    id: users.id,
+    name: users.name,
+    email: users.email,
+    artistHandle: users.artistHandle,
+    profilePhotoUrl: users.profilePhotoUrl,
+    role: users.role,
+    slotLimit: users.slotLimit,
+    songSlotsUsed: users.songSlotsUsed,
+    songSlotsTotal: users.songSlotsTotal,
+    createdAt: users.createdAt,
+  }).from(users)
+    .where(
+      query.trim().length > 0
+        ? or(
+            like(users.name as any, q),
+            like(users.email as any, q),
+            like(users.artistHandle as any, q),
+          )
+        : sql`1=1`
+    )
+    .orderBy(desc(users.createdAt))
+    .limit(limit);
+}
+
+// ─── Auto Video Engine ────────────────────────────────────────────────────────
+/**
+ * Returns songs that need an auto-generated loop video.
+ * Priority: founders first, then regular users.
+ * Filters: Published, public, has coverArtUrl + fileUrl, no autoVideoUrl yet.
+ */
+export async function getSongsNeedingAutoVideo(limit = 100): Promise<Array<{
+  id: number;
+  userId: number;
+  title: string;
+  coverArtUrl: string | null;
+  fileUrl: string | null;
+  autoVideoUrl: string | null;
+  isFounder: boolean;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  const { isNull, isNotNull } = await import("drizzle-orm");
+  // Fetch songs needing auto video, join users to get role for priority sorting
+  const rows = await db
+    .select({
+      id: songs.id,
+      userId: songs.userId,
+      title: songs.title,
+      coverArtUrl: songs.coverArtUrl,
+      fileUrl: songs.fileUrl,
+      autoVideoUrl: songs.autoVideoUrl,
+      role: users.role,
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(
+      eq(songs.status, "Published"),
+      eq(songs.isPublic, true),
+      isNull(songs.autoVideoUrl),
+      isNotNull(songs.coverArtUrl),
+      isNotNull(songs.fileUrl),
+    ))
+    .limit(limit);
+  // Sort: founders first
+  type RowItem = (typeof rows)[number];
+  type MappedRow = RowItem & { isFounder: boolean };
+  return rows
+    .map((r: RowItem): MappedRow => ({ ...r, isFounder: r.role === "founder" }))
+    .sort((a: MappedRow, b: MappedRow) => (b.isFounder ? 1 : 0) - (a.isFounder ? 1 : 0));
+}
+
+/** Cache the generated auto video URL + key on a song. */
+export async function cacheAutoVideoUrl(songId: number, url: string, key: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(songs).set({ autoVideoUrl: url, autoVideoKey: key }).where(eq(songs.id, songId));
+}
+
+/** Get auto video generation stats for the admin panel. */
+export async function getAutoVideoStats(): Promise<{ total: number; withAutoVideo: number; pending: number }> {
+  const db = await getDb();
+  if (!db) return { total: 0, withAutoVideo: 0, pending: 0 };
+  const { isNull, isNotNull } = await import("drizzle-orm");
+  const [totalRow] = await db.select({ count: sql`count(*)` }).from(songs)
+    .where(and(eq(songs.status, "Published"), eq(songs.isPublic, true)));
+  const [withRow] = await db.select({ count: sql`count(*)` }).from(songs)
+    .where(and(eq(songs.status, "Published"), eq(songs.isPublic, true), isNotNull(songs.autoVideoUrl)));
+  const total = Number(totalRow?.count ?? 0);
+  const withAutoVideo = Number(withRow?.count ?? 0);
+  return { total, withAutoVideo, pending: total - withAutoVideo };
+}
