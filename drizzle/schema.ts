@@ -787,3 +787,17 @@ export const shareArtifacts = mysqlTable("shareArtifacts", {
 });
 export type ShareArtifact = typeof shareArtifacts.$inferSelect;
 export type InsertShareArtifact = typeof shareArtifacts.$inferInsert;
+
+// ── Feature Attributions ──────────────────────────────────────────────────────
+// Formal platform-level records crediting individuals whose ideas, workflows,
+// or descriptions directly informed the architecture of a Living Nexus feature.
+export const featureAttributions = mysqlTable("featureAttributions", {
+  id: int("id").autoincrement().primaryKey(),
+  featureName: varchar("featureName", { length: 256 }).notNull(),
+  attributedTo: varchar("attributedTo", { length: 256 }).notNull(),
+  userId: int("userId"),
+  description: text("description").notNull(),
+  recordedAt: timestamp("recordedAt").defaultNow().notNull(),
+});
+export type FeatureAttribution = typeof featureAttributions.$inferSelect;
+export type InsertFeatureAttribution = typeof featureAttributions.$inferInsert;

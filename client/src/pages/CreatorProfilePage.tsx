@@ -7,7 +7,7 @@
 
 import { useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -365,6 +365,7 @@ function BannerUploadCTA({ onFocalDetected }: { onFocalDetected?: (focal: { x: n
 export default function CreatorProfilePage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const [, navigate] = useLocation();
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
@@ -1461,6 +1462,24 @@ export default function CreatorProfilePage() {
                   <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(245,196,81,0.45)" }}>COMPOSER'S NOTE</span>
                   <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{psResult.composerNote}</p>
                 </div>
+
+                {/* Register Prompt → Upload bridge */}
+                <button
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (psResult.styleTags) params.set("tags", psResult.styleTags);
+                    if (psGenre) params.set("genre", psGenre);
+                    if (psMood) params.set("mood", psMood);
+                    if (psResult.titleSuggestions?.[0]) params.set("title", psResult.titleSuggestions[0]);
+                    setShowPromptStudio(false);
+                    navigate(`/upload?${params.toString()}`);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, rgba(245,196,81,0.15), rgba(245,196,81,0.08))", border: "1px solid rgba(245,196,81,0.3)", color: "#F5C451" }}
+                >
+                  <Upload className="w-4 h-4" />
+                  Register this Prompt as a Work
+                </button>
               </div>
             )}
           </div>

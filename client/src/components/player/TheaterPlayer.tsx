@@ -14,7 +14,7 @@ import {
   X, Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, DollarSign,
   ChevronDown, MessageCircle, Music, Shield, Fingerprint,
-  ExternalLink, Users, Crown,
+  ExternalLink, Users, Crown, Share2, Check,
 } from "lucide-react";
 import PlayerTipModal from "./PlayerTipModal";
 
@@ -47,6 +47,7 @@ export default function TheaterPlayer() {
   const [tipOpen, setTipOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [widPanelOpen, setWidPanelOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
@@ -122,6 +123,21 @@ export default function TheaterPlayer() {
   const videoWitnessId = (songDetail?.song as any)?.videoWitnessId as string | null | undefined;
   // WID — prefer track.witnessId, fall back to videoWitnessId
   const widBadge = currentTrack?.witnessId || videoWitnessId || null;
+
+  const handleShare = useCallback(async () => {
+    if (!currentTrack) return;
+    const url = widBadge
+      ? `${window.location.origin}/share/${encodeURIComponent(widBadge)}`
+      : currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
+    try {
+      if (navigator.share) { await navigator.share({ title: currentTrack.title ?? "", url }); return; }
+    } catch {}
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  }, [currentTrack, currentSongId, widBadge]);
 
   // Background video ref — always muted, synced to audio play state
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -384,6 +400,14 @@ export default function TheaterPlayer() {
                     title="Take to Room"
                   >
                     <Users size={18} />
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="p-2 transition-colors"
+                    style={{ color: copied ? "oklch(0.80 0.145 82)" : "oklch(0.45 0.02 280)" }}
+                    title={copied ? "Link copied!" : "Share track"}
+                  >
+                    {copied ? <Check size={18} /> : <Share2 size={18} />}
                   </button>
                 </div>
               </div>

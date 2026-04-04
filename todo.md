@@ -2373,3 +2373,13 @@
 - [x] Display copy: "Prompt Studio — workflow architecture" label + "WORKFLOW ARCHITECT" badge + descriptive attribution sentence
 - [x] Kept avatar, handle, and /creator/780095 link
 - [x] Footer line changed to "Workflow attribution recorded on Living Nexus"
+
+## Feature Sprint: Attribution DB + Share URL + Prompt Register
+- [x] Add featureAttributions table to drizzle schema (featureName, attributedTo, userId, description, recordedAt)
+- [x] Push DB migration (migration applied) and seed MoshAIMusic Prompt Studio attribution record (ID 1, 2026-04-04)
+- [x] MobilePlayerLayer share button already uses /share/{witnessId} URL (confirmed)
+- [x] Add share button to TheaterPlayer controls row (Share2 icon, copies /share/{witnessId})
+- [x] Add "Register this Prompt as a Work" button to Prompt Studio modal output section
+- [x] Button navigates to /upload?title=&genre=&mood=&tags= with pre-filled values from generated output
+- [x] UploadPage reads query params on mount and pre-fills title, genre, selectedMoods, caption fields
+- [x] URL cleaned after pre-fill (window.history.replaceState) so refresh doesn't re-apply

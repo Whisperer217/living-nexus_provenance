@@ -190,6 +190,30 @@ export default function UploadPage() {
     }
   }, [creatorProfile?.primaryGenre]);
 
+  // Pre-fill from Prompt Studio query params (?title=&genre=&mood=&tags=)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const qTitle = params.get("title");
+    const qGenre = params.get("genre");
+    const qMood = params.get("mood");
+    const qTags = params.get("tags");
+    if (qTitle) setTitle(qTitle);
+    if (qGenre) setGenre(qGenre);
+    if (qMood) {
+      // mood maps to selectedMoods array
+      const moods = qMood.split(",").map(m => m.trim()).filter(Boolean);
+      if (moods.length) setSelectedMoods(moods);
+    }
+    if (qTags) {
+      // style tags go into caption field as a starting point
+      setCaption(qTags);
+    }
+    // Clean the URL so refreshing doesn't re-apply
+    if (qTitle || qGenre || qMood || qTags) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   const generateCaptionMutation = trpc.songs.generateCaption.useMutation({
     onSuccess: (data) => {
       setCaptionSuggestion(data.caption);
