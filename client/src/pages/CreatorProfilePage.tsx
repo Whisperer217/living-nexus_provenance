@@ -821,6 +821,16 @@ export default function CreatorProfilePage() {
 
                 {/* Actions — button row */}
                 <div className="flex items-center gap-1.5 flex-wrap">
+                  {/* Prompt Studio — visible to ALL visitors */}
+                  <button
+                    onClick={() => { setPsResult(null); setShowPromptStudio(true); }}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                    style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#a78bfa" }}
+                    title="Open Provenance Prompt Generator"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Prompt Studio
+                  </button>
                   {isOwner ? (
                     <>
                       <Link href="/dashboard">
@@ -831,15 +841,6 @@ export default function CreatorProfilePage() {
                           Edit Profile
                         </button>
                       </Link>
-                      <button
-                        onClick={() => { setPsResult(null); setShowPromptStudio(true); }}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                        style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#a78bfa" }}
-                        title="Open AI Music Prompt Studio"
-                      >
-                        <Sparkles className="w-3 h-3" />
-                        Prompt Studio
-                      </button>
                       {!creator.stripeAccountId && (
                         <button
                           onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
@@ -969,6 +970,16 @@ export default function CreatorProfilePage() {
 
               {/* Action buttons */}
               <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Prompt Studio — visible to ALL visitors */}
+                <button
+                  onClick={() => { setPsResult(null); setShowPromptStudio(true); }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                  style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#a78bfa" }}
+                  title="Open Provenance Prompt Generator"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Prompt Studio
+                </button>
                 {isOwner ? (
                   <>
                     <Link href="/dashboard">
@@ -979,14 +990,6 @@ export default function CreatorProfilePage() {
                         Edit Profile
                       </button>
                     </Link>
-                    <button
-                      onClick={() => { setPsResult(null); setShowPromptStudio(true); }}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                      style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#a78bfa" }}
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      Prompt Studio
-                    </button>
                     {!creator.stripeAccountId && (
                       <button
                         onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}

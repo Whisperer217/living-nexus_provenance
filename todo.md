@@ -2398,3 +2398,6 @@
 - [x] Add "Why Work With Us / Competitors" comparison section to homepage
 - [x] Fix MoshAIMusic attribution tag: remove last name, show only "Brandon" (not "Brandon Reedy")
 - [x] Add Prompt Studio entry point / CTA section on homepage so feature is discoverable
+
+## Prompt Studio Visibility Fix (Apr 2026)
+- [x] Move Prompt Studio button outside isOwner gate — visible to ALL visitors on every creator profile page
