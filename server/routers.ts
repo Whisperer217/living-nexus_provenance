@@ -538,11 +538,15 @@ export const appRouter = router({
     getCountsByContentType: publicProcedure.query(async () => {
       const { getDb } = await import("./db");
       const { songs: songsTable } = await import("../drizzle/schema");
-      const { count, eq: eqOp, or, isNull } = await import("drizzle-orm");
+      const { count, eq: eqOp, and: andOp } = await import("drizzle-orm");
       const db = await getDb();
       const countFor = async (ct: string) => {
         const [row] = await db.select({ total: count() }).from(songsTable)
-          .where(eqOp(songsTable.contentType as any, ct));
+          .where(andOp(
+            eqOp(songsTable.contentType as any, ct),
+            eqOp(songsTable.isPublic, true),
+            eqOp(songsTable.status, "Published"),
+          ));
         return row?.total ?? 0;
       };
       const [audio, lyrics, manuscript, comic] = await Promise.all([

@@ -64,7 +64,7 @@ export default function SongDetailPage() {
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
   const [commentText, setCommentText] = useState("");
-  const [showLyrics, setShowLyrics] = useState(true);
+  const [showLyrics, setShowLyrics] = useState(false);
   const [editingLyrics, setEditingLyrics] = useState(false);
   const [lyricsEdit, setLyricsEdit] = useState("");
   // Persistent reactions — backed by DB via tRPC
@@ -458,13 +458,33 @@ export default function SongDetailPage() {
                     {showVideo ? <><ImageIcon size={12} /> Cover Art</> : <><Video size={12} /> Music Video</>}
                   </button>
                 )}
-                {/* Cover art (only shown when no video or video is hidden) */}
+                {/* Cover art with play/pause overlay (only shown when no video or video is hidden) */}
                 {!(song as any).videoUrl && (
-                  <div className="w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex items-center justify-center"
-                    style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.13 0.04 290))" }}>
+                  <div
+                    className="relative w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex items-center justify-center group cursor-pointer"
+                    style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.13 0.04 290))" }}
+                    onClick={song.fileUrl ? handlePlay : undefined}
+                  >
                     {song.coverArtUrl
                       ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
                       : <Music className="w-20 h-20 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />}
+                    {/* Play/pause overlay — always visible when active, hover-visible otherwise */}
+                    {song.fileUrl && (
+                      <div className={`absolute inset-0 flex items-center justify-center transition-all ${
+                        isThisTrackActive ? "bg-black/30" : "bg-black/0 group-hover:bg-black/40"
+                      }`}>
+                        <div
+                          className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all ${
+                            isThisTrackActive ? "opacity-100 scale-100" : "opacity-0 group-hover:opacity-100 group-hover:scale-100 scale-90"
+                          }`}
+                          style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+                        >
+                          {isPlaying
+                            ? <Pause className="w-6 h-6" />
+                            : <Play className="w-6 h-6 ml-0.5" />}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -570,27 +590,7 @@ export default function SongDetailPage() {
               </div>
             </div>
 
-            {/* Play button — remote control for the global player only */}
-            {song.fileUrl && (
-              <div className="flex items-center gap-4 rounded-2xl px-5 py-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.15 0.025 275)" }}>
-                <button
-                  onClick={handlePlay}
-                  className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 flex-shrink-0"
-                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
-                  aria-label={isPlaying ? "Pause" : "Play"}
-                >
-                  {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
-                </button>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: "oklch(0.75 0.04 280)" }}>
-                    {isThisTrackActive ? (isPlaying ? "Now Playing" : "Paused — tap to resume") : "Tap to play in the global player"}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
-                    {isThisTrackActive ? "Controls in the player bar below" : "One audio source. One witness."}
-                  </p>
-                </div>
-              </div>
-            )}
+
 
             {/* ── PROMINENT TIP PANEL ── */}
             {tipsEnabled && !isOwner && (
@@ -622,66 +622,6 @@ export default function SongDetailPage() {
                     Custom
                   </button>
                 </div>
-              </div>
-            )}
-
-            {/* Lyrics — read-only, only shown if lyrics were submitted at upload time */}
-            {song.lyricsText && (
-              <div className="rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: `1px solid ${song.isLyricsOnly ? "oklch(0.75 0.18 85 / 0.35)" : "oklch(0.18 0.015 280)"}` }}>
-                <button className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
-                    {song.isLyricsOnly && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)", letterSpacing: "0.06em" }}>
-                        <Shield className="w-2.5 h-2.5" /> LYRICS PROTECTED — Audio Not Yet Attached
-                      </span>
-                    )}
-                  </div>
-                  {showLyrics
-                    ? <ChevronUp className="w-4 h-4" style={{ color: "#E2E8F0" }} />
-                    : <ChevronDown className="w-4 h-4" style={{ color: "#E2E8F0" }} />}
-                </button>
-                {showLyrics && (
-                  <div className="px-5 pb-5"
-                    onCopy={e => {
-                      if (!song.witnessId) return;
-                      const selected = window.getSelection()?.toString() || "";
-                      if (!selected.trim()) return;
-                      const registeredDate = song.createdAt
-                        ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
-                        : "Unknown date";
-                      const creatorName = creator?.artistHandle || creator?.name || "Unknown Artist";
-                      const cert = [
-                        "",
-                        "═══════════════════════════════",
-                        "WITNESS ID CERTIFICATE",
-                        `WID: ${song.witnessId}`,
-                        `Creator: ${creatorName}`,
-                        `Registered: ${registeredDate}`,
-                        `Verify: https://www.livingnexus.org/verify/${song.witnessId}`,
-                        "═══════════════════════════════",
-                      ].join("\n");
-                      e.clipboardData.setData("text/plain", selected + cert);
-                      e.preventDefault();
-                    }}>
-                    <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "oklch(0.75 0.03 280)" }}>
-                      {song.lyricsText}
-                    </pre>
-                    {song.witnessId && (
-                      <div className="mt-4 pt-4" style={{ borderTop: "1px solid oklch(0.2 0.015 280)" }}>
-                        <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "#E2E8F0" }}>{[
-                          "═══════════════════════════════",
-                          "WITNESS ID CERTIFICATE",
-                          `WID: ${song.witnessId}`,
-                          `Creator: ${creator?.artistHandle || creator?.name || "Unknown Artist"}`,
-                          `Registered: ${song.createdAt ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "Unknown"}`,
-                          `Verify: https://www.livingnexus.org/verify/${song.witnessId}`,
-                          "═══════════════════════════════",
-                        ].join("\n")}</pre>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 
@@ -731,11 +671,16 @@ export default function SongDetailPage() {
 
             {/* Unified Interaction Thread */}
             <div className="rounded-2xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 flex-wrap" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>
                 <MessageSquare className="w-4 h-4" />
                 Activity
                 {eventThread && eventThread.length > 0 && (
                   <span className="text-xs font-normal" style={{ color: "oklch(0.45 0.03 280)" }}>{eventThread.length}</span>
+                )}
+                {song.witnessId && (
+                  <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "oklch(0.65 0.2 300 / 0.12)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)" }}>
+                    WID-linked
+                  </span>
                 )}
               </h3>
 
@@ -844,6 +789,67 @@ export default function SongDetailPage() {
             )}
           </div>
         </div>
+
+        {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}
+        {song.lyricsText && (
+          <div className="mt-6 rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: `1px solid ${song.isLyricsOnly ? "oklch(0.75 0.18 85 / 0.35)" : "oklch(0.18 0.015 280)"}` }}>
+            <button className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
+                {song.isLyricsOnly && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)", letterSpacing: "0.06em" }}>
+                    <Shield className="w-2.5 h-2.5" /> LYRICS PROTECTED — Audio Not Yet Attached
+                  </span>
+                )}
+                <span className="text-xs ml-2" style={{ color: "oklch(0.45 0.03 280)" }}>{showLyrics ? "Tap to collapse" : "Tap to expand"}</span>
+              </div>
+              {showLyrics
+                ? <ChevronUp className="w-4 h-4" style={{ color: "#E2E8F0" }} />
+                : <ChevronDown className="w-4 h-4" style={{ color: "#E2E8F0" }} />}
+            </button>
+            {showLyrics && (
+              <div className="px-5 pb-5"
+                onCopy={e => {
+                  if (!song.witnessId) return;
+                  const selected = window.getSelection()?.toString() || "";
+                  if (!selected.trim()) return;
+                  const registeredDate = song.createdAt
+                    ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+                    : "Unknown date";
+                  const creatorName = creator?.artistHandle || creator?.name || "Unknown Artist";
+                  const cert = [
+                    "",
+                    "═══════════════════════════════",
+                    "WITNESS ID CERTIFICATE",
+                    `WID: ${song.witnessId}`,
+                    `Creator: ${creatorName}`,
+                    `Registered: ${registeredDate}`,
+                    `Verify: https://www.livingnexus.org/verify/${song.witnessId}`,
+                    "═══════════════════════════════",
+                  ].join("\n");
+                  e.clipboardData.setData("text/plain", selected + cert);
+                  e.preventDefault();
+                }}>
+                <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "oklch(0.75 0.03 280)" }}>
+                  {song.lyricsText}
+                </pre>
+                {song.witnessId && (
+                  <div className="mt-4 pt-4" style={{ borderTop: "1px solid oklch(0.2 0.015 280)" }}>
+                    <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "#E2E8F0" }}>{[
+                      "═══════════════════════════════",
+                      "WITNESS ID CERTIFICATE",
+                      `WID: ${song.witnessId}`,
+                      `Creator: ${creator?.artistHandle || creator?.name || "Unknown Artist"}`,
+                      `Registered: ${song.createdAt ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "Unknown"}`,
+                      `Verify: https://www.livingnexus.org/verify/${song.witnessId}`,
+                      "═══════════════════════════════",
+                    ].join("\n")}</pre>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Gift Modal */}

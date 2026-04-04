@@ -20,6 +20,7 @@ import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { WIDPanel } from "@/components/WIDPanel";
+import { WorkCarousel } from "@/components/WorkCarousel";
 
 /** Animated counter that counts up from 0 to `target` over ~1.2 s */
 function AnimatedCounter({ target }: { target: number }) {
@@ -805,6 +806,35 @@ export default function HomePage() {
             </div>
           </>
         )}
+
+        {/* ── Medium Sections ─────────────────────────────────────── */}
+        <div className="gold-divider mb-6" />
+        <div className="space-y-8 mb-8">
+          <WorkCarousel
+            type="audio"
+            title="Witnessed Music"
+            limit={12}
+            viewAllHref="/explore?medium=audio"
+          />
+          <WorkCarousel
+            type="lyrics"
+            title="Witnessed Lyrics"
+            limit={12}
+            viewAllHref="/explore?medium=lyrics"
+          />
+          <WorkCarousel
+            type="manuscript"
+            title="Witnessed Manuscripts"
+            limit={12}
+            viewAllHref="/explore?medium=manuscript"
+          />
+          <WorkCarousel
+            type="comic"
+            title="Witnessed Comics"
+            limit={12}
+            viewAllHref="/explore?medium=comic"
+          />
+        </div>
       </div>
 
       {/* Tip modal */}

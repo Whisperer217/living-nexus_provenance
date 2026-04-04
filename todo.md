@@ -2220,3 +2220,14 @@
 - [x] Button background/border shifts from violet to gold-tinted when active
 - [x] TypeScript: 0 errors
 - [x] Vitest: 123/123 passing (13 test files)
+
+## Batch 1 — Fix What's Broken
+- [x] Works Witnessed Counter — real DB counts (Published + isPublic only)
+- [x] Homepage Discover Tracks — confirmed rendering correctly (226 tracks)
+- [x] Remove Facebook Pixel — zero references found, codebase clean
+
+## Batch 2 — Expand What's Working
+- [x] Homepage Medium Sections — WorkCarousel for Music, Lyrics, Manuscripts, Comics
+- [x] Lyrics UX Mobile Fix — moved to bottom, collapsed by default, expand/collapse toggle
+- [x] Media Player Controls — play/pause moved inside cover art as hover overlay
+- [x] Expandable Lyrics + Comments — WID-linked badge on Activity header, full-width lyrics panel at bottom
