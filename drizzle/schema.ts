@@ -154,6 +154,11 @@ export const songs = mysqlTable("songs", {
   // "comic"      = comic book, graphic novel, illustrated story
   contentType: mysqlEnum("contentType", ["audio", "lyrics", "manuscript", "comic"]).default("audio").notNull(),
 
+  // Visual pipeline readiness
+  // true = autoVideoUrl is populated and the work is fully visually ready
+  // false (default) = pending visual generation
+  visualReady: boolean("visualReady").default(false).notNull(),
+
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
 
@@ -743,3 +748,22 @@ export const witnessTestimonies = mysqlTable("witnessTestimonies", {
 });
 export type WitnessTestimony = typeof witnessTestimonies.$inferSelect;
 export type InsertWitnessTestimony = typeof witnessTestimonies.$inferInsert;
+
+// ─── Visual Queue ─────────────────────────────────────────────────────────────
+// Background queue for automatic visual (MP4 loop video) generation.
+// Every work is enqueued on creation/WID issuance/publish.
+// Worker picks up pending jobs, generates the MP4, stores in S3, marks complete.
+// Status transitions: pending → processing → complete | failed
+export const visualQueue = mysqlTable("visualQueue", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("songId").notNull(),
+  status: mysqlEnum("status", ["pending", "processing", "complete", "failed"]).default("pending").notNull(),
+  priority: int("priority").default(0).notNull(), // higher = processed first; founders get priority=10
+  attempts: int("attempts").default(0).notNull(), // retry counter
+  errorMessage: text("errorMessage"),             // last error if failed
+  enqueuedAt: timestamp("enqueuedAt").defaultNow().notNull(),
+  startedAt: timestamp("startedAt"),
+  completedAt: timestamp("completedAt"),
+});
+export type VisualQueueJob = typeof visualQueue.$inferSelect;
+export type InsertVisualQueueJob = typeof visualQueue.$inferInsert;

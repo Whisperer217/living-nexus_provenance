@@ -17,6 +17,7 @@ import { shareRouter } from "../shareRoute";
 import { workRouter } from "../workRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { startVisualWorker, backfillVisualQueue } from "../visualQueue";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -109,6 +110,10 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    // Start the visual generation worker after the server is up.
+    // Backfill any published songs that don't have visuals yet.
+    backfillVisualQueue().catch(err => console.error("[VisualQueue] Backfill error:", err));
+    startVisualWorker();
   });
 }
 

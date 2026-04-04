@@ -2272,3 +2272,13 @@
 - [x] Admin tRPC: autoVideoStats, generateAutoVideos (founder-priority queue, fire-and-forget)
 - [x] Admin UI: Media Generation tab (stats, batch limit input, progress log, founder priority badge)
 - [x] All 123 tests passing
+
+## Automatic Visual Generation Pipeline
+- [x] Schema: add visualQueue table (pending/processing/complete/failed) + visualReady flag on songs
+- [x] Visual queue engine (server/visualQueue.ts): enqueueVisualJob, startVisualWorker, backfillVisualQueue
+- [x] Auto-trigger: enqueue on song creation (upload), batch upload, and publish event
+- [x] Background worker: processes 2 jobs/tick every 15s, founder-priority (priority=10), sets visualReady=true on completion
+- [x] Server startup: worker starts automatically, backfills all songs missing visuals
+- [x] Admin tRPC procedures: visualPipelineStats, visualQueueJobs, requeueFailedVisuals, enqueueVisualForSong
+- [x] Admin Media Generation tab: replaced manual trigger with live pipeline status dashboard
+- [x] Pipeline dashboard: stats grid, completion progress bar, requeue failed, enqueue by ID, live job table

@@ -66,6 +66,7 @@ import {
 import { LIVING_ARCHIVE_PRODUCTS, SLOTS_PER_PERIOD } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
+import { enqueueVisualJob } from "./visualQueue";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
 const PLATFORM_FEE_PERCENT = 10;
@@ -635,10 +636,11 @@ export const appRouter = router({
         coverArtUrl = url;
       }
       const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth });
-      const songId = (insertResult as any).insertId as number;
+       const songId = (insertResult as any).insertId as number;
+      // Trigger visual generation pipeline (non-blocking)
+      enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
       return { success: true, fileUrl, coverArtUrl, songId };
     }),
-
     uploadCoverArt: protectedProcedure.input(z.object({
       songId: z.number(),
       coverBase64: z.string(),
@@ -729,6 +731,11 @@ export const appRouter = router({
         // Capture the auto-increment ID directly from the insert result to preserve upload order
         const songId = (insertResult as any).insertId as number | undefined;
         results.push({ title: track.title, witnessId: track.witnessId, fileUrl, songId });
+        // Trigger visual generation pipeline for each song (non-blocking)
+        if (songId) {
+          const isBatchFounder = (ctx.user as any).role === "founder";
+          enqueueVisualJob(songId, isBatchFounder).catch(err => console.error("[VisualQueue] Batch enqueue error:", err));
+        }
       }
       // ── Generate Collection WID (WID-ALB) ─────────────────────────────────────
       // Collect all WIDs that were assigned, sort them, hash together
@@ -835,6 +842,11 @@ export const appRouter = router({
       status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]),
     })).mutation(async ({ ctx, input }) => {
       await updateSongStatus(input.songId, ctx.user.id, input.status);
+      // On publish: ensure visual pipeline is triggered
+      if (input.status === "Published") {
+        const isFounder = (ctx.user as any).role === "founder";
+        enqueueVisualJob(input.songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
+      }
       return { success: true };
     }),
     updateMetadata: protectedProcedure.input(z.object({
@@ -2120,6 +2132,46 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           founderCount,
           message: `Queued ${count} song${count === 1 ? "" : "s"} for auto video generation. ${founderCount > 0 ? `${founderCount} founder work${founderCount === 1 ? "" : "s"} processed first.` : ""} Check server logs for progress.`,
         };
+      }),
+    // ── Visual Pipeline Admin ────────────────────────────────────────────────
+    /** Get live visual pipeline stats for the admin dashboard */
+    visualPipelineStats: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+      const { getVisualPipelineStats } = await import("./visualQueue");
+      return getVisualPipelineStats();
+    }),
+    /** Get recent visual queue jobs for the admin pipeline view */
+    visualQueueJobs: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(200).default(50) }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        const { getRecentQueueJobs } = await import("./visualQueue");
+        return getRecentQueueJobs(input.limit);
+      }),
+    /** Requeue all failed visual jobs */
+    requeueFailedVisuals: protectedProcedure.mutation(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+      const { requeueFailedJobs } = await import("./visualQueue");
+      const count = await requeueFailedJobs();
+      return { requeued: count };
+    }),
+    /** Enqueue visual job for a specific song (admin override) */
+    enqueueVisualForSong: protectedProcedure
+      .input(z.object({ songId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        const { enqueueVisualJob } = await import("./visualQueue");
+        // Reset any existing failed job first
+        const db = await import("./db").then(m => m.getDb());
+        if (db) {
+          const { visualQueue } = await import("../drizzle/schema");
+          const { eq, inArray } = await import("drizzle-orm");
+          await db.update(visualQueue)
+            .set({ status: "pending", attempts: 0, errorMessage: null, startedAt: null, completedAt: null })
+            .where(eq(visualQueue.songId, input.songId));
+        }
+        await enqueueVisualJob(input.songId, true); // admin override = founder priority
+        return { success: true };
       }),
     // ── Works / WIDs Moderation ───────────────────────────────────────────────
     searchWorks: protectedProcedure

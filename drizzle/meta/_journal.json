@@ -225,6 +225,13 @@
       "when": 1775275998467,
       "tag": "0031_silly_mimic",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1775277629710,
+      "tag": "0032_purple_zombie",
+      "breakpoints": true
     }
   ]
 }

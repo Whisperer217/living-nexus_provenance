@@ -1356,142 +1356,260 @@ function FounderControlTab() {
 
 // ── Media Generation Tab ──────────────────────────────────────────────────────
 function MediaGenerationTab() {
-  const utils = trpc.useUtils();
-  const [limit, setLimit] = useState("100");
-  const [log, setLog] = useState<string[]>([]);
-  const [running, setRunning] = useState(false);
-
-  const statsQuery = trpc.admin.autoVideoStats.useQuery(undefined, { retry: false });
-  const stats = statsQuery.data;
-
-  const generateMutation = trpc.admin.generateAutoVideos.useMutation({
-    onMutate: () => {
-      setRunning(true);
-      setLog(["Starting background auto video generation..."]);
-    },
-    onSuccess: (result) => {
-      setRunning(false);
-      setLog(prev => [
-        ...prev,
-        result.message,
-        ...(result.founderCount > 0 ? [`★ ${result.founderCount} founder work(s) queued first`] : []),
-      ]);
-      toast.success(result.message);
-      statsQuery.refetch();
-      utils.admin.autoVideoStats.invalidate();
-    },
-    onError: (e) => {
-      setRunning(false);
-      setLog(prev => [...prev, `Error: ${e.message}`]);
-      toast.error(e.message);
-    },
-  });
-
+  const [enqueueId, setEnqueueId] = useState("");
   const FOUNDER_GOLD = "oklch(0.84 0.155 85)";
   const GREEN = "oklch(0.65 0.18 145)";
   const RED = "oklch(0.65 0.18 25)";
+  const YELLOW = "oklch(0.78 0.14 85)";
+  const BLUE = "oklch(0.65 0.18 230)";
+
+  // Live pipeline stats — auto-refresh every 10s
+  const statsQuery = trpc.admin.visualPipelineStats.useQuery(undefined, {
+    retry: false,
+    refetchInterval: 10_000,
+  });
+  const stats = statsQuery.data;
+
+  // Recent queue jobs — auto-refresh every 10s
+  const jobsQuery = trpc.admin.visualQueueJobs.useQuery({ limit: 50 }, {
+    retry: false,
+    refetchInterval: 10_000,
+  });
+  const jobs = jobsQuery.data ?? [];
+
+  // Requeue failed jobs
+  const requeueMutation = trpc.admin.requeueFailedVisuals.useMutation({
+    onSuccess: (r) => {
+      toast.success(`Requeued ${r.requeued} failed job(s)`);
+      statsQuery.refetch();
+      jobsQuery.refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  // Enqueue specific song
+  const enqueueMutation = trpc.admin.enqueueVisualForSong.useMutation({
+    onSuccess: () => {
+      toast.success("Song enqueued for visual generation");
+      setEnqueueId("");
+      jobsQuery.refetch();
+      statsQuery.refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const completionPct = stats && stats.totalPublished > 0
+    ? Math.round((stats.visualReady / stats.totalPublished) * 100)
+    : 0;
+
+  const statusColor = (s: string) => {
+    if (s === "complete") return GREEN;
+    if (s === "failed") return RED;
+    if (s === "processing") return BLUE;
+    return YELLOW;
+  };
+  const statusIcon = (s: string) => {
+    if (s === "complete") return "✓";
+    if (s === "failed") return "✗";
+    if (s === "processing") return "⟳";
+    return "·";
+  };
 
   return (
     <div className="space-y-6">
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-lg font-bold" style={{ color: TEXT, fontFamily: "'Cinzel', serif" }}>
+            Visual Pipeline
+          </h2>
+          <p className="text-xs mt-0.5" style={{ color: SUBTEXT }}>
+            Automatic visual generation — every work gets a looping MP4. Auto-refreshes every 10s.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => { statsQuery.refetch(); jobsQuery.refetch(); }}
+          style={{ borderColor: BORDER, color: SUBTEXT }}
+        >
+          <RotateCcw className="w-3 h-3 mr-1" />
+          Refresh
+        </Button>
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Total Published", value: stats?.total ?? "—", color: FOUNDER_GOLD },
-          { label: "Auto Video Ready", value: stats?.withAutoVideo ?? "—", color: GREEN },
-          { label: "Pending Generation", value: stats?.pending ?? "—", color: RED },
+          { label: "Total Published", value: stats?.totalPublished ?? "—", color: TEXT },
+          { label: "Visual Ready", value: stats?.visualReady ?? "—", color: GREEN },
+          { label: "Pending", value: stats?.pending ?? "—", color: YELLOW },
+          { label: "Processing", value: stats?.processing ?? "—", color: BLUE },
+          { label: "Complete", value: stats?.complete ?? "—", color: GREEN },
+          { label: "Failed", value: stats?.failed ?? "—", color: RED },
         ].map(s => (
-          <div key={s.label} className="rounded-xl p-4 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-            <p className="text-2xl font-bold" style={{ color: s.color, fontFamily: "'Orbitron', sans-serif" }}>{s.value}</p>
+          <div key={s.label} className="rounded-xl p-3 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            <p className="text-xl font-bold" style={{ color: s.color, fontFamily: "'Orbitron', sans-serif" }}>{s.value}</p>
             <p className="text-xs mt-1" style={{ color: SUBTEXT }}>{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Action card */}
-      <div className="rounded-xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-        <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold mb-1" style={{ color: TEXT, fontFamily: "'Cinzel', serif" }}>
-              Auto Video Generation
-            </h3>
-            <p className="text-sm mb-3" style={{ color: SUBTEXT }}>
-              Generates a 30-second looping MP4 (cover art + audio) for every published song that doesn't have one yet.
-              Videos are stored on S3 and linked to the work's <code className="text-xs px-1 rounded" style={{ background: "oklch(0.15 0.02 280)" }}>autoVideoUrl</code> field.
-            </p>
-            <div className="flex items-center gap-2 p-3 rounded-lg mb-3" style={{ background: "oklch(0.25 0.12 85 / 0.15)", border: "1px solid oklch(0.25 0.12 85 / 0.3)" }}>
-              <Crown className="w-4 h-4 shrink-0" style={{ color: FOUNDER_GOLD }} />
-              <p className="text-xs" style={{ color: "oklch(0.9 0.08 85)" }}>
-                <strong>Founder Priority Queue:</strong> Works by founders are processed first, ensuring their content is always at the front of the generation queue.
-              </p>
-            </div>
+      {/* Completion progress bar */}
+      {stats && (
+        <div className="rounded-xl p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold" style={{ color: TEXT }}>Pipeline Completion</span>
+            <span className="text-xs font-bold" style={{ color: completionPct === 100 ? GREEN : FOUNDER_GOLD }}>
+              {completionPct}%
+            </span>
           </div>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
-            <label className="text-xs" style={{ color: SUBTEXT }}>Batch limit:</label>
-            <Input
-              type="number"
-              min={1}
-              max={500}
-              value={limit}
-              onChange={e => setLimit(e.target.value)}
-              className="w-24 h-8 text-xs"
-              style={{ background: "oklch(0.15 0.015 280)", borderColor: BORDER, color: TEXT }}
+          <div className="w-full rounded-full h-2" style={{ background: "oklch(0.15 0.015 280)" }}>
+            <div
+              className="h-2 rounded-full transition-all duration-500"
+              style={{
+                width: `${completionPct}%`,
+                background: completionPct === 100
+                  ? GREEN
+                  : `linear-gradient(90deg, ${FOUNDER_GOLD}, ${GREEN})`,
+              }}
             />
           </div>
+          <p className="text-xs mt-2" style={{ color: SUBTEXT }}>
+            {stats.visualReady} of {stats.totalPublished} published works have visuals.
+            {stats.pending > 0 && ` ${stats.pending} job(s) queued.`}
+            {stats.processing > 0 && ` ${stats.processing} currently processing.`}
+          </p>
+        </div>
+      )}
+
+      {/* Actions row */}
+      <div className="flex flex-wrap gap-3 items-start">
+        {/* Requeue failed */}
+        <div className="rounded-xl p-4 flex-1 min-w-[220px]" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <p className="text-xs font-semibold mb-1" style={{ color: TEXT }}>Requeue Failed Jobs</p>
+          <p className="text-xs mb-3" style={{ color: SUBTEXT }}>
+            Reset all failed jobs back to pending so the worker retries them automatically.
+          </p>
           <Button
-            onClick={() => generateMutation.mutate({ limit: parseInt(limit) || 100 })}
-            disabled={running || generateMutation.isPending}
-            style={{ background: FOUNDER_GOLD, color: BG }}
-          >
-            {running ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-            {running ? "Running..." : "Start Generation"}
-          </Button>
-          <Button
-            variant="outline"
             size="sm"
-            onClick={() => statsQuery.refetch()}
-            style={{ borderColor: BORDER, color: SUBTEXT }}
+            onClick={() => requeueMutation.mutate()}
+            disabled={requeueMutation.isPending || (stats?.failed ?? 0) === 0}
+            style={{ background: RED, color: "#fff" }}
           >
-            <RotateCcw className="w-3 h-3 mr-1" />
-            Refresh Stats
+            {requeueMutation.isPending
+              ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              : <RotateCcw className="w-3 h-3 mr-1" />}
+            Retry Failed ({stats?.failed ?? 0})
           </Button>
         </div>
 
-        {/* Progress log */}
-        {log.length > 0 && (
-          <div className="mt-4 rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto"
-            style={{ background: "oklch(0.08 0.01 280)", border: `1px solid ${BORDER}` }}>
-            {log.map((line, i) => (
-              <p key={i} style={{
-                color: line.startsWith("Error") ? RED
-                  : line.startsWith("★") ? FOUNDER_GOLD
-                  : GREEN,
-              }}>
-                {line.startsWith("Error") ? "✗" : line.startsWith("★") ? "★" : "✓"} {line}
+        {/* Enqueue specific song */}
+        <div className="rounded-xl p-4 flex-1 min-w-[220px]" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <p className="text-xs font-semibold mb-1" style={{ color: TEXT }}>Enqueue Song by ID</p>
+          <p className="text-xs mb-3" style={{ color: SUBTEXT }}>
+            Force-enqueue a specific song for visual generation with founder priority.
+          </p>
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              placeholder="Song ID"
+              value={enqueueId}
+              onChange={e => setEnqueueId(e.target.value)}
+              className="h-8 text-xs w-28"
+              style={{ background: "oklch(0.15 0.015 280)", borderColor: BORDER, color: TEXT }}
+            />
+            <Button
+              size="sm"
+              onClick={() => enqueueMutation.mutate({ songId: parseInt(enqueueId) })}
+              disabled={!enqueueId || enqueueMutation.isPending}
+              style={{ background: FOUNDER_GOLD, color: BG }}
+            >
+              {enqueueMutation.isPending
+                ? <Loader2 className="w-3 h-3 animate-spin" />
+                : <Play className="w-3 h-3" />}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Live job queue table */}
+      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "oklch(0.10 0.015 280)" }}>
+          <span className="text-xs font-semibold" style={{ color: TEXT }}>Recent Queue Jobs</span>
+          <span className="text-xs" style={{ color: SUBTEXT }}>{jobs.length} shown · live</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr style={{ background: "oklch(0.09 0.01 280)", borderBottom: `1px solid ${BORDER}` }}>
+                {["Job ID", "Song ID", "Title", "Status", "Priority", "Attempts", "Queued", "Completed"].map(h => (
+                  <th key={h} className="px-3 py-2 text-left font-medium" style={{ color: SUBTEXT }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {jobs.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-3 py-6 text-center" style={{ color: SUBTEXT }}>
+                    No queue jobs found.
+                  </td>
+                </tr>
+              ) : jobs.map((job, i) => (
+                <tr
+                  key={job.id}
+                  style={{
+                    background: i % 2 === 0 ? CARD : "oklch(0.10 0.012 280)",
+                    borderBottom: `1px solid ${BORDER}`,
+                  }}
+                >
+                  <td className="px-3 py-2 font-mono" style={{ color: SUBTEXT }}>{job.id}</td>
+                  <td className="px-3 py-2 font-mono" style={{ color: SUBTEXT }}>{job.songId}</td>
+                  <td className="px-3 py-2 max-w-[160px] truncate" style={{ color: TEXT }}>{job.songTitle ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    <span
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono"
+                      style={{ color: statusColor(job.status), background: `${statusColor(job.status)}18` }}
+                    >
+                      {statusIcon(job.status)} {job.status}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-center" style={{ color: job.priority > 0 ? FOUNDER_GOLD : SUBTEXT }}>
+                    {job.priority > 0 ? <Crown className="w-3 h-3 inline" /> : "—"}
+                  </td>
+                  <td className="px-3 py-2 text-center" style={{ color: job.attempts > 1 ? RED : SUBTEXT }}>{job.attempts}</td>
+                  <td className="px-3 py-2" style={{ color: SUBTEXT }}>{formatDate(job.enqueuedAt)}</td>
+                  <td className="px-3 py-2" style={{ color: SUBTEXT }}>{job.completedAt ? formatDate(job.completedAt) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {jobs.some(j => j.errorMessage) && (
+          <div className="px-4 py-3 space-y-1" style={{ background: "oklch(0.09 0.01 280)", borderTop: `1px solid ${BORDER}` }}>
+            <p className="text-xs font-semibold mb-1" style={{ color: RED }}>Error Details</p>
+            {jobs.filter(j => j.errorMessage).map(j => (
+              <p key={j.id} className="text-xs font-mono" style={{ color: RED }}>
+                Job {j.id} (song {j.songId}): {j.errorMessage}
               </p>
             ))}
-            {running && (
-              <p style={{ color: FOUNDER_GOLD }} className="flex items-center gap-1">
-                <Loader2 className="w-3 h-3 animate-spin" /> Background generation in progress — check server logs for progress
-              </p>
-            )}
           </div>
         )}
       </div>
 
-      {/* Info */}
+      {/* Info footer */}
       <div className="rounded-xl p-4" style={{ background: "oklch(0.10 0.015 280)", border: `1px solid ${BORDER}` }}>
         <div className="flex items-start gap-3">
-          <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: GREEN }} />
+          <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: GREEN }} />
           <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
-            <p>Generation runs in the background — the page doesn't need to stay open.</p>
-            <p>Each video takes ~30–60 seconds to generate. Plan for ~30 minutes per 50 tracks.</p>
-            <p>Generated videos are stored at <code className="text-xs px-1 rounded" style={{ background: "oklch(0.15 0.02 280)" }}>auto-videos/{"{"}songId{"}"}.mp4</code> on S3.</p>
-            <p>Founder works are always processed first regardless of upload order.</p>
+            <p>The visual worker runs every 15 seconds, processing 2 jobs per tick (non-blocking).</p>
+            <p>Jobs are automatically enqueued on song creation, batch upload, and publish events.</p>
+            <p>Founder works are always processed first (priority = 10 vs 0 for standard).</p>
+            <p>A work is marked <strong style={{ color: GREEN }}>visualReady</strong> once its MP4 is stored on S3 and linked to the work record.</p>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
