@@ -1,12 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MobilePlayerLayer v1.0
+   LIVING NEXUS — MobilePlayerLayer v2.0 (Canonical Player)
    Full-viewport player layer — detached from layout tree via React portal.
-
    Three states:
      mini      → 64px bottom bar, always present when track loaded
      expanded  → full-screen sheet (100dvh), slides up from bottom
      cinematic → edge-to-edge artwork/video, tap to reveal controls
-
    Gesture model:
      mini      → swipe-up or tap artwork → expanded
      expanded  → swipe-down (≥60px) → mini
@@ -14,8 +12,12 @@
      cinematic → tap → toggle overlay controls
      cinematic → swipe-down (≥80px) → expanded
      landscape → reduced strip UI (play + scrubber + time only)
+   Canonical layers (expanded state):
+     1. WID provenance panel (expandable)
+     2. Signal/reactions display with emoji breakdown
+     3. Comments panel (WID-bound, expandable)
+     4. "Take to Room" action button
 ═══════════════════════════════════════════════════════════════════ */
-
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -27,7 +29,9 @@ import {
   Shuffle, Repeat, Heart, Music,
   Share2, DollarSign, ChevronDown,
   Maximize2, Check, Video, ListMusic,
-  Volume2, VolumeX,
+  Volume2, VolumeX, Shield, MessageCircle,
+  ChevronRight, Send, Users, Fingerprint,
+  ExternalLink,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -40,6 +44,16 @@ function fmtTime(s: number) {
 }
 
 type PlayerState = "mini" | "expanded" | "cinematic";
+
+// Emoji reaction config
+const EMOJI_REACTIONS = [
+  { type: "fire",     emoji: "🔥", label: "Fire"     },
+  { type: "love",     emoji: "❤️", label: "Love"     },
+  { type: "grateful", emoji: "🙏", label: "Grateful" },
+  { type: "magic",    emoji: "✨", label: "Magic"    },
+  { type: "gem",      emoji: "💎", label: "Gem"      },
+  { type: "vibe",     emoji: "🎵", label: "Vibe"     },
+];
 
 // ── Scrubber ───────────────────────────────────────────────────────
 function Scrubber({
@@ -104,16 +118,20 @@ export default function MobilePlayerLayer() {
   } = usePlayer();
   const { user } = useAuth();
   const [, navigate] = useLocation();
-
   const [playerState, setPlayerState] = useState<PlayerState>("mini");
   const [overlayVisible, setOverlayVisible] = useState(true);
   const [giftOpen, setGiftOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isLandscape, setIsLandscape] = useState(false);
 
+  // Canonical panel states
+  const [widPanelOpen, setWidPanelOpen] = useState(false);
+  const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+
   // Overlay auto-hide timer in cinematic mode
   const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const showOverlay = useCallback(() => {
     setOverlayVisible(true);
     if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
@@ -144,6 +162,13 @@ export default function MobilePlayerLayer() {
     return () => { document.body.style.overflow = ""; };
   }, [playerState]);
 
+  // Reset canonical panels when track changes
+  useEffect(() => {
+    setWidPanelOpen(false);
+    setCommentsPanelOpen(false);
+    setCommentText("");
+  }, [state.currentIdx]);
+
   // ── Gesture: swipe-up on mini → expanded ──────────────────────
   const miniTouchStartY = useRef<number | null>(null);
   const onMiniTouchStart = (e: React.TouchEvent) => {
@@ -152,7 +177,6 @@ export default function MobilePlayerLayer() {
   const onMiniTouchEnd = (e: React.TouchEvent) => {
     if (miniTouchStartY.current === null) return;
     const delta = miniTouchStartY.current - e.changedTouches[0].clientY;
-    // Long swipe (>120px) goes directly to cinematic; short swipe (>40px) goes to expanded
     if (delta > 120) setPlayerState("cinematic");
     else if (delta > 40) setPlayerState("expanded");
     miniTouchStartY.current = null;
@@ -204,6 +228,10 @@ export default function MobilePlayerLayer() {
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
   const videoWitnessId = (songDetail?.song as any)?.videoWitnessId as string | null | undefined;
   const lyricsText = (songDetail?.song as any)?.lyricsText as string | null | undefined;
+  const creatorId = currentTrack?.creatorId ?? (songDetail?.creator as any)?.id ?? null;
+
+  // WID — prefer track.witnessId, fall back to videoWitnessId
+  const widBadge = currentTrack?.witnessId || videoWitnessId || null;
 
   // Like state
   const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(
@@ -218,6 +246,45 @@ export default function MobilePlayerLayer() {
     if (!user || !currentSongId) return;
     toggleLikeMutation.mutate({ songId: currentSongId });
   }, [user, currentSongId, toggleLikeMutation]);
+
+  // Reactions
+  const { data: reactionsData, refetch: refetchReactions } = trpc.songs.getReactions.useQuery(
+    { songId: currentSongId! },
+    { enabled: !!currentSongId && !isNaN(currentSongId), staleTime: 30_000 }
+  );
+  const reactionCounts = reactionsData?.counts ?? {};
+  const myReactions = reactionsData?.mine ?? [];
+  const toggleReactionMutation = trpc.songs.toggleReaction.useMutation({
+    onSuccess: () => refetchReactions(),
+  });
+  const handleToggleReaction = useCallback((type: string) => {
+    if (!user || !currentSongId) return;
+    toggleReactionMutation.mutate({ songId: currentSongId, type });
+  }, [user, currentSongId, toggleReactionMutation]);
+
+  // Comments
+  const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
+    { songId: currentSongId! },
+    { enabled: !!currentSongId && !isNaN(currentSongId) && commentsPanelOpen, staleTime: 30_000 }
+  );
+  const comments = (commentsData ?? []) as any[];
+  const addCommentMutation = trpc.comments.add.useMutation({
+    onSuccess: () => {
+      setCommentText("");
+      setCommentSubmitting(false);
+      refetchComments();
+    },
+    onError: () => setCommentSubmitting(false),
+  });
+  const handleSubmitComment = useCallback(() => {
+    if (!commentText.trim() || !currentSongId) return;
+    setCommentSubmitting(true);
+    addCommentMutation.mutate({
+      songId: currentSongId,
+      content: commentText.trim(),
+      authorName: user?.name || undefined,
+    });
+  }, [commentText, currentSongId, user, addCommentMutation]);
 
   // Video ref
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -279,9 +346,8 @@ export default function MobilePlayerLayer() {
   // Share
   const handleShare = useCallback(async () => {
     if (!currentTrack) return;
-    // PDL: use /share/:wid when available so Discord/social embeds get song-specific metadata
-    const url = currentTrack?.witnessId
-      ? `${window.location.origin}/share/${encodeURIComponent(currentTrack.witnessId)}`
+    const url = widBadge
+      ? `${window.location.origin}/share/${encodeURIComponent(widBadge)}`
       : currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
     try {
       if (navigator.share) { await navigator.share({ title: currentTrack.title ?? "", url }); return; }
@@ -291,20 +357,12 @@ export default function MobilePlayerLayer() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {}
-  }, [currentTrack, currentSongId]);
+  }, [currentTrack, currentSongId, widBadge]);
 
   // Don't render if no track
   if (!currentTrack) return null;
 
-  // artStyle is used ONLY in the expanded sheet ArtworkLayer (object-contain so full art is visible).
-  // Mini thumbnail and cinematic mode use their own inline styles (object-cover is intentional there).
-  const artStyle: React.CSSProperties = {
-    objectFit: "contain",
-    width: "100%",
-    height: "100%",
-  };
-
-  // ── Artwork/Video layer (shared across expanded + cinematic) — MRS player mode ──
+  // ── Artwork/Video layer (shared across expanded + cinematic) ──
   const ArtworkLayer = ({ fill = false }: { fill?: boolean }) => (
     <div className={`relative ${fill ? "absolute inset-0" : "w-full h-full"} overflow-hidden`}>
       <MediaAsset
@@ -400,73 +458,78 @@ export default function MobilePlayerLayer() {
       <div className="absolute top-0 left-0 right-0 h-[2px]"
         style={{ background: "oklch(1 0 0 / 0.06)" }}>
         <div
-          className="h-full transition-[width] duration-100"
+          className="h-full transition-[width] duration-300"
           style={{
             width: `${Math.min(100, progress)}%`,
             background: "linear-gradient(90deg, oklch(0.84 0.155 85), oklch(0.75 0.18 85))",
           }}
         />
       </div>
-
-      <div className="flex items-center h-full px-3 gap-3">
-        {/* Artwork — tap to expand */}
+      {/* Content row */}
+      <div className="flex items-center gap-3 px-4 pt-2 pb-1">
+        {/* Thumbnail — tap to expand */}
         <button
           onClick={() => setPlayerState("expanded")}
-          className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden relative"
-          style={{ background: currentTrack.bg || "oklch(0.18 0.04 275)" }}
+          className="flex-shrink-0 w-10 h-10 rounded-xl overflow-hidden relative"
+          style={{ boxShadow: "0 2px 12px oklch(0 0 0 / 0.5)" }}
         >
-          {currentTrack.artUrl && currentTrack.artType !== "video" ? (
-            <img src={currentTrack.artUrl} alt="" className="w-full h-full" style={artStyle} />
-          ) : currentTrack.artUrl && currentTrack.artType === "video" ? (
-            <video src={currentTrack.artUrl} className="w-full h-full object-cover" muted />
+          {currentTrack.artUrl ? (
+            <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
           ) : (
-            <Music className="absolute inset-0 m-auto w-5 h-5 opacity-30 text-white" />
+            <div className="w-full h-full flex items-center justify-center"
+              style={{ background: "oklch(0.15 0.04 280)" }}>
+              <Music size={16} style={{ color: "oklch(0.45 0.03 280)" }} />
+            </div>
           )}
-          {/* Playing waveform overlay */}
+          {/* Live wave indicator */}
           {state.isPlaying && (
-            <div className="absolute inset-0 flex items-end justify-center gap-[2px] pb-1"
+            <div className="absolute inset-0 flex items-end justify-center pb-1 gap-[2px]"
               style={{ background: "oklch(0 0 0 / 0.35)" }}>
-              {[0, 1, 2].map(i => (
-                <div key={i} className="w-[2px] rounded-full"
+              {[1,2,3,4].map(i => (
+                <span key={i} className="w-[2px] rounded-full"
                   style={{
-                    background: "oklch(0.84 0.155 85)",
-                    animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`,
                     height: "6px",
+                    background: "oklch(0.84 0.155 85)",
+                    animation: `mobileWave ${0.4 + i * 0.1}s ease-in-out infinite alternate`,
+                    animationDelay: `${i * 0.08}s`,
                   }} />
               ))}
             </div>
           )}
         </button>
-
-        {/* Title + artist — tap to expand */}
+        {/* Track info — tap to expand */}
         <button
           onClick={() => setPlayerState("expanded")}
           className="flex-1 min-w-0 text-left"
         >
-          <div className="text-[13px] font-body text-white truncate leading-tight">
+          <div className="text-[13px] font-heading text-white truncate leading-tight">
             {currentTrack.title || "Unknown Track"}
           </div>
-          <div className="text-[11px] truncate leading-tight mt-0.5"
-            style={{ color: "oklch(0.55 0.04 280)" }}>
+          <div className="text-[11px] truncate mt-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
             {currentTrack.artist || "Unknown Artist"}
           </div>
         </button>
-
+        {/* Like */}
+        <button
+          onClick={handleToggleLike}
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
+          style={{ color: isLiked ? "oklch(0.65 0.22 15)" : "oklch(0.35 0.02 280)" }}
+        >
+          <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
+        </button>
         {/* Play/Pause */}
         <button
           onClick={togglePlay}
-          className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-all active:scale-90"
+          className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-all active:scale-90"
           style={{
-            background: "oklch(0.84 0.155 85 / 0.12)",
-            color: "oklch(0.84 0.155 85)",
-            border: "1px solid oklch(0.84 0.155 85 / 0.25)",
+            background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))",
+            boxShadow: "0 2px 10px oklch(0.84 0.155 85 / 0.25)",
           }}
         >
           {state.isPlaying
-            ? <Pause size={18} fill="currentColor" />
-            : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
+            ? <Pause size={18} fill="currentColor" style={{ color: "oklch(0.08 0.01 280)" }} />
+            : <Play size={18} fill="currentColor" style={{ color: "oklch(0.08 0.01 280)", marginLeft: "2px" }} />}
         </button>
-
         {/* Next */}
         <button
           onClick={nextTrack}
@@ -484,7 +547,7 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   const ExpandedSheet = () => (
     <div
-      className="md:hidden fixed inset-0 z-[9995] flex flex-col"
+      className="md:hidden fixed inset-0 z-[9995] flex flex-col overflow-y-auto"
       style={{
         background: "oklch(0.08 0.02 275)",
         transform: `translateY(${expandedDragOffset}px)`,
@@ -514,11 +577,11 @@ export default function MobilePlayerLayer() {
         </button>
         <div className="text-center">
           <div className="text-[10px] font-heading tracking-[0.18em] uppercase"
-            style={{ color: "oklch(0.45 0.03 280)" }}>
+            style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>
             Now Playing
           </div>
           {queueContextLabel && (
-            <div className="text-[9px] mt-0.5" style={{ color: "oklch(0.84 0.155 85 / 0.55)", fontFamily: "'Cinzel', serif" }}>
+            <div className="text-[9px] mt-0.5" style={{ color: "oklch(0.84 0.155 85 / 0.45)", fontFamily: "'Cinzel', serif" }}>
               {queueContextLabel}
             </div>
           )}
@@ -543,9 +606,10 @@ export default function MobilePlayerLayer() {
           }}
         >
           <ArtworkLayer />
-          {videoWitnessId && (
+          {/* WID badge on artwork — always show if WID exists */}
+          {widBadge && (
             <button
-              onClick={() => navigate(`/verify/${videoWitnessId}`)}
+              onClick={() => setWidPanelOpen(true)}
               className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
               style={{
                 background: "oklch(0.22 0.08 145 / 0.88)",
@@ -554,7 +618,8 @@ export default function MobilePlayerLayer() {
                 backdropFilter: "blur(4px)",
               }}
             >
-              ✓ WID
+              <Shield size={8} />
+              WID
             </button>
           )}
         </div>
@@ -566,9 +631,20 @@ export default function MobilePlayerLayer() {
           <div className="text-[18px] font-heading text-white truncate leading-tight">
             {currentTrack.title || "Unknown Track"}
           </div>
-          <div className="text-[13px] mt-1 truncate" style={{ color: "oklch(0.55 0.04 280)" }}>
-            {currentTrack.artist || "Unknown Artist"}
-          </div>
+          {/* Creator name — clickable */}
+          {creatorId ? (
+            <button
+              onClick={() => { setPlayerState("mini"); navigate(`/creator/${creatorId}`); }}
+              className="text-[13px] mt-1 truncate transition-colors hover:text-white text-left"
+              style={{ color: "oklch(0.55 0.04 280)" }}
+            >
+              {currentTrack.artist || "Unknown Artist"}
+            </button>
+          ) : (
+            <div className="text-[13px] mt-1 truncate" style={{ color: "oklch(0.55 0.04 280)" }}>
+              {currentTrack.artist || "Unknown Artist"}
+            </div>
+          )}
         </div>
         <button
           onClick={handleToggleLike}
@@ -608,16 +684,23 @@ export default function MobilePlayerLayer() {
           {copied ? <Check size={18} /> : <Share2 size={18} />}
           <span className="text-[9px] font-heading tracking-wide">{copied ? "Copied" : "Share"}</span>
         </button>
-
         <button
           onClick={() => setGiftOpen(true)}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
           style={{ color: "oklch(0.40 0.03 280)" }}
         >
           <DollarSign size={18} />
-          <span className="text-[9px] font-heading tracking-wide">Gift</span>
+          <span className="text-[9px] font-heading tracking-wide">Tip</span>
         </button>
-
+        {/* Take to Room */}
+        <button
+          onClick={() => { setPlayerState("mini"); navigate("/together"); }}
+          className="flex flex-col items-center gap-1 transition-all active:scale-90"
+          style={{ color: "oklch(0.40 0.03 280)" }}
+        >
+          <Users size={18} />
+          <span className="text-[9px] font-heading tracking-wide">Room</span>
+        </button>
         <button
           onClick={() => {
             if (currentSongId) {
@@ -631,8 +714,7 @@ export default function MobilePlayerLayer() {
           <ListMusic size={18} />
           <span className="text-[9px] font-heading tracking-wide">Details</span>
         </button>
-
-        {/* Volume — tap icon to toggle slider popup, long-press to mute */}
+        {/* Volume */}
         <div className="relative flex flex-col items-center">
           {showMobileVolume && (
             <div
@@ -676,9 +758,239 @@ export default function MobilePlayerLayer() {
         </div>
       </div>
 
+      {/* ── CANONICAL LAYERS ── */}
+
+      {/* WID Provenance Panel */}
+      {widBadge && (
+        <div className="flex-shrink-0 mx-8 mb-4 rounded-2xl overflow-hidden"
+          style={{
+            background: "oklch(0.10 0.03 145 / 0.6)",
+            border: "1px solid oklch(0.45 0.18 145 / 0.35)",
+          }}
+        >
+          {/* Header — always visible */}
+          <button
+            className="w-full flex items-center justify-between px-4 py-3 transition-all active:scale-[0.99]"
+            onClick={() => setWidPanelOpen(v => !v)}
+          >
+            <div className="flex items-center gap-2">
+              <Fingerprint size={14} style={{ color: "oklch(0.72 0.18 145)" }} />
+              <span className="text-[11px] font-heading tracking-[0.12em] uppercase"
+                style={{ color: "oklch(0.72 0.18 145)" }}>
+                Origin Proof
+              </span>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                style={{
+                  background: "oklch(0.22 0.08 145 / 0.5)",
+                  color: "oklch(0.82 0.18 145)",
+                  border: "1px solid oklch(0.45 0.18 145 / 0.3)",
+                }}>
+                ✓ WID
+              </span>
+            </div>
+            <ChevronRight
+              size={14}
+              style={{
+                color: "oklch(0.45 0.04 280)",
+                transform: widPanelOpen ? "rotate(90deg)" : "rotate(0deg)",
+                transition: "transform 0.2s",
+              }}
+            />
+          </button>
+          {/* Expanded content */}
+          {widPanelOpen && (
+            <div className="px-4 pb-4 space-y-3 border-t"
+              style={{ borderColor: "oklch(0.45 0.18 145 / 0.2)" }}>
+              <div className="pt-3">
+                <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
+                  style={{ color: "oklch(0.40 0.03 280)" }}>
+                  Witness ID
+                </div>
+                <div className="text-[11px] font-mono break-all"
+                  style={{ color: "oklch(0.75 0.14 145)" }}>
+                  {widBadge}
+                </div>
+              </div>
+              {currentTrack.title && (
+                <div>
+                  <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
+                    style={{ color: "oklch(0.40 0.03 280)" }}>
+                    Work
+                  </div>
+                  <div className="text-[12px]" style={{ color: "oklch(0.75 0.04 280)" }}>
+                    {currentTrack.title}
+                  </div>
+                </div>
+              )}
+              {currentTrack.artist && (
+                <div>
+                  <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
+                    style={{ color: "oklch(0.40 0.03 280)" }}>
+                    Creator
+                  </div>
+                  <div className="text-[12px]" style={{ color: "oklch(0.75 0.04 280)" }}>
+                    {currentTrack.artist}
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={() => { setPlayerState("mini"); navigate(`/verify/${widBadge}`); }}
+                className="flex items-center gap-1.5 text-[10px] font-heading tracking-wide transition-all active:scale-95"
+                style={{ color: "oklch(0.72 0.18 145)" }}
+              >
+                <ExternalLink size={11} />
+                Verify on-chain provenance
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Signal / Reactions */}
+      <div className="flex-shrink-0 mx-8 mb-4">
+        <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-2"
+          style={{ color: "oklch(0.35 0.02 280)" }}>
+          Signals
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {EMOJI_REACTIONS.map(({ type, emoji, label }) => {
+            const count = (reactionCounts as Record<string, number>)[type] ?? 0;
+            const isActive = myReactions.includes(type);
+            return (
+              <button
+                key={type}
+                onClick={() => handleToggleReaction(type)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full transition-all active:scale-90"
+                title={label}
+                style={{
+                  background: isActive
+                    ? "oklch(0.22 0.06 85 / 0.6)"
+                    : "oklch(0.14 0.03 275 / 0.8)",
+                  border: `1px solid ${isActive ? "oklch(0.84 0.155 85 / 0.5)" : "oklch(0.25 0.03 275 / 0.6)"}`,
+                }}
+              >
+                <span className="text-[14px] leading-none">{emoji}</span>
+                {count > 0 && (
+                  <span className="text-[10px] font-mono"
+                    style={{ color: isActive ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 280)" }}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Comments Panel */}
+      <div className="flex-shrink-0 mx-8 mb-4 rounded-2xl overflow-hidden"
+        style={{
+          background: "oklch(0.10 0.02 275 / 0.6)",
+          border: "1px solid oklch(0.22 0.03 275 / 0.5)",
+        }}
+      >
+        {/* Header */}
+        <button
+          className="w-full flex items-center justify-between px-4 py-3 transition-all active:scale-[0.99]"
+          onClick={() => setCommentsPanelOpen(v => !v)}
+        >
+          <div className="flex items-center gap-2">
+            <MessageCircle size={14} style={{ color: "oklch(0.55 0.04 280)" }} />
+            <span className="text-[11px] font-heading tracking-[0.12em] uppercase"
+              style={{ color: "oklch(0.55 0.04 280)" }}>
+              Comments
+            </span>
+            {comments.length > 0 && (
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                style={{
+                  background: "oklch(0.18 0.03 275 / 0.8)",
+                  color: "oklch(0.55 0.04 280)",
+                }}>
+                {comments.length}
+              </span>
+            )}
+          </div>
+          <ChevronRight
+            size={14}
+            style={{
+              color: "oklch(0.35 0.02 280)",
+              transform: commentsPanelOpen ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 0.2s",
+            }}
+          />
+        </button>
+        {/* Expanded content */}
+        {commentsPanelOpen && (
+          <div className="border-t" style={{ borderColor: "oklch(0.22 0.03 275 / 0.4)" }}>
+            {/* Comment list */}
+            <div className="max-h-48 overflow-y-auto px-4 py-3 space-y-3">
+              {comments.length === 0 ? (
+                <p className="text-[11px] text-center py-2" style={{ color: "oklch(0.35 0.02 280)" }}>
+                  No comments yet. Be the first.
+                </p>
+              ) : (
+                comments.slice(0, 20).map((c: any, i: number) => (
+                  <div key={c.id ?? i} className="flex gap-2">
+                    <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px]"
+                      style={{ background: "oklch(0.18 0.04 280)", color: "oklch(0.55 0.04 280)" }}>
+                      {(c.authorName || c.userName || "?")[0]?.toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-[10px] font-heading" style={{ color: "oklch(0.65 0.04 280)" }}>
+                          {c.authorName || c.userName || "Anonymous"}
+                        </span>
+                        {c.createdAt && (
+                          <span className="text-[9px]" style={{ color: "oklch(0.35 0.02 280)" }}>
+                            {new Date(c.createdAt).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "oklch(0.65 0.04 280)" }}>
+                        {c.content}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            {/* Comment input */}
+            <div className="px-4 pb-3 border-t" style={{ borderColor: "oklch(0.18 0.03 275 / 0.5)" }}>
+              <div className="flex gap-2 pt-3">
+                <input
+                  type="text"
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitComment(); } }}
+                  placeholder={user ? "Add a comment…" : "Sign in to comment"}
+                  disabled={!user || commentSubmitting}
+                  className="flex-1 text-[11px] px-3 py-2 rounded-xl outline-none transition-all"
+                  style={{
+                    background: "oklch(0.14 0.03 275 / 0.8)",
+                    border: "1px solid oklch(0.25 0.03 275 / 0.6)",
+                    color: "oklch(0.75 0.04 280)",
+                  }}
+                />
+                <button
+                  onClick={handleSubmitComment}
+                  disabled={!user || !commentText.trim() || commentSubmitting}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 disabled:opacity-40"
+                  style={{
+                    background: "oklch(0.84 0.155 85)",
+                    color: "oklch(0.08 0.01 280)",
+                  }}
+                >
+                  <Send size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Lyrics strip (if available) */}
       {lyricsText && (
-        <div className="flex-1 overflow-y-auto px-8 pb-4 min-h-0">
+        <div className="flex-shrink-0 px-8 pb-6">
           <div className="text-[11px] font-heading tracking-[0.12em] uppercase mb-3"
             style={{ color: "oklch(0.35 0.02 280)" }}>
             Lyrics
@@ -689,6 +1001,9 @@ export default function MobilePlayerLayer() {
           </div>
         </div>
       )}
+
+      {/* Bottom padding spacer */}
+      <div className="flex-shrink-0 h-6" />
     </div>
   );
 
@@ -702,7 +1017,7 @@ export default function MobilePlayerLayer() {
       onTouchEnd={onCinematicTouchEnd}
       onClick={showOverlay}
     >
-      {/* Full-bleed artwork/video — cinematic mode with Ken Burns + parallax */}
+      {/* Full-bleed artwork/video */}
       <MediaAsset
         src={currentTrack.artUrl}
         alt={currentTrack.title}
@@ -717,8 +1032,7 @@ export default function MobilePlayerLayer() {
         videoRef={videoRef as React.RefObject<HTMLVideoElement | null>}
         className="absolute inset-0 w-full h-full"
       />
-
-      {/* Ambient gradient — bottom fade for controls legibility */}
+      {/* Ambient gradient — bottom fade */}
       <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
@@ -728,8 +1042,7 @@ export default function MobilePlayerLayer() {
           opacity: overlayVisible ? 1 : 0,
         }}
       />
-
-      {/* Top gradient — for exit button legibility */}
+      {/* Top gradient */}
       <div
         className="absolute inset-x-0 top-0 pointer-events-none"
         style={{
@@ -739,8 +1052,7 @@ export default function MobilePlayerLayer() {
           opacity: overlayVisible ? 1 : 0,
         }}
       />
-
-      {/* ── Overlay controls — fade in/out ── */}
+      {/* Overlay controls */}
       <div
         className="absolute inset-0 flex flex-col justify-between"
         style={{
@@ -751,39 +1063,49 @@ export default function MobilePlayerLayer() {
           paddingBottom: "env(safe-area-inset-bottom, 16px)",
         }}
       >
-        {/* Top row: exit + track info */}
-        <div className="flex items-start justify-between px-5 pt-2">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-5 pt-3">
           <button
-            onClick={() => setPlayerState("expanded")}
+            onClick={(e) => { e.stopPropagation(); setPlayerState("expanded"); }}
             className="p-2 rounded-xl transition-all active:scale-90"
             style={{ color: "rgba(255,255,255,0.7)", background: "oklch(0 0 0 / 0.3)", backdropFilter: "blur(8px)" }}
           >
             <ChevronDown size={22} />
           </button>
-          <div className="text-right">
-            <div className="text-[13px] font-heading text-white/90 truncate max-w-[200px]">
-              {currentTrack.title}
-            </div>
-            <div className="text-[11px] text-white/50 truncate max-w-[200px]">
-              {currentTrack.artist}
+          <div className="text-center">
+            <div className="text-[9px] font-heading tracking-[0.2em] uppercase text-white/50">
+              Cinematic
             </div>
           </div>
+          {/* WID badge in cinematic */}
+          {widBadge ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); setPlayerState("expanded"); setWidPanelOpen(true); }}
+              className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
+              style={{
+                background: "oklch(0.22 0.08 145 / 0.88)",
+                border: "1px solid oklch(0.55 0.18 145 / 0.5)",
+                color: "oklch(0.82 0.18 145)",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <Shield size={8} />
+              WID
+            </button>
+          ) : <div className="w-10" />}
         </div>
-
         {/* Bottom controls */}
         {isLandscape ? (
-          // ── Landscape: minimal strip ──────────────────────────
-          <div className="px-6 pb-2">
+          <div className="px-6 pb-3">
             <div className="flex items-center gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="text-[14px] font-heading text-white truncate">{currentTrack.title}</div>
+                <div className="text-[11px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
+              </div>
               <button onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
-                style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "oklch(0.08 0.01 280)" }}>
-                {state.isPlaying
-                  ? <Pause size={18} fill="currentColor" />
-                  : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
+                style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))", color: "oklch(0.08 0.01 280)" }}>
+                {state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
               </button>
-              <span className="text-[10px] font-mono text-white/50 flex-shrink-0">
-                {fmtTime(state.currentTime)}
-              </span>
               <div className="flex-1">
                 <Scrubber
                   progress={progress}
@@ -803,7 +1125,6 @@ export default function MobilePlayerLayer() {
             </div>
           </div>
         ) : (
-          // ── Portrait: full controls ───────────────────────────
           <div className="px-6 pb-4 space-y-5">
             {/* Track info + like */}
             <div className="flex items-center justify-between">
@@ -816,8 +1137,6 @@ export default function MobilePlayerLayer() {
                 <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
               </button>
             </div>
-
-            {/* Scrubber */}
             <Scrubber
               progress={progress}
               currentTime={state.currentTime}
@@ -825,11 +1144,8 @@ export default function MobilePlayerLayer() {
               onSeek={handleSeek}
               onSeekTouch={handleSeekTouch}
             />
-
-            {/* Controls */}
             <ControlsRow large overlay />
-
-            {/* Action tray — Gift / Share / Details */}
+            {/* Action tray */}
             <div className="flex items-center justify-around pt-1">
               <button
                 onClick={(e) => { e.stopPropagation(); setGiftOpen(true); }}
@@ -840,7 +1156,7 @@ export default function MobilePlayerLayer() {
                   style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
                   <DollarSign size={16} />
                 </div>
-                <span className="text-[9px] font-heading tracking-widest uppercase">Gift</span>
+                <span className="text-[9px] font-heading tracking-widest uppercase">Tip</span>
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); handleShare(); }}
@@ -852,6 +1168,17 @@ export default function MobilePlayerLayer() {
                   {copied ? <Check size={16} style={{ color: "oklch(0.84 0.155 85)" }} /> : <Share2 size={16} />}
                 </div>
                 <span className="text-[9px] font-heading tracking-widest uppercase">{copied ? "Copied" : "Share"}</span>
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setPlayerState("mini"); navigate("/together"); }}
+                className="flex flex-col items-center gap-1 transition-all active:scale-90"
+                style={{ color: "rgba(255,255,255,0.55)" }}
+              >
+                <div className="w-9 h-9 flex items-center justify-center rounded-xl"
+                  style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
+                  <Users size={16} />
+                </div>
+                <span className="text-[9px] font-heading tracking-widest uppercase">Room</span>
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setPlayerState("mini"); navigate(`/song/${currentSongId}`); }}
@@ -874,24 +1201,15 @@ export default function MobilePlayerLayer() {
   // ── Render via portal ──────────────────────────────────────────
   return createPortal(
     <>
-      {/* CSS keyframes for waveform animation */}
       <style>{`
         @keyframes mobileWave {
           from { height: 3px; }
           to   { height: 10px; }
         }
       `}</style>
-
-      {/* Mini bar — always visible when track loaded */}
       {playerState === "mini" && <MiniBar />}
-
-      {/* Expanded sheet — slides up */}
       {playerState === "expanded" && <ExpandedSheet />}
-
-      {/* Cinematic layer — full-bleed */}
       {playerState === "cinematic" && <CinematicLayer />}
-
-      {/* Gift modal */}
       {giftOpen && currentTrack && currentSongId && (
         <GiftModal
           songId={currentSongId}

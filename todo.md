@@ -2238,3 +2238,26 @@
 - [x] QuickRefSlider confirmed returning 12 tracks on dev server — production staleness only
 - [x] Fixed nested <a> inside <Link> in ManifestoPage (hydration error)
 - [x] Fixed getCountsByContentType to only count Published + isPublic works
+
+## Canonical Player — Unified Player UI
+- [ ] Add WID provenance panel (expandable) to MobilePlayerLayer expanded state
+- [ ] Add signal/reactions display with emoji breakdown to expanded state
+- [ ] Add comments panel (WID-bound, expandable) to expanded state
+- [ ] Add "Take to Room" action button to expanded state
+- [ ] Make creator name clickable → /creator/:id in expanded state
+- [ ] Show witnessId WID badge even when no videoWitnessId (use track.witnessId)
+- [ ] Add desktop/web modal adaptation (TheaterPlayer uses same canonical structure)
+- [ ] TypeScript: 0 errors
+- [ ] Vitest: all tests passing
+
+## Canonical Player — Unified UI (Build Order)
+- [x] MobilePlayerLayer v2.0 — WID provenance panel (expandable, shows full WID hash + verify link)
+- [x] MobilePlayerLayer v2.0 — Signal/reactions display with emoji breakdown (6 reactions)
+- [x] MobilePlayerLayer v2.0 — Comments panel (WID-bound, expandable, inline input)
+- [x] MobilePlayerLayer v2.0 — "Take to Room" action button (navigates to /together)
+- [x] MobilePlayerLayer v2.0 — Cinematic mode WID badge
+- [x] TheaterPlayer — Signals tab added (3-tab: Lyrics / Signals / Comments)
+- [x] TheaterPlayer — WID provenance panel (overlay on artwork, toggle via WID badge)
+- [x] TheaterPlayer — Reactions/signals grid with emoji breakdown and user state
+- [x] TheaterPlayer — "Take to Room" button in controls area
+- [x] TheaterPlayer — widBadge unified (audio WID + video WID fallback)

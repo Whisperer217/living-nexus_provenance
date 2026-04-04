@@ -13,9 +13,20 @@ import { useLocation } from "wouter";
 import {
   X, Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, DollarSign,
-  ChevronDown, MessageCircle, Music,
+  ChevronDown, MessageCircle, Music, Shield, Fingerprint,
+  ExternalLink, Users,
 } from "lucide-react";
 import PlayerTipModal from "./PlayerTipModal";
+
+// Emoji reaction config (canonical — shared with MobilePlayerLayer)
+const THEATER_EMOJI_REACTIONS = [
+  { type: "fire",     emoji: "🔥", label: "Fire"     },
+  { type: "love",     emoji: "❤️", label: "Love"     },
+  { type: "grateful", emoji: "🙏", label: "Grateful" },
+  { type: "magic",    emoji: "✨", label: "Magic"    },
+  { type: "gem",      emoji: "💎", label: "Gem"      },
+  { type: "vibe",     emoji: "🎵", label: "Vibe"     },
+];
 
 function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
@@ -31,9 +42,10 @@ export default function TheaterPlayer() {
   } = usePlayer();
   const { user } = useAuth();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState<"lyrics" | "comments">("lyrics");
+  const [activeTab, setActiveTab] = useState<"lyrics" | "comments" | "signals">("lyrics");
   const [tipOpen, setTipOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [widPanelOpen, setWidPanelOpen] = useState(false);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
@@ -64,10 +76,27 @@ export default function TheaterPlayer() {
     onSuccess: () => refetchLikeStatus(),
   });
 
+  // Reactions / signals
+  const { data: reactionsData, refetch: refetchReactions } = trpc.songs.getReactions.useQuery(
+    { songId: currentSongId! },
+    { enabled: !!currentSongId && !isNaN(currentSongId), staleTime: 30_000 }
+  );
+  const reactionCounts = reactionsData?.counts ?? {};
+  const myReactions = reactionsData?.mine ?? [];
+  const toggleReactionMutation = trpc.songs.toggleReaction.useMutation({
+    onSuccess: () => refetchReactions(),
+  });
+  const handleToggleReaction = (type: string) => {
+    if (!user || !currentSongId) return;
+    toggleReactionMutation.mutate({ songId: currentSongId, type });
+  };
+
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
   const videoUrl = (songDetail?.song as any)?.videoUrl as string | null | undefined;
   const videoWitnessId = (songDetail?.song as any)?.videoWitnessId as string | null | undefined;
+  // WID — prefer track.witnessId, fall back to videoWitnessId
+  const widBadge = currentTrack?.witnessId || videoWitnessId || null;
 
   // Background video ref — always muted, synced to audio play state
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -194,10 +223,10 @@ export default function TheaterPlayer() {
                   {currentTrack?.emoji || "🎵"}
                 </div>
               )}
-              {/* Video WID badge — top-right corner, links to verify page */}
-              {videoWitnessId && (
+              {/* WID badge — always show if any WID exists */}
+              {widBadge && (
                 <button
-                  onClick={() => { closeTheater(); navigate(`/verify/${videoWitnessId}`); }}
+                  onClick={() => setWidPanelOpen(v => !v)}
                   className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide transition-all z-20"
                   style={{
                     background: "oklch(0.22 0.08 145 / 0.88)",
@@ -205,10 +234,44 @@ export default function TheaterPlayer() {
                     color: "oklch(0.82 0.18 145)",
                     backdropFilter: "blur(6px)",
                   }}
-                  title="Video cryptographically witnessed — click to verify"
+                  title="Cryptographically witnessed — click to expand"
                 >
-                  ✓ Video WID
+                  <Shield size={9} />
+                  WID
                 </button>
+              )}
+              {/* WID Provenance Panel — slides down from artwork */}
+              {widPanelOpen && widBadge && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 z-30 p-4"
+                  style={{
+                    background: "oklch(0.08 0.03 145 / 0.95)",
+                    backdropFilter: "blur(12px)",
+                    borderTop: "1px solid oklch(0.45 0.18 145 / 0.3)",
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Fingerprint size={14} style={{ color: "oklch(0.72 0.18 145)" }} />
+                      <span className="text-[11px] font-heading tracking-[0.12em] uppercase" style={{ color: "oklch(0.72 0.18 145)" }}>
+                        Origin Proof
+                      </span>
+                    </div>
+                    <button onClick={() => setWidPanelOpen(false)} className="text-[10px]" style={{ color: "oklch(0.45 0.04 280)" }}>✕</button>
+                  </div>
+                  <div className="text-[10px] font-mono break-all mb-2" style={{ color: "oklch(0.72 0.14 145)" }}>{widBadge}</div>
+                  <div className="flex items-center gap-3">
+                    {currentTrack?.title && <span className="text-[11px]" style={{ color: "oklch(0.65 0.04 280)" }}>{currentTrack.title}</span>}
+                    <button
+                      onClick={() => { closeTheater(); navigate(`/verify/${widBadge}`); }}
+                      className="flex items-center gap-1 text-[10px] ml-auto transition-all hover:opacity-80"
+                      style={{ color: "oklch(0.72 0.18 145)" }}
+                    >
+                      <ExternalLink size={10} />
+                      Verify
+                    </button>
+                  </div>
+                </div>
               )}
               {/* Gradient overlay at bottom */}
               <div
@@ -247,7 +310,7 @@ export default function TheaterPlayer() {
                     </button>
                   )}
                 </div>
-                {/* Like + Tip */}
+                {/* Like + Tip + Room */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
                     onClick={() => { if (user && currentSongId && !isNaN(currentSongId)) toggleLikeMutation.mutate({ songId: currentSongId }); }}
@@ -267,6 +330,13 @@ export default function TheaterPlayer() {
                       <DollarSign size={18} />
                     </button>
                   )}
+                  <button
+                    onClick={() => { closeTheater(); navigate("/together"); }}
+                    className="p-2 transition-colors text-white/30 hover:text-white/70"
+                    title="Take to Room"
+                  >
+                    <Users size={18} />
+                  </button>
                 </div>
               </div>
 
@@ -362,7 +432,7 @@ export default function TheaterPlayer() {
             </div>
           </div>
 
-          {/* ── RIGHT — Lyrics + Comments ── */}
+          {/* ── RIGHT — Lyrics + Comments + Signals ── */}
           <div
             className="w-full md:w-[380px] flex flex-col flex-shrink-0 overflow-hidden"
             style={{ borderLeft: "1px solid oklch(0.22 0.04 270 / 60%)" }}
@@ -372,11 +442,11 @@ export default function TheaterPlayer() {
               className="flex flex-shrink-0"
               style={{ borderBottom: "1px solid oklch(0.22 0.04 270 / 60%)" }}
             >
-              {(["lyrics", "comments"] as const).map(tab => (
+              {(["lyrics", "signals", "comments"] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className="flex-1 py-3 text-sm font-medium capitalize transition-colors flex items-center justify-center gap-1.5"
+                  className="flex-1 py-3 text-xs font-medium capitalize transition-colors flex items-center justify-center gap-1"
                   style={{
                     color: activeTab === tab ? "oklch(0.80 0.145 82)" : "oklch(0.55 0.02 280)",
                     borderBottom: activeTab === tab ? "2px solid oklch(0.80 0.145 82)" : "2px solid transparent",
@@ -384,7 +454,7 @@ export default function TheaterPlayer() {
                     letterSpacing: "0.05em",
                   }}
                 >
-                  {tab === "lyrics" ? <Music size={13} /> : <MessageCircle size={13} />}
+                  {tab === "lyrics" ? <Music size={12} /> : tab === "signals" ? <span className="text-[12px]">✨</span> : <MessageCircle size={12} />}
                   {tab}
                 </button>
               ))}
@@ -421,6 +491,66 @@ export default function TheaterPlayer() {
                       Upload lyrics to protect your words.
                     </p>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* Signals panel */}
+            {activeTab === "signals" && (
+              <div className="flex-1 overflow-y-auto p-5">
+                {/* Emoji reactions grid */}
+                <div className="mb-5">
+                  <div className="text-[10px] font-heading tracking-[0.15em] uppercase mb-3" style={{ color: "oklch(0.40 0.03 280)" }}>
+                    Signal this work
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {THEATER_EMOJI_REACTIONS.map(({ type, emoji, label }) => {
+                      const count = (reactionCounts as Record<string, number>)[type] ?? 0;
+                      const isActive = myReactions.includes(type);
+                      return (
+                        <button
+                          key={type}
+                          onClick={() => handleToggleReaction(type)}
+                          className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-all hover:scale-105 active:scale-95"
+                          style={{
+                            background: isActive ? "oklch(0.22 0.06 85 / 0.5)" : "oklch(0.12 0.03 275 / 0.8)",
+                            border: `1px solid ${isActive ? "oklch(0.80 0.145 82 / 0.5)" : "oklch(0.22 0.03 275 / 0.6)"}`,
+                          }}
+                          title={label}
+                        >
+                          <span className="text-[22px] leading-none">{emoji}</span>
+                          <span className="text-[10px] font-heading" style={{ color: isActive ? "oklch(0.80 0.145 82)" : "oklch(0.50 0.02 280)" }}>
+                            {label}
+                          </span>
+                          {count > 0 && (
+                            <span className="text-[10px] font-mono" style={{ color: isActive ? "oklch(0.80 0.145 82)" : "oklch(0.45 0.02 280)" }}>
+                              {count}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* Total signals summary */}
+                {Object.keys(reactionCounts).length > 0 && (
+                  <div className="rounded-xl p-4" style={{ background: "oklch(0.10 0.02 275)", border: "1px solid oklch(0.18 0.03 275)" }}>
+                    <div className="text-[10px] font-heading tracking-[0.15em] uppercase mb-2" style={{ color: "oklch(0.40 0.03 280)" }}>
+                      Total signals
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {THEATER_EMOJI_REACTIONS.filter(r => (reactionCounts as Record<string, number>)[r.type] > 0).map(({ type, emoji }) => (
+                        <span key={type} className="flex items-center gap-1 text-[12px]" style={{ color: "oklch(0.65 0.04 280)" }}>
+                          {emoji} {(reactionCounts as Record<string, number>)[type]}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {!user && (
+                  <p className="text-[12px] mt-4 text-center" style={{ color: "oklch(0.40 0.03 280)" }}>
+                    Sign in to send signals
+                  </p>
                 )}
               </div>
             )}
