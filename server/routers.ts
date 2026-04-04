@@ -3441,6 +3441,8 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           energyProfile: parsed.energyProfile ?? undefined,
           lyricsSnapshot: allLyrics || undefined,
           songCount,
+          promptMode: "identity_regen",
+          promptType: input.promptType,
         });
 
         return {
@@ -3454,6 +3456,174 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           tempoRange: parsed.tempoRange,
           energyProfile: parsed.energyProfile,
           lineageVersion: nextVersion,
+        };
+      }),
+
+    // ── Style Prompt Studio: user brings their own inspiration blocks ──────────
+    generateStylePrompt: protectedProcedure
+      .input(z.object({
+        promptType: z.enum(["style_prompt", "lyric_brief", "composer_blueprint", "visual_direction", "press_bio"]).default("style_prompt"),
+        targetPlatform: z.enum(["suno", "udio", "general"]).default("suno"),
+        userInputBlocks: z.array(z.object({
+          label: z.string(),   // e.g. "Lyrics", "Style Idea", "Mood", "Inspiration"
+          content: z.string(), // the creator's raw input
+        })).min(1, "At least one inspiration block is required"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+        // Fetch creator profile for grounding context
+        const creator = await getUserById(ctx.user.id);
+        if (!creator) throw new TRPCError({ code: "NOT_FOUND", message: "Creator not found" });
+
+        const profileContext = [
+          creator.name ? `Artist Name: ${creator.name}` : "",
+          creator.artistHandle ? `Handle: @${creator.artistHandle}` : "",
+          creator.bio ? `Bio: ${creator.bio}` : "",
+          creator.primaryGenre ? `Primary Genre: ${creator.primaryGenre}` : "",
+          creator.location ? `Location: ${creator.location}` : "",
+          creator.aiDisclosure ? `AI Disclosure: ${creator.aiDisclosure.replace(/_/g, " ")}` : "",
+          (creator as any).toneFrequencyNote ? `Tone/Frequency: ${(creator as any).toneFrequencyNote}` : "",
+          (creator as any).dominantKey ? `Dominant Key: ${(creator as any).dominantKey}` : "",
+          (creator as any).tempoRange ? `Tempo Range: ${(creator as any).tempoRange}` : "",
+          (creator as any).energyProfile ? `Energy Profile: ${(creator as any).energyProfile}` : "",
+        ].filter(Boolean).join("\n");
+
+        // Fetch creator's registered lyrics for lineage grounding
+        const creatorSongs = await getSongsByUser(creator.id);
+        const publishedSongs = creatorSongs.filter((s: any) => s.status !== "Deleted");
+        const songCount = publishedSongs.length;
+        const songLines = publishedSongs.map((s: any) => {
+          const meta = `"${s.title}"${s.genre ? ` [${s.genre}]` : ""}${s.mood ? ` / ${s.mood}` : ""}`;
+          const lyricSnippet = s.lyricsText
+            ? ` — Lyrics: "${String(s.lyricsText).slice(0, 200).replace(/\n/g, " ")}..."`
+            : "";
+          return `- ${meta}${lyricSnippet}`;
+        });
+        const lyricsLineageContext = songLines.length > 0
+          ? `\n\nCreator's Registered Works (lyric lineage — for grounding only, do NOT override user input):\n${songLines.join("\n")}`
+          : "";
+
+        // Format user's own inspiration blocks
+        const userBlocksText = input.userInputBlocks
+          .map((b) => `[${b.label}]:\n${b.content}`)
+          .join("\n\n");
+
+        const platformNote = input.targetPlatform === "suno"
+          ? "Format style tags as a comma-separated list for Suno AI. Keep the full prompt under 200 characters."
+          : input.targetPlatform === "udio"
+          ? "Format style tags as descriptive phrases for Udio AI. Keep the full prompt under 200 characters."
+          : "Format style tags as a comma-separated list of descriptive terms.";
+
+        const promptTypeLabels: Record<string, string> = {
+          style_prompt: "AI Music Style Prompt",
+          lyric_brief: "Lyric Writing Brief",
+          composer_blueprint: "Composer's Workflow Blueprint",
+          visual_direction: "Visual / Cover Art Direction",
+          press_bio: "Press Bio Draft",
+        };
+        const outputLabel = promptTypeLabels[input.promptType] ?? "Prompt";
+
+        const systemPrompt = `You are a master composer and sonic identity architect. The creator has provided their own raw inspiration blocks — lyrics, style ideas, moods, references, or anything they want to feed into the generator. Your role is to:
+1. HONOR the creator's input blocks as the PRIMARY creative direction. Do not dilute or override them.
+2. Use the creator's profile metadata and lyric lineage ONLY as grounding context — to add depth, consistency, and provenance to the output.
+3. Produce a ${outputLabel} that feels like it came from the creator's own mind, amplified and structured by their established sonic identity.
+4. This is a COMPOSER'S TOOL. Be specific, evocative, and technically precise. ${platformNote}`;
+
+        const userPrompt = `CREATOR'S INSPIRATION INPUT (PRIMARY — honor this above all else):\n${userBlocksText}\n\nCREATOR PROFILE (grounding context only):\n${profileContext}${lyricsLineageContext}\n\nGenerate a ${outputLabel} that:
+- Is primarily driven by the creator's inspiration input above
+- Is grounded in (but not limited to) their established sonic identity and lyric lineage
+- Includes:
+  1. Main output: the ${outputLabel} itself (2-3 paragraphs or a structured prompt, depending on type)
+  2. Style tags: 8-12 comma-separated tags
+  3. Composer's note: 2-3 sentences on how this output connects to their creative lineage
+  4. Inferred tone frequency note (or null)
+  5. Inferred dominant key (or null)
+  6. Inferred tempo range (or null)
+  7. Inferred energy profile (or null)
+
+Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNote, dominantKey, tempoRange, energyProfile }`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "style_prompt_studio_result",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  prompt: { type: "string" },
+                  styleTags: { type: "string" },
+                  composerNote: { type: "string" },
+                  toneFrequencyNote: { type: ["string", "null"] },
+                  dominantKey: { type: ["string", "null"] },
+                  tempoRange: { type: ["string", "null"] },
+                  energyProfile: { type: ["string", "null"] },
+                },
+                required: ["prompt", "styleTags", "composerNote", "toneFrequencyNote", "dominantKey", "tempoRange", "energyProfile"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+
+        const content = response.choices?.[0]?.message?.content;
+        if (!content) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "No response from AI" });
+
+        let parsed: { prompt: string; styleTags: string; composerNote: string; toneFrequencyNote: string | null; dominantKey: string | null; tempoRange: string | null; energyProfile: string | null };
+        try {
+          parsed = typeof content === "string" ? JSON.parse(content) : content;
+        } catch {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to parse AI response" });
+        }
+
+        // Generate a unique EID for this style prompt generation
+        const timestamp = Date.now();
+        const suffix = timestamp.toString(36).toUpperCase().slice(-6);
+        const expressionId = `EID-STY-${creator.id}-${suffix}`;
+        const generatedAt = new Date();
+
+        // Get prior lineage count for version numbering
+        const priorLineage = await getExpressionLineageByUser(ctx.user.id);
+        const nextVersion = priorLineage.length + 1;
+
+        // Archive to unified lineage history
+        await insertExpressionLineage({
+          userId: creator.id,
+          eid: expressionId,
+          version: nextVersion,
+          prompt: String(parsed.prompt),
+          styleTags: String(parsed.styleTags),
+          composerNote: String(parsed.composerNote),
+          toneFrequencyNote: parsed.toneFrequencyNote ?? undefined,
+          dominantKey: parsed.dominantKey ?? undefined,
+          tempoRange: parsed.tempoRange ?? undefined,
+          energyProfile: parsed.energyProfile ?? undefined,
+          songCount,
+          promptMode: "style_prompt",
+          promptType: input.promptType,
+          userInputBlocks: JSON.stringify(input.userInputBlocks),
+        });
+
+        return {
+          expressionId,
+          expressionPrompt: String(parsed.prompt),
+          expressionStyleTags: String(parsed.styleTags),
+          expressionComposerNote: String(parsed.composerNote),
+          expressionGeneratedAt: generatedAt,
+          toneFrequencyNote: parsed.toneFrequencyNote,
+          dominantKey: parsed.dominantKey,
+          tempoRange: parsed.tempoRange,
+          energyProfile: parsed.energyProfile,
+          lineageVersion: nextVersion,
+          promptMode: "style_prompt" as const,
+          promptType: input.promptType,
         };
       }),
   }),

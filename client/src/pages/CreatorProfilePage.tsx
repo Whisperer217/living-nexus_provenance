@@ -373,11 +373,16 @@ export default function CreatorProfilePage() {
   const [bannerPos, setBannerPos] = useState({ x: 50, y: 50 });
   // AI focal point — set when a new banner is uploaded via the BannerUploadCTA
   const [aiFocalPos, setAiFocalPos] = useState<{ x: number; y: number } | null>(null);
-  // Prompt Studio (auto-generate from profile)
+  // Prompt Studio (3-tab: identity_regen | style_prompt_studio | archive)
   const [showPromptStudio, setShowPromptStudio] = useState(false);
+  const [psTab, setPsTab] = useState<"identity_regen" | "style_prompt_studio" | "archive">("identity_regen");
   const [psPlatform, setPsPlatform] = useState<"suno" | "udio" | "general">("suno");
   const [psPromptType, setPsPromptType] = useState<"style_prompt" | "lyric_brief" | "composer_blueprint" | "visual_direction" | "press_bio">("style_prompt");
-  const [psResult, setPsResult] = useState<{ expressionId: string | null; expressionPrompt: string | null; expressionStyleTags: string | null; expressionComposerNote: string | null; expressionGeneratedAt: Date | null; toneFrequencyNote?: string | null; dominantKey?: string | null; tempoRange?: string | null; energyProfile?: string | null; lineageVersion?: number } | null>(null);
+  const [psResult, setPsResult] = useState<{ expressionId: string | null; expressionPrompt: string | null; expressionStyleTags: string | null; expressionComposerNote: string | null; expressionGeneratedAt: Date | null; toneFrequencyNote?: string | null; dominantKey?: string | null; tempoRange?: string | null; energyProfile?: string | null; lineageVersion?: number; promptMode?: string } | null>(null);
+  // Style Prompt Studio — user's own inspiration blocks
+  const [psInputBlocks, setPsInputBlocks] = useState<{ label: string; content: string }[]>([
+    { label: "Lyrics / Inspiration", content: "" },
+  ]);
   const [showLineage, setShowLineage] = useState(false);
   const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
   // Use currentTrackId (derived from currentIdx) — NOT tracks[0] which always points to the
@@ -438,10 +443,14 @@ export default function CreatorProfilePage() {
   );
   const { data: lineageHistory = [] } = trpc.promptStudio.getLineageHistory.useQuery(
     { creatorId },
-    { enabled: creatorId > 0 && showLineage, staleTime: 30_000 }
+    { enabled: creatorId > 0 && (psTab === "archive" || showLineage), staleTime: 30_000 }
   );
   const generateExpressionMutation = trpc.promptStudio.generateFromProfile.useMutation({
-    onSuccess: (result) => { setPsResult(result); refetchExpression(); },
+    onSuccess: (result) => { setPsResult({ ...result, promptMode: "identity_regen" }); refetchExpression(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const generateStylePromptMutation = trpc.promptStudio.generateStylePrompt.useMutation({
+    onSuccess: (result) => { setPsResult({ ...result, promptMode: "style_prompt" }); refetchExpression(); },
     onError: (e: any) => toast.error(e.message),
   });
   const { data: creatorTestimonies = [] } = trpc.testimony.getByCreator.useQuery(
@@ -1321,7 +1330,7 @@ export default function CreatorProfilePage() {
       </Dialog>
 
       {/* ─── Provenance Prompt Generator Modal ────────────────────────────── */}
-      <Dialog open={showPromptStudio} onOpenChange={setShowPromptStudio}>
+      <Dialog open={showPromptStudio} onOpenChange={(open) => { setShowPromptStudio(open); if (!open) { setPsTab("identity_regen"); setPsResult(null); } }}>
         <DialogContent
           className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           style={{ background: "oklch(0.10 0.04 265)", border: "1px solid rgba(139,92,246,0.25)" }}
@@ -1332,280 +1341,249 @@ export default function CreatorProfilePage() {
               Provenance Prompt Generator
             </DialogTitle>
             <p className="text-xs mt-1" style={{ color: "rgba(156,163,175,0.65)" }}>
-              A composer's tool — auto-generates from this creator's profile metadata, registered works, and lyric lineage. Each result is issued an EID and permanently archived.
+              A composer's tool grounded in your creative lineage. Bring your own inspiration — lyrics, ideas, moods — or auto-generate from your profile. Every result is issued an EID and permanently archived.
             </p>
           </DialogHeader>
 
-          {/* Prompt Type Selector — dropdown */}
-          {isOwner && (
-          <div className="mt-3 mb-1">
-            <label className="text-[10px] font-mono tracking-widest block mb-1.5" style={{ color: "rgba(167,139,250,0.55)" }}>GENERATOR MODE</label>
-            <select
-              value={psPromptType}
-              onChange={(e) => { setPsPromptType(e.target.value as typeof psPromptType); setPsResult(null); }}
-              className="w-full rounded-lg px-3 py-2 text-sm font-semibold appearance-none cursor-pointer"
-              style={{
-                background: "rgba(139,92,246,0.08)",
-                border: "1px solid rgba(139,92,246,0.3)",
-                color: "#a78bfa",
-                outline: "none",
-              }}
-            >
-              <option value="style_prompt">🎵  Style Prompt — AI Music Generation</option>
-              <option value="lyric_brief">✍️  Lyric Writing Brief</option>
-              <option value="composer_blueprint">🎛️  Composer's Workflow Blueprint</option>
-              <option value="visual_direction">🎨  Visual / Cover Art Direction</option>
-              <option value="press_bio">📰  Press Bio Draft</option>
-            </select>
-            <p className="text-[10px] mt-1.5" style={{ color: "rgba(156,163,175,0.4)" }}>
-              {psPromptType === "style_prompt" && "Generates a composer-grade sonic identity prompt for Suno, Udio, or general AI music tools — grounded in your registered works and tone/frequency data."}
-              {psPromptType === "lyric_brief" && "Builds a structured lyric writing guide from your lyrical DNA, recurring themes, rhyme patterns, and spiritual/emotional anchors."}
-              {psPromptType === "composer_blueprint" && "Creates a step-by-step production workflow tailored to your sonic identity — from initial concept to final arrangement."}
-              {psPromptType === "visual_direction" && "Generates a visual language brief for cover art and AI image generation — color palette, symbolic motifs, and aesthetic world."}
-              {psPromptType === "press_bio" && "Writes a professional third-person press bio ready for streaming platforms, press outlets, and booking agents."}
-            </p>
-          </div>
-          )}
-
-          {/* Tab switcher: Current Identity vs Lineage Archive */}
-          <div className="flex gap-1 mt-3 mb-4">
-            <button
-              onClick={() => setShowLineage(false)}
-              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={!showLineage
-                ? { background: "rgba(139,92,246,0.2)", border: "1px solid rgba(139,92,246,0.4)", color: "#a78bfa" }
-                : { background: "transparent", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(156,163,175,0.5)" }
-              }
-            >
-              Current Identity
-            </button>
-            <button
-              onClick={() => setShowLineage(true)}
-              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={showLineage
-                ? { background: "rgba(139,92,246,0.2)", border: "1px solid rgba(139,92,246,0.4)", color: "#a78bfa" }
-                : { background: "transparent", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(156,163,175,0.5)" }
-              }
-            >
-              Lineage Archive {lineageHistory.length > 0 && `(${lineageHistory.length})`}
-            </button>
-          </div>
-
-          {!showLineage ? (
-          <div className="space-y-4">
-            {/* EID badge — show if already generated */}
-            {(existingExpression?.expressionId || psResult?.expressionId) && (
-              <div
-                className="flex items-center gap-3 rounded-lg px-4 py-3"
-                style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.3)" }}
+          {/* ── 3-Tab Switcher ─────────────────────────────────────────── */}
+          <div className="flex gap-1 mt-4 mb-4">
+            {([
+              { id: "identity_regen", label: "Identity Regen" },
+              { id: "style_prompt_studio", label: "Prompt Studio" },
+              { id: "archive", label: `Archive${lineageHistory.length > 0 ? ` (${lineageHistory.length})` : ""}` },
+            ] as const).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => { setPsTab(tab.id); setPsResult(null); }}
+                className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={psTab === tab.id
+                  ? { background: "rgba(139,92,246,0.2)", border: "1px solid rgba(139,92,246,0.4)", color: "#a78bfa" }
+                  : { background: "transparent", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(156,163,175,0.5)" }
+                }
               >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* ── TAB 1: IDENTITY REGEN ────────────────────────────────────── */}
+          {psTab === "identity_regen" && (
+          <div className="space-y-4">
+            <p className="text-xs" style={{ color: "rgba(156,163,175,0.5)" }}>
+              Auto-generates your sonic identity from your profile metadata, registered works, and lyric lineage. The result is issued an EID and permanently archived.
+            </p>
+            {(existingExpression?.expressionId || psResult?.expressionId) && (
+              <div className="flex items-center gap-3 rounded-lg px-4 py-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.3)" }}>
                 <Shield className="w-4 h-4 flex-shrink-0" style={{ color: "#a78bfa" }} />
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(167,139,250,0.6)" }}>EXPRESSION ID</div>
-                  <div className="font-mono text-sm font-bold truncate" style={{ color: "#a78bfa" }}>
-                    {psResult?.expressionId || existingExpression?.expressionId}
-                  </div>
-                  {(psResult?.lineageVersion || (lineageHistory.length > 0)) && (
-                    <div className="text-[10px] mt-0.5" style={{ color: "rgba(167,139,250,0.4)" }}>
-                      Version {psResult?.lineageVersion ?? lineageHistory.length} of lineage
-                    </div>
+                  <div className="font-mono text-sm font-bold truncate" style={{ color: "#a78bfa" }}>{psResult?.expressionId || existingExpression?.expressionId}</div>
+                  {(psResult?.lineageVersion || lineageHistory.length > 0) && (
+                    <div className="text-[10px] mt-0.5" style={{ color: "rgba(167,139,250,0.4)" }}>Version {psResult?.lineageVersion ?? lineageHistory.length} of lineage</div>
                   )}
                 </div>
-                <button
-                  onClick={() => {
-                    const eid = psResult?.expressionId || existingExpression?.expressionId || "";
-                    navigator.clipboard.writeText(eid);
-                    toast.success("EID copied!");
-                  }}
-                  className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded transition-all flex-shrink-0"
-                  style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}
-                >
+                <button onClick={() => { navigator.clipboard.writeText(psResult?.expressionId || existingExpression?.expressionId || ""); toast.success("EID copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded flex-shrink-0" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}>
                   <ClipboardCopy className="w-2.5 h-2.5" /> Copy
                 </button>
               </div>
             )}
-
-            {/* Tone / Frequency identity row */}
-            {(() => {
-              const display = psResult || existingExpression;
-              const hasTone = display?.toneFrequencyNote || display?.dominantKey || display?.tempoRange || display?.energyProfile;
-              if (!hasTone) return null;
-              return (
-                <div className="grid grid-cols-2 gap-2">
-                  {display?.toneFrequencyNote && (
-                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(245,196,81,0.05)", border: "1px solid rgba(245,196,81,0.12)" }}>
-                      <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(245,196,81,0.45)" }}>TONE / FREQUENCY</div>
-                      <div className="text-xs font-semibold" style={{ color: "rgba(245,196,81,0.8)" }}>{display.toneFrequencyNote}</div>
-                    </div>
-                  )}
-                  {display?.dominantKey && (
-                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(52,211,153,0.05)", border: "1px solid rgba(52,211,153,0.12)" }}>
-                      <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(52,211,153,0.45)" }}>DOMINANT KEY</div>
-                      <div className="text-xs font-semibold" style={{ color: "rgba(52,211,153,0.8)" }}>{display.dominantKey}</div>
-                    </div>
-                  )}
-                  {display?.tempoRange && (
-                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.12)" }}>
-                      <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(96,165,250,0.45)" }}>TEMPO RANGE</div>
-                      <div className="text-xs font-semibold" style={{ color: "rgba(96,165,250,0.8)" }}>{display.tempoRange}</div>
-                    </div>
-                  )}
-                  {display?.energyProfile && (
-                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(251,113,133,0.05)", border: "1px solid rgba(251,113,133,0.12)" }}>
-                      <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(251,113,133,0.45)" }}>ENERGY PROFILE</div>
-                      <div className="text-xs font-semibold" style={{ color: "rgba(251,113,133,0.8)" }}>{display.energyProfile}</div>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-
-            {/* Platform selector */}
             {isOwner && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Target platform:</span>
-              {(["suno", "udio", "general"] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPsPlatform(p)}
-                  className="px-3 py-1 rounded-full text-xs font-mono transition-all"
-                  style={psPlatform === p
-                    ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" }
-                    : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(156,163,175,0.5)" }
-                  }
-                >
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
-                </button>
-              ))}
-            </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Target platform:</span>
+                {(["suno", "udio", "general"] as const).map((p) => (
+                  <button key={p} onClick={() => setPsPlatform(p)} className="px-3 py-1 rounded-full text-xs font-mono transition-all"
+                    style={psPlatform === p ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" } : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(156,163,175,0.5)" }}>
+                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                  </button>
+                ))}
+              </div>
             )}
-
-            {/* Generate / Regenerate button — only for the creator themselves */}
             {isOwner && (
-            <button
-              onClick={() => generateExpressionMutation.mutate({ targetPlatform: psPlatform, promptType: psPromptType, forceRegenerate: true })}
-              disabled={generateExpressionMutation.isPending}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all"
-              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.8), rgba(167,139,250,0.6))", color: "#fff" }}
-            >
-              {generateExpressionMutation.isPending
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
-                : (() => {
-                    const labels: Record<string, string> = {
-                      style_prompt: "Generate Style Prompt",
-                      lyric_brief: "Generate Lyric Brief",
-                      composer_blueprint: "Generate Composer Blueprint",
-                      visual_direction: "Generate Visual Direction",
-                      press_bio: "Generate Press Bio",
-                    };
-                    return <><Wand2 className="w-4 h-4" /> {labels[psPromptType] ?? "Generate"}</>;
-                  })()
-              }
-            </button>
+              <button onClick={() => generateExpressionMutation.mutate({ targetPlatform: psPlatform, promptType: "style_prompt", forceRegenerate: true })} disabled={generateExpressionMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all"
+                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.8), rgba(167,139,250,0.6))", color: "#fff" }}>
+                {generateExpressionMutation.isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</> : <><Wand2 className="w-4 h-4" /> Regenerate Expression Identity</>}
+              </button>
             )}
-
-            {/* Results — show psResult (freshly generated) or existingExpression (saved) */}
             {(() => {
-              const display = psResult || existingExpression;
+              const display = psResult?.promptMode === "identity_regen" ? psResult : (psResult ? null : existingExpression);
               if (!display?.expressionPrompt) return null;
               return (
                 <div className="space-y-3 pt-2" style={{ borderTop: "1px solid rgba(139,92,246,0.15)" }}>
-                  {/* Main prompt */}
-                  <div
-                    className="rounded-lg p-3 relative group"
-                    style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}
-                  >
+                  <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>
-                        {psPromptType === "style_prompt" && "EXPRESSION PROMPT"}
-                        {psPromptType === "lyric_brief" && "LYRIC WRITING BRIEF"}
-                        {psPromptType === "composer_blueprint" && "COMPOSER'S WORKFLOW BLUEPRINT"}
-                        {psPromptType === "visual_direction" && "VISUAL / COVER ART DIRECTION"}
-                        {psPromptType === "press_bio" && "PRESS BIO DRAFT"}
-                      </span>
-                      <button
-                        onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Prompt copied!"); }}
-                        className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded transition-all"
-                        style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}
-                      >
-                        <ClipboardCopy className="w-2.5 h-2.5" /> Copy
-                      </button>
+                      <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>EXPRESSION PROMPT</span>
+                      <button onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                     </div>
                     <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{display.expressionPrompt}</p>
                   </div>
-
-                  {/* Style tags */}
                   {display.expressionStyleTags && (
-                    <div
-                      className="rounded-lg p-3 relative"
-                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-                    >
+                    <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
-                        <button
-                          onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Tags copied!"); }}
-                          className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded transition-all"
-                          style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}
-                        >
-                          <ClipboardCopy className="w-2.5 h-2.5" /> Copy
-                        </button>
+                        <button onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                       </div>
                       <p className="text-xs leading-relaxed" style={{ color: "rgba(209,213,219,0.7)" }}>{display.expressionStyleTags}</p>
                     </div>
                   )}
-
-                  {/* Composer's note */}
                   {display.expressionComposerNote && (
-                    <div
-                      className="rounded-lg p-3"
-                      style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}
-                    >
+                    <div className="rounded-lg p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
                       <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(245,196,81,0.45)" }}>COMPOSER'S NOTE</span>
                       <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{display.expressionComposerNote}</p>
                     </div>
                   )}
-
-                  {/* Timestamp */}
-                  {display.expressionGeneratedAt && (
-                    <p className="text-[10px] text-center" style={{ color: "rgba(156,163,175,0.35)" }}>
-                      Generated {new Date(display.expressionGeneratedAt).toLocaleDateString()}
-                    </p>
-                  )}
+                  {display.expressionGeneratedAt && <p className="text-[10px] text-center" style={{ color: "rgba(156,163,175,0.35)" }}>Generated {new Date(display.expressionGeneratedAt).toLocaleDateString()}</p>}
                 </div>
               );
             })()}
           </div>
-          ) : (
-          /* Lineage Archive tab */
+          )}
+
+          {/* ── TAB 2: STYLE PROMPT STUDIO ──────────────────────────────────── */}
+          {psTab === "style_prompt_studio" && (
+          <div className="space-y-4">
+            <p className="text-xs" style={{ color: "rgba(156,163,175,0.5)" }}>
+              Bring your own inspiration — lyrics, style ideas, mood, references, anything. The generator fuses your input with your profile lineage and EID to produce a provenance-grounded prompt.
+            </p>
+            {isOwner && (
+            <div>
+              <label className="text-[10px] font-mono tracking-widest block mb-1.5" style={{ color: "rgba(167,139,250,0.55)" }}>GENERATOR MODE</label>
+              <select value={psPromptType} onChange={(e) => { setPsPromptType(e.target.value as typeof psPromptType); setPsResult(null); }}
+                className="w-full rounded-lg px-3 py-2 text-sm font-semibold appearance-none cursor-pointer"
+                style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.3)", color: "#a78bfa", outline: "none" }}>
+                <option value="style_prompt">🎵  Style Prompt — AI Music Generation</option>
+                <option value="lyric_brief">✍️  Lyric Writing Brief</option>
+                <option value="composer_blueprint">🎛️  Composer's Workflow Blueprint</option>
+                <option value="visual_direction">🎨  Visual / Cover Art Direction</option>
+                <option value="press_bio">📰  Press Bio Draft</option>
+              </select>
+            </div>
+            )}
+            {isOwner && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.55)" }}>YOUR INSPIRATION BLOCKS</label>
+                <button onClick={() => setPsInputBlocks(prev => [...prev, { label: "", content: "" }])}
+                  className="text-[10px] px-2 py-0.5 rounded flex items-center gap-1 transition-all"
+                  style={{ color: "rgba(167,139,250,0.7)", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)" }}>
+                  + Add Block
+                </button>
+              </div>
+              {psInputBlocks.map((block, idx) => (
+                <div key={idx} className="rounded-lg p-3 space-y-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="flex items-center gap-2">
+                    <input value={block.label}
+                      onChange={(e) => setPsInputBlocks(prev => prev.map((b, i) => i === idx ? { ...b, label: e.target.value } : b))}
+                      placeholder="Block label (e.g. Lyrics, Style Idea, Mood)"
+                      className="flex-1 bg-transparent text-[11px] font-mono outline-none"
+                      style={{ color: "rgba(167,139,250,0.8)", borderBottom: "1px solid rgba(139,92,246,0.2)", paddingBottom: "2px" }} />
+                    {psInputBlocks.length > 1 && (
+                      <button onClick={() => setPsInputBlocks(prev => prev.filter((_, i) => i !== idx))} className="text-[10px] opacity-40 hover:opacity-80 transition-opacity" style={{ color: "rgba(251,113,133,0.8)" }}>×</button>
+                    )}
+                  </div>
+                  <textarea value={block.content}
+                    onChange={(e) => setPsInputBlocks(prev => prev.map((b, i) => i === idx ? { ...b, content: e.target.value } : b))}
+                    placeholder="Paste lyrics, describe a style, write a mood, reference an artist or era..."
+                    rows={4} className="w-full bg-transparent text-xs leading-relaxed resize-none outline-none"
+                    style={{ color: "rgba(229,231,235,0.8)", caretColor: "#a78bfa" }} />
+                </div>
+              ))}
+            </div>
+            )}
+            {isOwner && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Target platform:</span>
+                {(["suno", "udio", "general"] as const).map((p) => (
+                  <button key={p} onClick={() => setPsPlatform(p)} className="px-3 py-1 rounded-full text-xs font-mono transition-all"
+                    style={psPlatform === p ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" } : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(156,163,175,0.5)" }}>
+                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                  </button>
+                ))}
+              </div>
+            )}
+            {isOwner && (
+              <button
+                onClick={() => generateStylePromptMutation.mutate({ targetPlatform: psPlatform, promptType: psPromptType, userInputBlocks: psInputBlocks.filter(b => b.content.trim()) })}
+                disabled={generateStylePromptMutation.isPending || psInputBlocks.every(b => !b.content.trim())}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.8), rgba(167,139,250,0.6))", color: "#fff" }}>
+                {generateStylePromptMutation.isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</> : <><Wand2 className="w-4 h-4" /> Generate from My Input</>}
+              </button>
+            )}
+            {(() => {
+              const display = psResult?.promptMode === "style_prompt" ? psResult : null;
+              if (!display?.expressionPrompt) return null;
+              return (
+                <div className="space-y-3 pt-2" style={{ borderTop: "1px solid rgba(139,92,246,0.15)" }}>
+                  {display.expressionId && (
+                    <div className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.3)" }}>
+                      <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#a78bfa" }} />
+                      <span className="font-mono text-xs font-bold" style={{ color: "#a78bfa" }}>{display.expressionId}</span>
+                      <button onClick={() => { navigator.clipboard.writeText(display.expressionId || ""); toast.success("EID copied!"); }} className="ml-auto flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                    </div>
+                  )}
+                  <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>GENERATED PROMPT</span>
+                      <button onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                    </div>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{display.expressionPrompt}</p>
+                  </div>
+                  {display.expressionStyleTags && (
+                    <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
+                        <button onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                      </div>
+                      <p className="text-xs leading-relaxed" style={{ color: "rgba(209,213,219,0.7)" }}>{display.expressionStyleTags}</p>
+                    </div>
+                  )}
+                  {display.expressionComposerNote && (
+                    <div className="rounded-lg p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
+                      <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(245,196,81,0.45)" }}>COMPOSER'S NOTE</span>
+                      <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{display.expressionComposerNote}</p>
+                    </div>
+                  )}
+                  <button onClick={() => { const all = [display.expressionPrompt, display.expressionStyleTags, display.expressionComposerNote].filter(Boolean).join('\n\n'); navigator.clipboard.writeText(all); toast.success("Full output copied!"); }}
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all"
+                    style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(167,139,250,0.8)" }}>
+                    <ClipboardCopy className="w-3.5 h-3.5" /> Copy Full Output
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+          )}
+
+          {/* ── TAB 3: ARCHIVE ──────────────────────────────────────────────── */}
+          {psTab === "archive" && (
           <div className="space-y-3">
             <p className="text-xs" style={{ color: "rgba(156,163,175,0.5)" }}>
-              Every Expression Identity ever generated for this creator is permanently archived here. This is the spiritual and creative lineage of their sonic identity.
+              Every Identity Regen and Style Prompt generation is permanently archived here — the full spiritual and creative lineage of this creator's sonic identity.
             </p>
             {lineageHistory.length === 0 ? (
               <div className="text-center py-8" style={{ color: "rgba(156,163,175,0.35)" }}>
                 <Shield className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                <p className="text-xs">No lineage records yet. Generate an Expression Identity to begin the archive.</p>
+                <p className="text-xs">No lineage records yet. Generate from either tab to begin the archive.</p>
               </div>
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
                 {lineageHistory.map((entry: any, idx: number) => (
-                  <div
-                    key={entry.id ?? idx}
-                    className="rounded-lg p-3"
-                    style={{ background: idx === 0 ? "rgba(139,92,246,0.08)" : "rgba(255,255,255,0.02)", border: idx === 0 ? "1px solid rgba(139,92,246,0.25)" : "1px solid rgba(255,255,255,0.06)" }}
-                  >
+                  <div key={entry.id ?? idx} className="rounded-lg p-3"
+                    style={{ background: idx === 0 ? "rgba(139,92,246,0.08)" : "rgba(255,255,255,0.02)", border: idx === 0 ? "1px solid rgba(139,92,246,0.25)" : "1px solid rgba(255,255,255,0.06)" }}>
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-mono text-[10px] font-bold" style={{ color: idx === 0 ? "#a78bfa" : "rgba(167,139,250,0.5)" }}>{entry.eid}</span>
-                        <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.5)" }}>v{entry.version}</span>
-                        {idx === 0 && <span className="ml-1 text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(52,211,153,0.1)", color: "rgba(52,211,153,0.7)" }}>CURRENT</span>}
+                        <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.5)" }}>v{entry.version}</span>
+                        {entry.promptMode === "style_prompt" && <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(96,165,250,0.1)", color: "rgba(96,165,250,0.7)" }}>STUDIO</span>}
+                        {entry.promptMode === "identity_regen" && <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.6)" }}>IDENTITY</span>}
+                        {idx === 0 && <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(52,211,153,0.1)", color: "rgba(52,211,153,0.7)" }}>CURRENT</span>}
                       </div>
-                      <span className="text-[9px] flex-shrink-0" style={{ color: "rgba(156,163,175,0.3)" }}>
-                        {new Date(entry.generatedAt).toLocaleDateString()}
-                      </span>
+                      <span className="text-[9px] flex-shrink-0" style={{ color: "rgba(156,163,175,0.3)" }}>{new Date(entry.generatedAt).toLocaleDateString()}</span>
                     </div>
                     {entry.prompt && <p className="text-[11px] leading-relaxed mb-1" style={{ color: "rgba(229,231,235,0.7)" }}>{entry.prompt}</p>}
                     {entry.composerNote && <p className="text-[10px] italic" style={{ color: "rgba(229,231,235,0.4)" }}>{entry.composerNote}</p>}
+                    {entry.userInputBlocks && <p className="text-[9px] mt-1" style={{ color: "rgba(156,163,175,0.35)" }}>✍️ Creator input included</p>}
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {entry.dominantKey && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(52,211,153,0.08)", color: "rgba(52,211,153,0.6)" }}>{entry.dominantKey}</span>}
                       {entry.tempoRange && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(96,165,250,0.08)", color: "rgba(96,165,250,0.6)" }}>{entry.tempoRange}</span>}

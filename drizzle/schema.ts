@@ -833,6 +833,9 @@ export const expressionLineage = mysqlTable("expressionLineage", {
   energyProfile: varchar("energyProfile", { length: 128 }),
   lyricsSnapshot: text("lyricsSnapshot"), // first 1000 chars of lyrics used at generation time
   songCount: int("songCount").default(0).notNull(), // how many songs the creator had at generation time
+  promptMode: mysqlEnum("promptMode", ["identity_regen", "style_prompt"]).default("identity_regen").notNull(), // which tab generated this entry
+  promptType: varchar("promptType", { length: 32 }), // style_prompt | lyric_brief | composer_blueprint | visual_direction | press_bio
+  userInputBlocks: text("userInputBlocks"), // JSON array of user-supplied inspiration blocks [{label, content}]
   generatedAt: timestamp("generatedAt").defaultNow().notNull(),
 });
 export type ExpressionLineage = typeof expressionLineage.$inferSelect;

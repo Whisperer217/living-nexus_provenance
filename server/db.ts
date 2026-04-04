@@ -152,6 +152,9 @@ export async function insertExpressionLineage(data: {
   energyProfile?: string;
   lyricsSnapshot?: string;
   songCount: number;
+  promptMode?: "identity_regen" | "style_prompt";
+  promptType?: string;
+  userInputBlocks?: string; // JSON string of [{label, content}]
 }) {
   const db = await getDb();
   if (!db) return;
@@ -168,6 +171,9 @@ export async function insertExpressionLineage(data: {
     energyProfile: data.energyProfile ?? null,
     lyricsSnapshot: data.lyricsSnapshot ?? null,
     songCount: data.songCount,
+    promptMode: data.promptMode ?? "identity_regen",
+    promptType: data.promptType ?? null,
+    userInputBlocks: data.userInputBlocks ?? null,
     generatedAt: new Date(),
   });
 }

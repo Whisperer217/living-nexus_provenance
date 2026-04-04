@@ -2429,3 +2429,11 @@
 - [x] Add promptType dropdown to generator modal (Style Prompt, Lyric Brief, Composer Blueprint, Visual Direction, Press Bio)
 - [x] Backend: promptType parameter on generateFromProfile, each type has own LLM system prompt
 - [x] UI: update result display per type (labels, copy buttons, output sections)
+
+## Provenance Prompt Generator v3 (Apr 4 2026)
+- [ ] DB: add promptMode (identity_regen | style_prompt) and userInputBlocks fields to expressionLineage table
+- [ ] Backend: add generateStylePrompt procedure with user input blocks + profile fusion
+- [ ] Backend: update archive to store both identity_regen and style_prompt entries
+- [ ] UI: rebuild modal as 3-tab tool (Identity Regen / Style Prompt Studio / Archive)
+- [ ] UI: Style Prompt Studio tab has free-form input blocks (lyrics, style ideas, mood, etc.)
+- [ ] UI: Archive tab shows unified history of both modes with mode badge

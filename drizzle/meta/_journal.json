@@ -260,6 +260,13 @@
       "when": 1775324025012,
       "tag": "0036_brave_wolverine",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1775326629337,
+      "tag": "0037_lazy_nomad",
+      "breakpoints": true
     }
   ]
 }
