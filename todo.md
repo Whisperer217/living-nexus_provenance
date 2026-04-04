@@ -2325,3 +2325,31 @@
 ## Bug Fix: WID Badges Not Rendering on TrackCards
 - [x] Diagnose why WID (Witness ID) badges are missing on TrackCards in Discover/Explore carousels
 - [x] Fix WID badge rendering in TrackCard and/or data mapping sites
+
+## UX Sprint: Player, Interactions, Profiles, Prompt Generator, Tribute
+
+### MoshAIMusic Tribute (Community Inspiration)
+- [x] Add tribute/inspiration state at homepage bottom honoring MoshAIMusic (Slimdoggy on Discord)
+- [x] Quote his Discord comment about lyric sheet → instrumentation cue → timing map workflow
+- [x] Include his real avatar, handle, and link to his profile (/creator/780095)
+
+### Testimony Pill on Creator Profile
+- [x] Show a "WITNESSED" testimony pill/badge on creator profile when they have uploaded works
+- [x] Pill shows WID count (both desktop and mobile stats rows)
+
+### AI Music Prompt Generator (Creator Profile Tab)
+- [x] Add "Prompt Studio" button to creator profile page (desktop + mobile, owner only)
+- [x] Pop-up/modal with LLM-powered prompt generator for music AI tools (Suno/Udio/General)
+- [x] Inputs: lyrics or theme, genre, mood, instrumentation, target platform
+- [x] Output: full prompt text, style tags, title suggestions, composer note
+- [x] Copy-to-clipboard for prompt, style tags, and each title suggestion
+- [x] Backend tRPC promptStudio.generate procedure using LLM
+
+### Global Player UX Polish
+- [x] Mini player artist name color improved (more visible on dark bg)
+- [x] Signals section label upgraded with divider line (mobile + theater)
+- [x] TheaterPlayer artist name color improved for readability
+
+### Interaction Layer Polish
+- [x] Signals label divider line added for visual hierarchy
+- [ ] Signal burst micro-animation on emoji reaction tap (deferred)

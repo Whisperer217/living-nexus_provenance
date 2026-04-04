@@ -19,8 +19,9 @@ import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
-  Library, Move, Upload, Loader2, Crown,
+  Library, Move, Upload, Loader2, Crown, Sparkles, Wand2, ClipboardCopy, ChevronDown,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -371,6 +372,14 @@ export default function CreatorProfilePage() {
   const [bannerPos, setBannerPos] = useState({ x: 50, y: 50 });
   // AI focal point — set when a new banner is uploaded via the BannerUploadCTA
   const [aiFocalPos, setAiFocalPos] = useState<{ x: number; y: number } | null>(null);
+  // Prompt Studio
+  const [showPromptStudio, setShowPromptStudio] = useState(false);
+  const [psLyrics, setPsLyrics] = useState("");
+  const [psGenre, setPsGenre] = useState("");
+  const [psMood, setPsMood] = useState("");
+  const [psInstrumentation, setPsInstrumentation] = useState("");
+  const [psPlatform, setPsPlatform] = useState<"suno" | "udio" | "general">("suno");
+  const [psResult, setPsResult] = useState<{ prompt: string; styleTags: string; titleSuggestions: string[]; composerNote: string } | null>(null);
   const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
   // Use currentTrackId (derived from currentIdx) — NOT tracks[0] which always points to the
   // first track in the queue regardless of which track is actively playing.
@@ -423,6 +432,10 @@ export default function CreatorProfilePage() {
   });
   const isWitnessingCreator = witnessStatusQuery.data?.witnessing ?? false;
   const witnessCount = witnessStatusQuery.data?.count ?? 0;
+  const promptStudioMutation = trpc.promptStudio.generate.useMutation({
+    onSuccess: (result) => { setPsResult(result); },
+    onError: (e) => toast.error(e.message),
+  });
   const { data: creatorTestimonies = [] } = trpc.testimony.getByCreator.useQuery(
     { creatorId, limit: 10 },
     { enabled: creatorId > 0, staleTime: 60_000 }
@@ -522,6 +535,7 @@ export default function CreatorProfilePage() {
   const totalPlays = songs.reduce((acc: number, s: any) => acc + (s.playCount || 0), 0);
   const totalTips = songs.reduce((acc: number, s: any) => acc + (s.tipCount || 0), 0);
   const tipsEnabled = creator.stripeAccountStatus === "enabled";
+  const witnessedWorksCount = songs.filter((s: any) => !!s.witnessId).length;
 
   const profileTitle = `${creator.artistHandle || creator.name || "Artist"} — Living Nexus`;
   const profileDesc = creator.bio
@@ -781,6 +795,17 @@ export default function CreatorProfilePage() {
                   {creator.supporterTier && (
                     <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
                   )}
+                  {/* WITNESSED testimony pill */}
+                  {witnessedWorksCount > 0 && (
+                    <span
+                      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest"
+                      style={{ background: "rgba(245,196,81,0.1)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.3)" }}
+                      title={`${witnessedWorksCount} works registered on the Living Nexus provenance registry`}
+                    >
+                      <Shield className="w-2.5 h-2.5" />
+                      WITNESSED &middot; {witnessedWorksCount}
+                    </span>
+                  )}
                   <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
                     <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>
                     {" "}tracks
@@ -805,6 +830,15 @@ export default function CreatorProfilePage() {
                           Edit Profile
                         </button>
                       </Link>
+                      <button
+                        onClick={() => { setPsResult(null); setShowPromptStudio(true); }}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                        style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#a78bfa" }}
+                        title="Open AI Music Prompt Studio"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        Prompt Studio
+                      </button>
                       {!creator.stripeAccountId && (
                         <button
                           onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
@@ -878,6 +912,17 @@ export default function CreatorProfilePage() {
                 {creator.supporterTier && (
                   <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
                 )}
+                {/* WITNESSED testimony pill */}
+                {witnessedWorksCount > 0 && (
+                  <span
+                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest"
+                    style={{ background: "rgba(245,196,81,0.1)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.3)" }}
+                    title={`${witnessedWorksCount} works on the Living Nexus provenance registry`}
+                  >
+                    <Shield className="w-2.5 h-2.5" />
+                    WITNESSED &middot; {witnessedWorksCount}
+                  </span>
+                )}
                 <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
                   <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}tracks
                 </span>
@@ -933,6 +978,14 @@ export default function CreatorProfilePage() {
                         Edit Profile
                       </button>
                     </Link>
+                    <button
+                      onClick={() => { setPsResult(null); setShowPromptStudio(true); }}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                      style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#a78bfa" }}
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      Prompt Studio
+                    </button>
                     {!creator.stripeAccountId && (
                       <button
                         onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
@@ -1234,6 +1287,182 @@ export default function CreatorProfilePage() {
             >
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Gift`}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Prompt Studio Modal ───────────────────────────────────────────── */}
+      <Dialog open={showPromptStudio} onOpenChange={setShowPromptStudio}>
+        <DialogContent
+          className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          style={{ background: "oklch(0.10 0.04 265)", border: "1px solid rgba(139,92,246,0.25)" }}
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2" style={{ fontFamily: "'Cinzel', serif", color: "#a78bfa" }}>
+              <Sparkles className="w-5 h-5" />
+              Prompt Studio
+            </DialogTitle>
+            <p className="text-xs mt-1" style={{ color: "rgba(156,163,175,0.65)" }}>
+              Describe your vision — lyrics, theme, mood, instrumentation — and get a ready-to-paste AI music prompt.
+            </p>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-2">
+            {/* Platform selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Target platform:</span>
+              {(["suno", "udio", "general"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPsPlatform(p)}
+                  className="px-3 py-1 rounded-full text-xs font-mono transition-all"
+                  style={psPlatform === p
+                    ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" }
+                    : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(156,163,175,0.5)" }
+                  }
+                >
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {/* Lyrics / Theme */}
+            <div>
+              <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(167,139,250,0.8)" }}>
+                Lyrics or Theme
+              </label>
+              <Textarea
+                placeholder="Paste your lyrics, a theme, a Bible verse, a story — anything that captures the essence of the song..."
+                value={psLyrics}
+                onChange={(e) => setPsLyrics(e.target.value)}
+                rows={5}
+                className="text-sm resize-none"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(229,231,235,0.9)" }}
+              />
+            </div>
+
+            {/* Genre + Mood row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(167,139,250,0.8)" }}>Genre</label>
+                <Input
+                  placeholder="e.g. Christian Power Metal"
+                  value={psGenre}
+                  onChange={(e) => setPsGenre(e.target.value)}
+                  className="text-sm"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(229,231,235,0.9)" }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(167,139,250,0.8)" }}>Mood</label>
+                <Input
+                  placeholder="e.g. Epic, Triumphant, Melancholic"
+                  value={psMood}
+                  onChange={(e) => setPsMood(e.target.value)}
+                  className="text-sm"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(229,231,235,0.9)" }}
+                />
+              </div>
+            </div>
+
+            {/* Instrumentation */}
+            <div>
+              <label className="text-xs font-semibold mb-1 block" style={{ color: "rgba(167,139,250,0.8)" }}>Instrumentation Cues</label>
+              <Input
+                placeholder="e.g. orchestral strings, electric guitar, choir, timpani drums"
+                value={psInstrumentation}
+                onChange={(e) => setPsInstrumentation(e.target.value)}
+                className="text-sm"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(229,231,235,0.9)" }}
+              />
+            </div>
+
+            {/* Generate button */}
+            <button
+              onClick={() => promptStudioMutation.mutate({
+                lyrics: psLyrics || undefined,
+                genre: psGenre || undefined,
+                mood: psMood || undefined,
+                instrumentation: psInstrumentation || undefined,
+                targetPlatform: psPlatform,
+              })}
+              disabled={promptStudioMutation.isPending}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all"
+              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.8), rgba(167,139,250,0.6))", color: "#fff" }}
+            >
+              {promptStudioMutation.isPending
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
+                : <><Wand2 className="w-4 h-4" /> Generate Prompt</>
+              }
+            </button>
+
+            {/* Results */}
+            {psResult && (
+              <div className="space-y-3 pt-2" style={{ borderTop: "1px solid rgba(139,92,246,0.15)" }}>
+                {/* Main prompt */}
+                <div
+                  className="rounded-lg p-3 relative group"
+                  style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>MUSIC PROMPT</span>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(psResult.prompt); toast.success("Prompt copied!"); }}
+                      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded transition-all"
+                      style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}
+                    >
+                      <ClipboardCopy className="w-2.5 h-2.5" /> Copy
+                    </button>
+                  </div>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{psResult.prompt}</p>
+                </div>
+
+                {/* Style tags */}
+                <div
+                  className="rounded-lg p-3 relative"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(psResult.styleTags); toast.success("Tags copied!"); }}
+                      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded transition-all"
+                      style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}
+                    >
+                      <ClipboardCopy className="w-2.5 h-2.5" /> Copy
+                    </button>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: "rgba(209,213,219,0.7)" }}>{psResult.styleTags}</p>
+                </div>
+
+                {/* Title suggestions */}
+                <div>
+                  <span className="text-[10px] font-mono tracking-widest block mb-2" style={{ color: "rgba(156,163,175,0.5)" }}>TITLE SUGGESTIONS</span>
+                  <div className="flex flex-wrap gap-2">
+                    {psResult.titleSuggestions.map((title, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { navigator.clipboard.writeText(title); toast.success(`"${title}" copied!`); }}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs transition-all"
+                        style={{ background: "rgba(245,196,81,0.08)", border: "1px solid rgba(245,196,81,0.2)", color: "#F5C451" }}
+                      >
+                        <ClipboardCopy className="w-2.5 h-2.5" />
+                        {title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Composer's note */}
+                <div
+                  className="rounded-lg p-3"
+                  style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}
+                >
+                  <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(245,196,81,0.45)" }}>COMPOSER'S NOTE</span>
+                  <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{psResult.composerNote}</p>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -340,7 +340,7 @@ export default function TheaterPlayer() {
                     onClick={goToCreator}
                     disabled={!songDetail?.creator?.id}
                     className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80 disabled:cursor-default"
-                    style={{ color: "oklch(0.82 0.155 175)" }}
+                    style={{ color: "oklch(0.72 0.08 280)" }}
                   >
                     {currentTrack?.creatorRole === "founder" && (
                       <Crown size={11} style={{ color: "oklch(0.84 0.155 85)", flexShrink: 0 }} />
@@ -568,8 +568,11 @@ export default function TheaterPlayer() {
                 )}
                 {/* Emoji reactions grid */}
                 <div className="mb-5">
-                  <div className="text-[10px] font-heading tracking-[0.15em] uppercase mb-3" style={{ color: "oklch(0.40 0.03 280)" }}>
-                    Signal this work
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="text-[10px] font-heading tracking-[0.15em] uppercase" style={{ color: "oklch(0.58 0.05 280)" }}>
+                      Signal this work
+                    </div>
+                    <div className="flex-1 h-px" style={{ background: "oklch(0.22 0.03 275 / 0.5)" }} />
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {THEATER_EMOJI_REACTIONS.map(({ type, emoji, label }) => {

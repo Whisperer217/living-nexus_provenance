@@ -555,7 +555,7 @@ export default function MobilePlayerLayer() {
           <div className="text-[13px] font-heading text-white truncate leading-tight">
             {currentTrack.title || "Unknown Track"}
           </div>
-          <div className="text-[11px] truncate mt-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>
+          <div className="text-[11px] truncate mt-0.5" style={{ color: "oklch(0.62 0.05 280)" }}>
             {currentTrack.artist || "Unknown Artist"}
           </div>
         </button>
@@ -904,9 +904,12 @@ export default function MobilePlayerLayer() {
 
       {/* Signal / Reactions */}
       <div className="flex-shrink-0 mx-8 mb-4">
-        <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-2"
-          style={{ color: "oklch(0.35 0.02 280)" }}>
-          Signals
+        <div className="flex items-center gap-2 mb-2">
+          <div className="text-[9px] font-heading tracking-[0.15em] uppercase"
+            style={{ color: "oklch(0.58 0.05 280)" }}>
+            Signals
+          </div>
+          <div className="flex-1 h-px" style={{ background: "oklch(0.22 0.03 275 / 0.5)" }} />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {EMOJI_REACTIONS.map(({ type, emoji, label }) => {

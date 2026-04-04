@@ -3170,5 +3170,79 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         return { success: true, message: "Founder Free Tier granted — 100 slots added" };
       }),
   }),
+
+  // ─── Prompt Studio ────────────────────────────────────────────────────────
+  promptStudio: router({
+    /** Generate a music AI prompt from lyrics/theme, style, and mood inputs */
+    generate: protectedProcedure
+      .input(z.object({
+        lyrics: z.string().max(2000).optional(),
+        theme: z.string().max(500).optional(),
+        genre: z.string().max(200).optional(),
+        mood: z.string().max(200).optional(),
+        instrumentation: z.string().max(300).optional(),
+        targetPlatform: z.enum(["suno", "udio", "general"]).default("suno"),
+      }))
+      .mutation(async ({ input }) => {
+        const contextParts = [
+          input.lyrics ? `Lyrics/Theme:\n${input.lyrics}` : input.theme ? `Theme: ${input.theme}` : "",
+          input.genre ? `Genre: ${input.genre}` : "",
+          input.mood ? `Mood: ${input.mood}` : "",
+          input.instrumentation ? `Instrumentation: ${input.instrumentation}` : "",
+        ].filter(Boolean);
+        const context = contextParts.join("\n");
+
+        const platformNote = input.targetPlatform === "suno"
+          ? "Format style tags as a comma-separated list for Suno AI (e.g. 'cinematic, orchestral, epic, male vocals'). Keep the full prompt under 200 characters."
+          : input.targetPlatform === "udio"
+          ? "Format style tags as descriptive phrases for Udio AI. Keep the full prompt under 200 characters."
+          : "Format style tags as a comma-separated list of descriptive terms.";
+
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: `You are a music AI prompt engineer who specializes in crafting precise, evocative prompts for AI music generation tools. You understand music theory, genre conventions, and how to translate lyrical themes into sonic descriptions. ${platformNote}`,
+            },
+            {
+              role: "user",
+              content: `Based on the following creative input, generate:\n1. A complete music AI prompt (style tags + sonic description, max 200 characters)\n2. A list of 8-12 style tags (comma-separated)\n3. Three compelling song title suggestions that fit the theme\n4. A brief composer's note (1-2 sentences) explaining the sonic vision\n\nCreative input:\n${context || "No specific input — create something powerful and original."}\n\nRespond ONLY with valid JSON matching this exact schema: { prompt, styleTags, titleSuggestions, composerNote }`,
+            },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "music_prompt_result",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  prompt: { type: "string", description: "The complete music AI prompt" },
+                  styleTags: { type: "string", description: "Comma-separated style tags" },
+                  titleSuggestions: { type: "array", items: { type: "string" }, description: "Three song title suggestions" },
+                  composerNote: { type: "string", description: "Brief sonic vision note" },
+                },
+                required: ["prompt", "styleTags", "titleSuggestions", "composerNote"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+
+        const content = response.choices?.[0]?.message?.content;
+        if (!content) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "No response from AI" });
+        try {
+          const parsed = typeof content === "string" ? JSON.parse(content) : content;
+          return {
+            prompt: String(parsed.prompt),
+            styleTags: String(parsed.styleTags),
+            titleSuggestions: (Array.isArray(parsed.titleSuggestions) ? parsed.titleSuggestions : []).slice(0, 3).map(String),
+            composerNote: String(parsed.composerNote),
+          };
+        } catch {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to parse AI response" });
+        }
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;
