@@ -3255,6 +3255,13 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .input(z.object({
         targetPlatform: z.enum(["suno", "udio", "general"]).default("suno"),
         forceRegenerate: z.boolean().default(false),
+        promptType: z.enum([
+          "style_prompt",       // AI Music Style Prompt (original)
+          "lyric_brief",        // Lyric Writing Brief
+          "composer_blueprint", // Composer's Workflow Blueprint
+          "visual_direction",   // Visual / Cover Art Direction
+          "press_bio",          // Press Bio Draft
+        ]).default("style_prompt"),
       }))
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
@@ -3337,16 +3344,36 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           ? "Format style tags as descriptive phrases for Udio AI. Keep the full prompt under 200 characters."
           : "Format style tags as a comma-separated list of descriptive terms.";
 
+        // ── Prompt-type specific system + user prompts ──────────────
+        const promptTypeConfigs: Record<string, { systemPrompt: string; userPrompt: string }> = {
+          style_prompt: {
+            systemPrompt: `You are a master composer and sonic identity architect. Your role is to distill a creator's entire artistic lineage — their genre, lyrical themes, tone frequencies, key signatures, tempo range, energy profile, and sonic fingerprint — into a precise, evocative AI music generation prompt. You are building a COMPOSER'S TOOL, not a marketing tagline. Be specific about musical elements: keys, modes, BPM ranges, frequency characteristics, harmonic tension, lyrical motifs. ${platformNote}`,
+            userPrompt: `Based on the following creator profile and their complete registered works, generate their Expression Identity — a composer-grade sonic formation prompt:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A complete composer-grade music AI prompt capturing this creator's sonic identity (style tags + sonic description, max 200 characters)\n2. A list of 8-12 style tags (comma-separated) that define their sound — include musical keys, modes, BPM range, and frequency characteristics if available\n3. A composer's note (2-3 sentences) describing their sonic vision, lyrical themes, and the emotional/spiritual frequency of their work\n4. Inferred tone frequency note (e.g. '432Hz, Solfeggio Mi 528Hz') if discernible from their work, or null\n5. Inferred dominant key (e.g. 'D Minor') if discernible, or null\n6. Inferred tempo range (e.g. '80-120 BPM') if discernible, or null\n7. Inferred energy profile (e.g. 'Epic, Triumphant, Meditative') if discernible, or null\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNote, dominantKey, tempoRange, energyProfile }`,
+          },
+          lyric_brief: {
+            systemPrompt: `You are a lyric architect and creative writing director. Your role is to build a Lyric Writing Brief — a structured guide that a songwriter can use to write new lyrics that are consistent with their established voice, thematic lineage, and lyrical DNA. Ground everything in the creator's existing registered lyrics, their spiritual/emotional themes, and their sonic identity. This is a COMPOSER'S TOOL: be specific about rhyme schemes, syllabic patterns, recurring motifs, and thematic anchors.`,
+            userPrompt: `Based on the following creator profile and their complete registered works, generate a Lyric Writing Brief:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A lyric writing brief (2-3 paragraphs) describing the creator's lyrical voice, recurring themes, and writing style — grounded in their actual registered lyrics\n2. A list of 8-12 style tags describing their lyrical DNA (e.g. 'testimony, spiritual warfare, redemption arc, spoken word, first-person narrative')\n3. A composer's note (2-3 sentences) on the emotional/spiritual frequency of their lyrical work\n4. Inferred tone frequency note if discernible, or null\n5. Inferred dominant key if discernible, or null\n6. Inferred tempo range if discernible, or null\n7. Inferred energy profile if discernible, or null\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNote, dominantKey, tempoRange, energyProfile }`,
+          },
+          composer_blueprint: {
+            systemPrompt: `You are a workflow architect for composers and music producers. Your role is to build a Composer's Workflow Blueprint — a step-by-step production framework that a creator can follow to build new tracks that are consistent with their established sonic identity, lyrical lineage, and creative process. This is a COMPOSER'S TOOL: include specific production steps, instrumentation choices, arrangement patterns, and AI tool recommendations grounded in the creator's actual registered works.`,
+            userPrompt: `Based on the following creator profile and their complete registered works, generate a Composer's Workflow Blueprint:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A workflow blueprint (2-3 paragraphs) describing a step-by-step production process tailored to this creator's sonic identity — from initial concept to final arrangement\n2. A list of 8-12 style tags describing their production DNA (e.g. 'layered atmospherics, sparse percussion, call-and-response vocals, cinematic builds')\n3. A composer's note (2-3 sentences) on the structural and spiritual architecture of their work\n4. Inferred tone frequency note if discernible, or null\n5. Inferred dominant key if discernible, or null\n6. Inferred tempo range if discernible, or null\n7. Inferred energy profile if discernible, or null\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNote, dominantKey, tempoRange, energyProfile }`,
+          },
+          visual_direction: {
+            systemPrompt: `You are a visual director and art director for music. Your role is to build a Visual / Cover Art Direction brief — a detailed visual language guide that a designer or AI image generator can use to create artwork that is consistent with the creator's sonic identity, lyrical themes, and spiritual aesthetic. Ground everything in the creator's actual registered works and profile. This is a COMPOSER'S TOOL: be specific about color palettes, visual motifs, lighting, composition, and symbolic elements.`,
+            userPrompt: `Based on the following creator profile and their complete registered works, generate a Visual / Cover Art Direction brief:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A visual direction brief (2-3 paragraphs) describing the visual language, color palette, symbolic motifs, and aesthetic world that represents this creator's sonic identity\n2. A list of 8-12 style tags for AI image generation (e.g. 'dark cinematic, sacred geometry, warrior archetype, golden light, atmospheric depth')\n3. A composer's note (2-3 sentences) on the visual-spiritual connection to their work\n4. Inferred tone frequency note if discernible, or null\n5. Inferred dominant key if discernible, or null\n6. Inferred tempo range if discernible, or null\n7. Inferred energy profile if discernible, or null\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNote, dominantKey, tempoRange, energyProfile }`,
+          },
+          press_bio: {
+            systemPrompt: `You are a music publicist and narrative architect. Your role is to write a Press Bio Draft — a professional, third-person artist biography that captures the creator's artistic identity, lyrical themes, sonic fingerprint, and creative mission. Ground everything in their actual registered works, profile metadata, and EID lineage. This is a COMPOSER'S TOOL: the bio should be ready to submit to press outlets, streaming platforms, and booking agents.`,
+            userPrompt: `Based on the following creator profile and their complete registered works, generate a Press Bio Draft:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A press bio (2-3 paragraphs, third-person) that introduces the artist, describes their sonic identity and lyrical themes, references their registered works, and articulates their creative mission\n2. A list of 8-12 style tags that describe their public artistic identity (e.g. 'faith-driven, cinematic hip-hop, spoken word, spiritual warrior, AI-assisted composer')\n3. A composer's note (2-3 sentences) on the artist's unique position in the music landscape\n4. Inferred tone frequency note if discernible, or null\n5. Inferred dominant key if discernible, or null\n6. Inferred tempo range if discernible, or null\n7. Inferred energy profile if discernible, or null\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNote, dominantKey, tempoRange, energyProfile }`,
+          },
+        };
+
+        const config = promptTypeConfigs[input.promptType] ?? promptTypeConfigs.style_prompt;
+
         const response = await invokeLLM({
           messages: [
-            {
-              role: "system",
-              content: `You are a master composer and sonic identity architect. Your role is to distill a creator's entire artistic lineage — their genre, lyrical themes, tone frequencies, key signatures, tempo range, energy profile, and sonic fingerprint — into a precise, evocative AI music generation prompt. You are building a COMPOSER'S TOOL, not a marketing tagline. Be specific about musical elements: keys, modes, BPM ranges, frequency characteristics, harmonic tension, lyrical motifs. ${platformNote}`,
-            },
-            {
-              role: "user",
-              content: `Based on the following creator profile and their complete registered works, generate their Expression Identity — a composer-grade sonic formation prompt:\n\n${profileContext}${songContext}\n\nGenerate:\n1. A complete composer-grade music AI prompt capturing this creator's sonic identity (style tags + sonic description, max 200 characters)\n2. A list of 8-12 style tags (comma-separated) that define their sound — include musical keys, modes, BPM range, and frequency characteristics if available\n3. A composer's note (2-3 sentences) describing their sonic vision, lyrical themes, and the emotional/spiritual frequency of their work\n4. Inferred tone frequency note (e.g. '432Hz, Solfeggio Mi 528Hz') if discernible from their work, or null\n5. Inferred dominant key (e.g. 'D Minor') if discernible, or null\n6. Inferred tempo range (e.g. '80-120 BPM') if discernible, or null\n7. Inferred energy profile (e.g. 'Epic, Triumphant, Meditative') if discernible, or null\n\nRespond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNote, dominantKey, tempoRange, energyProfile }`,
-            },
+            { role: "system", content: config.systemPrompt },
+            { role: "user", content: config.userPrompt },
           ],
           response_format: {
             type: "json_schema",
@@ -3356,9 +3383,9 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
               schema: {
                 type: "object",
                 properties: {
-                  prompt: { type: "string", description: "The complete music AI prompt" },
+                  prompt: { type: "string", description: "The main generated output" },
                   styleTags: { type: "string", description: "Comma-separated style tags" },
-                  composerNote: { type: "string", description: "Composer's sonic vision note" },
+                  composerNote: { type: "string", description: "Composer's note" },
                   toneFrequencyNote: { type: ["string", "null"], description: "Tone/frequency note or null" },
                   dominantKey: { type: ["string", "null"], description: "Dominant key or null" },
                   tempoRange: { type: ["string", "null"], description: "Tempo range or null" },

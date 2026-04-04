@@ -2424,3 +2424,8 @@
 
 ## Mobile Player Scroll Fix (Apr 4 2026)
 - [x] Fix mobile expanded player panel scroll — ORIGIN PROOF / WID section content not scrollable
+
+## Provenance Prompt Generator — Multi-Type Dropdown (Apr 4 2026)
+- [x] Add promptType dropdown to generator modal (Style Prompt, Lyric Brief, Composer Blueprint, Visual Direction, Press Bio)
+- [x] Backend: promptType parameter on generateFromProfile, each type has own LLM system prompt
+- [x] UI: update result display per type (labels, copy buttons, output sections)

@@ -376,6 +376,7 @@ export default function CreatorProfilePage() {
   // Prompt Studio (auto-generate from profile)
   const [showPromptStudio, setShowPromptStudio] = useState(false);
   const [psPlatform, setPsPlatform] = useState<"suno" | "udio" | "general">("suno");
+  const [psPromptType, setPsPromptType] = useState<"style_prompt" | "lyric_brief" | "composer_blueprint" | "visual_direction" | "press_bio">("style_prompt");
   const [psResult, setPsResult] = useState<{ expressionId: string | null; expressionPrompt: string | null; expressionStyleTags: string | null; expressionComposerNote: string | null; expressionGeneratedAt: Date | null; toneFrequencyNote?: string | null; dominantKey?: string | null; tempoRange?: string | null; energyProfile?: string | null; lineageVersion?: number } | null>(null);
   const [showLineage, setShowLineage] = useState(false);
   const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
@@ -1331,9 +1332,40 @@ export default function CreatorProfilePage() {
               Provenance Prompt Generator
             </DialogTitle>
             <p className="text-xs mt-1" style={{ color: "rgba(156,163,175,0.65)" }}>
-              Auto-generates a sonic identity prompt from this creator's profile metadata and registered works. The result is issued an EID and permanently attached to their profile.
+              A composer's tool — auto-generates from this creator's profile metadata, registered works, and lyric lineage. Each result is issued an EID and permanently archived.
             </p>
           </DialogHeader>
+
+          {/* Prompt Type Selector — dropdown */}
+          {isOwner && (
+          <div className="mt-3 mb-1">
+            <label className="text-[10px] font-mono tracking-widest block mb-1.5" style={{ color: "rgba(167,139,250,0.55)" }}>GENERATOR MODE</label>
+            <select
+              value={psPromptType}
+              onChange={(e) => { setPsPromptType(e.target.value as typeof psPromptType); setPsResult(null); }}
+              className="w-full rounded-lg px-3 py-2 text-sm font-semibold appearance-none cursor-pointer"
+              style={{
+                background: "rgba(139,92,246,0.08)",
+                border: "1px solid rgba(139,92,246,0.3)",
+                color: "#a78bfa",
+                outline: "none",
+              }}
+            >
+              <option value="style_prompt">🎵  Style Prompt — AI Music Generation</option>
+              <option value="lyric_brief">✍️  Lyric Writing Brief</option>
+              <option value="composer_blueprint">🎛️  Composer's Workflow Blueprint</option>
+              <option value="visual_direction">🎨  Visual / Cover Art Direction</option>
+              <option value="press_bio">📰  Press Bio Draft</option>
+            </select>
+            <p className="text-[10px] mt-1.5" style={{ color: "rgba(156,163,175,0.4)" }}>
+              {psPromptType === "style_prompt" && "Generates a composer-grade sonic identity prompt for Suno, Udio, or general AI music tools — grounded in your registered works and tone/frequency data."}
+              {psPromptType === "lyric_brief" && "Builds a structured lyric writing guide from your lyrical DNA, recurring themes, rhyme patterns, and spiritual/emotional anchors."}
+              {psPromptType === "composer_blueprint" && "Creates a step-by-step production workflow tailored to your sonic identity — from initial concept to final arrangement."}
+              {psPromptType === "visual_direction" && "Generates a visual language brief for cover art and AI image generation — color palette, symbolic motifs, and aesthetic world."}
+              {psPromptType === "press_bio" && "Writes a professional third-person press bio ready for streaming platforms, press outlets, and booking agents."}
+            </p>
+          </div>
+          )}
 
           {/* Tab switcher: Current Identity vs Lineage Archive */}
           <div className="flex gap-1 mt-3 mb-4">
@@ -1451,16 +1483,23 @@ export default function CreatorProfilePage() {
             {/* Generate / Regenerate button — only for the creator themselves */}
             {isOwner && (
             <button
-              onClick={() => generateExpressionMutation.mutate({ targetPlatform: psPlatform, forceRegenerate: !!(psResult || existingExpression) })}
+              onClick={() => generateExpressionMutation.mutate({ targetPlatform: psPlatform, promptType: psPromptType, forceRegenerate: true })}
               disabled={generateExpressionMutation.isPending}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all"
               style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.8), rgba(167,139,250,0.6))", color: "#fff" }}
             >
               {generateExpressionMutation.isPending
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating Expression Identity…</>
-                : (psResult || existingExpression)
-                  ? <><Wand2 className="w-4 h-4" /> Regenerate Expression Identity</>
-                  : <><Wand2 className="w-4 h-4" /> Generate Expression Identity</>
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
+                : (() => {
+                    const labels: Record<string, string> = {
+                      style_prompt: "Generate Style Prompt",
+                      lyric_brief: "Generate Lyric Brief",
+                      composer_blueprint: "Generate Composer Blueprint",
+                      visual_direction: "Generate Visual Direction",
+                      press_bio: "Generate Press Bio",
+                    };
+                    return <><Wand2 className="w-4 h-4" /> {labels[psPromptType] ?? "Generate"}</>;
+                  })()
               }
             </button>
             )}
@@ -1477,7 +1516,13 @@ export default function CreatorProfilePage() {
                     style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>EXPRESSION PROMPT</span>
+                      <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>
+                        {psPromptType === "style_prompt" && "EXPRESSION PROMPT"}
+                        {psPromptType === "lyric_brief" && "LYRIC WRITING BRIEF"}
+                        {psPromptType === "composer_blueprint" && "COMPOSER'S WORKFLOW BLUEPRINT"}
+                        {psPromptType === "visual_direction" && "VISUAL / COVER ART DIRECTION"}
+                        {psPromptType === "press_bio" && "PRESS BIO DRAFT"}
+                      </span>
                       <button
                         onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Prompt copied!"); }}
                         className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded transition-all"
