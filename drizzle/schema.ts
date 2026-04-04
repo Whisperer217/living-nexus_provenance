@@ -833,9 +833,11 @@ export const expressionLineage = mysqlTable("expressionLineage", {
   energyProfile: varchar("energyProfile", { length: 128 }),
   lyricsSnapshot: text("lyricsSnapshot"), // first 1000 chars of lyrics used at generation time
   songCount: int("songCount").default(0).notNull(), // how many songs the creator had at generation time
-  promptMode: mysqlEnum("promptMode", ["identity_regen", "style_prompt"]).default("identity_regen").notNull(), // which tab generated this entry
+  promptMode: mysqlEnum("promptMode", ["identity_regen", "style_prompt", "import_anchor"]).default("identity_regen").notNull(), // which tab generated this entry
   promptType: varchar("promptType", { length: 32 }), // style_prompt | lyric_brief | composer_blueprint | visual_direction | press_bio
   userInputBlocks: text("userInputBlocks"), // JSON array of user-supplied inspiration blocks [{label, content}]
+  sourcePlatform: varchar("sourcePlatform", { length: 64 }), // for import_anchor: Suno | Udio | Udio v2 | Stable Audio | General
+  rawExternalPrompt: text("rawExternalPrompt"), // for import_anchor: the original pasted prompt before EID fusion
   generatedAt: timestamp("generatedAt").defaultNow().notNull(),
 });
 export type ExpressionLineage = typeof expressionLineage.$inferSelect;
@@ -848,7 +850,9 @@ export const promptDrafts = mysqlTable("promptDrafts", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   name: varchar("name", { length: 256 }).notNull(),
-  promptMode: mysqlEnum("promptMode", ["identity_regen", "style_prompt"]).default("style_prompt").notNull(),
+  promptMode: mysqlEnum("promptMode", ["identity_regen", "style_prompt", "import_anchor"]).default("style_prompt").notNull(),
+  sourcePlatform: varchar("sourcePlatform", { length: 64 }),
+  rawExternalPrompt: text("rawExternalPrompt"),
   promptType: varchar("promptType", { length: 32 }).notNull(),
   targetPlatform: varchar("targetPlatform", { length: 32 }),
   expressionId: varchar("expressionId", { length: 32 }),

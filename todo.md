@@ -2465,3 +2465,31 @@
 - [x] Add Saved Drafts panel to Archive tab in Provenance Prompt Generator modal
 - [ ] Build public /prompt/:token shared prompt landing page
 - [ ] Register /prompt/:token route in App.tsx
+
+## PPG Import & Anchor Tab (Apr 4 2026)
+- [ ] Add anchorExternalPrompt procedure to promptStudio router
+- [ ] Add importMode and sourcePlatform fields to expressionLineage schema
+- [ ] Add Import & Anchor as 4th tab in PPG modal
+- [ ] Paste input area for raw external style prompt
+- [ ] Source platform selector (Suno, Udio, Udio v2, Stable Audio, General)
+- [ ] LLM fusion: blend external prompt with creator EID + profile lineage
+- [ ] Store anchored result in expressionLineage archive with IMPORT badge
+- [ ] Copy-ready output tied to creator EID
+- [ ] Add anchorExternalPrompt procedure to promptStudio router
+- [ ] Add Import & Anchor 4th tab to PPG modal with paste input, platform selector, EID fusion, archive storage
+
+## PPG Import & Anchor Tab — COMPLETED (Apr 4 2026)
+- [x] Add anchorExternalPrompt procedure to promptStudio router
+- [x] Add sourcePlatform and rawExternalPrompt fields to expressionLineage schema
+- [x] Add sourcePlatform and rawExternalPrompt fields to promptDrafts schema
+- [x] Extend saveDraft promptMode enum to include import_anchor
+- [x] Add Import & Anchor as 4th tab in PPG modal
+- [x] Paste input area for raw external style prompt with char counter and clear button
+- [x] Source platform selector (Suno, Udio, Udio v2, Stable Audio, General)
+- [x] Target platform selector (Suno, Udio, General)
+- [x] LLM fusion: blend external prompt with creator EID + profile lineage
+- [x] Store anchored result in expressionLineage archive (promptMode=import_anchor)
+- [x] Display anchored prompt, style tags, composer note, fusion note
+- [x] Copy Full Output button
+- [x] Save Draft and Share buttons on result
+- [x] TypeScript: 0 errors | Tests: 123/123 passing

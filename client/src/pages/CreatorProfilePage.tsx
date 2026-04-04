@@ -375,7 +375,7 @@ export default function CreatorProfilePage() {
   const [aiFocalPos, setAiFocalPos] = useState<{ x: number; y: number } | null>(null);
   // Prompt Studio (3-tab: identity_regen | style_prompt_studio | archive)
   const [showPromptStudio, setShowPromptStudio] = useState(false);
-  const [psTab, setPsTab] = useState<"identity_regen" | "style_prompt_studio" | "archive">("identity_regen");
+  const [psTab, setPsTab] = useState<"identity_regen" | "style_prompt_studio" | "import_anchor" | "archive">("identity_regen");
   const [psPlatform, setPsPlatform] = useState<"suno" | "udio" | "general">("suno");
   const [psPromptType, setPsPromptType] = useState<"style_prompt" | "lyric_brief" | "composer_blueprint" | "visual_direction" | "press_bio">("style_prompt");
   const [psResult, setPsResult] = useState<{ expressionId: string | null; expressionPrompt: string | null; expressionStyleTags: string | null; expressionComposerNote: string | null; expressionGeneratedAt: Date | null; toneFrequencyNote?: string | null; dominantKey?: string | null; tempoRange?: string | null; energyProfile?: string | null; lineageVersion?: number; promptMode?: string } | null>(null);
@@ -462,6 +462,15 @@ export default function CreatorProfilePage() {
   });
   const generateStylePromptMutation = trpc.promptStudio.generateStylePrompt.useMutation({
     onSuccess: (result) => { setPsResult({ ...result, promptMode: "style_prompt" }); refetchExpression(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  // Import & Anchor state
+  const [psAnchorRaw, setPsAnchorRaw] = useState("");
+  const [psAnchorSource, setPsAnchorSource] = useState<"Suno" | "Udio" | "Udio v2" | "Stable Audio" | "General">("Suno");
+  const [psAnchorTarget, setPsAnchorTarget] = useState<"Suno" | "Udio" | "General">("Suno");
+  const [psAnchorResult, setPsAnchorResult] = useState<{ anchoredPrompt: string; styleTags: string; composerNote: string; fusionNote: string; sourcePlatform: string; targetPlatform: string; eid: string; version: number } | null>(null);
+  const anchorMutation = trpc.promptStudio.anchorExternalPrompt.useMutation({
+    onSuccess: (result) => { setPsAnchorResult(result); },
     onError: (e: any) => toast.error(e.message),
   });
   const [savedDraftId, setSavedDraftId] = useState<number | null>(null);
@@ -1380,6 +1389,7 @@ export default function CreatorProfilePage() {
             {([
               { id: "identity_regen", label: "Identity Regen" },
               { id: "style_prompt_studio", label: "Prompt Studio" },
+              { id: "import_anchor", label: "Import & Anchor" },
               { id: "archive", label: `Archive${lineageHistory.length > 0 ? ` (${lineageHistory.length})` : ""}` },
             ] as const).map((tab) => (
               <button
@@ -1618,7 +1628,190 @@ export default function CreatorProfilePage() {
           </div>
           )}
 
-          {/* ── TAB 3: ARCHIVE ──────────────────────────────────────────────── */}
+          {/* ── TAB 3: IMPORT & ANCHOR ──────────────────────────────────────── */}
+          {psTab === "import_anchor" && (
+          <div className="space-y-4">
+            <p className="text-xs" style={{ color: "rgba(156,163,175,0.5)" }}>
+              Paste a raw style prompt from Suno, Udio, or another AI platform. Living Nexus will fuse it with your EID and creative lineage to produce a provenance-anchored version — permanently registered to you.
+            </p>
+
+            {/* Source platform selector */}
+            {isOwner && (
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.55)" }}>SOURCE PLATFORM</label>
+              <div className="flex gap-1.5 flex-wrap">
+                {(["Suno", "Udio", "Udio v2", "Stable Audio", "General"] as const).map((p) => (
+                  <button key={p} onClick={() => setPsAnchorSource(p)}
+                    className="px-3 py-1 rounded-full text-xs font-mono transition-all"
+                    style={psAnchorSource === p
+                      ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" }
+                      : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(156,163,175,0.5)" }}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+            )}
+
+            {/* Raw prompt textarea */}
+            {isOwner && (
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.55)" }}>PASTE ORIGINAL PROMPT</label>
+              <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <textarea
+                  value={psAnchorRaw}
+                  onChange={(e) => setPsAnchorRaw(e.target.value)}
+                  placeholder={`Paste your ${psAnchorSource} style prompt here…\n\nExample: "dark ambient orchestral, cinematic tension, strings, brass, 120bpm, minor key, emotional, epic"`}
+                  rows={6}
+                  className="w-full bg-transparent text-xs leading-relaxed resize-none outline-none"
+                  style={{ color: "rgba(229,231,235,0.8)", caretColor: "#a78bfa" }}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[9px]" style={{ color: "rgba(156,163,175,0.3)" }}>{psAnchorRaw.length} / 4000 chars</span>
+                {psAnchorRaw.length > 0 && (
+                  <button onClick={() => { setPsAnchorRaw(""); setPsAnchorResult(null); }} className="text-[9px] opacity-40 hover:opacity-70 transition-opacity" style={{ color: "rgba(251,113,133,0.8)" }}>Clear</button>
+                )}
+              </div>
+            </div>
+            )}
+
+            {/* Target platform selector */}
+            {isOwner && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Output for:</span>
+              {(["Suno", "Udio", "General"] as const).map((p) => (
+                <button key={p} onClick={() => setPsAnchorTarget(p)}
+                  className="px-3 py-1 rounded-full text-xs font-mono transition-all"
+                  style={psAnchorTarget === p
+                    ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" }
+                    : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(156,163,175,0.5)" }}>
+                  {p}
+                </button>
+              ))}
+            </div>
+            )}
+
+            {/* Anchor button */}
+            {isOwner && (
+            <button
+              onClick={() => anchorMutation.mutate({ rawPrompt: psAnchorRaw.trim(), sourcePlatform: psAnchorSource, targetPlatform: psAnchorTarget })}
+              disabled={anchorMutation.isPending || psAnchorRaw.trim().length < 10}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.8), rgba(167,139,250,0.6))", color: "#fff" }}>
+              {anchorMutation.isPending
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Anchoring to EID…</>
+                : <><Shield className="w-4 h-4" /> Anchor to My EID</>}
+            </button>
+            )}
+
+            {/* Result display */}
+            {psAnchorResult && (
+            <div className="space-y-3 pt-2" style={{ borderTop: "1px solid rgba(139,92,246,0.15)" }}>
+              {/* EID badge */}
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.3)" }}>
+                <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#a78bfa" }} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[9px] font-mono tracking-widest mb-0.5" style={{ color: "rgba(167,139,250,0.5)" }}>ANCHORED TO EID</div>
+                  <div className="font-mono text-xs font-bold truncate" style={{ color: "#a78bfa" }}>{psAnchorResult.eid}</div>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.5)" }}>v{psAnchorResult.version}</span>
+                  <button onClick={() => { navigator.clipboard.writeText(psAnchorResult!.eid); toast.success("EID copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                </div>
+              </div>
+
+              {/* Source / target info */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[9px] px-2 py-0.5 rounded font-mono" style={{ background: "rgba(251,113,133,0.08)", color: "rgba(251,113,133,0.5)" }}>FROM: {psAnchorResult.sourcePlatform}</span>
+                <span className="text-[9px]" style={{ color: "rgba(156,163,175,0.3)" }}>→</span>
+                <span className="text-[9px] px-2 py-0.5 rounded font-mono" style={{ background: "rgba(52,211,153,0.08)", color: "rgba(52,211,153,0.5)" }}>FOR: {psAnchorResult.targetPlatform}</span>
+              </div>
+
+              {/* Anchored prompt */}
+              <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>ANCHORED PROMPT</span>
+                  <button onClick={() => { navigator.clipboard.writeText(psAnchorResult!.anchoredPrompt); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                </div>
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{psAnchorResult.anchoredPrompt}</p>
+              </div>
+
+              {/* Style tags */}
+              {psAnchorResult.styleTags && (
+              <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
+                  <button onClick={() => { navigator.clipboard.writeText(psAnchorResult!.styleTags); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                </div>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(209,213,219,0.7)" }}>{psAnchorResult.styleTags}</p>
+              </div>
+              )}
+
+              {/* Composer note */}
+              {psAnchorResult.composerNote && (
+              <div className="rounded-lg p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
+                <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(245,196,81,0.45)" }}>COMPOSER'S NOTE</span>
+                <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{psAnchorResult.composerNote}</p>
+              </div>
+              )}
+
+              {/* Fusion note */}
+              {psAnchorResult.fusionNote && (
+              <div className="rounded-lg p-3" style={{ background: "rgba(96,165,250,0.04)", border: "1px solid rgba(96,165,250,0.1)" }}>
+                <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(96,165,250,0.45)" }}>FUSION NOTE</span>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(229,231,235,0.55)" }}>{psAnchorResult.fusionNote}</p>
+              </div>
+              )}
+
+              {/* Copy full output */}
+              <button
+                onClick={() => { const all = [psAnchorResult!.anchoredPrompt, psAnchorResult!.styleTags, psAnchorResult!.composerNote, psAnchorResult!.fusionNote].filter(Boolean).join('\n\n'); navigator.clipboard.writeText(all); toast.success("Full output copied!"); }}
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all"
+                style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(167,139,250,0.8)" }}>
+                <ClipboardCopy className="w-3.5 h-3.5" /> Copy Full Output
+              </button>
+
+              {/* Save draft */}
+              {isOwner && (
+              <div className="flex gap-2">
+                {!showDraftNameInput ? (
+                  <button onClick={() => { setShowDraftNameInput(true); setDraftName(""); setSavedDraftId(null); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all"
+                    style={{ background: "rgba(245,196,81,0.08)", border: "1px solid rgba(245,196,81,0.2)", color: "rgba(245,196,81,0.8)" }}>
+                    <BookOpen className="w-3.5 h-3.5" /> Save Draft
+                  </button>
+                ) : (
+                  <div className="flex-1 flex gap-2">
+                    <input value={draftName} onChange={(e) => setDraftName(e.target.value)} placeholder="Draft name…"
+                      className="flex-1 rounded-lg px-3 py-1.5 text-xs bg-transparent outline-none"
+                      style={{ border: "1px solid rgba(245,196,81,0.3)", color: "rgba(229,231,235,0.9)", caretColor: "#f5c451" }}
+                      onKeyDown={(e) => { if (e.key === "Enter" && draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "import_anchor", promptType: psAnchorSource, targetPlatform: psAnchorTarget, expressionId: psAnchorResult?.eid ?? undefined, prompt: psAnchorResult?.anchoredPrompt ?? "", styleTags: psAnchorResult?.styleTags ?? undefined, composerNote: psAnchorResult?.composerNote ?? undefined }); }} />
+                    <button onClick={() => { if (draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "import_anchor", promptType: psAnchorSource, targetPlatform: psAnchorTarget, expressionId: psAnchorResult?.eid ?? undefined, prompt: psAnchorResult?.anchoredPrompt ?? "", styleTags: psAnchorResult?.styleTags ?? undefined, composerNote: psAnchorResult?.composerNote ?? undefined }); }}
+                      disabled={!draftName.trim() || saveDraftMutation.isPending}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                      style={{ background: "rgba(245,196,81,0.15)", color: "rgba(245,196,81,0.9)" }}>
+                      {saveDraftMutation.isPending ? "Saving…" : "Save"}
+                    </button>
+                    <button onClick={() => setShowDraftNameInput(false)} className="px-2 py-1.5 rounded-lg text-xs opacity-40 hover:opacity-70" style={{ color: "rgba(156,163,175,0.8)" }}>✕</button>
+                  </div>
+                )}
+                {savedDraftId && (
+                  <button onClick={() => shareMutation.mutate({ draftId: savedDraftId, origin: window.location.origin })}
+                    disabled={shareMutation.isPending}
+                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                    style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)", color: "rgba(167,139,250,0.8)" }}>
+                    <Share2 className="w-3.5 h-3.5" /> {shareMutation.isPending ? "Copying…" : "Share"}
+                  </button>
+                )}
+              </div>
+              )}
+            </div>
+            )}
+          </div>
+          )}
+
+          {/* ── TAB 4: ARCHIVE ──────────────────────────────────────────────── */}
           {psTab === "archive" && (
           <div className="space-y-3">
             <p className="text-xs" style={{ color: "rgba(156,163,175,0.5)" }}>

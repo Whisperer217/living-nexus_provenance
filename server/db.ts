@@ -152,9 +152,11 @@ export async function insertExpressionLineage(data: {
   energyProfile?: string;
   lyricsSnapshot?: string;
   songCount: number;
-  promptMode?: "identity_regen" | "style_prompt";
+  promptMode?: "identity_regen" | "style_prompt" | "import_anchor";
   promptType?: string;
   userInputBlocks?: string; // JSON string of [{label, content}]
+  sourcePlatform?: string; // for import_anchor: Suno | Udio | etc.
+  rawExternalPrompt?: string; // for import_anchor: original pasted prompt
 }) {
   const db = await getDb();
   if (!db) return;
@@ -171,9 +173,11 @@ export async function insertExpressionLineage(data: {
     energyProfile: data.energyProfile ?? null,
     lyricsSnapshot: data.lyricsSnapshot ?? null,
     songCount: data.songCount,
-    promptMode: data.promptMode ?? "identity_regen",
+    promptMode: (data.promptMode ?? "identity_regen") as any,
     promptType: data.promptType ?? null,
     userInputBlocks: data.userInputBlocks ?? null,
+    sourcePlatform: data.sourcePlatform ?? null,
+    rawExternalPrompt: data.rawExternalPrompt ?? null,
     generatedAt: new Date(),
   });
 }
@@ -3025,7 +3029,7 @@ export async function getAutoVideoStats(): Promise<{ total: number; withAutoVide
 export async function savePromptDraft(data: {
   userId: number;
   name: string;
-  promptMode: "identity_regen" | "style_prompt";
+  promptMode: "identity_regen" | "style_prompt" | "import_anchor";
   promptType: string;
   targetPlatform?: string;
   expressionId?: string;

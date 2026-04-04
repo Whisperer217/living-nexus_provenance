@@ -3634,7 +3634,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     saveDraft: protectedProcedure
       .input(z.object({
         name: z.string().min(1).max(256),
-        promptMode: z.enum(["identity_regen", "style_prompt"]).default("style_prompt"),
+        promptMode: z.enum(["identity_regen", "style_prompt", "import_anchor"]).default("style_prompt"),
         promptType: z.string(),
         targetPlatform: z.string().optional(),
         expressionId: z.string().optional(),
@@ -3703,6 +3703,101 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         return {
           ...draft,
           userInputBlocks: draft.userInputBlocks ? JSON.parse(draft.userInputBlocks) : [],
+        };
+      }),
+
+    // ── Import & Anchor: fuse external platform prompt with creator EID ────────
+    anchorExternalPrompt: protectedProcedure
+      .input(z.object({
+        rawPrompt: z.string().min(1).max(4000),
+        sourcePlatform: z.enum(["Suno", "Udio", "Udio v2", "Stable Audio", "General"]).default("General"),
+        targetPlatform: z.enum(["Suno", "Udio", "General"]).default("General"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { users } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        const [creator] = await db.select().from(users).where(eq(users.id, ctx.user.id)).limit(1);
+        if (!creator) throw new TRPCError({ code: "NOT_FOUND" });
+
+        const priorLineage = await getExpressionLineageByUser(ctx.user.id);
+        const eidContext = creator.expressionId
+          ? `Creator EID: ${creator.expressionId}\nExpression Prompt: ${creator.expressionPrompt || "(none)"}\nStyle Tags: ${creator.expressionStyleTags || "(none)"}`
+          : "(No EID yet — generate one in Identity Regen tab first)";
+        const profileContext = [
+          creator.name && `Name: ${creator.name}`,
+          creator.artistHandle && `Handle: @${creator.artistHandle}`,
+          creator.bio && `Bio: ${creator.bio}`,
+          creator.primaryGenre && `Primary Genre: ${creator.primaryGenre}`,
+          creator.dominantKey && `Dominant Key: ${creator.dominantKey}`,
+          creator.tempoRange && `Tempo Range: ${creator.tempoRange}`,
+          creator.energyProfile && `Energy Profile: ${creator.energyProfile}`,
+          creator.toneFrequencyNote && `Tone/Frequency: ${creator.toneFrequencyNote}`,
+          creator.aiDisclosure && `AI Disclosure: ${creator.aiDisclosure}`,
+        ].filter(Boolean).join("\n");
+        const lineageContext = priorLineage.length > 0
+          ? `Prior EID lineage (${priorLineage.length} versions): ${priorLineage.slice(-2).map((l: any) => `[${l.eid}] ${l.prompt.slice(0, 120)}`).join(" | ")}`
+          : "(No prior lineage)";
+
+        const systemPrompt = `You are a Provenance Prompt Architect for Living Nexus — a creative registry that anchors AI-generated music to real creator identities.\n\nYour task: Take a raw style prompt from ${input.sourcePlatform} and fuse it with the creator's Living Nexus identity (EID, profile metadata, tone/frequency lineage) to produce a provenance-anchored version.\n\nRules:\n- Preserve the core sonic intent of the original prompt\n- Weave in the creator's identity markers (genre, tone, energy, spiritual/thematic voice) without diluting the original\n- Add a Living Nexus provenance signature at the end: "[Anchored to ${creator.expressionId || "EID pending"} via Living Nexus]"\n- Output a JSON object with: { anchoredPrompt, styleTags, composerNote, fusionNote }\n  - anchoredPrompt: the fused, provenance-ready prompt (ready to paste into ${input.targetPlatform})\n  - styleTags: comma-separated style tags derived from the fusion\n  - composerNote: 1-2 sentences on how the original was transformed by the creator's identity\n  - fusionNote: 1 sentence describing what from the original was preserved vs. what was added from the creator's lineage`;
+
+        const userPrompt = `ORIGINAL PROMPT FROM ${input.sourcePlatform}:\n${input.rawPrompt}\n\nCREATOR IDENTITY:\n${profileContext}\n\n${eidContext}\n\n${lineageContext}\n\nFuse this prompt with the creator's identity and return the JSON object.`;
+
+        const llmResponse = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "anchored_prompt",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  anchoredPrompt: { type: "string" },
+                  styleTags: { type: "string" },
+                  composerNote: { type: "string" },
+                  fusionNote: { type: "string" },
+                },
+                required: ["anchoredPrompt", "styleTags", "composerNote", "fusionNote"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+
+        const raw = llmResponse?.choices?.[0]?.message?.content;
+        if (!raw) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "LLM returned empty response" });
+        const result = typeof raw === "string" ? JSON.parse(raw) : raw;
+
+        const eid = creator.expressionId || `EID-IMPORT-${ctx.user.id}-${Date.now().toString(36).toUpperCase()}`;
+        const version = priorLineage.length + 1;
+        await insertExpressionLineage({
+          userId: ctx.user.id,
+          eid,
+          version,
+          prompt: result.anchoredPrompt,
+          styleTags: result.styleTags,
+          composerNote: result.composerNote,
+          promptMode: "import_anchor" as any,
+          promptType: input.sourcePlatform,
+          sourcePlatform: input.sourcePlatform,
+          rawExternalPrompt: input.rawPrompt,
+          songCount: 0,
+        });
+
+        return {
+          anchoredPrompt: result.anchoredPrompt,
+          styleTags: result.styleTags,
+          composerNote: result.composerNote,
+          fusionNote: result.fusionNote,
+          sourcePlatform: input.sourcePlatform,
+          targetPlatform: input.targetPlatform,
+          eid,
+          version,
         };
       }),
 
