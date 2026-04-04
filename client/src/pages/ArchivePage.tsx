@@ -166,6 +166,8 @@ export default function ArchivePage() {
     aiDisclosure: song.aiConsent ?? "original",
     coverPositionX: song.coverPositionX ?? 50,
     coverPositionY: song.coverPositionY ?? 50,
+        visualReady: song.visualReady ?? false,
+        autoVideoUrl: song.autoVideoUrl ?? undefined,
   });
 
   const handlePlay = (e: React.MouseEvent, songList: any[], idx: number) => {

@@ -48,6 +48,8 @@ export interface Track {
   creatorId?: number; // numeric user ID for Zone 3 artist link
   coverPositionX?: number; // objectPosition X (0-100)
   coverPositionY?: number; // objectPosition Y (0-100)
+  visualReady?: boolean; // true once auto-video MP4 is generated and stored
+  autoVideoUrl?: string; // S3 CDN URL of the looping MP4 visual
 }
 
 /** Describes WHERE the current queue was built from — controls shuffle/repeat scope */

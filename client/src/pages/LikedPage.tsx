@@ -50,6 +50,8 @@ export default function LikedPage() {
         creatorId: item.creator?.id ?? undefined,
         coverPositionX: item.song.coverPositionX ?? 50,
         coverPositionY: item.song.coverPositionY ?? 50,
+        visualReady: item.song.visualReady ?? false,
+        autoVideoUrl: item.song.autoVideoUrl ?? undefined,
       }));
 
   const handlePlay = (idx: number) => {

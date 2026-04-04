@@ -30,6 +30,8 @@ export default function QueueLoader() {
         plays: song.playCount ?? 0,
         witnessId: song.witnessId ?? undefined,
         aiDisclosure: (song.aiConsent as Track["aiDisclosure"]) ?? undefined,
+        visualReady: song.visualReady ?? false,
+        autoVideoUrl: song.autoVideoUrl ?? undefined,
       }));
     setQueue(tracks);
   }, [data, setQueue]);

@@ -74,6 +74,8 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
       creatorId: item.creator?.id ?? undefined,
       coverPositionX: item.song.coverPositionX ?? 50,
       coverPositionY: item.song.coverPositionY ?? 50,
+        visualReady: item.song.visualReady ?? false,
+        autoVideoUrl: item.song.autoVideoUrl ?? undefined,
     });
   };
 

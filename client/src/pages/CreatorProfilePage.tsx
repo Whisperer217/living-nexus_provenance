@@ -69,6 +69,8 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
       witnessId: song.witnessId || undefined,
       coverPositionX: song.coverPositionX ?? 50,
       coverPositionY: song.coverPositionY ?? 50,
+        visualReady: song.visualReady ?? false,
+        autoVideoUrl: song.autoVideoUrl ?? undefined,
       creatorHandle: song.creatorHandle || undefined,
     });
     toast.success(`"${song.title}" plays next`);
@@ -435,7 +437,7 @@ export default function CreatorProfilePage() {
     // Build queue from all this creator's public songs so playback continues
     const creatorSongs = (data?.songs || []).filter((s: any) => !!s.fileUrl);
     if (creatorSongs.length > 1) {
-      const queue = creatorSongs.map((s: { id: number; title: string; fileUrl: string; coverArtUrl?: string; genre?: string; witnessId?: string; coverPositionX?: number; coverPositionY?: number }) => ({
+      const queue = creatorSongs.map((s: { id: number; title: string; fileUrl: string; coverArtUrl?: string; genre?: string; witnessId?: string; coverPositionX?: number; coverPositionY?: number; visualReady?: boolean; autoVideoUrl?: string | null }) => ({
         id: String(s.id),
         title: s.title,
         artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
@@ -447,6 +449,8 @@ export default function CreatorProfilePage() {
         creatorId: (data?.creator as any)?.id ?? undefined,
         coverPositionX: s.coverPositionX ?? 50,
         coverPositionY: s.coverPositionY ?? 50,
+          visualReady: s.visualReady ?? false,
+          autoVideoUrl: s.autoVideoUrl ?? undefined,
       }));
       const startIdx = queue.findIndex((t: any) => t.id === String(song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
@@ -462,6 +466,8 @@ export default function CreatorProfilePage() {
         creatorId: (data?.creator as any)?.id ?? undefined,
         coverPositionX: song.coverPositionX ?? 50,
         coverPositionY: song.coverPositionY ?? 50,
+        visualReady: song.visualReady ?? false,
+        autoVideoUrl: song.autoVideoUrl ?? undefined,
       });
     }
     playMutation.mutate({ songId: song.id });

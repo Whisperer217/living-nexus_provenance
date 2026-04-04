@@ -362,6 +362,9 @@ export default function MobilePlayerLayer() {
   // Don't render if no track
   if (!currentTrack) return null;
 
+  // visualReady gate: true when the auto-video MP4 is still being generated
+  const isVisualPending = currentTrack.visualReady === false && !videoUrl;
+
   // ── Artwork/Video layer (shared across expanded + cinematic) ──
   const ArtworkLayer = ({ fill = false }: { fill?: boolean }) => (
     <div className={`relative ${fill ? "absolute inset-0" : "w-full h-full"} overflow-hidden`}>
@@ -379,6 +382,26 @@ export default function MobilePlayerLayer() {
         videoRef={videoRef as React.RefObject<HTMLVideoElement | null>}
         className="absolute inset-0 w-full h-full"
       />
+      {/* ── visualReady shimmer: shown while the auto-video MP4 is being generated ── */}
+      {isVisualPending && (
+        <div
+          className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-1.5 py-1.5 px-3"
+          style={{ background: "linear-gradient(to top, oklch(0.08 0.01 280 / 0.82), transparent)" }}
+        >
+          <div className="flex gap-0.5 items-center">
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                className="w-1 h-1 rounded-full animate-pulse"
+                style={{ background: "oklch(0.84 0.155 85 / 0.65)", animationDelay: `${i * 200}ms` }}
+              />
+            ))}
+          </div>
+          <span className="text-[9px] font-heading tracking-wider" style={{ color: "oklch(0.84 0.155 85 / 0.65)" }}>
+            generating visual…
+          </span>
+        </div>
+      )}
       {videoUrl && showVideo && (
         <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
           style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "oklch(0.08 0.01 280)" }}>

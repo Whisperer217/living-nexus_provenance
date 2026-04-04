@@ -223,6 +223,26 @@ export default function TheaterPlayer() {
                   {currentTrack?.emoji || "🎵"}
                 </div>
               )}
+              {/* visualReady shimmer — shown while auto-video MP4 is being generated */}
+              {currentTrack && currentTrack.visualReady === false && !videoUrl && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 py-2 px-4"
+                  style={{ background: "linear-gradient(to top, oklch(0.07 0.03 268 / 0.88), transparent)" }}
+                >
+                  <div className="flex gap-1 items-center">
+                    {[0, 1, 2].map(i => (
+                      <div
+                        key={i}
+                        className="w-1.5 h-1.5 rounded-full animate-pulse"
+                        style={{ background: "oklch(0.84 0.155 85 / 0.6)", animationDelay: `${i * 200}ms` }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] font-heading tracking-wider" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}>
+                    generating visual…
+                  </span>
+                </div>
+              )}
               {/* WID badge — always show if any WID exists */}
               {widBadge && (
                 <button

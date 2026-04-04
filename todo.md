@@ -2282,3 +2282,9 @@
 - [x] Admin tRPC procedures: visualPipelineStats, visualQueueJobs, requeueFailedVisuals, enqueueVisualForSong
 - [x] Admin Media Generation tab: replaced manual trigger with live pipeline status dashboard
 - [x] Pipeline dashboard: stats grid, completion progress bar, requeue failed, enqueue by ID, live job table
+
+## Visual Pipeline Improvements (Apr 4)
+- [x] visualReady gate: shimmer "generating visual…" overlay in MobilePlayerLayer
+- [x] visualReady gate: shimmer "generating visual…" overlay in TheaterPlayer
+- [x] Worker throughput: BATCH_SIZE increased from 2 → 5 per tick
+- [x] Failed job alerting: notifyOwner fires when a job exhausts MAX_ATTEMPTS (3)

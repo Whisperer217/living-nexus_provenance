@@ -508,6 +508,8 @@ export default function HomePage() {
       witnessId: song.witnessId ?? undefined,
       coverPositionX: song.coverPositionX ?? 50,
       coverPositionY: song.coverPositionY ?? 50,
+        visualReady: song.visualReady ?? false,
+        autoVideoUrl: song.autoVideoUrl ?? undefined,
       artAspectRatio: song.artAspectRatio ?? "1:1",
       userId: song.userId,
       artistHandle: creator?.artistHandle ?? undefined,

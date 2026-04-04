@@ -196,10 +196,14 @@ function PlaylistDetail({
     const queue = tracks.map((t: any) => ({
       id: t.song.id, title: t.song.title, artist: t.song.userId,
       artUrl: t.song.coverArtUrl, audioUrl: t.song.fileUrl, witnessId: t.song.witnessId,
+      visualReady: t.song.visualReady ?? false,
+      autoVideoUrl: t.song.autoVideoUrl ?? undefined,
     }));
     const playerTracks = tracks.map((t: any) => ({
       id: String(t.song.id), title: t.song.title, artist: t.creator?.artistHandle || t.creator?.name || String(t.song.userId),
       genre: t.song.genre || "", audioUrl: t.song.fileUrl, artUrl: t.song.coverArtUrl, witnessId: t.song.witnessId,
+      visualReady: t.song.visualReady ?? false,
+      autoVideoUrl: t.song.autoVideoUrl ?? undefined,
     }));
     playQueueAt(playerTracks, 0, "PLAYLIST");
     openNowPlayingPanel();

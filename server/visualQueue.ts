@@ -22,6 +22,7 @@ import { getDb } from "./db";
 import { visualQueue, songs, users } from "../drizzle/schema";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
 import { storagePut } from "./storage";
+import { notifyOwner } from "./_core/notification";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -29,7 +30,7 @@ import { storagePut } from "./storage";
 const MAX_ATTEMPTS = 3;
 
 /** How many jobs the worker processes per tick. */
-const BATCH_SIZE = 2;
+const BATCH_SIZE = 5;
 
 /** Worker poll interval in ms. */
 const WORKER_INTERVAL_MS = 15_000; // 15 seconds
@@ -295,6 +296,14 @@ async function processNextBatch(): Promise<void> {
         await db.update(visualQueue)
           .set({ status: newStatus, errorMessage, startedAt: null })
           .where(eq(visualQueue.id, job.id));
+
+        // Notify owner when a job exhausts all retry attempts
+        if (newAttempts >= MAX_ATTEMPTS) {
+          notifyOwner({
+            title: `Visual generation permanently failed — song ${job.songId}`,
+            content: `Job #${job.id} failed after ${MAX_ATTEMPTS} attempts.\n\nError: ${errorMessage}\n\nSong ID: ${job.songId}. Open Admin → Media Generation to requeue.`,
+          }).catch(() => {});
+        }
       }
     }
   } finally {

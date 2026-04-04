@@ -96,6 +96,8 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
       emoji: "🎵",
       coverPositionX: track.coverPositionX ?? track.song?.coverPositionX ?? 50,
       coverPositionY: track.coverPositionY ?? track.song?.coverPositionY ?? 50,
+      visualReady: track.visualReady ?? track.song?.visualReady ?? false,
+      autoVideoUrl: track.autoVideoUrl ?? track.song?.autoVideoUrl ?? undefined,
     });
   };
 
