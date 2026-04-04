@@ -560,6 +560,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 {/* Creator nav — authenticated only */}
                 {!authLoading && user && renderNavItem(DASHBOARD_NAV_ITEM, true)}
                 {!authLoading && user && renderNavItem(ARCHIVE_NAV_ITEM, true)}
+                {/* My Profile + Prompt Generator — authenticated only */}
+                {!authLoading && user && renderNavItem({ label: "My Profile", icon: Fingerprint, path: `/creator/${(user as any).id}`, goldLabel: false }, true)}
+                {!authLoading && user && renderNavItem({ label: "Prompt Generator", icon: Sparkles, path: `/creator/${(user as any).id}?openPromptStudio=1`, goldLabel: false }, true)}
                 {/* Admin nav — role-gated */}
                 {!authLoading && (user as any)?.role === "admin" && renderNavItem({ label: "LN Command", icon: Terminal, path: "/admin", goldLabel: false }, true)}
 
