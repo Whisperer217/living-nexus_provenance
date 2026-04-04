@@ -49,9 +49,9 @@ function GenrePills({ genre, maxVisible = 4 }: { genre: string | undefined | nul
           key={tag}
           className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
-            background: "oklch(0.18 0.04 275 / 0.8)",
-            color: "oklch(0.72 0.06 280)",
-            border: "1px solid oklch(0.30 0.04 275 / 0.6)",
+            background: "rgba(20,18,40,0.8)",
+            color: "#9b8fc0",
+            border: "1px solid rgba(50,45,80,0.6)",
           }}
         >
           {tag}
@@ -61,9 +61,9 @@ function GenrePills({ genre, maxVisible = 4 }: { genre: string | undefined | nul
         <span
           className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
-            background: "oklch(0.14 0.03 275 / 0.6)",
-            color: "oklch(0.55 0.04 280)",
-            border: "1px solid oklch(0.25 0.03 275 / 0.4)",
+            background: "rgba(14,12,30,0.6)",
+            color: "#7a7099",
+            border: "1px solid rgba(40,36,65,0.4)",
           }}
         >
           +{overflow}
@@ -79,7 +79,7 @@ function AiDisclosureBadge({ value }: { value: string }) {
     return (
       <div
         className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-        style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.45)" }}
+        style={{ background: "rgba(0,0,0,0.72)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.45)" }}
         title="Original human creation — no AI generation"
       >
         <Fingerprint size={8} />
@@ -91,7 +91,7 @@ function AiDisclosureBadge({ value }: { value: string }) {
     return (
       <div
         className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-        style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.45)" }}
+        style={{ background: "rgba(0,0,0,0.72)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.45)" }}
         title="AI-assisted creation"
       >
         <Sparkles size={8} />
@@ -103,7 +103,7 @@ function AiDisclosureBadge({ value }: { value: string }) {
     return (
       <div
         className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-        style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.45)" }}
+        style={{ background: "rgba(0,0,0,0.72)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.45)" }}
         title="AI-generated content"
       >
         <Bot size={8} />
@@ -219,7 +219,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             href={`/verify/${track.witnessId}`}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
             className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow wid-origin-glow transition-opacity opacity-90 hover:opacity-100"
-            style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}
+            style={{ background: "rgba(0,0,0,0.72)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.55)" }}
             title={`Verified Witness ID: ${track.witnessId}`}
           >
             <Shield size={8} />
@@ -242,7 +242,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             <div
               className="absolute inset-0"
               style={{
-                background: "linear-gradient(105deg, transparent 35%, oklch(0.84 0.155 85 / 0.09) 50%, transparent 65%)",
+                background: "linear-gradient(105deg, transparent 35%, rgba(245,196,81,0.09) 50%, transparent 65%)",
                 backgroundSize: "200% 100%",
                 animation: "trackCardShimmer 2.2s ease-in-out infinite",
               }}
@@ -251,7 +251,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             <div
               className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-1.5"
               style={{
-                background: "linear-gradient(to top, oklch(0 0 0 / 0.6), transparent)",
+                background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
               }}
             >
               <span
@@ -260,14 +260,14 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                   width: 4,
                   height: 4,
                   borderRadius: "50%",
-                  background: "oklch(0.84 0.155 85 / 0.7)",
+                  background: "rgba(245,196,81,0.7)",
                   animation: "trackCardDot 1.1s ease-in-out infinite",
                 }}
               />
               <span
                 style={{
                   fontSize: "8px",
-                  color: "oklch(0.84 0.155 85 / 0.75)",
+                  color: "rgba(245,196,81,0.75)",
                   letterSpacing: "0.12em",
                   fontFamily: "'Cinzel', serif",
                 }}
@@ -314,7 +314,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             <span
               title="Founding Creator"
               className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold tracking-widest flex-shrink-0"
-              style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.35)" }}
+              style={{ background: "rgba(245,196,81,0.15)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.35)" }}
             >
               <Crown className="w-2.5 h-2.5" />
             </span>

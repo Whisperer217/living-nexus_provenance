@@ -24,10 +24,10 @@ const WID_TYPE_LABEL: Record<WorkType, string> = {
 };
 
 const WID_TYPE_COLOR: Record<WorkType, string> = {
-  audio: "oklch(0.84 0.155 85)",
-  lyrics: "oklch(0.75 0.18 300)",
-  manuscript: "oklch(0.65 0.18 145)",
-  comic: "oklch(0.70 0.18 220)",
+  audio: "#F5C451",
+  lyrics: "#c084fc",
+  manuscript: "#4ade80",
+  comic: "#60a5fa",
 };
 
 const CONTENT_ICON: Record<WorkType, React.ElementType> = {
@@ -87,7 +87,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Icon size={14} style={{ color: widColor }} />
-          <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+          <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#f5f0e8" }}>
             {title}
           </h2>
           <span
@@ -107,7 +107,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
       {isLoading ? (
         <div className="flex gap-3 overflow-hidden">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: 160, height: 200, background: "oklch(0.115 0.055 278)" }} />
+            <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: 160, height: 200, background: "#0e0c1f" }} />
           ))}
         </div>
       ) : (
@@ -126,8 +126,8 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
                 className="flex-shrink-0 snap-start rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] group"
                 style={{
                   width: 160,
-                  background: "oklch(0.115 0.055 278)",
-                  border: `1px solid ${isActive ? widColor + "cc" : "oklch(0.2 0.015 280)"}`,
+                  background: "#0e0c1f",
+                  border: `1px solid ${isActive ? widColor + "cc" : "#2a2840"}`,
                   outline: isActive ? `2px solid ${widColor}55` : "none",
                   outlineOffset: "1px",
                 }}
@@ -147,7 +147,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
                         className="absolute inset-0 w-full h-full"
                       />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: "oklch(0.14 0.04 280)" }}>
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: "#0f0d22" }}>
                         <Icon size={32} style={{ color: widColor + "66" }} />
                       </div>
                     )}
@@ -159,9 +159,9 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-opacity ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                           style={{ background: widColor }}>
                           {isPlaying ? (
-                            <Pause className="w-4 h-4" style={{ color: "oklch(0.09 0.04 265)" }} />
+                            <Pause className="w-4 h-4" style={{ color: "#0a0815" }} />
                           ) : (
-                            <Play className="w-4 h-4 fill-current" style={{ color: "oklch(0.09 0.04 265)" }} />
+                            <Play className="w-4 h-4 fill-current" style={{ color: "#0a0815" }} />
                           )}
                         </div>
                       </div>
@@ -182,7 +182,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
                 {/* Meta */}
                 <div className="p-2.5">
                   <p className="text-[12px] font-semibold truncate" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{item.song.title}</p>
-                  <p className="text-[10px] truncate mt-0.5" style={{ color: "oklch(0.6 0.03 280)" }}>
+                  <p className="text-[10px] truncate mt-0.5" style={{ color: "#7a7899" }}>
                     {item.creator?.artistHandle || item.creator?.name || "Unknown"}
                   </p>
                 </div>

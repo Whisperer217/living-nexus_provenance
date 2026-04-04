@@ -2321,3 +2321,7 @@
 - [ ] visualReady shimmer on TrackCard cover art thumbnails
 - [x] Witness Activity strip: live listener count polling endpoint
 - [x] Witness Activity strip: player UI above comments panel
+
+## Bug Fix: WID Badges Not Rendering on TrackCards
+- [x] Diagnose why WID (Witness ID) badges are missing on TrackCards in Discover/Explore carousels
+- [x] Fix WID badge rendering in TrackCard and/or data mapping sites
