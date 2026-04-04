@@ -923,13 +923,163 @@ export default function HomePage() {
                 className="text-sm leading-relaxed mb-3"
                 style={{ color: "rgba(229,231,235,0.82)" }}
               >
-                The lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline that powers this generator was conceived from Brandon Reedy&rsquo;s description of his own creative process.
+                The lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline that powers this generator was conceived from Brandon&rsquo;s description of his own creative process.
               </p>
               <div className="flex items-center gap-1.5 mt-3">
                 <Shield className="w-3 h-3" style={{ color: "rgba(245,196,81,0.45)" }} />
                 <span className="text-[10px] font-mono" style={{ color: "rgba(245,196,81,0.45)" }}>Workflow attribution recorded on Living Nexus</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* ── Prompt Studio CTA ───────────────────────────────────────────────── */}
+        <div className="gold-divider mb-8" />
+        <div
+          className="mb-10 rounded-2xl p-6 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(14,12,28,0.97) 60%, rgba(20,16,42,0.99) 100%)",
+            border: "1px solid rgba(124,58,237,0.25)",
+            boxShadow: "0 0 40px rgba(124,58,237,0.06), inset 0 1px 0 rgba(124,58,237,0.1)",
+          }}
+        >
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "radial-gradient(ellipse 40% 70% at 95% 50%, rgba(245,196,81,0.05) 0%, transparent 70%)" }}
+          />
+          <div className="relative flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+            <div
+              className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(245,196,81,0.2))", border: "1px solid rgba(124,58,237,0.4)" }}
+            >
+              <Sparkles className="w-7 h-7" style={{ color: "#A78BFA" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-mono tracking-widest uppercase mb-1" style={{ color: "rgba(167,139,250,0.6)" }}>AI Tool</p>
+              <h3 className="font-heading text-[18px] font-bold text-white mb-1">Prompt Studio</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.75)" }}>
+                Turn your lyrics into a production-ready AI music prompt. The generator builds a lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline — then pre-fills your upload form so you can register the work immediately.
+              </p>
+            </div>
+            <Link href="/profile">
+              <button
+                className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                style={{
+                  background: "linear-gradient(135deg, rgba(124,58,237,0.5), rgba(167,139,250,0.3))",
+                  border: "1px solid rgba(124,58,237,0.5)",
+                  color: "#E9D5FF",
+                  boxShadow: "0 0 20px rgba(124,58,237,0.2)",
+                }}
+              >
+                <Sparkles size={14} />
+                Open Prompt Studio
+              </button>
+            </Link>
+          </div>
+          <p className="text-[10px] font-mono mt-4" style={{ color: "rgba(167,139,250,0.4)" }}>
+            Prompt Studio is available on any creator profile page. Visit your profile or any creator&rsquo;s page to access it.
+          </p>
+        </div>
+
+        {/* ── Why Work With Us / Competitor Comparison ────────────────────────── */}
+        <div className="gold-divider mb-8" />
+        <div className="mb-12">
+          <div className="text-center mb-8">
+            <p className="text-[10px] font-mono tracking-widest uppercase mb-2" style={{ color: "rgba(245,196,81,0.55)" }}>The Registry Difference</p>
+            <h2 className="font-heading text-[24px] sm:text-[28px] font-bold text-white mb-3">Why Work With Living Nexus?</h2>
+            <p className="text-sm max-w-xl mx-auto" style={{ color: "rgba(229,231,235,0.65)" }}>
+              Every platform stores your music. Only Living Nexus witnesses it — issuing a cryptographic timestamp that functions as a deed of creative origin.
+            </p>
+          </div>
+
+          {/* Comparison table */}
+          <div className="overflow-x-auto rounded-2xl" style={{ border: "1px solid rgba(245,196,81,0.12)" }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ background: "rgba(14,12,28,0.98)", borderBottom: "1px solid rgba(245,196,81,0.15)" }}>
+                  <th className="text-left px-5 py-4 font-mono text-[11px] tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.4)", minWidth: 180 }}>Feature</th>
+                  <th className="px-5 py-4 font-mono text-[11px] tracking-widest uppercase text-center" style={{ color: "rgba(255,255,255,0.35)" }}>Spotify / Apple</th>
+                  <th className="px-5 py-4 font-mono text-[11px] tracking-widest uppercase text-center" style={{ color: "rgba(255,255,255,0.35)" }}>SoundCloud / Bandcamp</th>
+                  <th className="px-5 py-4 font-mono text-[11px] tracking-widest uppercase text-center" style={{ color: "#F5C451", background: "rgba(245,196,81,0.06)" }}>Living Nexus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {([
+                  ["Cryptographic WID provenance", "✗", "✗", "✓"],
+                  ["Creator owns the timestamp", "✗", "Partial", "✓"],
+                  ["Multi-medium registry (music, lyrics, manuscript, comic)", "✗", "✗", "✓"],
+                  ["AI Prompt Studio (lyric → production prompt)", "✗", "✗", "✓"],
+                  ["Direct tipping / creator commerce", "✗", "Partial", "✓"],
+                  ["Together Room (live listening)", "✗", "✗", "✓"],
+                  ["Guilds / community rooms", "✗", "✗", "✓"],
+                  ["OG-optimized share pipeline (Discord / X)", "✓", "Partial", "✓"],
+                  ["Platform takes revenue cut", "Yes (30%+)", "Yes (15%+)", "10% tip fee only"],
+                  ["Independent creator focus", "✗", "✓", "✓"],
+                ] as [string, string, string, string][]).map(([feature, col1, col2, col3], i) => (
+                  <tr
+                    key={feature}
+                    style={{
+                      background: i % 2 === 0 ? "rgba(14,12,28,0.92)" : "rgba(20,16,42,0.85)",
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    }}
+                  >
+                    <td className="px-5 py-3.5 font-body" style={{ color: "rgba(229,231,235,0.82)" }}>{feature}</td>
+                    <td className="px-5 py-3.5 text-center font-mono text-[13px]" style={{ color: col1 === "✓" ? "#4ade80" : col1 === "✗" ? "rgba(255,255,255,0.25)" : "rgba(245,196,81,0.7)" }}>{col1}</td>
+                    <td className="px-5 py-3.5 text-center font-mono text-[13px]" style={{ color: col2 === "✓" ? "#4ade80" : col2 === "✗" ? "rgba(255,255,255,0.25)" : "rgba(245,196,81,0.7)" }}>{col2}</td>
+                    <td className="px-5 py-3.5 text-center font-mono text-[13px]" style={{ color: col3 === "✓" ? "#4ade80" : col3 === "✗" ? "rgba(255,255,255,0.25)" : "rgba(245,196,81,0.7)", background: "rgba(245,196,81,0.04)" }}>{col3}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Three value pillars */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+            {[
+              { icon: Fingerprint, color: "#F5C451", bg: "rgba(245,196,81,0.08)", border: "rgba(245,196,81,0.2)", title: "Your Work, Witnessed", body: "Every upload receives a Witness ID — a cryptographic timestamp that proves you created it first. Not a certificate. A deed." },
+              { icon: ShieldCheck, color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "Creator-First Commerce", body: "Direct tipping, Jukebox queuing, and Living Archive subscriptions. The platform takes 10% on tips only. Everything else is yours." },
+              { icon: Sparkles, color: "#A78BFA", bg: "rgba(167,139,250,0.06)", border: "rgba(167,139,250,0.18)", title: "AI Tools That Serve You", body: "Prompt Studio turns your lyrics into a production-ready AI music prompt. The WID goes on the output — you stay the origin." },
+            ].map(({ icon: Icon, color, bg, border, title, body }) => (
+              <div
+                key={title}
+                className="rounded-xl p-5"
+                style={{ background: bg, border: `1px solid ${border}` }}
+              >
+                <Icon className="w-6 h-6 mb-3" style={{ color }} />
+                <h4 className="font-heading font-bold text-white text-[14px] mb-2">{title}</h4>
+                <p className="text-[13px] leading-relaxed" style={{ color: "rgba(229,231,235,0.7)" }}>{body}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA row */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <Link href="/upload">
+              <button
+                className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                style={{
+                  background: "linear-gradient(135deg, #F5C451, #D4AF37)",
+                  color: "#0a0812",
+                  boxShadow: "0 0 24px rgba(245,196,81,0.25)",
+                }}
+              >
+                <Upload size={14} />
+                Register Your First Work
+              </button>
+            </Link>
+            <Link href="/learn">
+              <button
+                className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                style={{
+                  background: "rgba(14,12,28,0.8)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(229,231,235,0.8)",
+                }}
+              >
+                <ShieldCheck size={14} />
+                How WIDs Work
+              </button>
+            </Link>
           </div>
         </div>
       </div>

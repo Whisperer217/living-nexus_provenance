@@ -2393,3 +2393,8 @@
 - [x] Wire navigation: sidebar nav (desktop + mobile) — Founding Creators (Star) + Founder Era Support (Heart)
 - [x] Register /founders and /founder-era routes in App.tsx
 - [x] Add public supporters.getFoundingCreators tRPC procedure (returns creatorRole='founder' users with WID counts)
+
+## Homepage Improvements (Apr 2026)
+- [x] Add "Why Work With Us / Competitors" comparison section to homepage
+- [x] Fix MoshAIMusic attribution tag: remove last name, show only "Brandon" (not "Brandon Reedy")
+- [x] Add Prompt Studio entry point / CTA section on homepage so feature is discoverable
