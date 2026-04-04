@@ -2304,3 +2304,13 @@
 - [x] Skip ineligible songs (no coverArtUrl or fileUrl) silently at enqueue AND worker level
 - [x] Deduplicate owner notifications — only fire once per job lifetime (shouldNotify guard)
 - [x] Backfill query now filters out ineligible songs before enqueuing
+
+## Visual Pipeline — Follow-up Round 2
+- [ ] Bulk-requeue failed jobs button in admin Media Generation tab
+- [ ] Cover art required validation on upload flow (client-side block)
+- [ ] Daily midnight digest replacing per-failure notifyOwner
+
+## Visual Pipeline — Three Improvements (Apr 4)
+- [x] Bulk-requeue failed jobs button (already existed in admin panel — confirmed)
+- [x] Cover art required validation on upload flow (client-side block for audio uploads)
+- [x] Daily midnight digest replacing per-failure notifyOwner

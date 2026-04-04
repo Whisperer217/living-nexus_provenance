@@ -774,7 +774,8 @@ export default function UploadPage() {
                 ) : (
                   <>
                     <ImageIcon className="w-6 h-6 mx-auto mb-1" style={{ color: "oklch(0.65 0.2 300)", opacity: 0.4 }} />
-                    <p className="text-sm" style={{ color: "#E2E8F0" }}>Cover art (optional) — JPG, PNG, WebP</p>
+                    <p className="text-sm" style={{ color: "#E2E8F0" }}>Cover art {uploadMode === "audio" ? <span style={{ color: "oklch(0.7 0.22 25)" }}>*required</span> : <span style={{ color: "oklch(0.45 0.03 280)" }}>(optional)</span>} — JPG, PNG, WebP</p>
+                    {uploadMode === "audio" && <p className="text-xs mt-1" style={{ color: "oklch(0.45 0.03 280)" }}>Required to generate your work's visual — every audio work must be visually alive</p>}
                   </>
                 )}
               </div>
@@ -936,7 +937,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" disabled={!title} onClick={() => setStep(3)} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
                   Next: Witness ID <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>

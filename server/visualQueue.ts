@@ -325,23 +325,72 @@ async function processNextBatch(): Promise<void> {
         const newStatus = newAttempts >= MAX_ATTEMPTS ? "failed" : "pending";
         // Only notify owner on the FIRST time a job reaches permanently-failed status
         // (i.e., this transition — not on re-runs of already-failed jobs)
-        const shouldNotify = newAttempts >= MAX_ATTEMPTS && job.status !== "failed";
-
         await db.update(visualQueue)
           .set({ status: newStatus, errorMessage, startedAt: null })
           .where(eq(visualQueue.id, job.id));
-
-        if (shouldNotify) {
-          notifyOwner({
-            title: `Visual generation permanently failed — song ${job.songId}`,
-            content: `Job #${job.id} failed after ${MAX_ATTEMPTS} attempts.\n\nError: ${errorMessage}\n\nSong ID: ${job.songId}. Open Admin → Media Generation to requeue.`,
-          }).catch(() => {});
-        }
+        // Per-failure notifications suppressed — daily digest handles alerting
       }
     }
   } finally {
     workerRunning = false;
   }
+}
+
+/**
+ * Send a daily digest of visual pipeline activity to the owner.
+ */
+async function sendDailyDigest(): Promise<void> {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    const queueRows = await db
+      .select({ status: visualQueue.status, count: sql<number>`count(*)` })
+      .from(visualQueue)
+      .groupBy(visualQueue.status);
+    const queueMap: Record<string, number> = {};
+    for (const r of queueRows) queueMap[r.status] = Number(r.count);
+    const completed = queueMap["complete"] ?? 0;
+    const failed = queueMap["failed"] ?? 0;
+    const pending = queueMap["pending"] ?? 0;
+    const processing = queueMap["processing"] ?? 0;
+    const total = completed + failed + pending + processing;
+    const content = [
+      `Visual Pipeline — Daily Digest`,
+      ``,
+      `Total jobs tracked: ${total}`,
+      `  ✓ Complete:    ${completed}`,
+      `  ✗ Failed:      ${failed}`,
+      `  ⏳ Pending:     ${pending}`,
+      `  ▶ Processing:  ${processing}`,
+      ``,
+      failed > 0
+        ? `${failed} job(s) need attention. Open Admin → Media Generation to requeue.`
+        : `No failed jobs — pipeline is healthy.`,
+    ].join("\n");
+    await notifyOwner({
+      title: `Visual Pipeline Digest — ${new Date().toLocaleDateString()}`,
+      content,
+    });
+    console.log("[VisualQueue] Daily digest sent");
+  } catch (err) {
+    console.error("[VisualQueue] Failed to send daily digest:", err);
+  }
+}
+
+/**
+ * Schedule the daily digest to fire at midnight (00:00) server time.
+ */
+function scheduleDailyDigest(): void {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0); // next midnight
+  const msUntilMidnight = midnight.getTime() - now.getTime();
+  console.log(`[VisualQueue] Daily digest scheduled in ${Math.round(msUntilMidnight / 60000)} min`);
+  setTimeout(() => {
+    sendDailyDigest();
+    // Re-schedule every 24 hours after the first midnight fire
+    setInterval(sendDailyDigest, 24 * 60 * 60 * 1000);
+  }, msUntilMidnight);
 }
 
 /**
@@ -358,4 +407,7 @@ export function startVisualWorker(): void {
   setInterval(() => {
     processNextBatch().catch(err => console.error("[VisualQueue] Worker tick error:", err));
   }, WORKER_INTERVAL_MS);
+
+  // Schedule daily digest at midnight
+  scheduleDailyDigest();
 }
