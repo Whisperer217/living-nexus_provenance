@@ -35,7 +35,7 @@ import {
   Home, Compass, Users, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
   CheckCircle2, Fingerprint, Bell,
-  BookOpen, Star, Eye, Archive, LayoutDashboard, Sparkles, Terminal,
+  BookOpen, Star, Eye, Archive, LayoutDashboard, Sparkles, Terminal, Heart,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -379,6 +379,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 {([
                   { label: "Manifesto", icon: BookOpen, path: "/manifesto" },
                   { label: "Founding Creators", icon: Star, path: "/founders" },
+                  { label: "Founder Era Support", icon: Heart, path: "/founder-era" },
                   { label: "Witness Registry", icon: Eye, path: "/witness-registry" },
                 ] as { label: string; icon: React.ElementType; path: string }[]).map(item => {
                   const Icon = item.icon;
@@ -545,6 +546,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   {([
                     { label: "Manifesto", icon: BookOpen, path: "/manifesto" },
                     { label: "Founding Creators", icon: Star, path: "/founders" },
+                    { label: "Founder Era Support", icon: Heart, path: "/founder-era" },
                     { label: "Witness Registry", icon: Eye, path: "/witness-registry" },
                   ] as { label: string; icon: React.ElementType; path: string }[]).map(item => {
                     const Icon = item.icon;

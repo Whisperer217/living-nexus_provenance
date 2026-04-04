@@ -15,7 +15,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TrackCard from "@/components/TrackCard";
 import TipModal from "@/components/TipModal";
-import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play } from "lucide-react";
+import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -694,7 +694,7 @@ export default function HomePage() {
                 ))}
               </div>
 
-              <div className="mt-5">
+              <div className="mt-5 flex flex-wrap gap-2">
                 <Link href={isAuthenticated ? "/upload" : getLoginUrl("/upload")}>
                   <button
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
@@ -706,6 +706,32 @@ export default function HomePage() {
                   >
                     <Upload size={13} />
                     Claim Your Founder's Era WID
+                  </button>
+                </Link>
+                <Link href="/founders">
+                  <button
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                    style={{
+                      background: "oklch(0.08 0.03 270 / 0.6)",
+                      border: "1px solid oklch(1 0 0 / 0.12)",
+                      color: "oklch(0.78 0.02 280)",
+                    }}
+                  >
+                    <Users size={13} />
+                    View Founding Creators
+                  </button>
+                </Link>
+                <Link href="/founder-era">
+                  <button
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                    style={{
+                      background: "oklch(0.08 0.03 270 / 0.6)",
+                      border: "1px solid oklch(0.84 0.155 85 / 0.2)",
+                      color: "oklch(0.84 0.155 85 / 0.8)",
+                    }}
+                  >
+                    <Heart size={13} />
+                    Support the Era
                   </button>
                 </Link>
               </div>

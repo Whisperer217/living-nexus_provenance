@@ -2936,6 +2936,27 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
   normalization: normalizationRouter,
   // ── Founder's Era Supporters ─────────────────────────────────────────────────
   supporters: router({
+    /** Public Founding Creators list — users with role='founder', public */
+    getFoundingCreators: publicProcedure.query(async () => {
+      const founders = await listFounders();
+      // Attach WID count for each founder
+      const { getDb } = await import("./db");
+      const db = await getDb();
+      if (!db) return founders.map((f: typeof founders[0]) => ({ ...f, widCount: 0 }));
+      const { sql: sqlFn, eq: eqFn, and: andFn } = await import("drizzle-orm");
+      const { songs: songsTable } = await import("../drizzle/schema");
+      const counts = await Promise.all(
+        founders.map(async (f: typeof founders[0]) => {
+          const rows = await db
+            .select({ count: sqlFn<number>`count(*)` })
+            .from(songsTable)
+            .where(andFn(eqFn(songsTable.userId, f.id), sqlFn`${songsTable.witnessId} IS NOT NULL`, eqFn(songsTable.status, 'Published' as any)));
+          return { ...f, widCount: Number(rows[0]?.count ?? 0) };
+        })
+      );
+      return counts;
+    }),
+
     /** Public Supporters Wall — all supporters ordered by totalGifted desc */
     getAll: publicProcedure.query(async () => getAllSupporters()),
 

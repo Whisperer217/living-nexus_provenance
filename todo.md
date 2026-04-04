@@ -2383,3 +2383,13 @@
 - [x] Button navigates to /upload?title=&genre=&mood=&tags= with pre-filled values from generated output
 - [x] UploadPage reads query params on mount and pre-fills title, genre, selectedMoods, caption fields
 - [x] URL cleaned after pre-fill (window.history.replaceState) so refresh doesn't re-apply
+
+## Founders Flow: List Page + Era Support Page + Homepage Entry
+- [x] Audit existing founders data (creatorRole='founder' in users table), routes, and homepage
+- [x] Build /founders page: Founding Creators list with avatar, handle, WID count, linked profile, gold rank badges
+- [x] /founders page: attribution section explaining Founder Era significance + CTA to /founder-era
+- [x] Build /founder-era page: FounderEraPage.tsx (gift tiers, Stripe checkout, supporters wall)
+- [x] Add Founder Era section/entry point to homepage (two CTAs: View Founding Creators + Support the Era)
+- [x] Wire navigation: sidebar nav (desktop + mobile) — Founding Creators (Star) + Founder Era Support (Heart)
+- [x] Register /founders and /founder-era routes in App.tsx
+- [x] Add public supporters.getFoundingCreators tRPC procedure (returns creatorRole='founder' users with WID counts)

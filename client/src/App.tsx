@@ -44,6 +44,7 @@ const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const WitnessRegistryPage = lazy(() => import("./pages/WitnessRegistryPage"));
 const DownloadPage = lazy(() => import("./pages/DownloadPage"));
 const FoundersPage = lazy(() => import("./pages/FoundersPage"));
+const FounderEraPage = lazy(() => import("./pages/FounderEraPage"));
 const ArtworkNormalizationPage = lazy(() => import("./pages/ArtworkNormalizationPage"));
 const GuildPage = lazy(() => import("./pages/GuildPage"));
 const GuildsListPage = lazy(() => import("./pages/GuildsListPage"));
@@ -110,6 +111,7 @@ function Router() {
                 <Route path="/witness-flow/:witnessId" component={WitnessFlowPage} />
                 <Route path="/witness-flow/song/:songId" component={WitnessFlowPage} />
                 <Route path="/founders" component={FoundersPage} />
+                <Route path="/founder-era" component={FounderEraPage} />
                 <Route path="/settings/billing" component={LivingArchiveBillingPage} />
                 <Route path="/guilds" component={GuildsListPage} />
                 <Route path="/guild/:slug" component={GuildPage} />
