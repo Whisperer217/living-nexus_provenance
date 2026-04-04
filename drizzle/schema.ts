@@ -767,3 +767,23 @@ export const visualQueue = mysqlTable("visualQueue", {
 });
 export type VisualQueueJob = typeof visualQueue.$inferSelect;
 export type InsertVisualQueueJob = typeof visualQueue.$inferInsert;
+
+// ─── Share Artifacts ──────────────────────────────────────────────────────────
+// Precomputed static share artifacts for every WID.
+// Generated once at publish time, served forever at /share/:wid.
+// Contains the full OG HTML snapshot and oEmbed JSON — no runtime rendering.
+export const shareArtifacts = mysqlTable("shareArtifacts", {
+  wid: varchar("wid", { length: 128 }).primaryKey(),
+  title: varchar("title", { length: 512 }).notNull(),
+  creatorName: varchar("creatorName", { length: 256 }).notNull(),
+  imageUrl: text("imageUrl").notNull(),
+  shareUrl: varchar("shareUrl", { length: 512 }).notNull(),
+  trackId: int("trackId").notNull(),
+  htmlSnapshot: text("htmlSnapshot").notNull(),
+  oembedJson: json("oembedJson").notNull(),
+  status: mysqlEnum("status", ["preparing", "ready"]).default("preparing").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ShareArtifact = typeof shareArtifacts.$inferSelect;
+export type InsertShareArtifact = typeof shareArtifacts.$inferInsert;

@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { z } from "zod";
+import { generateShareArtifact } from "./services/shareArtifactService";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -639,6 +640,10 @@ export const appRouter = router({
        const songId = (insertResult as any).insertId as number;
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
+      // Generate share artifact (non-blocking) — precomputed OG HTML for Discord/X/iMessage
+      if (input.witnessId) {
+        generateShareArtifact(input.witnessId).catch(err => console.error("[ShareArtifact] Generation error:", err));
+      }
       return { success: true, fileUrl, coverArtUrl, songId };
     }),
     uploadCoverArt: protectedProcedure.input(z.object({
@@ -2312,6 +2317,19 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "set_user_role", targetType: "user", targetId: String(input.userId), details: { role: input.role } });
         return { ok: true };
       }),
+
+    /**
+     * Manually regenerate the share artifact for a specific WID.
+     * Use this after updating a track's cover art, title, or creator name.
+     * Admin only.
+     */
+    regenerateShareArtifact: protectedProcedure
+      .input(z.object({ wid: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await generateShareArtifact(input.wid);
+        return { success: true, wid: input.wid };
+      }),
   }),
 
   // ── Field Notes ────────────────────────────────────────────────────────────
@@ -3244,5 +3262,6 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         }
       }),
   }),
+
 });
 export type AppRouter = typeof appRouter;

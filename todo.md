@@ -2353,3 +2353,16 @@
 ### Interaction Layer Polish
 - [x] Signals label divider line added for visual hierarchy
 - [ ] Signal burst micro-animation on emoji reaction tap (deferred)
+
+## Share Preparation Pipeline (Static OG Artifacts) — COMPLETE
+- [x] Add share_artifacts table to drizzle schema (wid PK, title, creatorName, imageUrl, shareUrl, htmlSnapshot, oembedJson, status enum, timestamps)
+- [x] Push DB migration (pnpm db:push) — shareArtifacts table live
+- [x] Create server/services/shareArtifactService.ts with generateShareArtifact(wid) function
+- [x] Wire generateShareArtifact call in songs.upload tRPC procedure (fire-and-forget after publish)
+- [x] Add admin.regenerateShareArtifact tRPC mutation for manual reruns
+- [x] Upgrade GET /share/:wid Express route with fast-path cache lookup from share_artifacts
+- [x] GET /api/oembed Express route already live (checks share_artifacts first)
+- [x] Homepage OG URL already correct — og:url set to https://www.livingnexus.org/
+- [x] Write backfill script: server/scripts/backfillShareArtifacts.mjs
+- [x] Run backfill script — 222 published WIDs processed successfully (Success: 222 | Failed: 0)
+- [ ] Verify: paste a /share/WID URL into Discord and confirm correct title/image/creator renders (manual step)

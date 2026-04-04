@@ -18,6 +18,9 @@
 
 import { Router } from "express";
 import { getSongByWitnessId } from "./db";
+import { getDb } from "./db";
+import { shareArtifacts } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 const CANONICAL_ORIGIN = "https://www.livingnexus.org";
 const FALLBACK_IMAGE =
@@ -40,6 +43,33 @@ shareRouter.get("/share/:wid", async (req, res) => {
     return res.redirect(302, "/");
   }
 
+  // ── Fast path: serve precomputed HTML artifact if available ──────────────
+  // This is the "write-once, serve-forever" optimization.
+  // The artifact is generated at upload time and cached in the DB.
+  // Skip cache warm requests (?warm=1) so the artifact is always fresh.
+  if (!req.query.warm) {
+    try {
+      const db = await getDb();
+      const [artifact] = await db
+        .select({ htmlSnapshot: shareArtifacts.htmlSnapshot, status: shareArtifacts.status })
+        .from(shareArtifacts)
+        .where(eq(shareArtifacts.wid, wid))
+        .limit(1);
+
+      if (artifact?.status === "ready" && artifact.htmlSnapshot) {
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.setHeader("X-Frame-Options", "ALLOWALL");
+        res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=60");
+        res.setHeader("X-Share-Cache", "HIT");
+        return res.status(200).end(artifact.htmlSnapshot);
+      }
+    } catch (cacheErr) {
+      // Cache miss or DB error — fall through to live render
+      console.warn("[PDL] Cache lookup failed, falling back to live render:", cacheErr);
+    }
+  }
+
+  // ── Live render fallback ──────────────────────────────────────────────────
   try {
     const result = await getSongByWitnessId(wid);
 

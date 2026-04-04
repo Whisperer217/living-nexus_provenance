@@ -232,6 +232,13 @@
       "when": 1775277629710,
       "tag": "0032_purple_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1775286079507,
+      "tag": "0033_pale_eternals",
+      "breakpoints": true
     }
   ]
 }
