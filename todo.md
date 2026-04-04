@@ -2366,3 +2366,10 @@
 - [x] Write backfill script: server/scripts/backfillShareArtifacts.mjs
 - [x] Run backfill script — 222 published WIDs processed successfully (Success: 222 | Failed: 0)
 - [ ] Verify: paste a /share/WID URL into Discord and confirm correct title/image/creator renders (manual step)
+
+## Attribution Correction: Prompt Studio Inventor Credit
+- [x] Update homepage MoshAIMusic section: remove testimonial/fan framing, replace with factual inventor attribution for Prompt Studio workflow architecture
+- [x] Remove fabricated/paraphrased quote block (blockquote element removed entirely)
+- [x] Display copy: "Prompt Studio — workflow architecture" label + "WORKFLOW ARCHITECT" badge + descriptive attribution sentence
+- [x] Kept avatar, handle, and /creator/780095 link
+- [x] Footer line changed to "Workflow attribution recorded on Living Nexus"

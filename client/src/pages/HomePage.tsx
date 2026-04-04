@@ -839,7 +839,7 @@ export default function HomePage() {
           />
         </div>
 
-        {/* ── Community Inspiration: Slimdoggy ─────────────────────────────── */}
+        {/* ── Prompt Studio: Workflow Attribution ───────────────────────────── */}
         <div className="gold-divider mb-8" />
         <div
           className="mb-10 rounded-2xl p-6 relative overflow-hidden"
@@ -854,13 +854,6 @@ export default function HomePage() {
             className="absolute inset-0 pointer-events-none"
             style={{ background: "radial-gradient(ellipse 55% 60% at 8% 50%, rgba(124,58,237,0.08) 0%, transparent 70%)" }}
           />
-          {/* Decorative quote mark */}
-          <div
-            className="absolute top-3 right-5 text-8xl leading-none select-none pointer-events-none"
-            style={{ color: "rgba(245,196,81,0.06)", fontFamily: "'Cinzel Decorative', serif" }}
-          >
-            &ldquo;
-          </div>
           <div className="relative flex flex-col sm:flex-row gap-5 items-start">
             {/* Avatar */}
             <Link href="/creator/780095">
@@ -876,6 +869,14 @@ export default function HomePage() {
             </Link>
             {/* Content */}
             <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <p
+                  className="text-xs font-mono tracking-widest uppercase"
+                  style={{ color: "rgba(245,196,81,0.55)" }}
+                >
+                  Prompt Studio &mdash; workflow architecture
+                </p>
+              </div>
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <Link href="/creator/780095">
                   <span
@@ -889,24 +890,18 @@ export default function HomePage() {
                   className="text-[9px] px-2 py-0.5 rounded-full font-mono tracking-widest"
                   style={{ background: "rgba(245,196,81,0.1)", color: "rgba(245,196,81,0.65)", border: "1px solid rgba(245,196,81,0.2)" }}
                 >
-                  COMMUNITY VOICE
+                  WORKFLOW ARCHITECT
                 </span>
               </div>
-              <blockquote
-                className="text-sm leading-relaxed mb-3"
-                style={{ color: "rgba(229,231,235,0.82)", fontStyle: "italic", borderLeft: "2px solid rgba(245,196,81,0.25)", paddingLeft: "12px" }}
-              >
-                &ldquo;This is why it takes me hours to create songs. Because I go down a lyric sheet, instrumentation cue, timing map, etc&hellip; journey when writing. Kind of makes me feel like I&rsquo;m composing without having to learn the studio.&rdquo;
-              </blockquote>
               <p
-                className="text-xs leading-relaxed"
-                style={{ color: "rgba(156,163,175,0.65)" }}
+                className="text-sm leading-relaxed mb-3"
+                style={{ color: "rgba(229,231,235,0.82)" }}
               >
-                This is the workflow Living Nexus was built to honor &mdash; every lyric, every cue, every moment of creation, witnessed and protected. The Prompt Studio on your profile is built for creators like MoshAIMusic.
+                The lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline that powers this generator was conceived from Brandon Reedy&rsquo;s description of his own creative process.
               </p>
               <div className="flex items-center gap-1.5 mt-3">
                 <Shield className="w-3 h-3" style={{ color: "rgba(245,196,81,0.45)" }} />
-                <span className="text-[10px] font-mono" style={{ color: "rgba(245,196,81,0.45)" }}>Made possible by creators who compose without limits</span>
+                <span className="text-[10px] font-mono" style={{ color: "rgba(245,196,81,0.45)" }}>Workflow attribution recorded on Living Nexus</span>
               </div>
             </div>
           </div>
