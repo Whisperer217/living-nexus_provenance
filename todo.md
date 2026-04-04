@@ -2231,3 +2231,10 @@
 - [x] Lyrics UX Mobile Fix — moved to bottom, collapsed by default, expand/collapse toggle
 - [x] Media Player Controls — play/pause moved inside cover art as hover overlay
 - [x] Expandable Lyrics + Comments — WID-linked badge on Activity header, full-width lyrics panel at bottom
+
+## Audit Fixes (Post Batch 1+2)
+- [x] Confirmed Facebook pixel 1383830073227216 absent from all source files
+- [x] OG URL confirmed using CANONICAL_ORIGIN (livingnexus.org) correctly
+- [x] QuickRefSlider confirmed returning 12 tracks on dev server — production staleness only
+- [x] Fixed nested <a> inside <Link> in ManifestoPage (hydration error)
+- [x] Fixed getCountsByContentType to only count Published + isPublic works

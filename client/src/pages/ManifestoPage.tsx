@@ -41,11 +41,9 @@ export default function ManifestoPage() {
     >
       {/* Back nav */}
       <div className="max-w-3xl mx-auto px-6 pt-8">
-        <Link href="/">
-          <a className="inline-flex items-center gap-2 text-sm mb-10 transition-opacity hover:opacity-70"
+        <Link href="/" className="inline-flex items-center gap-2 text-sm mb-10 transition-opacity hover:opacity-70"
             style={{ color: "oklch(0.55 0.04 280)" }}>
-            <ChevronLeft size={14} /> Back to Living Nexus
-          </a>
+          <ChevronLeft size={14} /> Back to Living Nexus
         </Link>
       </div>
 
