@@ -2299,3 +2299,8 @@
 - [x] Founder crown badge on TrackCard and CreatorProfilePage
 - [x] creatorRole propagated through all 12 track-mapping sites + getPublicSongs DB query
 - [x] Worker interval reduced from 15s to 10s in visualQueue.ts
+
+## Visual Queue Notification Fix
+- [x] Skip ineligible songs (no coverArtUrl or fileUrl) silently at enqueue AND worker level
+- [x] Deduplicate owner notifications — only fire once per job lifetime (shouldNotify guard)
+- [x] Backfill query now filters out ineligible songs before enqueuing

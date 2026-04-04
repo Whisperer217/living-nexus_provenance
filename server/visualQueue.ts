@@ -53,13 +53,23 @@ export async function enqueueVisualJob(songId: number, isFounder = false): Promi
   if (!db) return;
 
   // Check if song already has a video — if so, just mark visualReady
-  const [song] = await db.select({ autoVideoUrl: songs.autoVideoUrl, visualReady: songs.visualReady })
-    .from(songs).where(eq(songs.id, songId)).limit(1);
+  const [song] = await db.select({
+    autoVideoUrl: songs.autoVideoUrl,
+    visualReady: songs.visualReady,
+    coverArtUrl: songs.coverArtUrl,
+    fileUrl: songs.fileUrl,
+  }).from(songs).where(eq(songs.id, songId)).limit(1);
 
   if (song?.autoVideoUrl) {
     if (!song.visualReady) {
       await db.update(songs).set({ visualReady: true }).where(eq(songs.id, songId));
     }
+    return;
+  }
+
+  // Songs without both cover art AND audio are ineligible — skip silently
+  if (!song?.coverArtUrl || !song?.fileUrl) {
+    console.log(`[VisualQueue] Skipping enqueue for song ${songId} — ineligible (no cover or audio)`);
     return;
   }
 
@@ -88,9 +98,9 @@ export async function backfillVisualQueue(): Promise<void> {
   const db = await getDb();
   if (!db) return;
 
-  const { isNull, isNotNull } = await import("drizzle-orm");
+  const { isNull, isNotNull, ne } = await import("drizzle-orm");
 
-  // Get all published songs without autoVideoUrl
+  // Only enqueue songs that have BOTH cover art AND audio file — ineligible songs are silently skipped
   const rows = await db
     .select({
       id: songs.id,
@@ -103,7 +113,9 @@ export async function backfillVisualQueue(): Promise<void> {
       eq(songs.isPublic, true),
       isNull(songs.autoVideoUrl),
       isNotNull(songs.coverArtUrl),
+      ne(songs.coverArtUrl, ""),
       isNotNull(songs.fileUrl),
+      ne(songs.fileUrl, ""),
     ));
 
   let enqueued = 0;
@@ -252,7 +264,21 @@ async function processNextBatch(): Promise<void> {
           .limit(1);
 
         if (!song) {
-          throw new Error(`Song ${job.songId} not found`);
+          // Song deleted — mark job as skipped/complete silently
+          await db.update(visualQueue)
+            .set({ status: "complete", completedAt: new Date(), errorMessage: "Song not found — skipped" })
+            .where(eq(visualQueue.id, job.id));
+          console.log(`[VisualQueue] ⚠ Skipped job ${job.id} — song ${job.songId} not found`);
+          continue;
+        }
+
+        // Songs without both cover art AND audio cannot generate a video — skip silently
+        if (!song.coverArtUrl || !song.fileUrl) {
+          await db.update(visualQueue)
+            .set({ status: "complete", completedAt: new Date(), errorMessage: "Ineligible: missing coverArtUrl or fileUrl" })
+            .where(eq(visualQueue.id, job.id));
+          console.log(`[VisualQueue] ⚠ Skipped job ${job.id} for song ${job.songId} — ineligible (no cover or audio)`);
+          continue;
         }
 
         // If song already has autoVideoUrl (e.g., manually set), just mark complete
@@ -266,7 +292,12 @@ async function processNextBatch(): Promise<void> {
           });
 
           if (!videoUrl) {
-            throw new Error(`Video generation returned null for song ${job.songId}`);
+            // Generation returned null — skip silently rather than retrying
+            await db.update(visualQueue)
+              .set({ status: "complete", completedAt: new Date(), errorMessage: "Generation returned null — skipped" })
+              .where(eq(visualQueue.id, job.id));
+            console.log(`[VisualQueue] ⚠ Skipped job ${job.id} for song ${job.songId} — generation returned null`);
+            continue;
           }
 
           // Store in autoVideoUrl (separate from embedVideoUrl)
@@ -292,13 +323,15 @@ async function processNextBatch(): Promise<void> {
 
         const newAttempts = job.attempts + 1;
         const newStatus = newAttempts >= MAX_ATTEMPTS ? "failed" : "pending";
+        // Only notify owner on the FIRST time a job reaches permanently-failed status
+        // (i.e., this transition — not on re-runs of already-failed jobs)
+        const shouldNotify = newAttempts >= MAX_ATTEMPTS && job.status !== "failed";
 
         await db.update(visualQueue)
           .set({ status: newStatus, errorMessage, startedAt: null })
           .where(eq(visualQueue.id, job.id));
 
-        // Notify owner when a job exhausts all retry attempts
-        if (newAttempts >= MAX_ATTEMPTS) {
+        if (shouldNotify) {
           notifyOwner({
             title: `Visual generation permanently failed — song ${job.songId}`,
             content: `Job #${job.id} failed after ${MAX_ATTEMPTS} attempts.\n\nError: ${errorMessage}\n\nSong ID: ${job.songId}. Open Admin → Media Generation to requeue.`,
