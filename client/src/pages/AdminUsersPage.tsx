@@ -15,13 +15,13 @@ import { toast } from "sonner";
 import {
   Loader2, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Users, Shield, Tag, Plus, CheckCircle2, XCircle,
-  Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle, Crown, UserX,
+  Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle, Crown, UserX, AlertTriangle,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
 type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus";
 type SortDir = "asc" | "desc";
-type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media";
+type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation";
 
 const GOLD = "oklch(0.84 0.155 85)";
 const BG = "oklch(0.08 0.015 280)";
@@ -30,6 +30,8 @@ const BORDER = "oklch(0.2 0.02 280)";
 const MUTED = "#64748B";
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";
+const GREEN = "oklch(0.65 0.18 145)";
+const RED = "oklch(0.65 0.18 25)";
 
 function formatDate(d: Date | string | null | undefined) {
   if (!d) return "—";
@@ -684,6 +686,7 @@ export default function AdminUsersPage() {
     { id: "logs", label: "Audit Log", icon: <History className="w-4 h-4" /> },
     { id: "founders", label: "Founder Control", icon: <Crown className="w-4 h-4" /> },
     { id: "media", label: "Media Generation", icon: <Video className="w-4 h-4" /> },
+    { id: "moderation", label: "Covenant Moderation", icon: <Shield className="w-4 h-4" style={{ color: "oklch(0.65 0.18 30)" }} /> },
   ];
 
   return (
@@ -735,6 +738,7 @@ export default function AdminUsersPage() {
         {tab === "logs" && <AuditLogTab />}
         {tab === "founders" && <FounderControlTab />}
         {tab === "media" && <MediaGenerationTab />}
+        {tab === "moderation" && <ModerationQueueEmbed />}
 
       </div>
     </div>
@@ -1613,3 +1617,164 @@ function MediaGenerationTab() {
   );
 }
 
+
+// ── Covenant Moderation Tab (embedded) ───────────────────────────────────────
+function ModerationQueueEmbed() {
+  const [statusFilter, setStatusFilter] = useState<"pending" | "reviewed_ok" | "removed_violation" | "escalated" | "all">("pending");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [adminNotes, setAdminNotes] = useState<Record<number, string>>({});
+
+  const { data: flags = [], refetch } = trpc.moderation.listFlags.useQuery({ status: statusFilter });
+  const { data: stats = [] } = trpc.moderation.stats.useQuery();
+
+  const resolveMutation = trpc.moderation.resolveFlag.useMutation({
+    onSuccess: (_, vars) => {
+      const action = vars.resolution === "reviewed_ok" ? "Cleared" : vars.resolution === "removed_violation" ? "Removed" : "Escalated";
+      toast.success(`${action} — flag resolved.`);
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const statMap = Object.fromEntries(stats.map((s: { status: string; total: number }) => [s.status, s.total]));
+
+  const REASON_LABELS: Record<string, string> = {
+    dehumanization: "Dehumanization",
+    csam: "Child Exploitation",
+    facilitates_harm: "Facilitates Harm",
+    harassment: "Harassment",
+    spam: "Spam",
+    other: "Other",
+  };
+
+  const REASON_SEVERITY: Record<string, string> = {
+    csam: "critical",
+    dehumanization: "critical",
+    facilitates_harm: "high",
+    harassment: "medium",
+    spam: "low",
+    other: "medium",
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: "Pending", key: "pending", color: "oklch(0.85 0.18 85)" },
+          { label: "Cleared", key: "reviewed_ok", color: GREEN },
+          { label: "Removed", key: "removed_violation", color: RED },
+          { label: "Escalated", key: "escalated", color: "oklch(0.75 0.18 50)" },
+        ].map(({ label, key, color }) => (
+          <div key={key} className="rounded-xl p-4 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            <div className="text-2xl font-bold" style={{ color }}>{statMap[key] ?? 0}</div>
+            <div className="text-xs mt-1" style={{ color: SUBTEXT }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filter */}
+      <div className="flex items-center gap-3">
+        <span className="text-xs uppercase tracking-wider" style={{ color: SUBTEXT }}>Filter:</span>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+          className="text-sm rounded-lg px-3 py-1.5 border"
+          style={{ background: CARD, borderColor: BORDER, color: "oklch(0.92 0.02 85)" }}
+        >
+          <option value="pending">Pending Review</option>
+          <option value="reviewed_ok">Cleared</option>
+          <option value="removed_violation">Removed</option>
+          <option value="escalated">Escalated</option>
+          <option value="all">All Flags</option>
+        </select>
+        <span className="text-xs" style={{ color: SUBTEXT }}>{flags.length} result{flags.length !== 1 ? "s" : ""}</span>
+      </div>
+
+      {/* Flag list */}
+      {flags.length === 0 ? (
+        <div className="text-center py-12" style={{ color: SUBTEXT }}>
+          <CheckCircle className="w-8 h-8 mx-auto mb-2" style={{ color: GREEN }} />
+          <p className="text-sm">No flags in this queue</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {flags.map((flag: {
+            id: number;
+            workId: number;
+            workType: string;
+            workTitle: string | null;
+            reporterId: number;
+            reporterName: string;
+            reason: string;
+            details: string | null;
+            status: string;
+            adminNote: string | null;
+            createdAt: Date;
+            resolvedAt: Date | null;
+          }) => {
+            const severity = REASON_SEVERITY[flag.reason] ?? "medium";
+            const isExpanded = expandedId === flag.id;
+            return (
+              <div key={flag.id} className="rounded-xl overflow-hidden" style={{ background: CARD, border: `1px solid ${severity === "critical" ? "oklch(0.45 0.18 25)" : BORDER}` }}>
+                <button className="w-full text-left p-4 flex items-center gap-4" onClick={() => setExpandedId(isExpanded ? null : flag.id)}>
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: severity === "critical" ? RED : "oklch(0.85 0.18 85)" }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: severity === "critical" ? "oklch(0.25 0.1 25)" : "oklch(0.18 0.05 280)", color: severity === "critical" ? RED : SUBTEXT }}>
+                        {REASON_LABELS[flag.reason] ?? flag.reason}
+                      </span>
+                      <span className="text-xs capitalize" style={{ color: SUBTEXT }}>{flag.workType}</span>
+                      {flag.workTitle && <span className="text-xs truncate max-w-xs" style={{ color: "oklch(0.75 0.02 280)" }}>"{flag.workTitle}"</span>}
+                    </div>
+                    <div className="text-xs mt-1" style={{ color: SUBTEXT }}>
+                      Reported by {flag.reporterName} · {new Date(flag.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <span className="text-xs px-2 py-0.5 rounded" style={{ background: "oklch(0.15 0.01 280)", color: flag.status === "pending" ? "oklch(0.85 0.18 85)" : flag.status === "reviewed_ok" ? GREEN : flag.status === "removed_violation" ? RED : "oklch(0.75 0.18 50)" }}>
+                    {flag.status.replace("_", " ")}
+                  </span>
+                </button>
+
+                {isExpanded && (
+                  <div className="border-t p-4 space-y-3" style={{ borderColor: BORDER }}>
+                    {flag.details && (
+                      <div>
+                        <p className="text-xs uppercase tracking-wider mb-1" style={{ color: SUBTEXT }}>Reporter's details</p>
+                        <p className="text-sm rounded p-3" style={{ background: "oklch(0.09 0.01 280)", color: "oklch(0.82 0.02 280)" }}>{flag.details}</p>
+                      </div>
+                    )}
+                    <p className="text-xs" style={{ color: SUBTEXT }}>Work ID: {flag.workId}</p>
+                    {flag.status === "pending" && (
+                      <div className="space-y-2">
+                        <textarea
+                          placeholder="Admin note (optional)"
+                          value={adminNotes[flag.id] ?? ""}
+                          onChange={(e) => setAdminNotes(prev => ({ ...prev, [flag.id]: e.target.value }))}
+                          rows={2}
+                          className="w-full text-sm rounded-lg px-3 py-2 resize-none border"
+                          style={{ background: "oklch(0.09 0.01 280)", borderColor: BORDER, color: "oklch(0.88 0.02 280)" }}
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "reviewed_ok", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: "oklch(0.25 0.08 145)", color: GREEN, border: `1px solid oklch(0.35 0.1 145)` }}>
+                            ✓ Clear
+                          </Button>
+                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "removed_violation", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: "oklch(0.22 0.08 25)", color: RED, border: `1px solid oklch(0.35 0.1 25)` }}>
+                            ✗ Remove
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "escalated", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ borderColor: "oklch(0.35 0.1 50)", color: "oklch(0.75 0.18 50)" }}>
+                            Escalate
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -34,6 +34,7 @@ const ContributorsPage = lazy(() => import("./pages/ContributorsPage"));
 const PlaylistPage = lazy(() => import("./pages/PlaylistPage"));
 const ManifestoPage = lazy(() => import("./pages/ManifestoPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
+const ModerationQueuePage = lazy(() => import("./pages/admin/ModerationQueuePage"));
 const RedeemPage = lazy(() => import("./pages/RedeemPage"));
 const PricingCovenantPage = lazy(() => import("./pages/PricingCovenantPage"));
 const FieldNotesPage = lazy(() => import("./pages/FieldNotesPage"));
@@ -99,6 +100,7 @@ function Router() {
                 <Route path="/manifesto" component={ManifestoPage} />
                 <Route path="/admin/users" component={AdminUsersPage} />
                 <Route path="/admin/normalization" component={ArtworkNormalizationPage} />
+                <Route path="/admin/moderation" component={ModerationQueuePage} />
                 <Route path="/admin" component={AdminUsersPage} />
                 <Route path="/redeem" component={RedeemPage} />
                 <Route path="/pricing" component={PricingCovenantPage} />

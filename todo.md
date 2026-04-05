@@ -2524,3 +2524,40 @@
 - [x] DashboardPage: slot purchase shows 6 package buttons (micro + bulk)
 - [x] PricingCovenantPage: uses purchaseLicenseOneTime, no subscription references
 - [x] TypeScript: 0 errors | Tests: 123/123 passing
+
+## Cosmic Visual Improvements — Medium Icons (Apr 5 2026)
+- [ ] Replace generic emoji/lucide icons on homepage Witnessed Works section with custom cosmic SVG glyphs
+- [ ] Add ambient glow halos and particle dust treatment to each medium card
+- [ ] Apply same cosmic icon treatment to upload medium selector (Step 1 of upload flow)
+- [ ] Ensure consistent visual language: Music (sound wave/nebula), Lyrics (quill/starfield), Manuscripts (scroll/constellation), Comics (panel/galaxy burst)
+
+## Content Moderation System — Living Nexus Doctrine (Apr 5 2026)
+- [ ] Add contentFlags table to drizzle schema (workId, workType, reporterId, reason, status, adminNote, resolvedAt)
+- [ ] Add flagWork / listFlags / resolveFlag DB helpers to server/db.ts
+- [ ] Add moderation.flagWork (public protected) and moderation.listFlags / moderation.resolveFlag (admin) tRPC procedures
+- [ ] Add Flag button to song detail page, post detail page, and creator profile
+- [ ] Build Admin → Moderation tab with queue, filter by status, action buttons (approve/warn/remove/ban)
+- [ ] Add songs.status = "removed_violation" handling — work removed from public view, WID preserved
+- [ ] Doctrine text embedded in admin panel and flag report flow
+
+## Signable Creator Declaration (Apr 5 2026)
+- [ ] Add declarationSignatures table (userId, declarationVersion, signedAt, signatureName, ipHash)
+- [ ] Add declaration.sign tRPC procedure (protected, stores signature)
+- [ ] Add declaration.hasUserSigned query (returns version signed + date)
+- [ ] Build signing modal: shown before first WID registration, creator types their name to sign
+- [ ] Declaration text versioned in shared/declaration.ts (v1 initial text)
+- [ ] Profile badge: "Covenant Signed [date]" shown on creator profiles
+- [ ] /manifesto page: show current Declaration text + live count of signatories
+- [ ] Notify creators when Declaration version updates (re-affirm flow)
+
+## Phase: Moderation & Declaration System Completion (Apr 2026)
+- [x] Fix TypeScript error in ModerationQueuePage (GREEN/RED constants at module scope in AdminUsersPage.tsx)
+- [x] Moderation Queue route already registered at /admin/moderation in App.tsx
+- [x] ModerationQueueEmbed already wired as "Covenant Moderation" tab in AdminUsersPage
+- [x] FlagContentButton wired into SongDetailPage action buttons (non-owner only)
+- [x] Added declaration.creatorStatus public tRPC procedure to query creator's declaration status
+- [x] CovenantBadge wired into CreatorProfilePage profile header (shows if creator has signed)
+- [x] Owner CTA added to CreatorProfilePage: "Sign the Living Nexus Declaration →" button for unsigned owners
+- [x] DeclarationModal wired into CreatorProfilePage for owner signing flow
+- [x] ManifestoPage already has DeclarationCTA with live signer count (was pre-wired)
+- [x] TypeScript: 0 errors | Tests: 123/123 passing

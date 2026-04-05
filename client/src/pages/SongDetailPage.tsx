@@ -28,6 +28,7 @@ import {
 import { useLike } from "@/hooks/useLike";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { WIDPanel } from "@/components/WIDPanel";
+import { FlagContentButton } from "@/components/FlagContentButton";
 import { safeAudioUrl } from "@shared/const";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
@@ -592,6 +593,15 @@ export default function SongDetailPage() {
                     style={{ borderColor: "oklch(0.65 0.2 300 / 0.4)", color: "oklch(0.65 0.2 300)" }}>
                     <Wand2 className="w-3.5 h-3.5 mr-1" />AI Transform
                   </Button>
+                  {!isOwner && (
+                    <FlagContentButton
+                      workId={song.id}
+                      workType="audio"
+                      workTitle={song.title}
+                      size="sm"
+                      className="px-2 py-1 rounded border border-zinc-800 hover:border-red-800/60"
+                    />
+                  )}
                 </div>
               </div>
             </div>

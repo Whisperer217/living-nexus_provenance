@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
+import { CovenantBadge, DeclarationModal } from "@/components/DeclarationModal";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -456,6 +457,13 @@ export default function CreatorProfilePage() {
     { creatorId },
     { enabled: creatorId > 0 && (psTab === "archive" || showLineage), staleTime: 30_000 }
   );
+  // Declaration status for this creator (public)
+  const { data: creatorDeclaration } = trpc.declaration.creatorStatus.useQuery(
+    { userId: creatorId },
+    { enabled: creatorId > 0, staleTime: 300_000 }
+  );
+  const [showDeclarationModal, setShowDeclarationModal] = useState(false);
+
   const generateExpressionMutation = trpc.promptStudio.generateFromProfile.useMutation({
     onSuccess: (result) => { setPsResult({ ...result, promptMode: "identity_regen" }); refetchExpression(); },
     onError: (e: any) => toast.error(e.message),
@@ -860,6 +868,22 @@ export default function CreatorProfilePage() {
                   </div>
                 )}
               </div>{/* end identity block */}
+
+              {/* Covenant Badge — shows if creator has signed the declaration */}
+              {creatorDeclaration?.hasSigned && (
+                <div className="mt-2">
+                  <CovenantBadge signedAt={creatorDeclaration.signedAt} />
+                </div>
+              )}
+              {/* Owner CTA — sign if not yet signed */}
+              {isOwner && !creatorDeclaration?.hasSigned && (
+                <button
+                  onClick={() => setShowDeclarationModal(true)}
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-amber-600/70 hover:text-amber-400 transition-colors"
+                >
+                  <span>Sign the Living Nexus Declaration →</span>
+                </button>
+              )}
 
               {/* ── Right column: signals + actions ── */}
               <div className="flex-shrink-0 flex flex-col items-start sm:items-end gap-3 pt-1 mt-3 sm:mt-0">
@@ -1905,6 +1929,18 @@ export default function CreatorProfilePage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Declaration Modal — for owner to sign */}
+      {isOwner && (
+        <DeclarationModal
+          open={showDeclarationModal}
+          onOpenChange={setShowDeclarationModal}
+          onSigned={() => {
+            // Refetch declaration status after signing
+            utils.declaration.creatorStatus.invalidate({ userId: creatorId });
+          }}
+        />
+      )}
     </div>
   );
 }

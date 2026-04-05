@@ -21,6 +21,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { WIDPanel } from "@/components/WIDPanel";
 import { WorkCarousel } from "@/components/WorkCarousel";
+import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
 
 /** Animated counter that counts up from 0 to `target` over ~1.2 s */
 function AnimatedCounter({ target }: { target: number }) {
@@ -101,29 +102,45 @@ function WIDTrustLayer() {
         </Link>
       </div>
 
-      {/* ── Witnessed Works by Medium ── */}
-      <div className="rounded-2xl px-5 py-4" style={{ background: "oklch(0.10 0.04 270 / 0.7)", border: "1px solid oklch(0.84 0.155 85 / 0.12)" }}>
-        <p className="text-[11px] uppercase tracking-widest mb-3 font-heading" style={{ color: "oklch(0.55 0.03 280)" }}>Witnessed Works</p>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: "Music",       icon: "🎵", color: "oklch(0.65 0.2 300)",  count: mediumCounts?.audio ?? 0 },
-            { label: "Lyrics",      icon: "✍️", color: "oklch(0.75 0.18 85)",  count: mediumCounts?.lyrics ?? 0 },
-            { label: "Manuscripts", icon: "📖", color: "oklch(0.65 0.18 145)", count: mediumCounts?.manuscript ?? 0 },
-            { label: "Comics",      icon: "🎨", color: "oklch(0.65 0.18 25)",  count: mediumCounts?.comic ?? 0 },
-          ].map(m => (
-            <div key={m.label} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5"
-              style={{ background: "oklch(0.07 0.02 280)", border: `1px solid ${m.color}22` }}>
-              <span className="text-base leading-none flex-shrink-0">{m.icon}</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-heading font-semibold leading-none" style={{ color: m.color }}>{m.label}</p>
-                <p className="text-[11px] font-mono mt-0.5 tabular-nums" style={{ color: "oklch(0.55 0.03 280)" }}>
-                  {m.count > 0 ? m.count.toLocaleString() : "—"}
-                </p>
-              </div>
-            </div>
+      {/* ── Witnessed Works by Medium — Cosmic Edition ── */}
+      <div
+        className="rounded-2xl px-5 py-4 relative overflow-hidden"
+        style={{
+          background: "oklch(0.08 0.04 270 / 0.85)",
+          border: "1px solid oklch(0.84 0.155 85 / 0.10)",
+          boxShadow: "0 0 40px oklch(0.68 0.22 295 / 0.06), 0 0 80px oklch(0.82 0.18 85 / 0.04)",
+        }}
+      >
+        {/* Deep space background shimmer */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at 20% 50%, oklch(0.68 0.22 295 / 0.05) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, oklch(0.82 0.18 85 / 0.04) 0%, transparent 60%)",
+          }}
+        />
+        <p
+          className="text-[10px] uppercase tracking-[0.2em] mb-3 font-heading relative"
+          style={{ color: "oklch(0.45 0.03 280)" }}
+        >
+          Witnessed Works
+        </p>
+        <div className="grid grid-cols-2 gap-2 relative">
+          {([
+            { medium: "audio"      as const, count: mediumCounts?.audio      ?? 0 },
+            { medium: "lyrics"     as const, count: mediumCounts?.lyrics     ?? 0 },
+            { medium: "manuscript" as const, count: mediumCounts?.manuscript ?? 0 },
+            { medium: "comic"      as const, count: mediumCounts?.comic      ?? 0 },
+          ]).map(({ medium, count }) => (
+            <CosmicMediumIcon
+              key={medium}
+              medium={medium}
+              size={36}
+              card
+              count={count > 0 ? count.toLocaleString() : "—"}
+            />
           ))}
         </div>
-        <p className="text-[10px] mt-3" style={{ color: "oklch(0.38 0.02 280)" }}>
+        <p className="text-[10px] mt-3 relative" style={{ color: "oklch(0.32 0.02 280)" }}>
           Every medium. One registry. Your proof of origin — sealed at the moment of creation.
         </p>
       </div>

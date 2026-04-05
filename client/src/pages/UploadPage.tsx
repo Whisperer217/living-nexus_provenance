@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { addWIDSnapshot } from "@/lib/lnxCache";
 import { runUploadPipeline, type UploadMetadata } from "@/lib/uploadPipeline";
+import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
 
 const GENRES = [
   "Ambient / Lo-fi", "Electronic / House", "Gospel / Worship",
@@ -668,32 +669,39 @@ export default function UploadPage() {
             <div className="space-y-5">
               <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Select Files</h2>
 
-              {/* Mode Toggle */}
-              <div className="grid grid-cols-2 gap-1 p-1 rounded-xl" style={{ background: "oklch(0.10 0.015 280)", border: "1px solid oklch(0.22 0.015 280)" }}>
-                <button
-                  onClick={() => { setUploadMode("audio"); setWitnessData(null); setDocumentFile(null); }}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all"
-                  style={uploadMode === "audio" ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" } : { color: "oklch(0.55 0.03 280)" }}>
-                  <Music className="w-4 h-4" /> Music / Audio
-                </button>
-                <button
-                  onClick={() => { setUploadMode("lyrics"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all"
-                  style={uploadMode === "lyrics" ? { background: "oklch(0.75 0.18 85)", color: "oklch(0.08 0.015 280)" } : { color: "oklch(0.55 0.03 280)" }}>
-                  <Shield className="w-4 h-4" /> Lyrics Only
-                </button>
-                <button
-                  onClick={() => { setUploadMode("manuscript"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all"
-                  style={uploadMode === "manuscript" ? { background: "oklch(0.65 0.18 145)", color: "oklch(0.08 0.015 280)" } : { color: "oklch(0.55 0.03 280)" }}>
-                  <span className="text-base leading-none">📖</span> Manuscript
-                </button>
-                <button
-                  onClick={() => { setUploadMode("comic"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all"
-                  style={uploadMode === "comic" ? { background: "oklch(0.65 0.18 25)", color: "oklch(0.08 0.015 280)" } : { color: "oklch(0.55 0.03 280)" }}>
-                  <span className="text-base leading-none">🎨</span> Comic / Novel
-                </button>
+              {/* Medium Selector — Cosmic Edition */}
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] mb-2 font-heading" style={{ color: "oklch(0.45 0.03 280)" }}>Choose Your Medium</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <CosmicMediumIcon
+                    medium="audio"
+                    size={38}
+                    active={uploadMode === "audio"}
+                    label="Music / Audio"
+                    onClick={() => { setUploadMode("audio"); setWitnessData(null); setDocumentFile(null); }}
+                  />
+                  <CosmicMediumIcon
+                    medium="lyrics"
+                    size={38}
+                    active={uploadMode === "lyrics"}
+                    label="Lyrics Only"
+                    onClick={() => { setUploadMode("lyrics"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
+                  />
+                  <CosmicMediumIcon
+                    medium="manuscript"
+                    size={38}
+                    active={uploadMode === "manuscript"}
+                    label="Manuscript"
+                    onClick={() => { setUploadMode("manuscript"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
+                  />
+                  <CosmicMediumIcon
+                    medium="comic"
+                    size={38}
+                    active={uploadMode === "comic"}
+                    label="Comic / Novel"
+                    onClick={() => { setUploadMode("comic"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
+                  />
+                </div>
               </div>
 
               {uploadMode === "audio" && (

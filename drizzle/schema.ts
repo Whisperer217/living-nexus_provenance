@@ -867,3 +867,45 @@ export const promptDrafts = mysqlTable("promptDrafts", {
 });
 export type PromptDraft = typeof promptDrafts.$inferSelect;
 export type InsertPromptDraft = typeof promptDrafts.$inferInsert;
+
+// ─── Content Flags (Moderation) ───────────────────────────────────────────────
+export const contentFlags = mysqlTable("contentFlags", {
+  id: int("id").autoincrement().primaryKey(),
+  // What was flagged
+  workId: int("workId").notNull(),
+  workType: mysqlEnum("workType", ["audio", "lyrics", "manuscript", "comic", "post"]).notNull(),
+  workTitle: varchar("workTitle", { length: 256 }),
+  // Who flagged it
+  reporterId: int("reporterId").notNull(),
+  reporterName: varchar("reporterName", { length: 128 }),
+  // Why
+  reason: mysqlEnum("reason", [
+    "dehumanization",
+    "csam",
+    "facilitates_harm",
+    "harassment",
+    "spam",
+    "other"
+  ]).notNull(),
+  details: text("details"),
+  // Admin resolution
+  status: mysqlEnum("status", ["pending", "reviewed_ok", "removed_violation", "escalated"]).default("pending").notNull(),
+  adminNote: text("adminNote"),
+  resolvedById: int("resolvedById"),
+  resolvedAt: timestamp("resolvedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ContentFlag = typeof contentFlags.$inferSelect;
+export type InsertContentFlag = typeof contentFlags.$inferInsert;
+
+// ─── Declaration Signatures ───────────────────────────────────────────────────
+export const declarationSignatures = mysqlTable("declarationSignatures", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  declarationVersion: varchar("declarationVersion", { length: 16 }).notNull().default("1.0"),
+  signatureName: varchar("signatureName", { length: 128 }).notNull(),
+  signedAt: timestamp("signedAt").defaultNow().notNull(),
+  ipHash: varchar("ipHash", { length: 64 }), // anonymized IP hash for audit
+});
+export type DeclarationSignature = typeof declarationSignatures.$inferSelect;
+export type InsertDeclarationSignature = typeof declarationSignatures.$inferInsert;

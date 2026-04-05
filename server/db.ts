@@ -1,5 +1,5 @@
 import { alias } from "drizzle-orm/mysql-core";
-import { and, desc, eq, gte, inArray, isNotNull, like, ne, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, isNotNull, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {
@@ -14,6 +14,8 @@ import {
   playEvents,
   witnessTestimonies,
   expressionLineage,
+  contentFlags, declarationSignatures,
+  type InsertContentFlag, type InsertDeclarationSignature,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3157,4 +3159,93 @@ export async function listActiveJukeboxRooms(): Promise<Array<{
       hostName: first?.tipperName ?? null,
     };
   });
+}
+
+// ─── Content Moderation Helpers ───────────────────────────────────────────────
+export async function createContentFlag(data: InsertContentFlag) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [result] = await db.insert(contentFlags).values(data);
+  return result;
+}
+
+export async function listContentFlags(status?: "pending" | "reviewed_ok" | "removed_violation" | "escalated") {
+  const db = await getDb();
+  if (!db) return [];
+  if (status) {
+    return db.select().from(contentFlags).where(eq(contentFlags.status, status)).orderBy(desc(contentFlags.createdAt));
+  }
+  return db.select().from(contentFlags).orderBy(desc(contentFlags.createdAt));
+}
+
+export async function resolveContentFlag(
+  flagId: number,
+  adminId: number,
+  resolution: "reviewed_ok" | "removed_violation" | "escalated",
+  adminNote?: string,
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(contentFlags)
+    .set({
+      status: resolution,
+      resolvedById: adminId,
+      resolvedAt: new Date(),
+      adminNote: adminNote ?? null,
+    })
+    .where(eq(contentFlags.id, flagId));
+}
+
+export async function getContentFlagStats() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({ status: contentFlags.status, total: count() })
+    .from(contentFlags)
+    .groupBy(contentFlags.status);
+}
+
+// ─── Declaration Signature Helpers ────────────────────────────────────────────
+export async function signDeclaration(data: InsertDeclarationSignature) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const existing = await db
+    .select({ id: declarationSignatures.id })
+    .from(declarationSignatures)
+    .where(
+      and(
+        eq(declarationSignatures.userId, data.userId),
+        eq(declarationSignatures.declarationVersion, data.declarationVersion ?? "1.0"),
+      )
+    )
+    .limit(1);
+  if (existing.length > 0) return { alreadySigned: true };
+  await db.insert(declarationSignatures).values(data);
+  return { alreadySigned: false };
+}
+
+export async function getDeclarationSignature(userId: number, version = "1.0") {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(declarationSignatures)
+    .where(
+      and(
+        eq(declarationSignatures.userId, userId),
+        eq(declarationSignatures.declarationVersion, version),
+      )
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function countDeclarationSigners(version = "1.0") {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ total: count() })
+    .from(declarationSignatures)
+    .where(eq(declarationSignatures.declarationVersion, version));
+  return rows[0]?.total ?? 0;
 }

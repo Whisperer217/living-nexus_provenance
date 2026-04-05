@@ -1,5 +1,30 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import { Shield, Music, Lock, Users, ChevronLeft, ExternalLink } from "lucide-react";
+import { Shield, Music, Lock, Users, ChevronLeft, ExternalLink, ScrollText } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { DeclarationModal } from "@/components/DeclarationModal";
+
+function DeclarationCTA() {
+  const [declOpen, setDeclOpen] = useState(false);
+  const { data: signerData } = trpc.declaration.signerCount.useQuery();
+  return (
+    <>
+      <div className="text-center mb-8">
+        <button
+          onClick={() => setDeclOpen(true)}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-amber-500/40 bg-amber-500/5 text-amber-400 text-sm hover:bg-amber-500/10 transition-colors"
+        >
+          <ScrollText className="w-4 h-4" />
+          Sign the Living Nexus Declaration
+          {signerData?.count ? (
+            <span className="ml-1 text-amber-600 text-xs">{signerData.count.toLocaleString()} signed</span>
+          ) : null}
+        </button>
+      </div>
+      <DeclarationModal open={declOpen} onOpenChange={setDeclOpen} />
+    </>
+  );
+}
 
 const TENETS = [
   {
@@ -297,6 +322,9 @@ export default function ManifestoPage() {
             </div>
           </div>
         </div>
+
+        {/* Declaration CTA */}
+        <DeclarationCTA />
 
         {/* CTA row */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center pb-20">

@@ -71,6 +71,8 @@ import {
   getPromptDraftByShareToken, updatePromptDraftShare, deletePromptDraft,
   updateUserToneFrequency,
   listActiveJukeboxRooms,
+  createContentFlag, listContentFlags, resolveContentFlag, getContentFlagStats,
+  signDeclaration, getDeclarationSignature, countDeclarationSigners,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -3822,6 +3824,114 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .mutation(async ({ ctx, input }) => {
         await updateUserToneFrequency(ctx.user.id, input);
         return { success: true };
+      }),
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONTENT MODERATION
+  // ═══════════════════════════════════════════════════════════════════════════
+  moderation: router({
+    // Flag a piece of content for review
+    flagContent: protectedProcedure
+      .input(z.object({
+        workId: z.number(),
+        workType: z.enum(["audio", "lyrics", "manuscript", "comic", "post"]),
+        workTitle: z.string().optional(),
+        reason: z.enum(["dehumanization", "csam", "facilitates_harm", "harassment", "spam", "other"]),
+        details: z.string().max(1000).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await createContentFlag({
+          workId: input.workId,
+          workType: input.workType,
+          workTitle: input.workTitle ?? null,
+          reporterId: ctx.user.id,
+          reporterName: ctx.user.name ?? "Anonymous",
+          reason: input.reason,
+          details: input.details ?? null,
+          status: "pending",
+        });
+        return { success: true };
+      }),
+
+    // Admin: list flags
+    listFlags: protectedProcedure
+      .input(z.object({
+        status: z.enum(["pending", "reviewed_ok", "removed_violation", "escalated", "all"]).default("pending"),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        const status = input.status === "all" ? undefined : input.status;
+        return listContentFlags(status);
+      }),
+
+    // Admin: resolve a flag
+    resolveFlag: protectedProcedure
+      .input(z.object({
+        flagId: z.number(),
+        resolution: z.enum(["reviewed_ok", "removed_violation", "escalated"]),
+        adminNote: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        await resolveContentFlag(input.flagId, ctx.user.id, input.resolution, input.adminNote);
+        return { success: true };
+      }),
+
+    // Admin: flag stats
+    stats: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return getContentFlagStats();
+      }),
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LIVING NEXUS DECLARATION
+  // ═══════════════════════════════════════════════════════════════════════════
+  declaration: router({
+    // Get current declaration status for the logged-in user
+    myStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        const sig = await getDeclarationSignature(ctx.user.id, "1.0");
+        const signerCount = await countDeclarationSigners("1.0");
+        return {
+          hasSigned: !!sig,
+          signedAt: sig?.signedAt ?? null,
+          signatureName: sig?.signatureName ?? null,
+          declarationVersion: "1.0",
+          signerCount,
+        };
+      }),
+
+    // Public: how many have signed
+    signerCount: publicProcedure
+      .query(async () => {
+        return { count: await countDeclarationSigners("1.0") };
+      }),
+
+    // Public: check if a specific creator has signed
+    creatorStatus: publicProcedure
+      .input(z.object({ userId: z.number() }))
+      .query(async ({ input }) => {
+        const sig = await getDeclarationSignature(input.userId, "1.0");
+        return {
+          hasSigned: !!sig,
+          signedAt: sig?.signedAt ?? null,
+        };
+      }),
+    // Sign the declaration
+    sign: protectedProcedure
+      .input(z.object({
+        signatureName: z.string().min(2).max(128),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await signDeclaration({
+          userId: ctx.user.id,
+          declarationVersion: "1.0",
+          signatureName: input.signatureName,
+        });
+        return result;
       }),
   }),
 });
