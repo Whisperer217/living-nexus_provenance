@@ -32,7 +32,7 @@ import {
   Home, Compass, Users, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
   CheckCircle2, Fingerprint, Bell,
-  BookOpen, Star, Eye, Archive, LayoutDashboard, Sparkles, Terminal, Heart,
+  BookOpen, Star, Eye, Archive, LayoutDashboard, Sparkles, Terminal, Heart, Scale,
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
@@ -258,6 +258,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase mb-2">Discover</p>
                 {([
                   { label: "Manifesto",         icon: BookOpen, path: "/manifesto"        },
+                  { label: "Terms of Service",  icon: Scale,    path: "/terms"            },
                   { label: "Founding Creators", icon: Star,     path: "/founders"         },
                   { label: "Founder Era Support", icon: Heart,  path: "/founder-era"      },
                   { label: "Witness Registry",  icon: Eye,      path: "/witness-registry" },

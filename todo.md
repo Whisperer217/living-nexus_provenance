@@ -2561,3 +2561,9 @@
 - [x] DeclarationModal wired into CreatorProfilePage for owner signing flow
 - [x] ManifestoPage already has DeclarationCTA with live signer count (was pre-wired)
 - [x] TypeScript: 0 errors | Tests: 123/123 passing
+
+## Phase: Terms of Service Page (Apr 2026)
+- [x] Create TermsPage.tsx with creator-protection preamble as the opening statement
+- [x] Register /terms route in App.tsx
+- [x] Add Terms link to sidebar/footer navigation (mobile drawer + desktop TopBar drawer)
+- [x] Style with Divine Noir aesthetic matching ManifestoPage

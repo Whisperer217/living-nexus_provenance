@@ -15,7 +15,7 @@ import { WhatsNewModal } from "@/components/WhatsNewModal";
 import {
   Home, Compass, Users, User, Upload, Shield,
   LayoutDashboard, Archive, Sparkles, Terminal,
-  BookOpen, Star, Heart, Eye, Fingerprint,
+  BookOpen, Star, Heart, Eye, Fingerprint, Scale,
   LogIn, LogOut, Bell, Menu, X, ChevronRight,
   CheckCircle2, Zap,
 } from "lucide-react";
@@ -51,6 +51,7 @@ const DRAWER_CREATE = [
 
 const DRAWER_DISCOVER = [
   { label: "Manifesto",         icon: BookOpen, path: "/manifesto"        },
+  { label: "Terms of Service",  icon: Scale,    path: "/terms"            },
   { label: "Founding Creators", icon: Star,     path: "/founders"         },
   { label: "Founder Era Support", icon: Heart,  path: "/founder-era"      },
   { label: "Witness Registry",  icon: Eye,      path: "/witness-registry" },
