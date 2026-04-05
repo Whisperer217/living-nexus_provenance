@@ -6,7 +6,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { usePlayer, DEMO_ROOMS } from "@/contexts/PlayerContext";
+import { usePlayer } from "@/contexts/PlayerContext";
 import { useParams } from "wouter";
 import {
   Plus, Send, Copy, LogOut, Music2, DollarSign,
@@ -746,6 +746,12 @@ export default function TogetherPage() {
   const chatRef = useRef<HTMLDivElement>(null);
   const autoJoinedRef = useRef(false);
 
+  // Live active sanctuaries — poll every 30s when on the lobby
+  const { data: activeRooms, isLoading: activeRoomsLoading } = trpc.jukebox.listActiveRooms.useQuery(
+    undefined,
+    { enabled: !state.room, refetchInterval: 30000 }
+  );
+
   // Poll queue every 5 seconds when in a room
   const { data: queueData, refetch: refetchQueue } = trpc.jukebox.getQueue.useQuery(
     { roomCode: state.room?.code ?? "" },
@@ -833,9 +839,7 @@ export default function TogetherPage() {
   const joinRoom = (code?: string) => {
     const c = (code || joinCode).trim().toUpperCase();
     if (c.length < 4) { toast.error("Enter a valid room code"); return; }
-    const demo = DEMO_ROOMS.find(r => r.code === c);
-    const names = demo ? ["You", "Nova", "Kai", "Mia"].slice(0, demo.listeners) : ["You"];
-    setRoom({ code: c, name: demo?.name || "Music Sanctuary", listeners: names });
+    setRoom({ code: c, name: "Music Sanctuary", listeners: ["You"] });
     setIsHost(false);
     setJoinCode("");
     setMessages([]);
@@ -843,8 +847,6 @@ export default function TogetherPage() {
     sessionStorage.removeItem("lnx_room_host");
     window.history.replaceState({}, "", `/together/${c}`);
     toast.success(`✅ Joined room ${c}`);
-    setTimeout(() => addMsg("Nova", "anyone know this track? 🔥"), 1200);
-    setTimeout(() => addMsg("Kai", "yesss absolute banger 🙌"), 3000);
   };
 
   const leaveRoom = () => {
@@ -869,9 +871,7 @@ export default function TogetherPage() {
     if (codeToUse && !state.room) {
       autoJoinedRef.current = true;
       const c = codeToUse.trim().toUpperCase();
-      const demo = DEMO_ROOMS.find(r => r.code === c);
-      const names = demo ? ["You", "Nova", "Kai", "Mia"].slice(0, demo.listeners) : ["You"];
-      setRoom({ code: c, name: demo?.name || "Music Sanctuary", listeners: names });
+      setRoom({ code: c, name: "Music Sanctuary", listeners: ["You"] });
       setIsHost(savedHost || false);
       setMessages([]);
       // Update URL if we restored from sessionStorage without URL param
@@ -1180,37 +1180,85 @@ export default function TogetherPage() {
         {!state.room && (
           <>
             <div className="font-heading text-[15px] tracking-wider text-white/70 mb-4">Active Sanctuaries</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {DEMO_ROOMS.map(room => (
-                <div
-                  key={room.code}
-                  onClick={() => joinRoom(room.code)}
-                  className="rounded-xl overflow-hidden border border-white/[0.07] cursor-pointer
-                    hover:border-[#A78BFA]/30 hover:-translate-y-1 transition-all group"
-                  style={{ background: "oklch(0.115 0.055 278)" }}
-                >
-                  <div className="aspect-video relative flex items-center justify-center text-5xl"
-                    style={{ background: "linear-gradient(135deg,#1a0a3e,#0a1a3e)" }}>
-                    {room.emoji}
-                    <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
-                      bg-[oklch(0.65_0.18_160)/90] text-black font-heading tracking-wider">
-                      LIVE
+            {activeRoomsLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="rounded-xl overflow-hidden border border-white/[0.07] animate-pulse"
+                    style={{ background: "oklch(0.115 0.055 278)" }}>
+                    <div className="aspect-video bg-white/[0.04]" />
+                    <div className="p-3 space-y-2">
+                      <div className="h-3 bg-white/[0.06] rounded w-2/3" />
+                      <div className="h-2.5 bg-white/[0.04] rounded w-1/2" />
                     </div>
                   </div>
-                  <div className="p-3">
-                    <div className="text-[13px] font-heading text-white/80 tracking-wide mb-1">{room.name}</div>
-                    <div className="text-[11px] text-white/75 font-body">
-                      {room.listeners} listening · {room.track}
-                    </div>
-                    <div className="mt-2">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 font-body tracking-widest">
-                        {room.code}
-                      </span>
-                    </div>
-                  </div>
+                ))}
+              </div>
+            ) : !activeRooms || activeRooms.length === 0 ? (
+              <div className="rounded-xl border border-white/[0.07] p-10 text-center"
+                style={{ background: "oklch(0.115 0.055 278)" }}>
+                <div className="text-4xl mb-3">🎵</div>
+                <div className="text-[14px] font-heading text-white/50 tracking-wide mb-1">No Active Sanctuaries</div>
+                <div className="text-[12px] font-body text-white/30">
+                  Create a room above and invite others to listen together.
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activeRooms.map(room => (
+                  <div
+                    key={room.roomCode}
+                    onClick={() => joinRoom(room.roomCode)}
+                    className="rounded-xl overflow-hidden border border-white/[0.07] cursor-pointer
+                      hover:border-[#A78BFA]/30 hover:-translate-y-1 transition-all group"
+                    style={{ background: "oklch(0.115 0.055 278)" }}
+                  >
+                    <div className="aspect-video relative overflow-hidden"
+                      style={{ background: "linear-gradient(135deg,#1a0a3e,#0a1a3e)" }}>
+                      {room.nowPlayingCoverArtUrl ? (
+                        <img
+                          src={room.nowPlayingCoverArtUrl}
+                          alt={room.nowPlayingTitle ?? "Now Playing"}
+                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Music2 size={32} className="text-white/20" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
+                        bg-green-500/90 text-black font-heading tracking-wider">
+                        LIVE
+                      </div>
+                      {room.pendingCount > 0 && (
+                        <div className="absolute top-2 right-2 text-[9px] font-bold px-2 py-0.5 rounded
+                          bg-[#A78BFA]/80 text-white font-heading tracking-wider">
+                          {room.pendingCount} queued
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <div className="text-[13px] font-heading text-white/80 tracking-wide mb-0.5 truncate">
+                        {room.nowPlayingTitle ?? "Sanctuary"}
+                      </div>
+                      <div className="text-[11px] text-white/50 font-body truncate">
+                        {room.nowPlayingArtist ? `by ${room.nowPlayingArtist}` : ""}
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/70 font-body tracking-widest">
+                          {room.roomCode}
+                        </span>
+                        {room.hostName && (
+                          <span className="text-[10px] text-white/30 font-body truncate max-w-[80px]">
+                            {room.hostName}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

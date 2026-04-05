@@ -2604,3 +2604,14 @@
 - [x] Fix album end-of-queue — after last track, player stops instead of looping back to track 1 (both onEnded and nextTrack)
 - [x] Fix duplicate @handle display in profile edit panel — new HandleField component integrates @ prefix, no duplication when editing
 - [x] TypeScript: 0 errors | Tests: 123/123 passing
+
+## Phase: Listen Together Room Cards (Apr 5 2026)
+- [ ] Fix Sanctuary room cards — show currently-playing track album art instead of placeholder emoji
+- [ ] Fix duplicate/empty tabs on the Listen Together page
+
+## Phase (Active Sanctuaries Fix)
+- [x] Replace DEMO_ROOMS hardcoded array in TogetherPage lobby with live trpc.jukebox.listActiveRooms query
+- [x] Room cards now show real album artwork (nowPlayingCoverArtUrl), track title, artist, room code, queued count
+- [x] Loading skeleton shown while fetching; empty state shown when no rooms are active
+- [x] joinRoom() and auto-rejoin no longer reference DEMO_ROOMS (removed all demo data dependencies)
+- [x] TypeScript: 0 errors | Tests: 123/123 passing
