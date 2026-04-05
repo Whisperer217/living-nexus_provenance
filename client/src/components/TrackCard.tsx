@@ -125,10 +125,10 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
     <>
     <div
       className={`group relative rounded-xl overflow-hidden transition-all duration-200
-        border bg-[oklch(0.095_0.028_275)] track-card-glow
+        border bg-[oklch(0.148_0.032_50)] track-card-glow parchment-grain
         ${isActive
-          ? "border-[#D4AF37]/40 track-active-glow shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
-          : "border-white/[0.05] hover:border-[#A78BFA]/30"
+          ? "border-[#E8A830]/40 track-active-glow shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+          : "border-[oklch(0.28_0.04_60/0.25)] hover:border-[oklch(0.55_0.10_72/0.40)]"
         }`}
     >
       {/* ── Zone 1: Cover Art — plays in global player ── */}

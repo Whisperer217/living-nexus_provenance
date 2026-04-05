@@ -605,9 +605,14 @@ export default function HomePage() {
           alt="Living Nexus"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.06_0.025_255)] via-[oklch(0.07_0.025_255)]/80 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.06_0.025_255)] via-[oklch(0.07_0.025_255)]/40 to-transparent" />
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 90% 70% at 50% 50%, transparent 0%, oklch(0.09 0.04 265 / 0.35) 40%, oklch(0.07 0.08 290 / 0.65) 100%)" }} />
+        {/* Warm directional overlay — left-to-right fade, lantern-lit from left */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, oklch(0.08 0.025 50 / 0.96) 0%, oklch(0.09 0.022 52 / 0.82) 45%, oklch(0.10 0.018 55 / 0.40) 100%)" }} />
+        {/* Bottom scrim — pulls content up from dark base */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, oklch(0.08 0.022 50 / 0.95) 0%, oklch(0.09 0.020 52 / 0.45) 40%, transparent 100%)" }} />
+        {/* Candlelight radial — warm amber glow emanating from center-left, fading to dark edges */}
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 75% 65% at 30% 55%, oklch(0.55 0.12 72 / 0.14) 0%, oklch(0.30 0.08 60 / 0.08) 40%, transparent 70%)" }} />
+        {/* Edge vignette — dark corners like candlelight in a room */}
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 30%, oklch(0.06 0.015 50 / 0.55) 75%, oklch(0.05 0.010 50 / 0.85) 100%)" }} />
 
         <div className="relative z-10 flex flex-col justify-end px-6 pb-10 pt-16 max-w-3xl">
           <div className="flex items-center gap-2 mb-4">
@@ -629,7 +634,7 @@ export default function HomePage() {
             <span style={{ color: "oklch(0.84 0.155 85)" }}>witnessed.</span>
           </h1>
 
-          <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "oklch(0.75 0.025 280)" }}>
+          <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "oklch(0.72 0.035 68)" }}>
             Every work — music, lyrics, manuscripts, comics, video — carries a Witness ID. Cryptographic proof of origin that belongs to you before it belongs to anyone else.
           </p>
 
@@ -639,7 +644,7 @@ export default function HomePage() {
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
                   background: "oklch(0.84 0.155 85)",
-                  color: "oklch(0.12 0.04 270)",
+                  color: "oklch(0.12 0.03 52)",
                 }}
               >
                 <Upload size={13} />
@@ -652,7 +657,7 @@ export default function HomePage() {
                 style={{
                   background: "oklch(1 0 0 / 0.06)",
                   border: "1px solid oklch(1 0 0 / 0.14)",
-                  color: "oklch(0.85 0.01 280)",
+                  color: "oklch(0.82 0.025 72)",
                 }}
               >
                 <Compass size={13} />

@@ -304,7 +304,8 @@ export default function PlayerBar() {
                   className="h-full rounded-full"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, oklch(0.55 0.16 45), oklch(0.80 0.145 82))",
+                    background: "linear-gradient(90deg, oklch(0.42 0.14 38) 0%, oklch(0.62 0.18 55) 50%, oklch(0.88 0.18 82) 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px oklch(0.82 0.155 75 / 0.45)" : "none",
                   }}
                 />
               </div>
@@ -454,13 +455,14 @@ export default function PlayerBar() {
                   className="h-full rounded-full relative transition-all"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, oklch(0.55 0.16 45), oklch(0.80 0.145 82))",
+                    background: "linear-gradient(90deg, oklch(0.42 0.14 38) 0%, oklch(0.62 0.18 55) 50%, oklch(0.88 0.18 82) 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px oklch(0.82 0.155 75 / 0.45)" : "none",
                   }}
                 >
                   {state.isPlaying && (
                     <div
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full progress-playhead"
-                      style={{ background: "oklch(0.80 0.145 82)", boxShadow: "0 0 6px 2px oklch(0.80 0.145 82 / 0.7)" }}
+                      style={{ background: "oklch(0.92 0.16 82)", boxShadow: "0 0 8px 3px oklch(0.82 0.155 75 / 0.80)" }}
                     />
                   )}
                 </div>
@@ -525,7 +527,7 @@ export default function PlayerBar() {
                         onChange={e => { setVolume(parseFloat(e.target.value)); }}
                         className="volume-slider-vertical"
                         style={{
-                          background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
+                          background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
                             state.isMuted ? 0 : state.volume * 100
                           }%, oklch(0.30 0.04 60 / 70%) ${
                             state.isMuted ? 0 : state.volume * 100
@@ -762,13 +764,14 @@ export default function PlayerBar() {
                   className="h-full rounded-full relative transition-all"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, oklch(0.55 0.16 45), oklch(0.80 0.145 82))",
+                    background: "linear-gradient(90deg, oklch(0.42 0.14 38) 0%, oklch(0.62 0.18 55) 50%, oklch(0.88 0.18 82) 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px oklch(0.82 0.155 75 / 0.45)" : "none",
                   }}
                 >
                   {state.isPlaying && (
                     <div
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full progress-playhead"
-                      style={{ background: "oklch(0.80 0.145 82)", boxShadow: "0 0 6px 2px oklch(0.80 0.145 82 / 0.7)" }}
+                      style={{ background: "oklch(0.92 0.16 82)", boxShadow: "0 0 8px 3px oklch(0.82 0.155 75 / 0.80)" }}
                     />
                   )}
                   {!state.isPlaying && (
@@ -952,7 +955,7 @@ export default function PlayerBar() {
                     onChange={e => { setVolume(parseFloat(e.target.value)); }}
                     className="volume-slider-vertical"
                     style={{
-                      background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
+                      background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
                         state.isMuted ? 0 : state.volume * 100
                       }%, oklch(0.30 0.04 60 / 70%) ${
                         state.isMuted ? 0 : state.volume * 100

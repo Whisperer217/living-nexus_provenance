@@ -2615,3 +2615,8 @@
 - [x] Loading skeleton shown while fetching; empty state shown when no rooms are active
 - [x] joinRoom() and auto-rejoin no longer reference DEMO_ROOMS (removed all demo data dependencies)
 - [x] TypeScript: 0 errors | Tests: 123/123 passing
+
+## Atmospheric Lighting Enhancements
+- [x] Warm radial vignette / ambient candlelight glow on homepage hero
+- [x] Parchment grain texture overlay on track cards and modals
+- [x] Amber-to-gold flame gradient on progress bar scrubber
