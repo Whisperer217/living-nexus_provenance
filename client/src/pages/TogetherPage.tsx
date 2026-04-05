@@ -760,6 +760,7 @@ export default function TogetherPage() {
 
   const markPlayed = trpc.jukebox.markPlayed.useMutation({ onSuccess: () => refetchQueue() });
   const skipCurrent = trpc.jukebox.skipCurrent.useMutation({ onSuccess: () => refetchQueue() });
+  const notifyRoomOpened = trpc.jukebox.notifyRoomOpened.useMutation();
 
   // Handle Stripe success redirect: ?jukebox=success&songId=X
   const confirmQueue = trpc.jukebox.confirmQueue.useMutation({
@@ -834,6 +835,8 @@ export default function TogetherPage() {
     window.history.replaceState({}, "", `/together/${code}`);
     toast.success(`🎧 Room created! Share link copied to clipboard.`);
     navigator.clipboard.writeText(`${window.location.origin}/together/${code}`).catch(() => {});
+    // Fire Discord webhook non-blocking
+    if (user) notifyRoomOpened.mutate({ roomCode: code });
   };
 
   const joinRoom = (code?: string) => {

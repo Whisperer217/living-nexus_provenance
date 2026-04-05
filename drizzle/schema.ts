@@ -931,3 +931,22 @@ export const songVersions = mysqlTable("songVersions", {
 });
 export type SongVersion = typeof songVersions.$inferSelect;
 export type InsertSongVersion = typeof songVersions.$inferInsert;
+
+// ─── Discord Webhooks ─────────────────────────────────────────────────────────
+// Per-user, per-event Discord webhook configuration.
+// Each row stores one webhook URL for one event type for one user.
+// Webhook URLs are stored in plaintext (Discord webhooks are not secrets —
+// they are scoped to a single channel and can be regenerated at any time).
+export const discordWebhooks = mysqlTable("discordWebhooks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),              // owner (creator or admin)
+  event: varchar("event", { length: 64 }).notNull(), // e.g. "wid_minted", "track_upload"
+  webhookUrl: text("webhookUrl").notNull(),      // Discord webhook URL
+  enabled: boolean("enabled").default(true).notNull(),
+  lastFiredAt: timestamp("lastFiredAt"),         // last successful fire
+  lastError: text("lastError"),                  // last error message (if any)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+export type DiscordWebhook = typeof discordWebhooks.$inferSelect;
+export type InsertDiscordWebhook = typeof discordWebhooks.$inferInsert;

@@ -17,11 +17,11 @@ import {
   BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
   XCircle, Download, Play, Activity, MessageCircle, Zap, Gift,
   Library, RefreshCw, FileArchive, PackageOpen, Camera, X,
-  TrendingUp, Heart, LineChart, Pencil, Fingerprint, BookOpen, FileText, Image
+  TrendingUp, Heart, LineChart, Pencil, Fingerprint, BookOpen, FileText, Image, Bell
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
-type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive" | "analytics" | "widcache";
+type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive" | "analytics" | "widcache" | "discord";
 
 interface BatchTrack {
   id: number;
@@ -622,6 +622,19 @@ export default function DashboardPage() {
           >
             <Fingerprint className="w-4 h-4" />
             Witness Cache
+          </button>
+          <button
+            onClick={() => setActiveTab("discord")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: activeTab === "discord" ? "oklch(0.45 0.2 265 / 0.2)" : "transparent",
+              color: activeTab === "discord" ? "oklch(0.75 0.18 265)" : "oklch(0.6 0.04 280)",
+              border: activeTab === "discord" ? "1px solid oklch(0.45 0.2 265 / 0.4)" : "1px solid transparent",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            <Bell className="w-4 h-4" />
+            Discord
           </button>
         </div>
         {/* My Songs Tab */}
@@ -1337,6 +1350,8 @@ export default function DashboardPage() {
         )}
       {/* WID Witness Cache Tab */}
       {activeTab === "widcache" && <WIDCacheTab />}
+      {/* Discord Integration Tab */}
+      {activeTab === "discord" && <DiscordIntegrationTab />}
       </div>
       {/* ── Edit Track Panel ───────────────────────────────────────── */}
       {editingSong && (
@@ -1352,6 +1367,182 @@ export default function DashboardPage() {
     </div>
    );
 }
+// ─── Discord Integration Tab ─────────────────────────────────────────────────
+const DISCORD_EVENTS = [
+  {
+    key: "wid_minted" as const,
+    label: "WID Minted",
+    description: "Fires when a new Witness ID is issued for a track",
+    icon: "🔐",
+    color: "oklch(0.84 0.155 85)",
+  },
+  {
+    key: "track_upload" as const,
+    label: "Track Uploaded",
+    description: "Fires when a new track is successfully uploaded",
+    icon: "🎵",
+    color: "oklch(0.75 0.18 140)",
+  },
+  {
+    key: "jukebox_room" as const,
+    label: "Jukebox Room Opened",
+    description: "Fires when you open a new Listen Together sanctuary",
+    icon: "🎧",
+    color: "oklch(0.75 0.18 220)",
+  },
+  {
+    key: "tip_received" as const,
+    label: "Tip Received",
+    description: "Fires when a fan sends you a gift on one of your tracks",
+    icon: "💛",
+    color: "oklch(0.84 0.155 85)",
+  },
+  {
+    key: "like_surge" as const,
+    label: "Like Surge",
+    description: "Fires when a track hits 10, 50, 100, or 500 likes",
+    icon: "🔥",
+    color: "oklch(0.75 0.18 30)",
+  },
+] as const;
+
+type DiscordEventKey = typeof DISCORD_EVENTS[number]["key"];
+
+function DiscordIntegrationTab() {
+  const { data: webhooks, refetch } = trpc.discord.getWebhooks.useQuery();
+  const saveWebhook = trpc.discord.saveWebhook.useMutation({ onSuccess: () => { toast.success("Webhook saved"); refetch(); } });
+  const toggleWebhook = trpc.discord.toggleWebhook.useMutation({ onSuccess: () => refetch() });
+  const deleteWebhook = trpc.discord.deleteWebhook.useMutation({ onSuccess: () => { toast.success("Webhook removed"); refetch(); } });
+  const testWebhook = trpc.discord.testWebhook.useMutation({
+    onSuccess: (data) => {
+      if (data.ok) toast.success("Test message sent to Discord!");
+      else toast.error(`Test failed: ${data.error}`);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [testing, setTesting] = useState<string | null>(null);
+
+  // Populate URL inputs from saved webhooks
+  useEffect(() => {
+    if (!webhooks) return;
+    const map: Record<string, string> = {};
+    for (const wh of webhooks) map[wh.event] = wh.webhookUrl;
+    setUrls(map);
+  }, [webhooks]);
+
+  const getWebhook = (key: DiscordEventKey) => webhooks?.find((w: { event: string }) => w.event === key);
+
+  return (
+    <div className="space-y-6 py-4">
+      {/* Header */}
+      <div className="flex items-start gap-4 p-5 rounded-xl" style={{ background: "oklch(0.45 0.2 265 / 0.12)", border: "1px solid oklch(0.45 0.2 265 / 0.3)" }}>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: "oklch(0.45 0.2 265 / 0.2)" }}>🔔</div>
+        <div>
+          <h2 className="text-lg font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Discord Webhook Integration</h2>
+          <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>Get real-time notifications in your Discord server when platform events happen. Paste a Discord webhook URL for each event you want to track.</p>
+          <a href="https://support.discord.com/hc/en-us/articles/228383668" target="_blank" rel="noopener noreferrer" className="text-xs mt-2 inline-flex items-center gap-1" style={{ color: "oklch(0.75 0.18 265)" }}>
+            <ExternalLink className="w-3 h-3" /> How to create a Discord webhook
+          </a>
+        </div>
+      </div>
+
+      {/* Event rows */}
+      {DISCORD_EVENTS.map(ev => {
+        const saved = getWebhook(ev.key);
+        const url = urls[ev.key] ?? "";
+        const isDirty = url !== (saved?.webhookUrl ?? "");
+        return (
+          <div key={ev.key} className="p-5 rounded-xl" style={{ background: "oklch(0.12 0.02 280 / 0.6)", border: "1px solid oklch(0.2 0.03 280)" }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{ev.icon}</span>
+                <div>
+                  <p className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: ev.color }}>{ev.label}</p>
+                  <p className="text-xs" style={{ color: "oklch(0.55 0.03 280)" }}>{ev.description}</p>
+                </div>
+              </div>
+              {saved && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <span className="text-xs" style={{ color: "oklch(0.55 0.03 280)" }}>{saved.enabled ? "Enabled" : "Disabled"}</span>
+                  <div
+                    className="relative w-10 h-5 rounded-full transition-colors cursor-pointer"
+                    style={{ background: saved.enabled ? ev.color : "oklch(0.25 0.03 280)" }}
+                    onClick={() => toggleWebhook.mutate({ event: ev.key, enabled: !saved.enabled })}
+                  >
+                    <div className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform" style={{ transform: saved.enabled ? "translateX(22px)" : "translateX(2px)" }} />
+                  </div>
+                </label>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                placeholder="https://discord.com/api/webhooks/..."
+                value={url}
+                onChange={e => setUrls(prev => ({ ...prev, [ev.key]: e.target.value }))}
+                className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+                style={{
+                  background: "oklch(0.08 0.015 280)",
+                  border: "1px solid oklch(0.22 0.03 280)",
+                  color: "oklch(0.85 0.02 85)",
+                  fontFamily: "monospace",
+                }}
+              />
+              <Button
+                size="sm"
+                disabled={!url || !isDirty || saveWebhook.isPending}
+                onClick={() => saveWebhook.mutate({ event: ev.key, webhookUrl: url, enabled: saved?.enabled ?? true })}
+                style={{ background: isDirty && url ? ev.color : "oklch(0.2 0.03 280)", color: "oklch(0.08 0.015 280)", opacity: (!url || !isDirty) ? 0.5 : 1 }}
+              >
+                {saveWebhook.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                Save
+              </Button>
+              {saved && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={testing === ev.key || testWebhook.isPending}
+                    onClick={async () => {
+                      setTesting(ev.key);
+                      await testWebhook.mutateAsync({ event: ev.key, webhookUrl: saved.webhookUrl });
+                      setTesting(null);
+                    }}
+                    style={{ borderColor: "oklch(0.3 0.04 280)", color: "oklch(0.7 0.04 280)" }}
+                  >
+                    {testing === ev.key ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                    Test
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => deleteWebhook.mutate({ event: ev.key })}
+                    style={{ borderColor: "oklch(0.4 0.15 30 / 0.4)", color: "oklch(0.65 0.15 30)" }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </>
+              )}
+            </div>
+            {saved && (
+              <p className="text-xs mt-2" style={{ color: "oklch(0.5 0.03 280)" }}>
+                Last updated: {new Date(saved.updatedAt).toLocaleString()}
+              </p>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Rate limit note */}
+      <p className="text-xs text-center" style={{ color: "oklch(0.45 0.03 280)" }}>
+        Webhooks are rate-limited to 30 requests per minute per event. Failures are silent and will not affect platform operations.
+      </p>
+    </div>
+  );
+}
+
 // ─── Archive Tab Component ────────────────────────────────────────────────────
 function ArchiveTab() {
   const [batchInfo, setBatchInfo] = useState<BatchInfoResponse | null>(null);

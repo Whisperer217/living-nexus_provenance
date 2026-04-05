@@ -2626,3 +2626,11 @@
 - [x] Add gold banner CSS (shimmer border, crown badge) for tracks with 50+ plays
 - [x] Apply gold banner to TrackCard component
 - [x] Apply gold banner to ArchivePage and ExplorePage song rows
+
+## Discord Webhook Integration
+- [x] Add discordWebhooks table to drizzle schema and push migration
+- [x] Build server/discord.ts webhook service (store/retrieve, fire, rate limit 30/min, test)
+- [x] Add tRPC procedures: getWebhooks, saveWebhook, toggleWebhook, deleteWebhook, testWebhook, notifyRoomOpened
+- [x] Wire webhook triggers: WID issuance, track upload, jukebox room, tip, like surge
+- [x] Build Discord Integration settings tab in creator dashboard
+- [x] Write vitest tests for webhook service (8 tests passing)

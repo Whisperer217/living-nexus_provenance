@@ -152,6 +152,19 @@ export async function handleStripeWebhook(req: any, res: any) {
               refType: "song",
               refId: songId,
             });
+            // Discord webhook — non-blocking
+            void (async () => {
+              try {
+                const { fireUserWebhook } = await import("./discord");
+                const creator = await getUserById(song.userId);
+                await fireUserWebhook(song.userId, "tip_received", {
+                  creatorName: creator?.displayName || creator?.username || "Unknown",
+                  amountCents,
+                  songTitle: song.title,
+                  fanName: tipperName,
+                });
+              } catch (e) { /* swallow */ }
+            })();
           }
         }
         // Tip-to-Download: record as a tip so getUserTipTotalForSong unlocks the download
@@ -606,6 +619,24 @@ export const appRouter = router({
       if (input.witnessId) {
         generateShareArtifact(input.witnessId).catch(err => console.error("[ShareArtifact] Generation error:", err));
       }
+      // Discord webhooks — fire non-blocking
+      void (async () => {
+        try {
+          const { fireUserWebhook } = await import("./discord");
+          const creator = await getUserById(ctx.user.id);
+          const webhookPayload = {
+            title: input.title,
+            creatorName: creator?.displayName || creator?.username || "Unknown",
+            contentType: input.contentType ?? "audio",
+            genre: input.genre ?? undefined,
+            witnessId: input.witnessId ?? undefined,
+          };
+          await fireUserWebhook(ctx.user.id, "track_upload", webhookPayload);
+          if (input.witnessId) {
+            await fireUserWebhook(ctx.user.id, "wid_minted", webhookPayload);
+          }
+        } catch (e) { /* swallow */ }
+      })();
       return { success: true, fileUrl, coverArtUrl, songId };
     }),
     uploadCoverArt: protectedProcedure.input(z.object({
@@ -1126,7 +1157,37 @@ export const appRouter = router({
       return getLikedSongs(ctx.user.id);
     }),
     toggleLike: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => {
-      return toggleLike(ctx.user.id, input.songId);
+      const result = await toggleLike(ctx.user.id, input.songId);
+      // Check for like surge: if this was a new like, see if the song got 10+ likes in the last hour
+      if (result?.liked) {
+        void (async () => {
+          try {
+            const db = await getDb();
+            if (!db) return;
+            const { likes } = await import("../drizzle/schema");
+            const { gte, count: drizzleCount, eq } = await import("drizzle-orm");
+            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+            const [{ cnt }] = await db
+              .select({ cnt: drizzleCount(likes.id) })
+              .from(likes)
+              .where(eq(likes.songId, input.songId));
+            // Fire surge webhook only at the 10-like milestone (within ±1 to avoid spam)
+            if (cnt === 10 || cnt === 50 || cnt === 100 || cnt === 500) {
+              const song = await getSongById(input.songId);
+              if (song?.userId) {
+                const { fireUserWebhook } = await import("./discord");
+                const creator = await getUserById(song.userId);
+                await fireUserWebhook(song.userId, "like_surge", {
+                  title: song.title,
+                  creatorName: creator?.displayName || creator?.username || "Unknown",
+                  newLikes: cnt,
+                });
+              }
+            }
+          } catch (e) { /* swallow */ }
+        })();
+      }
+      return result;
     }),
     getLikeStatus: protectedProcedure.input(z.object({ songId: z.number() })).query(async ({ ctx, input }) => {
       const liked = await getLikeStatus(ctx.user.id, input.songId);
@@ -1683,6 +1744,25 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
           stripeSessionId: input.stripeSessionId,
         });
         return { success: true };
+      }),
+
+    // Notify server that a room was opened (fires jukebox_room Discord webhook)
+    notifyRoomOpened: protectedProcedure
+      .input(z.object({
+        roomCode: z.string().min(1).max(32),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        void (async () => {
+          try {
+            const { fireUserWebhook } = await import("./discord");
+            const host = await getUserById(ctx.user.id);
+            await fireUserWebhook(ctx.user.id, "jukebox_room", {
+              roomCode: input.roomCode,
+              hostName: host?.artistHandle || host?.displayName || host?.name || "Unknown",
+            });
+          } catch (e) { /* swallow */ }
+        })();
+        return { ok: true };
       }),
 
     // Free queue — add a song to the jukebox without payment
@@ -4027,6 +4107,74 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           witnessId: newWid,
           fileUrl: newFileUrl,
         };
+      }),
+  }),
+
+  // ─── Discord Webhook Integration ──────────────────────────────────────────
+  discord: router({
+    /** Get all webhook configs for the current user */
+    getWebhooks: protectedProcedure.query(async ({ ctx }) => {
+      const { getWebhooksForUser } = await import("./discord");
+      return getWebhooksForUser(ctx.user.id);
+    }),
+
+    /** Save (upsert) a webhook config for the current user */
+    saveWebhook: protectedProcedure
+      .input(z.object({
+        event: z.enum(["wid_minted", "track_upload", "jukebox_room", "tip_received", "like_surge"]),
+        webhookUrl: z.string().url().max(512),
+        enabled: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { upsertWebhook } = await import("./discord");
+        await upsertWebhook(ctx.user.id, input.event, input.webhookUrl, input.enabled);
+        return { ok: true };
+      }),
+
+    /** Toggle enabled state without changing the URL */
+    toggleWebhook: protectedProcedure
+      .input(z.object({
+        event: z.enum(["wid_minted", "track_upload", "jukebox_room", "tip_received", "like_surge"]),
+        enabled: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { discordWebhooks } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+        await db
+          .update(discordWebhooks)
+          .set({ enabled: input.enabled, updatedAt: new Date() })
+          .where(and(eq(discordWebhooks.userId, ctx.user.id), eq(discordWebhooks.event, input.event)));
+        return { ok: true };
+      }),
+
+    /** Delete a webhook config */
+    deleteWebhook: protectedProcedure
+      .input(z.object({
+        event: z.enum(["wid_minted", "track_upload", "jukebox_room", "tip_received", "like_surge"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { discordWebhooks } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+        await db
+          .delete(discordWebhooks)
+          .where(and(eq(discordWebhooks.userId, ctx.user.id), eq(discordWebhooks.event, input.event)));
+        return { ok: true };
+      }),
+
+    /** Test a webhook URL by sending a sample payload */
+    testWebhook: protectedProcedure
+      .input(z.object({
+        event: z.enum(["wid_minted", "track_upload", "jukebox_room", "tip_received", "like_surge"]),
+        webhookUrl: z.string().url().max(512),
+      }))
+      .mutation(async ({ input }) => {
+        const { testWebhookUrl } = await import("./discord");
+        const result = await testWebhookUrl(input.event, input.webhookUrl);
+        return result;
       }),
   }),
 });

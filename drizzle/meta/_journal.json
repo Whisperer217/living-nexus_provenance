@@ -295,6 +295,13 @@
       "when": 1775368893036,
       "tag": "0041_dusty_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "5",
+      "when": 1775414633786,
+      "tag": "0042_ambitious_cyclops",
+      "breakpoints": true
     }
   ]
 }
