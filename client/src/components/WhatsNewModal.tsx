@@ -9,14 +9,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.18.0";
+const CURRENT_VERSION = "v2.19.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.18.0",
+    version: "v2.19.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Shield, text: "AI Disclosure Audit — All AI disclosure labels are now unified across every surface: Human-Made, AI-Assisted, and AI-Generated. One shared component, one vocabulary, no ambiguity anywhere on the platform." },
+      { icon: ArrowUpFromLine, text: "Work Versioning — Every work now has a Version History. Upload a new version of a track, add a change note and version label, and the original is automatically archived as v1 with its WID preserved. Creative evolution, fully documented." },
+      { icon: FileText, text: "Terms of Service — A full Terms page is now live at /terms. It opens with a creator-protection preamble: these terms exist to protect creators, not the platform. Accessible from the sidebar and mobile drawer." },
+      { icon: Music, text: "Ordered Playback — Every section on the platform now plays its own ordered queue. Album tracks stay within the album. Homepage sections (Witnessed Voices, Discover, Trending) each play their own list in sequence. No more jumping across unrelated tracks." },
+      { icon: Users, text: "Creator Profile Header — The artist name is now a stable display heading that never changes on interaction. Below it, the @handle appears as a Twitter-style sub-header: click it to copy the profile link to your clipboard." },
+    ],
+  },
+  {
+    version: "v2.18.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: BookOpen, text: "Multi-Medium Registry — Living Nexus now witnesses Music, Lyrics, Manuscripts, and Comics/Graphic Novels. Every medium. One registry." },
       { icon: Shield, text: "Medium-Aware WID Badges — Verify page now shows WID-MUS, WID-LYR, WID-MAN, or WID-CMX with a description of the work type." },
