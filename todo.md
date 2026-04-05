@@ -2593,3 +2593,14 @@
 - [x] Fix creator profile H1 header — now always shows creator.name (stable display name), never changes on interaction
 - [x] Add @handle sub-header below artist name — clickable button that copies the profile URL to clipboard (like Twitter), styled in muted mono font
 - [x] TypeScript: 0 errors | Tests: 123/123 passing
+
+## Phase: Bug Fixes — Tabs / Volume / Listen Together (Apr 5 2026)
+- [ ] Fix duplicate adjacent tabs (identify which page has two tabs side-by-side that shouldn't be there)
+- [x] Fix volume control non-functional when player bar is minimized — added volumePopupCompactRef, fixed z-index and positioning
+- [x] Fix Listen Together track reset — navigating away and back resets the currently playing track — added currentTrackId guard
+
+## Phase: Tester Bug Reports (Apr 5 2026 — Slimdoggy/MaxSpeed)
+- [x] Fix description textarea — auto-grows height as user types (EditTrackPanel Caption + ProfilePage Bio EditableField)
+- [x] Fix album end-of-queue — after last track, player stops instead of looping back to track 1 (both onEnded and nextTrack)
+- [x] Fix duplicate @handle display in profile edit panel — new HandleField component integrates @ prefix, no duplication when editing
+- [x] TypeScript: 0 errors | Tests: 123/123 passing

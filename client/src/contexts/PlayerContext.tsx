@@ -273,8 +273,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
             next = 0;
           }
         }
-        // Wrap around within the context queue
-        if (next >= tracks.length) next = 0;
+        // End of queue — stop playback instead of looping back to track 1
+        if (next >= tracks.length) {
+          audio.pause();
+          audio.currentTime = 0;
+          return { ...s, isPlaying: false };
+        }
         const t = tracks[next];
         if (t?.audioUrl) {
           audio.src = safeAudioUrl(t.audioUrl);
@@ -327,9 +331,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const nextTrack = useCallback(() => {
     setState(s => {
       const tracks = s.tracks.filter(t => !!t.audioUrl);
-      let next = s.isShuffle
+      const next = s.isShuffle
         ? Math.floor(Math.random() * tracks.length)
-        : (s.currentIdx + 1) % tracks.length;
+        : s.currentIdx + 1;
+      // At end of queue, stop instead of looping
+      if (!s.isShuffle && next >= tracks.length) {
+        const audio = audioRef.current;
+        if (audio) { audio.pause(); audio.currentTime = 0; }
+        return { ...s, isPlaying: false };
+      }
       const t = tracks[next];
       const audio = audioRef.current;
       if (audio && t?.audioUrl) {

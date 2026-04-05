@@ -734,7 +734,7 @@ function QueuePanel({ items }: { items: any[] }) {
 
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function TogetherPage() {
-  const { state, setRoom, addAndPlay, audioRef: globalAudioRef, setJukeboxQueueCount } = usePlayer();
+  const { state, setRoom, addAndPlay, audioRef: globalAudioRef, setJukeboxQueueCount, currentTrackId } = usePlayer();
   const { user } = useAuth();
   const params = useParams<{ roomCode?: string }>();
   const [joinCode, setJoinCode] = useState("");
@@ -928,12 +928,25 @@ export default function TogetherPage() {
   // When the jukebox queue's nowPlaying changes, tell the global PlayerContext
   // to play that song. This removes the need for a separate audio element in
   // NowPlayingPanel — the jukebox is just a queue controller.
+  //
+  // FIX: prevNowPlayingId resets to null on every remount (navigate away + back),
+  // which caused the track to restart even though the global player was already
+  // playing it. We now also check currentTrackId so that returning to this page
+  // never interrupts a track that is already live in the global player.
   const prevNowPlayingId = useRef<number | null>(null);
   useEffect(() => {
-    if (!nowPlaying || nowPlaying.id === prevNowPlayingId.current) return;
+    if (!nowPlaying) return;
+    const songIdStr = String(nowPlaying.songId ?? nowPlaying.id);
+    // Already playing this exact song in the global player — do not restart.
+    if (currentTrackId === songIdStr) {
+      prevNowPlayingId.current = nowPlaying.id;
+      return;
+    }
+    // Already handled this jukebox item in the current mount cycle.
+    if (nowPlaying.id === prevNowPlayingId.current) return;
     prevNowPlayingId.current = nowPlaying.id;
     addAndPlay({
-      id: String(nowPlaying.songId ?? nowPlaying.id),
+      id: songIdStr,
       title: nowPlaying.songTitle ?? "Unknown",
       audioUrl: nowPlaying.songFileUrl ?? "",
       artUrl: nowPlaying.songCoverArtUrl ?? undefined,

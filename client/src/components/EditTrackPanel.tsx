@@ -518,15 +518,22 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             <Label className="text-white text-sm font-medium">Caption / Description</Label>
             <Textarea
               value={caption}
-              onChange={(e) => setCaption(e.target.value)}
+              onChange={(e) => {
+                setCaption(e.target.value);
+                // Auto-grow height
+                const t = e.target as HTMLTextAreaElement;
+                t.style.height = "auto";
+                t.style.height = `${t.scrollHeight}px`;
+              }}
               placeholder="Add a caption or description for this track…"
               maxLength={2000}
               rows={3}
-              className="resize-none text-sm"
+              className="resize-none text-sm overflow-hidden"
               style={{
                 background: "rgba(255,255,255,0.04)",
                 border: "1px solid rgba(255,255,255,0.12)",
                 color: "#f1f5f9",
+                minHeight: "4.5rem",
               }}
             />
             <p className="text-xs text-right" style={{ color: "#475569" }}>{caption.length}/2000</p>

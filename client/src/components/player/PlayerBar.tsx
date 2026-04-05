@@ -140,14 +140,16 @@ export default function PlayerBar() {
 
   // Vertical volume popup
   const [showVolume, setShowVolume] = useState(false);
-  const volumePopupRef = useRef<HTMLDivElement>(null);
+  const volumePopupRef = useRef<HTMLDivElement>(null);       // expanded bar
+  const volumePopupCompactRef = useRef<HTMLDivElement>(null); // compact bar
 
   useEffect(() => {
     if (!showVolume) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (volumePopupRef.current && !volumePopupRef.current.contains(e.target as Node)) {
-        setShowVolume(false);
-      }
+      const target = e.target as Node;
+      const inExpanded = volumePopupRef.current?.contains(target);
+      const inCompact = volumePopupCompactRef.current?.contains(target);
+      if (!inExpanded && !inCompact) setShowVolume(false);
     };
     // Delay so the button click that opened it doesn't immediately close it
     const timer = setTimeout(() => document.addEventListener("click", handleClickOutside), 0);
@@ -923,8 +925,8 @@ export default function PlayerBar() {
               </button>
             )}
 
-            {/* Volume — vertical popup (shared state with collapsed bar) */}
-            <div className="relative">
+            {/* Volume — vertical popup (compact bar) */}
+            <div ref={volumePopupCompactRef} className="relative">
               <button
                 onClick={() => setShowVolume(v => !v)}
                 className="p-1 transition-colors"
@@ -937,8 +939,8 @@ export default function PlayerBar() {
               </button>
               {showVolume && (
                 <div
-                  className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-xl p-3 shadow-xl z-50 flex flex-col items-center gap-2"
-                  style={{ background: "oklch(0.14 0.04 270)", border: "1px solid oklch(0.30 0.04 270 / 60%)" }}
+                  className="absolute bottom-12 right-0 rounded-xl p-3 shadow-xl z-[200] flex flex-col items-center gap-2"
+                  style={{ background: "oklch(0.14 0.04 270)", border: "1px solid oklch(0.30 0.04 270 / 60%)", minWidth: "56px" }}
                 >
                   <span className="text-xs font-mono" style={{ color: "oklch(0.80 0.145 82)" }}>
                     {state.isMuted ? "0" : Math.round(state.volume * 100)}%
@@ -949,13 +951,13 @@ export default function PlayerBar() {
                     value={state.isMuted ? 0 : state.volume}
                     onChange={e => { setVolume(parseFloat(e.target.value)); }}
                     className="volume-slider-vertical"
-                        style={{
-                          background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
-                            state.isMuted ? 0 : state.volume * 100
-                          }%, oklch(0.28 0.04 270 / 80%) ${
-                            state.isMuted ? 0 : state.volume * 100
-                          }%)`,
-                        }}
+                    style={{
+                      background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
+                        state.isMuted ? 0 : state.volume * 100
+                      }%, oklch(0.28 0.04 270 / 80%) ${
+                        state.isMuted ? 0 : state.volume * 100
+                      }%)`,
+                    }}
                   />
                   <button
                     onClick={toggleMute}

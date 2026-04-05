@@ -46,12 +46,19 @@ function EditableField({
         {multiline ? (
           <textarea
             value={val}
-            onChange={e => setVal(e.target.value)}
+            onChange={e => {
+              setVal(e.target.value);
+              // Auto-grow height
+              const t = e.target;
+              t.style.height = "auto";
+              t.style.height = `${t.scrollHeight}px`;
+            }}
             rows={3}
             placeholder={placeholder}
             className="flex-1 px-3 py-2 rounded-xl text-[13px] font-body text-white/80
               bg-[oklch(0.14_0.013_280)] border border-[#A78BFA]/50 outline-none resize-none
-              placeholder:text-white/60"
+              placeholder:text-white/60 overflow-hidden"
+            style={{ minHeight: "4.5rem" }}
             autoFocus
           />
         ) : (
@@ -80,6 +87,47 @@ function EditableField({
     <div className="group flex items-center gap-2 cursor-pointer" onClick={() => setEditing(true)}>
       <span className={`text-[13px] font-body ${value ? "text-white/60" : "text-white/60 italic"}`}>
         {value || placeholder}
+      </span>
+      <Edit2 size={11} className="text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
+    </div>
+  );
+}
+
+/* ── Handle field — @ prefix is integrated to avoid duplication when editing ── */
+function HandleField({ value, onSave }: { value: string; onSave: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState(value);
+  useEffect(() => { setVal(value); }, [value]);
+  const save = () => { onSave(val.trim()); setEditing(false); };
+  const cancel = () => { setVal(value); setEditing(false); };
+  if (editing) {
+    return (
+      <div className="flex items-center gap-1 w-full">
+        <span className="text-sm text-white/40 font-body flex-shrink-0">@</span>
+        <input
+          value={val}
+          onChange={e => setVal(e.target.value)}
+          placeholder="artist-handle"
+          className="flex-1 px-2 py-1 rounded-lg text-[13px] font-body text-white/80
+            bg-[oklch(0.14_0.013_280)] border border-[#A78BFA]/50 outline-none
+            placeholder:text-white/60"
+          autoFocus
+          onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
+        />
+        <button onClick={save} className="p-1.5 text-[#D4AF37] hover:text-[#D4AF37]/80 flex-shrink-0">
+          <Check size={13} />
+        </button>
+        <button onClick={cancel} className="p-1.5 text-white/70 hover:text-white/60 flex-shrink-0">
+          <X size={13} />
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="group flex items-center gap-1 cursor-pointer" onClick={() => setEditing(true)}>
+      <span className="text-sm text-white/40 font-body">@</span>
+      <span className={`text-[13px] font-body ${value ? "text-white/60" : "text-white/40 italic"}`}>
+        {value || "artist-handle"}
       </span>
       <Edit2 size={11} className="text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
@@ -571,14 +619,11 @@ export default function ProfilePage() {
                   ARTIST
                 </span>
               </div>
-              {/* Handle */}
+              {/* Handle — @ prefix integrated into HandleField to avoid duplication when editing */}
               <div className="flex items-center gap-1 mb-1">
-                <span className="text-sm text-white/40 font-body">@</span>
-                <EditableField
-                  label="Artist Handle"
+                <HandleField
                   value={profile?.artistHandle || ""}
                   onSave={v => save({ artistHandle: v })}
-                  placeholder="artist-handle"
                 />
               </div>
               {/* Bio — inline edit, single line preview */}
