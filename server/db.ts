@@ -1090,11 +1090,27 @@ export async function getCreatorForOg(userId: number) {
 export async function getUserTipTotalForSong(userId: number, songId: number): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
-  const result = await db
+  // Primary: check tips table (final reconciled record)
+  const tipsResult = await db
     .select({ total: sql<number>`COALESCE(SUM(${tips.amountCents}), 0)` })
     .from(tips)
     .where(and(eq(tips.songId, songId), eq(tips.tipperUserId, userId)));
-  return Number(result[0]?.total ?? 0);
+  const tipsTotal = Number(tipsResult[0]?.total ?? 0);
+  if (tipsTotal > 0) return tipsTotal;
+  // Fallback: check events table (written FIRST by Stripe webhook, before tips table).
+  // This resolves the race condition where the webhook has fired and written the TIP event
+  // but the secondary tips table write hasn't committed yet when the user polls for unlock.
+  const eventsResult = await db
+    .select({ total: sql<number>`COALESCE(SUM(CAST(JSON_UNQUOTE(JSON_EXTRACT(${events.payload}, '$.amountCents')) AS UNSIGNED)), 0)` })
+    .from(events)
+    .where(
+      and(
+        eq(events.type, "TIP"),
+        eq(events.workId, songId),
+        eq(events.actorId, userId)
+      )
+    );
+  return Number(eventsResult[0]?.total ?? 0);
 }
 
 /** Update a song's download permission (creator only — caller must verify ownership) */

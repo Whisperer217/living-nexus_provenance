@@ -238,37 +238,44 @@ export default function SongDetailPage() {
       toast.loading("Payment received — unlocking download...", { id: "download-unlock" });
       window.history.replaceState({}, "", window.location.pathname);
 
-      // Poll the permission endpoint until the webhook has recorded the tip (up to 20s)
+      // Poll the permission endpoint until the webhook has recorded the tip (up to 30s).
+      // The server now checks both the tips table AND the events table (written first by
+      // the Stripe webhook), so unlock should succeed within the first 1-2 attempts.
       let attempts = 0;
-      const maxAttempts = 10;
+      const maxAttempts = 15;
       let busy = false;
-      const poll = setInterval(async () => {
-        if (busy) return; // prevent overlapping calls
-        attempts++;
-        busy = true;
-        try {
-          // Force-refetch permission to bypass staleTime cache
-          await utils.songDownload.getPermission.invalidate({ songId });
-          // Attempt the download — will throw FORBIDDEN if tip not yet recorded
-          await downloadMutation.mutateAsync({ songId });
-          clearInterval(poll);
-          toast.dismiss("download-unlock");
-          toast.success("✅ Download started! Your WID-tagged file is saving.");
-          // Refresh ticker and activity thread
-          utils.tips.recentTips.invalidate();
-          utils.events.getByWork.invalidate({ workId: songId });
-        } catch (e: any) {
-          if (attempts >= maxAttempts) {
+      // Small initial delay — give the Stripe webhook time to fire before first poll
+      const startPoll = () => {
+        const poll = setInterval(async () => {
+          if (busy) return; // prevent overlapping calls
+          attempts++;
+          busy = true;
+          try {
+            // Force-refetch permission to bypass staleTime cache
+            await utils.songDownload.getPermission.invalidate({ songId });
+            // Attempt the download — will throw FORBIDDEN if tip not yet recorded
+            await downloadMutation.mutateAsync({ songId });
             clearInterval(poll);
             toast.dismiss("download-unlock");
-            toast.error("Download unlock is taking longer than expected. Refresh the page and try downloading again.");
-          } else {
-            console.warn(`[download-unlock] attempt ${attempts}/${maxAttempts}: ${e?.message}`);
+            toast.success("✅ Download started! Your WID-tagged file is saving.");
+            // Refresh ticker and activity thread
+            utils.tips.recentTips.invalidate();
+            utils.events.getByWork.invalidate({ workId: songId });
+          } catch (e: any) {
+            if (attempts >= maxAttempts) {
+              clearInterval(poll);
+              toast.dismiss("download-unlock");
+              toast.error("Download unlock is taking longer than expected. Refresh the page and try downloading again.");
+            } else {
+              console.warn(`[download-unlock] attempt ${attempts}/${maxAttempts}: ${e?.message}`);
+            }
+          } finally {
+            busy = false;
           }
-        } finally {
-          busy = false;
-        }
-      }, 2000); // poll every 2 seconds
+        }, 2000); // poll every 2 seconds
+      };
+      // Wait 1.5s before first poll to give Stripe webhook time to fire
+      setTimeout(startPoll, 1500);
     }
   }, []);
 

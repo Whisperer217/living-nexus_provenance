@@ -2658,3 +2658,8 @@
 
 ## Bug Fix: Missing React key props in LiveActivityPanel
 - [x] Fixed tips list using array index i as key — changed to t.id (stable unique identifier)
+
+## Bug Fix: Tip-to-Download Unlock Timeout
+- [ ] Diagnose "Download unlock is taking longer than expected" timeout in tip-download flow
+- [ ] Fix Stripe webhook handler to correctly mark tip_download as unlocked
+- [ ] Fix frontend polling to detect unlock reliably without timing out
