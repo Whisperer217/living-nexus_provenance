@@ -475,30 +475,41 @@ export default function TheaterPlayer() {
                   </button>
                 </div>
 
-                {/* Volume */}
-                <div className="flex items-center gap-2">
+                {/* Volume — theater organ-pipe vertical slider */}
+                <div className="flex flex-col items-center gap-1.5 px-1">
+                  {/* Mute / volume icon */}
                   <button
                     onClick={toggleMute}
-                    className="p-1 transition-colors"
-                    style={{ color: "oklch(0.65 0.04 65)" }}
+                    className="p-1 transition-all rounded-full"
+                    style={{
+                      color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.65 0.04 65)",
+                      background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                    }}
                     onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.94 0.025 75)")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.65 0.04 65)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.65 0.04 65)")}
+                    title={state.isMuted ? "Unmute" : "Mute"}
                   >
                     {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                   </button>
-                  <div
-                    className="w-24 h-1.5 rounded-full cursor-pointer relative group"
-                    style={{ background: "oklch(0.22 0.04 270)" }}
-                    onClick={handleVolume}
-                  >
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: state.isMuted ? "0%" : `${state.volume * 100}%`,
-                        background: "oklch(0.65 0.04 65)",
-                      }}
-                    />
-                  </div>
+                  {/* Vertical organ-pipe slider */}
+                  <input
+                    type="range"
+                    min="0" max="1" step="0.01"
+                    value={state.isMuted ? 0 : state.volume}
+                    onChange={e => { setVolume(parseFloat(e.target.value)); }}
+                    className="volume-slider-theater"
+                    style={{
+                      background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
+                        state.isMuted ? 0 : state.volume * 100
+                      }%, oklch(0.18 0.04 55 / 85%) ${
+                        state.isMuted ? 0 : state.volume * 100
+                      }%)`,
+                    }}
+                  />
+                  {/* Volume % readout */}
+                  <span className="text-[9px] font-mono tracking-widest" style={{ color: "oklch(0.70 0.10 72)" }}>
+                    {state.isMuted ? "0" : Math.round(state.volume * 100)}%
+                  </span>
                 </div>
               </div>
             </div>

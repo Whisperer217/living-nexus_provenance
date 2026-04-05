@@ -2649,3 +2649,9 @@
 ## Bug Fix: Download Service Unavailable
 - [x] Diagnose /api/download/:id returning "Service Unavailable"
 - [x] Fix download route: upload ID3-tagged file to S3 and redirect browser directly, bypassing CDN response-body size limit
+
+## Vertical Volume Control Redesign
+- [ ] Audit current volume control in PlayerBar (bottom bar, cinematic, theater views)
+- [ ] Implement vertical volume slider popup on bottom bar with amber lantern styling
+- [ ] Implement unique vertical volume control for cinematic view
+- [ ] Implement unique vertical volume control for theater view

@@ -514,12 +514,18 @@ export default function PlayerBar() {
                   </button>
                   {showVolume && (
                     <div
-                      className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-xl p-3 shadow-xl z-50 flex flex-col items-center gap-2"
-                      style={{ background: "oklch(0.148 0.030 50)", border: "1px solid oklch(0.30 0.04 60 / 55%)" }}
+                      className="absolute bottom-12 left-1/2 -translate-x-1/2 rounded-2xl px-3 pt-3 pb-2 shadow-2xl z-50 flex flex-col items-center gap-2"
+                      style={{
+                        background: "oklch(0.12 0.030 52)",
+                        border: "1px solid oklch(0.38 0.08 68 / 60%)",
+                        boxShadow: "0 0 24px 4px oklch(0.82 0.155 75 / 0.18), 0 8px 32px oklch(0.10 0.02 55 / 0.8)",
+                      }}
                     >
-                      <span className="text-xs font-mono" style={{ color: "oklch(0.80 0.145 82)" }}>
+                      {/* Volume % label */}
+                      <span className="text-[10px] font-mono tracking-widest" style={{ color: "oklch(0.82 0.155 75)" }}>
                         {state.isMuted ? "0" : Math.round(state.volume * 100)}%
                       </span>
+                      {/* Vertical flame slider */}
                       <input
                         type="range"
                         min="0" max="1" step="0.01"
@@ -529,18 +535,22 @@ export default function PlayerBar() {
                         style={{
                           background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
                             state.isMuted ? 0 : state.volume * 100
-                          }%, oklch(0.30 0.04 60 / 70%) ${
+                          }%, oklch(0.22 0.04 55 / 80%) ${
                             state.isMuted ? 0 : state.volume * 100
                           }%)`,
                         }}
                       />
+                      {/* Mute toggle */}
                       <button
                         onClick={toggleMute}
-                        className="p-1 transition-colors"
-                        style={{ color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.50 0.04 55)" }}
+                        className="p-1 rounded-full transition-all"
+                        style={{
+                          color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.45 0.04 55)",
+                          background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                        }}
                         title={state.isMuted ? "Unmute" : "Mute"}
                       >
-                        <VolumeX size={12} />
+                        <VolumeX size={11} />
                       </button>
                     </div>
                   )}
@@ -942,10 +952,15 @@ export default function PlayerBar() {
               </button>
               {showVolume && (
                 <div
-                  className="absolute bottom-12 right-0 rounded-xl p-3 shadow-xl z-[200] flex flex-col items-center gap-2"
-                  style={{ background: "oklch(0.14 0.04 270)", border: "1px solid oklch(0.30 0.04 270 / 60%)", minWidth: "56px" }}
+                  className="absolute bottom-12 right-0 rounded-2xl px-3 pt-3 pb-2 shadow-2xl z-[200] flex flex-col items-center gap-2"
+                  style={{
+                    background: "oklch(0.12 0.030 52)",
+                    border: "1px solid oklch(0.38 0.08 68 / 60%)",
+                    boxShadow: "0 0 24px 4px oklch(0.82 0.155 75 / 0.18), 0 8px 32px oklch(0.10 0.02 55 / 0.8)",
+                    minWidth: "52px",
+                  }}
                 >
-                  <span className="text-xs font-mono" style={{ color: "oklch(0.80 0.145 82)" }}>
+                  <span className="text-[10px] font-mono tracking-widest" style={{ color: "oklch(0.82 0.155 75)" }}>
                     {state.isMuted ? "0" : Math.round(state.volume * 100)}%
                   </span>
                   <input
@@ -957,18 +972,21 @@ export default function PlayerBar() {
                     style={{
                       background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
                         state.isMuted ? 0 : state.volume * 100
-                      }%, oklch(0.30 0.04 60 / 70%) ${
+                      }%, oklch(0.22 0.04 55 / 80%) ${
                         state.isMuted ? 0 : state.volume * 100
                       }%)`,
                     }}
                   />
                   <button
                     onClick={toggleMute}
-                    className="p-1 transition-colors"
-                    style={{ color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.50 0.04 55)" }}
+                    className="p-1 rounded-full transition-all"
+                    style={{
+                      color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.45 0.04 55)",
+                      background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                    }}
                     title={state.isMuted ? "Unmute" : "Mute"}
                   >
-                    <VolumeX size={12} />
+                    <VolumeX size={11} />
                   </button>
                 </div>
               )}
