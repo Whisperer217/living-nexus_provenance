@@ -1,24 +1,21 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MainLayout v3
-   Clean 6-item sidebar. Creator-centered. No system/dev items.
+   LIVING NEXUS — MainLayout v4
+   Desktop: slim TopBar + full-width drawer + LiveActivityPanel
+   Mobile: unchanged (hamburger + bottom nav)
 
-   PRIMARY NAV (always visible):
-     Home · Explore · Listen Together · Guilds · Profile · Upload
-
-   CREATOR NAV (authenticated only):
-     Dashboard · LNA — Archive (with song count badge)
-
-   System tools are accessible via contextual locations:
-     - Verify WID → WIDPanel component
-     - Batch Upload → UploadPage
-     - Witness Records → Profile → Works tab
-     - WID Spec + Lexicon → /learn
-     - Redeem Code → Profile → Settings
-     - Admin → direct URL only (role-gated)
+   Desktop layout:
+     ┌─────────────────────────────────────────────────┐
+     │  TopBar (52px fixed)                            │
+     ├─────────────────────────────────────────────────┤
+     │ [Live]  │  Page content (scrollable)            │
+     │  panel  │                                       │
+     │ (slide) │                                       │
+     ├─────────────────────────────────────────────────┤
+     │  PlayerBar (72px fixed, full width)             │
+     └─────────────────────────────────────────────────┘
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useCallback } from "react";
-import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -27,9 +24,9 @@ import PlayerBar from "@/components/player/PlayerBar";
 import MobilePlayerLayer from "@/components/player/MobilePlayerLayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
-import TipTicker from "@/components/TipTicker";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
-import { WhatsNewModal } from "@/components/WhatsNewModal";
+import TopBar from "@/components/layout/TopBar";
+import LiveActivityPanel from "@/components/layout/LiveActivityPanel";
 import { trpc } from "@/lib/trpc";
 import {
   Home, Compass, Users, User, Upload, Shield,
@@ -40,7 +37,6 @@ import {
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
-// ── Nav item types ─────────────────────────────────────────────────
 interface NavItem {
   label: string;
   icon: React.ElementType;
@@ -51,96 +47,17 @@ interface NavItem {
 }
 
 const PRIMARY_NAV: NavItem[] = [
-  { label: "Home",            icon: Home,    path: "/"         },
-  { label: "Explore",         icon: Compass, path: "/explore"  },
+  { label: "Home",            icon: Home,    path: "/"          },
+  { label: "Explore",         icon: Compass, path: "/explore"   },
   { label: "Listen Together", icon: Users,   path: "/together", badge: "LIVE", notifKey: "jukebox" },
-  { label: "Guilds",          icon: Shield,  path: "/guilds"   },
-  { label: "Profile",         icon: User,    path: "/profile", notifKey: "signals" },
-  { label: "Upload",          icon: Upload,  path: "/upload"   },
+  { label: "Guilds",          icon: Shield,  path: "/guilds"    },
+  { label: "Profile",         icon: User,    path: "/profile",  notifKey: "signals" },
+  { label: "Upload",          icon: Upload,  path: "/upload"    },
 ];
 
-// Dashboard nav item — only rendered when authenticated
-const DASHBOARD_NAV_ITEM: NavItem = {
-  label: "Dashboard",
-  icon: LayoutDashboard,
-  path: "/dashboard",
-};
+const DASHBOARD_NAV_ITEM: NavItem = { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" };
+const ARCHIVE_NAV_ITEM: NavItem   = { label: "LNA — Archive", icon: Archive, path: "/archive", goldLabel: true };
 
-// Archive nav item — only rendered when authenticated
-const ARCHIVE_NAV_ITEM: NavItem = {
-  label: "LNA — Archive",
-  icon: Archive,
-  path: "/archive",
-  goldLabel: true,
-};
-
-// ── (PAGE_SUMMARIES removed — QuickAccessPanel is self-contained) ──
-
-// ── Identity header ────────────────────────────────────────────────
-function IdentityHeader({
-  user, profileAvatar, profileName, sidebarOpen, onProfileClick,
-}: {
-  user: { name?: string | null; profilePhotoUrl?: string | null; licenseStatus?: string | null; avatarObjectPosition?: string | null } | null;
-  profileAvatar?: string;
-  profileName?: string;
-  sidebarOpen: boolean;
-  onProfileClick: () => void;
-}) {
-  const displayName = user?.name || profileName || "Creator";
-  const avatar = user?.profilePhotoUrl || profileAvatar;
-  const hasWid = user?.licenseStatus === "licensed";
-
-  if (!user) return null;
-
-  return (
-    <button
-      onClick={onProfileClick}
-      className={`w-full text-left transition-all rounded-xl p-3 hover:bg-white/[0.05] group
-        ${sidebarOpen ? "flex items-center gap-3" : "flex flex-col items-center gap-1.5"}`}
-    >
-      {/* Avatar */}
-      <div className="relative flex-shrink-0">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden flex-shrink-0"
-          style={{
-            background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
-            boxShadow: hasWid ? "0 0 0 2px #D4AF37, 0 0 12px oklch(0.80 0.145 82 / 0.35)" : "none",
-          }}
-        >
-          {avatar
-            ? <img src={avatar} alt="avatar" className="w-full h-full object-cover rounded-full" style={{ objectPosition: user?.avatarObjectPosition ?? "50% 50%" }} />
-            : displayName.charAt(0).toUpperCase()
-          }
-        </div>
-        {hasWid && (
-          <div
-            className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-            style={{ background: "#D4AF37" }}
-            title="Witness ID Verified"
-          >
-            <CheckCircle2 size={10} className="text-black" />
-          </div>
-        )}
-      </div>
-
-      {sidebarOpen && (
-        <div className="min-w-0 flex-1">
-          <div className="text-[13px] font-medium text-white/90 truncate leading-tight">{displayName}</div>
-          {hasWid ? (
-            <div className="flex items-center gap-1 mt-0.5">
-              <Fingerprint size={9} style={{ color: "#D4AF37" }} />
-              <span className="text-[9px] font-heading tracking-wider" style={{ color: "#D4AF37" }}>WITNESSED</span>
-            </div>
-          ) : (
-            <div className="text-[10px] text-white/30 font-body mt-0.5">Creator</div>
-          )}
-        </div>
-      )}
-    </button>
-  );
-}
-
-// ── Main component ─────────────────────────────────────────────────
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { state } = usePlayer();
@@ -154,12 +71,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     }
   }, [logout, navigate]);
 
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(
-    () => getCache<boolean>(CACHE_KEYS.SIDEBAR) ?? true
-  );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
-  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const [liveOpen, setLiveOpen] = useState(false);
 
   // Notification badges
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, {
@@ -168,7 +82,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     staleTime: 30_000,
   });
 
-  // Song count for Archive badge — only fetch when authenticated
+  // Archive badge count
   const { data: mySongs } = trpc.songs.mySongs.useQuery(undefined, {
     enabled: !!user,
     staleTime: 60_000,
@@ -183,227 +97,170 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }, [qrOpen]);
   const goTo = useCallback((path: string) => { navigate(path); setMobileMenuOpen(false); }, [navigate]);
 
-  // Active check — treat /home as / alias
   const isActive = (path: string) => {
     if (path === "/" && (location === "/" || location === "/home")) return true;
     return location === path || (path !== "/" && location.startsWith(path + "/"));
   };
 
-  const renderNavItem = (item: NavItem, compact: boolean) => {
+  // ── Mobile nav item renderer ──────────────────────────────────────
+  const renderMobileNavItem = (item: NavItem) => {
     const Icon = item.icon;
     const active = isActive(item.path);
     const isLive = item.badge === "LIVE";
     const isArchive = item.path === "/archive";
-
-    // Dynamic badges
-    const isJukebox = item.notifKey === "jukebox";
     const isSignals = item.notifKey === "signals";
+    const isJukebox = item.notifKey === "jukebox";
     const jukeboxBadge = isJukebox && jukeboxQueueCount > 0 ? (jukeboxQueueCount > 9 ? "9+" : String(jukeboxQueueCount)) : null;
     const signalsBadge = isSignals && (unreadCount as number) > 0 ? ((unreadCount as number) > 99 ? "99+" : String(unreadCount)) : null;
     const archiveBadge = isArchive && archiveSongCount > 0 ? (archiveSongCount > 99 ? "99+" : String(archiveSongCount)) : null;
     const pulseBadge = signalsBadge;
-    const staticBadge = !pulseBadge && !jukeboxBadge && !archiveBadge && item.badge && isLive ? item.badge : null;
     const countBadge = jukeboxBadge || archiveBadge;
-
-    // Gold label for Archive
-    const labelColor = item.goldLabel
-      ? (active ? "#D4AF37" : "oklch(0.72 0.12 82 / 0.7)")
-      : undefined;
+    const staticBadge = !pulseBadge && !jukeboxBadge && !archiveBadge && isLive ? item.badge : null;
+    const labelColor = item.goldLabel ? (active ? "#D4AF37" : "oklch(0.72 0.12 82 / 0.7)") : undefined;
 
     return (
       <button
         key={item.label}
         onClick={() => goTo(item.path)}
         title={item.label}
-        className={`w-full flex items-center gap-3 transition-all duration-150 relative
-          ${compact ? "px-4 py-3 text-[14px]" : `py-2.5 text-[13.5px] ${sidebarOpen ? "px-4" : "justify-center px-0"}`}
-          ${active
-            ? "text-white/95"
-            : "text-white/40 hover:text-[oklch(0.82_0.155_175)] hover:bg-[oklch(0.82_0.155_175/0.06)]"
-          }`}
+        className={`w-full flex items-center gap-3 transition-all duration-150 relative px-4 py-3 text-[14px]
+          ${active ? "text-white/95" : "text-white/40 hover:text-[oklch(0.82_0.155_175)] hover:bg-[oklch(0.82_0.155_175/0.06)]"}`}
         style={active ? { background: "oklch(0.80 0.145 82 / 0.08)" } : {}}
       >
-        {/* Left accent bar for active state */}
-        {active && !compact && (
-          <span
-            className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r-full"
-            style={{ background: item.goldLabel ? "#D4AF37" : "oklch(0.80 0.145 82)" }}
-          />
-        )}
-
-        {/* Icon */}
-        <div className="relative flex-shrink-0">
-          <Icon
-            size={compact ? 16 : 15}
-            style={{
-              color: active
-                ? (item.goldLabel ? "#D4AF37" : "oklch(0.80 0.145 82)")
-                : (item.goldLabel ? "oklch(0.72 0.12 82 / 0.6)" : "inherit"),
-              opacity: active ? 1 : (item.goldLabel ? 1 : 0.6),
-            }}
-          />
-          {/* Collapsed sidebar: dot badge on icon */}
-          {!compact && !sidebarOpen && pulseBadge && (
-            <span
-              className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
-              style={{ background: "oklch(0.65 0.22 25)" }}
-            />
-          )}
-          {/* Collapsed sidebar: count dot for archive */}
-          {!compact && !sidebarOpen && archiveBadge && (
-            <span
-              className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
-              style={{ background: "#D4AF37" }}
-            />
-          )}
-        </div>
-
-        {(compact || sidebarOpen) && (
-          <>
-            <span
-              className="font-body flex-1 text-left truncate"
-              style={labelColor ? { color: labelColor } : undefined}
-            >
-              {item.label}
-            </span>
-            {/* Pulse badge (signals) */}
-            {pulseBadge && (
-              <span
-                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center animate-pulse"
-                style={{ background: "oklch(0.65 0.22 25)", color: "white" }}
-              >{pulseBadge}</span>
-            )}
-            {/* Count badge (jukebox queue or archive count) */}
-            {!pulseBadge && countBadge && (
-              <span
-                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center"
-                style={isArchive
-                  ? { background: "oklch(0.84 0.155 85 / 0.18)", color: "#D4AF37", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }
-                  : { background: "oklch(0.80 0.145 82)", color: "oklch(0.15 0.01 280)" }
-                }
-              >{countBadge}</span>
-            )}
-            {/* Static badge (LIVE) */}
-            {!pulseBadge && !countBadge && staticBadge && (
-              <span
-                className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto"
-                style={{ background: "oklch(0.65 0.18 160 / 0.20)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.30)" }}
-              >{staticBadge}</span>
-            )}
-          </>
-        )}
+        <Icon size={16} style={{
+          color: active ? (item.goldLabel ? "#D4AF37" : "oklch(0.80 0.145 82)") : (item.goldLabel ? "oklch(0.72 0.12 82 / 0.6)" : "inherit"),
+          opacity: active ? 1 : (item.goldLabel ? 1 : 0.6),
+        }} />
+        <span className="flex-1 text-left font-body" style={labelColor ? { color: labelColor } : undefined}>{item.label}</span>
+        {pulseBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse" style={{ background: "oklch(0.65 0.22 25)", color: "white" }}>{pulseBadge}</span>}
+        {!pulseBadge && countBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center" style={isArchive ? { background: "oklch(0.84 0.155 85 / 0.18)", color: "#D4AF37", border: "1px solid oklch(0.84 0.155 85 / 0.3)" } : { background: "oklch(0.80 0.145 82)", color: "oklch(0.15 0.01 280)" }}>{countBadge}</span>}
+        {!pulseBadge && !countBadge && staticBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto" style={{ background: "oklch(0.65 0.18 160 / 0.20)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.30)" }}>{staticBadge}</span>}
       </button>
     );
   };
 
   return (
     <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.08_0.01_280)] relative">
-      {/* Quick Reference Slider */}
+
+      {/* ── Quick Reference Slider (all breakpoints) ── */}
       <QuickRefSlider open={qrOpen} onToggle={toggleQr} />
 
-      <div className="flex flex-1 overflow-hidden relative z-10">
+      {/* ══════════════════════════════════════════════
+          DESKTOP LAYOUT (md+)
+          TopBar replaces sidebar entirely.
+          LiveActivityPanel slides in from left edge.
+      ══════════════════════════════════════════════ */}
 
-        {/* ── Desktop Sidebar ── */}
-        <aside
-          className={`hidden md:flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out
-            border-r bg-[oklch(0.115_0.05_268)]
-            ${sidebarOpen ? "w-[220px]" : "w-[64px]"}`}
-          style={{ borderColor: "oklch(0.28 0.04 270 / 60%)" }}
+      {/* TopBar — desktop only */}
+      <TopBar archiveSongCount={archiveSongCount} unreadCount={unreadCount as number} />
+
+      {/* LiveActivityPanel — desktop only */}
+      <LiveActivityPanel open={liveOpen} onToggle={() => setLiveOpen(o => !o)} />
+
+      {/* ══════════════════════════════════════════════
+          MOBILE LAYOUT (<md)
+      ══════════════════════════════════════════════ */}
+
+      {/* Mobile header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-3 px-4 py-3
+        bg-[oklch(0.11_0.012_280)] border-b border-white/[0.07]">
+        <button
+          onClick={() => mobileMenuOpen ? setMobileMenuOpen(false) : openMobileMenu()}
+          className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.06] transition-all"
         >
-          {/* Logo row */}
-          <div className={`flex items-center gap-3 px-4 py-4 border-b border-white/[0.07] ${!sidebarOpen && "justify-center px-0"}`}>
-            <div
-              className="w-9 h-9 flex items-center justify-center flex-shrink-0 cursor-pointer"
-              onClick={() => setSidebarOpen(o => { const next = !o; setCache(CACHE_KEYS.SIDEBAR, next, TTL.UI_STATE); return next; })}
-            >
-              <img src={LOGO_URL} alt="Living Nexus" className="w-full h-full object-contain" />
-            </div>
-            {sidebarOpen && (
-              <>
-                <span className="font-display text-lg gold-shimmer cursor-pointer select-none flex-1" onClick={() => goTo("/")}>
-                  Living Nexus
-                </span>
-                {/* Collapse button */}
-                <button
-                  onClick={() => setSidebarOpen(o => { const next = !o; setCache(CACHE_KEYS.SIDEBAR, next, TTL.UI_STATE); return next; })}
-                  className="flex-shrink-0 p-1 rounded transition-all opacity-30 hover:opacity-80"
-                  style={{ color: "oklch(0.75 0.03 280)" }}
-                  title="Collapse sidebar"
-                >
-                  <ChevronRight className="w-4 h-4 rotate-180" />
-                </button>
-              </>
-            )}
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(o => { const next = !o; setCache(CACHE_KEYS.SIDEBAR, next, TTL.UI_STATE); return next; })}
-                className="absolute right-0 top-[52px] translate-x-1/2 z-50 w-5 h-5 rounded-full flex items-center justify-center"
-                style={{ background: "oklch(0.115 0.05 268)", border: "1px solid oklch(0.28 0.04 270 / 60%)", color: "oklch(0.75 0.03 280)" }}
-                title="Expand sidebar"
-              >
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            )}
-          </div>
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+        <div className="flex items-center gap-2 flex-1">
+          <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
+          <span className="font-display text-base gold-shimmer">Living Nexus</span>
+        </div>
+        <button
+          onClick={toggleQr}
+          className="p-2 rounded-lg text-white/40 hover:text-[#D4AF37] transition-all"
+        >
+          <ChevronRight size={16} className={`transition-transform ${qrOpen ? "rotate-180" : ""}`} />
+        </button>
+        {!!user && (unreadCount as number) > 0 && (
+          <button className="relative p-2 rounded-lg text-white/40 hover:text-white/70">
+            <Bell size={16} />
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full animate-pulse" style={{ background: "oklch(0.65 0.22 25)" }} />
+          </button>
+        )}
+      </div>
 
-          {/* Identity header — clickable, routes to /profile */}
-          {!authLoading && user && (
-            <div className="px-2 pt-3 pb-2 border-b border-white/[0.05]">
-              <IdentityHeader
-                user={user}
-                profileAvatar={state.profileAvatar ?? undefined}
-                profileName={state.profileName}
-                sidebarOpen={sidebarOpen}
-                onProfileClick={() => goTo("/profile")}
-              />
-            </div>
-          )}
-
-          {/* Primary nav — 6 items */}
-          <nav className="flex-1 overflow-y-auto py-3">
-            <div className="space-y-0.5">
-              {PRIMARY_NAV.map(item => renderNavItem(item, false))}
-            </div>
-
-            {/* Creator nav items — authenticated only */}
+      {/* Mobile nav overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
+          <div
+            className="w-72 h-full bg-[oklch(0.11_0.012_280)] border-r border-white/[0.07] pt-16 overflow-y-auto flex flex-col"
+            style={{ paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Mobile identity header */}
             {!authLoading && user && (
-              <div className="space-y-0.5 mt-0.5">
-                {renderNavItem(DASHBOARD_NAV_ITEM, false)}
-                {renderNavItem(ARCHIVE_NAV_ITEM, false)}
-                {renderNavItem({ label: "My Profile", icon: Fingerprint, path: `/creator/${(user as any).id}`, goldLabel: false }, false)}
-                {renderNavItem({ label: "Prompt Generator", icon: Sparkles, path: `/creator/${(user as any).id}?openPromptStudio=1`, goldLabel: false }, false)}
+              <div className="px-3 pt-3 pb-3 border-b border-white/[0.07]">
+                <button
+                  className="flex items-center gap-3 p-3 rounded-xl w-full text-left"
+                  style={{ background: "oklch(0.14 0.04 270 / 60%)" }}
+                  onClick={() => goTo("/profile")}
+                >
+                  <div className="relative flex-shrink-0">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold text-white overflow-hidden"
+                      style={{
+                        background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
+                        boxShadow: user?.licenseStatus === "licensed" ? "0 0 0 2px #D4AF37, 0 0 14px oklch(0.80 0.145 82 / 0.4)" : "none",
+                      }}
+                    >
+                      {user?.profilePhotoUrl || state.profileAvatar
+                        ? <img src={user?.profilePhotoUrl ?? state.profileAvatar ?? ""} alt="avatar" className="w-full h-full object-cover rounded-full" style={{ objectPosition: user?.avatarObjectPosition ?? "50% 50%" }} />
+                        : (user?.name || state.profileName || "?").charAt(0).toUpperCase()
+                      }
+                    </div>
+                    {user?.licenseStatus === "licensed" && (
+                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#D4AF37" }}>
+                        <CheckCircle2 size={10} className="text-black" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[14px] font-medium text-white/95 truncate">{user?.name || state.profileName || "Creator"}</div>
+                    {user?.licenseStatus === "licensed" ? (
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <Fingerprint size={10} style={{ color: "#D4AF37" }} />
+                        <span className="text-[10px] font-heading tracking-wider" style={{ color: "#D4AF37" }}>WITNESSED</span>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-white/35 mt-0.5">View Profile</div>
+                    )}
+                  </div>
+                  <ChevronRight size={14} className="text-white/30 flex-shrink-0" />
+                </button>
               </div>
             )}
 
-            {/* Admin nav item — only for admin role */}
-            {!authLoading && (user as any)?.role === "admin" && (
-              <div className="space-y-0.5 mt-0.5">
-                {renderNavItem({ label: "LN Command", icon: Terminal, path: "/admin", goldLabel: false }, false)}
-              </div>
-            )}
+            {/* Mobile primary nav */}
+            <div className="flex-1 py-2 overflow-y-auto">
+              {PRIMARY_NAV.map(item => renderMobileNavItem(item))}
+              {!authLoading && user && (
+                <div className="px-4 pt-4 pb-1">
+                  <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase">Creator Tools</p>
+                </div>
+              )}
+              {!authLoading && user && renderMobileNavItem({ label: "Upload", icon: Upload, path: "/upload" })}
+              {!authLoading && user && renderMobileNavItem(DASHBOARD_NAV_ITEM)}
+              {!authLoading && user && renderMobileNavItem(ARCHIVE_NAV_ITEM)}
+              {!authLoading && user && renderMobileNavItem({ label: "My Profile", icon: Fingerprint, path: `/creator/${(user as any).id}` })}
+              {!authLoading && user && renderMobileNavItem({ label: "Prompt Generator", icon: Sparkles, path: `/creator/${(user as any).id}?openPromptStudio=1` })}
+              {!authLoading && (user as any)?.role === "admin" && renderMobileNavItem({ label: "LN Command", icon: Terminal, path: "/admin" })}
 
-            {/* Divider after Upload / Archive */}
-            {sidebarOpen && (
-              <div className="gold-divider mx-4 mt-3 mb-2 opacity-20" />
-            )}
-
-            {/* Unauthenticated discovery hint */}
-            {!authLoading && !user && sidebarOpen && (
-              <div className="px-4 py-2">
-                <p className="text-[10px] text-white/25 leading-relaxed">
-                  Sign in to upload, witness your work, and build your creator profile.
-                </p>
-              </div>
-            )}
-            {/* Secondary: Lore & Discover links */}
-            {sidebarOpen && (
-              <div className="px-4 pt-2 pb-2 space-y-0.5">
-                <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase mb-1.5">Discover</p>
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase mb-2">Discover</p>
                 {([
-                  { label: "Manifesto", icon: BookOpen, path: "/manifesto" },
-                  { label: "Founding Creators", icon: Star, path: "/founders" },
-                  { label: "Founder Era Support", icon: Heart, path: "/founder-era" },
-                  { label: "Witness Registry", icon: Eye, path: "/witness-registry" },
+                  { label: "Manifesto",         icon: BookOpen, path: "/manifesto"        },
+                  { label: "Founding Creators", icon: Star,     path: "/founders"         },
+                  { label: "Founder Era Support", icon: Heart,  path: "/founder-era"      },
+                  { label: "Witness Registry",  icon: Eye,      path: "/witness-registry" },
                 ] as { label: string; icon: React.ElementType; path: string }[]).map(item => {
                   const Icon = item.icon;
                   const active = location === item.path;
@@ -411,251 +268,80 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     <button
                       key={item.label}
                       onClick={() => goTo(item.path)}
-                      className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg text-left transition-colors"
-                      style={{
-                        background: active ? "oklch(0.75 0.18 85 / 0.10)" : "transparent",
-                        color: active ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.02 280)",
-                      }}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors"
+                      style={{ background: active ? "oklch(0.75 0.18 85 / 0.10)" : "transparent", color: active ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.02 280)" }}
                     >
-                      <Icon size={12} className="flex-shrink-0" />
-                      <span className="text-[11px] font-body">{item.label}</span>
+                      <Icon size={14} className="flex-shrink-0" />
+                      <span className="text-[13px] font-body">{item.label}</span>
                     </button>
                   );
                 })}
               </div>
-            )}
-          </nav>
+            </div>
 
-          {/* Account footer */}
-          <div className={`p-3 border-t border-white/[0.07] ${!sidebarOpen && "flex flex-col items-center gap-2"}`}>
-            {/* What's New trigger */}
-            <button
-              onClick={() => setWhatsNewOpen(true)}
-              title="What's New"
-              className={`flex items-center gap-2 rounded-md mb-1.5 transition-all
-                text-white/30 hover:text-[#D4AF37] hover:bg-[oklch(0.84_0.155_85/0.06)]
-                ${!sidebarOpen && "justify-center"}`}
-              style={{ paddingRight: "40px", paddingLeft: "8px", marginTop: "6px", width: "180px" }}
-            >
-              <Sparkles size={13} className="flex-shrink-0" />
-              {sidebarOpen && <span className="text-[11px] font-body">What's New</span>}
-              {sidebarOpen && <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.18</span>}
-            </button>
-            {!authLoading && !user ? (
-              <a
-                href={getLoginUrl()}
-                className={`flex items-center gap-3 p-2.5 rounded-lg transition-all w-full ${!sidebarOpen ? "justify-center w-auto" : ""}`}
-                style={{ background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
-              >
-                <LogIn size={16} style={{ color: "oklch(0.75 0.18 85)", flexShrink: 0 }} />
-                {sidebarOpen && (
-                  <div className="min-w-0 flex-1 text-left">
-                    <div className="text-[13px] font-medium" style={{ color: "oklch(0.85 0.1 85)" }}>Sign In</div>
-                    <div className="text-[11px]" style={{ color: "oklch(0.6 0.04 280)" }}>Upload &amp; earn tips</div>
-                  </div>
-                )}
-              </a>
-            ) : (
+            {/* Mobile account footer */}
+            <div className="px-4 pb-4 border-t border-white/[0.07] pt-3">
               <button
-                onClick={handleLogout}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md w-full transition-all
-                  text-white/30 hover:text-white/60 hover:bg-white/[0.04]
-                  ${!sidebarOpen && "justify-center"}`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#D4AF37] hover:bg-[oklch(0.84_0.155_85/0.06)]"
               >
-                <LogOut size={13} className="flex-shrink-0" />
-                {sidebarOpen && <span className="text-[12px] font-body">Log Out</span>}
+                <Sparkles size={15} className="flex-shrink-0" />
+                <span className="text-[13px] font-body">What's New</span>
+                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.18</span>
               </button>
-            )}
-          </div>
-        </aside>
-
-        {/* ── Mobile header ── */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-3 px-4 py-3
-          bg-[oklch(0.11_0.012_280)] border-b border-white/[0.07]">
-          <button
-            onClick={() => mobileMenuOpen ? setMobileMenuOpen(false) : openMobileMenu()}
-            className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.06] transition-all"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-          <div className="flex items-center gap-2 flex-1">
-            <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
-            <span className="font-display text-base gold-shimmer">Living Nexus</span>
-          </div>
-          <button
-            onClick={toggleQr}
-            className="p-2 rounded-lg text-white/40 hover:text-[#D4AF37] transition-all"
-          >
-            <ChevronRight size={16} className={`transition-transform ${qrOpen ? "rotate-180" : ""}`} />
-          </button>
-          {/* Mobile signals badge */}
-          {!!user && (unreadCount as number) > 0 && (
-            <button
-              onClick={() => goTo("/profile")}
-              className="relative p-2 rounded-lg text-white/40 hover:text-white/70"
-            >
-              <Bell size={16} />
-              <span
-                className="absolute top-1 right-1 w-2 h-2 rounded-full animate-pulse"
-                style={{ background: "oklch(0.65 0.22 25)" }}
-              />
-            </button>
-          )}
-        </div>
-
-        {/* ── Mobile nav overlay ── */}
-        {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
-            <div
-              className="w-72 h-full bg-[oklch(0.11_0.012_280)] border-r border-white/[0.07] pt-16 overflow-y-auto flex flex-col"
-              style={{ paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))" }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Mobile identity header */}
-              {!authLoading && user && (
-                <div className="px-3 pt-3 pb-3 border-b border-white/[0.07]">
-                  <button
-                    className="flex items-center gap-3 p-3 rounded-xl w-full text-left"
-                    style={{ background: "oklch(0.14 0.04 270 / 60%)" }}
-                    onClick={() => goTo("/profile")}
-                  >
-                    <div className="relative flex-shrink-0">
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold text-white overflow-hidden"
-                        style={{
-                          background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
-                          boxShadow: user?.licenseStatus === "licensed" ? "0 0 0 2px #D4AF37, 0 0 14px oklch(0.80 0.145 82 / 0.4)" : "none",
-                        }}
-                      >
-                        {user?.profilePhotoUrl || state.profileAvatar
-                          ? <img src={user?.profilePhotoUrl ?? state.profileAvatar ?? ""} alt="avatar" className="w-full h-full object-cover rounded-full" style={{ objectPosition: user?.avatarObjectPosition ?? "50% 50%" }} />
-                          : (user?.name || state.profileName || "?").charAt(0).toUpperCase()
-                        }
-                      </div>
-                      {user?.licenseStatus === "licensed" && (
-                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#D4AF37" }}>
-                          <CheckCircle2 size={10} className="text-black" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[14px] font-medium text-white/95 truncate">{user?.name || state.profileName || "Creator"}</div>
-                      {user?.licenseStatus === "licensed" ? (
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <Fingerprint size={10} style={{ color: "#D4AF37" }} />
-                          <span className="text-[10px] font-heading tracking-wider" style={{ color: "#D4AF37" }}>WITNESSED</span>
-                        </div>
-                      ) : (
-                        <div className="text-[11px] text-white/35 mt-0.5">View Profile</div>
-                      )}
-                    </div>
-                    <ChevronRight size={14} className="text-white/30 flex-shrink-0" />
-                  </button>
-                </div>
-              )}
-
-              {/* Mobile primary nav */}
-              <div className="flex-1 py-2 overflow-y-auto">
-                {PRIMARY_NAV.map(item => renderNavItem(item, true))}
-                {/* CREATOR TOOLS section — authenticated only */}
-                {!authLoading && user && (
-                  <div className="px-4 pt-4 pb-1">
-                    <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase">Creator Tools</p>
-                  </div>
-                )}
-                {!authLoading && user && renderNavItem({ label: "Upload", icon: Upload, path: "/upload", goldLabel: false }, true)}
-                {!authLoading && user && renderNavItem(DASHBOARD_NAV_ITEM, true)}
-                {!authLoading && user && renderNavItem(ARCHIVE_NAV_ITEM, true)}
-                {!authLoading && user && renderNavItem({ label: "My Profile", icon: Fingerprint, path: `/creator/${(user as any).id}`, goldLabel: false }, true)}
-                {!authLoading && user && renderNavItem({ label: "Prompt Generator", icon: Sparkles, path: `/creator/${(user as any).id}?openPromptStudio=1`, goldLabel: false }, true)}
-                {/* Admin nav — role-gated */}
-                {!authLoading && (user as any)?.role === "admin" && renderNavItem({ label: "LN Command", icon: Terminal, path: "/admin", goldLabel: false }, true)}
-
-                {/* DISCOVER section */}
-                <div className="px-4 pt-4 pb-2">
-                  <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase mb-2">Discover</p>
-                  {([
-                    { label: "Manifesto", icon: BookOpen, path: "/manifesto" },
-                    { label: "Founding Creators", icon: Star, path: "/founders" },
-                    { label: "Founder Era Support", icon: Heart, path: "/founder-era" },
-                    { label: "Witness Registry", icon: Eye, path: "/witness-registry" },
-                  ] as { label: string; icon: React.ElementType; path: string }[]).map(item => {
-                    const Icon = item.icon;
-                    const active = location === item.path;
-                    return (
-                      <button
-                        key={item.label}
-                        onClick={() => goTo(item.path)}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors"
-                        style={{
-                          background: active ? "oklch(0.75 0.18 85 / 0.10)" : "transparent",
-                          color: active ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.02 280)",
-                        }}
-                      >
-                        <Icon size={14} className="flex-shrink-0" />
-                        <span className="text-[13px] font-body">{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Mobile account footer */}
-              <div className="px-4 pb-4 border-t border-white/[0.07] pt-3">
-                {/* What's New trigger */}
-                <button
-                  onClick={() => { setWhatsNewOpen(true); setMobileMenuOpen(false); }}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#D4AF37] hover:bg-[oklch(0.84_0.155_85/0.06)]"
+              {!authLoading && !user ? (
+                <a
+                  href={getLoginUrl()}
+                  className="flex items-center gap-3 p-3 rounded-xl w-full transition-all"
+                  style={{ background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
                 >
-                  <Sparkles size={15} className="flex-shrink-0" />
-                  <span className="text-[13px] font-body">What's New</span>
-                  <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.18</span>
+                  <LogIn size={16} style={{ color: "oklch(0.75 0.18 85)" }} />
+                  <div>
+                    <div className="text-[13px] font-medium" style={{ color: "oklch(0.85 0.1 85)" }}>Sign In</div>
+                    <div className="text-[11px] text-white/35">Upload &amp; earn tips</div>
+                  </div>
+                </a>
+              ) : (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all text-white/35 hover:text-white/60 hover:bg-white/[0.04]"
+                >
+                  <LogOut size={14} className="flex-shrink-0" />
+                  <span className="text-[13px] font-body">Log Out</span>
                 </button>
-                {!authLoading && !user ? (
-                  <a
-                    href={getLoginUrl()}
-                    className="flex items-center gap-3 p-3 rounded-xl w-full transition-all"
-                    style={{ background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
-                  >
-                    <LogIn size={16} style={{ color: "oklch(0.75 0.18 85)" }} />
-                    <div>
-                      <div className="text-[13px] font-medium" style={{ color: "oklch(0.85 0.1 85)" }}>Sign In</div>
-                      <div className="text-[11px] text-white/35">Upload &amp; earn tips</div>
-                    </div>
-                  </a>
-                ) : (
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all text-white/35 hover:text-white/60 hover:bg-white/[0.04]"
-                  >
-                    <LogOut size={14} className="flex-shrink-0" />
-                    <span className="text-[13px] font-body">Log Out</span>
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ── Page content ── */}
-        <main className="flex-1 flex flex-col overflow-hidden md:pt-0 pt-14">
-          <TipTicker />
-          <style>{`
-            @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
-            @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(80px + max(env(safe-area-inset-bottom, 0px), 8px)) !important; } }
-          `}</style>
-          <div className="flex-1 overflow-y-auto player-scroll-area">
-            {children}
-          </div>
-        </main>
-      </div>
+      {/* ══════════════════════════════════════════════
+          PAGE CONTENT
+          Desktop: top-padding for TopBar (52px)
+          Mobile: top-padding for mobile header (56px)
+      ══════════════════════════════════════════════ */}
+      <main className="flex-1 flex flex-col overflow-hidden md:pt-[52px] pt-14">
+        <style>{`
+          @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
+          @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(80px + max(env(safe-area-inset-bottom, 0px), 8px)) !important; } }
+        `}</style>
+        <div className="flex-1 overflow-y-auto player-scroll-area">
+          {children}
+        </div>
+      </main>
 
-      {/* Desktop Player Bar */}
+      {/* ══════════════════════════════════════════════
+          PLAYERS
+          Desktop PlayerBar: full-width (no left offset)
+          Mobile: portal-based MobilePlayerLayer
+      ══════════════════════════════════════════════ */}
+
+      {/* Desktop Player Bar — full width */}
       <div className="hidden md:block">
         <PlayerBar />
       </div>
 
-      {/* Mobile Player Layer — portal-based, full-viewport, detached from layout */}
+      {/* Mobile Player Layer */}
       <MobilePlayerLayer />
 
       {/* Theater Player */}
@@ -663,11 +349,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* Scroll to top */}
       <ScrollToTopButton />
-
-      {/* What's New Modal — triggered from sidebar/mobile footer */}
-      {whatsNewOpen && (
-        <WhatsNewModal forceOpen={true} onClose={() => setWhatsNewOpen(false)} />
-      )}
     </div>
   );
 }

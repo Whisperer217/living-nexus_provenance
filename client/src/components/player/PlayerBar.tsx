@@ -192,7 +192,7 @@ export default function PlayerBar() {
       style={{
         position: "fixed",
         bottom: 0,
-        left: "164px",
+        left: 0,
         right: 0,
         height: isCinematic ? "100dvh" : isExpanded ? "256px" : "68px",
         background: isCinematic ? "#000" : "oklch(0.115 0.05 268)",
@@ -201,7 +201,7 @@ export default function PlayerBar() {
           : isCinematic ? "none" : "1px solid oklch(0.28 0.04 270 / 60%)",
         boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.7), 0 -4px 32px oklch(0.82 0.155 175 / 0.06), 0 -1px 8px oklch(0.80 0.145 82 / 0.08)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        paddingLeft: "44px",
+        paddingLeft: "16px",
         zIndex: isCinematic ? 9999 : 50,
       }}
     >

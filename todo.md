@@ -2493,3 +2493,13 @@
 - [x] Copy Full Output button
 - [x] Save Draft and Share buttons on result
 - [x] TypeScript: 0 errors | Tests: 123/123 passing
+
+## Desktop Layout Migration — Top Bar + Live Panel (Apr 5 2026)
+- [x] Build TopBar.tsx: slim fixed top bar with logo, 6 core nav pills, Prompt Gen button, Register Work gold button, avatar, hamburger
+- [x] Build NavDrawer.tsx: full-width collapsible drawer with 5 sections (Navigate/Create/Discover/Account/Platform) + user card
+- [x] Build LiveActivityPanel.tsx: left-edge slide-in panel with Now Playing / Tips / Sessions tabs
+- [x] Update MainLayout.tsx: use TopBar on desktop (lg+), keep existing mobile sidebar/bottom nav unchanged
+- [x] Remove marquee banner (replace with LiveActivityPanel)
+- [x] Extend bottom player bar to full-width on desktop (remove left sidebar offset)
+- [x] Adjust main content area top padding for topbar height on desktop
+- [x] TypeScript: 0 errors | Tests: 123/123 passing
