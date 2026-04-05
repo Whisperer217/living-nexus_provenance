@@ -2634,3 +2634,18 @@
 - [x] Wire webhook triggers: WID issuance, track upload, jukebox room, tip, like surge
 - [x] Build Discord Integration settings tab in creator dashboard
 - [x] Write vitest tests for webhook service (8 tests passing)
+
+## Platform Master Discord Webhook + Creator Chat
+- [ ] Add platformSettings table to schema (key/value store for owner config)
+- [ ] Add platform master webhook URL to discord.ts fire logic (fires on ALL events for all users)
+- [ ] Add admin settings UI for owner to configure master webhook URL + test it
+- [ ] Add messages table to schema (senderId, recipientId, content, readAt, timestamps)
+- [ ] Add sendMessage, getConversation, getInbox, markRead tRPC procedures
+- [ ] Add chat bubble button to creator profile pages (opens slide-in chat panel)
+- [ ] Add Messages inbox tab to creator dashboard
+- [ ] Real-time polling (every 10s) for new messages with unread badge count
+- [ ] Write vitest tests for chat procedures
+
+## Bug Fix: Download Service Unavailable
+- [x] Diagnose /api/download/:id returning "Service Unavailable"
+- [x] Fix download route: upload ID3-tagged file to S3 and redirect browser directly, bypassing CDN response-body size limit

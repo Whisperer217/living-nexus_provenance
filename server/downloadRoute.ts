@@ -24,6 +24,7 @@ import JSZip from "jszip";
 import { getSongWithCreator, getUserTipTotalForSong, recordDownload, getSongsByUser } from "./db";
 import { ENV } from "./_core/env";
 import { sdk } from "./_core/sdk";
+import { storagePut } from "./storage";
 import type { Song } from "../drizzle/schema";
 
 export const downloadRouter = Router();
@@ -146,7 +147,19 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
   // 6. Write ID3 tags into audio buffer
   const taggedBuffer = NodeID3.write(tags, audioBuffer);
 
-  // 7. Record download in DB
+  // 7. Build filename: "Title - Artist [WID-MUS-XXXXXXXX].mp3"
+  const widShort = witnessId.length > 8 ? witnessId.slice(0, 20) : witnessId;
+  const safeTitle = sanitizeFilename(song.title);
+  const safeArtist = sanitizeFilename(creatorName.replace(/^@/, ""));
+  const filename = `${safeTitle} - ${safeArtist} [${widShort}].mp3`;
+
+  // 8. Upload tagged file to S3 and redirect — avoids CDN response-body size limits
+  //    The tagged file is stored under a short-lived key (24h TTL by convention).
+  try {
+    const s3Key = `downloads/${songId}-${Date.now()}-${sanitizeFilename(filename)}`;
+    const { url: taggedUrl } = await storagePut(s3Key, taggedBuffer, "audio/mpeg");
+
+    // Record download in DB (non-fatal)
     try {
       let userId: number | undefined;
       try {
@@ -156,18 +169,17 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
       await recordDownload({ songId, userId });
     } catch { /* non-fatal */ }
 
-  // 8. Build filename: "Title - Artist [WID-MUS-XXXXXXXX].mp3"
-  const widShort = witnessId.length > 8 ? witnessId.slice(0, 20) : witnessId;
-  const safeTitle = sanitizeFilename(song.title);
-  const safeArtist = sanitizeFilename(creatorName.replace(/^@/, ""));
-  const filename = `${safeTitle} - ${safeArtist} [${widShort}].mp3`;
-
-  // 9. Stream to client
-  res.setHeader("Content-Type", "audio/mpeg");
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-  res.setHeader("Content-Length", taggedBuffer.length.toString());
-  res.setHeader("Cache-Control", "no-store");
-  res.end(taggedBuffer);
+    // Redirect browser directly to the S3 URL — bypasses CDN proxy size limit
+    res.redirect(302, taggedUrl);
+  } catch (uploadErr) {
+    console.error("[Download] S3 upload failed, falling back to direct stream:", uploadErr);
+    // Fallback: stream directly (may fail on CDN for large files, but better than nothing)
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Length", taggedBuffer.length.toString());
+    res.setHeader("Cache-Control", "no-store");
+    res.end(taggedBuffer);
+  }
 });
 
 // ── Batch Archive Download ────────────────────────────────────────────────────
