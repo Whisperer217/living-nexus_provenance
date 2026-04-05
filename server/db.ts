@@ -3095,3 +3095,66 @@ export async function updateUserToneFrequency(userId: number, data: {
   const db = await getDb();
   await db.update(users).set(data).where(eq(users.id, userId));
 }
+
+// ─── Jukebox: list active rooms ─────────────────────────────────────────────
+/**
+ * Returns distinct room codes that have pending (unplayed, unskipped) queue
+ * items created within the last 2 hours, along with the first pending song
+ * and the host (tipper of the oldest pending item) for display in the
+ * Live Activity panel.
+ */
+export async function listActiveJukeboxRooms(): Promise<Array<{
+  roomCode: string;
+  pendingCount: number;
+  nowPlayingTitle: string | null;
+  nowPlayingArtist: string | null;
+  nowPlayingCoverArtUrl: string | null;
+  hostName: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  const { jukeboxQueue, songs: songsTable, users: usersTable } = await import("../drizzle/schema");
+
+  const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000);
+  const rows = await db
+    .select({
+      roomCode: jukeboxQueue.roomCode,
+      position: jukeboxQueue.position,
+      createdAt: jukeboxQueue.createdAt,
+      tipperName: jukeboxQueue.tipperName,
+      songTitle: songsTable.title,
+      songCoverArtUrl: songsTable.coverArtUrl,
+      creatorName: usersTable.name,
+      creatorArtistHandle: usersTable.artistHandle,
+    })
+    .from(jukeboxQueue)
+    .innerJoin(songsTable, eq(jukeboxQueue.songId, songsTable.id))
+    .innerJoin(usersTable, eq(songsTable.userId, usersTable.id))
+    .where(
+      and(
+        sql`${jukeboxQueue.playedAt} IS NULL`,
+        sql`${jukeboxQueue.skippedAt} IS NULL`,
+        sql`${jukeboxQueue.createdAt} >= ${cutoff}`,
+      )
+    )
+    .orderBy(jukeboxQueue.roomCode, jukeboxQueue.position, jukeboxQueue.createdAt);
+
+  // Group by roomCode
+  const roomMap = new Map<string, typeof rows>();
+  for (const row of rows) {
+    if (!roomMap.has(row.roomCode)) roomMap.set(row.roomCode, []);
+    roomMap.get(row.roomCode)!.push(row);
+  }
+
+  return Array.from(roomMap.entries()).map(([roomCode, items]) => {
+    const first = items[0];
+    return {
+      roomCode,
+      pendingCount: items.length,
+      nowPlayingTitle: first?.songTitle ?? null,
+      nowPlayingArtist: first?.creatorArtistHandle || first?.creatorName || null,
+      nowPlayingCoverArtUrl: first?.songCoverArtUrl ?? null,
+      hostName: first?.tipperName ?? null,
+    };
+  });
+}

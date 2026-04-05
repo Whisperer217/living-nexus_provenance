@@ -42,8 +42,11 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
     staleTime: 25_000,
   });
 
-  // Active jukebox rooms — no listRooms procedure; link to /together page
-  const rooms: any[] = [];
+  // Active jukebox rooms — poll every 15s
+  const { data: rooms } = trpc.jukebox.listActiveRooms.useQuery(undefined, {
+    refetchInterval: 15_000,
+    staleTime: 12_000,
+  });
 
   // Recent tracks from explore (for "Now Playing" context)
   const { data: recentSongs } = trpc.songs.discover.useQuery(
@@ -300,31 +303,49 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
               </div>
               {rooms && rooms.length > 0 ? rooms.map((room: any) => (
                 <div
-                  key={room.id}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-all"
+                  key={room.roomCode}
+                  className="flex items-start gap-3 px-4 py-3 cursor-pointer transition-all"
                   style={{ borderBottom: "1px solid oklch(0.28 0.04 270 / 15%)" }}
-                  onClick={() => navigate(`/together?room=${room.id}`)}
+                  onClick={() => navigate(`/together?room=${room.roomCode}`)}
                   onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "oklch(0.14 0.02 280 / 0.6)"}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
                 >
                   <div
-                    className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center"
+                    className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"
                     style={{ background: "oklch(0.65 0.18 160 / 0.15)", border: "1px solid oklch(0.65 0.18 160 / 0.25)" }}
                   >
-                    <Radio size={14} style={{ color: "oklch(0.65 0.18 160)" }} />
+                    {room.nowPlayingCoverArtUrl
+                      ? <img src={room.nowPlayingCoverArtUrl} alt="" className="w-full h-full object-cover rounded-lg" />
+                      : <Radio size={14} style={{ color: "oklch(0.65 0.18 160)" }} />
+                    }
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-semibold truncate" style={{ color: "oklch(0.85 0.02 280)" }}>{room.name || "Unnamed Room"}</div>
-                    <div className="text-[9px] mt-0.5" style={{ color: "oklch(0.50 0.02 280)" }}>
-                      {room.listenerCount ?? 0} listener{(room.listenerCount ?? 0) !== 1 ? "s" : ""}
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span
+                        className="text-[8px] font-bold px-1 py-0.5 rounded flex-shrink-0"
+                        style={{ background: "oklch(0.65 0.18 160 / 0.15)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.25)" }}
+                      >
+                        LIVE
+                      </span>
+                      <span className="text-[10px] font-mono truncate" style={{ color: "oklch(0.55 0.02 280)" }}>
+                        #{room.roomCode}
+                      </span>
+                    </div>
+                    {room.nowPlayingTitle && (
+                      <div className="text-[11px] font-semibold truncate" style={{ color: "oklch(0.88 0.02 280)" }}>
+                        {room.nowPlayingTitle}
+                      </div>
+                    )}
+                    {room.nowPlayingArtist && (
+                      <div className="text-[9px] truncate" style={{ color: "oklch(0.50 0.02 280)" }}>
+                        {room.nowPlayingArtist}
+                      </div>
+                    )}
+                    <div className="text-[9px] mt-0.5" style={{ color: "oklch(0.40 0.02 280)" }}>
+                      {room.pendingCount} track{room.pendingCount !== 1 ? "s" : ""} queued
+                      {room.hostName ? ` · hosted by ${room.hostName}` : ""}
                     </div>
                   </div>
-                  <span
-                    className="text-[8px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-                    style={{ background: "oklch(0.65 0.18 160 / 0.15)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.25)" }}
-                  >
-                    LIVE
-                  </span>
                 </div>
               )) : (
                 <div className="px-4 py-6 text-center">

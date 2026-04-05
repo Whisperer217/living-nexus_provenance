@@ -2503,3 +2503,11 @@
 - [x] Extend bottom player bar to full-width on desktop (remove left sidebar offset)
 - [x] Adjust main content area top padding for topbar height on desktop
 - [x] TypeScript: 0 errors | Tests: 123/123 passing
+
+## Live Activity Panel — Sessions Tab Fix (Apr 5 2026)
+- [x] Added `listActiveJukeboxRooms` DB helper (distinct room codes with pending queue items in last 2h)
+- [x] Added `jukebox.listActiveRooms` tRPC public procedure
+- [x] Wired LiveActivityPanel Sessions tab to real `trpc.jukebox.listActiveRooms` query (polls every 15s)
+- [x] Shows room card: cover art, room code badge, now-playing title/artist, queued track count, host name
+- [x] Clicking a room card navigates to /together?room=CODE
+- [x] TypeScript: 0 errors | Tests: 121/123 passing (2 pre-existing mock failures in trust.layer.test.ts)

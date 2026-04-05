@@ -70,6 +70,7 @@ import {
   savePromptDraft, getPromptDraftsByUser, getPromptDraftById,
   getPromptDraftByShareToken, updatePromptDraftShare, deletePromptDraft,
   updateUserToneFrequency,
+  listActiveJukeboxRooms,
 } from "./db";
 import { LIVING_ARCHIVE_PRODUCTS, SLOTS_PER_PERIOD } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -1634,6 +1635,12 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
   }),
   // ── Jukebox ───────────────────────────────────────────────────────────────────────────────────────
   jukebox: router({
+    // List all rooms with pending queue items in the last 2 hours
+    listActiveRooms: publicProcedure
+      .query(async () => {
+        return listActiveJukeboxRooms();
+      }),
+
     // Get current queue (pending items) for a room
     getQueue: publicProcedure
       .input(z.object({ roomCode: z.string().min(1) }))
