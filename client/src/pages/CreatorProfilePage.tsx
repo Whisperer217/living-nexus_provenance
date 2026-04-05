@@ -773,13 +773,13 @@ export default function CreatorProfilePage() {
 
               {/* ── Identity block ── */}
               <div className="flex-1 min-w-0 pt-1">
-                {/* Name row */}
+                {/* Name row — artist name is ALWAYS the stable display name, never a link */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1
-                    className="text-2xl sm:text-4xl font-bold leading-tight"
+                    className="text-2xl sm:text-4xl font-bold leading-tight select-text"
                     style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)", wordBreak: "break-word" }}
                   >
-                    {creator.artistHandle || creator.name}
+                    {creator.name || creator.artistHandle}
                   </h1>
                   {(creator as any).role === "founder" && (
                     <span
@@ -800,6 +800,23 @@ export default function CreatorProfilePage() {
                     </span>
                   )}
                 </div>
+
+                {/* @handle sub-header — clickable hyperlink like Twitter, copies profile URL */}
+                {creator.artistHandle && (
+                  <button
+                    className="mt-0.5 text-sm font-mono transition-colors hover:text-[#D4AF37] focus:outline-none"
+                    style={{ color: "oklch(0.55 0.04 280)", letterSpacing: "0.01em" }}
+                    title="Copy profile link"
+                    onClick={() => {
+                      const url = `${window.location.origin}/creator/${creator.id}`;
+                      navigator.clipboard.writeText(url).then(() =>
+                        toast.success("Profile link copied")
+                      ).catch(() => toast.error("Could not copy"));
+                    }}
+                  >
+                    @{creator.artistHandle}
+                  </button>
+                )}
 
                 {/* Bio — single line, muted */}
                 {creator.bio && (
@@ -988,13 +1005,13 @@ export default function CreatorProfilePage() {
 
             {/* Mobile-only: full-width stacked layout */}
             <div className="sm:hidden flex flex-col gap-3">
-              {/* Name row */}
+              {/* Name row — artist name is ALWAYS the stable display name, never a link */}
               <div className="flex items-center gap-2 flex-wrap">
                 <h1
-                  className="text-2xl font-bold leading-tight"
+                  className="text-2xl font-bold leading-tight select-text"
                   style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}
                 >
-                  {creator.artistHandle || creator.name}
+                  {creator.name || creator.artistHandle}
                 </h1>
                 {creator.licenseStatus === "licensed" && (
                   <span
@@ -1005,6 +1022,23 @@ export default function CreatorProfilePage() {
                   </span>
                 )}
               </div>
+
+              {/* @handle sub-header — clickable hyperlink like Twitter, copies profile URL */}
+              {creator.artistHandle && (
+                <button
+                  className="-mt-1 text-sm font-mono transition-colors hover:text-[#D4AF37] focus:outline-none text-left"
+                  style={{ color: "oklch(0.55 0.04 280)", letterSpacing: "0.01em" }}
+                  title="Copy profile link"
+                  onClick={() => {
+                    const url = `${window.location.origin}/creator/${creator.id}`;
+                    navigator.clipboard.writeText(url).then(() =>
+                      toast.success("Profile link copied")
+                    ).catch(() => toast.error("Could not copy"));
+                  }}
+                >
+                  @{creator.artistHandle}
+                </button>
+              )}
 
               {/* Stats row */}
               <div className="flex items-center gap-3 flex-wrap">
@@ -1214,7 +1248,33 @@ export default function CreatorProfilePage() {
                           song={song}
                           index={idx}
                           isPlaying={playingId === song.id}
-                          onPlay={() => handlePlay(song)}
+                          onPlay={() => {
+                            // Build queue from ONLY this album's tracks in sorted order
+                            const albumQueue = albumSongs
+                              .filter((s: any) => !!s.fileUrl)
+                              .map((s: any) => ({
+                                id: String(s.id),
+                                title: s.title,
+                                artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
+                                genre: s.genre || "",
+                                audioUrl: s.fileUrl!,
+                                artUrl: s.coverArtUrl || undefined,
+                                witnessId: s.witnessId || undefined,
+                                coverPositionX: s.coverPositionX ?? 50,
+                                coverPositionY: s.coverPositionY ?? 50,
+                                visualReady: s.visualReady ?? false,
+                                autoVideoUrl: s.autoVideoUrl ?? undefined,
+                                creatorId: (data?.creator as any)?.id ?? undefined,
+                                creatorRole: (data?.creator as any)?.role ?? undefined,
+                              }));
+                            if (albumQueue.length > 1) {
+                              const startIdx = albumQueue.findIndex((t: any) => t.id === String(song.id));
+                              playQueueAt(albumQueue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
+                            } else {
+                              handlePlay(song);
+                            }
+                            openNowPlayingPanel();
+                          }}
                           isOwner={isOwner}
                           onDelete={(id) => deleteMutation.mutate({ songId: id })}
                         />

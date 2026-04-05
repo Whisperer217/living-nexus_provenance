@@ -58,9 +58,30 @@ function WIDTrustLayer() {
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
-  const { addAndPlay } = usePlayer();
+  const { addAndPlay, playQueueAt, openNowPlayingPanel } = usePlayer();
 
   const total = countData?.count ?? 0;
+
+  // Build a stable queue from all witnessed voices for ordered playback
+  const voiceQueue = (voices ?? []).slice(0, 10).map((v: any) => ({
+    id: String(v.songId),
+    title: v.title,
+    artist: v.artistHandle || v.userName,
+    artUrl: v.coverArtUrl || undefined,
+    audioUrl: v.fileUrl || "",
+    witnessId: v.witnessId || undefined,
+    genre: v.genre || "",
+  }));
+
+  const handleVoicePlay = (songId: number) => {
+    if (voiceQueue.length > 1) {
+      const startIdx = voiceQueue.findIndex((t: { id: string }) => t.id === String(songId));
+      playQueueAt(voiceQueue, startIdx >= 0 ? startIdx : 0, "HOME");
+    } else if (voiceQueue.length === 1) {
+      addAndPlay(voiceQueue[0]);
+    }
+    openNowPlayingPanel();
+  };
 
   return (
     <div className="px-6 pt-4 pb-6 space-y-5">
@@ -221,15 +242,8 @@ function WIDTrustLayer() {
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    addAndPlay({
-                      id: String(v.songId),
-                      title: v.title,
-                      artist: v.artistHandle || v.userName,
-                      artUrl: v.coverArtUrl || undefined,
-                      audioUrl: v.fileUrl || "",
-                      witnessId: v.witnessId || undefined,
-                      genre: v.genre || "",
-                    });
+                    e.stopPropagation();
+                    handleVoicePlay(v.songId);
                   }}
                   className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   style={{ background: "oklch(0 0 0 / 0.15)" }}
@@ -351,6 +365,15 @@ function HorizontalTrackGrid({
   emptyMessage?: string;
   likeMap?: Record<number, { liked: boolean; count: number }>;
 }) {
+  const { playQueueAt, openNowPlayingPanel } = usePlayer();
+  const handleSectionPlay = (clickedTrack: any) => {
+    const queue = tracks.filter((t: any) => !!t.audioUrl);
+    if (queue.length >= 1) {
+      const startIdx = queue.findIndex((t: any) => t.id === clickedTrack.id);
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "HOME");
+    }
+    openNowPlayingPanel();
+  };
   if (loading) {
     return (
       <div
@@ -402,7 +425,7 @@ function HorizontalTrackGrid({
       >
         {row1.map((track, idx) => (
           <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
-            <TrackCard track={track} index={idx} onTip={onTip} {...getPrefetch(track)} />
+            <TrackCard track={track} index={idx} onTip={onTip} onPlay={handleSectionPlay} {...getPrefetch(track)} />
           </div>
         ))}
       </div>
@@ -415,7 +438,7 @@ function HorizontalTrackGrid({
         >
           {row2.map((track, idx) => (
             <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
-              <TrackCard track={track} index={12 + idx} onTip={onTip} {...getPrefetch(track)} />
+              <TrackCard track={track} index={12 + idx} onTip={onTip} onPlay={handleSectionPlay} {...getPrefetch(track)} />
             </div>
           ))}
         </div>
@@ -434,6 +457,15 @@ function TrendingHorizontalGrid({
   onTip?: (index: number, rect: DOMRect) => void;
   likeMap?: Record<number, { liked: boolean; count: number }>;
 }) {
+  const { playQueueAt, openNowPlayingPanel } = usePlayer();
+  const handleTrendingPlay = (clickedTrack: any) => {
+    const queue = tracks.filter((t: any) => !!t.audioUrl);
+    if (queue.length >= 1) {
+      const startIdx = queue.findIndex((t: any) => t.id === clickedTrack.id);
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "HOME");
+    }
+    openNowPlayingPanel();
+  };
   if (tracks.length === 0) return null;
 
   const row1 = tracks.slice(0, 12);
@@ -455,7 +487,7 @@ function TrendingHorizontalGrid({
       >
         {row1.map((track, idx) => (
           <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
-            <TrackCard track={track} index={idx} onTip={onTip} {...getPrefetch(track)} />
+            <TrackCard track={track} index={idx} onTip={onTip} onPlay={handleTrendingPlay} {...getPrefetch(track)} />
           </div>
         ))}
       </div>
@@ -466,7 +498,7 @@ function TrendingHorizontalGrid({
         >
           {row2.map((track, idx) => (
             <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
-              <TrackCard track={track} index={12 + idx} onTip={onTip} {...getPrefetch(track)} />
+              <TrackCard track={track} index={12 + idx} onTip={onTip} onPlay={handleTrendingPlay} {...getPrefetch(track)} />
             </div>
           ))}
         </div>

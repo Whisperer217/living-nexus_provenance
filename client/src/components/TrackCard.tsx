@@ -29,6 +29,12 @@ interface Props {
   prefetchedLikeCount?: number;
   /** Pre-fetched liked status — skips the individual getLikeStatus query when provided */
   prefetchedLiked?: boolean;
+  /**
+   * Optional override for cover-art click. When provided, the parent section
+   * is responsible for calling playQueueAt with the correct ordered queue.
+   * When omitted, falls back to addAndPlay (single-track, no queue context).
+   */
+  onPlay?: (track: Track) => void;
 }
 
 /** Split a comma-separated genre string into trimmed, non-empty tags */
@@ -76,7 +82,7 @@ function GenrePills({ genre, maxVisible = 4 }: { genre: string | undefined | nul
 
 // AiDisclosureBadge replaced by shared AiDisclosurePill component
 
-export default function TrackCard({ track, index, onTip, prefetchedLikeCount, prefetchedLiked }: Props) {
+export default function TrackCard({ track, index, onTip, prefetchedLikeCount, prefetchedLiked, onPlay }: Props) {
   const { state, addAndPlay, playNext, openNowPlayingPanel, currentTrackId } = usePlayer();
   const [showAddToList, setShowAddToList] = useState(false);
   const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
@@ -88,7 +94,11 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
   const handleCoverClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addAndPlay(track);
+    if (onPlay) {
+      onPlay(track);
+    } else {
+      addAndPlay(track);
+    }
     openNowPlayingPanel();
   };
 

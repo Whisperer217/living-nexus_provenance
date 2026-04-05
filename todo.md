@@ -2584,3 +2584,12 @@
 - [x] Build VersionHistoryModal component (version list, upload new version flow, WID per version, doctrine note)
 - [x] Wire VersionHistoryModal into SongDetailPage with "Versions" button in action row
 - [x] TypeScript: 0 errors | Tests: 123/123 passing
+
+### Phase: Player Queue & Profile Header Fixes (Apr 2026)
+- [x] Fix album/collection track queue on CreatorProfilePage — clicking a track in an album now queues only that album's tracks in order
+- [x] Fix homepage Witnessed Voices section — clicking a voice card queues the entire Witnessed Voices list in order
+- [x] Fix homepage HorizontalTrackGrid sections — each section plays only its own tracks in order via onPlay prop on TrackCard
+- [x] Fix homepage TrendingHorizontalGrid — same ordered queue fix applied
+- [x] Fix creator profile H1 header — now always shows creator.name (stable display name), never changes on interaction
+- [x] Add @handle sub-header below artist name — clickable button that copies the profile URL to clipboard (like Twitter), styled in muted mono font
+- [x] TypeScript: 0 errors | Tests: 123/123 passing
