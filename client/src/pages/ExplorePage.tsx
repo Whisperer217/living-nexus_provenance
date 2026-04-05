@@ -10,7 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -68,6 +68,7 @@ function ExploreCard({
   const artistName = creator?.artistHandle || creator?.name || "Unknown";
   // Non-audio types navigate to song detail page instead of playing audio
   const isNonAudio = song.contentType === "manuscript" || song.contentType === "comic";
+  const isHot = (song.playCount ?? 0) >= 50;
   const handleCardClick = () => {
     if (isNonAudio) { navigate(`/song/${song.id}`); } else { onPlay(item); }
   };
@@ -76,10 +77,12 @@ function ExploreCard({
     <>
     <div
       className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
-        border bg-[oklch(0.095_0.028_275)] track-card-glow
+        border bg-[oklch(0.148_0.032_50)] track-card-glow parchment-grain
         ${isActive && !isNonAudio
-          ? "border-[#D4AF37]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.6),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
-          : "border-white/[0.05] hover:border-[#A78BFA]/30"
+          ? "border-[#E8A830]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.5),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
+          : isHot
+            ? "gold-banner"
+            : "border-[oklch(0.28_0.04_60/0.25)] hover:border-[oklch(0.55_0.10_72/0.40)]"
         }`}
       onClick={handleCardClick}
       onContextMenu={e => { e.preventDefault(); }}
@@ -118,6 +121,24 @@ function ExploreCard({
               : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
           }
         </div>
+        {/* 🔥 Hot badge — top-left ribbon for 50+ plays */}
+        {isHot && (
+          <div className="absolute top-0 left-0 z-20 flex items-center gap-0.5 px-2 py-0.5"
+            style={{
+              background: "linear-gradient(90deg, oklch(0.55 0.14 60 / 0.92), oklch(0.80 0.17 80 / 0.88))",
+              borderBottomRightRadius: "8px",
+              borderTopLeftRadius: "inherit",
+            }}
+          >
+            <Crown size={9} style={{ color: "oklch(0.10 0.02 55)" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "oklch(0.10 0.02 55)" }}>
+              {(song.playCount ?? 0) >= 1000
+                ? `${Math.floor((song.playCount ?? 0) / 1000)}K PLAYS`
+                : `${song.playCount} PLAYS`}
+            </span>
+          </div>
+        )}
+
         {/* WID badge — clickable → /verify/:witnessId */}
         {song.witnessId && (
           <Link

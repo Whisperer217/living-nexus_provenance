@@ -120,6 +120,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
 
   const hasWid = !!track.witnessId;
   const hasAiDisclosure = !!track.aiDisclosure;
+  const isHot = (track.plays ?? 0) >= 50;
 
   return (
     <>
@@ -128,7 +129,9 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         border bg-[oklch(0.148_0.032_50)] track-card-glow parchment-grain
         ${isActive
           ? "border-[#E8A830]/40 track-active-glow shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-          : "border-[oklch(0.28_0.04_60/0.25)] hover:border-[oklch(0.55_0.10_72/0.40)]"
+          : isHot
+            ? "gold-banner"
+            : "border-[oklch(0.28_0.04_60/0.25)] hover:border-[oklch(0.55_0.10_72/0.40)]"
         }`}
     >
       {/* ── Zone 1: Cover Art — plays in global player ── */}
@@ -176,6 +179,24 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
           }
         </div>
+
+        {/* 🔥 Hot badge — top-left corner ribbon for 50+ plays */}
+        {isHot && !track.isOwn && (
+          <div className="absolute top-0 left-0 z-20 flex items-center gap-0.5 px-2 py-0.5"
+            style={{
+              background: "linear-gradient(90deg, oklch(0.55 0.14 60 / 0.92), oklch(0.80 0.17 80 / 0.88))",
+              borderBottomRightRadius: "8px",
+              borderTopLeftRadius: "inherit",
+            }}
+          >
+            <Crown size={9} style={{ color: "oklch(0.10 0.02 55)" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "oklch(0.10 0.02 55)" }}>
+              {(track.plays ?? 0) >= 1000
+                ? `${Math.floor((track.plays ?? 0) / 1000)}K PLAYS`
+                : `${track.plays} PLAYS`}
+            </span>
+          </div>
+        )}
 
         {/* YOURS badge — top-left */}
         {track.isOwn && (

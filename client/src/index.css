@@ -304,6 +304,41 @@
     transform: translateY(-1px);
   }
 
+  /* ── Gold banner — tracks with 50+ plays earn a luminous gold border treatment ── */
+  .gold-banner {
+    border-color: oklch(0.78 0.16 78 / 0.65) !important;
+    box-shadow:
+      0 0 0 1px oklch(0.82 0.155 75 / 0.30),
+      0 0 18px 2px oklch(0.75 0.14 72 / 0.20),
+      inset 0 0 12px 0 oklch(0.82 0.155 75 / 0.04);
+  }
+  .gold-banner:hover {
+    border-color: oklch(0.84 0.18 80 / 0.80) !important;
+    box-shadow:
+      0 0 0 1px oklch(0.84 0.18 80 / 0.45),
+      0 0 28px 4px oklch(0.78 0.16 76 / 0.30),
+      inset 0 0 16px 0 oklch(0.82 0.155 75 / 0.06);
+    transform: translateY(-2px);
+  }
+  @keyframes goldShimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+  }
+  .gold-banner-ribbon {
+    background: linear-gradient(90deg,
+      oklch(0.62 0.14 60) 0%,
+      oklch(0.88 0.18 82) 40%,
+      oklch(0.96 0.14 88) 55%,
+      oklch(0.88 0.18 82) 70%,
+      oklch(0.62 0.14 60) 100%
+    );
+    background-size: 200% auto;
+    animation: goldShimmer 2.8s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
   /* ── Noise texture overlay ── */
   .noise-overlay::before {
     content: '';

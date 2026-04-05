@@ -2620,3 +2620,9 @@
 - [x] Warm radial vignette / ambient candlelight glow on homepage hero
 - [x] Parchment grain texture overlay on track cards and modals
 - [x] Amber-to-gold flame gradient on progress bar scrubber
+
+## Gold Banner for 50+ Play Tracks
+- [x] Confirm playCount field available in TrackCard props and song list data
+- [x] Add gold banner CSS (shimmer border, crown badge) for tracks with 50+ plays
+- [x] Apply gold banner to TrackCard component
+- [x] Apply gold banner to ArchivePage and ExplorePage song rows
