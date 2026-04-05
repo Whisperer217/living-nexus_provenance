@@ -208,7 +208,7 @@ export default function LexiconPage() {
   const categories: LexiconEntry["category"][] = ["identity", "record", "action", "space", "economy"];
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
+    <div className="min-h-screen" style={{ background: "oklch(0.10 0.022 55)" }}>
       {/* ── Header ── */}
       <div
         className="relative px-6 py-16 text-center border-b"

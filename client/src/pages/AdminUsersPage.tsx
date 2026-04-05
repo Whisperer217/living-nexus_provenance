@@ -518,7 +518,7 @@ function EmbedVideoTab() {
 
         {/* Progress log */}
         {progress.log.length > 0 && (
-          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "oklch(0.08 0.01 280)", border: `1px solid ${BORDER}` }}>
+          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "oklch(0.10 0.02 55)", border: `1px solid ${BORDER}` }}>
             {progress.log.map((line, i) => (
               <p key={i} style={{ color: line.startsWith("Error") ? "oklch(0.65 0.18 25)" : "oklch(0.65 0.18 145)" }}>
                 {line.startsWith("Error") ? "✗" : "✓"} {line}

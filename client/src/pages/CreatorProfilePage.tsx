@@ -563,7 +563,7 @@ export default function CreatorProfilePage() {
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.09 0.04 265)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.10 0.022 55)" }}>
       <div className="space-y-2 text-center">
         <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "oklch(0.75 0.18 85 / 0.3)" }} />
         <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>Loading profile...</p>
@@ -572,7 +572,7 @@ export default function CreatorProfilePage() {
   );
 
   if (!data) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.09 0.04 265)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.10 0.022 55)" }}>
       <div className="text-center">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Creator not found.</p>
         <Link href="/">
@@ -609,7 +609,7 @@ export default function CreatorProfilePage() {
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
+    <div className="min-h-screen" style={{ background: "oklch(0.10 0.022 55)" }}>
       <Helmet>
         <title>{profileTitle}</title>
         <meta name="description" content={profileDesc} />
@@ -717,7 +717,7 @@ export default function CreatorProfilePage() {
             style={{
               background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
               /* Ring: dark bg outline so avatar pops off the banner */
-              outline: "4px solid oklch(0.09 0.04 265)",
+              outline: "4px solid oklch(0.10 0.022 55)",
               boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.25)",
             }}
           >
@@ -751,7 +751,7 @@ export default function CreatorProfilePage() {
       <div
         className="w-full"
         style={{
-          background: "oklch(0.09 0.04 265)",
+          background: "oklch(0.10 0.022 55)",
           borderBottom: "1px solid oklch(0.15 0.015 280)",
         }}
       >

@@ -617,7 +617,7 @@ export default function ExplorePage() {
         {/* Mode toggle + controls */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           {/* Mode pills */}
-          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.04 270 / 40%)" }}>
+          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.04 270 / 40%)" }}>
             <button
               onClick={() => setMode("infinite")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${

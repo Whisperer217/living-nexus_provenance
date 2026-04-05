@@ -116,7 +116,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const pulseBadge = signalsBadge;
     const countBadge = jukeboxBadge || archiveBadge;
     const staticBadge = !pulseBadge && !jukeboxBadge && !archiveBadge && isLive ? item.badge : null;
-    const labelColor = item.goldLabel ? (active ? "#D4AF37" : "oklch(0.72 0.12 82 / 0.7)") : undefined;
+    const labelColor = item.goldLabel ? (active ? "#E8A830" : "oklch(0.72 0.13 72 / 0.7)") : undefined;
 
     return (
       <button
@@ -124,23 +124,23 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onClick={() => goTo(item.path)}
         title={item.label}
         className={`w-full flex items-center gap-3 transition-all duration-150 relative px-4 py-3 text-[14px]
-          ${active ? "text-white/95" : "text-white/40 hover:text-[oklch(0.82_0.155_175)] hover:bg-[oklch(0.82_0.155_175/0.06)]"}`}
-        style={active ? { background: "oklch(0.80 0.145 82 / 0.08)" } : {}}
+          ${active ? "text-white/95" : "text-white/40 hover:text-[oklch(0.82_0.155_75)] hover:bg-[oklch(0.82_0.155_75/0.06)]"}`}
+        style={active ? { background: "oklch(0.82 0.155 75 / 0.10)" } : {}}
       >
         <Icon size={16} style={{
-          color: active ? (item.goldLabel ? "#D4AF37" : "oklch(0.80 0.145 82)") : (item.goldLabel ? "oklch(0.72 0.12 82 / 0.6)" : "inherit"),
+          color: active ? (item.goldLabel ? "#E8A830" : "oklch(0.82 0.155 75)") : (item.goldLabel ? "oklch(0.72 0.13 72 / 0.7)" : "inherit"),
           opacity: active ? 1 : (item.goldLabel ? 1 : 0.6),
         }} />
         <span className="flex-1 text-left font-body" style={labelColor ? { color: labelColor } : undefined}>{item.label}</span>
         {pulseBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse" style={{ background: "oklch(0.65 0.22 25)", color: "white" }}>{pulseBadge}</span>}
-        {!pulseBadge && countBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center" style={isArchive ? { background: "oklch(0.84 0.155 85 / 0.18)", color: "#D4AF37", border: "1px solid oklch(0.84 0.155 85 / 0.3)" } : { background: "oklch(0.80 0.145 82)", color: "oklch(0.15 0.01 280)" }}>{countBadge}</span>}
-        {!pulseBadge && !countBadge && staticBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto" style={{ background: "oklch(0.65 0.18 160 / 0.20)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.30)" }}>{staticBadge}</span>}
+        {!pulseBadge && countBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center" style={isArchive ? { background: "oklch(0.82 0.155 75 / 0.18)", color: "#E8A830", border: "1px solid oklch(0.82 0.155 75 / 0.3)" } : { background: "oklch(0.82 0.155 75)", color: "oklch(0.12 0.02 55)" }}>{countBadge}</span>}
+        {!pulseBadge && !countBadge && staticBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto" style={{ background: "oklch(0.78 0.12 175 / 0.20)", color: "oklch(0.78 0.12 175)", border: "1px solid oklch(0.78 0.12 175 / 0.30)" }}>{staticBadge}</span>}
       </button>
     );
   };
 
   return (
-    <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.08_0.01_280)] relative">
+    <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.10_0.022_55)] relative">
 
       {/* ── Quick Reference Slider (all breakpoints) ── */}
       <QuickRefSlider open={qrOpen} onToggle={toggleQr} />
@@ -163,7 +163,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* Mobile header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-3 px-4 py-3
-        bg-[oklch(0.11_0.012_280)] border-b border-white/[0.07]">
+        bg-[oklch(0.125_0.028_52)] border-b border-[oklch(0.30_0.04_60/0.35)]">
         <button
           onClick={() => mobileMenuOpen ? setMobileMenuOpen(false) : openMobileMenu()}
           className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.06] transition-all"
@@ -192,24 +192,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
           <div
-            className="w-72 h-full bg-[oklch(0.11_0.012_280)] border-r border-white/[0.07] pt-16 overflow-y-auto flex flex-col"
+            className="w-72 h-full bg-[oklch(0.125_0.028_52)] border-r border-[oklch(0.30_0.04_60/0.35)] pt-16 overflow-y-auto flex flex-col"
             style={{ paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))" }}
             onClick={e => e.stopPropagation()}
           >
             {/* Mobile identity header */}
             {!authLoading && user && (
-              <div className="px-3 pt-3 pb-3 border-b border-white/[0.07]">
+              <div className="px-3 pt-3 pb-3 border-b border-[oklch(0.30_0.04_60/0.35)]">
                 <button
                   className="flex items-center gap-3 p-3 rounded-xl w-full text-left"
-                  style={{ background: "oklch(0.14 0.04 270 / 60%)" }}
+                  style={{ background: "oklch(0.148 0.030 50 / 60%)" }}
                   onClick={() => goTo("/profile")}
                 >
                   <div className="relative flex-shrink-0">
                     <div
                       className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold text-white overflow-hidden"
                       style={{
-                        background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
-                        boxShadow: user?.licenseStatus === "licensed" ? "0 0 0 2px #D4AF37, 0 0 14px oklch(0.80 0.145 82 / 0.4)" : "none",
+                        background: "linear-gradient(135deg, #8B5E1A, #C8954A)",
+                        boxShadow: user?.licenseStatus === "licensed" ? "0 0 0 2px #E8A830, 0 0 14px oklch(0.82 0.155 75 / 0.4)" : "none",
                       }}
                     >
                       {user?.profilePhotoUrl || state.profileAvatar
@@ -270,7 +270,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       key={item.label}
                       onClick={() => goTo(item.path)}
                       className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors"
-                      style={{ background: active ? "oklch(0.75 0.18 85 / 0.10)" : "transparent", color: active ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.02 280)" }}
+                      style={{ background: active ? "oklch(0.82 0.155 75 / 0.10)" : "transparent", color: active ? "oklch(0.82 0.155 75)" : "oklch(0.55 0.04 60)" }}
                     >
                       <Icon size={14} className="flex-shrink-0" />
                       <span className="text-[13px] font-body">{item.label}</span>
@@ -281,24 +281,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             {/* Mobile account footer */}
-            <div className="px-4 pb-4 border-t border-white/[0.07] pt-3">
+            <div className="px-4 pb-4 border-t border-[oklch(0.30_0.04_60/0.35)] pt-3">
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#D4AF37] hover:bg-[oklch(0.84_0.155_85/0.06)]"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#E8A830] hover:bg-[oklch(0.82_0.155_75/0.06)]"
               >
                 <Sparkles size={15} className="flex-shrink-0" />
                 <span className="text-[13px] font-body">What's New</span>
-                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.18</span>
+                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.82 0.155 75 / 0.12)", color: "oklch(0.75 0.13 72)" }}>v2.18</span>
               </button>
               {!authLoading && !user ? (
                 <a
                   href={getLoginUrl()}
                   className="flex items-center gap-3 p-3 rounded-xl w-full transition-all"
-                  style={{ background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+                  style={{ background: "oklch(0.82 0.155 75 / 0.12)", border: "1px solid oklch(0.82 0.155 75 / 0.25)" }}
                 >
-                  <LogIn size={16} style={{ color: "oklch(0.75 0.18 85)" }} />
+                  <LogIn size={16} style={{ color: "oklch(0.82 0.155 75)" }} />
                   <div>
-                    <div className="text-[13px] font-medium" style={{ color: "oklch(0.85 0.1 85)" }}>Sign In</div>
+                    <div className="text-[13px] font-medium" style={{ color: "oklch(0.88 0.12 75)" }}>Sign In</div>
                     <div className="text-[11px] text-white/35">Upload &amp; earn tips</div>
                   </div>
                 </a>

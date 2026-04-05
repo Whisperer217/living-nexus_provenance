@@ -80,7 +80,7 @@ function CollectionVerifyView({
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
+      <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
         <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "oklch(0.65 0.18 25)" }} />
         <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 25)" }}>
           Collection Not Found
@@ -387,7 +387,7 @@ function TrackVerifyView({
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
+      <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
         <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "oklch(0.65 0.18 25)" }} />
         <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 25)" }}>
           Not Verified
@@ -752,7 +752,7 @@ export default function VerifyPage() {
 
           {/* Empty state — no query yet */}
           {!queryWid && (
-            <div className="text-center py-12 rounded-2xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+            <div className="text-center py-12 rounded-2xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
               <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
               <p className="text-sm" style={{ color: "oklch(0.42 0.03 280)" }}>
                 Enter a Witness ID or Collection ID above to verify a registered work.

@@ -81,10 +81,10 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors"
         style={{
-          background: open ? "oklch(0.115 0.055 278)" : "oklch(0.10 0.04 268)",
+          background: open ? "oklch(0.125 0.028 52)" : "oklch(0.10 0.04 268)",
           color: "oklch(0.92 0.01 280)",
         }}
-        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.background = "oklch(0.115 0.055 278)"; }}
+        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.background = "oklch(0.125 0.028 52)"; }}
         onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.background = "oklch(0.10 0.04 268)"; }}
       >
         <span className="font-semibold text-sm pr-4" style={{ fontFamily: "'Cinzel', serif" }}>{q}</span>
@@ -93,7 +93,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
       {open && (
         <div
           className="px-5 pb-5 pt-3 text-sm leading-relaxed"
-          style={{ background: "oklch(0.115 0.055 278)", color: "oklch(0.75 0.02 280)" }}
+          style={{ background: "oklch(0.125 0.028 52)", color: "oklch(0.75 0.02 280)" }}
         >
           {a}
         </div>
@@ -130,13 +130,13 @@ export default function PricingCovenantPage() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: "oklch(0.09 0.04 265)", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
+      style={{ background: "oklch(0.10 0.022 55)", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
     >
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <div
         className="relative overflow-hidden"
         style={{
-          background: "linear-gradient(180deg, oklch(0.10 0.06 270) 0%, oklch(0.09 0.04 265) 100%)",
+          background: "linear-gradient(180deg, oklch(0.10 0.06 270) 0%, oklch(0.10 0.022 55) 100%)",
           borderBottom: "1px solid oklch(0.22 0.04 270 / 40%)",
         }}
       >
@@ -166,7 +166,7 @@ export default function PricingCovenantPage() {
           {/* Title */}
           <h1
             className="text-4xl md:text-5xl font-bold mb-6 leading-tight"
-            style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.96 0.008 270)" }}
+            style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.94 0.025 75)" }}
           >
             The Pricing Covenant
           </h1>
@@ -180,7 +180,7 @@ export default function PricingCovenantPage() {
           </p>
           <p
             className="text-base leading-relaxed mb-8 max-w-2xl mx-auto"
-            style={{ color: "oklch(0.65 0.02 280)" }}
+            style={{ color: "oklch(0.63 0.04 65)" }}
           >
             This platform was built to protect creators — their music, their testimony, their intellectual property.
             Charging for that protection is not extraction. It is restocking the aid bag so we can keep treating people.
@@ -225,14 +225,14 @@ export default function PricingCovenantPage() {
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.99] disabled:opacity-60"
                 style={{
                   background: "linear-gradient(135deg, oklch(0.80 0.145 82), oklch(0.72 0.18 75))",
-                  color: "oklch(0.08 0.01 280)",
+                  color: "oklch(0.10 0.02 55)",
                   boxShadow: "0 4px 24px oklch(0.80 0.145 82 / 0.35)",
                   fontFamily: "'Cinzel', serif",
                 }}
               >
                 {licenseMutation.isPending ? (
                   <>
-                    <div className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "oklch(0.08 0.01 280)", borderTopColor: "transparent" }} />
+                    <div className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "oklch(0.10 0.02 55)", borderTopColor: "transparent" }} />
                     Processing...
                   </>
                 ) : (
@@ -268,7 +268,7 @@ export default function PricingCovenantPage() {
               key={i}
               className="flex gap-4 rounded-xl p-5"
               style={{
-                background: "oklch(0.115 0.055 278)",
+                background: "oklch(0.125 0.028 52)",
                 border: "1px solid oklch(0.22 0.04 270 / 50%)",
               }}
             >
@@ -285,7 +285,7 @@ export default function PricingCovenantPage() {
                 >
                   {item.title}
                 </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "oklch(0.68 0.02 280)" }}>
+                <p className="text-sm leading-relaxed" style={{ color: "oklch(0.65 0.04 65)" }}>
                   {item.body}
                 </p>
               </div>
@@ -298,7 +298,7 @@ export default function PricingCovenantPage() {
       <div
         className="mx-4 md:mx-auto max-w-3xl rounded-2xl p-8 md:p-10 mb-14"
         style={{
-          background: "linear-gradient(135deg, oklch(0.115 0.055 278), oklch(0.10 0.04 268))",
+          background: "linear-gradient(135deg, oklch(0.125 0.028 52), oklch(0.10 0.04 268))",
           border: "1px solid oklch(0.80 0.145 82 / 0.18)",
         }}
       >
@@ -349,7 +349,7 @@ export default function PricingCovenantPage() {
         <div className="container max-w-3xl mx-auto px-4 pb-10 text-center">
           <p
             className="text-base mb-6 leading-relaxed"
-            style={{ color: "oklch(0.65 0.02 280)" }}
+            style={{ color: "oklch(0.63 0.04 65)" }}
           >
             You built something real. You built it with your hands, your voice, your testimony.
             <br />
@@ -361,7 +361,7 @@ export default function PricingCovenantPage() {
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.99] disabled:opacity-60"
             style={{
               background: "linear-gradient(135deg, oklch(0.80 0.145 82), oklch(0.72 0.18 75))",
-              color: "oklch(0.08 0.01 280)",
+              color: "oklch(0.10 0.02 55)",
               boxShadow: "0 4px 24px oklch(0.80 0.145 82 / 0.30)",
               fontFamily: "'Cinzel', serif",
             }}

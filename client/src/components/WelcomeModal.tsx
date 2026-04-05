@@ -175,7 +175,7 @@ export default function WelcomeModal() {
           ))}
 
           {/* Founder's Era CTA for new users */}
-          <div className="rounded-xl border px-4 py-3 mt-2" style={{ background: "oklch(0.115 0.055 278)", borderColor: "oklch(0.84 0.155 85 / 0.25)" }}>
+          <div className="rounded-xl border px-4 py-3 mt-2" style={{ background: "oklch(0.125 0.028 52)", borderColor: "oklch(0.84 0.155 85 / 0.25)" }}>
             <p className="text-xs font-bold mb-0.5" style={{ color: "oklch(0.84 0.155 85)" }}>✦ Founder's Era — Genesis Day, March 2026</p>
             <p className="text-xs" style={{ color: "#94A3B8" }}>
               Support the platform during its founding 90 days. Your name lives here forever.{" "}

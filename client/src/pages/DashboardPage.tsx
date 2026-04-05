@@ -388,7 +388,7 @@ export default function DashboardPage() {
             { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "var(--lnx-green)", delta: null },
             { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "oklch(0.55 0.18 160)", delta: (dashboardDeltas as any)?.newTips ?? 0 },
           ].map(({ label, value, icon: Icon, color, delta }) => (
-            <div key={label} className="rounded-xl p-4 relative" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+            <div key={label} className="rounded-xl p-4 relative" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4" style={{ color }} />
                 <span className="text-xs" style={{ color: "#E2E8F0" }}>{label}</span>
@@ -411,7 +411,7 @@ export default function DashboardPage() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           {/* License Status */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
             <div className="flex items-center gap-2 mb-3">
               <Shield className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
               <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Creator License</h3>
@@ -433,7 +433,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Song Slots */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
             <div className="flex items-center gap-2 mb-3">
               <Music className="w-4 h-4" style={{ color: "oklch(0.65 0.2 300)" }} />
               <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Song Slots</h3>
@@ -442,7 +442,7 @@ export default function DashboardPage() {
               <div className="flex justify-between text-xs mb-1" style={{ color: "#E2E8F0" }}>
                 <span>{slotsUsed} used</span><span>{slotsTotal} total</span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: "oklch(0.15 0.05 275)" }}>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: "oklch(0.158 0.030 50)" }}>
                 <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "var(--lnx-red)" : "oklch(0.65 0.2 300)" }} />
               </div>
             </div>
@@ -464,7 +464,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Tips / Stripe Connect */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="w-4 h-4" style={{ color: "var(--lnx-orange)" }} />
               <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Gift Payments</h3>
@@ -511,7 +511,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
           <button
             onClick={() => setActiveTab("songs")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
@@ -643,7 +643,7 @@ export default function DashboardPage() {
                 route="/dashboard#songs"
               />
             ) : !songs?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
                 <p className="text-sm mb-2" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>Upload your first piece and get your WID</p>
                 <p className="text-xs mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>Every work you upload receives a cryptographic Witness ID — your permanent proof of origin.</p>
@@ -654,7 +654,7 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {songs.map((song: any, idx: number) => (
-                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
                     {/* Top row: index + cover + title + actions */}
                     <div className="flex items-center gap-3">
                       <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#E2E8F0", minWidth: "20px" }}>{idx + 1}</span>
@@ -768,7 +768,7 @@ export default function DashboardPage() {
                 <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
               </div>
             ) : !activityEvents?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No activity yet.</p>
                 <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Gifts, comments, and witnesses on your songs will appear here.</p>
@@ -785,7 +785,7 @@ export default function DashboardPage() {
                       key={evt.id}
                       className="rounded-xl p-3 flex gap-3 items-start"
                       style={{
-                        background: isTip ? "oklch(0.84 0.155 85 / 0.06)" : "oklch(0.115 0.055 278)",
+                        background: isTip ? "oklch(0.84 0.155 85 / 0.06)" : "oklch(0.125 0.028 52)",
                         border: `1px solid ${isTip ? "oklch(0.84 0.155 85 / 0.25)" : "oklch(0.18 0.015 280)"}`,
                       }}
                     >
@@ -854,7 +854,7 @@ export default function DashboardPage() {
                 route="/dashboard#transforms"
               />
             ) : !transforms?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No AI transforms yet.</p>
                 <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Open any song page and use the AI Transform button to create a derivative.</p>
@@ -864,7 +864,7 @@ export default function DashboardPage() {
                 {transforms.map((t: any) => {
                   const { label, color } = transformStatusLabel(t.status);
                   return (
-                    <div key={t.id} className="rounded-xl p-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                    <div key={t.id} className="rounded-xl p-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
                       <div className="flex items-start gap-4">
                         {/* Status icon */}
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.11 0.025 270)" }}>
@@ -962,7 +962,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mx-auto" />
               </div>
             ) : !earningsData?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Gift className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.55 0.18 160)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No jukebox earnings yet.</p>
                 <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>When fans leave offerings in rooms where your songs play, your share appears here.</p>
@@ -970,7 +970,7 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {/* Summary */}
-                <div className="rounded-xl p-4 mb-2" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.55 0.18 160 / 0.3)" }}>
+                <div className="rounded-xl p-4 mb-2" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.55 0.18 160 / 0.3)" }}>
                   <div className="flex items-center gap-3">
                     <Gift className="w-5 h-5" style={{ color: "oklch(0.55 0.18 160)" }} />
                     <div>
@@ -985,7 +985,7 @@ export default function DashboardPage() {
                 </div>
                 {/* Per-room rows */}
                 {(earningsData as any[]).map((row: any) => (
-                  <div key={row.roomCode} className="rounded-xl p-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                  <div key={row.roomCode} className="rounded-xl p-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
@@ -1043,7 +1043,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mx-auto" />
               </div>
             ) : !myCollections?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <Library className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No collections yet.</p>
                 <p className="text-xs mb-4" style={{ color: "oklch(0.4 0.03 280)" }}>Upload an album or batch of songs to generate a Collection WID that binds all works into one origin record.</p>
@@ -1073,7 +1073,7 @@ export default function DashboardPage() {
                   <div
                     key={col.id}
                     className="rounded-xl p-5"
-                    style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}
+                    style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}
                   >
                     <div className="flex items-start gap-4">
                       {/* Cover art thumbnail */}
@@ -1211,7 +1211,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "oklch(0.75 0.15 260)", borderTopColor: "transparent" }} />
               </div>
             ) : !analyticsData ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
                 <LineChart className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.15 260)" }} />
                 <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>No analytics data available yet.</p>
               </div>
@@ -1225,7 +1225,7 @@ export default function DashboardPage() {
                     { label: "Gifts Received", value: analyticsData.totalGiftsReceived, icon: Gift, color: "oklch(0.55 0.18 160)" },
                     { label: "Downloads", value: analyticsData.totalDownloads, icon: Download, color: "oklch(0.65 0.18 220)" },
                   ].map(({ label, value, icon: Icon, color }) => (
-                    <div key={label} className="rounded-xl p-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                    <div key={label} className="rounded-xl p-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
                       <div className="flex items-center gap-2 mb-2">
                         <Icon className="w-4 h-4" style={{ color }} />
                         <span className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{label}</span>
@@ -1235,7 +1235,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
                 {/* 30-day activity trend */}
-                <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-4 h-4" style={{ color: "oklch(0.75 0.15 260)" }} />
                     <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>30-Day Activity Trend</h3>
@@ -1259,7 +1259,7 @@ export default function DashboardPage() {
                 </div>
                 {/* Plays by track */}
                 {analyticsData.playsByTrack.filter((t: { plays: number }) => t.plays > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                  <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
                     <div className="flex items-center gap-2 mb-4">
                       <Play className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
                       <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Plays by Track</h3>
@@ -1279,7 +1279,7 @@ export default function DashboardPage() {
                 )}
                 {/* Likes by track */}
                 {analyticsData.likesByTrack.filter((t: { likes: number }) => t.likes > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                  <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
                     <div className="flex items-center gap-2 mb-4">
                       <Heart className="w-4 h-4" style={{ color: "oklch(0.65 0.2 25)" }} />
                       <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Likes by Track</h3>
@@ -1299,7 +1299,7 @@ export default function DashboardPage() {
                 )}
                 {/* Gifts by track */}
                 {analyticsData.giftsByTrack.filter((t: { giftCount: number }) => t.giftCount > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                  <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
                     <div className="flex items-center gap-2 mb-4">
                       <Gift className="w-4 h-4" style={{ color: "oklch(0.55 0.18 160)" }} />
                       <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Gifts by Track</h3>
@@ -1406,14 +1406,14 @@ function ArchiveTab() {
   );
 
   if (error) return (
-    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.65 0.18 25 / 0.4)" }}>
+    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.65 0.18 25 / 0.4)" }}>
       <FileArchive className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--lnx-red)" }} />
       <p className="text-sm" style={{ color: "var(--lnx-red)" }}>{error}</p>
     </div>
   );
 
   if (!batchInfo || batchInfo.totalTracks === 0) return (
-    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
       <PackageOpen className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.7 0.15 220)" }} />
       <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No tracks in your archive yet.</p>
       <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Upload songs to build your archive. Each batch of up to 10 tracks can be downloaded as a ZIP with ID3-tagged audio and WID certificates.</p>
@@ -1454,7 +1454,7 @@ function ArchiveTab() {
           <div
             key={batch.index}
             className="rounded-xl overflow-hidden"
-            style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}
+            style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}
           >
             {/* Batch header row */}
             <div className="flex items-center justify-between gap-4 p-4">
@@ -1604,7 +1604,7 @@ function WIDCacheTab() {
       </div>
 
       {snapshots.length === 0 ? (
-        <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+        <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
           <Fingerprint className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
           <p className="text-sm mb-1" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>No witness records cached</p>
           <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
@@ -1621,7 +1621,7 @@ function WIDCacheTab() {
               <div
                 key={snap.wid}
                 className="flex items-start gap-4 p-4 rounded-xl"
-                style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.02 280)" }}
+                style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}
               >
                 {/* Medium icon */}
                 <div

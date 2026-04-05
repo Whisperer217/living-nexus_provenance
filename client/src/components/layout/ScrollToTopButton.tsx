@@ -51,7 +51,7 @@ export default function ScrollToTopButton() {
         justifyContent: "center",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
-        color: "oklch(0.08 0.01 280)",
+        color: "oklch(0.10 0.02 55)",
       }}
     >
       <ArrowUp size={15} strokeWidth={2.5} />

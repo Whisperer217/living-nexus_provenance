@@ -512,7 +512,7 @@ export default function ProfilePage() {
       <div
         className="w-full"
         style={{
-          background: "oklch(0.09 0.04 265)",
+          background: "oklch(0.10 0.022 55)",
           borderBottom: "1px solid oklch(0.14 0.012 280)",
         }}
       >
@@ -525,7 +525,7 @@ export default function ProfilePage() {
                 <div
                   className="w-36 h-36 rounded-2xl overflow-hidden bg-[oklch(0.14_0.013_280)] flex items-center justify-center"
                   style={{
-                    outline: "3px solid oklch(0.09 0.04 265)",
+                    outline: "3px solid oklch(0.10 0.022 55)",
                     border: "1.5px solid rgba(212,175,55,0.25)",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                   }}
@@ -696,7 +696,7 @@ export default function ProfilePage() {
                 value={profile?.aiDisclosure || "original"}
                 onChange={e => save({ aiDisclosure: e.target.value as "original" | "ai_assisted" | "ai_generated" })}
                 className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[oklch(0.14_0.013_280)] border border-white/[0.1] outline-none cursor-pointer hover:border-[#A78BFA]/50 transition-colors"
-                style={{ background: "oklch(0.14 0.013 280)" }}
+                style={{ background: "oklch(0.148 0.025 52)" }}
               >
                 <option value="original">Human-Made — No AI Used</option>
                 <option value="ai_assisted">AI-Assisted — Human + AI Tools</option>
@@ -905,7 +905,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/upload")}
                 className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
               >
                 <Upload size={11} /> Upload
               </button>
@@ -996,7 +996,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/archive")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
               >
                 Manage in Archive
               </button>
@@ -1072,7 +1072,7 @@ export default function ProfilePage() {
                 <button
                   onClick={() => markAllRead.mutate()}
                   className="text-[11px] font-body px-3 py-1 rounded-lg transition-all"
-                  style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+                  style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
                 >
                   Mark all read
                 </button>
@@ -1225,7 +1225,7 @@ export default function ProfilePage() {
                           disabled={!replyText.trim() || replyMutation.isPending}
                           className="text-[11px] font-body px-3 py-1 rounded-lg transition-all disabled:opacity-40"
                           style={{
-                            background: "oklch(0.22 0.06 280)",
+                            background: "oklch(0.220 0.038 48)",
                             border: "1px solid oklch(0.32 0.08 280)",
                             color: "#A78BFA",
                           }}
@@ -1251,7 +1251,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/field-notes")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
               >
                 Open Field Notes
               </button>
@@ -1431,21 +1431,21 @@ export default function ProfilePage() {
             <button
               onClick={() => navigate("/redeem")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.65 0.12 85)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.65 0.12 85)" }}
             >
               <Zap size={11} /> Redeem Code
             </button>
             <button
               onClick={() => navigate("/learn")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.03 280)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.03 280)" }}
             >
               <ScrollText size={11} /> WID Spec &amp; Lexicon
             </button>
             <button
               onClick={() => navigate("/founders")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.03 280)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.03 280)" }}
             >
               <Star size={11} /> Founders
             </button>

@@ -123,7 +123,7 @@ export default function PlaylistPage() {
       {!isLoading && items.length === 0 && (
         <div className="text-center py-20">
           <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-            style={{ background: "oklch(0.14 0.013 280)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            style={{ background: "oklch(0.148 0.025 52)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <BookmarkX size={28} style={{ color: "rgba(255,255,255,0.25)" }} />
           </div>
           <div className="font-heading text-[17px] text-white/40 mb-2">Your playlist is empty</div>
@@ -178,7 +178,7 @@ export default function PlaylistPage() {
 
                 {/* Cover art */}
                 <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
-                  style={{ background: "oklch(0.15 0.05 275)" }}>
+                  style={{ background: "oklch(0.158 0.030 50)" }}>
                   {song.coverArtUrl ? (
                     <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
                   ) : (

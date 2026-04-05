@@ -245,7 +245,7 @@ export function VersionHistoryModal({
                   onClick={handleUpload}
                   disabled={!uploadFile || uploading}
                   className="w-full"
-                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.09 0.04 265)", fontFamily: "'Cinzel', serif", fontWeight: 700 }}
+                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.10 0.022 55)", fontFamily: "'Cinzel', serif", fontWeight: 700 }}
                 >
                   {uploading ? (
                     <><Loader2 size={14} className="animate-spin mr-2" />Uploading & Witnessing…</>

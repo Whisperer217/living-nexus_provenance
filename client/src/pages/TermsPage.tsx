@@ -274,7 +274,7 @@ function Section({
       </div>
       <div
         className="space-y-4 text-sm leading-relaxed pl-6"
-        style={{ color: "oklch(0.68 0.02 280)", borderLeft: "1px solid oklch(0.2 0.015 280)" }}
+        style={{ color: "oklch(0.65 0.04 65)", borderLeft: "1px solid oklch(0.2 0.015 280)" }}
       >
         {children}
       </div>

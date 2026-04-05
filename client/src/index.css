@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — Divine Steel Design System
+   LIVING NEXUS — Lantern Light Design System
    Philosophy: Sacred Technology × Sovereign Witness
-   Colors: Deep Navy + Sovereign Gold + Orbital Teal
+   Colors: Charred Oak + Candlelight Amber + Warm Parchment
    Typography: Cinzel (proclamation) + DM Sans (clarity)
    Doctrine: Laminin/Logos v0.1 — He holds all things together
+   Aesthetic: 1930s reading lamp · lighthouse beam · candle in the dark
 ═══════════════════════════════════════════════════════════════════ */
 
 @import "tailwindcss";
@@ -63,76 +64,76 @@
 }
 
 :root {
-  /* ── Divine Steel Palette — Deep Navy + Sovereign Gold + Orbital Teal ── */
-  /* Mirrors the Living Nexus orbital sphere logo exactly */
-  --void:   oklch(0.095 0.045 265);  /* #0d0d1a deep navy — not pure black */
-  --void-2: oklch(0.115 0.05 268);   /* #13132b sidebar / nav */
-  --void-3: oklch(0.135 0.055 272);  /* #1a1a3e cards / surfaces */
-  --void-4: oklch(0.185 0.06 270);   /* elevated surfaces, modals */
+  /* ── Lantern Light Palette — Charred Oak + Candlelight Amber + Warm Parchment ── */
+  /* Like reading by candlelight in 1930s · lighthouse beam · lantern glow */
+  --void:   oklch(0.10 0.022 55);   /* charred oak — warm dark brown, not cold black */
+  --void-2: oklch(0.125 0.028 52);  /* aged timber — sidebar / nav */
+  --void-3: oklch(0.148 0.032 50);  /* dark parchment — cards / surfaces */
+  --void-4: oklch(0.195 0.038 48);  /* warm elevated surface — modals */
 
-  --gold:     oklch(0.80 0.145 82);  /* #c9a84c sovereign gold — exact spec */
-  --gold-dim: oklch(0.68 0.12 80);   /* muted gold for secondary uses */
-  --teal:     oklch(0.82 0.155 175); /* #00d4aa orbital teal — pulled from logo */
-  --teal-dim: oklch(0.68 0.12 172);  /* muted teal */
-  --violet:     oklch(0.50 0.20 295); /* #7b5ea7 gunmetal purple */
-  --violet-dim: oklch(0.65 0.16 292); /* soft purple */
+  --gold:     oklch(0.82 0.155 75);  /* candlelight amber — warm bright gold */
+  --gold-dim: oklch(0.70 0.13 72);   /* dimmed lantern — secondary gold */
+  --teal:     oklch(0.78 0.12 175);  /* sage green — softer accent, less electric */
+  --teal-dim: oklch(0.65 0.09 172);  /* muted sage */
+  --violet:     oklch(0.52 0.16 40); /* warm amber-rust — replaces cold purple */
+  --violet-dim: oklch(0.65 0.12 42); /* soft rust */
 
   /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
-  /* Gold = Authority / WID / Primary actions */
-  --lnx-gold:       #F5C451;   /* oklch(0.82 0.155 85) */
-  --lnx-gold-glow:  #FACC15;   /* brighter for glows */
-  --lnx-gold-muted: #B8962E;   /* secondary gold */
+  /* Gold = Authority / WID / Primary actions — candlelight amber */
+  --lnx-gold:       #E8A830;   /* warm amber gold */
+  --lnx-gold-glow:  #F5C451;   /* brighter candle flame for glows */
+  --lnx-gold-muted: #A07820;   /* aged gold */
   /* Green = Verified / Published / Alive */
-  --lnx-green:      #22C55E;   /* oklch(0.70 0.20 145) */
-  --lnx-green-soft: #4ADE80;
+  --lnx-green:      #4ADE80;
+  --lnx-green-soft: #86EFAC;
   /* Orange = Draft / In Progress / Transition */
-  --lnx-orange:     #F97316;   /* oklch(0.70 0.20 40) */
-  --lnx-orange-soft:#FB923C;
+  --lnx-orange:     #FB923C;
+  --lnx-orange-soft:#FDBA74;
   /* Red = Destructive / Warning / Irreversible */
-  --lnx-red:        #EF4444;   /* oklch(0.65 0.22 25) */
-  --lnx-red-soft:   #F87171;
-  /* Foundation — never changes */
-  --lnx-bg:         #05070D;
-  --lnx-bg-2:       #0B0F1A;
-  --lnx-bg-3:       #111827;
-  --lnx-text:       #E5E7EB;
-  --lnx-text-muted: #9CA3AF;
+  --lnx-red:        #F87171;
+  --lnx-red-soft:   #FCA5A5;
+  /* Foundation — warm dark backgrounds */
+  --lnx-bg:         #0D0A06;   /* charred wood — deepest bg */
+  --lnx-bg-2:       #141008;   /* dark oak */
+  --lnx-bg-3:       #1C160C;   /* aged timber */
+  --lnx-text:       #F5EDD6;   /* warm parchment white */
+  --lnx-text-muted: #B8A882;   /* aged paper — muted text */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
   --background: var(--void);
-  --foreground: oklch(0.96 0.008 270);  /* #f0f0ff soft blue-white — readable in daylight */
+  --foreground: oklch(0.94 0.025 75);  /* warm parchment — readable candlelight */
   --card: var(--void-3);
-  --card-foreground: oklch(0.96 0.008 270);
+  --card-foreground: oklch(0.94 0.025 75);
   --popover: var(--void-2);
-  --popover-foreground: oklch(0.96 0.008 270);
+  --popover-foreground: oklch(0.94 0.025 75);
   --primary: var(--gold);
-  --primary-foreground: oklch(0.08 0.01 280);
+  --primary-foreground: oklch(0.10 0.02 55);
   --secondary: var(--void-4);
-  --secondary-foreground: oklch(0.96 0.008 270);
+  --secondary-foreground: oklch(0.94 0.025 75);
   --muted: var(--void-3);
-  --muted-foreground: oklch(0.68 0.02 280); /* #a0a0c0 purple-grey — visible in ambient light */
+  --muted-foreground: oklch(0.65 0.04 65); /* warm grey-amber — visible in ambient light */
   --accent: var(--teal);
-  --accent-foreground: oklch(0.08 0.01 280);
+  --accent-foreground: oklch(0.10 0.02 55);
   --destructive: oklch(0.65 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.28 0.04 270 / 80%); /* #2a2a4a visible but not harsh */
-  --input: oklch(0.28 0.04 270 / 60%);
+  --border: oklch(0.30 0.04 60 / 70%); /* warm amber-brown border */
+  --input: oklch(0.30 0.04 60 / 50%);
   --ring: var(--gold);
 
   --chart-1: var(--gold);
   --chart-2: var(--teal);
-  --chart-3: oklch(0.65 0.18 160);
-  --chart-4: oklch(0.70 0.20 30);
+  --chart-3: oklch(0.65 0.18 145);
+  --chart-4: oklch(0.70 0.20 40);
   --chart-5: var(--violet-dim);
 
   --sidebar: var(--void-2);
-  --sidebar-foreground: oklch(0.96 0.008 270);
+  --sidebar-foreground: oklch(0.94 0.025 75);
   --sidebar-primary: var(--gold);
-  --sidebar-primary-foreground: oklch(0.08 0.01 280);
+  --sidebar-primary-foreground: oklch(0.10 0.02 55);
   --sidebar-accent: var(--void-4);
-  --sidebar-accent-foreground: oklch(0.96 0.008 270);
-  --sidebar-border: oklch(0.28 0.04 270 / 60%);
+  --sidebar-accent-foreground: oklch(0.94 0.025 75);
+  --sidebar-border: oklch(0.30 0.04 60 / 50%);
   --sidebar-ring: var(--gold);
 }
 
@@ -154,7 +155,7 @@
     font-weight: 450;
   }
   h1, h2, h3, h4, h5, h6 {
-    color: oklch(0.96 0.008 270); /* --text-primary always on headings */
+    color: oklch(0.94 0.025 75); /* warm parchment — headings in candlelight */
     letter-spacing: 0.02em;
   }
   button:not(:disabled),
@@ -166,11 +167,11 @@
     @apply cursor-pointer;
   }
 
-  /* Scrollbar styling */
+  /* Scrollbar styling — warm amber tint */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-thumb { background: oklch(1 0 0 / 15%); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: oklch(0.55 0.08 70 / 40%); border-radius: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  * { scrollbar-width: thin; scrollbar-color: oklch(1 0 0 / 15%) transparent; }
+  * { scrollbar-width: thin; scrollbar-color: oklch(0.55 0.08 70 / 40%) transparent; }
 }
 
 @layer components {
@@ -205,27 +206,27 @@
     font-family: 'DM Sans', sans-serif;
   }
 
-  /* ── Gold gradient text ── */
+  /* ── Gold gradient text — candlelight amber ── */
   .text-gold-gradient {
-    background: linear-gradient(135deg, #c9a84c, #e8c96a, #c9a84c);
+    background: linear-gradient(135deg, #B8820A, #E8A830, #F5C451, #E8A830, #B8820A);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-teal-gradient {
-    background: linear-gradient(135deg, #00d4aa, #00f0c0, #00d4aa);
+    background: linear-gradient(135deg, #4A9A7A, #6BBFA0, #4A9A7A);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-violet-gradient {
-    background: linear-gradient(135deg, #9b7fc4, #7b5ea7);
+    background: linear-gradient(135deg, #C87840, #E8A060);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* ── Ambient glow — soft radial halo behind key UI elements ── */
+  /* ── Ambient glow — candlelight halo behind key UI elements ── */
   .glow-gold {
     position: relative;
   }
@@ -234,7 +235,7 @@
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 18px 2px oklch(0.82 0.14 85 / 0.12), 0 0 6px 0px oklch(0.82 0.14 85 / 0.18);
+    box-shadow: 0 0 22px 4px oklch(0.82 0.155 75 / 0.22), 0 0 8px 1px oklch(0.82 0.155 75 / 0.30);
     pointer-events: none;
     z-index: 0;
   }
@@ -246,31 +247,32 @@
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 22px 3px oklch(0.55 0.22 295 / 0.14), 0 0 8px 0px oklch(0.68 0.18 295 / 0.20);
+    box-shadow: 0 0 22px 3px oklch(0.70 0.14 55 / 0.22), 0 0 8px 1px oklch(0.75 0.12 60 / 0.28);
     pointer-events: none;
     z-index: 0;
   }
 
-  /* ── Hero radial gradient — dark center bleeding to deep purple/blue edge ── */
+  /* ── Hero radial gradient — warm lantern center bleeding to charred oak edge ── */
   .hero-radial {
     background:
       radial-gradient(ellipse 80% 60% at 50% 40%,
-        oklch(0.09 0.04 265 / 0.0) 0%,
-        oklch(0.09 0.04 265 / 0.6) 45%,
-        oklch(0.09 0.06 280 / 0.85) 70%,
-        oklch(0.07 0.08 290 / 1.0) 100%
+        oklch(0.10 0.022 55 / 0.0) 0%,
+        oklch(0.10 0.022 55 / 0.6) 45%,
+        oklch(0.09 0.025 50 / 0.85) 70%,
+        oklch(0.08 0.028 45 / 1.0) 100%
       );
     pointer-events: none;
   }
 
-  /* ── Player bar ambient glow ── */
+  /* ── Player bar ambient glow — warm amber lantern uplight ── */
   .player-glow {
     box-shadow:
-      0 -4px 32px oklch(0.82 0.155 175 / 0.08),
-      0 -1px 8px oklch(0.80 0.145 82 / 0.10);
+      0 -4px 32px oklch(0.82 0.155 75 / 0.18),
+      0 -1px 8px oklch(0.82 0.155 75 / 0.25),
+      0 -8px 48px oklch(0.70 0.13 72 / 0.10);
   }
 
-  /* ── Teal glow for teal-accented elements ── */
+  /* ── Sage glow for teal-accented elements ── */
   .glow-teal {
     position: relative;
   }
@@ -279,26 +281,26 @@
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 18px 2px oklch(0.82 0.155 175 / 0.18), 0 0 6px 0px oklch(0.82 0.155 175 / 0.25);
+    box-shadow: 0 0 18px 2px oklch(0.78 0.12 175 / 0.20), 0 0 6px 0px oklch(0.78 0.12 175 / 0.28);
     pointer-events: none;
     z-index: 0;
   }
 
-  /* ── WID badge ambient glow — luminous gold/amber ── */
+  /* ── WID badge ambient glow — candlelight amber halo ── */
   .wid-glow {
     box-shadow:
-      0 0 14px 3px oklch(0.84 0.155 85 / 0.45),
-      0 0 6px 1px oklch(0.84 0.155 85 / 0.30),
-      0 0 28px 6px oklch(0.68 0.18 295 / 0.20);
-    border-color: oklch(0.84 0.155 85 / 0.55) !important;
+      0 0 16px 4px oklch(0.82 0.155 75 / 0.55),
+      0 0 6px 1px oklch(0.82 0.155 75 / 0.40),
+      0 0 32px 8px oklch(0.70 0.13 72 / 0.25);
+    border-color: oklch(0.82 0.155 75 / 0.65) !important;
   }
 
-  /* ── Track card ambient glow on hover ── */
+  /* ── Track card ambient glow on hover — warm lantern lift ── */
   .track-card-glow {
     transition: box-shadow 0.25s ease, transform 0.2s ease;
   }
   .track-card-glow:hover {
-    box-shadow: 0 4px 28px oklch(0.55 0.22 295 / 0.18), 0 2px 10px oklch(0.82 0.14 85 / 0.10);
+    box-shadow: 0 4px 28px oklch(0.70 0.13 72 / 0.22), 0 2px 10px oklch(0.82 0.155 75 / 0.18);
     transform: translateY(-1px);
   }
 
@@ -313,10 +315,10 @@
     opacity: 0.35;
   }
 
-  /* ── Gold divider line ── */
+  /* ── Gold divider line — candlelight amber ── */
   .gold-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, oklch(0.82 0.14 85 / 40%), transparent);
+    background: linear-gradient(90deg, transparent, oklch(0.82 0.155 75 / 45%), transparent);
   }
 
   /* ── Live wave animation ── */
@@ -343,13 +345,13 @@
   }
   .live-wave.paused span { animation-play-state: paused; }
 
-  /* ── Pulse dot ── */
+  /* ── Pulse dot — warm amber live indicator ── */
   .pulse-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: oklch(0.65 0.18 160);
-    box-shadow: 0 0 8px oklch(0.65 0.18 160);
+    background: oklch(0.82 0.155 75);
+    box-shadow: 0 0 10px oklch(0.82 0.155 75 / 0.7);
     animation: pulseDot 1.5s ease-in-out infinite;
   }
   @keyframes pulseDot {
@@ -366,13 +368,13 @@
     animation: fadeUp 0.35s ease both;
   }
 
-  /* ── Gold shimmer ── */
+  /* ── Gold shimmer — candlelight flicker ── */
   @keyframes goldShimmer {
     0% { background-position: -200% center; }
     100% { background-position: 200% center; }
   }
   .gold-shimmer {
-    background: linear-gradient(90deg, #c9a84c, #c9a84c, #e8c96a, #c9a84c, #c9a84c);
+    background: linear-gradient(90deg, #B8820A, #E8A830, #F5C451, #FADA7A, #F5C451, #E8A830, #B8820A);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -380,50 +382,50 @@
     animation: goldShimmer 4s linear infinite;
   }
 
-  /* ── Animated gold progress glow ── */
+  /* ── Animated gold progress glow — candlelight pulse ── */
   @keyframes progressGlow {
-    0%, 100% { box-shadow: 0 0 4px 1px oklch(0.80 0.145 82 / 0.5); }
-    50% { box-shadow: 0 0 8px 3px oklch(0.80 0.145 82 / 0.8); }
+    0%, 100% { box-shadow: 0 0 5px 2px oklch(0.82 0.155 75 / 0.55); }
+    50% { box-shadow: 0 0 10px 4px oklch(0.82 0.155 75 / 0.85); }
   }
   .progress-playhead {
     animation: progressGlow 1.8s ease-in-out infinite;
   }
 
-  /* ── Cosmic cathedral background — deep navy with gold/teal radial glow ── */
+  /* ── Lantern cathedral background — warm charred oak with amber radial glow ── */
   .cosmic-bg {
     background:
       radial-gradient(ellipse 80% 50% at 50% 0%,
-        oklch(0.25 0.08 175 / 0.18) 0%,
-        oklch(0.18 0.06 200 / 0.12) 40%,
+        oklch(0.35 0.08 75 / 0.15) 0%,
+        oklch(0.22 0.05 65 / 0.10) 40%,
         transparent 70%
       ),
       radial-gradient(ellipse 60% 40% at 50% 100%,
-        oklch(0.20 0.06 82 / 0.12) 0%,
-        oklch(0.14 0.04 90 / 0.08) 50%,
+        oklch(0.25 0.06 72 / 0.12) 0%,
+        oklch(0.16 0.04 60 / 0.08) 50%,
         transparent 80%
       ),
-      oklch(0.095 0.045 265);
+      oklch(0.10 0.022 55);
   }
 
-  /* ── CTA button glow ── */
+  /* ── CTA button glow — lantern warmth ── */
   .btn-gold-glow {
-    box-shadow: 0 0 0 0 oklch(0.84 0.155 85 / 0);
+    box-shadow: 0 0 0 0 oklch(0.82 0.155 75 / 0);
     transition: box-shadow 0.25s ease, transform 0.15s ease;
   }
   .btn-gold-glow:hover {
     box-shadow:
-      0 0 18px 4px oklch(0.84 0.155 85 / 0.35),
-      0 4px 16px oklch(0.84 0.155 85 / 0.20);
+      0 0 20px 5px oklch(0.82 0.155 75 / 0.40),
+      0 4px 18px oklch(0.82 0.155 75 / 0.25);
     transform: translateY(-1px);
   }
   .btn-violet-glow {
-    box-shadow: 0 0 0 0 oklch(0.55 0.22 295 / 0);
+    box-shadow: 0 0 0 0 oklch(0.70 0.14 55 / 0);
     transition: box-shadow 0.25s ease, transform 0.15s ease;
   }
   .btn-violet-glow:hover {
     box-shadow:
-      0 0 18px 4px oklch(0.55 0.22 295 / 0.35),
-      0 4px 16px oklch(0.68 0.18 295 / 0.20);
+      0 0 18px 4px oklch(0.70 0.14 55 / 0.35),
+      0 4px 16px oklch(0.75 0.12 60 / 0.22);
     transform: translateY(-1px);
   }
 
@@ -506,7 +508,7 @@
   .surface-base     { background: var(--lnx-bg); }
   .surface-raised   { background: var(--lnx-bg-2); }
   .surface-elevated { background: var(--lnx-bg-3); }
-  .surface-modal    { background: oklch(0.185 0.06 270); backdrop-filter: blur(12px); }
+  .surface-modal    { background: oklch(0.195 0.038 48); backdrop-filter: blur(12px); }
 
   /* ── SEMANTIC TEXT COLORS — use these instead of hardcoded values ── */
   .text-lnx-gold   { color: var(--lnx-gold); }
@@ -515,11 +517,11 @@
   .text-lnx-red    { color: var(--lnx-red); }
   .text-lnx-muted  { color: var(--lnx-text-muted); }
 
-  /* ── Genre pill ── */
+  /* ── Genre pill — warm amber ── */
   .genre-pill {
-    border: 1px solid oklch(0.84 0.155 85 / 0.30);
-    color: oklch(0.90 0.04 280);
-    background: oklch(0.84 0.155 85 / 0.07);
+    border: 1px solid oklch(0.82 0.155 75 / 0.30);
+    color: oklch(0.88 0.04 70);
+    background: oklch(0.82 0.155 75 / 0.08);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.6875rem;
     padding: 0.125rem 0.625rem;
@@ -527,9 +529,9 @@
     transition: border-color 0.2s, color 0.2s, background 0.2s;
   }
   .genre-pill:hover, .genre-pill.active {
-    border-color: oklch(0.84 0.155 85 / 0.65);
-    color: oklch(0.84 0.155 85);
-    background: oklch(0.84 0.155 85 / 0.12);
+    border-color: oklch(0.82 0.155 75 / 0.65);
+    color: oklch(0.82 0.155 75);
+    background: oklch(0.82 0.155 75 / 0.14);
   }
 }
 
@@ -554,32 +556,31 @@ input[type="range"].volume-slider-vertical::-webkit-slider-runnable-track {
   border-radius: 9999px;
 }
 
-/* Webkit thumb */
+//* Webkit thumb */
 input[type="range"].volume-slider-vertical::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: oklch(0.80 0.145 82);
-  border: 2px solid oklch(0.97 0.03 85 / 0.9);
+  background: oklch(0.82 0.155 75);
+  border: 2px solid oklch(0.94 0.04 75 / 0.9);
   margin-left: -4px;
   cursor: pointer;
-  box-shadow: 0 0 6px oklch(0.80 0.145 82 / 0.5);
+  box-shadow: 0 0 8px oklch(0.82 0.155 75 / 0.6);
 }
-
 /* Firefox */
 input[type="range"].volume-slider-vertical::-moz-range-track {
   width: 6px;
   border-radius: 9999px;
-  background: oklch(0.28 0.04 270 / 80%);
+  background: oklch(0.28 0.04 60 / 80%);
 }
 input[type="range"].volume-slider-vertical::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: oklch(0.80 0.145 82);
-  border: 2px solid oklch(0.97 0.03 85 / 0.9);
+  background: oklch(0.82 0.155 75);
+  border: 2px solid oklch(0.94 0.04 75 / 0.9);
   cursor: pointer;
 }
 

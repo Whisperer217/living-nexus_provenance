@@ -188,7 +188,7 @@ function TrackCardUI({
     <div
       className="rounded-2xl overflow-hidden transition-all"
       style={{
-        background: "oklch(0.115 0.055 278)",
+        background: "oklch(0.125 0.028 52)",
         border: `1px solid ${card.audioStatus === "done" ? "oklch(0.65 0.18 160 / 0.5)" : "oklch(0.22 0.02 280)"}`,
       }}
     >
@@ -638,7 +638,7 @@ export default function BatchUploadPage() {
             {collectionResult.trackCount} track{collectionResult.trackCount > 1 ? "s" : ""} registered to the Living Nexus Archive
           </p>
         </div>
-        <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.22 0.02 280)" }}>
+        <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.22 0.02 280)" }}>
           <div>
             <p className="text-[10px] font-heading tracking-widest uppercase mb-1" style={{ color: "oklch(0.72 0.04 280)" }}>
               Collection WID
@@ -752,7 +752,7 @@ export default function BatchUploadPage() {
       {/* Album info */}
       <div
         className="rounded-2xl p-4 space-y-3"
-        style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.22 0.02 280)" }}
+        style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.22 0.02 280)" }}
       >
         <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.72 0.04 280)" }}>
           Collection / Album
@@ -824,7 +824,7 @@ export default function BatchUploadPage() {
       {/* Batch fill panel */}
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.22 0.02 280)" }}
+        style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.22 0.02 280)" }}
       >
         <button
           onClick={() => setBatchFillOpen(o => !o)}

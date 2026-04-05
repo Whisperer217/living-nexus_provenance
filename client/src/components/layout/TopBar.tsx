@@ -175,21 +175,21 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         className="fixed top-0 left-0 right-0 z-50 flex items-center gap-0"
         style={{
           height: "52px",
-          background: "oklch(0.08 0.015 280 / 0.97)",
-          borderBottom: "1px solid oklch(0.28 0.04 270 / 50%)",
+          background: "oklch(0.115 0.025 52 / 0.97)",
+          borderBottom: "1px solid oklch(0.30 0.04 60 / 45%)",
           backdropFilter: "blur(16px)",
         }}
       >
         {/* Logo zone */}
         <div
           className="flex items-center gap-2.5 px-4 flex-shrink-0 cursor-pointer"
-          style={{ borderRight: "1px solid oklch(0.28 0.04 270 / 40%)", height: "100%", paddingRight: "16px" }}
+          style={{ borderRight: "1px solid oklch(0.30 0.04 60 / 35%)", height: "100%", paddingRight: "16px" }}
           onClick={() => goTo("/")}
         >
           <img src={LOGO_URL} alt="Living Nexus" className="w-8 h-8 object-contain" />
           <div>
             <div className="font-display text-sm gold-shimmer leading-tight">Living Nexus</div>
-            <div className="text-[8px] tracking-widest font-heading" style={{ color: "oklch(0.55 0.04 280)" }}>CREATIVE PROVENANCE</div>
+            <div className="text-[8px] tracking-widest font-heading" style={{ color: "oklch(0.58 0.06 65)" }}>CREATIVE PROVENANCE</div>
           </div>
         </div>
 
@@ -211,19 +211,19 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 style={{
                   fontSize: "12px",
                   fontWeight: 500,
-                  background: active ? "oklch(0.80 0.145 82 / 0.10)" : "transparent",
-                  border: active ? "1px solid oklch(0.80 0.145 82 / 0.20)" : "1px solid transparent",
-                  color: active ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.03 280)",
+                  background: active ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                  border: active ? "1px solid oklch(0.82 0.155 75 / 0.22)" : "1px solid transparent",
+                  color: active ? "oklch(0.88 0.14 75)" : "oklch(0.62 0.04 65)",
                 }}
               >
-                <item.icon size={13} style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit" }} />
+                <item.icon size={13} style={{ color: active ? "oklch(0.82 0.155 75)" : "inherit" }} />
                 <span>{item.label}</span>
                 {isLive && (
                   <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#ef4444", animation: "pulse 1.5s infinite" }} />
                 )}
                 {archiveBadge && (
                   <span className="text-[9px] font-bold px-1 py-0.5 rounded-full"
-                    style={{ background: "oklch(0.84 0.155 85 / 0.18)", color: "#D4AF37" }}>
+                    style={{ background: "oklch(0.82 0.155 75 / 0.18)", color: "#E8A830" }}>
                     {archiveBadge}
                   </span>
                 )}
@@ -235,7 +235,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         {/* Right zone */}
         <div
           className="flex items-center gap-2 px-4 flex-shrink-0"
-          style={{ borderLeft: "1px solid oklch(0.28 0.04 270 / 40%)", height: "100%" }}
+          style={{ borderLeft: "1px solid oklch(0.30 0.04 60 / 35%)", height: "100%" }}
         >
           {/* Prompt Generator quick button */}
           {user && userId && (
@@ -245,8 +245,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               style={{
                 fontSize: "11px", fontWeight: 600,
                 background: "transparent",
-                border: "1px solid oklch(0.28 0.04 270 / 60%)",
-                color: "oklch(0.55 0.03 280)",
+                border: "1px solid oklch(0.30 0.04 60 / 50%)",
+                color: "oklch(0.62 0.04 65)",
               }}
             >
               <Zap size={12} />
@@ -260,7 +260,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
             style={{
               fontSize: "11px", fontWeight: 700,
-              background: "#D4AF37",
+              background: "#E8A830",
               color: "#000",
               border: "none",
             }}
@@ -274,7 +274,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             <button
               onClick={() => goTo("/notifications")}
               className="relative p-2 rounded-lg transition-all"
-              style={{ color: "oklch(0.55 0.03 280)" }}
+              style={{ color: "oklch(0.62 0.04 65)" }}
             >
               <Bell size={16} />
               {(unreadCount as number) > 0 && (
@@ -296,8 +296,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden"
                 style={{
-                  background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
-                  boxShadow: hasWid ? "0 0 0 2px #D4AF37, 0 0 10px oklch(0.80 0.145 82 / 0.3)" : "none",
+                  background: "linear-gradient(135deg, #8B5E1A, #C8954A)",
+                  boxShadow: hasWid ? "0 0 0 2px #E8A830, 0 0 10px oklch(0.82 0.155 75 / 0.35)" : "none",
                 }}
               >
                 {avatar
@@ -306,7 +306,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 }
               </div>
               {hasWid && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: "#D4AF37" }}>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: "#E8A830" }}>
                   <CheckCircle2 size={8} className="text-black" />
                 </div>
               )}
@@ -317,9 +317,9 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
               style={{
                 fontSize: "11px", fontWeight: 600,
-                background: "oklch(0.75 0.18 85 / 0.12)",
-                border: "1px solid oklch(0.75 0.18 85 / 0.25)",
-                color: "oklch(0.85 0.1 85)",
+                background: "oklch(0.82 0.155 75 / 0.12)",
+                border: "1px solid oklch(0.82 0.155 75 / 0.25)",
+                color: "oklch(0.88 0.12 75)",
               }}
             >
               <LogIn size={12} />
@@ -331,7 +331,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           <button
             onClick={() => setDrawerOpen(o => !o)}
             className="flex flex-col gap-1 p-2 rounded-lg transition-all"
-            style={{ color: drawerOpen ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.03 280)" }}
+            style={{ color: drawerOpen ? "oklch(0.88 0.14 75)" : "oklch(0.62 0.04 65)" }}
             aria-label="Open navigation menu"
           >
             {drawerOpen ? <X size={18} /> : <Menu size={18} />}
@@ -436,7 +436,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                         }
                       </div>
                       {hasWid && (
-                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#D4AF37" }}>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#E8A830" }}>
                           <CheckCircle2 size={9} className="text-black" />
                         </div>
                       )}

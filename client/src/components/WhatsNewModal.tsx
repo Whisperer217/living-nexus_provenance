@@ -384,7 +384,7 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
                       className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black"
                       style={{
                         background: "oklch(0.84 0.155 85)",
-                        color: "oklch(0.08 0.01 280)",
+                        color: "oklch(0.10 0.02 55)",
                         fontFamily: "'Orbitron', sans-serif",
                       }}
                     >
@@ -427,7 +427,7 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
             className="font-semibold text-xs px-5 h-8 flex-shrink-0"
             style={{
               background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.14 75))",
-              color: "oklch(0.08 0.01 280)",
+              color: "oklch(0.10 0.02 55)",
             }}
           >
             Got it

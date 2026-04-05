@@ -333,7 +333,7 @@ export default function ManifestoPage() {
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
               style={{
                 background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.14 75))",
-                color: "oklch(0.08 0.01 280)",
+                color: "oklch(0.10 0.02 55)",
               }}
             >
               <Music size={14} /> Upload Your Music

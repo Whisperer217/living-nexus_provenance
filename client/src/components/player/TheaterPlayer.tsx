@@ -348,7 +348,7 @@ export default function TheaterPlayer() {
                 <div className="min-w-0 flex-1 mr-4">
                   <h2
                     className="text-xl font-bold truncate mb-0.5"
-                    style={{ color: "oklch(0.96 0.008 270)", fontFamily: "'Cinzel', serif" }}
+                    style={{ color: "oklch(0.94 0.025 75)", fontFamily: "'Cinzel', serif" }}
                   >
                     {currentTrack?.title || "No track selected"}
                   </h2>
@@ -414,7 +414,7 @@ export default function TheaterPlayer() {
 
               {/* Progress bar */}
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "oklch(0.68 0.02 280)" }}>
+                <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "oklch(0.65 0.04 65)" }}>
                   {fmtTime(state.currentTime)}
                 </span>
                 <div
@@ -426,7 +426,7 @@ export default function TheaterPlayer() {
                     className="h-full rounded-full relative"
                     style={{
                       width: `${progress}%`,
-                      background: "linear-gradient(90deg, oklch(0.50 0.20 295), oklch(0.80 0.145 82))",
+                      background: "linear-gradient(90deg, oklch(0.55 0.16 45), oklch(0.80 0.145 82))",
                     }}
                   >
                     {state.isPlaying && (
@@ -437,7 +437,7 @@ export default function TheaterPlayer() {
                     )}
                   </div>
                 </div>
-                <span className="text-[11px] w-8 tabular-nums" style={{ color: "oklch(0.68 0.02 280)" }}>
+                <span className="text-[11px] w-8 tabular-nums" style={{ color: "oklch(0.65 0.04 65)" }}>
                   {fmtTime(state.duration)}
                 </span>
               </div>
@@ -457,7 +457,7 @@ export default function TheaterPlayer() {
                   <button
                     onClick={togglePlay}
                     className="w-12 h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                    style={{ background: "oklch(0.96 0.008 270)", color: "oklch(0.08 0.01 280)" }}
+                    style={{ background: "oklch(0.94 0.025 75)", color: "oklch(0.10 0.02 55)" }}
                   >
                     {state.isPlaying
                       ? <Pause size={20} fill="currentColor" />
@@ -480,9 +480,9 @@ export default function TheaterPlayer() {
                   <button
                     onClick={toggleMute}
                     className="p-1 transition-colors"
-                    style={{ color: "oklch(0.68 0.02 280)" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.96 0.008 270)")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
+                    style={{ color: "oklch(0.65 0.04 65)" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.94 0.025 75)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.65 0.04 65)")}
                   >
                     {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                   </button>
@@ -495,7 +495,7 @@ export default function TheaterPlayer() {
                       className="h-full rounded-full"
                       style={{
                         width: state.isMuted ? "0%" : `${state.volume * 100}%`,
-                        background: "oklch(0.68 0.02 280)",
+                        background: "oklch(0.65 0.04 65)",
                       }}
                     />
                   </div>
@@ -734,7 +734,7 @@ export default function TheaterPlayer() {
                       onClick={submitComment}
                       disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                       className="px-3 py-2 rounded-lg text-[12px] font-semibold transition-colors disabled:opacity-40"
-                      style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.08 0.01 280)" }}
+                      style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.10 0.02 55)" }}
                     >
                       Post
                     </button>
@@ -750,11 +750,11 @@ export default function TheaterPlayer() {
             className="absolute top-4 right-4 rounded-full p-2 transition-colors z-10"
             style={{
               background: "oklch(0.12 0.04 270 / 80%)",
-              color: "oklch(0.68 0.02 280)",
+              color: "oklch(0.65 0.04 65)",
               border: "1px solid oklch(0.22 0.04 270)",
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.96 0.008 270)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.68 0.02 280)")}
+            onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.94 0.025 75)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.65 0.04 65)")}
             title="Close Theater"
           >
             <X size={18} />
@@ -766,7 +766,7 @@ export default function TheaterPlayer() {
             className="absolute bottom-[220px] left-1/2 -translate-x-1/2 rounded-full px-4 py-1.5 text-[11px] flex items-center gap-1.5 transition-colors md:hidden"
             style={{
               background: "oklch(0.12 0.04 270 / 80%)",
-              color: "oklch(0.68 0.02 280)",
+              color: "oklch(0.65 0.04 65)",
               border: "1px solid oklch(0.22 0.04 270)",
             }}
           >

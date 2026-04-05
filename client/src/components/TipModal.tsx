@@ -144,7 +144,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
                   key={tag}
                   className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
                   style={{
-                    background: "oklch(0.18 0.05 275)",
+                    background: "oklch(0.195 0.035 48)",
                     color: "oklch(0.70 0.08 280)",
                     border: "1px solid oklch(0.28 0.05 275)",
                   }}

@@ -255,7 +255,7 @@ function WIDTrustLayer() {
                       boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.5)",
                     }}
                   >
-                    <Play size={20} fill="oklch(0.08 0.01 280)" style={{ color: "oklch(0.08 0.01 280)", marginLeft: "2px" }} />
+                    <Play size={20} fill="oklch(0.10 0.02 55)" style={{ color: "oklch(0.10 0.02 55)", marginLeft: "2px" }} />
                   </div>
                 </button>
 
@@ -384,7 +384,7 @@ function HorizontalTrackGrid({
           <div
             key={i}
             className="flex-shrink-0 rounded-2xl animate-pulse"
-            style={{ width: "160px", height: "220px", background: "oklch(0.115 0.055 278)" }}
+            style={{ width: "160px", height: "220px", background: "oklch(0.125 0.028 52)" }}
           />
         ))}
       </div>

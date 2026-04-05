@@ -270,7 +270,7 @@ function SongBrowserModal({
     >
       <div
         className="w-full max-w-lg rounded-2xl overflow-hidden border border-white/[0.1]"
-        style={{ background: "oklch(0.115 0.055 278)", maxHeight: "92vh", display: "flex", flexDirection: "column" }}
+        style={{ background: "oklch(0.125 0.028 52)", maxHeight: "92vh", display: "flex", flexDirection: "column" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08] flex-shrink-0">
@@ -549,7 +549,7 @@ function OfferingModal({
     >
       <div
         className="w-full max-w-sm rounded-2xl overflow-hidden border border-white/[0.1] p-6"
-        style={{ background: "oklch(0.115 0.055 278)" }}
+        style={{ background: "oklch(0.125 0.028 52)" }}
       >
         <div className="text-center mb-5">
           <div className="text-3xl mb-2">🎶</div>
@@ -634,7 +634,7 @@ function NowPlayingPanel({
 
   return (
     <div className="rounded-2xl p-5 mb-4 border border-[#D4AF37]/20 relative overflow-hidden"
-      style={{ background: "linear-gradient(135deg, oklch(0.12 0.06 280), oklch(0.10 0.04 270))" }}>
+      style={{ background: "linear-gradient(135deg, oklch(0.140 0.030 50), oklch(0.10 0.04 270))" }}>
       {/* Glow */}
       <div className="absolute inset-0 opacity-10 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 50% 0%, #D4AF37 0%, transparent 70%)" }} />
@@ -647,7 +647,7 @@ function NowPlayingPanel({
       <div className="flex gap-4 items-start">
         {/* Cover art */}
         <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-white/[0.08]"
-          style={{ background: "oklch(0.15 0.04 280)" }}>
+          style={{ background: "oklch(0.158 0.030 50)" }}>
           {item.songCoverArtUrl
             ? <img src={item.songCoverArtUrl} alt="" className="w-full h-full object-cover" />
             : <Music2 size={24} className="text-white/65" />}
@@ -714,7 +714,7 @@ function QueuePanel({ items }: { items: any[] }) {
             className="flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.04] last:border-0">
             <span className="text-[11px] text-white/60 font-body w-4 text-center flex-shrink-0">{idx + 1}</span>
             <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
-              style={{ background: "oklch(0.15 0.04 280)" }}>
+              style={{ background: "oklch(0.158 0.030 50)" }}>
               {item.songCoverArtUrl
                 ? <img src={item.songCoverArtUrl} alt="" className="w-full h-full object-cover" />
                 : <Music2 size={12} className="text-white/65" />}
@@ -985,7 +985,7 @@ export default function TogetherPage() {
         {!state.room && (
           <div className="rounded-2xl p-6 mb-6 border"
             style={{
-              background: "linear-gradient(135deg, oklch(0.115 0.055 278), oklch(0.11 0.05 270))",
+              background: "linear-gradient(135deg, oklch(0.125 0.028 52), oklch(0.125 0.028 52))",
               borderColor: "oklch(0.55 0.22 295 / 30%)",
             }}>
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -1026,7 +1026,7 @@ export default function TogetherPage() {
             {/* Left: Chat + Room info */}
             <div className="flex-1 min-w-0">
               <div className="rounded-2xl p-5 mb-4 border border-white/[0.1]"
-                style={{ background: "oklch(0.115 0.055 278)" }}>
+                style={{ background: "oklch(0.125 0.028 52)" }}>
                 {/* Room header */}
                 <div className="flex flex-col gap-2 mb-4">
                   <div className="flex items-center justify-between gap-2">
@@ -1078,7 +1078,7 @@ export default function TogetherPage() {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {state.room.listeners.map((l, i) => (
                     <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[12px] font-body text-white/70"
-                      style={{ background: "oklch(0.15 0.05 275)" }}>
+                      style={{ background: "oklch(0.158 0.030 50)" }}>
                       <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
                         style={{ background: COLORS[i % COLORS.length] }}>
                         {l.charAt(0)}
@@ -1091,7 +1091,7 @@ export default function TogetherPage() {
                 {/* Chat */}
                 <div ref={chatRef}
                   className="rounded-xl p-4 max-h-[200px] overflow-y-auto flex flex-col gap-2 mb-3"
-                  style={{ background: "oklch(0.11 0.05 270)" }}>
+                  style={{ background: "oklch(0.125 0.028 52)" }}>
                   {messages.length === 0 && (
                     <div className="text-[12px] text-white/60 text-center font-body py-4">
                       The sanctuary awaits… say something 🎵
@@ -1143,7 +1143,7 @@ export default function TogetherPage() {
                 className="w-full mb-3 flex items-center justify-center gap-2 py-3 rounded-xl font-body text-[13px] font-semibold
                   transition-all hover:-translate-y-0.5"
                 style={{
-                  background: "oklch(0.13 0.04 278)",
+                  background: "oklch(0.148 0.030 50)",
                   border: "1.5px solid #D4AF37",
                   color: "#D4AF37",
                   boxShadow: "0 0 16px rgba(212,175,55,0.18), inset 0 0 24px rgba(212,175,55,0.05)",
@@ -1184,7 +1184,7 @@ export default function TogetherPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[0, 1, 2].map(i => (
                   <div key={i} className="rounded-xl overflow-hidden border border-white/[0.07] animate-pulse"
-                    style={{ background: "oklch(0.115 0.055 278)" }}>
+                    style={{ background: "oklch(0.125 0.028 52)" }}>
                     <div className="aspect-video bg-white/[0.04]" />
                     <div className="p-3 space-y-2">
                       <div className="h-3 bg-white/[0.06] rounded w-2/3" />
@@ -1195,7 +1195,7 @@ export default function TogetherPage() {
               </div>
             ) : !activeRooms || activeRooms.length === 0 ? (
               <div className="rounded-xl border border-white/[0.07] p-10 text-center"
-                style={{ background: "oklch(0.115 0.055 278)" }}>
+                style={{ background: "oklch(0.125 0.028 52)" }}>
                 <div className="text-4xl mb-3">🎵</div>
                 <div className="text-[14px] font-heading text-white/50 tracking-wide mb-1">No Active Sanctuaries</div>
                 <div className="text-[12px] font-body text-white/30">
@@ -1210,10 +1210,10 @@ export default function TogetherPage() {
                     onClick={() => joinRoom(room.roomCode)}
                     className="rounded-xl overflow-hidden border border-white/[0.07] cursor-pointer
                       hover:border-[#A78BFA]/30 hover:-translate-y-1 transition-all group"
-                    style={{ background: "oklch(0.115 0.055 278)" }}
+                    style={{ background: "oklch(0.125 0.028 52)" }}
                   >
                     <div className="aspect-video relative overflow-hidden"
-                      style={{ background: "linear-gradient(135deg,#1a0a3e,#0a1a3e)" }}>
+                      style={{ background: "linear-gradient(135deg,#1a0e06,#120c04)" }}>
                       {room.nowPlayingCoverArtUrl ? (
                         <img
                           src={room.nowPlayingCoverArtUrl}

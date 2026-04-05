@@ -88,7 +88,7 @@ export default function DownloadPage() {
       <div
         className="rounded-xl p-5 max-w-sm w-full mb-6"
         style={{
-          background: "oklch(0.115 0.055 278)",
+          background: "oklch(0.125 0.028 52)",
           border: "1px solid oklch(0.2 0.015 280)",
         }}
       >

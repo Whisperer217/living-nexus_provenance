@@ -92,12 +92,12 @@ export default function LikedPage() {
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="h-20 rounded-xl animate-pulse"
-              style={{ background: "oklch(0.115 0.055 278)" }} />
+              style={{ background: "oklch(0.125 0.028 52)" }} />
           ))}
         </div>
       ) : !likedTracks || likedTracks.length === 0 ? (
         <div className="rounded-2xl p-16 text-center"
-          style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
           <Heart className="w-14 h-14 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
           <p className="text-base font-semibold mb-2"
             style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>
@@ -115,7 +115,7 @@ export default function LikedPage() {
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden"
-          style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
           <div className="divide-y" style={{ borderColor: "oklch(0.15 0.01 280)" }}>
             {likedTracks.map((item: any, idx: number) => {
               const song = item.song;
@@ -138,7 +138,7 @@ export default function LikedPage() {
 
                   {/* Cover Art */}
                   <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0"
-                    style={{ background: "oklch(0.15 0.04 280)" }}>
+                    style={{ background: "oklch(0.158 0.030 50)" }}>
                     {song.coverArtUrl ? (
                       <img src={song.coverArtUrl} alt={song.title}
                         className="w-full h-full object-cover"

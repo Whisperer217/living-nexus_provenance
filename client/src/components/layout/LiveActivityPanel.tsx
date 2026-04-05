@@ -108,7 +108,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-          style={{ borderBottom: "1px solid oklch(0.28 0.04 270 / 40%)" }}
+          style={{ borderBottom: "1px solid oklch(0.30 0.04 60 / 35%)" }}
         >
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#ef4444", animation: "pulse 1.5s infinite" }} />
@@ -168,7 +168,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                   >
                     <div
                       className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"
-                      style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid oklch(0.28 0.04 270 / 40%)" }}
+                      style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid oklch(0.30 0.04 60 / 35%)" }}
                     >
                       {currentTrack.artUrl
                         ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover rounded-lg" />

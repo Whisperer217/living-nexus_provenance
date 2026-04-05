@@ -343,7 +343,7 @@ export default function SongDetailPage() {
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.01 280)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.10 0.02 55)" }}>
       <div className="text-center space-y-3">
         <div className="w-16 h-16 rounded-2xl mx-auto animate-pulse" style={{ background: "oklch(0.75 0.18 85 / 0.2)" }} />
         <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>Loading track...</p>
@@ -352,7 +352,7 @@ export default function SongDetailPage() {
   );
 
   if (!song || !songData) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.01 280)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.10 0.02 55)" }}>
       <div className="text-center">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Song not found.</p>
         <Link href="/"><Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Go Home</Button></Link>
@@ -372,7 +372,7 @@ export default function SongDetailPage() {
   const embedVideoUrl = (song as any).embedVideoUrl as string | undefined;
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: "oklch(0.09 0.04 265)" }}>
+    <div className="min-h-screen pb-8" style={{ background: "oklch(0.10 0.022 55)" }}>
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
@@ -422,7 +422,7 @@ export default function SongDetailPage() {
                 {(song as any).videoUrl && (
                   <div
                     className="w-full rounded-2xl overflow-hidden mb-3"
-                    style={{ aspectRatio: "16/9", background: "oklch(0.08 0.01 280)" }}
+                    style={{ aspectRatio: "16/9", background: "oklch(0.10 0.02 55)" }}
                   >
                     {showVideo ? (
                       <video
@@ -445,7 +445,7 @@ export default function SongDetailPage() {
                           : <Music className="w-16 h-16 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold"
-                            style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.01 280)" }}>
+                            style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.10 0.02 55)" }}>
                             <Video size={14} /> Watch Video
                           </div>
                         </div>
@@ -471,7 +471,7 @@ export default function SongDetailPage() {
                 {!(song as any).videoUrl && (
                   <div
                     className="relative w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex items-center justify-center group cursor-pointer"
-                    style={{ background: "linear-gradient(135deg, oklch(0.11 0.05 270), oklch(0.13 0.04 290))" }}
+                    style={{ background: "linear-gradient(135deg, oklch(0.125 0.028 52), oklch(0.13 0.04 290))" }}
                     onClick={song.fileUrl ? handlePlay : undefined}
                   >
                     {song.coverArtUrl
@@ -1066,7 +1066,7 @@ export default function SongDetailPage() {
                   style: transformStyle.trim() || undefined,
                   tags: transformTags.length > 0 ? transformTags : undefined,
                 })}
-                style={{ background: "oklch(0.65 0.2 300)", color: "oklch(0.08 0.01 280)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}
+                style={{ background: "oklch(0.65 0.2 300)", color: "oklch(0.10 0.02 55)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}
               >
                 <Wand2 className="w-4 h-4 mr-2" />
                 {aiTransformMutation.isPending ? "SUBMITTING..." : "GENERATE TRANSFORM"}

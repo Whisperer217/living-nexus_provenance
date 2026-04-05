@@ -92,7 +92,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
       audioUrl: track.fileUrl ?? track.song?.fileUrl ?? undefined,
       witnessId: track.witnessId ?? track.song?.witnessId ?? undefined,
       genre: track.genre ?? "",
-      bg: "oklch(0.185 0.06 270)",
+      bg: "oklch(0.195 0.038 48)",
       emoji: "🎵",
       coverPositionX: track.coverPositionX ?? track.song?.coverPositionX ?? 50,
       coverPositionY: track.coverPositionY ?? track.song?.coverPositionY ?? 50,
@@ -119,7 +119,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
           w-5 h-16 rounded-r-lg transition-all duration-300
           border border-l-0 qr-tab-glow`}
         style={{
-          background: "oklch(0.14 0.013 280)",
+          background: "oklch(0.148 0.025 52)",
           borderColor: "oklch(0.80 0.145 82 / 0.4)",
           transform: `translateY(-50%) translateX(${open ? "240px" : "0px"})`,
         }}
@@ -269,7 +269,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded flex-shrink-0 flex items-center justify-center text-sm"
-                      style={{ background: "oklch(0.185 0.06 270)" }}>
+                      style={{ background: "oklch(0.195 0.038 48)" }}>
                       🎵
                     </div>
                   )}

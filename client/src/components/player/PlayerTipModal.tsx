@@ -204,7 +204,7 @@ export default function PlayerTipModal({
                       ? "oklch(0.84 0.155 85)"
                       : "oklch(0.16 0.025 275)",
                     color: !useCustom && selectedCents === cents
-                      ? "oklch(0.08 0.01 280)"
+                      ? "oklch(0.10 0.02 55)"
                       : "oklch(0.65 0.04 280)",
                     border: `1px solid ${!useCustom && selectedCents === cents ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
                   }}
@@ -217,7 +217,7 @@ export default function PlayerTipModal({
                 className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                 style={{
                   background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.16 0.025 275)",
-                  color: useCustom ? "oklch(0.08 0.01 280)" : "oklch(0.65 0.04 280)",
+                  color: useCustom ? "oklch(0.10 0.02 55)" : "oklch(0.65 0.04 280)",
                   border: `1px solid ${useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
                 }}
               >
@@ -252,7 +252,7 @@ export default function PlayerTipModal({
                 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
                 background: "oklch(0.84 0.155 85)",
-                color: "oklch(0.08 0.01 280)",
+                color: "oklch(0.10 0.02 55)",
                 fontFamily: "'Cinzel', serif",
               }}
             >

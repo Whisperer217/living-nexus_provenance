@@ -68,7 +68,7 @@ function ConfirmDeleteModal({
       <div
         className="rounded-2xl p-6 max-w-sm w-full"
         style={{
-          background: "oklch(0.09 0.04 265)",
+          background: "oklch(0.10 0.022 55)",
           border: "1px solid color-mix(in srgb, var(--lnx-red) 35%, transparent)",
         }}
         onClick={(e) => e.stopPropagation()}
@@ -335,7 +335,7 @@ export default function ArchivePage() {
 
   if (loading || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.09 0.04 265)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.10 0.022 55)" }}>
         <div className="w-8 h-8 rounded-full border-2 animate-spin"
           style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
       </div>
@@ -347,7 +347,7 @@ export default function ArchivePage() {
 
   return (
     <>
-    <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
+    <div className="min-h-screen" style={{ background: "oklch(0.10 0.022 55)" }}>
       <div className="container py-10 max-w-4xl mx-auto px-4" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
         {/* ── Breadcrumb ──────────────────────────────────────────── */}
@@ -391,7 +391,7 @@ export default function ArchivePage() {
               <div
                 className="flex items-center gap-3 mb-6 px-4 py-3 rounded-xl border cursor-pointer hover:border-amber-500/50 transition-colors"
                 style={{
-                  background: isFull ? "oklch(0.12 0.04 25 / 0.4)" : isNear ? "oklch(0.12 0.04 85 / 0.3)" : "oklch(0.115 0.055 278)",
+                  background: isFull ? "oklch(0.12 0.04 25 / 0.4)" : isNear ? "oklch(0.12 0.04 85 / 0.3)" : "oklch(0.125 0.028 52)",
                   borderColor: isFull ? "oklch(0.55 0.2 25 / 0.4)" : isNear ? "oklch(0.75 0.15 85 / 0.4)" : "oklch(0.3 0.03 280 / 0.4)",
                 }}
               >
@@ -426,7 +426,7 @@ export default function ArchivePage() {
         })()}
 
         {/* ── Tab switcher ───────────────────────────────────────── */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "oklch(0.115 0.055 278)" }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "oklch(0.125 0.028 52)" }}>
           {(["tracks", "lists", "external"] as const).map((tab) => (
             <button
               key={tab}
@@ -500,7 +500,7 @@ export default function ArchivePage() {
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-16 rounded-xl animate-pulse"
-                style={{ background: "oklch(0.115 0.055 278)" }} />
+                style={{ background: "oklch(0.125 0.028 52)" }} />
             ))}
           </div>
         )}
@@ -508,7 +508,7 @@ export default function ArchivePage() {
         {/* ── Empty state ────────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length === 0 && (
           <div className="text-center py-20 rounded-xl"
-            style={{ background: "oklch(0.115 0.055 278)", border: "1px dashed oklch(0.25 0.02 280)" }}>
+            style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
             <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
             <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>
               You have not uploaded any tracks yet.
@@ -547,7 +547,7 @@ export default function ArchivePage() {
                   style={{
                     background: isSelected
                       ? "oklch(0.84 0.155 85 / 0.08)"
-                      : isDeleted ? "oklch(0.09 0.02 265)" : "oklch(0.115 0.055 278)",
+                      : isDeleted ? "oklch(0.09 0.02 265)" : "oklch(0.125 0.028 52)",
                     border: isSelected
                       ? "1px solid oklch(0.84 0.155 85 / 0.35)"
                       : `1px solid ${isDeleted ? "color-mix(in srgb, var(--lnx-red) 20%, transparent)" : "oklch(0.18 0.015 280)"}`,

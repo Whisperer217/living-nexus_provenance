@@ -279,7 +279,7 @@ export default function LearnPage() {
   const [activeSection, setActiveSection] = useState<"wid-spec" | "lexicon">("wid-spec");
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
+    <div className="min-h-screen" style={{ background: "oklch(0.10 0.022 55)" }}>
       <div className="container py-10 max-w-3xl mx-auto px-4"
         style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
@@ -295,7 +295,7 @@ export default function LearnPage() {
         </div>
 
         {/* Tab switcher */}
-        <div className="flex gap-1 mb-8 p-1 rounded-xl" style={{ background: "oklch(0.115 0.055 278)" }}>
+        <div className="flex gap-1 mb-8 p-1 rounded-xl" style={{ background: "oklch(0.125 0.028 52)" }}>
           <button
             onClick={() => setActiveSection("wid-spec")}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"

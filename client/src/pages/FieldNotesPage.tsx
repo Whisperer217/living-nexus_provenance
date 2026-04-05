@@ -220,7 +220,7 @@ function NoteForm({
               style={
                 active
                   ? { background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}50` }
-                  : { background: "oklch(0.15 0.04 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
+                  : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
               }
             >
               <Icon size={10} />
@@ -247,7 +247,7 @@ function NoteForm({
           style={
             isPublic
               ? { background: "oklch(0.65 0.18 145 / 0.12)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }
-              : { background: "oklch(0.15 0.04 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
+              : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
           }
         >
           {isPublic ? <><Eye size={11} /> Public — visible to all</> : <><EyeOff size={11} /> Private — only you</>}
@@ -418,7 +418,7 @@ export default function FieldNotesPage() {
               style={
                 activeFilter === "all"
                   ? { background: "#D4AF3722", color: "#D4AF37", border: "1px solid #D4AF3750" }
-                  : { background: "oklch(0.15 0.04 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
+                  : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
               }
             >
               All
@@ -435,7 +435,7 @@ export default function FieldNotesPage() {
                   style={
                     activeFilter === cat.value
                       ? { background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}50` }
-                      : { background: "oklch(0.15 0.04 280)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
+                      : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
                   }
                 >
                   <Icon size={9} />

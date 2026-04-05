@@ -431,7 +431,7 @@ export default function MobilePlayerLayer() {
       )}
       {videoUrl && showVideo && (
         <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
-          style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "oklch(0.08 0.01 280)" }}>
+          style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "oklch(0.10 0.02 55)" }}>
           <Video size={9} /> Live
         </div>
       )}
@@ -463,7 +463,7 @@ export default function MobilePlayerLayer() {
           height: large ? "64px" : "52px",
           background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))",
           boxShadow: "0 4px 20px oklch(0.84 0.155 85 / 0.35)",
-          color: "oklch(0.08 0.01 280)",
+          color: "oklch(0.10 0.02 55)",
         }}
       >
         {state.isPlaying
@@ -527,7 +527,7 @@ export default function MobilePlayerLayer() {
             <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
-              style={{ background: "oklch(0.15 0.04 280)" }}>
+              style={{ background: "oklch(0.158 0.030 50)" }}>
               <Music size={16} style={{ color: "oklch(0.45 0.03 280)" }} />
             </div>
           )}
@@ -577,8 +577,8 @@ export default function MobilePlayerLayer() {
           }}
         >
           {state.isPlaying
-            ? <Pause size={18} fill="currentColor" style={{ color: "oklch(0.08 0.01 280)" }} />
-            : <Play size={18} fill="currentColor" style={{ color: "oklch(0.08 0.01 280)", marginLeft: "2px" }} />}
+            ? <Pause size={18} fill="currentColor" style={{ color: "oklch(0.10 0.02 55)" }} />
+            : <Play size={18} fill="currentColor" style={{ color: "oklch(0.10 0.02 55)", marginLeft: "2px" }} />}
         </button>
         {/* Next */}
         <button
@@ -798,7 +798,7 @@ export default function MobilePlayerLayer() {
                 style={{
                   background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
                     state.isMuted ? 0 : state.volume * 100
-                  }%, oklch(0.28 0.04 270 / 80%) ${
+                  }%, oklch(0.30 0.04 60 / 70%) ${
                     state.isMuted ? 0 : state.volume * 100
                   }%)`,
                 }}
@@ -1066,7 +1066,7 @@ export default function MobilePlayerLayer() {
                   className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 disabled:opacity-40"
                   style={{
                     background: "oklch(0.84 0.155 85)",
-                    color: "oklch(0.08 0.01 280)",
+                    color: "oklch(0.10 0.02 55)",
                   }}
                 >
                   <Send size={14} />
@@ -1194,7 +1194,7 @@ export default function MobilePlayerLayer() {
                 <div className="text-[11px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
               </div>
               <button onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
-                style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))", color: "oklch(0.08 0.01 280)" }}>
+                style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))", color: "oklch(0.10 0.02 55)" }}>
                 {state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
               </button>
               <div className="flex-1">

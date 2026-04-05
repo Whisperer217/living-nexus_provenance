@@ -115,7 +115,7 @@ function HarmonicWaveform({ frequencies, active }: { frequencies: number[]; acti
 
   return (
     <canvas ref={canvasRef} width={500} height={80} className="w-full rounded-xl"
-      style={{ background: "oklch(0.11 0.05 270)" }} />
+      style={{ background: "oklch(0.125 0.028 52)" }} />
   );
 }
 
@@ -636,7 +636,7 @@ export default function UploadPage() {
             <button
               onClick={() => navigate("/batch-upload")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body flex-shrink-0 transition-all"
-              style={{ background: "oklch(0.14 0.013 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.65 0.12 85)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.65 0.12 85)" }}
             >
               <Upload size={12} /> Batch Upload
             </button>
@@ -652,7 +652,7 @@ export default function UploadPage() {
               <div key={s.n} className="flex items-center gap-1 flex-1">
                 <div className="flex-1 flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
-                    style={{ background: isDone ? "oklch(0.65 0.18 145)" : isActive ? "oklch(0.84 0.155 85)" : "oklch(0.15 0.05 275)", color: isDone || isActive ? "oklch(0.08 0.015 280)" : "oklch(0.45 0.03 280)" }}>
+                    style={{ background: isDone ? "oklch(0.65 0.18 145)" : isActive ? "oklch(0.84 0.155 85)" : "oklch(0.158 0.030 50)", color: isDone || isActive ? "oklch(0.08 0.015 280)" : "oklch(0.45 0.03 280)" }}>
                     {isDone ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
                   </div>
                   <span className="text-xs hidden sm:block" style={{ color: isActive ? "oklch(0.84 0.155 85)" : isDone ? "oklch(0.65 0.18 145)" : "oklch(0.45 0.03 280)" }}>{s.label}</span>
@@ -663,7 +663,7 @@ export default function UploadPage() {
           })}
         </div>
 
-        <div className="rounded-2xl p-6 md:p-8" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+        <div className="rounded-2xl p-6 md:p-8" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
 
           {step === 1 && (
             <div className="space-y-5">

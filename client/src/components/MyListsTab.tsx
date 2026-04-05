@@ -93,7 +93,7 @@ function ManageTrackRow({
       onDragOver={(e) => e.preventDefault()}
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors select-none"
       style={{
-        background: "oklch(0.115 0.055 278)",
+        background: "oklch(0.125 0.028 52)",
         border: "1px solid oklch(0.18 0.015 280)",
         cursor: "grab",
       }}
@@ -288,7 +288,7 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
           <div
             key={i}
             className="h-12 rounded-xl animate-pulse"
-            style={{ background: "oklch(0.115 0.055 278)" }}
+            style={{ background: "oklch(0.125 0.028 52)" }}
           />
         ))}
       </div>
@@ -415,7 +415,7 @@ export default function MyListsTab() {
           <div
             key={i}
             className="h-16 rounded-xl animate-pulse"
-            style={{ background: "oklch(0.115 0.055 278)" }}
+            style={{ background: "oklch(0.125 0.028 52)" }}
           />
         ))}
       </div>
@@ -428,7 +428,7 @@ export default function MyListsTab() {
       {showCreate ? (
         <div
           className="flex items-center gap-2 rounded-xl px-3 py-2.5"
-          style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.65 0.2 300 / 0.25)" }}
+          style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.65 0.2 300 / 0.25)" }}
         >
           <input
             autoFocus
@@ -502,7 +502,7 @@ export default function MyListsTab() {
             {/* Header row */}
             <div
               className="flex items-center gap-3 px-3 py-3 cursor-pointer transition-colors hover:brightness-110"
-              style={{ background: "oklch(0.115 0.055 278)" }}
+              style={{ background: "oklch(0.125 0.028 52)" }}
               onClick={() => setExpandedId(isExpanded ? null : pl.id)}
             >
               {/* Expand icon */}

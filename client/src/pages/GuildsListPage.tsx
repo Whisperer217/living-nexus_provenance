@@ -140,7 +140,7 @@ export default function GuildsListPage() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: "oklch(0.09 0.04 265)", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
+      style={{ background: "oklch(0.10 0.022 55)", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
     >
       {showCreate && <CreateGuildModal onClose={() => setShowCreate(false)} />}
 
@@ -182,7 +182,7 @@ export default function GuildsListPage() {
               <div
                 key={i}
                 className="h-24 rounded-2xl animate-pulse"
-                style={{ background: "oklch(0.115 0.055 278)" }}
+                style={{ background: "oklch(0.125 0.028 52)" }}
               />
             ))}
           </div>
@@ -221,7 +221,7 @@ export default function GuildsListPage() {
                 <div
                   className="flex items-center gap-4 p-4 rounded-2xl transition-all cursor-pointer hover:brightness-110"
                   style={{
-                    background: "oklch(0.115 0.055 278)",
+                    background: "oklch(0.125 0.028 52)",
                     border: "1px solid oklch(0.18 0.015 280)",
                   }}
                 >

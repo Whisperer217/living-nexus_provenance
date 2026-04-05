@@ -119,7 +119,7 @@ export default function DiscoverPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.09 0.04 265)" }}>
+    <div className="min-h-screen" style={{ background: "oklch(0.10 0.022 55)" }}>
       {/* Hero */}
       <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, oklch(0.095 0.025 260) 0%, oklch(0.11 0.04 295) 50%, oklch(0.095 0.025 255) 100%)" }}>
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, oklch(0.75 0.18 85 / 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.65 0.2 300 / 0.2) 0%, transparent 50%)" }} />
@@ -140,7 +140,7 @@ export default function DiscoverPage() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/upload">
-                <Button size="lg" className="btn-gold-glow" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.09 0.04 265)", fontFamily: "'Cinzel', serif", fontWeight: 700 }}>
+                <Button size="lg" className="btn-gold-glow" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.10 0.022 55)", fontFamily: "'Cinzel', serif", fontWeight: 700 }}>
                   Upload Your Music
                 </Button>
               </Link>
@@ -158,7 +158,7 @@ export default function DiscoverPage() {
         <Link href="/founders">
           <div
             className="flex items-center justify-between rounded-xl border px-5 py-4 cursor-pointer hover:opacity-90 transition-opacity"
-            style={{ background: "oklch(0.115 0.055 278)", borderColor: "oklch(0.84 0.155 85 / 0.35)" }}
+            style={{ background: "oklch(0.125 0.028 52)", borderColor: "oklch(0.84 0.155 85 / 0.35)" }}
           >
             <div className="flex items-center gap-3">
               <span style={{ color: "oklch(0.84 0.155 85)" }} className="text-lg">✦</span>
@@ -175,7 +175,7 @@ export default function DiscoverPage() {
       <div className="container py-10">
         <div className="grid sm:grid-cols-2 gap-5 max-w-3xl">
           {/* For Creators */}
-          <div className="rounded-xl border p-5" style={{ background: "oklch(0.115 0.055 278)", borderColor: "oklch(0.84 0.155 85 / 0.2)" }}>
+          <div className="rounded-xl border p-5" style={{ background: "oklch(0.125 0.028 52)", borderColor: "oklch(0.84 0.155 85 / 0.2)" }}>
             <p className="text-xs font-mono tracking-[0.2em] uppercase mb-4" style={{ color: "oklch(0.84 0.155 85)" }}>For Creators</p>
             <ul className="space-y-2">
               {["Upload your music. Get your WID.", "Keep 90% of every gift received.", "Own your catalog. Always.", "Batch upload entire albums at once."].map(t => (
@@ -187,7 +187,7 @@ export default function DiscoverPage() {
             </ul>
           </div>
           {/* For Fans */}
-          <div className="rounded-xl border p-5" style={{ background: "oklch(0.115 0.055 278)", borderColor: "oklch(0.84 0.155 85 / 0.2)" }}>
+          <div className="rounded-xl border p-5" style={{ background: "oklch(0.125 0.028 52)", borderColor: "oklch(0.84 0.155 85 / 0.2)" }}>
             <p className="text-xs font-mono tracking-[0.2em] uppercase mb-4" style={{ color: "oklch(0.84 0.155 85)" }}>For Fans</p>
             <ul className="space-y-2">
               {["Discover real music from real people.", "Gift creators directly. 90% reaches them.", "Verify any track's origin with its WID.", "No algorithm. No ads. No noise."].map(t => (
@@ -219,7 +219,7 @@ export default function DiscoverPage() {
               <Link key={ct} href={href}>
                 <div
                   className="rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] hover:opacity-90"
-                  style={{ background: "oklch(0.115 0.055 278)", border: `1px solid ${color}33` }}
+                  style={{ background: "oklch(0.125 0.028 52)", border: `1px solid ${color}33` }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <Icon size={18} style={{ color }} />
@@ -245,7 +245,7 @@ export default function DiscoverPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-10"
-            style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }}
+            style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }}
           />
         </div>
 
@@ -275,7 +275,7 @@ export default function DiscoverPage() {
               <button
                 onClick={() => setActiveGenre(undefined)}
                 className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                style={{ background: !activeGenre ? "oklch(0.84 0.155 85)" : "oklch(0.115 0.055 278)", color: !activeGenre ? "oklch(0.09 0.04 265)" : "#E2E8F0", border: `1px solid ${!activeGenre ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.30)"}` }}
+                style={{ background: !activeGenre ? "oklch(0.84 0.155 85)" : "oklch(0.125 0.028 52)", color: !activeGenre ? "oklch(0.10 0.022 55)" : "#E2E8F0", border: `1px solid ${!activeGenre ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.30)"}` }}
               >
                 All Music
               </button>
@@ -284,7 +284,7 @@ export default function DiscoverPage() {
                   key={genre}
                   onClick={() => setActiveGenre(genre === activeGenre ? undefined : genre)}
                   className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  style={{ background: activeGenre === genre ? "oklch(0.84 0.155 85)" : "oklch(0.115 0.055 278)", color: activeGenre === genre ? "oklch(0.09 0.04 265)" : "#E2E8F0", border: `1px solid ${activeGenre === genre ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.30)"}` }}
+                  style={{ background: activeGenre === genre ? "oklch(0.84 0.155 85)" : "oklch(0.125 0.028 52)", color: activeGenre === genre ? "oklch(0.10 0.022 55)" : "#E2E8F0", border: `1px solid ${activeGenre === genre ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.30)"}` }}
                 >
                   {genre}
                 </button>
@@ -304,7 +304,7 @@ export default function DiscoverPage() {
                   key={cat}
                   onClick={() => toast.info(`Filtering by ${cat} coming soon`)}
                   className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  style={{ background: "oklch(0.115 0.055 278)", color: "#E2E8F0", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }}
+                  style={{ background: "oklch(0.125 0.028 52)", color: "#E2E8F0", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }}
                 >
                   {cat}
                 </button>
@@ -324,7 +324,7 @@ export default function DiscoverPage() {
                   key={cat}
                   onClick={() => toast.info(`Filtering by ${cat} coming soon`)}
                   className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  style={{ background: "oklch(0.115 0.055 278)", color: "#E2E8F0", border: "1px solid oklch(0.75 0.18 300 / 0.3)" }}
+                  style={{ background: "oklch(0.125 0.028 52)", color: "#E2E8F0", border: "1px solid oklch(0.75 0.18 300 / 0.3)" }}
                 >
                   {cat}
                 </button>
@@ -346,14 +346,14 @@ export default function DiscoverPage() {
           {songsLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="rounded-xl animate-pulse" style={{ background: "oklch(0.115 0.055 278)", height: 220 }} />
+                <div key={i} className="rounded-xl animate-pulse" style={{ background: "oklch(0.125 0.028 52)", height: 220 }} />
               ))}
             </div>
           ) : !songs?.length ? (
             <div className="text-center py-16" style={{ color: "oklch(0.5 0.03 280)" }}>
               <Music className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>No songs yet. Be the first to upload.</p>
-              <Link href="/upload"><Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.09 0.04 265)" }}>Upload Now</Button></Link>
+              <Link href="/upload"><Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.10 0.022 55)" }}>Upload Now</Button></Link>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -366,7 +366,7 @@ export default function DiscoverPage() {
                   onContextMenu={(e) => openMenu(e, item)}
                   className="group relative rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02]"
                   style={{
-                    background: "oklch(0.115 0.055 278)",
+                    background: "oklch(0.125 0.028 52)",
                     border: `1px solid ${isActive ? "oklch(0.75 0.18 85 / 0.8)" : "oklch(0.2 0.015 280)"}`,
                     outline: isActive ? "2px solid oklch(0.75 0.18 85 / 0.6)" : "none",
                     outlineOffset: "1px"
@@ -393,7 +393,7 @@ export default function DiscoverPage() {
                           <div className="flex items-end gap-[2px] h-5">
                             {[1,2,3,4].map(i => (
                               <div key={i} className="w-[3px] rounded-full" style={{
-                                background: "oklch(0.09 0.04 265)",
+                                background: "oklch(0.10 0.022 55)",
                                 height: "40%",
                                 animation: `waveBar 0.7s ease-in-out ${i * 0.12}s infinite alternate`
                               }} />
@@ -404,7 +404,7 @@ export default function DiscoverPage() {
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-opacity ${
                           isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                         }`} style={{ background: "oklch(0.84 0.155 85)" }}>
-                          <Play className="w-5 h-5 fill-current" style={{ color: "oklch(0.09 0.04 265)" }} />
+                          <Play className="w-5 h-5 fill-current" style={{ color: "oklch(0.10 0.022 55)" }} />
                         </div>
                       )}
                     </div>
@@ -508,7 +508,7 @@ export default function DiscoverPage() {
           {creatorsLoading ? (
             <div className="flex gap-3 overflow-hidden">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: 120, height: 160, background: "oklch(0.115 0.055 278)" }} />
+                <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: 120, height: 160, background: "oklch(0.125 0.028 52)" }} />
               ))}
             </div>
           ) : !creators?.length ? (
@@ -529,7 +529,7 @@ export default function DiscoverPage() {
                 const hue = hues[creator.id % hues.length];
                 return (
                   <Link key={creator.id} href={`/creator/${creator.id}`} className="flex-shrink-0 snap-start">
-                    <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ width: 120, background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+                    <div className="rounded-xl p-4 text-center transition-all hover:scale-[1.03] cursor-pointer" style={{ width: 120, background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
                       <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden flex items-center justify-center" style={{ background: creator.profilePhotoUrl ? undefined : `oklch(0.22 0.08 ${hue})`, border: "2px solid oklch(0.75 0.18 85 / 0.4)" }}>
                         {creator.profilePhotoUrl ? (
                           <img src={creator.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
@@ -557,7 +557,7 @@ export default function DiscoverPage() {
             { icon: Music, title: "Creator-Owned", desc: "You own your music. Platform takes 10% on tips only. No royalty splits, no hidden fees on your catalog." },
             { icon: Users, title: "Gift Directly", desc: "Fans gift creators directly via Stripe Connect. Funds route to your bank account with full identity verification." },
           ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-xl p-6" style={{ background: "oklch(0.115 0.055 278)", border: "1px solid oklch(0.2 0.015 280)" }}>
+            <div key={title} className="rounded-xl p-6" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
               <Icon className="w-6 h-6 mb-3" style={{ color: "oklch(0.84 0.155 85)" }} />
               <h3 className="font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#FFFFFF" }}>{title}</h3>
               <p className="text-sm" style={{ color: "#E2E8F0" }}>{desc}</p>

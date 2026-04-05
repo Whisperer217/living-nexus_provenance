@@ -59,7 +59,7 @@ function GuildMixRow({
       onClick={onPlay}
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer hover:brightness-110 group"
       style={{
-        background: "oklch(0.115 0.055 278)",
+        background: "oklch(0.125 0.028 52)",
         border: "1px solid oklch(0.18 0.015 280)",
       }}
     >
@@ -198,7 +198,7 @@ export default function GuildPage() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ background: "oklch(0.09 0.04 265)" }}
+        style={{ background: "oklch(0.10 0.022 55)" }}
       >
         <div
           className="w-8 h-8 rounded-full border-2 animate-spin"
@@ -213,7 +213,7 @@ export default function GuildPage() {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center gap-4"
-        style={{ background: "oklch(0.09 0.04 265)" }}
+        style={{ background: "oklch(0.10 0.022 55)" }}
       >
         <p className="text-lg" style={{ color: "oklch(0.7 0.03 280)" }}>
           Guild not found
@@ -232,7 +232,7 @@ export default function GuildPage() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: "oklch(0.09 0.04 265)", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
+      style={{ background: "oklch(0.10 0.022 55)", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
     >
       {/* ── Hero banner ─────────────────────────────────────────────── */}
       <div className="relative" style={{ height: "clamp(180px, 28vw, 240px)" }}>
@@ -258,7 +258,7 @@ export default function GuildPage() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, transparent 40%, oklch(0.09 0.04 265) 100%)",
+              "linear-gradient(to bottom, transparent 40%, oklch(0.10 0.022 55) 100%)",
           }}
         />
         {/* Back button */}
@@ -283,7 +283,7 @@ export default function GuildPage() {
           <div
             className="w-16 h-16 rounded-2xl overflow-hidden"
             style={{
-              border: "3px solid oklch(0.09 0.04 265)",
+              border: "3px solid oklch(0.10 0.022 55)",
               background: "oklch(0.12 0.04 280)",
               boxShadow: "0 4px 20px oklch(0.84 0.155 85 / 0.2)",
             }}
@@ -384,7 +384,7 @@ export default function GuildPage() {
                 <div
                   key={i}
                   className="h-12 rounded-xl animate-pulse"
-                  style={{ background: "oklch(0.115 0.055 278)" }}
+                  style={{ background: "oklch(0.125 0.028 52)" }}
                 />
               ))}
             </div>
@@ -436,7 +436,7 @@ export default function GuildPage() {
                   <div
                     className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all hover:brightness-110 cursor-pointer"
                     style={{
-                      background: "oklch(0.115 0.055 278)",
+                      background: "oklch(0.125 0.028 52)",
                       border: "1px solid oklch(0.18 0.015 280)",
                     }}
                   >
