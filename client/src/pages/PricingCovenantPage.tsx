@@ -111,7 +111,7 @@ export default function PricingCovenantPage() {
   });
   const isLicensed = licenseData?.licenseStatus === "licensed";
 
-  const licenseMutation = trpc.licenses.purchaseLicense.useMutation({
+  const licenseMutation = trpc.livingArchive.purchaseLicenseOneTime.useMutation({
     onSuccess: (data: { url: string | null }) => {
       if (data.url) window.open(data.url, "_blank");
       toast.info("Redirecting to secure checkout...");

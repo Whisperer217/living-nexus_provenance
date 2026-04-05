@@ -2511,3 +2511,16 @@
 - [x] Shows room card: cover art, room code badge, now-playing title/artist, queued track count, host name
 - [x] Clicking a room card navigates to /together?room=CODE
 - [x] TypeScript: 0 errors | Tests: 121/123 passing (2 pre-existing mock failures in trust.layer.test.ts)
+
+## Pricing Overhaul — One-Time Payments Only (Apr 5 2026)
+- [x] Remove all monthly/subscription tiers from livingArchiveProducts.ts
+- [x] Founder tier: $88.88 one-time (dynamic: $288.88 after 10 founders claimed) — purchaseFounder procedure
+- [x] License tier: $88.88 one-time, 100 slots included — purchaseLicenseOneTime procedure
+- [x] Slot packages (bulk): 100/300/500 slots — purchaseSlotPackage procedure
+- [x] Micro packages: 10/30/50 slots — purchaseSlotPackage procedure
+- [x] All Stripe checkout procedures use mode: "payment" (not subscription)
+- [x] FoundersPage: shows current price, "price increases after 10 founders" note, gold CTA button
+- [x] LivingArchiveBillingPage: full Slot Store with micro + bulk package cards
+- [x] DashboardPage: slot purchase shows 6 package buttons (micro + bulk)
+- [x] PricingCovenantPage: uses purchaseLicenseOneTime, no subscription references
+- [x] TypeScript: 0 errors | Tests: 123/123 passing

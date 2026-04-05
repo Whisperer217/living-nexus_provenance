@@ -72,7 +72,7 @@ import {
   updateUserToneFrequency,
   listActiveJukeboxRooms,
 } from "./db";
-import { LIVING_ARCHIVE_PRODUCTS, SLOTS_PER_PERIOD } from "./livingArchiveProducts";
+import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
 import { enqueueVisualJob } from "./visualQueue";
@@ -216,63 +216,14 @@ export async function handleStripeWebhook(req: any, res: any) {
         }
         break;
       }
-      // ─── Living Archive Subscription Events ───────────────────────────────────
+      // ─── Subscription events (legacy — no subscriptions on this platform) ─────
       case "customer.subscription.created":
-      case "customer.subscription.updated": {
-        const sub = event.data.object as Stripe.Subscription;
-        const meta = sub.metadata || {};
-        const userId = meta.userId ? parseInt(meta.userId) : null;
-        if (!userId) break;
-        const planKey = meta.plan as "quarterly" | "annual" | null;
-        if (!planKey || !(planKey in LIVING_ARCHIVE_PRODUCTS)) break;
-        const product = LIVING_ARCHIVE_PRODUCTS[planKey];
-        const isActive = sub.status === "active" || sub.status === "trialing";
-        if (isActive) {
-          const periodEnd = new Date((sub as any).current_period_end * 1000);
-          // Only add slots on creation (not on every update)
-          const isNew = event.type === "customer.subscription.created";
-          await activateLivingArchive(userId, {
-            plan: planKey,
-            stripeSubscriptionId: sub.id,
-            expiresAt: periodEnd,
-            slotsToAdd: isNew ? SLOTS_PER_PERIOD[planKey] : 0,
-          });
-          console.log(`[LivingArchive] ${isNew ? "Activated" : "Updated"} ${planKey} for user ${userId}`);
-        }
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted":
+      case "invoice.paid":
+        // Living Nexus uses one-time payments only. Subscription events are ignored.
+        console.log(`[Webhook] Ignoring legacy subscription event: ${event.type}`);
         break;
-      }
-      case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        const user = await getUserByStripeSubscriptionId(sub.id);
-        if (user) {
-          await deactivateLivingArchive(user.id);
-          console.log(`[LivingArchive] Deactivated subscription for user ${user.id}`);
-        }
-        break;
-      }
-      case "invoice.paid": {
-        // Renewal: add slots for each new billing period
-        const invoice = event.data.object as any;
-        if (!invoice.subscription) break;
-        const sub = await stripe.subscriptions.retrieve(invoice.subscription as string);
-        const meta = sub.metadata || {};
-        const userId = meta.userId ? parseInt(meta.userId) : null;
-        const planKey = meta.plan as "quarterly" | "annual" | null;
-        if (!userId || !planKey || !(planKey in LIVING_ARCHIVE_PRODUCTS)) break;
-        // Only add slots on renewal (not the first invoice — that's handled by subscription.created)
-        const billingReason = (invoice as any).billing_reason;
-        if (billingReason === "subscription_cycle") {
-          const periodEnd = new Date((sub as any).current_period_end * 1000);
-          await activateLivingArchive(userId, {
-            plan: planKey,
-            stripeSubscriptionId: sub.id,
-            expiresAt: periodEnd,
-            slotsToAdd: SLOTS_PER_PERIOD[planKey],
-          });
-          console.log(`[LivingArchive] Renewal: added ${SLOTS_PER_PERIOD[planKey]} slots for user ${userId} (${planKey})`);
-        }
-        break;
-      }
     }
     res.json({ received: true });
   } catch (err) {
@@ -3127,85 +3078,137 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
 
   // ── Living Archive Subscription ──────────────────────────────────────────
   livingArchive: router({
-    /** Get current subscription status + slot counts for the logged-in user */
+    /** Get current slot counts + license status for the logged-in user */
     status: protectedProcedure.query(async ({ ctx }) => {
       return getLivingArchiveStatus(ctx.user.id);
     }),
 
-    /** Create a Stripe Checkout Session for a Living Archive subscription */
-    checkout: protectedProcedure
-      .input(z.object({
-        plan: z.enum(["quarterly", "annual"]),
-        origin: z.string().url(),
-      }))
+    /** List all available slot packages */
+    listPackages: publicProcedure.query(() => {
+      return SLOT_PACKAGES;
+    }),
+
+    /** Founder Unlimited — one-time purchase. Price: $88.88 before threshold, $288.88 after. */
+    purchaseFounder: protectedProcedure
+      .input(z.object({ origin: z.string().url() }))
       .mutation(async ({ ctx, input }) => {
         const user = await getUserById(ctx.user.id);
         if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
-        const product = LIVING_ARCHIVE_PRODUCTS[input.plan];
-
-        // Ensure Stripe customer exists
-        let customerId = user.stripeCustomerId ?? undefined;
-        if (!customerId) {
-          const customer = await stripe.customers.create({
-            email: user.email ?? undefined,
-            name: user.name ?? undefined,
-            metadata: { userId: ctx.user.id.toString() },
-          });
-          customerId = customer.id;
-          await updateUserStripeAccount(ctx.user.id, { stripeCustomerId: customerId } as any);
-        }
-
-        // Build price inline (no pre-created Stripe price required)
+        const currentFounders = await countFounders();
+        const priceCents = currentFounders < FOUNDER_THRESHOLD
+          ? FOUNDER_PRICE_EARLY_CENTS
+          : FOUNDER_PRICE_LATE_CENTS;
+        const priceLabel = currentFounders < FOUNDER_THRESHOLD
+          ? `$${(FOUNDER_PRICE_EARLY_CENTS / 100).toFixed(2)}`
+          : `$${(FOUNDER_PRICE_LATE_CENTS / 100).toFixed(2)}`;
         const session = await stripe.checkout.sessions.create({
-          mode: "subscription",
-          customer: customerId,
+          mode: "payment",
+          payment_method_types: ["card"],
+          customer_email: user.email ?? undefined,
           line_items: [{
             price_data: {
               currency: "usd",
-              unit_amount: product.priceCents,
-              recurring: {
-                interval: product.interval,
-                interval_count: product.intervalCount,
-              },
+              unit_amount: priceCents,
               product_data: {
-                name: product.name,
-                description: product.description,
+                name: "Living Nexus — Founder Unlimited Access",
+                description: `One-time payment. Unlimited upload slots. Permanent Founder status. ${priceLabel} — no renewals, no monthly fees.`,
               },
             },
             quantity: 1,
           }],
-          subscription_data: {
+          payment_intent_data: {
             metadata: {
+              type: "founder_purchase",
               userId: ctx.user.id.toString(),
-              plan: input.plan,
-              userName: user.name || "",
+              customerEmail: user.email || "",
+              customerName: user.name || "",
             },
           },
-          metadata: {
-            type: "living_archive_subscription",
-            userId: ctx.user.id.toString(),
-            plan: input.plan,
+          client_reference_id: ctx.user.id.toString(),
+          success_url: `${input.origin}/founders?founder=success`,
+          cancel_url: `${input.origin}/founders`,
+          allow_promotion_codes: true,
+        });
+        return { url: session.url, priceCents, foundersRemaining: Math.max(0, FOUNDER_THRESHOLD - currentFounders) };
+      }),
+
+    /** Creator License — one-time $88.88, includes 100 slots */
+    purchaseLicenseOneTime: protectedProcedure
+      .input(z.object({ origin: z.string().url() }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await getUserById(ctx.user.id);
+        if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card"],
+          customer_email: user.email ?? undefined,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              unit_amount: LICENSE_PRICE_CENTS,
+              product_data: {
+                name: "Living Nexus Creator License",
+                description: `${LICENSE_SLOTS} upload slots + commercial license + Witness ID provenance — Command Domains LLC / BDDT Publishing. One-time payment, no renewal.`,
+              },
+            },
+            quantity: 1,
+          }],
+          payment_intent_data: {
+            metadata: {
+              type: "license",
+              userId: ctx.user.id.toString(),
+              customerEmail: user.email || "",
+              customerName: user.name || "",
+            },
           },
           client_reference_id: ctx.user.id.toString(),
-          success_url: `${input.origin}/settings/billing?subscription=success&plan=${input.plan}`,
-          cancel_url: `${input.origin}/settings/billing`,
+          success_url: `${input.origin}/dashboard?license=success`,
+          cancel_url: `${input.origin}/dashboard`,
           allow_promotion_codes: true,
         });
         return { url: session.url };
       }),
 
-    /** Cancel the current Living Archive subscription */
-    cancel: protectedProcedure.mutation(async ({ ctx }) => {
-      const status = await getLivingArchiveStatus(ctx.user.id);
-      if (!status?.stripeSubscriptionId) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "No active subscription found" });
-      }
-      // Cancel at period end (not immediately — user keeps access until expiry)
-      await stripe.subscriptions.update(status.stripeSubscriptionId, {
-        cancel_at_period_end: true,
-      });
-      return { success: true, message: "Subscription will cancel at end of current period. Your slots remain permanently." };
-    }),
+    /** Slot package purchase — choose from micro (10/30/50) or bulk (100/300/500) */
+    purchaseSlotPackage: protectedProcedure
+      .input(z.object({
+        packageId: z.enum(["micro_10", "micro_30", "micro_50", "bulk_100", "bulk_300", "bulk_500"]),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await getUserById(ctx.user.id);
+        if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        const pkg = getSlotPackage(input.packageId as SlotPackageId);
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card"],
+          customer_email: user.email ?? undefined,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              unit_amount: pkg.priceCents,
+              product_data: {
+                name: `Living Nexus — ${pkg.slots} Upload Slots`,
+                description: pkg.description,
+              },
+            },
+            quantity: 1,
+          }],
+          payment_intent_data: {
+            metadata: {
+              type: "slots",
+              userId: ctx.user.id.toString(),
+              slots: pkg.slots.toString(),
+              packageId: pkg.id,
+            },
+          },
+          client_reference_id: ctx.user.id.toString(),
+          success_url: `${input.origin}/dashboard?slots=success`,
+          cancel_url: `${input.origin}/dashboard`,
+          allow_promotion_codes: true,
+        });
+        return { url: session.url };
+      }),
 
     /** Admin: grant Founder Free Tier to a user */
     grantFounderFree: protectedProcedure

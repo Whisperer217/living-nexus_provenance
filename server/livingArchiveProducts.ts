@@ -1,50 +1,47 @@
 /**
- * Living Archive Subscription Products
+ * Living Nexus — One-Time Payment Products
  *
- * Two tiers — quarterly and annual — each granting +100 upload slots per period.
- * Slots are additive: a creator with 100 base slots who subscribes quarterly gets 200 total.
+ * No subscriptions. No monthly fees. Pay once, own it forever.
  *
- * Pricing:
- *   Quarterly: $12.99 / 3 months  (~$4.33/mo)
- *   Annual:    $44.99 / year       (~$3.75/mo)
+ * Tiers:
+ *   Founder Unlimited    — $88.88 (early), $288.88 (after 10 founders claimed)
+ *   Creator License      — $88.88 one-time, 100 slots included
+ *   Slot Packages (bulk) — 100 / 300 / 500 slots
+ *   Micro Packages       — 10 / 30 / 50 slots
  *
- * Framing: "Your WIDs are permanent. Your hosting is sustained."
- * The subscription covers the ongoing cost of keeping immutable WID records live.
+ * Slot unit price: $0.88 each (bulk packages priced accordingly)
  */
 
-export const LIVING_ARCHIVE_PRODUCTS = {
-  quarterly: {
-    name: "Living Archive — Quarterly",
-    description: "100 upload slots per quarter. Your WIDs are permanent. Your hosting is sustained.",
-    priceCents: 1299,
-    interval: "month" as const,
-    intervalCount: 3,
-    slotsPerPeriod: 100,
-    stripePriceId: process.env.STRIPE_LIVING_ARCHIVE_QUARTERLY_PRICE_ID ?? "",
-  },
-  annual: {
-    name: "Living Archive — Annual",
-    description: "100 upload slots per year. Best value. Your WIDs are permanent. Your hosting is sustained.",
-    priceCents: 4499,
-    interval: "year" as const,
-    intervalCount: 1,
-    slotsPerPeriod: 100,
-    stripePriceId: process.env.STRIPE_LIVING_ARCHIVE_ANNUAL_PRICE_ID ?? "",
-  },
-} as const;
+// ── Founder tier ──────────────────────────────────────────────────────────────
+export const FOUNDER_PRICE_EARLY_CENTS = 8888;   // $88.88 — first 10 founders
+export const FOUNDER_PRICE_LATE_CENTS  = 28888;  // $288.88 — after 10 founders claimed
+export const FOUNDER_THRESHOLD        = 10;       // price increases after this many founders
 
-export type LivingArchivePlan = keyof typeof LIVING_ARCHIVE_PRODUCTS;
+// ── Creator License ───────────────────────────────────────────────────────────
+export const LICENSE_PRICE_CENTS = 8888;  // $88.88 one-time, includes 100 slots
+export const LICENSE_SLOTS       = 100;
 
-/** Slots granted per period for each plan */
-export const SLOTS_PER_PERIOD: Record<LivingArchivePlan, number> = {
-  quarterly: 100,
-  annual: 100,
-};
+// ── Slot packages ─────────────────────────────────────────────────────────────
+export const SLOT_PACKAGES = [
+  { id: "micro_10",  label: "Micro",    slots: 10,  priceCents: 880,   description: "10 upload slots" },
+  { id: "micro_30",  label: "Micro",    slots: 30,  priceCents: 2640,  description: "30 upload slots" },
+  { id: "micro_50",  label: "Micro",    slots: 50,  priceCents: 4400,  description: "50 upload slots" },
+  { id: "bulk_100",  label: "Standard", slots: 100, priceCents: 8800,  description: "100 upload slots" },
+  { id: "bulk_300",  label: "Value",    slots: 300, priceCents: 26400, description: "300 upload slots — save 0%" },
+  { id: "bulk_500",  label: "Pro",      slots: 500, priceCents: 44000, description: "500 upload slots" },
+] as const;
 
-/** Human-readable plan labels */
-export const PLAN_LABELS: Record<string, string> = {
-  none: "No subscription",
-  quarterly: "Living Archive — Quarterly",
-  annual: "Living Archive — Annual",
+export type SlotPackageId = typeof SLOT_PACKAGES[number]["id"];
+
+/** Look up a slot package by id */
+export function getSlotPackage(id: SlotPackageId) {
+  return SLOT_PACKAGES.find(p => p.id === id)!;
+}
+
+/** Human-readable tier labels (for admin display) */
+export const TIER_LABELS: Record<string, string> = {
+  none:         "No license",
+  license:      "Creator License",
+  founder:      "Founder — Unlimited",
   founder_free: "Founder Free Tier",
 };

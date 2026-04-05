@@ -1,381 +1,255 @@
+/**
+ * Slot Store — one-time slot packages (no subscriptions)
+ * Route: /settings/billing
+ */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import {
-  Archive, Zap, Crown, CheckCircle2, AlertTriangle, XCircle,
-  RefreshCw, ArrowLeft, Layers, Calendar, Infinity
-} from "lucide-react";
-import { Link } from "wouter";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Zap, Package, Star, ChevronRight, Info, CheckCircle2 } from "lucide-react";
 
-const QUARTERLY_PRICE = "$12.99";
-const ANNUAL_PRICE = "$44.99";
-const SLOTS_PER_PERIOD = 100;
+const GOLD = "oklch(0.82 0.15 85)";
+const SURFACE = "oklch(0.10 0.015 268)";
+const BORDER = "oklch(0.20 0.015 268)";
+const SUBTEXT = "oklch(0.65 0.01 268)";
+
+const MICRO_PACKAGES = [
+  { id: "micro_10",  slots: 10,  priceCents: 880,   label: "Micro 10" },
+  { id: "micro_30",  slots: 30,  priceCents: 2640,  label: "Micro 30" },
+  { id: "micro_50",  slots: 50,  priceCents: 4400,  label: "Micro 50" },
+] as const;
+
+const BULK_PACKAGES = [
+  { id: "bulk_100", slots: 100, priceCents: 8800,  label: "Standard",  badge: null },
+  { id: "bulk_300", slots: 300, priceCents: 26400, label: "Value",     badge: "Popular" },
+  { id: "bulk_500", slots: 500, priceCents: 44000, label: "Pro",       badge: "Best Value" },
+] as const;
+
+type PackageId = typeof MICRO_PACKAGES[number]["id"] | typeof BULK_PACKAGES[number]["id"];
+
+function formatPrice(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`;
+}
 
 export default function LivingArchiveBillingPage() {
-  const { user } = useAuth();
-  const [, navigate] = useLocation();
-  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const [purchasing, setPurchasing] = useState<PackageId | null>(null);
 
-  const { data: archiveStatus, isLoading, refetch } = trpc.livingArchive.status.useQuery(undefined, {
-    enabled: !!user,
+  const { data: archiveStatus, isLoading } = trpc.livingArchive.status.useQuery(undefined, {
+    enabled: isAuthenticated,
   });
 
-  const checkoutMutation = trpc.livingArchive.checkout.useMutation({
+  const purchaseMutation = trpc.livingArchive.purchaseSlotPackage.useMutation({
     onSuccess: (data) => {
       if (data.url) {
-        toast.info("Redirecting to checkout...");
+        toast.info("Redirecting to secure checkout…");
         window.open(data.url, "_blank");
       }
+      setPurchasing(null);
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => {
+      toast.error(err.message || "Checkout failed. Please try again.");
+      setPurchasing(null);
+    },
   });
 
-  const cancelMutation = trpc.livingArchive.cancel.useMutation({
-    onSuccess: (data) => {
-      toast.success(data.message);
-      setCancelConfirm(false);
-      refetch();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const handleCheckout = (plan: "quarterly" | "annual") => {
-    checkoutMutation.mutate({ plan, origin: window.location.origin });
+  const handlePurchase = (packageId: PackageId) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to purchase slots.");
+      return;
+    }
+    setPurchasing(packageId);
+    purchaseMutation.mutate({ packageId, origin: window.location.origin });
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-white/60">Please log in to manage your Living Archive.</p>
-      </div>
-    );
-  }
-
-  const slotsUsed = archiveStatus?.slotsUsed ?? 0;
-  const slotsTotal = archiveStatus?.slotsTotal ?? 0;
-  const slotPct = slotsTotal > 0 ? Math.round((slotsUsed / slotsTotal) * 100) : 0;
-  const isNearLimit = slotPct >= 90;
-  const isAtLimit = slotsUsed >= slotsTotal;
-  const hasActiveSub = archiveStatus?.isActive ?? false;
-  const plan = archiveStatus?.plan;
-  const expiresAt = archiveStatus?.expiresAt ? new Date(archiveStatus.expiresAt) : null;
-  const isFounderFree = archiveStatus?.isFounderFree ?? false;
+  const slotsUsed = (archiveStatus as any)?.songSlotsUsed ?? (archiveStatus as any)?.slotsUsed ?? 0;
+  const slotsTotal = (archiveStatus as any)?.songSlotsTotal ?? (archiveStatus as any)?.slotsTotal ?? 1;
+  const licenseStatus = (archiveStatus as any)?.licenseStatus ?? "";
+  const isFounder = licenseStatus === "founder" || licenseStatus === "founder_free";
+  const pct = isFounder ? 100 : Math.min(100, Math.round((slotsUsed / Math.max(slotsTotal, 1)) * 100));
 
   return (
-    <div className="min-h-screen bg-[oklch(0.08_0.01_260)] text-white">
-      {/* Header */}
-      <div className="border-b border-white/10 px-6 py-4 flex items-center gap-4">
-        <Link href="/archive">
-          <button className="text-white/60 hover:text-white transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Archive className="w-6 h-6 text-amber-400" />
+    <TooltipProvider>
+      <div className="min-h-screen py-12 px-4" style={{ background: "oklch(0.07 0.02 268)" }}>
+        <div className="max-w-3xl mx-auto space-y-10">
+
+          {/* Header */}
           <div>
-            <h1 className="text-xl font-bold tracking-wide">Living Archive</h1>
-            <p className="text-xs text-white/50">Sustain the hosting of your immutable WID records</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Zap size={18} style={{ color: GOLD }} />
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
+                Slot Store
+              </span>
+            </div>
+            <h1 className="text-3xl font-bold text-white">Buy Upload Slots</h1>
+            <p className="mt-2 text-sm" style={{ color: SUBTEXT }}>
+              One-time payments. No subscriptions. No monthly fees. Your WIDs are permanent forever.
+            </p>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-10 space-y-10">
-
-        {/* Slot Counter */}
-        <Card className="bg-[oklch(0.12_0.015_260)] border-white/10">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold text-white/80 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-amber-400" />
-              Archive Slot Usage
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isLoading ? (
-              <div className="h-8 bg-white/5 rounded animate-pulse" />
-            ) : (
-              <>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <span className="text-3xl font-bold text-white">{slotsUsed}</span>
-                    <span className="text-white/40 text-lg"> / {slotsTotal}</span>
-                    <span className="text-white/50 text-sm ml-2">slots used</span>
-                  </div>
-                  <div className="text-right">
-                    {isAtLimit ? (
-                      <Badge className="bg-red-500/20 text-red-400 border-red-500/30 gap-1">
-                        <XCircle className="w-3 h-3" /> Archive Full
-                      </Badge>
-                    ) : isNearLimit ? (
-                      <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 gap-1">
-                        <AlertTriangle className="w-3 h-3" /> {100 - slotPct}% remaining
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> {slotsTotal - slotsUsed} slots free
-                      </Badge>
-                    )}
-                  </div>
+          {/* Current usage */}
+          {isAuthenticated && !isLoading && (
+            <div className="rounded-xl p-5 border" style={{ background: SURFACE, borderColor: BORDER }}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-white">Your Slots</span>
+                {isFounder ? (
+                  <Badge style={{ background: GOLD, color: "#000" }}>Founder — Unlimited</Badge>
+                ) : (
+                  <span className="text-sm" style={{ color: SUBTEXT }}>
+                    {slotsUsed} / {slotsTotal} used
+                  </span>
+                )}
+              </div>
+              {!isFounder && (
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: BORDER }}>
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${pct}%`,
+                      background: pct >= 90 ? "oklch(0.65 0.2 25)" : GOLD,
+                    }}
+                  />
                 </div>
-                <Progress
-                  value={slotPct}
-                  className="h-2 bg-white/10"
+              )}
+              {isFounder && (
+                <p className="text-xs" style={{ color: SUBTEXT }}>
+                  You have unlimited upload slots as a Founder. No purchases needed.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Micro packages */}
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <Package size={15} style={{ color: GOLD }} />
+              <h2 className="text-sm font-bold uppercase tracking-widest text-white">Micro Packages</h2>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info size={13} style={{ color: SUBTEXT }} className="cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs max-w-[200px]">
+                    Perfect for occasional uploads or testing the platform. Each slot = one Witness ID registration.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {MICRO_PACKAGES.map((pkg) => (
+                <Card key={pkg.id} className="border" style={{ background: SURFACE, borderColor: BORDER }}>
+                  <CardHeader className="pb-2 pt-4 px-4">
+                    <CardTitle className="text-base text-white">{pkg.slots} Slots</CardTitle>
+                    <p className="text-2xl font-bold" style={{ color: GOLD }}>{formatPrice(pkg.priceCents)}</p>
+                    <p className="text-xs" style={{ color: SUBTEXT }}>one-time</p>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4">
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      disabled={purchasing === pkg.id || isFounder}
+                      onClick={() => handlePurchase(pkg.id)}
+                      style={{ background: GOLD, color: "#000", fontWeight: 700 }}
+                    >
+                      {purchasing === pkg.id ? "Opening…" : "Buy Now"}
+                      <ChevronRight size={14} className="ml-1" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* Bulk packages */}
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <Star size={15} style={{ color: GOLD }} />
+              <h2 className="text-sm font-bold uppercase tracking-widest text-white">Bulk Packages</h2>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {BULK_PACKAGES.map((pkg) => (
+                <Card
+                  key={pkg.id}
+                  className="border relative"
                   style={{
-                    // Color the bar based on usage
+                    background: pkg.badge === "Popular" ? "oklch(0.13 0.04 85 / 0.6)" : SURFACE,
+                    borderColor: pkg.badge ? GOLD : BORDER,
                   }}
-                />
-                {isAtLimit && (
-                  <p className="text-sm text-red-400 bg-red-500/10 rounded-lg px-4 py-3 border border-red-500/20">
-                    Your archive is full. Subscribe to Living Archive to add 100 more slots per period. Your existing WIDs are permanent and unaffected.
-                  </p>
-                )}
-                {isNearLimit && !isAtLimit && (
-                  <p className="text-sm text-amber-400 bg-amber-500/10 rounded-lg px-4 py-3 border border-amber-500/20">
-                    You're approaching your slot limit. Consider subscribing to Living Archive before you run out.
-                  </p>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Current Subscription Status */}
-        {hasActiveSub && (
-          <Card className="bg-[oklch(0.12_0.015_260)] border-amber-500/30">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {isFounderFree ? (
-                    <Crown className="w-5 h-5 text-amber-400" />
-                  ) : (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  )}
-                  <div>
-                    <p className="font-semibold text-white">
-                      {isFounderFree
-                        ? "Founder Free Tier — Active"
-                        : plan === "quarterly"
-                        ? "Living Archive Quarterly — Active"
-                        : "Living Archive Annual — Active"}
-                    </p>
-                    {expiresAt && !isFounderFree && (
-                      <p className="text-xs text-white/50">
-                        Renews {expiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                      </p>
-                    )}
-                    {isFounderFree && (
-                      <p className="text-xs text-amber-400/70">Granted by the platform — no expiry</p>
-                    )}
-                  </div>
-                </div>
-                {!isFounderFree && archiveStatus?.stripeSubscriptionId && (
-                  <div>
-                    {cancelConfirm ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-white/50">Cancel at period end?</span>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => cancelMutation.mutate()}
-                          disabled={cancelMutation.isPending}
-                        >
-                          {cancelMutation.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : "Confirm"}
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setCancelConfirm(false)}>
-                          Keep
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-white/40 hover:text-white/70 text-xs"
-                        onClick={() => setCancelConfirm(true)}
-                      >
-                        Cancel subscription
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Plan Cards */}
-        {!hasActiveSub && (
-          <>
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-white">Expand Your Archive</h2>
-              <p className="text-white/50 max-w-lg mx-auto text-sm">
-                Each period adds <strong className="text-amber-400">100 permanent slots</strong> to your archive.
-                Slots accumulate — they never expire, even if you cancel.
-                Your WIDs are immutable. Your hosting is sustained.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Quarterly */}
-              <Card className="bg-[oklch(0.12_0.015_260)] border-white/10 hover:border-amber-500/40 transition-colors">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-amber-400" />
-                      Quarterly
-                    </CardTitle>
-                    <Badge className="bg-white/10 text-white/60 border-white/10 text-xs">3 months</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div>
-                    <span className="text-4xl font-bold text-white">{QUARTERLY_PRICE}</span>
-                    <span className="text-white/40 text-sm ml-1">/ quarter</span>
-                  </div>
-                  <ul className="space-y-2 text-sm text-white/70">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      +{SLOTS_PER_PERIOD} permanent archive slots
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      Slots accumulate each period
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      WIDs remain permanent if you cancel
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      Audio replacement generates new WID
-                    </li>
-                  </ul>
-                  <Button
-                    className="w-full bg-amber-500 hover:bg-amber-400 text-black font-semibold"
-                    onClick={() => handleCheckout("quarterly")}
-                    disabled={checkoutMutation.isPending}
-                  >
-                    {checkoutMutation.isPending ? (
-                      <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-                    ) : (
-                      <Zap className="w-4 h-4 mr-2" />
-                    )}
-                    Subscribe Quarterly
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Annual */}
-              <Card className="bg-[oklch(0.12_0.015_260)] border-amber-500/40 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-amber-500 text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
-                  BEST VALUE
-                </div>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
-                      <Infinity className="w-5 h-5 text-amber-400" />
-                      Annual
-                    </CardTitle>
-                    <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">12 months</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div>
-                    <span className="text-4xl font-bold text-white">{ANNUAL_PRICE}</span>
-                    <span className="text-white/40 text-sm ml-1">/ year</span>
-                    <span className="text-xs text-emerald-400 ml-2">~$3.75/mo</span>
-                  </div>
-                  <ul className="space-y-2 text-sm text-white/70">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      +{SLOTS_PER_PERIOD} permanent archive slots
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      Slots accumulate each year
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      WIDs remain permanent if you cancel
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      Save 71% vs quarterly billing
-                    </li>
-                  </ul>
-                  <Button
-                    className="w-full bg-amber-500 hover:bg-amber-400 text-black font-semibold"
-                    onClick={() => handleCheckout("annual")}
-                    disabled={checkoutMutation.isPending}
-                  >
-                    {checkoutMutation.isPending ? (
-                      <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-                    ) : (
-                      <Crown className="w-4 h-4 mr-2" />
-                    )}
-                    Subscribe Annually
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </>
-        )}
-
-        {/* Upgrade prompt when active but near limit */}
-        {hasActiveSub && isNearLimit && (
-          <Card className="bg-[oklch(0.12_0.015_260)] border-amber-500/30">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-white text-sm">Running low on slots</p>
-                    <p className="text-xs text-white/50">
-                      Add another period now to ensure uninterrupted archiving.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  className="bg-amber-500 hover:bg-amber-400 text-black font-semibold flex-shrink-0"
-                  onClick={() => handleCheckout(plan === "annual" ? "annual" : "quarterly")}
-                  disabled={checkoutMutation.isPending}
                 >
-                  Add Slots
-                </Button>
+                  {pkg.badge && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge style={{ background: GOLD, color: "#000", fontSize: "10px" }}>{pkg.badge}</Badge>
+                    </div>
+                  )}
+                  <CardHeader className="pb-2 pt-5 px-4">
+                    <CardTitle className="text-base text-white">{pkg.slots} Slots</CardTitle>
+                    <p className="text-2xl font-bold" style={{ color: GOLD }}>{formatPrice(pkg.priceCents)}</p>
+                    <p className="text-xs" style={{ color: SUBTEXT }}>one-time · {pkg.label}</p>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4">
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      disabled={purchasing === pkg.id || isFounder}
+                      onClick={() => handlePurchase(pkg.id)}
+                      style={{ background: GOLD, color: "#000", fontWeight: 700 }}
+                    >
+                      {purchasing === pkg.id ? "Opening…" : "Buy Now"}
+                      <ChevronRight size={14} className="ml-1" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* What you get */}
+          <div className="rounded-xl p-6 border space-y-3" style={{ background: SURFACE, borderColor: BORDER }}>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-white">Every slot includes</h3>
+            {[
+              "Cryptographic Witness ID (WID) — permanent provenance record",
+              "Immutable timestamp on the Living Nexus ledger",
+              "Commercial license coverage via BDDT Publishing",
+              "Slots never expire — buy once, use whenever",
+            ].map((item) => (
+              <div key={item} className="flex items-start gap-2">
+                <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" style={{ color: "oklch(0.7 0.15 145)" }} />
+                <span className="text-sm" style={{ color: SUBTEXT }}>{item}</span>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* How slots work */}
-        <div className="border border-white/10 rounded-xl p-6 space-y-4">
-          <h3 className="font-semibold text-white/80 text-sm uppercase tracking-wider">How Living Archive Slots Work</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-white/60">
-            <div className="space-y-1">
-              <p className="text-white/80 font-medium">Each upload = 1 slot</p>
-              <p>Every file you witness into the archive consumes one slot and generates a permanent WID.</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-white/80 font-medium">Audio swaps = new WID</p>
-              <p>Replacing an audio file generates a new WID and consumes a slot. The original WID stays in the archive, immutable.</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-white/80 font-medium">Slots are permanent</p>
-              <p>Slots you've earned accumulate forever. Cancelling your subscription doesn't remove slots you've already received.</p>
-            </div>
+            ))}
           </div>
-        </div>
 
-        {/* Test card note */}
-        <p className="text-center text-xs text-white/30">
-          Test payments: use card <code className="bg-white/5 px-1 rounded">4242 4242 4242 4242</code> with any future expiry and any CVC.
-        </p>
+          {/* Founder upsell */}
+          {!isFounder && (
+            <div
+              className="rounded-xl p-6 border text-center"
+              style={{ background: "oklch(0.12 0.04 85 / 0.3)", borderColor: GOLD }}
+            >
+              <Star size={20} style={{ color: GOLD }} className="mx-auto mb-2" />
+              <h3 className="font-bold text-white mb-1">Want unlimited slots forever?</h3>
+              <p className="text-sm mb-4" style={{ color: SUBTEXT }}>
+                Become a Founder for one flat payment — no slot counting, no renewals, ever.
+              </p>
+              <a href="/founders">
+                <Button style={{ background: GOLD, color: "#000", fontWeight: 700 }}>
+                  View Founder Access →
+                </Button>
+              </a>
+            </div>
+          )}
+
+          {/* Fine print */}
+          <p className="text-xs text-center" style={{ color: SUBTEXT }}>
+            All purchases are one-time payments. Slots never expire. Your Witness IDs are permanent regardless of slot balance.
+            Payments processed by Stripe. Test card: 4242 4242 4242 4242.
+          </p>
+
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

@@ -175,11 +175,11 @@ export default function DashboardPage() {
     Unlisted: "oklch(0.65 0.2 300)",
     Deleted: "var(--lnx-red)",
   }[s] ?? "oklch(0.5 0.03 280)");
-  const licenseMutation = trpc.licenses.purchaseLicense.useMutation({
+  const licenseMutation = trpc.livingArchive.purchaseLicenseOneTime.useMutation({
     onSuccess: (data: { url: string | null }) => { if (data.url) window.open(data.url, "_blank"); toast.info("Redirecting to checkout..."); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
-  const slotsMutation = trpc.licenses.purchaseSlots.useMutation({
+  const slotsMutation = trpc.livingArchive.purchaseSlotPackage.useMutation({
     onSuccess: (data: { url: string | null }) => { if (data.url) window.open(data.url, "_blank"); toast.info("Redirecting to checkout..."); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
@@ -446,10 +446,21 @@ export default function DashboardPage() {
                 <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "var(--lnx-red)" : "oklch(0.65 0.2 300)" }} />
               </div>
             </div>
-            <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Need more? Add slots at $0.99 each.</p>
-            <Button size="sm" className="w-full" variant="outline" onClick={() => slotsMutation.mutate({ slots: 10, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "oklch(0.65 0.2 300 / 0.5)", color: "oklch(0.65 0.2 300)" }}>
-              {slotsMutation.isPending ? "Processing..." : "Buy 10 Slots ($9.90)"}
-            </Button>
+            <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Need more? Choose a package — one-time, no subscription.</p>
+            <div className="grid grid-cols-3 gap-1 mb-2">
+              {(["micro_10", "micro_30", "micro_50"] as const).map((pkg) => (
+                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "oklch(0.65 0.2 300 / 0.5)", color: "oklch(0.65 0.2 300)", fontSize: "11px", padding: "4px 2px" }}>
+                  {pkg === "micro_10" ? "10 · $8.80" : pkg === "micro_30" ? "30 · $26.40" : "50 · $44"}
+                </Button>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {(["bulk_100", "bulk_300", "bulk_500"] as const).map((pkg) => (
+                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "oklch(0.65 0.2 300 / 0.5)", color: "oklch(0.65 0.2 300)", fontSize: "11px", padding: "4px 2px" }}>
+                  {pkg === "bulk_100" ? "100 · $88" : pkg === "bulk_300" ? "300 · $264" : "500 · $440"}
+                </Button>
+              ))}
+            </div>
           </div>
 
           {/* Tips / Stripe Connect */}
