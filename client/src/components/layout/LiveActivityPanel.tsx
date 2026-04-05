@@ -252,9 +252,9 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                   Recent Tips
                 </span>
               </div>
-              {tips && tips.length > 0 ? tips.map((t: any, i: number) => (
+              {tips && tips.length > 0 ? tips.map((t: any) => (
                 <div
-                  key={i}
+                  key={t.id}
                   className="flex items-start gap-3 px-4 py-2.5 transition-all"
                   style={{ borderBottom: "1px solid oklch(0.28 0.04 270 / 15%)" }}
                 >

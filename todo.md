@@ -2655,3 +2655,6 @@
 - [ ] Implement vertical volume slider popup on bottom bar with amber lantern styling
 - [ ] Implement unique vertical volume control for cinematic view
 - [ ] Implement unique vertical volume control for theater view
+
+## Bug Fix: Missing React key props in LiveActivityPanel
+- [x] Fixed tips list using array index i as key — changed to t.id (stable unique identifier)
