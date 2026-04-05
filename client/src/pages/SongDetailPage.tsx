@@ -23,12 +23,13 @@ import {
   Play, Pause, Share2, Copy, DollarSign, MessageSquare,
   Shield, Music, ChevronLeft, Download, Headphones,
   Wand2, ExternalLink, Check, ChevronDown, ChevronUp, Twitter, Heart,
-  Video, ImageIcon,
+  Video, ImageIcon, History,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { WIDPanel } from "@/components/WIDPanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
+import { VersionHistoryModal } from "@/components/VersionHistoryModal";
 import { safeAudioUrl } from "@shared/const";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
@@ -101,6 +102,7 @@ export default function SongDetailPage() {
     },
   });
   const [shareOpen, setShareOpen] = useState(false);
+  const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === `song-${songId}`;
   const isPlaying = isThisTrackActive && playerState.isPlaying;
@@ -585,6 +587,10 @@ export default function SongDetailPage() {
                     );
                     return null;
                   })()}
+                  <Button size="sm" variant="outline" onClick={() => setVersionHistoryOpen(true)}
+                    style={{ borderColor: "oklch(0.84 0.155 85 / 0.3)", color: "oklch(0.84 0.155 85)" }}>
+                    <History className="w-3.5 h-3.5 mr-1" />Versions
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => setShareOpen(true)}
                     style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
                     <Share2 className="w-3.5 h-3.5 mr-1" />Share
@@ -895,6 +901,17 @@ export default function SongDetailPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Version History Modal */}
+      {song && (
+        <VersionHistoryModal
+          songId={song.id}
+          songTitle={song.title}
+          isOwner={isOwner}
+          open={versionHistoryOpen}
+          onClose={() => setVersionHistoryOpen(false)}
+        />
+      )}
 
       {/* Share Modal */}
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>

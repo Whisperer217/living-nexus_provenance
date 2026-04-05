@@ -288,6 +288,13 @@
       "when": 1775363142138,
       "tag": "0040_yielding_captain_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1775368893036,
+      "tag": "0041_dusty_beast",
+      "breakpoints": true
     }
   ]
 }

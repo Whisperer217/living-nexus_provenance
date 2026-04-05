@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Play, Pause, Search, Music, Users, Shield, ChevronRight, Star, MoreHorizontal, FileText, BookOpen, Layers } from "lucide-react";
 import { WorkCarousel } from "@/components/WorkCarousel";
 import { MediaAsset } from "@/components/MediaAsset";
+import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { toast } from "sonner";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -412,14 +413,9 @@ export default function DiscoverPage() {
                         <Badge className="text-xs font-mono px-1 py-0 wid-glow" style={{ background: "oklch(0.84 0.155 85 / 0.20)", color: "oklch(0.84 0.155 85)", fontSize: "9px", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}>WID</Badge>
                       </div>
                     )}
-                    {item.creator?.aiDisclosure && item.creator.aiDisclosure !== "original" && (
+                    {item.creator?.aiDisclosure && (
                       <div className="absolute top-2 left-2">
-                        <Badge className="text-[8px] font-mono px-1 py-0" style={{
-                          background: item.creator.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.9)" : "oklch(0.60 0.18 55 / 0.9)",
-                          color: "white",
-                        }}>
-                          {item.creator.aiDisclosure === "ai_generated" ? "AI" : "AI+"}
-                        </Badge>
+                        <AiDisclosurePill value={item.creator.aiDisclosure as any} size="compact" />
                       </div>
                     )}
                   </div>

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import PlayerTipModal from "./PlayerTipModal";
+import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 
 function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
@@ -858,14 +859,12 @@ export default function MobilePlayerPanel() {
                     </div>
                   </div>
                 )}
-                {currentTrack?.aiDisclosure && currentTrack.aiDisclosure !== "original" && (
+                {currentTrack?.aiDisclosure && (
                   <div className="flex items-start gap-2.5">
                     <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 25)" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>Provenance</div>
-                      <span className="text-[12px]" style={{ color: "oklch(0.80 0.02 280)" }}>
-                        {currentTrack.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
-                      </span>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>AI Disclosure</div>
+                      <AiDisclosurePill value={currentTrack.aiDisclosure as any} size="full" showTooltip={false} />
                     </div>
                   </div>
                 )}

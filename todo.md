@@ -2567,3 +2567,20 @@
 - [x] Register /terms route in App.tsx
 - [x] Add Terms link to sidebar/footer navigation (mobile drawer + desktop TopBar drawer)
 - [x] Style with Divine Noir aesthetic matching ManifestoPage
+
+## Phase: AI Disclosure Audit & Work Versioning (Apr 2026)
+
+- [x] Create shared AiDisclosurePill component (single source of truth for all AI disclosure badges)
+- [x] Update TrackCard to use shared AiDisclosurePill (removed inline AiDisclosureBadge)
+- [x] Update ExplorePage to use shared AiDisclosurePill (removed inline AiDisclosureBadge)
+- [x] Update MobilePlayerPanel to use shared AiDisclosurePill
+- [x] Update DiscoverPage to use shared AiDisclosurePill
+- [x] Update EditTrackPanel select option labels: ORIG→Human-Made, AI+→AI-Assisted, AI→AI-Generated
+- [x] Update ProfilePage AI disclosure select option labels to new terminology
+- [x] Add songVersions table to drizzle/schema.ts (versionNumber, versionLabel, fileUrl, witnessId, changeNote, aiDisclosure, fileSizeBytes)
+- [x] Run pnpm db:push to create songVersions table in database
+- [x] Add songVersions DB helpers to server/db.ts (createSongVersion, getSongVersions, getLatestVersionNumber, getSongVersionById)
+- [x] Add versions tRPC router to routers.ts (list, upload procedures — archives original as v1 on first new upload)
+- [x] Build VersionHistoryModal component (version list, upload new version flow, WID per version, doctrine note)
+- [x] Wire VersionHistoryModal into SongDetailPage with "Versions" button in action row
+- [x] TypeScript: 0 errors | Tests: 123/123 passing

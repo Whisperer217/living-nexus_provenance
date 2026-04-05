@@ -909,3 +909,25 @@ export const declarationSignatures = mysqlTable("declarationSignatures", {
 });
 export type DeclarationSignature = typeof declarationSignatures.$inferSelect;
 export type InsertDeclarationSignature = typeof declarationSignatures.$inferInsert;
+
+// ─── Song Versions ────────────────────────────────────────────────────────────
+// Tracks the version history of a song. When a creator uploads a new version,
+// the old audio/video is preserved here with its original WID and provenance.
+// The songs table always holds the CURRENT (latest) version.
+export const songVersions = mysqlTable("songVersions", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("songId").notNull(),              // FK → songs.id
+  creatorId: int("creatorId").notNull(),         // FK → users.id
+  versionNumber: int("versionNumber").notNull(), // 1, 2, 3 …
+  versionLabel: varchar("versionLabel", { length: 128 }), // e.g. "Demo Mix", "Final Master"
+  fileUrl: text("fileUrl").notNull(),            // S3 URL of the audio file for this version
+  fileKey: varchar("fileKey", { length: 512 }),  // S3 key for cleanup
+  witnessId: varchar("witnessId", { length: 64 }), // WID assigned to this version
+  changeNote: text("changeNote"),                // Creator's note about what changed
+  aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated"]).default("original"),
+  durationSeconds: float("durationSeconds"),
+  fileSizeBytes: int("fileSizeBytes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type SongVersion = typeof songVersions.$inferSelect;
+export type InsertSongVersion = typeof songVersions.$inferInsert;

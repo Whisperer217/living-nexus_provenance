@@ -10,7 +10,8 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, Bot, Sparkles, Fingerprint, SkipForward, ListPlus, ExternalLink } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink } from "lucide-react";
+import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLike } from "@/hooks/useLike";
@@ -41,31 +42,7 @@ const CONTENT_TABS: { id: ContentType; label: string; icon: string; color: strin
   { id: "comic",      label: "Comics",      icon: "🎨", color: "oklch(0.65 0.18 25)" },
 ];
 
-/** AI disclosure badge — same design as TrackCard */
-function AiDisclosureBadge({ value }: { value: string }) {
-  if (value === "original") return (
-    <div className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-      style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.45)" }}
-      title="Original human creation">
-      <Fingerprint size={8} /><span>ORIG</span>
-    </div>
-  );
-  if (value === "ai_assisted") return (
-    <div className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-      style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.45)" }}
-      title="AI-assisted creation">
-      <Sparkles size={8} /><span>AI+</span>
-    </div>
-  );
-  if (value === "ai_generated") return (
-    <div className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-      style={{ background: "rgba(0,0,0,0.72)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.45)" }}
-      title="AI-generated content">
-      <Bot size={8} /><span>AI</span>
-    </div>
-  );
-  return null;
-}
+// AiDisclosureBadge replaced by shared AiDisclosurePill component
 
 /** ExploreCard — mirrors TrackCard architecture exactly */
 function ExploreCard({
@@ -154,7 +131,11 @@ function ExploreCard({
           </Link>
         )}
         {/* AI disclosure badge — top-right */}
-        {creator?.aiDisclosure && <AiDisclosureBadge value={creator.aiDisclosure} />}
+        {creator?.aiDisclosure && (
+          <div className="absolute top-2 right-2 z-10">
+            <AiDisclosurePill value={creator.aiDisclosure as any} size="compact" />
+          </div>
+        )}
       </div>
 
       {/* ── Info panel ── */}

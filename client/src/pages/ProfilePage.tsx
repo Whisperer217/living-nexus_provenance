@@ -653,9 +653,9 @@ export default function ProfilePage() {
                 className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[oklch(0.14_0.013_280)] border border-white/[0.1] outline-none cursor-pointer hover:border-[#A78BFA]/50 transition-colors"
                 style={{ background: "oklch(0.14 0.013 280)" }}
               >
-                <option value="original">Original — Human-created</option>
-                <option value="ai_assisted">AI-Assisted — Human + AI</option>
-                <option value="ai_generated">AI-Generated — AI-created</option>
+                <option value="original">Human-Made — No AI Used</option>
+                <option value="ai_assisted">AI-Assisted — Human + AI Tools</option>
+                <option value="ai_generated">AI-Generated — AI-Created</option>
               </select>
             </div>
             {/* Primary Genre */}

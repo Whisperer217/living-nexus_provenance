@@ -10,7 +10,8 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward, Shield, Bot, Sparkles, Fingerprint, Crown } from "lucide-react";
+import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward, Shield, Crown } from "lucide-react";
+import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { Link, useLocation } from "wouter";
@@ -73,46 +74,7 @@ function GenrePills({ genre, maxVisible = 4 }: { genre: string | undefined | nul
   );
 }
 
-/** Map aiDisclosure value to a compact badge label + color */
-function AiDisclosureBadge({ value }: { value: string }) {
-  if (value === "original") {
-    return (
-      <div
-        className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-        style={{ background: "rgba(0,0,0,0.72)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.45)" }}
-        title="Original human creation — no AI generation"
-      >
-        <Fingerprint size={8} />
-        <span>ORIG</span>
-      </div>
-    );
-  }
-  if (value === "ai_assisted") {
-    return (
-      <div
-        className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-        style={{ background: "rgba(0,0,0,0.72)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.45)" }}
-        title="AI-assisted creation"
-      >
-        <Sparkles size={8} />
-        <span>AI+</span>
-      </div>
-    );
-  }
-  if (value === "ai_generated") {
-    return (
-      <div
-        className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider"
-        style={{ background: "rgba(0,0,0,0.72)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.45)" }}
-        title="AI-generated content"
-      >
-        <Bot size={8} />
-        <span>AI</span>
-      </div>
-    );
-  }
-  return null;
-}
+// AiDisclosureBadge replaced by shared AiDisclosurePill component
 
 export default function TrackCard({ track, index, onTip, prefetchedLikeCount, prefetchedLiked }: Props) {
   const { state, addAndPlay, playNext, openNowPlayingPanel, currentTrackId } = usePlayer();
@@ -229,7 +191,9 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
 
         {/* AI Disclosure badge — top-right */}
         {hasAiDisclosure && (
-          <AiDisclosureBadge value={track.aiDisclosure!} />
+          <div className="absolute top-2 right-2 z-10">
+            <AiDisclosurePill value={track.aiDisclosure as any} size="compact" />
+          </div>
         )}
 
         {/* visualReady shimmer — pulsing overlay while auto-video is being generated */}

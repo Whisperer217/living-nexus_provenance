@@ -73,6 +73,7 @@ import {
   listActiveJukeboxRooms,
   createContentFlag, listContentFlags, resolveContentFlag, getContentFlagStats,
   signDeclaration, getDeclarationSignature, countDeclarationSigners,
+  createSongVersion, getSongVersions, getLatestVersionNumber, getSongVersionById,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -3932,6 +3933,100 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           signatureName: input.signatureName,
         });
         return result;
+      }),
+  }),
+
+  // ─── Song Versions ─────────────────────────────────────────────────────────
+  versions: router({
+    // Public: get all versions for a song
+    list: publicProcedure
+      .input(z.object({ songId: z.number() }))
+      .query(async ({ input }) => {
+        return getSongVersions(input.songId);
+      }),
+
+    // Protected: upload a new version (archives current audio, replaces with new)
+    upload: protectedProcedure
+      .input(z.object({
+        songId: z.number(),
+        fileBase64: z.string(),
+        fileMimeType: z.string(),
+        fileName: z.string(),
+        versionLabel: z.string().max(128).optional(),
+        changeNote: z.string().max(1000).optional(),
+        aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Verify ownership
+        const song = await getSongById(input.songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
+        if (song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+
+        // Get next version number
+        const latestVersion = await getLatestVersionNumber(input.songId);
+        const nextVersion = latestVersion + 1;
+
+        // Archive the CURRENT audio as version N (if it has a fileUrl)
+        if (song.fileUrl && nextVersion === 1) {
+          // First new version upload — archive the original as v1
+          const originalWid = song.witnessId ?? `WID-V1-${song.id}`;
+          await createSongVersion({
+            songId: song.id,
+            creatorId: ctx.user.id,
+            versionNumber: 1,
+            versionLabel: "Original",
+            fileUrl: song.fileUrl,
+            fileKey: song.fileKey ?? undefined,
+            witnessId: originalWid,
+            changeNote: "Original upload",
+            aiDisclosure: "original",
+            durationSeconds: song.durationSeconds ?? undefined,
+          });
+        }
+
+        // Upload new audio to S3
+        const buf = Buffer.from(input.fileBase64, "base64");
+        const ext = input.fileName.split(".").pop() ?? "mp3";
+        const randomSuffix = Math.random().toString(36).slice(2, 8);
+        const fileKey = `songs/${ctx.user.id}/${input.songId}/v${nextVersion + 1}-${randomSuffix}.${ext}`;
+        const { url: newFileUrl } = await storagePut(fileKey, buf, input.fileMimeType);
+
+        // Generate WID for new version
+        const crypto = await import("crypto");
+        const hashHex = crypto.createHash("sha256").update(buf).digest("hex");
+        const newWid = `WID-V${nextVersion + 1}-${hashHex.slice(0, 8).toUpperCase()}-${hashHex.slice(8, 16).toUpperCase()}`;
+
+        // Archive the new version
+        await createSongVersion({
+          songId: song.id,
+          creatorId: ctx.user.id,
+          versionNumber: nextVersion + 1,
+          versionLabel: input.versionLabel ?? `Version ${nextVersion + 1}`,
+          fileUrl: newFileUrl,
+          fileKey,
+          witnessId: newWid,
+          changeNote: input.changeNote ?? null,
+          aiDisclosure: input.aiDisclosure ?? "original",
+          fileSizeBytes: buf.length,
+        });
+
+        // Update the songs table to point to the new audio
+        await replaceAudioFile(
+          song.id,
+          ctx.user.id,
+          {
+            fileUrl: newFileUrl,
+            fileKey,
+            fileHash: hashHex,
+            witnessId: newWid,
+          }
+        );
+
+        return {
+          versionNumber: nextVersion + 1,
+          witnessId: newWid,
+          fileUrl: newFileUrl,
+        };
       }),
   }),
 });

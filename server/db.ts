@@ -15,7 +15,9 @@ import {
   witnessTestimonies,
   expressionLineage,
   contentFlags, declarationSignatures,
+  songVersions,
   type InsertContentFlag, type InsertDeclarationSignature,
+  type InsertSongVersion,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3248,4 +3250,47 @@ export async function countDeclarationSigners(version = "1.0") {
     .from(declarationSignatures)
     .where(eq(declarationSignatures.declarationVersion, version));
   return rows[0]?.total ?? 0;
+}
+
+// ─── Song Versions ────────────────────────────────────────────────────────────
+
+/** Create a new version record for a song. */
+export async function createSongVersion(data: InsertSongVersion) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.insert(songVersions).values(data);
+}
+
+/** Get all versions for a song, newest first. */
+export async function getSongVersions(songId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(songVersions)
+    .where(eq(songVersions.songId, songId))
+    .orderBy(desc(songVersions.versionNumber));
+}
+
+/** Get the latest version number for a song (0 if no versions yet). */
+export async function getLatestVersionNumber(songId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ maxVersion: sql<number>`MAX(${songVersions.versionNumber})` })
+    .from(songVersions)
+    .where(eq(songVersions.songId, songId));
+  return rows[0]?.maxVersion ?? 0;
+}
+
+/** Get a single version by its ID. */
+export async function getSongVersionById(versionId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(songVersions)
+    .where(eq(songVersions.id, versionId))
+    .limit(1);
+  return rows[0] ?? null;
 }

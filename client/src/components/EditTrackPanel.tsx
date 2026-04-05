@@ -22,9 +22,9 @@ const GENRES = [
 ];
 
 const AI_CONSENT_LABELS: Record<string, string> = {
-  prohibited: "Original — AI Training Prohibited",
+  prohibited: "Human-Made — No AI Training",
   permitted_attribution: "AI-Assisted — Attribution Required",
-  permitted: "AI-Generated — Permitted",
+  permitted: "AI-Generated — Open Training",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -593,13 +593,13 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               </SelectTrigger>
               <SelectContent style={{ background: "#0d1520", border: "1px solid rgba(212,175,55,0.2)" }}>
                 <SelectItem value="prohibited" className="text-white hover:bg-white/10">
-                  Original — AI Training Prohibited
+                  Human-Made — No AI Training
                 </SelectItem>
                 <SelectItem value="permitted_attribution" className="text-white hover:bg-white/10">
                   AI-Assisted — Attribution Required
                 </SelectItem>
                 <SelectItem value="permitted" className="text-white hover:bg-white/10">
-                  AI-Generated — Permitted
+                  AI-Generated — Open Training
                 </SelectItem>
               </SelectContent>
             </Select>
