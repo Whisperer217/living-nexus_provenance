@@ -130,20 +130,34 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const staticBadge = !pulseBadge && !jukeboxBadge && !archiveBadge && isLive ? item.badge : null;
     const labelColor = item.goldLabel ? (active ? "#E8A830" : "oklch(0.72 0.13 72 / 0.7)") : undefined;
 
+    const warmActiveBg = "rgba(184,150,62,0.13)";
+    const warmHoverBg = "rgba(44,26,14,0.07)";
+    const warmActiveText = "#B8963E";
+    const warmMutedText = "#6B4C35";
+    const warmBodyText = "#2C1A0E";
+
     return (
       <button
         key={item.label}
         onClick={() => goTo(item.path)}
         title={item.label}
         className={`w-full flex items-center gap-3 transition-all duration-150 relative px-4 py-3 text-[14px]
-          ${active ? "text-white/95" : "text-white/40 hover:text-[oklch(0.82_0.155_75)] hover:bg-[oklch(0.82_0.155_75/0.06)]"}`}
-        style={active ? { background: "oklch(0.82 0.155 75 / 0.10)" } : {}}
+          ${!isWarm ? (active ? "text-white/95" : "text-white/40 hover:text-[oklch(0.82_0.155_75)] hover:bg-[oklch(0.82_0.155_75/0.06)]") : ""}`}
+        style={{
+          background: active ? (isWarm ? warmActiveBg : "oklch(0.82 0.155 75 / 0.10)") : "transparent",
+          color: isWarm ? (active ? warmActiveText : warmMutedText) : undefined,
+          transition: "background 0.3s ease, color 0.3s ease",
+        }}
+        onMouseEnter={isWarm ? e => { if (!active) { (e.currentTarget as HTMLElement).style.background = warmHoverBg; (e.currentTarget as HTMLElement).style.color = warmBodyText; } } : undefined}
+        onMouseLeave={isWarm ? e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = warmMutedText; } } : undefined}
       >
         <Icon size={16} style={{
-          color: active ? (item.goldLabel ? "#E8A830" : "oklch(0.82 0.155 75)") : (item.goldLabel ? "oklch(0.72 0.13 72 / 0.7)" : "inherit"),
-          opacity: active ? 1 : (item.goldLabel ? 1 : 0.6),
+          color: isWarm
+            ? (active ? warmActiveText : warmMutedText)
+            : (active ? (item.goldLabel ? "#E8A830" : "oklch(0.82 0.155 75)") : (item.goldLabel ? "oklch(0.72 0.13 72 / 0.7)" : "inherit")),
+          opacity: (!isWarm && !active && !item.goldLabel) ? 0.6 : 1,
         }} />
-        <span className="flex-1 text-left font-body" style={labelColor ? { color: labelColor } : undefined}>{item.label}</span>
+        <span className="flex-1 text-left font-body" style={isWarm ? { color: active ? warmActiveText : warmMutedText } : (labelColor ? { color: labelColor } : undefined)}>{item.label}</span>
         {pulseBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse" style={{ background: "oklch(0.65 0.22 25)", color: "white" }}>{pulseBadge}</span>}
         {!pulseBadge && countBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center" style={isArchive ? { background: "oklch(0.82 0.155 75 / 0.18)", color: "#E8A830", border: "1px solid oklch(0.82 0.155 75 / 0.3)" } : { background: "oklch(0.82 0.155 75)", color: "oklch(0.12 0.02 55)" }}>{countBadge}</span>}
         {!pulseBadge && !countBadge && staticBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto" style={{ background: "oklch(0.78 0.12 175 / 0.20)", color: "oklch(0.78 0.12 175)", border: "1px solid oklch(0.78 0.12 175 / 0.30)" }}>{staticBadge}</span>}

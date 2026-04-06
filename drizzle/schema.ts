@@ -225,6 +225,7 @@ export const comments = mysqlTable("comments", {
   userId: int("userId"),
   authorName: varchar("authorName", { length: 128 }),
   content: text("content").notNull(),
+  parentId: int("parentId"), // null = top-level comment, set = reply to parentId
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

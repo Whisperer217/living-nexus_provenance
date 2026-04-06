@@ -2883,3 +2883,12 @@
 - [x] Fix What's New version badge in TopBar drawer (updated v2.18 → v2.24)
 - [x] Fix What's New version badge in MainLayout mobile sidebar (updated v2.18 → v2.24)
 - [ ] Comment reply system — DB has no parentId column yet; needs schema migration before threading can be built
+
+## Phase 55: Comment Threading + Warm Mobile Nav + Profile Bio Cache
+- [x] Add parentId column to comments table (nullable int, self-referential FK)
+- [x] Run pnpm db:push to migrate (migration 0054_mature_leopardon.sql applied)
+- [x] Add comments.addReply tRPC procedure (protected, requires parentId)
+- [x] Update comments.getBySong to return replies nested under parent comments
+- [x] Render threaded replies on SongDetailPage — reply button, indented reply list, reply input
+- [x] Apply warm theme inline styles to renderMobileNavItem in MainLayout (text color, active bg)
+- [x] Fix profile.me staleTime/refetchOnMount so bio always loads fresh on profile page visit

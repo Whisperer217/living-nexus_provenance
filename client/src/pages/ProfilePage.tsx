@@ -164,9 +164,12 @@ export default function ProfilePage() {
     }
   };
 
-  // Load full profile from DB
+  // Load full profile from DB — always fetch fresh on mount so bio/photo updates are immediately visible
   const { data: profile, isLoading: profileLoading } = trpc.profile.me.useQuery(undefined, {
     enabled: !!user,
+    staleTime: 0,           // treat cached data as immediately stale
+    refetchOnMount: true,   // always re-fetch when the profile page is visited
+    refetchOnWindowFocus: true, // re-fetch when tab regains focus
   });
 
   // Load user's songs from DB

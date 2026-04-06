@@ -66,6 +66,8 @@ export default function SongDetailPage() {
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
   const [commentText, setCommentText] = useState("");
+  const [replyingTo, setReplyingTo] = useState<{ id: number; authorName: string } | null>(null);
+  const [replyText, setReplyText] = useState("");
   const [showLyrics, setShowLyrics] = useState(false);
   const [editingLyrics, setEditingLyrics] = useState(false);
   const [lyricsEdit, setLyricsEdit] = useState("");
@@ -194,6 +196,10 @@ export default function SongDetailPage() {
   });
   const commentMutation = trpc.comments.add.useMutation({
     onSuccess: () => { setCommentText(""); refetchComments(); refetchEvents(); toast.success("Comment posted!"); },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+  const replyMutation = trpc.comments.addReply.useMutation({
+    onSuccess: () => { setReplyText(""); setReplyingTo(null); refetchComments(); toast.success("Reply posted!"); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
   // WID-tagged download: permission check via tRPC, then trigger /api/download/:songId
@@ -801,60 +807,98 @@ export default function SongDetailPage() {
                 </div>
               </div>
 
-              {/* Unified event thread */}
-              <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                {eventThread && eventThread.length > 0 ? (
-                  eventThread.map((ev: any) => {
-                    const isTip = ev.type === "TIP";
-                    const payload = ev.payload || {};
-                    const actorInitial = (ev.actorName || "A").charAt(0).toUpperCase();
-                    const timeStr = new Date(ev.createdAt).toLocaleDateString();
-
-                    if (isTip) {
-                      const dollars = ((payload.amountCents || 0) / 100).toFixed(2);
-                      return (
-                        <div key={ev.id} className="flex gap-2 rounded-xl px-3 py-2"
-                          style={{ background: "oklch(0.14 0.04 85 / 0.25)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+              {/* Threaded comment list — from comments.list (supports replies) */}
+              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                {comments && comments.length > 0 ? (
+                  (comments as any[]).map((c: any) => {
+                    const initial = (c.authorName || "A").charAt(0).toUpperCase();
+                    const timeStr = new Date(c.createdAt).toLocaleDateString();
+                    const isReplying = replyingTo?.id === c.id;
+                    return (
+                      <div key={c.id}>
+                        {/* Top-level comment */}
+                        <div className="flex gap-2">
                           <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                            style={{ background: "oklch(0.84 0.155 85 / 0.2)" }}>
-                            <DollarSign className="w-3.5 h-3.5" style={{ color: "oklch(0.84 0.155 85)" }} />
+                            style={{ background: "oklch(0.18 0.03 280)" }}>
+                            <span style={{ color: "oklch(0.65 0.04 280)" }}>{initial}</span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-xs font-semibold" style={{ color: "oklch(0.84 0.155 85)" }}>
-                                {ev.actorName || "A fan"}
-                              </span>
-                              <span className="text-[10px]" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }}>tipped</span>
-                              <span className="text-xs font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>${dollars}</span>
+                              <span className="text-xs font-medium" style={{ color: "oklch(0.7 0.04 280)" }}>{c.authorName || "Anonymous"}</span>
                               <span className="text-[10px] ml-auto" style={{ color: "oklch(0.35 0.02 280)" }}>{timeStr}</span>
                             </div>
-                            {payload.message && (
-                              <p className="text-xs italic" style={{ color: "oklch(0.65 0.06 85)" }}>"{payload.message}"</p>
-                            )}
+                            <p className="text-sm" style={{ color: "oklch(0.7 0.03 280)" }}>{c.content}</p>
+                            <button
+                              onClick={() => { setReplyingTo(isReplying ? null : { id: c.id, authorName: c.authorName || "Anonymous" }); setReplyText(""); }}
+                              className="text-[10px] mt-1 transition-colors"
+                              style={{ color: isReplying ? "oklch(0.80 0.145 82)" : "oklch(0.40 0.02 280)" }}
+                            >
+                              {isReplying ? "Cancel" : `Reply`}
+                              {c.replies?.length > 0 && !isReplying && ` · ${c.replies.length} ${c.replies.length === 1 ? "reply" : "replies"}`}
+                            </button>
                           </div>
                         </div>
-                      );
-                    }
 
-                    // COMMENT
-                    return (
-                      <div key={ev.id} className="flex gap-2">
-                        <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                          style={{ background: "oklch(0.18 0.03 280)" }}>
-                          <span style={{ color: "oklch(0.65 0.04 280)" }}>{actorInitial}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-xs font-medium" style={{ color: "oklch(0.7 0.04 280)" }}>{ev.actorName || "Anonymous"}</span>
-                            <span className="text-[10px] ml-auto" style={{ color: "oklch(0.35 0.02 280)" }}>{timeStr}</span>
+                        {/* Inline reply input */}
+                        {isReplying && (
+                          <div className="ml-9 mt-2 flex gap-2">
+                            <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
+                              style={{ background: "oklch(0.2 0.04 280)" }}>
+                              {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
+                            </div>
+                            <div className="flex-1 space-y-1.5">
+                              <Input
+                                placeholder={`Reply to ${replyingTo?.authorName ?? "comment"}…`}
+                                value={replyText}
+                                onChange={e => setReplyText(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === "Enter" && !e.shiftKey && replyText.trim()) {
+                                    e.preventDefault();
+                                    replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim(), authorName: user?.name || undefined });
+                                  }
+                                  if (e.key === "Escape") { setReplyingTo(null); setReplyText(""); }
+                                }}
+                                style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.85 0.02 280)", fontSize: "12px", height: "32px" }}
+                                autoFocus
+                              />
+                              {replyText.trim() && (
+                                <Button size="sm"
+                                  onClick={() => replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim(), authorName: user?.name || undefined })}
+                                  disabled={replyMutation.isPending}
+                                  className="h-6 text-[11px] px-2"
+                                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
+                                  Post reply
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-sm" style={{ color: "oklch(0.7 0.03 280)" }}>{payload.content || ""}</p>
-                        </div>
+                        )}
+
+                        {/* Nested replies */}
+                        {c.replies?.length > 0 && (
+                          <div className="ml-9 mt-2 space-y-2 pl-3" style={{ borderLeft: "1px solid oklch(0.22 0.02 280)" }}>
+                            {(c.replies as any[]).map((r: any) => (
+                              <div key={r.id} className="flex gap-2">
+                                <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
+                                  style={{ background: "oklch(0.16 0.025 280)" }}>
+                                  <span style={{ color: "oklch(0.55 0.04 280)" }}>{(r.authorName || "A").charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-0.5">
+                                    <span className="text-[11px] font-medium" style={{ color: "oklch(0.65 0.04 280)" }}>{r.authorName || "Anonymous"}</span>
+                                    <span className="text-[9px] ml-auto" style={{ color: "oklch(0.30 0.02 280)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
+                                  </div>
+                                  <p className="text-xs" style={{ color: "oklch(0.62 0.03 280)" }}>{r.content}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     );
                   })
                 ) : (
-                  <p className="text-xs text-center py-4" style={{ color: "oklch(0.4 0.03 280)" }}>Be the first to comment or send a gift</p>
+                  <p className="text-xs text-center py-4" style={{ color: "oklch(0.4 0.03 280)" }}>Be the first to comment</p>
                 )}
               </div>
             </div>

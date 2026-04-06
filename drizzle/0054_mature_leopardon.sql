@@ -1,0 +1,1 @@
+ALTER TABLE `comments` ADD `parentId` int DEFAULT null;

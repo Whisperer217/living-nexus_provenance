@@ -497,10 +497,34 @@ export async function updateSongMetadata(
 export async function getCommentsBySong(songId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(comments).where(eq(comments.songId, songId)).orderBy(desc(comments.createdAt)).limit(100);
+  // Fetch all comments for the song (top-level + replies), oldest first for threading
+  const allComments = await db
+    .select()
+    .from(comments)
+    .where(eq(comments.songId, songId))
+    .orderBy(comments.createdAt)
+    .limit(200);
+  // Build threaded structure: top-level comments with nested replies
+  type CommentRow = typeof allComments[0];
+  type CommentWithReplies = CommentRow & { replies: CommentRow[] };
+  const topLevel: CommentWithReplies[] = [];
+  const replyMap = new Map<number, CommentRow[]>();
+  for (const c of allComments) {
+    if (c.parentId == null) {
+      topLevel.push({ ...c, replies: [] });
+    } else {
+      const arr = replyMap.get(c.parentId) ?? [];
+      arr.push(c);
+      replyMap.set(c.parentId, arr);
+    }
+  }
+  for (const c of topLevel) {
+    c.replies = replyMap.get(c.id) ?? [];
+  }
+  // Return newest top-level first
+  return topLevel.reverse();
 }
-
-export async function addComment(data: { songId: number; userId?: number; authorName?: string; content: string }) {
+export async function addComment(data: { songId: number; userId?: number; authorName?: string; content: string; parentId?: number | null }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   return db.insert(comments).values(data);
