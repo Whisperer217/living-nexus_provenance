@@ -1183,7 +1183,90 @@ export default function CreatorProfilePage() {
       </div>{/* end profile header bg */}
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
-
+        {/* ── Projects Section (top priority) ── */}
+        {(creatorProjects as any[]).length > 0 && (
+          <section className="py-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                Projects
+              </h2>
+              {isOwner && (
+                <Link href="/my-projects">
+                  <button className="text-xs px-3 py-1 rounded-lg transition-colors" style={{ color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.28 0.08 80)" }}>
+                    Manage Projects
+                  </button>
+                </Link>
+              )}
+            </div>
+            {/* Netflix-style horizontal scroll on mobile, grid on desktop */}
+            <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-4 pb-2" style={{ minWidth: "max-content" }}>
+                {(creatorProjects as any[]).map((project: any) => (
+                  <Link key={project.id} href={`/project/${project.slug}`}>
+                    <div
+                      className="relative rounded-xl overflow-hidden cursor-pointer group flex-shrink-0"
+                      style={{ width: "220px", height: "160px", background: "oklch(0.14 0.015 280)" }}
+                    >
+                      {project.bannerUrl ? (
+                        <img src={project.bannerUrl} alt={project.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-[#1a1025] to-[#080d14] flex items-center justify-center">
+                          <span className="text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85 / 0.2)" }}>{project.title[0]}</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+                        <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>{project.title}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-[10px]" style={{ color: "oklch(0.6 0.04 280)" }}>
+                            ${((project.raisedAmountCents || 0) / 100).toLocaleString()} raised
+                          </span>
+                          <span
+                            className="text-[9px] px-1.5 py-0.5 rounded font-medium"
+                            style={{
+                              background: project.status === "active" ? "oklch(0.35 0.12 145 / 0.8)" : "oklch(0.18 0.02 280 / 0.8)",
+                              color: project.status === "active" ? "oklch(0.85 0.15 145)" : "oklch(0.6 0.03 280)",
+                            }}
+                          >
+                            {project.status === "active" ? "Funding" : project.status === "completed" ? "Done" : "Draft"}
+                          </span>
+                        </div>
+                        {project.goalAmountCents && project.raisedAmountCents > 0 && (
+                          <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${Math.min(100, Math.round((project.raisedAmountCents / project.goalAmountCents) * 100))}%`,
+                                background: "oklch(0.84 0.155 85)",
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      {project.linkedWitnessId && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.2 300 / 0.9)" }}>
+                          <Shield className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+        {isOwner && (creatorProjects as any[]).length === 0 && (
+          <section className="py-6">
+            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Projects</h2>
+            <div className="text-center py-10 rounded-xl" style={{ border: "1px dashed oklch(0.25 0.02 280)" }}>
+              <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
+              <p className="text-sm mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>No projects yet.</p>
+              <Link href="/my-projects">
+                <Button style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Start a Project</Button>
+              </Link>
+            </div>
+          </section>
+        )}
         {/* ── Featured Songs Grid ── */}
         {featuredSongs.length > 0 && (
           <section className="py-6">
@@ -1374,91 +1457,6 @@ export default function CreatorProfilePage() {
               </Link>
             )}
           </div>
-        )}
-
-        {/* ── Projects Section ── */}
-        {(creatorProjects as any[]).length > 0 && (
-          <section className="py-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
-                Projects
-              </h2>
-              {isOwner && (
-                <Link href="/my-projects">
-                  <button className="text-xs px-3 py-1 rounded-lg transition-colors" style={{ color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.28 0.08 80)" }}>
-                    Manage Projects
-                  </button>
-                </Link>
-              )}
-            </div>
-            {/* Netflix-style horizontal scroll on mobile, grid on desktop */}
-            <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
-              <div className="flex gap-4 pb-2" style={{ minWidth: "max-content" }}>
-                {(creatorProjects as any[]).map((project: any) => (
-                  <Link key={project.id} href={`/project/${project.slug}`}>
-                    <div
-                      className="relative rounded-xl overflow-hidden cursor-pointer group flex-shrink-0"
-                      style={{ width: "220px", height: "160px", background: "oklch(0.14 0.015 280)" }}
-                    >
-                      {project.bannerUrl ? (
-                        <img src={project.bannerUrl} alt={project.title} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#1a1025] to-[#080d14] flex items-center justify-center">
-                          <span className="text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85 / 0.2)" }}>{project.title[0]}</span>
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200" />
-                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
-                        <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>{project.title}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-[10px]" style={{ color: "oklch(0.6 0.04 280)" }}>
-                            ${((project.raisedAmountCents || 0) / 100).toLocaleString()} raised
-                          </span>
-                          <span
-                            className="text-[9px] px-1.5 py-0.5 rounded font-medium"
-                            style={{
-                              background: project.status === "active" ? "oklch(0.35 0.12 145 / 0.8)" : "oklch(0.18 0.02 280 / 0.8)",
-                              color: project.status === "active" ? "oklch(0.85 0.15 145)" : "oklch(0.6 0.03 280)",
-                            }}
-                          >
-                            {project.status === "active" ? "Funding" : project.status === "completed" ? "Done" : "Draft"}
-                          </span>
-                        </div>
-                        {project.goalAmountCents && project.raisedAmountCents > 0 && (
-                          <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${Math.min(100, Math.round((project.raisedAmountCents / project.goalAmountCents) * 100))}%`,
-                                background: "oklch(0.84 0.155 85)",
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                      {project.linkedWitnessId && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.2 300 / 0.9)" }}>
-                          <Shield className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-        {isOwner && (creatorProjects as any[]).length === 0 && (
-          <section className="py-6">
-            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Projects</h2>
-            <div className="text-center py-10 rounded-xl" style={{ border: "1px dashed oklch(0.25 0.02 280)" }}>
-              <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
-              <p className="text-sm mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>No projects yet.</p>
-              <Link href="/my-projects">
-                <Button style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Start a Project</Button>
-              </Link>
-            </div>
-          </section>
         )}
 
         {/* ── Witness Testimonies ── */}

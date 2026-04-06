@@ -2935,3 +2935,8 @@
 - [x] Steel overlay approach confirmed: only TopBar + MainLayout get the rgba tint via React inline styles
 - [x] OG metadata errors confirmed as pre-restart artifacts — no new errors since server restart
 - [x] WID verification for PROJ-* WIDs confirmed working in routers.ts
+
+## Phase 63: Projects Section — Move to Top
+- [x] Move Projects section above Featured Songs on HomePage
+- [x] Move Creator Projects section above Featured Songs on CreatorProfilePage
+- [x] Verify projects section renders correctly at top position
