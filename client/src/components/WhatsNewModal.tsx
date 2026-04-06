@@ -5,19 +5,29 @@ import {
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
   Eye, Globe, FileText, Network, Scroll, Film, Gift, Link2,
   Radio, ArrowUpFromLine, Library, FileArchive, Rocket, ImagePlus, Compass,
-  Bell, LayoutGrid, ImageIcon,
+  Bell, LayoutGrid, ImageIcon, Sun, Moon, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.22.0";
+const CURRENT_VERSION = "v2.23.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.22.0",
+    version: "v2.23.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Sun, text: "Lights On — A new global display mode lives in your Profile → Settings. Toggle between Lantern Mode (the classic charred-oak dark palette) and Espresso Crème (a warm steamed-cream palette with roasted caramel accents). The switch applies instantly across the entire platform for every visitor." },
+      { icon: Sparkles, text: "Instant Palette Fade — Switching modes now animates smoothly over 0.4 seconds instead of snapping. Background, text, and accent colors all cross-fade together for a polished, intentional feel." },
+      { icon: Moon, text: "Flash-Free Load — Your last-chosen mode is remembered in the browser. On your next visit the correct palette is applied before the first pixel paints, so there is never a flash of the wrong theme." },
+    ],
+  },
+  {
+    version: "v2.22.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Bell, text: "Follow Projects — You can now follow any creator campaign without donating. Hit the Follow button on any project page to subscribe to updates. You’ll receive an in-app notification every time the creator posts a progress update, keeping you in the loop from day one." },
       { icon: LayoutGrid, text: "Featured Projects on Explore — The Explore page now surfaces active creator campaigns in a dedicated Featured Projects grid. Discover what the community is building, track funding progress, and follow projects you care about — all from the same page where you find new music." },

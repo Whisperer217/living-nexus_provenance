@@ -2838,3 +2838,8 @@
 - [x] Define .lights-on CSS variable overrides in index.css (espresso crème palette)
 - [x] Wire LightsModeContext into App.tsx / main.tsx
 - [x] Add Lights On / Dim toggle control to creator's ProfilePage settings panel
+
+## Phase 47: Lights Mode Polish
+- [x] Add CSS transition (background-color 0.45s, color 0.35s) to html/body for graceful palette fade
+- [x] Persist lightsMode in localStorage — hydrate synchronously at module load to eliminate flash
+- [x] Bump What's New modal to v2.23.0 with Espresso Crème / Lights toggle entry

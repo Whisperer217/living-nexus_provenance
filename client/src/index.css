@@ -211,10 +211,19 @@
     height: 100%;
     overflow: hidden;
   }
+  /* Graceful Lights On ↔ Lights Dim transition — all color tokens fade together */
+  html {
+    transition:
+      background-color 0.45s ease,
+      color 0.35s ease;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'DM Sans', sans-serif;
     font-weight: 400; /* base — components bump up as needed */
+    transition:
+      background-color 0.45s ease,
+      color 0.35s ease;
   }
   /* Typography weight upgrade — body text one step heavier for daylight readability */
   p, span, li, td, th, label, input, textarea, select {
