@@ -218,6 +218,7 @@ export default function ProfilePage() {
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, { enabled: !!user });
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [activityLimit, setActivityLimit] = useState(8);
   const replyMutation = trpc.notifications.reply.useMutation({
     onSuccess: () => {
       utils.notifications.list.invalidate();
@@ -880,7 +881,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {(myActivity as any[]).slice(0, 8).map((evt) => {
+                  {(myActivity as any[]).slice(0, activityLimit).map((evt) => {
                     const iconMap: Record<string, { icon: any; color: string; label: string }> = {
                       TIP: { icon: DollarSign, color: "#4ade80", label: "Gift received" },
                       COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Comment" },
@@ -891,20 +892,30 @@ export default function ProfilePage() {
                       SYSTEM_UPDATE: { icon: Zap, color: "#60a5fa", label: "System Update" },
                       PRESERVATION_MODE: { icon: Star, color: "#D4AF37", label: "Preservation Mode" },
                       PROJECT_PUBLISHED: { icon: Layers, color: "#34d399", label: "Project Published" },
+                      PROJECT_FUNDED: { icon: DollarSign, color: "#34d399", label: "Project Funded" },
                       FOLLOW: { icon: Users, color: "#f472b6", label: "New Follower" },
                       PROJECT_ARCHIVED: { icon: Star, color: "#94a3b8", label: "Project Archived" },
                       PROJECT_DRAFT: { icon: Star, color: "#94a3b8", label: "Project Saved as Draft" },
                     };
                     const meta = iconMap[evt.type] ?? { icon: Activity, color: "#A78BFA", label: evt.type };
                     const Icon = meta.icon;
+                    // Build navigation link: song link or project link
+                    const evtLink = (evt as any).songLink ?? ((evt as any).projectSlug ? `/project/${(evt as any).projectSlug}` : null);
+                    const titleEl = evt.songTitle ? (
+                      evtLink ? (
+                        <Link href={evtLink} className="text-[11px] font-body text-[#A78BFA]/70 ml-1 truncate hover:text-[#A78BFA] transition-colors">— {evt.songTitle}</Link>
+                      ) : (
+                        <span className="text-[11px] font-body text-white/35 ml-1 truncate">— {evt.songTitle}</span>
+                      )
+                    ) : null;
                     return (
                       <div key={evt.id} className="flex items-center gap-3 p-2.5 rounded-xl border border-white/[0.04] bg-white/[0.02]">
                         <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: `${meta.color}15` }}>
                           <Icon size={12} style={{ color: meta.color }} />
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-baseline flex-wrap gap-x-0">
                           <span className="text-[12px] font-body text-white/65">{meta.label}</span>
-                          {evt.songTitle && <span className="text-[11px] font-body text-white/35 ml-1 truncate">— {evt.songTitle}</span>}
+                          {titleEl}
                         </div>
                         <span className="text-[10px] font-body text-white/25 flex-shrink-0">
                           {new Date(evt.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
@@ -912,6 +923,14 @@ export default function ProfilePage() {
                       </div>
                     );
                   })}
+                  {(myActivity as any[]).length > activityLimit && (
+                    <button
+                      onClick={() => setActivityLimit(prev => prev + 12)}
+                      className="w-full py-2 text-[11px] font-body text-white/35 hover:text-white/60 transition-colors rounded-xl border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04]"
+                    >
+                      Show more ({(myActivity as any[]).length - activityLimit} remaining)
+                    </button>
+                  )}
                 </div>
               )}
             </div>

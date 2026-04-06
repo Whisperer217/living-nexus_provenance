@@ -373,6 +373,7 @@ export const events = mysqlTable("events", {
     "SYSTEM_UPDATE",
     "PRESERVATION_MODE",
     "PROJECT_PUBLISHED",
+    "PROJECT_FUNDED",
   ]).notNull(),
 
   // Work reference (WID origin node)

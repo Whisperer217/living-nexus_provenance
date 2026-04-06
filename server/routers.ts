@@ -214,6 +214,18 @@ export async function handleStripeWebhook(req: any, res: any) {
             stripeSessionId: session.id,
             stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
           });
+          // Log PROJECT_FUNDED activity event for the project creator's feed
+          await createEvent({
+            type: "PROJECT_FUNDED",
+            workId: parseInt(meta.projectId),
+            actorId: meta.userId ? parseInt(meta.userId) : undefined,
+            actorName: meta.anonymous === "true" ? "Anonymous" : (meta.donorName || "A supporter"),
+            payload: {
+              amountCents,
+              message: meta.message || null,
+              anonymous: meta.anonymous === "true",
+            },
+          });
         }
         // Platform gift (Founder's Era): record supporter status
         if (meta.type === "platform_gift" && meta.userId) {

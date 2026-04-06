@@ -1250,7 +1250,7 @@ export async function getAllUsersWithStats(limit: number = 50, offset: number = 
  * for the unified interaction thread.
  */
 export async function createEvent(data: {
-  type: "TIP" | "COMMENT" | "LIKE" | "FOLLOW" | "WITNESS_REGISTERED" | "WITNESS_VERIFIED" | "WORK_REFERENCED" | "SYSTEM_UPDATE" | "PRESERVATION_MODE" | "PROJECT_PUBLISHED";
+  type: "TIP" | "COMMENT" | "LIKE" | "FOLLOW" | "WITNESS_REGISTERED" | "WITNESS_VERIFIED" | "WORK_REFERENCED" | "SYSTEM_UPDATE" | "PRESERVATION_MODE" | "PROJECT_PUBLISHED" | "PROJECT_FUNDED";
   workId: number;
   actorId?: number;
   actorName?: string;
@@ -1287,30 +1287,44 @@ export async function getEventsByWork(workId: number, limit = 100) {
 export async function getEventsForCreator(creatorId: number, limit = 200) {
   const db = await getDb();
   if (!db) return [];
-  const { isNull, inArray } = await import("drizzle-orm");
-  // First get all song IDs for this creator
+  const { isNull, inArray, or } = await import("drizzle-orm");
+  // Get all song IDs for this creator
   const creatorSongs = await db
     .select({ id: songs.id, title: songs.title, coverArtUrl: songs.coverArtUrl, coverPositionX: songs.coverPositionX, coverPositionY: songs.coverPositionY })
     .from(songs)
     .where(eq(songs.userId, creatorId));
-  if (!creatorSongs.length) return [];
   const songIds = creatorSongs.map((s: { id: number; title: string | null; coverArtUrl: string | null; coverPositionX: number; coverPositionY: number }) => s.id);
   const songMap: Record<number, { id: number; title: string | null; coverArtUrl: string | null; coverPositionX: number; coverPositionY: number }> = Object.fromEntries(
     creatorSongs.map((s: { id: number; title: string | null; coverArtUrl: string | null; coverPositionX: number; coverPositionY: number }) => [s.id, s])
   );
+  // Get all project IDs + slugs for this creator
+  const creatorProjects = await db
+    .select({ id: projects.id, title: projects.title, slug: projects.slug, bannerUrl: projects.bannerUrl })
+    .from(projects)
+    .where(eq(projects.userId, creatorId));
+  const projectIds = creatorProjects.map((p: { id: number; title: string; slug: string; bannerUrl: string | null }) => p.id);
+  const projectMap: Record<number, { id: number; title: string; slug: string; bannerUrl: string | null }> = Object.fromEntries(
+    creatorProjects.map((p: { id: number; title: string; slug: string; bannerUrl: string | null }) => [p.id, p])
+  );
+  // Build where clause — include both song and project events
+  const allIds = [...songIds, ...projectIds];
+  if (!allIds.length) return [];
   const evts = await db
     .select()
     .from(events)
-    .where(and(inArray(events.workId, songIds), isNull(events.deletedAt)))
+    .where(and(inArray(events.workId, allIds), isNull(events.deletedAt)))
     .orderBy(desc(events.createdAt))
     .limit(limit);
-  // Attach song title/cover to each event for display
+  // Attach song/project title and link info to each event for display
   return evts.map((e: typeof evts[number]) => ({
     ...e,
-    songTitle: songMap[e.workId]?.title ?? null,
-    songCoverArtUrl: songMap[e.workId]?.coverArtUrl ?? null,
+    songTitle: songMap[e.workId]?.title ?? projectMap[e.workId]?.title ?? null,
+    songCoverArtUrl: songMap[e.workId]?.coverArtUrl ?? projectMap[e.workId]?.bannerUrl ?? null,
     songCoverPositionX: songMap[e.workId]?.coverPositionX ?? 50,
     songCoverPositionY: songMap[e.workId]?.coverPositionY ?? 50,
+    // Link helpers: songLink = /song/:id, projectSlug = slug for /project/:slug
+    songLink: songMap[e.workId] ? `/song/${e.workId}` : null,
+    projectSlug: projectMap[e.workId]?.slug ?? null,
   }));
 }
 
