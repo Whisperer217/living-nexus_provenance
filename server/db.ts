@@ -3648,10 +3648,10 @@ export async function saveProjectBlocks(projectId: number, blocks: Array<{
   content?: string;
   imageUrl?: string;
   imageKey?: string;
-  imageCaption?: string;
+  imageCaption?: string | null;
   videoUrl?: string;
   videoType?: "youtube" | "vimeo" | "s3" | "none";
-  videoCaption?: string;
+  videoCaption?: string | null;
 }>): Promise<void> {
   const db = await getDb();
   if (!db) return;
