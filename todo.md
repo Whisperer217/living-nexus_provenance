@@ -2663,3 +2663,11 @@
 - [ ] Diagnose "Download unlock is taking longer than expected" timeout in tip-download flow
 - [ ] Fix Stripe webhook handler to correctly mark tip_download as unlocked
 - [ ] Fix frontend polling to detect unlock reliably without timing out
+
+## WID Explainer, Popup Updates & Terms of Service
+- [x] Audit current homepage WID sections, popup copy, and any existing TOS content
+- [x] Expand homepage with dedicated WID Clarity section (what it proves, what it supports, what it does not replace) with copyright.gov link
+- [x] Update WID-related popups with disclaimer: WelcomeModal, UploadPage (post-WID generation), LearnPage (after interop table)
+- [x] Add Section 2 to Terms of Service: "Witness IDs — Scope and Limitations" with full legal disclaimer language and copyright.gov link; renumbered remaining sections 3–9
+- [x] /terms page already live at /terms with route and footer link
+- [ ] Add TOS acceptance checkbox to registration / first-login flow

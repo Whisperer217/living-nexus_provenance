@@ -9,7 +9,7 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
-  Upload, Music, Image as ImageIcon, Check, Shield, ChevronRight,
+  Upload, Music, Image as ImageIcon, Check, Shield, ShieldCheck, ChevronRight,
   ChevronLeft, Play, Download, Copy, RefreshCw, Zap, Loader2,
   Sparkles, CheckCircle2, X as XIcon, Video,
 } from "lucide-react";
@@ -1053,6 +1053,18 @@ export default function UploadPage() {
                   <Button variant="outline" className="w-full" onClick={downloadCertificate} style={{ borderColor: "oklch(0.75 0.18 85 / 0.4)", color: "oklch(0.84 0.155 85)" }}>
                     <Download className="w-4 h-4 mr-2" /> Download Witness Certificate (HTML)
                   </Button>
+
+                  {/* ── WID Legal Disclaimer ── */}
+                  <div
+                    className="rounded-lg px-3 py-2.5 flex items-start gap-2"
+                    style={{ background: "oklch(0.09 0.015 68 / 0.7)", border: "1px solid oklch(0.84 0.155 85 / 0.15)" }}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }} />
+                    <p className="text-[11px] leading-relaxed" style={{ color: "oklch(0.5 0.025 68)" }}>
+                      Your Witness ID preserves verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration. For legal protection, visit{" "}
+                      <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "oklch(0.65 0.08 85)" }}>copyright.gov/registration</a>.
+                    </p>
+                  </div>
 
                   {/* ── Post-WID Caption Consent Prompt ── */}
                   <div className="rounded-xl p-4 mt-2" style={{ background: "oklch(0.11 0.04 280)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}>

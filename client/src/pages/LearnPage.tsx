@@ -8,7 +8,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import {
-  BookOpen, GitBranch, Shield, Globe, Fingerprint,
+  BookOpen, GitBranch, Shield, ShieldCheck, Globe, Fingerprint,
   ExternalLink, ChevronRight, Search, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -165,11 +165,23 @@ function WIDSpecSection() {
           ))}
         </div>
       </div>
+
+      {/* Legal Disclaimer */}
+      <div
+        className="rounded-xl px-4 py-3 flex items-start gap-2.5"
+        style={{ background: "oklch(0.11 0.025 68 / 0.8)", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}
+      >
+        <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }} />
+        <p className="text-xs leading-relaxed" style={{ color: "oklch(0.52 0.025 68)" }}>
+          <strong style={{ color: "oklch(0.75 0.06 68)" }}>Legal Notice:</strong> Witness IDs are cryptographic provenance records issued by Living Nexus (operated by BDDT Publishing, a DBA of Command Domains LLC). They preserve verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration. For legal copyright protection in the United States, visit{" "}
+          <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "oklch(0.65 0.08 85)" }}>copyright.gov/registration</a>.
+        </p>
+      </div>
     </div>
   );
 }
 
-// ── Lexicon section ────────────────────────────────────────────────────────────
+// ── Lexicon section ─────────────────────────────────────────────────────────────────────────────────
 function LexiconSection() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");

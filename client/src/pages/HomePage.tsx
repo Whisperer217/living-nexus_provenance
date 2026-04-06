@@ -799,6 +799,129 @@ export default function HomePage() {
       <WIDTrustLayer />
 
       {/* ══════════════════════════════════════════════════════════════
+          WID CLARITY — what it proves vs. what it does not replace
+      ══════════════════════════════════════════════════════════════ */}
+      <div className="px-6 pb-2">
+        <div
+          className="rounded-2xl p-5 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, oklch(0.11 0.025 68 / 0.85) 0%, oklch(0.09 0.018 52 / 0.85) 100%)",
+            border: "1px solid oklch(0.84 0.155 85 / 0.22)",
+            boxShadow: "0 0 40px oklch(0.84 0.155 85 / 0.06)",
+          }}
+        >
+          {/* Ambient glow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "radial-gradient(ellipse 60% 40% at 50% 0%, oklch(0.84 0.155 85 / 0.07) 0%, transparent 70%)",
+            }}
+          />
+          {/* Header */}
+          <div className="flex items-center gap-2.5 mb-4 relative">
+            <ShieldCheck className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.84 0.155 85)" }} />
+            <span
+              className="font-heading text-[11px] tracking-[0.2em] uppercase"
+              style={{ color: "oklch(0.84 0.155 85)" }}
+            >
+              What a Witness ID Is — and Is Not
+            </span>
+          </div>
+          {/* Core statement */}
+          <blockquote
+            className="font-body text-[14px] leading-relaxed mb-4 pl-4 relative"
+            style={{
+              color: "oklch(0.88 0.03 72)",
+              borderLeft: "3px solid oklch(0.84 0.155 85 / 0.5)",
+            }}
+          >
+            Witness IDs help creators preserve verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration.
+          </blockquote>
+          {/* Three-column breakdown */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 relative">
+            {([
+              {
+                icon: "✓",
+                color: "#4ade80",
+                bg: "rgba(74,222,128,0.06)",
+                border: "rgba(74,222,128,0.18)",
+                title: "What a WID Proves",
+                points: [
+                  "You created this work",
+                  "The exact timestamp of creation",
+                  "The content has not been altered since registration",
+                  "Your AI disclosure intent at time of upload",
+                ],
+              },
+              {
+                icon: "◎",
+                color: "#F5C451",
+                bg: "rgba(245,196,81,0.06)",
+                border: "rgba(245,196,81,0.18)",
+                title: "What a WID Supports",
+                points: [
+                  "Copyright registration applications",
+                  "Dispute resolution and prior art claims",
+                  "Licensing negotiations and provenance audits",
+                  "AI training consent documentation",
+                ],
+              },
+              {
+                icon: "✗",
+                color: "rgba(255,255,255,0.35)",
+                bg: "rgba(255,255,255,0.03)",
+                border: "rgba(255,255,255,0.08)",
+                title: "What a WID Does Not Replace",
+                points: [
+                  "Official copyright registration (U.S. Copyright Office)",
+                  "Trademark or patent filings",
+                  "Legal representation or counsel",
+                  "Enforcement action against infringement",
+                ],
+              },
+            ] as const).map(({ icon, color, bg, border, title, points }) => (
+              <div
+                key={title}
+                className="rounded-xl p-4"
+                style={{ background: bg, border: `1px solid ${border}` }}
+              >
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="font-mono text-[15px]" style={{ color }}>{icon}</span>
+                  <h4 className="font-heading font-bold text-[11px] tracking-wide" style={{ color: "rgba(255,255,255,0.9)" }}>{title}</h4>
+                </div>
+                <ul className="space-y-1">
+                  {points.map(p => (
+                    <li key={p} className="flex items-start gap-1.5 text-[11px] font-body leading-snug" style={{ color: "rgba(229,231,235,0.7)" }}>
+                      <span className="mt-0.5 flex-shrink-0" style={{ color }}>·</span>
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          {/* Disclaimer footer */}
+          <p
+            className="text-[11px] font-body leading-relaxed relative"
+            style={{ color: "oklch(0.45 0.025 68)" }}
+          >
+            Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records issued by this platform and do not constitute legal copyright registration. For official copyright protection, visit{" "}
+            <a
+              href="https://www.copyright.gov/registration/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-[#D4AF37] transition-colors"
+              style={{ color: "oklch(0.65 0.08 85)" }}
+            >
+              copyright.gov/registration
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+
+
+      {/* ══════════════════════════════════════════════════════════════
           FEATURED CREATORS — horizontal panning carousel
       ══════════════════════════════════════════════════════════════ */}
       <FeaturedCreatorsCarousel />

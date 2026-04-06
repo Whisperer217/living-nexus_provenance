@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ChevronLeft, Shield, Scale, BookOpen, ScrollText } from "lucide-react";
+import { ChevronLeft, Shield, ShieldCheck, Scale, BookOpen, ScrollText } from "lucide-react";
 
 const LAST_UPDATED = "April 2026";
 const VERSION = "1.0";
@@ -125,7 +125,40 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Shield className="w-4 h-4" />} label="2. AI Training Consent">
+        <Section icon={<ShieldCheck className="w-4 h-4" />} label="2. Witness IDs — Scope and Limitations">
+          <p>
+            A Witness ID (WID) is a cryptographic provenance record issued by Living Nexus at the moment
+            of upload. It preserves verifiable proof of authorship, creation date, and work integrity by
+            generating a SHA-256 file hash, an ECDSA P-256 digital signature, and a harmonic frequency
+            fingerprint derived from the content.
+          </p>
+          <p>
+            <strong>Witness IDs support, but do not replace, official copyright registration.</strong> A WID
+            establishes a timestamped record of prior creation that can support copyright registration
+            applications, dispute resolution, licensing negotiations, and AI training consent documentation.
+            However, a WID is not a substitute for registration with the U.S. Copyright Office or equivalent
+            authority in your jurisdiction. For full legal copyright protection in the United States, creators
+            are encouraged to register their works at{" "}
+            <a
+              href="https://www.copyright.gov/registration/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              style={{ color: "oklch(0.84 0.155 85)" }}
+            >
+              copyright.gov/registration
+            </a>
+            .
+          </p>
+          <p>
+            Living Nexus (operated by BDDT Publishing, a DBA of Command Domains LLC) issues WIDs as a
+            provenance infrastructure service. We make no representations that a WID constitutes legal
+            copyright, trademark, or patent protection, and we are not responsible for outcomes in legal
+            proceedings that rely solely on a WID as evidence.
+          </p>
+        </Section>
+
+        <Section icon={<Shield className="w-4 h-4" />} label="3. AI Training Consent">
           <p>
             Your work will never be used to train, fine-tune, or improve any artificial intelligence model
             without your explicit, informed, and affirmative consent. The AI Training Consent field on every
@@ -139,7 +172,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Scale className="w-4 h-4" />} label="3. Platform Fees and Revenue">
+        <Section icon={<Scale className="w-4 h-4" />} label="4. Platform Fees and Revenue">
           <p>
             Living Nexus takes a 10% platform fee on direct creator-to-fan transactions (tips, downloads,
             licensing). This fee funds infrastructure, development, and the provenance registry. It is
@@ -152,7 +185,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Shield className="w-4 h-4" />} label="4. Conduct and Content Standards">
+        <Section icon={<Shield className="w-4 h-4" />} label="5. Conduct and Content Standards">
           <p>
             Living Nexus is a creative provenance platform. Content that exploits, harms, or dehumanizes
             others has no place here. Works that violate applicable law — including copyright infringement,
@@ -166,7 +199,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<BookOpen className="w-4 h-4" />} label="5. Account Termination">
+        <Section icon={<BookOpen className="w-4 h-4" />} label="6. Account Termination">
           <p>
             You may delete your account at any time. Upon deletion, your public profile and works are
             removed from the platform. Your provenance records (WIDs) are retained in the registry as
@@ -179,7 +212,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Scale className="w-4 h-4" />} label="6. Limitation of Liability">
+        <Section icon={<Scale className="w-4 h-4" />} label="7. Limitation of Liability">
           <p>
             Living Nexus is provided "as is." We do not guarantee uninterrupted service, and we are not
             liable for indirect, incidental, or consequential damages arising from your use of the platform.
@@ -192,7 +225,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Shield className="w-4 h-4" />} label="7. Governing Law">
+        <Section icon={<Shield className="w-4 h-4" />} label="8. Governing Law">
           <p>
             These terms are governed by the laws of the United States and the state in which Command
             Domains LLC is registered. Disputes that cannot be resolved informally will be submitted to
@@ -205,7 +238,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<BookOpen className="w-4 h-4" />} label="8. Changes to These Terms">
+        <Section icon={<BookOpen className="w-4 h-4" />} label="9. Changes to These Terms">
           <p>
             When these terms change materially, registered creators will be notified before the changes
             take effect. Continued use of the platform after the effective date constitutes acceptance.

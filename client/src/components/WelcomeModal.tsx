@@ -152,7 +152,7 @@ export default function WelcomeModal() {
             {
               icon: <Shield className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.75 0.18 145)" }} />,
               title: "Your music, protected",
-              desc: "Every track you upload receives a Witness ID (WID) — a cryptographic timestamp that proves you created it first.",
+              desc: "Every track you upload receives a Witness ID (WID) — a cryptographic timestamp that proves you created it first. WIDs support, but do not replace, official copyright registration.",
             },
             {
               icon: <Music2 className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.84 0.155 85)" }} />,
