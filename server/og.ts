@@ -15,7 +15,7 @@
 import { type Express } from "express";
 import fs from "fs";
 import path from "path";
-import { getSongWithCreator, getCreatorForOg, getCollectionByWid, getUserById } from "./db";
+import { getSongWithCreator, getCreatorForOg, getCollectionByWid, getUserById, getProjectBySlug } from "./db";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
 
 /** Canonical production origin — always use this for og:url */
@@ -562,6 +562,58 @@ export function registerOgRoutes(app: Express) {
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
       console.error("[OG] Error generating meta tags for creator", creatorId, err);
+      next();
+    }
+  });
+
+  // ── /project/:slug ────────────────────────────────────────────────────────
+  // Creator project pages — crowdfunding campaigns with WID provenance.
+  // Sharing a project URL unfurls the banner, title, tagline, creator name,
+  // funding progress, and WID badge.
+  app.get("/project/:slug", async (req, res, next) => {
+    const slug = req.params.slug?.trim();
+    if (!slug) return next();
+
+    try {
+      const data = await getProjectBySlug(slug);
+      if (!data) return next();
+      const { project, creator } = data as any;
+
+      const creatorName =
+        creator?.artistHandle?.trim() ||
+        creator?.name?.trim() ||
+        "Unknown Creator";
+
+      const ogTitle = `${project.title} — ${creatorName} | Living Nexus Project`;
+
+      const raisedDollars = Math.floor((project.raisedAmountCents || 0) / 100);
+      const goalDollars = project.goalAmountCents ? Math.floor(project.goalAmountCents / 100) : null;
+      const fundingLine = goalDollars
+        ? `$${raisedDollars} raised of $${goalDollars} goal · ${project.donorCount || 0} supporters`
+        : `$${raisedDollars} raised · ${project.donorCount || 0} supporters`;
+      const widLine = project.linkedWitnessId ? ` · WID: ${project.linkedWitnessId}` : "";
+      const taglinePart = project.tagline?.trim() ? `${project.tagline.trim()} — ` : "";
+      const ogDescription = `${taglinePart}${fundingLine}${widLine} — Support this project on Living Nexus`;
+
+      const bannerUrl = project.bannerUrl?.trim();
+      const ogImage = (bannerUrl && bannerUrl.length > 0 ? bannerUrl : null) ?? FALLBACK_IMAGE;
+      const ogUrl = `${CANONICAL_ORIGIN}/project/${slug}`;
+
+      const ogBlock = buildCreatorOgTags({
+        title: ogTitle,
+        description: ogDescription,
+        image: ogImage,
+        url: ogUrl,
+        siteName: "Living Nexus",
+      });
+
+      const html = await getHtmlTemplate(isDev);
+      if (!html) return next();
+
+      const page = injectOg(html, ogBlock, ogTitle, ogUrl);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (err) {
+      console.error("[OG] Error generating meta tags for project", slug, err);
       next();
     }
   });

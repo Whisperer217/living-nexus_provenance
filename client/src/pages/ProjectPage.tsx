@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   Heart, Users, Calendar, ShieldCheck, ChevronDown, ChevronUp,
   Pencil, Plus, Trash2, Image as ImageIcon, Video, Type, Quote,
-  Minus, Check, X, Eye, Upload, ExternalLink, Rocket,
+  Minus, Check, X, Eye, Upload, ExternalLink, Rocket, Share2, Copy,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -937,6 +937,19 @@ export default function ProjectPage() {
               }`}>
                 {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
               </Badge>
+              <button
+                className="p-1.5 text-white/30 hover:text-[#d4a017] transition-colors rounded-lg"
+                title="Copy project link"
+                onClick={async () => {
+                  const url = `${window.location.origin}/project/${project.slug}`;
+                  try {
+                    if (navigator.share) { await navigator.share({ title: project.title, url }); return; }
+                  } catch {}
+                  try { await navigator.clipboard.writeText(url); toast.success("Link copied!"); } catch {}
+                }}
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
@@ -1043,6 +1056,26 @@ export default function ProjectPage() {
               )}
               <Button onClick={() => setDonateOpen(true)} className="bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold px-6">
                 Donate
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/20 text-white/60 hover:text-white hover:border-white/40 bg-transparent"
+                onClick={async () => {
+                  const url = `${window.location.origin}/project/${project.slug}`;
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({ title: project.title, text: `Support "${project.title}" on Living Nexus`, url });
+                      return;
+                    }
+                  } catch {}
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    toast.success("Link copied!");
+                  } catch {}
+                }}
+              >
+                <Share2 className="w-4 h-4 mr-1" /> Share
               </Button>
             </div>
           </div>

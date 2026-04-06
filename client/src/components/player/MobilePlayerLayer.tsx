@@ -373,9 +373,8 @@ export default function MobilePlayerLayer() {
   // Share
   const handleShare = useCallback(async () => {
     if (!currentTrack) return;
-    const url = widBadge
-      ? `${window.location.origin}/share/${encodeURIComponent(widBadge)}`
-      : currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
+    // Always use /song/:id — canonical shareable URL with server-side OG tags
+    const url = currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
     try {
       if (navigator.share) { await navigator.share({ title: currentTrack.title ?? "", url }); return; }
     } catch {}

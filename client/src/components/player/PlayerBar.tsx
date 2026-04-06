@@ -834,10 +834,8 @@ export default function PlayerBar() {
             {currentTrack && currentSongId && (
               <button
                 onClick={async () => {
-                  // PDL: use /share/:wid when available so Discord/social embeds get song-specific metadata
-                  const url = currentTrack?.witnessId
-                    ? `${window.location.origin}/share/${encodeURIComponent(currentTrack.witnessId)}`
-                    : `${window.location.origin}/song/${currentSongId}`;
+                  // Always use /song/:id — canonical shareable URL with server-side OG tags
+                  const url = `${window.location.origin}/song/${currentSongId}`;
                   const shareData = {
                     title: currentTrack.title || "Track on Living Nexus",
                     text: `${currentTrack.title} by ${currentTrack.artist} — Listen on Living Nexus — sovereign music with cryptographic provenance.`,

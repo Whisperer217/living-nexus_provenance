@@ -219,10 +219,8 @@ export default function MobilePlayerPanel() {
 
   const handleShare = useCallback(async () => {
     if (!currentTrack) return;
-    // PDL: use /share/:wid when available so Discord/social embeds get song-specific metadata
-    const url = currentTrack?.witnessId
-      ? `${window.location.origin}/share/${encodeURIComponent(currentTrack.witnessId)}`
-      : currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
+    // Always use /song/:id — canonical shareable URL with server-side OG tags
+    const url = currentSongId ? `${window.location.origin}/song/${currentSongId}` : window.location.href;
     try {
       if (navigator.share) { await navigator.share({ title: currentTrack.title || "", url }); return; }
     } catch {}

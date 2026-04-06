@@ -2803,3 +2803,9 @@
 - [x] Projects v2: WID generated on project publish
 - [x] Projects v2: creator profile Projects tab with Netflix-style horizontal scroll feed
 - [x] Projects v2: Creator Projects horizontal scroll row on HomePage
+
+## Feature: Share Links Fix
+- [ ] Fix music share: remove /share/:wid fallback, always use /song/:id
+- [ ] Fix project share: add share button to project page with correct URL
+- [ ] Add OG meta route for /project/:slug (server-side)
+- [ ] Register /share/:wid server route that redirects to /song/:id via WID lookup
