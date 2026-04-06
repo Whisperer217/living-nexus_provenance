@@ -25,6 +25,35 @@ function copyToClipboard(text: string, label: string) {
   navigator.clipboard.writeText(text).then(() => toast.success(`${label} copied`));
 }
 
+function ShareVerifyButton({ witnessId, title }: { witnessId: string; title: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleShare = () => {
+    const url = `${window.location.origin}/verify/${encodeURIComponent(witnessId)}`;
+    if (navigator.share) {
+      navigator.share({ title: `${title} — Living Nexus Provenance`, url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopied(true);
+        toast.success("Verification link copied");
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
+  return (
+    <button
+      onClick={handleShare}
+      className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all hover:opacity-80 active:scale-95"
+      style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.5)", color: "oklch(0.65 0.18 145)" }}
+    >
+      {copied ? (
+        <><CheckCircle2 className="w-4 h-4" /> Copied!</>
+      ) : (
+        <><Copy className="w-4 h-4" /> Copy Verification Link</>
+      )}
+    </button>
+  );
+}
+
 function TruncatedMono({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex items-start gap-2 group">
@@ -456,6 +485,10 @@ function TrackVerifyView({
             </div>
           );
         })()}
+        {/* ── Share button ── */}
+        <div className="mt-4 flex justify-center">
+          <ShareVerifyButton witnessId={data.witnessId ?? ""} title={data.title} />
+        </div>
       </div>
 
       {/* ── Collection back-reference ── */}

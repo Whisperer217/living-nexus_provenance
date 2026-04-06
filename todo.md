@@ -2953,3 +2953,9 @@
 - [x] Fix auto-advance to next track bug in audio player (web + mobile)
 - [x] Shrink refresh banner — reduce height/padding and fix multi-click dismiss
 - [x] Add project archive/unpublish button to ProjectPage management UI
+
+## Phase 67: Restore/Tint/Share + WID Persistence Audit
+- [ ] Audit WID changes not persisting - find root cause
+- [x] Add Restore to Draft button for archived projects in MyProjectsPage
+- [ ] Add mobile bottom nav steel tint in Lights On mode
+- [ ] Add Copy Link / Share button on Verify page result card

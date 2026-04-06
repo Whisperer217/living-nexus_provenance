@@ -708,16 +708,19 @@ export default function ProjectPage() {
     }
   }, [rawBlocks]);
 
-  // Sync header fields when data loads
+  // Sync header fields when data loads — only when NOT in edit mode to avoid overwriting
+  // in-progress edits. Use stable primitives (id + updatedAt) instead of the full object
+  // reference so this doesn't fire on every re-render.
   useEffect(() => {
-    if (data?.project) {
+    if (data?.project && !editMode) {
       setLocalTitle(data.project.title);
       setLocalTagline(data.project.tagline || "");
       setLocalGoal(data.project.goalAmountCents ? String(data.project.goalAmountCents / 100) : "");
       setLocalVideoUrl(data.project.videoUrl || "");
       setLocalVideoType((data.project.videoType as any) || "none");
     }
-  }, [data?.project]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.project?.id, (data?.project as any)?.updatedAt]);
 
   const isOwner = !!user && !!data?.project && user.id === data.project.userId;
 

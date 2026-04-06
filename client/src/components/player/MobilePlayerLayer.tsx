@@ -24,6 +24,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
+import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Heart, Music,
@@ -496,15 +497,21 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   //  MINI STATE
   // ══════════════════════════════════════════════════════════════
+  const { mode: lightsMode } = useLightsMode();
+  const isLightsOn = lightsMode === "on";
   const MiniBar = () => (
     <div
       className="md:hidden fixed bottom-0 left-0 right-0 z-[9990]"
       style={{
         minHeight: "64px",
         paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
-        background: "oklch(0.10 0.025 275 / 0.98)",
+        background: isLightsOn
+          ? "rgba(55,68,85,0.92)"
+          : "oklch(0.10 0.025 275 / 0.98)",
         backdropFilter: "blur(20px) saturate(1.4)",
-        borderTop: "1px solid oklch(0.84 0.155 85 / 0.20)",
+        borderTop: isLightsOn
+          ? "1px solid rgba(255,255,255,0.15)"
+          : "1px solid oklch(0.84 0.155 85 / 0.20)",
         boxShadow: "0 -8px 40px oklch(0 0 0 / 0.6), 0 -1px 0 oklch(0.84 0.155 85 / 0.08)",
       }}
       onTouchStart={onMiniTouchStart}

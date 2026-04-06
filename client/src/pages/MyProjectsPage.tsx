@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Edit2, Eye, ExternalLink, Heart, Users, Loader2, Upload, Image as ImageIcon } from "lucide-react";
+import { Plus, Edit2, Eye, ExternalLink, Heart, Users, Loader2, Upload, Image as ImageIcon, RotateCcw } from "lucide-react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -388,6 +388,14 @@ type ProjectRow = {
 function ProjectCard({ project }: { project: ProjectRow }) {
   const [editOpen, setEditOpen] = useState(false);
   const [updateOpen, setUpdateOpen] = useState(false);
+  const utils = trpc.useUtils();
+  const restoreToDraft = trpc.projects.update.useMutation({
+    onSuccess: () => {
+      utils.projects.mine.invalidate();
+      toast.success("Project restored to draft.");
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const pct = project.goalAmountCents
     ? Math.min(100, Math.round((project.raisedAmountCents / project.goalAmountCents) * 100))
     : null;
@@ -464,6 +472,18 @@ function ProjectCard({ project }: { project: ProjectRow }) {
           >
             <Plus className="w-3 h-3 mr-1" /> Post Update
           </Button>
+          {project.status === "archived" && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-green-500/30 text-green-400/70 hover:text-green-400 text-xs"
+              disabled={restoreToDraft.isPending}
+              onClick={() => restoreToDraft.mutate({ id: project.id, status: "draft" })}
+            >
+              <RotateCcw className="w-3 h-3 mr-1" />
+              {restoreToDraft.isPending ? "Restoring…" : "Restore to Draft"}
+            </Button>
+          )}
         </div>
       </CardContent>
 
