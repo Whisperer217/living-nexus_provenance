@@ -2992,3 +2992,17 @@
 - [x] Haptic feedback: navigator.vibrate(10) fires once when drag crosses 60px dismiss threshold; resets if pulled back
 - [x] Pinch-to-zoom artwork: two-finger pinch scales art 1x–3x from center; tap-anywhere overlay resets to 1x with spring animation
 - [x] 0 TypeScript errors
+## Phase 75: Hamburger Menu Fix + OG Meta Tags (Facebook, Discord, X, Messenger)
+- [x] Fix: hamburger nav z-index raised to z-[60] so it covers sticky owner toolbar (Edit/Unpublish/Archive)
+- [x] Root cause of OG failure: Manus CDN intercepts ALL page routes and serves static bundle + injects generic OG tags, bypassing Express og.ts
+- [x] Confirmed: /api/* routes DO reach Express (oEmbed endpoint works perfectly)
+- [x] Confirmed: og.ts already has correct OG injection for /song/:id, /creator/:id, /project/:slug, /verify/:witnessId, 15+ static routes
+- [x] Confirmed: oEmbed endpoint returns correct song-specific data (title, artist, cover art, embed player)
+- [x] Fix A: OEmbedUpdater React component dynamically updates oEmbed <link> href to current page URL on every navigation
+- [x] Fix B: OEmbedUpdater also updates <link rel="canonical"> for Facebook/Messenger canonical URL
+- [x] Fix C: oEmbed endpoint extended to cover /project/:slug (songs and creators already covered)
+- [x] Fix D: Added og:image:width/height and twitter:site to /api/og/* HTML endpoints
+- [x] Fix E: Created /api/og/song/:id, /api/og/creator/:id, /api/og/project/:slug CDN-bypass HTML endpoints
+- [x] All three /api/og/* endpoints tested and returning correct title/description/image
+- [x] Registered ogApiRouter in server/_core/index.ts
+- [x] 0 TypeScript errors

@@ -13,6 +13,7 @@ import { uploadRouter } from "../uploadRoute";
 import { downloadRouter } from "../downloadRoute";
 import { publicApiRouter } from "../publicApiRoute";
 import { oembedRouter } from "../oembedRoute";
+import { ogApiRouter } from "../ogApiRoutes";
 import { shareRouter } from "../shareRoute";
 import { workRouter } from "../workRoute";
 import { createContext } from "./context";
@@ -80,6 +81,10 @@ async function startServer() {
   // oEmbed discovery endpoint — Discord reads this to get song-specific metadata
   // Must be under /api/* so the Manus CDN forwards it to the Express server
   app.use(oembedRouter);
+  // OG API HTML endpoints — CDN-bypass OG meta tag pages for Facebook/Messenger
+  // /api/og/song/:id, /api/og/creator/:id, /api/og/project/:slug
+  // These return OG-injected HTML that Facebook/Messenger crawlers can scrape directly
+  app.use(ogApiRouter);
   // WID Protocol — Canonical Work API
   // GET /api/work/:wid — read-only, immutable provenance record for any registered work
   // CORS open, external apps can call this directly

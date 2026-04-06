@@ -223,7 +223,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* Mobile nav overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
+        <div className="md:hidden fixed inset-0 z-[55] bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
           <div
             className="w-72 h-full pt-16 overflow-y-auto flex flex-col"
             style={{

@@ -14,7 +14,7 @@
  */
 
 import { Router } from "express";
-import { getSongWithCreator, getCreatorForOg } from "./db";
+import { getSongWithCreator, getCreatorForOg, getProjectBySlug } from "./db";
 
 const CANONICAL_ORIGIN = "https://www.livingnexus.org";
 const FALLBACK_IMAGE =
@@ -196,6 +196,62 @@ oembedRouter.get("/api/oembed", async (req, res) => {
         thumbnail_height: 630,
         url: `${CANONICAL_ORIGIN}/creator/${creatorId}`,
         description: bioSnippet,
+      };
+
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Content-Type", "application/json+oembed");
+      return res.json(response);
+    }
+
+    // ── Project page: /project/:slug ─────────────────────────────────────
+    const projectMatch = urlPath.match(/^\/project\/([^/]+)/);
+    if (projectMatch) {
+      const slug = decodeURIComponent(projectMatch[1]);
+      const project = await getProjectBySlug(slug);
+
+      if (!project) {
+        return res.status(404).json({ error: "project not found" });
+      }
+
+      const creatorName =
+        (project as any).creatorHandle?.trim() ||
+        (project as any).creatorName?.trim() ||
+        "Unknown Creator";
+
+      const raisedDollars = Math.floor(((project as any).raisedAmountCents || 0) / 100);
+      const goalDollars = (project as any).goalAmountCents
+        ? Math.floor((project as any).goalAmountCents / 100)
+        : null;
+      const fundingLine = goalDollars
+        ? `$${raisedDollars} raised of $${goalDollars} goal · ${
+            (project as any).donorCount || 0
+          } supporters`
+        : `$${raisedDollars} raised · ${(project as any).donorCount || 0} supporters`;
+      const taglinePart = (project as any).tagline?.trim()
+        ? `${(project as any).tagline.trim()} — `
+        : "";
+      const description = `${taglinePart}${fundingLine} — Support this project on Living Nexus`;
+
+      const bannerUrl = (project as any).bannerUrl?.trim();
+      const thumbnailUrl =
+        bannerUrl && bannerUrl.length > 0 ? bannerUrl : FALLBACK_IMAGE;
+
+      const projectUrl = `${CANONICAL_ORIGIN}/project/${slug}`;
+      const creatorId = (project as any).creatorId || "";
+
+      const response = {
+        version: "1.0",
+        type: "rich",
+        title: `${project.title} — ${creatorName} | Living Nexus Project`,
+        author_name: creatorName,
+        author_url: `${CANONICAL_ORIGIN}/creator/${creatorId}`,
+        provider_name: "Living Nexus",
+        provider_url: CANONICAL_ORIGIN,
+        thumbnail_url: thumbnailUrl,
+        thumbnail_width: 1200,
+        thumbnail_height: 630,
+        url: projectUrl,
+        description,
       };
 
       res.setHeader("Access-Control-Allow-Origin", "*");

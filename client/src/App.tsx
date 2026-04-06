@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { lazy, Suspense } from "react";
-import { Route, Switch, Redirect } from "wouter";
+import { lazy, Suspense, useEffect } from "react";
+import { Route, Switch, Redirect, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PlayerProvider } from "./contexts/PlayerContext";
@@ -69,6 +69,45 @@ function PageLoader() {
         style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
     </div>
   );
+}
+
+/**
+ * Dynamically updates the <link rel="alternate" type="application/json+oembed">
+ * tag in <head> to point to the current page URL.
+ * This ensures Discord, X, and other oEmbed-aware platforms read the correct
+ * song/creator/project metadata when a URL is shared — bypassing the CDN's
+ * generic OG tag override which only affects HTML meta tags, not the oEmbed JSON.
+ */
+function OEmbedUpdater() {
+  const [location] = useLocation();
+  useEffect(() => {
+    const CANONICAL_ORIGIN = "https://www.livingnexus.org";
+    const pageUrl = `${CANONICAL_ORIGIN}${location}`;
+    const oembedUrl = `/api/oembed?url=${encodeURIComponent(pageUrl)}`;
+
+    // Update or create the oEmbed discovery link tag
+    let link = document.querySelector<HTMLLinkElement>(
+      'link[type="application/json+oembed"]'
+    );
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "alternate";
+      link.type = "application/json+oembed";
+      link.title = "Living Nexus oEmbed";
+      document.head.appendChild(link);
+    }
+    link.href = oembedUrl;
+
+    // Also update the canonical URL for Facebook/Messenger
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = pageUrl;
+  }, [location]);
+  return null;
 }
 
 function Router() {
@@ -166,6 +205,7 @@ export default function App() {
                 },
               }}
             />
+            <OEmbedUpdater />
             <AmbientWidget />
             <Router />
             </AmbientPlayerProvider>
