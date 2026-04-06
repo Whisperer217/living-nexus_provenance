@@ -32,7 +32,7 @@ import {
   Maximize2, Check, Video, ListMusic,
   Volume2, VolumeX, Shield, MessageCircle,
   ChevronRight, Send, Users, Fingerprint,
-  ExternalLink, Crown,
+  ExternalLink, Crown, ArrowUp,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -134,6 +134,50 @@ export default function MobilePlayerLayer() {
 
   // Scroll container ref — used to check scrollTop before triggering dismiss
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  // Scroll-to-top button visibility
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  // Haptic feedback: track whether we've fired vibration for the current drag
+  const hapticFiredRef = useRef(false);
+
+  // Pinch-to-zoom artwork state
+  const [artZoom, setArtZoom] = useState(1);
+  const [artZoomed, setArtZoomed] = useState(false);
+  const pinchStartDistRef = useRef<number | null>(null);
+  const pinchStartZoomRef = useRef(1);
+
+  const getPinchDist = (e: React.TouchEvent) => {
+    const [t0, t1] = [e.touches[0], e.touches[1]];
+    return Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+  };
+
+  const onArtTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      pinchStartDistRef.current = getPinchDist(e);
+      pinchStartZoomRef.current = artZoom;
+    }
+  };
+
+  const onArtTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchStartDistRef.current !== null) {
+      e.preventDefault();
+      const ratio = getPinchDist(e) / pinchStartDistRef.current;
+      const next = Math.min(Math.max(pinchStartZoomRef.current * ratio, 1), 3);
+      setArtZoom(next);
+      setArtZoomed(next > 1.05);
+    }
+  };
+
+  const onArtTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      pinchStartDistRef.current = null;
+    }
+  };
+
+  const resetArtZoom = () => {
+    setArtZoom(1);
+    setArtZoomed(false);
+  };
 
   // Overlay auto-hide timer in cinematic mode
   const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -188,6 +232,7 @@ export default function MobilePlayerLayer() {
   const onExpandedTouchStart = (e: React.TouchEvent) => {
     expandedTouchStartY.current = e.touches[0].clientY;
     setExpandedDragOffset(0);
+    hapticFiredRef.current = false;
   };
   const onExpandedTouchMove = (e: React.TouchEvent) => {
     if (expandedTouchStartY.current === null) return;
@@ -200,7 +245,17 @@ export default function MobilePlayerLayer() {
       return;
     }
     const delta = e.touches[0].clientY - expandedTouchStartY.current;
-    if (delta > 0) setExpandedDragOffset(Math.min(delta, 200));
+    if (delta > 0) {
+      const clamped = Math.min(delta, 200);
+      setExpandedDragOffset(clamped);
+      // Haptic pulse once when crossing the 60px dismiss threshold
+      if (clamped >= 60 && !hapticFiredRef.current) {
+        hapticFiredRef.current = true;
+        try { navigator.vibrate?.(10); } catch {}
+      } else if (clamped < 60) {
+        hapticFiredRef.current = false;
+      }
+    }
   };
   const onExpandedTouchEnd = () => {
     if (expandedDragOffset > 60) {
@@ -208,6 +263,7 @@ export default function MobilePlayerLayer() {
     }
     setExpandedDragOffset(0);
     expandedTouchStartY.current = null;
+    hapticFiredRef.current = false;
   };
 
   // ── Gesture: swipe-down on cinematic → expanded ───────────────
@@ -640,10 +696,31 @@ export default function MobilePlayerLayer() {
         <div className="w-10 h-1 rounded-full" style={{ background: "oklch(1 0 0 / 0.15)" }} />
       </div>
 
+      {/* Scroll-to-top button — floats over content when user has scrolled down */}
+      {showScrollTop && (
+        <button
+          onClick={() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+          className="absolute bottom-24 right-4 z-10 flex items-center justify-center w-9 h-9 rounded-full shadow-lg transition-all active:scale-90"
+          style={{
+            background: "oklch(0.84 0.155 85 / 0.15)",
+            border: "1px solid oklch(0.84 0.155 85 / 0.3)",
+            color: "oklch(0.84 0.155 85)",
+            backdropFilter: "blur(8px)",
+          }}
+          aria-label="Scroll to top"
+        >
+          <ArrowUp size={16} />
+        </button>
+      )}
+
       {/* Scrollable content area — everything below the drag handle scrolls freely */}
       <div
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto"
+        onScroll={(e) => {
+          const top = (e.currentTarget as HTMLDivElement).scrollTop;
+          setShowScrollTop(top > 80);
+        }}
         style={{
           WebkitOverflowScrolling: "touch",
           touchAction: "pan-y",
@@ -682,18 +759,36 @@ export default function MobilePlayerLayer() {
         </button>
       </div>
 
-      {/* Artwork — square, centered */}
+      {/* Artwork — square, centered, pinch-to-zoom */}
       <div className="flex-shrink-0 px-8 pb-5">
         <div
-          className="w-full rounded-2xl overflow-hidden relative"
+          className="w-full rounded-2xl relative"
           style={{
             aspectRatio: "1 / 1",
             boxShadow: "0 16px 64px oklch(0 0 0 / 0.6), 0 4px 16px oklch(0.84 0.155 85 / 0.08)",
+            overflow: artZoomed ? "visible" : "hidden",
+            zIndex: artZoomed ? 20 : "auto",
           }}
+          onTouchStart={onArtTouchStart}
+          onTouchMove={onArtTouchMove}
+          onTouchEnd={onArtTouchEnd}
         >
-          <ArtworkLayer />
-          {/* WID badge on artwork — always show if WID exists */}
-          {widBadge && (
+          {/* Zoomed artwork inner — scales from center */}
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              transform: `scale(${artZoom})`,
+              transformOrigin: "center center",
+              transition: artZoom === 1 ? "transform 0.3s cubic-bezier(0.32,0.72,0,1)" : "none",
+              borderRadius: "1rem",
+              overflow: "hidden",
+            }}
+          >
+            <ArtworkLayer />
+          </div>
+          {/* WID badge on artwork — always show if WID exists and not zoomed */}
+          {widBadge && !artZoomed && (
             <button
               onClick={() => setWidPanelOpen(true)}
               className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
@@ -707,6 +802,14 @@ export default function MobilePlayerLayer() {
               <Shield size={8} />
               WID
             </button>
+          )}
+          {/* Tap-to-reset overlay when zoomed */}
+          {artZoomed && (
+            <div
+              className="fixed inset-0 z-[9994]"
+              onClick={resetArtZoom}
+              style={{ cursor: "zoom-out" }}
+            />
           )}
         </div>
       </div>

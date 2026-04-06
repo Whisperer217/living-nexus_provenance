@@ -2987,3 +2987,8 @@
 - [x] Fix: added scrollContainerRef to scroll area; dismiss gesture now checks scrollTop > 4 and cancels if user is scrolled down
 - [x] Fix: added overscrollBehaviorY: contain to scroll container to prevent bounce from triggering dismiss
 - [x] 0 TypeScript errors
+## Phase 74: Expanded Player UX Enhancements
+- [x] Scroll-to-top button: gold-tinted ArrowUp button appears after 80px scroll, smooth-scrolls back to top
+- [x] Haptic feedback: navigator.vibrate(10) fires once when drag crosses 60px dismiss threshold; resets if pulled back
+- [x] Pinch-to-zoom artwork: two-finger pinch scales art 1x–3x from center; tap-anywhere overlay resets to 1x with spring animation
+- [x] 0 TypeScript errors
