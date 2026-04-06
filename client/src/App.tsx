@@ -55,6 +55,7 @@ const WitnessFlowPage = lazy(() => import("./pages/WitnessFlowPage"));
 const LivingArchiveBillingPage = lazy(() => import("./pages/LivingArchiveBillingPage"));
 const SharedPromptPage = lazy(() => import("./pages/SharedPromptPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
+const TosComparePage = lazy(() => import("./pages/TosComparePage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -121,6 +122,7 @@ function Router() {
                 <Route path="/guilds" component={GuildsListPage} />
                 <Route path="/prompt/:token" component={SharedPromptPage} />
                 <Route path="/guild/:slug" component={GuildPage} />
+                <Route path="/terms/compare" component={TosComparePage} />
                 <Route path="/terms" component={TermsPage} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />

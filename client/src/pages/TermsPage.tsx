@@ -92,8 +92,8 @@ export default function TermsPage() {
               </p>
             </div>
 
-            {/* Covenant link */}
-            <div className="mt-6 pt-5" style={{ borderTop: "1px solid oklch(0.75 0.18 85 / 0.12)" }}>
+            {/* Covenant + Compare links */}
+            <div className="mt-6 pt-5 flex flex-wrap gap-4" style={{ borderTop: "1px solid oklch(0.75 0.18 85 / 0.12)" }}>
               <Link href="/manifesto">
                 <span
                   className="inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer"
@@ -101,6 +101,15 @@ export default function TermsPage() {
                 >
                   <ScrollText className="w-3.5 h-3.5" />
                   Read the Living Nexus Covenant →
+                </span>
+              </Link>
+              <Link href="/terms/compare">
+                <span
+                  className="inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer"
+                  style={{ color: "oklch(0.65 0.12 85)" }}
+                >
+                  <Scale className="w-3.5 h-3.5" />
+                  Compare Platform TOS →
                 </span>
               </Link>
             </div>

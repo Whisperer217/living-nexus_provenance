@@ -2714,3 +2714,13 @@
 - [x] Updated checkbox label to include platform infrastructure acknowledgment
 - [x] Bumped CURRENT_TOS_VERSION to "2.1" — existing users who accepted v2.0 will be re-prompted
 - [x] TypeScript: 0 errors | Tests: 131/131 passing
+
+## Feature: Platform TOS Comparison Page (/terms/compare)
+- [x] Researched platform TOS obfuscation: word counts, Flesch scores, reading times from Visual Capitalist (2020) + Social Media Lab TMU (2024)
+- [x] Built /terms/compare page with 3 tabs: Platform Analysis (5 platforms), Legal Lexicon (12 terms), Our Approach (6 commitments)
+- [x] Each platform card: word count, reading time, Flesch score, grade level, 4 feature flags, expandable clause cards with raw vs plain-English translation
+- [x] Lexicon: 12 terms with severity ratings (CRITICAL/HIGH/MEDIUM), definitions, and real-world examples
+- [x] Our Approach tab includes honest platform limitation disclosure
+- [x] Wired /terms/compare route in App.tsx (before /terms to avoid route shadowing)
+- [x] Added Compare Platform TOS link to /terms page header
+- [x] TypeScript: 0 errors | Tests: 131/131 passing
