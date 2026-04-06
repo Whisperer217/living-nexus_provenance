@@ -2787,3 +2787,19 @@
 - [ ] Wire Stripe donate checkout (10% platform fee via Connect)
 - [ ] Register /project/:slug route in App.tsx
 - [ ] Add Projects link to creator dashboard sidebar
+
+## Feature: Projects v2 - Inline Canvas + Discovery
+- [ ] projectBlocks table (ordered content blocks: text/image/video/divider)
+- [ ] tRPC procedures: saveBlocks, publishProject (auto-generates WID), getPublicProjects
+- [ ] Inline editable ProjectPage canvas (click-to-edit, block editor)
+- [ ] Image/video upload blocks via S3
+- [ ] WID auto-generated on project publish
+- [ ] Projects tab on CreatorProfilePage with Netflix card feed
+- [ ] Projects horizontal scroll row on HomePage
+- [ ] Projects horizontal scroll row on ExplorePage
+
+- [x] Projects v2: projectBlocks table for inline content editing
+- [x] Projects v2: inline editable ProjectPage canvas (click-to-edit sections, image/video upload)
+- [x] Projects v2: WID generated on project publish
+- [x] Projects v2: creator profile Projects tab with Netflix-style horizontal scroll feed
+- [x] Projects v2: Creator Projects horizontal scroll row on HomePage

@@ -17,12 +17,13 @@ import {
   contentFlags, declarationSignatures,
   songVersions,
   platformSettings,
-  projects, projectUpdates, projectDonations,
+  projects, projectUpdates, projectDonations, projectBlocks,
   type InsertContentFlag, type InsertDeclarationSignature,
   type InsertSongVersion,
   type Project, type InsertProject,
   type ProjectUpdate,
   type ProjectDonation,
+  type ProjectBlock,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1225,7 +1226,7 @@ export async function getAllUsersWithStats(limit: number = 50, offset: number = 
  * for the unified interaction thread.
  */
 export async function createEvent(data: {
-  type: "TIP" | "COMMENT" | "LIKE" | "FOLLOW" | "WITNESS_REGISTERED" | "WITNESS_VERIFIED" | "WORK_REFERENCED" | "SYSTEM_UPDATE" | "PRESERVATION_MODE";
+  type: "TIP" | "COMMENT" | "LIKE" | "FOLLOW" | "WITNESS_REGISTERED" | "WITNESS_VERIFIED" | "WORK_REFERENCED" | "SYSTEM_UPDATE" | "PRESERVATION_MODE" | "PROJECT_PUBLISHED";
   workId: number;
   actorId?: number;
   actorName?: string;
@@ -3503,39 +3504,7 @@ export async function createProject(data: InsertProject): Promise<number> {
   return (result as any)[0].insertId as number;
 }
 
-export async function getProjectBySlug(slug: string): Promise<(Project & { creatorName: string | null; creatorHandle: string | null; creatorAvatar: string | null }) | undefined> {
-  const db = await getDb();
-  if (!db) return undefined;
-  const rows = await db
-    .select({
-      id: projects.id,
-      userId: projects.userId,
-      slug: projects.slug,
-      title: projects.title,
-      tagline: projects.tagline,
-      description: projects.description,
-      bannerUrl: projects.bannerUrl,
-      bannerKey: projects.bannerKey,
-      videoUrl: projects.videoUrl,
-      videoType: projects.videoType,
-      goalAmountCents: projects.goalAmountCents,
-      raisedAmountCents: projects.raisedAmountCents,
-      donorCount: projects.donorCount,
-      status: projects.status,
-      linkedWitnessId: projects.linkedWitnessId,
-      linkedSongId: projects.linkedSongId,
-      createdAt: projects.createdAt,
-      updatedAt: projects.updatedAt,
-      creatorName: users.name,
-      creatorHandle: users.artistHandle,
-      creatorAvatar: users.profilePhotoUrl,
-    })
-    .from(projects)
-    .leftJoin(users, eq(projects.userId, users.id))
-    .where(eq(projects.slug, slug))
-    .limit(1);
-  return rows.length > 0 ? rows[0] as any : undefined;
-}
+// getProjectBySlug moved below with creatorId field
 
 export async function getProjectById(id: number): Promise<Project | undefined> {
   const db = await getDb();
@@ -3629,4 +3598,95 @@ export async function listActiveProjects(): Promise<(Project & { creatorName: st
     .where(eq(projects.status, "active"))
     .orderBy(desc(projects.createdAt));
   return rows as any;
+}
+
+// ─── Project Blocks (Inline Canvas) ──────────────────────────────────────────
+
+export async function getProjectBlocks(projectId: number): Promise<ProjectBlock[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projectBlocks)
+    .where(eq(projectBlocks.projectId, projectId))
+    .orderBy(projectBlocks.position);
+}
+
+export async function saveProjectBlocks(projectId: number, blocks: Array<{
+  id?: number;
+  type: "text" | "image" | "video" | "divider" | "quote";
+  position: number;
+  content?: string;
+  imageUrl?: string;
+  imageKey?: string;
+  imageCaption?: string;
+  videoUrl?: string;
+  videoType?: "youtube" | "vimeo" | "s3" | "none";
+  videoCaption?: string;
+}>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Delete all existing blocks for this project and re-insert (simple replace strategy)
+  await db.delete(projectBlocks).where(eq(projectBlocks.projectId, projectId));
+  if (blocks.length === 0) return;
+  await db.insert(projectBlocks).values(
+    blocks.map((b, i) => ({
+      projectId,
+      type: b.type,
+      position: b.position ?? i,
+      content: b.content ?? null,
+      imageUrl: b.imageUrl ?? null,
+      imageKey: b.imageKey ?? null,
+      imageCaption: b.imageCaption ?? null,
+      videoUrl: b.videoUrl ?? null,
+      videoType: (b.videoType ?? "none") as any,
+      videoCaption: b.videoCaption ?? null,
+    }))
+  );
+}
+
+export async function getProjectBySlug(slug: string): Promise<(Project & {
+  creatorName: string | null;
+  creatorHandle: string | null;
+  creatorAvatar: string | null;
+  creatorId: number;
+}) | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select({
+      id: projects.id,
+      userId: projects.userId,
+      slug: projects.slug,
+      title: projects.title,
+      tagline: projects.tagline,
+      description: projects.description,
+      bannerUrl: projects.bannerUrl,
+      bannerKey: projects.bannerKey,
+      videoUrl: projects.videoUrl,
+      videoType: projects.videoType,
+      goalAmountCents: projects.goalAmountCents,
+      raisedAmountCents: projects.raisedAmountCents,
+      donorCount: projects.donorCount,
+      status: projects.status,
+      linkedWitnessId: projects.linkedWitnessId,
+      linkedSongId: projects.linkedSongId,
+      createdAt: projects.createdAt,
+      updatedAt: projects.updatedAt,
+      creatorName: users.name,
+      creatorHandle: users.artistHandle,
+      creatorAvatar: users.profilePhotoUrl,
+      creatorId: users.id,
+    })
+    .from(projects)
+    .leftJoin(users, eq(projects.userId, users.id))
+    .where(eq(projects.slug, slug))
+    .limit(1);
+  return rows.length > 0 ? (rows[0] as any) : undefined;
+}
+
+export async function getProjectsByCreator(userId: number): Promise<Project[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projects)
+    .where(and(eq(projects.userId, userId), ne(projects.status as any, "archived")))
+    .orderBy(desc(projects.updatedAt));
 }

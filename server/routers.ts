@@ -79,6 +79,7 @@ import {
   listDeletionRequests, clearDeletionRequest,
   createProject, getProjectBySlug, getProjectById, getProjectsByUser, updateProject,
   getProjectUpdates, addProjectUpdate, getProjectDonations, recordProjectDonation, listActiveProjects,
+  getProjectBlocks, saveProjectBlocks, getProjectsByCreator,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -4486,6 +4487,99 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           },
         });
         return { url: session.url };
+      }),
+
+    /** Get content blocks for a project — public */
+    getBlocks: publicProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .query(async ({ input }) => {
+        return getProjectBlocks(input.projectId);
+      }),
+
+    /** Save content blocks (replace all) — protected, must be owner */
+    saveBlocks: protectedProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        blocks: z.array(z.object({
+          type: z.enum(["text", "image", "video", "divider", "quote"]),
+          position: z.number().int(),
+          content: z.string().optional(),
+          imageUrl: z.string().optional(),
+          imageKey: z.string().optional(),
+          imageCaption: z.string().optional(),
+          videoUrl: z.string().optional(),
+          videoType: z.enum(["youtube", "vimeo", "s3", "none"]).optional(),
+          videoCaption: z.string().optional(),
+        })),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        await saveProjectBlocks(input.projectId, input.blocks);
+        return { ok: true };
+      }),
+
+    /** Upload a block image to S3 — protected, must be owner */
+    uploadBlockImage: protectedProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        fileBase64: z.string(),
+        mimeType: z.string(),
+        caption: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        const buf = Buffer.from(input.fileBase64, "base64");
+        const ext = input.mimeType.split("/")[1] || "jpg";
+        const key = `project-blocks/${ctx.user.id}-${input.projectId}-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buf, input.mimeType);
+        return { url, key };
+      }),
+
+    /** Publish a project — sets status to active and generates a WID */
+    publish: protectedProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        if (project.status !== "draft") throw new TRPCError({ code: "BAD_REQUEST", message: "Project is already published" });
+        // Generate a WID for this project (same format as song WIDs)
+        const widPrefix = "PROJ";
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+        const wid = `${widPrefix}-${timestamp}-${random}`;
+        await updateProject(input.projectId, {
+          status: "active",
+          linkedWitnessId: wid,
+          updatedAt: new Date(),
+        });
+        // Log a creation event
+        await createEvent({
+          type: "PROJECT_PUBLISHED",
+          workId: input.projectId,
+          actorId: ctx.user.id,
+          actorName: ctx.user.name || undefined,
+          payload: { wid, title: project.title },
+        });
+        return { ok: true, wid };
+      }),
+
+    /** List all active public projects — public */
+    listPublic: publicProcedure
+      .input(z.object({ limit: z.number().int().max(50).default(20) }).optional())
+      .query(async ({ input }) => {
+        return listActiveProjects();
+      }),
+
+    /** Get projects by a specific creator — public */
+    getByCreator: publicProcedure
+      .input(z.object({ userId: z.number().int() }))
+      .query(async ({ input }) => {
+        return getProjectsByCreator(input.userId);
       }),
   }),
 });

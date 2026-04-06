@@ -589,6 +589,10 @@ export default function HomePage() {
     { songIds: allSongIds },
     { enabled: allSongIds.length > 0, staleTime: 30_000 }
   );
+  const { data: publicProjects = [] } = trpc.projects.listPublic.useQuery(
+    { limit: 12 },
+    { staleTime: 60_000 }
+  );
 
   const tipTrack = tipTarget !== null ? tracks[tipTarget] ?? trendingTracks[tipTarget] : null;
   const handleTip = (index: number, rect: DOMRect) => { setTipTarget(index); setTipRect(rect); };
@@ -1013,7 +1017,63 @@ export default function HomePage() {
           </>
         )}
 
-        {/* ── Medium Sections ─────────────────────────────────────── */}
+        {/* ── Projects Row ─────────────────────────────────────────── */}
+        {(publicProjects as any[]).length > 0 && (
+          <>
+            <div className="gold-divider mb-6" />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-heading text-[16px] tracking-wider text-white">Creator Projects</h2>
+              <Link href="/explore?tab=projects">
+                <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#D4AF37]" style={{ color: "oklch(0.55 0.03 280)" }}>See all</span>
+              </Link>
+            </div>
+            <div
+              className="flex gap-4 overflow-x-auto pb-3 -mx-6 px-6 mb-8"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {(publicProjects as any[]).map((project: any) => (
+                <Link key={project.id} href={`/project/${project.slug}`}>
+                  <div
+                    className="relative flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group"
+                    style={{ width: "200px", height: "150px", background: "oklch(0.12 0.03 270)", boxShadow: "0 4px 24px oklch(0 0 0 / 0.5)" }}
+                  >
+                    {project.bannerUrl ? (
+                      <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, oklch(0.14 0.04 280), oklch(0.10 0.02 270))" }}>
+                        <span className="text-5xl font-bold" style={{ color: "oklch(0.84 0.155 85 / 0.15)" }}>{project.title?.[0]}</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, oklch(0 0 0 / 0.9) 0%, oklch(0 0 0 / 0.2) 55%, transparent 100%)" }} />
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>{project.title}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px]" style={{ color: "oklch(0.6 0.04 280)" }}>{project.creatorName || project.creatorHandle || "Creator"}</span>
+                        {project.goalAmountCents && (
+                          <span className="text-[9px] font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>
+                            {Math.min(100, Math.round(((project.raisedAmountCents || 0) / project.goalAmountCents) * 100))}%
+                          </span>
+                        )}
+                      </div>
+                      {project.goalAmountCents && (
+                        <div className="mt-1.5 h-0.5 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
+                          <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((project.raisedAmountCents || 0) / project.goalAmountCents) * 100))}%`, background: "oklch(0.84 0.155 85)" }} />
+                        </div>
+                      )}
+                    </div>
+                    {project.linkedWitnessId && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.2 300 / 0.9)" }}>
+                        <Shield size={10} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── Medium Sections ────────────────────────────────────────────────────────── */}
         <div className="gold-divider mb-6" />
         <div className="space-y-8 mb-8">
           <WorkCarousel

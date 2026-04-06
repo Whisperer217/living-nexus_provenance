@@ -344,6 +344,20 @@
       "when": 1775455629400,
       "tag": "0048_nervous_nitro",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "5",
+      "when": 1775457141514,
+      "tag": "0049_wandering_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "5",
+      "when": 1775457529758,
+      "tag": "0050_mute_banshee",
+      "breakpoints": true
     }
   ]
 }

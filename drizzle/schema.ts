@@ -368,10 +368,11 @@ export const events = mysqlTable("events", {
     "WORK_REFERENCED",
     "SYSTEM_UPDATE",
     "PRESERVATION_MODE",
+    "PROJECT_PUBLISHED",
   ]).notNull(),
 
   // Work reference (WID origin node)
-  workId: int("workId").notNull(),   // maps to songs.id
+  workId: int("workId").notNull(),   // maps to songs.id or projects.id
 
   // Actor (human source)
   actorId: int("actorId"),           // maps to users.id; null = anonymous
@@ -1045,3 +1046,24 @@ export const projectDonations = mysqlTable("projectDonations", {
 });
 export type ProjectDonation = typeof projectDonations.$inferSelect;
 export type InsertProjectDonation = typeof projectDonations.$inferInsert;
+
+// ─── Project Content Blocks (Inline Canvas Editor) ───────────────────────────
+// Each block is one section of the project page: text, image, video, or divider.
+// Ordered by `position` (ascending). Creator edits blocks in-place on the page.
+export const projectBlocks = mysqlTable("projectBlocks", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  type: mysqlEnum("type", ["text", "image", "video", "divider", "quote"]).notNull(),
+  position: int("position").default(0).notNull(),
+  content: text("content"),           // markdown text for text/quote blocks
+  imageUrl: text("imageUrl"),         // S3 CDN url for image blocks
+  imageKey: varchar("imageKey", { length: 512 }),
+  imageCaption: varchar("imageCaption", { length: 512 }),
+  videoUrl: text("videoUrl"),         // YouTube/Vimeo/S3 url for video blocks
+  videoType: mysqlEnum("videoType", ["youtube", "vimeo", "s3", "none"]).default("none"),
+  videoCaption: varchar("videoCaption", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+export type ProjectBlock = typeof projectBlocks.$inferSelect;
+export type InsertProjectBlock = typeof projectBlocks.$inferInsert;
