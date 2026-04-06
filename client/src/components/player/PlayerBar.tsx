@@ -191,6 +191,7 @@ export default function PlayerBar() {
   return (
     <div
       className="z-50 transition-all duration-500 ease-in-out hidden md:block"
+      data-no-filter
       style={{
         position: "fixed",
         bottom: 0,

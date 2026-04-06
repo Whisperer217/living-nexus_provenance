@@ -2843,3 +2843,7 @@
 - [x] Add CSS transition (background-color 0.45s, color 0.35s) to html/body for graceful palette fade
 - [x] Persist lightsMode in localStorage — hydrate synchronously at module load to eliminate flash
 - [x] Bump What's New modal to v2.23.0 with Espresso Crème / Lights toggle entry
+## Phase 48: Lights Mode Filter Refinement
+- [x] Reduce filter intensity to very subtle warm tint (sepia 0.18, brightness 1.12, contrast 0.95, hue-rotate 4deg)
+- [x] Exclude music player bar (PlayerBar + MobilePlayerLayer) via data-no-filter attribute
+- [x] Images, video, canvas already counter-filtered to stay colour-accurate

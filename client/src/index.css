@@ -148,11 +148,11 @@
 /* Apply warm espresso-creme filter to the entire page */
 .lights-on body {
   filter:
-    sepia(0.55)
-    brightness(2.10)
-    contrast(0.72)
-    saturate(0.80)
-    hue-rotate(8deg);
+    sepia(0.18)
+    brightness(1.12)
+    contrast(0.95)
+    saturate(0.92)
+    hue-rotate(4deg);
   transition: filter 0.45s ease;
 }
 
