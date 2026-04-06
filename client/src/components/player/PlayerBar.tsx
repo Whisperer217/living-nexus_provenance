@@ -514,44 +514,50 @@ export default function PlayerBar() {
                   </button>
                   {showVolume && (
                     <div
-                      className="absolute bottom-12 left-1/2 -translate-x-1/2 rounded-2xl px-3 pt-3 pb-2 shadow-2xl z-50 flex flex-col items-center gap-2"
+                      className="absolute bottom-12 left-1/2 -translate-x-1/2 rounded-2xl shadow-2xl z-50"
                       style={{
                         background: "oklch(0.12 0.030 52)",
                         border: "1px solid oklch(0.38 0.08 68 / 60%)",
                         boxShadow: "0 0 24px 4px oklch(0.82 0.155 75 / 0.18), 0 8px 32px oklch(0.10 0.02 55 / 0.8)",
+                        padding: "12px 14px 10px",
+                        minWidth: "140px",
                       }}
                     >
                       {/* Volume % label */}
-                      <span className="text-[10px] font-mono tracking-widest" style={{ color: "oklch(0.82 0.155 75)" }}>
-                        {state.isMuted ? "0" : Math.round(state.volume * 100)}%
-                      </span>
-                      {/* Vertical flame slider */}
-                      <input
-                        type="range"
-                        min="0" max="1" step="0.01"
-                        value={state.isMuted ? 0 : state.volume}
-                        onChange={e => { setVolume(parseFloat(e.target.value)); }}
-                        className="volume-slider-vertical"
-                        style={{
-                          background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
-                            state.isMuted ? 0 : state.volume * 100
-                          }%, oklch(0.22 0.04 55 / 80%) ${
-                            state.isMuted ? 0 : state.volume * 100
-                          }%)`,
-                        }}
-                      />
-                      {/* Mute toggle */}
-                      <button
-                        onClick={toggleMute}
-                        className="p-1 rounded-full transition-all"
-                        style={{
-                          color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.45 0.04 55)",
-                          background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
-                        }}
-                        title={state.isMuted ? "Unmute" : "Mute"}
-                      >
-                        <VolumeX size={11} />
-                      </button>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "oklch(0.82 0.155 75)" }}>
+                          {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
+                        </span>
+                        {/* Mute toggle */}
+                        <button
+                          onClick={toggleMute}
+                          className="p-1 rounded-full transition-all"
+                          style={{
+                            color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.45 0.04 55)",
+                            background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                          }}
+                          title={state.isMuted ? "Unmute" : "Mute"}
+                        >
+                          <VolumeX size={11} />
+                        </button>
+                      </div>
+                      {/* Horizontal slider (visually looks vertical via CSS rotate on the element itself) */}
+                      <div className="flex items-center justify-center" style={{ height: "116px", overflow: "visible" }}>
+                        <input
+                          type="range"
+                          min="0" max="1" step="0.01"
+                          value={state.isMuted ? 0 : state.volume}
+                          onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
+                          className="volume-slider-vertical"
+                          style={{
+                            background: `linear-gradient(to right, oklch(0.88 0.18 82) ${
+                              state.isMuted ? 0 : state.volume * 100
+                            }%, oklch(0.22 0.04 55 / 80%) ${
+                              state.isMuted ? 0 : state.volume * 100
+                            }%)`,
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -952,42 +958,49 @@ export default function PlayerBar() {
               </button>
               {showVolume && (
                 <div
-                  className="absolute bottom-12 right-0 rounded-2xl px-3 pt-3 pb-2 shadow-2xl z-[200] flex flex-col items-center gap-2"
+                  className="absolute bottom-12 right-0 rounded-2xl shadow-2xl z-[200]"
                   style={{
                     background: "oklch(0.12 0.030 52)",
                     border: "1px solid oklch(0.38 0.08 68 / 60%)",
                     boxShadow: "0 0 24px 4px oklch(0.82 0.155 75 / 0.18), 0 8px 32px oklch(0.10 0.02 55 / 0.8)",
-                    minWidth: "52px",
+                    padding: "12px 14px 10px",
+                    minWidth: "140px",
                   }}
                 >
-                  <span className="text-[10px] font-mono tracking-widest" style={{ color: "oklch(0.82 0.155 75)" }}>
-                    {state.isMuted ? "0" : Math.round(state.volume * 100)}%
-                  </span>
-                  <input
-                    type="range"
-                    min="0" max="1" step="0.01"
-                    value={state.isMuted ? 0 : state.volume}
-                    onChange={e => { setVolume(parseFloat(e.target.value)); }}
-                    className="volume-slider-vertical"
-                    style={{
-                      background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
-                        state.isMuted ? 0 : state.volume * 100
-                      }%, oklch(0.22 0.04 55 / 80%) ${
-                        state.isMuted ? 0 : state.volume * 100
-                      }%)`,
-                    }}
-                  />
-                  <button
-                    onClick={toggleMute}
-                    className="p-1 rounded-full transition-all"
-                    style={{
-                      color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.45 0.04 55)",
-                      background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
-                    }}
-                    title={state.isMuted ? "Unmute" : "Mute"}
-                  >
-                    <VolumeX size={11} />
-                  </button>
+                  {/* Header row: label + mute */}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "oklch(0.82 0.155 75)" }}>
+                      {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
+                    </span>
+                    <button
+                      onClick={toggleMute}
+                      className="p-1 rounded-full transition-all"
+                      style={{
+                        color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.45 0.04 55)",
+                        background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                      }}
+                      title={state.isMuted ? "Unmute" : "Mute"}
+                    >
+                      <VolumeX size={11} />
+                    </button>
+                  </div>
+                  {/* Slider container — overflow:visible so rotated slider isn't clipped */}
+                  <div className="flex items-center justify-center" style={{ height: "116px", overflow: "visible" }}>
+                    <input
+                      type="range"
+                      min="0" max="1" step="0.01"
+                      value={state.isMuted ? 0 : state.volume}
+                      onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
+                      className="volume-slider-vertical"
+                      style={{
+                        background: `linear-gradient(to right, oklch(0.88 0.18 82) ${
+                          state.isMuted ? 0 : state.volume * 100
+                        }%, oklch(0.22 0.04 55 / 80%) ${
+                          state.isMuted ? 0 : state.volume * 100
+                        }%)`,
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </div>

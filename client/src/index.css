@@ -597,21 +597,23 @@
 }
 
 /* ── Standard vertical slider (bottom bar + expanded bar) ── */
+/* Uses transform rotation — slider-vertical is deprecated in Chrome 121+ */
 input[type="range"].volume-slider-vertical {
-  -webkit-appearance: slider-vertical;
-  appearance: auto;
-  writing-mode: vertical-lr;
-  direction: rtl;
-  width: 8px;
-  height: 108px;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 108px;        /* becomes the height after rotation */
+  height: 8px;
+  transform: rotate(-90deg);
   cursor: pointer;
   border-radius: 9999px;
   outline: none;
   padding: 0;
+  flex-shrink: 0;
 }
 input[type="range"].volume-slider-vertical::-webkit-slider-runnable-track {
-  width: 8px;
+  height: 8px;
   border-radius: 9999px;
+  background: oklch(0.22 0.04 55 / 80%);
 }
 input[type="range"].volume-slider-vertical::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -621,7 +623,7 @@ input[type="range"].volume-slider-vertical::-webkit-slider-thumb {
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, oklch(0.96 0.10 90), oklch(0.82 0.155 75) 55%, oklch(0.62 0.18 55));
   border: 2px solid oklch(0.94 0.06 82 / 0.95);
-  margin-left: -5px;
+  margin-top: -5px;
   cursor: pointer;
   animation: flamePulse 2.4s ease-in-out infinite;
   transition: transform 0.15s ease;
@@ -630,7 +632,7 @@ input[type="range"].volume-slider-vertical::-webkit-slider-thumb:hover {
   transform: scale(1.25);
 }
 input[type="range"].volume-slider-vertical::-moz-range-track {
-  width: 8px;
+  height: 8px;
   border-radius: 9999px;
   background: oklch(0.28 0.04 60 / 80%);
 }
@@ -645,21 +647,23 @@ input[type="range"].volume-slider-vertical::-moz-range-thumb {
 }
 
 /* ── Theater-mode vertical slider — taller, organ-pipe style ──────────── */
+/* Theater slider: same rotation approach, taller */
 input[type="range"].volume-slider-theater {
-  -webkit-appearance: slider-vertical;
-  appearance: auto;
-  writing-mode: vertical-lr;
-  direction: rtl;
-  width: 10px;
-  height: 130px;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 130px;        /* becomes the height after rotation */
+  height: 10px;
+  transform: rotate(-90deg);
   cursor: pointer;
   border-radius: 9999px;
   outline: none;
   padding: 0;
+  flex-shrink: 0;
 }
 input[type="range"].volume-slider-theater::-webkit-slider-runnable-track {
-  width: 10px;
+  height: 10px;
   border-radius: 9999px;
+  background: oklch(0.22 0.04 270 / 80%);
 }
 input[type="range"].volume-slider-theater::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -669,7 +673,7 @@ input[type="range"].volume-slider-theater::-webkit-slider-thumb {
   border-radius: 50%;
   background: radial-gradient(circle at 38% 32%, oklch(0.98 0.08 92), oklch(0.85 0.16 78) 50%, oklch(0.58 0.20 52));
   border: 2px solid oklch(0.96 0.08 85 / 0.95);
-  margin-left: -6px;
+  margin-top: -6px;
   cursor: pointer;
   animation: flamePulse 2.0s ease-in-out infinite;
   transition: transform 0.15s ease;
@@ -678,7 +682,7 @@ input[type="range"].volume-slider-theater::-webkit-slider-thumb:hover {
   transform: scale(1.20);
 }
 input[type="range"].volume-slider-theater::-moz-range-track {
-  width: 10px;
+  height: 10px;
   border-radius: 9999px;
   background: oklch(0.22 0.04 270 / 80%);
 }
