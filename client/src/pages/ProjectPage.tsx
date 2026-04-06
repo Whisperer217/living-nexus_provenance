@@ -762,6 +762,24 @@ export default function ProjectPage() {
     },
     onError: (e) => toast.error(e.message),
   });
+  const archiveProject = trpc.projects.archive.useMutation({
+    onSuccess: () => {
+      utils.projects.getBySlug.invalidate({ slug: slug ?? "" });
+      utils.projects.mine.invalidate();
+      toast.success("Project archived. It is no longer visible to the public.");
+      setEditMode(false);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const unpublishProject = trpc.projects.unpublish.useMutation({
+    onSuccess: () => {
+      utils.projects.getBySlug.invalidate({ slug: slug ?? "" });
+      utils.projects.mine.invalidate();
+      toast.success("Project moved back to draft. Only you can see it.");
+      setEditMode(false);
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const uploadBanner = trpc.projects.uploadBlockImage.useMutation({
     onSuccess: (data) => {
       if (!project) return;
@@ -893,9 +911,27 @@ export default function ProjectPage() {
                 )}
               </>
             ) : (
-              <Button size="sm" onClick={() => setEditMode(true)} className="bg-white/10 hover:bg-white/20 text-white text-xs h-8">
-                <Pencil className="w-3 h-3 mr-1" /> Edit Project
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={() => setEditMode(true)} className="bg-white/10 hover:bg-white/20 text-white text-xs h-8">
+                  <Pencil className="w-3 h-3 mr-1" /> Edit Project
+                </Button>
+                {project.status === "active" && (
+                  <Button size="sm" variant="ghost"
+                    onClick={() => { if (confirm("Move this project back to draft? It will be hidden from the public.")) unpublishProject.mutate({ projectId: project.id }); }}
+                    disabled={unpublishProject.isPending}
+                    className="text-yellow-400/70 hover:text-yellow-400 hover:bg-yellow-400/10 text-xs h-8">
+                    Unpublish
+                  </Button>
+                )}
+                {project.status !== "archived" && (
+                  <Button size="sm" variant="ghost"
+                    onClick={() => { if (confirm("Archive this project? It will be removed from all public listings.")) archiveProject.mutate({ projectId: project.id }); }}
+                    disabled={archiveProject.isPending}
+                    className="text-red-400/70 hover:text-red-400 hover:bg-red-400/10 text-xs h-8">
+                    Archive
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         </div>

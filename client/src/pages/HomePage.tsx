@@ -932,7 +932,7 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════════
           CREATOR PROJECTS — horizontal scroll row (top priority)
       ══════════════════════════════════════════════════════════════ */}
-      {(publicProjects as any[]).length > 0 && (
+      {(isAuthenticated || (publicProjects as any[]).length > 0) && (
         <div className="px-6 pt-5 pb-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-[16px] tracking-wider text-white">Creator Projects</h2>
@@ -982,6 +982,20 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
+            {isAuthenticated && (
+              <Link href="/my-projects">
+                <div
+                  className="relative flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group flex flex-col items-center justify-center gap-2"
+                  style={{ width: "200px", height: "150px", background: "transparent", border: "1.5px dashed oklch(0.84 0.155 85 / 0.35)", boxShadow: "none" }}
+                >
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
+                    <span style={{ color: "oklch(0.84 0.155 85)", fontSize: "20px", lineHeight: 1 }}>+</span>
+                  </div>
+                  <p className="text-[11px] font-semibold text-center px-3" style={{ color: "oklch(0.84 0.155 85 / 0.8)", fontFamily: "'Cinzel', serif" }}>Start a Project</p>
+                  <p className="text-[9px] text-center px-3" style={{ color: "oklch(0.55 0.03 280)" }}>Launch your campaign</p>
+                </div>
+              </Link>
+            )}
           </div>
           <div className="gold-divider mt-4" />
         </div>

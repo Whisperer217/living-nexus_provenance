@@ -2945,3 +2945,11 @@
 - [x] Find caption field in tRPC router/Zod schema that rejects null
 - [x] Make caption nullable/optional (z.string().nullable().optional()) or coerce null to empty string
 - [x] Fix any frontend code sending null instead of undefined/empty string for caption
+
+## Phase 65: Multi-Fix Batch
+
+- [ ] Update v2.24 What's New changelog to describe steel overlay mechanic accurately
+- [ ] Add New Project CTA ghost card in Projects row on home page (for creators with no projects)
+- [x] Fix auto-advance to next track bug in audio player (web + mobile)
+- [x] Shrink refresh banner — reduce height/padding and fix multi-click dismiss
+- [x] Add project archive/unpublish button to ProjectPage management UI

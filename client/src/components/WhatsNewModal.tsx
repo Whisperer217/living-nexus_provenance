@@ -19,9 +19,9 @@ const UPDATES = [
     date: "April 2026",
     label: "Latest",
     items: [
-      { icon: Sun, text: "Warm Theme — A proper two-theme system now powers the platform. Lantern Mode (dark, charred oak) and Warm Mode (Onyx Coffee cream-clay) are independent CSS themes that swap every surface token simultaneously. Toggle in Profile → Settings. Your preference is remembered across sessions with zero flash on load." },
-      { icon: Sparkles, text: "Cream-Clay Palette — Warm Mode surfaces step through warm linen (#F2EDE8) → cream (#EDE4D8) → light clay (#E5D8C8) → warm sand (#DACCB8). Text reads in deep espresso. Borders and CTAs use forest olive. Cathedral gold is retained as the accent across both themes." },
-      { icon: Moon, text: "Dark Theme Preserved — The Lantern Light palette is fully intact and unchanged. Switching to Warm Mode is additive, not destructive — the dark theme is always one tap away from Profile → Settings." },
+      { icon: Sun, text: "Lights On — Steel Overlay Mode is now available in Profile → Settings. The dark charcoal base palette stays fully active — Lights On lays a translucent steel-blue tint over the navigation bar and sidebar only, with a subtle body brightness reduction. Your music and content remain in full contrast. Toggle in Profile → Settings; preference is remembered across sessions with zero flash on load." },
+      { icon: Sparkles, text: "Steel Tint Architecture — Unlike a full theme swap, Lights On applies a single backdrop-filtered overlay to nav surfaces only. No color tokens are overridden. Headings, titles, and body text remain on the dark base palette — only the chrome dims. Cathedral gold accents are fully preserved." },
+      { icon: LayoutGrid, text: "Projects Promoted — Creator Projects now lead on both the home page (above Featured Songs) and on creator profile pages (above the song list). Projects are the first thing visitors see, giving campaigns maximum discovery surface." },
     ],
   },
   {

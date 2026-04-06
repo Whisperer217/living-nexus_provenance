@@ -4759,6 +4759,28 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           : false;
         return { isFollowing, followerCount };
       }),
+
+    /** Archive a project (owner only) — sets status to 'archived', removes from public listings */
+    archive: protectedProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found' });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN', message: 'Not your project' });
+        await updateProject(input.projectId, { status: 'archived' });
+        return { success: true };
+      }),
+
+    /** Unpublish a project (owner only) — reverts status from 'active' back to 'draft' */
+    unpublish: protectedProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found' });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN', message: 'Not your project' });
+        await updateProject(input.projectId, { status: 'draft' });
+        return { success: true };
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

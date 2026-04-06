@@ -282,6 +282,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const t = tracks[next];
         if (t?.audioUrl) {
           audio.src = safeAudioUrl(t.audioUrl);
+          audio.load(); // required on iOS Safari to reset ended state before play()
           audio.play().catch(() => {});
         }
         return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl };
@@ -289,18 +290,38 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
     const onPlay = () => setState(s => ({ ...s, isPlaying: true }));
     const onPause = () => setState(s => ({ ...s, isPlaying: false }));
+    // Skip to next track on audio error (broken URL, network failure, etc.)
+    const onError = () => {
+      setState(s => {
+        const tracks = s.tracks.filter(t => !!t.audioUrl);
+        const next = s.currentIdx + 1;
+        if (next >= tracks.length) {
+          audio.pause();
+          return { ...s, isPlaying: false };
+        }
+        const t = tracks[next];
+        if (t?.audioUrl) {
+          audio.src = safeAudioUrl(t.audioUrl);
+          audio.load();
+          audio.play().catch(() => {});
+        }
+        return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl };
+      });
+    };
 
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("durationchange", onDurationChange);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
+    audio.addEventListener("error", onError);
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("durationchange", onDurationChange);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("error", onError);
     };
   }, [state.tracks]);
 
@@ -431,6 +452,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const newIdx = 0;
       if (t.audioUrl) {
         audio.src = safeAudioUrl(t.audioUrl);
+        audio.load(); // reset ended state for mobile browsers
         audio.play().catch(() => {});
       }
       return { ...s, tracks: newTracks, currentIdx: newIdx, isPlaying: !!t.audioUrl, queueContext: "NONE" };
@@ -494,6 +516,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const t = validTracks[clampedIdx];
     if (!t?.audioUrl) return;
     audio.src = safeAudioUrl(t.audioUrl);
+    audio.load(); // reset ended state for mobile browsers
     audio.play().catch(() => {});
     setState(s => ({ ...s, tracks: validTracks, currentIdx: clampedIdx, isPlaying: true, queueContext: context }));
   }, []);
