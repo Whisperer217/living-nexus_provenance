@@ -16,7 +16,7 @@
  */
 
 import React from "react";
-import { Cpu, Sparkles, Music, ShieldOff, Info, CheckCircle } from "lucide-react";
+import { Cpu, Sparkles, Music, ShieldOff, Info, CheckCircle, PenLine } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +26,7 @@ import {
 
 // ─── AI Disclosure (how much AI was used in creation) ─────────────────────────
 
-export type AiDisclosureValue = "original" | "ai_assisted" | "ai_generated" | null | undefined;
+export type AiDisclosureValue = "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument" | null | undefined;
 
 interface DisclosureConfig {
   label: string;
@@ -40,6 +40,16 @@ interface DisclosureConfig {
 
 function getDisclosureConfig(value: AiDisclosureValue): DisclosureConfig {
   switch (value) {
+    case "human_authored_ai_instrument":
+      return {
+        label: "Human-Authored via AI Instrument",
+        shortLabel: "HAAI",
+        icon: <PenLine className="w-3 h-3" />,
+        color: "oklch(0.84 0.155 85)",
+        bg: "oklch(0.84 0.155 85 / 0.10)",
+        border: "oklch(0.84 0.155 85 / 0.30)",
+        tooltip: "The creator authored the intent, vision, and direction. AI was the instrument — not the author. Directorial declaration is on record.",
+      };
     case "ai_generated":
       return {
         label: "AI-Generated",

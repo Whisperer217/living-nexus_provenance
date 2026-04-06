@@ -30,7 +30,7 @@ export const users = mysqlTable("users", {
   bannerPositionY: float("bannerPositionY").default(50).notNull(),
 
   // Creator AI & genre defaults
-  aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated"]).default("original"),
+  aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).default("original"),
   primaryGenre: varchar("primaryGenre", { length: 64 }),
 
   // License & slots
@@ -174,6 +174,23 @@ export const songs = mysqlTable("songs", {
 
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
+
+  // AI Disclosure — how the creator describes their authorship role
+  // "original"                  = entirely human-made, no AI tools
+  // "ai_assisted"               = AI used as a production aid; human vision, human direction
+  // "ai_generated"              = AI generated the primary content
+  // "human_authored_ai_instrument" = human authored intent, AI used as the instrument (HAAI)
+  aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]),
+
+  // HAAI Declaration — structured authorship intent record (only populated when aiDisclosure = "human_authored_ai_instrument")
+  // Each field documents one dimension of the creator's directorial vision before/during AI instrument use
+  haaiVisualConcept: text("haaiVisualConcept"),        // The visual/cinematic image the creator was trying to articulate
+  haaiStyleLanguage: text("haaiStyleLanguage"),        // Plain-language description of the desired style
+  haaiInstrumentation: text("haaiInstrumentation"),    // Instrumentation choices and sonic palette
+  haaiVocalConveyance: text("haaiVocalConveyance"),    // The voice, tone, and delivery the creator was trying to convey
+  haaiLyricalInspiration: text("haaiLyricalInspiration"), // Lyrical seed / inspiration snippets that anchored the work
+  haaiEmotionalTone: text("haaiEmotionalTone"),        // The emotional tone and MUT-alignment the creator was pursuing
+  haaiDeclaredAt: timestamp("haaiDeclaredAt"),         // Timestamp when the HAAI declaration was completed
 
   // Stats
   isPublic: boolean("isPublic").default(true).notNull(),
@@ -924,7 +941,7 @@ export const songVersions = mysqlTable("songVersions", {
   fileKey: varchar("fileKey", { length: 512 }),  // S3 key for cleanup
   witnessId: varchar("witnessId", { length: 64 }), // WID assigned to this version
   changeNote: text("changeNote"),                // Creator's note about what changed
-  aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated"]).default("original"),
+  aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).default("original"),
   durationSeconds: float("durationSeconds"),
   fileSizeBytes: int("fileSizeBytes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

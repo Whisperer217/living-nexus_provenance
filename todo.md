@@ -2677,3 +2677,16 @@
 - [x] Replaced all `animation` shorthand + `animationDelay` pairs with separate `animationName`, `animationDuration`, `animationTimingFunction`, `animationIterationCount`, `animationDirection`, `animationDelay` properties
 - [x] Removed conflicting `animate-pulse` Tailwind classes where inline animation properties were added
 - [x] TypeScript: 0 errors | Tests: 131/131 passing
+
+## Feature: Human-Authored via AI Instrument (HAAI) Disclosure System
+- [x] Add HAAI declaration columns to songs DB schema: haaiVisualConcept, haaiStyleLanguage, haaiInstrumentation, haaiVocalConveyance, haaiLyricalInspiration, haaiEmotionalTone, haaiDeclaredAt
+- [x] Run direct SQL migration (drizzle journal out of sync; columns confirmed live in DB)
+- [x] Add HAAI as 4th aiDisclosure option: "human_authored_ai_instrument" (users + songs tables, DB enums updated)
+- [x] Build HAAIDeclarationForm component: 6-field structured intent form
+- [x] Integrate HAAIDeclarationForm into UploadPage — shown when disclosure = "human_authored_ai_instrument"
+- [x] Surface HAAI Authorship Declaration panel on SongDetailPage (collapsible, below WID badge)
+- [x] Update AiDisclosurePill: HAAI type, PenLine icon, gold color, directorial tooltip
+- [x] Update AI disclosure badge in SongDetailPage, ProfilePage, and all disclosure selectors
+- [x] TypeScript: 0 errors | Tests: 131/131 passing
+- [ ] Include HAAI fields in WID certificate PDF download
+- [ ] Write dedicated vitest tests for HAAI schema and procedures

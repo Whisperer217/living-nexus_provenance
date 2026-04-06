@@ -539,16 +539,22 @@ export default function SongDetailPage() {
                         certificateUrl={song.certificateUrl}
                       />
                     )}
-                    {creator?.aiDisclosure && creator.aiDisclosure !== "original" && (
-                      <Badge style={{
-                        background: creator.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.15)" : "oklch(0.60 0.18 55 / 0.15)",
-                        color: creator.aiDisclosure === "ai_generated" ? "oklch(0.75 0.18 25)" : "oklch(0.80 0.18 55)",
-                        border: `1px solid ${creator.aiDisclosure === "ai_generated" ? "oklch(0.55 0.18 25 / 0.4)" : "oklch(0.60 0.18 55 / 0.4)"}`,
-                        fontSize: "11px",
-                      }}>
-                        {creator.aiDisclosure === "ai_generated" ? "AI-Generated" : "AI-Assisted"}
-                      </Badge>
-                    )}
+                    {(() => {
+                      const disc = (song as any).aiDisclosure || creator?.aiDisclosure;
+                      if (!disc || disc === "original") return null;
+                      const map: Record<string, { label: string; bg: string; fg: string; border: string }> = {
+                        ai_generated: { label: "AI-Generated", bg: "oklch(0.55 0.18 25 / 0.15)", fg: "oklch(0.75 0.18 25)", border: "oklch(0.55 0.18 25 / 0.4)" },
+                        ai_assisted: { label: "AI-Assisted", bg: "oklch(0.60 0.18 55 / 0.15)", fg: "oklch(0.80 0.18 55)", border: "oklch(0.60 0.18 55 / 0.4)" },
+                        human_authored_ai_instrument: { label: "HAAI — Human-Authored", bg: "oklch(0.7 0.18 280 / 0.12)", fg: "oklch(0.84 0.155 85)", border: "oklch(0.7 0.18 280 / 0.35)" },
+                      };
+                      const style = map[disc];
+                      if (!style) return null;
+                      return (
+                        <Badge style={{ background: style.bg, color: style.fg, border: `1px solid ${style.border}`, fontSize: "11px" }}>
+                          {style.label}
+                        </Badge>
+                      );
+                    })()}
                   </div>
                   <div className="flex items-center gap-4 text-xs" style={{ color: "#E2E8F0" }}>
                     <span className="flex items-center gap-1"><Headphones className="w-3.5 h-3.5" />{song.playCount || 0} plays</span>
@@ -675,6 +681,45 @@ export default function SongDetailPage() {
                     )}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* HAAI Authorship Declaration — shown when song has HAAI disclosure */}
+            {(song as any).aiDisclosure === "human_authored_ai_instrument" && (
+              <div className="rounded-2xl p-5" style={{ background: "oklch(0.14 0.025 280)", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.84 0.155 85 / 0.15)" }}>
+                    <span style={{ color: "oklch(0.84 0.155 85)", fontSize: "14px" }}>✍</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>HAAI Authorship Declaration</p>
+                    <p className="text-[11px]" style={{ color: "oklch(0.55 0.03 280)" }}>Human-Authored via AI Instrument — directorial intent on record</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {([
+                    { key: "haaiVisualConcept", label: "Visual Concept" },
+                    { key: "haaiStyleLanguage", label: "Style" },
+                    { key: "haaiInstrumentation", label: "Instrumentation" },
+                    { key: "haaiVocalConveyance", label: "Vocal Conveyance" },
+                    { key: "haaiLyricalInspiration", label: "Lyrical Inspiration" },
+                    { key: "haaiEmotionalTone", label: "Emotional Tone" },
+                  ] as const).map(({ key, label }) => {
+                    const val = (song as any)[key] as string | null | undefined;
+                    if (!val) return null;
+                    return (
+                      <div key={key}>
+                        <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}>{label}</p>
+                        <p className="text-xs leading-relaxed" style={{ color: "oklch(0.78 0.03 280)" }}>{val}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                {(song as any).haaiDeclaredAt && (
+                  <p className="text-[10px] mt-4 pt-3" style={{ color: "oklch(0.42 0.03 280)", borderTop: "1px solid oklch(0.22 0.02 280)" }}>
+                    Declaration sealed {new Date((song as any).haaiDeclaredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                  </p>
+                )}
               </div>
             )}
           </div>

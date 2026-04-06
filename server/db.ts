@@ -116,7 +116,7 @@ export async function updateUserProfile(userId: number, data: {
   name?: string; artistHandle?: string; bio?: string; profilePhotoUrl?: string; bannerUrl?: string;
   bmiMemberNumber?: string; website?: string; location?: string; twitterHandle?: string;
   instagramHandle?: string; youtubeHandle?: string;
-  aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
+  aiDisclosure?: "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument";
   primaryGenre?: string;
   avatarObjectPosition?: string;
   bannerPositionX?: number;
@@ -453,6 +453,15 @@ export async function updateSongMetadata(
     status?: "Draft" | "Published" | "Unlisted" | "Deleted";
     coverPositionX?: number;
     coverPositionY?: number;
+    // AI Disclosure & HAAI Declaration fields
+    aiDisclosure?: "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument" | null;
+    haaiVisualConcept?: string | null;
+    haaiStyleLanguage?: string | null;
+    haaiInstrumentation?: string | null;
+    haaiVocalConveyance?: string | null;
+    haaiLyricalInspiration?: string | null;
+    haaiEmotionalTone?: string | null;
+    haaiDeclaredAt?: Date | null;
   }
 ) {
   const db = await getDb();
@@ -466,6 +475,14 @@ export async function updateSongMetadata(
   if (fields.status !== undefined) updateSet.status = fields.status;
   if (fields.coverPositionX !== undefined) updateSet.coverPositionX = fields.coverPositionX;
   if (fields.coverPositionY !== undefined) updateSet.coverPositionY = fields.coverPositionY;
+  if (fields.aiDisclosure !== undefined) updateSet.aiDisclosure = fields.aiDisclosure;
+  if (fields.haaiVisualConcept !== undefined) updateSet.haaiVisualConcept = fields.haaiVisualConcept;
+  if (fields.haaiStyleLanguage !== undefined) updateSet.haaiStyleLanguage = fields.haaiStyleLanguage;
+  if (fields.haaiInstrumentation !== undefined) updateSet.haaiInstrumentation = fields.haaiInstrumentation;
+  if (fields.haaiVocalConveyance !== undefined) updateSet.haaiVocalConveyance = fields.haaiVocalConveyance;
+  if (fields.haaiLyricalInspiration !== undefined) updateSet.haaiLyricalInspiration = fields.haaiLyricalInspiration;
+  if (fields.haaiEmotionalTone !== undefined) updateSet.haaiEmotionalTone = fields.haaiEmotionalTone;
+  if (fields.haaiDeclaredAt !== undefined) updateSet.haaiDeclaredAt = fields.haaiDeclaredAt;
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 

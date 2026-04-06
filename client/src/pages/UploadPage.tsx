@@ -22,6 +22,7 @@ import { getLoginUrl } from "@/const";
 import { addWIDSnapshot } from "@/lib/lnxCache";
 import { runUploadPipeline, type UploadMetadata } from "@/lib/uploadPipeline";
 import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
+import { HAAIDeclarationForm, EMPTY_HAAI } from "@/components/HAAIDeclarationForm";
 
 const GENRES = [
   "Ambient / Lo-fi", "Electronic / House", "Gospel / Worship",
@@ -167,6 +168,15 @@ export default function UploadPage() {
   const [lyrics, setLyrics] = useState("");
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
+  const [aiDisclosure, setAiDisclosure] = useState<"original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument">("original");
+  const [haaiDeclaration, setHaaiDeclaration] = useState({
+    haaiVisualConcept: "",
+    haaiStyleLanguage: "",
+    haaiInstrumentation: "",
+    haaiVocalConveyance: "",
+    haaiLyricalInspiration: "",
+    haaiEmotionalTone: "",
+  });
   const [caption, setCaption] = useState("");
   const [captionSuggestion, setCaptionSuggestion] = useState<string | null>(null);
   const [captionState, setCaptionState] = useState<"idle" | "loading" | "suggested" | "accepted">("idle");
@@ -537,6 +547,8 @@ export default function UploadPage() {
           fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
           harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
           ecdsaSignature: witnessData?.signature,
+          aiDisclosure,
+          ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
@@ -564,6 +576,8 @@ export default function UploadPage() {
           harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
           ecdsaSignature: witnessData?.signature,
           caption: caption || undefined,
+          aiDisclosure,
+          ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
@@ -598,6 +612,8 @@ export default function UploadPage() {
         durationSeconds: pipelineMeta?.durationSeconds,
         sampleRate: pipelineMeta?.sampleRate,
         bitDepth: pipelineMeta?.bitDepth,
+        aiDisclosure,
+        ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
       } as any);
     } catch (err: any) {
       setUploadPhase("idle");
@@ -951,6 +967,39 @@ export default function UploadPage() {
                   ))}
                 </div>
               </div>
+              {/* AI Authorship Disclosure */}
+              <div>
+                <label className="text-xs mb-2 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>AI AUTHORSHIP DISCLOSURE</label>
+                <div className="space-y-2">
+                  {([
+                    { value: "original" as const, label: "Human Original", color: "oklch(0.65 0.18 145)", desc: "Entirely human-made. No AI tools used in creation." },
+                    { value: "ai_assisted" as const, label: "AI-Assisted", color: "oklch(0.84 0.155 85)", desc: "AI used as a production aid. Human vision, human direction." },
+                    { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "oklch(0.7 0.18 280)", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
+                    { value: "ai_generated" as const, label: "AI-Generated", color: "oklch(0.65 0.18 25)", desc: "AI generated the primary content." },
+                  ] as const).map(opt => (
+                    <button key={opt.value} onClick={() => setAiDisclosure(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
+                      style={{ background: aiDisclosure === opt.value ? `${opt.color.replace(")", " / 0.08)")}` : "oklch(0.13 0.015 280)", border: `1px solid ${aiDisclosure === opt.value ? opt.color.replace(")", " / 0.35)") : "oklch(0.2 0.015 280)"}` }}>
+                      <div className="w-4 h-4 rounded-full mt-0.5 flex-shrink-0 transition-all"
+                        style={{ background: aiDisclosure === opt.value ? opt.color : "transparent", border: `2px solid ${opt.color}` }} />
+                      <div>
+                        <p className="text-sm font-medium" style={{ color: opt.color }}>{opt.label}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>{opt.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {/* HAAI Declaration form — shown only when HAAI is selected */}
+                {aiDisclosure === "human_authored_ai_instrument" && (
+                  <div className="mt-4">
+                    <HAAIDeclarationForm
+                      value={haaiDeclaration}
+                      onChange={setHaaiDeclaration}
+                      compact={false}
+                    />
+                  </div>
+                )}
+              </div>
+
               {/* Lyrics */}
               <div>
                 <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>LYRICS <span style={{ color: "#E2E8F0" }}>(optional — included in WID registration)</span></label>

@@ -694,12 +694,13 @@ export default function ProfilePage() {
               <label className="text-[11px] text-white/70 font-body">AI Disclosure</label>
               <select
                 value={profile?.aiDisclosure || "original"}
-                onChange={e => save({ aiDisclosure: e.target.value as "original" | "ai_assisted" | "ai_generated" })}
+                onChange={e => save({ aiDisclosure: e.target.value as "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument" })}
                 className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[oklch(0.14_0.013_280)] border border-white/[0.1] outline-none cursor-pointer hover:border-[#A78BFA]/50 transition-colors"
                 style={{ background: "oklch(0.148 0.025 52)" }}
               >
                 <option value="original">Human-Made — No AI Used</option>
                 <option value="ai_assisted">AI-Assisted — Human + AI Tools</option>
+                <option value="human_authored_ai_instrument">HAAI — Human-Authored via AI Instrument</option>
                 <option value="ai_generated">AI-Generated — AI-Created</option>
               </select>
             </div>

@@ -319,7 +319,7 @@ export const appRouter = router({
       twitterHandle: z.string().max(64).optional(),
       instagramHandle: z.string().max(64).optional(),
       youtubeHandle: z.string().max(64).optional(),
-      aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated"]).optional(),
+      aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).optional(),
       primaryGenre: z.string().max(64).optional(),
       avatarObjectPosition: z.string().max(32).optional(),
       bannerPositionX: z.number().min(0).max(100).optional(),
@@ -588,6 +588,14 @@ export const appRouter = router({
       durationSeconds: z.number().optional(),
       sampleRate: z.number().optional(),
       bitDepth: z.number().optional(),
+      // AI Disclosure & HAAI Declaration
+      aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).optional(),
+      haaiVisualConcept: z.string().max(2000).optional(),
+      haaiStyleLanguage: z.string().max(2000).optional(),
+      haaiInstrumentation: z.string().max(2000).optional(),
+      haaiVocalConveyance: z.string().max(2000).optional(),
+      haaiLyricalInspiration: z.string().max(2000).optional(),
+      haaiEmotionalTone: z.string().max(2000).optional(),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
@@ -611,7 +619,10 @@ export const appRouter = router({
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.jpg`, coverBuffer, input.coverMimeType);
         coverArtUrl = url;
       }
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth });
+      // Determine HAAI declared timestamp if all 6 fields are provided
+      const haaiFields = [input.haaiVisualConcept, input.haaiStyleLanguage, input.haaiInstrumentation, input.haaiVocalConveyance, input.haaiLyricalInspiration, input.haaiEmotionalTone];
+      const haaiDeclaredAt = (input.aiDisclosure === "human_authored_ai_instrument" && haaiFields.every(f => f && f.trim().length > 0)) ? new Date() : undefined;
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiDeclaredAt } as any);
        const songId = (insertResult as any).insertId as number;
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
@@ -857,9 +868,23 @@ export const appRouter = router({
       status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]).optional(),
       coverPositionX: z.number().min(0).max(100).optional(),
       coverPositionY: z.number().min(0).max(100).optional(),
+      // AI Disclosure & HAAI Declaration
+      aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).nullable().optional(),
+      haaiVisualConcept: z.string().max(2000).nullable().optional(),
+      haaiStyleLanguage: z.string().max(2000).nullable().optional(),
+      haaiInstrumentation: z.string().max(2000).nullable().optional(),
+      haaiVocalConveyance: z.string().max(2000).nullable().optional(),
+      haaiLyricalInspiration: z.string().max(2000).nullable().optional(),
+      haaiEmotionalTone: z.string().max(2000).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, ...fields } = input;
-      await updateSongMetadata(songId, ctx.user.id, fields);
+      // If saving a complete HAAI declaration, stamp the declared timestamp
+      const haaiFields = [fields.haaiVisualConcept, fields.haaiStyleLanguage, fields.haaiInstrumentation, fields.haaiVocalConveyance, fields.haaiLyricalInspiration, fields.haaiEmotionalTone];
+      const isHaaiComplete = haaiFields.every(f => f && f.trim().length > 0);
+      await updateSongMetadata(songId, ctx.user.id, {
+        ...fields,
+        haaiDeclaredAt: isHaaiComplete ? new Date() : undefined,
+      });
       return { success: true };
     }),
 
@@ -4034,7 +4059,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         fileName: z.string(),
         versionLabel: z.string().max(128).optional(),
         changeNote: z.string().max(1000).optional(),
-        aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated"]).optional(),
+        aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verify ownership
