@@ -204,6 +204,39 @@ export default function MobilePlayerLayer() {
   // No body scroll lock — the inner scroll container handles its own scroll.
   // Locking body overflow breaks native scroll on iOS Safari inside the player.
 
+  // ── History API: intercept device back button ─────────────────
+  // When entering expanded/cinematic, push a history entry so the device back
+  // button steps back through player states instead of navigating the page.
+  useEffect(() => {
+    if (playerState === "mini") {
+      // Popped back to mini — nothing to push
+      return;
+    }
+    // Push a dummy history entry so the back button fires popstate here
+    window.history.pushState({ playerState }, "");
+  }, [playerState]);
+
+  useEffect(() => {
+    const handlePopState = (_e: PopStateEvent) => {
+      // Only intercept if we're in expanded or cinematic state
+      if (playerState === "cinematic") {
+        // cinematic → expanded
+        setPlayerState("expanded");
+        // Push another entry so the next back goes expanded → mini
+        window.history.pushState({ playerState: "expanded" }, "");
+        return;
+      }
+      if (playerState === "expanded") {
+        // expanded → mini
+        setPlayerState("mini");
+        return;
+      }
+      // mini — let the browser handle it (navigate back in page history)
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [playerState]);
+
   // Reset canonical panels when track changes
   useEffect(() => {
     setWidPanelOpen(false);
@@ -714,6 +747,7 @@ export default function MobilePlayerLayer() {
       )}
 
       {/* Scrollable content area — everything below the drag handle scrolls freely */}
+      {/* iOS Safari requires explicit height:0 + min-height:0 on flex-1 children to compute scroll height */}
       <div
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto"
@@ -726,6 +760,8 @@ export default function MobilePlayerLayer() {
           touchAction: "pan-y",
           overscrollBehaviorY: "contain",
           paddingBottom: "env(safe-area-inset-bottom, 12px)",
+          height: 0,
+          minHeight: 0,
         }}
       >
 

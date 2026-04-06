@@ -3006,3 +3006,11 @@
 - [x] All three /api/og/* endpoints tested and returning correct title/description/image
 - [x] Registered ogApiRouter in server/_core/index.ts
 - [x] 0 TypeScript errors
+
+## Phase 76: Mobile Player — Scroll + Back Navigation Fix
+- [x] Fix: iOS Safari flex-1 scroll container height bug — added height:0 + minHeight:0 so iOS computes scroll height correctly inside fixed container
+- [x] Fix: device back button (Android/iOS) now steps through player states: cinematic → expanded → mini, instead of navigating page history
+- [x] Implementation: History API pushState when entering expanded/cinematic; popstate handler intercepts back press and transitions player state
+- [x] Cinematic → expanded: back button works; pushes new history entry so next back goes expanded → mini
+- [x] Expanded → mini: back button works; releases history back to page navigation
+- [x] 0 TypeScript errors
