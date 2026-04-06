@@ -28,6 +28,7 @@ import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import TopBar from "@/components/layout/TopBar";
 import LiveActivityPanel from "@/components/layout/LiveActivityPanel";
 import { trpc } from "@/lib/trpc";
+import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
   Home, Compass, Users, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
@@ -89,6 +90,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     refetchOnWindowFocus: false,
   });
   const archiveSongCount = mySongs ? mySongs.filter((s: any) => s.status !== "Deleted").length : 0;
+
+  const { mode: lightsMode } = useLightsMode();
+  const isWarm = lightsMode === "on";
+
+  // Warm theme tokens for mobile chrome only
+  const MOBILE_HEADER_BG = isWarm ? "#EDE4D8" : "oklch(0.125 0.028 52)";
+  const MOBILE_HEADER_BORDER = isWarm ? "rgba(74,92,58,0.25)" : "oklch(0.30 0.04 60 / 0.35)";
+  const MOBILE_SIDEBAR_BG = isWarm ? "#E5D8C8" : "oklch(0.125 0.028 52)";
+  const MOBILE_SIDEBAR_BORDER = isWarm ? "rgba(74,92,58,0.25)" : "oklch(0.30 0.04 60 / 0.35)";
+  const MOBILE_TEXT = isWarm ? "#2C1A0E" : undefined;
+  const MOBILE_TEXT_MUTED = isWarm ? "#6B4C35" : undefined;
 
   const openMobileMenu = useCallback(() => { setQrOpen(false); setMobileMenuOpen(true); }, []);
   const toggleQr = useCallback(() => {
@@ -162,8 +174,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       ══════════════════════════════════════════════ */}
 
       {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-3 px-4 py-3
-        bg-[oklch(0.125_0.028_52)] border-b border-[oklch(0.30_0.04_60/0.35)]">
+      <div
+        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-3 px-4 py-3"
+        style={{
+          background: MOBILE_HEADER_BG,
+          borderBottom: `1px solid ${MOBILE_HEADER_BORDER}`,
+          transition: "background 0.4s ease",
+        }}
+      >
         <button
           onClick={() => mobileMenuOpen ? setMobileMenuOpen(false) : openMobileMenu()}
           className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.06] transition-all"
@@ -192,13 +210,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
           <div
-            className="w-72 h-full bg-[oklch(0.125_0.028_52)] border-r border-[oklch(0.30_0.04_60/0.35)] pt-16 overflow-y-auto flex flex-col"
-            style={{ paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))" }}
+            className="w-72 h-full pt-16 overflow-y-auto flex flex-col"
+            style={{
+              background: MOBILE_SIDEBAR_BG,
+              borderRight: `1px solid ${MOBILE_SIDEBAR_BORDER}`,
+              paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))",
+              transition: "background 0.4s ease",
+            }}
             onClick={e => e.stopPropagation()}
           >
             {/* Mobile identity header */}
             {!authLoading && user && (
-              <div className="px-3 pt-3 pb-3 border-b border-[oklch(0.30_0.04_60/0.35)]">
+              <div className="px-3 pt-3 pb-3" style={{ borderBottom: `1px solid ${MOBILE_SIDEBAR_BORDER}` }}>
                 <button
                   className="flex items-center gap-3 p-3 rounded-xl w-full text-left"
                   style={{ background: "oklch(0.148 0.030 50 / 60%)" }}

@@ -12,6 +12,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
+import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
   Home, Compass, Users, User, Upload, Shield,
   LayoutDashboard, Archive, Sparkles, Terminal,
@@ -120,6 +121,24 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
   const isAdmin = (user as any)?.role === "admin";
   const userId = (user as any)?.id;
 
+  const { mode: lightsMode } = useLightsMode();
+  const isWarm = lightsMode === "on";
+
+  // Warm theme tokens — applied only to nav chrome, not music cards or player
+  const NAV_BG = isWarm ? "#EDE4D8" : "oklch(0.115 0.025 52 / 0.97)";
+  const NAV_BORDER = isWarm ? "rgba(74,92,58,0.25)" : "oklch(0.30 0.04 60 / 45%)";
+  const DRAWER_BG = isWarm ? "#E5D8C8" : "oklch(0.09 0.018 280 / 0.98)";
+  const DRAWER_BORDER = isWarm ? "rgba(74,92,58,0.20)" : "oklch(0.28 0.04 270 / 50%)";
+  const NAV_TEXT = isWarm ? "#2C1A0E" : "oklch(0.62 0.04 65)";
+  const NAV_TEXT_MUTED = isWarm ? "#6B4C35" : "oklch(0.55 0.02 280)";
+  const NAV_SECTION_LABEL = isWarm ? "rgba(44,26,14,0.55)" : "oklch(0.75 0.12 85 / 0.7)";
+  const NAV_SECTION_BORDER = isWarm ? "rgba(74,92,58,0.20)" : "oklch(0.84 0.155 85 / 0.10)";
+  const NAV_ACTIVE_BG = isWarm ? "rgba(184,150,62,0.15)" : "oklch(0.82 0.155 75 / 0.12)";
+  const NAV_ACTIVE_BORDER = isWarm ? "rgba(184,150,62,0.35)" : "oklch(0.82 0.155 75 / 0.22)";
+  const NAV_ACTIVE_TEXT = isWarm ? "#B8963E" : "oklch(0.88 0.14 75)";
+  const LOGO_DIVIDER = isWarm ? "rgba(74,92,58,0.25)" : "oklch(0.30 0.04 60 / 35%)";
+  const RIGHT_DIVIDER = isWarm ? "rgba(74,92,58,0.25)" : "oklch(0.30 0.04 60 / 35%)";
+
   // ── Drawer item renderer ─────────────────────────────────────────
   const renderDrawerItem = (item: {
     label: string; icon: React.ElementType; path: string;
@@ -160,11 +179,11 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         onClick={() => goTo(targetPath)}
         className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-left transition-all"
         style={{
-          background: active ? "oklch(0.80 0.145 82 / 0.10)" : "transparent",
-          color: active ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.02 280)",
+          background: active ? NAV_ACTIVE_BG : "transparent",
+          color: active ? NAV_ACTIVE_TEXT : NAV_TEXT_MUTED,
         }}
-        onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "oklch(0.20 0.02 280 / 0.6)"; (e.currentTarget as HTMLElement).style.color = "oklch(0.85 0.02 280)"; }}
-        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "oklch(0.55 0.02 280)"; } }}
+        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(44,26,14,0.08)" : "oklch(0.20 0.02 280 / 0.6)"; (e.currentTarget as HTMLElement).style.color = isWarm ? "#2C1A0E" : "oklch(0.85 0.02 280)"; } }}
+        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = NAV_TEXT_MUTED; } }}
       >
         <Icon size={13} className="flex-shrink-0" style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit" }} />
         <span className="text-[12px] font-body flex-1">{item.label}</span>
@@ -180,15 +199,16 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         className="fixed top-0 left-0 right-0 z-50 flex items-center gap-0"
         style={{
           height: "52px",
-          background: "oklch(0.115 0.025 52 / 0.97)",
-          borderBottom: "1px solid oklch(0.30 0.04 60 / 45%)",
+          background: NAV_BG,
+          borderBottom: `1px solid ${NAV_BORDER}`,
           backdropFilter: "blur(16px)",
+          transition: "background 0.4s ease, border-color 0.4s ease",
         }}
       >
         {/* Logo zone */}
         <div
           className="flex items-center gap-2.5 px-4 flex-shrink-0 cursor-pointer"
-          style={{ borderRight: "1px solid oklch(0.30 0.04 60 / 35%)", height: "100%", paddingRight: "16px" }}
+          style={{ borderRight: `1px solid ${LOGO_DIVIDER}`, height: "100%", paddingRight: "16px" }}
           onClick={() => goTo("/")}
         >
           <img src={LOGO_URL} alt="Living Nexus" className="w-8 h-8 object-contain" />
@@ -216,9 +236,9 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 style={{
                   fontSize: "12px",
                   fontWeight: 500,
-                  background: active ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
-                  border: active ? "1px solid oklch(0.82 0.155 75 / 0.22)" : "1px solid transparent",
-                  color: active ? "oklch(0.88 0.14 75)" : "oklch(0.62 0.04 65)",
+                  background: active ? NAV_ACTIVE_BG : "transparent",
+                  border: active ? `1px solid ${NAV_ACTIVE_BORDER}` : "1px solid transparent",
+                  color: active ? NAV_ACTIVE_TEXT : NAV_TEXT,
                 }}
               >
                 <item.icon size={13} style={{ color: active ? "oklch(0.82 0.155 75)" : "inherit" }} />
@@ -240,7 +260,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         {/* Right zone */}
         <div
           className="flex items-center gap-2 px-4 flex-shrink-0"
-          style={{ borderLeft: "1px solid oklch(0.30 0.04 60 / 35%)", height: "100%" }}
+          style={{ borderLeft: `1px solid ${RIGHT_DIVIDER}`, height: "100%" }}
         >
           {/* Prompt Generator quick button */}
           {user && userId && (
@@ -351,9 +371,10 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           top: "52px",
           maxHeight: drawerOpen ? "420px" : "0px",
           opacity: drawerOpen ? 1 : 0,
-          background: "oklch(0.09 0.018 280 / 0.98)",
-          borderBottom: drawerOpen ? "1px solid oklch(0.28 0.04 270 / 50%)" : "none",
+          background: DRAWER_BG,
+          borderBottom: drawerOpen ? `1px solid ${DRAWER_BORDER}` : "none",
           backdropFilter: "blur(20px)",
+          transition: "background 0.4s ease",
         }}
       >
         <div className="max-w-[1400px] mx-auto px-6 py-5">
@@ -362,7 +383,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             {/* NAVIGATE */}
             <div>
               <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                style={{ color: "oklch(0.75 0.12 85 / 0.7)", borderBottom: "1px solid oklch(0.84 0.155 85 / 0.10)" }}>
+                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
                 Navigate
               </div>
               <div className="space-y-0.5">
@@ -373,7 +394,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             {/* CREATE */}
             <div>
               <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                style={{ color: "oklch(0.75 0.12 85 / 0.7)", borderBottom: "1px solid oklch(0.84 0.155 85 / 0.10)" }}>
+                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
                 Create
               </div>
               <div className="space-y-0.5">
@@ -384,7 +405,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             {/* DISCOVER */}
             <div>
               <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                style={{ color: "oklch(0.75 0.12 85 / 0.7)", borderBottom: "1px solid oklch(0.84 0.155 85 / 0.10)" }}>
+                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
                 Discover
               </div>
               <div className="space-y-0.5">
@@ -395,7 +416,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             {/* ACCOUNT */}
             <div>
               <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                style={{ color: "oklch(0.75 0.12 85 / 0.7)", borderBottom: "1px solid oklch(0.84 0.155 85 / 0.10)" }}>
+                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
                 Account
               </div>
               <div className="space-y-0.5">
@@ -418,7 +439,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             <div className="flex flex-col justify-between">
               <div>
                 <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                  style={{ color: "oklch(0.75 0.12 85 / 0.7)", borderBottom: "1px solid oklch(0.84 0.155 85 / 0.10)" }}>
+                  style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
                   {user ? "Signed In As" : "Platform"}
                 </div>
                 {!authLoading && user ? (

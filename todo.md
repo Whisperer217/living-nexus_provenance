@@ -2871,3 +2871,9 @@
 - [x] Update localStorage key from lnx_lights_mode to lnx_theme
 - [x] Bump What's New to v2.24.0 — document proper theme system
 - [x] Run 137 tests against both themes — all pass
+
+## Phase 53: Warm Theme — Nav & Sidebar Only
+- [x] Apply --bg-nav: #EDE4D8, --text-nav: #2C1A0E, --accent-nav: #B8963E to TopBar in warm theme
+- [x] Apply --bg-sidebar: #E5D8C8 to sidebar in warm theme
+- [x] Remove body filter from [data-theme="warm"] so music cards/player stay dark
+- [x] Music cards, player bar, track pages untouched (no changes made to those components)
