@@ -430,7 +430,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 >
                   <Sparkles size={13} className="flex-shrink-0" />
                   <span className="text-[12px] font-body flex-1">What's New</span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.18</span>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.24</span>
                 </button>
               </div>
             </div>

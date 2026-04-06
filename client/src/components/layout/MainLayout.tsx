@@ -313,7 +313,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               >
                 <Sparkles size={15} className="flex-shrink-0" />
                 <span className="text-[13px] font-body">What's New</span>
-                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.82 0.155 75 / 0.12)", color: "oklch(0.75 0.13 72)" }}>v2.18</span>
+                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.82 0.155 75 / 0.12)", color: "oklch(0.75 0.13 72)" }}>v2.24</span>
               </button>
               {!authLoading && !user ? (
                 <a

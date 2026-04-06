@@ -57,19 +57,24 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
 
   const tracks = feedData ?? [];
 
-  // ── Close on outside click ────────────────────────────────────────
+  // ── Close on outside click (mouse + touch) ───────────────────────
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+    const handler = (e: MouseEvent | TouchEvent) => {
+      const target = e instanceof TouchEvent ? e.touches[0]?.target : (e as MouseEvent).target;
+      if (panelRef.current && target && !panelRef.current.contains(target as Node)) {
         onToggle();
       }
     };
-    // Small delay so the toggle click itself doesn't immediately close
-    const id = setTimeout(() => document.addEventListener("mousedown", handler), 100);
+    // Small delay so the toggle click/tap itself doesn't immediately close
+    const id = setTimeout(() => {
+      document.addEventListener("mousedown", handler as EventListener);
+      document.addEventListener("touchstart", handler as EventListener, { passive: true });
+    }, 100);
     return () => {
       clearTimeout(id);
-      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("mousedown", handler as EventListener);
+      document.removeEventListener("touchstart", handler as EventListener);
     };
   }, [open, onToggle]);
 
@@ -116,16 +121,18 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
         onClick={onToggle}
         aria-label={open ? "Close quick access panel" : "Open quick access panel"}
         className={`fixed left-0 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center
-          w-5 h-16 rounded-r-lg transition-all duration-300
+          w-8 h-20 rounded-r-xl transition-all duration-300
           border border-l-0 qr-tab-glow`}
         style={{
           background: "oklch(0.148 0.025 52)",
           borderColor: "oklch(0.80 0.145 82 / 0.4)",
           transform: `translateY(-50%) translateX(${open ? "240px" : "0px"})`,
+          touchAction: "manipulation",
+          WebkitTapHighlightColor: "transparent",
         }}
       >
         <ChevronRight
-          size={12}
+          size={14}
           className="transition-transform duration-300"
           style={{
             color: "oklch(0.80 0.145 82)",
@@ -163,11 +170,11 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
           </span>
           <button
             onClick={onToggle}
-            className="p-1 rounded-md transition-colors hover:bg-white/[0.06]"
-            style={{ color: "oklch(0.55 0.03 280)" }}
+            className="p-2.5 -mr-1.5 rounded-md transition-colors hover:bg-white/[0.06] active:bg-white/[0.10]"
+            style={{ color: "oklch(0.55 0.03 280)", touchAction: "manipulation", WebkitTapHighlightColor: "transparent", minWidth: "36px", minHeight: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
             aria-label="Close panel"
           >
-            <X size={13} />
+            <X size={14} />
           </button>
         </div>
 

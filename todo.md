@@ -2877,3 +2877,9 @@
 - [x] Apply --bg-sidebar: #E5D8C8 to sidebar in warm theme
 - [x] Remove body filter from [data-theme="warm"] so music cards/player stay dark
 - [x] Music cards, player bar, track pages untouched (no changes made to those components)
+
+## Phase 54: Bug Fixes (User Report Apr 6)
+- [x] Fix QuickRefSlider close arrow not registering taps on mobile (enlarged tab w-8 h-20, added touchstart listener, enlarged X button to 36px min)
+- [x] Fix What's New version badge in TopBar drawer (updated v2.18 → v2.24)
+- [x] Fix What's New version badge in MainLayout mobile sidebar (updated v2.18 → v2.24)
+- [ ] Comment reply system — DB has no parentId column yet; needs schema migration before threading can be built
