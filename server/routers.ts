@@ -665,7 +665,7 @@ export const appRouter = router({
       contentType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional(),
       fileHash: z.string().optional(), witnessId: z.string().optional(),
       harmonicSignature: z.array(z.number()).optional(), ecdsaPublicKey: z.string().optional(), ecdsaSignature: z.string().optional(),
-      caption: z.string().max(2000).optional(),
+      caption: z.string().max(2000).nullable().optional(),
       // Audio metadata from upload pipeline
       durationSeconds: z.number().optional(),
       sampleRate: z.number().optional(),
@@ -4636,10 +4636,10 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           content: z.string().optional(),
           imageUrl: z.string().optional(),
           imageKey: z.string().optional(),
-          imageCaption: z.string().optional(),
+          imageCaption: z.string().nullable().optional(),
           videoUrl: z.string().optional(),
           videoType: z.enum(["youtube", "vimeo", "s3", "none"]).optional(),
-          videoCaption: z.string().optional(),
+          videoCaption: z.string().nullable().optional(),
         })),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -4656,7 +4656,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         projectId: z.number().int(),
         fileBase64: z.string(),
         mimeType: z.string(),
-        caption: z.string().optional(),
+        caption: z.string().nullable().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const project = await getProjectById(input.projectId);

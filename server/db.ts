@@ -257,7 +257,7 @@ export async function createSong(data: {
   ecdsaPublicKey?: string; ecdsaSignature?: string; certificateUrl?: string; certificateKey?: string;
   isLyricsOnly?: boolean;
   contentType?: "audio" | "lyrics" | "manuscript" | "comic";
-  caption?: string;
+  caption?: string | null;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");

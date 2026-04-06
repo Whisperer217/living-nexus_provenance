@@ -2940,3 +2940,8 @@
 - [x] Move Projects section above Featured Songs on HomePage
 - [x] Move Creator Projects section above Featured Songs on CreatorProfilePage
 - [x] Verify projects section renders correctly at top position
+
+## Phase 64: Fix Caption Null Validation Error
+- [x] Find caption field in tRPC router/Zod schema that rejects null
+- [x] Make caption nullable/optional (z.string().nullable().optional()) or coerce null to empty string
+- [x] Fix any frontend code sending null instead of undefined/empty string for caption
