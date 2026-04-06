@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   Heart, Users, Calendar, ShieldCheck, ChevronDown, ChevronUp,
   Pencil, Plus, Trash2, Image as ImageIcon, Video, Type, Quote,
-  Minus, Check, X, Eye, Upload, ExternalLink, Rocket, Share2, Copy,
+  Minus, Check, X, Eye, Upload, ExternalLink, Rocket, Share2, Copy, Bell, BellOff,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -721,6 +721,30 @@ export default function ProjectPage() {
 
   const isOwner = !!user && !!data?.project && user.id === data.project.userId;
 
+  // Follow state
+  const { data: followStatus, refetch: refetchFollow } = trpc.projects.getFollowStatus.useQuery(
+    { projectId: data?.project.id ?? 0 },
+    { enabled: !!data?.project.id }
+  );
+  const followMutation = trpc.projects.follow.useMutation({
+    onSuccess: () => { refetchFollow(); toast.success("Following project — you'll be notified of updates!"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const unfollowMutation = trpc.projects.unfollow.useMutation({
+    onSuccess: () => { refetchFollow(); toast.success("Unfollowed project"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleFollowToggle = () => {
+    if (!user) { toast.error("Sign in to follow this project"); return; }
+    if (!data?.project) return;
+    if (followStatus?.isFollowing) {
+      unfollowMutation.mutate({ projectId: data.project.id });
+    } else {
+      followMutation.mutate({ projectId: data.project.id });
+    }
+  };
+
   // Mutations
   const updateProject = trpc.projects.update.useMutation({
     onSuccess: () => { utils.projects.getBySlug.invalidate({ slug: slug ?? "" }); toast.success("Project saved"); },
@@ -916,11 +940,29 @@ export default function ProjectPage() {
               <VideoHero videoUrl={project.videoUrl} videoType={project.videoType} bannerUrl={project.bannerUrl} title={project.title} />
             )}
 
-            {/* Quick donate under video */}
+            {/* Quick donate + follow under video */}
             {project.status === "active" && !editMode && (
-              <Button onClick={() => setDonateOpen(true)} className="w-full bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold py-3 text-base">
-                <Heart className="w-4 h-4 mr-2" /> Donate
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={() => setDonateOpen(true)} className="flex-1 bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold py-3 text-base">
+                  <Heart className="w-4 h-4 mr-2" /> Donate
+                </Button>
+                {!isOwner && (
+                  <Button
+                    variant="outline"
+                    onClick={handleFollowToggle}
+                    disabled={followMutation.isPending || unfollowMutation.isPending}
+                    className={`py-3 px-4 border font-semibold transition-all ${
+                      followStatus?.isFollowing
+                        ? "border-[#d4a017] text-[#d4a017] bg-[#d4a017]/10 hover:bg-[#d4a017]/20"
+                        : "border-white/20 text-white/70 bg-transparent hover:border-white/40 hover:text-white"
+                    }`}
+                  >
+                    {followStatus?.isFollowing
+                      ? <><BellOff className="w-4 h-4 mr-1.5" /> Following</>  
+                      : <><Bell className="w-4 h-4 mr-1.5" /> Follow</>}
+                  </Button>
+                )}
+              </div>
             )}
           </div>
 
@@ -976,7 +1018,7 @@ export default function ProjectPage() {
             )}
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="bg-white/5 rounded-lg p-3 text-center">
                 <p className="text-[#d4a017] font-bold text-lg">{formatCents(project.raisedAmountCents)}</p>
                 <p className="text-white/40 text-xs">raised</p>
@@ -984,6 +1026,10 @@ export default function ProjectPage() {
               <div className="bg-white/5 rounded-lg p-3 text-center">
                 <p className="text-[#d4a017] font-bold text-lg">{project.donorCount}</p>
                 <p className="text-white/40 text-xs">supporters</p>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <p className="text-[#d4a017] font-bold text-lg">{followStatus?.followerCount ?? 0}</p>
+                <p className="text-white/40 text-xs">followers</p>
               </div>
             </div>
 
@@ -1134,6 +1180,23 @@ export default function ProjectPage() {
               <Button onClick={() => setDonateOpen(true)} className="bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold px-6">
                 Donate
               </Button>
+              {!isOwner && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleFollowToggle}
+                  disabled={followMutation.isPending || unfollowMutation.isPending}
+                  className={`border font-semibold transition-all ${
+                    followStatus?.isFollowing
+                      ? "border-[#d4a017] text-[#d4a017] bg-[#d4a017]/10 hover:bg-[#d4a017]/20"
+                      : "border-white/20 text-white/60 bg-transparent hover:text-white hover:border-white/40"
+                  }`}
+                >
+                  {followStatus?.isFollowing
+                    ? <><BellOff className="w-3.5 h-3.5 mr-1" /> Following</>
+                    : <><Bell className="w-3.5 h-3.5 mr-1" /> Follow</>}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

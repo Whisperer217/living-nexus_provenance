@@ -17,7 +17,7 @@ import {
   contentFlags, declarationSignatures,
   songVersions,
   platformSettings,
-  projects, projectUpdates, projectDonations, projectBlocks,
+  projects, projectUpdates, projectDonations, projectBlocks, projectFollowers,
   type InsertContentFlag, type InsertDeclarationSignature,
   type InsertSongVersion,
   type Project, type InsertProject,
@@ -3689,4 +3689,52 @@ export async function getProjectsByCreator(userId: number): Promise<Project[]> {
   return db.select().from(projects)
     .where(and(eq(projects.userId, userId), ne(projects.status as any, "archived")))
     .orderBy(desc(projects.updatedAt));
+}
+
+// ─── Project Followers ────────────────────────────────────────────────────────
+
+export async function followProject(projectId: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Insert or ignore if already following (idempotent)
+  await db.execute(
+    sql`INSERT IGNORE INTO projectFollowers (projectId, userId, createdAt) VALUES (${projectId}, ${userId}, NOW())`
+  );
+}
+
+export async function unfollowProject(projectId: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(projectFollowers).where(
+    and(eq(projectFollowers.projectId, projectId), eq(projectFollowers.userId, userId))
+  );
+}
+
+export async function isFollowingProject(projectId: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const rows = await db.select({ id: projectFollowers.id })
+    .from(projectFollowers)
+    .where(and(eq(projectFollowers.projectId, projectId), eq(projectFollowers.userId, userId)))
+    .limit(1);
+  return rows.length > 0;
+}
+
+export async function getProjectFollowerCount(projectId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db.select({ cnt: sql<number>`count(*)` })
+    .from(projectFollowers)
+    .where(eq(projectFollowers.projectId, projectId));
+  return Number(rows[0]?.cnt ?? 0);
+}
+
+/** Return all follower userIds for a project (for sending notifications). */
+export async function getProjectFollowerUserIds(projectId: number): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ userId: projectFollowers.userId })
+    .from(projectFollowers)
+    .where(eq(projectFollowers.projectId, projectId));
+  return rows.map((r: { userId: number }) => r.userId);
 }

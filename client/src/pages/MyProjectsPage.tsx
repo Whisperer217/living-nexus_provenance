@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -250,13 +250,38 @@ function PostUpdateDialog({
   const utils = trpc.useUtils();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [imageKey, setImageKey] = useState<string | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
+  const imageFileRef = useRef<HTMLInputElement>(null);
+
+  const uploadImage = trpc.projects.uploadBlockImage.useMutation({
+    onSuccess: (data) => { setImageUrl(data.url); setImageKey(data.key); toast.success("Image attached!"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleImageFile = (file: File) => {
+    if (file.size > 8 * 1024 * 1024) { toast.error("Max 8 MB"); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setImagePreview(dataUrl);
+      const b64 = dataUrl.split(",")[1];
+      uploadImage.mutate({ projectId, fileBase64: b64, mimeType: file.type });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImageUrl(undefined); setImageKey(undefined); setImagePreview(undefined);
+    if (imageFileRef.current) imageFileRef.current.value = "";
+  };
 
   const addUpdate = trpc.projects.addUpdate.useMutation({
     onSuccess: () => {
       toast.success("Update posted!");
       utils.projects.mine.invalidate();
-      setTitle("");
-      setBody("");
+      setTitle(""); setBody(""); setImageUrl(undefined); setImageKey(undefined); setImagePreview(undefined);
       onClose();
     },
     onError: (e) => toast.error(e.message),
@@ -289,10 +314,44 @@ function PostUpdateDialog({
               rows={5}
             />
           </div>
+          {/* Photo attachment */}
+          <div>
+            <Label className="text-white/70 text-sm">Photo (optional)</Label>
+            {imagePreview ? (
+              <div className="mt-2 relative rounded-xl overflow-hidden border border-white/10">
+                <img src={imagePreview} alt="Update preview" className="w-full max-h-44 object-cover" />
+                {uploadImage.isPending && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#d4a017]" />
+                  </div>
+                )}
+                <button
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white/70 hover:text-white transition-colors text-lg leading-none"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => imageFileRef.current?.click()}
+                className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/25 transition-all py-4 text-white/40 hover:text-white/60 text-sm"
+              >
+                <ImageIcon className="w-4 h-4" /> Attach a photo
+              </button>
+            )}
+            <input
+              ref={imageFileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f); }}
+            />
+          </div>
           <div className="flex gap-3">
             <Button
-              onClick={() => addUpdate.mutate({ projectId, title: title.trim() || undefined, body: body.trim() })}
-              disabled={addUpdate.isPending || !body.trim()}
+              onClick={() => addUpdate.mutate({ projectId, title: title.trim() || undefined, body: body.trim(), imageUrl, imageKey })}
+              disabled={addUpdate.isPending || !body.trim() || uploadImage.isPending}
               className="flex-1 bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold"
             >
               {addUpdate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Post Update"}

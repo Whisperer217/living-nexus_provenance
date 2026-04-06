@@ -492,6 +492,7 @@ export const notifications = mysqlTable("notifications", {
     "system",            // platform announcement
     "project_update",    // creator posted a project update
     "project_donation",  // someone donated to your project
+    "project_follow",    // someone followed your project
   ]).notNull(),
   title: varchar("title", { length: 256 }).notNull(),
   body: text("body"),
@@ -1069,3 +1070,14 @@ export const projectBlocks = mysqlTable("projectBlocks", {
 });
 export type ProjectBlock = typeof projectBlocks.$inferSelect;
 export type InsertProjectBlock = typeof projectBlocks.$inferInsert;
+
+// ─── Project Followers ────────────────────────────────────────────────────────
+// Users who follow a project to receive update notifications (without donating).
+export const projectFollowers = mysqlTable("projectFollowers", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ProjectFollower = typeof projectFollowers.$inferSelect;
+export type InsertProjectFollower = typeof projectFollowers.$inferInsert;

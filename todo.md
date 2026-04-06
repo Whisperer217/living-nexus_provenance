@@ -2814,3 +2814,8 @@
 - [ ] Add Projects nav link to TopBar next to Explore
 - [ ] Add donor notification when creator posts project update
 - [ ] Add full Share modal with copy link and Twitter/X share to project pages
+
+## Phase 44: Three Creator Projects Enhancements
+- [x] Follow Project button — DB table, tRPC follow/unfollow, notification on project updates
+- [x] Featured Projects section on Explore page
+- [x] Image upload in project update modal (MyProjectsPage)

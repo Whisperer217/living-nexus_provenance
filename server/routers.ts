@@ -80,6 +80,7 @@ import {
   createProject, getProjectBySlug, getProjectById, getProjectsByUser, updateProject,
   getProjectUpdates, addProjectUpdate, getProjectDonations, recordProjectDonation, listActiveProjects,
   getProjectBlocks, saveProjectBlocks, getProjectsByCreator,
+  followProject, unfollowProject, isFollowingProject, getProjectFollowerCount, getProjectFollowerUserIds,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -4432,22 +4433,24 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         if (!project) throw new TRPCError({ code: "NOT_FOUND" });
         if (project.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
         await addProjectUpdate({ ...input, userId: ctx.user.id });
-        // Notify all donors about the new update (fire-and-forget, non-blocking)
+        // Notify all donors AND followers about the new update (fire-and-forget, non-blocking)
         void (async () => {
           try {
             const donations = await getProjectDonations(input.projectId);
-            const donorUserIds = Array.from(new Set(
-              donations
-                .filter((d) => d.donorUserId != null && d.donorUserId !== ctx.user.id)
-                .map((d) => d.donorUserId as number)
-            ));
-            if (donorUserIds.length === 0) return;
+            const followerIds = await getProjectFollowerUserIds(input.projectId);
+            const donorUserIds = donations
+              .filter((d) => d.donorUserId != null && d.donorUserId !== ctx.user.id)
+              .map((d) => d.donorUserId as number);
+            // Merge donors + followers, deduplicate, exclude the creator
+            const recipientIds = Array.from(new Set([...donorUserIds, ...followerIds]))
+              .filter((uid) => uid !== ctx.user.id);
+            if (recipientIds.length === 0) return;
             const creator = await getUserById(ctx.user.id);
             const notifTitle = input.title
               ? `Update on "${project.title}": ${input.title}`
               : `New update on "${project.title}"`;
             await Promise.all(
-              donorUserIds.map((uid) =>
+              recipientIds.map((uid) =>
                 createNotification({
                   userId: uid,
                   type: "project_update",
@@ -4462,7 +4465,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
               )
             );
           } catch (e) {
-            console.error("[projects.addUpdate] Failed to notify donors:", e);
+            console.error("[projects.addUpdate] Failed to notify donors/followers:", e);
           }
         })();
         return { ok: true };
@@ -4606,12 +4609,60 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .query(async ({ input }) => {
         return listActiveProjects();
       }),
-
-    /** Get projects by a specific creator — public */
+    /** Get projects by a specific creator -- public */
     getByCreator: publicProcedure
       .input(z.object({ userId: z.number().int() }))
       .query(async ({ input }) => {
         return getProjectsByCreator(input.userId);
+      }),
+
+    /** Follow a project -- protected */
+    follow: protectedProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+        if (project.userId === ctx.user.id) throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot follow your own project" });
+        await followProject(input.projectId, ctx.user.id);
+        // Notify the creator that someone followed their project
+        void (async () => {
+          try {
+            const follower = await getUserById(ctx.user.id);
+            await createNotification({
+              userId: project.userId,
+              type: "project_follow",
+              title: `${follower?.name ?? "Someone"} is following your project`,
+              body: `"${project.title}" just gained a new follower.`,
+              actorId: ctx.user.id,
+              actorName: follower?.name ?? undefined,
+              actorAvatarUrl: follower?.profilePhotoUrl ?? undefined,
+              refId: input.projectId,
+              refType: "project",
+            });
+          } catch (e) {
+            console.error("[projects.follow] Notification failed:", e);
+          }
+        })();
+        return { ok: true };
+      }),
+
+    /** Unfollow a project -- protected */
+    unfollow: protectedProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        await unfollowProject(input.projectId, ctx.user.id);
+        return { ok: true };
+      }),
+
+    /** Get follow status + follower count for a project -- public */
+    getFollowStatus: publicProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .query(async ({ ctx, input }) => {
+        const followerCount = await getProjectFollowerCount(input.projectId);
+        const isFollowing = ctx.user
+          ? await isFollowingProject(input.projectId, ctx.user.id)
+          : false;
+        return { isFollowing, followerCount };
       }),
   }),
 });
