@@ -137,6 +137,72 @@
   --sidebar-ring: var(--gold);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHTS ON — Espresso Crème Mode
+   Activated by .lights-on on <html>, controlled by the platform owner.
+   Philosophy: Italian café · warm cream steamed milk · espresso depth
+   Palette: Crème bg (#F2E8D9) · espresso text (#2C1A0E) · caramel amber accents
+═══════════════════════════════════════════════════════════════════ */
+.lights-on {
+  /* Void palette — espresso crème surfaces */
+  --void:   oklch(0.935 0.028 68);  /* steamed crème — main bg  (#F2E8D9) */
+  --void-2: oklch(0.900 0.032 65);  /* latte foam — sidebar / nav (#E8D9C4) */
+  --void-3: oklch(0.870 0.036 63);  /* warm cappuccino — cards (#DECCB2) */
+  --void-4: oklch(0.840 0.040 61);  /* macchiato layer — modals (#D4BF9E) */
+
+  /* Gold stays warm caramel — readable on cream */
+  --gold:     oklch(0.58 0.14 58);  /* caramel amber */
+  --gold-dim: oklch(0.50 0.11 56);  /* dark caramel */
+
+  /* Semantic tokens */
+  --background: var(--void);
+  --foreground: oklch(0.18 0.040 42);   /* espresso — deep brown text (#2C1A0E) */
+  --card: var(--void-3);
+  --card-foreground: oklch(0.18 0.040 42);
+  --popover: var(--void-2);
+  --popover-foreground: oklch(0.18 0.040 42);
+  --primary: oklch(0.52 0.14 52);        /* roasted caramel — primary actions */
+  --primary-foreground: oklch(0.97 0.01 75);
+  --secondary: var(--void-4);
+  --secondary-foreground: oklch(0.18 0.040 42);
+  --muted: var(--void-3);
+  --muted-foreground: oklch(0.42 0.05 55);  /* medium espresso — muted text */
+  --accent: oklch(0.48 0.10 168);        /* sage green — readable on cream */
+  --accent-foreground: oklch(0.97 0.01 75);
+  --destructive: oklch(0.52 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.68 0.05 60 / 65%);
+  --input: oklch(0.68 0.05 60 / 45%);
+  --ring: oklch(0.52 0.14 52);
+
+  /* Sidebar */
+  --sidebar: var(--void-2);
+  --sidebar-foreground: oklch(0.18 0.040 42);
+  --sidebar-primary: oklch(0.52 0.14 52);
+  --sidebar-primary-foreground: oklch(0.97 0.01 75);
+  --sidebar-accent: var(--void-4);
+  --sidebar-accent-foreground: oklch(0.18 0.040 42);
+  --sidebar-border: oklch(0.68 0.05 60 / 45%);
+  --sidebar-ring: oklch(0.52 0.14 52);
+
+  /* Foundation hex tokens used by inline styles across the platform */
+  --lnx-bg:         #F2E8D9;   /* steamed crème */
+  --lnx-bg-2:       #E8D9C4;   /* latte foam */
+  --lnx-bg-3:       #DECCB2;   /* cappuccino */
+  --lnx-text:       #2C1A0E;   /* espresso */
+  --lnx-text-muted: #7A5C3A;   /* lungo — muted text */
+}
+
+/* Headings in lights-on mode */
+.lights-on h1,
+.lights-on h2,
+.lights-on h3,
+.lights-on h4,
+.lights-on h5,
+.lights-on h6 {
+  color: oklch(0.16 0.042 40);  /* deep espresso headings */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

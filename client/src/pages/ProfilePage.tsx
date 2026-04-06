@@ -15,11 +15,12 @@ import {
   Play, ExternalLink, Copy, TrendingUp, Loader2,
   CheckCircle, AlertCircle, Zap, LogOut,
   Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users, Shield,
-  Download, Trash2, AlertTriangle,
+  Download, Trash2, AlertTriangle, Sun, Moon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useLightsMode } from "@/contexts/LightsModeContext";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
 import { usePlayer, Track } from "@/contexts/PlayerContext";
@@ -141,7 +142,20 @@ export default function ProfilePage() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
-
+  // ── Lights mode ────────────────────────────────────────────────
+  const { mode: lightsMode, setMode: setLightsModeLocal } = useLightsMode();
+  const setLightsModeMutation = trpc.profile.setLightsMode.useMutation({
+    onSuccess: (data) => {
+      setLightsModeLocal(data.mode);
+      toast.success(data.mode === 'on' ? '☀ Lights On — Espresso Crème mode' : '🌙 Lights Dim — Lantern mode');
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const handleLightsToggle = () => {
+    const next = lightsMode === 'dim' ? 'on' : 'dim';
+    setLightsModeLocal(next); // optimistic
+    setLightsModeMutation.mutate({ mode: next });
+  };
   const handleLogout = async () => {
     try {
       await logout();
@@ -1429,6 +1443,42 @@ export default function ProfilePage() {
         {/* ── Settings utility bar ── */}
         <div className="mt-8 pb-8">
           <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">SETTINGS</div>
+          {/* ── Lights On / Lights Dim toggle ────────────────────────────────── */}
+          <div className="mb-4 flex items-center justify-between px-4 py-3 rounded-xl"
+            style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)" }}>
+            <div>
+              <div className="text-[12px] font-heading tracking-wide" style={{ color: "oklch(0.82 0.155 75)" }}>
+                {lightsMode === 'on' ? '☀️ Lights On' : '🌙 Lights Dim'}
+              </div>
+              <div className="text-[10px] font-body mt-0.5" style={{ color: "oklch(0.55 0.03 280)" }}>
+                {lightsMode === 'on'
+                  ? 'Espresso Crème — warm cream palette for all visitors'
+                  : 'Lantern Mode — charred oak dark palette for all visitors'}
+              </div>
+            </div>
+            <button
+              onClick={handleLightsToggle}
+              disabled={setLightsModeMutation.isPending}
+              className="relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-body transition-all disabled:opacity-60"
+              style={{
+                background: lightsMode === 'on'
+                  ? "oklch(0.58 0.14 58 / 0.20)"
+                  : "oklch(0.22 0.02 280)",
+                border: lightsMode === 'on'
+                  ? "1px solid oklch(0.58 0.14 58 / 0.50)"
+                  : "1px solid oklch(0.30 0.02 280)",
+                color: lightsMode === 'on' ? "oklch(0.58 0.14 58)" : "oklch(0.65 0.03 280)",
+              }}
+            >
+              {setLightsModeMutation.isPending ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : lightsMode === 'on' ? (
+                <><Moon size={12} /> Switch to Dim</>
+              ) : (
+                <><Sun size={12} /> Switch to On</>
+              )}
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => navigate("/redeem")}

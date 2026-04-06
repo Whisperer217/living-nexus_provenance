@@ -2824,3 +2824,17 @@
 - [x] Bump What's New changelog to v2.22.0 — mention Follow Project feature
 - [x] Wire batch follower notifications in addUpdate procedure (already wired in Phase 44)
 - [x] Add Projects nav link to top bar next to Explore (already present in CORE_NAV)
+
+## Phase 46: Creator Lights On / Lights Dim Toggle
+- [ ] Add lightsMode column (enum: 'dim' | 'on') to users table, default 'dim'
+- [ ] Add profile.setLightsMode tRPC procedure (protected)
+- [ ] Add Lights toggle control to ProfilePage (creator's own settings)
+- [ ] Apply lights-on/dim theme to CreatorProfilePage based on creator's stored setting
+
+## Phase 46: Global Lights On / Lights Dim Toggle
+- [x] Add lightsMode column (enum: 'dim' | 'on') to users table, default 'dim', DB migration
+- [x] Add profile.getLightsMode (public) and profile.setLightsMode (protected) tRPC procedures
+- [x] Build LightsModeContext — fetches owner's setting on app load, applies .lights-on CSS class to <html>
+- [x] Define .lights-on CSS variable overrides in index.css (espresso crème palette)
+- [x] Wire LightsModeContext into App.tsx / main.tsx
+- [x] Add Lights On / Dim toggle control to creator's ProfilePage settings panel

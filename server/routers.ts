@@ -454,8 +454,33 @@ export const appRouter = router({
       .input(z.object({ limit: z.number().max(50).default(20) }))
       .query(async ({ ctx, input }) => getEventsForCreator(ctx.user.id, input.limit)),
     myAnalytics: protectedProcedure.query(async ({ ctx }) => getCreatorAnalytics(ctx.user.id)),
+    /** Get the platform owner's lights mode — public so all visitors can read it on load */
+    getLightsMode: publicProcedure.query(async () => {
+      const { getDb } = await import("./db");
+      const { users: usersTable } = await import("../drizzle/schema");
+      const db = await getDb();
+      if (!db) return { lightsMode: 'dim' as const };
+      const rows = await db.select({ lightsMode: usersTable.lightsMode })
+        .from(usersTable)
+        .orderBy(usersTable.id)
+        .limit(1);
+      return { lightsMode: (rows[0]?.lightsMode ?? 'dim') as 'dim' | 'on' };
+    }),
+    /** Set the authenticated creator's lights mode */
+    setLightsMode: protectedProcedure
+      .input(z.object({ mode: z.enum(['dim', 'on']) }))
+      .mutation(async ({ ctx, input }) => {
+        const { getDb } = await import("./db");
+        const { users: usersTable } = await import("../drizzle/schema");
+        const { eq: eqOp } = await import("drizzle-orm");
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        await db.update(usersTable)
+          .set({ lightsMode: input.mode })
+          .where(eqOp(usersTable.id, ctx.user.id));
+        return { ok: true, mode: input.mode };
+      }),
   }),
-
   songs: router({
     discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(100).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
     trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),

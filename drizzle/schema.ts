@@ -74,6 +74,9 @@ export const users = mysqlTable("users", {
   tosVersion: varchar("tosVersion", { length: 16 }),  // e.g. "2.0" (current TOS with WID legal scope section)
   dataDeletionRequestedAt: timestamp("dataDeletionRequestedAt"),  // Set when creator submits account deletion request
 
+  // Global display mode — 'dim' = default dark lantern; 'on' = lights-on warm parchment
+  lightsMode: mysqlEnum("lightsMode", ["dim", "on"]).default("dim").notNull(),
+
   // Activity delta tracking — used for "new since last visit" badges
   lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),
   lastVisitedDashboardAt: timestamp("lastVisitedDashboardAt"),

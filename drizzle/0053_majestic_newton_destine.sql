@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `lightsMode` enum('dim','on') DEFAULT 'dim' NOT NULL;
