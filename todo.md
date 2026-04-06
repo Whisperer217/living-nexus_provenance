@@ -2911,3 +2911,9 @@
 - [x] Lowered steel drawer tint to rgba(42,55,70,0.80) in TopBar
 - [x] Increased backdrop-filter blur to blur(32px) saturate(0.7) on nav, blur(40px) saturate(0.6) on drawer
 - [x] Applied same opacity/blur values to MainLayout mobile header/sidebar
+
+## Phase 59: Lights On Body Text Contrast Reduction
+- [x] Fixed warm theme body filter: removed brightness(1.28) boost, now brightness(0.96) contrast(0.92) saturate(0.88) — no more 28% brightness amplification
+- [x] Kept sepia(0.04) and hue-rotate(2deg) for subtle cool-steel tint on page content
+- [x] --foreground and card/popover/sidebar foreground unchanged (dark theme values apply via CSS cascade)
+- [x] Warm theme CSS block surfaces still have old cream-clay values but body filter is now the primary contrast control

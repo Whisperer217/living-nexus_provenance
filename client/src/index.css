@@ -252,9 +252,9 @@
   --sidebar-ring:               #B8963E;
 }
 
-/* Warm theme body nudge — lifts hardcoded inline oklch dark values */
+/* Warm theme body nudge — subtle cool-steel desaturation, no brightness boost */
 [data-theme="warm"] body {
-  filter: sepia(0.12) brightness(1.28) contrast(0.88) saturate(0.80) hue-rotate(5deg);
+  filter: sepia(0.04) brightness(0.96) contrast(0.92) saturate(0.88) hue-rotate(2deg);
   transition: filter 0.45s ease;
 }
 
