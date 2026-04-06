@@ -2847,3 +2847,8 @@
 - [x] Reduce filter intensity to very subtle warm tint (sepia 0.18, brightness 1.12, contrast 0.95, hue-rotate 4deg)
 - [x] Exclude music player bar (PlayerBar + MobilePlayerLayer) via data-no-filter attribute
 - [x] Images, video, canvas already counter-filtered to stay colour-accurate
+
+## Phase 49: Lights On — Precise Palette Variables
+- [x] Replace .lights-on CSS filter with full variable overrides (8 designer tokens)
+- [x] Map: background=#F5F0E8, card-1=#EDE8DC, card-2=#E8E0D0, card-3=#E2D9C8, accent=#C4A882, text-primary=#2C1A0E, text-secondary=#6B4C35, gold=#B8963E
+- [x] Remove data-no-filter from PlayerBar and MobilePlayerLayer (filter approach gone)

@@ -138,32 +138,86 @@
 }
 
 /* =================================================================
-   LIGHTS ON - Espresso Creme Mode
+   LIGHTS ON — Espresso Crème Mode
    Activated by .lights-on on <html>, controlled by the platform owner.
-   Strategy: CSS filter on body shifts the ENTIRE rendered page toward
-   warm cream tones, including hardcoded oklch values in inline styles.
-   Images and video get a counter-filter to stay colour-accurate.
+   Strategy: Override every CSS custom property token so Tailwind
+   utilities and variable-based styles all resolve to the warm palette.
+   A very gentle body filter nudges hardcoded inline oklch values.
 ================================================================= */
+.lights-on {
+  /* ── Surface tokens ── */
+  --void:   #F5F0E8;
+  --void-2: #EDE8DC;
+  --void-3: #E8E0D0;
+  --void-4: #E2D9C8;
 
-/* Apply warm espresso-creme filter to the entire page */
+  /* ── Accent tokens ── */
+  --gold:     #B8963E;
+  --gold-dim: #A07820;
+  --teal:     oklch(0.45 0.10 175);
+  --teal-dim: oklch(0.38 0.08 172);
+
+  /* ── Semantic background / foreground ── */
+  --background:          #F5F0E8;
+  --foreground:          #2C1A0E;
+  --card:                #E8E0D0;
+  --card-foreground:     #2C1A0E;
+  --popover:             #EDE8DC;
+  --popover-foreground:  #2C1A0E;
+  --primary:             #B8963E;
+  --primary-foreground:  #F5F0E8;
+  --secondary:           #E2D9C8;
+  --secondary-foreground:#2C1A0E;
+  --muted:               #E8E0D0;
+  --muted-foreground:    #6B4C35;
+  --accent:              #C4A882;
+  --accent-foreground:   #2C1A0E;
+  --border:              #C4A882;
+  --input:               rgba(196,168,130,0.67);
+  --ring:                #B8963E;
+
+  /* ── Living Nexus custom tokens ── */
+  --lnx-bg:         #F5F0E8;
+  --lnx-bg-2:       #EDE8DC;
+  --lnx-bg-3:       #E8E0D0;
+  --lnx-text:       #2C1A0E;
+  --lnx-text-muted: #6B4C35;
+  --lnx-gold:       #B8963E;
+  --lnx-gold-glow:  #D4A843;
+  --lnx-gold-muted: #8A6E2A;
+
+  /* ── Sidebar ── */
+  --sidebar:                    #EDE8DC;
+  --sidebar-foreground:         #2C1A0E;
+  --sidebar-primary:            #B8963E;
+  --sidebar-primary-foreground: #F5F0E8;
+  --sidebar-accent:             #E2D9C8;
+  --sidebar-accent-foreground:  #2C1A0E;
+  --sidebar-border:             #C4A882;
+  --sidebar-ring:               #B8963E;
+}
+
+/* Gentle nudge for hardcoded inline oklch values in components */
 .lights-on body {
-  filter:
-    sepia(0.18)
-    brightness(1.12)
-    contrast(0.95)
-    saturate(0.92)
-    hue-rotate(4deg);
+  filter: sepia(0.10) brightness(1.06) contrast(0.97) saturate(0.90);
   transition: filter 0.45s ease;
 }
 
-/* Counter-filter for images, video, canvas - keep them colour-accurate */
-.lights-on img,
-.lights-on video,
-.lights-on canvas,
-.lights-on [data-no-filter] {
-  filter: sepia(0) brightness(1) contrast(1) saturate(1) hue-rotate(0deg);
-  transition: filter 0.45s ease;
+/* Headings: espresso text in lights-on */
+.lights-on h1,
+.lights-on h2,
+.lights-on h3,
+.lights-on h4,
+.lights-on h5,
+.lights-on h6 {
+  color: #2C1A0E;
 }
+
+/* Scrollbar warm caramel in lights-on */
+.lights-on ::-webkit-scrollbar-thumb {
+  background: rgba(196,168,130,0.67);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

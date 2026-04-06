@@ -499,7 +499,6 @@ export default function MobilePlayerLayer() {
   const MiniBar = () => (
     <div
       className="md:hidden fixed bottom-0 left-0 right-0 z-[9990]"
-      data-no-filter
       style={{
         minHeight: "64px",
         paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
