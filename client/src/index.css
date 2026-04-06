@@ -252,9 +252,9 @@
   --sidebar-ring:               #B8963E;
 }
 
-/* Warm theme body nudge — subtle cool-steel desaturation, no brightness boost */
+/* Warm theme body nudge — slight dim + contrast reduction, full saturation preserved so gold stays vivid */
 [data-theme="warm"] body {
-  filter: sepia(0.04) brightness(0.96) contrast(0.92) saturate(0.88) hue-rotate(2deg);
+  filter: sepia(0.03) brightness(0.94) contrast(0.90) saturate(1.0) hue-rotate(1deg);
   transition: filter 0.45s ease;
 }
 

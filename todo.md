@@ -2917,3 +2917,8 @@
 - [x] Kept sepia(0.04) and hue-rotate(2deg) for subtle cool-steel tint on page content
 - [x] --foreground and card/popover/sidebar foreground unchanged (dark theme values apply via CSS cascade)
 - [x] Warm theme CSS block surfaces still have old cream-clay values but body filter is now the primary contrast control
+
+## Phase 60: Fix Faded Gold Accent in Lights On Mode
+- [x] Raised saturate() from 0.88 to 1.0 so gold accent text stays vivid
+- [x] Kept brightness(0.94) and contrast(0.90) for the dimming effect
+- [x] Reduced sepia to 0.03 and hue-rotate to 1deg for minimal tint
