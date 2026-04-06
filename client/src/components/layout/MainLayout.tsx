@@ -169,8 +169,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.10_0.022_55)] relative" style={{ overscrollBehaviorX: "none" }}>
 
-      {/* ── Quick Reference Slider (all breakpoints) ── */}
-      <QuickRefSlider open={qrOpen} onToggle={toggleQr} />
+      {/* ── Quick Reference Slider — temporarily hidden per user request (Phase 77) ── */}
+      {/* <QuickRefSlider open={qrOpen} onToggle={toggleQr} /> */}
 
       {/* ══════════════════════════════════════════════
           DESKTOP LAYOUT (md+)
@@ -207,16 +207,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
           <span className="font-display text-base gold-shimmer">Living Nexus</span>
         </div>
-        <button
-          onClick={toggleQr}
-          className="p-2 rounded-lg text-white/40 hover:text-[#D4AF37] transition-all"
-        >
-          <ChevronRight size={16} className={`transition-transform ${qrOpen ? "rotate-180" : ""}`} />
-        </button>
-        {!!user && (unreadCount as number) > 0 && (
-          <button className="relative p-2 rounded-lg text-white/40 hover:text-white/70">
-            <Bell size={16} />
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full animate-pulse" style={{ background: "oklch(0.65 0.22 25)" }} />
+        {/* Bell — 44px tap target, navigates to /notifications */}
+        {!!user && (
+          <button
+            onClick={() => navigate("/notifications")}
+            className="relative flex items-center justify-center rounded-lg text-white/40 hover:text-white/70 transition-all"
+            style={{ minWidth: 44, minHeight: 44 }}
+          >
+            <Bell size={18} />
+            {(unreadCount as number) > 0 && (
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse" style={{ background: "oklch(0.65 0.22 25)" }} />
+            )}
           </button>
         )}
       </div>

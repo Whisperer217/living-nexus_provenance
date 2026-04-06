@@ -3014,3 +3014,13 @@
 - [x] Cinematic → expanded: back button works; pushes new history entry so next back goes expanded → mini
 - [x] Expanded → mini: back button works; releases history back to page navigation
 - [x] 0 TypeScript errors
+
+## Phase 77: Mobile Bell Tap Fix + Remove Left Pane
+- [x] Fix: mobile header bell button had no onClick handler — was a dead button showing only the badge
+- [x] Fix: bell now navigates to /notifications with 44px min tap target (minWidth/minHeight: 44)
+- [x] Fix: removed the QuickRef chevron toggle button from mobile header (was taking up space, confusing)
+- [x] Fix: QuickRefSlider commented out in MainLayout — can be re-enabled when ready
+- [x] Also fixed TopBar (desktop) bell button — increased to 44px tap target and Bell size 18
+- [x] Noted: lock screen mini player working confirmed by testers
+- [x] Noted: car/Google Assistant integration (Android Auto) logged as future feature
+- [x] 0 TypeScript errors

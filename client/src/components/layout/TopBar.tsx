@@ -294,14 +294,14 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             <span>Register Work</span>
           </button>
 
-          {/* Notification bell */}
+          {/* Notification bell — min 44px tap target for mobile */}
           {user && (
             <button
               onClick={() => goTo("/notifications")}
-              className="relative p-2 rounded-lg transition-all"
-              style={{ color: "oklch(0.62 0.04 65)" }}
+              className="relative flex items-center justify-center rounded-lg transition-all"
+              style={{ color: "oklch(0.62 0.04 65)", minWidth: 44, minHeight: 44, padding: "0 10px" }}
             >
-              <Bell size={16} />
+              <Bell size={18} />
               {(unreadCount as number) > 0 && (
                 <span
                   className="absolute top-1 right-1 w-2 h-2 rounded-full animate-pulse"
