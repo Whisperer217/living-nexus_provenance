@@ -230,7 +230,6 @@
   }
   html, body {
     height: 100%;
-    overflow: hidden;
   }
   /* Graceful Lights On transition */
   html {
