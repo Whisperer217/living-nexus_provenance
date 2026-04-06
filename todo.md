@@ -2724,3 +2724,11 @@
 - [x] Wired /terms/compare route in App.tsx (before /terms to avoid route shadowing)
 - [x] Added Compare Platform TOS link to /terms page header
 - [x] TypeScript: 0 errors | Tests: 131/131 passing
+
+## Feature: v2.20.0 WhatsNew Entry + Footer Links + Privacy Policy
+- [x] Added v2.20.0 WhatsNew entry: HAAI disclosure, TOS v2.1 platform dependency, /terms/compare page; bumped CURRENT_VERSION
+- [x] Added /terms/compare and /privacy to sidebar footer (MainLayout) and mobile drawer (TopBar)
+- [x] Built Privacy Policy page at /privacy: 9 sections covering data collection, use, AI training consent, data residency, retention (5 categories), third-party processors (5 processors with policy links), creator data rights (6 rights), cookies, and contact
+- [x] Wired /privacy route in App.tsx
+- [x] Added Privacy Policy link to /terms page header
+- [x] TypeScript: 0 errors | Tests: 131/131 passing

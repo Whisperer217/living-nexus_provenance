@@ -112,6 +112,15 @@ export default function TermsPage() {
                   Compare Platform TOS →
                 </span>
               </Link>
+              <Link href="/privacy">
+                <span
+                  className="inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer"
+                  style={{ color: "oklch(0.65 0.12 85)" }}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Privacy Policy →
+                </span>
+              </Link>
             </div>
           </div>
         </section>

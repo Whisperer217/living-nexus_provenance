@@ -9,14 +9,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.19.0";
+const CURRENT_VERSION = "v2.20.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.19.0",
+    version: "v2.20.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Shield, text: "HAAI Disclosure — A fourth authorship label is now available: Human-Authored via AI Instrument. When you select it during upload, a structured declaration form captures your visual concept, style language, instrumentation, vocal conveyance, lyrical inspiration, and emotional tone. The intent is on record. The authorship is yours." },
+      { icon: FileText, text: "Terms of Service v2.1 — A new Platform Infrastructure section now discloses honestly that Living Nexus currently operates within third-party hosting infrastructure. Until sovereign migration is complete, the host platform's terms may govern. You deserve to know the constraint before you accept the covenant." },
+      { icon: BookOpen, text: "Platform TOS Comparison — A new page at /terms/compare shows side-by-side how major platforms (Meta, Spotify, YouTube, SoundCloud, TikTok) write their terms vs. what those terms actually mean. Includes a 12-term plain-English lexicon covering perpetual licenses, moral rights waivers, arbitration clauses, and more." },
+    ],
+  },
+  {
+    version: "v2.19.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Shield, text: "AI Disclosure Audit — All AI disclosure labels are now unified across every surface: Human-Made, AI-Assisted, and AI-Generated. One shared component, one vocabulary, no ambiguity anywhere on the platform." },
       { icon: ArrowUpFromLine, text: "Work Versioning — Every work now has a Version History. Upload a new version of a track, add a change note and version label, and the original is automatically archived as v1 with its WID preserved. Creative evolution, fully documented." },

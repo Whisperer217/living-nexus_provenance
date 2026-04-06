@@ -259,6 +259,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 {([
                   { label: "Manifesto",         icon: BookOpen, path: "/manifesto"        },
                   { label: "Terms of Service",  icon: Scale,    path: "/terms"            },
+                  { label: "Compare Platform TOS", icon: Scale,  path: "/terms/compare"    },
+                  { label: "Privacy Policy",     icon: Shield,   path: "/privacy"          },
                   { label: "Founding Creators", icon: Star,     path: "/founders"         },
                   { label: "Founder Era Support", icon: Heart,  path: "/founder-era"      },
                   { label: "Witness Registry",  icon: Eye,      path: "/witness-registry" },
