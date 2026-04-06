@@ -2969,3 +2969,7 @@
 - [x] Add imageSize / imageFocalX / imageFocalY to saveProjectBlocks function signature in db.ts
 - [x] Verify DB schema already has imageSize enum + imageFocalX/Y int columns
 - [x] 137/137 tests passing, 0 TypeScript errors
+## Phase 71: Fix Projects Page — Published Projects Not Showing
+- [x] Root cause: listPublic Zod schema had max(50) but ProjectsDiscoveryPage passed limit:100, causing silent validation failure
+- [x] Fix: raised listPublic input limit max from 50 to 200 in routers.ts
+- [x] Verified via direct API call: 1 active project now returned correctly

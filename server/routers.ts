@@ -4715,7 +4715,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
 
     /** List all active public projects — public */
     listPublic: publicProcedure
-      .input(z.object({ limit: z.number().int().max(50).default(20) }).optional())
+      .input(z.object({ limit: z.number().int().max(200).default(50) }).optional())
       .query(async ({ input }) => {
         return listActiveProjects();
       }),
