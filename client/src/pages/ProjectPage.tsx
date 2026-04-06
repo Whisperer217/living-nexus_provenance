@@ -55,7 +55,101 @@ function makeId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-// ── Video Hero ────────────────────────────────────────────────────────────────
+// ── Banner Drop Zone ─────────────────────────────────────────────────────────
+
+function BannerDropZone({
+  bannerUrl,
+  title,
+  status,
+  editMode,
+  isPending,
+  onFile,
+  bannerFileRef,
+}: {
+  bannerUrl: string | null;
+  title: string;
+  status: string;
+  editMode: boolean;
+  isPending: boolean;
+  onFile: (file: File) => void;
+  bannerFileRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!editMode) return;
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+  const handleDragLeave = () => setIsDragOver(false);
+  const handleDrop = (e: React.DragEvent) => {
+    if (!editMode) return;
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith("image/")) onFile(file);
+    else if (file) toast.error("Please drop an image file (JPG, PNG, WebP)");
+  };
+
+  return (
+    <div
+      className="relative w-full h-56 md:h-80 overflow-hidden"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {bannerUrl ? (
+        <img src={bannerUrl} alt={title} className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#080d14]" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#080d14]/40 to-[#080d14]" />
+
+      {/* Drag-over overlay */}
+      {editMode && isDragOver && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10"
+          style={{ background: "oklch(0.84 0.155 85 / 0.15)", backdropFilter: "blur(4px)", border: "2px dashed oklch(0.84 0.155 85 / 0.6)" }}
+        >
+          <Upload className="w-10 h-10" style={{ color: "oklch(0.84 0.155 85)" }} />
+          <p className="text-sm font-heading" style={{ color: "oklch(0.84 0.155 85)" }}>Drop to set as banner</p>
+        </div>
+      )}
+
+      {/* Funding badge */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <Badge className="bg-[#d4a017]/90 text-black font-bold px-3 py-1 text-sm">
+          {status === "draft" ? "Draft" : status === "completed" ? "Completed" : "Funding"}
+        </Badge>
+      </div>
+
+      {/* Banner upload controls (edit mode) */}
+      {editMode && !isDragOver && (
+        <div className="absolute bottom-4 left-4 flex items-center gap-2">
+          <button
+            onClick={() => bannerFileRef.current?.click()}
+            className="flex items-center gap-2 bg-black/60 backdrop-blur border border-white/20 rounded-xl px-3 py-2 text-white/70 hover:text-white text-sm transition-colors"
+          >
+            <Upload className="w-4 h-4" />
+            {isPending ? "Uploading…" : bannerUrl ? "Change banner" : "Upload banner"}
+          </button>
+          {!bannerUrl && (
+            <span className="text-white/30 text-xs">or drag &amp; drop an image here</span>
+          )}
+        </div>
+      )}
+
+      <input
+        ref={bannerFileRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }}
+      />
+    </div>
+  );
+}
+
+// ── Video Hero ─────────────────────────────────────────────────────────────────────────────────────
 
 function VideoHero({ videoUrl, videoType, bannerUrl, title }: {
   videoUrl: string | null;
@@ -652,35 +746,16 @@ export default function ProjectPage() {
 
   return (
     <div className="min-h-screen bg-[#080d14] text-white">
-      {/* ── Banner ── */}
-      <div className="relative w-full h-56 md:h-80 overflow-hidden">
-        {project.bannerUrl ? (
-          <img src={project.bannerUrl} alt={project.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#080d14]" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#080d14]/40 to-[#080d14]" />
-
-        {/* Funding badge */}
-        <div className="absolute top-4 right-4 flex items-center gap-2">
-          <Badge className="bg-[#d4a017]/90 text-black font-bold px-3 py-1 text-sm">
-            {project.status === "draft" ? "Draft" : project.status === "completed" ? "Completed" : "Funding"}
-          </Badge>
-        </div>
-
-        {/* Banner upload button (edit mode) */}
-        {editMode && (
-          <button
-            onClick={() => bannerFileRef.current?.click()}
-            className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/60 backdrop-blur border border-white/20 rounded-xl px-3 py-2 text-white/70 hover:text-white text-sm transition-colors"
-          >
-            <Upload className="w-4 h-4" />
-            {uploadBanner.isPending ? "Uploading…" : "Change banner"}
-          </button>
-        )}
-        <input ref={bannerFileRef} type="file" accept="image/*" className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBannerFile(f); }} />
-      </div>
+      {/* ── Banner (drag-and-drop in edit mode) ── */}
+      <BannerDropZone
+        bannerUrl={project.bannerUrl ?? null}
+        title={project.title}
+        status={project.status}
+        editMode={editMode}
+        isPending={uploadBanner.isPending}
+        onFile={handleBannerFile}
+        bannerFileRef={bannerFileRef}
+      />
 
       {/* ── Owner toolbar ── */}
       {isOwner && (

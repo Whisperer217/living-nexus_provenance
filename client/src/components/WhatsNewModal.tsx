@@ -4,19 +4,29 @@ import {
   Shield, Upload, Music, Video, DollarSign, Users, BookOpen,
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
   Eye, Globe, FileText, Network, Scroll, Film, Gift, Link2,
-  Radio, ArrowUpFromLine, Library, FileArchive,
+  Radio, ArrowUpFromLine, Library, FileArchive, Rocket, ImagePlus, Compass,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.20.0";
+const CURRENT_VERSION = "v2.21.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.20.0",
+    version: "v2.21.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Rocket, text: "Creator Projects — You can now launch a crowdfunding campaign directly on Living Nexus. Build a project page with a cinematic banner, rich content blocks (text, images, quotes, video), and a Stripe-powered Support button. Set a funding goal and watch the progress bar fill. When you publish, a WID is generated — your project is provenance-sealed from day one. Go to My Projects in your account menu to get started." },
+      { icon: ImagePlus, text: "Project Banner Upload — Drag and drop a cover image directly onto your project hero area to make your campaign page stand out. Supports JPG, PNG, and WebP up to 10 MB." },
+      { icon: Compass, text: "Projects Discovery — A new /projects page lets anyone browse all active creator campaigns. Find projects to support, filter by status, and discover what the Living Nexus community is building next." },
+    ],
+  },
+  {
+    version: "v2.20.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Shield, text: "HAAI Disclosure — A fourth authorship label is now available: Human-Authored via AI Instrument. When you select it during upload, a structured declaration form captures your visual concept, style language, instrumentation, vocal conveyance, lyrical inspiration, and emotional tone. The intent is on record. The authorship is yours." },
       { icon: FileText, text: "Terms of Service v2.1 — A new Platform Infrastructure section now discloses honestly that Living Nexus currently operates within third-party hosting infrastructure. Until sovereign migration is complete, the host platform's terms may govern. You deserve to know the constraint before you accept the covenant." },
