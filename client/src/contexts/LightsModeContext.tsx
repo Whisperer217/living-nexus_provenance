@@ -2,12 +2,14 @@
  * LightsModeContext
  *
  * Fetches the platform owner's `lightsMode` setting and applies the
- * `.lights-on` CSS class to <html> when the mode is "on".
+ * `data-theme` attribute to <html>:
+ *   - "dim"  → data-theme="dark"   (Lantern Light — charred oak)
+ *   - "on"   → data-theme="warm"   (Onyx Coffee — cream-clay)
  *
  * Flash prevention strategy:
- *   1. On first render, read `lnx_lights_mode` from localStorage and apply
- *      the class synchronously — this runs before the first paint so there
- *      is no visible flash.
+ *   1. On first render, read `lnx_theme` from localStorage and apply
+ *      the attribute synchronously — this runs before the first paint so
+ *      there is no visible flash.
  *   2. Once the tRPC query resolves, sync state from the server and persist
  *      the latest value back to localStorage for the next visit.
  *
@@ -17,9 +19,9 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { trpc } from "@/lib/trpc";
 
-type LightsMode = "dim" | "on";
+export type LightsMode = "dim" | "on";
 
-const LS_KEY = "lnx_lights_mode";
+const LS_KEY = "lnx_theme";
 
 /** Read the stored mode synchronously — safe to call during render */
 function readStoredMode(): LightsMode {
@@ -32,18 +34,17 @@ function readStoredMode(): LightsMode {
   return "dim";
 }
 
-/** Apply or remove .lights-on on <html> immediately (no React state cycle) */
-function applyClass(mode: LightsMode) {
-  if (mode === "on") {
-    document.documentElement.classList.add("lights-on");
-  } else {
-    document.documentElement.classList.remove("lights-on");
-  }
+/** Apply data-theme attribute to <html> immediately (no React state cycle) */
+function applyTheme(mode: LightsMode) {
+  document.documentElement.setAttribute(
+    "data-theme",
+    mode === "on" ? "warm" : "dark"
+  );
 }
 
-// Hydrate the class synchronously before React renders anything
+// Hydrate the theme synchronously before React renders anything.
 // This runs at module-evaluation time, before the first paint.
-applyClass(readStoredMode());
+applyTheme(readStoredMode());
 
 interface LightsModeContextValue {
   mode: LightsMode;
@@ -56,11 +57,11 @@ const LightsModeContext = createContext<LightsModeContextValue>({
 });
 
 export function LightsModeProvider({ children }: { children: ReactNode }) {
-  // Initialise from localStorage so the first render matches the already-applied class
+  // Initialise from localStorage so the first render matches the already-applied theme
   const [mode, setModeState] = useState<LightsMode>(readStoredMode);
 
   const { data } = trpc.profile.getLightsMode.useQuery(undefined, {
-    staleTime: 60_000,          // re-fetch at most once per minute
+    staleTime: 60_000,           // re-fetch at most once per minute
     refetchOnWindowFocus: false,
   });
 
@@ -69,14 +70,14 @@ export function LightsModeProvider({ children }: { children: ReactNode }) {
     if (data?.lightsMode && (data.lightsMode === "on" || data.lightsMode === "dim")) {
       const serverMode = data.lightsMode as LightsMode;
       setModeState(serverMode);
-      applyClass(serverMode);
+      applyTheme(serverMode);
       try { localStorage.setItem(LS_KEY, serverMode); } catch { /* ignore */ }
     }
   }, [data?.lightsMode]);
 
   const setMode = (m: LightsMode) => {
     setModeState(m);
-    applyClass(m);
+    applyTheme(m);
     try { localStorage.setItem(LS_KEY, m); } catch { /* ignore */ }
   };
 

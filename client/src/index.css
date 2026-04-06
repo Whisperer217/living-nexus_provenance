@@ -138,49 +138,103 @@
 }
 
 /* =================================================================
-   LIGHTS ON — Onyx Coffee Mode
-   Inspired by Onyx Coffee Lab packaging:
-     Power Nap  -> dusty clay-rose surfaces
-     Genmaicha  -> deep forest olive accents
-     Tealight   -> near-black charcoal text
-   Activated by .lights-on on <html>, controlled by the platform owner.
+   LIVING NEXUS — Theme System
+   Two themes: dark (default Lantern) and warm (Onyx Coffee / Cream-Clay)
+   Toggle via: document.documentElement.setAttribute('data-theme', 'warm')
+   Saved to user profile and localStorage for flash-free load.
 ================================================================= */
-.lights-on {
-  /* Surface tokens — cream-clay depth steps */
-  --void:   #E8C4A8;
-  --void-2: #DFB898;
-  --void-3: #D6AC8A;
-  --void-4: #CCAA82;
 
-  /* Accent tokens — forest olive */
+/* ── DARK THEME (default — Lantern Light, Charred Oak) ── */
+[data-theme="dark"] {
+  /* Surface depth steps */
+  --void:   oklch(0.10 0.022 55);
+  --void-2: oklch(0.125 0.028 52);
+  --void-3: oklch(0.148 0.032 50);
+  --void-4: oklch(0.195 0.038 48);
+
+  /* Accent tokens */
+  --gold:     oklch(0.82 0.155 75);
+  --gold-dim: oklch(0.70 0.13 72);
+  --teal:     oklch(0.78 0.12 175);
+  --teal-dim: oklch(0.65 0.09 172);
+
+  /* Semantic tokens */
+  --background:          var(--void);
+  --foreground:          oklch(0.94 0.025 75);
+  --card:                var(--void-3);
+  --card-foreground:     oklch(0.94 0.025 75);
+  --popover:             var(--void-2);
+  --popover-foreground:  oklch(0.94 0.025 75);
+  --primary:             var(--gold);
+  --primary-foreground:  oklch(0.10 0.02 55);
+  --secondary:           var(--void-4);
+  --secondary-foreground:oklch(0.94 0.025 75);
+  --muted:               var(--void-3);
+  --muted-foreground:    oklch(0.65 0.04 65);
+  --accent:              var(--teal);
+  --accent-foreground:   oklch(0.10 0.02 55);
+  --border:              oklch(0.30 0.04 60 / 70%);
+  --input:               oklch(0.30 0.04 60 / 50%);
+  --ring:                var(--gold);
+
+  /* Living Nexus custom tokens */
+  --lnx-bg:         #0D0A06;
+  --lnx-bg-2:       #141008;
+  --lnx-bg-3:       #1C160C;
+  --lnx-text:       #F5EDD6;
+  --lnx-text-muted: #B8A882;
+  --lnx-gold:       #E8A830;
+  --lnx-gold-glow:  #F5C451;
+  --lnx-gold-muted: #A07820;
+
+  /* Sidebar */
+  --sidebar:                    var(--void-2);
+  --sidebar-foreground:         oklch(0.94 0.025 75);
+  --sidebar-primary:            var(--gold);
+  --sidebar-primary-foreground: oklch(0.10 0.02 55);
+  --sidebar-accent:             var(--void-4);
+  --sidebar-accent-foreground:  oklch(0.94 0.025 75);
+  --sidebar-border:             oklch(0.30 0.04 60 / 50%);
+  --sidebar-ring:               var(--gold);
+}
+
+/* ── WARM THEME (Onyx Coffee — Cream-Clay / Forest Olive) ── */
+[data-theme="warm"] {
+  /* Surface depth steps — cream-clay */
+  --void:   #F2EDE8;
+  --void-2: #EDE4D8;
+  --void-3: #E5D8C8;
+  --void-4: #DACCB8;
+
+  /* Accent tokens — cathedral gold + forest olive */
   --gold:     #B8963E;
   --gold-dim: #8A6E2A;
   --teal:     #4A5C3A;
   --teal-dim: #3A4A2C;
 
-  /* Semantic background / foreground */
-  --background:          #E8C4A8;
+  /* Semantic tokens */
+  --background:          #F2EDE8;
   --foreground:          #2C1A0E;
-  --card:                #D6AC8A;
+  --card:                #E5D8C8;
   --card-foreground:     #2C1A0E;
-  --popover:             #DFB898;
+  --popover:             #EDE4D8;
   --popover-foreground:  #2C1A0E;
   --primary:             #4A5C3A;
   --primary-foreground:  #F2EDE8;
-  --secondary:           #CCAA82;
+  --secondary:           #DACCB8;
   --secondary-foreground:#2C1A0E;
-  --muted:               #D6AC8A;
+  --muted:               #E5D8C8;
   --muted-foreground:    #6B4C35;
   --accent:              #4A5C3A;
   --accent-foreground:   #F2EDE8;
-  --border:              rgba(242,237,232,0.22);
-  --input:               rgba(242,237,232,0.18);
+  --border:              rgba(44,26,14,0.18);
+  --input:               rgba(44,26,14,0.14);
   --ring:                #B8963E;
 
   /* Living Nexus custom tokens */
-  --lnx-bg:         #E8C4A8;
-  --lnx-bg-2:       #DFB898;
-  --lnx-bg-3:       #D6AC8A;
+  --lnx-bg:         #F2EDE8;
+  --lnx-bg-2:       #EDE4D8;
+  --lnx-bg-3:       #E5D8C8;
   --lnx-text:       #2C1A0E;
   --lnx-text-muted: #6B4C35;
   --lnx-gold:       #B8963E;
@@ -188,35 +242,35 @@
   --lnx-gold-muted: #8A6E2A;
 
   /* Sidebar */
-  --sidebar:                    #DFB898;
+  --sidebar:                    #EDE4D8;
   --sidebar-foreground:         #2C1A0E;
   --sidebar-primary:            #4A5C3A;
   --sidebar-primary-foreground: #F2EDE8;
-  --sidebar-accent:             #CCAA82;
+  --sidebar-accent:             #DACCB8;
   --sidebar-accent-foreground:  #2C1A0E;
-  --sidebar-border:             rgba(242,237,232,0.18);
+  --sidebar-border:             rgba(44,26,14,0.14);
   --sidebar-ring:               #B8963E;
 }
 
-/* Nudge hardcoded inline oklch values toward the cream-clay palette */
-.lights-on body {
-  filter: sepia(0.18) brightness(1.22) contrast(0.90) saturate(0.82) hue-rotate(4deg);
+/* Warm theme body nudge — lifts hardcoded inline oklch dark values */
+[data-theme="warm"] body {
+  filter: sepia(0.12) brightness(1.28) contrast(0.88) saturate(0.80) hue-rotate(5deg);
   transition: filter 0.45s ease;
 }
 
-/* Headings: espresso on cream-clay in lights-on */
-.lights-on h1,
-.lights-on h2,
-.lights-on h3,
-.lights-on h4,
-.lights-on h5,
-.lights-on h6 {
+/* Warm theme headings — espresso */
+[data-theme="warm"] h1,
+[data-theme="warm"] h2,
+[data-theme="warm"] h3,
+[data-theme="warm"] h4,
+[data-theme="warm"] h5,
+[data-theme="warm"] h6 {
   color: #2C1A0E;
 }
 
-/* Scrollbar olive in lights-on */
-.lights-on ::-webkit-scrollbar-thumb {
-  background: rgba(74,92,58,0.60);
+/* Warm theme scrollbar — olive tint */
+[data-theme="warm"] ::-webkit-scrollbar-thumb {
+  background: rgba(74,92,58,0.55);
 }
 
 @layer base {

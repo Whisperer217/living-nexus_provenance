@@ -10,14 +10,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.23.0";
+const CURRENT_VERSION = "v2.24.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.23.0",
+    version: "v2.24.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Sun, text: "Warm Theme — A proper two-theme system now powers the platform. Lantern Mode (dark, charred oak) and Warm Mode (Onyx Coffee cream-clay) are independent CSS themes that swap every surface token simultaneously. Toggle in Profile → Settings. Your preference is remembered across sessions with zero flash on load." },
+      { icon: Sparkles, text: "Cream-Clay Palette — Warm Mode surfaces step through warm linen (#F2EDE8) → cream (#EDE4D8) → light clay (#E5D8C8) → warm sand (#DACCB8). Text reads in deep espresso. Borders and CTAs use forest olive. Cathedral gold is retained as the accent across both themes." },
+      { icon: Moon, text: "Dark Theme Preserved — The Lantern Light palette is fully intact and unchanged. Switching to Warm Mode is additive, not destructive — the dark theme is always one tap away from Profile → Settings." },
+    ],
+  },
+  {
+    version: "v2.23.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Sun, text: "Lights On — A new global display mode lives in your Profile → Settings. Toggle between Lantern Mode (the classic charred-oak dark palette) and Espresso Crème (a warm steamed-cream palette with roasted caramel accents). The switch applies instantly across the entire platform for every visitor." },
       { icon: Sparkles, text: "Instant Palette Fade — Switching modes now animates smoothly over 0.4 seconds instead of snapping. Background, text, and accent colors all cross-fade together for a polished, intentional feel." },

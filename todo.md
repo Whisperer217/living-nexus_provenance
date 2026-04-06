@@ -2864,3 +2864,10 @@
 - [x] Shift four surface vars lighter: #C4876A→#E8C4A8, #B87A5E→#DFB898, #A86D52→#D6AC8A, #986046→#CCAA82
 - [x] Foreground updated to espresso #2C1A0E for legibility on light surfaces
 - [x] All other tokens unchanged (olive border/CTA, cathedral gold)
+
+## Phase 52: data-theme Theme System Migration
+- [x] Replace .lights-on CSS block with [data-theme="dark"] and [data-theme="warm"] in index.css
+- [x] Update LightsModeContext to set data-theme attribute on <html> instead of .lights-on class
+- [x] Update localStorage key from lnx_lights_mode to lnx_theme
+- [x] Bump What's New to v2.24.0 — document proper theme system
+- [x] Run 137 tests against both themes — all pass
