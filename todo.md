@@ -2777,3 +2777,13 @@
 - [x] Added HAAI fields display to WIDPanel modal inline provenance record
 - [x] Passed HAAI fields from song data to WIDPanel in SongDetailPage.tsx
 - [x] TypeScript: 0 errors | Tests: 131/131 passing
+
+## Feature: Creator Projects (Crowdfunding)
+- [ ] Add projects, projectUpdates, projectDonations tables to schema
+- [ ] Add project db helpers (create, get, update, list, donate)
+- [ ] Add tRPC procedures: projects.create, projects.get, projects.update, projects.addUpdate, projects.donate
+- [ ] Build public /project/:slug page matching sketch (banner, video hero, content blocks, donate bar)
+- [ ] Build creator dashboard /dashboard/projects page (list + create/edit)
+- [ ] Wire Stripe donate checkout (10% platform fee via Connect)
+- [ ] Register /project/:slug route in App.tsx
+- [ ] Add Projects link to creator dashboard sidebar

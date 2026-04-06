@@ -77,6 +77,8 @@ import {
   exportUserData, requestDataDeletion,
   getPlatformSetting, setPlatformSetting,
   listDeletionRequests, clearDeletionRequest,
+  createProject, getProjectBySlug, getProjectById, getProjectsByUser, updateProject,
+  getProjectUpdates, addProjectUpdate, getProjectDonations, recordProjectDonation, listActiveProjects,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -193,6 +195,21 @@ export async function handleStripeWebhook(req: any, res: any) {
             songId,
             tipperUserId,
             amountCents,
+            stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          });
+        }
+        // Project donation: record in projectDonations table and update totals
+        if (meta.type === "project_donation" && meta.projectId) {
+          const amountCents = session.amount_total ?? 0;
+          await recordProjectDonation({
+            projectId: parseInt(meta.projectId),
+            donorUserId: meta.userId ? parseInt(meta.userId) : undefined,
+            donorName: meta.anonymous === "true" ? "Anonymous" : (meta.donorName || undefined),
+            donorEmail: meta.donorEmail || undefined,
+            amountCents,
+            message: meta.message || undefined,
+            anonymous: meta.anonymous === "true",
+            stripeSessionId: session.id,
             stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
           });
         }
@@ -4292,6 +4309,183 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         const { testWebhookUrl } = await import("./discord");
         const result = await testWebhookUrl(input.event, input.webhookUrl);
         return result;
+      }),
+  }),
+
+  // ─── Projects (Crowdfunding) ────────────────────────────────────────────────
+  projects: router({
+    /** List all active (published) projects — public */
+    list: publicProcedure.query(async () => {
+      return listActiveProjects();
+    }),
+
+    /** Get a single project by slug — public */
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const project = await getProjectBySlug(input.slug);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+        const updates = await getProjectUpdates(project.id);
+        const donations = await getProjectDonations(project.id);
+        return { project, updates, donations };
+      }),
+
+    /** Get current user's projects — protected */
+    mine: protectedProcedure.query(async ({ ctx }) => {
+      return getProjectsByUser(ctx.user.id);
+    }),
+
+    /** Create a new project — protected */
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(256),
+        tagline: z.string().max(512).optional(),
+        description: z.string().optional(),
+        videoUrl: z.string().url().optional().or(z.literal("")),
+        videoType: z.enum(["youtube", "vimeo", "s3", "none"]).optional(),
+        goalAmountCents: z.number().int().positive().optional(),
+        linkedWitnessId: z.string().optional(),
+        linkedSongId: z.number().int().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Generate slug from title
+        const baseSlug = input.title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .slice(0, 80);
+        const slug = `${baseSlug}-${Date.now().toString(36)}`;
+        const id = await createProject({
+          userId: ctx.user.id,
+          slug,
+          title: input.title,
+          tagline: input.tagline ?? null,
+          description: input.description ?? null,
+          videoUrl: input.videoUrl || null,
+          videoType: (input.videoType ?? "none") as any,
+          goalAmountCents: input.goalAmountCents ?? null,
+          linkedWitnessId: input.linkedWitnessId ?? null,
+          linkedSongId: input.linkedSongId ?? null,
+          status: "draft",
+        });
+        return { id, slug };
+      }),
+
+    /** Update project details — protected, must be owner */
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int(),
+        title: z.string().min(1).max(256).optional(),
+        tagline: z.string().max(512).optional(),
+        description: z.string().optional(),
+        bannerUrl: z.string().optional(),
+        bannerKey: z.string().optional(),
+        videoUrl: z.string().optional(),
+        videoType: z.enum(["youtube", "vimeo", "s3", "none"]).optional(),
+        goalAmountCents: z.number().int().positive().nullable().optional(),
+        status: z.enum(["draft", "active", "completed", "archived"]).optional(),
+        linkedWitnessId: z.string().optional(),
+        linkedSongId: z.number().int().nullable().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.id);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+        if (project.userId !== ctx.user.id && ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        const { id, ...data } = input;
+        await updateProject(id, data as any);
+        return { ok: true };
+      }),
+
+    /** Upload banner image — protected, must be owner */
+    uploadBanner: protectedProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        fileBase64: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        const buf = Buffer.from(input.fileBase64, "base64");
+        const ext = input.mimeType.split("/")[1] || "jpg";
+        const key = `project-banners/${ctx.user.id}-${input.projectId}-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buf, input.mimeType);
+        await updateProject(input.projectId, { bannerUrl: url, bannerKey: key });
+        return { url, key };
+      }),
+
+    /** Post a progress update — protected, must be owner */
+    addUpdate: protectedProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        title: z.string().max(256).optional(),
+        body: z.string().min(1),
+        imageUrl: z.string().optional(),
+        imageKey: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        await addProjectUpdate({ ...input, userId: ctx.user.id });
+        return { ok: true };
+      }),
+
+    /** Create Stripe checkout for a project donation — public (logged in optional) */
+    donate: publicProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        amountCents: z.number().int().min(100).max(1000000),
+        message: z.string().max(500).optional(),
+        anonymous: z.boolean().optional(),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+        if (project.status !== "active") throw new TRPCError({ code: "BAD_REQUEST", message: "This project is not currently accepting donations" });
+
+        // Get creator's Stripe account for transfer
+        const creator = await getUserById(project.userId);
+        if (!creator?.stripeAccountId || creator.stripeAccountStatus !== "enabled") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Creator has not set up payouts yet" });
+        }
+
+        const platformFeeCents = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
+        const user = ctx.user;
+
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              product_data: { name: `Support: ${project.title}`, description: project.tagline || undefined },
+              unit_amount: input.amountCents,
+            },
+            quantity: 1,
+          }],
+          mode: "payment",
+          success_url: `${input.origin}/project/${project.slug}?donation=success`,
+          cancel_url: `${input.origin}/project/${project.slug}`,
+          customer_email: user?.email || undefined,
+          payment_intent_data: {
+            transfer_data: { destination: creator.stripeAccountId },
+            application_fee_amount: platformFeeCents,
+          },
+          metadata: {
+            type: "project_donation",
+            projectId: String(project.id),
+            userId: user ? String(user.id) : "",
+            donorName: user?.name || "",
+            donorEmail: user?.email || "",
+            message: input.message || "",
+            anonymous: input.anonymous ? "true" : "false",
+          },
+        });
+        return { url: session.url };
       }),
   }),
 });

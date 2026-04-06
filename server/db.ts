@@ -17,8 +17,12 @@ import {
   contentFlags, declarationSignatures,
   songVersions,
   platformSettings,
+  projects, projectUpdates, projectDonations,
   type InsertContentFlag, type InsertDeclarationSignature,
   type InsertSongVersion,
+  type Project, type InsertProject,
+  type ProjectUpdate,
+  type ProjectDonation,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3488,4 +3492,141 @@ export async function clearDeletionRequest(userId: number): Promise<void> {
     .update(users)
     .set({ dataDeletionRequestedAt: null })
     .where(eq(users.id, userId));
+}
+
+// ─── Projects (Crowdfunding) ──────────────────────────────────────────────────
+
+export async function createProject(data: InsertProject): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const result = await db.insert(projects).values(data);
+  return (result as any)[0].insertId as number;
+}
+
+export async function getProjectBySlug(slug: string): Promise<(Project & { creatorName: string | null; creatorHandle: string | null; creatorAvatar: string | null }) | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select({
+      id: projects.id,
+      userId: projects.userId,
+      slug: projects.slug,
+      title: projects.title,
+      tagline: projects.tagline,
+      description: projects.description,
+      bannerUrl: projects.bannerUrl,
+      bannerKey: projects.bannerKey,
+      videoUrl: projects.videoUrl,
+      videoType: projects.videoType,
+      goalAmountCents: projects.goalAmountCents,
+      raisedAmountCents: projects.raisedAmountCents,
+      donorCount: projects.donorCount,
+      status: projects.status,
+      linkedWitnessId: projects.linkedWitnessId,
+      linkedSongId: projects.linkedSongId,
+      createdAt: projects.createdAt,
+      updatedAt: projects.updatedAt,
+      creatorName: users.name,
+      creatorHandle: users.artistHandle,
+      creatorAvatar: users.profilePhotoUrl,
+    })
+    .from(projects)
+    .leftJoin(users, eq(projects.userId, users.id))
+    .where(eq(projects.slug, slug))
+    .limit(1);
+  return rows.length > 0 ? rows[0] as any : undefined;
+}
+
+export async function getProjectById(id: number): Promise<Project | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+  return rows.length > 0 ? rows[0] : undefined;
+}
+
+export async function getProjectsByUser(userId: number): Promise<Project[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projects).where(eq(projects.userId, userId)).orderBy(desc(projects.createdAt));
+}
+
+export async function updateProject(id: number, data: Partial<InsertProject>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(projects).set({ ...data, updatedAt: new Date() }).where(eq(projects.id, id));
+}
+
+export async function getProjectUpdates(projectId: number): Promise<ProjectUpdate[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projectUpdates).where(eq(projectUpdates.projectId, projectId)).orderBy(desc(projectUpdates.createdAt));
+}
+
+export async function addProjectUpdate(data: { projectId: number; userId: number; title?: string; body: string; imageUrl?: string; imageKey?: string }): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(projectUpdates).values(data);
+}
+
+export async function getProjectDonations(projectId: number): Promise<ProjectDonation[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projectDonations).where(eq(projectDonations.projectId, projectId)).orderBy(desc(projectDonations.createdAt));
+}
+
+export async function recordProjectDonation(data: {
+  projectId: number;
+  donorUserId?: number;
+  donorName?: string;
+  donorEmail?: string;
+  amountCents: number;
+  message?: string;
+  anonymous?: boolean;
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(projectDonations).values(data);
+  // Update project totals
+  await db.execute(sql`
+    UPDATE projects
+    SET raisedAmountCents = raisedAmountCents + ${data.amountCents},
+        donorCount = donorCount + 1
+    WHERE id = ${data.projectId}
+  `);
+}
+
+export async function listActiveProjects(): Promise<(Project & { creatorName: string | null; creatorHandle: string | null; creatorAvatar: string | null })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: projects.id,
+      userId: projects.userId,
+      slug: projects.slug,
+      title: projects.title,
+      tagline: projects.tagline,
+      description: projects.description,
+      bannerUrl: projects.bannerUrl,
+      bannerKey: projects.bannerKey,
+      videoUrl: projects.videoUrl,
+      videoType: projects.videoType,
+      goalAmountCents: projects.goalAmountCents,
+      raisedAmountCents: projects.raisedAmountCents,
+      donorCount: projects.donorCount,
+      status: projects.status,
+      linkedWitnessId: projects.linkedWitnessId,
+      linkedSongId: projects.linkedSongId,
+      createdAt: projects.createdAt,
+      updatedAt: projects.updatedAt,
+      creatorName: users.name,
+      creatorHandle: users.artistHandle,
+      creatorAvatar: users.profilePhotoUrl,
+    })
+    .from(projects)
+    .leftJoin(users, eq(projects.userId, users.id))
+    .where(eq(projects.status, "active"))
+    .orderBy(desc(projects.createdAt));
+  return rows as any;
 }

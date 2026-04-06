@@ -988,3 +988,60 @@ export const platformSettings = mysqlTable("platformSettings", {
 });
 export type PlatformSetting = typeof platformSettings.$inferSelect;
 export type InsertPlatformSetting = typeof platformSettings.$inferInsert;
+
+// ─── Creator Projects (Crowdfunding) ─────────────────────────────────────────
+// A creator-built campaign page for funding a work-in-progress.
+// Platform takes 10% of all donations (same as tips, via Stripe Connect).
+export const projects = mysqlTable("projects", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),                        // FK → users.id (creator)
+  slug: varchar("slug", { length: 128 }).notNull(),       // URL slug: /project/:slug
+  title: varchar("title", { length: 256 }).notNull(),
+  tagline: varchar("tagline", { length: 512 }),           // Short one-liner under title
+  description: text("description"),                       // Rich text body (markdown)
+  bannerUrl: text("bannerUrl"),                           // S3 URL for banner image
+  bannerKey: varchar("bannerKey", { length: 512 }),
+  videoUrl: text("videoUrl"),                             // YouTube/Vimeo embed or S3 video URL
+  videoType: mysqlEnum("videoType", ["youtube", "vimeo", "s3", "none"]).default("none"),
+  goalAmountCents: int("goalAmountCents"),                // Optional funding goal (null = open-ended)
+  raisedAmountCents: int("raisedAmountCents").default(0).notNull(),
+  donorCount: int("donorCount").default(0).notNull(),
+  status: mysqlEnum("status", ["draft", "active", "completed", "archived"]).default("draft").notNull(),
+  linkedWitnessId: varchar("linkedWitnessId", { length: 64 }),
+  linkedSongId: int("linkedSongId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
+
+// ─── Project Updates (Creator Progress Log) ───────────────────────────────────
+export const projectUpdates = mysqlTable("projectUpdates", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 256 }),
+  body: text("body").notNull(),
+  imageUrl: text("imageUrl"),
+  imageKey: varchar("imageKey", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ProjectUpdate = typeof projectUpdates.$inferSelect;
+export type InsertProjectUpdate = typeof projectUpdates.$inferInsert;
+
+// ─── Project Donations ────────────────────────────────────────────────────────
+export const projectDonations = mysqlTable("projectDonations", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  donorUserId: int("donorUserId"),
+  donorName: varchar("donorName", { length: 128 }),
+  donorEmail: varchar("donorEmail", { length: 256 }),
+  amountCents: int("amountCents").notNull(),
+  message: text("message"),
+  anonymous: boolean("anonymous").default(false).notNull(),
+  stripeSessionId: varchar("stripeSessionId", { length: 256 }),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 256 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ProjectDonation = typeof projectDonations.$inferSelect;
+export type InsertProjectDonation = typeof projectDonations.$inferInsert;

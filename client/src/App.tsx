@@ -57,6 +57,8 @@ const SharedPromptPage = lazy(() => import("./pages/SharedPromptPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const TosComparePage = lazy(() => import("./pages/TosComparePage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const ProjectPage = lazy(() => import("./pages/ProjectPage"));
+const MyProjectsPage = lazy(() => import("./pages/MyProjectsPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -126,6 +128,8 @@ function Router() {
                 <Route path="/terms/compare" component={TosComparePage} />
                 <Route path="/terms" component={TermsPage} />
                 <Route path="/privacy" component={PrivacyPage} />
+                <Route path="/project/:slug" component={ProjectPage} />
+                <Route path="/my-projects" component={MyProjectsPage} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>

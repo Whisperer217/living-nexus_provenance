@@ -62,6 +62,7 @@ const DRAWER_DISCOVER = [
 const DRAWER_ACCOUNT = [
   { label: "My Profile",    icon: User,        path: "/profile",     authOnly: true },
   { label: "Creator Page",  icon: Fingerprint, path: "",             authOnly: true, creatorPage: true },
+  { label: "My Projects",   icon: Heart,       path: "/my-projects", authOnly: true },
   { label: "Notifications", icon: Bell,        path: "/notifications", authOnly: true, notifBadge: true },
 ];
 
