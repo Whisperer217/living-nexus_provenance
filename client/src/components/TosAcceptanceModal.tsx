@@ -20,7 +20,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 
 // Bump this when a new TOS version is published to re-prompt existing users
-export const CURRENT_TOS_VERSION = "2.0";
+export const CURRENT_TOS_VERSION = "2.1";
 
 export function TosAcceptanceModal() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -120,7 +120,28 @@ export function TosAcceptanceModal() {
             </section>
 
             <section>
-              <h3 className="text-[#e8dcc8] font-semibold mb-1">3. Creator Responsibilities</h3>
+              <h3 className="text-amber-400 font-semibold mb-1 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                3. Platform Infrastructure & Governing Terms
+              </h3>
+              <div className="p-2.5 rounded border border-amber-500/30 bg-amber-500/5 mb-2">
+                <p className="text-amber-200/80 text-xs leading-relaxed">
+                  <strong className="text-amber-300">Current Limitation:</strong> Living Nexus currently
+                  operates within a third-party AI infrastructure platform. Until we migrate to fully
+                  sovereign hosting, the host platform's Terms of Service may take precedence over these
+                  terms in areas of conflict. We cannot fully confirm our TOS is self-enforcing until that
+                  migration is complete.
+                </p>
+              </div>
+              <p>
+                We are actively working toward sovereign infrastructure fully owned by BDDT Publishing /
+                Command Domains LLC. A public notice will be posted when these Terms become the sole
+                governing document. We encourage you to review the host platform's terms independently.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-[#e8dcc8] font-semibold mb-1">4. Creator Responsibilities</h3>
               <p>
                 By uploading content to Living Nexus, you affirm that you are the original creator or have
                 obtained all necessary rights, licenses, and permissions. You are solely responsible for the
@@ -129,7 +150,7 @@ export function TosAcceptanceModal() {
             </section>
 
             <section>
-              <h3 className="text-[#e8dcc8] font-semibold mb-1">4. AI Disclosure</h3>
+              <h3 className="text-[#e8dcc8] font-semibold mb-1">5. AI Disclosure</h3>
               <p>
                 You agree to accurately disclose the role of AI tools in the creation of your works using
                 the platform's disclosure system (Human-Made, AI-Assisted, AI-Generated, or
@@ -139,7 +160,7 @@ export function TosAcceptanceModal() {
             </section>
 
             <section>
-              <h3 className="text-[#e8dcc8] font-semibold mb-1">5. Platform Liability</h3>
+              <h3 className="text-[#e8dcc8] font-semibold mb-1">6. Platform Liability</h3>
               <p>
                 Living Nexus is provided "as is." BDDT Publishing / Command Domains LLC is not liable for
                 any loss of data, infringement claims, or damages arising from your use of the platform.
@@ -185,8 +206,10 @@ export function TosAcceptanceModal() {
             className="text-sm text-[#b0a090] leading-relaxed cursor-pointer select-none"
           >
             I have read and agree to the Living Nexus Terms of Service (v{CURRENT_TOS_VERSION}), including the
-            Witness ID scope and limitations. I understand that a WID supports but does not replace official
-            copyright registration.
+            Witness ID scope and limitations, and the platform infrastructure disclosure. I understand that
+            a WID supports but does not replace official copyright registration, and that Living Nexus
+            currently operates within a third-party AI infrastructure platform whose terms may supersede
+            these terms until sovereign migration is complete.
           </label>
         </div>
 

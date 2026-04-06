@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ChevronLeft, Shield, ShieldCheck, Scale, BookOpen, ScrollText } from "lucide-react";
+import { ChevronLeft, Shield, ShieldCheck, Scale, BookOpen, ScrollText, AlertTriangle, Server } from "lucide-react";
 
 const LAST_UPDATED = "April 2026";
 const VERSION = "1.0";
@@ -158,7 +158,39 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Shield className="w-4 h-4" />} label="3. AI Training Consent">
+        <Section icon={<Server className="w-4 h-4" />} label="3. Platform Infrastructure & Governing Terms">
+          <div className="flex items-start gap-2 p-3 rounded-md border border-amber-500/30 bg-amber-500/5 mb-3">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            <p className="text-amber-200/80 text-sm leading-relaxed">
+              <strong className="text-amber-300">Current Platform Limitation:</strong> Living Nexus currently
+              operates within a third-party AI infrastructure and hosting environment. Until we complete
+              migration to fully sovereign, self-hosted infrastructure, the governing terms of that host
+              platform may take precedence over the terms stated here in areas of conflict.
+            </p>
+          </div>
+          <p>
+            Living Nexus is built on and delivered through an AI provenance generation platform operated by
+            a third-party provider. As of the current version of these Terms, we do not have full control
+            over the underlying infrastructure, data residency, or the host platform's own Terms of Service.
+            The host platform's terms may differ from the protections described in this document — including,
+            but not limited to, provisions regarding data use, AI training, content ownership, and service
+            availability.
+          </p>
+          <p>
+            We are transparent about this limitation because we believe creators deserve to know the full
+            scope of the environment their work is registered in. We are actively working toward sovereign
+            hosting — a migration to infrastructure fully owned and controlled by BDDT Publishing / Command
+            Domains LLC — at which point these Terms will be the sole governing document without
+            third-party override.
+          </p>
+          <p>
+            Until that migration is complete, we encourage creators to review the host platform's Terms of
+            Service independently. We will publish a public notice on this page and via platform notification
+            when sovereign migration is achieved and these Terms become fully self-enforcing.
+          </p>
+        </Section>
+
+        <Section icon={<Shield className="w-4 h-4" />} label="4. AI Training Consent">
           <p>
             Your work will never be used to train, fine-tune, or improve any artificial intelligence model
             without your explicit, informed, and affirmative consent. The AI Training Consent field on every
@@ -172,7 +204,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Scale className="w-4 h-4" />} label="4. Platform Fees and Revenue">
+        <Section icon={<Scale className="w-4 h-4" />} label="5. Platform Fees and Revenue">
           <p>
             Living Nexus takes a 10% platform fee on direct creator-to-fan transactions (tips, downloads,
             licensing). This fee funds infrastructure, development, and the provenance registry. It is
@@ -185,7 +217,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Shield className="w-4 h-4" />} label="5. Conduct and Content Standards">
+        <Section icon={<Shield className="w-4 h-4" />} label="6. Conduct and Content Standards">
           <p>
             Living Nexus is a creative provenance platform. Content that exploits, harms, or dehumanizes
             others has no place here. Works that violate applicable law — including copyright infringement,
@@ -199,7 +231,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<BookOpen className="w-4 h-4" />} label="6. Account Termination">
+        <Section icon={<BookOpen className="w-4 h-4" />} label="7. Account Termination">
           <p>
             You may delete your account at any time. Upon deletion, your public profile and works are
             removed from the platform. Your provenance records (WIDs) are retained in the registry as
@@ -212,7 +244,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Scale className="w-4 h-4" />} label="7. Limitation of Liability">
+        <Section icon={<Scale className="w-4 h-4" />} label="8. Limitation of Liability">
           <p>
             Living Nexus is provided "as is." We do not guarantee uninterrupted service, and we are not
             liable for indirect, incidental, or consequential damages arising from your use of the platform.
@@ -225,7 +257,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<Shield className="w-4 h-4" />} label="8. Governing Law">
+        <Section icon={<Shield className="w-4 h-4" />} label="9. Governing Law">
           <p>
             These terms are governed by the laws of the United States and the state in which Command
             Domains LLC is registered. Disputes that cannot be resolved informally will be submitted to
@@ -238,7 +270,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section icon={<BookOpen className="w-4 h-4" />} label="9. Changes to These Terms">
+        <Section icon={<BookOpen className="w-4 h-4" />} label="10. Changes to These Terms">
           <p>
             When these terms change materially, registered creators will be notified before the changes
             take effect. Continued use of the platform after the effective date constitutes acceptance.

@@ -2707,3 +2707,10 @@
 - [x] Modal shows on first login when tosAcceptedAt is null OR tosVersion !== CURRENT_TOS_VERSION (re-prompts on TOS updates)
 - [x] Wired into App.tsx before WelcomeModal so TOS is accepted before welcome flow
 - [x] TypeScript: 0 errors | Tests: 131/131 passing
+
+## Disclosure: Platform Dependency & TOS Limitation Notice
+- [x] Added Section 3 to TermsPage: "Platform Infrastructure & Governing Terms" with amber warning callout, 3 paragraphs covering third-party dependency, sovereign migration commitment, and creator guidance; renumbered sections 4–10
+- [x] Added Section 3 to TosAcceptanceModal with amber callout: "Current Limitation" notice about host platform TOS precedence
+- [x] Updated checkbox label to include platform infrastructure acknowledgment
+- [x] Bumped CURRENT_TOS_VERSION to "2.1" — existing users who accepted v2.0 will be re-prompted
+- [x] TypeScript: 0 errors | Tests: 131/131 passing
