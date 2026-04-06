@@ -2741,3 +2741,39 @@
 - [x] Added trpc.onboarding.requestDeletion mutation: sets dataDeletionRequestedAt + notifyOwner with creator details and timestamp
 - [x] Added RequestDeletionButton to ProfilePage DATA RIGHTS section: two-step confirm dialog before submitting
 - [x] TypeScript: 0 errors | Tests: 131/131 passing
+## Feature: Admin Data Rights Tab + Sovereign Migration DB + HAAI Certificate Fields
+- [x] Added platformSettings table to drizzle/schema.ts (key/value store for sovereign migration stage and notes)
+- [x] Seeded platformSettings with default sovereignMigrationStage=hosted
+- [x] Added listDeletionRequests(), markDeletionRequestProcessed(), getPlatformSetting(), setPlatformSetting() helpers to server/db.ts
+- [x] Added trpc.admin.listDeletionRequests query: returns all users with dataDeletionRequestedAt set, including name/email/request date/processed status
+- [x] Added trpc.admin.markDeletionRequestProcessed mutation: sets dataDeletionProcessedAt on user record
+- [x] Added trpc.admin.getSovereignMigrationStatus query: reads stage+notes from platformSettings DB table
+- [x] Added trpc.admin.setSovereignMigrationStatus mutation: updates stage+notes in platformSettings DB table
+- [x] Added trpc.onboarding.getSovereignMigrationStatus public query: reads stage from DB for /privacy page
+- [x] Built DataRightsTab component in AdminUsersPage.tsx: deletion requests table with creator name, email, request date, processed status, and Mark Processed action button
+- [x] Built SovereignMigrationAdmin panel in DataRightsTab: dropdown to change stage (Hosted/Migrating/Sovereign) + notes textarea + Save button
+- [x] Wired Data Rights tab into AdminUsersPage tab list with Trash2 icon
+- [x] Replaced hardcoded migration tracker on /privacy page with live SovereignMigrationTracker component (reads from DB via tRPC)
+- [x] Added HAAI fields to WIDPanelProps interface: haaiVisualConcept, haaiStyleLanguage, haaiInstrumentation, haaiVocalConveyance, haaiLyricalInspiration, haaiEmotionalTone, haaiDeclaredAt
+- [x] Updated buildCertificate() in WIDPanel.tsx: appends full HAAI Authorship Declaration block to downloaded .txt certificate when HAAI fields are present
+- [x] Added HAAI fields display to WIDPanel modal: shows declaration fields inline in the provenance record
+- [x] Passed HAAI fields from song data to WIDPanel in SongDetailPage.tsx
+- [x] TypeScript: 0 errors | Tests: 131/131 passing
+
+## Feature: Admin Data Rights Tab + Sovereign Migration DB + HAAI Certificate Fields
+- [x] Added platformSettings table to drizzle/schema.ts (key/value store for sovereign migration stage and notes)
+- [x] Seeded platformSettings with default sovereignMigrationStage=hosted
+- [x] Added listDeletionRequests(), markDeletionRequestProcessed(), getPlatformSetting(), setPlatformSetting() helpers to server/db.ts
+- [x] Added trpc.admin.listDeletionRequests query: returns all users with dataDeletionRequestedAt set
+- [x] Added trpc.admin.markDeletionRequestProcessed mutation: sets dataDeletionProcessedAt on user record
+- [x] Added trpc.admin.getSovereignMigrationStatus query: reads stage+notes from platformSettings DB table
+- [x] Added trpc.admin.setSovereignMigrationStatus mutation: updates stage+notes in platformSettings DB table
+- [x] Added trpc.onboarding.getSovereignMigrationStatus public query: reads stage from DB for /privacy page
+- [x] Built DataRightsTab component in AdminUsersPage.tsx with deletion requests table and Mark Processed action
+- [x] Built SovereignMigrationAdmin panel in DataRightsTab: stage dropdown + notes + Save button
+- [x] Replaced hardcoded migration tracker on /privacy page with live SovereignMigrationTracker component
+- [x] Added HAAI fields to WIDPanelProps interface and buildCertificate() output
+- [x] HAAI Authorship Declaration block appended to downloaded .txt certificate when fields are present
+- [x] Added HAAI fields display to WIDPanel modal inline provenance record
+- [x] Passed HAAI fields from song data to WIDPanel in SongDetailPage.tsx
+- [x] TypeScript: 0 errors | Tests: 131/131 passing

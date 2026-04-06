@@ -537,6 +537,13 @@ export default function SongDetailPage() {
                         registeredAt={song.createdAt}
                         coverArtUrl={song.coverArtUrl}
                         certificateUrl={song.certificateUrl}
+                        haaiVisualConcept={(song as any).haaiVisualConcept}
+                        haaiStyleLanguage={(song as any).haaiStyleLanguage}
+                        haaiInstrumentation={(song as any).haaiInstrumentation}
+                        haaiVocalConveyance={(song as any).haaiVocalConveyance}
+                        haaiLyricalInspiration={(song as any).haaiLyricalInspiration}
+                        haaiEmotionalTone={(song as any).haaiEmotionalTone}
+                        haaiDeclaredAt={(song as any).haaiDeclaredAt}
                       />
                     )}
                     {(() => {

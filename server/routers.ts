@@ -75,6 +75,8 @@ import {
   signDeclaration, getDeclarationSignature, countDeclarationSigners,
   createSongVersion, getSongVersions, getLatestVersionNumber, getSongVersionById,
   exportUserData, requestDataDeletion,
+  getPlatformSetting, setPlatformSetting,
+  listDeletionRequests, clearDeletionRequest,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -2405,8 +2407,61 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         await generateShareArtifact(input.wid);
         return { success: true, wid: input.wid };
       }),
+    // ── Data Rights: Deletion Requests ───────────────────────────────────────
+    /** List all pending data deletion requests. Admin only. */
+    getDeletionRequests: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+      return listDeletionRequests();
+    }),
+    /** Mark a deletion request as processed (clears the flag). Admin only. */
+    markDeletionProcessed: protectedProcedure
+      .input(z.object({ userId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await clearDeletionRequest(input.userId);
+        await logAdminAction({
+          adminId: ctx.user.id,
+          adminName: ctx.user.name,
+          action: "deletion_request_processed",
+          targetType: "user",
+          targetId: String(input.userId),
+        });
+        return { ok: true };
+      }),
+    // ── Sovereign Migration Status ────────────────────────────────────────────
+    /** Get the current sovereign migration stage. Admin only. */
+    getSovereignMigrationStatus: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+      const stage = await getPlatformSetting("sovereignMigrationStage");
+      const notes = await getPlatformSetting("sovereignMigrationNotes");
+      return {
+        stage: (stage ?? "hosted") as "hosted" | "migrating" | "sovereign",
+        notes: notes ?? null,
+      };
+    }),
+    /** Update the sovereign migration stage. Admin only. */
+    updateSovereignMigrationStatus: protectedProcedure
+      .input(z.object({
+        stage: z.enum(["hosted", "migrating", "sovereign"]),
+        notes: z.string().max(512).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        await setPlatformSetting("sovereignMigrationStage", input.stage, ctx.user.id);
+        if (input.notes) {
+          await setPlatformSetting("sovereignMigrationNotes", input.notes, ctx.user.id);
+        }
+        await logAdminAction({
+          adminId: ctx.user.id,
+          adminName: ctx.user.name,
+          action: "sovereign_migration_update",
+          targetType: "platform",
+          targetId: "sovereignMigrationStage",
+          details: { stage: input.stage, notes: input.notes },
+        });
+        return { ok: true, stage: input.stage };
+      }),
   }),
-
   // ── Field Notes ────────────────────────────────────────────────────────────
   fieldNotes: router({
     /** Get all field notes for the current user */
@@ -2478,6 +2533,15 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         content: `Creator ${user?.name ?? "unknown"} (ID: ${ctx.user.id}, email: ${user?.email ?? "unknown"}) has submitted a data deletion request. Per the Privacy Policy, account data must be deleted within 90 days. Requested at: ${new Date().toISOString()}.`,
       });
       return { ok: true, requestedAt: new Date() };
+    }),
+    /** Public read of the sovereign migration stage (visible on /privacy page). */
+    getSovereignMigrationStatus: publicProcedure.query(async () => {
+      const stage = await getPlatformSetting("sovereignMigrationStage");
+      const notes = await getPlatformSetting("sovereignMigrationNotes");
+      return {
+        stage: (stage ?? "hosted") as "hosted" | "migrating" | "sovereign",
+        notes: notes ?? null,
+      };
     }),
   }),
 

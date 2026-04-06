@@ -16,12 +16,13 @@ import {
   Loader2, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Users, Shield, Tag, Plus, CheckCircle2, XCircle,
   Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle, Crown, UserX, AlertTriangle,
+  Trash2, Database, Globe, Lock, ArrowRight,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
 type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus";
 type SortDir = "asc" | "desc";
-type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation";
+type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation" | "data_rights";
 
 const GOLD = "oklch(0.84 0.155 85)";
 const BG = "oklch(0.08 0.015 280)";
@@ -687,6 +688,7 @@ export default function AdminUsersPage() {
     { id: "founders", label: "Founder Control", icon: <Crown className="w-4 h-4" /> },
     { id: "media", label: "Media Generation", icon: <Video className="w-4 h-4" /> },
     { id: "moderation", label: "Covenant Moderation", icon: <Shield className="w-4 h-4" style={{ color: "oklch(0.65 0.18 30)" }} /> },
+    { id: "data_rights", label: "Data Rights", icon: <Database className="w-4 h-4" style={{ color: "oklch(0.65 0.18 200)" }} /> },
   ];
 
   return (
@@ -739,12 +741,11 @@ export default function AdminUsersPage() {
         {tab === "founders" && <FounderControlTab />}
         {tab === "media" && <MediaGenerationTab />}
         {tab === "moderation" && <ModerationQueueEmbed />}
-
+        {tab === "data_rights" && <DataRightsTab />}
       </div>
     </div>
   );
 }
-
 // ── Works / WIDs Moderation Tab ───────────────────────────────────────────────
 function WorksModerationTab() {
   const utils = trpc.useUtils();
@@ -1775,6 +1776,225 @@ function ModerationQueueEmbed() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Data Rights Tab ───────────────────────────────────────────────────────────
+function DataRightsTab() {
+  const utils = trpc.useUtils();
+
+  // ── Deletion Requests ──────────────────────────────────────────────────────
+  const { data: deletionRequests, isLoading: loadingDeletions } =
+    trpc.admin.getDeletionRequests.useQuery(undefined, { retry: false });
+
+  const markProcessed = trpc.admin.markDeletionProcessed.useMutation({
+    onSuccess: () => {
+      toast.success("Deletion request marked as processed.");
+      utils.admin.getDeletionRequests.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  // ── Sovereign Migration Status ─────────────────────────────────────────────
+  const { data: migrationData, isLoading: loadingMigration } =
+    trpc.admin.getSovereignMigrationStatus.useQuery(undefined, { retry: false });
+
+  const [newStage, setNewStage] = useState<"hosted" | "migrating" | "sovereign">("hosted");
+  const [migrationNotes, setMigrationNotes] = useState("");
+  const [stageInitialized, setStageInitialized] = useState(false);
+
+  // Sync newStage when data loads
+  if (migrationData && !stageInitialized) {
+    setNewStage(migrationData.stage);
+    setMigrationNotes(migrationData.notes ?? "");
+    setStageInitialized(true);
+  }
+
+  const updateMigration = trpc.admin.updateSovereignMigrationStatus.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Migration stage updated to: ${data.stage}`);
+      utils.admin.getSovereignMigrationStatus.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const stageColors: Record<string, string> = {
+    hosted: "oklch(0.65 0.18 50)",
+    migrating: "oklch(0.65 0.18 200)",
+    sovereign: "oklch(0.65 0.18 145)",
+  };
+
+  const stageLabels: Record<string, string> = {
+    hosted: "Hosted (Third-Party Infrastructure)",
+    migrating: "Migrating (Transition in Progress)",
+    sovereign: "Sovereign (Independent Infrastructure)",
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Section 1: Deletion Requests */}
+      <div className="rounded-xl border p-6" style={{ background: CARD, borderColor: BORDER }}>
+        <div className="flex items-center gap-3 mb-4">
+          <Trash2 className="w-5 h-5" style={{ color: RED }} />
+          <h2 className="text-lg font-bold" style={{ color: "oklch(0.95 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+            Data Deletion Requests
+          </h2>
+          {deletionRequests && deletionRequests.length > 0 && (
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: RED, border: `1px solid oklch(0.65 0.18 25 / 0.4)` }}>
+              {deletionRequests.length} pending
+            </span>
+          )}
+        </div>
+        <p className="text-sm mb-4" style={{ color: SUBTEXT }}>
+          Creators who have submitted account deletion requests. Per the Privacy Policy, data must be deleted within 90 days of the request date. Mark as processed once the deletion is complete.
+        </p>
+
+        {loadingDeletions ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: GOLD }} />
+          </div>
+        ) : !deletionRequests || deletionRequests.length === 0 ? (
+          <div className="text-center py-10 text-sm" style={{ color: MUTED }}>
+            No pending deletion requests.
+          </div>
+        ) : (
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: BORDER }}>
+            <table className="w-full">
+              <thead style={{ background: "oklch(0.10 0.015 280)", borderBottom: `1px solid ${BORDER}` }}>
+                <tr>
+                  {["Creator", "Email", "Requested On", "Days Elapsed", "Action"].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: SUBTEXT }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {deletionRequests.map((req, i) => {
+                  const requestedAt = new Date(req.dataDeletionRequestedAt);
+                  const daysElapsed = Math.floor((Date.now() - requestedAt.getTime()) / (1000 * 60 * 60 * 24));
+                  const isUrgent = daysElapsed >= 80;
+                  return (
+                    <tr key={req.id} style={{
+                      background: i % 2 === 0 ? "oklch(0.10 0.015 280)" : "oklch(0.11 0.015 280)",
+                      borderBottom: `1px solid oklch(0.16 0.02 280)`,
+                    }}>
+                      <td className="px-4 py-3 text-sm">
+                        <div className="font-medium" style={{ color: TEXT }}>
+                          {req.artistHandle ? `@${req.artistHandle}` : req.name ?? "—"}
+                        </div>
+                        {req.artistHandle && req.name && (
+                          <div className="text-xs mt-0.5" style={{ color: MUTED }}>{req.name}</div>
+                        )}
+                        <div className="text-xs font-mono mt-0.5" style={{ color: "oklch(0.5 0.02 280)" }}>ID: {req.id}</div>
+                      </td>
+                      <td className="px-4 py-3 text-sm" style={{ color: SUBTEXT }}>{req.email ?? "—"}</td>
+                      <td className="px-4 py-3 text-sm" style={{ color: SUBTEXT }}>{formatDate(requestedAt)}</td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className="font-mono font-semibold" style={{ color: isUrgent ? RED : SUBTEXT }}>
+                          {daysElapsed}d {isUrgent && "⚠ URGENT"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button
+                          size="sm"
+                          disabled={markProcessed.isPending}
+                          onClick={() => markProcessed.mutate({ userId: req.id })}
+                          style={{ background: "oklch(0.25 0.08 145)", color: GREEN, border: `1px solid oklch(0.35 0.1 145)` }}
+                        >
+                          {markProcessed.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
+                          Mark Processed
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Section 2: Sovereign Migration Status */}
+      <div className="rounded-xl border p-6" style={{ background: CARD, borderColor: BORDER }}>
+        <div className="flex items-center gap-3 mb-4">
+          <Globe className="w-5 h-5" style={{ color: "oklch(0.65 0.18 200)" }} />
+          <h2 className="text-lg font-bold" style={{ color: "oklch(0.95 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+            Sovereign Infrastructure Migration
+          </h2>
+        </div>
+        <p className="text-sm mb-6" style={{ color: SUBTEXT }}>
+          This status is displayed publicly on the <code className="text-xs px-1 py-0.5 rounded" style={{ background: "oklch(0.15 0.02 280)", color: GOLD }}>/privacy</code> page. Update it as the platform progresses toward sovereign infrastructure.
+        </p>
+
+        {/* Current Status Display */}
+        {loadingMigration ? (
+          <div className="flex items-center gap-2 mb-6">
+            <Loader2 className="w-4 h-4 animate-spin" style={{ color: GOLD }} />
+            <span className="text-sm" style={{ color: SUBTEXT }}>Loading current status…</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 mb-6 p-4 rounded-xl border" style={{ background: "oklch(0.10 0.015 280)", borderColor: BORDER }}>
+            <div className="w-3 h-3 rounded-full" style={{ background: stageColors[migrationData?.stage ?? "hosted"] }} />
+            <div>
+              <div className="text-sm font-semibold" style={{ color: TEXT }}>
+                Current Stage: {stageLabels[migrationData?.stage ?? "hosted"]}
+              </div>
+              {migrationData?.notes && (
+                <div className="text-xs mt-1" style={{ color: SUBTEXT }}>{migrationData.notes}</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Update Form */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: SUBTEXT }}>
+              New Stage
+            </label>
+            <div className="flex gap-3 flex-wrap">
+              {(["hosted", "migrating", "sovereign"] as const).map(stage => (
+                <button
+                  key={stage}
+                  onClick={() => setNewStage(stage)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border"
+                  style={newStage === stage
+                    ? { background: stageColors[stage] + "33", color: stageColors[stage], borderColor: stageColors[stage] }
+                    : { background: "transparent", color: SUBTEXT, borderColor: BORDER }}
+                >
+                  {stage === "hosted" && <Lock className="w-3.5 h-3.5" />}
+                  {stage === "migrating" && <ArrowRight className="w-3.5 h-3.5" />}
+                  {stage === "sovereign" && <Globe className="w-3.5 h-3.5" />}
+                  {stageLabels[stage]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: SUBTEXT }}>
+              Admin Notes (optional — displayed publicly)
+            </label>
+            <textarea
+              rows={2}
+              placeholder="e.g. 'DNS migration complete, database replication in progress…'"
+              value={migrationNotes}
+              onChange={e => setMigrationNotes(e.target.value)}
+              className="w-full text-sm rounded-lg px-3 py-2 resize-none border"
+              style={{ background: "oklch(0.09 0.01 280)", borderColor: BORDER, color: TEXT }}
+            />
+          </div>
+
+          <Button
+            disabled={updateMigration.isPending || (newStage === migrationData?.stage && migrationNotes === (migrationData?.notes ?? ""))}
+            onClick={() => updateMigration.mutate({ stage: newStage, notes: migrationNotes || undefined })}
+            style={{ background: GOLD, color: BG }}
+          >
+            {updateMigration.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Update Migration Status
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

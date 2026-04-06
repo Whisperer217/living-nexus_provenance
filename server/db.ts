@@ -16,6 +16,7 @@ import {
   expressionLineage,
   contentFlags, declarationSignatures,
   songVersions,
+  platformSettings,
   type InsertContentFlag, type InsertDeclarationSignature,
   type InsertSongVersion,
 } from "../drizzle/schema";
@@ -3401,5 +3402,90 @@ export async function requestDataDeletion(userId: number): Promise<void> {
   if (!db) return;
   await db.update(users)
     .set({ dataDeletionRequestedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
+// ─── Platform Settings helpers ────────────────────────────────────────────────
+
+/** Get a platform setting by key. Returns null if not found. */
+export async function getPlatformSetting(key: string): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(platformSettings)
+    .where(eq(platformSettings.key, key))
+    .limit(1);
+  return rows[0]?.value ?? null;
+}
+
+/** Set (upsert) a platform setting. */
+export async function setPlatformSetting(
+  key: string,
+  value: string,
+  updatedBy?: number,
+  description?: string,
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const existing = await db
+    .select()
+    .from(platformSettings)
+    .where(eq(platformSettings.key, key))
+    .limit(1);
+  if (existing.length > 0) {
+    await db
+      .update(platformSettings)
+      .set({ value, updatedBy: updatedBy ?? null, updatedAt: new Date() })
+      .where(eq(platformSettings.key, key));
+  } else {
+    await db.insert(platformSettings).values({
+      key,
+      value,
+      description: description ?? null,
+      updatedBy: updatedBy ?? null,
+    });
+  }
+}
+
+// ─── Admin: Deletion Requests helpers ─────────────────────────────────────────
+
+/** List all users who have requested data deletion, ordered by request date. */
+export async function listDeletionRequests(): Promise<Array<{
+  id: number;
+  name: string | null;
+  email: string | null;
+  artistHandle: string | null;
+  dataDeletionRequestedAt: Date;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      artistHandle: users.artistHandle,
+      dataDeletionRequestedAt: users.dataDeletionRequestedAt,
+    })
+    .from(users)
+    .where(isNotNull(users.dataDeletionRequestedAt))
+    .orderBy(users.dataDeletionRequestedAt);
+  return rows.filter((r: typeof rows[0]) => r.dataDeletionRequestedAt !== null) as Array<{
+    id: number;
+    name: string | null;
+    email: string | null;
+    artistHandle: string | null;
+    dataDeletionRequestedAt: Date;
+  }>;
+}
+
+/** Clear the deletion request flag for a user (mark as processed). */
+export async function clearDeletionRequest(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(users)
+    .set({ dataDeletionRequestedAt: null })
     .where(eq(users.id, userId));
 }

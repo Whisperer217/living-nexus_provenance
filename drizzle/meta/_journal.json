@@ -330,6 +330,13 @@
       "when": 1775450764233,
       "tag": "0046_lowly_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "5",
+      "when": 1775452327012,
+      "tag": "0047_wooden_maverick",
+      "breakpoints": true
     }
   ]
 }

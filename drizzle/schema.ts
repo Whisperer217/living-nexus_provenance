@@ -974,3 +974,17 @@ export const discordWebhooks = mysqlTable("discordWebhooks", {
 });
 export type DiscordWebhook = typeof discordWebhooks.$inferSelect;
 export type InsertDiscordWebhook = typeof discordWebhooks.$inferInsert;
+
+// ─── Platform Settings ────────────────────────────────────────────────────────
+// Key-value store for admin-configurable platform settings.
+// Used for sovereign migration status, feature flags, and other runtime config.
+export const platformSettings = mysqlTable("platformSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  key: varchar("key", { length: 128 }).notNull(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedBy: int("updatedBy"),               // userId of last admin to update
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+export type PlatformSetting = typeof platformSettings.$inferSelect;
+export type InsertPlatformSetting = typeof platformSettings.$inferInsert;

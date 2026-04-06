@@ -9,6 +9,14 @@
  *     registeredAt={new Date("2026-03-01")}
  *     coverArtUrl="https://..."
  *     certificateUrl="https://..."   // optional
+ *     // HAAI fields (optional — only when aiDisclosure = "human_authored_ai_instrument")
+ *     haaiVisualConcept="..."
+ *     haaiStyleLanguage="..."
+ *     haaiInstrumentation="..."
+ *     haaiVocalConveyance="..."
+ *     haaiLyricalInspiration="..."
+ *     haaiEmotionalTone="..."
+ *     haaiDeclaredAt={new Date("2026-03-01")}
  *   />
  *
  * The badge is inline and clickable. On click it opens a Dialog with the
@@ -48,6 +56,14 @@ interface WIDPanelProps {
   /** If true, renders only the badge text (no icon), useful in compact rows */
   compact?: boolean;
   className?: string;
+  // HAAI Declaration fields — only populated when aiDisclosure = "human_authored_ai_instrument"
+  haaiVisualConcept?: string | null;
+  haaiStyleLanguage?: string | null;
+  haaiInstrumentation?: string | null;
+  haaiVocalConveyance?: string | null;
+  haaiLyricalInspiration?: string | null;
+  haaiEmotionalTone?: string | null;
+  haaiDeclaredAt?: Date | string | number | null;
 }
 
 function formatDate(d: Date | string | number | null | undefined): string {
@@ -62,6 +78,15 @@ function formatDate(d: Date | string | number | null | undefined): string {
 }
 
 function buildCertificate(props: WIDPanelProps): string {
+  const hasHaai = !!(
+    props.haaiVisualConcept ||
+    props.haaiStyleLanguage ||
+    props.haaiInstrumentation ||
+    props.haaiVocalConveyance ||
+    props.haaiLyricalInspiration ||
+    props.haaiEmotionalTone
+  );
+
   const lines = [
     "╔══════════════════════════════════════════════════╗",
     "║        LIVING NEXUS — WITNESS ID CERTIFICATE      ║",
@@ -79,9 +104,59 @@ function buildCertificate(props: WIDPanelProps): string {
     "work above. The Witness ID is immutable and cannot",
     "be transferred, revoked, or reassigned.",
     "──────────────────────────────────────────────────",
-    "",
-    `Generated  : ${new Date().toISOString()}`,
   ];
+
+  if (hasHaai) {
+    lines.push(
+      "",
+      "╔══════════════════════════════════════════════════╗",
+      "║      HAAI AUTHORSHIP DECLARATION                  ║",
+      "║  Human-Authored via AI Instrument (HAAI)          ║",
+      "╚══════════════════════════════════════════════════╝",
+      "",
+      "This work was authored by a human creator using AI",
+      "as an instrument. The following declaration fields",
+      "record the creator's original intent and authorship",
+      "at the time of registration.",
+      ""
+    );
+
+    if (props.haaiVisualConcept) {
+      lines.push(`Visual Concept      : ${props.haaiVisualConcept}`);
+    }
+    if (props.haaiStyleLanguage) {
+      lines.push(`Style Language      : ${props.haaiStyleLanguage}`);
+    }
+    if (props.haaiInstrumentation) {
+      lines.push(`Instrumentation     : ${props.haaiInstrumentation}`);
+    }
+    if (props.haaiVocalConveyance) {
+      lines.push(`Vocal Conveyance    : ${props.haaiVocalConveyance}`);
+    }
+    if (props.haaiLyricalInspiration) {
+      lines.push(`Lyrical Inspiration : ${props.haaiLyricalInspiration}`);
+    }
+    if (props.haaiEmotionalTone) {
+      lines.push(`Emotional Tone      : ${props.haaiEmotionalTone}`);
+    }
+    if (props.haaiDeclaredAt) {
+      lines.push(`Declaration Sealed  : ${formatDate(props.haaiDeclaredAt)}`);
+    }
+
+    lines.push(
+      "",
+      "──────────────────────────────────────────────────",
+      "HAAI declaration is part of the immutable authorship",
+      "record. It cannot be altered after registration.",
+      "──────────────────────────────────────────────────"
+    );
+  }
+
+  lines.push(
+    "",
+    `Generated  : ${new Date().toISOString()}`
+  );
+
   return lines.join("\n");
 }
 
@@ -94,6 +169,13 @@ export function WIDPanel({
   certificateUrl,
   compact = false,
   className = "",
+  haaiVisualConcept,
+  haaiStyleLanguage,
+  haaiInstrumentation,
+  haaiVocalConveyance,
+  haaiLyricalInspiration,
+  haaiEmotionalTone,
+  haaiDeclaredAt,
 }: WIDPanelProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -131,6 +213,13 @@ export function WIDPanel({
       songTitle,
       creatorName,
       registeredAt,
+      haaiVisualConcept,
+      haaiStyleLanguage,
+      haaiInstrumentation,
+      haaiVocalConveyance,
+      haaiLyricalInspiration,
+      haaiEmotionalTone,
+      haaiDeclaredAt,
     });
     const blob = new Blob([cert], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -271,6 +360,43 @@ export function WIDPanel({
                 <ExternalLink className="w-3 h-3 flex-shrink-0" />
               </a>
             </div>
+
+            {/* HAAI Declaration fields — shown when present */}
+            {(haaiVisualConcept || haaiStyleLanguage || haaiInstrumentation ||
+              haaiVocalConveyance || haaiLyricalInspiration || haaiEmotionalTone) && (
+              <>
+                <div style={{ borderTop: "1px solid oklch(0.65 0.2 300 / 0.1)" }} />
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "oklch(0.75 0.18 85)" }}>
+                    HAAI Authorship Declaration
+                  </p>
+                  <div className="space-y-1.5 font-sans">
+                    {[
+                      { label: "Visual Concept",      value: haaiVisualConcept },
+                      { label: "Style Language",      value: haaiStyleLanguage },
+                      { label: "Instrumentation",     value: haaiInstrumentation },
+                      { label: "Vocal Conveyance",    value: haaiVocalConveyance },
+                      { label: "Lyrical Inspiration", value: haaiLyricalInspiration },
+                      { label: "Emotional Tone",      value: haaiEmotionalTone },
+                    ].filter(f => f.value).map(f => (
+                      <div key={f.label}>
+                        <span className="text-[9px] uppercase tracking-wider" style={{ color: "oklch(0.55 0.04 280)" }}>
+                          {f.label}
+                        </span>
+                        <p className="text-[11px] leading-snug mt-0.5" style={{ color: "oklch(0.82 0.04 280)" }}>
+                          {f.value}
+                        </p>
+                      </div>
+                    ))}
+                    {haaiDeclaredAt && (
+                      <p className="text-[9px] mt-1" style={{ color: "oklch(0.45 0.03 280)" }}>
+                        Declaration sealed {formatDate(haaiDeclaredAt)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Status badge */}

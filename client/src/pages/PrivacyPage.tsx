@@ -1,5 +1,6 @@
-import { ChevronLeft, Shield, Database, Server, Lock, Eye, UserCheck, AlertTriangle, Globe, Trash2, Mail, FileText } from "lucide-react";
+import { ChevronLeft, Shield, Database, Server, Lock, Eye, UserCheck, AlertTriangle, Globe, Trash2, Mail, FileText, Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
 
 // ── Section wrapper ─────────────────────────────────────────────────────────
 function Section({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
@@ -62,6 +63,82 @@ function ProcessorRow({ name, purpose, dataShared, policy }: { name: string; pur
   );
 }
 
+// ── Sovereign Migration Status Tracker (live from DB) ───────────────────────
+function SovereignMigrationTracker() {
+  const { data, isLoading } = trpc.onboarding.getSovereignMigrationStatus.useQuery(undefined, {
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const stage = data?.stage ?? "hosted";
+  const notes = data?.notes;
+
+  const stageIndex: Record<string, number> = { hosted: 0, migrating: 2, sovereign: 3 };
+  const currentIndex = stageIndex[stage] ?? 0;
+
+  const steps = [
+    { label: "Hosted" },
+    { label: "Planning" },
+    { label: "Migrating" },
+    { label: "Sovereign" },
+  ];
+
+  const stageBadgeStyle: Record<string, React.CSSProperties> = {
+    hosted:    { background: "oklch(0.35 0.08 75 / 0.30)",  color: "oklch(0.88 0.12 75)",  border: "1px solid oklch(0.75 0.15 75 / 0.30)" },
+    migrating: { background: "oklch(0.25 0.08 200 / 0.30)", color: "oklch(0.78 0.12 200)", border: "1px solid oklch(0.65 0.15 200 / 0.30)" },
+    sovereign: { background: "oklch(0.25 0.08 145 / 0.30)", color: "oklch(0.80 0.12 145)", border: "1px solid oklch(0.65 0.15 145 / 0.30)" },
+  };
+
+  const stageDescriptions: Record<string, string> = {
+    hosted:    "Third-party hosted infrastructure (Manus platform). Planning phase begins when sovereign server infrastructure is procured.",
+    migrating: "Migration in progress. Data is being transitioned to independently operated infrastructure.",
+    sovereign: "Sovereign infrastructure active. Living Nexus operates on independently controlled servers.",
+  };
+
+  return (
+    <div className="mt-5 rounded-xl p-4" style={{ background: "oklch(0.08 0.02 275)", border: "1px solid oklch(0.75 0.18 85 / 0.20)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.75 0.18 85)" }}>Sovereign Migration Status</p>
+        {isLoading ? (
+          <Loader2 className="w-3 h-3 animate-spin" style={{ color: "oklch(0.55 0.04 280)" }} />
+        ) : (
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase" style={stageBadgeStyle[stage] ?? stageBadgeStyle.hosted}>
+            {stage}
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-0 mb-3">
+        {steps.map((step, i, arr) => {
+          const done = i <= currentIndex;
+          const current = i === currentIndex;
+          return (
+            <div key={step.label} className="flex items-center" style={{ flex: i < arr.length - 1 ? "1" : "none" }}>
+              <div className="flex flex-col items-center">
+                <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold"
+                  style={{
+                    background: done ? "oklch(0.75 0.18 85)" : "oklch(0.15 0.02 275)",
+                    border: current ? "2px solid oklch(0.88 0.12 75)" : done ? "none" : "1px solid oklch(0.30 0.04 280)",
+                    color: done ? "oklch(0.08 0.02 275)" : "oklch(0.40 0.04 280)",
+                  }}>
+                  {done ? "✓" : i + 1}
+                </div>
+                <span className="text-[9px] mt-1 whitespace-nowrap" style={{ color: done ? "oklch(0.75 0.18 85)" : "oklch(0.40 0.04 280)" }}>{step.label}</span>
+              </div>
+              {i < arr.length - 1 && (
+                <div className="flex-1 h-px mx-1 mb-3" style={{ background: done ? "oklch(0.75 0.18 85 / 0.40)" : "oklch(0.25 0.02 280)" }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[10px] leading-relaxed" style={{ color: "oklch(0.50 0.04 280)" }}>
+        {stageDescriptions[stage]}
+        {notes && <><br /><span className="italic">{notes}</span></>}
+      </p>
+    </div>
+  );
+}
+
 // ── Main page ────────────────────────────────────────────────────────────────
 export default function PrivacyPage() {
   return (
@@ -117,43 +194,8 @@ export default function PrivacyPage() {
           transparently rather than obscuring it in legal boilerplate.
         </Callout>
 
-        {/* ── Sovereign Migration Status Tracker ─────────────────────────── */}
-        <div className="mt-5 rounded-xl p-4" style={{ background: "oklch(0.08 0.02 275)", border: "1px solid oklch(0.75 0.18 85 / 0.20)" }}>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.75 0.18 85)" }}>Sovereign Migration Status</p>
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "oklch(0.35 0.08 75 / 0.30)", color: "oklch(0.88 0.12 75)", border: "1px solid oklch(0.75 0.15 75 / 0.30)" }}>HOSTED</span>
-          </div>
-          <div className="flex items-center gap-0 mb-3">
-            {[
-              { label: "Hosted",    done: true,  current: true  },
-              { label: "Planning",  done: false, current: false },
-              { label: "Migrating", done: false, current: false },
-              { label: "Sovereign", done: false, current: false },
-            ].map((step, i, arr) => (
-              <div key={step.label} className="flex items-center" style={{ flex: i < arr.length - 1 ? "1" : "none" }}>
-                <div className="flex flex-col items-center">
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold"
-                    style={{
-                      background: step.done ? "oklch(0.75 0.18 85)" : "oklch(0.15 0.02 275)",
-                      border: step.current ? "2px solid oklch(0.88 0.12 75)" : step.done ? "none" : "1px solid oklch(0.30 0.04 280)",
-                      color: step.done ? "oklch(0.08 0.02 275)" : "oklch(0.40 0.04 280)",
-                    }}>
-                    {step.done ? "✓" : i + 1}
-                  </div>
-                  <span className="text-[9px] mt-1 whitespace-nowrap" style={{ color: step.done ? "oklch(0.75 0.18 85)" : "oklch(0.40 0.04 280)" }}>{step.label}</span>
-                </div>
-                {i < arr.length - 1 && (
-                  <div className="flex-1 h-px mx-1 mb-3" style={{ background: step.done ? "oklch(0.75 0.18 85 / 0.40)" : "oklch(0.25 0.02 280)" }} />
-                )}
-              </div>
-            ))}
-          </div>
-          <p className="text-[10px] leading-relaxed" style={{ color: "oklch(0.50 0.04 280)" }}>
-            Current: Third-party hosted infrastructure (Manus platform). Planning phase begins when sovereign server infrastructure is procured.
-            This tracker is updated manually as milestones are reached. Last updated: April 2026.
-          </p>
-        </div>
-
+         {/* ── Sovereign Migration Status Tracker (live from DB) ── */}
+        <SovereignMigrationTracker />
         <div className="mt-5 pt-4 flex flex-wrap gap-4" style={{ borderTop: "1px solid oklch(0.75 0.18 85 / 0.12)" }}>
           <Link href="/terms">
             <span className="inline-flex items-center gap-1.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
@@ -171,7 +213,6 @@ export default function PrivacyPage() {
           </Link>
         </div>
       </div>
-
       {/* Section 1 — Data We Collect */}
       <Section icon={<Database className="w-4 h-4" />} label="1. Data We Collect">
         <p>
