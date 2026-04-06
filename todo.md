@@ -2922,3 +2922,16 @@
 - [x] Raised saturate() from 0.88 to 1.0 so gold accent text stays vivid
 - [x] Kept brightness(0.94) and contrast(0.90) for the dimming effect
 - [x] Reduced sepia to 0.03 and hue-rotate to 1deg for minimal tint
+
+## Phase 61: WID Verify + OG Meta + Project Title Color
+- [x] Fix WID verify to search projects table in addition to works/songs
+- [x] Fix OG metadata null-check in server/og.ts (TypeError on project page)
+- [x] Fix project title color faded in Lights On mode
+
+## Phase 62: Lights On Mode — Root Cause Fix (Steel Overlay)
+- [x] Removed h1-h6 color override ([data-theme="warm"] h1-h6 { color: #2C1A0E }) — was forcing all headings to dark espresso, making project/song titles invisible
+- [x] Stripped warm theme CSS variable block — removed cream-clay background/foreground overrides that were flipping page background to #F2EDE8
+- [x] Warm theme [data-theme="warm"] block now intentionally empty — dark base tokens remain active
+- [x] Steel overlay approach confirmed: only TopBar + MainLayout get the rgba tint via React inline styles
+- [x] OG metadata errors confirmed as pre-restart artifacts — no new errors since server restart
+- [x] WID verification for PROJ-* WIDs confirmed working in routers.ts

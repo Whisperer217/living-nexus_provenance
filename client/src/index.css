@@ -198,58 +198,17 @@
   --sidebar-ring:               var(--gold);
 }
 
-/* ── WARM THEME (Onyx Coffee — Cream-Clay / Forest Olive) ── */
+/* ── WARM THEME (Steel Overlay — Lights On) ──
+   The steel tint is applied via React inline styles on TopBar + MainLayout
+   (rgba rgba(55,68,85,0.72) nav, rgba(42,55,70,0.80) drawer).
+   The dark base palette is intentionally preserved here — no CSS variable
+   overrides needed. Only the body filter and scrollbar tint are applied.
+   This prevents the page background / card surfaces / text from flipping
+   to cream-clay, which would make white text invisible.
+*/
 [data-theme="warm"] {
-  /* Surface depth steps — cream-clay */
-  --void:   #F2EDE8;
-  --void-2: #EDE4D8;
-  --void-3: #E5D8C8;
-  --void-4: #DACCB8;
-
-  /* Accent tokens — cathedral gold + forest olive */
-  --gold:     #B8963E;
-  --gold-dim: #8A6E2A;
-  --teal:     #4A5C3A;
-  --teal-dim: #3A4A2C;
-
-  /* Semantic tokens */
-  --background:          #F2EDE8;
-  --foreground:          #2C1A0E;
-  --card:                #E5D8C8;
-  --card-foreground:     #2C1A0E;
-  --popover:             #EDE4D8;
-  --popover-foreground:  #2C1A0E;
-  --primary:             #4A5C3A;
-  --primary-foreground:  #F2EDE8;
-  --secondary:           #DACCB8;
-  --secondary-foreground:#2C1A0E;
-  --muted:               #E5D8C8;
-  --muted-foreground:    #6B4C35;
-  --accent:              #4A5C3A;
-  --accent-foreground:   #F2EDE8;
-  --border:              rgba(44,26,14,0.18);
-  --input:               rgba(44,26,14,0.14);
-  --ring:                #B8963E;
-
-  /* Living Nexus custom tokens */
-  --lnx-bg:         #F2EDE8;
-  --lnx-bg-2:       #EDE4D8;
-  --lnx-bg-3:       #E5D8C8;
-  --lnx-text:       #2C1A0E;
-  --lnx-text-muted: #6B4C35;
-  --lnx-gold:       #B8963E;
-  --lnx-gold-glow:  #D4A843;
-  --lnx-gold-muted: #8A6E2A;
-
-  /* Sidebar */
-  --sidebar:                    #EDE4D8;
-  --sidebar-foreground:         #2C1A0E;
-  --sidebar-primary:            #4A5C3A;
-  --sidebar-primary-foreground: #F2EDE8;
-  --sidebar-accent:             #DACCB8;
-  --sidebar-accent-foreground:  #2C1A0E;
-  --sidebar-border:             rgba(44,26,14,0.14);
-  --sidebar-ring:               #B8963E;
+  /* Intentionally empty — dark base tokens remain active.
+     Visual tint is handled by backdrop-filter overlays in React components. */
 }
 
 /* Warm theme body nudge — slight dim + contrast reduction, full saturation preserved so gold stays vivid */
@@ -258,15 +217,7 @@
   transition: filter 0.45s ease;
 }
 
-/* Warm theme headings — espresso */
-[data-theme="warm"] h1,
-[data-theme="warm"] h2,
-[data-theme="warm"] h3,
-[data-theme="warm"] h4,
-[data-theme="warm"] h5,
-[data-theme="warm"] h6 {
-  color: #2C1A0E;
-}
+/* Warm theme headings — inherit from dark base (no color override; steel overlay handles the tint) */
 
 /* Warm theme scrollbar — olive tint */
 [data-theme="warm"] ::-webkit-scrollbar-thumb {

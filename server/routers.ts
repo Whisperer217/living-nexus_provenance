@@ -77,7 +77,7 @@ import {
   exportUserData, requestDataDeletion,
   getPlatformSetting, setPlatformSetting,
   listDeletionRequests, clearDeletionRequest,
-  createProject, getProjectBySlug, getProjectById, getProjectsByUser, updateProject,
+  createProject, getProjectBySlug, getProjectById, getProjectsByUser, getProjectByWid, updateProject,
   getProjectUpdates, addProjectUpdate, getProjectDonations, recordProjectDonation, listActiveProjects,
   getProjectBlocks, saveProjectBlocks, getProjectsByCreator,
   followProject, unfollowProject, isFollowingProject, getProjectFollowerCount, getProjectFollowerUserIds,
@@ -517,6 +517,40 @@ export const appRouter = router({
           contentType: "testimony" as any,
           testimonyContent: testimony.content,
           testimonyLinkedWorks: (testimony.linkedWorks as string[] | null) ?? [],
+        };
+      }
+      // Handle PROJ-* project WIDs
+      if (input.witnessId.startsWith("PROJ-")) {
+        const project = await getProjectByWid(input.witnessId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND", message: "No record found for this Witness ID" });
+        const creator = await getUserById((project as any).userId);
+        const creatorName = creator?.artistHandle || creator?.name || "Unknown Creator";
+        return {
+          witnessId: input.witnessId,
+          title: project.title,
+          artistName: creatorName,
+          artistHandle: creator?.artistHandle ?? null,
+          profilePhotoUrl: creator?.profilePhotoUrl ?? null,
+          songId: null,
+          registeredAt: project.createdAt,
+          fileHash: null,
+          lyricsHash: null,
+          isLyricsOnly: false,
+          ecdsaSignature: null,
+          ecdsaPublicKey: null,
+          harmonicSignature: null,
+          coverArtUrl: project.bannerUrl ?? null,
+          aiConsent: false,
+          genre: null,
+          isrc: null,
+          nameAtWitnessing: creatorName,
+          nameHistory: [],
+          lyricsWid: null,
+          lyricsFileName: null,
+          lyricsAddedAt: null,
+          contentType: "project" as any,
+          testimonyContent: project.tagline ?? null,
+          testimonyLinkedWorks: [],
         };
       }
       const result = await getSongByWitnessId(input.witnessId);

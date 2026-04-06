@@ -3537,6 +3537,13 @@ export async function getProjectById(id: number): Promise<Project | undefined> {
   return rows.length > 0 ? rows[0] : undefined;
 }
 
+export async function getProjectByWid(wid: string): Promise<Project | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(projects).where(eq(projects.linkedWitnessId, wid)).limit(1);
+  return rows.length > 0 ? rows[0] : undefined;
+}
+
 export async function getProjectsByUser(userId: number): Promise<Project[]> {
   const db = await getDb();
   if (!db) return [];

@@ -575,13 +575,12 @@ export function registerOgRoutes(app: Express) {
     if (!slug) return next();
 
     try {
-      const data = await getProjectBySlug(slug);
-      if (!data) return next();
-      const { project, creator } = data as any;
+      const project = await getProjectBySlug(slug);
+      if (!project) return next();
 
       const creatorName =
-        creator?.artistHandle?.trim() ||
-        creator?.name?.trim() ||
+        (project as any).creatorHandle?.trim() ||
+        (project as any).creatorName?.trim() ||
         "Unknown Creator";
 
       const ogTitle = `${project.title} — ${creatorName} | Living Nexus Project`;
