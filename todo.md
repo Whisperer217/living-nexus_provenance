@@ -2899,3 +2899,9 @@
 - [x] Adjust warm text colors to light amber (rgba(255,230,160,0.92)) readable against dark blended surface
 - [x] Desktop TopBar mega-menu warm tint uses same overlay approach
 - [x] Mobile sidebar warm tint uses same overlay approach
+
+## Phase 57: Steel Tint Rework
+- [x] Replace amber rgba(160,110,40,0.55) nav tint with steel rgba(75,90,108,0.38) in TopBar
+- [x] Replace amber rgba(140,95,30,0.50) drawer tint with steel rgba(60,75,92,0.35) in TopBar
+- [x] Update text colors to cool silver-white rgba(210,220,235,0.88) for steel theme
+- [x] Apply same steel tint to MainLayout mobile header/sidebar

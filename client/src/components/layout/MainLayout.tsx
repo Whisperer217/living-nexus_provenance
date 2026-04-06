@@ -95,13 +95,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const isWarm = lightsMode === "on";
 
   // Warm theme tokens for mobile chrome only
-  // Warm mode: translucent amber tint over dark base — dark charcoal shows through
-  const MOBILE_HEADER_BG = isWarm ? "rgba(160,110,40,0.55)" : "oklch(0.125 0.028 52)";
-  const MOBILE_HEADER_BORDER = isWarm ? "rgba(200,160,70,0.32)" : "oklch(0.30 0.04 60 / 0.35)";
-  const MOBILE_SIDEBAR_BG = isWarm ? "rgba(140,95,30,0.50)" : "oklch(0.125 0.028 52)";
-  const MOBILE_SIDEBAR_BORDER = isWarm ? "rgba(200,160,70,0.28)" : "oklch(0.30 0.04 60 / 0.35)";
-  const MOBILE_TEXT = isWarm ? "rgba(255,230,160,0.92)" : undefined;
-  const MOBILE_TEXT_MUTED = isWarm ? "rgba(220,185,110,0.68)" : undefined;
+  // Warm mode: cool steel blue-grey tint over dark base — gunmetal feel, low opacity
+  const MOBILE_HEADER_BG = isWarm ? "rgba(75,90,108,0.38)" : "oklch(0.125 0.028 52)";
+  const MOBILE_HEADER_BORDER = isWarm ? "rgba(120,145,170,0.28)" : "oklch(0.30 0.04 60 / 0.35)";
+  const MOBILE_SIDEBAR_BG = isWarm ? "rgba(60,75,92,0.35)" : "oklch(0.125 0.028 52)";
+  const MOBILE_SIDEBAR_BORDER = isWarm ? "rgba(120,145,170,0.22)" : "oklch(0.30 0.04 60 / 0.35)";
+  const MOBILE_TEXT = isWarm ? "rgba(210,220,235,0.88)" : undefined;
+  const MOBILE_TEXT_MUTED = isWarm ? "rgba(160,175,195,0.65)" : undefined;
 
   const openMobileMenu = useCallback(() => { setQrOpen(false); setMobileMenuOpen(true); }, []);
   const toggleQr = useCallback(() => {
@@ -131,11 +131,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const staticBadge = !pulseBadge && !jukeboxBadge && !archiveBadge && isLive ? item.badge : null;
     const labelColor = item.goldLabel ? (active ? "#E8A830" : "oklch(0.72 0.13 72 / 0.7)") : undefined;
 
-    const warmActiveBg = "rgba(200,160,70,0.25)";
-    const warmHoverBg = "rgba(200,160,70,0.15)";
-    const warmActiveText = "#F0D070";
-    const warmMutedText = "rgba(220,185,110,0.68)";
-    const warmBodyText = "rgba(255,235,170,0.95)";
+    const warmActiveBg = "rgba(120,145,170,0.22)";
+    const warmHoverBg = "rgba(120,145,170,0.15)";
+    const warmActiveText = "rgba(190,210,240,0.95)";
+    const warmMutedText = "rgba(160,175,195,0.65)";
+    const warmBodyText = "rgba(210,225,245,0.95)";
 
     return (
       <button
