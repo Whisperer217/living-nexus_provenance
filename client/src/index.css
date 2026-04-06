@@ -146,11 +146,11 @@
    Activated by .lights-on on <html>, controlled by the platform owner.
 ================================================================= */
 .lights-on {
-  /* Surface tokens — clay-rose depth steps */
-  --void:   #C4876A;
-  --void-2: #B87A5E;
-  --void-3: #A86D52;
-  --void-4: #986046;
+  /* Surface tokens — cream-clay depth steps */
+  --void:   #E8C4A8;
+  --void-2: #DFB898;
+  --void-3: #D6AC8A;
+  --void-4: #CCAA82;
 
   /* Accent tokens — forest olive */
   --gold:     #B8963E;
@@ -159,18 +159,18 @@
   --teal-dim: #3A4A2C;
 
   /* Semantic background / foreground */
-  --background:          #C4876A;
-  --foreground:          #F2EDE8;
-  --card:                #A86D52;
-  --card-foreground:     #F2EDE8;
-  --popover:             #B87A5E;
-  --popover-foreground:  #F2EDE8;
+  --background:          #E8C4A8;
+  --foreground:          #2C1A0E;
+  --card:                #D6AC8A;
+  --card-foreground:     #2C1A0E;
+  --popover:             #DFB898;
+  --popover-foreground:  #2C1A0E;
   --primary:             #4A5C3A;
   --primary-foreground:  #F2EDE8;
-  --secondary:           #986046;
-  --secondary-foreground:#F2EDE8;
-  --muted:               #A86D52;
-  --muted-foreground:    #D4BFB0;
+  --secondary:           #CCAA82;
+  --secondary-foreground:#2C1A0E;
+  --muted:               #D6AC8A;
+  --muted-foreground:    #6B4C35;
   --accent:              #4A5C3A;
   --accent-foreground:   #F2EDE8;
   --border:              rgba(242,237,232,0.22);
@@ -178,40 +178,40 @@
   --ring:                #B8963E;
 
   /* Living Nexus custom tokens */
-  --lnx-bg:         #C4876A;
-  --lnx-bg-2:       #B87A5E;
-  --lnx-bg-3:       #A86D52;
-  --lnx-text:       #F2EDE8;
-  --lnx-text-muted: #D4BFB0;
+  --lnx-bg:         #E8C4A8;
+  --lnx-bg-2:       #DFB898;
+  --lnx-bg-3:       #D6AC8A;
+  --lnx-text:       #2C1A0E;
+  --lnx-text-muted: #6B4C35;
   --lnx-gold:       #B8963E;
   --lnx-gold-glow:  #D4A843;
   --lnx-gold-muted: #8A6E2A;
 
   /* Sidebar */
-  --sidebar:                    #B87A5E;
-  --sidebar-foreground:         #F2EDE8;
+  --sidebar:                    #DFB898;
+  --sidebar-foreground:         #2C1A0E;
   --sidebar-primary:            #4A5C3A;
   --sidebar-primary-foreground: #F2EDE8;
-  --sidebar-accent:             #986046;
-  --sidebar-accent-foreground:  #F2EDE8;
+  --sidebar-accent:             #CCAA82;
+  --sidebar-accent-foreground:  #2C1A0E;
   --sidebar-border:             rgba(242,237,232,0.18);
   --sidebar-ring:               #B8963E;
 }
 
-/* Nudge hardcoded inline oklch values toward the clay-rose palette */
+/* Nudge hardcoded inline oklch values toward the cream-clay palette */
 .lights-on body {
-  filter: sepia(0.35) brightness(0.92) contrast(0.95) saturate(1.10) hue-rotate(-8deg);
+  filter: sepia(0.18) brightness(1.22) contrast(0.90) saturate(0.82) hue-rotate(4deg);
   transition: filter 0.45s ease;
 }
 
-/* Headings: warm linen in lights-on */
+/* Headings: espresso on cream-clay in lights-on */
 .lights-on h1,
 .lights-on h2,
 .lights-on h3,
 .lights-on h4,
 .lights-on h5,
 .lights-on h6 {
-  color: #F2EDE8;
+  color: #2C1A0E;
 }
 
 /* Scrollbar olive in lights-on */

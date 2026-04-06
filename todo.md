@@ -2859,3 +2859,8 @@
 - [x] Text: warm linen #F2EDE8 (primary), muted linen #D4BFB0 (secondary)
 - [x] Accent/borders: deep forest olive #4A5C3A
 - [x] Gold: warm amber #B8963E (retained)
+
+## Phase 51: Lights On Surface Palette Revision
+- [x] Shift four surface vars lighter: #C4876A→#E8C4A8, #B87A5E→#DFB898, #A86D52→#D6AC8A, #986046→#CCAA82
+- [x] Foreground updated to espresso #2C1A0E for legibility on light surfaces
+- [x] All other tokens unchanged (olive border/CTA, cathedral gold)
