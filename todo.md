@@ -2959,3 +2959,13 @@
 - [x] Add Restore to Draft button for archived projects in MyProjectsPage
 - [ ] Add mobile bottom nav steel tint in Lights On mode
 - [ ] Add Copy Link / Share button on Verify page result card
+## Phase 70: Image Block — Adjustable Size & Focal Point
+- [x] Add imageSize ("small"/"medium"/"large"/"full") to Block interface in ProjectPage.tsx
+- [x] Add imageFocalX / imageFocalY (0-100 percent) to Block interface
+- [x] Implement FocalPointDragger component (drag-to-set crosshair overlay, mouse + touch)
+- [x] Update BlockView to render image with correct sizeClass, maxH, and objectPosition
+- [x] Update BlockEditor to show focal point dragger overlay and size toggle buttons
+- [x] Add imageSize / imageFocalX / imageFocalY to saveBlocks Zod schema in routers.ts
+- [x] Add imageSize / imageFocalX / imageFocalY to saveProjectBlocks function signature in db.ts
+- [x] Verify DB schema already has imageSize enum + imageFocalX/Y int columns
+- [x] 137/137 tests passing, 0 TypeScript errors

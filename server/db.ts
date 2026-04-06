@@ -3663,6 +3663,9 @@ export async function saveProjectBlocks(projectId: number, blocks: Array<{
   imageUrl?: string;
   imageKey?: string;
   imageCaption?: string | null;
+  imageSize?: "small" | "medium" | "large" | "full";
+  imageFocalX?: number;
+  imageFocalY?: number;
   videoUrl?: string;
   videoType?: "youtube" | "vimeo" | "s3" | "none";
   videoCaption?: string | null;
@@ -3681,6 +3684,9 @@ export async function saveProjectBlocks(projectId: number, blocks: Array<{
       imageUrl: b.imageUrl ?? null,
       imageKey: b.imageKey ?? null,
       imageCaption: b.imageCaption ?? null,
+      imageSize: b.imageSize ?? null,
+      imageFocalX: b.imageFocalX ?? null,
+      imageFocalY: b.imageFocalY ?? null,
       videoUrl: b.videoUrl ?? null,
       videoType: (b.videoType ?? "none") as any,
       videoCaption: b.videoCaption ?? null,

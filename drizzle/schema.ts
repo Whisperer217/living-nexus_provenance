@@ -1067,6 +1067,9 @@ export const projectBlocks = mysqlTable("projectBlocks", {
   imageUrl: text("imageUrl"),         // S3 CDN url for image blocks
   imageKey: varchar("imageKey", { length: 512 }),
   imageCaption: varchar("imageCaption", { length: 512 }),
+  imageSize: mysqlEnum("imageSize", ["small", "medium", "large", "full"]).default("full"),
+  imageFocalX: int("imageFocalX").default(50), // 0-100 percent
+  imageFocalY: int("imageFocalY").default(50), // 0-100 percent
   videoUrl: text("videoUrl"),         // YouTube/Vimeo/S3 url for video blocks
   videoType: mysqlEnum("videoType", ["youtube", "vimeo", "s3", "none"]).default("none"),
   videoCaption: varchar("videoCaption", { length: 512 }),

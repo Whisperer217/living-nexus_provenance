@@ -128,6 +128,9 @@ interface Block {
   imageUrl?: string;
   imageKey?: string;
   imageCaption?: string;
+  imageSize?: "small" | "medium" | "large" | "full";
+  imageFocalX?: number; // 0-100
+  imageFocalY?: number; // 0-100
   videoUrl?: string;
   videoType?: "youtube" | "vimeo" | "s3" | "none";
   videoCaption?: string;
@@ -285,6 +288,72 @@ function VideoHero({ videoUrl, videoType, bannerUrl, title }: {
   );
 }
 
+// ── Focal Point Dragger ─────────────────────────────────────────────────────
+
+function FocalPointDragger({ x, y, onChange }: {
+  x: number;
+  y: number;
+  onChange: (x: number, y: number) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+
+  const calcPosition = (clientX: number, clientY: number) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const nx = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const ny = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    onChange(Math.round(nx), Math.round(ny));
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    calcPosition(e.clientX, e.clientY);
+    e.preventDefault();
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    calcPosition(e.clientX, e.clientY);
+  };
+  const handleMouseUp = () => { isDragging.current = false; };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isDragging.current = true;
+    const t = e.touches[0];
+    calcPosition(t.clientX, t.clientY);
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    const t = e.touches[0];
+    calcPosition(t.clientX, t.clientY);
+  };
+  const handleTouchEnd = () => { isDragging.current = false; };
+
+  return (
+    <div
+      ref={containerRef}
+      className="absolute inset-0 z-10 cursor-crosshair"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Focal point crosshair */}
+      <div
+        className="absolute w-6 h-6 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        style={{ left: `${x}%`, top: `${y}%` }}
+      >
+        <div className="absolute inset-0 rounded-full border-2 border-white shadow-lg" />
+        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/70 -translate-x-1/2" />
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-white/70 -translate-y-1/2" />
+      </div>
+    </div>
+  );
+}
+
 // ── Block Renderer (view mode) ────────────────────────────────────────────────
 
 function BlockView({ block }: { block: Block }) {
@@ -306,9 +375,30 @@ function BlockView({ block }: { block: Block }) {
     );
   }
   if (block.type === "image" && block.imageUrl) {
+    const sizeClass = {
+      small: "max-w-xs mx-auto",
+      medium: "max-w-md mx-auto",
+      large: "max-w-2xl mx-auto",
+      full: "w-full",
+    }[block.imageSize ?? "full"];
+    const maxH = {
+      small: "max-h-48",
+      medium: "max-h-64",
+      large: "max-h-96",
+      full: "max-h-[480px]",
+    }[block.imageSize ?? "full"];
+    const focalX = block.imageFocalX ?? 50;
+    const focalY = block.imageFocalY ?? 50;
     return (
       <figure className="space-y-2">
-        <img src={block.imageUrl} alt={block.imageCaption || ""} className="w-full rounded-xl object-cover max-h-[480px]" />
+        <div className={`${sizeClass} ${maxH} overflow-hidden rounded-xl`}>
+          <img
+            src={block.imageUrl}
+            alt={block.imageCaption || ""}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: `${focalX}% ${focalY}%` }}
+          />
+        </div>
         {block.imageCaption && (
           <figcaption className="text-white/40 text-xs text-center">{block.imageCaption}</figcaption>
         )}
@@ -407,14 +497,50 @@ function BlockEditor({ block, projectId, onChange, onDelete, onMoveUp, onMoveDow
       {block.type === "image" && (
         <div className="space-y-3">
           {block.imageUrl ? (
-            <div className="relative">
-              <img src={block.imageUrl} alt="" className="w-full rounded-lg max-h-64 object-cover" />
-              <button
-                onClick={() => onChange({ ...block, imageUrl: undefined, imageKey: undefined })}
-                className="absolute top-2 right-2 bg-black/60 rounded-full p-1 text-white/70 hover:text-red-400 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            <div className="space-y-3">
+              {/* Image preview with focal point dragger */}
+              <div className="relative rounded-lg overflow-hidden" style={{ height: 200 }}>
+                <img
+                  src={block.imageUrl}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: `${block.imageFocalX ?? 50}% ${block.imageFocalY ?? 50}%` }}
+                />
+                {/* Focal point drag overlay */}
+                <FocalPointDragger
+                  x={block.imageFocalX ?? 50}
+                  y={block.imageFocalY ?? 50}
+                  onChange={(x, y) => onChange({ ...block, imageFocalX: x, imageFocalY: y })}
+                />
+                <button
+                  onClick={() => onChange({ ...block, imageUrl: undefined, imageKey: undefined })}
+                  className="absolute top-2 right-2 bg-black/60 rounded-full p-1 text-white/70 hover:text-red-400 transition-colors z-10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="absolute bottom-2 left-2 bg-black/60 rounded px-2 py-0.5 text-white/50 text-xs z-10">
+                  Drag to set focal point
+                </div>
+              </div>
+              {/* Size selector */}
+              <div className="space-y-1">
+                <p className="text-white/40 text-xs uppercase tracking-widest">Display Size</p>
+                <div className="flex gap-2">
+                  {(["small", "medium", "large", "full"] as const).map((sz) => (
+                    <button
+                      key={sz}
+                      onClick={() => onChange({ ...block, imageSize: sz })}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
+                        (block.imageSize ?? "full") === sz
+                          ? "bg-[#d4a017] text-black border-[#d4a017]"
+                          : "bg-white/5 text-white/50 border-white/10 hover:border-[#d4a017]/40"
+                      }`}
+                    >
+                      {sz.charAt(0).toUpperCase() + sz.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <div
