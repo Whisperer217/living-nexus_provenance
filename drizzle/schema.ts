@@ -72,6 +72,7 @@ export const users = mysqlTable("users", {
   // Version tracked via tosVersion field so future TOS updates can re-prompt
   tosAcceptedAt: timestamp("tosAcceptedAt"),
   tosVersion: varchar("tosVersion", { length: 16 }),  // e.g. "2.0" (current TOS with WID legal scope section)
+  dataDeletionRequestedAt: timestamp("dataDeletionRequestedAt"),  // Set when creator submits account deletion request
 
   // Activity delta tracking — used for "new since last visit" badges
   lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),

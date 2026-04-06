@@ -15,6 +15,7 @@ import {
   Play, ExternalLink, Copy, TrendingUp, Loader2,
   CheckCircle, AlertCircle, Zap, LogOut,
   Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users, Shield,
+  Download, Trash2, AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -1451,6 +1452,18 @@ export default function ProfilePage() {
               <Star size={11} /> Founders
             </button>
           </div>
+          {/* ── Data Rights ─────────────────────────────────────── */}
+          <div className="mt-6 pt-5" style={{ borderTop: "1px solid oklch(0.22 0.02 280)" }}>
+            <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">DATA RIGHTS</div>
+            <p className="text-[11px] font-body text-white/35 mb-3 leading-relaxed">
+              Per our Privacy Policy, you have the right to export your data or request account deletion. Deletion requests are processed within 90 days.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <ExportDataButton />
+              <RequestDeletionButton />
+            </div>
+          </div>
+
           <div className="flex justify-start mt-4">
             <button
               onClick={handleLogout}
@@ -1525,5 +1538,88 @@ function SocialsEditor({
         </button>
       </div>
     </div>
+  );
+}
+
+/* ── Data Rights sub-components ──────────────────────────────────── */
+
+function ExportDataButton() {
+  const exportQuery = trpc.onboarding.exportData.useQuery(undefined, { enabled: false });
+  const [loading, setLoading] = useState(false);
+
+  const handleExport = async () => {
+    setLoading(true);
+    try {
+      const data = await exportQuery.refetch();
+      if (data.data) {
+        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `living-nexus-data-export-${new Date().toISOString().split("T")[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("Data export downloaded");
+      }
+    } catch {
+      toast.error("Export failed — please try again");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleExport}
+      disabled={loading}
+      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all disabled:opacity-50"
+      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.12 200)" }}
+    >
+      {loading ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
+      Export My Data
+    </button>
+  );
+}
+
+function RequestDeletionButton() {
+  const [confirming, setConfirming] = useState(false);
+  const deleteMutation = trpc.onboarding.requestDeletion.useMutation({
+    onSuccess: () => {
+      toast.success("Deletion request submitted. We will process it within 90 days.");
+      setConfirming(false);
+    },
+    onError: () => toast.error("Failed to submit deletion request — please try again"),
+  });
+
+  if (confirming) {
+    return (
+      <div
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-body"
+        style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.35 0.12 25)", color: "oklch(0.75 0.15 25)" }}
+      >
+        <AlertTriangle size={11} />
+        <span>Confirm deletion request?</span>
+        <button
+          onClick={() => deleteMutation.mutate()}
+          disabled={deleteMutation.isPending}
+          className="underline hover:no-underline"
+        >
+          {deleteMutation.isPending ? "Submitting…" : "Yes, submit"}
+        </button>
+        <button onClick={() => setConfirming(false)} className="text-white/40 hover:text-white/60 ml-1">
+          <X size={11} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setConfirming(true)}
+      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
+      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.45 0.03 280)" }}
+    >
+      <Trash2 size={11} /> Request Account Deletion
+    </button>
   );
 }

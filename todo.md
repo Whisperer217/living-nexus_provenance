@@ -2732,3 +2732,12 @@
 - [x] Wired /privacy route in App.tsx
 - [x] Added Privacy Policy link to /terms page header
 - [x] TypeScript: 0 errors | Tests: 131/131 passing
+
+## Feature: Sovereign Migration Tracker + Data Export + Data Deletion Request
+- [x] Added Sovereign Migration Status tracker to /privacy page: 3-stage roadmap (Hosted → Migrating → Sovereign) with current stage highlighted in amber
+- [x] Added trpc.onboarding.exportData query procedure: returns account (no Stripe IDs), songs, witnessTestimonies, haaiDeclarations, songVersionHistory as JSON
+- [x] Added ExportDataButton to ProfilePage DATA RIGHTS section: downloads JSON file with date-stamped filename
+- [x] Added dataDeletionRequestedAt column to users table in schema.ts and live DB
+- [x] Added trpc.onboarding.requestDeletion mutation: sets dataDeletionRequestedAt + notifyOwner with creator details and timestamp
+- [x] Added RequestDeletionButton to ProfilePage DATA RIGHTS section: two-step confirm dialog before submitting
+- [x] TypeScript: 0 errors | Tests: 131/131 passing

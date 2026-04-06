@@ -3337,3 +3337,69 @@ export async function getSongVersionById(versionId: number) {
     .limit(1);
   return rows[0] ?? null;
 }
+
+// ─── Data Portability & Deletion Request ─────────────────────────────────────
+
+/** Collect all data for a user for GDPR/CCPA-style JSON export. */
+export async function exportUserData(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [account, userSongs, testimonies, songVers] = await Promise.all([
+    db.select().from(users).where(eq(users.id, userId)).limit(1),
+    db.select().from(songs).where(eq(songs.userId, userId)).orderBy(desc(songs.createdAt)),
+    db.select().from(witnessTestimonies).where(eq(witnessTestimonies.creatorId, userId)).orderBy(desc(witnessTestimonies.createdAt)),
+    db.select().from(songVersions).where(eq(songVersions.creatorId, userId)).orderBy(desc(songVersions.createdAt)),
+  ]);
+
+  const user = account[0];
+  if (!user) return null;
+
+  // Strip sensitive internal fields before export
+  const { stripeCustomerId, stripeAccountId, stripeSubscriptionId, ...safeUser } = user;
+
+  // Build HAAI declarations from songs that have them
+  type SongRow = typeof userSongs[number];
+  type VersionRow = typeof songVers[number];
+  const haaiDeclarations = userSongs
+    .filter((s: SongRow) => s.aiDisclosure === "human_authored_ai_instrument" && s.haaiDeclaredAt)
+    .map((s: SongRow) => ({
+      songId: s.id,
+      songTitle: s.title,
+      witnessId: s.witnessId,
+      declaredAt: s.haaiDeclaredAt,
+      visualConcept: s.haaiVisualConcept,
+      styleLanguage: s.haaiStyleLanguage,
+      instrumentation: s.haaiInstrumentation,
+      vocalConveyance: s.haaiVocalConveyance,
+      lyricalInspiration: s.haaiLyricalInspiration,
+      emotionalTone: s.haaiEmotionalTone,
+    }));
+
+  return {
+    exportedAt: new Date().toISOString(),
+    exportVersion: "1.0",
+    platform: "Living Nexus — BDDT Publishing / Command Domains LLC",
+    account: safeUser,
+    songs: userSongs.map((s: SongRow) => ({
+      id: s.id, title: s.title, genre: s.genre, witnessId: s.witnessId,
+      lyricsWid: s.lyricsWid, aiDisclosure: s.aiDisclosure, aiConsent: s.aiConsent,
+      status: s.status, contentType: s.contentType, createdAt: s.createdAt,
+    })),
+    witnessTestimonies: testimonies,
+    haaiDeclarations,
+    songVersionHistory: songVers.map((v: VersionRow) => ({
+      id: v.id, songId: v.songId, versionNumber: v.versionNumber,
+      witnessId: v.witnessId, createdAt: v.createdAt,
+    })),
+  };
+}
+
+/** Record a data deletion request for a user. */
+export async function requestDataDeletion(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users)
+    .set({ dataDeletionRequestedAt: new Date() })
+    .where(eq(users.id, userId));
+}

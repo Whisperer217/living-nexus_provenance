@@ -74,11 +74,13 @@ import {
   createContentFlag, listContentFlags, resolveContentFlag, getContentFlagStats,
   signDeclaration, getDeclarationSignature, countDeclarationSigners,
   createSongVersion, getSongVersions, getLatestVersionNumber, getSongVersionById,
+  exportUserData, requestDataDeletion,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
 import { enqueueVisualJob } from "./visualQueue";
+import { notifyOwner } from "./_core/notification";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
 const PLATFORM_FEE_PERCENT = 10;
@@ -2459,6 +2461,24 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         await recordTosAcceptance(ctx.user.id, input.version);
         return { ok: true, acceptedAt: new Date(), version: input.version };
       }),
+
+    /** Export all user data as a JSON-serializable object (GDPR/CCPA Right to Portability). */
+    exportData: protectedProcedure.query(async ({ ctx }) => {
+      const data = await exportUserData(ctx.user.id);
+      if (!data) throw new TRPCError({ code: "NOT_FOUND", message: "User data not found" });
+      return data;
+    }),
+
+    /** Submit a data deletion request — sets dataDeletionRequestedAt and notifies the owner. */
+    requestDeletion: protectedProcedure.mutation(async ({ ctx }) => {
+      await requestDataDeletion(ctx.user.id);
+      const user = await getUserById(ctx.user.id);
+      await notifyOwner({
+        title: `Data Deletion Request: ${user?.name ?? user?.email ?? `User #${ctx.user.id}`}`,
+        content: `Creator ${user?.name ?? "unknown"} (ID: ${ctx.user.id}, email: ${user?.email ?? "unknown"}) has submitted a data deletion request. Per the Privacy Policy, account data must be deleted within 90 days. Requested at: ${new Date().toISOString()}.`,
+      });
+      return { ok: true, requestedAt: new Date() };
+    }),
   }),
 
   // ── Witness Network ────────────────────────────────────────────────────────
