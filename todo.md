@@ -2809,3 +2809,8 @@
 - [ ] Fix project share: add share button to project page with correct URL
 - [ ] Add OG meta route for /project/:slug (server-side)
 - [ ] Register /share/:wid server route that redirects to /song/:id via WID lookup
+
+## Feature: Projects Nav + Notifications + Share Modal
+- [ ] Add Projects nav link to TopBar next to Explore
+- [ ] Add donor notification when creator posts project update
+- [ ] Add full Share modal with copy link and Twitter/X share to project pages

@@ -490,6 +490,8 @@ export const notifications = mysqlTable("notifications", {
     "playlist_invite",   // invited to collaborate on a playlist
     "new_track",         // someone you witness dropped a new track
     "system",            // platform announcement
+    "project_update",    // creator posted a project update
+    "project_donation",  // someone donated to your project
   ]).notNull(),
   title: varchar("title", { length: 256 }).notNull(),
   body: text("body"),

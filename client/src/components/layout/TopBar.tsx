@@ -17,7 +17,7 @@ import {
   LayoutDashboard, Archive, Sparkles, Terminal,
   BookOpen, Star, Heart, Eye, Fingerprint, Scale,
   LogIn, LogOut, Bell, Menu, X, ChevronRight,
-  CheckCircle2, Zap,
+  CheckCircle2, Zap, Rocket,
 } from "lucide-react";
 
 const LOGO_URL =
@@ -27,6 +27,7 @@ const LOGO_URL =
 const CORE_NAV = [
   { label: "Home",            icon: Home,          path: "/"          },
   { label: "Explore",         icon: Compass,       path: "/explore"   },
+  { label: "Projects",        icon: Rocket,        path: "/projects"  },
   { label: "Listen Together", icon: Users,         path: "/together", badge: "LIVE" },
   { label: "Upload",          icon: Upload,        path: "/upload"    },
   { label: "Dashboard",       icon: LayoutDashboard, path: "/dashboard", authOnly: true },
@@ -37,6 +38,7 @@ const CORE_NAV = [
 const DRAWER_NAVIGATE = [
   { label: "Home",            icon: Home,    path: "/"          },
   { label: "Explore",         icon: Compass, path: "/explore"   },
+  { label: "Projects",        icon: Rocket,  path: "/projects"  },
   { label: "Listen Together", icon: Users,   path: "/together", badge: "LIVE" },
   { label: "Guilds",          icon: Shield,  path: "/guilds"    },
 ];

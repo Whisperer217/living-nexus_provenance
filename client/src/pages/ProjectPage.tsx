@@ -18,6 +18,88 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
+// ── Share Modal ──────────────────────────────────────────────────────────────────
+
+function ShareModal({ project, open, onClose }: {
+  project: { title: string; slug: string };
+  open: boolean;
+  onClose: () => void;
+}) {
+  const url = typeof window !== "undefined"
+    ? `${window.location.origin}/project/${project.slug}`
+    : `/project/${project.slug}`;
+  const tweetText = encodeURIComponent(`Support "${project.title}" on Living Nexus`);
+  const tweetUrl = encodeURIComponent(url);
+  const twitterHref = `https://twitter.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`;
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("Link copied!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Could not copy link");
+    }
+  };
+
+  const handleNativeShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: project.title, text: `Support "${project.title}" on Living Nexus`, url });
+      }
+    } catch {}
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="bg-[#0d0d0d] border border-white/10 text-white max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="text-white">Share Project</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center gap-2">
+            <Input
+              readOnly
+              value={url}
+              className="bg-white/5 border-white/10 text-white/70 text-xs flex-1"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-white/20 bg-transparent text-white hover:bg-white/10 shrink-0"
+              onClick={handleCopy}
+            >
+              {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button
+              className="w-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-semibold"
+              onClick={() => window.open(twitterHref, "_blank", "noopener,noreferrer")}
+            >
+              <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              Share on X (Twitter)
+            </Button>
+            {typeof navigator !== "undefined" && "share" in navigator && (
+              <Button
+                variant="outline"
+                className="w-full border-white/20 bg-transparent text-white hover:bg-white/10"
+                onClick={handleNativeShare}
+              >
+                <Share2 className="w-4 h-4 mr-2" /> Share via...
+              </Button>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function getYouTubeId(url: string): string | null {
@@ -594,6 +676,7 @@ export default function ProjectPage() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [donateOpen, setDonateOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [updatesExpanded, setUpdatesExpanded] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
@@ -939,16 +1022,10 @@ export default function ProjectPage() {
               </Badge>
               <button
                 className="p-1.5 text-white/30 hover:text-[#d4a017] transition-colors rounded-lg"
-                title="Copy project link"
-                onClick={async () => {
-                  const url = `${window.location.origin}/project/${project.slug}`;
-                  try {
-                    if (navigator.share) { await navigator.share({ title: project.title, url }); return; }
-                  } catch {}
-                  try { await navigator.clipboard.writeText(url); toast.success("Link copied!"); } catch {}
-                }}
+                title="Share project"
+                onClick={() => setShareOpen(true)}
               >
-                <Copy className="w-3.5 h-3.5" />
+                <Share2 className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -1061,19 +1138,7 @@ export default function ProjectPage() {
                 variant="outline"
                 size="sm"
                 className="border-white/20 text-white/60 hover:text-white hover:border-white/40 bg-transparent"
-                onClick={async () => {
-                  const url = `${window.location.origin}/project/${project.slug}`;
-                  try {
-                    if (navigator.share) {
-                      await navigator.share({ title: project.title, text: `Support "${project.title}" on Living Nexus`, url });
-                      return;
-                    }
-                  } catch {}
-                  try {
-                    await navigator.clipboard.writeText(url);
-                    toast.success("Link copied!");
-                  } catch {}
-                }}
+                onClick={() => setShareOpen(true)}
               >
                 <Share2 className="w-4 h-4 mr-1" /> Share
               </Button>
@@ -1086,6 +1151,11 @@ export default function ProjectPage() {
         project={{ id: project.id, title: project.title, slug: project.slug }}
         open={donateOpen}
         onClose={() => setDonateOpen(false)}
+      />
+      <ShareModal
+        project={{ title: project.title, slug: project.slug }}
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
       />
     </div>
   );

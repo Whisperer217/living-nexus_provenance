@@ -4432,10 +4432,42 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         if (!project) throw new TRPCError({ code: "NOT_FOUND" });
         if (project.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
         await addProjectUpdate({ ...input, userId: ctx.user.id });
+        // Notify all donors about the new update (fire-and-forget, non-blocking)
+        void (async () => {
+          try {
+            const donations = await getProjectDonations(input.projectId);
+            const donorUserIds = Array.from(new Set(
+              donations
+                .filter((d) => d.donorUserId != null && d.donorUserId !== ctx.user.id)
+                .map((d) => d.donorUserId as number)
+            ));
+            if (donorUserIds.length === 0) return;
+            const creator = await getUserById(ctx.user.id);
+            const notifTitle = input.title
+              ? `Update on "${project.title}": ${input.title}`
+              : `New update on "${project.title}"`;
+            await Promise.all(
+              donorUserIds.map((uid) =>
+                createNotification({
+                  userId: uid,
+                  type: "project_update",
+                  title: notifTitle,
+                  body: input.body.slice(0, 200),
+                  actorId: ctx.user.id,
+                  actorName: creator?.name ?? ctx.user.name,
+                  actorAvatarUrl: creator?.profilePhotoUrl ?? undefined,
+                  refId: input.projectId,
+                  refType: "project",
+                })
+              )
+            );
+          } catch (e) {
+            console.error("[projects.addUpdate] Failed to notify donors:", e);
+          }
+        })();
         return { ok: true };
       }),
-
-    /** Create Stripe checkout for a project donation — public (logged in optional) */
+    /** Create Stripe checkout for a project donation - public (logged in optional) */
     donate: publicProcedure
       .input(z.object({
         projectId: z.number().int(),
