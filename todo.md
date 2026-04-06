@@ -2905,3 +2905,9 @@
 - [x] Replace amber rgba(140,95,30,0.50) drawer tint with steel rgba(60,75,92,0.35) in TopBar
 - [x] Update text colors to cool silver-white rgba(210,220,235,0.88) for steel theme
 - [x] Apply same steel tint to MainLayout mobile header/sidebar
+
+## Phase 58: Steel Tint Opacity + Blur Reduction
+- [x] Lowered steel nav tint to rgba(55,68,85,0.72) with dark base dominant in TopBar
+- [x] Lowered steel drawer tint to rgba(42,55,70,0.80) in TopBar
+- [x] Increased backdrop-filter blur to blur(32px) saturate(0.7) on nav, blur(40px) saturate(0.6) on drawer
+- [x] Applied same opacity/blur values to MainLayout mobile header/sidebar

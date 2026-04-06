@@ -124,20 +124,20 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
   const { mode: lightsMode } = useLightsMode();
   const isWarm = lightsMode === "on";
 
-  // Warm mode: cool steel blue-grey tint over dark base — gunmetal feel, low opacity
-  const NAV_BG = isWarm ? "rgba(75,90,108,0.38)" : "oklch(0.115 0.025 52 / 0.97)";
-  const NAV_BORDER = isWarm ? "rgba(120,145,170,0.28)" : "oklch(0.30 0.04 60 / 45%)";
-  const DRAWER_BG = isWarm ? "rgba(60,75,92,0.35)" : "oklch(0.09 0.018 280 / 0.98)";
-  const DRAWER_BORDER = isWarm ? "rgba(120,145,170,0.22)" : "oklch(0.28 0.04 270 / 50%)";
-  const NAV_TEXT = isWarm ? "rgba(210,220,235,0.88)" : "oklch(0.62 0.04 65)";
-  const NAV_TEXT_MUTED = isWarm ? "rgba(160,175,195,0.65)" : "oklch(0.55 0.02 280)";
-  const NAV_SECTION_LABEL = isWarm ? "rgba(160,175,195,0.50)" : "oklch(0.75 0.12 85 / 0.7)";
-  const NAV_SECTION_BORDER = isWarm ? "rgba(120,145,170,0.18)" : "oklch(0.84 0.155 85 / 0.10)";
-  const NAV_ACTIVE_BG = isWarm ? "rgba(120,145,170,0.20)" : "oklch(0.82 0.155 75 / 0.12)";
-  const NAV_ACTIVE_BORDER = isWarm ? "rgba(140,165,195,0.38)" : "oklch(0.82 0.155 75 / 0.22)";
-  const NAV_ACTIVE_TEXT = isWarm ? "rgba(190,210,240,0.95)" : "oklch(0.88 0.14 75)";
-  const LOGO_DIVIDER = isWarm ? "rgba(120,145,170,0.25)" : "oklch(0.30 0.04 60 / 35%)";
-  const RIGHT_DIVIDER = isWarm ? "rgba(120,145,170,0.25)" : "oklch(0.30 0.04 60 / 35%)";
+  // Warm mode: very subtle steel tint — dark base fully dominates, just a faint cool cast
+  const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "oklch(0.115 0.025 52 / 0.97)";
+  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "oklch(0.30 0.04 60 / 45%)";
+  const DRAWER_BG = isWarm ? "rgba(42,55,70,0.80)" : "oklch(0.09 0.018 280 / 0.98)";
+  const DRAWER_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "oklch(0.28 0.04 270 / 50%)";
+  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "oklch(0.62 0.04 65)";
+  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "oklch(0.55 0.02 280)";
+  const NAV_SECTION_LABEL = isWarm ? "rgba(148,165,185,0.45)" : "oklch(0.75 0.12 85 / 0.7)";
+  const NAV_SECTION_BORDER = isWarm ? "rgba(100,125,150,0.15)" : "oklch(0.84 0.155 85 / 0.10)";
+  const NAV_ACTIVE_BG = isWarm ? "rgba(100,125,150,0.18)" : "oklch(0.82 0.155 75 / 0.12)";
+  const NAV_ACTIVE_BORDER = isWarm ? "rgba(120,148,178,0.32)" : "oklch(0.82 0.155 75 / 0.22)";
+  const NAV_ACTIVE_TEXT = isWarm ? "rgba(180,202,230,0.95)" : "oklch(0.88 0.14 75)";
+  const LOGO_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "oklch(0.30 0.04 60 / 35%)";
+  const RIGHT_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "oklch(0.30 0.04 60 / 35%)";
 
   // ── Drawer item renderer ─────────────────────────────────────────
   const renderDrawerItem = (item: {
@@ -201,7 +201,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           height: "52px",
           background: NAV_BG,
           borderBottom: `1px solid ${NAV_BORDER}`,
-          backdropFilter: "blur(16px)",
+          backdropFilter: isWarm ? "blur(32px) saturate(0.7)" : "blur(16px)",
           transition: "background 0.4s ease, border-color 0.4s ease",
         }}
       >
@@ -373,7 +373,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           opacity: drawerOpen ? 1 : 0,
           background: DRAWER_BG,
           borderBottom: drawerOpen ? `1px solid ${DRAWER_BORDER}` : "none",
-          backdropFilter: "blur(20px)",
+          backdropFilter: isWarm ? "blur(40px) saturate(0.6)" : "blur(20px)",
           transition: "background 0.4s ease",
         }}
       >
