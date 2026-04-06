@@ -138,84 +138,85 @@
 }
 
 /* =================================================================
-   LIGHTS ON — Espresso Crème Mode
+   LIGHTS ON — Onyx Coffee Mode
+   Inspired by Onyx Coffee Lab packaging:
+     Power Nap  -> dusty clay-rose surfaces
+     Genmaicha  -> deep forest olive accents
+     Tealight   -> near-black charcoal text
    Activated by .lights-on on <html>, controlled by the platform owner.
-   Strategy: Override every CSS custom property token so Tailwind
-   utilities and variable-based styles all resolve to the warm palette.
-   A very gentle body filter nudges hardcoded inline oklch values.
 ================================================================= */
 .lights-on {
-  /* ── Surface tokens ── */
-  --void:   #F5F0E8;
-  --void-2: #EDE8DC;
-  --void-3: #E8E0D0;
-  --void-4: #E2D9C8;
+  /* Surface tokens — clay-rose depth steps */
+  --void:   #C4876A;
+  --void-2: #B87A5E;
+  --void-3: #A86D52;
+  --void-4: #986046;
 
-  /* ── Accent tokens ── */
+  /* Accent tokens — forest olive */
   --gold:     #B8963E;
-  --gold-dim: #A07820;
-  --teal:     oklch(0.45 0.10 175);
-  --teal-dim: oklch(0.38 0.08 172);
+  --gold-dim: #8A6E2A;
+  --teal:     #4A5C3A;
+  --teal-dim: #3A4A2C;
 
-  /* ── Semantic background / foreground ── */
-  --background:          #F5F0E8;
-  --foreground:          #2C1A0E;
-  --card:                #E8E0D0;
-  --card-foreground:     #2C1A0E;
-  --popover:             #EDE8DC;
-  --popover-foreground:  #2C1A0E;
-  --primary:             #B8963E;
-  --primary-foreground:  #F5F0E8;
-  --secondary:           #E2D9C8;
-  --secondary-foreground:#2C1A0E;
-  --muted:               #E8E0D0;
-  --muted-foreground:    #6B4C35;
-  --accent:              #C4A882;
-  --accent-foreground:   #2C1A0E;
-  --border:              #C4A882;
-  --input:               rgba(196,168,130,0.67);
+  /* Semantic background / foreground */
+  --background:          #C4876A;
+  --foreground:          #F2EDE8;
+  --card:                #A86D52;
+  --card-foreground:     #F2EDE8;
+  --popover:             #B87A5E;
+  --popover-foreground:  #F2EDE8;
+  --primary:             #4A5C3A;
+  --primary-foreground:  #F2EDE8;
+  --secondary:           #986046;
+  --secondary-foreground:#F2EDE8;
+  --muted:               #A86D52;
+  --muted-foreground:    #D4BFB0;
+  --accent:              #4A5C3A;
+  --accent-foreground:   #F2EDE8;
+  --border:              rgba(242,237,232,0.22);
+  --input:               rgba(242,237,232,0.18);
   --ring:                #B8963E;
 
-  /* ── Living Nexus custom tokens ── */
-  --lnx-bg:         #F5F0E8;
-  --lnx-bg-2:       #EDE8DC;
-  --lnx-bg-3:       #E8E0D0;
-  --lnx-text:       #2C1A0E;
-  --lnx-text-muted: #6B4C35;
+  /* Living Nexus custom tokens */
+  --lnx-bg:         #C4876A;
+  --lnx-bg-2:       #B87A5E;
+  --lnx-bg-3:       #A86D52;
+  --lnx-text:       #F2EDE8;
+  --lnx-text-muted: #D4BFB0;
   --lnx-gold:       #B8963E;
   --lnx-gold-glow:  #D4A843;
   --lnx-gold-muted: #8A6E2A;
 
-  /* ── Sidebar ── */
-  --sidebar:                    #EDE8DC;
-  --sidebar-foreground:         #2C1A0E;
-  --sidebar-primary:            #B8963E;
-  --sidebar-primary-foreground: #F5F0E8;
-  --sidebar-accent:             #E2D9C8;
-  --sidebar-accent-foreground:  #2C1A0E;
-  --sidebar-border:             #C4A882;
+  /* Sidebar */
+  --sidebar:                    #B87A5E;
+  --sidebar-foreground:         #F2EDE8;
+  --sidebar-primary:            #4A5C3A;
+  --sidebar-primary-foreground: #F2EDE8;
+  --sidebar-accent:             #986046;
+  --sidebar-accent-foreground:  #F2EDE8;
+  --sidebar-border:             rgba(242,237,232,0.18);
   --sidebar-ring:               #B8963E;
 }
 
-/* Gentle nudge for hardcoded inline oklch values in components */
+/* Nudge hardcoded inline oklch values toward the clay-rose palette */
 .lights-on body {
-  filter: sepia(0.10) brightness(1.06) contrast(0.97) saturate(0.90);
+  filter: sepia(0.35) brightness(0.92) contrast(0.95) saturate(1.10) hue-rotate(-8deg);
   transition: filter 0.45s ease;
 }
 
-/* Headings: espresso text in lights-on */
+/* Headings: warm linen in lights-on */
 .lights-on h1,
 .lights-on h2,
 .lights-on h3,
 .lights-on h4,
 .lights-on h5,
 .lights-on h6 {
-  color: #2C1A0E;
+  color: #F2EDE8;
 }
 
-/* Scrollbar warm caramel in lights-on */
+/* Scrollbar olive in lights-on */
 .lights-on ::-webkit-scrollbar-thumb {
-  background: rgba(196,168,130,0.67);
+  background: rgba(74,92,58,0.60);
 }
 
 @layer base {
