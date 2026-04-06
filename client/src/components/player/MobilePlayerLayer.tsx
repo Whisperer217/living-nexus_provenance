@@ -620,6 +620,8 @@ export default function MobilePlayerLayer() {
         transform: `translateY(${expandedDragOffset}px)`,
         transition: expandedDragOffset === 0 ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "none",
         paddingTop: "env(safe-area-inset-top, 0px)",
+        overscrollBehaviorX: "none",
+        touchAction: "pan-y",
       }}
     >
       {/* Drag handle — ONLY this element triggers swipe-to-dismiss */}
@@ -1121,6 +1123,7 @@ export default function MobilePlayerLayer() {
   const CinematicLayer = () => (
     <div
       className="md:hidden fixed inset-0 z-[9999] bg-black"
+      style={{ overscrollBehaviorX: "none", touchAction: "pan-y" }}
       onTouchStart={onCinematicTouchStart}
       onTouchEnd={onCinematicTouchEnd}
       onClick={showOverlay}

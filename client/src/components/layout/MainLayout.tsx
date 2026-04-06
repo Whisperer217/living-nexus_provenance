@@ -167,7 +167,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.10_0.022_55)] relative">
+    <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.10_0.022_55)] relative" style={{ overscrollBehaviorX: "none" }}>
 
       {/* ── Quick Reference Slider (all breakpoints) ── */}
       <QuickRefSlider open={qrOpen} onToggle={toggleQr} />
@@ -361,12 +361,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           Desktop: top-padding for TopBar (52px)
           Mobile: top-padding for mobile header (56px)
       ══════════════════════════════════════════════ */}
-      <main className="flex-1 flex flex-col overflow-hidden md:pt-[52px] pt-14">
+      <main className="flex-1 flex flex-col overflow-hidden md:pt-[52px] pt-14" style={{ overscrollBehaviorX: "none" }}>
         <style>{`
           @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
           @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(80px + max(env(safe-area-inset-bottom, 0px), 8px)) !important; } }
         `}</style>
-        <div className="flex-1 overflow-y-auto player-scroll-area">
+        <div className="flex-1 overflow-y-auto player-scroll-area" style={{ overscrollBehaviorX: "none", touchAction: "pan-y" }}>
           {children}
         </div>
       </main>

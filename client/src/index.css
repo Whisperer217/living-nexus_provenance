@@ -230,6 +230,7 @@
   }
   html, body {
     height: 100%;
+    overscroll-behavior-x: none; /* allow browser back/forward swipe on mobile */
   }
   /* Graceful Lights On transition */
   html {

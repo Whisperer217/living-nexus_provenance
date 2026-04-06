@@ -2973,3 +2973,10 @@
 - [x] Root cause: listPublic Zod schema had max(50) but ProjectsDiscoveryPage passed limit:100, causing silent validation failure
 - [x] Fix: raised listPublic input limit max from 50 to 200 in routers.ts
 - [x] Verified via direct API call: 1 active project now returned correctly
+## Phase 72: Fix Mobile Back Navigation
+- [x] Audit wouter router setup — using wouter v3 history mode (pushState), correct
+- [x] Root cause: overflow-hidden root + overflow-y-auto scroll container consumed all touch events, blocking browser back-swipe gesture
+- [x] Fix: added overscroll-behavior-x: none + touch-action: pan-y to scroll container, main, and root div in MainLayout
+- [x] Fix: added overscroll-behavior-x: none to html/body in index.css
+- [x] Fix: added overscroll-behavior-x: none + touch-action: pan-y to expanded player sheet and cinematic layer in MobilePlayerLayer
+- [x] Verified 0 TypeScript errors
