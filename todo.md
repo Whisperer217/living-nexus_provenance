@@ -3033,3 +3033,21 @@
 - [x] Sheet renders via portal above bottom nav, swipe-down 60px to dismiss, pill handle always visible
 - [x] Mounted QuickRefBottomSheet in MainLayout replacing commented-out QuickRefSlider
 - [x] 0 TypeScript errors
+
+## Phase 79: Live Bell Badge + Now Playing Tab + Haptic Nav
+- [ ] Wire bell badge to trpc.notifications.unreadCount (live, refetch every 30s)
+- [ ] Add haptic feedback navigator.vibrate(5) to each BottomNavBar tap
+- [ ] Add "Now Playing" tab to QuickRefBottomSheet — cover art, title, artist, mini scrubber
+- [ ] Now Playing tab only visible when a track is active in PlayerContext
+
+## Phase 79: QuickRef Now Playing Tab + Haptic Feedback Verification
+
+- [x] Rewrite QuickRefBottomSheet with Now Playing / Discover tab switcher
+- [x] Now Playing tab: cover art, title, artist, mini scrubber with currentTime/duration
+- [x] Now Playing tab: play/pause, prev/next controls
+- [x] Now Playing tab: auto-switches to Now Playing when a new track starts and sheet is open
+- [x] Pill handle shows "Now Playing" label when a track is active and sheet is closed
+- [x] miniPlayerVisible prop wired to actual player state in MainLayout
+- [x] Haptic feedback (navigator.vibrate(5)) confirmed present on all BottomNavBar taps
+- [x] Bell badge count wired to trpc.notifications.unreadCount (confirmed from Phase 78)
+- [x] 137/137 tests passing, 0 TypeScript errors

@@ -389,7 +389,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <MobilePlayerLayer />
 
       {/* Quick Access Bottom Sheet — mobile only */}
-      <QuickRefBottomSheet miniPlayerVisible={false} />
+      <QuickRefBottomSheet miniPlayerVisible={state.currentIdx >= 0 && !!state.tracks[state.currentIdx]?.audioUrl} />
 
       {/* Theater Player */}
       <TheaterPlayer />

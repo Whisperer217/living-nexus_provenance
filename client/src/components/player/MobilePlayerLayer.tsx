@@ -626,7 +626,7 @@ export default function MobilePlayerLayer() {
             return (
               <button
                 key={path}
-                onClick={() => navigate(path)}
+                onClick={() => { try { navigator.vibrate?.(5); } catch {} navigate(path); }}
                 className="relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all active:scale-90"
                 style={{ color: isActive ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)" }}
                 aria-label={label}
