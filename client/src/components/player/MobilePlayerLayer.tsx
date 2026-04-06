@@ -132,6 +132,9 @@ export default function MobilePlayerLayer() {
   const [commentText, setCommentText] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
 
+  // Scroll container ref — used to check scrollTop before triggering dismiss
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
   // Overlay auto-hide timer in cinematic mode
   const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showOverlay = useCallback(() => {
@@ -154,15 +157,8 @@ export default function MobilePlayerLayer() {
     };
   }, []);
 
-  // Lock body scroll when expanded/cinematic
-  useEffect(() => {
-    if (playerState !== "mini") {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [playerState]);
+  // No body scroll lock — the inner scroll container handles its own scroll.
+  // Locking body overflow breaks native scroll on iOS Safari inside the player.
 
   // Reset canonical panels when track changes
   useEffect(() => {
@@ -184,7 +180,9 @@ export default function MobilePlayerLayer() {
     miniTouchStartY.current = null;
   };
 
-  // ── Gesture: swipe-down on expanded → mini ────────────────────
+  // ── Gesture: swipe-down on expanded → mini (drag handle ONLY) ────────────────────
+  // The dismiss gesture only fires when the scroll container is scrolled to the top.
+  // This lets users freely scroll through comments/reactions while the song plays.
   const expandedTouchStartY = useRef<number | null>(null);
   const [expandedDragOffset, setExpandedDragOffset] = useState(0);
   const onExpandedTouchStart = (e: React.TouchEvent) => {
@@ -193,6 +191,14 @@ export default function MobilePlayerLayer() {
   };
   const onExpandedTouchMove = (e: React.TouchEvent) => {
     if (expandedTouchStartY.current === null) return;
+    // Only allow dismiss drag when scroll container is at the very top
+    const scrollTop = scrollContainerRef.current?.scrollTop ?? 0;
+    if (scrollTop > 4) {
+      // User is scrolled down — cancel dismiss, let native scroll work
+      expandedTouchStartY.current = null;
+      setExpandedDragOffset(0);
+      return;
+    }
     const delta = e.touches[0].clientY - expandedTouchStartY.current;
     if (delta > 0) setExpandedDragOffset(Math.min(delta, 200));
   };
@@ -636,10 +642,12 @@ export default function MobilePlayerLayer() {
 
       {/* Scrollable content area — everything below the drag handle scrolls freely */}
       <div
+        ref={scrollContainerRef}
         className="flex-1 overflow-y-auto"
         style={{
           WebkitOverflowScrolling: "touch",
           touchAction: "pan-y",
+          overscrollBehaviorY: "contain",
           paddingBottom: "env(safe-area-inset-bottom, 12px)",
         }}
       >

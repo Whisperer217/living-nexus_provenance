@@ -2980,3 +2980,10 @@
 - [x] Fix: added overscroll-behavior-x: none to html/body in index.css
 - [x] Fix: added overscroll-behavior-x: none + touch-action: pan-y to expanded player sheet and cinematic layer in MobilePlayerLayer
 - [x] Verified 0 TypeScript errors
+## Phase 73: Fix Expanded Player — Scroll While Playing
+- [x] Audit: body overflow lock (document.body.style.overflow = hidden) was blocking iOS Safari scroll inside player
+- [x] Audit: swipe-dismiss onTouchMove fired even when user was scrolled down in content area
+- [x] Fix: removed body overflow lock — inner scroll container handles its own scroll
+- [x] Fix: added scrollContainerRef to scroll area; dismiss gesture now checks scrollTop > 4 and cancels if user is scrolled down
+- [x] Fix: added overscrollBehaviorY: contain to scroll container to prevent bounce from triggering dismiss
+- [x] 0 TypeScript errors
