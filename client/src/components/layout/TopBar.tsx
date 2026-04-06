@@ -124,20 +124,21 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
   const { mode: lightsMode } = useLightsMode();
   const isWarm = lightsMode === "on";
 
-  // Warm theme tokens — applied only to nav chrome, not music cards or player
-  const NAV_BG = isWarm ? "#EDE4D8" : "oklch(0.115 0.025 52 / 0.97)";
-  const NAV_BORDER = isWarm ? "rgba(74,92,58,0.25)" : "oklch(0.30 0.04 60 / 45%)";
-  const DRAWER_BG = isWarm ? "#E5D8C8" : "oklch(0.09 0.018 280 / 0.98)";
-  const DRAWER_BORDER = isWarm ? "rgba(74,92,58,0.20)" : "oklch(0.28 0.04 270 / 50%)";
-  const NAV_TEXT = isWarm ? "#2C1A0E" : "oklch(0.62 0.04 65)";
-  const NAV_TEXT_MUTED = isWarm ? "#6B4C35" : "oklch(0.55 0.02 280)";
-  const NAV_SECTION_LABEL = isWarm ? "rgba(44,26,14,0.55)" : "oklch(0.75 0.12 85 / 0.7)";
-  const NAV_SECTION_BORDER = isWarm ? "rgba(74,92,58,0.20)" : "oklch(0.84 0.155 85 / 0.10)";
-  const NAV_ACTIVE_BG = isWarm ? "rgba(184,150,62,0.15)" : "oklch(0.82 0.155 75 / 0.12)";
-  const NAV_ACTIVE_BORDER = isWarm ? "rgba(184,150,62,0.35)" : "oklch(0.82 0.155 75 / 0.22)";
-  const NAV_ACTIVE_TEXT = isWarm ? "#B8963E" : "oklch(0.88 0.14 75)";
-  const LOGO_DIVIDER = isWarm ? "rgba(74,92,58,0.25)" : "oklch(0.30 0.04 60 / 35%)";
-  const RIGHT_DIVIDER = isWarm ? "rgba(74,92,58,0.25)" : "oklch(0.30 0.04 60 / 35%)";
+  // Warm theme: translucent amber tint (~55% opacity) over the dark base
+  // Dark charcoal shows through — reads as warm glass filter, not a full repaint
+  const NAV_BG = isWarm ? "rgba(160,110,40,0.55)" : "oklch(0.115 0.025 52 / 0.97)";
+  const NAV_BORDER = isWarm ? "rgba(200,160,70,0.35)" : "oklch(0.30 0.04 60 / 45%)";
+  const DRAWER_BG = isWarm ? "rgba(140,95,30,0.50)" : "oklch(0.09 0.018 280 / 0.98)";
+  const DRAWER_BORDER = isWarm ? "rgba(200,160,70,0.28)" : "oklch(0.28 0.04 270 / 50%)";
+  const NAV_TEXT = isWarm ? "rgba(255,230,160,0.92)" : "oklch(0.62 0.04 65)";
+  const NAV_TEXT_MUTED = isWarm ? "rgba(220,185,110,0.68)" : "oklch(0.55 0.02 280)";
+  const NAV_SECTION_LABEL = isWarm ? "rgba(220,185,110,0.52)" : "oklch(0.75 0.12 85 / 0.7)";
+  const NAV_SECTION_BORDER = isWarm ? "rgba(200,160,70,0.22)" : "oklch(0.84 0.155 85 / 0.10)";
+  const NAV_ACTIVE_BG = isWarm ? "rgba(200,160,70,0.25)" : "oklch(0.82 0.155 75 / 0.12)";
+  const NAV_ACTIVE_BORDER = isWarm ? "rgba(200,160,70,0.45)" : "oklch(0.82 0.155 75 / 0.22)";
+  const NAV_ACTIVE_TEXT = isWarm ? "#F0D070" : "oklch(0.88 0.14 75)";
+  const LOGO_DIVIDER = isWarm ? "rgba(200,160,70,0.30)" : "oklch(0.30 0.04 60 / 35%)";
+  const RIGHT_DIVIDER = isWarm ? "rgba(200,160,70,0.30)" : "oklch(0.30 0.04 60 / 35%)";
 
   // ── Drawer item renderer ─────────────────────────────────────────
   const renderDrawerItem = (item: {
@@ -182,7 +183,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           background: active ? NAV_ACTIVE_BG : "transparent",
           color: active ? NAV_ACTIVE_TEXT : NAV_TEXT_MUTED,
         }}
-        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(44,26,14,0.08)" : "oklch(0.20 0.02 280 / 0.6)"; (e.currentTarget as HTMLElement).style.color = isWarm ? "#2C1A0E" : "oklch(0.85 0.02 280)"; } }}
+        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(200,160,70,0.18)" : "oklch(0.20 0.02 280 / 0.6)"; (e.currentTarget as HTMLElement).style.color = isWarm ? "rgba(255,235,170,0.95)" : "oklch(0.85 0.02 280)"; } }}
         onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = NAV_TEXT_MUTED; } }}
       >
         <Icon size={13} className="flex-shrink-0" style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit" }} />

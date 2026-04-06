@@ -2892,3 +2892,10 @@
 - [x] Render threaded replies on SongDetailPage — reply button, indented reply list, reply input
 - [x] Apply warm theme inline styles to renderMobileNavItem in MainLayout (text color, active bg)
 - [x] Fix profile.me staleTime/refetchOnMount so bio always loads fresh on profile page visit
+
+## Phase 56: Warm Theme Overlay Rework
+- [x] Change warm nav background from solid #EDE4D8 to translucent warm tint rgba(160,110,40,0.55) over dark base
+- [x] Change warm sidebar background from solid #E5D8C8 to translucent warm tint rgba(140,95,30,0.50) over dark base
+- [x] Adjust warm text colors to light amber (rgba(255,230,160,0.92)) readable against dark blended surface
+- [x] Desktop TopBar mega-menu warm tint uses same overlay approach
+- [x] Mobile sidebar warm tint uses same overlay approach
