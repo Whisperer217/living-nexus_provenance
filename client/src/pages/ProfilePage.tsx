@@ -890,6 +890,10 @@ export default function ProfilePage() {
                       WORK_REFERENCED: { icon: Layers, color: "#fb923c", label: "Work Referenced" },
                       SYSTEM_UPDATE: { icon: Zap, color: "#60a5fa", label: "System Update" },
                       PRESERVATION_MODE: { icon: Star, color: "#D4AF37", label: "Preservation Mode" },
+                      PROJECT_PUBLISHED: { icon: Layers, color: "#34d399", label: "Project Published" },
+                      FOLLOW: { icon: Users, color: "#f472b6", label: "New Follower" },
+                      PROJECT_ARCHIVED: { icon: Star, color: "#94a3b8", label: "Project Archived" },
+                      PROJECT_DRAFT: { icon: Star, color: "#94a3b8", label: "Project Saved as Draft" },
                     };
                     const meta = iconMap[evt.type] ?? { icon: Activity, color: "#A78BFA", label: evt.type };
                     const Icon = meta.icon;
