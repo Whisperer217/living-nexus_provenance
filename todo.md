@@ -3024,3 +3024,12 @@
 - [x] Noted: lock screen mini player working confirmed by testers
 - [x] Noted: car/Google Assistant integration (Android Auto) logged as future feature
 - [x] 0 TypeScript errors
+
+## Phase 78: Mobile Nav Bell + Media Session Skip + QuickRef Bottom Sheet
+- [x] Added BottomNavBar component: Home, Explore, Together, Bell (with unread badge), Profile — renders via portal z-[9989]
+- [x] MiniBar repositioned to sit 56px above bottom nav; scroll area padding updated to 136px
+- [x] Media Session previoustrack/nexttrack already present in PlayerContext.tsx — no change needed
+- [x] QuickRefBottomSheet: new swipe-up bottom sheet with search, genre chips, recently added tracks
+- [x] Sheet renders via portal above bottom nav, swipe-down 60px to dismiss, pill handle always visible
+- [x] Mounted QuickRefBottomSheet in MainLayout replacing commented-out QuickRefSlider
+- [x] 0 TypeScript errors

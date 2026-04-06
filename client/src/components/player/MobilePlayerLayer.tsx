@@ -33,6 +33,7 @@ import {
   Volume2, VolumeX, Shield, MessageCircle,
   ChevronRight, Send, Users, Fingerprint,
   ExternalLink, Crown, ArrowUp,
+  Home, Compass, Bell, User,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -594,12 +595,70 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   const { mode: lightsMode } = useLightsMode();
   const isLightsOn = lightsMode === "on";
+  // ── Bottom Nav Bar ─────────────────────────────────────────────
+  const BottomNavBar = () => {
+    const [location] = useLocation();
+    const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, {
+      enabled: !!user,
+      refetchInterval: 30_000,
+    });
+    const NAV_ITEMS = [
+      { icon: Home,    label: "Home",    path: "/" },
+      { icon: Compass, label: "Explore", path: "/explore" },
+      { icon: Users,   label: "Together",path: "/together" },
+      { icon: Bell,    label: "Signals", path: "/notifications", badge: (unreadCount as number) > 0 ? String(Math.min(unreadCount as number, 99)) : undefined },
+      { icon: User,    label: "Profile", path: "/profile" },
+    ];
+    return (
+      <div
+        className="md:hidden fixed bottom-0 left-0 right-0 z-[9989]"
+        style={{
+          height: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+          background: isLightsOn ? "rgba(40,52,68,0.97)" : "oklch(0.08 0.022 275 / 0.98)",
+          backdropFilter: "blur(20px) saturate(1.4)",
+          borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid oklch(0.84 0.155 85 / 0.12)",
+        }}
+      >
+        <div className="flex items-center justify-around h-14 px-2">
+          {NAV_ITEMS.map(({ icon: Icon, label, path, badge }) => {
+            const isActive = path === "/" ? location === "/" : location.startsWith(path);
+            return (
+              <button
+                key={path}
+                onClick={() => navigate(path)}
+                className="relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all active:scale-90"
+                style={{ color: isActive ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)" }}
+                aria-label={label}
+              >
+                <div className="relative">
+                  <Icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />
+                  {badge && (
+                    <span
+                      className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-1"
+                      style={{ background: "oklch(0.65 0.22 25)", color: "white" }}
+                    >{badge}</span>
+                  )}
+                </div>
+                <span className="text-[9px] font-heading tracking-wide uppercase" style={{ lineHeight: 1 }}>{label}</span>
+                {isActive && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full" style={{ background: "oklch(0.84 0.155 85)" }} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const MiniBar = () => (
     <div
-      className="md:hidden fixed bottom-0 left-0 right-0 z-[9990]"
+      className="md:hidden fixed left-0 right-0 z-[9990]"
       style={{
+        bottom: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
         minHeight: "64px",
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+        paddingBottom: 0,
         background: isLightsOn
           ? "rgba(55,68,85,0.92)"
           : "oklch(0.10 0.025 275 / 0.98)",
@@ -1465,6 +1524,9 @@ export default function MobilePlayerLayer() {
           to   { height: 10px; }
         }
       `}</style>
+      {/* Bottom nav bar — always visible on mobile */}
+      <BottomNavBar />
+      {/* Mini player — sits above bottom nav when a track is loaded */}
       {playerState === "mini" && <MiniBar />}
       {playerState === "expanded" && <ExpandedSheet />}
       {playerState === "cinematic" && <CinematicLayer />}

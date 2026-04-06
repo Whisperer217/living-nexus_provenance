@@ -24,6 +24,7 @@ import PlayerBar from "@/components/player/PlayerBar";
 import MobilePlayerLayer from "@/components/player/MobilePlayerLayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 import QuickRefSlider from "@/components/layout/QuickRefSlider";
+import QuickRefBottomSheet from "@/components/layout/QuickRefBottomSheet";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import TopBar from "@/components/layout/TopBar";
 import LiveActivityPanel from "@/components/layout/LiveActivityPanel";
@@ -365,7 +366,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <main className="flex-1 flex flex-col overflow-hidden md:pt-[52px] pt-14" style={{ overscrollBehaviorX: "none" }}>
         <style>{`
           @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
-          @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(80px + max(env(safe-area-inset-bottom, 0px), 8px)) !important; } }
+          /* Mobile: 56px bottom nav + 64px mini player + safe area */
+          @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(136px + max(env(safe-area-inset-bottom, 0px), 8px)) !important; } }
         `}</style>
         <div className="flex-1 overflow-y-auto player-scroll-area" style={{ overscrollBehaviorX: "none", touchAction: "pan-y" }}>
           {children}
@@ -385,6 +387,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* Mobile Player Layer */}
       <MobilePlayerLayer />
+
+      {/* Quick Access Bottom Sheet — mobile only */}
+      <QuickRefBottomSheet miniPlayerVisible={false} />
 
       {/* Theater Player */}
       <TheaterPlayer />
