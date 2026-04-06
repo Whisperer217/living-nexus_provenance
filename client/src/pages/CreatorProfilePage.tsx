@@ -235,7 +235,15 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           {isPlaying ? (
             <div className="flex gap-0.5 items-end h-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="w-0.5 rounded-full animate-pulse" style={{ height: `${8 + i * 3}px`, background: "oklch(0.84 0.155 85)", animationDelay: `${i * 0.1}s` }} />
+                <div key={i} className="w-0.5 rounded-full" style={{
+                  height: `${8 + i * 3}px`,
+                  background: "oklch(0.84 0.155 85)",
+                  animationName: "pulse",
+                  animationDuration: "2s",
+                  animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
+                  animationIterationCount: "infinite",
+                  animationDelay: `${i * 0.1}s`,
+                }} />
               ))}
             </div>
           ) : (

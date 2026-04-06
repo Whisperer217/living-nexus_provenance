@@ -419,8 +419,15 @@ export default function MobilePlayerLayer() {
             {[0, 1, 2].map(i => (
               <div
                 key={i}
-                className="w-1 h-1 rounded-full animate-pulse"
-                style={{ background: "oklch(0.84 0.155 85 / 0.65)", animationDelay: `${i * 200}ms` }}
+                className="w-1 h-1 rounded-full"
+                style={{
+                  background: "oklch(0.84 0.155 85 / 0.65)",
+                  animationName: "pulse",
+                  animationDuration: "2s",
+                  animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
+                  animationIterationCount: "infinite",
+                  animationDelay: `${i * 200}ms`,
+                }}
               />
             ))}
           </div>
@@ -540,7 +547,11 @@ export default function MobilePlayerLayer() {
                   style={{
                     height: "6px",
                     background: "oklch(0.84 0.155 85)",
-                    animation: `mobileWave ${0.4 + i * 0.1}s ease-in-out infinite alternate`,
+                    animationName: "mobileWave",
+                    animationDuration: `${0.4 + i * 0.1}s`,
+                    animationTimingFunction: "ease-in-out",
+                    animationIterationCount: "infinite",
+                    animationDirection: "alternate",
                     animationDelay: `${i * 0.08}s`,
                   }} />
               ))}

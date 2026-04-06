@@ -2671,3 +2671,9 @@
 - [x] Add Section 2 to Terms of Service: "Witness IDs — Scope and Limitations" with full legal disclaimer language and copyright.gov link; renumbered remaining sections 3–9
 - [x] /terms page already live at /terms with route and footer link
 - [ ] Add TOS acceptance checkbox to registration / first-login flow
+
+## Bug Fix: Animation Shorthand/Non-Shorthand Conflict on /song/:id
+- [x] Found 6 conflict sites across 4 files: LiveActivityPanel (2), MobilePlayerLayer (2), TheaterPlayer (1), CreatorProfilePage (1)
+- [x] Replaced all `animation` shorthand + `animationDelay` pairs with separate `animationName`, `animationDuration`, `animationTimingFunction`, `animationIterationCount`, `animationDirection`, `animationDelay` properties
+- [x] Removed conflicting `animate-pulse` Tailwind classes where inline animation properties were added
+- [x] TypeScript: 0 errors | Tests: 131/131 passing

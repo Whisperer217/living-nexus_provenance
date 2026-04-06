@@ -178,7 +178,11 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                               <div key={i} className="w-0.5 rounded-sm" style={{
                                 background: "#D4AF37",
                                 height: `${[8, 14, 10][i]}px`,
-                                animation: `bar-bounce 0.8s ease-in-out infinite alternate`,
+                                animationName: "bar-bounce",
+                                animationDuration: "0.8s",
+                                animationTimingFunction: "ease-in-out",
+                                animationIterationCount: "infinite",
+                                animationDirection: "alternate",
                                 animationDelay: `${i * 0.2}s`,
                               }} />
                             ))}
@@ -195,7 +199,11 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                         <div key={i} className="w-0.5 rounded-sm" style={{
                           background: "#D4AF37",
                           height: `${[6, 12, 8][i]}px`,
-                          animation: state.isPlaying ? `bar-bounce 0.8s ease-in-out infinite alternate` : "none",
+                          animationName: state.isPlaying ? "bar-bounce" : "none",
+                          animationDuration: "0.8s",
+                          animationTimingFunction: "ease-in-out",
+                          animationIterationCount: "infinite",
+                          animationDirection: "alternate",
                           animationDelay: `${i * 0.2}s`,
                         }} />
                       ))}

@@ -274,8 +274,15 @@ export default function TheaterPlayer() {
                     {[0, 1, 2].map(i => (
                       <div
                         key={i}
-                        className="w-1.5 h-1.5 rounded-full animate-pulse"
-                        style={{ background: "oklch(0.84 0.155 85 / 0.6)", animationDelay: `${i * 200}ms` }}
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{
+                          background: "oklch(0.84 0.155 85 / 0.6)",
+                          animationName: "pulse",
+                          animationDuration: "2s",
+                          animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
+                          animationIterationCount: "infinite",
+                          animationDelay: `${i * 200}ms`,
+                        }}
                       />
                     ))}
                   </div>
