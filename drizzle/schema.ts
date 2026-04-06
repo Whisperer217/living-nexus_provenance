@@ -68,6 +68,11 @@ export const users = mysqlTable("users", {
   // Onboarding
   hasSeenWelcome: boolean("hasSeenWelcome").default(false).notNull(),
 
+  // TOS acceptance — null = not yet accepted; timestamp = when the creator accepted the current TOS
+  // Version tracked via tosVersion field so future TOS updates can re-prompt
+  tosAcceptedAt: timestamp("tosAcceptedAt"),
+  tosVersion: varchar("tosVersion", { length: 16 }),  // e.g. "2.0" (current TOS with WID legal scope section)
+
   // Activity delta tracking — used for "new since last visit" badges
   lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),
   lastVisitedDashboardAt: timestamp("lastVisitedDashboardAt"),
@@ -479,6 +484,7 @@ export const notifications = mysqlTable("notifications", {
     "comment",           // someone commented on your track
     "like",              // someone liked your track
     "tip",               // someone tipped you
+    "reaction",          // someone sent an emoji reaction on your track
     "playlist_invite",   // invited to collaborate on a playlist
     "new_track",         // someone you witness dropped a new track
     "system",            // platform announcement

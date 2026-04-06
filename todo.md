@@ -2690,3 +2690,20 @@
 - [x] TypeScript: 0 errors | Tests: 131/131 passing
 - [ ] Include HAAI fields in WID certificate PDF download
 - [ ] Write dedicated vitest tests for HAAI schema and procedures
+
+## Bug Fix: Notification Type Enum Truncation (reactions)
+- [x] Audited notifications table enum — had 7 values, missing "reaction"
+- [x] Identified routers.ts line 1279 sends type: "reaction" on emoji reaction events
+- [x] Added "reaction" to notifications.type enum in drizzle/schema.ts
+- [x] Applied ALTER TABLE to live DB — enum now includes reaction
+- [x] Data truncated error on reaction events resolved
+
+## Feature: TOS Acceptance Checkbox (First Login / First Upload)
+- [x] Add tosAcceptedAt and tosVersion columns to users table in drizzle/schema.ts
+- [x] Applied ALTER TABLE to live DB — both columns confirmed
+- [x] Added recordTosAcceptance() helper to db.ts
+- [x] Added trpc.onboarding.acceptTos mutation (version-stamped, idempotent)
+- [x] Built TosAcceptanceModal: scrollable TOS summary, non-dismissible dialog, checkbox, Accept & Continue button
+- [x] Modal shows on first login when tosAcceptedAt is null OR tosVersion !== CURRENT_TOS_VERSION (re-prompts on TOS updates)
+- [x] Wired into App.tsx before WelcomeModal so TOS is accepted before welcome flow
+- [x] TypeScript: 0 errors | Tests: 131/131 passing

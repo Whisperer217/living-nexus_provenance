@@ -24,7 +24,7 @@ import {
   getSongByWitnessId, updateSongMetadata, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
   getUserTipTotalForSong, updateSongDownloadPermission,
-  getAllUsersWithStats, markWelcomeSeen, getCreatorAnalytics,
+  getAllUsersWithStats, markWelcomeSeen, recordTosAcceptance, getCreatorAnalytics,
   createEvent, getEventsByWork, getEventsForCreator,
   getCreatorForOg,
   createFieldNote, getFieldNotesByUser, getPublicFieldNotes,
@@ -2451,6 +2451,14 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       await markWelcomeSeen(ctx.user.id);
       return { ok: true };
     }),
+
+    /** Record TOS acceptance — sets tosAcceptedAt and tosVersion on the user record. */
+    acceptTos: protectedProcedure
+      .input(z.object({ version: z.string().max(16).default("2.0") }))
+      .mutation(async ({ ctx, input }) => {
+        await recordTosAcceptance(ctx.user.id, input.version);
+        return { ok: true, acceptedAt: new Date(), version: input.version };
+      }),
   }),
 
   // ── Witness Network ────────────────────────────────────────────────────────

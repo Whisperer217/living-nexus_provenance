@@ -9,6 +9,7 @@ import MainLayout from "./components/layout/MainLayout";
 import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
 import WelcomeModal from "./components/WelcomeModal";
+import { TosAcceptanceModal } from "./components/TosAcceptanceModal";
 import { CommunityToastProvider } from "./components/CommunityToast";
 import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
 import AmbientWidget from "./components/AmbientWidget";
@@ -141,6 +142,7 @@ export default function App() {
             <AmbientPlayerProvider>
             <QueueLoader />
             <WhatsNewModal />
+            <TosAcceptanceModal />
             <WelcomeModal />
             <CommunityToastProvider />
             <Toaster

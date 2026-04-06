@@ -1294,6 +1294,16 @@ export async function markWelcomeSeen(userId: number): Promise<void> {
     .where(eq(users.id, userId));
 }
 
+/** Record TOS acceptance with version stamp (idempotent — always updates to latest). */
+export async function recordTosAcceptance(userId: number, version: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db
+    .update(users)
+    .set({ tosAcceptedAt: new Date(), tosVersion: version, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
 // ─── Field Notes ──────────────────────────────────────────────────────────────
 export async function createFieldNote(data: {
   userId: number;
