@@ -2819,3 +2819,8 @@
 - [x] Follow Project button — DB table, tRPC follow/unfollow, notification on project updates
 - [x] Featured Projects section on Explore page
 - [x] Image upload in project update modal (MyProjectsPage)
+
+## Phase 45: Follow-up Improvements
+- [x] Bump What's New changelog to v2.22.0 — mention Follow Project feature
+- [x] Wire batch follower notifications in addUpdate procedure (already wired in Phase 44)
+- [x] Add Projects nav link to top bar next to Explore (already present in CORE_NAV)

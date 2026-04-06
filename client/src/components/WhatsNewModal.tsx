@@ -5,18 +5,29 @@ import {
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
   Eye, Globe, FileText, Network, Scroll, Film, Gift, Link2,
   Radio, ArrowUpFromLine, Library, FileArchive, Rocket, ImagePlus, Compass,
+  Bell, LayoutGrid, ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.21.0";
+const CURRENT_VERSION = "v2.22.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.21.0",
+    version: "v2.22.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Bell, text: "Follow Projects — You can now follow any creator campaign without donating. Hit the Follow button on any project page to subscribe to updates. You’ll receive an in-app notification every time the creator posts a progress update, keeping you in the loop from day one." },
+      { icon: LayoutGrid, text: "Featured Projects on Explore — The Explore page now surfaces active creator campaigns in a dedicated Featured Projects grid. Discover what the community is building, track funding progress, and follow projects you care about — all from the same page where you find new music." },
+      { icon: ImageIcon, text: "Update Image Uploads — Creators can now attach a photo to each progress update. The Post Update dialog includes an image picker that uploads directly to the CDN and embeds the image in the update, making campaigns feel more alive." },
+    ],
+  },
+  {
+    version: "v2.21.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Rocket, text: "Creator Projects — You can now launch a crowdfunding campaign directly on Living Nexus. Build a project page with a cinematic banner, rich content blocks (text, images, quotes, video), and a Stripe-powered Support button. Set a funding goal and watch the progress bar fill. When you publish, a WID is generated — your project is provenance-sealed from day one. Go to My Projects in your account menu to get started." },
       { icon: ImagePlus, text: "Project Banner Upload — Drag and drop a cover image directly onto your project hero area to make your campaign page stand out. Supports JPG, PNG, and WebP up to 10 MB." },
