@@ -441,11 +441,11 @@ export const appRouter = router({
     }),
     allCreators: publicProcedure.query(async () => getAllCreators()),
     featuredCreators: publicProcedure.query(async () => {
-      // Return up to 12 creators with most published tracks for the homepage carousel
+      // Return up to 12 creators sorted by most published tracks (most prolific first)
       const all = await getAllCreators();
-      return all.slice(0, 12);
+      return [...all].sort((a, b) => (b.publishedCount ?? 0) - (a.publishedCount ?? 0)).slice(0, 12);
     }),
-    recentCreators: publicProcedure.input(z.object({ limit: z.number().max(12).optional() }).optional()).query(async ({ input }) => {
+    recentCreators: publicProcedure.input(z.object({ limit: z.number().max(20).optional() }).optional()).query(async ({ input }) => {
       return getRecentCreators(input?.limit ?? 8);
     }),
     getCreator: publicProcedure.input(z.object({ creatorId: z.number() })).query(async ({ input }) => {

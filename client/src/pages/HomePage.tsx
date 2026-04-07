@@ -351,13 +351,22 @@ function FeaturedCreatorsCarousel() {
   );
 }
 
-/** New Voices — recently joined creators who have published at least one track */
+/** New Voices — recently joined creators who have published at least one track.
+ *  Excludes any creator already shown in FeaturedCreatorsCarousel to prevent duplicates. */
 function NewVoicesCarousel() {
-  const { data: creators } = trpc.profile.recentCreators.useQuery(
-    { limit: 10 },
+  const { data: allRecent } = trpc.profile.recentCreators.useQuery(
+    { limit: 20 },
     { staleTime: 120_000, refetchOnWindowFocus: false }
   );
-  if (!creators || creators.length === 0) return null;
+  const { data: featured } = trpc.profile.featuredCreators.useQuery(undefined, {
+    staleTime: 120_000,
+    refetchOnWindowFocus: false,
+  });
+  // Build a set of IDs already shown in the Featured row
+  const featuredIds = new Set((featured ?? []).map((c: any) => c.id as number));
+  // Only show creators NOT already in the Featured row, capped at 10
+  const creators = (allRecent ?? []).filter((c: any) => !featuredIds.has(c.id)).slice(0, 10);
+  if (creators.length === 0) return null;
   return (
     <div className="px-6 pb-6">
       <div className="flex items-center justify-between mb-3">
