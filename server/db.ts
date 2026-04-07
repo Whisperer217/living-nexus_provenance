@@ -249,6 +249,7 @@ export async function getAllCreators() {
 export async function createSong(data: {
   userId: number; title: string; genre?: string; bpm?: number; keySignature?: string;
   moodTags?: string[]; lyricsText?: string; lyricsHash?: string; coWriters?: string[]; albumName?: string;
+  creditsJson?: string;
   releaseDate?: string; isrc?: string;
   aiConsent: "prohibited" | "permitted_attribution" | "permitted";
   fileUrl?: string; fileKey?: string; coverArtUrl?: string; fileHash?: string;
@@ -3788,4 +3789,82 @@ export async function getProjectFollowerUserIds(projectId: number): Promise<numb
     .from(projectFollowers)
     .where(eq(projectFollowers.projectId, projectId));
   return rows.map((r: { userId: number }) => r.userId);
+}
+
+// ─── Competitive Edge Helpers (Phase 80) ─────────────────────────────────────
+
+/** Return up to `limit` creators who joined in the last 30 days and have at least 1 published track. */
+export async function getRecentCreators(limit = 8) {
+  const db = await getDb();
+  if (!db) return [];
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const results = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      profilePhotoUrl: users.profilePhotoUrl,
+      primaryGenre: users.primaryGenre,
+      createdAt: users.createdAt,
+      publishedCount: sql<number>`count(${songs.id})`,
+    })
+    .from(users)
+    .innerJoin(songs, and(eq(songs.userId, users.id), eq(songs.status, "Published")))
+    .where(and(
+      isNotNull(users.name),
+      ne(users.name, ""),
+      sql`${users.createdAt} >= ${thirtyDaysAgo}`,
+    ))
+    .groupBy(users.id)
+    .having(sql`count(${songs.id}) > 0`)
+    .orderBy(desc(users.createdAt))
+    .limit(limit);
+  return results;
+}
+
+/** Return top `limit` published songs uploaded in the last 7 days, ranked by play count. */
+export async function getNewThisWeek(opts?: { genre?: string; contentType?: "audio" | "lyrics" | "manuscript" | "comic"; limit?: number }) {
+  const db = await getDb();
+  if (!db) return [];
+  const limit = opts?.limit ?? 24;
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const conditions: ReturnType<typeof eq>[] = [
+    eq(songs.isPublic, true) as ReturnType<typeof eq>,
+    eq(songs.status, "Published") as ReturnType<typeof eq>,
+    sql`${songs.createdAt} >= ${sevenDaysAgo}` as unknown as ReturnType<typeof eq>,
+  ];
+  if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
+  if (opts?.contentType) conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
+  return db.select({
+    song: songs,
+    creator: {
+      id: users.id, name: users.name, artistHandle: users.artistHandle,
+      profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure,
+      primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus,
+      role: users.role,
+    },
+  })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(...conditions))
+    .orderBy(desc(songs.playCount), desc(songs.createdAt))
+    .limit(limit);
+}
+
+/** Update the creditsJson field for a song (owner only — enforced in router). */
+export async function updateSongCredits(songId: number, creditsJson: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.update(songs).set({ creditsJson }).where(eq(songs.id, songId));
+}
+
+/** Get total play count for a creator (sum of all their published songs). */
+export async function getCreatorTotalPlays(creatorId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ total: sql<number>`COALESCE(SUM(${songs.playCount}), 0)` })
+    .from(songs)
+    .where(and(eq(songs.userId, creatorId), eq(songs.status, "Published"), eq(songs.isPublic, true)));
+  return Number(rows[0]?.total ?? 0);
 }

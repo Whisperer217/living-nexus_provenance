@@ -1071,6 +1071,11 @@ export default function CreatorProfilePage() {
                 <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
                   <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}tracks
                 </span>
+                {totalPlays > 0 && (
+                  <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
+                    <span style={{ color: "oklch(0.84 0.155 85)", fontVariantNumeric: "tabular-nums" }}>{totalPlays.toLocaleString()}</span>{" "}plays
+                  </span>
+                )}
                 {witnessCount > 0 && (
                   <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
                     <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses

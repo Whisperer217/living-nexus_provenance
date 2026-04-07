@@ -977,6 +977,34 @@ export default function SongDetailPage() {
         )}
       </div>
 
+      {/* ── CREDITS ── */}
+      {(() => {
+        const rawCredits = (song as any)?.creditsJson;
+        const coWriters: string[] = Array.isArray((song as any)?.coWriters) ? (song as any).coWriters : [];
+        let credits: { role: string; name: string }[] = [];
+        if (rawCredits) {
+          try { credits = JSON.parse(rawCredits); } catch { /* ignore */ }
+        }
+        const coWriterCredits = coWriters.map((name: string) => ({ role: "Co-Writer", name }));
+        const allCredits = [...credits, ...coWriterCredits];
+        if (allCredits.length === 0) return null;
+        return (
+          <div className="mt-4 rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+            <div className="px-5 py-4">
+              <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Credits</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                {allCredits.map((c: { role: string; name: string }, i: number) => (
+                  <div key={i} className="flex items-baseline gap-2">
+                    <span className="text-[10px] uppercase tracking-widest flex-shrink-0" style={{ color: "oklch(0.45 0.04 280)", minWidth: "80px" }}>{c.role}</span>
+                    <span className="text-sm" style={{ color: "oklch(0.78 0.03 280)" }}>{c.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Gift Modal */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
         <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}>

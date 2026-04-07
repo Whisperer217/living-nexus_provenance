@@ -3051,3 +3051,14 @@
 - [x] Haptic feedback (navigator.vibrate(5)) confirmed present on all BottomNavBar taps
 - [x] Bell badge count wired to trpc.notifications.unreadCount (confirmed from Phase 78)
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 80: Competitive Edge Improvements (vs Audius/SoundCloud/Spotify/Bandcamp)
+- [x] Creator Profile: total play count stat already wired (line 611+1074) to profile stats row (visible to visitors)
+- [x] Creator Profile: Witness/Follow button already wired from prior phases with follower count display (social proof like SoundCloud)
+- [x] Song Detail: Credits section added — creditsJson DB column, upload editor, SongDetailPage display — songwriter, producer, featured artists fields (editable by owner, visible to all)
+- [x] Explore: "New This Week" mode added filter mode alongside Infinite/Trending/Randomize
+- [ ] Dashboard Analytics: add 7-day vs 30-day toggle for plays chart
+- [ ] Dashboard Analytics: add top track trending indicator with percentage change vs prior period
+- [ ] Upload: add "Schedule Release" date/time field (future publish date — Spotify/SoundCloud-inspired)
+- [ ] Home: add "Trending This Week" section showing top 5 tracks by play velocity
+- [x] Home: "New Voices" carousel added (recently joined creators with badge) showing recently joined creators with at least 1 upload

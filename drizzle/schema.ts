@@ -201,6 +201,10 @@ export const songs = mysqlTable("songs", {
   haaiEmotionalTone: text("haaiEmotionalTone"),        // The emotional tone and MUT-alignment the creator was pursuing
   haaiDeclaredAt: timestamp("haaiDeclaredAt"),         // Timestamp when the HAAI declaration was completed
 
+  // Song Credits — JSON array of { role: string; name: string } objects
+  // Roles: songwriter, producer, featured, mixing, mastering, etc.
+  creditsJson: text("creditsJson"),
+
   // Stats
   isPublic: boolean("isPublic").default(true).notNull(),
   playCount: int("playCount").default(0).notNull(),

@@ -11,7 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Upload, Music, Image as ImageIcon, Check, Shield, ShieldCheck, ChevronRight,
   ChevronLeft, Play, Download, Copy, RefreshCw, Zap, Loader2,
-  Sparkles, CheckCircle2, X as XIcon, Video,
+  Sparkles, CheckCircle2, X as XIcon, Video, Plus, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -166,6 +166,8 @@ export default function UploadPage() {
   const [isrc, setIsrc] = useState("");
   const [bmiNumber, setBmiNumber] = useState("");
   const [lyrics, setLyrics] = useState("");
+  // Credits: array of { role, name } entries
+  const [credits, setCredits] = useState<{ role: string; name: string }[]>([]);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
   const [aiDisclosure, setAiDisclosure] = useState<"original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument">("original");
@@ -542,6 +544,7 @@ export default function UploadPage() {
           fileUrl, fileKey, coverArtUrl, title, genre: genre || undefined,
           albumName: albumName || undefined, releaseDate: releaseDate || undefined,
           isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+          creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
           caption: caption || undefined,
           contentType: uploadMode,
           fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
@@ -568,6 +571,7 @@ export default function UploadPage() {
           bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
           albumName: albumName || undefined, releaseDate: releaseDate || undefined,
           isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+          creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
           lyricsText: lyrics,
           lyricsHash: witnessData?.fileHash,
           isLyricsOnly: true,
@@ -603,6 +607,7 @@ export default function UploadPage() {
         bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
         albumName: albumName || undefined, releaseDate: releaseDate || undefined,
         isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+        creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
         lyricsText: lyrics || undefined,
         fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
         harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
@@ -948,6 +953,51 @@ export default function UploadPage() {
                       style={{ background: selectedMoods.includes(m) ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.15 0.015 280)", color: selectedMoods.includes(m) ? "oklch(0.84 0.155 85)" : "oklch(0.5 0.03 280)", border: `1px solid ${selectedMoods.includes(m) ? "oklch(0.75 0.18 85 / 0.4)" : "oklch(0.22 0.015 280)"}` }}>
                       {m}
                     </button>
+                  ))}
+                </div>
+              </div>
+              {/* Credits editor */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Credits</label>
+                  <button
+                    type="button"
+                    onClick={() => setCredits(prev => [...prev, { role: "", name: "" }])}
+                    className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg transition-all"
+                    style={{ color: "oklch(0.75 0.18 145)", border: "1px solid oklch(0.75 0.18 145 / 0.3)", background: "oklch(0.75 0.18 145 / 0.06)" }}
+                  >
+                    <Plus size={10} /> Add credit
+                  </button>
+                </div>
+                {credits.length === 0 && (
+                  <p className="text-[11px]" style={{ color: "oklch(0.4 0.03 280)" }}>No credits added. Click "Add credit" to list co-writers, producers, engineers, etc.</p>
+                )}
+                <div className="space-y-2">
+                  {credits.map((c, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Input
+                        placeholder="Role (e.g. Producer)"
+                        value={c.role}
+                        onChange={e => setCredits(prev => prev.map((x, j) => j === i ? { ...x, role: e.target.value } : x))}
+                        className="flex-1"
+                        style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)", fontSize: "12px" }}
+                      />
+                      <Input
+                        placeholder="Name"
+                        value={c.name}
+                        onChange={e => setCredits(prev => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
+                        className="flex-1"
+                        style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)", fontSize: "12px" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setCredits(prev => prev.filter((_, j) => j !== i))}
+                        className="flex-shrink-0 p-1.5 rounded-lg transition-all hover:bg-red-900/20"
+                        style={{ color: "oklch(0.55 0.18 25)" }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>

@@ -351,6 +351,70 @@ function FeaturedCreatorsCarousel() {
   );
 }
 
+/** New Voices — recently joined creators who have published at least one track */
+function NewVoicesCarousel() {
+  const { data: creators } = trpc.profile.recentCreators.useQuery(
+    { limit: 10 },
+    { staleTime: 120_000, refetchOnWindowFocus: false }
+  );
+  if (!creators || creators.length === 0) return null;
+  return (
+    <div className="px-6 pb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-heading text-[13px] tracking-[0.14em] uppercase" style={{ color: "rgba(255,255,255,0.65)" }}>
+          <Sparkles size={13} className="inline mr-1.5" style={{ color: "oklch(0.75 0.18 145)" }} />
+          New Voices
+        </h2>
+        <Link href="/explore">
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#D4AF37]" style={{ color: "oklch(0.55 0.03 280)" }}>
+            See all
+          </span>
+        </Link>
+      </div>
+      <div
+        className="flex gap-3 overflow-x-auto pb-2"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {creators.map((creator: any) => (
+          <Link key={creator.id} href={`/creator/${creator.id}`}>
+            <div
+              className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
+              style={{
+                width: "88px",
+                background: "oklch(0.10 0.04 145 / 0.5)",
+                border: "1px solid oklch(0.75 0.18 145 / 0.15)",
+              }}
+            >
+              <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                style={{ border: "2px solid oklch(0.75 0.18 145 / 0.4)" }}>
+                {creator.profilePhotoUrl ? (
+                  <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[16px] font-bold"
+                    style={{ background: "oklch(0.75 0.18 145 / 0.15)", color: "oklch(0.75 0.18 145)" }}>
+                    {(creator.artistHandle || creator.name || "?")[0].toUpperCase()}
+                  </div>
+                )}
+                {/* NEW badge */}
+                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+                  style={{ background: "oklch(0.75 0.18 145)", border: "1.5px solid oklch(0.08 0.02 280)" }}>
+                  <Sparkles size={8} style={{ color: "oklch(0.08 0.02 280)" }} />
+                </div>
+              </div>
+              <div className="text-center min-w-0 w-full">
+                <p className="font-heading text-[10px] truncate w-full" style={{ color: "oklch(0.92 0.01 280)" }}>
+                  {creator.artistHandle || creator.name}
+                </p>
+                <p className="font-body text-[9px] mt-0.5" style={{ color: "oklch(0.75 0.18 145 / 0.8)" }}>New</p>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Horizontal 2-row track grid — accepts pre-fetched like data to avoid per-card queries */
 function HorizontalTrackGrid({
   tracks,
@@ -929,6 +993,10 @@ export default function HomePage() {
           FEATURED CREATORS — horizontal panning carousel
       ══════════════════════════════════════════════════════════════ */}
       <FeaturedCreatorsCarousel />
+      {/* ══════════════════════════════════════════════════════════════
+          NEW VOICES — recently joined creators
+      ══════════════════════════════════════════════════════════════ */}
+      <NewVoicesCarousel />
       {/* ══════════════════════════════════════════════════════════════
           CREATOR PROJECTS — horizontal scroll row (top priority)
       ══════════════════════════════════════════════════════════════ */}

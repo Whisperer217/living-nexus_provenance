@@ -50,6 +50,10 @@ import {
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
   getSongReactions, toggleSongReaction,
   getTrendingWorks,
+  getNewThisWeek,
+  getRecentCreators,
+  updateSongCredits,
+  getCreatorTotalPlays,
   getSongsWithoutEmbedVideo,
   reorderMySongs,
   archiveAudioVersion, replaceAudioFile, getAudioVersions,
@@ -441,6 +445,9 @@ export const appRouter = router({
       const all = await getAllCreators();
       return all.slice(0, 12);
     }),
+    recentCreators: publicProcedure.input(z.object({ limit: z.number().max(12).optional() }).optional()).query(async ({ input }) => {
+      return getRecentCreators(input?.limit ?? 8);
+    }),
     getCreator: publicProcedure.input(z.object({ creatorId: z.number() })).query(async ({ input }) => {
       const creator = await getUserById(input.creatorId);
       if (!creator) return null;
@@ -496,6 +503,18 @@ export const appRouter = router({
   songs: router({
     discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(100).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
     trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
+    newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input ?? {})),
+    updateCredits: protectedProcedure.input(z.object({ songId: z.number().int(), creditsJson: z.string().max(4096) })).mutation(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
+      if (song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
+      await updateSongCredits(input.songId, input.creditsJson);
+      return { ok: true };
+    }),
+    getTotalPlays: publicProcedure.input(z.object({ creatorId: z.number().int() })).query(async ({ input }) => {
+      const total = await getCreatorTotalPlays(input.creatorId);
+      return { total };
+    }),
     getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => getSongWithCreator(input.id)),
     verifyWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
       // Handle WID-TST (testimony) lookups
@@ -669,6 +688,7 @@ export const appRouter = router({
       title: z.string().min(1).max(255), genre: z.string().optional(), bpm: z.number().optional(),
       keySignature: z.string().optional(), moodTags: z.array(z.string()).optional(),
       coWriters: z.array(z.string()).optional(), albumName: z.string().optional(),
+      creditsJson: z.string().max(4096).optional(),
       releaseDate: z.string().optional(), isrc: z.string().optional(),
       aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]),
       lyricsText: z.string().max(20000).optional(),
@@ -716,7 +736,7 @@ export const appRouter = router({
       // Determine HAAI declared timestamp if all 6 fields are provided
       const haaiFields = [input.haaiVisualConcept, input.haaiStyleLanguage, input.haaiInstrumentation, input.haaiVocalConveyance, input.haaiLyricalInspiration, input.haaiEmotionalTone];
       const haaiDeclaredAt = (input.aiDisclosure === "human_authored_ai_instrument" && haaiFields.every(f => f && f.trim().length > 0)) ? new Date() : undefined;
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiDeclaredAt } as any);
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiDeclaredAt } as any);
        const songId = (insertResult as any).insertId as number;
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));

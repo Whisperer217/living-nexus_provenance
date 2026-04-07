@@ -10,7 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -32,7 +32,7 @@ const GENRE_CARDS = [
 const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp";
 const PAGE_SIZE = 24;
 
-type ExploreMode = "infinite" | "randomize" | "trending";
+type ExploreMode = "infinite" | "randomize" | "trending" | "new";
 type ContentType = "audio" | "lyrics" | "manuscript" | "comic";
 
 const CONTENT_TABS: { id: ContentType; label: string; icon: string; color: string }[] = [
@@ -333,6 +333,12 @@ export default function ExplorePage() {
     { staleTime: 60_000, refetchOnWindowFocus: false }
   );
 
+  // New This Week query
+  const { data: newThisWeekData, isLoading: newThisWeekLoading } = trpc.songs.newThisWeek.useQuery(
+    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 48, contentType },
+    { enabled: mode === "new", refetchOnWindowFocus: false, staleTime: 120_000 }
+  );
+
   // Trending query
   const { data: trendingData, isLoading: trendingLoading } = trpc.songs.trending.useQuery(
     { genre: activeGenre === "All" ? undefined : activeGenre, limit: 50 },
@@ -432,8 +438,8 @@ export default function ExplorePage() {
   }, []);
 
   // Active songs list
-  const songs = mode === "infinite" ? allSongs : mode === "trending" ? (trendingData || []) : (randomData || []);
-  const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : mode === "trending" ? trendingLoading : randomLoading;
+  const songs = mode === "infinite" ? allSongs : mode === "trending" ? (trendingData || []) : mode === "new" ? (newThisWeekData || []) : (randomData || []);
+  const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : mode === "trending" ? trendingLoading : mode === "new" ? newThisWeekLoading : randomLoading;
 
   // Bulk like status — one query for all visible songs instead of per-card queries
   const songIds = useMemo(() => songs.map((s: any) => s.song.id as number), [songs]);
@@ -740,6 +746,16 @@ export default function ExplorePage() {
             >
               <TrendingUp size={12} />
               Trending
+            </button>
+            <button
+              onClick={() => setMode("new")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
+                mode === "new" ? "" : "text-white/40 hover:text-white/70"
+              }`}
+              style={mode === "new" ? { background: "oklch(0.22 0.04 270)", color: "oklch(0.75 0.18 145)" } : {}}
+            >
+              <Sparkles size={12} />
+              New
             </button>
           </div>
 
