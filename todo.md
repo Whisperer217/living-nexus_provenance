@@ -3074,3 +3074,8 @@
 - [x] Credits editor in song Edit/metadata panel (retroactive credits for existing songs)
 - [x] New This Week empty state card on Explore page
 - [x] Verify pin/unpin functionality end-to-end
+
+## Phase 80.6: Block Editor Improvements
+- [ ] Install @dnd-kit/sortable and add drag-to-reorder to block editor
+- [ ] Add focal-point drag UI to block image editor
+- [ ] Add image upload to project update form
