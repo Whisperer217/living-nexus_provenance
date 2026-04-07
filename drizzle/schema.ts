@@ -901,6 +901,7 @@ export const promptDrafts = mysqlTable("promptDrafts", {
   userInputBlocks: text("userInputBlocks"),
   shareToken: varchar("shareToken", { length: 64 }),
   shareUrl: varchar("shareUrl", { length: 512 }),
+  isShared: boolean("isShared").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

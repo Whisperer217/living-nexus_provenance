@@ -1,0 +1,1 @@
+ALTER TABLE `promptDrafts` ADD `isShared` boolean DEFAULT false NOT NULL;

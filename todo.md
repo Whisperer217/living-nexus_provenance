@@ -3100,3 +3100,16 @@
 - [x] Context menu closes on outside click
 - [x] Speed toggle syncs to audio element playbackRate
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 82: Provenance Prompt Generator — Identity Lock
+- [x] Added `isShared` boolean column to `promptDrafts` schema (default false), migrated DB (migration 0060)
+- [x] Added `revokePromptDraftShare` helper in db.ts
+- [x] `getSharedPrompt` now refuses to serve prompts where `isShared = false` (private by default)
+- [x] `getSharedPrompt` returns creator attribution (name, handle, id) for watermark display
+- [x] Added `revokeShare` protectedProcedure (owner-only) to promptStudio router
+- [x] Prompt Studio dialog shows a "Profile-Locked Tool" locked state for non-owners
+- [x] Full studio UI only renders when `isOwner === true`
+- [x] Draft archive: Share button is conditional — shows "Revoke" when already shared (isShared=true)
+- [x] SharedPromptPage rebuilt with creator identity badge, provenance watermark footer auto-appended to all copy actions
+- [x] SharedPromptPage shows "Prompt Not Available" locked state for unshared/revoked prompts
+- [x] 137/137 tests passing, 0 TypeScript errors

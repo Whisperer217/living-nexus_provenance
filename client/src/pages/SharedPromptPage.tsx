@@ -1,6 +1,6 @@
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Shield, Copy, ExternalLink, Sparkles, Music, FileText, Layers, Image, Newspaper } from "lucide-react";
+import { Shield, Copy, ExternalLink, Sparkles, Music, FileText, Layers, Image, Newspaper, Lock, User } from "lucide-react";
 import { toast } from "sonner";
 
 const PROMPT_TYPE_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
@@ -19,9 +19,35 @@ export default function SharedPromptPage() {
     { enabled: !!token, staleTime: 60_000 }
   );
 
+  // Build the provenance watermark footer that is always appended to any copy action
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const buildProvenanceFooter = (d: any) => {
+    const lines = [
+      ``,
+      `─────────────────────────────────────────`,
+      `PROVENANCE RECORD — Living Nexus`,
+      `Creator: ${d.creatorName ?? "Unknown Creator"}${d.creatorHandle ? ` (@${d.creatorHandle})` : ""}`,
+      d.expressionId ? `Expression ID: ${d.expressionId}` : null,
+      `Prompt Type: ${PROMPT_TYPE_LABELS[d.promptType]?.label ?? d.promptType}`,
+      `Generated: ${new Date(d.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
+      `Source: livingnexus.org`,
+      `─────────────────────────────────────────`,
+      `This prompt was generated from the creator's registered works and expression identity.`,
+      `Reuse without attribution violates the creator's provenance rights.`,
+    ].filter(Boolean).join("\n");
+    return lines;
+  };
+
   const copyText = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast.success(`${label} copied to clipboard`);
+  };
+
+  const copyWithProvenance = (text: string, label: string) => {
+    if (!draft) return;
+    const withWatermark = text + buildProvenanceFooter(draft);
+    navigator.clipboard.writeText(withWatermark);
+    toast.success(`${label} copied with provenance record`);
   };
 
   if (isLoading) {
@@ -35,10 +61,12 @@ export default function SharedPromptPage() {
   if (error || !draft) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6" style={{ background: "#0a0a12" }}>
-        <Shield className="w-12 h-12" style={{ color: "rgba(139,92,246,0.3)" }} />
-        <h1 className="text-xl font-heading" style={{ color: "rgba(229,231,235,0.7)" }}>Prompt Not Found</h1>
+        <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+          <Lock className="w-7 h-7" style={{ color: "rgba(139,92,246,0.5)" }} />
+        </div>
+        <h1 className="text-xl font-heading" style={{ color: "rgba(229,231,235,0.7)" }}>Prompt Not Available</h1>
         <p className="text-sm text-center max-w-xs" style={{ color: "rgba(156,163,175,0.5)" }}>
-          This shared prompt link may have expired or been removed by the creator.
+          This prompt is private or the share link has been revoked by the creator. Provenance prompts are profile-locked and shared only by explicit creator action.
         </p>
         <Link href="/">
           <a className="mt-2 px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "rgba(139,92,246,0.15)", color: "rgba(167,139,250,0.9)", border: "1px solid rgba(139,92,246,0.25)" }}>
@@ -52,6 +80,9 @@ export default function SharedPromptPage() {
   const typeInfo = PROMPT_TYPE_LABELS[draft.promptType] ?? { label: draft.promptType, icon: <Sparkles className="w-4 h-4" />, color: "rgba(167,139,250,0.8)" };
   const styleTags = draft.styleTags ? draft.styleTags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
   const inputBlocks: Array<{ label: string; content: string }> = Array.isArray(draft.userInputBlocks) ? draft.userInputBlocks : [];
+  const creatorName = (draft as any).creatorName ?? "Unknown Creator";
+  const creatorHandle = (draft as any).creatorHandle;
+  const creatorId = (draft as any).creatorId;
 
   return (
     <div className="min-h-screen px-4 py-10 flex flex-col items-center" style={{ background: "#0a0a12" }}>
@@ -63,6 +94,37 @@ export default function SharedPromptPage() {
         </div>
         <h1 className="text-2xl font-heading mb-1" style={{ color: "rgba(229,231,235,0.9)" }}>Provenance Prompt</h1>
         <p className="text-sm" style={{ color: "rgba(156,163,175,0.5)" }}>A creator-grounded prompt generated from registered works and expression identity</p>
+      </div>
+
+      {/* ── Creator Identity Badge (watermark) ─────────────────────────── */}
+      <div className="w-full max-w-xl mb-4 rounded-xl px-4 py-3 flex items-center gap-3"
+        style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.18)" }}>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.3)" }}>
+          <User className="w-4 h-4" style={{ color: "rgba(167,139,250,0.8)" }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-heading tracking-widest uppercase mb-0.5" style={{ color: "rgba(139,92,246,0.5)" }}>Shared by Creator</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            {creatorId ? (
+              <Link href={`/creator/${creatorId}`}>
+                <a className="text-sm font-semibold hover:underline" style={{ color: "rgba(167,139,250,0.9)" }}>
+                  {creatorName}
+                </a>
+              </Link>
+            ) : (
+              <span className="text-sm font-semibold" style={{ color: "rgba(167,139,250,0.9)" }}>{creatorName}</span>
+            )}
+            {creatorHandle && (
+              <span className="text-[10px]" style={{ color: "rgba(156,163,175,0.45)" }}>@{creatorHandle}</span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-1 flex-shrink-0 px-2 py-1 rounded-lg"
+          style={{ background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.15)" }}>
+          <Shield className="w-3 h-3" style={{ color: "rgba(52,211,153,0.6)" }} />
+          <span className="text-[9px] font-mono" style={{ color: "rgba(52,211,153,0.6)" }}>SHARED</span>
+        </div>
       </div>
 
       {/* Main card */}
@@ -100,7 +162,7 @@ export default function SharedPromptPage() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-[9px] font-heading tracking-widest uppercase" style={{ color: "rgba(156,163,175,0.4)" }}>Expression Prompt</span>
             <button
-              onClick={() => copyText(draft.prompt, "Prompt")}
+              onClick={() => copyWithProvenance(draft.prompt, "Prompt")}
               className="flex items-center gap-1 text-[9px] px-2 py-1 rounded"
               style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.7)" }}
             >
@@ -116,7 +178,7 @@ export default function SharedPromptPage() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-[9px] font-heading tracking-widest uppercase" style={{ color: "rgba(156,163,175,0.4)" }}>Style Tags</span>
               <button
-                onClick={() => copyText(styleTags.join(", "), "Style tags")}
+                onClick={() => copyWithProvenance(styleTags.join(", "), "Style tags")}
                 className="flex items-center gap-1 text-[9px] px-2 py-1 rounded"
                 style={{ background: "rgba(96,165,250,0.08)", color: "rgba(96,165,250,0.6)" }}
               >
@@ -156,7 +218,7 @@ export default function SharedPromptPage() {
           </div>
         )}
 
-        {/* Copy all button */}
+        {/* Copy all button — always appends provenance watermark */}
         <div className="px-5 pb-5">
           <button
             onClick={() => {
@@ -166,20 +228,34 @@ export default function SharedPromptPage() {
                 draft.composerNote ? `\nComposer's Note: ${draft.composerNote}` : "",
                 draft.expressionId ? `\nExpression ID: ${draft.expressionId}` : "",
               ].filter(Boolean).join("\n");
-              copyText(full, "Full output");
+              copyWithProvenance(full, "Full output");
             }}
             className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
             style={{ background: "rgba(139,92,246,0.15)", color: "rgba(167,139,250,0.9)", border: "1px solid rgba(139,92,246,0.25)" }}
           >
             <Copy className="w-4 h-4" /> Copy Full Output
           </button>
+          <p className="text-[9px] text-center mt-2" style={{ color: "rgba(156,163,175,0.3)" }}>
+            Provenance record is automatically appended to all copied text
+          </p>
+        </div>
+      </div>
+
+      {/* Provenance notice */}
+      <div className="w-full max-w-xl mt-4 rounded-xl px-4 py-3"
+        style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-start gap-2">
+          <Shield className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "rgba(139,92,246,0.4)" }} />
+          <p className="text-[10px] leading-relaxed" style={{ color: "rgba(156,163,175,0.4)" }}>
+            This prompt was generated from <strong style={{ color: "rgba(167,139,250,0.6)" }}>{creatorName}</strong>'s registered works and expression identity on Living Nexus. It is profile-locked — the generator can only be used by the creator themselves. Copying this prompt without attribution violates the creator's provenance rights.
+          </p>
         </div>
       </div>
 
       {/* Footer CTA */}
       <div className="mt-8 text-center">
         <p className="text-xs mb-3" style={{ color: "rgba(156,163,175,0.35)" }}>
-          This prompt was generated and registered on Living Nexus — the provenance layer for creative work.
+          Register your own creative works and generate your Expression Identity on Living Nexus.
         </p>
         <Link href="/">
           <a className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "rgba(139,92,246,0.12)", color: "rgba(167,139,250,0.8)", border: "1px solid rgba(139,92,246,0.2)" }}>

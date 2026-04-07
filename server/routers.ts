@@ -72,7 +72,7 @@ import {
   countFounders, grantFounder, revokeFounder, listFounders, searchUsersForFounderPanel, MAX_FOUNDERS,
   getSongsNeedingAutoVideo, cacheAutoVideoUrl, getAutoVideoStats,
   savePromptDraft, getPromptDraftsByUser, getPromptDraftById,
-  getPromptDraftByShareToken, updatePromptDraftShare, deletePromptDraft,
+  getPromptDraftByShareToken, updatePromptDraftShare, deletePromptDraft, revokePromptDraftShare,
   updateUserToneFrequency,
   listActiveJukeboxRooms,
   createContentFlag, listContentFlags, resolveContentFlag, getContentFlagStats,
@@ -4073,16 +4073,33 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         return { shareUrl, shareToken };
       }),
 
-    // ── View a shared prompt (public) ─────────────────────────────────────────
+    // ── View a shared prompt (public — only if owner explicitly shared it) ────────
     getSharedPrompt: publicProcedure
       .input(z.object({ shareToken: z.string() }))
       .query(async ({ input }) => {
         const draft = await getPromptDraftByShareToken(input.shareToken);
-        if (!draft) throw new TRPCError({ code: "NOT_FOUND" });
+        // Only serve prompts that the owner has explicitly shared
+        if (!draft || !draft.isShared) throw new TRPCError({ code: "NOT_FOUND" });
+        // Fetch creator info for attribution watermark
+        const creator = await getUserById(draft.userId);
         return {
           ...draft,
           userInputBlocks: draft.userInputBlocks ? JSON.parse(draft.userInputBlocks) : [],
+          // Embed creator attribution for the shared view
+          creatorName: creator?.name ?? creator?.artistHandle ?? "Unknown Creator",
+          creatorHandle: creator?.artistHandle ?? null,
+          creatorId: draft.userId,
         };
+      }),
+
+    // ── Revoke a share link (owner only) ─────────────────────────────────────
+    revokeShare: protectedProcedure
+      .input(z.object({ draftId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const draft = await getPromptDraftById(input.draftId);
+        if (!draft || draft.userId !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND" });
+        await revokePromptDraftShare(input.draftId, ctx.user.id);
+        return { success: true };
       }),
 
     // ── Import & Anchor: fuse external platform prompt with creator EID ────────

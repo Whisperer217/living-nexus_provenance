@@ -504,6 +504,10 @@ export default function CreatorProfilePage() {
     onSuccess: () => { refetchDrafts(); toast.success("Draft deleted."); },
     onError: (e: any) => toast.error(e.message),
   });
+  const revokeShareMutation = trpc.promptStudio.revokeShare.useMutation({
+    onSuccess: () => { refetchDrafts(); toast.success("Share link revoked. This prompt is now private."); },
+    onError: (e: any) => toast.error(e.message),
+  });
   const { data: myDrafts = [], refetch: refetchDrafts } = trpc.promptStudio.getDrafts.useQuery(
     undefined,
     { enabled: !!user, staleTime: 30_000 }
@@ -1552,7 +1556,7 @@ export default function CreatorProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* ─── Provenance Prompt Generator Modal ────────────────────────────── */}
+       {/* ─── Provenance Prompt Generator Modal ───────────────────── */}
       <Dialog open={showPromptStudio} onOpenChange={(open) => { setShowPromptStudio(open); if (!open) { setPsTab("identity_regen"); setPsResult(null); } }}>
         <DialogContent
           className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
@@ -1567,6 +1571,29 @@ export default function CreatorProfilePage() {
               A composer's tool grounded in your creative lineage. Bring your own inspiration — lyrics, ideas, moods — or auto-generate from your profile. Every result is issued an EID and permanently archived.
             </p>
           </DialogHeader>
+
+          {/* ── OWNER GUARD: block non-owners from using the generator ──────────── */}
+          {!isOwner && (
+            <div className="flex flex-col items-center justify-center gap-4 py-10 px-4 text-center">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "rgba(139,92,246,0.10)", border: "1px solid rgba(139,92,246,0.25)" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="rgba(139,92,246,0.6)" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold mb-1" style={{ color: "rgba(167,139,250,0.9)" }}>Profile-Locked Tool</p>
+                <p className="text-xs max-w-xs" style={{ color: "rgba(156,163,175,0.55)" }}>
+                  The Provenance Prompt Generator is bound to the creator's own identity and registered works. It can only be used by the profile owner.
+                </p>
+              </div>
+              <p className="text-[10px] mt-2" style={{ color: "rgba(156,163,175,0.35)" }}>
+                Sign in as this creator to access their Prompt Studio.
+              </p>
+            </div>
+          )}
+
+          {/* Only render the full studio for the profile owner */}
+          {isOwner && (<>
 
           {/* ── 3-Tab Switcher ─────────────────────────────────────────── */}
           <div className="flex gap-1 mt-4 mb-4">
@@ -2031,10 +2058,17 @@ export default function CreatorProfilePage() {
                               onClick={() => { navigator.clipboard.writeText(draft.prompt || ""); toast.success("Copied!"); }}
                               className="text-[9px] px-2 py-1 rounded" style={{ background: "rgba(96,165,250,0.1)", color: "rgba(96,165,250,0.7)" }}
                             >Copy</button>
-                            <button
-                              onClick={() => shareMutation.mutate({ draftId: draft.id, origin: window.location.origin })}
-                              className="text-[9px] px-2 py-1 rounded" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.7)" }}
-                            >Share</button>
+                            {draft.isShared ? (
+                              <button
+                                onClick={() => { if (confirm("Revoke this share link? Anyone with the link will lose access.")) revokeShareMutation.mutate({ draftId: draft.id }); }}
+                                className="text-[9px] px-2 py-1 rounded" style={{ background: "rgba(251,113,133,0.08)", color: "rgba(251,113,133,0.6)", border: "1px solid rgba(251,113,133,0.15)" }}
+                              >Revoke</button>
+                            ) : (
+                              <button
+                                onClick={() => shareMutation.mutate({ draftId: draft.id, origin: window.location.origin })}
+                                className="text-[9px] px-2 py-1 rounded" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.7)" }}
+                              >Share</button>
+                            )}
                             <button
                               onClick={() => { if (confirm("Delete this draft?")) deleteDraftMutation.mutate({ id: draft.id }); }}
                               className="text-[9px] px-2 py-1 rounded" style={{ background: "rgba(239,68,68,0.08)", color: "rgba(239,68,68,0.5)" }}
@@ -2086,7 +2120,8 @@ export default function CreatorProfilePage() {
               </div>
             )}
           </div>
-          )}
+          )} {/* end archive tab */}
+          </>) /* end isOwner guard */}
         </DialogContent>
       </Dialog>
 

@@ -3164,11 +3164,20 @@ export async function getPromptDraftByShareToken(shareToken: string) {
   return row ?? null;
 }
 
-/** Update share token and URL on a draft. */
+/** Update share token and URL on a draft, and mark it as shared. */
 export async function updatePromptDraftShare(id: number, shareToken: string, shareUrl: string): Promise<void> {
   const db = await getDb();
   const { promptDrafts } = await import("../drizzle/schema");
-  await db.update(promptDrafts).set({ shareToken, shareUrl }).where(eq(promptDrafts.id, id));
+  await db.update(promptDrafts).set({ shareToken, shareUrl, isShared: true }).where(eq(promptDrafts.id, id));
+}
+
+/** Revoke a share link — clears token, URL, and isShared flag. */
+export async function revokePromptDraftShare(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  const { promptDrafts } = await import("../drizzle/schema");
+  await db.update(promptDrafts)
+    .set({ shareToken: null, shareUrl: null, isShared: false })
+    .where(and(eq(promptDrafts.id, id), eq(promptDrafts.userId, userId)));
 }
 
 /** Delete a prompt draft (owner only — caller must verify ownership). */
