@@ -12,7 +12,7 @@ import { invokeLLM } from "./_core/llm";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
-  getSongsByUser, getSongWithCreator, getTipsBySong,
+  getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs,
   getUserById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
@@ -683,6 +683,17 @@ export const appRouter = router({
     }),
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     bySelf: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
+    reorder: protectedProcedure
+      .input(z.object({ orderedIds: z.array(z.number()).min(1).max(500) }))
+      .mutation(async ({ ctx, input }) => {
+        // Validate all IDs belong to the requesting user before updating
+        const userSongs = await getSongsByUser(ctx.user.id);
+        const userSongIds = new Set(userSongs.map((s: { id: number }) => s.id));
+        const invalid = input.orderedIds.filter((id) => !userSongIds.has(id));
+        if (invalid.length > 0) throw new TRPCError({ code: 'FORBIDDEN', message: 'One or more song IDs do not belong to you.' });
+        await reorderSongs(ctx.user.id, input.orderedIds);
+        return { success: true };
+      }),
     upload: protectedProcedure.input(z.object({
       // Legacy base64 fields (still accepted for backward compat)
       audioBase64: z.string().max(50_000_000).optional(), audioMimeType: z.string().optional(), audioFileName: z.string().optional(),

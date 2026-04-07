@@ -1,0 +1,1 @@
+ALTER TABLE `songs` ADD `displayOrder` int DEFAULT 0 NOT NULL;

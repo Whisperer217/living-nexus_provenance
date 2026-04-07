@@ -3118,3 +3118,16 @@
 - [x] Changed `getSongsByUser` sort from `desc(createdAt)` to `asc(createdAt)` — first upload now appears at top, latest at bottom
 - [x] Added `asc` to drizzle-orm import in db.ts
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 84: Creator Track Display Order (Drag-to-Reorder)
+- [x] Added `displayOrder` integer column to songs table (default 0), migration 0061 applied
+- [x] Added `reorderSongs` db helper (bulk update displayOrder by userId + ordered id array, ownership-safe)
+- [x] Added `songs.reorder` protectedProcedure (owner-only, validates all song IDs belong to requesting user)
+- [x] Updated `getSongsByUser` to sort by `displayOrder ASC, createdAt ASC` (unset=0 falls back to upload date)
+- [x] Updated `getPublicSongs` to sort by `displayOrder ASC, createdAt ASC` when a creatorId filter is active
+- [x] Fixed ArchivePage drag-reorder mutation: was calling non-existent `songs.reorderMySongs` with `songIds` — now correctly calls `songs.reorder` with `orderedIds`
+- [x] Drag handles (GripVertical) already present in Archive track list rows — now fully wired to persist order via HTML5 drag events
+- [x] Optimistic update: local list reorders immediately on drop, rolls back on server error
+- [x] Creator profile page song list respects displayOrder (via getSongsByUser)
+- [x] Explore page respects creator's displayOrder when showing their tracks (via getPublicSongs creatorId path)
+- [x] 137/137 tests passing, 0 TypeScript errors

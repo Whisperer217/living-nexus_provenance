@@ -268,8 +268,8 @@ export default function ArchivePage() {
     updateDownload.mutate({ songId: song.id, permission: next, tipThresholdCents: song.downloadTipThresholdCents ?? 179 });
   };
 
-  /* Reorder */
-  const reorderMySongs = trpc.songs.reorderMySongs.useMutation({
+  /* Reorder — calls songs.reorder which validates ownership server-side */
+  const reorderMySongs = trpc.songs.reorder.useMutation({
     onError: () => {
       toast.error("Failed to save order");
       if (songs) setLocalSongs(songs); // rollback
@@ -322,7 +322,7 @@ export default function ArchivePage() {
     const [moved] = reordered.splice(from, 1);
     reordered.splice(to, 0, moved);
     setLocalSongs(reordered);
-    reorderMySongs.mutate({ songIds: reordered.map((s) => s.id) });
+    reorderMySongs.mutate({ orderedIds: reordered.map((s: any) => s.id) });
     toast.success("Track order saved");
     draggedId.current = null;
     dragOverId.current = null;

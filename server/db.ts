@@ -299,7 +299,22 @@ export async function getSongWithCreator(id: number) {
 export async function getSongsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(asc(songs.createdAt));
+  // Sort by creator's explicit displayOrder first; fall back to upload date for unset (0) entries
+  return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(asc(songs.displayOrder), asc(songs.createdAt));
+}
+
+/** Bulk-update displayOrder for a creator's songs. orderedIds must all belong to userId. */
+export async function reorderSongs(userId: number, orderedIds: number[]) {
+  const db = await getDb();
+  if (!db) return;
+  // Update each song's displayOrder to its 1-based position in the array
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      db.update(songs)
+        .set({ displayOrder: index + 1 })
+        .where(and(eq(songs.id, id), eq(songs.userId, userId)))
+    )
+  );
 }
 
 export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" }) {
@@ -316,9 +331,13 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
       like(songs.genre, `%${opts.search}%`),
     ) as unknown as ReturnType<typeof eq>);
   }
+  // When a specific creator is filtered (via creatorId option), respect their displayOrder.
+  // For global/mixed feeds, use newest-first unless randomized.
   const orderExpr = opts?.randomize
     ? (opts.seed !== undefined ? sql`RAND(${opts.seed})` : sql`RAND()`)
-    : desc(songs.createdAt);
+    : (opts as any)?.creatorId
+      ? sql`${songs.displayOrder} ASC, ${songs.createdAt} ASC`
+      : desc(songs.createdAt);
   return db.select({
     song: songs,
     creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus, role: users.role },

@@ -207,6 +207,10 @@ export const songs = mysqlTable("songs", {
   // Roles: songwriter, producer, featured, mixing, mastering, etc.
   creditsJson: text("creditsJson"),
 
+  // Display order — creator-controlled sort position for their public tracklist
+  // 0 = unset (falls back to createdAt ASC); positive integers = explicit position (1-indexed)
+  displayOrder: int("displayOrder").default(0).notNull(),
+
   // Stats
   isPublic: boolean("isPublic").default(true).notNull(),
   playCount: int("playCount").default(0).notNull(),
