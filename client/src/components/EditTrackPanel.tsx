@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History } from "lucide-react";
+import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const GENRES = [
@@ -61,6 +61,7 @@ interface Song {
   lyricsAddedAt?: Date | string | null;
   videoUrl?: string | null;
   videoWitnessId?: string | null;
+  creditsJson?: string | null;
 }
 
 interface EditTrackPanelProps {
@@ -117,6 +118,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [replaceAudioLoading, setReplaceAudioLoading] = useState(false);
   const [currentWitnessId, setCurrentWitnessId] = useState<string | null>(song.witnessId ?? null);
   const replaceAudioInputRef = useRef<HTMLInputElement>(null);
+
+  // Credits state
+  type CreditEntry = { role: string; name: string };
+  const parseCredits = (json: string | null | undefined): CreditEntry[] => {
+    if (!json) return [];
+    try { return JSON.parse(json); } catch { return []; }
+  };
+  const [credits, setCredits] = useState<CreditEntry[]>(() => parseCredits(song.creditsJson));
 
   const utils = trpc.useUtils();
   const updateDownloadPermission = trpc.songDownload.updatePermission.useMutation({
@@ -264,6 +273,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
   async function handleSave() {
     setSaving(true);
+    const validCredits = credits.filter(c => c.role.trim() || c.name.trim());
     await updateMetadata.mutateAsync({
       songId: song.id,
       caption: caption.trim() || null,
@@ -272,6 +282,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       coverArtUrl: coverArtUrl || null,
       aiConsent,
       status,
+      creditsJson: validCredits.length > 0 ? JSON.stringify(validCredits) : null,
     });
     setSaving(false);
   }
@@ -1039,6 +1050,60 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 {videoUploading ? "Uploading video…" : "Upload & Witness Video"}
               </Button>
             )}
+          </div>
+
+          {/* ── Credits ──────────────────────────────────────────────────────────────────────────────────────────── */}
+          <div
+            className="rounded-xl p-4 sm:p-5"
+            style={{ background: "rgba(212,175,55,0.04)", border: "1px solid rgba(212,175,55,0.12)" }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-semibold" style={{ color: "#D4AF37" }}>Credits</h3>
+                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>Add producers, engineers, co-writers, and featured artists.</p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs gap-1"
+                style={{ borderColor: "rgba(212,175,55,0.3)", color: "#D4AF37", background: "transparent" }}
+                onClick={() => setCredits(prev => [...prev, { role: "", name: "" }])}
+              >
+                <Plus size={12} /> Add
+              </Button>
+            </div>
+            {credits.length === 0 ? (
+              <p className="text-xs text-center py-3" style={{ color: "#475569" }}>No credits yet. Hit Add to give collaborators recognition.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {credits.map((c, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <Input
+                      placeholder="Role (e.g. Producer)"
+                      value={c.role}
+                      onChange={e => setCredits(prev => prev.map((x, j) => j === i ? { ...x, role: e.target.value } : x))}
+                      className="flex-1 h-8 text-xs"
+                      style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+                    />
+                    <Input
+                      placeholder="Name"
+                      value={c.name}
+                      onChange={e => setCredits(prev => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
+                      className="flex-1 h-8 text-xs"
+                      style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+                    />
+                    <button
+                      onClick={() => setCredits(prev => prev.filter((_, j) => j !== i))}
+                      className="p-1 rounded hover:bg-red-900/30 transition-colors"
+                      title="Remove"
+                    >
+                      <Trash2 size={13} style={{ color: "#ef4444" }} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-xs mt-2" style={{ color: "#475569" }}>Credits are saved when you click Save Changes below.</p>
           </div>
 
         </div>{/* end Form */}

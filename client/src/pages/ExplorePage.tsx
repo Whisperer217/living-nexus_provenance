@@ -907,11 +907,30 @@ export default function ExplorePage() {
         {/* Empty state */}
         {!isLoading && songs.length === 0 && (
           <div className="text-center py-20 text-white/70">
-            <div className="text-5xl mb-4">🔮</div>
-            <div className="font-heading text-[17px] text-white/50 mb-2">No tracks found</div>
-            <div className="text-[13px] font-body">
-              {query || activeGenre !== "All" ? "Try a different search term or genre" : "No songs uploaded yet — be the first!"}
-            </div>
+            {mode === "new" ? (
+              <>
+                <div className="text-5xl mb-4">🌱</div>
+                <div className="font-heading text-[17px] text-white/50 mb-2">Nothing new this week</div>
+                <div className="text-[13px] font-body text-white/40 max-w-xs mx-auto">
+                  No tracks were published in the last 7 days. Check back soon — or be the first to drop something new.
+                </div>
+                <button
+                  className="mt-5 text-xs px-4 py-2 rounded-full transition-colors"
+                  style={{ background: "oklch(0.18 0.03 270)", color: "oklch(0.75 0.18 145)", border: "1px solid oklch(0.75 0.18 145 / 0.3)" }}
+                  onClick={() => setMode("trending")}
+                >
+                  Browse Trending instead
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="text-5xl mb-4">🔮</div>
+                <div className="font-heading text-[17px] text-white/50 mb-2">No tracks found</div>
+                <div className="text-[13px] font-body">
+                  {query || activeGenre !== "All" ? "Try a different search term or genre" : "No songs uploaded yet — be the first!"}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

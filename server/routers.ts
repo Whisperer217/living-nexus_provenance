@@ -995,8 +995,9 @@ export const appRouter = router({
       haaiVocalConveyance: z.string().max(2000).nullable().optional(),
       haaiLyricalInspiration: z.string().max(2000).nullable().optional(),
       haaiEmotionalTone: z.string().max(2000).nullable().optional(),
+      creditsJson: z.string().max(4096).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
-      const { songId, ...fields } = input;
+      const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
       const haaiFields = [fields.haaiVisualConcept, fields.haaiStyleLanguage, fields.haaiInstrumentation, fields.haaiVocalConveyance, fields.haaiLyricalInspiration, fields.haaiEmotionalTone];
       const isHaaiComplete = haaiFields.every(f => f && f.trim().length > 0);
@@ -1004,6 +1005,10 @@ export const appRouter = router({
         ...fields,
         haaiDeclaredAt: isHaaiComplete ? new Date() : undefined,
       });
+      // Save credits separately if provided
+      if (creditsJson !== undefined && creditsJson !== null) {
+        await updateSongCredits(songId, creditsJson);
+      }
       return { success: true };
     }),
 

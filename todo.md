@@ -3069,3 +3069,8 @@
 - [ ] Wire pinned creator to featuredCreators procedure (pinned always first)
 - [ ] Add pin/unpin toggle in Admin panel User Roster tab
 - [ ] Bump What's New modal to v2.25 with Phase 80 release notes
+
+## Phase 80.4: Follow-up Improvements
+- [x] Credits editor in song Edit/metadata panel (retroactive credits for existing songs)
+- [x] New This Week empty state card on Explore page
+- [x] Verify pin/unpin functionality end-to-end
