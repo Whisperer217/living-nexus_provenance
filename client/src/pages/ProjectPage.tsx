@@ -1,4 +1,21 @@
 import { useParams, Link, useLocation } from "wouter";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { trpc } from "@/lib/trpc";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +31,7 @@ import { toast } from "sonner";
 import {
   Heart, Users, Calendar, ShieldCheck, ChevronDown, ChevronUp,
   Pencil, Plus, Trash2, Image as ImageIcon, Video, Type, Quote,
-  Minus, Check, X, Eye, Upload, ExternalLink, Rocket, Share2, Copy, Bell, BellOff,
+  Minus, Check, X, Eye, Upload, ExternalLink, Rocket, Share2, Copy, Bell, BellOff, GripVertical,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -432,16 +449,26 @@ function BlockView({ block }: { block: Block }) {
 
 // ── Block Editor (edit mode) ──────────────────────────────────────────────────
 
-function BlockEditor({ block, projectId, onChange, onDelete, onMoveUp, onMoveDown, isFirst, isLast }: {
+function BlockEditor({ block, projectId, onChange, onDelete }: {
   block: Block;
   projectId: number;
   onChange: (updated: Block) => void;
   onDelete: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  isFirst: boolean;
-  isLast: boolean;
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: block.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  };
   const fileRef = useRef<HTMLInputElement>(null);
   const uploadImage = trpc.projects.uploadBlockImage.useMutation({
     onSuccess: (data) => {
@@ -462,21 +489,22 @@ function BlockEditor({ block, projectId, onChange, onDelete, onMoveUp, onMoveDow
   }, [projectId, block.imageCaption, uploadImage]);
 
   return (
-    <div className="group relative bg-white/[0.04] border border-white/10 rounded-xl p-4 space-y-3">
+    <div ref={setNodeRef} style={style} className="group relative bg-white/[0.04] border border-white/10 rounded-xl p-4 space-y-3">
       {/* Block type badge + controls */}
       <div className="flex items-center justify-between">
-        <span className="text-white/30 text-xs uppercase tracking-widest font-mono">{block.type}</span>
+        <div className="flex items-center gap-2">
+          {/* Drag handle */}
+          <button
+            {...attributes}
+            {...listeners}
+            className="p-1 text-white/20 hover:text-white/60 transition-colors cursor-grab active:cursor-grabbing touch-none"
+            title="Drag to reorder"
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+          <span className="text-white/30 text-xs uppercase tracking-widest font-mono">{block.type}</span>
+        </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {!isFirst && (
-            <button onClick={onMoveUp} className="p-1 text-white/40 hover:text-white transition-colors" title="Move up">
-              <ChevronUp className="w-4 h-4" />
-            </button>
-          )}
-          {!isLast && (
-            <button onClick={onMoveDown} className="p-1 text-white/40 hover:text-white transition-colors" title="Move down">
-              <ChevronDown className="w-4 h-4" />
-            </button>
-          )}
           <button onClick={onDelete} className="p-1 text-red-400/60 hover:text-red-400 transition-colors" title="Delete block">
             <Trash2 className="w-4 h-4" />
           </button>
@@ -972,6 +1000,23 @@ export default function ProjectPage() {
     setBlocksDirty(true);
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setBlocks((prev) => {
+      const oldIdx = prev.findIndex((b) => b.id === active.id);
+      const newIdx = prev.findIndex((b) => b.id === over.id);
+      if (oldIdx < 0 || newIdx < 0) return prev;
+      return arrayMove(prev, oldIdx, newIdx);
+    });
+    setBlocksDirty(true);
+  };
+
   const urlParams = new URLSearchParams(window.location.search);
   const donationSuccess = urlParams.get("donation") === "success";
 
@@ -1253,19 +1298,26 @@ export default function ProjectPage() {
           )}
           {editMode ? (
             <>
-              {blocks.map((block, idx) => (
-                <BlockEditor
-                  key={block.id}
-                  block={block}
-                  projectId={project.id}
-                  onChange={(updated) => updateBlock(block.id, updated)}
-                  onDelete={() => deleteBlock(block.id)}
-                  onMoveUp={() => moveBlock(block.id, -1)}
-                  onMoveDown={() => moveBlock(block.id, 1)}
-                  isFirst={idx === 0}
-                  isLast={idx === blocks.length - 1}
-                />
-              ))}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={blocks.map((b) => b.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {blocks.map((block) => (
+                    <BlockEditor
+                      key={block.id}
+                      block={block}
+                      projectId={project.id}
+                      onChange={(updated) => updateBlock(block.id, updated)}
+                      onDelete={() => deleteBlock(block.id)}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
               <AddBlockBar onAdd={addBlock} />
             </>
           ) : (

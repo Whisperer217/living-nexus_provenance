@@ -148,6 +148,7 @@ export default function UploadPage() {
   const [, navigate] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const [step, setStep] = useState<Step>(1);
+  const { data: newThisWeekData } = trpc.songs.newThisWeek.useQuery({ limit: 1 });
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -663,6 +664,19 @@ export default function UploadPage() {
             </button>
           </div>
         </div>
+
+        {/* New This Week nudge — show when no tracks dropped this week */}
+        {newThisWeekData !== undefined && newThisWeekData.length === 0 && (
+          <div
+            className="flex items-center gap-3 px-4 py-3 rounded-xl mb-6 text-sm"
+            style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.80 0.145 82 / 0.3)" }}
+          >
+            <Sparkles className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.80 0.145 82)" }} />
+            <span style={{ color: "oklch(0.75 0.08 85)" }}>
+              Nothing dropped this week — <strong style={{ color: "oklch(0.90 0.12 82)" }}>be the first.</strong>
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center gap-1 mb-8">
           {steps.map((s, i) => {

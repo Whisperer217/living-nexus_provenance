@@ -3079,3 +3079,8 @@
 - [ ] Install @dnd-kit/sortable and add drag-to-reorder to block editor
 - [ ] Add focal-point drag UI to block image editor
 - [ ] Add image upload to project update form
+
+## Phase 80.7: UX Polish
+- [ ] Drag-to-reorder blocks with @dnd-kit in ProjectPage
+- [ ] Expand scrubber hit-area to 40px in QuickRefBottomSheet
+- [ ] Add New This Week upload nudge banner to UploadPage

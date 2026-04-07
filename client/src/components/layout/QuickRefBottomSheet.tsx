@@ -315,25 +315,27 @@ export default function QuickRefBottomSheet({
 
             {/* Scrubber */}
             <div className="mb-3">
+              {/* 40px tall transparent hit area for easier touch seeking */}
               <div
-                className="relative h-1.5 rounded-full cursor-pointer mb-1.5"
-                style={{ background: "oklch(0.20 0.02 280)", touchAction: "none" }}
+                className="relative flex items-center cursor-pointer mb-1.5"
+                style={{ height: "40px", touchAction: "none" }}
                 onClick={handleScrubberClick}
                 onTouchMove={handleScrubberTouchMove}
               >
-                <div
-                  className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-300"
-                  style={{ width: `${progress}%`, background: "oklch(0.80 0.145 82)" }}
-                />
-                {/* Thumb */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full shadow"
-                  style={{
-                    left: `calc(${progress}% - 6px)`,
-                    background: "oklch(0.80 0.145 82)",
-                    boxShadow: "0 0 6px oklch(0.80 0.145 82 / 0.6)",
-                  }}
-                />
+                <div className="relative w-full h-1.5 rounded-full" style={{ background: "oklch(0.20 0.02 280)" }}>
+                  <div
+                    className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-300"
+                    style={{ width: `${progress}%`, background: "oklch(0.80 0.145 82)" }}
+                  />
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full shadow"
+                    style={{
+                      left: `calc(${progress}% - 6px)`,
+                      background: "oklch(0.80 0.145 82)",
+                      boxShadow: "0 0 6px oklch(0.80 0.145 82 / 0.6)",
+                    }}
+                  />
+                </div>
               </div>
               <div className="flex justify-between text-[10px]" style={{ color: "oklch(0.45 0.02 280)" }}>
                 <span>{formatTime(state.currentTime)}</span>
