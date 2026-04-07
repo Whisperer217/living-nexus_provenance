@@ -900,7 +900,7 @@ export default function ProfilePage() {
                     const meta = iconMap[evt.type] ?? { icon: Activity, color: "#A78BFA", label: evt.type };
                     const Icon = meta.icon;
                     // Build navigation link: song link or project link
-                    const evtLink = (evt as any).songLink ?? ((evt as any).projectSlug ? `/project/${(evt as any).projectSlug}` : null);
+                    const evtLink = (evt as any).songLink ?? ((evt as any).projectSlug ? `/projects/${(evt as any).projectSlug}` : null);
                     const titleEl = evt.songTitle ? (
                       evtLink ? (
                         <Link href={evtLink} className="text-[11px] font-body text-[#A78BFA]/70 ml-1 truncate hover:text-[#A78BFA] transition-colors">— {evt.songTitle}</Link>

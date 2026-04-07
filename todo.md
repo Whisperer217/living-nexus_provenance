@@ -3084,3 +3084,9 @@
 - [ ] Drag-to-reorder blocks with @dnd-kit in ProjectPage
 - [ ] Expand scrubber hit-area to 40px in QuickRefBottomSheet
 - [ ] Add New This Week upload nudge banner to UploadPage
+
+## Phase 80.8: Activity Feed Routing Bug Fix
+- [x] Fix DashboardPage activity feed: PROJECT_PUBLISHED events now link to /projects/{slug} instead of /song/{workId}
+- [x] Fix ProfilePage activity feed: /project/ typo corrected to /projects/ (was a dead link)
+- [x] Both fixes use evt.songLink (when present) → evt.projectSlug → fallback /song/{workId} priority chain
+- [x] 137/137 tests passing, 0 TypeScript errors
