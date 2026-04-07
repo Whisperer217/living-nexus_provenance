@@ -3578,7 +3578,7 @@ export async function getProjectUpdates(projectId: number): Promise<ProjectUpdat
   return db.select().from(projectUpdates).where(eq(projectUpdates.projectId, projectId)).orderBy(desc(projectUpdates.createdAt));
 }
 
-export async function addProjectUpdate(data: { projectId: number; userId: number; title?: string; body: string; imageUrl?: string; imageKey?: string }): Promise<void> {
+export async function addProjectUpdate(data: { projectId: number; userId: number; title?: string; body: string; imageUrl?: string | null; imageKey?: string | null }): Promise<void> {
   const db = await getDb();
   if (!db) return;
   await db.insert(projectUpdates).values(data);
@@ -3662,14 +3662,14 @@ export async function saveProjectBlocks(projectId: number, blocks: Array<{
   type: "text" | "image" | "video" | "divider" | "quote";
   position: number;
   content?: string;
-  imageUrl?: string;
-  imageKey?: string;
+  imageUrl?: string | null;
+  imageKey?: string | null;
   imageCaption?: string | null;
-  imageSize?: "small" | "medium" | "large" | "full";
-  imageFocalX?: number;
-  imageFocalY?: number;
-  videoUrl?: string;
-  videoType?: "youtube" | "vimeo" | "s3" | "none";
+  imageSize?: "small" | "medium" | "large" | "full" | null;
+  imageFocalX?: number | null;
+  imageFocalY?: number | null;
+  videoUrl?: string | null;
+  videoType?: "youtube" | "vimeo" | "s3" | "none" | null;
   videoCaption?: string | null;
 }>): Promise<void> {
   const db = await getDb();
