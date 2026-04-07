@@ -153,10 +153,18 @@ export default function QuickRefBottomSheet({
     }
   };
 
-  // Handle scrubber seek
+  // Handle scrubber seek (click + touch drag)
   const handleScrubberClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    seek(ratio * state.duration);
+  };
+
+  const handleScrubberTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    e.stopPropagation(); // prevent sheet drag-to-dismiss from firing
+    const rect = e.currentTarget.getBoundingClientRect();
+    const touch = e.touches[0];
+    const ratio = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
     seek(ratio * state.duration);
   };
 
@@ -173,7 +181,7 @@ export default function QuickRefBottomSheet({
           if (next && hasTrack) setActiveTab("nowplaying");
         }}
         aria-label={open ? "Close quick access" : "Open quick access"}
-        className="md:hidden fixed left-1/2 -translate-x-1/2 z-[9988] flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all active:scale-95"
+        className="md:hidden fixed left-1/2 -translate-x-1/2 z-[9992] flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all active:scale-95"
         style={{
           bottom: `${bottomOffset + 8}px`,
           background: "oklch(0.14 0.025 278 / 0.95)",
@@ -204,7 +212,7 @@ export default function QuickRefBottomSheet({
       {/* ── Backdrop ─────────────────────────────────────────────────── */}
       {open && (
         <div
-          className="md:hidden fixed inset-0 z-[9987] bg-black/60"
+          className="md:hidden fixed inset-0 z-[9989] bg-black/60"
           aria-hidden="true"
           style={{ backdropFilter: "blur(2px)" }}
         />
@@ -213,10 +221,10 @@ export default function QuickRefBottomSheet({
       {/* ── Sheet ────────────────────────────────────────────────────── */}
       <div
         ref={sheetRef}
-        className="md:hidden fixed left-0 right-0 z-[9988] flex flex-col rounded-t-2xl overflow-hidden"
+        className="md:hidden fixed left-0 right-0 z-[9991] flex flex-col rounded-t-2xl overflow-hidden"
         style={{
           bottom: `${bottomOffset}px`,
-          maxHeight: "70dvh",
+          maxHeight: `calc(100dvh - ${bottomOffset}px - 16px)`,
           background: "oklch(0.10 0.018 278)",
           border: "1px solid oklch(0.80 0.145 82 / 0.15)",
           borderBottom: "none",
@@ -296,8 +304,8 @@ export default function QuickRefBottomSheet({
 
             {/* Title + artist */}
             <div className="text-center mb-4">
-              <p className="text-[16px] font-heading font-semibold truncate"
-                style={{ color: "oklch(0.92 0.01 280)" }}>
+              <p className="text-[14px] font-heading font-semibold leading-snug"
+                style={{ color: "oklch(0.92 0.01 280)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                 {currentTrack.title}
               </p>
               <p className="text-[13px] mt-0.5 truncate" style={{ color: "oklch(0.60 0.03 280)" }}>
@@ -309,8 +317,9 @@ export default function QuickRefBottomSheet({
             <div className="mb-3">
               <div
                 className="relative h-1.5 rounded-full cursor-pointer mb-1.5"
-                style={{ background: "oklch(0.20 0.02 280)" }}
+                style={{ background: "oklch(0.20 0.02 280)", touchAction: "none" }}
                 onClick={handleScrubberClick}
+                onTouchMove={handleScrubberTouchMove}
               >
                 <div
                   className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-300"
