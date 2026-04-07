@@ -15,7 +15,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TrackCard from "@/components/TrackCard";
 import TipModal from "@/components/TipModal";
-import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart } from "lucide-react";
+import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart, DollarSign, Cpu, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -1007,69 +1007,171 @@ export default function HomePage() {
       ══════════════════════════════════════════════════════════════ */}
       <NewVoicesCarousel />
       {/* ══════════════════════════════════════════════════════════════
-          CREATOR PROJECTS — horizontal scroll row (top priority)
+          FEATURED PROJECTS — wireframe redesign (Phase 81)
+          Cards: banner + artist avatar/name + AI/$/♥/WID badges
       ══════════════════════════════════════════════════════════════ */}
       {(isAuthenticated || (publicProjects as any[]).length > 0) && (
         <div className="px-6 pt-5 pb-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-[16px] tracking-wider text-white">Creator Projects</h2>
-            <Link href="/explore?tab=projects">
+            <h2 className="font-heading text-[16px] tracking-wider" style={{ color: "oklch(0.94 0.025 75)" }}>Featured Projects</h2>
+            <Link href="/projects">
               <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#D4AF37]" style={{ color: "oklch(0.55 0.03 280)" }}>See all</span>
             </Link>
           </div>
-          <div
-            className="flex gap-4 overflow-x-auto pb-3 -mx-6 px-6 mb-2"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {(publicProjects as any[]).map((project: any) => (
-              <Link key={project.id} href={`/project/${project.slug}`}>
-                <div
-                  className="relative flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group"
-                  style={{ width: "200px", height: "150px", background: "oklch(0.12 0.03 270)", boxShadow: "0 4px 24px oklch(0 0 0 / 0.5)" }}
-                >
-                  {project.bannerUrl ? (
-                    <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, oklch(0.14 0.04 280), oklch(0.10 0.02 270))" }}>
-                      <span className="text-5xl font-bold" style={{ color: "oklch(0.84 0.155 85 / 0.15)" }}>{project.title?.[0]}</span>
-                    </div>
-                  )}
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, oklch(0 0 0 / 0.9) 0%, oklch(0 0 0 / 0.2) 55%, transparent 100%)" }} />
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>{project.title}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-[10px]" style={{ color: "oklch(0.6 0.04 280)" }}>{project.creatorName || project.creatorHandle || "Creator"}</span>
-                      {project.goalAmountCents && (
-                        <span className="text-[9px] font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>
-                          {Math.min(100, Math.round(((project.raisedAmountCents || 0) / project.goalAmountCents) * 100))}%
+
+          {/* Vertical stack of featured project cards */}
+          <div className="flex flex-col gap-4 mb-2">
+            {(publicProjects as any[]).slice(0, 4).map((project: any) => (
+              <div
+                key={project.id}
+                className="relative rounded-2xl overflow-hidden group"
+                style={{ background: "oklch(0.11 0.025 270)", boxShadow: "0 4px 28px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(0.84 0.155 85 / 0.08)" }}
+              >
+                {/* Banner image — 160px tall */}
+                <Link href={`/projects/${project.slug}`}>
+                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "160px" }}>
+                    {project.bannerUrl ? (
+                      <img
+                        src={project.bannerUrl}
+                        alt={project.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ background: "linear-gradient(135deg, oklch(0.14 0.04 280), oklch(0.10 0.02 270))" }}
+                      >
+                        <span className="text-6xl font-bold" style={{ color: "oklch(0.84 0.155 85 / 0.18)", fontFamily: "'Cinzel', serif" }}>
+                          {project.title?.[0] ?? "P"}
                         </span>
-                      )}
-                    </div>
-                    {project.goalAmountCents && (
-                      <div className="mt-1.5 h-0.5 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
-                        <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((project.raisedAmountCents || 0) / project.goalAmountCents) * 100))}%`, background: "oklch(0.84 0.155 85)" }} />
+                      </div>
+                    )}
+                    {/* Dark gradient over banner */}
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, oklch(0.11 0.025 270 / 0.95) 0%, oklch(0 0 0 / 0.15) 60%, transparent 100%)" }} />
+                    {/* WID badge — top right */}
+                    {project.linkedWitnessId && (
+                      <div
+                        className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-0.5 rounded-full"
+                        style={{ background: "oklch(0.65 0.2 300 / 0.88)", backdropFilter: "blur(4px)" }}
+                      >
+                        <Fingerprint size={9} className="text-white" />
+                        <span className="text-[9px] font-mono text-white">WID</span>
+                      </div>
+                    )}
+                    {/* Verified checkmark — top left */}
+                    {project.isVerified && (
+                      <div className="absolute top-2.5 left-2.5">
+                        <CheckCircle2 size={16} style={{ color: "oklch(0.84 0.155 85)" }} />
                       </div>
                     )}
                   </div>
-                  {project.linkedWitnessId && (
-                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.2 300 / 0.9)" }}>
-                      <Shield size={10} className="text-white" />
+                </Link>
+
+                {/* Bottom info row */}
+                <div className="flex items-center gap-3 px-3 py-2.5">
+                  {/* Artist avatar */}
+                  <Link href={`/creator/${project.creatorHandle || project.creatorId}`}>
+                    <div
+                      className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-sm font-bold cursor-pointer transition-opacity hover:opacity-80"
+                      style={{ background: "oklch(0.22 0.05 280)", border: "1.5px solid oklch(0.84 0.155 85 / 0.35)" }}
+                    >
+                      {project.creatorAvatarUrl ? (
+                        <img src={project.creatorAvatarUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span style={{ color: "oklch(0.84 0.155 85)" }}>
+                          {(project.creatorName || project.creatorHandle || "?")[0].toUpperCase()}
+                        </span>
+                      )}
                     </div>
-                  )}
+                  </Link>
+
+                  {/* Title + artist name */}
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/projects/${project.slug}`}>
+                      <p className="text-[13px] font-semibold truncate cursor-pointer hover:text-[oklch(0.84_0.155_85)] transition-colors" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>
+                        {project.title}
+                      </p>
+                    </Link>
+                    <Link href={`/creator/${project.creatorHandle || project.creatorId}`}>
+                      <p className="text-[11px] truncate cursor-pointer hover:opacity-80 transition-opacity" style={{ color: "oklch(0.60 0.04 280)" }}>
+                        {project.creatorName || project.creatorHandle || "Creator"}
+                      </p>
+                    </Link>
+                  </div>
+
+                  {/* Action badges: AI · $ · ♥ */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {/* AI badge */}
+                    {project.hasAiContent && (
+                      <div
+                        className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md"
+                        style={{ background: "oklch(0.55 0.18 280 / 0.25)", border: "1px solid oklch(0.55 0.18 280 / 0.5)" }}
+                        title="AI-assisted project"
+                      >
+                        <Cpu size={9} style={{ color: "oklch(0.72 0.18 280)" }} />
+                        <span className="text-[9px] font-mono" style={{ color: "oklch(0.72 0.18 280)" }}>AI</span>
+                      </div>
+                    )}
+                    {/* Tip / fund button */}
+                    {project.goalAmountCents && (
+                      <button
+                        className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md transition-all hover:brightness-110"
+                        style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.4)" }}
+                        title="Fund this project"
+                        onClick={() => { window.location.href = `/projects/${project.slug}`; }}
+                      >
+                        <DollarSign size={9} style={{ color: "oklch(0.84 0.155 85)" }} />
+                        <span className="text-[9px] font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>
+                          {Math.min(100, Math.round(((project.raisedAmountCents || 0) / project.goalAmountCents) * 100))}%
+                        </span>
+                      </button>
+                    )}
+                    {/* Heart / follow */}
+                    <button
+                      className="p-1 rounded-md transition-all hover:scale-110"
+                      style={{ color: "oklch(0.65 0.18 0 / 0.7)" }}
+                      title="Follow project"
+                      onClick={() => { window.location.href = `/projects/${project.slug}`; }}
+                    >
+                      <Heart size={13} />
+                    </button>
+                  </div>
                 </div>
-              </Link>
+
+                {/* Funding progress bar (if goal set) */}
+                {project.goalAmountCents && (
+                  <div className="px-3 pb-2.5">
+                    <div className="h-0.5 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${Math.min(100, Math.round(((project.raisedAmountCents || 0) / project.goalAmountCents) * 100))}%`,
+                          background: "linear-gradient(90deg, oklch(0.62 0.18 55), oklch(0.84 0.155 85))",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
+
+            {/* Start a Project CTA */}
             {isAuthenticated && (
               <Link href="/my-projects">
                 <div
-                  className="relative flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group flex flex-col items-center justify-center gap-2"
-                  style={{ width: "200px", height: "150px", background: "transparent", border: "1.5px dashed oklch(0.84 0.155 85 / 0.35)", boxShadow: "none" }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all hover:brightness-110"
+                  style={{ background: "transparent", border: "1.5px dashed oklch(0.84 0.155 85 / 0.30)" }}
                 >
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
-                    <span style={{ color: "oklch(0.84 0.155 85)", fontSize: "20px", lineHeight: 1 }}>+</span>
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: "oklch(0.84 0.155 85 / 0.10)", border: "1px solid oklch(0.84 0.155 85 / 0.28)" }}
+                  >
+                    <span style={{ color: "oklch(0.84 0.155 85)", fontSize: "18px", lineHeight: 1 }}>+</span>
                   </div>
-                  <p className="text-[11px] font-semibold text-center px-3" style={{ color: "oklch(0.84 0.155 85 / 0.8)", fontFamily: "'Cinzel', serif" }}>Start a Project</p>
-                  <p className="text-[9px] text-center px-3" style={{ color: "oklch(0.55 0.03 280)" }}>Launch your campaign</p>
+                  <div>
+                    <p className="text-[12px] font-semibold" style={{ color: "oklch(0.84 0.155 85 / 0.85)", fontFamily: "'Cinzel', serif" }}>Start a Project</p>
+                    <p className="text-[10px]" style={{ color: "oklch(0.50 0.03 280)" }}>Launch your campaign with a Witness ID</p>
+                  </div>
                 </div>
               </Link>
             )}

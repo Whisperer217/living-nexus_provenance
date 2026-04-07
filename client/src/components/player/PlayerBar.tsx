@@ -12,13 +12,13 @@ import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, Users, DollarSign, Maximize2, Minimize2,
   ChevronDown, ChevronUp, MessageCircle, LogOut, Share2, Download,
+  MoreHorizontal, ExternalLink, ListPlus, List,
 } from "lucide-react";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLocation } from "wouter";
 import { useState, useCallback, useRef, useEffect } from "react";
 import PlayerTipModal from "./PlayerTipModal";
 import { MediaAsset } from "@/components/MediaAsset";
-import { ListPlus } from "lucide-react";
 
 function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
@@ -40,6 +40,12 @@ export default function PlayerBar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [newComment, setNewComment] = useState("");
   const commentListRef = useRef<HTMLDivElement>(null);
+  // Context menu (Go-To / Share / Download / Add / List)
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  // Playback speed toggle: 1x → 1.5x → 2x → 0.75x → 1x
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const SPEED_CYCLE = [1, 1.5, 2, 0.75];
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
@@ -187,6 +193,28 @@ export default function PlayerBar() {
     setIsExpanded(false);
     setIsCinematic(false);
   }, [currentTrack?.id]);
+
+  // Sync playback rate to audio element
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = playbackRate;
+  }, [playbackRate, audioRef]);
+
+  // Close context menu on outside click
+  useEffect(() => {
+    if (!showContextMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (!contextMenuRef.current?.contains(e.target as Node)) setShowContextMenu(false);
+    };
+    const t = setTimeout(() => document.addEventListener("click", handler), 0);
+    return () => { clearTimeout(t); document.removeEventListener("click", handler); };
+  }, [showContextMenu]);
+
+  const cycleSpeed = useCallback(() => {
+    setPlaybackRate(r => {
+      const idx = SPEED_CYCLE.indexOf(r);
+      return SPEED_CYCLE[(idx + 1) % SPEED_CYCLE.length];
+    });
+  }, []);
 
   return (
     <div
@@ -1014,6 +1042,121 @@ export default function PlayerBar() {
             >
               {isCinematic ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </button>
+
+            {/* Speed toggle — x1 / x1.5 / x2 / x0.75 */}
+            {currentTrack && (
+              <button
+                onClick={cycleSpeed}
+                className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all ml-1"
+                style={{
+                  color: playbackRate !== 1 ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 65)",
+                  background: playbackRate !== 1 ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
+                  border: `1px solid ${playbackRate !== 1 ? "oklch(0.84 0.155 85 / 0.40)" : "oklch(0.35 0.04 60 / 0.50)"}`,
+                  minWidth: "30px",
+                }}
+                title="Cycle playback speed"
+              >
+                {playbackRate === 1 ? "1×" : playbackRate === 1.5 ? "1.5×" : playbackRate === 2 ? "2×" : "¾×"}
+              </button>
+            )}
+
+            {/* Context menu — ⋯ kebab (Go-To / Share / Download / Add / List) */}
+            {currentTrack && (
+              <div ref={contextMenuRef} className="relative ml-1">
+                <button
+                  onClick={() => setShowContextMenu(v => !v)}
+                  className="p-1.5 rounded transition-all"
+                  style={{ color: showContextMenu ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 65)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.84 0.155 85)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = showContextMenu ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 65)")}
+                  title="More options"
+                >
+                  <MoreHorizontal size={16} />
+                </button>
+                {showContextMenu && (
+                  <div
+                    className="absolute bottom-12 right-0 rounded-2xl shadow-2xl z-[300] overflow-hidden"
+                    style={{
+                      background: "oklch(0.13 0.030 52)",
+                      border: "1px solid oklch(0.38 0.08 68 / 55%)",
+                      boxShadow: "0 0 28px 4px oklch(0.82 0.155 75 / 0.15), 0 8px 32px oklch(0.10 0.02 55 / 0.85)",
+                      minWidth: "160px",
+                    }}
+                  >
+                    {/* Go-To Song */}
+                    <button
+                      onClick={() => { setShowContextMenu(false); goToSong(); }}
+                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+                      style={{ color: "oklch(0.85 0.025 75)" }}
+                    >
+                      <ExternalLink size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                      Go to Song
+                    </button>
+                    {/* Share */}
+                    <button
+                      onClick={async () => {
+                        setShowContextMenu(false);
+                        const url = `${window.location.origin}/song/${currentSongId}`;
+                        try { if (navigator.share) { await navigator.share({ title: currentTrack.title, url }); return; } } catch {}
+                        try { await navigator.clipboard.writeText(url); } catch {}
+                      }}
+                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+                      style={{ color: "oklch(0.85 0.025 75)" }}
+                    >
+                      <Share2 size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                      Share
+                    </button>
+                    {/* Download */}
+                    {(() => {
+                      const dlPerm = (songDetail?.song as any)?.downloadPermission as string | undefined;
+                      if (!dlPerm || dlPerm === "none") return null;
+                      return (
+                        <button
+                          onClick={() => {
+                            setShowContextMenu(false);
+                            const a = document.createElement("a");
+                            a.href = `/api/download/${currentSongId}`;
+                            a.style.display = "none";
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                          }}
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+                          style={{ color: "oklch(0.85 0.025 75)" }}
+                        >
+                          <Download size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                          Download
+                        </button>
+                      );
+                    })()}
+                    {/* Add to My List */}
+                    {currentSongId && (
+                      <button
+                        onClick={e => {
+                          setShowContextMenu(false);
+                          setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
+                          setAddToListOpen(true);
+                        }}
+                        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+                        style={{ color: "oklch(0.85 0.025 75)" }}
+                      >
+                        <ListPlus size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                        Add to List
+                      </button>
+                    )}
+                    {/* View Queue */}
+                    <button
+                      onClick={() => { setShowContextMenu(false); navigate("/archive"); }}
+                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left border-t"
+                      style={{ color: "oklch(0.85 0.025 75)", borderColor: "oklch(0.25 0.04 60 / 0.5)" }}
+                    >
+                      <List size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                      View Queue
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

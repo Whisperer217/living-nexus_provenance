@@ -3090,3 +3090,13 @@
 - [x] Fix ProfilePage activity feed: /project/ typo corrected to /projects/ (was a dead link)
 - [x] Both fixes use evt.songLink (when present) → evt.projectSlug → fallback /song/{workId} priority chain
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 81: Wireframe Implementation (from sketch page 21)
+- [x] Featured Projects section redesigned: vertical card stack with 160px banner, artist avatar, title, AI badge, $ funding %, heart button, WID fingerprint badge
+- [x] Project cards link correctly to /projects/{slug} (not /project/)
+- [x] Start a Project CTA row at bottom of Featured Projects section
+- [x] PlayerBar: playback speed toggle (1x / 1.5x / 2x / 0.75x) added to compact bar right side
+- [x] PlayerBar: context menu (⋯ kebab) added — Go to Song / Share / Download / Add to List / View Queue
+- [x] Context menu closes on outside click
+- [x] Speed toggle syncs to audio element playbackRate
+- [x] 137/137 tests passing, 0 TypeScript errors
