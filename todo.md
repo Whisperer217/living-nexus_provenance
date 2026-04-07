@@ -3113,3 +3113,8 @@
 - [x] SharedPromptPage rebuilt with creator identity badge, provenance watermark footer auto-appended to all copy actions
 - [x] SharedPromptPage shows "Prompt Not Available" locked state for unshared/revoked prompts
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 83: Upload Sort Order Fix
+- [x] Changed `getSongsByUser` sort from `desc(createdAt)` to `asc(createdAt)` — first upload now appears at top, latest at bottom
+- [x] Added `asc` to drizzle-orm import in db.ts
+- [x] 137/137 tests passing, 0 TypeScript errors

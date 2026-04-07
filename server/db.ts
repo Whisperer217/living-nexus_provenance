@@ -1,5 +1,5 @@
 import { alias } from "drizzle-orm/mysql-core";
-import { and, count, desc, eq, gte, inArray, isNotNull, like, ne, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {
@@ -299,7 +299,7 @@ export async function getSongWithCreator(id: number) {
 export async function getSongsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(desc(songs.createdAt));
+  return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(asc(songs.createdAt));
 }
 
 export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" }) {
