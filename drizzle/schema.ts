@@ -11,6 +11,8 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "founder", "admin"]).default("user").notNull(),
+  // Pinned creator: when true, this creator is promoted to the front of the Featured Creators carousel
+  isPinned: boolean("isPinned").default(false).notNull(),
   // Founder system: null = infinite slots (founders only); max 10 founders enforced in application logic
   slotLimit: int("slotLimit"), // null = ∞ (founders), number = hard cap (regular users)
 

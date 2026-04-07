@@ -16,7 +16,7 @@ import {
   Loader2, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Users, Shield, Tag, Plus, CheckCircle2, XCircle,
   Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle, Crown, UserX, AlertTriangle,
-  Trash2, Database, Globe, Lock, ArrowRight,
+  Trash2, Database, Globe, Lock, ArrowRight, Pin, PinOff,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
@@ -67,6 +67,15 @@ function UsersTab() {
       toast.success(`License granted — User ID ${vars.userId} now has ${vars.slotsGranted} upload slots.`);
       setGrantingId(null);
       utils.admin.getUsers.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const togglePin = trpc.admin.togglePinCreator.useMutation({
+    onSuccess: (data, vars) => {
+      toast.success(data.isPinned ? `Creator ID ${vars.userId} pinned to Featured Creators.` : `Creator ID ${vars.userId} unpinned.`);
+      utils.admin.getUsers.invalidate();
+      utils.profile.featuredCreators.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });
@@ -231,6 +240,21 @@ function UsersTab() {
                           <Gift className="w-3 h-3 mr-1" /> Grant
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs mt-1"
+                        title={u.isPinned ? "Unpin from Featured Creators" : "Pin to top of Featured Creators"}
+                        style={u.isPinned
+                          ? { borderColor: "oklch(0.75 0.18 145)", color: "oklch(0.75 0.18 145)" }
+                          : { borderColor: BORDER, color: MUTED }
+                        }
+                        disabled={togglePin.isPending}
+                        onClick={() => togglePin.mutate({ userId: u.id, pin: !u.isPinned })}
+                      >
+                        {u.isPinned ? <PinOff className="w-3 h-3 mr-1" /> : <Pin className="w-3 h-3 mr-1" />}
+                        {u.isPinned ? "Unpin" : "Pin"}
+                      </Button>
                     </td>
                   </tr>
                 ))}

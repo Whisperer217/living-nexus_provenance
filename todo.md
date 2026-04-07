@@ -3062,3 +3062,10 @@
 - [ ] Upload: add "Schedule Release" date/time field (future publish date — Spotify/SoundCloud-inspired)
 - [ ] Home: add "Trending This Week" section showing top 5 tracks by play velocity
 - [x] Home: "New Voices" carousel added (recently joined creators with badge) showing recently joined creators with at least 1 upload
+
+## Phase 80.3: Creator Discovery Polish
+- [ ] Tighten New Voices cutoff from 30 days to 14 days
+- [ ] Add isPinned boolean column to users table + db:push migration
+- [ ] Wire pinned creator to featuredCreators procedure (pinned always first)
+- [ ] Add pin/unpin toggle in Admin panel User Roster tab
+- [ ] Bump What's New modal to v2.25 with Phase 80 release notes

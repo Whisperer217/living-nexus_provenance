@@ -5,19 +5,30 @@ import {
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
   Eye, Globe, FileText, Network, Scroll, Film, Gift, Link2,
   Radio, ArrowUpFromLine, Library, FileArchive, Rocket, ImagePlus, Compass,
-  Bell, LayoutGrid, ImageIcon, Sun, Moon, Sparkles,
+  Bell, LayoutGrid, ImageIcon, Sun, Moon, Sparkles, TrendingUp, Pin, Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.24.0";
+const CURRENT_VERSION = "v2.25.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.24.0",
+    version: "v2.25.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: TrendingUp, text: "New This Week — A fourth Explore filter now surfaces tracks published in the last 7 days, sorted by newest. Discover what the community just released before it trends." },
+      { icon: Sparkles, text: "New Voices — The Home page now features a New Voices carousel showing creators who joined in the last 14 days. Fresh talent, front and center — never buried under established names." },
+      { icon: Star, text: "Song Credits — Upload and edit pages now include a Credits section. Add producers, engineers, co-writers, and featured artists by role and name. Credits appear on every song detail page, giving collaborators the recognition they deserve." },
+      { icon: Pin, text: "Pinned Creators — Admins can now pin any creator to the top of the Featured Creators carousel from the User Roster in LN Command. Pinned creators float above the track-count sort order, giving you a spotlight slot for emerging voices." },
+    ],
+  },
+  {
+    version: "v2.24.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Sun, text: "Lights On — Steel Overlay Mode is now available in Profile → Settings. The dark charcoal base palette stays fully active — Lights On lays a translucent steel-blue tint over the navigation bar and sidebar only, with a subtle body brightness reduction. Your music and content remain in full contrast. Toggle in Profile → Settings; preference is remembered across sessions with zero flash on load." },
       { icon: Sparkles, text: "Steel Tint Architecture — Unlike a full theme swap, Lights On applies a single backdrop-filtered overlay to nav surfaces only. No color tokens are overridden. Headings, titles, and body text remain on the dark base palette — only the chrome dims. Cathedral gold accents are fully preserved." },

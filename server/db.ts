@@ -230,6 +230,7 @@ export async function getAllCreators() {
       bio: users.bio, profilePhotoUrl: users.profilePhotoUrl, bannerUrl: users.bannerUrl,
       licenseStatus: users.licenseStatus, songSlotsUsed: users.songSlotsUsed,
       stripeAccountStatus: users.stripeAccountStatus,
+      isPinned: users.isPinned,
       publishedCount: sql<number>`count(${songs.id})`,
     })
     .from(users)
@@ -3797,7 +3798,7 @@ export async function getProjectFollowerUserIds(projectId: number): Promise<numb
 export async function getRecentCreators(limit = 8) {
   const db = await getDb();
   if (!db) return [];
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
   const results = await db
     .select({
       id: users.id,
@@ -3813,7 +3814,7 @@ export async function getRecentCreators(limit = 8) {
     .where(and(
       isNotNull(users.name),
       ne(users.name, ""),
-      sql`${users.createdAt} >= ${thirtyDaysAgo}`,
+      sql`${users.createdAt} >= ${fourteenDaysAgo}`,
     ))
     .groupBy(users.id)
     .having(sql`count(${songs.id}) > 0`)

@@ -441,9 +441,14 @@ export const appRouter = router({
     }),
     allCreators: publicProcedure.query(async () => getAllCreators()),
     featuredCreators: publicProcedure.query(async () => {
-      // Return up to 12 creators sorted by most published tracks (most prolific first)
+      // Return up to 12 creators: pinned creators first, then sorted by most published tracks
       const all = await getAllCreators();
-      return [...all].sort((a, b) => (b.publishedCount ?? 0) - (a.publishedCount ?? 0)).slice(0, 12);
+      return [...all].sort((a, b) => {
+        // Pinned creators always float to the top
+        if ((a.isPinned ? 1 : 0) !== (b.isPinned ? 1 : 0)) return (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0);
+        // Then sort by track count descending
+        return (b.publishedCount ?? 0) - (a.publishedCount ?? 0);
+      }).slice(0, 12);
     }),
     recentCreators: publicProcedure.input(z.object({ limit: z.number().max(20).optional() }).optional()).query(async ({ input }) => {
       return getRecentCreators(input?.limit ?? 8);
@@ -2157,6 +2162,19 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
         await adminGrantLicense(input.userId, input.slotsGranted);
         return { success: true };
+      }),
+
+    /** Toggle the isPinned flag for a creator — pinned creators appear first in the Featured Creators carousel */
+    togglePinCreator: protectedProcedure
+      .input(z.object({ userId: z.number().int(), pin: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        // Use raw execute to avoid import conflicts with outer-scope variables
+        await db.execute(`UPDATE users SET isPinned = ${input.pin ? 1 : 0} WHERE id = ${input.userId}`);
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: input.pin ? "pin_creator" : "unpin_creator", targetType: "user", targetId: String(input.userId) });
+        return { success: true, isPinned: input.pin };
       }),
 
     // ── Founder Control ──────────────────────────────────────────────────────
