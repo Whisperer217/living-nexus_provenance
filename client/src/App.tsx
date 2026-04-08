@@ -170,6 +170,7 @@ function Router() {
                 <Route path="/privacy" component={PrivacyPage} />
                 <Route path="/projects" component={ProjectsDiscoveryPage} />
                 <Route path="/project/:slug" component={ProjectPage} />
+                <Route path="/projects/:slug">{({ slug }: { slug: string }) => <Redirect to={`/project/${slug}`} />}</Route>
                 <Route path="/my-projects" component={MyProjectsPage} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />

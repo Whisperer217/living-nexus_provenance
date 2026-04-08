@@ -10,14 +10,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.25.0";
+const CURRENT_VERSION = "v2.26.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.25.0",
+    version: "v2.26.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Shield, text: "Prompt Studio Identity Lock — The Provenance Prompt Generator is now fully profile-centric. Only you can open your own studio. Prompts are private by default — a share link is only created when you explicitly click Share. Copying a shared prompt now automatically appends a provenance watermark (creator name, EID, date, source) so authorship travels with the content." },
+      { icon: Music, text: "Custom Track Order — You can now drag and reorder your tracks in the Archive. The grip handle on each row lets you arrange your catalogue exactly as you intend it to be heard. Your custom order is respected everywhere your music appears: your creator profile, the Explore page, and the Home feed." },
+      { icon: Link2, text: "Project Link Fix — Featured Project cards on the Home page and activity feed entries now correctly navigate to the project page. Old shared links using the previous URL format are automatically redirected to the correct destination." },
+    ],
+  },
+  {
+    version: "v2.25.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: TrendingUp, text: "New This Week — A fourth Explore filter now surfaces tracks published in the last 7 days, sorted by newest. Discover what the community just released before it trends." },
       { icon: Sparkles, text: "New Voices — The Home page now features a New Voices carousel showing creators who joined in the last 14 days. Fresh talent, front and center — never buried under established names." },

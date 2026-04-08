@@ -33,7 +33,7 @@ import {
   Volume2, VolumeX, Shield, MessageCircle,
   ChevronRight, Send, Users, Fingerprint,
   ExternalLink, Crown, ArrowUp,
-  Home, Compass, Bell, User,
+  Home, Compass, Bell, User, Rocket,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -603,11 +603,11 @@ export default function MobilePlayerLayer() {
       refetchInterval: 30_000,
     });
     const NAV_ITEMS = [
-      { icon: Home,    label: "Home",    path: "/" },
-      { icon: Compass, label: "Explore", path: "/explore" },
-      { icon: Users,   label: "Together",path: "/together" },
-      { icon: Bell,    label: "Signals", path: "/notifications", badge: (unreadCount as number) > 0 ? String(Math.min(unreadCount as number, 99)) : undefined },
-      { icon: User,    label: "Profile", path: "/profile" },
+      { icon: Home,    label: "Home",     path: "/" },
+      { icon: Compass, label: "Explore",  path: "/explore" },
+      { icon: Rocket,  label: "Projects", path: "/projects" },
+      { icon: Bell,    label: "Signals",  path: "/notifications", badge: (unreadCount as number) > 0 ? String(Math.min(unreadCount as number, 99)) : undefined },
+      { icon: User,    label: "Profile",  path: "/profile" },
     ];
     return (
       <div

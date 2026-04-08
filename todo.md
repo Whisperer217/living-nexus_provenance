@@ -3138,3 +3138,9 @@
 - [x] Fixed same broken link in ProfilePage activity feed (`/projects/` → `/project/`)
 - [x] Capped Featured Projects card banner image height from 160px to 120px (no longer full-viewport tall)
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 86: v2.26 Changelog + Mobile Nav + Redirect Alias
+- [x] Bumped What's New modal to v2.26 with Phase 82 (Prompt Studio Identity Lock), Phase 84 (Custom Track Order), Phase 85 (Project Link Fix) entries
+- [x] Added Projects tab (Rocket icon) to mobile bottom nav — replaces Together tab; Home / Explore / Projects / Signals / Profile
+- [x] Registered /projects/:slug as client-side redirect alias → /project/:slug in App.tsx (wouter Redirect)
+- [x] 137/137 tests passing, 0 TypeScript errors
