@@ -3183,3 +3183,11 @@
 - [x] Double Featured Project card banner height: 120px → 240px in HomePage.tsx
 - [x] Double Featured Project card banner height in ExplorePage.tsx: h-28 → h-56
 - [x] 0 TypeScript errors
+
+## Phase 89b — Playlist Drawer Refinements + Discover Tab + Featured Card 2× Resize
+- [x] Confirmed PlaylistDrawer tab trigger at bottom: calc(safe-area + 100px) - above player bar
+- [x] Confirmed z-index hierarchy: drawer (z-9000/9001) < mini bar (z-9990) < expanded (z-9995)
+- [x] Added DiscoverPanel component to MobilePlayerLayer with related tracks query
+- [x] Added Now Playing / Discover tab bar to expanded player sheet
+- [x] Doubled Featured Project card banner height in HomePage: 240px → 360px (2× TrackCard 180px)
+- [x] Doubled Featured Project card banner height in ExplorePage: h-56 → h-[360px]

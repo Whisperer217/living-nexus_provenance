@@ -1027,9 +1027,9 @@ export default function HomePage() {
                 className="relative rounded-2xl overflow-hidden group"
                 style={{ background: "oklch(0.11 0.025 270)", boxShadow: "0 4px 28px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(0.84 0.155 85 / 0.08)" }}
               >
-                {/* Banner image — 160px tall */}
+                {/* Banner image — 360px tall (2× TrackCard 180px) */}
                 <Link href={`/project/${project.slug}`}>
-                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "240px" }}>
+                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "360px" }}>
                     {project.bannerUrl ? (
                       <img
                         src={project.bannerUrl}
