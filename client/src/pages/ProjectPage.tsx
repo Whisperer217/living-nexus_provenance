@@ -207,7 +207,8 @@ function BannerDropZone({
 
   return (
     <div
-      className="relative w-full h-56 md:h-80 overflow-hidden"
+      className="relative w-full overflow-hidden bg-[#080d14] flex items-center justify-center"
+      style={{ minHeight: "clamp(14rem, 42vw, 34rem)" }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -216,15 +217,15 @@ function BannerDropZone({
         <img
           src={bannerUrl}
           alt={title}
-          className="w-full h-full object-cover"
+          className="w-full object-contain"
           style={{
-            objectPosition: `${positionX}% ${positionY}%`,
+            maxHeight: "clamp(14rem, 42vw, 34rem)",
             cursor: editMode ? (showFocalEditor ? "crosshair" : "default") : "zoom-in",
           }}
           onClick={() => !editMode && setLightboxOpen(true)}
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#080d14]" />
+        <div className="w-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#080d14]" style={{ height: "clamp(14rem, 42vw, 34rem)" }} />
       )}
       {/* Lightbox */}
       {lightboxOpen && bannerUrl && (
