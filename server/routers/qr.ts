@@ -30,7 +30,7 @@ function buildShareUrl(
   let path: string;
   switch (entityType) {
     case "creator": path = `/creator/${entitySlug}`; break;
-    case "project": path = `/projects/${entitySlug}`; break;
+    case "project": path = `/project/${entitySlug}`; break;
     case "song":    path = `/song/${entitySlug}`; break;
   }
   const params = new URLSearchParams();

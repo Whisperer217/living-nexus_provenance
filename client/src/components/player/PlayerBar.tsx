@@ -218,7 +218,7 @@ export default function PlayerBar() {
 
   return (
     <div
-      className="z-[9985] transition-all duration-500 ease-in-out hidden md:block"
+      className="z-[9995] transition-all duration-500 ease-in-out hidden md:block"
       style={{
         position: "fixed",
         bottom: 0,
@@ -233,7 +233,7 @@ export default function PlayerBar() {
         boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px oklch(0.82 0.155 75 / 0.18), 0 -1px 8px oklch(0.82 0.155 75 / 0.22)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
-        zIndex: isCinematic ? 9999 : 9985,
+        zIndex: isCinematic ? 9999 : 9995,
       }}
     >
       {/* ── Expand / Collapse tab — sits on top of bar, centered ── */}
@@ -571,7 +571,7 @@ export default function PlayerBar() {
                         </button>
                       </div>
                       {/* Horizontal slider (visually looks vertical via CSS rotate on the element itself) */}
-                      <div className="flex items-center justify-center" style={{ height: "116px", overflow: "visible" }}>
+                      <div className="flex items-center justify-center py-2">
                         <input
                           type="range"
                           min="0" max="1" step="0.01"
@@ -579,7 +579,7 @@ export default function PlayerBar() {
                           onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
                           className="volume-slider-vertical"
                           style={{
-                            background: `linear-gradient(to right, oklch(0.88 0.18 82) ${
+                            background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
                               state.isMuted ? 0 : state.volume * 100
                             }%, oklch(0.22 0.04 55 / 80%) ${
                               state.isMuted ? 0 : state.volume * 100
@@ -1013,7 +1013,7 @@ export default function PlayerBar() {
                     </button>
                   </div>
                   {/* Slider container — overflow:visible so rotated slider isn't clipped */}
-                  <div className="flex items-center justify-center" style={{ height: "116px", overflow: "visible" }}>
+                  <div className="flex items-center justify-center py-2">
                     <input
                       type="range"
                       min="0" max="1" step="0.01"
@@ -1021,7 +1021,7 @@ export default function PlayerBar() {
                       onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
                       className="volume-slider-vertical"
                       style={{
-                        background: `linear-gradient(to right, oklch(0.88 0.18 82) ${
+                        background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
                           state.isMuted ? 0 : state.volume * 100
                         }%, oklch(0.22 0.04 55 / 80%) ${
                           state.isMuted ? 0 : state.volume * 100

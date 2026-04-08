@@ -219,11 +219,14 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                   Recently Registered
                 </span>
               </div>
-              {recentSongs?.slice(0, 6).map((song: any) => (
+              {recentSongs?.slice(0, 6).map((item: any) => {
+                const s = item.song ?? item;
+                const c = item.creator ?? {};
+                return (
                 <div
-                  key={song.id}
+                  key={s.id}
                   className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all"
-                  onClick={() => navigate(`/song/${song.id}`)}
+                  onClick={() => navigate(`/song/${s.id}`)}
                   style={{ borderBottom: "1px solid oklch(0.28 0.04 270 / 15%)" }}
                   onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "oklch(0.14 0.02 280 / 0.6)"}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
@@ -232,17 +235,18 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                     className="w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden"
                     style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid oklch(0.28 0.04 270 / 30%)" }}
                   >
-                    {song.coverArtUrl
-                      ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover rounded-md" />
+                    {s.coverArtUrl
+                      ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover rounded-md" />
                       : <Music size={12} style={{ color: "oklch(0.55 0.02 280)" }} />
                     }
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-medium truncate" style={{ color: "oklch(0.85 0.02 280)" }}>{song.title}</div>
-                    <div className="text-[9px] truncate" style={{ color: "oklch(0.50 0.02 280)" }}>{song.creatorName || "Unknown"}</div>
+                    <div className="text-[11px] font-medium truncate" style={{ color: "oklch(0.85 0.02 280)" }}>{s.title}</div>
+                    <div className="text-[9px] truncate" style={{ color: "oklch(0.50 0.02 280)" }}>{c.name || c.artistHandle || "Unknown"}</div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
               {(!recentSongs || recentSongs.length === 0) && (
                 <div className="px-4 py-6 text-center">
                   <Music size={20} style={{ color: "oklch(0.30 0.02 280)", margin: "0 auto 8px" }} />

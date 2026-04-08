@@ -3290,3 +3290,10 @@
 - [x] Add provenance accent line at bottom of banner (green when witnessed, gold when not)
 - [x] Update WID badge in FeaturedProjectsCarousel to green (was purple)
 - [x] Update WID badge in ProjectsDiscoveryPage to green with verify link
+
+## Audit Fixes (Apr 2026)
+- [x] Fix LiveActivityPanel missing key props (song.id → item.song.id)
+- [x] Fix QR buildShareUrl using /projects/ instead of /project/ (broken QR scans)
+- [x] Fix volume slider CSS rotation → writing-mode vertical (no more clipping)
+- [x] Fix PlayerBar z-index from 9985 to 9995 (popups now above QuickRefBottomSheet)
+- [x] Fix volume popup container height hack removed (native vertical slider)
