@@ -3303,3 +3303,4 @@
 - [x] Fix project banner: object-contain + clamp height so full character visible on all screen sizes
 - [x] Save LAMININ.md to /docs/LAMININ.md and link from README.md as first architecture doc
 - [x] Fix Quick Play tab trigger: slide fully off-screen (right:-28px) when any dialog/modal is open + 100ms polling fallback
+- [x] Fix React hooks order violation in MobilePlayerLayer (useLightsMode called after early return — caused blank screen on mobile)

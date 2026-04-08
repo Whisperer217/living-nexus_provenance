@@ -636,6 +636,10 @@ export default function MobilePlayerLayer() {
     } catch {}
   }, [currentTrack, currentSongId, widBadge]);
 
+  // useLightsMode MUST be called before any early return (Rules of Hooks)
+  const { mode: lightsMode } = useLightsMode();
+  const isLightsOn = lightsMode === "on";
+
   // Don't render if no track
   if (!currentTrack) return null;
 
@@ -747,8 +751,7 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   //  MINI STATE
   // ══════════════════════════════════════════════════════════════
-  const { mode: lightsMode } = useLightsMode();
-  const isLightsOn = lightsMode === "on";
+  // (lightsMode / isLightsOn declared above the early return — see Rules of Hooks)
   // ── Bottom Nav Bar ─────────────────────────────────────────────
   const BottomNavBar = () => {
     const [location] = useLocation();
