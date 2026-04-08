@@ -183,16 +183,26 @@ export default function PlaylistDrawer() {
   const { user } = useAuth();
   // Detect when any Radix dialog/modal is open — hide tab trigger to prevent accidental activation
   useEffect(() => {
-    const observer = new MutationObserver(() => {
+    const checkDialogOpen = () => {
       // Radix Dialog sets data-scroll-locked on <body> when open
       // Custom modals (EditTrackPanel etc.) set body overflow:hidden directly
       const locked =
         document.body.hasAttribute("data-scroll-locked") ||
-        document.body.style.overflow === "hidden";
+        document.body.style.overflow === "hidden" ||
+        document.body.style.overflowY === "hidden";
       setDialogOpen(locked);
-    });
+    };
+    // Run immediately on mount to catch already-open dialogs
+    checkDialogOpen();
+    // Watch for attribute/style changes
+    const observer = new MutationObserver(checkDialogOpen);
     observer.observe(document.body, { attributes: true, attributeFilter: ["data-scroll-locked", "style"] });
-    return () => observer.disconnect();
+    // Poll as a safety net (100ms interval) — catches edge cases where MutationObserver fires late
+    const interval = setInterval(checkDialogOpen, 100);
+    return () => {
+      observer.disconnect();
+      clearInterval(interval);
+    };
   }, []);
   // Swipe-to-close gesture
   const touchStartX = useRef<number | null>(null);
@@ -302,12 +312,15 @@ export default function PlaylistDrawer() {
       )}
 
       {/* Tab trigger — right edge, visible on all screen sizes */}
-      {/* Hidden when any dialog/modal is open to prevent accidental activation */}
+      {/* Slides fully off-screen when any dialog/modal is open to prevent accidental activation */}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed z-[9001] flex items-center justify-center transition-all active:scale-95"
+        className="fixed z-[9001] flex items-center justify-center active:scale-95"
         style={{
-          right: isOpen ? "280px" : "0px",
+          // When drawer open: peeking left of the drawer panel
+          // When drawer closed + no dialog: peek 4px into screen (visible handle)
+          // When drawer closed + dialog open: fully off-screen (right: -28px)
+          right: isOpen ? "280px" : (dialogOpen ? "-28px" : "0px"),
           bottom: "calc(env(safe-area-inset-bottom, 0px) + 140px)",
           width: "22px",
           height: "64px",
@@ -319,10 +332,8 @@ export default function PlaylistDrawer() {
           borderRight: "none",
           backdropFilter: "blur(12px)",
           boxShadow: "-2px 0 16px oklch(0 0 0 / 0.4)",
-          transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s, opacity 0.15s",
+          transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s",
           color: "oklch(0.84 0.155 85)",
-          // Hide when a dialog/modal is open — prevents accidental activation when tapping buttons near the right edge
-          opacity: dialogOpen && !isOpen ? 0 : 1,
           pointerEvents: dialogOpen && !isOpen ? "none" : "auto",
         }}
         title={isOpen ? "Close playlist drawer" : "Open playlist drawer"}

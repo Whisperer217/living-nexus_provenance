@@ -3302,3 +3302,4 @@
 - [x] Fix Share Identity Card modal not scrollable on mobile: moved overflow-y-auto to backdrop, sticky header, canvas scales with min(240px, 100vw-4rem)
 - [x] Fix project banner: object-contain + clamp height so full character visible on all screen sizes
 - [x] Save LAMININ.md to /docs/LAMININ.md and link from README.md as first architecture doc
+- [x] Fix Quick Play tab trigger: slide fully off-screen (right:-28px) when any dialog/modal is open + 100ms polling fallback
