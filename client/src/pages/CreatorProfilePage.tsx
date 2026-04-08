@@ -795,33 +795,36 @@ export default function CreatorProfilePage() {
 
               {/* ── Identity block ── */}
               <div className="flex-1 min-w-0 pt-1">
-                {/* Name row — artist name is ALWAYS the stable display name, never a link */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1
-                    className="text-2xl sm:text-4xl font-bold leading-tight select-text"
-                    style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)", wordBreak: "break-word" }}
-                  >
-                    {creator.name || creator.artistHandle}
-                  </h1>
-                  {(creator as any).role === "founder" && (
-                    <span
-                      title="Founding Creator"
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
-                      style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}
-                    >
-                      <Crown className="w-3 h-3" />
-                      FOUNDER
-                    </span>
-                  )}
-                  {creator.licenseStatus === "licensed" && (
-                    <span
-                      className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
-                      style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
-                    >
-                      LICENSED
-                    </span>
-                  )}
-                </div>
+                {/* Name — single line, never wraps mid-word */}
+                <h1
+                  className="text-2xl sm:text-4xl font-bold leading-tight select-text"
+                  style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                >
+                  {creator.name || creator.artistHandle}
+                </h1>
+                {/* Badges row — always below the name, never inline with it */}
+                {((creator as any).role === "founder" || creator.licenseStatus === "licensed") && (
+                  <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                    {(creator as any).role === "founder" && (
+                      <span
+                        title="Founding Creator"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
+                        style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}
+                      >
+                        <Crown className="w-3 h-3" />
+                        FOUNDER
+                      </span>
+                    )}
+                    {creator.licenseStatus === "licensed" && (
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
+                        style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+                      >
+                        LICENSED
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* @handle sub-header — clickable hyperlink like Twitter, copies profile URL */}
                 {creator.artistHandle && (
@@ -906,29 +909,28 @@ export default function CreatorProfilePage() {
                     )}
                   </div>
                 )}
+                {/* Covenant Badge — inside identity block, below EID */}
+                {creatorDeclaration?.hasSigned && (
+                  <div className="mt-2">
+                    <CovenantBadge signedAt={creatorDeclaration.signedAt} />
+                  </div>
+                )}
+                {/* Owner CTA — sign if not yet signed */}
+                {isOwner && !creatorDeclaration?.hasSigned && (
+                  <button
+                    onClick={() => setShowDeclarationModal(true)}
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs text-amber-600/70 hover:text-amber-400 transition-colors"
+                  >
+                    <span>Sign the Living Nexus Declaration →</span>
+                  </button>
+                )}
               </div>{/* end identity block */}
 
-              {/* Covenant Badge — shows if creator has signed the declaration */}
-              {creatorDeclaration?.hasSigned && (
-                <div className="mt-2">
-                  <CovenantBadge signedAt={creatorDeclaration.signedAt} />
-                </div>
-              )}
-              {/* Owner CTA — sign if not yet signed */}
-              {isOwner && !creatorDeclaration?.hasSigned && (
-                <button
-                  onClick={() => setShowDeclarationModal(true)}
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-amber-600/70 hover:text-amber-400 transition-colors"
-                >
-                  <span>Sign the Living Nexus Declaration →</span>
-                </button>
-              )}
-
               {/* ── Right column: signals + actions ── */}
-              <div className="flex-shrink-0 flex flex-col items-start sm:items-end gap-3 pt-1 mt-3 sm:mt-0">
+              <div className="flex-shrink-0 flex flex-col items-end gap-2.5 pt-1">
 
                 {/* Signals — stats row */}
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5 flex-wrap justify-end">
                   {creator.supporterTier && (
                     <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
                   )}
@@ -956,7 +958,7 @@ export default function CreatorProfilePage() {
                 </div>
 
                 {/* Actions — button row */}
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap justify-end">
                   {/* Provenance Prompt Generator — visible to ALL visitors */}
                   <button
                     onClick={() => { setPsResult(null); setShowPromptStudio(true); }}
@@ -1039,23 +1041,36 @@ export default function CreatorProfilePage() {
 
             {/* Mobile-only: full-width stacked layout */}
             <div className="sm:hidden flex flex-col gap-3">
-              {/* Name row — artist name is ALWAYS the stable display name, never a link */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1
-                  className="text-2xl font-bold leading-tight select-text"
-                  style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}
-                >
-                  {creator.name || creator.artistHandle}
-                </h1>
-                {creator.licenseStatus === "licensed" && (
-                  <span
-                    className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
-                    style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
-                  >
-                    LICENSED
-                  </span>
-                )}
-              </div>
+              {/* Name — single line, never wraps mid-word */}
+              <h1
+                className="text-2xl font-bold leading-tight select-text"
+                style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+              >
+                {creator.name || creator.artistHandle}
+              </h1>
+              {/* Badges row — always below the name */}
+              {((creator as any).role === "founder" || creator.licenseStatus === "licensed") && (
+                <div className="flex items-center gap-1.5 -mt-1 flex-wrap">
+                  {(creator as any).role === "founder" && (
+                    <span
+                      title="Founding Creator"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
+                      style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}
+                    >
+                      <Crown className="w-3 h-3" />
+                      FOUNDER
+                    </span>
+                  )}
+                  {creator.licenseStatus === "licensed" && (
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
+                      style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+                    >
+                      LICENSED
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* @handle sub-header — clickable hyperlink like Twitter, copies profile URL */}
               {creator.artistHandle && (
