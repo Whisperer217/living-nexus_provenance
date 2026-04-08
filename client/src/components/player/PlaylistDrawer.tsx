@@ -45,7 +45,7 @@ function flattenSong(s: any): TrackRow {
     title: song.title ?? "Untitled",
     artist: creator.name ?? creator.artistHandle ?? song.artistName ?? "Unknown",
     artUrl: song.coverArtUrl ?? null,
-    audioUrl: song.audioUrl ?? "",
+    audioUrl: song.fileUrl ?? song.audioUrl ?? "",
     genre: song.genre ?? null,
     witnessId: song.witnessId ?? null,
     creatorId: creator.id ?? null,
@@ -316,7 +316,7 @@ export default function PlaylistDrawer() {
 
       {/* Drawer panel */}
       <div
-        className="fixed top-0 right-0 h-full z-[9000] flex flex-col"
+        className={`fixed top-0 right-0 h-full z-[9000] flex flex-col${isOpen ? "" : " pointer-events-none"}`}
         style={{
           width: "280px",
           background: "oklch(0.09 0.022 275 / 0.97)",

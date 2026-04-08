@@ -3214,3 +3214,8 @@
 - [x] Add 5-second auto-advance timer to FeaturedProjectsCarousel (pauses on touch)
 - [x] Overlay project title + funding % on banner image (remove separate info row)
 - [x] Add New badge pill to projects created within the last 7 days
+
+## Phase 91 — Bug Fixes: Quick Play + Desktop 3-Dot Menu
+- [x] Fix PlaylistDrawer flattenSong: use song.fileUrl (not song.audioUrl) so tracks have valid audio URLs
+- [x] Fix PlayerBar z-index from z-50 to z-[9985] so context menu dropdowns render above PlaylistDrawer
+- [x] Fix PlaylistDrawer panel: add pointer-events-none when closed to prevent blocking desktop player clicks
