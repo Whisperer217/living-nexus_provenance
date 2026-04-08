@@ -3195,3 +3195,8 @@
 ## Phase 89c — Featured Project Card Size Correction
 - [x] Revert banner height to 180px in HomePage and ExplorePage (matches TrackCard)
 - [x] Ensure 2-column grid layout so each card is ~half the viewport width
+
+## Phase 89d — Featured Projects Swipeable 2×2 Carousel
+- [x] Build FeaturedProjectsCarousel component: paged 2x2 grid, touch swipe left/right, dot indicators
+- [x] Replace static grid in HomePage with FeaturedProjectsCarousel
+- [x] Replace static grid in ExplorePage with FeaturedProjectsCarousel

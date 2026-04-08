@@ -16,6 +16,7 @@ import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLike } from "@/hooks/useLike";
 import TipModal from "@/components/TipModal";
+import FeaturedProjectsCarousel from "@/components/FeaturedProjectsCarousel";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -659,57 +660,7 @@ export default function ExplorePage() {
                 View all →
               </Link>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              {featuredProjects.slice(0, 6).map((project: any) => {
-                const pct = project.goalAmountCents
-                  ? Math.min(100, Math.round((project.raisedAmountCents / project.goalAmountCents) * 100))
-                  : null;
-                return (
-                  <Link
-                    key={project.id}
-                    href={`/project/${project.slug}`}
-                    className="group relative rounded-xl overflow-hidden border border-white/[0.08] bg-[oklch(0.13_0.025_50)] hover:border-[#D4AF37]/30 transition-all duration-200 flex flex-col"
-                  >
-                    {/* Banner */}
-                    <div className="relative h-[180px] overflow-hidden">
-                      {project.bannerUrl ? (
-                        <img src={project.bannerUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#080d14]" />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
-                      <div className="absolute top-2 right-2">
-                        <span className="text-[9px] font-heading font-bold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.145 82 / 0.15)", color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.35)" }}>Funding</span>
-                      </div>
-                    </div>
-                    {/* Info */}
-                    <div className="p-3 flex flex-col gap-1.5 flex-1">
-                      <p className="text-[13px] font-heading text-white/90 truncate tracking-wide group-hover:text-[#D4AF37] transition-colors">{project.title}</p>
-                      {project.tagline && (
-                        <p className="text-[11px] font-body text-white/50 line-clamp-1">{project.tagline}</p>
-                      )}
-                      {/* Progress bar */}
-                      {pct !== null && (
-                        <div className="mt-1">
-                          <div className="flex items-center justify-between text-[10px] font-body text-white/40 mb-1">
-                            <span>${(project.raisedAmountCents / 100).toLocaleString()} raised</span>
-                            <span>{pct}%</span>
-                          </div>
-                          <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-                            <div className="h-full rounded-full bg-gradient-to-r from-[#d4a017] to-[#f0c040]" style={{ width: `${pct}%` }} />
-                          </div>
-                        </div>
-                      )}
-                      {/* Stats row */}
-                      <div className="flex items-center gap-3 mt-1 text-[10px] font-body text-white/35">
-                        <span className="flex items-center gap-1"><Users size={9} />{project.donorCount} donor{project.donorCount !== 1 ? "s" : ""}</span>
-                        <span className="flex items-center gap-1 text-[#d4a017]/60"><Bell size={9} />Follow to get updates</span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+            <FeaturedProjectsCarousel projects={featuredProjects as any[]} />
           </div>
         )}
 
