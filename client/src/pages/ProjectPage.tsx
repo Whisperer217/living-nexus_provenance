@@ -35,6 +35,7 @@ import {
   Mic, Music, Volume2, Play, Pause, Search, FileVideo,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { QRShareModal } from "@/components/QRIdentityCard";
 
 // ── Share Modal ──────────────────────────────────────────────────────────────────
 
@@ -1913,6 +1914,34 @@ export default function ProjectPage() {
               >
                 <Share2 className="w-4 h-4 mr-1" /> Share
               </Button>
+              {project && (
+                <QRShareModal
+                  entity={{
+                    type: "project",
+                    id: project.id,
+                    slug: project.slug,
+                    name: project.title,
+                    subtitle: project.tagline ?? undefined,
+                    description: project.description ?? undefined,
+                    thumbnailUrl: project.bannerUrl ?? undefined,
+                  }}
+                  trigger={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-700/40 text-amber-400/70 hover:text-amber-300 hover:border-amber-600/60 bg-transparent gap-1.5"
+                    >
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                        <path d="M14 14h2v2h-2zm4 0h3v3h-3zm0 4v3h-3v-3"/>
+                      </svg>
+                      ID Card
+                    </Button>
+                  }
+                />
+              )}
             </div>
           </div>
         )}

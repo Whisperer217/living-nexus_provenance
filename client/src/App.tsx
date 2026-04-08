@@ -13,6 +13,13 @@ import { TosAcceptanceModal } from "./components/TosAcceptanceModal";
 import { CommunityToastProvider } from "./components/CommunityToast";
 import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
 import AmbientWidget from "./components/AmbientWidget";
+import { useQrScanLogger } from "./hooks/useQrScanLogger";
+
+/** Logs QR scan events when ?qr= param is present in the URL. */
+function QrScanLogger() {
+  useQrScanLogger();
+  return null;
+}
 
 // Lazy-loaded page components — each becomes its own JS chunk
 // This cuts initial bundle size significantly; pages load on first visit only
@@ -211,6 +218,7 @@ export default function App() {
               }}
             />
             <OEmbedUpdater />
+            <QrScanLogger />
             <AmbientWidget />
             <Router />
             </AmbientPlayerProvider>

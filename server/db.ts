@@ -20,6 +20,7 @@ import {
   projects, projectUpdates, projectDonations, projectBlocks, projectFollowers,
   projectSongs,
   platformAuditLogs,
+  qrShares, qrScans,
   type InsertContentFlag, type InsertDeclarationSignature,
   type InsertSongVersion,
   type Project, type InsertProject,
@@ -27,6 +28,7 @@ import {
   type ProjectDonation,
   type ProjectBlock,
   type InsertPlatformAuditLog,
+  type QrShare, type InsertQrShare,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -4010,4 +4012,88 @@ export async function reorderProjectSongs(projectId: number, orderedIds: number[
         .where(and(eq(projectSongs.id, id), eq(projectSongs.projectId, projectId)))
     )
   );
+}
+
+// ─── QR Identity Shares ───────────────────────────────────────────────────────
+
+/** Create a new QR share record and return it. */
+export async function createQrShare(data: InsertQrShare): Promise<QrShare | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(qrShares).values(data);
+  const id = (result as any)[0]?.insertId as number;
+  if (!id) return undefined;
+  const rows = await db.select().from(qrShares).where(eq(qrShares.id, id)).limit(1);
+  return rows[0];
+}
+
+/** Get a QR share by ID. */
+export async function getQrShareById(id: number): Promise<QrShare | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(qrShares).where(eq(qrShares.id, id)).limit(1);
+  return rows[0];
+}
+
+/** Get all QR shares created by a user (sharer). */
+export async function getQrSharesByUser(sharerId: number): Promise<QrShare[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(qrShares)
+    .where(eq(qrShares.sharerId, sharerId))
+    .orderBy(desc(qrShares.createdAt));
+}
+
+/** Get all QR shares for a specific entity (creator/project/song). */
+export async function getQrSharesByEntity(
+  entityType: "creator" | "project" | "song",
+  entityId: number
+): Promise<QrShare[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(qrShares)
+    .where(and(eq(qrShares.entityType, entityType), eq(qrShares.entityId, entityId)))
+    .orderBy(desc(qrShares.createdAt));
+}
+
+/** Log a QR scan event and increment the scanCount on the share. */
+export async function logQrScan(data: {
+  shareId: number;
+  refHandle?: string | null;
+  campaign?: string | null;
+  ipHash?: string | null;
+  userAgent?: string | null;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(qrScans).values({
+    shareId: data.shareId,
+    refHandle: data.refHandle ?? null,
+    campaign: data.campaign ?? null,
+    ipHash: data.ipHash ?? null,
+    userAgent: data.userAgent ?? null,
+  });
+  // Increment denormalized scan count
+  await db.execute(sql`UPDATE qrShares SET scanCount = scanCount + 1 WHERE id = ${data.shareId}`);
+}
+
+/** Get scan stats for a share (total scans + recent 20 events). */
+export async function getQrScanStats(shareId: number): Promise<{
+  total: number;
+  recent: Array<{ refHandle: string | null; campaign: string | null; scannedAt: Date }>;
+}> {
+  const db = await getDb();
+  if (!db) return { total: 0, recent: [] };
+  const share = await getQrShareById(shareId);
+  const total = share?.scanCount ?? 0;
+  const recent = await db.select({
+    refHandle: qrScans.refHandle,
+    campaign: qrScans.campaign,
+    scannedAt: qrScans.scannedAt,
+  })
+    .from(qrScans)
+    .where(eq(qrScans.shareId, shareId))
+    .orderBy(desc(qrScans.scannedAt))
+    .limit(20);
+  return { total, recent };
 }

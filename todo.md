@@ -3240,3 +3240,39 @@
 - [x] Add narrationUrl/narrationKey fields to projects DB schema
 - [x] Add tRPC procedures: projects.getSongs, projects.addSong, projects.removeSong, projects.reorderSongs
 - [x] Add tRPC procedures: projects.uploadNarration, projects.uploadVideo
+
+## QR Identity Card System
+- [ ] Add qr_shares table to DB schema (entity type, entity id, sharer userId, campaign tag, scan count)
+- [ ] Add qr_scans table (share id, IP hash, user agent, timestamp)
+- [ ] Add tRPC procedures: qr.generate, qr.logScan, qr.getStats
+- [ ] Build QRIdentityCard component (canvas-based visual card with QR + creator info)
+- [ ] Add PNG export from canvas
+- [ ] Add share button to creator profile page
+- [ ] Add share button to project pages
+- [ ] Add share button to song pages
+- [ ] Add attribution ref params to landing URLs (?ref=&context=&ts=)
+- [ ] Log scan events when ref param is present on page load
+- [ ] Write vitest tests for QR procedures
+
+## QR Identity Card System
+- [ ] Add qr_shares table to DB schema
+- [ ] Add qr_scans table to DB schema
+- [ ] Add tRPC procedures: qr.generate, qr.logScan, qr.getStats
+- [ ] Build QRIdentityCard component
+- [ ] Add PNG export from canvas
+- [ ] Add share buttons to creator/project/song pages
+- [ ] Log scan events with attribution params
+- [ ] Write vitest tests for QR procedures
+
+## QR Identity Card System
+- [x] DB schema: qrShares and qrScans tables
+- [x] Server: createQrShare, logQrScan, getQrStats, listQrShares db helpers
+- [x] Server: qrRouter with generate, logScan, getStats, list procedures
+- [x] Client: QRIdentityCard canvas renderer with PNG export
+- [x] Client: QRShareModal wrapper component
+- [x] Client: useQrScanLogger hook for attribution tracking
+- [x] Client: QrScanLogger wired into App.tsx
+- [x] Creator profile: QR share button replaces plain share button
+- [x] Project page: QR ID Card button alongside existing share button
+- [x] Song detail page: QR ID Card button alongside existing share button
+- [x] Tests: 11 QR unit tests passing

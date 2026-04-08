@@ -1150,3 +1150,42 @@ export const projectSongs = mysqlTable("projectSongs", {
 });
 export type ProjectSong = typeof projectSongs.$inferSelect;
 export type InsertProjectSong = typeof projectSongs.$inferInsert;
+
+// ─── QR Identity Shares ───────────────────────────────────────────────────────
+// Each row represents a generated QR share link for a creator, project, or song.
+// The sharerId is the user who generated the card; campaign/tag is optional context.
+export const qrShares = mysqlTable("qrShares", {
+  id: int("id").autoincrement().primaryKey(),
+  // Entity being shared
+  entityType: mysqlEnum("entityType", ["creator", "project", "song"]).notNull(),
+  entityId: int("entityId").notNull(),         // userId / projectId / songId
+  entitySlug: varchar("entitySlug", { length: 128 }), // for URL construction
+  // Sharer attribution
+  sharerId: int("sharerId"),                   // null = anonymous / public share
+  sharerHandle: varchar("sharerHandle", { length: 64 }), // cached for card rendering
+  // Context metadata
+  campaign: varchar("campaign", { length: 128 }), // e.g. "prayer-warrior", "launch-2025"
+  tag: varchar("tag", { length: 64 }),             // short label shown on card
+  // Stats (denormalized for fast reads)
+  scanCount: int("scanCount").default(0).notNull(),
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type QrShare = typeof qrShares.$inferSelect;
+export type InsertQrShare = typeof qrShares.$inferInsert;
+
+// ─── QR Scan Events ───────────────────────────────────────────────────────────
+// Each row is one scan / click of a QR share link.
+export const qrScans = mysqlTable("qrScans", {
+  id: int("id").autoincrement().primaryKey(),
+  shareId: int("shareId").notNull(),           // FK → qrShares.id
+  // Attribution context carried in the URL
+  refHandle: varchar("refHandle", { length: 64 }),  // ?ref= value
+  campaign: varchar("campaign", { length: 128 }),   // ?context= value
+  // Anonymised visitor fingerprint
+  ipHash: varchar("ipHash", { length: 64 }),
+  userAgent: text("userAgent"),
+  scannedAt: timestamp("scannedAt").defaultNow().notNull(),
+});
+export type QrScan = typeof qrScans.$inferSelect;
+export type InsertQrScan = typeof qrScans.$inferInsert;

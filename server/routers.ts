@@ -5,6 +5,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { normalizationRouter } from "./routers/normalization";
+import { qrRouter } from "./routers/qr";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { storagePut } from "./storage";
@@ -291,6 +292,7 @@ export async function handleStripeWebhook(req: any, res: any) {
 
 export const appRouter = router({
   system: systemRouter,
+  qr: qrRouter,
 
   // ─── Witness Testimony ────────────────────────────────────────────────────────
   testimony: router({

@@ -31,6 +31,7 @@ import { WIDPanel } from "@/components/WIDPanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
 import { VersionHistoryModal } from "@/components/VersionHistoryModal";
 import { safeAudioUrl } from "@shared/const";
+import { QRShareModal } from "@/components/QRIdentityCard";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
 
@@ -621,6 +622,33 @@ export default function SongDetailPage() {
                     style={{ borderColor: "oklch(0.25 0.02 280)", color: "oklch(0.65 0.04 280)" }}>
                     <Share2 className="w-3.5 h-3.5 mr-1" />Share
                   </Button>
+                  {song && (
+                    <QRShareModal
+                      entity={{
+                        type: "song",
+                        id: song.id,
+                        slug: song.witnessId || String(song.id),
+                        name: song.title,
+                        subtitle: song.artistHandle || song.creatorName || undefined,
+                        description: song.description ?? undefined,
+                        thumbnailUrl: song.coverArtUrl ?? undefined,
+                      }}
+                      trigger={
+                        <Button size="sm" variant="outline"
+                          style={{ borderColor: "oklch(0.75 0.18 85 / 0.3)", color: "oklch(0.84 0.155 85 / 0.7)" }}
+                          className="gap-1.5"
+                        >
+                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                            <path d="M14 14h2v2h-2zm4 0h3v3h-3zm0 4v3h-3v-3"/>
+                          </svg>
+                          ID Card
+                        </Button>
+                      }
+                    />
+                  )}
                   <Button size="sm" variant="outline" onClick={() => setAiTransformOpen(true)}
                     style={{ borderColor: "oklch(0.65 0.2 300 / 0.4)", color: "oklch(0.65 0.2 300)" }}>
                     <Wand2 className="w-3.5 h-3.5 mr-1" />AI Transform
