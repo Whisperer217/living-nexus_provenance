@@ -409,9 +409,13 @@ export default function DiscoverPage() {
                       )}
                     </div>
                     {item.song.witnessId && (
-                      <div className="absolute top-2 right-2">
-                        <Badge className="text-xs font-mono px-1 py-0 wid-glow" style={{ background: "oklch(0.84 0.155 85 / 0.20)", color: "oklch(0.84 0.155 85)", fontSize: "9px", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}>WID</Badge>
-                      </div>
+                      <Link
+                        href={`/verify/${item.song.witnessId}`}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        className="absolute top-2 right-2"
+                      >
+                        <Badge className="text-xs font-mono px-1 py-0 wid-glow cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "oklch(0.84 0.155 85 / 0.20)", color: "oklch(0.84 0.155 85)", fontSize: "9px", border: "1px solid oklch(0.84 0.155 85 / 0.55)" }}>WID</Badge>
+                      </Link>
                     )}
                     {item.creator?.aiDisclosure && (
                       <div className="absolute top-2 left-2">

@@ -3297,3 +3297,4 @@
 - [x] Fix volume slider CSS rotation → writing-mode vertical (no more clipping)
 - [x] Fix PlayerBar z-index from 9985 to 9995 (popups now above QuickRefBottomSheet)
 - [x] Fix volume popup container height hack removed (native vertical slider)
+- [x] Fix WID badge on mobile: tapping WID in song rows/cards no longer triggers the player or opens the quick access panel — badge now stops event propagation and navigates to /verify/:witnessId (CreatorProfilePage SongRow + context menu, DiscoverPage card)

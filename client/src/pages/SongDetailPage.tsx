@@ -627,7 +627,7 @@ export default function SongDetailPage() {
                       entity={{
                         type: "song",
                         id: song.id,
-                        slug: song.witnessId || String(song.id),
+                        slug: String(song.id),
                         name: song.title,
                         subtitle: song.artistHandle || song.creatorName || undefined,
                         description: song.description ?? undefined,

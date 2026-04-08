@@ -45,7 +45,22 @@ export default function QuickRefBottomSheet({
   const [, navigate] = useLocation();
   const { addAndPlay, state, togglePlay, seek, nextTrack, prevTrack } = usePlayer();
   const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
+
+  // Auto-close sheet and hide pill when any Radix dialog/modal opens
+  useEffect(() => {
+    const checkModalOpen = () => {
+      const hasOpenModal = !!document.querySelector(
+        '[data-slot="dialog-overlay"], [data-radix-dialog-overlay], [role="dialog"][data-state="open"], [data-state="open"][role="alertdialog"]'
+      );
+      setModalOpen(hasOpenModal);
+      if (hasOpenModal) setOpen(false);
+    };
+    const observer = new MutationObserver(checkModalOpen);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-state'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Derive current track info from player state
   const activeTracks = state.tracks.filter(t => !!t.audioUrl);
@@ -181,7 +196,7 @@ export default function QuickRefBottomSheet({
           if (next && hasTrack) setActiveTab("nowplaying");
         }}
         aria-label={open ? "Close quick access" : "Open quick access"}
-        className="md:hidden fixed left-1/2 -translate-x-1/2 z-[9992] flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all active:scale-95"
+        className={`md:hidden fixed left-1/2 -translate-x-1/2 z-[9992] flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all active:scale-95 ${modalOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         style={{
           bottom: `${bottomOffset + 8}px`,
           background: "oklch(0.14 0.025 278 / 0.95)",

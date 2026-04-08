@@ -123,7 +123,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
           <Download className="w-4 h-4 opacity-60" /> Download
         </button>
         {song.witnessId && (
-          <Link href={`/song/${song.id}`} onClick={onClose}>
+          <Link href={`/verify/${song.witnessId}`} onClick={onClose}>
             <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.65 0.2 300)" }}>
               <Shield className="w-4 h-4" /> View Witness ID
             </button>
@@ -270,9 +270,14 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             {song.genre && <span className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{song.genre}</span>}
             {song.witnessId && (
-              <Badge className="text-[9px] px-1 py-0" style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)" }}>
-                <Shield className="w-2.5 h-2.5 mr-0.5" /> WID
-              </Badge>
+              <Link
+                href={`/verify/${song.witnessId}`}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
+                <Badge className="text-[9px] px-1 py-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)" }}>
+                  <Shield className="w-2.5 h-2.5 mr-0.5" /> WID
+                </Badge>
+              </Link>
             )}
           </div>
         </div>
