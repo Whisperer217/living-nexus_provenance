@@ -3200,3 +3200,17 @@
 - [x] Build FeaturedProjectsCarousel component: paged 2x2 grid, touch swipe left/right, dot indicators
 - [x] Replace static grid in HomePage with FeaturedProjectsCarousel
 - [x] Replace static grid in ExplorePage with FeaturedProjectsCarousel
+
+## Phase 90 — Mini Player Visualizer + 3-Dot Menu + Carousel Enhancements
+- [ ] Add vertical audio visualizer bars (CSS animation) to mini player bar when playing
+- [x] Add 3-dot MoreVertical menu to mini player bar with track settings (queue, artist, share, etc.)
+- [x] Add 5-second auto-advance timer to FeaturedProjectsCarousel (pauses on touch)
+- [x] Overlay project title + funding % on banner image (remove separate info row)
+- [ ] Add 'New' badge pill to projects created within the last 7 days
+
+## Phase 90 — Mini Player Visualizer + 3-Dot Menu + Carousel Enhancements
+- [x] Add vertical audio visualizer bars to mini player bar when playing
+- [x] Add 3-dot MoreVertical menu to mini player bar with track settings
+- [x] Add 5-second auto-advance timer to FeaturedProjectsCarousel (pauses on touch)
+- [x] Overlay project title + funding % on banner image (remove separate info row)
+- [x] Add New badge pill to projects created within the last 7 days

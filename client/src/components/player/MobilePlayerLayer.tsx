@@ -34,6 +34,7 @@ import {
   ChevronRight, Send, Users, Fingerprint,
   ExternalLink, Crown, ArrowUp,
   Home, Compass, Bell, User, Rocket, Sparkles, Loader2,
+  MoreVertical, ListPlus, UserCircle2, Copy, Flag,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -262,7 +263,7 @@ export default function MobilePlayerLayer() {
     setVolume, seek,
     queueContextLabel,
     patchTrack,
-    addAndPlay, playQueueAt,
+    addAndPlay, playQueueAt, playNext,
   } = usePlayer();
   const { user } = useAuth();
   const [, navigate] = useLocation();
@@ -566,6 +567,7 @@ export default function MobilePlayerLayer() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoBuffering, setVideoBuffering] = useState(true);
   const [showMobileVolume, setShowMobileVolume] = useState(false);
+  const [showMiniMenu, setShowMiniMenu] = useState(false);
   const showVideo = state.isPlaying && !videoBuffering;
 
   useEffect(() => {
@@ -911,6 +913,121 @@ export default function MobilePlayerLayer() {
         >
           <SkipForward size={18} fill="currentColor" />
         </button>
+
+        {/* Vertical audio visualizer — visible when playing */}
+        {state.isPlaying && (
+          <div className="flex-shrink-0 flex items-end gap-[2px] h-5 px-0.5" aria-hidden>
+            {[1, 2, 3, 4, 5].map(i => (
+              <span
+                key={i}
+                className="w-[2px] rounded-full"
+                style={{
+                  background: "oklch(0.84 0.155 85 / 0.7)",
+                  animationName: "mobileWave",
+                  animationDuration: `${0.35 + i * 0.09}s`,
+                  animationTimingFunction: "ease-in-out",
+                  animationIterationCount: "infinite",
+                  animationDirection: "alternate",
+                  animationDelay: `${i * 0.07}s`,
+                  minHeight: "3px",
+                  height: `${6 + (i % 3) * 4}px`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* 3-dot track settings menu */}
+        <div className="relative flex-shrink-0">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowMiniMenu(v => !v); }}
+            className="w-7 h-8 flex items-center justify-center transition-all active:scale-90"
+            style={{ color: "oklch(0.45 0.03 280)" }}
+            aria-label="Track options"
+          >
+            <MoreVertical size={16} />
+          </button>
+
+          {/* Dropdown menu */}
+          {showMiniMenu && (
+            <>
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 z-[9991]"
+                onClick={() => setShowMiniMenu(false)}
+              />
+              <div
+                className="absolute bottom-full right-0 mb-2 w-52 rounded-2xl overflow-hidden z-[9992]"
+                style={{
+                  background: "oklch(0.13 0.025 275 / 0.97)",
+                  backdropFilter: "blur(20px)",
+                  border: "1px solid oklch(0.84 0.155 85 / 0.18)",
+                  boxShadow: "0 8px 40px oklch(0 0 0 / 0.7)",
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                {/* Track header */}
+                <div className="px-4 py-3 border-b" style={{ borderColor: "oklch(0.84 0.155 85 / 0.10)" }}>
+                  <p className="text-[12px] font-heading text-white/90 truncate">{currentTrack.title}</p>
+                  <p className="text-[10px] mt-0.5 truncate" style={{ color: "oklch(0.55 0.04 280)" }}>{currentTrack.artist}</p>
+                </div>
+
+                {/* Menu items */}
+                {[
+                  {
+                    icon: <ListPlus size={15} />,
+                    label: "Play Next",
+                    action: () => { playNext(currentTrack); setShowMiniMenu(false); },
+                  },
+                  {
+                    icon: <UserCircle2 size={15} />,
+                    label: "View Artist",
+                    action: () => {
+                      if (currentTrack.creatorHandle || currentTrack.creatorId) {
+                        window.location.href = `/creator/${currentTrack.creatorHandle || currentTrack.creatorId}`;
+                      }
+                      setShowMiniMenu(false);
+                    },
+                  },
+                  {
+                    icon: <Share2 size={15} />,
+                    label: "Share Track",
+                    action: () => {
+                      const url = `${window.location.origin}/song/${currentTrack.id}`;
+                      navigator.clipboard?.writeText(url).catch(() => {});
+                      setShowMiniMenu(false);
+                    },
+                  },
+                  {
+                    icon: <Copy size={15} />,
+                    label: "Copy Link",
+                    action: () => {
+                      const url = `${window.location.origin}/song/${currentTrack.id}`;
+                      navigator.clipboard?.writeText(url).catch(() => {});
+                      setShowMiniMenu(false);
+                    },
+                  },
+                  {
+                    icon: <Flag size={15} />,
+                    label: "Report",
+                    action: () => { setShowMiniMenu(false); },
+                    danger: true,
+                  },
+                ].map(item => (
+                  <button
+                    key={item.label}
+                    onClick={item.action}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all hover:bg-white/5 active:bg-white/10"
+                    style={{ color: item.danger ? "oklch(0.65 0.18 15)" : "oklch(0.80 0.03 280)" }}
+                  >
+                    <span style={{ color: item.danger ? "oklch(0.65 0.18 15)" : "oklch(0.84 0.155 85 / 0.7)" }}>{item.icon}</span>
+                    <span className="text-[13px] font-body">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

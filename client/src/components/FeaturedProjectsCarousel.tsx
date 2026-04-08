@@ -3,13 +3,20 @@
  *
  * Horizontally swipeable paged carousel of Featured Project cards.
  * Each page shows a 2×2 grid (4 cards). Swipe left/right or use the
- * dot indicators to navigate between pages. Includes a "Start a Project"
- * CTA card at the end when the user is authenticated.
+ * dot indicators to navigate between pages.
+ *
+ * Features:
+ * - 5-second auto-advance timer (pauses on touch/hover)
+ * - Project title + funding % overlaid on the banner image
+ * - "New" badge on projects created within the last 7 days
+ * - "Start a Project" CTA card for authenticated users
  */
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Link } from "wouter";
-import { Fingerprint, CheckCircle2, Cpu, DollarSign, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Fingerprint, CheckCircle2, Cpu, DollarSign, Heart, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 interface ProjectCard {
   id: number;
@@ -25,6 +32,7 @@ interface ProjectCard {
   creatorId?: number | null;
   creatorName?: string | null;
   creatorAvatarUrl?: string | null;
+  createdAt?: string | number | null;
 }
 
 interface Props {
@@ -35,8 +43,6 @@ interface Props {
 const PAGE_SIZE = 4; // 2×2
 
 export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: Props) {
-  // Build pages: each page is up to 4 project cards.
-  // If authenticated, append a virtual "Start a Project" CTA as the last item.
   const allItems: Array<ProjectCard | { __cta: true }> = [
     ...projects,
     ...(isAuthenticated ? [{ __cta: true as const }] : []),
@@ -44,18 +50,31 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
 
   const totalPages = Math.max(1, Math.ceil(allItems.length / PAGE_SIZE));
   const [page, setPage] = useState(0);
-
-  // Touch / mouse drag tracking
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
-  const isDragging = useRef(false);
+  const isPaused = useRef(false);
 
   const goTo = useCallback(
     (p: number) => setPage(Math.max(0, Math.min(totalPages - 1, p))),
     [totalPages]
   );
 
+  // ── Auto-advance timer ──────────────────────────────────────────
+  useEffect(() => {
+    if (totalPages <= 1) return;
+    const id = setInterval(() => {
+      if (!isPaused.current) {
+        setPage(p => (p + 1) % totalPages);
+      }
+    }, 5000);
+    return () => clearInterval(id);
+  }, [totalPages]);
+
+  // ── Touch / swipe tracking ──────────────────────────────────────
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isDragging = useRef(false);
+
   const handleTouchStart = (e: React.TouchEvent) => {
+    isPaused.current = true;
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     isDragging.current = false;
@@ -65,7 +84,6 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
     if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
-    // Only mark as horizontal drag if horizontal movement dominates
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
       isDragging.current = true;
     }
@@ -80,12 +98,19 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
     touchStartX.current = null;
     touchStartY.current = null;
     isDragging.current = false;
+    // Resume auto-advance after 8 seconds of inactivity
+    setTimeout(() => { isPaused.current = false; }, 8000);
   };
 
   const pageItems = allItems.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const now = Date.now();
 
   return (
-    <div className="select-none">
+    <div
+      className="select-none"
+      onMouseEnter={() => { isPaused.current = true; }}
+      onMouseLeave={() => { isPaused.current = false; }}
+    >
       {/* Carousel viewport */}
       <div
         className="overflow-hidden"
@@ -135,18 +160,22 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                 ? Math.min(100, Math.round((project.raisedAmountCents / project.goalAmountCents) * 100))
                 : null;
 
+            // "New" badge: created within the last 7 days
+            const isNew = project.createdAt
+              ? now - new Date(project.createdAt).getTime() < SEVEN_DAYS_MS
+              : false;
+
             return (
-              <div
-                key={project.id}
-                className="relative rounded-2xl overflow-hidden group flex flex-col"
-                style={{
-                  background: "oklch(0.11 0.025 270)",
-                  boxShadow: "0 4px 28px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(0.84 0.155 85 / 0.08)",
-                }}
-              >
-                {/* Banner */}
-                <Link href={`/project/${project.slug}`}>
-                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "180px" }}>
+              <Link key={project.id} href={`/project/${project.slug}`}>
+                <div
+                  className="relative rounded-2xl overflow-hidden group cursor-pointer active:scale-[0.97] transition-transform"
+                  style={{
+                    background: "oklch(0.11 0.025 270)",
+                    boxShadow: "0 4px 28px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(0.84 0.155 85 / 0.08)",
+                  }}
+                >
+                  {/* Banner with overlaid content */}
+                  <div className="relative w-full overflow-hidden" style={{ height: "180px" }}>
                     {project.bannerUrl ? (
                       <img
                         src={project.bannerUrl}
@@ -161,131 +190,136 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                         }}
                       >
                         <span
-                          className="text-6xl font-bold"
+                          className="text-5xl font-bold"
                           style={{ color: "oklch(0.84 0.155 85 / 0.18)", fontFamily: "'Cinzel', serif" }}
                         >
                           {project.title?.[0] ?? "P"}
                         </span>
                       </div>
                     )}
-                    {/* Gradient overlay */}
+
+                    {/* Gradient overlay — stronger at bottom for text legibility */}
                     <div
                       className="absolute inset-0"
                       style={{
                         background:
-                          "linear-gradient(to top, oklch(0.11 0.025 270 / 0.95) 0%, oklch(0 0 0 / 0.15) 60%, transparent 100%)",
+                          "linear-gradient(to top, oklch(0.08 0.02 275 / 0.97) 0%, oklch(0 0 0 / 0.35) 55%, transparent 100%)",
                       }}
                     />
-                    {/* WID badge */}
-                    {project.linkedWitnessId && (
-                      <div
-                        className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-0.5 rounded-full"
-                        style={{ background: "oklch(0.65 0.2 300 / 0.88)", backdropFilter: "blur(4px)" }}
-                      >
-                        <Fingerprint size={9} className="text-white" />
-                        <span className="text-[9px] font-mono text-white">WID</span>
-                      </div>
-                    )}
-                    {/* Verified */}
-                    {project.isVerified && (
-                      <div className="absolute top-2.5 left-2.5">
-                        <CheckCircle2 size={16} style={{ color: "oklch(0.84 0.155 85)" }} />
-                      </div>
-                    )}
-                  </div>
-                </Link>
 
-                {/* Info row */}
-                <div className="flex items-center gap-2 px-2.5 py-2 flex-1">
-                  {/* Avatar */}
-                  <Link href={`/creator/${project.creatorHandle || project.creatorId}`}>
-                    <div
-                      className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-xs font-bold cursor-pointer transition-opacity hover:opacity-80"
-                      style={{
-                        background: "oklch(0.22 0.05 280)",
-                        border: "1.5px solid oklch(0.84 0.155 85 / 0.35)",
-                      }}
-                    >
-                      {project.creatorAvatarUrl ? (
-                        <img src={project.creatorAvatarUrl} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <span style={{ color: "oklch(0.84 0.155 85)" }}>
-                          {(project.creatorName || project.creatorHandle || "?")[0].toUpperCase()}
-                        </span>
+                    {/* Top-right badges */}
+                    <div className="absolute top-2 right-2 flex items-center gap-1">
+                      {isNew && (
+                        <div
+                          className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
+                          style={{
+                            background: "oklch(0.55 0.22 145 / 0.90)",
+                            backdropFilter: "blur(4px)",
+                          }}
+                        >
+                          <Sparkles size={8} className="text-white" />
+                          <span className="text-[9px] font-mono text-white font-bold">NEW</span>
+                        </div>
+                      )}
+                      {project.linkedWitnessId && (
+                        <div
+                          className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
+                          style={{ background: "oklch(0.65 0.2 300 / 0.88)", backdropFilter: "blur(4px)" }}
+                        >
+                          <Fingerprint size={8} className="text-white" />
+                          <span className="text-[9px] font-mono text-white">WID</span>
+                        </div>
                       )}
                     </div>
-                  </Link>
 
-                  {/* Title + creator */}
-                  <div className="flex-1 min-w-0">
-                    <Link href={`/project/${project.slug}`}>
+                    {/* Top-left verified */}
+                    {project.isVerified && (
+                      <div className="absolute top-2 left-2">
+                        <CheckCircle2 size={15} style={{ color: "oklch(0.84 0.155 85)" }} />
+                      </div>
+                    )}
+
+                    {/* Bottom overlay: title + creator + funding */}
+                    <div className="absolute bottom-0 left-0 right-0 px-2.5 pb-2.5 pt-6">
+                      {/* Title */}
                       <p
-                        className="text-[12px] font-semibold truncate cursor-pointer hover:text-[oklch(0.84_0.155_85)] transition-colors leading-tight"
-                        style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}
+                        className="text-[12px] font-semibold leading-tight truncate"
+                        style={{ color: "oklch(0.97 0.01 280)", fontFamily: "'Cinzel', serif" }}
                       >
                         {project.title}
                       </p>
-                    </Link>
-                    <p className="text-[10px] truncate" style={{ color: "oklch(0.55 0.04 280)" }}>
-                      {project.creatorName || project.creatorHandle || "Creator"}
-                    </p>
-                  </div>
 
-                  {/* Badges */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    {project.hasAiContent && (
-                      <div
-                        className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md"
-                        style={{
-                          background: "oklch(0.55 0.18 280 / 0.25)",
-                          border: "1px solid oklch(0.55 0.18 280 / 0.5)",
-                        }}
-                        title="AI-assisted"
-                      >
-                        <Cpu size={9} style={{ color: "oklch(0.72 0.18 280)" }} />
-                      </div>
-                    )}
-                    {pct !== null && (
-                      <div
-                        className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md"
-                        style={{
-                          background: "oklch(0.84 0.155 85 / 0.15)",
-                          border: "1px solid oklch(0.84 0.155 85 / 0.4)",
-                        }}
-                        title={`${pct}% funded`}
-                      >
-                        <DollarSign size={9} style={{ color: "oklch(0.84 0.155 85)" }} />
-                        <span className="text-[9px] font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>
-                          {pct}%
-                        </span>
-                      </div>
-                    )}
-                    <button
-                      className="p-1 rounded-md transition-all hover:scale-110"
-                      style={{ color: "oklch(0.65 0.18 0 / 0.7)" }}
-                      title="Follow"
-                      onClick={() => { window.location.href = `/project/${project.slug}`; }}
-                    >
-                      <Heart size={12} />
-                    </button>
-                  </div>
-                </div>
+                      {/* Creator + badges row */}
+                      <div className="flex items-center justify-between mt-1 gap-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {/* Mini avatar */}
+                          <div
+                            className="w-5 h-5 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-[9px] font-bold"
+                            style={{
+                              background: "oklch(0.22 0.05 280)",
+                              border: "1px solid oklch(0.84 0.155 85 / 0.35)",
+                            }}
+                          >
+                            {project.creatorAvatarUrl ? (
+                              <img src={project.creatorAvatarUrl} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <span style={{ color: "oklch(0.84 0.155 85)" }}>
+                                {(project.creatorName || project.creatorHandle || "?")[0].toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] truncate" style={{ color: "oklch(0.70 0.04 280)" }}>
+                            {project.creatorName || project.creatorHandle || "Creator"}
+                          </p>
+                        </div>
 
-                {/* Funding progress bar */}
-                {pct !== null && (
-                  <div className="px-2.5 pb-2">
-                    <div className="h-0.5 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${pct}%`,
-                          background: "linear-gradient(90deg, oklch(0.62 0.18 55), oklch(0.84 0.155 85))",
-                        }}
-                      />
+                        {/* Right badges */}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {project.hasAiContent && (
+                            <div
+                              className="flex items-center gap-0.5 px-1 py-0.5 rounded-md"
+                              style={{
+                                background: "oklch(0.55 0.18 280 / 0.30)",
+                                border: "1px solid oklch(0.55 0.18 280 / 0.5)",
+                              }}
+                            >
+                              <Cpu size={8} style={{ color: "oklch(0.72 0.18 280)" }} />
+                            </div>
+                          )}
+                          <button
+                            className="p-0.5 rounded-md transition-all hover:scale-110"
+                            style={{ color: "oklch(0.65 0.18 0 / 0.7)" }}
+                            onClick={e => e.preventDefault()}
+                          >
+                            <Heart size={11} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Funding progress bar */}
+                      {pct !== null && (
+                        <div className="mt-1.5">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-[9px] font-mono" style={{ color: "oklch(0.84 0.155 85 / 0.75)" }}>
+                              {pct}% funded
+                            </span>
+                            <DollarSign size={8} style={{ color: "oklch(0.84 0.155 85 / 0.6)" }} />
+                          </div>
+                          <div className="h-0.5 rounded-full overflow-hidden" style={{ background: "oklch(0.25 0.02 280 / 0.6)" }}>
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${pct}%`,
+                                background: "linear-gradient(90deg, oklch(0.62 0.18 55), oklch(0.84 0.155 85))",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              </Link>
             );
           })}
         </div>
@@ -295,7 +329,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-3 mt-1 mb-2">
           <button
-            onClick={() => goTo(page - 1)}
+            onClick={() => { goTo(page - 1); isPaused.current = true; setTimeout(() => { isPaused.current = false; }, 8000); }}
             disabled={page === 0}
             className="p-1 rounded-full transition-all disabled:opacity-20 hover:opacity-70 active:scale-90"
             style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}
@@ -304,12 +338,11 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
             <ChevronLeft size={16} />
           </button>
 
-          {/* Dot indicators */}
           <div className="flex items-center gap-1.5">
             {Array.from({ length: totalPages }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => goTo(i)}
+                onClick={() => { goTo(i); isPaused.current = true; setTimeout(() => { isPaused.current = false; }, 8000); }}
                 className="transition-all rounded-full"
                 style={{
                   width: i === page ? "18px" : "6px",
@@ -325,7 +358,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
           </div>
 
           <button
-            onClick={() => goTo(page + 1)}
+            onClick={() => { goTo(page + 1); isPaused.current = true; setTimeout(() => { isPaused.current = false; }, 8000); }}
             disabled={page === totalPages - 1}
             className="p-1 rounded-full transition-all disabled:opacity-20 hover:opacity-70 active:scale-90"
             style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}
