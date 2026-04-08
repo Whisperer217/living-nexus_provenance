@@ -32,6 +32,7 @@ import {
   Heart, Users, Calendar, ShieldCheck, ChevronDown, ChevronUp,
   Pencil, Plus, Trash2, Image as ImageIcon, Video, Type, Quote,
   Minus, Check, X, Eye, Upload, ExternalLink, Rocket, Share2, Copy, Bell, BellOff, GripVertical,
+  Mic, Music, Volume2, Play, Pause, Search, FileVideo,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -167,6 +168,9 @@ function BannerDropZone({
   isPending,
   onFile,
   bannerFileRef,
+  positionX = 50,
+  positionY = 50,
+  onPositionChange,
 }: {
   bannerUrl: string | null;
   title: string;
@@ -175,8 +179,13 @@ function BannerDropZone({
   isPending: boolean;
   onFile: (file: File) => void;
   bannerFileRef: React.RefObject<HTMLInputElement | null>;
+  positionX?: number;
+  positionY?: number;
+  onPositionChange?: (x: number, y: number) => void;
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showFocalEditor, setShowFocalEditor] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
     if (!editMode) return;
@@ -201,9 +210,36 @@ function BannerDropZone({
       onDrop={handleDrop}
     >
       {bannerUrl ? (
-        <img src={bannerUrl} alt={title} className="w-full h-full object-cover" />
+        <img
+          src={bannerUrl}
+          alt={title}
+          className="w-full h-full object-cover"
+          style={{
+            objectPosition: `${positionX}% ${positionY}%`,
+            cursor: editMode ? (showFocalEditor ? "crosshair" : "default") : "zoom-in",
+          }}
+          onClick={() => !editMode && setLightboxOpen(true)}
+        />
       ) : (
         <div className="w-full h-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#080d14]" />
+      )}
+      {/* Lightbox */}
+      {lightboxOpen && bannerUrl && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white/60 hover:text-white text-2xl font-bold"
+            onClick={() => setLightboxOpen(false)}
+          >✕</button>
+          <img
+            src={bannerUrl}
+            alt={title}
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-xl shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#080d14]/40 to-[#080d14]" />
 
@@ -224,9 +260,18 @@ function BannerDropZone({
         </Badge>
       </div>
 
+      {/* Focal point dragger overlay (edit mode, when focal editor is active) */}
+      {editMode && bannerUrl && showFocalEditor && onPositionChange && (
+        <FocalPointDragger
+          x={positionX}
+          y={positionY}
+          onChange={(x, y) => onPositionChange(x, y)}
+        />
+      )}
+
       {/* Banner upload controls (edit mode) */}
       {editMode && !isDragOver && (
-        <div className="absolute bottom-4 left-4 flex items-center gap-2">
+        <div className="absolute bottom-4 left-4 flex items-center gap-2 flex-wrap">
           <button
             onClick={() => bannerFileRef.current?.click()}
             className="flex items-center gap-2 bg-black/60 backdrop-blur border border-white/20 rounded-xl px-3 py-2 text-white/70 hover:text-white text-sm transition-colors"
@@ -234,6 +279,20 @@ function BannerDropZone({
             <Upload className="w-4 h-4" />
             {isPending ? "Uploading…" : bannerUrl ? "Change banner" : "Upload banner"}
           </button>
+          {bannerUrl && onPositionChange && (
+            <button
+              onClick={() => setShowFocalEditor(f => !f)}
+              className={`flex items-center gap-2 backdrop-blur border rounded-xl px-3 py-2 text-sm transition-colors ${
+                showFocalEditor
+                  ? "bg-[#d4a017]/80 border-[#d4a017] text-black font-semibold"
+                  : "bg-black/60 border-white/20 text-white/70 hover:text-white"
+              }`}
+              title="Drag the crosshair to set the focal point for cropped views"
+            >
+              <ImageIcon className="w-4 h-4" />
+              {showFocalEditor ? "Done — focal point set" : "Set focal point"}
+            </button>
+          )}
           {!bannerUrl && (
             <span className="text-white/30 text-xs">or drag &amp; drop an image here</span>
           )}
@@ -823,6 +882,386 @@ function InlineEdit({ value, onChange, placeholder, multiline, className }: {
   );
 }
 
+// ── Narration Player ─────────────────────────────────────────────────────────
+
+function NarrationPlayer({ url }: { url: string }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const toggle = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (playing) { a.pause(); setPlaying(false); }
+    else { a.play(); setPlaying(true); }
+  };
+
+  return (
+    <div className="flex items-center gap-3 bg-white/[0.04] border border-white/10 rounded-2xl px-4 py-3">
+      <button
+        onClick={toggle}
+        className="w-9 h-9 rounded-full bg-[#d4a017]/20 border border-[#d4a017]/40 flex items-center justify-center text-[#d4a017] hover:bg-[#d4a017]/30 transition-colors shrink-0"
+      >
+        {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+      </button>
+      <div className="flex-1 space-y-1">
+        <p className="text-white/60 text-xs font-medium uppercase tracking-widest">Creator Narration</p>
+        <div
+          className="h-1.5 bg-white/10 rounded-full cursor-pointer"
+          onClick={(e) => {
+            const a = audioRef.current;
+            if (!a || !duration) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pct = (e.clientX - rect.left) / rect.width;
+            a.currentTime = pct * duration;
+          }}
+        >
+          <div
+            className="h-full bg-gradient-to-r from-[#d4a017] to-[#f0c040] rounded-full transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+      <Mic className="w-4 h-4 text-[#d4a017]/60 shrink-0" />
+      <audio
+        ref={audioRef}
+        src={url}
+        onTimeUpdate={() => {
+          const a = audioRef.current;
+          if (a && a.duration) setProgress((a.currentTime / a.duration) * 100);
+        }}
+        onLoadedMetadata={() => { if (audioRef.current) setDuration(audioRef.current.duration); }}
+        onEnded={() => setPlaying(false)}
+      />
+    </div>
+  );
+}
+
+// ── Narration Upload Panel ─────────────────────────────────────────────────────
+
+function NarrationUploadPanel({ projectId, currentUrl, onUploaded }: {
+  projectId: number;
+  currentUrl?: string | null;
+  onUploaded: (url: string) => void;
+}) {
+  const narrationRef = useRef<HTMLInputElement>(null);
+  const upload = trpc.projects.uploadNarration.useMutation({
+    onSuccess: (data) => { onUploaded(data.url); toast.success("Narration uploaded!"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleFile = (file: File) => {
+    if (file.size > 50 * 1024 * 1024) { toast.error("Max 50 MB for narration"); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const b64 = (e.target?.result as string).split(",")[1];
+      upload.mutate({ projectId, fileBase64: b64, mimeType: file.type, fileName: file.name });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="space-y-3 bg-white/[0.04] border border-white/10 rounded-xl p-4">
+      <div className="flex items-center gap-2">
+        <Mic className="w-4 h-4 text-[#d4a017]" />
+        <p className="text-white/60 text-xs uppercase tracking-widest font-medium">Narration Audio</p>
+      </div>
+      {currentUrl && (
+        <NarrationPlayer url={currentUrl} />
+      )}
+      <button
+        onClick={() => narrationRef.current?.click()}
+        disabled={upload.isPending}
+        className="flex items-center gap-2 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-white/60 hover:text-white hover:border-white/30 text-sm transition-colors w-full justify-center"
+      >
+        <Upload className="w-4 h-4" />
+        {upload.isPending ? "Uploading narration…" : currentUrl ? "Replace narration" : "Upload narration (MP3, WAV, M4A — max 50 MB)"}
+      </button>
+      <input
+        ref={narrationRef}
+        type="file"
+        accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/m4a,audio/mp4,audio/ogg,audio/webm"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+      />
+    </div>
+  );
+}
+
+// ── Video Upload Panel ─────────────────────────────────────────────────────────
+
+function VideoUploadPanel({ projectId, onUploaded }: {
+  projectId: number;
+  onUploaded: (url: string) => void;
+}) {
+  const videoRef = useRef<HTMLInputElement>(null);
+  const upload = trpc.projects.uploadVideo.useMutation({
+    onSuccess: (data) => { onUploaded(data.url); toast.success("Video uploaded!"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleFile = (file: File) => {
+    if (file.size > 500 * 1024 * 1024) { toast.error("Max 500 MB for video"); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const b64 = (e.target?.result as string).split(",")[1];
+      upload.mutate({ projectId, fileBase64: b64, mimeType: file.type });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div
+      onClick={() => !upload.isPending && videoRef.current?.click()}
+      className="border-2 border-dashed border-white/15 rounded-xl p-8 text-center cursor-pointer hover:border-[#d4a017]/50 transition-colors"
+    >
+      {upload.isPending ? (
+        <div className="space-y-2">
+          <FileVideo className="w-8 h-8 text-[#d4a017]/60 mx-auto animate-pulse" />
+          <p className="text-white/40 text-sm">Uploading video…</p>
+        </div>
+      ) : (
+        <>
+          <FileVideo className="w-8 h-8 text-white/20 mx-auto mb-2" />
+          <p className="text-white/40 text-sm">Click to upload video (MP4, MOV, WebM — max 500 MB)</p>
+          <p className="text-white/20 text-xs mt-1">Stored securely on CDN</p>
+        </>
+      )}
+      <input
+        ref={videoRef}
+        type="file"
+        accept="video/mp4,video/quicktime,video/webm,video/x-msvideo"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+      />
+    </div>
+  );
+}
+
+// ── Sortable Song Row ─────────────────────────────────────────────────────────
+
+function SortableSongRow({ item, onRemove, editMode }: {
+  item: { id: number; songId: number; sortOrder: number; song: { id: number; title: string; coverArtUrl?: string | null; fileUrl?: string | null; durationSeconds?: number | null; genre?: string | null } | null };
+  onRemove: () => void;
+  editMode: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  };
+  const song = item.song;
+  const dur = song?.durationSeconds
+    ? `${Math.floor(song.durationSeconds / 60)}:${String(Math.floor(song.durationSeconds % 60)).padStart(2, "0")}`
+    : null;
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 group">
+      {editMode && (
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-1 text-white/20 hover:text-white/60 cursor-grab active:cursor-grabbing touch-none"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+      )}
+      {song?.coverArtUrl ? (
+        <img src={song.coverArtUrl} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
+      ) : (
+        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+          <Music className="w-4 h-4 text-white/30" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="text-white text-sm font-medium truncate">{song?.title ?? "Unknown track"}</p>
+        {song?.genre && <p className="text-white/40 text-xs">{song.genre}</p>}
+      </div>
+      {dur && <span className="text-white/30 text-xs shrink-0">{dur}</span>}
+      {editMode && (
+        <button
+          onClick={onRemove}
+          className="p-1 text-red-400/40 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Project Songs Panel ─────────────────────────────────────────────────────────
+
+function ProjectSongsPanel({ projectId, editMode, userId }: {
+  projectId: number;
+  editMode: boolean;
+  userId: number;
+}) {
+  const utils = trpc.useUtils();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
+
+  const { data: linkedSongs = [] } = trpc.projects.getSongs.useQuery({ projectId });
+
+  // Load the creator's own songs for the picker
+  const { data: mySongsRaw } = trpc.songs.mySongs.useQuery(
+    undefined,
+    { enabled: showPicker }
+  );
+  const mySongs = mySongsRaw
+    ? (searchQuery
+        ? mySongsRaw.filter((s: { title: string }) => s.title.toLowerCase().includes(searchQuery.toLowerCase()))
+        : mySongsRaw)
+    : undefined;
+
+  const addSong = trpc.projects.addSong.useMutation({
+    onSuccess: () => { utils.projects.getSongs.invalidate({ projectId }); toast.success("Track added"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const removeSong = trpc.projects.removeSong.useMutation({
+    onSuccess: () => utils.projects.getSongs.invalidate({ projectId }),
+    onError: (e) => toast.error(e.message),
+  });
+  const reorderSongs = trpc.projects.reorderSongs.useMutation({
+    onError: (e) => toast.error(e.message),
+  });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIdx = (linkedSongs as Array<{ id: number }>).findIndex((s) => s.id === active.id);
+    const newIdx = (linkedSongs as Array<{ id: number }>).findIndex((s) => s.id === over.id);
+    if (oldIdx < 0 || newIdx < 0) return;
+    const reordered = arrayMove(linkedSongs as any[], oldIdx, newIdx);
+    // Optimistic update via invalidate after mutation
+    reorderSongs.mutate(
+      { projectId, orderedIds: reordered.map((s: any) => s.id) },
+      { onSuccess: () => utils.projects.getSongs.invalidate({ projectId }) }
+    );
+  };
+
+  const linkedSongIds = new Set((linkedSongs as Array<{ songId: number }>).map((s) => s.songId));
+
+  if (!editMode && linkedSongs.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-white font-semibold text-lg flex items-center gap-2">
+          <Music className="w-5 h-5 text-[#d4a017]" /> Tracks
+          <Badge variant="outline" className="border-white/20 text-white/50 text-xs">{linkedSongs.length}</Badge>
+        </h2>
+        {editMode && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setShowPicker(!showPicker)}
+            className="border-white/20 bg-transparent text-white/70 hover:text-white hover:border-white/40 text-xs h-8"
+          >
+            <Plus className="w-3 h-3 mr-1" /> Add track
+          </Button>
+        )}
+      </div>
+
+      {/* Song picker (edit mode) */}
+      {editMode && showPicker && (
+        <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search your tracks…"
+              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/25 text-sm"
+            />
+          </div>
+          <div className="space-y-1 max-h-64 overflow-y-auto">
+            {(mySongs ?? []).map((s: { id: number; title: string; coverArtUrl?: string | null; genre?: string | null }) => (
+              <div
+                key={s.id}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                  linkedSongIds.has(s.id)
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-white/5"
+                }`}
+                onClick={() => {
+                  if (linkedSongIds.has(s.id)) return;
+                  addSong.mutate({ projectId, songId: s.id });
+                }}
+              >
+                {s.coverArtUrl ? (
+                  <img src={s.coverArtUrl} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
+                ) : (
+                  <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center shrink-0">
+                    <Music className="w-3 h-3 text-white/30" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm truncate">{s.title}</p>
+                  {s.genre && <p className="text-white/40 text-xs">{s.genre}</p>}
+                </div>
+                {linkedSongIds.has(s.id) ? (
+                  <Check className="w-4 h-4 text-[#d4a017]/60 shrink-0" />
+                ) : (
+                  <Plus className="w-4 h-4 text-white/30 shrink-0" />
+                )}
+              </div>
+            ))}
+            {showPicker && (!mySongs || mySongs.length === 0) && (
+              <p className="text-white/30 text-sm text-center py-4">No tracks found</p>
+            )}
+          </div>
+          <button
+            onClick={() => setShowPicker(false)}
+            className="text-white/30 hover:text-white text-xs w-full text-center transition-colors"
+          >
+            Done
+          </button>
+        </div>
+      )}
+
+      {/* Linked songs list */}
+      {linkedSongs.length > 0 && (
+        editMode ? (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={(linkedSongs as Array<{ id: number }>).map((s) => s.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {(linkedSongs as any[]).map((item) => (
+                  <SortableSongRow
+                    key={item.id}
+                    item={item}
+                    editMode={editMode}
+                    onRemove={() => removeSong.mutate({ projectId, songId: item.songId })}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div className="space-y-2">
+            {(linkedSongs as any[]).map((item) => (
+              <SortableSongRow
+                key={item.id}
+                item={item}
+                editMode={false}
+                onRemove={() => {}}
+              />
+            ))}
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function ProjectPage() {
@@ -840,6 +1279,9 @@ export default function ProjectPage() {
   const [localGoal, setLocalGoal] = useState("");
   const [localVideoUrl, setLocalVideoUrl] = useState("");
   const [localVideoType, setLocalVideoType] = useState<"youtube" | "vimeo" | "s3" | "none">("none");
+  const [localBannerPosX, setLocalBannerPosX] = useState(50);
+  const [localBannerPosY, setLocalBannerPosY] = useState(50);
+  const [localNarrationUrl, setLocalNarrationUrl] = useState<string | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [blocksDirty, setBlocksDirty] = useState(false);
   const bannerFileRef = useRef<HTMLInputElement>(null);
@@ -872,6 +1314,9 @@ export default function ProjectPage() {
       setLocalGoal(data.project.goalAmountCents ? String(data.project.goalAmountCents / 100) : "");
       setLocalVideoUrl(data.project.videoUrl || "");
       setLocalVideoType((data.project.videoType as any) || "none");
+      setLocalBannerPosX(data.project.bannerPositionX ?? 50);
+      setLocalBannerPosY(data.project.bannerPositionY ?? 15);
+      setLocalNarrationUrl((data.project as any).narrationUrl ?? null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.project?.id, (data?.project as any)?.updatedAt]);
@@ -955,6 +1400,8 @@ export default function ProjectPage() {
       goalAmountCents: goalCents,
       videoUrl: localVideoUrl || undefined,
       videoType: localVideoType !== "none" ? localVideoType : undefined,
+      bannerPositionX: localBannerPosX,
+      bannerPositionY: localBannerPosY,
     });
     if (blocksDirty) {
       saveBlocks.mutate({
@@ -1054,6 +1501,9 @@ export default function ProjectPage() {
         isPending={uploadBanner.isPending}
         onFile={handleBannerFile}
         bannerFileRef={bannerFileRef}
+        positionX={editMode ? localBannerPosX : (project.bannerPositionX ?? 50)}
+        positionY={editMode ? localBannerPosY : (project.bannerPositionY ?? 15)}
+        onPositionChange={editMode ? (x, y) => { setLocalBannerPosX(x); setLocalBannerPosY(y); } : undefined}
       />
 
       {/* ── Owner toolbar ── */}
@@ -1132,13 +1582,27 @@ export default function ProjectPage() {
                       className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
                         localVideoType === vt ? "bg-[#d4a017] text-black border-[#d4a017]" : "bg-white/5 text-white/50 border-white/10 hover:border-[#d4a017]/40"
                       }`}
-                    >{vt === "s3" ? "Direct URL" : vt === "none" ? "None" : vt.charAt(0).toUpperCase() + vt.slice(1)}</button>
+                    >{vt === "s3" ? "Upload Video" : vt === "none" ? "None" : vt.charAt(0).toUpperCase() + vt.slice(1)}</button>
                   ))}
                 </div>
-                {localVideoType !== "none" && (
+                {localVideoType !== "none" && localVideoType !== "s3" && (
                   <Input value={localVideoUrl} onChange={(e) => setLocalVideoUrl(e.target.value)}
-                    placeholder={localVideoType === "youtube" ? "https://www.youtube.com/watch?v=…" : localVideoType === "vimeo" ? "https://vimeo.com/…" : "https://…/video.mp4"}
+                    placeholder={localVideoType === "youtube" ? "https://www.youtube.com/watch?v=…" : "https://vimeo.com/…"}
                     className="bg-white/5 border-white/10 text-white placeholder:text-white/25 text-sm" />
+                )}
+                {localVideoType === "s3" && (
+                  localVideoUrl ? (
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                      <FileVideo className="w-4 h-4 text-[#d4a017]" />
+                      <span className="text-white/60 text-sm flex-1 truncate">Video uploaded</span>
+                      <button onClick={() => { setLocalVideoUrl(""); setLocalVideoType("none"); }} className="text-red-400/60 hover:text-red-400 text-xs">Remove</button>
+                    </div>
+                  ) : (
+                    <VideoUploadPanel
+                      projectId={project.id}
+                      onUploaded={(url) => { setLocalVideoUrl(url); }}
+                    />
+                  )
                 )}
                 {localVideoType !== "none" && localVideoUrl && (
                   <div className="rounded-xl overflow-hidden">
@@ -1287,6 +1751,24 @@ export default function ProjectPage() {
           </div>
         </div>
 
+        {/* ── Narration Player (public view) ── */}
+        {!editMode && localNarrationUrl && (
+          <div className="mb-6">
+            <NarrationPlayer url={localNarrationUrl} />
+          </div>
+        )}
+
+        {/* ── Narration Upload (edit mode) ── */}
+        {editMode && (
+          <div className="mb-6">
+            <NarrationUploadPanel
+              projectId={project.id}
+              currentUrl={localNarrationUrl}
+              onUploaded={(url) => setLocalNarrationUrl(url)}
+            />
+          </div>
+        )}
+
         {/* ── Content Blocks ── */}
         <div className="space-y-6 mb-10">
           {blocks.length === 0 && !editMode && (
@@ -1327,6 +1809,15 @@ export default function ProjectPage() {
               </div>
             ))
           )}
+        </div>
+
+        {/* ── Project Songs / Linked Tracks ── */}
+        <div className="mb-10">
+          <ProjectSongsPanel
+            projectId={project.id}
+            editMode={editMode}
+            userId={project.userId}
+          />
         </div>
 
         {/* ── Progress updates ── */}

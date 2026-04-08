@@ -1021,8 +1021,12 @@ export const projects = mysqlTable("projects", {
   description: text("description"),                       // Rich text body (markdown)
   bannerUrl: text("bannerUrl"),                           // S3 URL for banner image
   bannerKey: varchar("bannerKey", { length: 512 }),
+  bannerPositionX: float("bannerPositionX").default(50).notNull(),  // Focal point X (0-100)
+  bannerPositionY: float("bannerPositionY").default(15).notNull(),  // Focal point Y (0-100, default top)
   videoUrl: text("videoUrl"),                             // YouTube/Vimeo embed or S3 video URL
   videoType: mysqlEnum("videoType", ["youtube", "vimeo", "s3", "none"]).default("none"),
+  narrationUrl: text("narrationUrl"),                     // S3 URL for project narration audio
+  narrationKey: varchar("narrationKey", { length: 512 }), // S3 key for narration audio
   goalAmountCents: int("goalAmountCents"),                // Optional funding goal (null = open-ended)
   raisedAmountCents: int("raisedAmountCents").default(0).notNull(),
   donorCount: int("donorCount").default(0).notNull(),
@@ -1133,3 +1137,16 @@ export const platformAuditLogs = mysqlTable("platformAuditLogs", {
 });
 export type PlatformAuditLog = typeof platformAuditLogs.$inferSelect;
 export type InsertPlatformAuditLog = typeof platformAuditLogs.$inferInsert;
+
+// ─── Project Songs (Linked Tracks) ───────────────────────────────────────────
+// Junction table linking a project to songs from the user's catalog.
+// sortOrder controls the display order; drag-to-reorder updates this field.
+export const projectSongs = mysqlTable("projectSongs", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  songId: int("songId").notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  addedAt: timestamp("addedAt").defaultNow().notNull(),
+});
+export type ProjectSong = typeof projectSongs.$inferSelect;
+export type InsertProjectSong = typeof projectSongs.$inferInsert;

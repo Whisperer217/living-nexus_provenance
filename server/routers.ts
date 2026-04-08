@@ -85,6 +85,7 @@ import {
   getProjectUpdates, addProjectUpdate, getProjectDonations, recordProjectDonation, listActiveProjects,
   getProjectBlocks, saveProjectBlocks, getProjectsByCreator,
   followProject, unfollowProject, isFollowingProject, getProjectFollowerCount, getProjectFollowerUserIds,
+  getProjectSongs, addSongToProject, removeSongFromProject, reorderProjectSongs,
   getLatestAuditLog, getAllAuditLogs, createAuditLog, updateAuditLog,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
@@ -4561,6 +4562,8 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         description: z.string().optional(),
         bannerUrl: z.string().nullable().optional(),
         bannerKey: z.string().nullable().optional(),
+        bannerPositionX: z.number().min(0).max(100).optional(),
+        bannerPositionY: z.number().min(0).max(100).optional(),
         videoUrl: z.string().nullable().optional(),
         videoType: z.enum(["youtube", "vimeo", "s3", "none"]).nullable().optional(),
         goalAmountCents: z.number().int().positive().nullable().optional(),
@@ -4867,6 +4870,85 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN', message: 'Not your project' });
         await updateProject(input.projectId, { status: 'draft' });
         return { success: true };
+      }),
+
+    /** Upload a narration audio file for a project (owner only) */
+    uploadNarration: protectedProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        fileBase64: z.string(),
+        mimeType: z.string(),
+        fileName: z.string().max(256).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
+        const buf = Buffer.from(input.fileBase64, 'base64');
+        const ext = input.mimeType.split('/')[1]?.replace('mpeg', 'mp3') || 'mp3';
+        const key = `project-narrations/${ctx.user.id}-${input.projectId}-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buf, input.mimeType);
+        await updateProject(input.projectId, { narrationUrl: url, narrationKey: key });
+        return { url, key };
+      }),
+
+    /** Upload a video file directly to S3 for a project (owner only) */
+    uploadVideo: protectedProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        fileBase64: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
+        const buf = Buffer.from(input.fileBase64, 'base64');
+        const ext = input.mimeType.split('/')[1] || 'mp4';
+        const key = `project-videos/${ctx.user.id}-${input.projectId}-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buf, input.mimeType);
+        await updateProject(input.projectId, { videoUrl: url, videoType: 's3' });
+        return { url, key };
+      }),
+
+    /** Get all songs linked to a project */
+    getSongs: publicProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .query(async ({ input }) => {
+        return getProjectSongs(input.projectId);
+      }),
+
+    /** Add a song to a project (owner only) */
+    addSong: protectedProcedure
+      .input(z.object({ projectId: z.number().int(), songId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
+        await addSongToProject(input.projectId, input.songId);
+        return { ok: true };
+      }),
+
+    /** Remove a song from a project (owner only) */
+    removeSong: protectedProcedure
+      .input(z.object({ projectId: z.number().int(), songId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
+        await removeSongFromProject(input.projectId, input.songId);
+        return { ok: true };
+      }),
+
+    /** Reorder project songs — accepts ordered array of projectSong row IDs */
+    reorderSongs: protectedProcedure
+      .input(z.object({ projectId: z.number().int(), orderedIds: z.array(z.number().int()) }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
+        await reorderProjectSongs(input.projectId, input.orderedIds);
+        return { ok: true };
       }),
   }),
 

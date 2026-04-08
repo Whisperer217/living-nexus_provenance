@@ -18,6 +18,7 @@ import {
   songVersions,
   platformSettings,
   projects, projectUpdates, projectDonations, projectBlocks, projectFollowers,
+  projectSongs,
   platformAuditLogs,
   type InsertContentFlag, type InsertDeclarationSignature,
   type InsertSongVersion,
@@ -3658,6 +3659,8 @@ export async function listActiveProjects(): Promise<(Project & { creatorName: st
       bannerKey: projects.bannerKey,
       videoUrl: projects.videoUrl,
       videoType: projects.videoType,
+      narrationUrl: projects.narrationUrl,
+      narrationKey: projects.narrationKey,
       goalAmountCents: projects.goalAmountCents,
       raisedAmountCents: projects.raisedAmountCents,
       donorCount: projects.donorCount,
@@ -3744,8 +3747,12 @@ export async function getProjectBySlug(slug: string): Promise<(Project & {
       description: projects.description,
       bannerUrl: projects.bannerUrl,
       bannerKey: projects.bannerKey,
+      bannerPositionX: projects.bannerPositionX,
+      bannerPositionY: projects.bannerPositionY,
       videoUrl: projects.videoUrl,
       videoType: projects.videoType,
+      narrationUrl: projects.narrationUrl,
+      narrationKey: projects.narrationKey,
       goalAmountCents: projects.goalAmountCents,
       raisedAmountCents: projects.raisedAmountCents,
       donorCount: projects.donorCount,
@@ -3935,4 +3942,72 @@ export async function updateAuditLog(id: number, data: Partial<InsertPlatformAud
     .update(platformAuditLogs)
     .set({ ...data, updatedAt: new Date() })
     .where(eq(platformAuditLogs.id, id));
+}
+
+// ─── Project Songs (Linked Tracks) ───────────────────────────────────────────
+
+/** Return all songs linked to a project, joined with song + creator info, ordered by sortOrder. */
+export async function getProjectSongs(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: projectSongs.id,
+      projectId: projectSongs.projectId,
+      songId: projectSongs.songId,
+      sortOrder: projectSongs.sortOrder,
+      addedAt: projectSongs.addedAt,
+      song: {
+        id: songs.id,
+        title: songs.title,
+        coverArtUrl: songs.coverArtUrl,
+        fileUrl: songs.fileUrl,
+        durationSeconds: songs.durationSeconds,
+        genre: songs.genre,
+        status: songs.status,
+        isPublic: songs.isPublic,
+      },
+    })
+    .from(projectSongs)
+    .leftJoin(songs, eq(projectSongs.songId, songs.id))
+    .where(eq(projectSongs.projectId, projectId))
+    .orderBy(asc(projectSongs.sortOrder));
+}
+
+/** Add a song to a project (idempotent — ignores duplicates). */
+export async function addSongToProject(projectId: number, songId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Get current max sortOrder
+  const rows = await db
+    .select({ maxOrder: sql<number>`COALESCE(MAX(sortOrder), -1)` })
+    .from(projectSongs)
+    .where(eq(projectSongs.projectId, projectId));
+  const nextOrder = Number(rows[0]?.maxOrder ?? -1) + 1;
+  // Insert ignore to handle duplicates
+  await db.execute(
+    sql`INSERT IGNORE INTO projectSongs (projectId, songId, sortOrder, addedAt) VALUES (${projectId}, ${songId}, ${nextOrder}, NOW())`
+  );
+}
+
+/** Remove a song from a project. */
+export async function removeSongFromProject(projectId: number, songId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(projectSongs).where(
+    and(eq(projectSongs.projectId, projectId), eq(projectSongs.songId, songId))
+  );
+}
+
+/** Reorder project songs — accepts an ordered array of projectSong IDs. */
+export async function reorderProjectSongs(projectId: number, orderedIds: number[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await Promise.all(
+    orderedIds.map((id, idx) =>
+      db.update(projectSongs)
+        .set({ sortOrder: idx })
+        .where(and(eq(projectSongs.id, id), eq(projectSongs.projectId, projectId)))
+    )
+  );
 }

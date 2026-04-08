@@ -225,6 +225,7 @@ export default function PlayerBar() {
         left: 0,
         right: 0,
         height: isCinematic ? "100dvh" : isExpanded ? "256px" : "68px",
+        overflow: "visible",
         background: isCinematic ? "#000" : "oklch(0.125 0.028 52)",
         borderTop: isExpanded && !isCinematic
           ? "1px solid oklch(0.80 0.145 82 / 0.20)"
@@ -695,7 +696,7 @@ export default function PlayerBar() {
       {!isExpanded && (
         <div
           className="flex items-center gap-4"
-          style={{ height: "68px", backgroundColor: "#282020", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px" }}
+          style={{ height: "68px", backgroundColor: "#282020", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible" }}
         >
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
@@ -834,7 +835,7 @@ export default function PlayerBar() {
           </div>
 
           {/* ── Right controls ── */}
-          <div className="flex items-center gap-1.5 w-[240px] justify-end flex-shrink-0 overflow-hidden">
+          <div className="flex items-center gap-1.5 w-[240px] justify-end flex-shrink-0 overflow-visible">
             {/* Live wave */}
             {state.isPlaying && (
               <div className="live-wave">

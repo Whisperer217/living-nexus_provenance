@@ -3219,3 +3219,24 @@
 - [x] Fix PlaylistDrawer flattenSong: use song.fileUrl (not song.audioUrl) so tracks have valid audio URLs
 - [x] Fix PlayerBar z-index from z-50 to z-[9985] so context menu dropdowns render above PlaylistDrawer
 - [x] Fix PlaylistDrawer panel: add pointer-events-none when closed to prevent blocking desktop player clicks
+
+## Phase 92 — Desktop Player Fix + Project Page Improvements
+- [ ] Fix desktop PlayerBar 3-dot menu and volume slider (real click blocker)
+- [ ] Fix project banner image: proper aspect ratio, object-cover with object-top, no stretching
+- [ ] Add zoom-on-click lightbox for project banner image
+- [ ] Add video upload field to project editor
+- [ ] Add narration (audio) upload field to project editor
+- [ ] Add drag-to-reorder for project tracks/media items
+
+- [x] Fix desktop PlayerBar overflow-hidden clipping volume and 3-dot menu dropdowns
+- [x] Fix project banner focal point default (positionY 15→50 for portrait images)
+- [x] Add narration audio upload to project editor (S3 upload, NarrationUploadPanel)
+- [x] Add narration player on project page (NarrationPlayer component)
+- [x] Add direct video upload to project editor (S3 upload via VideoUploadPanel)
+- [x] Add project songs linked tracks panel (ProjectSongsPanel)
+- [x] Add drag-to-reorder for linked project tracks (DnD Kit)
+- [x] Add song picker to link tracks from creator catalog to project
+- [x] Add projectSongs junction table to DB schema
+- [x] Add narrationUrl/narrationKey fields to projects DB schema
+- [x] Add tRPC procedures: projects.getSongs, projects.addSong, projects.removeSong, projects.reorderSongs
+- [x] Add tRPC procedures: projects.uploadNarration, projects.uploadVideo
