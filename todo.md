@@ -3131,3 +3131,10 @@
 - [x] Creator profile page song list respects displayOrder (via getSongsByUser)
 - [x] Explore page respects creator's displayOrder when showing their tracks (via getPublicSongs creatorId path)
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 85: Featured Projects Card Fixes
+- [x] Fixed broken project link URL in Featured Projects section — all 4 link/button hrefs changed from `/projects/:slug` to `/project/:slug` (matching the registered route)
+- [x] Fixed same broken link in DashboardPage activity feed (`/projects/` → `/project/`)
+- [x] Fixed same broken link in ProfilePage activity feed (`/projects/` → `/project/`)
+- [x] Capped Featured Projects card banner image height from 160px to 120px (no longer full-viewport tall)
+- [x] 137/137 tests passing, 0 TypeScript errors

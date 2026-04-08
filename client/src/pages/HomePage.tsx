@@ -1028,8 +1028,8 @@ export default function HomePage() {
                 style={{ background: "oklch(0.11 0.025 270)", boxShadow: "0 4px 28px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(0.84 0.155 85 / 0.08)" }}
               >
                 {/* Banner image — 160px tall */}
-                <Link href={`/projects/${project.slug}`}>
-                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "160px" }}>
+                <Link href={`/project/${project.slug}`}>
+                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "120px" }}>
                     {project.bannerUrl ? (
                       <img
                         src={project.bannerUrl}
@@ -1087,7 +1087,7 @@ export default function HomePage() {
 
                   {/* Title + artist name */}
                   <div className="flex-1 min-w-0">
-                    <Link href={`/projects/${project.slug}`}>
+                    <Link href={`/project/${project.slug}`}>
                       <p className="text-[13px] font-semibold truncate cursor-pointer hover:text-[oklch(0.84_0.155_85)] transition-colors" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>
                         {project.title}
                       </p>
@@ -1118,7 +1118,7 @@ export default function HomePage() {
                         className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md transition-all hover:brightness-110"
                         style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.4)" }}
                         title="Fund this project"
-                        onClick={() => { window.location.href = `/projects/${project.slug}`; }}
+                        onClick={() => { window.location.href = `/project/${project.slug}`; }}
                       >
                         <DollarSign size={9} style={{ color: "oklch(0.84 0.155 85)" }} />
                         <span className="text-[9px] font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>
@@ -1131,7 +1131,7 @@ export default function HomePage() {
                       className="p-1 rounded-md transition-all hover:scale-110"
                       style={{ color: "oklch(0.65 0.18 0 / 0.7)" }}
                       title="Follow project"
-                      onClick={() => { window.location.href = `/projects/${project.slug}`; }}
+                      onClick={() => { window.location.href = `/project/${project.slug}`; }}
                     >
                       <Heart size={13} />
                     </button>

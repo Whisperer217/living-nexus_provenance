@@ -822,7 +822,7 @@ export default function DashboardPage() {
                             <span className="text-xs" style={{ color: "oklch(0.7 0.03 280)" }}>by {evt.actorName}</span>
                           )}
                           {evt.songTitle && (
-                            <Link href={(evt as any).projectSlug ? `/projects/${(evt as any).projectSlug}` : ((evt as any).songLink ?? `/song/${evt.workId}`)}>
+                            <Link href={(evt as any).projectSlug ? `/project/${(evt as any).projectSlug}` : ((evt as any).songLink ?? `/song/${evt.workId}`)}>
                               <span className="text-xs hover:underline truncate" style={{ color: "oklch(0.55 0.04 280)" }}>on "{evt.songTitle}"</span>
                             </Link>
                           )}
