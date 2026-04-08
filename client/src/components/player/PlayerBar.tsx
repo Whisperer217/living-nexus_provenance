@@ -232,7 +232,7 @@ export default function PlayerBar() {
         boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px oklch(0.82 0.155 75 / 0.18), 0 -1px 8px oklch(0.82 0.155 75 / 0.22)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
-        zIndex: isCinematic ? 9999 : 50,
+        zIndex: isCinematic ? 9999 : 9985,
       }}
     >
       {/* ── Expand / Collapse tab — sits on top of bar, centered ── */}
@@ -984,8 +984,9 @@ export default function PlayerBar() {
               </button>
               {showVolume && (
                 <div
-                  className="absolute bottom-12 right-0 rounded-2xl shadow-2xl z-[200]"
+                  className="absolute bottom-12 right-0 rounded-2xl shadow-2xl"
                   style={{
+                    zIndex: 9990,
                     background: "oklch(0.12 0.030 52)",
                     border: "1px solid oklch(0.38 0.08 68 / 60%)",
                     boxShadow: "0 0 24px 4px oklch(0.82 0.155 75 / 0.18), 0 8px 32px oklch(0.10 0.02 55 / 0.8)",
@@ -1075,8 +1076,9 @@ export default function PlayerBar() {
                 </button>
                 {showContextMenu && (
                   <div
-                    className="absolute bottom-12 right-0 rounded-2xl shadow-2xl z-[300] overflow-hidden"
+                    className="absolute bottom-12 right-0 rounded-2xl shadow-2xl overflow-hidden"
                     style={{
+                      zIndex: 9990,
                       background: "oklch(0.13 0.030 52)",
                       border: "1px solid oklch(0.38 0.08 68 / 55%)",
                       boxShadow: "0 0 28px 4px oklch(0.82 0.155 75 / 0.15), 0 8px 32px oklch(0.10 0.02 55 / 0.85)",
