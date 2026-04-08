@@ -85,6 +85,7 @@ import {
   getProjectUpdates, addProjectUpdate, getProjectDonations, recordProjectDonation, listActiveProjects,
   getProjectBlocks, saveProjectBlocks, getProjectsByCreator,
   followProject, unfollowProject, isFollowingProject, getProjectFollowerCount, getProjectFollowerUserIds,
+  getLatestAuditLog, getAllAuditLogs, createAuditLog, updateAuditLog,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -4865,6 +4866,102 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         if (!project) throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found' });
         if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN', message: 'Not your project' });
         await updateProject(input.projectId, { status: 'draft' });
+        return { success: true };
+      }),
+  }),
+
+  // ─── Platform Audit ─────────────────────────────────────────────────────────
+  audit: router({
+    /** Public: get the latest audit summary for the /trust page */
+    getLatest: publicProcedure.query(async () => {
+      const log = await getLatestAuditLog();
+      if (!log) return null;
+      // Return only public-safe fields
+      return {
+        id: log.id,
+        auditVersion: log.auditVersion,
+        auditDate: log.auditDate,
+        auditorName: log.auditorName,
+        overallStatus: log.overallStatus,
+        artifactHash: log.artifactHash,
+        reportUrl: log.reportUrl,
+        publicSummary: log.publicSummary,
+        layer2Status: log.layer2Status,
+        layer3Status: log.layer3Status,
+        layer4Status: log.layer4Status,
+        layer5Status: log.layer5Status,
+        layer6Status: log.layer6Status,
+        layer7Status: log.layer7Status,
+        layer8Status: log.layer8Status,
+        layer9Status: log.layer9Status,
+        layer10Status: log.layer10Status,
+        layer11Status: log.layer11Status,
+        layer12Status: log.layer12Status,
+        layer13Status: log.layer13Status,
+        layer14Status: log.layer14Status,
+      };
+    }),
+    /** Admin: get all audit logs */
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+      return getAllAuditLogs();
+    }),
+    /** Admin: create a new audit log entry */
+    create: protectedProcedure
+      .input(z.object({
+        auditVersion: z.string(),
+        auditDate: z.date(),
+        auditorName: z.string(),
+        overallStatus: z.enum(['pass', 'conditional_pass', 'fail']),
+        artifactHash: z.string(),
+        reportUrl: z.string().optional(),
+        publicSummary: z.string().optional(),
+        internalNotes: z.string().optional(),
+        layer2Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer3Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer4Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer5Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer6Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer7Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer8Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer9Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer10Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer11Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer12Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer13Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer14Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+        await createAuditLog(input as any);
+        return { success: true };
+      }),
+    /** Admin: update an existing audit log entry */
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int(),
+        overallStatus: z.enum(['pass', 'conditional_pass', 'fail']).optional(),
+        publicSummary: z.string().optional(),
+        internalNotes: z.string().optional(),
+        reportUrl: z.string().optional(),
+        layer2Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer3Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer4Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer5Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer6Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer7Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer8Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer9Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer10Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer11Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer12Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer13Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+        layer14Status: z.enum(['pass', 'warning', 'fail', 'na']).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+        const { id, ...data } = input;
+        await updateAuditLog(id, data as any);
         return { success: true };
       }),
   }),

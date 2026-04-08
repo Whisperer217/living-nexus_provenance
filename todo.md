@@ -3144,3 +3144,16 @@
 - [x] Added Projects tab (Rocket icon) to mobile bottom nav — replaces Together tab; Home / Explore / Projects / Signals / Profile
 - [x] Registered /projects/:slug as client-side redirect alias → /project/:slug in App.tsx (wouter Redirect)
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 87: Platform Trust & Transparency
+- [x] Ran live Q1 2026 engineering audit on livingnexus.org (SSL, headers, TTFB, deps, tech fingerprint)
+- [x] Produced signed audit report (SHA-256: d894a3a64c29e027e41bad444ca87f04d8c69ad4f9bd94567fba7940a2750847)
+- [x] Added `platformAuditLogs` table to schema (migration 0062)
+- [x] Added db helpers: getLatestAuditLog, getAllAuditLogs, createAuditLog, updateAuditLog
+- [x] Added `audit` tRPC sub-router: getLatest (public), getAll (admin), create (admin), update (admin)
+- [x] Built Admin Audit Log page at /admin/audit (admin-only, 14-layer form with evidence fields + signed artifact generator)
+- [x] Built public /trust page with hero, overall status badge, artifact hash + copy, 14-layer grid, verification instructions
+- [x] Seeded Q1 2026 audit record (conditional_pass — CSP/Permissions-Policy headers missing)
+- [x] Registered /admin/audit and /trust routes in App.tsx
+- [x] Added "Platform Trust" link to desktop TopBar drawer and mobile MainLayout drawer
+- [x] 137/137 tests passing, 0 TypeScript errors

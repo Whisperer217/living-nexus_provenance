@@ -18,12 +18,14 @@ import {
   songVersions,
   platformSettings,
   projects, projectUpdates, projectDonations, projectBlocks, projectFollowers,
+  platformAuditLogs,
   type InsertContentFlag, type InsertDeclarationSignature,
   type InsertSongVersion,
   type Project, type InsertProject,
   type ProjectUpdate,
   type ProjectDonation,
   type ProjectBlock,
+  type InsertPlatformAuditLog,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3896,4 +3898,41 @@ export async function getCreatorTotalPlays(creatorId: number): Promise<number> {
     .from(songs)
     .where(and(eq(songs.userId, creatorId), eq(songs.status, "Published"), eq(songs.isPublic, true)));
   return Number(rows[0]?.total ?? 0);
+}
+
+// ─── Platform Audit Log Helpers ───────────────────────────────────────────────
+export async function getLatestAuditLog() {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(platformAuditLogs)
+    .orderBy(desc(platformAuditLogs.auditDate))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function getAllAuditLogs() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(platformAuditLogs)
+    .orderBy(desc(platformAuditLogs.auditDate));
+}
+
+export async function createAuditLog(data: InsertPlatformAuditLog) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [result] = await db.insert(platformAuditLogs).values(data);
+  return result;
+}
+
+export async function updateAuditLog(id: number, data: Partial<InsertPlatformAuditLog>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db
+    .update(platformAuditLogs)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(platformAuditLogs.id, id));
 }

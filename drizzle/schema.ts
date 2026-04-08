@@ -1100,3 +1100,36 @@ export const projectFollowers = mysqlTable("projectFollowers", {
 });
 export type ProjectFollower = typeof projectFollowers.$inferSelect;
 export type InsertProjectFollower = typeof projectFollowers.$inferInsert;
+
+// ─── Platform Audit Logs ──────────────────────────────────────────────────────
+// Stores quarterly engineering audit records. Each row is one audit run.
+// The artifactHash is SHA-256 of the full audit report document.
+export const platformAuditLogs = mysqlTable("platformAuditLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  auditVersion: varchar("auditVersion", { length: 32 }).notNull(), // e.g. "Q1-2026"
+  auditDate: timestamp("auditDate").notNull(),
+  auditorName: varchar("auditorName", { length: 128 }).notNull(),
+  overallStatus: mysqlEnum("overallStatus", ["pass", "conditional_pass", "fail"]).notNull(),
+  artifactHash: varchar("artifactHash", { length: 128 }).notNull(), // SHA-256 of report doc
+  reportUrl: text("reportUrl"),                                      // S3 URL of full report PDF/MD
+  // Per-layer statuses
+  layer2Status: mysqlEnum("layer2Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer3Status: mysqlEnum("layer3Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer4Status: mysqlEnum("layer4Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer5Status: mysqlEnum("layer5Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer6Status: mysqlEnum("layer6Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer7Status: mysqlEnum("layer7Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer8Status: mysqlEnum("layer8Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer9Status: mysqlEnum("layer9Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer10Status: mysqlEnum("layer10Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer11Status: mysqlEnum("layer11Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer12Status: mysqlEnum("layer12Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer13Status: mysqlEnum("layer13Status", ["pass", "warning", "fail", "na"]).default("na"),
+  layer14Status: mysqlEnum("layer14Status", ["pass", "warning", "fail", "na"]).default("na"),
+  publicSummary: text("publicSummary"),   // Shown on public /trust page
+  internalNotes: text("internalNotes"),   // Admin-only notes
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+export type PlatformAuditLog = typeof platformAuditLogs.$inferSelect;
+export type InsertPlatformAuditLog = typeof platformAuditLogs.$inferInsert;
