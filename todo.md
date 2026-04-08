@@ -3276,3 +3276,17 @@
 - [x] Project page: QR ID Card button alongside existing share button
 - [x] Song detail page: QR ID Card button alongside existing share button
 - [x] Tests: 11 QR unit tests passing
+
+## Donation Fix + Project Identity
+- [ ] Fix project donation Stripe checkout flow (payment not captured)
+- [ ] Fix donation progress bar not updating after payment
+- [ ] Add WID pill to project pages and project cards
+- [ ] Improve project banner visual identity (distinguishing design)
+
+- [x] Fix project donation - remove Stripe Connect requirement so donations work without connected account
+- [x] Fix donation progress bar - refetch project data 3s after returning from Stripe with ?donation=success
+- [x] Add green WID pill to project banner (BannerDropZone) matching player style
+- [x] Improve project banner status badges with color-coded styling (draft/funding/completed)
+- [x] Add provenance accent line at bottom of banner (green when witnessed, gold when not)
+- [x] Update WID badge in FeaturedProjectsCarousel to green (was purple)
+- [x] Update WID badge in ProjectsDiscoveryPage to green with verify link

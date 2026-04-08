@@ -4668,16 +4668,14 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         if (!project) throw new TRPCError({ code: "NOT_FOUND" });
         if (project.status !== "active") throw new TRPCError({ code: "BAD_REQUEST", message: "This project is not currently accepting donations" });
 
-        // Get creator's Stripe account for transfer
+        // Get creator's Stripe account for transfer (optional — works without Connect)
         const creator = await getUserById(project.userId);
-        if (!creator?.stripeAccountId || creator.stripeAccountStatus !== "enabled") {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Creator has not set up payouts yet" });
-        }
+        const hasConnectAccount = !!(creator?.stripeAccountId && creator.stripeAccountStatus === "enabled");
 
         const platformFeeCents = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
         const user = ctx.user;
 
-        const session = await stripe.checkout.sessions.create({
+        const sessionParams: Stripe.Checkout.SessionCreateParams = {
           payment_method_types: ["card"],
           line_items: [{
             price_data: {
@@ -4691,10 +4689,6 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           success_url: `${input.origin}/project/${project.slug}?donation=success`,
           cancel_url: `${input.origin}/project/${project.slug}`,
           customer_email: user?.email || undefined,
-          payment_intent_data: {
-            transfer_data: { destination: creator.stripeAccountId },
-            application_fee_amount: platformFeeCents,
-          },
           metadata: {
             type: "project_donation",
             projectId: String(project.id),
@@ -4704,7 +4698,17 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
             message: input.message || "",
             anonymous: input.anonymous ? "true" : "false",
           },
-        });
+        };
+
+        // Only add transfer_data if creator has a verified Stripe Connect account
+        if (hasConnectAccount) {
+          sessionParams.payment_intent_data = {
+            transfer_data: { destination: creator!.stripeAccountId! },
+            application_fee_amount: platformFeeCents,
+          };
+        }
+
+        const session = await stripe.checkout.sessions.create(sessionParams);
         return { url: session.url };
       }),
 

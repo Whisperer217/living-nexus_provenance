@@ -61,17 +61,22 @@ function ProjectCard({ project }: { project: any }) {
           />
           {/* WID badge */}
           {project.linkedWitnessId && (
-            <div
-              className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono font-bold"
+            <a
+              href={`/verify/${project.linkedWitnessId}`}
+              onClick={e => e.stopPropagation()}
+              className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-mono font-bold transition-all hover:opacity-90"
               style={{
-                background: "oklch(0.65 0.2 300 / 0.85)",
-                backdropFilter: "blur(8px)",
-                color: "white",
+                background: "oklch(0.22 0.08 145 / 0.92)",
+                border: "1px solid oklch(0.55 0.18 145 / 0.5)",
+                backdropFilter: "blur(6px)",
+                color: "oklch(0.82 0.18 145)",
+                textDecoration: "none",
               }}
+              title="Project cryptographically witnessed"
             >
               <Shield size={9} />
               WID
-            </div>
+            </a>
           )}
           {/* Status badge */}
           <div

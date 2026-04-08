@@ -224,10 +224,14 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                       {project.linkedWitnessId && (
                         <div
                           className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
-                          style={{ background: "oklch(0.65 0.2 300 / 0.88)", backdropFilter: "blur(4px)" }}
+                          style={{
+                            background: "oklch(0.22 0.08 145 / 0.92)",
+                            border: "1px solid oklch(0.55 0.18 145 / 0.5)",
+                            backdropFilter: "blur(6px)",
+                          }}
                         >
-                          <Fingerprint size={8} className="text-white" />
-                          <span className="text-[9px] font-mono text-white">WID</span>
+                          <Fingerprint size={8} style={{ color: "oklch(0.82 0.18 145)" }} />
+                          <span className="text-[9px] font-mono font-bold" style={{ color: "oklch(0.82 0.18 145)" }}>WID</span>
                         </div>
                       )}
                     </div>

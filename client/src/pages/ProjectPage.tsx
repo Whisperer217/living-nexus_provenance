@@ -172,6 +172,7 @@ function BannerDropZone({
   positionX = 50,
   positionY = 50,
   onPositionChange,
+  witnessId,
 }: {
   bannerUrl: string | null;
   title: string;
@@ -183,6 +184,7 @@ function BannerDropZone({
   positionX?: number;
   positionY?: number;
   onPositionChange?: (x: number, y: number) => void;
+  witnessId?: string | null;
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -254,10 +256,56 @@ function BannerDropZone({
         </div>
       )}
 
-      {/* Funding badge */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        <Badge className="bg-[#d4a017]/90 text-black font-bold px-3 py-1 text-sm">
-          {status === "draft" ? "Draft" : status === "completed" ? "Completed" : "Funding"}
+      {/* Provenance strip — bottom-left diagonal accent */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-1 pointer-events-none"
+        style={{
+          background: witnessId
+            ? "linear-gradient(to right, oklch(0.55 0.18 145 / 0.8), oklch(0.84 0.155 85 / 0.6), transparent)"
+            : "linear-gradient(to right, oklch(0.84 0.155 85 / 0.4), transparent)",
+        }}
+      />
+
+      {/* Top-right badges */}
+      <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
+        {/* WID pill — green, matches player style */}
+        {witnessId && (
+          <a
+            href={`/verify/${witnessId}`}
+            onClick={e => e.stopPropagation()}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide transition-all hover:opacity-90"
+            style={{
+              background: "oklch(0.22 0.08 145 / 0.92)",
+              border: "1px solid oklch(0.55 0.18 145 / 0.6)",
+              color: "oklch(0.82 0.18 145)",
+              backdropFilter: "blur(6px)",
+              textDecoration: "none",
+            }}
+            title="Project cryptographically witnessed — click to verify"
+          >
+            <ShieldCheck className="w-3 h-3" />
+            WID
+          </a>
+        )}
+        {/* Status badge */}
+        <Badge
+          className="font-bold px-3 py-1 text-sm"
+          style={{
+            background: status === "draft"
+              ? "oklch(0.25 0.02 280 / 0.9)"
+              : status === "completed"
+              ? "oklch(0.22 0.08 145 / 0.9)"
+              : "oklch(0.55 0.18 85 / 0.9)",
+            color: status === "draft" ? "oklch(0.65 0.04 280)" : status === "completed" ? "oklch(0.82 0.18 145)" : "oklch(0.12 0.03 60)",
+            border: status === "draft"
+              ? "1px solid oklch(0.35 0.03 280 / 0.5)"
+              : status === "completed"
+              ? "1px solid oklch(0.55 0.18 145 / 0.4)"
+              : "1px solid oklch(0.84 0.155 85 / 0.5)",
+            backdropFilter: "blur(6px)",
+          }}
+        >
+          {status === "draft" ? "Draft" : status === "completed" ? "✓ Completed" : "● Funding"}
         </Badge>
       </div>
 
@@ -1289,10 +1337,22 @@ export default function ProjectPage() {
 
   const utils = trpc.useUtils();
 
-  const { data, isLoading, error } = trpc.projects.getBySlug.useQuery(
+  const { data, isLoading, error, refetch: refetchProject } = trpc.projects.getBySlug.useQuery(
     { slug: slug ?? "" },
     { enabled: !!slug }
   );
+
+  // After returning from Stripe checkout with ?donation=success, refetch the project
+  // after a short delay to allow the webhook to process and update raisedAmountCents
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("donation") === "success") {
+      const timer = setTimeout(() => {
+        refetchProject();
+      }, 3000); // 3s delay for webhook to process
+      return () => clearTimeout(timer);
+    }
+  }, [refetchProject]);
   const { data: rawBlocks } = trpc.projects.getBlocks.useQuery(
     { projectId: data?.project.id ?? 0 },
     { enabled: !!data?.project.id }
@@ -1505,6 +1565,7 @@ export default function ProjectPage() {
         positionX={editMode ? localBannerPosX : (project.bannerPositionX ?? 50)}
         positionY={editMode ? localBannerPosY : (project.bannerPositionY ?? 15)}
         onPositionChange={editMode ? (x, y) => { setLocalBannerPosX(x); setLocalBannerPosY(y); } : undefined}
+        witnessId={project.linkedWitnessId}
       />
 
       {/* ── Owner toolbar ── */}
