@@ -23,8 +23,7 @@ import { getLoginUrl } from "@/const";
 import PlayerBar from "@/components/player/PlayerBar";
 import MobilePlayerLayer from "@/components/player/MobilePlayerLayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
-import QuickRefSlider from "@/components/layout/QuickRefSlider";
-import QuickRefBottomSheet from "@/components/layout/QuickRefBottomSheet";
+// QuickRefSlider and QuickRefBottomSheet removed (Phase 88) — replaced by right-side playlist drawer in future
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import TopBar from "@/components/layout/TopBar";
 import LiveActivityPanel from "@/components/layout/LiveActivityPanel";
@@ -74,7 +73,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }, [logout, navigate]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [qrOpen, setQrOpen] = useState(false);
   const [liveOpen, setLiveOpen] = useState(false);
 
   // Notification badges
@@ -104,11 +102,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const MOBILE_TEXT = isWarm ? "rgba(200,212,228,0.85)" : undefined;
   const MOBILE_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : undefined;
 
-  const openMobileMenu = useCallback(() => { setQrOpen(false); setMobileMenuOpen(true); }, []);
-  const toggleQr = useCallback(() => {
-    if (!qrOpen) setMobileMenuOpen(false);
-    setQrOpen(o => !o);
-  }, [qrOpen]);
+  const openMobileMenu = useCallback(() => { setMobileMenuOpen(true); }, []);
   const goTo = useCallback((path: string) => { navigate(path); setMobileMenuOpen(false); }, [navigate]);
 
   const isActive = (path: string) => {
@@ -171,7 +165,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.10_0.022_55)] relative" style={{ overscrollBehaviorX: "none" }}>
 
       {/* ── Quick Reference Slider — temporarily hidden per user request (Phase 77) ── */}
-      {/* <QuickRefSlider open={qrOpen} onToggle={toggleQr} /> */}
+
 
       {/* ══════════════════════════════════════════════
           DESKTOP LAYOUT (md+)
@@ -388,9 +382,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* Mobile Player Layer */}
       <MobilePlayerLayer />
-
-      {/* Quick Access Bottom Sheet — mobile only */}
-      <QuickRefBottomSheet miniPlayerVisible={state.currentIdx >= 0 && !!state.tracks[state.currentIdx]?.audioUrl} />
 
       {/* Theater Player */}
       <TheaterPlayer />

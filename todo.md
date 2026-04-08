@@ -3157,3 +3157,9 @@
 - [x] Registered /admin/audit and /trust routes in App.tsx
 - [x] Added "Platform Trust" link to desktop TopBar drawer and mobile MainLayout drawer
 - [x] 137/137 tests passing, 0 TypeScript errors
+
+## Phase 88: Player UI Cleanup — Remove Quick Access Strip, Fix Duplicate Player
+- [x] Remove Quick Access / discovery scroll strip that overlaps the global player bar
+- [x] Fix expanded player sheet so it fully replaces the mini bar (no stacking/layering)
+- [x] Remove duplicate "NOW PLAYING" label (appears in both mini bar and as floating pill)
+- [x] Park right-side horizontal playlist slider as future feature (pre-made / build-your-own playlists)
