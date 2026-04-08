@@ -3299,3 +3299,4 @@
 - [x] Fix volume popup container height hack removed (native vertical slider)
 - [x] Fix WID badge on mobile: tapping WID in song rows/cards no longer triggers the player or opens the quick access panel — badge now stops event propagation and navigates to /verify/:witnessId (CreatorProfilePage SongRow + context menu, DiscoverPage card)
 - [x] Fix Quick Play tab trigger auto-opening when Donate button tapped on mobile: tab trigger now hides (opacity:0, pointer-events:none) whenever any dialog/modal is open, detected via MutationObserver watching body[data-scroll-locked] and body style overflow
+- [x] Fix Share Identity Card modal not scrollable on mobile: moved overflow-y-auto to backdrop, sticky header, canvas scales with min(240px, 100vw-4rem)

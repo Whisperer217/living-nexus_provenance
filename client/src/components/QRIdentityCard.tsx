@@ -322,9 +322,9 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      {/* Canvas preview */}
+      {/* Canvas preview — scales down on narrow screens */}
       <div className="relative rounded-xl overflow-hidden shadow-2xl border border-amber-700/40"
-        style={{ width: CARD_W / 2, height: CARD_H / 2 }}>
+        style={{ width: "min(240px, calc(100vw - 4rem))", aspectRatio: `${CARD_W} / ${CARD_H}` }}>
         {isGenerating && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
             <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
@@ -332,7 +332,7 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
         )}
         <canvas
           ref={canvasRef}
-          style={{ width: CARD_W / 2, height: CARD_H / 2, display: "block" }}
+          style={{ width: "100%", height: "100%", display: "block" }}
         />
       </div>
 
@@ -411,31 +411,39 @@ export function QRShareModal({ entity, campaign, tag, trigger }: QRShareModalPro
         {trigger}
       </span>
       {open && (
+        // Backdrop: overflow-y-auto here (not on the card) so the whole modal scrolls on small screens
         <div
-          className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[9990] overflow-y-auto bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
         >
-          <div className="bg-[#0d0d0d] border border-amber-700/40 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-5 pt-5 pb-2">
-              <div>
-                <h2 className="text-amber-300 font-bold text-lg">Share Identity Card</h2>
-                <p className="text-white/40 text-xs mt-0.5">
-                  Provenance-preserving QR — every scan is attributed
-                </p>
+          <div className="flex min-h-full items-start justify-center p-4 py-8">
+            <div
+              className="bg-[#0d0d0d] border border-amber-700/40 rounded-2xl shadow-2xl w-full"
+              style={{ maxWidth: "min(480px, calc(100vw - 2rem))" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Sticky header so title + close are always visible while scrolling */}
+              <div className="sticky top-0 z-10 bg-[#0d0d0d] flex items-center justify-between px-5 pt-5 pb-2 rounded-t-2xl border-b border-amber-700/20">
+                <div>
+                  <h2 className="text-amber-300 font-bold text-lg">Share Identity Card</h2>
+                  <p className="text-white/40 text-xs mt-0.5">
+                    Provenance-preserving QR — every scan is attributed
+                  </p>
+                </div>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-white/40 hover:text-white/80 text-xl leading-none ml-4 shrink-0"
+                >
+                  ×
+                </button>
               </div>
-              <button
-                onClick={() => setOpen(false)}
-                className="text-white/40 hover:text-white/80 text-xl leading-none"
-              >
-                ×
-              </button>
+              <QRIdentityCard
+                entity={entity}
+                campaign={campaign}
+                tag={tag}
+                onClose={() => setOpen(false)}
+              />
             </div>
-            <QRIdentityCard
-              entity={entity}
-              campaign={campaign}
-              tag={tag}
-              onClose={() => setOpen(false)}
-            />
           </div>
         </div>
       )}
