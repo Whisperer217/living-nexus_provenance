@@ -1,0 +1,154 @@
+{
+  "name": "Living Nexus — Task Router",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "living-nexus/task",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Receive Task",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "notes": "Receives: { task, files, branch, priority, assignee_hint }"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate and normalise incoming task payload\nconst body = $input.first().json.body;\n\nif (!body.task) throw new Error('Missing required field: task');\n\nconst branch = body.branch || `feat/${Date.now()}-${body.task.slice(0,20).toLowerCase().replace(/[^a-z0-9]/g,'-')}`;\nconst priority = body.priority || 'normal';\nconst files = body.files || [];\n\n// Build the Manus prompt\nconst prompt = [\n  `You are working on the Living Nexus platform (GitHub: livingnexus repo).`,\n  `Clone the repo, checkout branch: ${branch} (create from main if it doesn't exist).`,\n  `Task: ${body.task}`,\n  files.length ? `Focus files: ${files.join(', ')}` : '',\n  `When done: commit all changes with a clear message and push branch ${branch}.`,\n  `Do NOT push to main. Do NOT merge. Push only to ${branch}.`,\n  `Run pnpm test before pushing. If tests fail, fix them first.`,\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    branch,\n    priority,\n    files,\n    original_task: body.task,\n    manus_prompt: prompt,\n    created_at: new Date().toISOString(),\n  }\n}];"
+      },
+      "id": "build-prompt",
+      "name": "Build Manus Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "reference",
+        "owner": "={{ $env.GITHUB_OWNER }}",
+        "repository": "={{ $env.GITHUB_REPO }}",
+        "ref": "={{ $json.branch }}",
+        "sha": "={{ $node['Get Main SHA'].json.object.sha }}",
+        "additionalParameters": {}
+      },
+      "id": "create-branch",
+      "name": "GitHub: Create Branch",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [680, 200],
+      "credentials": {
+        "githubApi": { "id": "github-creds", "name": "GitHub API" }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "reference",
+        "operation": "get",
+        "owner": "={{ $env.GITHUB_OWNER }}",
+        "repository": "={{ $env.GITHUB_REPO }}",
+        "ref": "heads/main"
+      },
+      "id": "get-main-sha",
+      "name": "Get Main SHA",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [680, 400],
+      "credentials": {
+        "githubApi": { "id": "github-creds", "name": "GitHub API" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.MANUS_API_URL }}/tasks",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "prompt", "value": "={{ $node['Build Manus Prompt'].json.manus_prompt }}" },
+            { "name": "project_id", "value": "={{ $env.MANUS_PROJECT_ID }}" },
+            { "name": "branch", "value": "={{ $node['Build Manus Prompt'].json.branch }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "spawn-manus",
+      "name": "Spawn Manus Instance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "notes": "Replace with actual Manus API endpoint when available. For now, log the prompt for manual session creation."
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "owner": "={{ $env.GITHUB_OWNER }}",
+        "repository": "={{ $env.GITHUB_REPO }}",
+        "title": "={{ $node['Build Manus Prompt'].json.branch }}",
+        "body": "## Auto-generated task\\n\\n**Task:** {{ $node['Build Manus Prompt'].json.original_task }}\\n\\n**Branch:** `{{ $node['Build Manus Prompt'].json.branch }}`\\n\\n**Created:** {{ $node['Build Manus Prompt'].json.created_at }}\\n\\n**Files in scope:** {{ $node['Build Manus Prompt'].json.files.join(', ') || 'All' }}\\n\\n---\\n_Assigned to Manus instance via N8N Task Router_",
+        "additionalParameters": {
+          "labels": ["manus-auto", "needs-review"]
+        }
+      },
+      "id": "create-pr",
+      "name": "GitHub: Open Draft PR",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [1120, 300],
+      "credentials": {
+        "githubApi": { "id": "github-creds", "name": "GitHub API" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'queued', branch: $node['Build Manus Prompt'].json.branch, pr_url: $node['GitHub: Open Draft PR'].json.html_url }) }}"
+      },
+      "id": "respond",
+      "name": "Respond to Caller",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Receive Task": {
+      "main": [[{ "node": "Build Manus Prompt", "type": "main", "index": 0 }]]
+    },
+    "Build Manus Prompt": {
+      "main": [
+        [
+          { "node": "Get Main SHA", "type": "main", "index": 0 },
+          { "node": "Spawn Manus Instance", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get Main SHA": {
+      "main": [[{ "node": "GitHub: Create Branch", "type": "main", "index": 0 }]]
+    },
+    "GitHub: Create Branch": {
+      "main": [[{ "node": "GitHub: Open Draft PR", "type": "main", "index": 0 }]]
+    },
+    "GitHub: Open Draft PR": {
+      "main": [[{ "node": "Respond to Caller", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["living-nexus", "orchestration"],
+  "meta": {
+    "description": "Receives a task payload, creates a GitHub feature branch, spawns a Manus instance with the task prompt, opens a draft PR, and returns the branch + PR URL to the caller."
+  }
+}

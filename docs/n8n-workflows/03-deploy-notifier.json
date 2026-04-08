@@ -1,0 +1,139 @@
+{
+  "name": "Living Nexus — Deploy Notifier",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "living-nexus/deploy-hook",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "github-webhook",
+      "name": "Webhook: GitHub Push to Main",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "notes": "Register this URL as a GitHub webhook on the repo. Event: push. Filter: refs/heads/main"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "is-main",
+              "leftValue": "={{ $json.body.ref }}",
+              "rightValue": "refs/heads/main",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-main",
+      "name": "If: Push to Main",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json.body;\nconst commits = payload.commits || [];\nconst pusher = payload.pusher?.name || 'unknown';\nconst compareUrl = payload.compare || '';\n\nconst summary = commits.map(c => `• ${c.message.split('\\n')[0]} (${c.id.slice(0,7)})`).join('\\n');\n\nreturn [{\n  json: {\n    pusher,\n    commit_count: commits.length,\n    summary,\n    compare_url: compareUrl,\n    pushed_at: new Date().toISOString(),\n    deploy_target: 'www.livingnexus.org'\n  }\n}];"
+      },
+      "id": "build-summary",
+      "name": "Build Deploy Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=:rocket: *Living Nexus — Deploy Triggered*\\n\\n*Pushed by:* {{ $json.pusher }}\\n*Commits:* {{ $json.commit_count }}\\n*Target:* {{ $json.deploy_target }}\\n\\n{{ $json.summary }}\\n\\n<{{ $json.compare_url }}|View diff>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "slack-deploy",
+      "name": "Notify: Slack Deploy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DEPLOY_WEBHOOK_URL }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "ref", "value": "main" },
+            { "name": "source", "value": "n8n-living-nexus" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "trigger-deploy",
+      "name": "Trigger: Platform Deploy Hook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 400],
+      "notes": "Set DEPLOY_WEBHOOK_URL to Railway/Render/Fly deploy hook URL. Remove this node if using Manus hosting (auto-deploys via Publish button)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "=🚀 **Living Nexus deployed to production**\\nPushed by: {{ $node['Build Deploy Summary'].json.pusher }}\\n{{ $node['Build Deploy Summary'].json.summary }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "discord-deploy",
+      "name": "Notify: Discord Deploy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 580]
+    }
+  ],
+  "connections": {
+    "Webhook: GitHub Push to Main": {
+      "main": [[{ "node": "If: Push to Main", "type": "main", "index": 0 }]]
+    },
+    "If: Push to Main": {
+      "main": [
+        [{ "node": "Build Deploy Summary", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Build Deploy Summary": {
+      "main": [
+        [
+          { "node": "Notify: Slack Deploy", "type": "main", "index": 0 },
+          { "node": "Trigger: Platform Deploy Hook", "type": "main", "index": 0 },
+          { "node": "Notify: Discord Deploy", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["living-nexus", "orchestration"],
+  "meta": {
+    "description": "Listens for GitHub push events to main. Builds a commit summary, notifies Slack and Discord, and triggers the platform deploy hook (Railway/Render/Fly)."
+  }
+}

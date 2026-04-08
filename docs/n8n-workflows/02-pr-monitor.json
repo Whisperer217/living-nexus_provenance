@@ -1,0 +1,152 @@
+{
+  "name": "Living Nexus — PR Monitor & Merge Gate",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 5 }]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule: Every 5 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "resource": "pullRequest",
+        "operation": "getAll",
+        "owner": "={{ $env.GITHUB_OWNER }}",
+        "repository": "={{ $env.GITHUB_REPO }}",
+        "filters": {
+          "state": "open",
+          "labels": "manus-auto"
+        },
+        "returnAll": true
+      },
+      "id": "get-open-prs",
+      "name": "GitHub: Get Open Manus PRs",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": {
+        "githubApi": { "id": "github-creds", "name": "GitHub API" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter PRs that have new commits since last check\n// and check if tests passed (look for 'tests-pass' label or CI status)\nconst prs = $input.all();\nconst ready = [];\nconst pending = [];\n\nfor (const pr of prs) {\n  const labels = pr.json.labels?.map(l => l.name) || [];\n  const isDraft = pr.json.draft === true;\n  const hasTestsPass = labels.includes('tests-pass');\n  const hasNeedsWork = labels.includes('needs-work');\n\n  if (!isDraft && hasTestsPass && !hasNeedsWork) {\n    ready.push(pr.json);\n  } else {\n    pending.push(pr.json);\n  }\n}\n\nreturn [\n  { json: { ready, pending, checked_at: new Date().toISOString() } }\n];"
+      },
+      "id": "classify-prs",
+      "name": "Classify PRs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "has-ready",
+              "leftValue": "={{ $json.ready.length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-ready",
+      "name": "If: Any PRs Ready",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=:white_check_mark: *Living Nexus — PR Ready for Review*\\n\\n{{ $node['Classify PRs'].json.ready.map(pr => `• <${pr.html_url}|${pr.title}>`).join('\\n') }}\\n\\n_Approve and merge when ready. Tests passed._"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-slack",
+      "name": "Notify: Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 200],
+      "notes": "Replace SLACK_WEBHOOK_URL with your Slack incoming webhook, or swap this node for Email/Discord/SMS"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "=✅ **Living Nexus PR Ready**\\n{{ $node['Classify PRs'].json.ready.map(pr => `[${pr.title}](${pr.html_url})`).join('\\n') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-discord",
+      "name": "Notify: Discord",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 380],
+      "notes": "Optional — remove if not using Discord"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log pending PRs for audit trail\nconst pending = $node['Classify PRs'].json.pending;\nconsole.log(`[PR Monitor] ${pending.length} PRs still pending:`, pending.map(p => p.title));\nreturn [{ json: { status: 'no_action', pending_count: pending.length } }];"
+      },
+      "id": "log-pending",
+      "name": "Log Pending (No Action)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 560]
+    }
+  ],
+  "connections": {
+    "Schedule: Every 5 Min": {
+      "main": [[{ "node": "GitHub: Get Open Manus PRs", "type": "main", "index": 0 }]]
+    },
+    "GitHub: Get Open Manus PRs": {
+      "main": [[{ "node": "Classify PRs", "type": "main", "index": 0 }]]
+    },
+    "Classify PRs": {
+      "main": [[{ "node": "If: Any PRs Ready", "type": "main", "index": 0 }]]
+    },
+    "If: Any PRs Ready": {
+      "main": [
+        [
+          { "node": "Notify: Slack", "type": "main", "index": 0 },
+          { "node": "Notify: Discord", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Log Pending (No Action)", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["living-nexus", "orchestration"],
+  "meta": {
+    "description": "Polls open Manus-labelled PRs every 5 minutes. When a PR has the 'tests-pass' label and is not a draft, notifies via Slack and Discord for human review and merge."
+  }
+}
