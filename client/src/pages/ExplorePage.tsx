@@ -671,7 +671,7 @@ export default function ExplorePage() {
                     className="group relative rounded-xl overflow-hidden border border-white/[0.08] bg-[oklch(0.13_0.025_50)] hover:border-[#D4AF37]/30 transition-all duration-200 flex flex-col"
                   >
                     {/* Banner */}
-                    <div className="relative h-28 overflow-hidden">
+                    <div className="relative h-56 overflow-hidden">
                       {project.bannerUrl ? (
                         <img src={project.bannerUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (

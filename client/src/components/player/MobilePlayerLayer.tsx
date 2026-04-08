@@ -20,7 +20,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { usePlayer } from "@/contexts/PlayerContext";
+import { usePlayer, type Track } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -33,7 +33,7 @@ import {
   Volume2, VolumeX, Shield, MessageCircle,
   ChevronRight, Send, Users, Fingerprint,
   ExternalLink, Crown, ArrowUp,
-  Home, Compass, Bell, User, Rocket,
+  Home, Compass, Bell, User, Rocket, Sparkles, Loader2,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -108,8 +108,152 @@ function Scrubber({
     </div>
   );
 }
+// ── Discover Panel ──────────────────────────────────────────────────
+function DiscoverPanel({
+  songId,
+  genre,
+  onPlay,
+  onPlayAll,
+}: {
+  songId: number | null;
+  genre?: string | null;
+  onPlay: (t: Track) => void;
+  onPlayAll: (tracks: Track[]) => void;
+}) {
+  const { data, isLoading } = trpc.songs.getRelated.useQuery(
+    { songId: songId!, genre: genre ?? undefined },
+    { enabled: !!songId && !isNaN(songId!), staleTime: 120_000 }
+  );
 
-// ── Main Component ─────────────────────────────────────────────────
+  const toTrack = (s: any): Track => {
+    const song = s.song ?? s;
+    const creator = s.creator ?? {};
+    return {
+      id: String(song.id),
+      title: song.title ?? "Untitled",
+      artist: creator.name ?? creator.artistHandle ?? song.artistName ?? "Unknown",
+      genre: song.genre ?? "",
+      audioUrl: song.audioUrl ?? undefined,
+      artUrl: song.coverArtUrl ?? undefined,
+      witnessId: song.witnessId ?? undefined,
+      creatorId: creator.id ?? undefined,
+      creatorHandle: creator.artistHandle ?? undefined,
+      creatorRole: creator.role ?? undefined,
+      visualReady: song.visualReady ?? undefined,
+      autoVideoUrl: song.autoVideoUrl ?? undefined,
+      coverPositionX: song.coverPositionX ?? 50,
+      coverPositionY: song.coverPositionY ?? 50,
+    };
+  };
+
+  const tracks: Track[] = ((data ?? []) as any[])
+    .map(toTrack)
+    .filter((t) => !!t.audioUrl)
+    .slice(0, 5);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 size={20} className="animate-spin" style={{ color: "oklch(0.55 0.04 280)" }} />
+      </div>
+    );
+  }
+
+  if (!tracks.length) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-8 text-center gap-3">
+        <Sparkles size={24} style={{ color: "oklch(0.30 0.03 280)" }} />
+        <div className="text-[12px] font-heading" style={{ color: "oklch(0.40 0.03 280)" }}>
+          No related tracks found
+        </div>
+        <div className="text-[10px]" style={{ color: "oklch(0.30 0.02 280)" }}>
+          Try exploring other genres
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-shrink-0 px-6 pb-8">
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-[10px] font-heading tracking-[0.18em] uppercase"
+          style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}>
+          Related Tracks
+        </div>
+        {tracks.length > 1 && (
+          <button
+            onClick={() => onPlayAll(tracks)}
+            className="flex items-center gap-1.5 text-[10px] font-heading tracking-wide px-3 py-1.5 rounded-full transition-all active:scale-95"
+            style={{
+              background: "oklch(0.84 0.155 85 / 0.12)",
+              border: "1px solid oklch(0.84 0.155 85 / 0.3)",
+              color: "oklch(0.84 0.155 85)",
+            }}
+          >
+            <Play size={10} fill="currentColor" />
+            Play All
+          </button>
+        )}
+      </div>
+      {/* Track list */}
+      <div className="flex flex-col gap-2">
+        {tracks.map((track) => (
+          <button
+            key={track.id}
+            onClick={() => onPlay(track)}
+            className="flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-[0.98] text-left"
+            style={{
+              background: "oklch(0.12 0.025 275 / 0.6)",
+              border: "1px solid oklch(0.22 0.03 275 / 0.5)",
+            }}
+          >
+            {/* Art */}
+            <div
+              className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden"
+              style={{ background: "oklch(0.18 0.04 280)" }}
+            >
+              {track.artUrl ? (
+                <img src={track.artUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Music size={16} style={{ color: "oklch(0.40 0.03 280)" }} />
+                </div>
+              )}
+            </div>
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] font-heading text-white truncate leading-tight">
+                {track.title}
+              </div>
+              <div className="text-[11px] truncate mt-0.5" style={{ color: "oklch(0.50 0.04 280)" }}>
+                {track.artist}
+              </div>
+              {track.genre && (
+                <div
+                  className="inline-block mt-1 text-[9px] font-heading tracking-wide px-1.5 py-0.5 rounded-full"
+                  style={{
+                    background: "oklch(0.84 0.155 85 / 0.10)",
+                    color: "oklch(0.84 0.155 85 / 0.7)",
+                    border: "1px solid oklch(0.84 0.155 85 / 0.2)",
+                  }}
+                >
+                  {track.genre}
+                </div>
+              )}
+            </div>
+            {/* Play icon */}
+            <Play size={14} style={{ color: "oklch(0.84 0.155 85 / 0.5)", flexShrink: 0 }} />
+          </button>
+        ))}
+      </div>
+      {/* Spacer */}
+      <div className="h-6" />
+    </div>
+  );
+}
+
+// ── Main Component ──────────────────────────────────────────────────
 export default function MobilePlayerLayer() {
   const {
     state, audioRef, allTracks,
@@ -118,6 +262,7 @@ export default function MobilePlayerLayer() {
     setVolume, seek,
     queueContextLabel,
     patchTrack,
+    addAndPlay, playQueueAt,
   } = usePlayer();
   const { user } = useAuth();
   const [, navigate] = useLocation();
@@ -127,6 +272,8 @@ export default function MobilePlayerLayer() {
   const [copied, setCopied] = useState(false);
   const [isLandscape, setIsLandscape] = useState(false);
 
+  // Expanded sheet tab: "playing" | "discover"
+  const [expandedTab, setExpandedTab] = useState<"playing" | "discover">("playing");
   // Canonical panel states
   const [widPanelOpen, setWidPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
@@ -384,8 +531,13 @@ export default function MobilePlayerLayer() {
     { songId: currentSongId! },
     { enabled: !!currentSongId && !isNaN(currentSongId), refetchInterval: 30_000, staleTime: 25_000 }
   );
-  const listenerCount = (listenerData as any)?.count ?? 0;
-
+   const listenerCount = (listenerData as any)?.count ?? 0;
+  // Related tracks — for Discover tab
+  const { data: relatedData, isLoading: relatedLoading } = trpc.songs.getRelated.useQuery(
+    { songId: currentSongId!, genre: currentTrack?.genre ?? undefined },
+    { enabled: !!currentSongId && !isNaN(currentSongId) && expandedTab === "discover", staleTime: 120_000 }
+  );
+  const relatedTracks = (relatedData ?? []) as any[];
   // Comments
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
     { songId: currentSongId! },
@@ -854,6 +1006,31 @@ export default function MobilePlayerLayer() {
         </button>
       </div>
 
+      {/* Tab bar: Now Playing | Discover */}
+      <div
+        className="flex-shrink-0 flex items-center gap-1 mx-8 mb-4 p-1 rounded-2xl"
+        style={{
+          background: "oklch(0.12 0.025 275 / 0.8)",
+          border: "1px solid oklch(0.22 0.03 275 / 0.5)",
+        }}
+      >
+        {(["playing", "discover"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setExpandedTab(tab)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all text-[11px] font-heading tracking-wide"
+            style={{
+              background: expandedTab === tab ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
+              color: expandedTab === tab ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)",
+              border: expandedTab === tab ? "1px solid oklch(0.84 0.155 85 / 0.3)" : "1px solid transparent",
+            }}
+          >
+            {tab === "playing" ? <ListMusic size={12} /> : <Sparkles size={12} />}
+            {tab === "playing" ? "Now Playing" : "Discover"}
+          </button>
+        ))}
+      </div>
+
       {/* Artwork — square, centered, pinch-to-zoom */}
       <div className="flex-shrink-0 px-8 pb-5">
         <div
@@ -1319,6 +1496,15 @@ export default function MobilePlayerLayer() {
       {/* Bottom padding spacer */}
       <div className="flex-shrink-0 h-6" />
 
+      {/* ── DISCOVER TAB CONTENT ── */}
+      {expandedTab === "discover" && (
+        <DiscoverPanel
+          songId={currentSongId}
+          genre={currentTrack?.genre}
+          onPlay={(t: Track) => { addAndPlay(t); setExpandedTab("playing"); }}
+          onPlayAll={(tracks: Track[]) => { playQueueAt(tracks, 0, "SONG_DETAIL"); setExpandedTab("playing"); }}
+        />
+      )}
       </div>{/* end scrollable content area */}
     </div>
   );

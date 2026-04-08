@@ -3163,3 +3163,23 @@
 - [x] Fix expanded player sheet so it fully replaces the mini bar (no stacking/layering)
 - [x] Remove duplicate "NOW PLAYING" label (appears in both mini bar and as floating pill)
 - [x] Park right-side horizontal playlist slider as future feature (pre-made / build-your-own playlists)
+
+## Phase 89 — Playlist Drawer, Player Fixes, Featured Cards
+
+- [x] Build right-side playlist drawer (PlaylistDrawer component) with swipe-in animation from right edge
+- [x] Add small tab trigger on right edge of screen to open/close the drawer
+- [x] Populate drawer with pre-made playlists: New Releases, Trending, Your Liked, Build Your Own
+- [x] Fix global player z-index so expanded modal (z-[9995]) always renders above playlist drawer
+- [x] Add "Discover" tab to expanded player sheet alongside "Now Playing" with 3-5 related tracks
+- [x] Double Featured Project card banner height: 120px → 240px in HomePage.tsx
+- [x] Double Featured Project card banner height: h-28 → h-56 in ExplorePage.tsx
+
+## Phase 89: Right-Side Playlist Drawer + Discover Tab + Player Z-Index + Featured Card Size
+- [x] Build right-side playlist drawer component (PlaylistDrawer) with small tab trigger on right edge
+- [x] Drawer shows pre-made playlists: New Releases, Trending, Your Liked, Build Your Own
+- [x] Drawer must not overlap expanded player modal (z-index layering: drawer < player)
+- [x] Add Discover tab to expanded player sheet showing 3-5 related tracks to queue
+- [x] Verify swipe-down gesture on expanded player dismisses to mini bar correctly
+- [x] Double Featured Project card banner height: 120px → 240px in HomePage.tsx
+- [x] Double Featured Project card banner height in ExplorePage.tsx: h-28 → h-56
+- [x] 0 TypeScript errors

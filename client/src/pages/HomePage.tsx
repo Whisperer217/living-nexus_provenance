@@ -1029,7 +1029,7 @@ export default function HomePage() {
               >
                 {/* Banner image — 160px tall */}
                 <Link href={`/project/${project.slug}`}>
-                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "120px" }}>
+                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "240px" }}>
                     {project.bannerUrl ? (
                       <img
                         src={project.bannerUrl}
