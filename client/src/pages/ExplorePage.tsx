@@ -659,7 +659,7 @@ export default function ExplorePage() {
                 View all →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
               {featuredProjects.slice(0, 6).map((project: any) => {
                 const pct = project.goalAmountCents
                   ? Math.min(100, Math.round((project.raisedAmountCents / project.goalAmountCents) * 100))
@@ -671,7 +671,7 @@ export default function ExplorePage() {
                     className="group relative rounded-xl overflow-hidden border border-white/[0.08] bg-[oklch(0.13_0.025_50)] hover:border-[#D4AF37]/30 transition-all duration-200 flex flex-col"
                   >
                     {/* Banner */}
-                    <div className="relative h-[360px] overflow-hidden">
+                    <div className="relative h-[180px] overflow-hidden">
                       {project.bannerUrl ? (
                         <img src={project.bannerUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (

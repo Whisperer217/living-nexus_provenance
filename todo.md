@@ -3191,3 +3191,7 @@
 - [x] Added Now Playing / Discover tab bar to expanded player sheet
 - [x] Doubled Featured Project card banner height in HomePage: 240px → 360px (2× TrackCard 180px)
 - [x] Doubled Featured Project card banner height in ExplorePage: h-56 → h-[360px]
+
+## Phase 89c — Featured Project Card Size Correction
+- [x] Revert banner height to 180px in HomePage and ExplorePage (matches TrackCard)
+- [x] Ensure 2-column grid layout so each card is ~half the viewport width

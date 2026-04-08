@@ -1019,17 +1019,17 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Vertical stack of featured project cards */}
-          <div className="flex flex-col gap-4 mb-2">
+          {/* 2-column grid of featured project cards — each card ~half viewport width */}
+          <div className="grid grid-cols-2 gap-3 mb-2">
             {(publicProjects as any[]).slice(0, 4).map((project: any) => (
               <div
                 key={project.id}
                 className="relative rounded-2xl overflow-hidden group"
                 style={{ background: "oklch(0.11 0.025 270)", boxShadow: "0 4px 28px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(0.84 0.155 85 / 0.08)" }}
               >
-                {/* Banner image — 360px tall (2× TrackCard 180px) */}
+                {/* Banner image — 180px tall (matches TrackCard) */}
                 <Link href={`/project/${project.slug}`}>
-                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "360px" }}>
+                  <div className="relative w-full overflow-hidden cursor-pointer" style={{ height: "180px" }}>
                     {project.bannerUrl ? (
                       <img
                         src={project.bannerUrl}
