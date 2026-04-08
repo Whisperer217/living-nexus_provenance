@@ -176,11 +176,24 @@ function BuildYourOwn({ onClose }: { onClose: () => void }) {
 
 // ── Main Component ─────────────────────────────────────────────────
 export default function PlaylistDrawer() {
-  const [isOpen, setIsOpen] = useState(false);
+   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<PlaylistTab>("new");
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { addAndPlay, playQueueAt, state } = usePlayer();
   const { user } = useAuth();
-
+  // Detect when any Radix dialog/modal is open — hide tab trigger to prevent accidental activation
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      // Radix Dialog sets data-scroll-locked on <body> when open
+      // Custom modals (EditTrackPanel etc.) set body overflow:hidden directly
+      const locked =
+        document.body.hasAttribute("data-scroll-locked") ||
+        document.body.style.overflow === "hidden";
+      setDialogOpen(locked);
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ["data-scroll-locked", "style"] });
+    return () => observer.disconnect();
+  }, []);
   // Swipe-to-close gesture
   const touchStartX = useRef<number | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
@@ -289,6 +302,7 @@ export default function PlaylistDrawer() {
       )}
 
       {/* Tab trigger — right edge, visible on all screen sizes */}
+      {/* Hidden when any dialog/modal is open to prevent accidental activation */}
       <button
         onClick={() => setIsOpen((v) => !v)}
         className="fixed z-[9001] flex items-center justify-center transition-all active:scale-95"
@@ -305,8 +319,11 @@ export default function PlaylistDrawer() {
           borderRight: "none",
           backdropFilter: "blur(12px)",
           boxShadow: "-2px 0 16px oklch(0 0 0 / 0.4)",
-          transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s",
+          transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s, opacity 0.15s",
           color: "oklch(0.84 0.155 85)",
+          // Hide when a dialog/modal is open — prevents accidental activation when tapping buttons near the right edge
+          opacity: dialogOpen && !isOpen ? 0 : 1,
+          pointerEvents: dialogOpen && !isOpen ? "none" : "auto",
         }}
         title={isOpen ? "Close playlist drawer" : "Open playlist drawer"}
         aria-label={isOpen ? "Close playlist drawer" : "Open playlist drawer"}
