@@ -20,6 +20,7 @@ import { workRouter } from "../workRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startVisualWorker, backfillVisualQueue } from "../visualQueue";
+import { startSelfImprovementWorker } from "../selfImprovementWorker";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -132,6 +133,8 @@ async function startServer() {
     // Backfill any published songs that don't have visuals yet.
     backfillVisualQueue().catch(err => console.error("[VisualQueue] Backfill error:", err));
     startVisualWorker();
+    // Self-improvement worker: runs nightly at 2am, scans codebase for issues
+    startSelfImprovementWorker();
   });
 }
 

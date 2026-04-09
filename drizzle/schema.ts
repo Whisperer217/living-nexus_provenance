@@ -1208,3 +1208,48 @@ export const qrScans = mysqlTable("qrScans", {
 });
 export type QrScan = typeof qrScans.$inferSelect;
 export type InsertQrScan = typeof qrScans.$inferInsert;
+
+// ─── Self-Improvement Worker ──────────────────────────────────────────────────
+// Each row is one full worker run (scheduled or manually triggered).
+export const selfImprovementRuns = mysqlTable("selfImprovementRuns", {
+  id: int("id").autoincrement().primaryKey(),
+  triggeredBy: mysqlEnum("triggeredBy", ["schedule", "manual"]).default("schedule").notNull(),
+  triggeredByUserId: int("triggeredByUserId"),
+  status: mysqlEnum("status", ["running", "completed", "failed"]).default("running").notNull(),
+  filesScanned: int("filesScanned").default(0).notNull(),
+  findingsCount: int("findingsCount").default(0).notNull(),
+  fixesApplied: int("fixesApplied").default(0).notNull(),
+  fixesFailed: int("fixesFailed").default(0).notNull(),
+  testsPassedBefore: int("testsPassedBefore").default(0).notNull(),
+  testsPassedAfter: int("testsPassedAfter").default(0).notNull(),
+  analysisSummary: text("analysisSummary"),
+  errorMessage: text("errorMessage"),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+});
+export type SelfImprovementRun = typeof selfImprovementRuns.$inferSelect;
+export type InsertSelfImprovementRun = typeof selfImprovementRuns.$inferInsert;
+
+// Each row is one finding from a worker run — a specific issue in a specific file.
+export const selfImprovementFindings = mysqlTable("selfImprovementFindings", {
+  id: int("id").autoincrement().primaryKey(),
+  runId: int("runId").notNull(),
+  severity: mysqlEnum("severity", ["critical", "high", "medium", "low", "info"]).notNull(),
+  category: mysqlEnum("category", [
+    "security", "performance", "correctness", "maintainability",
+    "accessibility", "dead_code", "type_safety", "error_handling"
+  ]).notNull(),
+  filePath: varchar("filePath", { length: 512 }).notNull(),
+  lineStart: int("lineStart"),
+  lineEnd: int("lineEnd"),
+  title: varchar("title", { length: 256 }).notNull(),
+  description: text("description").notNull(),
+  fixStatus: mysqlEnum("fixStatus", ["pending", "applied", "failed", "skipped", "reverted"]).default("pending").notNull(),
+  fixDiff: text("fixDiff"),
+  fixError: text("fixError"),
+  originalContent: text("originalContent"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  fixedAt: timestamp("fixedAt"),
+});
+export type SelfImprovementFinding = typeof selfImprovementFindings.$inferSelect;
+export type InsertSelfImprovementFinding = typeof selfImprovementFindings.$inferInsert;

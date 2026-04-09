@@ -5006,5 +5006,51 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         return { success: true };
       }),
   }),
+
+  // ─── Self-Improvement Worker ──────────────────────────────────────────────────
+  worker: router({
+    /** Admin: manually trigger a self-improvement run */
+    triggerRun: adminProcedure
+      .mutation(async ({ ctx }) => {
+        const { runSelfImprovementCycle } = await import('./selfImprovementWorker');
+        // Fire and forget — return immediately, run in background
+        runSelfImprovementCycle('manual', ctx.user.id).catch(err =>
+          console.error('[SelfImprove] Manual run error:', err)
+        );
+        return { started: true, message: 'Self-improvement run started in background. Check the runs list for progress.' };
+      }),
+
+    /** Admin: get list of recent runs */
+    getRuns: adminProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(50).optional() }))
+      .query(async ({ input }) => {
+        const { getSelfImprovementRuns } = await import('./selfImprovementWorker');
+        return getSelfImprovementRuns(input.limit ?? 20);
+      }),
+
+    /** Admin: get a single run by ID */
+    getRunById: adminProcedure
+      .input(z.object({ id: z.number().int() }))
+      .query(async ({ input }) => {
+        const { getSelfImprovementRunById } = await import('./selfImprovementWorker');
+        return getSelfImprovementRunById(input.id);
+      }),
+
+    /** Admin: get all findings for a run */
+    getFindingsByRun: adminProcedure
+      .input(z.object({ runId: z.number().int() }))
+      .query(async ({ input }) => {
+        const { getFindingsByRun } = await import('./selfImprovementWorker');
+        return getFindingsByRun(input.runId);
+      }),
+
+    /** Admin: revert a specific applied fix */
+    revertFinding: adminProcedure
+      .input(z.object({ findingId: z.number().int() }))
+      .mutation(async ({ input }) => {
+        const { revertFinding } = await import('./selfImprovementWorker');
+        return revertFinding(input.findingId);
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

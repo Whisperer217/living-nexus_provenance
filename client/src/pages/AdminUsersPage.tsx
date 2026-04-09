@@ -730,10 +730,16 @@ export default function AdminUsersPage() {
             </div>
             <p className="text-sm" style={{ color: SUBTEXT }}>Full platform governance — users, works, billing, system config, and audit trail.</p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/")}
-            style={{ borderColor: BORDER, color: SUBTEXT }}>
-            ← Back
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/self-improve")}
+              style={{ borderColor: "oklch(0.45 0.18 270)", color: "oklch(0.75 0.18 270)" }}>
+              🤖 Self-Improve
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/")}
+              style={{ borderColor: BORDER, color: SUBTEXT }}>
+              ← Back
+            </Button>
+          </div>
         </div>
 
         {/* Tabs */}

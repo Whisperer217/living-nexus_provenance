@@ -3325,3 +3325,13 @@
 - [x] Add global tRPC errorFormatter — logs unexpected errors server-side, strips stack traces from production responses
 - [ ] Replace jukebox 5s polling with SSE push (infrastructure already exists)
 - [ ] Split routers.ts (5057 lines) into feature sub-routers under server/routers/
+
+## Self-Improvement Worker
+
+- [x] Add selfImprovementRuns and selfImprovementFindings tables to drizzle schema
+- [x] Build server/selfImprovementWorker.ts: scanner, LLM analysis, fix applicator, test runner, DB logger
+- [x] Add tRPC procedures: worker.triggerRun, worker.getRuns, worker.getRunById, worker.getFindingsByRun, worker.revertFinding
+- [x] Build SelfImprovementPage.tsx: run history, findings table with diffs, revert controls
+- [x] Register /admin/self-improve route in App.tsx
+- [x] Wire scheduled worker (nightly at 2am via setInterval on server start)
+- [x] Add manual trigger button in admin UI + 🤖 Self-Improve button in LN Command Center header
