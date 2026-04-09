@@ -233,7 +233,7 @@ export default function PlayerBar() {
         boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px oklch(0.82 0.155 75 / 0.18), 0 -1px 8px oklch(0.82 0.155 75 / 0.22)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
-        zIndex: isCinematic ? 50 : 20,
+        zIndex: isCinematic ? 9020 : isExpanded ? 9010 : 20,
       }}
     >
       {/* ── Expand / Collapse tab — sits on top of bar, centered ── */}

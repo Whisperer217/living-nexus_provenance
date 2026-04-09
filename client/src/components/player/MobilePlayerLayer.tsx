@@ -350,8 +350,22 @@ export default function MobilePlayerLayer() {
     };
   }, []);
 
-  // No body scroll lock — the inner scroll container handles its own scroll.
-  // Locking body overflow breaks native scroll on iOS Safari inside the player.
+  // Body scroll lock: lock <html> (not body) when player is expanded/cinematic.
+  // Using documentElement works on iOS Safari; locking body alone does not.
+  useEffect(() => {
+    const html = document.documentElement;
+    if (playerState === "expanded" || playerState === "cinematic") {
+      html.style.overflow = "hidden";
+      html.style.touchAction = "none";
+    } else {
+      html.style.overflow = "";
+      html.style.touchAction = "";
+    }
+    return () => {
+      html.style.overflow = "";
+      html.style.touchAction = "";
+    };
+  }, [playerState]);
 
   // ── History API: intercept device back button ─────────────────
   // When entering expanded/cinematic, push a history entry so the device back
@@ -776,7 +790,7 @@ export default function MobilePlayerLayer() {
     ];
     return (
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-[20]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-[9000]"
         style={{
           height: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
@@ -819,7 +833,7 @@ export default function MobilePlayerLayer() {
 
   const MiniBar = () => (
     <div
-      className="md:hidden fixed left-0 right-0 z-[21]"
+      className="md:hidden fixed left-0 right-0 z-[9001]"
       style={{
         bottom: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
         minHeight: "64px",
@@ -1048,7 +1062,7 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   const ExpandedSheet = () => (
     <div
-      className="md:hidden fixed inset-0 z-[40] flex flex-col"
+      className="md:hidden fixed inset-0 z-[9010] flex flex-col"
       style={{
         background: "oklch(0.08 0.02 275)",
         transform: `translateY(${expandedDragOffset}px)`,
@@ -1643,7 +1657,7 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   const CinematicLayer = () => (
     <div
-      className="md:hidden fixed inset-0 z-[50] bg-black"
+      className="md:hidden fixed inset-0 z-[9020] bg-black"
       style={{ overscrollBehaviorX: "none", touchAction: "pan-y" }}
       onTouchStart={onCinematicTouchStart}
       onTouchEnd={onCinematicTouchEnd}
