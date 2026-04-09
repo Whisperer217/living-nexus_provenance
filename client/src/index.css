@@ -230,7 +230,13 @@
   }
   html, body {
     height: 100%;
-    overscroll-behavior-x: none; /* allow browser back/forward swipe on mobile */
+    overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
+    background-color: oklch(0.10 0.022 55); /* match app bg — no black void on overscroll */
+  }
+  #root {
+    min-height: 100dvh; /* dvh = true mobile viewport height, not browser-lied vh */
+    display: flex;
+    flex-direction: column;
   }
   /* Graceful Lights On transition */
   html {

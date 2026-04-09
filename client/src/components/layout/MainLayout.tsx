@@ -163,7 +163,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <div className="noise-overlay flex flex-col h-screen overflow-hidden bg-[oklch(0.10_0.022_55)] relative" style={{ overscrollBehaviorX: "none" }}>
+    <div className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[oklch(0.10_0.022_55)] relative" style={{ overscrollBehavior: "none" }}>
 
       {/* ── Quick Reference Slider — temporarily hidden per user request (Phase 77) ── */}
 
@@ -359,7 +359,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           Desktop: top-padding for TopBar (52px)
           Mobile: top-padding for mobile header (56px)
       ══════════════════════════════════════════════ */}
-      <main className="flex-1 flex flex-col overflow-hidden md:pt-[52px] pt-14" style={{ overscrollBehaviorX: "none" }}>
+      <main className="flex-1 flex flex-col overflow-hidden md:pt-[52px] pt-14" style={{ overscrollBehavior: "none" }}>
         <style>{`
           @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
           /* Mobile: 56px bottom nav + 64px mini player + safe area */
