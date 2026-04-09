@@ -131,7 +131,7 @@ export default function PlaylistPage() {
             Tap the bookmark icon on any track to save it here
           </div>
           <Link href="/explore">
-            <button className="px-5 py-2.5 rounded-xl font-heading text-[13px] tracking-wider transition-all hover:opacity-90"
+            <button type="button" className="px-5 py-2.5 rounded-xl font-heading text-[13px] tracking-wider transition-all hover:opacity-90"
               style={{ background: "linear-gradient(135deg, #D4AF37, #B8860B)", color: "#000" }}>
               Explore Tracks
             </button>

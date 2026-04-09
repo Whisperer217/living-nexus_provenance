@@ -87,7 +87,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
         style={{ top: position.y, left: position.x, background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}
       >
         <Link href={`/song/${song.id}`} onClick={onClose}>
-          <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
+          <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
             <ExternalLink className="w-4 h-4 opacity-60" /> Song Page
           </button>
         </Link>
@@ -112,7 +112,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
         </button>
 
         <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
-        <button onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
+        <button type="button" onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
           <Copy className="w-4 h-4 opacity-60" /> Copy Link
         </button>
         <button
@@ -124,7 +124,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
         </button>
         {song.witnessId && (
           <Link href={`/verify/${song.witnessId}`} onClick={onClose}>
-            <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.65 0.2 300)" }}>
+            <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.65 0.2 300)" }}>
               <Shield className="w-4 h-4" /> View Witness ID
             </button>
           </Link>
@@ -1234,7 +1234,7 @@ export default function CreatorProfilePage() {
               </h2>
               {isOwner && (
                 <Link href="/my-projects">
-                  <button className="text-xs px-3 py-1 rounded-lg transition-colors" style={{ color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.28 0.08 80)" }}>
+                  <button type="button" className="text-xs px-3 py-1 rounded-lg transition-colors" style={{ color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.28 0.08 80)" }}>
                     Manage Projects
                   </button>
                 </Link>
@@ -1317,7 +1317,7 @@ export default function CreatorProfilePage() {
                 Featured Songs
               </h2>
               {songs.length > 8 && (
-                <button className="flex items-center gap-1 text-xs hover:opacity-80 transition-opacity" style={{ color: "oklch(0.65 0.2 300)" }}>
+                <button type="button" className="flex items-center gap-1 text-xs hover:opacity-80 transition-opacity" style={{ color: "oklch(0.65 0.2 300)" }}>
                   See All <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -1666,7 +1666,7 @@ export default function CreatorProfilePage() {
                     <div className="text-[10px] mt-0.5" style={{ color: "rgba(167,139,250,0.4)" }}>Version {psResult?.lineageVersion ?? lineageHistory.length} of lineage</div>
                   )}
                 </div>
-                <button onClick={() => { navigator.clipboard.writeText(psResult?.expressionId || existingExpression?.expressionId || ""); toast.success("EID copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded flex-shrink-0" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}>
+                <button type="button" onClick={() => { navigator.clipboard.writeText(psResult?.expressionId || existingExpression?.expressionId || ""); toast.success("EID copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded flex-shrink-0" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}>
                   <ClipboardCopy className="w-2.5 h-2.5" /> Copy
                 </button>
               </div>
@@ -1675,7 +1675,7 @@ export default function CreatorProfilePage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Target platform:</span>
                 {(["suno", "udio", "general"] as const).map((p) => (
-                  <button key={p} onClick={() => setPsPlatform(p)} className="px-3 py-1 rounded-full text-xs font-mono transition-all"
+                  <button type="button" key={p} onClick={() => setPsPlatform(p)} className="px-3 py-1 rounded-full text-xs font-mono transition-all"
                     style={psPlatform === p ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" } : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(156,163,175,0.5)" }}>
                     {p.charAt(0).toUpperCase() + p.slice(1)}
                   </button>
@@ -1683,7 +1683,7 @@ export default function CreatorProfilePage() {
               </div>
             )}
             {isOwner && (
-              <button onClick={() => generateExpressionMutation.mutate({ targetPlatform: psPlatform, promptType: "style_prompt", forceRegenerate: true })} disabled={generateExpressionMutation.isPending}
+              <button type="button" onClick={() => generateExpressionMutation.mutate({ targetPlatform: psPlatform, promptType: "style_prompt", forceRegenerate: true })} disabled={generateExpressionMutation.isPending}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all"
                 style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.8), rgba(167,139,250,0.6))", color: "#fff" }}>
                 {generateExpressionMutation.isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</> : <><Wand2 className="w-4 h-4" /> Regenerate Expression Identity</>}
@@ -1697,7 +1697,7 @@ export default function CreatorProfilePage() {
                   <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>EXPRESSION PROMPT</span>
-                      <button onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                      <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                     </div>
                     <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{display.expressionPrompt}</p>
                   </div>
@@ -1705,7 +1705,7 @@ export default function CreatorProfilePage() {
                     <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
-                        <button onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                        <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                       </div>
                       <p className="text-xs leading-relaxed" style={{ color: "rgba(209,213,219,0.7)" }}>{display.expressionStyleTags}</p>
                     </div>
@@ -1747,7 +1747,7 @@ export default function CreatorProfilePage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.55)" }}>YOUR INSPIRATION BLOCKS</label>
-                <button onClick={() => setPsInputBlocks(prev => [...prev, { label: "", content: "" }])}
+                <button type="button" onClick={() => setPsInputBlocks(prev => [...prev, { label: "", content: "" }])}
                   className="text-[10px] px-2 py-0.5 rounded flex items-center gap-1 transition-all"
                   style={{ color: "rgba(167,139,250,0.7)", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)" }}>
                   + Add Block
@@ -1762,7 +1762,7 @@ export default function CreatorProfilePage() {
                       className="flex-1 bg-transparent text-[11px] font-mono outline-none"
                       style={{ color: "rgba(167,139,250,0.8)", borderBottom: "1px solid rgba(139,92,246,0.2)", paddingBottom: "2px" }} />
                     {psInputBlocks.length > 1 && (
-                      <button onClick={() => setPsInputBlocks(prev => prev.filter((_, i) => i !== idx))} className="text-[10px] opacity-40 hover:opacity-80 transition-opacity" style={{ color: "rgba(251,113,133,0.8)" }}>×</button>
+                      <button type="button" onClick={() => setPsInputBlocks(prev => prev.filter((_, i) => i !== idx))} className="text-[10px] opacity-40 hover:opacity-80 transition-opacity" style={{ color: "rgba(251,113,133,0.8)" }}>×</button>
                     )}
                   </div>
                   <textarea value={block.content}
@@ -1778,7 +1778,7 @@ export default function CreatorProfilePage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Target platform:</span>
                 {(["suno", "udio", "general"] as const).map((p) => (
-                  <button key={p} onClick={() => setPsPlatform(p)} className="px-3 py-1 rounded-full text-xs font-mono transition-all"
+                  <button type="button" key={p} onClick={() => setPsPlatform(p)} className="px-3 py-1 rounded-full text-xs font-mono transition-all"
                     style={psPlatform === p ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" } : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(156,163,175,0.5)" }}>
                     {p.charAt(0).toUpperCase() + p.slice(1)}
                   </button>
@@ -1803,13 +1803,13 @@ export default function CreatorProfilePage() {
                     <div className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.3)" }}>
                       <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#a78bfa" }} />
                       <span className="font-mono text-xs font-bold" style={{ color: "#a78bfa" }}>{display.expressionId}</span>
-                      <button onClick={() => { navigator.clipboard.writeText(display.expressionId || ""); toast.success("EID copied!"); }} className="ml-auto flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                      <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionId || ""); toast.success("EID copied!"); }} className="ml-auto flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                     </div>
                   )}
                   <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>GENERATED PROMPT</span>
-                      <button onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                      <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                     </div>
                     <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{display.expressionPrompt}</p>
                   </div>
@@ -1817,7 +1817,7 @@ export default function CreatorProfilePage() {
                     <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
-                        <button onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                        <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                       </div>
                       <p className="text-xs leading-relaxed" style={{ color: "rgba(209,213,219,0.7)" }}>{display.expressionStyleTags}</p>
                     </div>
@@ -1828,7 +1828,7 @@ export default function CreatorProfilePage() {
                       <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{display.expressionComposerNote}</p>
                     </div>
                   )}
-                  <button onClick={() => { const all = [display.expressionPrompt, display.expressionStyleTags, display.expressionComposerNote].filter(Boolean).join('\n\n'); navigator.clipboard.writeText(all); toast.success("Full output copied!"); }}
+                  <button type="button" onClick={() => { const all = [display.expressionPrompt, display.expressionStyleTags, display.expressionComposerNote].filter(Boolean).join('\n\n'); navigator.clipboard.writeText(all); toast.success("Full output copied!"); }}
                     className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all"
                     style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(167,139,250,0.8)" }}>
                     <ClipboardCopy className="w-3.5 h-3.5" /> Copy Full Output
@@ -1836,7 +1836,7 @@ export default function CreatorProfilePage() {
                   {isOwner && (
                     <div className="flex gap-2">
                       {!showDraftNameInput ? (
-                        <button onClick={() => { setShowDraftNameInput(true); setDraftName(""); setSavedDraftId(null); }}
+                        <button type="button" onClick={() => { setShowDraftNameInput(true); setDraftName(""); setSavedDraftId(null); }}
                           className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all"
                           style={{ background: "rgba(245,196,81,0.08)", border: "1px solid rgba(245,196,81,0.2)", color: "rgba(245,196,81,0.8)" }}>
                           <BookOpen className="w-3.5 h-3.5" /> Save Draft
@@ -1847,17 +1847,17 @@ export default function CreatorProfilePage() {
                             className="flex-1 rounded-lg px-3 py-1.5 text-xs bg-transparent outline-none"
                             style={{ border: "1px solid rgba(245,196,81,0.3)", color: "rgba(229,231,235,0.9)", caretColor: "#f5c451" }}
                             onKeyDown={(e) => { if (e.key === "Enter" && draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "style_prompt", promptType: psPromptType, targetPlatform: psPlatform, expressionId: display.expressionId ?? undefined, prompt: display.expressionPrompt ?? "", styleTags: display.expressionStyleTags ?? undefined, composerNote: display.expressionComposerNote ?? undefined, userInputBlocks: psInputBlocks.filter(b => b.content.trim()) }); }} />
-                          <button onClick={() => { if (draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "style_prompt", promptType: psPromptType, targetPlatform: psPlatform, expressionId: display.expressionId ?? undefined, prompt: display.expressionPrompt ?? "", styleTags: display.expressionStyleTags ?? undefined, composerNote: display.expressionComposerNote ?? undefined, userInputBlocks: psInputBlocks.filter(b => b.content.trim()) }); }}
+                          <button type="button" onClick={() => { if (draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "style_prompt", promptType: psPromptType, targetPlatform: psPlatform, expressionId: display.expressionId ?? undefined, prompt: display.expressionPrompt ?? "", styleTags: display.expressionStyleTags ?? undefined, composerNote: display.expressionComposerNote ?? undefined, userInputBlocks: psInputBlocks.filter(b => b.content.trim()) }); }}
                             disabled={!draftName.trim() || saveDraftMutation.isPending}
                             className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
                             style={{ background: "rgba(245,196,81,0.15)", color: "rgba(245,196,81,0.9)" }}>
                             {saveDraftMutation.isPending ? "Saving…" : "Save"}
                           </button>
-                          <button onClick={() => setShowDraftNameInput(false)} className="px-2 py-1.5 rounded-lg text-xs opacity-40 hover:opacity-70" style={{ color: "rgba(156,163,175,0.8)" }}>✕</button>
+                          <button type="button" onClick={() => setShowDraftNameInput(false)} className="px-2 py-1.5 rounded-lg text-xs opacity-40 hover:opacity-70" style={{ color: "rgba(156,163,175,0.8)" }}>✕</button>
                         </div>
                       )}
                       {savedDraftId && (
-                        <button onClick={() => shareMutation.mutate({ draftId: savedDraftId, origin: window.location.origin })}
+                        <button type="button" onClick={() => shareMutation.mutate({ draftId: savedDraftId, origin: window.location.origin })}
                           disabled={shareMutation.isPending}
                           className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
                           style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)", color: "rgba(167,139,250,0.8)" }}>
@@ -1885,7 +1885,7 @@ export default function CreatorProfilePage() {
               <label className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.55)" }}>SOURCE PLATFORM</label>
               <div className="flex gap-1.5 flex-wrap">
                 {(["Suno", "Udio", "Udio v2", "Stable Audio", "General"] as const).map((p) => (
-                  <button key={p} onClick={() => setPsAnchorSource(p)}
+                  <button type="button" key={p} onClick={() => setPsAnchorSource(p)}
                     className="px-3 py-1 rounded-full text-xs font-mono transition-all"
                     style={psAnchorSource === p
                       ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" }
@@ -1914,7 +1914,7 @@ export default function CreatorProfilePage() {
               <div className="flex items-center justify-between">
                 <span className="text-[9px]" style={{ color: "rgba(156,163,175,0.3)" }}>{psAnchorRaw.length} / 4000 chars</span>
                 {psAnchorRaw.length > 0 && (
-                  <button onClick={() => { setPsAnchorRaw(""); setPsAnchorResult(null); }} className="text-[9px] opacity-40 hover:opacity-70 transition-opacity" style={{ color: "rgba(251,113,133,0.8)" }}>Clear</button>
+                  <button type="button" onClick={() => { setPsAnchorRaw(""); setPsAnchorResult(null); }} className="text-[9px] opacity-40 hover:opacity-70 transition-opacity" style={{ color: "rgba(251,113,133,0.8)" }}>Clear</button>
                 )}
               </div>
             </div>
@@ -1925,7 +1925,7 @@ export default function CreatorProfilePage() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs" style={{ color: "rgba(156,163,175,0.7)" }}>Output for:</span>
               {(["Suno", "Udio", "General"] as const).map((p) => (
-                <button key={p} onClick={() => setPsAnchorTarget(p)}
+                <button type="button" key={p} onClick={() => setPsAnchorTarget(p)}
                   className="px-3 py-1 rounded-full text-xs font-mono transition-all"
                   style={psAnchorTarget === p
                     ? { background: "rgba(139,92,246,0.25)", border: "1px solid rgba(139,92,246,0.5)", color: "#a78bfa" }
@@ -1961,7 +1961,7 @@ export default function CreatorProfilePage() {
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(139,92,246,0.1)", color: "rgba(167,139,250,0.5)" }}>v{psAnchorResult.version}</span>
-                  <button onClick={() => { navigator.clipboard.writeText(psAnchorResult!.eid); toast.success("EID copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                  <button type="button" onClick={() => { navigator.clipboard.writeText(psAnchorResult!.eid); toast.success("EID copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                 </div>
               </div>
 
@@ -1976,7 +1976,7 @@ export default function CreatorProfilePage() {
               <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>ANCHORED PROMPT</span>
-                  <button onClick={() => { navigator.clipboard.writeText(psAnchorResult!.anchoredPrompt); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                  <button type="button" onClick={() => { navigator.clipboard.writeText(psAnchorResult!.anchoredPrompt); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                 </div>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{psAnchorResult.anchoredPrompt}</p>
               </div>
@@ -1986,7 +1986,7 @@ export default function CreatorProfilePage() {
               <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
-                  <button onClick={() => { navigator.clipboard.writeText(psAnchorResult!.styleTags); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
+                  <button type="button" onClick={() => { navigator.clipboard.writeText(psAnchorResult!.styleTags); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                 </div>
                 <p className="text-xs leading-relaxed" style={{ color: "rgba(209,213,219,0.7)" }}>{psAnchorResult.styleTags}</p>
               </div>
@@ -2020,7 +2020,7 @@ export default function CreatorProfilePage() {
               {isOwner && (
               <div className="flex gap-2">
                 {!showDraftNameInput ? (
-                  <button onClick={() => { setShowDraftNameInput(true); setDraftName(""); setSavedDraftId(null); }}
+                  <button type="button" onClick={() => { setShowDraftNameInput(true); setDraftName(""); setSavedDraftId(null); }}
                     className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all"
                     style={{ background: "rgba(245,196,81,0.08)", border: "1px solid rgba(245,196,81,0.2)", color: "rgba(245,196,81,0.8)" }}>
                     <BookOpen className="w-3.5 h-3.5" /> Save Draft
@@ -2031,17 +2031,17 @@ export default function CreatorProfilePage() {
                       className="flex-1 rounded-lg px-3 py-1.5 text-xs bg-transparent outline-none"
                       style={{ border: "1px solid rgba(245,196,81,0.3)", color: "rgba(229,231,235,0.9)", caretColor: "#f5c451" }}
                       onKeyDown={(e) => { if (e.key === "Enter" && draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "import_anchor", promptType: psAnchorSource, targetPlatform: psAnchorTarget, expressionId: psAnchorResult?.eid ?? undefined, prompt: psAnchorResult?.anchoredPrompt ?? "", styleTags: psAnchorResult?.styleTags ?? undefined, composerNote: psAnchorResult?.composerNote ?? undefined }); }} />
-                    <button onClick={() => { if (draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "import_anchor", promptType: psAnchorSource, targetPlatform: psAnchorTarget, expressionId: psAnchorResult?.eid ?? undefined, prompt: psAnchorResult?.anchoredPrompt ?? "", styleTags: psAnchorResult?.styleTags ?? undefined, composerNote: psAnchorResult?.composerNote ?? undefined }); }}
+                    <button type="button" onClick={() => { if (draftName.trim()) saveDraftMutation.mutate({ name: draftName.trim(), promptMode: "import_anchor", promptType: psAnchorSource, targetPlatform: psAnchorTarget, expressionId: psAnchorResult?.eid ?? undefined, prompt: psAnchorResult?.anchoredPrompt ?? "", styleTags: psAnchorResult?.styleTags ?? undefined, composerNote: psAnchorResult?.composerNote ?? undefined }); }}
                       disabled={!draftName.trim() || saveDraftMutation.isPending}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
                       style={{ background: "rgba(245,196,81,0.15)", color: "rgba(245,196,81,0.9)" }}>
                       {saveDraftMutation.isPending ? "Saving…" : "Save"}
                     </button>
-                    <button onClick={() => setShowDraftNameInput(false)} className="px-2 py-1.5 rounded-lg text-xs opacity-40 hover:opacity-70" style={{ color: "rgba(156,163,175,0.8)" }}>✕</button>
+                    <button type="button" onClick={() => setShowDraftNameInput(false)} className="px-2 py-1.5 rounded-lg text-xs opacity-40 hover:opacity-70" style={{ color: "rgba(156,163,175,0.8)" }}>✕</button>
                   </div>
                 )}
                 {savedDraftId && (
-                  <button onClick={() => shareMutation.mutate({ draftId: savedDraftId, origin: window.location.origin })}
+                  <button type="button" onClick={() => shareMutation.mutate({ draftId: savedDraftId, origin: window.location.origin })}
                     disabled={shareMutation.isPending}
                     className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
                     style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)", color: "rgba(167,139,250,0.8)" }}>

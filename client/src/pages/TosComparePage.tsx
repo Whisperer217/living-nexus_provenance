@@ -534,7 +534,7 @@ export default function TosComparePage() {
       <div className="border-b border-[#1a1a1a] sticky top-0 z-20 bg-[#080808]/95 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link href="/terms">
-            <button className="flex items-center gap-1.5 text-[#6a5a4a] hover:text-[#e8dcc8] transition-colors text-sm">
+            <button type="button" className="flex items-center gap-1.5 text-[#6a5a4a] hover:text-[#e8dcc8] transition-colors text-sm">
               <ChevronLeft className="w-4 h-4" />
               Terms
             </button>

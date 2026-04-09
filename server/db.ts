@@ -225,6 +225,12 @@ export async function updateUserLicense(userId: number, data: {
   await db.update(users).set(data).where(eq(users.id, userId));
 }
 
+export async function setPinCreator(userId: number, isPinned: boolean) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ isPinned }).where(eq(users.id, userId));
+}
+
 export async function getAllCreators() {
   const db = await getDb();
   if (!db) return [];

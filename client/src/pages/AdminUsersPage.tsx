@@ -433,7 +433,7 @@ function PromoCodesTab() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-bold text-sm" style={{ color: GOLD }}>{c.code}</span>
-                        <button onClick={() => copyCode(c.code)} className="opacity-50 hover:opacity-100 transition-opacity">
+                        <button type="button" onClick={() => copyCode(c.code)} className="opacity-50 hover:opacity-100 transition-opacity">
                           <Copy className="w-3 h-3" style={{ color: SUBTEXT }} />
                         </button>
                       </div>
@@ -1742,7 +1742,7 @@ function ModerationQueueEmbed() {
             const isExpanded = expandedId === flag.id;
             return (
               <div key={flag.id} className="rounded-xl overflow-hidden" style={{ background: CARD, border: `1px solid ${severity === "critical" ? "oklch(0.45 0.18 25)" : BORDER}` }}>
-                <button className="w-full text-left p-4 flex items-center gap-4" onClick={() => setExpandedId(isExpanded ? null : flag.id)}>
+                <button type="button" className="w-full text-left p-4 flex items-center gap-4" onClick={() => setExpandedId(isExpanded ? null : flag.id)}>
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: severity === "critical" ? RED : "oklch(0.85 0.18 85)" }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">

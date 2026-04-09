@@ -756,7 +756,7 @@ export default function UploadPage() {
                       </div>
                       <p className="font-medium text-sm" style={{ color: "oklch(0.65 0.18 145)" }}>{audioFile.name}</p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                      <button onClick={e => { e.stopPropagation(); setAudioFile(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
+                      <button type="button" onClick={e => { e.stopPropagation(); setAudioFile(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
                     </div>
                   ) : (
                     <>
@@ -809,7 +809,7 @@ export default function UploadPage() {
                       </div>
                       <p className="font-medium text-sm" style={{ color: uploadMode === "manuscript" ? "oklch(0.65 0.18 145)" : "oklch(0.65 0.18 25)" }}>{documentFile.name}</p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>{(documentFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                      <button onClick={e => { e.stopPropagation(); setDocumentFile(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
+                      <button type="button" onClick={e => { e.stopPropagation(); setDocumentFile(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
                     </div>
                   ) : (
                     <>
@@ -836,7 +836,7 @@ export default function UploadPage() {
                   <div className="flex items-center justify-center gap-2">
                     <Check className="w-4 h-4" style={{ color: "oklch(0.65 0.2 300)" }} />
                     <span className="text-sm" style={{ color: "oklch(0.65 0.2 300)" }}>{coverFile.name}</span>
-                    <button onClick={e => { e.stopPropagation(); setCoverFile(null); }} className="text-xs hover:underline ml-2" style={{ color: "#E2E8F0" }}>Remove</button>
+                    <button type="button" onClick={e => { e.stopPropagation(); setCoverFile(null); }} className="text-xs hover:underline ml-2" style={{ color: "#E2E8F0" }}>Remove</button>
                   </div>
                 ) : (
                   <>
@@ -863,7 +863,7 @@ export default function UploadPage() {
                       <Check className="w-4 h-4" style={{ color: "oklch(0.65 0.18 200)" }} />
                       <span className="text-sm" style={{ color: "oklch(0.65 0.18 200)" }}>{videoFile.name}</span>
                       <span className="text-xs" style={{ color: "#E2E8F0" }}>({(videoFile.size/1024/1024).toFixed(1)} MB)</span>
-                      <button onClick={e => { e.stopPropagation(); setVideoFile(null); }} className="text-xs hover:underline ml-2" style={{ color: "#E2E8F0" }}>Remove</button>
+                      <button type="button" onClick={e => { e.stopPropagation(); setVideoFile(null); }} className="text-xs hover:underline ml-2" style={{ color: "#E2E8F0" }}>Remove</button>
                     </div>
                   ) : (
                     <>
@@ -909,13 +909,13 @@ export default function UploadPage() {
                 <div className="flex flex-wrap gap-2">
                   {/* Allow free-text genre from profile if not in preset list */}
                   {creatorProfile?.primaryGenre && !GENRES.includes(creatorProfile.primaryGenre) && (
-                    <button key="profile-genre" onClick={() => setGenre(genre === creatorProfile.primaryGenre ? "" : (creatorProfile.primaryGenre ?? ""))} className="px-3 py-1 rounded-full text-xs transition-all"
+                    <button type="button" key="profile-genre" onClick={() => setGenre(genre === creatorProfile.primaryGenre ? "" : (creatorProfile.primaryGenre ?? ""))} className="px-3 py-1 rounded-full text-xs transition-all"
                       style={{ background: genre === creatorProfile.primaryGenre ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === creatorProfile.primaryGenre ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === creatorProfile.primaryGenre ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>
                       {creatorProfile.primaryGenre}
                     </button>
                   )}
                   {GENRES.map(g => (
-                    <button key={g} onClick={() => setGenre(g === genre ? "" : g)} className="px-3 py-1 rounded-full text-xs transition-all"
+                    <button type="button" key={g} onClick={() => setGenre(g === genre ? "" : g)} className="px-3 py-1 rounded-full text-xs transition-all"
                       style={{ background: genre === g ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === g ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === g ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>
                       {g}
                     </button>
@@ -962,7 +962,7 @@ export default function UploadPage() {
                 <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Mood Tags</label>
                 <div className="flex flex-wrap gap-2">
                   {MOODS.map(m => (
-                    <button key={m} onClick={() => setSelectedMoods(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])}
+                    <button type="button" key={m} onClick={() => setSelectedMoods(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])}
                       className="px-3 py-1 rounded-full text-xs transition-all"
                       style={{ background: selectedMoods.includes(m) ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.15 0.015 280)", color: selectedMoods.includes(m) ? "oklch(0.84 0.155 85)" : "oklch(0.5 0.03 280)", border: `1px solid ${selectedMoods.includes(m) ? "oklch(0.75 0.18 85 / 0.4)" : "oklch(0.22 0.015 280)"}` }}>
                       {m}
@@ -1019,7 +1019,7 @@ export default function UploadPage() {
                 <label className="text-xs mb-2 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>AI Training Consent</label>
                 <div className="space-y-2">
                   {AI_CONSENT_OPTIONS.map(opt => (
-                    <button key={opt.value} onClick={() => setAiConsent(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
+                    <button type="button" key={opt.value} onClick={() => setAiConsent(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
                       style={{ background: aiConsent === opt.value ? `${opt.color.replace(")", " / 0.08)")}` : "oklch(0.13 0.015 280)", border: `1px solid ${aiConsent === opt.value ? opt.color.replace(")", " / 0.35)") : "oklch(0.2 0.015 280)"}` }}>
                       <div className="w-4 h-4 rounded-full mt-0.5 flex-shrink-0 transition-all"
                         style={{ background: aiConsent === opt.value ? opt.color : "transparent", border: `2px solid ${opt.color}` }} />
@@ -1041,7 +1041,7 @@ export default function UploadPage() {
                     { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "oklch(0.7 0.18 280)", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
                     { value: "ai_generated" as const, label: "AI-Generated", color: "oklch(0.65 0.18 25)", desc: "AI generated the primary content." },
                   ] as const).map(opt => (
-                    <button key={opt.value} onClick={() => setAiDisclosure(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
+                    <button type="button" key={opt.value} onClick={() => setAiDisclosure(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
                       style={{ background: aiDisclosure === opt.value ? `${opt.color.replace(")", " / 0.08)")}` : "oklch(0.13 0.015 280)", border: `1px solid ${aiDisclosure === opt.value ? opt.color.replace(")", " / 0.35)") : "oklch(0.2 0.015 280)"}` }}>
                       <div className="w-4 h-4 rounded-full mt-0.5 flex-shrink-0 transition-all"
                         style={{ background: aiDisclosure === opt.value ? opt.color : "transparent", border: `2px solid ${opt.color}` }} />
@@ -1131,15 +1131,15 @@ export default function UploadPage() {
                     <p className="text-xs mb-2 font-medium" style={{ color: "#E2E8F0", letterSpacing: "0.12em" }}>WITNESS ID</p>
                     <p className="text-xl font-bold font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>{witnessData.wid}</p>
                     <div className="flex items-center justify-center gap-2 mt-2">
-                      <button onClick={() => { navigator.clipboard.writeText(witnessData.wid); toast.success("WID copied!"); }} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
+                      <button type="button" onClick={() => { navigator.clipboard.writeText(witnessData.wid); toast.success("WID copied!"); }} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <Copy className="w-3 h-3" /> Copy
                       </button>
                       <span style={{ color: "oklch(0.3 0.02 280)" }}>·</span>
-                      <button onClick={() => playIdentityChord(witnessData.frequencies)} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
+                      <button type="button" onClick={() => playIdentityChord(witnessData.frequencies)} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <Play className="w-3 h-3" /> Play Identity Chord
                       </button>
                       <span style={{ color: "oklch(0.3 0.02 280)" }}>·</span>
-                      <button onClick={handleGenerateWid} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
+                      <button type="button" onClick={handleGenerateWid} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <RefreshCw className="w-3 h-3" /> Regenerate
                       </button>
                     </div>
@@ -1221,13 +1221,13 @@ export default function UploadPage() {
                       <div className="rounded-lg p-3 mb-3" style={{ background: "oklch(0.09 0.02 280)", border: "1px solid oklch(0.75 0.18 85 / 0.2)" }}>
                         <p className="text-xs leading-relaxed mb-3" style={{ color: "oklch(0.85 0.02 280)" }}>{captionSuggestion}</p>
                         <div className="flex gap-2">
-                          <button onClick={handleAcceptCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.4)", color: "oklch(0.75 0.18 145)" }}>
+                          <button type="button" onClick={handleAcceptCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.4)", color: "oklch(0.75 0.18 145)" }}>
                             <CheckCircle2 size={11} /> Accept
                           </button>
-                          <button onClick={() => { const edited = window.prompt("Edit the caption:", captionSuggestion); if (edited !== null) { setCaption(edited); setCaptionState("accepted"); setCaptionSuggestion(null); toast.success("Caption saved"); } }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.75 0.18 85 / 0.1)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "#D4AF37" }}>
+                          <button type="button" onClick={() => { const edited = window.prompt("Edit the caption:", captionSuggestion); if (edited !== null) { setCaption(edited); setCaptionState("accepted"); setCaptionSuggestion(null); toast.success("Caption saved"); } }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.75 0.18 85 / 0.1)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "#D4AF37" }}>
                             <RefreshCw size={11} /> Edit
                           </button>
-                          <button onClick={handleIgnoreCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(1 0 0 / 0.04)", border: "1px solid oklch(1 0 0 / 0.1)", color: "oklch(0.5 0.03 280)" }}>
+                          <button type="button" onClick={handleIgnoreCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(1 0 0 / 0.04)", border: "1px solid oklch(1 0 0 / 0.1)", color: "oklch(0.5 0.03 280)" }}>
                             <XIcon size={11} /> Ignore
                           </button>
                         </div>
@@ -1254,7 +1254,7 @@ export default function UploadPage() {
                         <p className="text-[10px]" style={{ color: "oklch(0.42 0.03 280)", letterSpacing: "0.04em" }}>
                           🔐 Your lyrics are WID protected and never used for AI training.
                         </p>
-                        <button onClick={() => { setCaptionState("idle"); setCaption(""); }} className="text-[10px] hover:underline" style={{ color: "oklch(0.45 0.03 280)" }}>Reset caption</button>
+                        <button type="button" onClick={() => { setCaptionState("idle"); setCaption(""); }} className="text-[10px] hover:underline" style={{ color: "oklch(0.45 0.03 280)" }}>Reset caption</button>
                       </div>
                     )}
                   </div>

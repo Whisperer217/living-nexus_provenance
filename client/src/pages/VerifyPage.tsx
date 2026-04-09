@@ -733,7 +733,7 @@ export default function VerifyPage() {
 
       {/* ── Header ── */}
       <header className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: "oklch(0.15 0.015 280)" }}>
-        <button onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+        <button type="button" onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <img src={LOGO_URL} alt="Living Nexus" className="w-8 h-8 object-contain" />
           <span className="font-display text-base" style={{ color: "oklch(0.82 0.14 85)", fontFamily: "'Cinzel', serif" }}>Living Nexus</span>
         </button>

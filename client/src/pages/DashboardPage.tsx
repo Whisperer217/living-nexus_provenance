@@ -683,7 +683,7 @@ export default function DashboardPage() {
                       {/* Action buttons — always visible */}
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <Link href={`/song/${song.id}`}>
-                          <button className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">
+                          <button type="button" className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">
                             <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
                           </button>
                         </Link>
@@ -1560,7 +1560,7 @@ function ArchiveTab() {
       })
       .then((data: BatchInfoResponse) => { setBatchInfo(data); setLoading(false); })
       .catch((e: string) => { setError(e); setLoading(false); });
-  });
+  }, []); // mount-only: fetch batch info once on open
 
   const downloadBatch = async (batchIndex: number) => {
     setDownloading(batchIndex);

@@ -451,12 +451,12 @@ export default function MobilePlayerPanel() {
               )}
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={closeNowPlayingPanel}
+              <button type="button" onClick={closeNowPlayingPanel}
                 className="p-1.5 rounded-lg text-white/30 hover:text-white/70 transition-all"
                 style={{ background: "oklch(0 0 0 / 0.35)", backdropFilter: "blur(4px)" }}>
                 <ChevronDown size={16} />
               </button>
-              <button onClick={closeNowPlayingPanel}
+              <button type="button" onClick={closeNowPlayingPanel}
                 className="p-1.5 rounded-lg text-white/30 hover:text-white transition-all"
                 style={{ background: "oklch(0 0 0 / 0.35)", backdropFilter: "blur(4px)" }}>
                 <X size={16} />
@@ -627,7 +627,7 @@ export default function MobilePlayerPanel() {
             >
               <Shuffle size={18} />
             </button>
-            <button onClick={prevTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
+            <button type="button" onClick={prevTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
               <SkipBack size={24} />
             </button>
             <button
@@ -644,7 +644,7 @@ export default function MobilePlayerPanel() {
                 ? <Pause size={22} fill="currentColor" />
                 : <Play size={22} fill="currentColor" className="ml-0.5" />}
             </button>
-            <button onClick={nextTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
+            <button type="button" onClick={nextTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
               <SkipForward size={24} />
             </button>
             <button

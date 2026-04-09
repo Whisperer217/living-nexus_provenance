@@ -75,10 +75,10 @@ function EditableField({
             onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
           />
         )}
-        <button onClick={save} className="p-2 text-[#D4AF37] hover:text-[#D4AF37]/80 flex-shrink-0">
+        <button type="button" onClick={save} className="p-2 text-[#D4AF37] hover:text-[#D4AF37]/80 flex-shrink-0">
           <Check size={14} />
         </button>
-        <button onClick={cancel} className="p-2 text-white/70 hover:text-white/60 flex-shrink-0">
+        <button type="button" onClick={cancel} className="p-2 text-white/70 hover:text-white/60 flex-shrink-0">
           <X size={14} />
         </button>
       </div>
@@ -116,10 +116,10 @@ function HandleField({ value, onSave }: { value: string; onSave: (v: string) => 
           autoFocus
           onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
         />
-        <button onClick={save} className="p-1.5 text-[#D4AF37] hover:text-[#D4AF37]/80 flex-shrink-0">
+        <button type="button" onClick={save} className="p-1.5 text-[#D4AF37] hover:text-[#D4AF37]/80 flex-shrink-0">
           <Check size={13} />
         </button>
-        <button onClick={cancel} className="p-1.5 text-white/70 hover:text-white/60 flex-shrink-0">
+        <button type="button" onClick={cancel} className="p-1.5 text-white/70 hover:text-white/60 flex-shrink-0">
           <X size={13} />
         </button>
       </div>
@@ -967,7 +967,7 @@ export default function ProfilePage() {
             ) : dbSongs.length === 0 ? (
               <div className="text-center py-12 text-white/40 font-body text-[13px]">
                 No tracks yet.{" "}
-                <button onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">Upload your first track</button>
+                <button type="button" onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">Upload your first track</button>
               </div>
             ) : (
               (dbSongs as any[]).map((song) => (
@@ -1010,7 +1010,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => navigate(`/song/${song.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#A78BFA] hover:bg-white/[0.1] transition-all" title="Open song page"><ExternalLink size={12} /></button>
+                    <button type="button" onClick={() => navigate(`/song/${song.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#A78BFA] hover:bg-white/[0.1] transition-all" title="Open song page"><ExternalLink size={12} /></button>
                     {song.witnessId && (
                       <button
                         onClick={() => navigate(`/song/${song.id}#witness-records`)}
@@ -1020,7 +1020,7 @@ export default function ProfilePage() {
                         <Shield size={12} />
                       </button>
                     )}
-                    <button onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#D4AF37] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
+                    <button type="button" onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#D4AF37] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
                   </div>
                 </div>
               ))
@@ -1047,7 +1047,7 @@ export default function ProfilePage() {
               <div className="text-center py-12">
                 <Music size={24} className="mx-auto mb-2 text-white/15" />
                 <p className="text-white/30 font-body text-[12px]">No playlists yet</p>
-                <button onClick={() => navigate("/archive")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Create one in Archive</button>
+                <button type="button" onClick={() => navigate("/archive")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Create one in Archive</button>
               </div>
             ) : (
               (myPlaylists as any[]).map((pl) => (
@@ -1078,7 +1078,7 @@ export default function ProfilePage() {
               <div className="text-center py-12">
                 <Heart size={24} className="mx-auto mb-2 text-white/15" />
                 <p className="text-white/30 font-body text-[12px]">No liked tracks yet</p>
-                <button onClick={() => navigate("/explore")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Explore music</button>
+                <button type="button" onClick={() => navigate("/explore")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Explore music</button>
               </div>
             ) : (
               (likedSongs as any[]).map((item) => {
@@ -1095,7 +1095,7 @@ export default function ProfilePage() {
                       <p className="text-[13px] font-body text-white/80 truncate">{s.title}</p>
                       <p className="text-[11px] font-body text-white/35 mt-0.5 truncate">{creatorName}</p>
                     </div>
-                    <button onClick={() => navigate(`/song/${s.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/40 hover:text-[#A78BFA] transition-all flex-shrink-0"><ExternalLink size={12} /></button>
+                    <button type="button" onClick={() => navigate(`/song/${s.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/40 hover:text-[#A78BFA] transition-all flex-shrink-0"><ExternalLink size={12} /></button>
                   </div>
                 );
               })
@@ -1302,7 +1302,7 @@ export default function ProfilePage() {
               <div className="text-center py-12">
                 <ScrollText size={24} className="mx-auto mb-2 text-white/15" />
                 <p className="text-white/30 font-body text-[12px]">No field notes yet</p>
-                <button onClick={() => navigate("/field-notes")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Write your first note</button>
+                <button type="button" onClick={() => navigate("/field-notes")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Write your first note</button>
               </div>
             ) : (
               (myFieldNotes as any[]).map((note: any) => (
@@ -1352,7 +1352,7 @@ export default function ProfilePage() {
                       <h3 className="text-[16px] font-heading text-white">Add Testimony</h3>
                       <p className="text-[11px] font-body text-white/40 mt-0.5">This statement is permanent and cannot be edited after creation.</p>
                     </div>
-                    <button onClick={() => setShowAddTestimony(false)} className="text-white/30 hover:text-white/70 transition-colors"><X size={18} /></button>
+                    <button type="button" onClick={() => setShowAddTestimony(false)} className="text-white/30 hover:text-white/70 transition-colors"><X size={18} /></button>
                   </div>
 
                   {/* Content */}
@@ -1682,7 +1682,7 @@ function RequestDeletionButton() {
         >
           {deleteMutation.isPending ? "Submitting…" : "Yes, submit"}
         </button>
-        <button onClick={() => setConfirming(false)} className="text-white/40 hover:text-white/60 ml-1">
+        <button type="button" onClick={() => setConfirming(false)} className="text-white/40 hover:text-white/60 ml-1">
           <X size={11} />
         </button>
       </div>

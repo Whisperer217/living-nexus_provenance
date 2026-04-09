@@ -419,7 +419,7 @@ export default function SongDetailPage() {
       </Helmet>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
         <Link href={creator ? `/creator/${creator.id}` : "/"}>
-          <button className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity mb-6" style={{ color: "#E2E8F0" }}>
+          <button type="button" className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity mb-6" style={{ color: "#E2E8F0" }}>
             <ChevronLeft className="w-4 h-4" />
             {creator?.artistHandle || creator?.name || "Back"}
           </button>
@@ -771,7 +771,7 @@ export default function SongDetailPage() {
             <div className="rounded-2xl p-4" style={{ background: "oklch(0.11 0.015 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
               <div className="flex flex-wrap gap-2 justify-center">
                 {REACTIONS.map(emoji => (
-                  <button key={emoji} onClick={() => handleReaction(emoji)}
+                  <button type="button" key={emoji} onClick={() => handleReaction(emoji)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all hover:scale-110 active:scale-95"
                     style={{
                       background: myReactionsSet.has(emoji) ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.16 0.02 280)",
@@ -946,7 +946,7 @@ export default function SongDetailPage() {
         {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}
         {song.lyricsText && (
           <div className="mt-6 rounded-2xl overflow-hidden" style={{ background: "oklch(0.11 0.015 280)", border: `1px solid ${song.isLyricsOnly ? "oklch(0.75 0.18 85 / 0.35)" : "oklch(0.18 0.015 280)"}` }}>
-            <button className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
+            <button type="button" className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>Lyrics</span>
                 {song.isLyricsOnly && (
@@ -1045,7 +1045,7 @@ export default function SongDetailPage() {
             <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>90% goes directly to the artist. 10% supports Living Nexus.</p>
             <div className="grid grid-cols-4 gap-2">
               {["1", "5", "10", "25"].map(amt => (
-                <button key={amt} onClick={() => setTipAmount(amt)} className="py-2 rounded-lg text-sm font-medium transition-all"
+                <button type="button" key={amt} onClick={() => setTipAmount(amt)} className="py-2 rounded-lg text-sm font-medium transition-all"
                   style={{ background: tipAmount === amt ? "oklch(0.84 0.155 85)" : "oklch(0.16 0.02 280)", color: tipAmount === amt ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
                   ${amt}
                 </button>

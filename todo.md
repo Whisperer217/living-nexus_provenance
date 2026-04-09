@@ -3304,3 +3304,24 @@
 - [x] Save LAMININ.md to /docs/LAMININ.md and link from README.md as first architecture doc
 - [x] Fix Quick Play tab trigger: slide fully off-screen (right:-28px) when any dialog/modal is open + 100ms polling fallback
 - [x] Fix React hooks order violation in MobilePlayerLayer (useLightsMode called after early return — caused blank screen on mobile)
+
+## Codebase Audit Fixes (Apr 8 2026)
+- [x] Fix raw SQL string at routers.ts:2195 — replaced with typed Drizzle db.update() via new setPinCreator helper
+- [x] Add rate limiting to public write endpoints (comments.add, songs.play, songs.download) via express-rate-limit
+- [x] Reduce global JSON body limit from 50mb to 1mb; keep 50mb only on upload route
+- [ ] Extract shared adminProcedure middleware to replace 20+ inline role checks
+- [ ] Add LIMIT to unbounded DB queries (notifications, creators, supporters, promo codes)
+- [ ] Add try/catch to ~120 unhandled server mutations
+- [x] Add DB indexes: songs(userId, status, contentType, witnessId), likes(songId, userId), events(workId, actorId, type), notifications(userId, userId+isRead), jukeboxQueue(roomCode), playlistItems(userId) — 10 indexes pushed
+- [x] Fix useEffect missing dependency array in DashboardPage ArchiveTab (was running on every render)
+- [x] Add type="button" to 125 button elements missing it across 28 files
+- [x] Fix iOS Safari canvas download in QRIdentityCard — use toBlob + object URL with DOM append/remove
+- [x] Delete dead files: Home.tsx (stub), ComponentShowcase.tsx (dev artifact with console.log)
+- [x] Fix ErrorBoundary to hide stack trace in production (show generic message only)
+- [x] Remove console.log from ComponentShowcase.tsx (file deleted)
+- [ ] MusicWitnessIDPage.tsx (896 lines) — kept, not yet routed; wire up when ready
+- [ ] Extract shared adminProcedure middleware to replace 20+ inline role checks
+- [ ] Add LIMIT to unbounded DB queries (notifications, creators, supporters, promo codes)
+- [ ] Add try/catch to ~120 unhandled server mutations
+- [ ] Replace jukebox 5s polling with SSE push (infrastructure already exists)
+- [ ] Split routers.ts (5057 lines) into feature sub-routers under server/routers/

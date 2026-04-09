@@ -218,7 +218,7 @@ function LexiconSection() {
             className="pl-9 bg-white/5 border-white/10 text-sm"
           />
           {search && (
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+            <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
               onClick={() => setSearch("")}>
               <X className="w-3.5 h-3.5" />
             </button>

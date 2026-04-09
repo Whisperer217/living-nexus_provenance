@@ -99,7 +99,7 @@ export default function FounderEraPage() {
             Back to Living Nexus
           </button>
           <Link href="/founders">
-            <button className="flex items-center gap-1.5 text-gray-500 hover:text-[#c9a84c] text-sm transition-colors">
+            <button type="button" className="flex items-center gap-1.5 text-gray-500 hover:text-[#c9a84c] text-sm transition-colors">
               <Users size={14} />
               View Founding Creators
             </button>

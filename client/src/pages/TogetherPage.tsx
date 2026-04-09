@@ -286,7 +286,7 @@ function SongBrowserModal({
             >
               {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
-            <button onClick={() => { stopPreview(); onClose(); }} className="text-white/40 hover:text-white/70 transition-colors">
+            <button type="button" onClick={() => { stopPreview(); onClose(); }} className="text-white/40 hover:text-white/70 transition-colors">
               <X size={16} />
             </button>
           </div>
@@ -333,7 +333,7 @@ function SongBrowserModal({
                   className="flex-1 bg-transparent text-[13px] font-body text-white/80 outline-none placeholder:text-white/60"
                 />
                 {search && (
-                  <button onClick={() => setSearch("")} className="text-white/40 hover:text-white/70">
+                  <button type="button" onClick={() => setSearch("")} className="text-white/40 hover:text-white/70">
                     <X size={12} />
                   </button>
                 )}
@@ -680,7 +680,7 @@ function NowPlayingPanel({
 
         {/* Skip (host only) */}
         {isHost && (
-          <button onClick={onSkip}
+          <button type="button" onClick={onSkip}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
               text-white/40 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-all border border-white/[0.06]">
             <SkipForward size={12} /> Skip
@@ -1040,7 +1040,7 @@ export default function TogetherPage() {
                     </div>
                     {/* Right: Share + Copy + Leave */}
                     <div className="flex gap-2 flex-shrink-0">
-                      <button onClick={shareLink}
+                      <button type="button" onClick={shareLink}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
                           transition-all border"
                         style={{
@@ -1051,12 +1051,12 @@ export default function TogetherPage() {
                         title="Copy shareable room link">
                         <Globe size={11} /> Share Link
                       </button>
-                      <button onClick={copyCode}
+                      <button type="button" onClick={copyCode}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
                           text-white/50 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-all border border-white/[0.08]">
                         <Copy size={11} /> Code
                       </button>
-                      <button onClick={leaveRoom}
+                      <button type="button" onClick={leaveRoom}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body
                           text-lnx-red/70 hover:text-lnx-red bg-red-500/5 hover:bg-red-500/10 transition-all border border-red-500/10">
                         <LogOut size={11} /> Leave
@@ -1120,7 +1120,7 @@ export default function TogetherPage() {
                       px-3.5 py-2 text-[13px] font-body text-white/80 outline-none
                       focus:border-[#A78BFA]/40 transition-colors placeholder:text-white/60"
                   />
-                  <button onClick={sendChat}
+                  <button type="button" onClick={sendChat}
                     className="px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08]
                       text-white/60 hover:text-white transition-all">
                     <Send size={14} />

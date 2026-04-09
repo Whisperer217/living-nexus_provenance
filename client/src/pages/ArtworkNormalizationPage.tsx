@@ -216,7 +216,7 @@ export default function ArtworkNormalizationPage() {
       {/* Header */}
       <div className="mb-8">
         <Link href="/admin">
-          <button className="flex items-center gap-1.5 text-[12px] mb-4 hover:opacity-80 transition-opacity"
+          <button type="button" className="flex items-center gap-1.5 text-[12px] mb-4 hover:opacity-80 transition-opacity"
             style={{ color: "oklch(0.55 0.04 280)" }}>
             <ArrowLeft size={13} /> Back to Admin
           </button>

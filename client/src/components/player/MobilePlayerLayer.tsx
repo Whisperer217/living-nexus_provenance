@@ -1725,7 +1725,7 @@ export default function MobilePlayerLayer() {
                 <div className="text-[14px] font-heading text-white truncate">{currentTrack.title}</div>
                 <div className="text-[11px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
               </div>
-              <button onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
+              <button type="button" onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
                 style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))", color: "oklch(0.10 0.02 55)" }}>
                 {state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
               </button>
@@ -1742,7 +1742,7 @@ export default function MobilePlayerLayer() {
               <span className="text-[10px] font-mono text-white/50 flex-shrink-0">
                 {fmtTime(state.duration)}
               </span>
-              <button onClick={nextTrack} style={{ color: "rgba(255,255,255,0.6)" }}>
+              <button type="button" onClick={nextTrack} style={{ color: "rgba(255,255,255,0.6)" }}>
                 <SkipForward size={20} fill="currentColor" />
               </button>
             </div>
@@ -1755,7 +1755,7 @@ export default function MobilePlayerLayer() {
                 <div className="text-[17px] font-heading text-white truncate">{currentTrack.title}</div>
                 <div className="text-[12px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
               </div>
-              <button onClick={handleToggleLike} className="flex-shrink-0 ml-3 p-2"
+              <button type="button" onClick={handleToggleLike} className="flex-shrink-0 ml-3 p-2"
                 style={{ color: isLiked ? "oklch(0.65 0.22 15)" : "rgba(255,255,255,0.4)" }}>
                 <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
               </button>

@@ -177,7 +177,7 @@ export function ContextualModal({
                 <span className="text-[12px] font-heading text-white/80 tracking-wide uppercase">{title}</span>
               )}
               {showClose && (
-                <button onClick={onClose} className="p-1 text-white/40 hover:text-white/80 transition-colors ml-auto">
+                <button type="button" onClick={onClose} className="p-1 text-white/40 hover:text-white/80 transition-colors ml-auto">
                   <X size={12} />
                 </button>
               )}
@@ -229,7 +229,7 @@ export function ContextualModal({
                 <span className="text-[13px] font-heading text-white/80 tracking-wide">{title}</span>
               )}
               {showClose && (
-                <button onClick={onClose} className="p-1 text-white/40 hover:text-white/80 transition-colors ml-auto">
+                <button type="button" onClick={onClose} className="p-1 text-white/40 hover:text-white/80 transition-colors ml-auto">
                   <X size={14} />
                 </button>
               )}
@@ -279,7 +279,7 @@ export function ContextualModal({
               <span className="text-[13px] font-heading text-white/80 tracking-wide">{title}</span>
             )}
             {showClose && (
-              <button onClick={onClose} className="p-1 text-white/40 hover:text-white/80 transition-colors ml-auto">
+              <button type="button" onClick={onClose} className="p-1 text-white/40 hover:text-white/80 transition-colors ml-auto">
                 <X size={14} />
               </button>
             )}

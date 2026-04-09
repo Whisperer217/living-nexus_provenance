@@ -193,7 +193,7 @@ function NoteForm({
             {initial?.id ? "Edit Field Note" : "New Field Note"}
           </span>
         </div>
-        <button onClick={onCancel} className="text-white/40 hover:text-white/70 transition-colors">
+        <button type="button" onClick={onCancel} className="text-white/40 hover:text-white/70 transition-colors">
           <X size={16} />
         </button>
       </div>

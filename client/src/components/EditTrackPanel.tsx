@@ -835,7 +835,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                   <FileText size={14} style={{ color: "#D4AF37" }} />
                   <span className="text-sm" style={{ color: "#D4AF37" }}>{lyricsFile.name}</span>
                   <span className="text-xs" style={{ color: "#94a3b8" }}>({(lyricsFile.size / 1024).toFixed(1)} KB)</span>
-                  <button onClick={e => { e.stopPropagation(); setLyricsFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
+                  <button type="button" onClick={e => { e.stopPropagation(); setLyricsFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
                 </div>
               ) : (
                 <>
@@ -950,7 +950,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                   <RotateCcw size={14} style={{ color: "#D4AF37" }} />
                   <span className="text-sm" style={{ color: "#D4AF37" }}>{replaceAudioFile.name}</span>
                   <span className="text-xs" style={{ color: "#94a3b8" }}>({(replaceAudioFile.size/1024/1024).toFixed(1)} MB)</span>
-                  <button onClick={e => { e.stopPropagation(); setReplaceAudioFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
+                  <button type="button" onClick={e => { e.stopPropagation(); setReplaceAudioFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
                 </div>
               ) : (
                 <>
@@ -1028,7 +1028,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                   <Video size={14} style={{ color: "oklch(0.65 0.18 200)" }} />
                   <span className="text-sm" style={{ color: "oklch(0.65 0.18 200)" }}>{videoFile.name}</span>
                   <span className="text-xs" style={{ color: "#94a3b8" }}>({(videoFile.size/1024/1024).toFixed(1)} MB)</span>
-                  <button onClick={e => { e.stopPropagation(); setVideoFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
+                  <button type="button" onClick={e => { e.stopPropagation(); setVideoFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
                 </div>
               ) : (
                 <>

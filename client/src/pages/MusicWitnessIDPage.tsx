@@ -595,7 +595,7 @@ export default function MusicWitnessIDPage() {
           <Field label="Co-Writers" className="mt-4">
             <div className="flex gap-2 mb-2">
               <Input value={coWriterInput} onChange={setCoWriterInput} placeholder="Add co-writer name" onKeyDown={e => e.key === "Enter" && addCoWriter()} />
-              <button onClick={addCoWriter} className="px-3 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors">
+              <button type="button" onClick={addCoWriter} className="px-3 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors">
                 <Plus size={14} />
               </button>
             </div>
@@ -603,7 +603,7 @@ export default function MusicWitnessIDPage() {
               {meta.coWriters.filter(c => c).map((cw, i) => (
                 <span key={i} className="flex items-center gap-1 px-2 py-1 text-xs border border-[#6ee7f7]/20 text-[#6ee7f7]">
                   {cw}
-                  <button onClick={() => removeCoWriter(i)} className="hover:text-lnx-red transition-colors"><X size={10} /></button>
+                  <button type="button" onClick={() => removeCoWriter(i)} className="hover:text-lnx-red transition-colors"><X size={10} /></button>
                 </span>
               ))}
             </div>

@@ -172,7 +172,7 @@ export function VersionHistoryModal({
                   <p className="text-sm font-semibold" style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>
                     Upload New Version
                   </p>
-                  <button onClick={() => { setShowUpload(false); setUploadFile(null); }}>
+                  <button type="button" onClick={() => { setShowUpload(false); setUploadFile(null); }}>
                     <X size={14} style={{ color: "oklch(0.55 0.03 280)" }} />
                   </button>
                 </div>

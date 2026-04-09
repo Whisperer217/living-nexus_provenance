@@ -88,6 +88,7 @@ import {
   followProject, unfollowProject, isFollowingProject, getProjectFollowerCount, getProjectFollowerUserIds,
   getProjectSongs, addSongToProject, removeSongFromProject, reorderProjectSongs,
   getLatestAuditLog, getAllAuditLogs, createAuditLog, updateAuditLog,
+  setPinCreator,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -2189,15 +2190,11 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       .input(z.object({ userId: z.number().int(), pin: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
         if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
-        const db = await getDb();
-        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-        // Use raw execute to avoid import conflicts with outer-scope variables
-        await db.execute(`UPDATE users SET isPinned = ${input.pin ? 1 : 0} WHERE id = ${input.userId}`);
+        await setPinCreator(input.userId, input.pin);
         await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: input.pin ? "pin_creator" : "unpin_creator", targetType: "user", targetId: String(input.userId) });
         return { success: true, isPinned: input.pin };
       }),
-
-    // ── Founder Control ──────────────────────────────────────────────────────
+    // ── Founder Control ───────────────────────────────────────────────────────
     /** Get current founder count and list */
     getFounders: protectedProcedure.query(async ({ ctx }) => {
       if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });

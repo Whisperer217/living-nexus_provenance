@@ -342,10 +342,10 @@ export default function PlayerBar() {
             </div>
             {/* Playback controls */}
             <div className="flex items-center gap-6">
-              <button onClick={toggleShuffle} className={`p-2 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/40 hover:text-white/80"}`}>
+              <button type="button" onClick={toggleShuffle} className={`p-2 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/40 hover:text-white/80"}`}>
                 <Shuffle size={18} />
               </button>
-              <button onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
+              <button type="button" onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
                 <SkipBack size={22} />
               </button>
               <button
@@ -355,10 +355,10 @@ export default function PlayerBar() {
               >
                 {state.isPlaying ? <Pause size={24} /> : <Play size={24} fill="currentColor" />}
               </button>
-              <button onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
+              <button type="button" onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
                 <SkipForward size={22} />
               </button>
-              <button onClick={toggleRepeat} className={`p-2 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/40 hover:text-white/80"}`}>
+              <button type="button" onClick={toggleRepeat} className={`p-2 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/40 hover:text-white/80"}`}>
                 <Repeat size={18} />
               </button>
             </div>
@@ -504,10 +504,10 @@ export default function PlayerBar() {
             {/* Playback controls */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <button onClick={toggleShuffle} className={`p-1.5 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
+                <button type="button" onClick={toggleShuffle} className={`p-1.5 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
                   <Shuffle size={14} />
                 </button>
-                <button onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+                <button type="button" onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
                   <SkipBack size={18} />
                 </button>
                 <button
@@ -520,10 +520,10 @@ export default function PlayerBar() {
                     : <Play size={17} fill="currentColor" className="ml-0.5" />
                   }
                 </button>
-                <button onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+                <button type="button" onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
                   <SkipForward size={18} />
                 </button>
-                <button onClick={toggleRepeat} className={`p-1.5 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
+                <button type="button" onClick={toggleRepeat} className={`p-1.5 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
                   <Repeat size={14} />
                 </button>
               </div>
@@ -771,7 +771,7 @@ export default function PlayerBar() {
               >
                 <Shuffle size={14} />
               </button>
-              <button onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+              <button type="button" onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
                 <SkipBack size={18} />
               </button>
               <button
@@ -784,7 +784,7 @@ export default function PlayerBar() {
                   : <Play size={17} fill="currentColor" className="ml-0.5" />
                 }
               </button>
-              <button onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+              <button type="button" onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
                 <SkipForward size={18} />
               </button>
               <button

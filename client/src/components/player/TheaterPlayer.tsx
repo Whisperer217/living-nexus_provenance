@@ -325,7 +325,7 @@ export default function TheaterPlayer() {
                         Origin Proof
                       </span>
                     </div>
-                    <button onClick={() => setWidPanelOpen(false)} className="text-[10px]" style={{ color: "oklch(0.45 0.04 280)" }}>✕</button>
+                    <button type="button" onClick={() => setWidPanelOpen(false)} className="text-[10px]" style={{ color: "oklch(0.45 0.04 280)" }}>✕</button>
                   </div>
                   <div className="text-[10px] font-mono break-all mb-2" style={{ color: "oklch(0.72 0.14 145)" }}>{widBadge}</div>
                   <div className="flex items-center gap-3">
@@ -458,7 +458,7 @@ export default function TheaterPlayer() {
                   >
                     <Shuffle size={16} />
                   </button>
-                  <button onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+                  <button type="button" onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
                     <SkipBack size={22} />
                   </button>
                   <button
@@ -471,7 +471,7 @@ export default function TheaterPlayer() {
                       : <Play size={20} fill="currentColor" className="ml-0.5" />
                     }
                   </button>
-                  <button onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+                  <button type="button" onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
                     <SkipForward size={22} />
                   </button>
                   <button

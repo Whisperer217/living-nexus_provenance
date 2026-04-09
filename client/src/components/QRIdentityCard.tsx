@@ -290,11 +290,30 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
 
   const handleDownloadPng = useCallback(() => {
     if (!canvasRef.current) return;
-    const link = document.createElement("a");
-    link.download = `living-nexus-${entity.type}-${entity.slug}.png`;
-    link.href = canvasRef.current.toDataURL("image/png");
-    link.click();
-    toast.success("Card downloaded — PNG saved to your device.");
+    const filename = `living-nexus-${entity.type}-${entity.slug}.png`;
+    // iOS Safari does not support <a download> for data URIs — use toBlob + object URL instead
+    canvasRef.current.toBlob((blob) => {
+      if (!blob) {
+        // Fallback for browsers that don't support toBlob
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = canvasRef.current!.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Revoke after a short delay to allow the download to start
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      toast.success("Card downloaded — PNG saved to your device.");
+    }, "image/png");
   }, [entity]);
 
   const handleCopyLink = useCallback(async () => {

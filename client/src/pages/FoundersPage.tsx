@@ -42,7 +42,7 @@ export default function FoundersPage() {
       {/* Back nav */}
       <div className="max-w-2xl mx-auto px-4 pt-6">
         <Link href="/">
-          <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-300 text-sm transition-colors mb-8">
+          <button type="button" className="flex items-center gap-1.5 text-gray-500 hover:text-gray-300 text-sm transition-colors mb-8">
             <ChevronLeft size={16} />
             Back to Living Nexus
           </button>
@@ -223,7 +223,7 @@ export default function FoundersPage() {
           </button>
           <div className="mt-4 pt-4 border-t border-white/5">
             <Link href="/founder-era">
-              <button className="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-300 text-xs transition-colors">
+              <button type="button" className="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-300 text-xs transition-colors">
                 <Heart size={11} />
                 Support the Founder's Era instead
               </button>

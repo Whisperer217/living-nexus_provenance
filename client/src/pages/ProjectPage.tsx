@@ -614,7 +614,7 @@ function BlockEditor({ block, projectId, onChange, onDelete }: {
           <span className="text-white/30 text-xs uppercase tracking-widest font-mono">{block.type}</span>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={onDelete} className="p-1 text-red-400/60 hover:text-red-400 transition-colors" title="Delete block">
+          <button type="button" onClick={onDelete} className="p-1 text-red-400/60 hover:text-red-400 transition-colors" title="Delete block">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -782,7 +782,7 @@ function AddBlockBar({ onAdd }: { onAdd: (type: BlockType) => void }) {
               {t.label}
             </button>
           ))}
-          <button onClick={() => setOpen(false)} className="ml-2 text-white/30 hover:text-white transition-colors">
+          <button type="button" onClick={() => setOpen(false)} className="ml-2 text-white/30 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -839,7 +839,7 @@ function DonateDialog({ project, open, onClose }: {
             <Label className="text-white/70 text-sm mb-2 block">Choose an amount</Label>
             <div className="flex gap-2 flex-wrap mb-3">
               {presets.map((p) => (
-                <button key={p} onClick={() => setAmount(String(p))}
+                <button type="button" key={p} onClick={() => setAmount(String(p))}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
                     amount === String(p) ? "bg-[#d4a017] text-black border-[#d4a017]" : "bg-white/5 text-white/70 border-white/10 hover:border-[#d4a017]/50"
                   }`}
@@ -1641,7 +1641,7 @@ export default function ProjectPage() {
                 <p className="text-white/40 text-xs uppercase tracking-widest">Hero Video</p>
                 <div className="flex gap-2">
                   {(["youtube", "vimeo", "s3", "none"] as const).map((vt) => (
-                    <button key={vt} onClick={() => setLocalVideoType(vt)}
+                    <button type="button" key={vt} onClick={() => setLocalVideoType(vt)}
                       className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
                         localVideoType === vt ? "bg-[#d4a017] text-black border-[#d4a017]" : "bg-white/5 text-white/50 border-white/10 hover:border-[#d4a017]/40"
                       }`}
@@ -1658,7 +1658,7 @@ export default function ProjectPage() {
                     <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
                       <FileVideo className="w-4 h-4 text-[#d4a017]" />
                       <span className="text-white/60 text-sm flex-1 truncate">Video uploaded</span>
-                      <button onClick={() => { setLocalVideoUrl(""); setLocalVideoType("none"); }} className="text-red-400/60 hover:text-red-400 text-xs">Remove</button>
+                      <button type="button" onClick={() => { setLocalVideoUrl(""); setLocalVideoType("none"); }} className="text-red-400/60 hover:text-red-400 text-xs">Remove</button>
                     </div>
                   ) : (
                     <VideoUploadPanel
@@ -1903,7 +1903,7 @@ export default function ProjectPage() {
               ))}
             </div>
             {updates.length > 2 && (
-              <button onClick={() => setUpdatesExpanded(!updatesExpanded)}
+              <button type="button" onClick={() => setUpdatesExpanded(!updatesExpanded)}
                 className="mt-3 flex items-center gap-1 text-[#d4a017]/70 hover:text-[#d4a017] text-sm transition-colors">
                 {updatesExpanded ? <><ChevronUp className="w-4 h-4" /> Show less</> : <><ChevronDown className="w-4 h-4" /> Show {updates.length - 2} more updates</>}
               </button>

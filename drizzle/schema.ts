@@ -1,6 +1,6 @@
 import {
   int, mysqlEnum, mysqlTable, text, timestamp,
-  varchar, float, boolean, json, uniqueIndex
+  varchar, float, boolean, json, uniqueIndex, index
 } from "drizzle-orm/mysql-core";
 
 // ─── Users ────────────────────────────────────────────────────────────────────
@@ -223,7 +223,12 @@ export const songs = mysqlTable("songs", {
   isFlagged: boolean("isFlagged").default(false).notNull(),
   flagReason: varchar("flagReason", { length: 512 }),
   moderationStatus: mysqlEnum("moderationStatus", ["clear", "flagged", "removed"]).default("clear").notNull(),
-});
+}, (t) => ({
+  creatorIdx: index("songs_userId_idx").on(t.userId),
+  statusIdx: index("songs_status_idx").on(t.status),
+  contentTypeIdx: index("songs_contentType_idx").on(t.contentType),
+  witnessIdx: index("songs_witnessId_idx").on(t.witnessId),
+}));
 
 export type Song = typeof songs.$inferSelect;
 export type InsertSong = typeof songs.$inferInsert;
@@ -328,7 +333,10 @@ export const likes = mysqlTable("likes", {
   userId: int("userId").notNull(),   // the user who liked
   songId: int("songId").notNull(),   // the song that was liked
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (t) => ({
+  songIdx: index("likes_songId_idx").on(t.songId),
+  userIdx: index("likes_userId_idx").on(t.userId),
+}));
 
 export type Like = typeof likes.$inferSelect;
 export type InsertLike = typeof likes.$inferInsert;
@@ -346,7 +354,9 @@ export const jukeboxQueue = mysqlTable("jukeboxQueue", {
   playedAt: timestamp("playedAt"),               // null = not yet played
   skippedAt: timestamp("skippedAt"),             // null = not skipped
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (t) => ({
+  roomIdx: index("jukeboxQueue_roomCode_idx").on(t.roomCode),
+}));
 
 export type JukeboxQueueItem = typeof jukeboxQueue.$inferSelect;
 export type InsertJukeboxQueueItem = typeof jukeboxQueue.$inferInsert;
@@ -359,7 +369,9 @@ export const playlistItems = mysqlTable("playlistItems", {
   songId: int("songId").notNull(),   // the saved song
   position: int("position").notNull().default(0), // ordering within playlist
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (t) => ({
+  userIdx: index("playlistItems_userId_idx").on(t.userId),
+}));
 
 export type PlaylistItem = typeof playlistItems.$inferSelect;
 export type InsertPlaylistItem = typeof playlistItems.$inferInsert;
@@ -400,7 +412,11 @@ export const events = mysqlTable("events", {
   deletedAt: timestamp("deletedAt"),
 
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (t) => ({
+  workIdx: index("events_workId_idx").on(t.workId),
+  actorIdx: index("events_actorId_idx").on(t.actorId),
+  typeIdx: index("events_type_idx").on(t.type),
+}));
 
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = typeof events.$inferInsert;
@@ -519,7 +535,10 @@ export const notifications = mysqlTable("notifications", {
   isRead: boolean("isRead").default(false).notNull(),
   archivedAt: timestamp("archivedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (t) => ({
+  userIdx: index("notifications_userId_idx").on(t.userId),
+  userReadIdx: index("notifications_userId_isRead_idx").on(t.userId, t.isRead),
+}));
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
 

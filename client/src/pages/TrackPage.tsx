@@ -66,7 +66,7 @@ export default function TrackPage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Music size={40} className="text-white/15" />
         <p className="text-white/70 font-body text-[14px]">Track not found</p>
-        <button onClick={() => navigate("/")} className="text-[#A78BFA] text-[13px] hover:underline">
+        <button type="button" onClick={() => navigate("/")} className="text-[#A78BFA] text-[13px] hover:underline">
           ← Back to Home
         </button>
       </div>

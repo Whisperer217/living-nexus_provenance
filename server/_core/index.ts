@@ -1,6 +1,7 @@
 import "dotenv/config";
 import compression from "compression";
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -64,10 +65,22 @@ async function startServer() {
 
   // Stripe webhook MUST be before express.json() for signature verification
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), handleStripeWebhook);
-  // Configure body parser — 50mb covers base64-encoded audio up to ~37MB raw
-  // Large files should use the multipart /api/upload-file endpoint instead
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Body parser — 1mb for all routes; large file uploads use the multipart /api/upload-file endpoint
+  app.use(express.json({ limit: "1mb" }));
+  app.use(express.urlencoded({ limit: "1mb", extended: true }));
+
+  // Rate limiting for public write endpoints — prevents spam/play-count inflation
+  const publicWriteLimit = rateLimit({
+    windowMs: 60 * 1000, // 1 minute window
+    max: 30,             // 30 requests per IP per minute
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests, please slow down." },
+  });
+  app.use("/api/trpc/comments.add", publicWriteLimit);
+  app.use("/api/trpc/songs.play", publicWriteLimit);
+  app.use("/api/trpc/songs.download", publicWriteLimit);
+  app.use("/api/trpc/songs.recordPlay", publicWriteLimit);
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // Server-Sent Events for real-time community notifications
