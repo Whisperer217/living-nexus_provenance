@@ -326,14 +326,12 @@ export default function MobilePlayerPanel() {
   return (
     <>
       {/* ── Floating tab (right edge, draggable) ── */}
-      <button
-        onClick={() => { if (!isDragging.current) togglePanel(); }}
+      {/* Outer div: handles drag only — NOT a click target */}
+      <div
         onTouchStart={onTabTouchStart}
         onTouchMove={onTabTouchMove}
         onTouchEnd={onTabTouchEnd}
-        aria-label={open ? "Collapse player" : "Expand player"}
-        className="md:hidden fixed z-[25] flex flex-col items-center justify-center gap-1
-          transition-[box-shadow] duration-200 active:scale-95"
+        className="md:hidden fixed z-[25] flex flex-col items-center justify-center gap-1"
         style={{
           right: 0,
           top: `${tabTop}px`,
@@ -345,10 +343,13 @@ export default function MobilePlayerPanel() {
           border: "1px solid oklch(0.22 0.02 275)",
           borderRight: "none",
           boxShadow: "-4px 0 24px oklch(0 0 0 / 0.5), -2px 0 8px oklch(0.55 0.22 295 / 0.15)",
+          touchAction: "none",
+          userSelect: "none",
         }}
       >
+        {/* Art thumbnail — visual only, no click */}
         <div
-          className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center"
+          className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center pointer-events-none"
           style={{ background: currentTrack?.bg || "oklch(0.18 0.04 275)" }}
         >
           {currentTrack?.artUrl && currentTrack.artType !== "video" ? (
@@ -360,42 +361,62 @@ export default function MobilePlayerPanel() {
             <Music className="w-4 h-4 opacity-40 text-white" />
           )}
         </div>
+        {/* Wave bars — visual only, no click */}
         {state.isPlaying && (
-          <div className="flex items-end gap-[2px] h-3">
+          <div className="flex items-end gap-[2px] h-3 pointer-events-none">
             {[0, 1, 2].map(i => (
               <div key={i} className="w-[3px] rounded-full"
                 style={{ background: "#D4AF37", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
             ))}
           </div>
         )}
-        <div className="text-white/30 transition-transform duration-300"
-          style={{ transform: open ? "rotate(0deg)" : "rotate(180deg)", fontSize: "10px", lineHeight: 1 }}>
-          ›
-        </div>
-      </button>
+        {/* Arrow button — ONLY this triggers open/close */}
+        <button
+          onClick={(e) => { e.stopPropagation(); if (!isDragging.current) togglePanel(); }}
+          aria-label={open ? "Collapse player" : "Expand player"}
+          className="flex items-center justify-center w-8 h-6 rounded transition-colors hover:bg-white/10 active:scale-90"
+          style={{ touchAction: "manipulation" }}
+        >
+          <span
+            className="text-white/60 transition-transform duration-300 select-none"
+            style={{ transform: open ? "rotate(0deg)" : "rotate(180deg)", fontSize: "14px", lineHeight: 1 }}
+          >
+            ›
+          </span>
+        </button>
+      </div>
 
-      {/* ── Backdrop — dims page when panel is open ── */}
+      {/* ── Backdrop — dims page when panel is open, capped above player bar ── */}
       {open && (
         <div
-          className="md:hidden fixed inset-0 z-[34]"
-          style={{ background: "oklch(0 0 0 / 0.55)", backdropFilter: "blur(2px)" }}
+          className="md:hidden fixed z-[34]"
+          style={{
+            top: 0, left: 0, right: 0, bottom: "68px",
+            background: "oklch(0 0 0 / 0.55)",
+            backdropFilter: "blur(2px)",
+          }}
           onClick={closeNowPlayingPanel}
         />
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          CINEMATIC PANEL — full-screen, slides up from bottom
-          overflow-y-auto so content is always scrollable
-      ══════════════════════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════════════════════
+          QUICK PLAY PANEL — slides in from bottom
+          Capped: top=0, bottom=68px (above global player bar)
+          Never covers the player bar. Never extends below it.
+      ════════════════════════════════════════════════════════════ */}
       <div
-        className="md:hidden fixed inset-0 z-[35] flex flex-col
+        className="md:hidden fixed z-[35] flex flex-col
           transition-transform duration-500 ease-in-out"
         style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: "68px",
           background: "oklch(0.07 0.02 275)",
           boxShadow: "0 -8px 48px oklch(0 0 0 / 0.8)",
           transform: open ? "translateY(0)" : "translateY(100%)",
           paddingTop: "env(safe-area-inset-top, 0px)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          paddingBottom: 0,
           overflowY: "auto",
           overflowX: "hidden",
         }}
