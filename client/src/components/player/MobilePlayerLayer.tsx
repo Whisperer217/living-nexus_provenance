@@ -350,20 +350,21 @@ export default function MobilePlayerLayer() {
     };
   }, []);
 
-  // Body scroll lock: lock <html> (not body) when player is expanded/cinematic.
-  // Using documentElement works on iOS Safari; locking body alone does not.
+  // Body scroll lock: lock <body> when player is expanded/cinematic.
+  // We lock body (not html) so the html background still paints behind other panels.
+  // On iOS Safari, position:fixed on the expanded sheet prevents scroll without needing overflow:hidden.
   useEffect(() => {
-    const html = document.documentElement;
+    const body = document.body;
     if (playerState === "expanded" || playerState === "cinematic") {
-      html.style.overflow = "hidden";
-      html.style.touchAction = "none";
+      body.style.overflow = "hidden";
+      body.style.touchAction = "none";
     } else {
-      html.style.overflow = "";
-      html.style.touchAction = "";
+      body.style.overflow = "";
+      body.style.touchAction = "";
     }
     return () => {
-      html.style.overflow = "";
-      html.style.touchAction = "";
+      body.style.overflow = "";
+      body.style.touchAction = "";
     };
   }, [playerState]);
 

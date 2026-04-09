@@ -232,6 +232,7 @@
     height: 100%;
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
     background-color: oklch(0.10 0.022 55); /* match app bg — no black void on overscroll */
+    /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
   #root {
     min-height: 100dvh; /* dvh = true mobile viewport height, not browser-lied vh */

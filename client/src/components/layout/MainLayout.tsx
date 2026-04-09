@@ -66,13 +66,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const jukeboxQueueCount = state.jukeboxQueueCount;
   const { user, loading: authLoading, logout } = useAuth();
 
-  const handleLogout = useCallback(async () => {
-    try { await logout(); } finally {
-      setMobileMenuOpen(false);
-      navigate("/");
-    }
-  }, [logout, navigate]);
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [liveOpen, setLiveOpen] = useState(false);
 
@@ -103,8 +96,26 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const MOBILE_TEXT = isWarm ? "rgba(200,212,228,0.85)" : undefined;
   const MOBILE_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : undefined;
 
-  const openMobileMenu = useCallback(() => { setMobileMenuOpen(true); }, []);
-  const goTo = useCallback((path: string) => { navigate(path); setMobileMenuOpen(false); }, [navigate]);
+  // Body scroll lock for mobile menu — lock body (not html) so background still paints
+  const openMobileMenu = useCallback(() => {
+    setMobileMenuOpen(true);
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try { await logout(); } finally {
+      closeMobileMenu();
+      navigate("/");
+    }
+  }, [logout, navigate, closeMobileMenu]);
+  const goTo = useCallback((path: string) => { navigate(path); closeMobileMenu(); }, [navigate, closeMobileMenu]);
 
   const isActive = (path: string) => {
     if (path === "/" && (location === "/" || location === "/home")) return true;
@@ -218,19 +229,38 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         )}
       </div>
 
-      {/* Mobile nav overlay */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[55] bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
-          <div
-            className="w-72 h-full pt-16 overflow-y-auto flex flex-col"
-            style={{
-              background: MOBILE_SIDEBAR_BG,
-              borderRight: `1px solid ${MOBILE_SIDEBAR_BORDER}`,
-              paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))",
-              transition: "background 0.4s ease",
-            }}
-            onClick={e => e.stopPropagation()}
-          >
+      {/* Mobile nav overlay — always rendered, animated via translateX */}
+      {/* Backdrop */}
+      <div
+        className="md:hidden fixed inset-0 z-[8000]"
+        style={{
+          background: "oklch(0 0 0 / 0.72)",
+          backdropFilter: "blur(4px)",
+          opacity: mobileMenuOpen ? 1 : 0,
+          pointerEvents: mobileMenuOpen ? "auto" : "none",
+          transition: "opacity 0.3s ease",
+        }}
+        onClick={closeMobileMenu}
+      />
+      {/* Drawer panel */}
+      <div
+        className="md:hidden fixed top-0 left-0 z-[9000] flex flex-col"
+        style={{
+          width: "min(85vw, 320px)",
+          minHeight: "100dvh",
+          background: isWarm ? "rgba(28,38,52,0.98)" : "oklch(0.125 0.028 52)",
+          borderRight: `1px solid ${MOBILE_SIDEBAR_BORDER}`,
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))",
+          transform: mobileMenuOpen ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
+          overflowY: "auto",
+          boxShadow: mobileMenuOpen ? "4px 0 40px oklch(0 0 0 / 0.6)" : "none",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Spacer for mobile header height */}
+        <div style={{ height: "56px", flexShrink: 0 }} />
             {/* Mobile identity header */}
             {!authLoading && user && (
               <div className="px-3 pt-3 pb-3" style={{ borderBottom: `1px solid ${MOBILE_SIDEBAR_BORDER}` }}>
@@ -321,7 +351,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             {/* Mobile account footer */}
             <div className="px-4 pb-4 border-t border-[oklch(0.30_0.04_60/0.35)] pt-3">
               <button
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={closeMobileMenu}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#E8A830] hover:bg-[oklch(0.82_0.155_75/0.06)]"
               >
                 <Sparkles size={15} className="flex-shrink-0" />
@@ -350,9 +380,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 </button>
               )}
             </div>
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* ══════════════════════════════════════════════
           PAGE CONTENT
