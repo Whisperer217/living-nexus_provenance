@@ -5,6 +5,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -213,7 +214,7 @@ export default function TheaterPlayer() {
     });
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isTheaterOpen && (
         <motion.div
@@ -221,7 +222,7 @@ export default function TheaterPlayer() {
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 32, stiffness: 280 }}
-          className="fixed inset-0 z-[200] flex flex-col md:flex-row overflow-hidden"
+          className="fixed inset-0 z-[9015] flex flex-col md:flex-row overflow-hidden"
           style={{ background: "oklch(0.075 0.04 268)" }}
         >
           {/* ── LEFT — Media + Controls ── */}
@@ -803,6 +804,7 @@ export default function TheaterPlayer() {
           )}
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

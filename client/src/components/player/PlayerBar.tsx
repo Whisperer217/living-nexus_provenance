@@ -17,6 +17,7 @@ import {
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLocation } from "wouter";
 import { useState, useCallback, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import PlayerTipModal from "./PlayerTipModal";
 import { MediaAsset } from "@/components/MediaAsset";
 
@@ -216,7 +217,7 @@ export default function PlayerBar() {
     });
   }, []);
 
-  return (
+  return createPortal(
     <div
       className="transition-all duration-500 ease-in-out hidden md:block"
       style={{
@@ -233,7 +234,7 @@ export default function PlayerBar() {
         boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px oklch(0.82 0.155 75 / 0.18), 0 -1px 8px oklch(0.82 0.155 75 / 0.22)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
-        zIndex: isCinematic ? 9020 : isExpanded ? 9010 : 20,
+        zIndex: isCinematic ? 9020 : isExpanded ? 9010 : 9001,
       }}
     >
       {/* ── Expand / Collapse tab — sits on top of bar, centered ── */}
@@ -1187,6 +1188,7 @@ export default function PlayerBar() {
         onClose={() => setAddToListOpen(false)}
         originRect={addToListRect}
       />
-    </div>
+    </div>,
+    document.body
   );
 }
