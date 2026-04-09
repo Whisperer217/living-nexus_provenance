@@ -136,8 +136,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
     >
       {/* ── Zone 1: Cover Art — plays in global player ── */}
       <div
-        className="relative overflow-hidden cursor-pointer"
-        style={{ height: "180px" }}
+        className="relative overflow-hidden cursor-pointer w-full"
         onClick={handleCoverClick}
         title="Play this track"
       >
@@ -145,12 +144,12 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           src={track.artType !== "video" ? track.artUrl : null}
           alt={track.title}
           mode="card"
-          aspectRatio="1:1"
+          aspectRatio="4:5"
           focalX={track.coverPositionX ?? 50}
           focalY={track.coverPositionY ?? 50}
           emoji={track.emoji}
           bg={track.bg}
-          className="w-full h-full transition-transform duration-300 group-hover:scale-105"
+          className="w-full transition-transform duration-300 group-hover:scale-105"
         />
         {/* Video cover art */}
         {track.artUrl && track.artType === "video" && (
@@ -163,10 +162,12 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           />
         )}
 
-        {/* Overlay gradient */}
-        <div className={`absolute inset-0 transition-opacity duration-200
-          bg-gradient-to-b from-transparent via-transparent to-black/70
-          ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+        {/* Overlay gradient — always present, intensifies on hover/active */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.82) 100%)",
+          }}
         />
 
         {/* Play button */}
