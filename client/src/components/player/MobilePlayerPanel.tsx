@@ -68,10 +68,16 @@ export default function MobilePlayerPanel() {
     queueContextLabel,
   } = usePlayer();
   const { user } = useAuth();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
 
   const open = isNowPlayingPanelOpen;
   const togglePanel = () => isNowPlayingPanelOpen ? closeNowPlayingPanel() : openNowPlayingPanel();
+
+  // LAYER AUTHORITY: Close panel on route change — one primary surface at a time
+  useEffect(() => {
+    if (open) closeNowPlayingPanel();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
 
   // Cinematic mode: controls overlay fades, but identity (title/WID/art) ALWAYS visible
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -326,7 +332,7 @@ export default function MobilePlayerPanel() {
         onTouchMove={onTabTouchMove}
         onTouchEnd={onTabTouchEnd}
         aria-label={open ? "Collapse player" : "Expand player"}
-        className="md:hidden fixed z-50 flex flex-col items-center justify-center gap-1
+        className="md:hidden fixed z-[25] flex flex-col items-center justify-center gap-1
           transition-[box-shadow] duration-200 active:scale-95"
         style={{
           right: 0,
@@ -368,14 +374,21 @@ export default function MobilePlayerPanel() {
         </div>
       </button>
 
-      {/* ── Backdrop ── (only when panel is closed, to dim behind mini-player) */}
+      {/* ── Backdrop — dims page when panel is open ── */}
+      {open && (
+        <div
+          className="md:hidden fixed inset-0 z-[34]"
+          style={{ background: "oklch(0 0 0 / 0.55)", backdropFilter: "blur(2px)" }}
+          onClick={closeNowPlayingPanel}
+        />
+      )}
 
       {/* ══════════════════════════════════════════════════════════════
           CINEMATIC PANEL — full-screen, slides up from bottom
           overflow-y-auto so content is always scrollable
       ══════════════════════════════════════════════════════════════ */}
       <div
-        className="md:hidden fixed inset-0 z-50 flex flex-col
+        className="md:hidden fixed inset-0 z-[35] flex flex-col
           transition-transform duration-500 ease-in-out"
         style={{
           background: "oklch(0.07 0.02 275)",

@@ -218,7 +218,7 @@ export default function PlayerBar() {
 
   return (
     <div
-      className="z-[9995] transition-all duration-500 ease-in-out hidden md:block"
+      className="transition-all duration-500 ease-in-out hidden md:block"
       style={{
         position: "fixed",
         bottom: 0,
@@ -233,7 +233,7 @@ export default function PlayerBar() {
         boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px oklch(0.82 0.155 75 / 0.18), 0 -1px 8px oklch(0.82 0.155 75 / 0.22)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
-        zIndex: isCinematic ? 9999 : 9995,
+        zIndex: isCinematic ? 50 : 20,
       }}
     >
       {/* ── Expand / Collapse tab — sits on top of bar, centered ── */}
@@ -293,7 +293,7 @@ export default function PlayerBar() {
             onClick={() => setIsCinematic(false)}
             className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
             style={{
-              background: "oklch(0.10 0.04 270 / 80%)",
+              background: "oklch(0.10 0.04 270)",
               border: "1px solid oklch(0.40 0.04 270 / 60%)",
               color: "oklch(0.80 0.145 82)",
               backdropFilter: "blur(8px)",
