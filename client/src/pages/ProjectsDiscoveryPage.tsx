@@ -31,17 +31,17 @@ function ProjectCard({ project }: { project: any }) {
           boxShadow: "0 4px 24px oklch(0 0 0 / 0.4)",
         }}
       >
-        {/* Banner */}
-        <div className="relative h-44 overflow-hidden">
+        {/* Banner — 4:5 locked, object-cover, always-on gradient (CARD_STANDARDS) */}
+        <div className="prov-card-img-wrap">
           {project.bannerUrl ? (
             <img
               src={project.bannerUrl}
               alt={project.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div
-              className="w-full h-full flex items-center justify-center"
+              className="absolute inset-0 w-full h-full flex items-center justify-center"
               style={{
                 background: "linear-gradient(135deg, oklch(0.14 0.06 280), oklch(0.10 0.04 270), oklch(0.12 0.05 300))",
               }}
@@ -54,33 +54,32 @@ function ProjectCard({ project }: { project: any }) {
               </span>
             </div>
           )}
-          {/* Gradient overlay */}
+          {/* Gradient overlay — always-on bottom fade */}
           <div
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(to top, oklch(0.10 0.03 270) 0%, transparent 60%)" }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.82) 100%)" }}
           />
-          {/* WID badge */}
+          {/* WID badge — bottom-left (matches TrackCard) */}
           {project.linkedWitnessId && (
             <a
               href={`/verify/${project.linkedWitnessId}`}
               onClick={e => e.stopPropagation()}
-              className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-mono font-bold transition-all hover:opacity-90"
+              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider transition-opacity opacity-90 hover:opacity-100"
               style={{
-                background: "oklch(0.22 0.08 145 / 0.92)",
-                border: "1px solid oklch(0.55 0.18 145 / 0.5)",
-                backdropFilter: "blur(6px)",
-                color: "oklch(0.82 0.18 145)",
+                background: "rgba(0,0,0,0.72)",
+                color: "#F5C451",
+                border: "1px solid rgba(245,196,81,0.55)",
                 textDecoration: "none",
               }}
               title="Project cryptographically witnessed"
             >
-              <Shield size={9} />
-              WID
+              <Shield size={8} />
+              <span>WID</span>
             </a>
           )}
-          {/* Status badge */}
+          {/* Status badge — top-right */}
           <div
-            className="absolute top-3 right-3 px-2 py-1 rounded-lg text-[9px] font-heading tracking-wider uppercase"
+            className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-heading tracking-wider uppercase z-10"
             style={{
               background: project.status === "funded"
                 ? "oklch(0.55 0.18 145 / 0.85)"
@@ -95,39 +94,34 @@ function ProjectCard({ project }: { project: any }) {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-4">
+        {/* Content — p-3 matches TrackCard */}
+        <div className="p-3">
           <h3
-            className="font-heading text-[15px] leading-tight mb-1 truncate"
+            className="font-heading text-[13px] leading-tight mb-1 truncate tracking-wide"
             style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}
           >
             {project.title}
           </h3>
           {project.tagline && (
-            <p className="text-[12px] mb-3 line-clamp-2" style={{ color: "oklch(0.55 0.03 280)" }}>
+            <p className="text-[11px] mb-1.5 line-clamp-2" style={{ color: "oklch(0.55 0.03 280)" }}>
               {project.tagline}
             </p>
           )}
 
-          {/* Creator */}
-          <div className="flex items-center gap-2 mb-3">
-            {project.creatorPhotoUrl ? (
-              <img
-                src={project.creatorPhotoUrl}
-                alt={project.creatorName}
-                className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                style={{ border: "1px solid oklch(0.84 0.155 85 / 0.4)" }}
-              />
-            ) : (
-              <div
-                className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center"
-                style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
-              >
-                <span className="text-[9px] font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
+          {/* Creator — gap-1.5 matches TrackCard */}
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <div
+              className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 overflow-hidden"
+              style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+            >
+              {project.creatorPhotoUrl ? (
+                <img src={project.creatorPhotoUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span style={{ color: "oklch(0.84 0.155 85)" }}>
                   {(project.creatorName || project.creatorHandle || "?")[0].toUpperCase()}
                 </span>
-              </div>
-            )}
+              )}
+            </div>
             <span className="text-[11px] truncate" style={{ color: "oklch(0.6 0.04 280)" }}>
               {project.creatorName || project.creatorHandle || "Creator"}
             </span>

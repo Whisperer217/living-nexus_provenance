@@ -125,13 +125,32 @@ Apply this standard to all of the following:
 | Component | Status |
 |---|---|
 | `TrackCard.tsx` | ✅ Standardized (4:5, gradient always-on) |
-| `WorkCarousel.tsx` | ⚠️ Default fallback `"1:1"` → change to `"4:5"` |
-| `FeaturedProjectsCarousel.tsx` | ⚠️ `height: 180px` → replace with 4:5 via MediaAsset |
-| `DiscoverPage.tsx` (inline cards) | ⚠️ `height: 180px` → replace with 4:5 via MediaAsset |
-| `ExplorePage.tsx` (inline cards) | ⚠️ `height: 180px` → replace with 4:5 via MediaAsset |
-| `CreatorProfilePage.tsx` (track mini-cards) | ⚠️ `height: 180px` / `height: 160px` → replace with 4:5 |
+| `WorkCarousel.tsx` | ✅ 4:5 locked |
+| `FeaturedProjectsCarousel.tsx` | ✅ 4:5 locked, WID moved to bottom-left |
+| `DiscoverPage.tsx` (inline cards) | ✅ 4:5 locked |
+| `ExplorePage.tsx` (inline cards) | ✅ 4:5 locked |
+| `CreatorProfilePage.tsx` (track mini-cards) | ✅ 4:5 locked |
+| `ProjectsDiscoveryPage.tsx` (`ProjectCard`) | ✅ 4:5 locked, WID bottom-left, p-3, text-[13px], funding additive |
 | Creator cards (future) | 📋 Use this standard from day one |
 | Provenance download cards | 📋 Use this standard from day one |
+
+---
+
+## 11. Project Card — Funding Row (Additive Rule)
+
+The funding bar is **additive** — it is appended as an extra row below the creator row. It must **never** change the card's layout structure.
+
+```
+[ IMAGE (4:5) ]
+[ TITLE ]
+[ CREATOR ]
+[ FUNDING BAR ]  ← additive only when goalAmountCents > 0
+```
+
+- Funding row uses `text-[11px] font-mono` for amounts
+- Progress bar: `h-1.5 rounded-full`, gold gradient fill
+- No funding data = no row rendered (not a placeholder, not empty space)
+- Status badge goes top-right (same corner as AI disclosure on TrackCard)
 
 ---
 

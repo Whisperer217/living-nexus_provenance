@@ -207,34 +207,28 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                       }}
                     />
 
-                    {/* Top-right badges */}
-                    <div className="absolute top-2 right-2 flex items-center gap-1">
-                      {isNew && (
-                        <div
-                          className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
-                          style={{
-                            background: "oklch(0.55 0.22 145 / 0.90)",
-                            backdropFilter: "blur(4px)",
-                          }}
-                        >
-                          <Sparkles size={8} className="text-white" />
-                          <span className="text-[9px] font-mono text-white font-bold">NEW</span>
-                        </div>
-                      )}
-                      {project.linkedWitnessId && (
-                        <div
-                          className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
-                          style={{
-                            background: "oklch(0.22 0.08 145 / 0.92)",
-                            border: "1px solid oklch(0.55 0.18 145 / 0.5)",
-                            backdropFilter: "blur(6px)",
-                          }}
-                        >
-                          <Fingerprint size={8} style={{ color: "oklch(0.82 0.18 145)" }} />
-                          <span className="text-[9px] font-mono font-bold" style={{ color: "oklch(0.82 0.18 145)" }}>WID</span>
-                        </div>
-                      )}
-                    </div>
+                    {/* Top-right: NEW badge only */}
+                    {isNew && (
+                      <div className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full z-10"
+                        style={{ background: "oklch(0.55 0.22 145 / 0.90)", backdropFilter: "blur(4px)" }}
+                      >
+                        <Sparkles size={8} className="text-white" />
+                        <span className="text-[9px] font-mono text-white font-bold">NEW</span>
+                      </div>
+                    )}
+                    {/* WID badge — bottom-left (matches TrackCard standard) */}
+                    {project.linkedWitnessId && (
+                      <Link
+                        href={`/verify/${project.linkedWitnessId}`}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider transition-opacity opacity-90 hover:opacity-100"
+                        style={{ background: "rgba(0,0,0,0.72)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.55)" }}
+                        title="Project cryptographically witnessed"
+                      >
+                        <Fingerprint size={8} />
+                        <span>WID</span>
+                      </Link>
+                    )}
 
                     {/* Top-left verified */}
                     {project.isVerified && (
