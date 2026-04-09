@@ -1253,3 +1253,23 @@ export const selfImprovementFindings = mysqlTable("selfImprovementFindings", {
 });
 export type SelfImprovementFinding = typeof selfImprovementFindings.$inferSelect;
 export type InsertSelfImprovementFinding = typeof selfImprovementFindings.$inferInsert;
+
+// ─── Payment Integrity Monitor ─────────────────────────────────────────────────
+// Every Stripe checkout session the integrity worker inspects gets one row.
+// status = "ok"          → session was already credited in DB (no action needed)
+// status = "reconciled"  → session was missing from DB; worker auto-credited it
+// status = "skipped"     → test event, non-donation type, or already refunded
+// status = "failed"      → worker attempted reconciliation but it failed (see notes)
+export const paymentReconciliationLog = mysqlTable("paymentReconciliationLog", {
+  id: int("id").autoincrement().primaryKey(),
+  stripeSessionId: varchar("stripeSessionId", { length: 256 }).notNull().unique(),
+  paymentType: varchar("paymentType", { length: 64 }).notNull(), // project_donation | tip | license | slot | subscription
+  amountCents: int("amountCents").notNull().default(0),
+  currency: varchar("currency", { length: 8 }).default("usd").notNull(),
+  status: mysqlEnum("status", ["ok", "reconciled", "skipped", "failed"]).notNull(),
+  notes: text("notes"),
+  checkedAt: timestamp("checkedAt").defaultNow().notNull(),
+  reconciledAt: timestamp("reconciledAt"),
+});
+export type PaymentReconciliationLog = typeof paymentReconciliationLog.$inferSelect;
+export type InsertPaymentReconciliationLog = typeof paymentReconciliationLog.$inferInsert;

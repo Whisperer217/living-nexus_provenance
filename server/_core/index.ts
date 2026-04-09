@@ -21,6 +21,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startVisualWorker, backfillVisualQueue } from "../visualQueue";
 import { startSelfImprovementWorker } from "../selfImprovementWorker";
+import { startPaymentIntegrityWorker } from "../paymentIntegrityWorker";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -135,6 +136,7 @@ async function startServer() {
     startVisualWorker();
     // Self-improvement worker: runs nightly at 2am, scans codebase for issues
     startSelfImprovementWorker();
+    startPaymentIntegrityWorker();
   });
 }
 

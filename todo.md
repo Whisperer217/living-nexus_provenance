@@ -3335,3 +3335,17 @@
 - [x] Register /admin/self-improve route in App.tsx
 - [x] Wire scheduled worker (nightly at 2am via setInterval on server start)
 - [x] Add manual trigger button in admin UI + 🤖 Self-Improve button in LN Command Center header
+
+## Donation Feature Bug Fixes
+
+- [ ] Fix donation total not updating — $100 payment shows as $0 in goal progress display
+- [ ] Fix mobile swipe-up panel cutoff — large black dead zone below content on mobile
+
+## Payment Integrity Monitor Worker (Apr 8 2026)
+- [x] Add paymentReconciliationLog table to drizzle schema and push migration
+- [x] Build server/paymentIntegrityWorker.ts: polls Stripe every 15min, cross-checks DB, auto-reconciles missed credits, notifyOwner on reconciliation
+- [x] Wire worker to server startup (runs at startup after 30s delay + every 15 minutes)
+- [x] Add tRPC admin procedures: paymentIntegrity.getLogs, paymentIntegrity.getStats, paymentIntegrity.triggerRun
+- [x] Build PaymentIntegrityPage.tsx: stats cards, reconciled/failed alerts, full log table
+- [x] Register /admin/payment-integrity route in App.tsx
+- [x] Add 💳 Payment Integrity button to LN Command Center admin header

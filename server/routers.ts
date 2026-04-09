@@ -4639,7 +4639,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
             quantity: 1,
           }],
           mode: "payment",
-          success_url: `${input.origin}/project/${project.slug}?donation=success`,
+          success_url: `${input.origin}/project/${project.slug}?donation=success&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${input.origin}/project/${project.slug}`,
           customer_email: user?.email || undefined,
           metadata: {
@@ -4663,6 +4663,59 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
 
         const session = await stripe.checkout.sessions.create(sessionParams);
         return { url: session.url };
+      }),
+
+    /**
+     * Confirm a donation by verifying the Stripe session directly.
+     * Called client-side after returning from checkout with ?donation=success.
+     * Idempotent: uses stripeSessionId as unique key to prevent double-counting.
+     * Reliable fallback when webhooks are delayed or not configured in test mode.
+     */
+    confirmDonation: publicProcedure
+      .input(z.object({
+        sessionId: z.string().min(1),
+        projectId: z.number().int(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        try {
+          const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+          if (session.payment_status !== "paid") {
+            return { credited: false, reason: "payment_not_completed" };
+          }
+          const meta = session.metadata || {};
+          if (meta.type !== "project_donation" || parseInt(meta.projectId || "0") !== input.projectId) {
+            return { credited: false, reason: "metadata_mismatch" };
+          }
+          // Check if already recorded (webhook may have already processed it)
+          const db = await getDb();
+          if (!db) return { credited: false, reason: "db_unavailable" };
+          const existing = await db.execute(
+            `SELECT id FROM projectDonations WHERE stripeSessionId = ? LIMIT 1`,
+            [session.id]
+          ) as any;
+          const rows = existing?.[0] as any[];
+          if (rows && rows.length > 0) {
+            return { credited: true, alreadyRecorded: true };
+          }
+          // Webhook hasn't fired yet — record it now
+          const amountCents = session.amount_total ?? 0;
+          const user = ctx.user;
+          await recordProjectDonation({
+            projectId: input.projectId,
+            donorUserId: meta.userId ? parseInt(meta.userId) : (user?.id ?? undefined),
+            donorName: meta.anonymous === "true" ? "Anonymous" : (meta.donorName || user?.name || undefined),
+            donorEmail: meta.donorEmail || user?.email || undefined,
+            amountCents,
+            message: meta.message || undefined,
+            anonymous: meta.anonymous === "true",
+            stripeSessionId: session.id,
+            stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          });
+          return { credited: true, alreadyRecorded: false, amountCents };
+        } catch (err: any) {
+          console.error("[confirmDonation] Error:", err.message);
+          return { credited: false, reason: "error" };
+        }
       }),
 
     /** Get content blocks for a project — public */
@@ -5050,6 +5103,55 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .mutation(async ({ input }) => {
         const { revertFinding } = await import('./selfImprovementWorker');
         return revertFinding(input.findingId);
+      }),
+  }),
+
+  // ─── Payment Integrity Monitor ─────────────────────────────────────────────
+  paymentIntegrity: router({
+    /** Admin: manually trigger a payment integrity check */
+    triggerRun: adminProcedure
+      .mutation(async () => {
+        const { runPaymentIntegrityCheck } = await import('./paymentIntegrityWorker');
+        return runPaymentIntegrityCheck();
+      }),
+    /** Admin: get recent reconciliation log entries */
+    getLogs: adminProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(500).optional() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { paymentReconciliationLog } = await import('../drizzle/schema');
+        const { desc } = await import('drizzle-orm');
+        return db
+          .select()
+          .from(paymentReconciliationLog)
+          .orderBy(desc(paymentReconciliationLog.checkedAt))
+          .limit(input.limit ?? 200);
+      }),
+    /** Admin: get summary stats for the reconciliation log */
+    getStats: adminProcedure
+      .query(async () => {
+        const db = await getDb();
+        if (!db) return { total: 0, reconciled: 0, failed: 0, ok: 0, skipped: 0 };
+        const { paymentReconciliationLog } = await import('../drizzle/schema');
+        const { sql: drizzleSql } = await import('drizzle-orm');
+        const rows = await db
+          .select({
+            status: paymentReconciliationLog.status,
+            count: drizzleSql<number>`COUNT(*)`
+          })
+          .from(paymentReconciliationLog)
+          .groupBy(paymentReconciliationLog.status);
+        const stats = { total: 0, reconciled: 0, failed: 0, ok: 0, skipped: 0 };
+        for (const row of rows) {
+          const c = Number(row.count);
+          stats.total += c;
+          if (row.status === 'reconciled') stats.reconciled += c;
+          else if (row.status === 'failed') stats.failed += c;
+          else if (row.status === 'ok') stats.ok += c;
+          else if (row.status === 'skipped') stats.skipped += c;
+        }
+        return stats;
       }),
   }),
 });
