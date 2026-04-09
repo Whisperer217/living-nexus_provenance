@@ -596,7 +596,7 @@ const GENRE_CARDS = [
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-hero-76TJneE6NXajYSDJWHEXPg.webp";
 
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [activeGenre, setActiveGenre] = useState("All");
   const [tipTarget, setTipTarget] = useState<number | null>(null);
   const [tipRect, setTipRect] = useState<DOMRect | null>(null);
@@ -1240,7 +1240,7 @@ export default function HomePage() {
                 Turn your lyrics into a production-ready AI music prompt. The generator builds a lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline — then pre-fills your upload form so you can register the work immediately.
               </p>
             </div>
-            <Link href="/profile">
+            <Link href={(user as any)?.id ? `/creator/${(user as any).id}?openPromptStudio=1` : getLoginUrl()}>
               <button
                 className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{

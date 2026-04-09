@@ -3349,3 +3349,7 @@
 - [x] Build PaymentIntegrityPage.tsx: stats cards, reconciled/failed alerts, full log table
 - [x] Register /admin/payment-integrity route in App.tsx
 - [x] Add 💳 Payment Integrity button to LN Command Center admin header
+
+## Mobile Bug Fixes (Apr 8 2026)
+- [ ] Fix Provenance Prompt Generator button triggering Quick Play panel instead of navigating to prompt studio
+- [ ] Fix large black dead zone below bottom nav bar on mobile screens

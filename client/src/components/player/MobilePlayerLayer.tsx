@@ -1090,9 +1090,10 @@ export default function MobilePlayerLayer() {
           WebkitOverflowScrolling: "touch",
           touchAction: "pan-y",
           overscrollBehaviorY: "contain",
-          paddingBottom: "env(safe-area-inset-bottom, 12px)",
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
           height: 0,
           minHeight: 0,
+          background: "oklch(0.08 0.02 275)",
         }}
       >
 

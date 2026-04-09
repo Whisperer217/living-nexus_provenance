@@ -334,7 +334,9 @@ export default function PlaylistDrawer() {
           boxShadow: "-2px 0 16px oklch(0 0 0 / 0.4)",
           transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s",
           color: "oklch(0.84 0.155 85)",
-          pointerEvents: dialogOpen && !isOpen ? "none" : "auto",
+          // When any dialog/modal is open: always disable pointer events on the handle
+          // This prevents the handle from intercepting taps on dialogs (e.g. Prompt Studio)
+          pointerEvents: dialogOpen ? "none" : "auto",
         }}
         title={isOpen ? "Close playlist drawer" : "Open playlist drawer"}
         aria-label={isOpen ? "Close playlist drawer" : "Open playlist drawer"}
