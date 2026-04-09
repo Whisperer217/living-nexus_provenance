@@ -112,7 +112,7 @@ export async function recordNameChange(userId: number, oldName: string | null, n
 export async function getNameHistory(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(nameHistory).where(eq(nameHistory.userId, userId)).orderBy(desc(nameHistory.changedAt));
+  return db.select().from(nameHistory).where(eq(nameHistory.userId, userId)).orderBy(desc(nameHistory.changedAt)).limit(100); // Name history cap
 }
 
 /** Return the earliest recorded name for a user (the name at WID issuance). */
@@ -204,7 +204,8 @@ export async function getExpressionLineageByUser(userId: number) {
     .select()
     .from(expressionLineage)
     .where(eq(expressionLineage.userId, userId))
-    .orderBy(desc(expressionLineage.generatedAt));
+    .orderBy(desc(expressionLineage.generatedAt))
+    .limit(50); // Show last 50 expression lineage entries
 }
 
 export async function updateUserStripeAccount(userId: number, data: {
@@ -252,7 +253,8 @@ export async function getAllCreators() {
     ))
     .groupBy(users.id)
     .having(sql`count(${songs.id}) > 0`)
-    .orderBy(desc(users.createdAt));
+    .orderBy(desc(users.createdAt))
+    .limit(500); // Safety cap — paginate if platform exceeds 500 active creators
   return results;
 }
 
@@ -311,7 +313,7 @@ export async function getSongsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
   // Sort by creator's explicit displayOrder first; fall back to upload date for unset (0) entries
-  return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(asc(songs.displayOrder), asc(songs.createdAt));
+  return db.select().from(songs).where(eq(songs.userId, userId)).orderBy(asc(songs.displayOrder), asc(songs.createdAt)).limit(1000); // Safety cap per creator
 }
 
 /** Bulk-update displayOrder for a creator's songs. orderedIds must all belong to userId. */
@@ -2172,7 +2174,7 @@ export async function createPromoCode(data: {
 export async function listPromoCodes() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt));
+  return db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt)).limit(500); // Admin panel cap
 }
 
 /** Deactivate a promo code */
@@ -3046,7 +3048,7 @@ export async function listFounders() {
     profilePhotoUrl: users.profilePhotoUrl,
     createdAt: users.createdAt,
     songSlotsUsed: users.songSlotsUsed,
-  }).from(users).where(eq(users.role, "founder" as any));
+  }).from(users).where(eq(users.role, "founder" as any)).limit(200); // Founders are capped at MAX_FOUNDERS (200)
 }
 
 /** Search users for the Founder Control panel (any role). */

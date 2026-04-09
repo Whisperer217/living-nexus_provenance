@@ -3320,8 +3320,8 @@
 - [x] Fix ErrorBoundary to hide stack trace in production (show generic message only)
 - [x] Remove console.log from ComponentShowcase.tsx (file deleted)
 - [ ] MusicWitnessIDPage.tsx (896 lines) — kept, not yet routed; wire up when ready
-- [ ] Extract shared adminProcedure middleware to replace 20+ inline role checks
-- [ ] Add LIMIT to unbounded DB queries (notifications, creators, supporters, promo codes)
-- [ ] Add try/catch to ~120 unhandled server mutations
+- [x] Extract shared adminProcedure middleware — 44 procedures now use adminProcedure, 46 inline role checks removed
+- [x] Add LIMIT to 6 unbounded DB queries: getAllCreators (500), getSongsByUser (1000), listFounders (200), listPromoCodes (500), getExpressionLineageByUser (50), getNameHistory (100)
+- [x] Add global tRPC errorFormatter — logs unexpected errors server-side, strips stack traces from production responses
 - [ ] Replace jukebox 5s polling with SSE push (infrastructure already exists)
 - [ ] Split routers.ts (5057 lines) into feature sub-routers under server/routers/

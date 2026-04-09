@@ -5,6 +5,28 @@ import type { TrpcContext } from "./context";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
+  errorFormatter({ shape, error }) {
+    // Log unexpected server errors (not auth/validation errors) for observability
+    const isExpected =
+      error.code === "UNAUTHORIZED" ||
+      error.code === "FORBIDDEN" ||
+      error.code === "NOT_FOUND" ||
+      error.code === "BAD_REQUEST" ||
+      error.code === "CONFLICT";
+
+    if (!isExpected) {
+      console.error(`[tRPC Error] ${error.code} — ${error.message}`, error.cause ?? "");
+    }
+
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        // Never expose raw stack traces or internal error details in production
+        stack: process.env.NODE_ENV === "development" ? shape.data.stack : undefined,
+      },
+    };
+  },
 });
 
 export const router = t.router;
