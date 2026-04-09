@@ -181,6 +181,24 @@ export default function PlaylistDrawer() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { addAndPlay, playQueueAt, state } = usePlayer();
   const { user } = useAuth();
+  // LAYER AUTHORITY RULE: Close drawer on route change — prevents stacking with new pages
+  const [location] = useLocation();
+  useEffect(() => { setIsOpen(false); }, [location]);
+
+  // LAYER AUTHORITY RULE: Close drawer when any modal/dialog opens — one primary surface at a time
+  useEffect(() => {
+    const checkAndClose = () => {
+      const locked =
+        document.body.hasAttribute("data-scroll-locked") ||
+        document.body.style.overflow === "hidden" ||
+        document.body.style.overflowY === "hidden";
+      if (locked) setIsOpen(false);
+    };
+    const observer = new MutationObserver(checkAndClose);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["data-scroll-locked", "style"] });
+    return () => observer.disconnect();
+  }, []);
+
   // Detect when any Radix dialog/modal is open — hide tab trigger to prevent accidental activation
   useEffect(() => {
     const checkDialogOpen = () => {
@@ -305,7 +323,7 @@ export default function PlaylistDrawer() {
       {/* Backdrop — only on mobile */}
       {isOpen && (
         <div
-          className="md:hidden fixed inset-0 z-[8990]"
+          className="md:hidden fixed inset-0 z-[30]"
           style={{ background: "oklch(0 0 0 / 0.45)", backdropFilter: "blur(2px)" }}
           onClick={() => setIsOpen(false)}
         />
@@ -315,7 +333,7 @@ export default function PlaylistDrawer() {
       {/* Slides fully off-screen when any dialog/modal is open to prevent accidental activation */}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed z-[9001] flex items-center justify-center active:scale-95"
+        className="fixed z-[32] flex items-center justify-center active:scale-95"
         style={{
           // When drawer open: peeking left of the drawer panel
           // When drawer closed + no dialog: peek 4px into screen (visible handle)
@@ -346,7 +364,7 @@ export default function PlaylistDrawer() {
 
       {/* Drawer panel */}
       <div
-        className={`fixed top-0 right-0 h-full z-[9000] flex flex-col${isOpen ? "" : " pointer-events-none"}`}
+        className={`fixed top-0 right-0 h-full z-[31] flex flex-col${isOpen ? "" : " pointer-events-none"}`}
         style={{
           width: "280px",
           background: "oklch(0.09 0.022 275 / 0.97)",

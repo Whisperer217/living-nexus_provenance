@@ -397,8 +397,12 @@ export default function MobilePlayerLayer() {
   const miniTouchStartY = useRef<number | null>(null);
   const onMiniTouchStart = (e: React.TouchEvent) => {
     miniTouchStartY.current = e.touches[0].clientY;
+    // Lock page scroll during mini-bar drag so underlying content doesn't scroll
+    document.body.style.overflow = 'hidden';
   };
   const onMiniTouchEnd = (e: React.TouchEvent) => {
+    // Always restore scroll on release
+    document.body.style.overflow = '';
     if (miniTouchStartY.current === null) return;
     const delta = miniTouchStartY.current - e.changedTouches[0].clientY;
     if (delta > 120) setPlayerState("cinematic");
@@ -415,6 +419,8 @@ export default function MobilePlayerLayer() {
     expandedTouchStartY.current = e.touches[0].clientY;
     setExpandedDragOffset(0);
     hapticFiredRef.current = false;
+    // Lock page scroll during expanded drag-to-dismiss
+    document.body.style.overflow = 'hidden';
   };
   const onExpandedTouchMove = (e: React.TouchEvent) => {
     if (expandedTouchStartY.current === null) return;
@@ -440,6 +446,8 @@ export default function MobilePlayerLayer() {
     }
   };
   const onExpandedTouchEnd = () => {
+    // Always restore scroll on release
+    document.body.style.overflow = '';
     if (expandedDragOffset > 60) {
       setPlayerState("mini");
     }
@@ -768,7 +776,7 @@ export default function MobilePlayerLayer() {
     ];
     return (
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-[9989]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-[20]"
         style={{
           height: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
@@ -811,7 +819,7 @@ export default function MobilePlayerLayer() {
 
   const MiniBar = () => (
     <div
-      className="md:hidden fixed left-0 right-0 z-[9990]"
+      className="md:hidden fixed left-0 right-0 z-[21]"
       style={{
         bottom: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
         minHeight: "64px",
@@ -956,11 +964,11 @@ export default function MobilePlayerLayer() {
             <>
               {/* Backdrop */}
               <div
-                className="fixed inset-0 z-[9991]"
+                className="fixed inset-0 z-[22]"
                 onClick={() => setShowMiniMenu(false)}
               />
               <div
-                className="absolute bottom-full right-0 mb-2 w-52 rounded-2xl overflow-hidden z-[9992]"
+                className="absolute bottom-full right-0 mb-2 w-52 rounded-2xl overflow-hidden z-[23]"
                 style={{
                   background: "oklch(0.13 0.025 275 / 0.97)",
                   backdropFilter: "blur(20px)",
@@ -1040,7 +1048,7 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   const ExpandedSheet = () => (
     <div
-      className="md:hidden fixed inset-0 z-[9995] flex flex-col"
+      className="md:hidden fixed inset-0 z-[40] flex flex-col"
       style={{
         background: "oklch(0.08 0.02 275)",
         transform: `translateY(${expandedDragOffset}px)`,
@@ -1199,7 +1207,7 @@ export default function MobilePlayerLayer() {
           {/* Tap-to-reset overlay when zoomed */}
           {artZoomed && (
             <div
-              className="fixed inset-0 z-[9994]"
+              className="fixed inset-0 z-[41]"
               onClick={resetArtZoom}
               style={{ cursor: "zoom-out" }}
             />
@@ -1635,7 +1643,7 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   const CinematicLayer = () => (
     <div
-      className="md:hidden fixed inset-0 z-[9999] bg-black"
+      className="md:hidden fixed inset-0 z-[50] bg-black"
       style={{ overscrollBehaviorX: "none", touchAction: "pan-y" }}
       onTouchStart={onCinematicTouchStart}
       onTouchEnd={onCinematicTouchEnd}

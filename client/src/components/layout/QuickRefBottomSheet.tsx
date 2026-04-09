@@ -196,7 +196,7 @@ export default function QuickRefBottomSheet({
           if (next && hasTrack) setActiveTab("nowplaying");
         }}
         aria-label={open ? "Close quick access" : "Open quick access"}
-        className={`md:hidden fixed left-1/2 -translate-x-1/2 z-[9992] flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all active:scale-95 ${modalOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`md:hidden fixed left-1/2 -translate-x-1/2 z-[37] flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all active:scale-95 ${modalOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         style={{
           bottom: `${bottomOffset + 8}px`,
           background: "oklch(0.14 0.025 278 / 0.95)",
@@ -227,7 +227,7 @@ export default function QuickRefBottomSheet({
       {/* ── Backdrop ─────────────────────────────────────────────────── */}
       {open && (
         <div
-          className="md:hidden fixed inset-0 z-[9989] bg-black/60"
+          className="md:hidden fixed inset-0 z-[35] bg-black/60"
           aria-hidden="true"
           style={{ backdropFilter: "blur(2px)" }}
         />
@@ -236,7 +236,7 @@ export default function QuickRefBottomSheet({
       {/* ── Sheet ────────────────────────────────────────────────────── */}
       <div
         ref={sheetRef}
-        className="md:hidden fixed left-0 right-0 z-[9991] flex flex-col rounded-t-2xl overflow-hidden"
+        className="md:hidden fixed left-0 right-0 z-[36] flex flex-col rounded-t-2xl overflow-hidden"
         style={{
           bottom: `${bottomOffset}px`,
           maxHeight: `calc(100dvh - ${bottomOffset}px - 16px)`,
