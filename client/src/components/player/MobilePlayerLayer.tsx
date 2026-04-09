@@ -795,8 +795,9 @@ export default function MobilePlayerLayer() {
         style={{
           height: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
-          background: isLightsOn ? "rgba(40,52,68,0.97)" : "oklch(0.08 0.022 275 / 0.98)",
-          backdropFilter: "blur(20px) saturate(1.4)",
+          /* Solid background — no bleed-through from content below */
+          background: isLightsOn ? "rgb(28,38,52)" : "oklch(0.08 0.022 275)",
+          backdropFilter: "blur(12px) saturate(1.2)",
           borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid oklch(0.84 0.155 85 / 0.12)",
         }}
       >
@@ -836,13 +837,15 @@ export default function MobilePlayerLayer() {
     <div
       className="md:hidden fixed left-0 right-0 z-[9001]"
       style={{
-        bottom: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
+        /* Sits above BottomNavBar — uses --nav-total token */
+        bottom: `calc(var(--nav-height, 56px) + max(env(safe-area-inset-bottom, 0px), 8px))`,
         minHeight: "64px",
         paddingBottom: 0,
+        /* Solid background — no bleed-through */
         background: isLightsOn
-          ? "rgba(55,68,85,0.92)"
-          : "oklch(0.10 0.025 275 / 0.98)",
-        backdropFilter: "blur(20px) saturate(1.4)",
+          ? "rgb(32,44,58)"
+          : "oklch(0.10 0.025 275)",
+        backdropFilter: "blur(12px) saturate(1.2)",
         borderTop: isLightsOn
           ? "1px solid rgba(255,255,255,0.15)"
           : "1px solid oklch(0.84 0.155 85 / 0.20)",

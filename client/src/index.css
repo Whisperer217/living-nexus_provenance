@@ -234,6 +234,18 @@
     background-color: oklch(0.10 0.022 55); /* match app bg — no black void on overscroll */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
+  /* ── Bottom Stack Layout Tokens ─────────────────────────────────────
+     Single source of truth for all bottom-anchored heights.
+     Player sits ABOVE nav. Content padding accounts for both.
+     ─────────────────────────────────────────────────────────────────── */
+  :root {
+    --nav-height: 56px;                    /* BottomNavBar visual height */
+    --nav-safe: max(env(safe-area-inset-bottom, 0px), 8px);
+    --nav-total: calc(var(--nav-height) + var(--nav-safe)); /* full nav footprint */
+    --player-height: 64px;                 /* MiniBar height */
+    --bottom-stack: calc(var(--nav-total) + var(--player-height)); /* total reserved bottom */
+  }
+
   #root {
     min-height: 100dvh; /* dvh = true mobile viewport height, not browser-lied vh */
     display: flex;

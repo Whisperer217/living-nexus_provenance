@@ -389,9 +389,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       ══════════════════════════════════════════════ */}
       <main className="flex-1 flex flex-col overflow-hidden md:pt-[52px] pt-14" style={{ overscrollBehavior: "none" }}>
         <style>{`
+          /* Desktop: 72px player bar + safe area */
           @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
-          /* Mobile: 56px bottom nav + 64px mini player + safe area */
-          @media (max-width: 767px) { .player-scroll-area { padding-bottom: calc(136px + max(env(safe-area-inset-bottom, 0px), 8px)) !important; } }
+          /* Mobile: nav (56px + safe-area) + mini player (64px) = full bottom stack */
+          @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
         `}</style>
         <div className="flex-1 overflow-y-auto player-scroll-area" style={{ overscrollBehaviorX: "none", touchAction: "pan-y" }}>
           {children}
