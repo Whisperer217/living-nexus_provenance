@@ -372,15 +372,14 @@ export default function DiscoverPage() {
                     outlineOffset: "1px"
                   }}
                 >
-                  <div className="relative overflow-hidden" style={{ height: "180px" }}>
+                  <div className="prov-card-img-wrap">
                     <MediaAsset
                       src={item.song.coverArtUrl}
                       alt={item.song.title}
                       mode="card"
-                      aspectRatio={(item.song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+                      aspectRatio={(item.song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
                       focalX={item.song.coverPositionX ?? 50}
                       focalY={item.song.coverPositionY ?? 50}
-                      className="absolute inset-0 w-full h-full"
                     />
                     {/* Dark overlay on hover */}
                     <div className={`absolute inset-0 transition-opacity duration-200 bg-black/50 ${

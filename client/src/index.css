@@ -805,3 +805,30 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   0%, 100% { opacity: 0.4; transform: scale(0.8); }
   50%       { opacity: 1;   transform: scale(1.2); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PROVENANCE CARD STYLE STANDARD — see CARD_STANDARDS.md
+   Canonical CSS for all provenance cards. Do not override without
+   updating CARD_STANDARDS.md.
+═══════════════════════════════════════════════════════════════════ */
+
+/* Image wrapper: locked 4:5 frame via MediaAsset padding-bottom system */
+.prov-card-img-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.75rem; /* rounded-xl — consistent across all cards */
+}
+
+/* Bottom gradient overlay: always present, cinematic fade */
+.prov-card-gradient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    rgba(0, 0, 0, 0.55) 75%,
+    rgba(0, 0, 0, 0.82) 100%
+  );
+}

@@ -157,19 +157,16 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
 function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => void; isPlaying: boolean }) {
   return (
     <Link href={`/song/${song.id}`}>
-      <div
-        className="relative rounded-xl overflow-hidden cursor-pointer group"
-        style={{ height: "180px", background: "oklch(0.14 0.015 280)" }}
-      >
+      <div className="prov-card-img-wrap cursor-pointer group">
         <MediaAsset
           src={song.coverArtUrl}
           alt={song.title}
           mode="card"
-          aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+          aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
           focalX={song.coverPositionX ?? 50}
           focalY={song.coverPositionY ?? 50}
-          className="absolute inset-0 w-full h-full"
         />
+        <div className="prov-card-gradient" />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center">
           <button
             onClick={(e) => { e.preventDefault(); onPlay(); }}
@@ -1246,16 +1243,17 @@ export default function CreatorProfilePage() {
                 {(creatorProjects as any[]).map((project: any) => (
                   <Link key={project.id} href={`/project/${project.slug}`}>
                     <div
-                      className="relative rounded-xl overflow-hidden cursor-pointer group flex-shrink-0"
-                      style={{ width: "220px", height: "160px", background: "oklch(0.14 0.015 280)" }}
+                      className="prov-card-img-wrap cursor-pointer group flex-shrink-0"
+                      style={{ width: "160px" }}
                     >
                       {project.bannerUrl ? (
-                        <img src={project.bannerUrl} alt={project.title} className="w-full h-full object-cover" />
+                        <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover object-center" />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#1a1025] to-[#080d14] flex items-center justify-center">
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1025] to-[#080d14] flex items-center justify-center">
                           <span className="text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85 / 0.2)" }}>{project.title[0]}</span>
                         </div>
                       )}
+                      <div className="prov-card-gradient" />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200" />
                       <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
                         <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>{project.title}</p>

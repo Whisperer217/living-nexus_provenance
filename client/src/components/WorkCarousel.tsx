@@ -135,24 +135,23 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
               >
                 {/* Cover / thumbnail */}
                 <Link href={href}>
-                  <div className="relative overflow-hidden" style={{ height: 160 }}>
+                  <div className="prov-card-img-wrap">
                     {item.song.coverArtUrl ? (
                       <MediaAsset
                         src={item.song.coverArtUrl}
                         alt={item.song.title}
                         mode="card"
-                        aspectRatio={(item.song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+                        aspectRatio={(item.song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
                         focalX={item.song.coverPositionX ?? 50}
                         focalY={item.song.coverPositionY ?? 50}
-                        className="absolute inset-0 w-full h-full"
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center" style={{ background: "#0f0d22" }}>
                         <Icon size={32} style={{ color: widColor + "66" }} />
                       </div>
                     )}
-                    {/* Overlay */}
-                    <div className={`absolute inset-0 transition-opacity duration-200 bg-black/50 ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
+                    {/* Gradient overlay — always present per card standard */}
+                    <div className="prov-card-gradient" />
                     {/* Play indicator for audio */}
                     {type === "audio" && (
                       <div className="absolute inset-0 flex items-center justify-center">

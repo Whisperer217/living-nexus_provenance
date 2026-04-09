@@ -175,7 +175,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                   }}
                 >
                   {/* Banner with overlaid content */}
-                  <div className="relative w-full overflow-hidden" style={{ height: "180px" }}>
+                  <div className="prov-card-img-wrap" style={{ paddingBottom: "125%" }}>
                     {project.bannerUrl ? (
                       <img
                         src={project.bannerUrl}

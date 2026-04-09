@@ -90,24 +90,20 @@ function ExploreCard({
     >
       {/* ── Zone 1: Cover Art ── */}
       <div
-        className="relative overflow-hidden cursor-pointer"
-        style={{ height: "180px" }}
+        className="prov-card-img-wrap cursor-pointer"
         onClick={e => { e.stopPropagation(); handleCardClick(); }}
       >
         <MediaAsset
           src={song.coverArtUrl}
           alt={song.title}
           mode="card"
-          aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "1:1"}
+          aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
           focalX={song.coverPositionX ?? 50}
           focalY={song.coverPositionY ?? 50}
-          className="w-full h-full transition-transform duration-300 group-hover:scale-105"
+          className="transition-transform duration-300 group-hover:scale-105"
         />
-        {/* Overlay gradient */}
-        <div className={`absolute inset-0 transition-opacity duration-200
-          bg-gradient-to-b from-transparent via-transparent to-black/70
-          ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-        />
+        {/* Overlay gradient — always present per card standard */}
+        <div className="prov-card-gradient" />
         {/* Play / wave / read button */}
         <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
           transition-all duration-200 z-10
