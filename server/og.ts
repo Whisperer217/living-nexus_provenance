@@ -286,8 +286,9 @@ export function registerOgRoutes(app: Express) {
       const playPart = (song as any).playCount > 0 ? ` · ${(song as any).playCount} plays` : "";
       const ogDescription = `🎵 ${song.title} by ${artistName}${genrePart}${widPart}${playPart} — Listen on Living Nexus`;
 
-      const coverArt = (song as any).coverArtUrl?.trim();
-      const ogImage = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
+      // Use the generated provenance card image (full-bleed art + WID + badge overlay)
+      // Falls back to raw cover art if the generated endpoint is unavailable
+      const ogImage = `${CANONICAL_ORIGIN}/api/og/image/song/${songId}`;
       const ogUrl = `${CANONICAL_ORIGIN}/song/${songId}`;
 
       // Audio file URL — kept for Telegram og:audio

@@ -30,6 +30,7 @@ import {
   getCreatorForOg,
   getProjectBySlug,
 } from "./db";
+import { generateSongOgImage } from "./ogImageService";
 
 const CANONICAL_ORIGIN = "https://www.livingnexus.org";
 const FALLBACK_IMAGE =
@@ -124,6 +125,39 @@ function buildOgHtml(opts: {
 }
 
 export const ogApiRouter = Router();
+
+// ── /api/og/image/song/:id ─────────────────────────────────────────────────
+// Returns a 1200×630 PNG: full-bleed artwork + subtle WID + badge overlay
+ogApiRouter.get("/api/og/image/song/:id", async (req, res) => {
+  const songId = parseInt(req.params.id, 10);
+  if (isNaN(songId)) return res.status(400).send("Invalid song ID");
+
+  try {
+    const result = await getSongWithCreator(songId);
+    if (!result) return res.status(404).send("Song not found");
+
+    const { song, creator } = result;
+    const artistName =
+      (creator as any)?.artistHandle?.trim() ||
+      (creator as any)?.name?.trim() ||
+      "Unknown Artist";
+
+    const pngBuffer = await generateSongOgImage({
+      coverArtUrl: (song as any).coverArtUrl ?? null,
+      wid: (song as any).witnessId ?? null,
+      badge: (song as any).aiDisclosure ?? null,
+      fallbackImageUrl: FALLBACK_IMAGE,
+    });
+
+    res.status(200).set({
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=3600",
+    }).end(pngBuffer);
+  } catch (err) {
+    console.error("[OG Image] Error for song", songId, err);
+    res.status(500).send("Internal server error");
+  }
+});
 
 // ── /api/og/song/:id ────────────────────────────────────────────────────────
 ogApiRouter.get("/api/og/song/:id", async (req, res) => {
