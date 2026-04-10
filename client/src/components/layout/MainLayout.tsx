@@ -20,6 +20,7 @@ import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import PlayerBar from "@/components/player/PlayerBar";
 import MobilePlayerLayer from "@/components/player/MobilePlayerLayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
@@ -96,17 +97,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const MOBILE_TEXT = isWarm ? "rgba(200,212,228,0.85)" : undefined;
   const MOBILE_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : undefined;
 
-  // Body scroll lock for mobile menu — lock body (not html) so background still paints
+  // Body scroll lock for mobile menu — routed through global overlayController
   const openMobileMenu = useCallback(() => {
     setMobileMenuOpen(true);
-    document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
+    overlayOpen("menu");
   }, []);
 
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
-    document.body.style.overflow = "";
-    document.body.style.touchAction = "";
+    overlayClose("menu");
   }, []);
 
   const handleLogout = useCallback(async () => {

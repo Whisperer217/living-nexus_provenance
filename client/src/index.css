@@ -251,6 +251,15 @@
     display: flex;
     flex-direction: column;
   }
+  /* ── Global Overlay System ─────────────────────────────────────────
+     body.overlay-active is set by overlayController.ts.
+     All panels (menu, quickplay, player, modals) use this single class.
+     ─────────────────────────────────────────────────────────────────── */
+  body.overlay-active {
+    overflow: hidden;
+    touch-action: none;
+  }
+
   /* Graceful Lights On transition */
   html {
     transition:
