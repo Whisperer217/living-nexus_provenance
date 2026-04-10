@@ -255,6 +255,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           transform: mobileMenuOpen ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
           overflowY: "auto",
+          overscrollBehavior: "contain",
           boxShadow: mobileMenuOpen ? "4px 0 40px oklch(0 0 0 / 0.6)" : "none",
         }}
         onClick={e => e.stopPropagation()}
@@ -305,7 +306,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             )}
 
             {/* Mobile primary nav */}
-            <div className="flex-1 py-2 overflow-y-auto">
+            <div className="flex-1 py-2 overflow-y-auto" style={{ overscrollBehavior: "contain" }}>
               {PRIMARY_NAV.map(item => renderMobileNavItem(item))}
               {!authLoading && user && (
                 <div className="px-4 pt-4 pb-1">

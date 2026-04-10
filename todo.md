@@ -3366,3 +3366,4 @@
 - [ ] Step 2 — Extract shared format constants to shared/contentTypes.ts
 - [ ] Step 3 — Add parentSongId nullable FK to songs table
 - [ ] Step 4 — Add workType discriminator to events table
+- [x] Fix hamburger menu overscroll escape on mobile — panel translates past its bounds when scrolling hits the end of content
