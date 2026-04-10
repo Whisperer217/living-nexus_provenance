@@ -218,16 +218,16 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     )}
                     {/* WID badge — bottom-left (matches TrackCard standard) */}
                     {project.linkedWitnessId && (
-                      <Link
-                        href={`/verify/${project.linkedWitnessId}`}
-                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider transition-opacity opacity-90 hover:opacity-100"
+                      <button
+                        type="button"
+                        onClick={(e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); window.open(`/verify/${project.linkedWitnessId}`, "_self"); }}
+                        className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider transition-opacity opacity-90 hover:opacity-100 cursor-pointer"
                         style={{ background: "rgba(0,0,0,0.72)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.55)" }}
                         title="Project cryptographically witnessed"
                       >
                         <Fingerprint size={8} />
                         <span>WID</span>
-                      </Link>
+                      </button>
                     )}
 
                     {/* Top-left verified */}

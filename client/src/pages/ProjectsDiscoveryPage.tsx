@@ -61,21 +61,20 @@ function ProjectCard({ project }: { project: any }) {
           />
           {/* WID badge — bottom-left (matches TrackCard) */}
           {project.linkedWitnessId && (
-            <a
-              href={`/verify/${project.linkedWitnessId}`}
-              onClick={e => e.stopPropagation()}
-              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider transition-opacity opacity-90 hover:opacity-100"
+            <button
+              type="button"
+              onClick={e => { e.preventDefault(); e.stopPropagation(); window.location.href = `/verify/${project.linkedWitnessId}`; }}
+              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider transition-opacity opacity-90 hover:opacity-100 cursor-pointer"
               style={{
                 background: "rgba(0,0,0,0.72)",
                 color: "#F5C451",
                 border: "1px solid rgba(245,196,81,0.55)",
-                textDecoration: "none",
               }}
               title="Project cryptographically witnessed"
             >
               <Shield size={8} />
               <span>WID</span>
-            </a>
+            </button>
           )}
           {/* Status badge — top-right */}
           <div
