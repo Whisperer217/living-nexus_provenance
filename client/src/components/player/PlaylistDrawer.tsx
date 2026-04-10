@@ -375,6 +375,7 @@ export default function PlaylistDrawer() {
           boxShadow: "-8px 0 40px oklch(0 0 0 / 0.6)",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          overscrollBehavior: "contain", // prevent panel from escaping its bounds on mobile momentum scroll
         }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
@@ -425,7 +426,7 @@ export default function PlaylistDrawer() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto overscroll-contain" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)" }}>
+        <div className="flex-1 overflow-y-auto" style={{ overscrollBehavior: "contain", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)" }}>
           {activeTab === "build" ? (
             <BuildYourOwn onClose={() => setIsOpen(false)} />
           ) : activeTab === "liked" && !user ? (
