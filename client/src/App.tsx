@@ -14,6 +14,7 @@ import { CommunityToastProvider } from "./components/CommunityToast";
 import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
 import AmbientWidget from "./components/AmbientWidget";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
+import { overlayCloseAll } from "@/lib/overlayController";
 
 /** Logs QR scan events when ?qr= param is present in the URL. */
 function QrScanLogger() {
@@ -80,6 +81,18 @@ function PageLoader() {
         style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
     </div>
   );
+}
+
+/**
+ * Closes all overlays on every route change.
+ * Prevents stale scroll locks surviving navigation — critical on mobile.
+ */
+function OverlayRouteGuard() {
+  const [location] = useLocation();
+  useEffect(() => {
+    overlayCloseAll();
+  }, [location]);
+  return null;
 }
 
 /**
@@ -222,6 +235,7 @@ export default function App() {
               }}
             />
             <OEmbedUpdater />
+            <OverlayRouteGuard />
             <QrScanLogger />
             <AmbientWidget />
             <Router />

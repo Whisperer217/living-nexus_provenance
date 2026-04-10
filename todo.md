@@ -3360,3 +3360,9 @@
 - [x] Step 5 — Wire EditTrackPanel through overlayController: replace direct body.style.overflow with overlayOpen("edit-track") / overlayClose("edit-track")
 - [x] Manuscript-aware upload flow — show manuscript metadata fields (category, synopsis, author, page count, language) instead of music fields when content type is manuscript
 - [x] Manuscript-aware EditTrackPanel — conditionally render manuscript fields vs music fields based on song.contentType
+
+## Stabilization Sprint (Approved 2026-04-10)
+- [x] Step 1 — Close route-change scroll lock gap: overlayCloseAll() on location change in App.tsx
+- [ ] Step 2 — Extract shared format constants to shared/contentTypes.ts
+- [ ] Step 3 — Add parentSongId nullable FK to songs table
+- [ ] Step 4 — Add workType discriminator to events table
