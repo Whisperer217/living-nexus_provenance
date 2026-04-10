@@ -435,7 +435,7 @@ function HorizontalTrackGrid({
 }: {
   tracks: any[];
   loading?: boolean;
-  onTip?: (index: number, rect: DOMRect) => void;
+  onTip?: (track: any, rect: DOMRect) => void;
   emptyMessage?: string;
   likeMap?: Record<number, { liked: boolean; count: number }>;
 }) {
@@ -528,7 +528,7 @@ function TrendingHorizontalGrid({
   likeMap,
 }: {
   tracks: any[];
-  onTip?: (index: number, rect: DOMRect) => void;
+  onTip?: (track: any, rect: DOMRect) => void;
   likeMap?: Record<number, { liked: boolean; count: number }>;
 }) {
   const { playQueueAt, openNowPlayingPanel } = usePlayer();
@@ -598,7 +598,7 @@ const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkq
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
   const [activeGenre, setActiveGenre] = useState("All");
-  const [tipTarget, setTipTarget] = useState<number | null>(null);
+  const [tipTarget, setTipTarget] = useState<any | null>(null);
   const [tipRect, setTipRect] = useState<DOMRect | null>(null);
 
   const discoverInput = useMemo(() => ({
@@ -668,8 +668,8 @@ export default function HomePage() {
     { staleTime: 60_000 }
   );
 
-  const tipTrack = tipTarget !== null ? tracks[tipTarget] ?? trendingTracks[tipTarget] : null;
-  const handleTip = (index: number, rect: DOMRect) => { setTipTarget(index); setTipRect(rect); };
+  const tipTrack = tipTarget ?? null;
+  const handleTip = (track: any, rect: DOMRect) => { setTipTarget(track); setTipRect(rect); };
 
   return (
     <div className="animate-fade-up cosmic-bg min-h-screen">

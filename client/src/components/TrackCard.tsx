@@ -23,8 +23,8 @@ import { MediaAsset } from "@/components/MediaAsset";
 interface Props {
   track: Track;
   index: number;
-  /** Called when user clicks the gift button. Receives the index and the button's DOMRect for contextual modal anchoring. */
-  onTip?: (index: number, rect: DOMRect) => void;
+  /** Called when user clicks the gift button. Receives the track and the button's DOMRect for contextual modal anchoring. */
+  onTip?: (track: Track, rect: DOMRect) => void;
   /** Pre-fetched like count — skips the individual getLikeCount query when provided */
   prefetchedLikeCount?: number;
   /** Pre-fetched liked status — skips the individual getLikeStatus query when provided */
@@ -340,7 +340,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           <div className="flex items-center gap-1">
             {onTip && (
               <button
-                onClick={e => { e.stopPropagation(); onTip(index, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
+                onClick={e => { e.stopPropagation(); onTip(track, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
                 className="p-1 text-white/50 hover:text-[#D4AF37] transition-colors"
                 title="Send a gift"
               >

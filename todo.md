@@ -3353,3 +3353,6 @@
 ## Mobile Bug Fixes (Apr 8 2026)
 - [ ] Fix Provenance Prompt Generator button triggering Quick Play panel instead of navigating to prompt studio
 - [ ] Fix large black dead zone below bottom nav bar on mobile screens
+
+## Bug Fixes
+- [x] Fix GiftModal wrong song — $ button passes index to parent, parent uses tracks[index] which is wrong when Discover and Trending share the same handler; fix by passing the track object directly instead of index
