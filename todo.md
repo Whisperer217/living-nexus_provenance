@@ -3370,3 +3370,4 @@
 - [x] Fix mobile expanded player backdrop bleed — dragging past top boundary surfaces full-page black backdrop
 - [x] Fix mobile player controls unresponsive on Explore page — pointer-events blocked by background layer
 - [x] Fix PlaylistDrawer right-side panel overscroll escape on mobile — same momentum bleed as hamburger menu
+- [x] Fix viewport floor overscroll — main page scroll container bleeds past bottom boundary exposing black void behind app

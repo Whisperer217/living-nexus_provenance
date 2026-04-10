@@ -395,7 +395,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           /* Mobile: nav (56px + safe-area) + mini player (64px) = full bottom stack */
           @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
         `}</style>
-        <div className="flex-1 overflow-y-auto player-scroll-area" style={{ overscrollBehaviorX: "none", touchAction: "pan-y" }}>
+        <div className="flex-1 overflow-y-auto player-scroll-area" style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}>
           {children}
         </div>
       </main>
