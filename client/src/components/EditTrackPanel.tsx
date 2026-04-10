@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import { trpc } from "@/lib/trpc";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import { Button } from "@/components/ui/button";
@@ -170,10 +171,10 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  // Prevent body scroll
+  // Prevent body scroll — routed through global overlay controller
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    overlayOpen("edit-track");
+    return () => overlayClose("edit-track");
   }, []);
 
   const uploadVideoMutation = trpc.songs.uploadVideo.useMutation({

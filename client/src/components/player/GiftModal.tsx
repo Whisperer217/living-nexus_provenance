@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
+import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import { X, DollarSign, Loader2, Sparkles, Heart, Flame, Music, Star, Gem } from "lucide-react";
 
 const PRESET_AMOUNTS = [100, 200, 500, 1000, 2500]; // cents
@@ -38,6 +39,12 @@ export default function GiftModal({
 }: GiftModalProps) {
   const { user } = useAuth();
   const tipsEnabled = !!stripeAccountId;
+
+  // Wire into global overlay controller for scroll lock
+  useEffect(() => {
+    overlayOpen("gift");
+    return () => overlayClose("gift");
+  }, []);
 
   // Tab: "appreciate" or "tip"
   const [tab, setTab] = useState<"appreciate" | "tip">(tipsEnabled ? "tip" : "appreciate");
