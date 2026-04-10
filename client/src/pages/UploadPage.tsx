@@ -32,6 +32,19 @@ const GENRES = [
 
 const MOODS = ["War", "Healing", "Loss", "Triumph", "Faith", "Love", "Protest", "Documentary", "Joy", "Lament"];
 
+const MANUSCRIPT_CATEGORIES = [
+  "Fiction", "Non-Fiction", "Poetry", "Memoir", "Theology",
+  "Philosophy", "Biography", "Self-Help", "Academic", "Devotional",
+  "Children's", "Young Adult", "Short Stories", "Essay Collection", "Other",
+];
+
+const COMIC_CATEGORIES = [
+  "Graphic Novel", "Manga", "Webcomic", "Comic Strip", "Illustrated Story",
+  "Children's Illustrated", "Faith / Devotional", "Sci-Fi / Fantasy", "Memoir / Auto-Bio", "Other",
+];
+
+const MANUSCRIPT_THEMES = ["Faith", "War", "Identity", "Healing", "Loss", "Redemption", "Justice", "Love", "Protest", "Legacy", "Triumph", "Lament"];
+
 const AI_CONSENT_OPTIONS = [
   { value: "prohibited" as const, label: "AI Training PROHIBITED", color: "oklch(0.65 0.18 25)", desc: "No AI system may train on this work" },
   { value: "permitted_attribution" as const, label: "Permitted with Attribution", color: "oklch(0.84 0.155 85)", desc: "AI training allowed only with full credit" },
@@ -891,77 +904,122 @@ export default function UploadPage() {
 
           {step === 2 && (
             <div className="space-y-5">
-              <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Track Metadata</h2>
+              <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                {uploadMode === "manuscript" ? "Manuscript Metadata" : uploadMode === "comic" ? "Comic / Novel Metadata" : "Track Metadata"}
+              </h2>
+
+              {/* ── Title ── */}
               <div>
-                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Title *</label>
-                <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Enter track title"
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                  {uploadMode === "manuscript" || uploadMode === "comic" ? "Work Title *" : "Title *"}
+                </label>
+                <Input value={title} onChange={e => setTitle(e.target.value)}
+                  placeholder={uploadMode === "manuscript" ? "Enter manuscript title" : uploadMode === "comic" ? "Enter comic / novel title" : "Enter track title"}
                   style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
               </div>
-              <div>
-                <label className="text-xs mb-1.5 flex items-center gap-2 font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
-                  Genre
-                  {creatorProfile?.primaryGenre && (
-                    <span className="text-[10px] font-normal" style={{ color: "#E2E8F0" }}>
-                      — default from profile: <span style={{ color: "oklch(0.65 0.2 300)" }}>{creatorProfile.primaryGenre}</span>
-                    </span>
-                  )}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {/* Allow free-text genre from profile if not in preset list */}
-                  {creatorProfile?.primaryGenre && !GENRES.includes(creatorProfile.primaryGenre) && (
-                    <button type="button" key="profile-genre" onClick={() => setGenre(genre === creatorProfile.primaryGenre ? "" : (creatorProfile.primaryGenre ?? ""))} className="px-3 py-1 rounded-full text-xs transition-all"
-                      style={{ background: genre === creatorProfile.primaryGenre ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === creatorProfile.primaryGenre ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === creatorProfile.primaryGenre ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>
-                      {creatorProfile.primaryGenre}
-                    </button>
-                  )}
-                  {GENRES.map(g => (
-                    <button type="button" key={g} onClick={() => setGenre(g === genre ? "" : g)} className="px-3 py-1 rounded-full text-xs transition-all"
-                      style={{ background: genre === g ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === g ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === g ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>
-                      {g}
-                    </button>
-                  ))}
+
+              {/* ── Genre (music) OR Category (manuscript/comic) ── */}
+              {(uploadMode === "audio" || uploadMode === "lyrics") ? (
+                <div>
+                  <label className="text-xs mb-1.5 flex items-center gap-2 font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                    Genre
+                    {creatorProfile?.primaryGenre && (
+                      <span className="text-[10px] font-normal" style={{ color: "#E2E8F0" }}>
+                        — default from profile: <span style={{ color: "oklch(0.65 0.2 300)" }}>{creatorProfile.primaryGenre}</span>
+                      </span>
+                    )}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {creatorProfile?.primaryGenre && !GENRES.includes(creatorProfile.primaryGenre) && (
+                      <button type="button" key="profile-genre" onClick={() => setGenre(genre === creatorProfile.primaryGenre ? "" : (creatorProfile.primaryGenre ?? ""))} className="px-3 py-1 rounded-full text-xs transition-all"
+                        style={{ background: genre === creatorProfile.primaryGenre ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === creatorProfile.primaryGenre ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === creatorProfile.primaryGenre ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>
+                        {creatorProfile.primaryGenre}
+                      </button>
+                    )}
+                    {GENRES.map(g => (
+                      <button type="button" key={g} onClick={() => setGenre(g === genre ? "" : g)} className="px-3 py-1 rounded-full text-xs transition-all"
+                        style={{ background: genre === g ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === g ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === g ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>
+                        {g}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Category</label>
+                  <div className="flex flex-wrap gap-2">
+                    {(uploadMode === "manuscript" ? MANUSCRIPT_CATEGORIES : COMIC_CATEGORIES).map(cat => (
+                      <button type="button" key={cat} onClick={() => setGenre(cat === genre ? "" : cat)} className="px-3 py-1 rounded-full text-xs transition-all"
+                        style={{ background: genre === cat ? "oklch(0.65 0.2 300 / 0.25)" : "oklch(0.15 0.015 280)", color: genre === cat ? "oklch(0.75 0.2 300)" : "oklch(0.55 0.04 280)", border: `1px solid ${genre === cat ? "oklch(0.65 0.2 300 / 0.5)" : "oklch(0.22 0.015 280)"}` }}>
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── BPM + Key (music only) ── */}
+              {(uploadMode === "audio" || uploadMode === "lyrics") && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>BPM</label>
+                    <Input type="number" value={bpm} onChange={e => setBpm(e.target.value)} placeholder="120"
+                      style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
+                  </div>
+                  <div>
+                    <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Key</label>
+                    <Input value={keySignature} onChange={e => setKeySignature(e.target.value)} placeholder="C major"
+                      style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
+                  </div>
+                </div>
+              )}
+
+              {/* ── Album / Series + Date ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>BPM</label>
-                  <Input type="number" value={bpm} onChange={e => setBpm(e.target.value)} placeholder="120"
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                    {uploadMode === "manuscript" || uploadMode === "comic" ? "Series / Collection" : "Album"}
+                  </label>
+                  <Input value={albumName} onChange={e => setAlbumName(e.target.value)}
+                    placeholder={uploadMode === "manuscript" || uploadMode === "comic" ? "Series or collection name" : "Album name"}
                     style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
                 </div>
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Key</label>
-                  <Input value={keySignature} onChange={e => setKeySignature(e.target.value)} placeholder="C major"
-                    style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Album</label>
-                  <Input value={albumName} onChange={e => setAlbumName(e.target.value)} placeholder="Album name"
-                    style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
-                </div>
-                <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Release Date</label>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                    {uploadMode === "manuscript" || uploadMode === "comic" ? "Written / Completed" : "Release Date"}
+                  </label>
                   <Input type="date" value={releaseDate} onChange={e => setReleaseDate(e.target.value)}
                     style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
                 </div>
               </div>
+
+              {/* ── ISRC + BMI (music) OR ISBN + Publisher (manuscript/comic) ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>ISRC</label>
-                  <Input value={isrc} onChange={e => setIsrc(e.target.value)} placeholder="US-XXX-YY-NNNNN"
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                    {uploadMode === "manuscript" || uploadMode === "comic" ? "ISBN" : "ISRC"}
+                  </label>
+                  <Input value={isrc} onChange={e => setIsrc(e.target.value)}
+                    placeholder={uploadMode === "manuscript" || uploadMode === "comic" ? "978-0-000-00000-0 (optional)" : "US-XXX-YY-NNNNN"}
                     style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
                 </div>
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>BMI Member #</label>
-                  <Input value={bmiNumber} onChange={e => setBmiNumber(e.target.value)} placeholder="BMI number"
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                    {uploadMode === "manuscript" || uploadMode === "comic" ? "Publisher / Imprint" : "BMI Member #"}
+                  </label>
+                  <Input value={bmiNumber} onChange={e => setBmiNumber(e.target.value)}
+                    placeholder={uploadMode === "manuscript" || uploadMode === "comic" ? "Publisher or self-published" : "BMI number"}
                     style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.9 0.01 280)" }} />
                 </div>
               </div>
+
+              {/* ── Mood Tags (music) OR Themes (manuscript/comic) ── */}
               <div>
-                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>Mood Tags</label>
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                  {uploadMode === "manuscript" || uploadMode === "comic" ? "Themes" : "Mood Tags"}
+                </label>
                 <div className="flex flex-wrap gap-2">
-                  {MOODS.map(m => (
+                  {(uploadMode === "manuscript" || uploadMode === "comic" ? MANUSCRIPT_THEMES : MOODS).map(m => (
                     <button type="button" key={m} onClick={() => setSelectedMoods(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])}
                       className="px-3 py-1 rounded-full text-xs transition-all"
                       style={{ background: selectedMoods.includes(m) ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.15 0.015 280)", color: selectedMoods.includes(m) ? "oklch(0.84 0.155 85)" : "oklch(0.5 0.03 280)", border: `1px solid ${selectedMoods.includes(m) ? "oklch(0.75 0.18 85 / 0.4)" : "oklch(0.22 0.015 280)"}` }}>
@@ -1064,18 +1122,34 @@ export default function UploadPage() {
                 )}
               </div>
 
-              {/* Lyrics */}
-              <div>
-                <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>LYRICS <span style={{ color: "#E2E8F0" }}>(optional — included in WID registration)</span></label>
-                <Textarea
-                  value={lyrics}
-                  onChange={e => setLyrics(e.target.value)}
-                  placeholder="Paste or type your lyrics here..."
-                  rows={8}
-                  className="font-mono text-sm resize-none"
-                  style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
-                />
-              </div>
+              {/* Lyrics (music/lyrics mode) OR Synopsis (manuscript/comic) */}
+              {(uploadMode === "audio" || uploadMode === "lyrics") ? (
+                <div>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>LYRICS <span style={{ color: "#E2E8F0" }}>(optional — included in WID registration)</span></label>
+                  <Textarea
+                    value={lyrics}
+                    onChange={e => setLyrics(e.target.value)}
+                    placeholder="Paste or type your lyrics here..."
+                    rows={8}
+                    className="font-mono text-sm resize-none"
+                    style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "oklch(0.6 0.04 280)" }}>
+                    SYNOPSIS / DESCRIPTION <span style={{ color: "#E2E8F0" }}>(optional — included in WID registration)</span>
+                  </label>
+                  <Textarea
+                    value={lyrics}
+                    onChange={e => setLyrics(e.target.value)}
+                    placeholder={uploadMode === "manuscript" ? "Describe your manuscript — plot, themes, intended audience..." : "Describe your comic or novel — story, characters, visual style..."}
+                    rows={6}
+                    className="text-sm resize-none"
+                    style={{ background: "oklch(0.09 0.01 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.85 0.02 280)" }}
+                  />
+                </div>
+              )}
 
               {/* Caption section moved to Step 3 (after WID is confirmed) */}
               <div className="flex gap-2 pt-2">

@@ -3358,3 +3358,5 @@
 - [x] Fix GiftModal wrong song — $ button passes index to parent, parent uses tracks[index] which is wrong when Discover and Trending share the same handler; fix by passing the track object directly instead of index
 - [x] Step 4 — Wire GiftModal through overlayController: add overlayOpen("gift") on mount, overlayClose("gift") on unmount
 - [x] Step 5 — Wire EditTrackPanel through overlayController: replace direct body.style.overflow with overlayOpen("edit-track") / overlayClose("edit-track")
+- [x] Manuscript-aware upload flow — show manuscript metadata fields (category, synopsis, author, page count, language) instead of music fields when content type is manuscript
+- [x] Manuscript-aware EditTrackPanel — conditionally render manuscript fields vs music fields based on song.contentType

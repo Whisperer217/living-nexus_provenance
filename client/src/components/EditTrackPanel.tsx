@@ -22,6 +22,17 @@ const GENRES = [
   "Soul", "Funk", "Reggae", "Blues", "Indie", "Alternative", "Other",
 ];
 
+const MANUSCRIPT_CATEGORIES = [
+  "Fiction", "Non-Fiction", "Poetry", "Memoir", "Theology",
+  "Philosophy", "Biography", "Self-Help", "Academic", "Devotional",
+  "Children's", "Young Adult", "Short Stories", "Essay Collection", "Other",
+];
+
+const COMIC_CATEGORIES = [
+  "Graphic Novel", "Manga", "Webcomic", "Comic Strip", "Illustrated Story",
+  "Children's Illustrated", "Faith / Devotional", "Sci-Fi / Fantasy", "Memoir / Auto-Bio", "Other",
+];
+
 const AI_CONSENT_LABELS: Record<string, string> = {
   prohibited: "Human-Made — No AI Training",
   permitted_attribution: "AI-Assisted — Attribution Required",
@@ -63,6 +74,7 @@ interface Song {
   videoUrl?: string | null;
   videoWitnessId?: string | null;
   creditsJson?: string | null;
+  contentType?: string | null;
 }
 
 interface EditTrackPanelProps {
@@ -72,6 +84,10 @@ interface EditTrackPanelProps {
 }
 
 export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) {
+  const isManuscript = song.contentType === "manuscript";
+  const isComic = song.contentType === "comic";
+  const isWritten = isManuscript || isComic; // non-music written works
+
   const [caption, setCaption] = useState(song.caption ?? "");
   const [genre, setGenre] = useState(song.genre ?? "");
   const [collectionTag, setCollectionTag] = useState(song.collectionTag ?? "");
@@ -427,7 +443,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           style={{ background: "#0d1520", borderBottom: "1px solid rgba(212,175,55,0.15)" }}
         >
           <div>
-            <h2 className="text-white font-semibold text-lg leading-tight">Edit Track</h2>
+            <h2 className="text-white font-semibold text-lg leading-tight">
+              {isManuscript ? "Edit Manuscript" : isComic ? "Edit Comic / Novel" : "Edit Track"}
+            </h2>
             <p className="text-sm mt-0.5" style={{ color: "#94a3b8" }}>
               {song.title}
             </p>
@@ -525,9 +543,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             />
           )}
 
-          {/* Caption */}
+          {/* Caption / Synopsis */}
           <div className="space-y-2.5">
-            <Label className="text-white text-sm font-medium">Caption / Description</Label>
+            <Label className="text-white text-sm font-medium">
+              {isWritten ? "Synopsis / Description" : "Caption / Description"}
+            </Label>
             <Textarea
               value={caption}
               onChange={(e) => {
@@ -537,7 +557,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 t.style.height = "auto";
                 t.style.height = `${t.scrollHeight}px`;
               }}
-              placeholder="Add a caption or description for this track…"
+              placeholder={isManuscript ? "Describe your manuscript — plot, themes, intended audience…" : isComic ? "Describe your comic or novel — story, characters, visual style…" : "Add a caption or description for this track…"}
               maxLength={2000}
               rows={3}
               className="resize-none text-sm overflow-hidden"
@@ -551,37 +571,61 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             <p className="text-xs text-right" style={{ color: "#475569" }}>{caption.length}/2000</p>
           </div>
 
-          {/* Genre */}
+          {/* Genre (music) OR Category chips (manuscript/comic) */}
           <div className="space-y-2.5">
-            <Label className="text-white text-sm font-medium">Genre</Label>
-            <Select value={genre} onValueChange={setGenre}>
-              <SelectTrigger
-                className="text-sm"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  color: genre ? "#f1f5f9" : "#64748b",
-                }}
-              >
-                <SelectValue placeholder="Select genre…" />
-              </SelectTrigger>
-              <SelectContent style={{ background: "#0d1520", border: "1px solid rgba(212,175,55,0.2)" }}>
-                {GENRES.map((g) => (
-                  <SelectItem key={g} value={g} className="text-white hover:bg-white/10">
-                    {g}
-                  </SelectItem>
+            <Label className="text-white text-sm font-medium">
+              {isWritten ? "Category" : "Genre"}
+            </Label>
+            {isWritten ? (
+              <div className="flex flex-wrap gap-2">
+                {(isManuscript ? MANUSCRIPT_CATEGORIES : COMIC_CATEGORIES).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setGenre(cat === genre ? "" : cat)}
+                    className="px-3 py-1 rounded-full text-xs transition-all"
+                    style={{
+                      background: genre === cat ? "oklch(0.65 0.2 300 / 0.25)" : "rgba(255,255,255,0.05)",
+                      color: genre === cat ? "oklch(0.75 0.2 300)" : "#94a3b8",
+                      border: `1px solid ${genre === cat ? "oklch(0.65 0.2 300 / 0.5)" : "rgba(255,255,255,0.12)"}`,
+                    }}
+                  >
+                    {cat}
+                  </button>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            ) : (
+              <Select value={genre} onValueChange={setGenre}>
+                <SelectTrigger
+                  className="text-sm"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    color: genre ? "#f1f5f9" : "#64748b",
+                  }}
+                >
+                  <SelectValue placeholder="Select genre…" />
+                </SelectTrigger>
+                <SelectContent style={{ background: "#0d1520", border: "1px solid rgba(212,175,55,0.2)" }}>
+                  {GENRES.map((g) => (
+                    <SelectItem key={g} value={g} className="text-white hover:bg-white/10">
+                      {g}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {/* Collection Tag */}
           <div className="space-y-2.5">
-            <Label className="text-white text-sm font-medium">Collection / Grouping Tag</Label>
+            <Label className="text-white text-sm font-medium">
+              {isWritten ? "Series / Collection" : "Collection / Grouping Tag"}
+            </Label>
             <Input
               value={collectionTag}
               onChange={(e) => setCollectionTag(e.target.value)}
-              placeholder="e.g. Summer EP, Mixtape Vol. 1, Unreleased…"
+              placeholder={isWritten ? "e.g. The Chronicles of…, Volume 1, Standalone…" : "e.g. Summer EP, Mixtape Vol. 1, Unreleased…"}
               maxLength={128}
               className="text-sm"
               style={{
@@ -590,7 +634,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 color: "#f1f5f9",
               }}
             />
-            <p className="text-xs" style={{ color: "#64748b" }}>Groups tracks together in your archive and creator profile.</p>
+            <p className="text-xs" style={{ color: "#64748b" }}>
+              {isWritten ? "Groups works into a series or collection in your archive." : "Groups tracks together in your archive and creator profile."}
+            </p>
           </div>
 
           {/* AI Disclosure */}
@@ -626,7 +672,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
           {/* Visibility */}
           <div className="space-y-2.5">
-            <Label className="text-white text-sm font-medium">Track Visibility</Label>
+            <Label className="text-white text-sm font-medium">
+              {isWritten ? "Work Visibility" : "Track Visibility"}
+            </Label>
             <Select value={status} onValueChange={(v) => setStatus(v as any)}>
               <SelectTrigger
                 className="text-sm"
@@ -739,22 +787,24 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             </Button>
           </div>
 
-          {/* ── Lyrics Editor ──────────────────────────────────────────────────────────────────────────────────────── */}
+           {/* ── Lyrics / Synopsis Editor ─────────────────────────────────────────────────────────────────────────────────────── */}
           <div
             className="space-y-3 rounded-xl p-4"
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <Label className="text-white text-sm font-medium flex items-center gap-2">
               <FileText size={14} style={{ color: "#D4AF37" }} />
-              Lyrics
+              {isWritten ? "Synopsis / Full Text" : "Lyrics"}
             </Label>
             <p className="text-xs" style={{ color: "#64748b" }}>
-              Add or update the lyrics for this track. Lyrics are displayed in the Now Playing panel and serve as a timestamped record of your words.
+              {isWritten
+                ? "Add or update the synopsis or body text for this work. Included in the provenance record."
+                : "Add or update the lyrics for this track. Lyrics are displayed in the Now Playing panel and serve as a timestamped record of your words."}
             </p>
             <textarea
               value={lyrics}
               onChange={(e) => setLyrics(e.target.value)}
-              placeholder="Paste or type your lyrics here…"
+              placeholder={isWritten ? (isManuscript ? "Synopsis or excerpt…" : "Story synopsis or excerpt…") : "Paste or type your lyrics here…"}
               rows={10}
               className="w-full rounded-lg px-3 py-2.5 text-sm resize-y"
               style={{
