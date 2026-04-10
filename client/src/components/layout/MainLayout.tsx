@@ -246,6 +246,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         className="md:hidden fixed top-0 left-0 z-[9000] flex flex-col"
         style={{
           width: "min(85vw, 320px)",
+          height: "100dvh",
           minHeight: "100dvh",
           background: isWarm ? "rgba(28,38,52,0.98)" : "oklch(0.125 0.028 52)",
           borderRight: `1px solid ${MOBILE_SIDEBAR_BORDER}`,
