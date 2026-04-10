@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import GiftModal from "./GiftModal";
 import { MediaAsset } from "@/components/MediaAsset";
+import { overlayOpen, overlayClose } from "@/lib/overlayController";
 
 // ── Helpers ────────────────────────────────────────────────────────
 function fmtTime(s: number) {
@@ -350,21 +351,16 @@ export default function MobilePlayerLayer() {
     };
   }, []);
 
-  // Body scroll lock: lock <body> when player is expanded/cinematic.
-  // We lock body (not html) so the html background still paints behind other panels.
-  // On iOS Safari, position:fixed on the expanded sheet prevents scroll without needing overflow:hidden.
+  // Body scroll lock: routed through global overlayController.
+  // Controller is reference-counted — safe even if hamburger menu is also open.
   useEffect(() => {
-    const body = document.body;
     if (playerState === "expanded" || playerState === "cinematic") {
-      body.style.overflow = "hidden";
-      body.style.touchAction = "none";
+      overlayOpen("player-expanded");
     } else {
-      body.style.overflow = "";
-      body.style.touchAction = "";
+      overlayClose("player-expanded");
     }
     return () => {
-      body.style.overflow = "";
-      body.style.touchAction = "";
+      overlayClose("player-expanded");
     };
   }, [playerState]);
 
@@ -413,11 +409,11 @@ export default function MobilePlayerLayer() {
   const onMiniTouchStart = (e: React.TouchEvent) => {
     miniTouchStartY.current = e.touches[0].clientY;
     // Lock page scroll during mini-bar drag so underlying content doesn't scroll
-    document.body.style.overflow = 'hidden';
+    overlayOpen("player-drag");
   };
   const onMiniTouchEnd = (e: React.TouchEvent) => {
     // Always restore scroll on release
-    document.body.style.overflow = '';
+    overlayClose("player-drag");
     if (miniTouchStartY.current === null) return;
     const delta = miniTouchStartY.current - e.changedTouches[0].clientY;
     if (delta > 120) setPlayerState("cinematic");
@@ -435,7 +431,7 @@ export default function MobilePlayerLayer() {
     setExpandedDragOffset(0);
     hapticFiredRef.current = false;
     // Lock page scroll during expanded drag-to-dismiss
-    document.body.style.overflow = 'hidden';
+    overlayOpen("player-drag");
   };
   const onExpandedTouchMove = (e: React.TouchEvent) => {
     if (expandedTouchStartY.current === null) return;
@@ -462,7 +458,7 @@ export default function MobilePlayerLayer() {
   };
   const onExpandedTouchEnd = () => {
     // Always restore scroll on release
-    document.body.style.overflow = '';
+    overlayClose("player-drag");
     if (expandedDragOffset > 60) {
       setPlayerState("mini");
     }
