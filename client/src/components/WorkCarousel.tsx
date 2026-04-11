@@ -46,7 +46,7 @@ interface WorkCarouselProps {
 
 export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
 
   const { data: works, isLoading } = trpc.songs.discover.useQuery(
     { contentType: type, limit, randomize: false },
@@ -63,21 +63,45 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
       return;
     }
     if (!item.song.fileUrl) { toast.error("No audio file available"); return; }
-    addAndPlay({
-      id: String(item.song.id),
-      title: item.song.title,
-      artist: item.creator?.artistHandle || item.creator?.name || "Unknown",
-      genre: item.song.genre || "",
-      audioUrl: item.song.fileUrl,
-      artUrl: item.song.coverArtUrl || undefined,
-      witnessId: item.song.witnessId || undefined,
-      creatorId: item.creator?.id ?? undefined,
-      coverPositionX: item.song.coverPositionX ?? 50,
-      coverPositionY: item.song.coverPositionY ?? 50,
+    // Build a queue from all audio works in the carousel so the player auto-advances
+    const audioWorks = (works ?? [])
+      .filter((w: any) => !!w.song?.fileUrl)
+      .map((w: any) => ({
+        id: String(w.song.id),
+        title: w.song.title,
+        artist: w.creator?.artistHandle || w.creator?.name || "Unknown",
+        genre: w.song.genre || "",
+        audioUrl: w.song.fileUrl,
+        artUrl: w.song.coverArtUrl || undefined,
+        witnessId: w.song.witnessId || undefined,
+        creatorId: w.creator?.id ?? undefined,
+        coverPositionX: w.song.coverPositionX ?? 50,
+        coverPositionY: w.song.coverPositionY ?? 50,
+        visualReady: w.song.visualReady ?? false,
+        autoVideoUrl: w.song.autoVideoUrl ?? undefined,
+        creatorRole: w.creator?.role ?? undefined,
+      }));
+    const startIdx = Math.max(0, audioWorks.findIndex((w: any) => w.id === String(item.song.id)));
+    if (audioWorks.length > 0) {
+      playQueueAt(audioWorks, startIdx, "NONE");
+    } else {
+      // Fallback: single-track play (no queue available)
+      addAndPlay({
+        id: String(item.song.id),
+        title: item.song.title,
+        artist: item.creator?.artistHandle || item.creator?.name || "Unknown",
+        genre: item.song.genre || "",
+        audioUrl: item.song.fileUrl,
+        artUrl: item.song.coverArtUrl || undefined,
+        witnessId: item.song.witnessId || undefined,
+        creatorId: item.creator?.id ?? undefined,
+        coverPositionX: item.song.coverPositionX ?? 50,
+        coverPositionY: item.song.coverPositionY ?? 50,
         visualReady: item.song.visualReady ?? false,
         autoVideoUrl: item.song.autoVideoUrl ?? undefined,
         creatorRole: item.creator?.role ?? undefined,
-    });
+      });
+    }
   };
 
   if (!isLoading && (!works || works.length === 0)) return null;

@@ -36,7 +36,7 @@ interface Props {
 
 export default function QuickAccessPanel({ open, onToggle }: Props) {
   const [, navigate] = useLocation();
-  const { addAndPlay } = usePlayer();
+  const { playQueueAt } = usePlayer();
   const panelRef = useRef<HTMLDivElement>(null);
 
   // ── Search state ──────────────────────────────────────────────────
@@ -86,24 +86,32 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
     return () => document.removeEventListener("keydown", handler);
   }, [open, onToggle]);
 
-  const handleTrackClick = (track: any) => {
+  const handleTrackClick = (track: any, idx: number) => {
+    // Build a queue from all visible results so the player auto-advances track-by-track
+    const audioTracks = tracks
+      .slice(0, 10)
+      .filter((t: any) => !!(t.fileUrl ?? t.song?.fileUrl))
+      .map((t: any) => ({
+        id: String(t.id ?? t.song?.id),
+        title: t.title ?? t.song?.title,
+        artist: t.artistName ?? t.creator?.name ?? t.creator?.artistHandle ?? "Unknown",
+        artUrl: t.coverArtUrl ?? t.song?.coverArtUrl ?? undefined,
+        artType: "image" as const,
+        audioUrl: t.fileUrl ?? t.song?.fileUrl ?? undefined,
+        witnessId: t.witnessId ?? t.song?.witnessId ?? undefined,
+        genre: t.genre ?? "",
+        bg: "oklch(0.195 0.038 48)",
+        emoji: "🎵",
+        coverPositionX: t.coverPositionX ?? t.song?.coverPositionX ?? 50,
+        coverPositionY: t.coverPositionY ?? t.song?.coverPositionY ?? 50,
+        visualReady: t.visualReady ?? t.song?.visualReady ?? false,
+        autoVideoUrl: t.autoVideoUrl ?? t.song?.autoVideoUrl ?? undefined,
+      }));
+    // Find the clicked track's position within the audio-only subset
+    const clickedId = String(track.id ?? track.song?.id);
+    const startIdx = Math.max(0, audioTracks.findIndex((t: any) => t.id === clickedId));
     onToggle();
-    addAndPlay({
-      id: String(track.id ?? track.song?.id),
-      title: track.title ?? track.song?.title,
-      artist: track.artistName ?? track.creator?.name ?? track.creator?.artistHandle ?? "Unknown",
-      artUrl: track.coverArtUrl ?? track.song?.coverArtUrl ?? undefined,
-      artType: "image",
-      audioUrl: track.fileUrl ?? track.song?.fileUrl ?? undefined,
-      witnessId: track.witnessId ?? track.song?.witnessId ?? undefined,
-      genre: track.genre ?? "",
-      bg: "oklch(0.195 0.038 48)",
-      emoji: "🎵",
-      coverPositionX: track.coverPositionX ?? track.song?.coverPositionX ?? 50,
-      coverPositionY: track.coverPositionY ?? track.song?.coverPositionY ?? 50,
-      visualReady: track.visualReady ?? track.song?.visualReady ?? false,
-      autoVideoUrl: track.autoVideoUrl ?? track.song?.autoVideoUrl ?? undefined,
-    });
+    playQueueAt(audioTracks, startIdx, "NONE");
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -258,10 +266,10 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
             </div>
           ) : (
             <div className="space-y-1 overflow-y-auto flex-1 min-h-0">
-              {tracks.slice(0, 10).map((track: any) => (
+              {tracks.slice(0, 10).map((track: any, idx: number) => (
                 <button
                   key={track.id ?? track.song?.id}
-                  onClick={() => handleTrackClick(track)}
+                  onClick={() => handleTrackClick(track, idx)}
                   className="w-full flex items-center gap-2 rounded-lg p-1.5 transition-colors group text-left"
                   style={{ background: "transparent" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "oklch(0.96 0.008 270 / 0.05)")}
