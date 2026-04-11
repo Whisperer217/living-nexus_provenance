@@ -101,6 +101,8 @@ async function fetchEligibleSongs() {
          AND sovereignStampId IS NULL
          AND fileUrl IS NOT NULL
          AND status != 'Deleted'
+         AND (fileUrl LIKE '%.mp3' OR fileUrl LIKE '%.wav' OR fileUrl LIKE '%.flac'
+              OR fileUrl LIKE '%.m4a' OR fileUrl LIKE '%.ogg' OR fileUrl LIKE '%.aac')
        ORDER BY id ASC
        LIMIT ${BATCH_SIZE} OFFSET ${offset}`
     );

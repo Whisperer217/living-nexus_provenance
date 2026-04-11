@@ -10,14 +10,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.26.0";
+const CURRENT_VERSION = "v2.27.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.26.0",
+    version: "v2.27.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: FileText, text: "HAAI Work-Type Declarations — The Human-Authored via AI Instrument disclosure form now speaks your language. When uploading audio, the form uses music-native terms: Instrumentation, Vocal Conveyance, Lyrical Inspiration. When uploading a manuscript, it shifts to Structural Concept, Narrative Voice, Thematic Elements, Core Subject / Thesis. Lyrics use Imagery & Metaphor, Rhythmic Mechanics, and Intended Delivery. Comics use Composition & Framing, Color Palette & Lighting, and Atmosphere & Mood. The doctrine is the same — the vocabulary is yours." },
+      { icon: Shield, text: "Auto-Advance Queue — Tap any track in Quick Access or a Work Carousel and the full list becomes your queue. Songs advance automatically when one ends — no button press needed. Lock screen and notification shade controls on mobile now skip forward and back within the queue." },
+      { icon: Music, text: "Mobile Scroll Seal — The black void that appeared behind the app when rubber-band scrolling on iOS Safari while the player or Quick Access panel was active is now fully sealed. Panels contain their own scroll. The background never moves." },
+    ],
+  },
+  {
+    version: "v2.26.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Shield, text: "Prompt Studio Identity Lock — The Provenance Prompt Generator is now fully profile-centric. Only you can open your own studio. Prompts are private by default — a share link is only created when you explicitly click Share. Copying a shared prompt now automatically appends a provenance watermark (creator name, EID, date, source) so authorship travels with the content." },
       { icon: Music, text: "Custom Track Order — You can now drag and reorder your tracks in the Archive. The grip handle on each row lets you arrange your catalogue exactly as you intend it to be heard. Your custom order is respected everywhere your music appears: your creator profile, the Explore page, and the Home feed." },

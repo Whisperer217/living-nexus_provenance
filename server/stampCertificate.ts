@@ -28,6 +28,7 @@ export interface CertificateInput {
     | "witnessId"
     | "fileHash"
     | "aiDisclosure"
+    | "contentType"
     | "haaiVisualConcept"
     | "haaiStyleLanguage"
     | "haaiInstrumentation"
@@ -46,6 +47,43 @@ export interface CertificateResult {
   certificateText: string;
 }
 
+/** Domain-specific HAAI field label sets keyed by contentType */
+const HAAI_LABELS: Record<string, [string, string, string, string, string, string]> = {
+  manuscript: [
+    "STRUCTURAL_CONCEPT",
+    "NARRATIVE_VOICE",
+    "THEMATIC_ELEMENTS",
+    "PACING_AND_FLOW",
+    "CORE_SUBJECT_THESIS",
+    "EMOTIONAL_RESONANCE",
+  ],
+  lyrics: [
+    "IMAGERY_METAPHOR",
+    "POETIC_FORM_STYLE",
+    "RHYTHMIC_MECHANICS",
+    "INTENDED_DELIVERY",
+    "FOUNDATIONAL_CONCEPT",
+    "EMOTIONAL_TONE",
+  ],
+  comic: [
+    "COMPOSITION_FRAMING",
+    "AESTHETIC_MEDIUM",
+    "COLOR_PALETTE_LIGHTING",
+    "ACTION_MOVEMENT",
+    "SUBJECT_CHARACTER",
+    "ATMOSPHERE_MOOD",
+  ],
+  // audio / default
+  audio: [
+    "VISUAL_CONCEPT",
+    "STYLE_LANGUAGE",
+    "INSTRUMENTATION",
+    "VOCAL_CONVEYANCE",
+    "LYRICAL_INSPIRATION",
+    "EMOTIONAL_TONE",
+  ],
+};
+
 /**
  * Generate and upload a Sovereign Stamp provenance certificate.
  */
@@ -54,6 +92,7 @@ export async function generateCertificate(
 ): Promise<CertificateResult> {
   const { stampId, song, stampedFileHash, stampedAt } = input;
   const toneFrequency = deriveToneFrequency(stampId);
+  const workType = song.contentType ?? "audio";
 
   const lines: string[] = [
     "═══════════════════════════════════════════════════════════════",
@@ -65,8 +104,9 @@ export async function generateCertificate(
     `STAMP_ID:            ${stampId}`,
     `WITNESS_ID:          ${song.witnessId ?? "N/A"}`,
     `CREATOR_ID:          ${song.userId}`,
-    `SONG_ID:             ${song.id}`,
-    `SONG_TITLE:          ${song.title ?? "Untitled"}`,
+    `WORK_ID:             ${song.id}`,
+    `WORK_TITLE:          ${song.title ?? "Untitled"}`,
+    `WORK_TYPE:           ${workType}`,
     "",
     `ORIGINAL_HASH:       ${song.fileHash ?? "N/A"}`,
     `STAMPED_HASH:        ${stampedFileHash}`,
@@ -76,25 +116,28 @@ export async function generateCertificate(
     `AI_DISCLOSURE:       ${song.aiDisclosure ?? "N/A"}`,
   ];
 
-  // Include HAAI declaration fields if applicable
+  // Include HAAI declaration fields if applicable, using domain-aware labels
   if (song.aiDisclosure === "human_authored_ai_instrument") {
+    const [l1, l2, l3, l4, l5, l6] =
+      HAAI_LABELS[workType] ?? HAAI_LABELS["audio"];
+
     lines.push("");
-    lines.push("HAAI DECLARATION:");
+    lines.push(`HAAI DECLARATION (${workType.toUpperCase()}):`);
     if (song.haaiVisualConcept)
-      lines.push(`  VISUAL_CONCEPT:      ${song.haaiVisualConcept}`);
+      lines.push(`  ${l1.padEnd(24)} ${song.haaiVisualConcept}`);
     if (song.haaiStyleLanguage)
-      lines.push(`  STYLE_LANGUAGE:      ${song.haaiStyleLanguage}`);
+      lines.push(`  ${l2.padEnd(24)} ${song.haaiStyleLanguage}`);
     if (song.haaiInstrumentation)
-      lines.push(`  INSTRUMENTATION:     ${song.haaiInstrumentation}`);
+      lines.push(`  ${l3.padEnd(24)} ${song.haaiInstrumentation}`);
     if (song.haaiVocalConveyance)
-      lines.push(`  VOCAL_CONVEYANCE:    ${song.haaiVocalConveyance}`);
+      lines.push(`  ${l4.padEnd(24)} ${song.haaiVocalConveyance}`);
     if (song.haaiLyricalInspiration)
-      lines.push(`  LYRICAL_INSPIRATION: ${song.haaiLyricalInspiration}`);
+      lines.push(`  ${l5.padEnd(24)} ${song.haaiLyricalInspiration}`);
     if (song.haaiEmotionalTone)
-      lines.push(`  EMOTIONAL_TONE:      ${song.haaiEmotionalTone}`);
+      lines.push(`  ${l6.padEnd(24)} ${song.haaiEmotionalTone}`);
     if (song.haaiDeclaredAt)
       lines.push(
-        `  HAAI_DECLARED_AT:    ${song.haaiDeclaredAt.toISOString()}`
+        `  HAAI_DECLARED_AT:        ${song.haaiDeclaredAt.toISOString()}`
       );
   }
 
@@ -110,14 +153,13 @@ export async function generateCertificate(
     "decision made at the timestamp above. The Sovereign Stamp tone"
   );
   lines.push(
-    "embedded in this audio file constitutes a human-authored expressive"
+    "embedded in this work constitutes a human-authored expressive"
   );
   lines.push("element under 17 U.S.C. § 102(a).");
   lines.push("───────────────────────────────────────────────────────────────");
   lines.push("");
 
   const certificateText = lines.join("\n");
-  // stampId already starts with "SS-", so no prefix needed
   const certKey = `certificates/${song.userId}/${stampId}.txt`;
 
   const { url: certificateUrl, key: certificateKey } = await storagePut(
