@@ -234,9 +234,11 @@
     background-color: oklch(0.10 0.022 55); /* match app bg — no black void on overscroll */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
-  /* Ensure the html root also clips any bleed — belt-and-suspenders for iOS Safari */
+  /* NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals by clipping
+     fixed-position overlays against the html root instead of the viewport.
+     iOS Safari scroll void is sealed by body.overlay-active { position:fixed } instead.
+     The html height:100% is preserved for layout integrity. */
   html {
-    overflow: hidden;
     height: 100%;
   }
   /* ── Bottom Stack Layout Tokens ─────────────────────────────────────
@@ -256,6 +258,18 @@
     display: flex;
     flex-direction: column;
   }
+  /* ── Radix Dialog scroll-lock compatibility ──────────────────────────
+     Radix react-remove-scroll-bar injects:
+       body[data-scroll-locked] { position: relative !important; }
+     This breaks fixed-position portals (modals, dialogs) on mobile —
+     they resolve against the body instead of the viewport, rendering off-screen.
+     We override it to position:static so our own overlay-active system
+     (position:fixed via overlayController) remains the single authority.
+     ─────────────────────────────────────────────────────────────────── */
+  body[data-scroll-locked] {
+    position: static !important;
+  }
+
   /* ── Global Overlay System ─────────────────────────────────────────
      body.overlay-active is set by overlayController.ts.
      All panels (menu, quickplay, player, modals) use this single class.
