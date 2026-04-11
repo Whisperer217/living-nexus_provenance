@@ -117,7 +117,8 @@ export async function generateCertificate(
   lines.push("");
 
   const certificateText = lines.join("\n");
-  const certKey = `certificates/${song.userId}/SS-${stampId}.txt`;
+  // stampId already starts with "SS-", so no prefix needed
+  const certKey = `certificates/${song.userId}/${stampId}.txt`;
 
   const { url: certificateUrl, key: certificateKey } = await storagePut(
     certKey,

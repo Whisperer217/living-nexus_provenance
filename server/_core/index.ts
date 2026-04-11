@@ -11,6 +11,7 @@ import { registerEmbedRoutes } from "../embedRoute";
 import { registerSseRoutes } from "../sse";
 import { appRouter, handleStripeWebhook } from "../routers";
 import { uploadRouter } from "../uploadRoute";
+import { stampRouter } from "../stampRoute";
 import { downloadRouter } from "../downloadRoute";
 import { publicApiRouter } from "../publicApiRoute";
 import { oembedRouter } from "../oembedRoute";
@@ -89,6 +90,8 @@ async function startServer() {
   registerSseRoutes(app);
   // Multipart file upload endpoint (bypasses tRPC JSON body size limit)
   app.use(uploadRouter);
+  // Sovereign Stamp — POST /api/stamp-song (tone injection pipeline)
+  app.use(stampRouter);
   // WID-tagged audio download endpoint
   app.use(downloadRouter);
   // Public REST API v1 (Plex/Jellyfin/external clients)
