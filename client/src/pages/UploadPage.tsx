@@ -1102,6 +1102,7 @@ export default function UploadPage() {
                     <HAAIDeclarationForm
                       value={haaiDeclaration}
                       onChange={setHaaiDeclaration}
+                      workType={uploadMode === "comic" ? "comic" : uploadMode === "manuscript" ? "manuscript" : uploadMode === "lyrics" ? "lyrics" : "audio"}
                       compact={false}
                     />
                   </div>

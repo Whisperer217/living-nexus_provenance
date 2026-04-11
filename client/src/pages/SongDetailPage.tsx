@@ -738,14 +738,41 @@ export default function SongDetailPage() {
                   </div>
                 </div>
                 <div className="space-y-3">
-                  {([
-                    { key: "haaiVisualConcept", label: "Visual Concept" },
-                    { key: "haaiStyleLanguage", label: "Style" },
-                    { key: "haaiInstrumentation", label: "Instrumentation" },
-                    { key: "haaiVocalConveyance", label: "Vocal Conveyance" },
-                    { key: "haaiLyricalInspiration", label: "Lyrical Inspiration" },
-                    { key: "haaiEmotionalTone", label: "Emotional Tone" },
-                  ] as const).map(({ key, label }) => {
+                  {((() => {
+                    const ct = (song as any).contentType as string | undefined;
+                    if (ct === "manuscript") return [
+                      { key: "haaiVisualConcept", label: "Structural Concept" },
+                      { key: "haaiStyleLanguage", label: "Narrative Voice" },
+                      { key: "haaiInstrumentation", label: "Thematic Elements" },
+                      { key: "haaiVocalConveyance", label: "Pacing & Flow" },
+                      { key: "haaiLyricalInspiration", label: "Core Subject / Thesis" },
+                      { key: "haaiEmotionalTone", label: "Emotional Resonance" },
+                    ];
+                    if (ct === "lyrics") return [
+                      { key: "haaiVisualConcept", label: "Imagery & Metaphor" },
+                      { key: "haaiStyleLanguage", label: "Poetic Form & Style" },
+                      { key: "haaiInstrumentation", label: "Rhythmic Mechanics" },
+                      { key: "haaiVocalConveyance", label: "Intended Delivery" },
+                      { key: "haaiLyricalInspiration", label: "Foundational Concept" },
+                      { key: "haaiEmotionalTone", label: "Emotional Tone" },
+                    ];
+                    if (ct === "comic") return [
+                      { key: "haaiVisualConcept", label: "Composition & Framing" },
+                      { key: "haaiStyleLanguage", label: "Aesthetic & Medium" },
+                      { key: "haaiInstrumentation", label: "Color Palette & Lighting" },
+                      { key: "haaiVocalConveyance", label: "Action & Movement" },
+                      { key: "haaiLyricalInspiration", label: "Subject & Character" },
+                      { key: "haaiEmotionalTone", label: "Atmosphere & Mood" },
+                    ];
+                    return [
+                      { key: "haaiVisualConcept", label: "Visual Concept" },
+                      { key: "haaiStyleLanguage", label: "Style" },
+                      { key: "haaiInstrumentation", label: "Instrumentation" },
+                      { key: "haaiVocalConveyance", label: "Vocal Conveyance" },
+                      { key: "haaiLyricalInspiration", label: "Lyrical Inspiration" },
+                      { key: "haaiEmotionalTone", label: "Emotional Tone" },
+                    ];
+                  })() as { key: string; label: string }[]).map(({ key, label }) => {
                     const val = (song as any)[key] as string | null | undefined;
                     if (!val) return null;
                     return (
