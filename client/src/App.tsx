@@ -26,7 +26,6 @@ function QrScanLogger() {
 // This cuts initial bundle size significantly; pages load on first visit only
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage"));
-const TogetherPage = lazy(() => import("./pages/TogetherPage"));
 const UploadPage = lazy(() => import("./pages/UploadPage"));
 const BatchUploadPage = lazy(() => import("./pages/BatchUploadPage"));
 const LikedPage = lazy(() => import("./pages/LikedPage"));
@@ -60,8 +59,6 @@ const DownloadPage = lazy(() => import("./pages/DownloadPage"));
 const FoundersPage = lazy(() => import("./pages/FoundersPage"));
 const FounderEraPage = lazy(() => import("./pages/FounderEraPage"));
 const ArtworkNormalizationPage = lazy(() => import("./pages/ArtworkNormalizationPage"));
-const GuildPage = lazy(() => import("./pages/GuildPage"));
-const GuildsListPage = lazy(() => import("./pages/GuildsListPage"));
 const LearnPage = lazy(() => import("./pages/LearnPage"));
 const WitnessFlowPage = lazy(() => import("./pages/WitnessFlowPage"));
 const LivingArchiveBillingPage = lazy(() => import("./pages/LivingArchiveBillingPage"));
@@ -154,13 +151,10 @@ function Router() {
                 <Route path="/home" component={HomePage} />
                 <Route path="/discover"><Redirect to="/" /></Route>
                 <Route path="/explore" component={ExplorePage} />
-                <Route path="/together" component={TogetherPage} />
-                <Route path="/together/:roomCode" component={TogetherPage} />
                 <Route path="/upload" component={UploadPage} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />
-                <Route path="/listen-together" component={TogetherPage} />
                 <Route path="/song/:id" component={SongDetailPage} />
                 <Route path="/songs/:id" component={SongDetailPage} />
                 <Route path="/track/:id" component={TrackPage} />
@@ -192,9 +186,7 @@ function Router() {
                 <Route path="/founders" component={FoundersPage} />
                 <Route path="/founder-era" component={FounderEraPage} />
                 <Route path="/settings/billing" component={LivingArchiveBillingPage} />
-                <Route path="/guilds" component={GuildsListPage} />
                 <Route path="/prompt/:token" component={SharedPromptPage} />
-                <Route path="/guild/:slug" component={GuildPage} />
                 <Route path="/terms/compare" component={TosComparePage} />
                 <Route path="/terms" component={TermsPage} />
                 <Route path="/privacy" component={PrivacyPage} />

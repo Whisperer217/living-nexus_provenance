@@ -14,14 +14,12 @@ import { eq, and } from "drizzle-orm";
 export type DiscordEventType =
   | "wid_minted"
   | "track_upload"
-  | "jukebox_room"
   | "tip_received"
   | "like_surge";
 
 export const DISCORD_EVENT_LABELS: Record<DiscordEventType, string> = {
   wid_minted:    "WID Minted",
   track_upload:  "New Track Upload",
-  jukebox_room:  "Jukebox Room Opened",
   tip_received:  "Tip Received",
   like_surge:    "Like Surge",
 };
@@ -29,7 +27,6 @@ export const DISCORD_EVENT_LABELS: Record<DiscordEventType, string> = {
 export const DISCORD_EVENT_DESCRIPTIONS: Record<DiscordEventType, string> = {
   wid_minted:    "Fires when a Witness ID is issued for a track",
   track_upload:  "Fires when a creator completes a track upload",
-  jukebox_room:  "Fires when a new Listen Together room is opened",
   tip_received:  "Fires when a fan sends a tip to a creator",
   like_surge:    "Fires when a track gains 10+ likes in under an hour",
 };
@@ -105,22 +102,6 @@ function formatMessage(event: DiscordEventType, payload: Record<string, unknown>
             { name: "Type", value: String(payload.contentType ?? "audio"), inline: true },
             ...(payload.genre ? [{ name: "Genre", value: String(payload.genre), inline: true }] : []),
             ...(payload.witnessId ? [{ name: "WID", value: `\`${payload.witnessId}\``, inline: false }] : []),
-          ],
-          timestamp: new Date().toISOString(),
-          footer: { text: "Living Nexus · Audio Provenance Platform" },
-        }],
-      };
-
-    case "jukebox_room":
-      return {
-        ...base,
-        embeds: [{
-          title: "📻 Jukebox Room Opened",
-          color: 0x65C897,
-          description: `A new Listen Together session is live.`,
-          fields: [
-            { name: "Room Code", value: `\`${String(payload.roomCode ?? "—")}\``, inline: true },
-            { name: "Host", value: String(payload.hostName ?? "Unknown"), inline: true },
           ],
           timestamp: new Date().toISOString(),
           footer: { text: "Living Nexus · Audio Provenance Platform" },

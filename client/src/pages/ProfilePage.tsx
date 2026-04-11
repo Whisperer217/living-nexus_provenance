@@ -869,7 +869,7 @@ export default function ProfilePage() {
                   </button>
                 )}
               </div>
-              <p className="text-[11px] font-body text-white/30 mt-2">Receive tips and jukebox gifts — you keep 90%</p>
+              <p className="text-[11px] font-body text-white/30 mt-2">Receive tips — you keep 90%</p>
             </div>
             {/* Recent activity */}
             <div>

@@ -311,7 +311,7 @@ export async function runPaymentIntegrityCheck(): Promise<{
           }
         }
         // ── Tip ──
-        else if (paymentType === "tip" || paymentType === "jukebox_tip") {
+        else if (paymentType === "tip") {
           const credited = paymentIntentId ? await isTipCredited(paymentIntentId) : false;
           if (credited) {
             status = "ok";

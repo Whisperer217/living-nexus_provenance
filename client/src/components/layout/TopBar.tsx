@@ -14,7 +14,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
-  Home, Compass, Users, User, Upload, Shield,
+  Home, Compass, User, Upload, Shield,
   LayoutDashboard, Archive, Sparkles, Terminal,
   BookOpen, Star, Heart, Eye, Fingerprint, Scale,
   LogIn, LogOut, Bell, Menu, X, ChevronRight,
@@ -29,7 +29,6 @@ const CORE_NAV = [
   { label: "Home",            icon: Home,          path: "/"          },
   { label: "Explore",         icon: Compass,       path: "/explore"   },
   { label: "Projects",        icon: Rocket,        path: "/projects"  },
-  { label: "Listen Together", icon: Users,         path: "/together", badge: "LIVE" },
   { label: "Upload",          icon: Upload,        path: "/upload"    },
   { label: "Dashboard",       icon: LayoutDashboard, path: "/dashboard", authOnly: true },
   { label: "Archive",         icon: Archive,       path: "/archive",  authOnly: true, archiveBadge: true },
@@ -40,8 +39,6 @@ const DRAWER_NAVIGATE = [
   { label: "Home",            icon: Home,    path: "/"          },
   { label: "Explore",         icon: Compass, path: "/explore"   },
   { label: "Projects",        icon: Rocket,  path: "/projects"  },
-  { label: "Listen Together", icon: Users,   path: "/together", badge: "LIVE" },
-  { label: "Guilds",          icon: Shield,  path: "/guilds"    },
 ];
 
 const DRAWER_CREATE = [
@@ -224,7 +221,6 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           {CORE_NAV.map(item => {
             if (item.authOnly && !user && !authLoading) return null;
             const active = isActive(item.path);
-            const isLive = item.badge === "LIVE";
             const archiveBadge = item.archiveBadge && archiveSongCount > 0
               ? (archiveSongCount > 99 ? "99+" : String(archiveSongCount))
               : null;
@@ -244,9 +240,6 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               >
                 <item.icon size={13} style={{ color: active ? "oklch(0.82 0.155 75)" : "inherit" }} />
                 <span>{item.label}</span>
-                {isLive && (
-                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#ef4444", animation: "pulse 1.5s infinite" }} />
-                )}
                 {archiveBadge && (
                   <span className="text-[9px] font-bold px-1 py-0.5 rounded-full"
                     style={{ background: "oklch(0.82 0.155 75 / 0.18)", color: "#E8A830" }}>

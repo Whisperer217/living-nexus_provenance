@@ -354,27 +354,6 @@ export const likes = mysqlTable("likes", {
 
 export type Like = typeof likes.$inferSelect;
 export type InsertLike = typeof likes.$inferInsert;
-
-// ─── Jukebox Queue ────────────────────────────────────────────────────────────
-export const jukeboxQueue = mysqlTable("jukeboxQueue", {
-  id: int("id").autoincrement().primaryKey(),
-  roomCode: varchar("roomCode", { length: 16 }).notNull(),
-  songId: int("songId").notNull(),
-  tipperId: int("tipperId").notNull(),          // user who tipped
-  tipperName: varchar("tipperName", { length: 128 }),
-  tipAmountCents: int("tipAmountCents").notNull().default(0), // 0 = free queue, >0 = gifted
-  stripeSessionId: varchar("stripeSessionId", { length: 128 }),
-  position: int("position").notNull().default(0), // ordering within room
-  playedAt: timestamp("playedAt"),               // null = not yet played
-  skippedAt: timestamp("skippedAt"),             // null = not skipped
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-}, (t) => ({
-  roomIdx: index("jukeboxQueue_roomCode_idx").on(t.roomCode),
-}));
-
-export type JukeboxQueueItem = typeof jukeboxQueue.$inferSelect;
-export type InsertJukeboxQueueItem = typeof jukeboxQueue.$inferInsert;
-
 // ─── Playlist Items ───────────────────────────────────────────────────────────
 // Each user has a single personal playlist; rows are ordered by `position` ASC
 export const playlistItems = mysqlTable("playlistItems", {
@@ -558,34 +537,6 @@ export const notifications = mysqlTable("notifications", {
 }));
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
-
-// ─── Jukebox Offerings ────────────────────────────────────────────────────────
-// A voluntary "offering" left by a listener for a jukebox room.
-// The platform distributes proportionally to creators whose songs played in that room.
-export const jukeboxOfferings = mysqlTable("jukeboxOfferings", {
-  id: int("id").autoincrement().primaryKey(),
-  roomCode: varchar("roomCode", { length: 32 }).notNull(),
-  gifterId: int("gifterId").notNull(),          // user who left the offering
-  amountCents: int("amountCents").notNull(),     // e.g. 500 = $5.00
-  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 128 }),
-  status: mysqlEnum("status", ["pending", "completed", "failed"]).default("pending").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-export type JukeboxOffering = typeof jukeboxOfferings.$inferSelect;
-export type InsertJukeboxOffering = typeof jukeboxOfferings.$inferInsert;
-
-// ─── Jukebox Play Events ──────────────────────────────────────────────────────
-// Records each time a song plays in a jukebox room — used for proportional distribution.
-export const jukeboxPlayEvents = mysqlTable("jukeboxPlayEvents", {
-  id: int("id").autoincrement().primaryKey(),
-  roomCode: varchar("roomCode", { length: 32 }).notNull(),
-  songId: int("songId").notNull(),
-  creatorId: int("creatorId").notNull(),        // song owner (for earnings calculation)
-  playedAt: timestamp("playedAt").defaultNow().notNull(),
-});
-export type JukeboxPlayEvent = typeof jukeboxPlayEvents.$inferSelect;
-export type InsertJukeboxPlayEvent = typeof jukeboxPlayEvents.$inferInsert;
-
 // ─── Promo Codes ──────────────────────────────────────────────────────────────
 // Admin-created codes that grant a Creator License + slots to any user who redeems them.
 export const promoCodes = mysqlTable("promoCodes", {
@@ -684,51 +635,6 @@ export const playlistVersions = mysqlTable("playlistVersions", {
 });
 export type PlaylistVersion = typeof playlistVersions.$inferSelect;
 export type InsertPlaylistVersion = typeof playlistVersions.$inferInsert;
-
-// ─── Guilds ───────────────────────────────────────────────────────────────────
-// A Guild is a multi-creator collective that shares a channel page, a guild mix
-// playlist, and a versioned track ordering. Guilds are the social layer of LN.
-export const guilds = mysqlTable("guilds", {
-  id: int("id").autoincrement().primaryKey(),
-  slug: varchar("slug", { length: 64 }).notNull().unique(),   // URL-safe identifier
-  name: varchar("name", { length: 128 }).notNull(),
-  description: text("description"),
-  bannerUrl: text("bannerUrl"),
-  avatarUrl: text("avatarUrl"),
-  isPublic: boolean("isPublic").default(true).notNull(),
-  createdByUserId: int("createdByUserId").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-export type Guild = typeof guilds.$inferSelect;
-export type InsertGuild = typeof guilds.$inferInsert;
-
-// ─── Guild Members ────────────────────────────────────────────────────────────
-export const guildMembers = mysqlTable("guildMembers", {
-  id: int("id").autoincrement().primaryKey(),
-  guildId: int("guildId").notNull(),
-  userId: int("userId").notNull(),
-  role: mysqlEnum("role", ["owner", "admin", "member"]).default("member").notNull(),
-  joinedAt: timestamp("joinedAt").defaultNow().notNull(),
-});
-export type GuildMember = typeof guildMembers.$inferSelect;
-export type InsertGuildMember = typeof guildMembers.$inferInsert;
-
-// ─── Guild Playlists ──────────────────────────────────────────────────────────
-// The guild mix — a shared, versioned playlist where each entry records who
-// added the track. The full version history is stored in playlistVersions
-// (linked via playlistId when a guild playlist is backed by a named playlist).
-export const guildPlaylistTracks = mysqlTable("guildPlaylistTracks", {
-  id: int("id").autoincrement().primaryKey(),
-  guildId: int("guildId").notNull(),
-  songId: int("songId").notNull(),
-  addedByUserId: int("addedByUserId").notNull(),   // "added by" attribution
-  position: int("position").notNull().default(0),
-  addedAt: timestamp("addedAt").defaultNow().notNull(),
-});
-export type GuildPlaylistTrack = typeof guildPlaylistTracks.$inferSelect;
-export type InsertGuildPlaylistTrack = typeof guildPlaylistTracks.$inferInsert;
-
 // ─── External Playlists ───────────────────────────────────────────────────────
 // Read-only imported playlists from YouTube, Suno, or other sources.
 // Tracks are stored as a JSON snapshot — no sync, no DB rows per track.

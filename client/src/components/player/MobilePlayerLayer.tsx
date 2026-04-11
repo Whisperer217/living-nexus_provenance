@@ -1308,15 +1308,6 @@ export default function MobilePlayerLayer() {
           <DollarSign size={18} />
           <span className="text-[9px] font-heading tracking-wide">Tip</span>
         </button>
-        {/* Take to Room */}
-        <button
-          onClick={() => { setPlayerState("mini"); navigate("/together"); }}
-          className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "oklch(0.40 0.03 280)" }}
-        >
-          <Users size={18} />
-          <span className="text-[9px] font-heading tracking-wide">Room</span>
-        </button>
         <button
           onClick={() => {
             if (currentSongId) {
@@ -1820,17 +1811,6 @@ export default function MobilePlayerLayer() {
                   {copied ? <Check size={16} style={{ color: "oklch(0.84 0.155 85)" }} /> : <Share2 size={16} />}
                 </div>
                 <span className="text-[9px] font-heading tracking-widest uppercase">{copied ? "Copied" : "Share"}</span>
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setPlayerState("mini"); navigate("/together"); }}
-                className="flex flex-col items-center gap-1 transition-all active:scale-90"
-                style={{ color: "rgba(255,255,255,0.55)" }}
-              >
-                <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
-                  <Users size={16} />
-                </div>
-                <span className="text-[9px] font-heading tracking-widest uppercase">Room</span>
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setPlayerState("mini"); navigate(`/song/${currentSongId}`); }}

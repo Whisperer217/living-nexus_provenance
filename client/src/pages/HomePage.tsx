@@ -1289,8 +1289,6 @@ export default function HomePage() {
                   ["Multi-medium registry (music, lyrics, manuscript, comic)", "✗", "✗", "✓"],
                   ["AI Prompt Studio (lyric → production prompt)", "✗", "✗", "✓"],
                   ["Direct tipping / creator commerce", "✗", "Partial", "✓"],
-                  ["Together Room (live listening)", "✗", "✗", "✓"],
-                  ["Guilds / community rooms", "✗", "✗", "✓"],
                   ["OG-optimized share pipeline (Discord / X)", "✓", "Partial", "✓"],
                   ["Platform takes revenue cut", "Yes (30%+)", "Yes (15%+)", "10% tip fee only"],
                   ["Independent creator focus", "✗", "✓", "✓"],
@@ -1316,7 +1314,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
             {[
               { icon: Fingerprint, color: "#F5C451", bg: "rgba(245,196,81,0.08)", border: "rgba(245,196,81,0.2)", title: "Your Work, Witnessed", body: "Every upload receives a Witness ID — a cryptographic timestamp that proves you created it first. Not a certificate. A deed." },
-              { icon: ShieldCheck, color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "Creator-First Commerce", body: "Direct tipping, Jukebox queuing, and Living Archive subscriptions. The platform takes 10% on tips only. Everything else is yours." },
+              { icon: ShieldCheck, color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "Creator-First Commerce", body: "Direct tipping and Living Archive subscriptions. The platform takes 10% on tips only. Everything else is yours." },
               { icon: Sparkles, color: "#A78BFA", bg: "rgba(167,139,250,0.06)", border: "rgba(167,139,250,0.18)", title: "AI Tools That Serve You", body: "Prompt Studio turns your lyrics into a production-ready AI music prompt. The WID goes on the output — you stay the origin." },
             ].map(({ icon: Icon, color, bg, border, title, body }) => (
               <div

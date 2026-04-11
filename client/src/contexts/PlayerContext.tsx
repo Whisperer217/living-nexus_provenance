@@ -106,8 +106,6 @@ interface PlayerState {
   tipsEarned: number;
   trackComments: Record<string, Comment[]>; // trackId -> comments
   trackTips: Record<string, number>; // trackId -> tip total
-  room: { code: string; name: string; listeners: string[] } | null;
-  jukeboxQueueCount: number;
 }
 
 interface PlayerContextValue {
@@ -168,9 +166,6 @@ interface PlayerContextValue {
   addTrackTip: (trackId: string, amount: number) => void;
   addComment: (trackId: string, comment: Comment) => void;
   incrementShare: (trackId: string) => void;
-  setRoom: (r: PlayerState["room"]) => void;
-  /** Update the live Jukebox queue count (set by TogetherPage, read by sidebar) */
-  setJukeboxQueueCount: (n: number) => void;
   /** The creator handle of the currently playing track — for background routing */
   backgroundCreatorHandle: string | null;
 }
@@ -227,8 +222,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       tipsEarned: 0,
       trackComments: {},
       trackTips: {},
-      room: null,
-      jukeboxQueueCount: 0,
     };
   });
 
@@ -483,8 +476,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const updated = s.tracks.map(t => t.id === trackId ? { ...t, shareCount: (t.shareCount || 0) + 1 } : t);
     return { ...s, tracks: updated };
   }), []);
-  const setRoom = useCallback((r: PlayerState["room"]) => setState(s => ({ ...s, room: r })), []);
-  const setJukeboxQueueCount = useCallback((n: number) => setState(s => ({ ...s, jukeboxQueueCount: n })), []);
 
   /** Patch a single track's fields in the queue by id */
   const patchTrack = useCallback((trackId: string, patch: Partial<Track>) => {
@@ -647,7 +638,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       openTheater, isTheaterOpen, closeTheater,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,
       setProfileAvatar, setProfileBanner,
-      addTip, addTrackTip, addComment, incrementShare, setRoom, setJukeboxQueueCount,
+      addTip, addTrackTip, addComment, incrementShare,
       backgroundCreatorHandle,
     }}>
       {children}

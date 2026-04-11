@@ -775,18 +775,6 @@ export default function MobilePlayerPanel() {
           {currentTrack && (
             <div className="flex items-center gap-2 mt-3 px-4">
               <AddToPlaylistButton songId={currentSongId!} variant="full" className="flex-1" />
-              <button
-                onClick={() => { closeNowPlayingPanel(); navigate("/together"); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-body transition-all"
-                style={{
-                  background: "oklch(0.12 0.02 275)",
-                  color: "oklch(0.50 0.03 280)",
-                  border: "1px solid oklch(0.20 0.02 275)",
-                }}
-              >
-                <Users size={12} />
-                Room
-              </button>
             </div>
           )}
         </div>

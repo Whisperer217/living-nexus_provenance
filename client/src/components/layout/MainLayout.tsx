@@ -32,7 +32,7 @@ import LiveActivityPanel from "@/components/layout/LiveActivityPanel";
 import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
-  Home, Compass, Users, User, Upload, Shield,
+  Home, Compass, User, Upload, Shield,
   Menu, X, ChevronRight, LogIn, LogOut,
   CheckCircle2, Fingerprint, Bell,
   BookOpen, Star, Eye, Archive, LayoutDashboard, Sparkles, Terminal, Heart, Scale,
@@ -45,15 +45,13 @@ interface NavItem {
   icon: React.ElementType;
   path: string;
   badge?: string;
-  notifKey?: "signals" | "jukebox";
+  notifKey?: "signals";
   goldLabel?: boolean;
 }
 
 const PRIMARY_NAV: NavItem[] = [
   { label: "Home",            icon: Home,    path: "/"          },
   { label: "Explore",         icon: Compass, path: "/explore"   },
-  { label: "Listen Together", icon: Users,   path: "/together", badge: "LIVE", notifKey: "jukebox" },
-  { label: "Guilds",          icon: Shield,  path: "/guilds"    },
   { label: "Profile",         icon: User,    path: "/profile",  notifKey: "signals" },
   { label: "Upload",          icon: Upload,  path: "/upload"    },
 ];
@@ -64,7 +62,6 @@ const ARCHIVE_NAV_ITEM: NavItem   = { label: "LNA — Archive", icon: Archive, p
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { state } = usePlayer();
-  const jukeboxQueueCount = state.jukeboxQueueCount;
   const { user, loading: authLoading, logout } = useAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -128,13 +125,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const isLive = item.badge === "LIVE";
     const isArchive = item.path === "/archive";
     const isSignals = item.notifKey === "signals";
-    const isJukebox = item.notifKey === "jukebox";
-    const jukeboxBadge = isJukebox && jukeboxQueueCount > 0 ? (jukeboxQueueCount > 9 ? "9+" : String(jukeboxQueueCount)) : null;
     const signalsBadge = isSignals && (unreadCount as number) > 0 ? ((unreadCount as number) > 99 ? "99+" : String(unreadCount)) : null;
     const archiveBadge = isArchive && archiveSongCount > 0 ? (archiveSongCount > 99 ? "99+" : String(archiveSongCount)) : null;
     const pulseBadge = signalsBadge;
-    const countBadge = jukeboxBadge || archiveBadge;
-    const staticBadge = !pulseBadge && !jukeboxBadge && !archiveBadge && isLive ? item.badge : null;
+    const countBadge = archiveBadge;
+    const staticBadge = !pulseBadge && !archiveBadge && isLive ? item.badge : null;
     const labelColor = item.goldLabel ? (active ? "#E8A830" : "oklch(0.72 0.13 72 / 0.7)") : undefined;
 
     const warmActiveBg = "rgba(100,125,150,0.18)";

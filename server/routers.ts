@@ -21,7 +21,6 @@ import {
   createAiTransform, updateAiTransform, getAiTransformById,
   getAiTransformsBySong, getAiTransformsByUser,
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount, getBulkLikeStatuses,
-  getJukeboxQueue, addToJukeboxQueue, markJukeboxItemPlayed, markJukeboxItemSkipped,
   getSongByWitnessId, updateSongMetadata, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
   getUserTipTotalForSong, updateSongDownloadPermission,
@@ -39,8 +38,6 @@ import {
   createNotification, getNotifications, markNotificationRead, markAllNotificationsRead,
   archiveNotification, getUnreadNotificationCount, getNotificationById,
   getWitnessRegistry,
-  createJukeboxOffering, updateJukeboxOfferingStatus,
-  getOfferingsForRoom, recordJukeboxPlayEvent, getJukeboxEarningsForCreator,
   adminSearchUsers, adminGrantLicense,
   createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode, redeemPromoCode,
   recordNameChange, getNameHistory, getOriginalName,
@@ -75,7 +72,6 @@ import {
   savePromptDraft, getPromptDraftsByUser, getPromptDraftById,
   getPromptDraftByShareToken, updatePromptDraftShare, deletePromptDraft, revokePromptDraftShare,
   updateUserToneFrequency,
-  listActiveJukeboxRooms,
   createContentFlag, listContentFlags, resolveContentFlag, getContentFlagStats,
   signDeclaration, getDeclarationSignature, countDeclarationSigners,
   createSongVersion, getSongVersions, getLatestVersionNumber, getSongVersionById,
@@ -243,19 +239,6 @@ export async function handleStripeWebhook(req: any, res: any) {
           const amountUsd = (session.amount_total ?? 0) / 100;
           const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
           await recordPlatformGift(parseInt(meta.userId), amountUsd, paymentIntentId);
-        }
-        // Jukebox tip: auto-queue song when payment completes (webhook path)
-        if (meta.type === "jukebox_tip" && meta.roomCode && meta.songId && meta.tipperId) {
-          const amountCents = session.amount_total ?? 100;
-          const tipperName = meta.tipperName || "A listener";
-          await addToJukeboxQueue({
-            roomCode: meta.roomCode,
-            songId: parseInt(meta.songId),
-            tipperId: parseInt(meta.tipperId),
-            tipperName,
-            tipAmountCents: amountCents,
-            stripeSessionId: session.id,
-          });
         }
         break;
       }
@@ -1854,234 +1837,6 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
        return { url: session.url };
     }),
   }),
-  // ── Jukebox ───────────────────────────────────────────────────────────────────────────────────────
-  jukebox: router({
-    // List all rooms with pending queue items in the last 2 hours
-    listActiveRooms: publicProcedure
-      .query(async () => {
-        return listActiveJukeboxRooms();
-      }),
-
-    // Get current queue (pending items) for a room
-    getQueue: publicProcedure
-      .input(z.object({ roomCode: z.string().min(1) }))
-      .query(async ({ input }) => {
-        return getJukeboxQueue(input.roomCode);
-      }),
-
-    // Tip a song into the queue — creates Stripe Checkout Session
-    tipToQueue: protectedProcedure
-      .input(z.object({
-        roomCode: z.string().min(1),
-        songId: z.number().int().positive(),
-        amountCents: z.number().int().min(100), // $1 minimum
-        origin: z.string().url(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const song = await getSongById(input.songId);
-        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
-        const creator = await getUserById(song.userId);
-        if (!creator) throw new TRPCError({ code: "NOT_FOUND", message: "Creator not found" });
-         if (!creator.stripeAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "Creator has not enabled tips yet" });
-        const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
-        if (!acct.charges_enabled) throw new TRPCError({ code: "BAD_REQUEST", message: "Creator's Stripe account is still being verified. Gifts are not yet enabled." });
-        const tipper = await getUserById(ctx.user.id);
-        const tipperName = tipper?.artistHandle || tipper?.name || "A listener";
-        const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
-        const session = await stripe.checkout.sessions.create({
-          mode: "payment",
-          payment_method_types: ["card"],
-          customer_email: tipper?.email || undefined,
-          line_items: [{
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: `Jukebox Tip — "${song.title}"`,
-                description: `Queue "${song.title}" by ${creator.artistHandle || creator.name} in room ${input.roomCode}`,
-              },
-              unit_amount: input.amountCents,
-            },
-            quantity: 1,
-          }],
-          payment_intent_data: {
-            application_fee_amount: feeAmount,
-            transfer_data: { destination: creator.stripeAccountId },
-            metadata: {
-              type: "jukebox_tip",
-              roomCode: input.roomCode,
-              songId: input.songId.toString(),
-              tipperId: ctx.user.id.toString(),
-              tipperName,
-            },
-          },
-          client_reference_id: ctx.user.id.toString(),
-          metadata: {
-            type: "jukebox_tip",
-            roomCode: input.roomCode,
-            songId: input.songId.toString(),
-            tipperId: ctx.user.id.toString(),
-            tipperName,
-          },
-          allow_promotion_codes: false,
-          success_url: `${input.origin}/together?room=${input.roomCode}&jukebox=success&songId=${input.songId}&amountCents=${input.amountCents}`,
-          cancel_url: `${input.origin}/together?room=${input.roomCode}`,
-        });
-
-        return { url: session.url, sessionId: session.id };
-      }),
-
-    // Called after Stripe success redirect — adds item to queue
-    confirmQueue: protectedProcedure
-      .input(z.object({
-        roomCode: z.string().min(1),
-        songId: z.number().int().positive(),
-        amountCents: z.number().int().min(100),
-        stripeSessionId: z.string().optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const tipper = await getUserById(ctx.user.id);
-        const tipperName = tipper?.artistHandle || tipper?.name || "A listener";
-        await addToJukeboxQueue({
-          roomCode: input.roomCode,
-          songId: input.songId,
-          tipperId: ctx.user.id,
-          tipperName,
-          tipAmountCents: input.amountCents,
-          stripeSessionId: input.stripeSessionId,
-        });
-        return { success: true };
-      }),
-
-    // Notify server that a room was opened (fires jukebox_room Discord webhook)
-    notifyRoomOpened: protectedProcedure
-      .input(z.object({
-        roomCode: z.string().min(1).max(32),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        void (async () => {
-          try {
-            const { fireUserWebhook } = await import("./discord");
-            const host = await getUserById(ctx.user.id);
-            await fireUserWebhook(ctx.user.id, "jukebox_room", {
-              roomCode: input.roomCode,
-              hostName: host?.artistHandle || host?.displayName || host?.name || "Unknown",
-            });
-          } catch (e) { /* swallow */ }
-        })();
-        return { ok: true };
-      }),
-
-    // Free queue — add a song to the jukebox without payment
-    freeQueue: protectedProcedure
-      .input(z.object({
-        roomCode: z.string().min(1),
-        songId: z.number().int().positive(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const song = await getSongById(input.songId);
-        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
-        const queuer = await getUserById(ctx.user.id);
-        const queuerName = queuer?.artistHandle || queuer?.name || "A listener";
-        await addToJukeboxQueue({
-          roomCode: input.roomCode,
-          songId: input.songId,
-          tipperId: ctx.user.id,
-          tipperName: queuerName,
-          tipAmountCents: 0,
-        });
-        return { success: true, songTitle: song.title, queuerName };
-      }),
-    // Mark the current (first) item as played
-    markPlayed: protectedProcedure
-      .input(z.object({ itemId: z.number().int().positive() }))
-      .mutation(async ({ input }) => {
-        await markJukeboxItemPlayed(input.itemId);
-        return { success: true };
-      }),
-
-    // Host skips the current item
-    skipCurrent: protectedProcedure
-      .input(z.object({ itemId: z.number().int().positive() }))
-      .mutation(async ({ input }) => {
-        await markJukeboxItemSkipped(input.itemId);
-        return { success: true };
-      }),
-    // Leave a voluntary offering for the room — single Stripe charge, distributed proportionally to creators
-    leaveOffering: protectedProcedure
-      .input(z.object({
-        roomCode: z.string().min(1),
-        amountCents: z.number().int().min(100), // $1 minimum
-        origin: z.string().url(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const gifter = await getUserById(ctx.user.id);
-        const session = await stripe.checkout.sessions.create({
-          mode: "payment",
-          payment_method_types: ["card"],
-          customer_email: gifter?.email || undefined,
-          line_items: [{
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: `Jukebox Offering — Room ${input.roomCode}`,
-                description: `A voluntary offering for the creators playing in room ${input.roomCode}. Distributed proportionally by play count.`,
-              },
-              unit_amount: input.amountCents,
-            },
-            quantity: 1,
-          }],
-          payment_intent_data: {
-            metadata: {
-              type: "jukebox_offering",
-              roomCode: input.roomCode,
-              gifterId: ctx.user.id.toString(),
-              gifterName: gifter?.artistHandle || gifter?.name || "A listener",
-            },
-          },
-          client_reference_id: ctx.user.id.toString(),
-          metadata: {
-            type: "jukebox_offering",
-            roomCode: input.roomCode,
-            gifterId: ctx.user.id.toString(),
-          },
-          allow_promotion_codes: true,
-          success_url: `${input.origin}/together?room=${input.roomCode}&offering=success&amountCents=${input.amountCents}`,
-          cancel_url: `${input.origin}/together?room=${input.roomCode}`,
-        });
-        // Pre-create offering record as pending
-        await createJukeboxOffering({
-          roomCode: input.roomCode,
-          gifterId: ctx.user.id,
-          amountCents: input.amountCents,
-          status: "pending",
-        });
-        return { url: session.url, sessionId: session.id };
-      }),
-    // Record a play event when a song starts playing in a room
-    recordPlay: protectedProcedure
-      .input(z.object({
-        roomCode: z.string().min(1),
-        songId: z.number().int().positive(),
-        creatorId: z.number().int().positive(),
-      }))
-      .mutation(async ({ input }) => {
-        await recordJukeboxPlayEvent(input);
-        return { success: true };
-      }),
-    // Get offerings and earnings for a room
-    getRoomOfferings: publicProcedure
-      .input(z.object({ roomCode: z.string().min(1) }))
-      .query(async ({ input }) => {
-        const offerings = await getOfferingsForRoom(input.roomCode);
-        const totalCents = offerings.reduce((sum: number, o: any) => sum + o.amountCents, 0);
-        return { offerings, totalCents };
-      }),
-    // Get jukebox earnings for the logged-in creator (dashboard)
-    getMyEarnings: protectedProcedure
-      .query(async ({ ctx }) => {
-        return getJukeboxEarningsForCreator(ctx.user.id);
-      }),
-  }),
 
   // ─── Downloads ─────────────────────────────────────────────────────────────
   songDownload: router({
@@ -3108,140 +2863,6 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         if (!result.success) throw new TRPCError({ code: "BAD_REQUEST", message: result.message });
         return result;
       }),
-  }),  // ── Guilds ───────────────────────────────────────────────────────────────────────────────────
-  guilds: router({
-    /** List all public guilds */
-    list: publicProcedure.query(async () => {
-      const { getDb } = await import("./db");
-      const { guilds } = await import("../drizzle/schema");
-      const { eq: eqOp, desc: descOp } = await import("drizzle-orm");
-      const db = await getDb();
-      return db.select().from(guilds).where(eqOp(guilds.isPublic, true)).orderBy(descOp(guilds.createdAt)).limit(50);
-    }),
-    /** Get a single guild by slug */
-    getBySlug: publicProcedure
-      .input(z.object({ slug: z.string().min(1).max(64) }))
-      .query(async ({ input }) => {
-        const { getDb } = await import("./db");
-        const { guilds, guildMembers, users: usersTable } = await import("../drizzle/schema");
-        const { eq: eqOp } = await import("drizzle-orm");
-        const db = await getDb();
-        const [guild] = await db.select().from(guilds).where(eqOp(guilds.slug, input.slug)).limit(1);
-        if (!guild) throw new TRPCError({ code: "NOT_FOUND" });
-        const members = await db
-          .select({ userId: guildMembers.userId, role: guildMembers.role, joinedAt: guildMembers.joinedAt,
-            name: usersTable.name, handle: usersTable.artistHandle, avatar: usersTable.profilePhotoUrl })
-          .from(guildMembers)
-          .leftJoin(usersTable, eqOp(guildMembers.userId, usersTable.id))
-          .where(eqOp(guildMembers.guildId, guild.id));
-        return { guild, members };
-      }),
-    /** Create a guild */
-    create: protectedProcedure
-      .input(z.object({
-        slug: z.string().min(2).max(64).regex(/^[a-z0-9-]+$/),
-        name: z.string().min(1).max(128),
-        description: z.string().max(1000).optional(),
-        isPublic: z.boolean().optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const { getDb } = await import("./db");
-        const { guilds, guildMembers } = await import("../drizzle/schema");
-        const db = await getDb();
-        const [existing] = await db.select({ id: guilds.id }).from(guilds).where(
-          (await import("drizzle-orm")).eq(guilds.slug, input.slug)
-        ).limit(1);
-        if (existing) throw new TRPCError({ code: "CONFLICT", message: "Slug already taken" });
-        const [result] = await db.insert(guilds).values({
-          ...input,
-          isPublic: input.isPublic ?? true,
-          createdByUserId: ctx.user.id,
-        });
-        const guildId = (result as any).insertId as number;
-        // Creator becomes owner
-        await db.insert(guildMembers).values({ guildId, userId: ctx.user.id, role: "owner" });
-        return { guildId };
-      }),
-    /** Get guild mix tracks */
-    getMix: publicProcedure
-      .input(z.object({ guildId: z.number().int().positive() }))
-      .query(async ({ input }) => {
-        const { getDb } = await import("./db");
-        const { guildPlaylistTracks, songs: songsTable, users: usersTable } = await import("../drizzle/schema");
-        const { eq: eqOp, asc } = await import("drizzle-orm");
-        const db = await getDb();
-        return db
-          .select({
-            id: guildPlaylistTracks.id,
-            songId: guildPlaylistTracks.songId,
-            position: guildPlaylistTracks.position,
-            addedAt: guildPlaylistTracks.addedAt,
-            title: songsTable.title,
-            coverArtUrl: songsTable.coverArtUrl,
-            witnessId: songsTable.witnessId,
-            fileUrl: songsTable.fileUrl,
-            addedByName: usersTable.name,
-            addedByHandle: usersTable.artistHandle,
-            addedByAvatar: usersTable.profilePhotoUrl,
-          })
-          .from(guildPlaylistTracks)
-          .leftJoin(songsTable, eqOp(guildPlaylistTracks.songId, songsTable.id))
-          .leftJoin(usersTable, eqOp(guildPlaylistTracks.addedByUserId, usersTable.id))
-          .where(eqOp(guildPlaylistTracks.guildId, input.guildId))
-          .orderBy(asc(guildPlaylistTracks.position));
-      }),
-    /** Add a track to the guild mix */
-    addToMix: protectedProcedure
-      .input(z.object({ guildId: z.number().int().positive(), songId: z.number().int().positive() }))
-      .mutation(async ({ ctx, input }) => {
-        const { getDb } = await import("./db");
-        const { guildMembers, guildPlaylistTracks } = await import("../drizzle/schema");
-        const { eq: eqOp, and, max } = await import("drizzle-orm");
-        const db = await getDb();
-        const [membership] = await db.select().from(guildMembers)
-          .where(and(eqOp(guildMembers.guildId, input.guildId), eqOp(guildMembers.userId, ctx.user.id)))
-          .limit(1);
-        if (!membership) throw new TRPCError({ code: "FORBIDDEN", message: "Not a guild member" });
-        const [{ maxPos }] = await db.select({ maxPos: max(guildPlaylistTracks.position) })
-          .from(guildPlaylistTracks).where(eqOp(guildPlaylistTracks.guildId, input.guildId));
-        await db.insert(guildPlaylistTracks).values({
-          guildId: input.guildId,
-          songId: input.songId,
-          addedByUserId: ctx.user.id,
-          position: (maxPos ?? -1) + 1,
-        });
-        return { ok: true };
-      }),
-    /** Join a public guild */
-    join: protectedProcedure
-      .input(z.object({ guildId: z.number().int().positive() }))
-      .mutation(async ({ ctx, input }) => {
-        const { getDb } = await import("./db");
-        const { guilds, guildMembers } = await import("../drizzle/schema");
-        const { eq: eqOp, and } = await import("drizzle-orm");
-        const db = await getDb();
-        const [guild] = await db.select().from(guilds).where(eqOp(guilds.id, input.guildId)).limit(1);
-        if (!guild || !guild.isPublic) throw new TRPCError({ code: "FORBIDDEN" });
-        const [existing] = await db.select().from(guildMembers)
-          .where(and(eqOp(guildMembers.guildId, input.guildId), eqOp(guildMembers.userId, ctx.user.id)))
-          .limit(1);
-        if (existing) return { ok: true }; // already a member
-        await db.insert(guildMembers).values({ guildId: input.guildId, userId: ctx.user.id, role: "member" });
-        return { ok: true };
-      }),
-    /** My guilds */
-    mine: protectedProcedure.query(async ({ ctx }) => {
-      const { getDb } = await import("./db");
-      const { guilds, guildMembers } = await import("../drizzle/schema");
-      const { eq: eqOp } = await import("drizzle-orm");
-      const db = await getDb();
-      return db
-        .select({ id: guilds.id, slug: guilds.slug, name: guilds.name, avatarUrl: guilds.avatarUrl,
-          role: guildMembers.role, joinedAt: guildMembers.joinedAt })
-        .from(guildMembers)
-        .leftJoin(guilds, eqOp(guildMembers.guildId, guilds.id))
-        .where(eqOp(guildMembers.userId, ctx.user.id));
-    }),
   }),
 
   // ── Artwork Normalization (admin) ────────────────────────────────────────────
@@ -4398,7 +4019,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     /** Save (upsert) a webhook config for the current user */
     saveWebhook: protectedProcedure
       .input(z.object({
-        event: z.enum(["wid_minted", "track_upload", "jukebox_room", "tip_received", "like_surge"]),
+        event: z.enum(["wid_minted", "track_upload", "tip_received", "like_surge"]),
         webhookUrl: z.string().url().max(512),
         enabled: z.boolean(),
       }))
@@ -4411,7 +4032,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     /** Toggle enabled state without changing the URL */
     toggleWebhook: protectedProcedure
       .input(z.object({
-        event: z.enum(["wid_minted", "track_upload", "jukebox_room", "tip_received", "like_surge"]),
+        event: z.enum(["wid_minted", "track_upload", "tip_received", "like_surge"]),
         enabled: z.boolean(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -4429,7 +4050,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     /** Delete a webhook config */
     deleteWebhook: protectedProcedure
       .input(z.object({
-        event: z.enum(["wid_minted", "track_upload", "jukebox_room", "tip_received", "like_surge"]),
+        event: z.enum(["wid_minted", "track_upload", "tip_received", "like_surge"]),
       }))
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
@@ -4445,7 +4066,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     /** Test a webhook URL by sending a sample payload */
     testWebhook: protectedProcedure
       .input(z.object({
-        event: z.enum(["wid_minted", "track_upload", "jukebox_room", "tip_received", "like_surge"]),
+        event: z.enum(["wid_minted", "track_upload", "tip_received", "like_surge"]),
         webhookUrl: z.string().url().max(512),
       }))
       .mutation(async ({ input }) => {

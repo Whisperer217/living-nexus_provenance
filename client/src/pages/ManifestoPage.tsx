@@ -45,7 +45,7 @@ const TENETS = [
   {
     icon: Users,
     title: "Community over algorithm.",
-    body: "No recommendation engine decides who gets heard. No engagement metric determines whose work surfaces. Living Nexus is a room where creators and listeners find each other honestly — through medium, through genre, through search, through word of mouth, through the Listen Together rooms where music plays live. The platform does not amplify the loudest. It protects the real.",
+    body: "No recommendation engine decides who gets heard. No engagement metric determines whose work surfaces. Living Nexus is a room where creators and listeners find each other honestly — through medium, through genre, through search, through word of mouth. The platform does not amplify the loudest. It protects the real.",
   },
 ];
 
@@ -309,7 +309,6 @@ export default function ManifestoPage() {
                 {[
                   "Discover real music. No algorithm.",
                   "Gift creators directly. 90% reaches them.",
-                  "Queue songs in the Jukebox — free.",
                   "Verify any work's origin. Cryptographically.",
                   "No ads. No data harvesting. No extraction.",
                 ].map((line) => (

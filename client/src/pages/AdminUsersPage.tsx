@@ -919,7 +919,6 @@ function SystemConfigTab() {
     { key: "feature.manuscript_upload", value: "true", description: "Enable manuscript upload flow" },
     { key: "feature.comic_upload", value: "true", description: "Enable comic/novel upload flow" },
     { key: "feature.ai_transforms", value: "true", description: "Enable AI transform feature" },
-    { key: "feature.jukebox", value: "true", description: "Enable Jukebox mode" },
     { key: "feature.tips", value: "true", description: "Enable tip/gift payments" },
     { key: "platform.maintenance_mode", value: "false", description: "Put platform in maintenance mode" },
     { key: "platform.registration_open", value: "true", description: "Allow new user registrations" },

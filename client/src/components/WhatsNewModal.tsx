@@ -161,7 +161,6 @@ const UPDATES = [
     date: "March 2026",
     label: null,
     items: [
-      { icon: Users, text: "Jukebox Free Multi-Queue — Songs now queue freely in sequence. No checkout required. Add as many as you want. The room hears them all." },
       { icon: Globe, text: "Declaration-First Homepage — Living Nexus now opens with its declaration, doctrine, and the Creator/Fan value split front and center. This is what we are. No confusion." },
     ],
   },
@@ -188,9 +187,6 @@ const UPDATES = [
     date: "March 2026",
     label: null,
     items: [
-      { icon: Gift, text: "Gift Economy — offerings replace tips. Every song in the Jukebox is freely queueable. Leave a voluntary offering ($1–$20) to support the room's creators. No gates, no blocks — pure sovereign generosity." },
-      { icon: Link2, text: "Jukebox Share Links — every room now has a direct link. Share it and anyone who taps it lands straight in the room, no code entry needed. Room link auto-copies when you create a session." },
-      { icon: Radio, text: "Global Player Integration — the Jukebox now plays through the global player bar. Music follows you across every page while a session is active. A gold session badge in the player shows your room and a Leave button." },
       { icon: ArrowUpFromLine, text: "Large File Upload Fix — WAV files of any size now upload reliably. The upload pipeline was rebuilt as a streaming relay, bypassing the platform's request-body limit entirely." },
     ],
   },
@@ -284,7 +280,6 @@ const UPDATES = [
     items: [
       { icon: DollarSign, text: "Per-track download permissions — Free, Gift-to-Download, or No Downloads." },
       { icon: Music, text: "Now Playing redesign — controls overlay cover art, more room for lyrics." },
-      { icon: Users, text: "Listen Together rooms — play music live with fans in real time." },
     ],
   },
 ];

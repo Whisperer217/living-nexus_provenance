@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
-type Tab = "songs" | "transforms" | "activity" | "earnings" | "collections" | "archive" | "analytics" | "widcache" | "discord";
+type Tab = "songs" | "transforms" | "activity" | "collections" | "archive" | "analytics" | "widcache" | "discord";
 
 interface BatchTrack {
   id: number;
@@ -70,10 +70,6 @@ export default function DashboardPage() {
   );
   const { data: licenseData, error: licenseError, refetch: refetchLicense } = trpc.licenses.myStatus.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
   const { data: connectData, error: connectError, refetch: refetchConnect } = trpc.tips.connectStatus.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
-  const { data: earningsData, isLoading: earningsLoading, error: earningsError, refetch: refetchEarnings } = trpc.jukebox.getMyEarnings.useQuery(
-    undefined,
-    { enabled: isAuthenticated && activeTab === "earnings", retry: 1 }
-  );
   const { data: myCollections, isLoading: collectionsLoading, refetch: refetchCollections, error: collectionsError } = trpc.songs.getMyCollections.useQuery(
     undefined,
     { enabled: isAuthenticated && activeTab === "collections", retry: 1 }
@@ -559,18 +555,6 @@ export default function DashboardPage() {
             ) : null}
           </button>
           <button
-            onClick={() => setActiveTab("earnings")}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-            style={{
-              background: activeTab === "earnings" ? "oklch(0.55 0.18 160)" : "transparent",
-              color: activeTab === "earnings" ? "white" : "oklch(0.6 0.04 280)",
-              fontFamily: "'Cinzel', serif",
-            }}
-          >
-            <Gift className="w-4 h-4" />
-            Jukebox Earnings
-          </button>
-          <button
             onClick={() => setActiveTab("collections")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
@@ -954,80 +938,8 @@ export default function DashboardPage() {
             )}
           </div>
         )}
-        {/* Jukebox Earnings Tab */}
-        {activeTab === "earnings" && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Jukebox Earnings</h2>
-                <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>Your proportional share from offerings left in jukebox rooms where your songs played.</p>
-              </div>
-            </div>
-            {earningsError ? (
-              <DashboardErrorCard
-                section="your jukebox earnings"
-                error={earningsError}
-                onRetry={() => refetchEarnings()}
-                route="/dashboard#earnings"
-              />
-            ) : earningsLoading ? (
-              <div className="text-center py-16">
-                <div className="w-8 h-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mx-auto" />
-              </div>
-            ) : !earningsData?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.25 0.02 280)" }}>
-                <Gift className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.55 0.18 160)" }} />
-                <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No jukebox earnings yet.</p>
-                <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>When fans leave offerings in rooms where your songs play, your share appears here.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {/* Summary */}
-                <div className="rounded-xl p-4 mb-2" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.55 0.18 160 / 0.3)" }}>
-                  <div className="flex items-center gap-3">
-                    <Gift className="w-5 h-5" style={{ color: "oklch(0.55 0.18 160)" }} />
-                    <div>
-                      <p className="text-sm font-medium" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
-                        Total Earned: ${((earningsData as any[]).reduce((sum: number, r: any) => sum + r.earnedCents, 0) / 100).toFixed(2)}
-                      </p>
-                      <p className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>
-                        Across {(earningsData as any[]).length} room{(earningsData as any[]).length !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                {/* Per-room rows */}
-                {(earningsData as any[]).map((row: any) => (
-                  <div key={row.roomCode} className="rounded-xl p-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
-                          Room #{row.roomCode}
-                        </p>
-                        <p className="text-xs mt-0.5" style={{ color: "oklch(0.6 0.04 280)" }}>
-                          {row.creatorPlays} of {row.totalPlays} plays · ${(row.totalOfferingsCents / 100).toFixed(2)} total offerings
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-base font-bold" style={{ color: "oklch(0.55 0.18 160)", fontFamily: "'Cinzel', serif" }}>
-                          +${(row.earnedCents / 100).toFixed(2)}
-                        </p>
-                        <p className="text-[10px]" style={{ color: "oklch(0.4 0.03 280)" }}>
-                          {row.totalPlays > 0 ? Math.round((row.creatorPlays / row.totalPlays) * 100) : 0}% of room
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <p className="text-[11px] text-center mt-4" style={{ color: "oklch(0.4 0.03 280)" }}>
-                  Payouts are processed monthly. Connect Stripe to receive direct transfers.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Collections Tab */}
+                {/* Collections Tab */}
         {activeTab === "collections" && (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -1382,13 +1294,6 @@ const DISCORD_EVENTS = [
     description: "Fires when a new track is successfully uploaded",
     icon: "🎵",
     color: "oklch(0.75 0.18 140)",
-  },
-  {
-    key: "jukebox_room" as const,
-    label: "Jukebox Room Opened",
-    description: "Fires when you open a new Listen Together sanctuary",
-    icon: "🎧",
-    color: "oklch(0.75 0.18 220)",
   },
   {
     key: "tip_received" as const,

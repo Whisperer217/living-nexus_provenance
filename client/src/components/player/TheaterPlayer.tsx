@@ -403,13 +403,6 @@ export default function TheaterPlayer() {
                     </button>
                   )}
                   <button
-                    onClick={() => { closeTheater(); navigate("/together"); }}
-                    className="p-2 transition-colors text-white/30 hover:text-white/70"
-                    title="Take to Room"
-                  >
-                    <Users size={18} />
-                  </button>
-                  <button
                     onClick={handleShare}
                     className="p-2 transition-colors"
                     style={{ color: copied ? "oklch(0.80 0.145 82)" : "oklch(0.45 0.02 280)" }}

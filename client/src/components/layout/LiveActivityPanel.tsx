@@ -9,11 +9,11 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
-import { X, Music, Zap, Radio } from "lucide-react";
+import { X, Music, Zap } from "lucide-react";
 
 const PANEL_WIDTH = 272;
 
-type LiveTab = "playing" | "tips" | "sessions";
+type LiveTab = "playing" | "tips";
 
 function formatAmount(cents: number): string {
   return `$${(cents / 100).toFixed(2).replace(/\.00$/, "")}`;
@@ -42,11 +42,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
     staleTime: 25_000,
   });
 
-  // Active jukebox rooms — poll every 15s
-  const { data: rooms } = trpc.jukebox.listActiveRooms.useQuery(undefined, {
-    refetchInterval: 15_000,
-    staleTime: 12_000,
-  });
+
 
   // Recent tracks from explore (for "Now Playing" context)
   const { data: recentSongs } = trpc.songs.discover.useQuery(
@@ -130,7 +126,6 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           {([
             { key: "playing", label: "Playing", icon: Music },
             { key: "tips",    label: "Tips",    icon: Zap    },
-            { key: "sessions",label: "Sessions",icon: Radio  },
           ] as { key: LiveTab; label: string; icon: React.ElementType }[]).map(t => (
             <button
               key={t.key}
@@ -305,75 +300,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
             </div>
           )}
 
-          {/* SESSIONS TAB */}
-          {tab === "sessions" && (
-            <div className="py-2">
-              <div className="px-4 py-1.5">
-                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "oklch(0.45 0.02 280)" }}>
-                  Active Listen Together Rooms
-                </span>
-              </div>
-              {rooms && rooms.length > 0 ? rooms.map((room: any) => (
-                <div
-                  key={room.roomCode}
-                  className="flex items-start gap-3 px-4 py-3 cursor-pointer transition-all"
-                  style={{ borderBottom: "1px solid oklch(0.28 0.04 270 / 15%)" }}
-                  onClick={() => navigate(`/together?room=${room.roomCode}`)}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "oklch(0.14 0.02 280 / 0.6)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
-                >
-                  <div
-                    className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"
-                    style={{ background: "oklch(0.65 0.18 160 / 0.15)", border: "1px solid oklch(0.65 0.18 160 / 0.25)" }}
-                  >
-                    {room.nowPlayingCoverArtUrl
-                      ? <img src={room.nowPlayingCoverArtUrl} alt="" className="w-full h-full object-cover rounded-lg" />
-                      : <Radio size={14} style={{ color: "oklch(0.65 0.18 160)" }} />
-                    }
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <span
-                        className="text-[8px] font-bold px-1 py-0.5 rounded flex-shrink-0"
-                        style={{ background: "oklch(0.65 0.18 160 / 0.15)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.25)" }}
-                      >
-                        LIVE
-                      </span>
-                      <span className="text-[10px] font-mono truncate" style={{ color: "oklch(0.55 0.02 280)" }}>
-                        #{room.roomCode}
-                      </span>
-                    </div>
-                    {room.nowPlayingTitle && (
-                      <div className="text-[11px] font-semibold truncate" style={{ color: "oklch(0.88 0.02 280)" }}>
-                        {room.nowPlayingTitle}
-                      </div>
-                    )}
-                    {room.nowPlayingArtist && (
-                      <div className="text-[9px] truncate" style={{ color: "oklch(0.50 0.02 280)" }}>
-                        {room.nowPlayingArtist}
-                      </div>
-                    )}
-                    <div className="text-[9px] mt-0.5" style={{ color: "oklch(0.40 0.02 280)" }}>
-                      {room.pendingCount} track{room.pendingCount !== 1 ? "s" : ""} queued
-                      {room.hostName ? ` · hosted by ${room.hostName}` : ""}
-                    </div>
-                  </div>
-                </div>
-              )) : (
-                <div className="px-4 py-6 text-center">
-                  <Radio size={20} style={{ color: "oklch(0.30 0.02 280)", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "oklch(0.40 0.02 280)" }}>No active sessions</div>
-                  <button
-                    onClick={() => navigate("/together")}
-                    className="mt-3 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all"
-                    style={{ background: "oklch(0.65 0.18 160 / 0.15)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.25)" }}
-                  >
-                    Start a Session
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+
 
         </div>
       </div>

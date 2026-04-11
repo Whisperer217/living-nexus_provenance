@@ -360,11 +360,6 @@ export function registerOgRoutes(app: Express) {
       description: "The public specification for the Witness Identity Document (WID) system — a sovereign creative registry that proves origin before a work touches any platform.",
     },
     {
-      path: "/together",
-      title: "Listen Together — Living Nexus Sanctuary",
-      description: "Host or join a live music sanctuary. Queue songs, tip creators, and vibe in real-time with your community.",
-    },
-    {
       path: "/manifesto",
       title: "The Manifesto — Living Nexus",
       description: "The founding doctrine of Living Nexus. Why sovereign music provenance matters and what we are building to protect it.",
