@@ -234,6 +234,11 @@
     background-color: oklch(0.10 0.022 55); /* match app bg — no black void on overscroll */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
+  /* Ensure the html root also clips any bleed — belt-and-suspenders for iOS Safari */
+  html {
+    overflow: hidden;
+    height: 100%;
+  }
   /* ── Bottom Stack Layout Tokens ─────────────────────────────────────
      Single source of truth for all bottom-anchored heights.
      Player sits ABOVE nav. Content padding accounts for both.
@@ -257,7 +262,14 @@
      ─────────────────────────────────────────────────────────────────── */
   body.overlay-active {
     overflow: hidden;
+    /* position:fixed prevents iOS Safari rubber-band scroll from revealing the
+       black browser chrome / void behind the app when any panel is open.
+       We preserve scroll position via JS (overlayController) so the page
+       doesn't jump when the panel closes. */
+    position: fixed;
+    width: 100%;
     touch-action: none;
+    overscroll-behavior: none;
   }
 
   /* Graceful Lights On transition */

@@ -12,6 +12,7 @@ import { ChevronRight, Search, Play, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
+import { overlayOpen, overlayClose } from "@/lib/overlayController";
 
 // ── Genre filter chips (same set as HomePage) ─────────────────────
 const GENRE_FILTERS = [
@@ -57,7 +58,19 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
 
   const tracks = feedData ?? [];
 
-  // ── Close on outside click (mouse + touch) ───────────────────────
+  // ── Scroll lock ──────────────────────────────────────────────────────────────────────
+  // Lock body scroll when panel is open so background never scrolls or
+  // reveals the black void behind the app on iOS Safari rubber-band.
+  useEffect(() => {
+    if (open) {
+      overlayOpen("quick-access");
+    } else {
+      overlayClose("quick-access");
+    }
+    return () => overlayClose("quick-access");
+  }, [open]);
+
+  // ── Close on outside click (mouse + touch) ────────────────────────────────────
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent | TouchEvent) => {
@@ -265,7 +278,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
               </p>
             </div>
           ) : (
-            <div className="space-y-1 overflow-y-auto flex-1 min-h-0">
+            <div className="space-y-1 overflow-y-auto flex-1 min-h-0" style={{ overscrollBehavior: "contain" }}>
               {tracks.slice(0, 10).map((track: any, idx: number) => (
                 <button
                   key={track.id ?? track.song?.id}

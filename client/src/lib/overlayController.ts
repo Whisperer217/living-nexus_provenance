@@ -21,14 +21,17 @@
 type PanelName =
   | "menu"
   | "quickplay"
+  | "quick-access"
   | "player-expanded"
   | "player-cinematic"
+  | "player-drag"
   | "gift"
   | "edit-track"
   | string;
 
 // ── Internal state ──────────────────────────────────────────────────────────
 let _activePanel: PanelName | null = null;
+let _savedScrollY = 0; // saved before position:fixed to restore on unlock
 const _listeners: Set<() => void> = new Set();
 
 function _notify() {
@@ -36,16 +39,23 @@ function _notify() {
 }
 
 // ── Scroll lock helpers ─────────────────────────────────────────────────────
+// iOS Safari requires position:fixed to prevent rubber-band scroll revealing
+// the black void behind the app. We save/restore scrollY to prevent page jump.
 function _lockScroll() {
+  _savedScrollY = window.scrollY;
   document.body.style.overflow = "hidden";
   document.body.style.touchAction = "none";
+  document.body.style.top = `-${_savedScrollY}px`;
   document.body.classList.add("overlay-active");
 }
 
 function _unlockScroll() {
   document.body.style.overflow = "";
   document.body.style.touchAction = "";
+  document.body.style.top = "";
   document.body.classList.remove("overlay-active");
+  // Restore scroll position — position:fixed resets it to 0
+  window.scrollTo(0, _savedScrollY);
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────
