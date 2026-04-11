@@ -1286,6 +1286,8 @@ export async function getAllUsersWithStats(limit: number = 50, offset: number = 
 export async function createEvent(data: {
   type: "TIP" | "COMMENT" | "LIKE" | "FOLLOW" | "WITNESS_REGISTERED" | "WITNESS_VERIFIED" | "WORK_REFERENCED" | "SYSTEM_UPDATE" | "PRESERVATION_MODE" | "PROJECT_PUBLISHED" | "PROJECT_FUNDED";
   workId: number;
+  /** Required discriminator — must be "song" or "project". No fallback. */
+  workType: "song" | "project";
   actorId?: number;
   actorName?: string;
   payload?: Record<string, unknown>;
@@ -1295,6 +1297,7 @@ export async function createEvent(data: {
   await db.insert(events).values({
     type: data.type,
     workId: data.workId,
+    workType: data.workType,
     actorId: data.actorId ?? null,
     actorName: data.actorName ?? null,
     payload: data.payload ?? null,

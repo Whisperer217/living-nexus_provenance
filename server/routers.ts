@@ -138,6 +138,7 @@ export async function handleStripeWebhook(req: any, res: any) {
           await createEvent({
             type: "TIP",
             workId: songId,
+            workType: "song",
             actorId: tipperUserId,
             actorName: meta.tipperName || undefined,
             payload: {
@@ -192,6 +193,7 @@ export async function handleStripeWebhook(req: any, res: any) {
           await createEvent({
             type: "TIP",
             workId: songId,
+            workType: "song",
             actorId: tipperUserId,
             actorName: meta.tipperName || undefined,
             payload: {
@@ -226,6 +228,7 @@ export async function handleStripeWebhook(req: any, res: any) {
           await createEvent({
             type: "PROJECT_FUNDED",
             workId: parseInt(meta.projectId),
+            workType: "project",
             actorId: meta.userId ? parseInt(meta.userId) : undefined,
             actorName: meta.anonymous === "true" ? "Anonymous" : (meta.donorName || "A supporter"),
             payload: {
@@ -1596,6 +1599,7 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
       await createEvent({
         type: "COMMENT",
         workId: input.songId,
+        workType: "song",
         actorId: ctx.user?.id,
         actorName,
         payload: { content: input.content },
@@ -3048,6 +3052,7 @@ Return ONLY the caption text. No quotes. No labels. No explanation.`;
         await createEvent({
           type: "COMMENT",
           workId: songId,
+          workType: "song",
           actorId: ctx.user.id,
           actorName: replierName,
           payload: { content: input.content, isReply: true, replyToActorId: notif.actorId },
@@ -4793,6 +4798,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         await createEvent({
           type: "PROJECT_PUBLISHED",
           workId: input.projectId,
+          workType: "project",
           actorId: ctx.user.id,
           actorName: ctx.user.name || undefined,
           payload: { wid, title: project.title },
