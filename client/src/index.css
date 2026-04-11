@@ -258,27 +258,7 @@
     display: flex;
     flex-direction: column;
   }
-  /* ── Radix Dialog scroll-lock compatibility ──────────────────────────
-     react-remove-scroll-bar dynamically appends a <style> tag to <head>
-     that injects: body[data-scroll-locked] { position: relative !important; }
-     Because it is appended AFTER our CSS, it wins the cascade even with
-     equal specificity + !important (last declaration wins per CSS spec).
-
-     Fix: use a higher-specificity selector (html body[...]) so our rule
-     beats the library's rule regardless of source order.
-
-     Why this matters: when body has position:relative, fixed-position
-     dialog portals resolve against the body instead of the viewport —
-     causing the modal to render flush-left instead of centered, and
-     causing layout-shift ghost-clicks that open the PlaylistDrawer tab.
-     ─────────────────────────────────────────────────────────────────── */
-  html body[data-scroll-locked] {
-    position: static !important;
-    /* Neutralise the margin-right scrollbar-gap compensation that shifts
-       the page layout and can trigger ghost-click events on fixed elements */
-    margin-right: 0 !important;
-    padding-right: 0 !important;
-  }
+  /* scroll-lock override moved outside @layer base — see below */
 
   /* ── Global Overlay System ─────────────────────────────────────────
      body.overlay-active is set by overlayController.ts.
@@ -331,7 +311,46 @@
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-thumb { background: oklch(0.55 0.08 70 / 40%); border-radius: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  * { scrollbar-width: thin; scrollbar-color: oklch(0.55 0.08 70 / 40%) transparent; }
+   * { scrollbar-width: thin; scrollbar-color: oklch(0.55 0.08 70 / 40%) transparent; }
+}
+
+/* ── Radix Dialog scroll-lock compatibility ──────────────────────────────
+   MUST live OUTSIDE any @layer block.
+
+   react-remove-scroll-bar dynamically appends a plain (unlayered) <style>
+   tag to <head> that injects:
+     body[data-scroll-locked] { position: relative !important; }
+
+   In the CSS cascade, unlayered styles ALWAYS beat @layer styles —
+   even with higher specificity and !important inside the layer.
+   The only way to beat an unlayered rule is with another unlayered rule
+   that has equal-or-higher specificity and appears later in source order.
+
+   This block is unlayered and uses html body[...] (higher specificity)
+   so it definitively wins regardless of when the library injects its tag.
+
+   Effect: body stays position:static when a Radix dialog is open, so
+   fixed-position portals (modals) resolve against the viewport and center
+   correctly. The margin-right scrollbar-gap compensation is also zeroed
+   to prevent layout-shift ghost-clicks on the PlaylistDrawer tab.
+   ─────────────────────────────────────────────────────────────────── */
+html body[data-scroll-locked] {
+  position: static !important;
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* ── Dialog centering ───────────────────────────────────────────────────────────────
+   Tailwind v4 translate-x-[-50%] / translate-y-[-50%] utilities may not
+   generate CSS in all build configurations. This unlayered rule guarantees
+   the dialog is always viewport-centered using raw CSS, regardless of
+   Tailwind utility output or CSS variable resolution.
+   ─────────────────────────────────────────────────────────────── */
+[data-slot="dialog-content"] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 @layer components {
