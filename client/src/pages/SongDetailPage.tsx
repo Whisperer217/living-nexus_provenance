@@ -725,6 +725,40 @@ export default function SongDetailPage() {
               </div>
             )}
 
+            {/* Sovereign Stamp Badge — shown when stamp has been applied */}
+            {(song as any).sovereignStampId && (
+              <div className="rounded-2xl p-5" style={{ background: "oklch(0.84 0.155 85 / 0.05)", border: "1px solid oklch(0.84 0.155 85 / 0.35)" }}>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 mt-0.5 flex-shrink-0 flex items-center justify-center">
+                    <span style={{ fontSize: "18px", lineHeight: 1 }}>🔏</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>Sovereign Stamp Applied</p>
+                    <p className="text-xs font-mono break-all" style={{ color: "#E2E8F0" }}>{(song as any).sovereignStampId}</p>
+                    {(song as any).sovereignStampedAt && (
+                      <p className="text-xs mt-1" style={{ color: "oklch(0.65 0.03 280)" }}>
+                        Stamped {new Date((song as any).sovereignStampedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                      </p>
+                    )}
+                    <p className="text-[11px] mt-1" style={{ color: "oklch(0.55 0.03 280)" }}>
+                      Near-ultrasonic tone embedded in audio — 17 U.S.C. § 102(a)
+                    </p>
+                    {(song as any).certificateUrl && (
+                      <a
+                        href={(song as any).certificateUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 text-xs mt-2 hover:underline"
+                        style={{ color: "oklch(0.84 0.155 85)" }}
+                      >
+                        <ExternalLink className="w-3 h-3" />View Provenance Certificate
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* HAAI Authorship Declaration — shown when song has HAAI disclosure */}
             {(song as any).aiDisclosure === "human_authored_ai_instrument" && (
               <div className="rounded-2xl p-5" style={{ background: "oklch(0.14 0.025 280)", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}>
