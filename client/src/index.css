@@ -259,15 +259,25 @@
     flex-direction: column;
   }
   /* ── Radix Dialog scroll-lock compatibility ──────────────────────────
-     Radix react-remove-scroll-bar injects:
-       body[data-scroll-locked] { position: relative !important; }
-     This breaks fixed-position portals (modals, dialogs) on mobile —
-     they resolve against the body instead of the viewport, rendering off-screen.
-     We override it to position:static so our own overlay-active system
-     (position:fixed via overlayController) remains the single authority.
+     react-remove-scroll-bar dynamically appends a <style> tag to <head>
+     that injects: body[data-scroll-locked] { position: relative !important; }
+     Because it is appended AFTER our CSS, it wins the cascade even with
+     equal specificity + !important (last declaration wins per CSS spec).
+
+     Fix: use a higher-specificity selector (html body[...]) so our rule
+     beats the library's rule regardless of source order.
+
+     Why this matters: when body has position:relative, fixed-position
+     dialog portals resolve against the body instead of the viewport —
+     causing the modal to render flush-left instead of centered, and
+     causing layout-shift ghost-clicks that open the PlaylistDrawer tab.
      ─────────────────────────────────────────────────────────────────── */
-  body[data-scroll-locked] {
+  html body[data-scroll-locked] {
     position: static !important;
+    /* Neutralise the margin-right scrollbar-gap compensation that shifts
+       the page layout and can trigger ghost-click events on fixed elements */
+    margin-right: 0 !important;
+    padding-right: 0 !important;
   }
 
   /* ── Global Overlay System ─────────────────────────────────────────

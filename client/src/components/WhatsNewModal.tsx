@@ -354,6 +354,13 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
           background: "oklch(0.09 0.02 270)",
           border: "1px solid oklch(0.84 0.155 85 / 0.2)",
           maxHeight: "min(88vh, 640px)",
+          /* Belt-and-suspenders centering — inline style wins over any CSS class conflict.
+             Ensures the modal is viewport-centered even if Tailwind translate utilities
+             are overridden by the react-remove-scroll-bar cascade issue. */
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
         }}
       >
         <DialogDescription className="sr-only">
