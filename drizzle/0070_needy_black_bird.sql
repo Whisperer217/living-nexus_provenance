@@ -1,0 +1,1 @@
+ALTER TABLE `events` ADD `workType` enum('song','project');

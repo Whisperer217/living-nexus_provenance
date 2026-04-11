@@ -207,6 +207,11 @@ export const songs = mysqlTable("songs", {
   // Roles: songwriter, producer, featured, mixing, mastering, etc.
   creditsJson: text("creditsJson"),
 
+  // Lineage bridge — links this work to its parent artifact (e.g. manuscript that became an album)
+  // null = root artifact (no parent); set = this work is a derivative/expression of parentSongId
+  // This is the minimal bridge toward the Artifact Root (WID) architecture — no UI yet
+  parentSongId: int("parentSongId"),
+
   // Display order — creator-controlled sort position for their public tracklist
   // 0 = unset (falls back to createdAt ASC); positive integers = explicit position (1-indexed)
   displayOrder: int("displayOrder").default(0).notNull(),
@@ -400,6 +405,9 @@ export const events = mysqlTable("events", {
 
   // Work reference (WID origin node)
   workId: int("workId").notNull(),   // maps to songs.id or projects.id
+  // workType discriminator — prevents ambiguous workId joins when a third entity type is added
+  // null = legacy rows (pre-discriminator); new rows must always set this
+  workType: mysqlEnum("workType", ["song", "project"]),
 
   // Actor (human source)
   actorId: int("actorId"),           // maps to users.id; null = anonymous

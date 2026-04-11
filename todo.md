@@ -3365,9 +3365,14 @@
 - [x] Step 1 — Close route-change scroll lock gap: overlayCloseAll() on location change in App.tsx
 - [ ] Step 2 — Extract shared format constants to shared/contentTypes.ts
 - [ ] Step 3 — Add parentSongId nullable FK to songs table
-- [ ] Step 4 — Add workType discriminator to events table
+- [x] Step 4 — Add workType discriminator to events table
 - [x] Fix hamburger menu overscroll escape on mobile — panel translates past its bounds when scrolling hits the end of content
 - [x] Fix mobile expanded player backdrop bleed — dragging past top boundary surfaces full-page black backdrop
 - [x] Fix mobile player controls unresponsive on Explore page — pointer-events blocked by background layer
 - [x] Fix PlaylistDrawer right-side panel overscroll escape on mobile — same momentum bleed as hamburger menu
 - [x] Fix viewport floor overscroll — main page scroll container bleeds past bottom boundary exposing black void behind app
+- [x] Audit and seal overscroll gaps in WID panel, Comments sheet, EditTrackPanel
+- [x] Swap useEffect to useLayoutEffect in OverlayRouteGuard
+- [x] Step 2 — Extract shared constants to shared/contentTypes.ts
+- [x] Step 3 — Add parentSongId to songs table (lineage bridge)
+- [x] Step 4 — Add workType discriminator to events table

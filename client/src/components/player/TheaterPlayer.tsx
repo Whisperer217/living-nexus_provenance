@@ -553,7 +553,7 @@ export default function TheaterPlayer() {
 
             {/* Lyrics panel */}
             {activeTab === "lyrics" && (
-              <div className="flex-1 overflow-y-auto p-5">
+              <div className="flex-1 overflow-y-auto p-5" style={{ overscrollBehavior: "contain" }}>
                 {songDetail?.song?.lyricsText ? (
                   <pre
                     className="whitespace-pre-wrap"
@@ -588,7 +588,7 @@ export default function TheaterPlayer() {
 
             {/* Signals panel */}
             {activeTab === "signals" && (
-              <div className="flex-1 overflow-y-auto p-5">
+              <div className="flex-1 overflow-y-auto p-5" style={{ overscrollBehavior: "contain" }}>
                 {/* Witness Activity Strip */}
                 {listenerCount > 0 && (
                   <div
@@ -692,7 +692,7 @@ export default function TheaterPlayer() {
                     </span>
                   </div>
                 )}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ overscrollBehavior: "contain" }}>
                   {commentsData && commentsData.length > 0 ? (
                     commentsData.map((c: any) => (
                       <div key={c.id} className="flex gap-2.5">

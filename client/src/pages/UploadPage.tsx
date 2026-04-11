@@ -23,27 +23,13 @@ import { addWIDSnapshot } from "@/lib/lnxCache";
 import { runUploadPipeline, type UploadMetadata } from "@/lib/uploadPipeline";
 import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
 import { HAAIDeclarationForm, EMPTY_HAAI } from "@/components/HAAIDeclarationForm";
-
-const GENRES = [
-  "Ambient / Lo-fi", "Electronic / House", "Gospel / Worship",
-  "Classical / Jazz", "Hip-Hop / Trap", "Rock / Indie",
-  "R&B / Soul", "Pop", "Other",
-];
-
-const MOODS = ["War", "Healing", "Loss", "Triumph", "Faith", "Love", "Protest", "Documentary", "Joy", "Lament"];
-
-const MANUSCRIPT_CATEGORIES = [
-  "Fiction", "Non-Fiction", "Poetry", "Memoir", "Theology",
-  "Philosophy", "Biography", "Self-Help", "Academic", "Devotional",
-  "Children's", "Young Adult", "Short Stories", "Essay Collection", "Other",
-];
-
-const COMIC_CATEGORIES = [
-  "Graphic Novel", "Manga", "Webcomic", "Comic Strip", "Illustrated Story",
-  "Children's Illustrated", "Faith / Devotional", "Sci-Fi / Fantasy", "Memoir / Auto-Bio", "Other",
-];
-
-const MANUSCRIPT_THEMES = ["Faith", "War", "Identity", "Healing", "Loss", "Redemption", "Justice", "Love", "Protest", "Legacy", "Triumph", "Lament"];
+import {
+  UPLOAD_GENRES as GENRES,
+  MOODS,
+  MANUSCRIPT_CATEGORIES,
+  COMIC_CATEGORIES,
+  MANUSCRIPT_THEMES,
+} from "@shared/contentTypes";
 
 const AI_CONSENT_OPTIONS = [
   { value: "prohibited" as const, label: "AI Training PROHIBITED", color: "oklch(0.65 0.18 25)", desc: "No AI system may train on this work" },

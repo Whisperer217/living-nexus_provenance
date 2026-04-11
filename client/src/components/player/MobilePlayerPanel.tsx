@@ -419,6 +419,7 @@ export default function MobilePlayerPanel() {
           paddingBottom: 0,
           overflowY: "auto",
           overflowX: "hidden",
+          overscrollBehavior: "contain",
         }}
       >
         {/* ══ ARTWORK SECTION — full-bleed, dominant, ALWAYS visible ══ */}
@@ -847,7 +848,7 @@ export default function MobilePlayerPanel() {
           </div>
 
           {/* Sheet content — scrollable */}
-          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}>
+          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent", overscrollBehavior: "contain" }}>
 
             {/* ── DETAILS TAB ── */}
             {sheetTab === "details" && (

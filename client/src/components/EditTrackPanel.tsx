@@ -15,23 +15,11 @@ import {
 } from "@/components/ui/select";
 import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-
-const GENRES = [
-  "Gospel", "Hip-Hop", "R&B", "Electronic", "Rock", "Classical",
-  "Jazz", "Ambient", "Pop", "Country", "Latin", "Metal", "Folk",
-  "Soul", "Funk", "Reggae", "Blues", "Indie", "Alternative", "Other",
-];
-
-const MANUSCRIPT_CATEGORIES = [
-  "Fiction", "Non-Fiction", "Poetry", "Memoir", "Theology",
-  "Philosophy", "Biography", "Self-Help", "Academic", "Devotional",
-  "Children's", "Young Adult", "Short Stories", "Essay Collection", "Other",
-];
-
-const COMIC_CATEGORIES = [
-  "Graphic Novel", "Manga", "Webcomic", "Comic Strip", "Illustrated Story",
-  "Children's Illustrated", "Faith / Devotional", "Sci-Fi / Fantasy", "Memoir / Auto-Bio", "Other",
-];
+import {
+  EDIT_GENRES as GENRES,
+  MANUSCRIPT_CATEGORIES,
+  COMIC_CATEGORIES,
+} from "@shared/contentTypes";
 
 const AI_CONSENT_LABELS: Record<string, string> = {
   prohibited: "Human-Made — No AI Training",
@@ -474,7 +462,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         </div>
 
         {/* Form */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-6 space-y-6" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-6 space-y-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
 
           {/* Cover Art */}
           <div className="space-y-2.5">

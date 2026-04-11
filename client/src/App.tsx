@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect } from "react";
 import { Route, Switch, Redirect, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -89,7 +89,9 @@ function PageLoader() {
  */
 function OverlayRouteGuard() {
   const [location] = useLocation();
-  useEffect(() => {
+  // useLayoutEffect fires before paint — ensures scroll lock is cleared
+  // before the new page renders, preventing a single-frame frozen-scroll flash on mobile
+  useLayoutEffect(() => {
     overlayCloseAll();
   }, [location]);
   return null;
