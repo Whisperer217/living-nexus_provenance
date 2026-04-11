@@ -90,7 +90,7 @@ async function fetchEligibleSongs() {
   const songs = [];
   let offset = 0;
   while (true) {
-    const [rows] = await conn.execute(
+    const [rows] = await conn.query(
       `SELECT id, userId, title, witnessId, fileUrl, fileKey, fileHash,
               aiDisclosure,
               haaiVisualConcept, haaiStyleLanguage, haaiInstrumentation,
@@ -102,8 +102,7 @@ async function fetchEligibleSongs() {
          AND fileUrl IS NOT NULL
          AND status != 'Deleted'
        ORDER BY id ASC
-       LIMIT ? OFFSET ?`,
-      [BATCH_SIZE, offset]
+       LIMIT ${BATCH_SIZE} OFFSET ${offset}`
     );
     if (rows.length === 0) break;
     songs.push(...rows);

@@ -1,0 +1,11 @@
+{
+  "startedAt": "2026-04-11T06:33:49.433Z",
+  "completedAt": "2026-04-11T06:33:49.473Z",
+  "dryRun": true,
+  "totalEligible": 293,
+  "processed": 0,
+  "succeeded": 0,
+  "failed": 0,
+  "skipped": 0,
+  "results": []
+}
