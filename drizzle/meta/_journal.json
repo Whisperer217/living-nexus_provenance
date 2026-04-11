@@ -498,6 +498,13 @@
       "when": 1775865838601,
       "tag": "0070_needy_black_bird",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "5",
+      "when": 1775885259162,
+      "tag": "0071_naive_butterfly",
+      "breakpoints": true
     }
   ]
 }

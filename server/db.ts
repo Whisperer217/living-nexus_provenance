@@ -528,6 +528,41 @@ export async function updateSongMetadata(
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
+// ─── Sovereign Stamp ─────────────────────────────────────────────────────────
+// getSongById already exists above (line ~289) — no duplicate needed.
+
+/**
+ * Update the Sovereign Stamp fields on a song row.
+ * Called after the tone injection pipeline completes.
+ */
+export async function updateSongStamp(
+  id: number,
+  data: {
+    sovereignStampId: string;
+    sovereignStampedAt: Date;
+    stampedFileUrl: string;
+    stampedFileKey: string;
+    stampedFileHash: string;
+    certificateUrl: string;
+    certificateKey: string;
+  }
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(songs)
+    .set({
+      sovereignStampId: data.sovereignStampId,
+      sovereignStampedAt: data.sovereignStampedAt,
+      stampedFileUrl: data.stampedFileUrl,
+      stampedFileKey: data.stampedFileKey,
+      stampedFileHash: data.stampedFileHash,
+      certificateUrl: data.certificateUrl,
+      certificateKey: data.certificateKey,
+    })
+    .where(eq(songs.id, id));
+}
+
 // ─── Comments ─────────────────────────────────────────────────────────────────
 
 export async function getCommentsBySong(songId: number) {

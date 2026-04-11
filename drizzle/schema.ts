@@ -228,6 +228,15 @@ export const songs = mysqlTable("songs", {
   isFlagged: boolean("isFlagged").default(false).notNull(),
   flagReason: varchar("flagReason", { length: 512 }),
   moderationStatus: mysqlEnum("moderationStatus", ["clear", "flagged", "removed"]).default("clear").notNull(),
+
+  // ─── Sovereign Stamp ─────────────────────────────────────────────────────────
+  // Authorship tone injection system — BDDT Publishing / Command Domains LLC
+  // null = not yet stamped; set = stamped audio file with embedded provenance tone
+  sovereignStampId: varchar("sovereignStampId", { length: 64 }),
+  sovereignStampedAt: timestamp("sovereignStampedAt"),
+  stampedFileUrl: text("stampedFileUrl"),
+  stampedFileKey: text("stampedFileKey"),
+  stampedFileHash: varchar("stampedFileHash", { length: 64 }),
 }, (t) => ({
   creatorIdx: index("songs_userId_idx").on(t.userId),
   statusIdx: index("songs_status_idx").on(t.status),
