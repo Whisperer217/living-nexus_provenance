@@ -1015,6 +1015,7 @@ export const appRouter = router({
       haaiLyricalInspiration: z.string().max(2000).nullable().optional(),
       haaiEmotionalTone: z.string().max(2000).nullable().optional(),
       creditsJson: z.string().max(4096).nullable().optional(),
+      parentSongId: z.number().int().positive().nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp

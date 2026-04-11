@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History, Plus, Trash2 } from "lucide-react";
+import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History, Plus, Trash2, ChevronDown, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   EDIT_GENRES as GENRES,
@@ -63,6 +63,7 @@ interface Song {
   videoWitnessId?: string | null;
   creditsJson?: string | null;
   contentType?: string | null;
+  parentSongId?: number | null;
 }
 
 interface EditTrackPanelProps {
@@ -123,6 +124,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [replaceAudioLoading, setReplaceAudioLoading] = useState(false);
   const [currentWitnessId, setCurrentWitnessId] = useState<string | null>(song.witnessId ?? null);
   const replaceAudioInputRef = useRef<HTMLInputElement>(null);
+
+  // Lineage state
+  const [parentSongId, setParentSongId] = useState<string>(
+    song.parentSongId != null ? String(song.parentSongId) : ""
+  );
+  const [lineageExpanded, setLineageExpanded] = useState(false);
 
   // Credits state
   type CreditEntry = { role: string; name: string };
@@ -279,6 +286,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   async function handleSave() {
     setSaving(true);
     const validCredits = credits.filter(c => c.role.trim() || c.name.trim());
+    // Only include parentSongId in the payload if the user has touched the field
+    const parsedParentId = parentSongId.trim() !== "" ? parseInt(parentSongId, 10) : null;
     await updateMetadata.mutateAsync({
       songId: song.id,
       caption: caption.trim() || null,
@@ -288,6 +297,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       aiConsent,
       status,
       creditsJson: validCredits.length > 0 ? JSON.stringify(validCredits) : null,
+      parentSongId: parsedParentId,
     });
     setSaving(false);
   }
@@ -1143,6 +1153,55 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               </div>
             )}
             <p className="text-xs mt-2" style={{ color: "#475569" }}>Credits are saved when you click Save Changes below.</p>
+          </div>
+
+          {/* ── Lineage ─────────────────────────────────────────────────────────────────────────────────────────── */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+          >
+            {/* Collapsed header — always visible */}
+            <button
+              type="button"
+              className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/5"
+              style={{ background: "rgba(255,255,255,0.02)" }}
+              onClick={() => setLineageExpanded(v => !v)}
+            >
+              <div className="flex items-center gap-2">
+                <Link2 size={14} style={{ color: "#64748b" }} />
+                <span className="text-sm font-medium" style={{ color: "#94a3b8" }}>Lineage</span>
+                {parentSongId.trim() !== "" && (
+                  <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37" }}>linked</span>
+                )}
+              </div>
+              <ChevronDown
+                size={14}
+                style={{ color: "#64748b", transform: lineageExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+              />
+            </button>
+
+            {/* Expanded body */}
+            {lineageExpanded && (
+              <div className="px-4 pb-4 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-xs mb-3" style={{ color: "#64748b" }}>
+                  Optionally link this work to a parent work by entering its numeric ID. Leave blank for no lineage.
+                </p>
+                <Label className="text-xs mb-1 block" style={{ color: "#94a3b8" }}>Parent Work ID</Label>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="e.g. 12345"
+                  value={parentSongId}
+                  onChange={e => {
+                    const v = e.target.value.replace(/[^0-9]/g, "");
+                    setParentSongId(v);
+                  }}
+                  className="h-8 text-xs"
+                  style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+                />
+                <p className="text-xs mt-2" style={{ color: "#475569" }}>Saved with Save Changes. Set to blank to remove the link.</p>
+              </div>
+            )}
           </div>
 
         </div>{/* end Form */}
