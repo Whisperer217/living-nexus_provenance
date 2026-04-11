@@ -505,6 +505,13 @@
       "when": 1775885259162,
       "tag": "0071_naive_butterfly",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "5",
+      "when": 1775933931597,
+      "tag": "0072_shallow_tusk",
+      "breakpoints": true
     }
   ]
 }
