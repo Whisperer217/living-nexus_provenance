@@ -629,6 +629,22 @@ export default function UploadPage() {
 
   if (!isAuthenticated) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#353E43" }}>
+      {/* ── Hero Banner ─────────────────────────────────────────────────── */}
+      <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
+        <img
+          src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/DfMDtKnrmowldQhs.png"
+          alt="Upload hero"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ filter: "saturate(1.2) contrast(1.08)" }}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.82) 0%, rgba(30,16,40,0.45) 45%, transparent 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(53,62,67,0.85) 0%, rgba(53,62,67,0.15) 40%, transparent 100%)" }} />
+        <div className="absolute bottom-0 left-0 p-6">
+          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
+          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Register Your Work</h1>
+          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#DACAAA" }}>Seal your creation with a cryptographic Witness ID</p>
+        </div>
+      </div>
       <div className="text-center max-w-sm mx-auto px-6">
         <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "#CBB183" }} />
         <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Sign In Required</h2>
