@@ -420,7 +420,7 @@ export default function ProfilePage() {
           <div
             className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
             style={{
-              background: "linear-gradient(135deg, oklch(0.10 0.03 270), oklch(0.12 0.04 280))",
+              background: "linear-gradient(135deg, #3A2030, oklch(0.12 0.04 280))",
             }}
             onClick={() => bannerRef.current?.click()}
           >
@@ -531,7 +531,7 @@ export default function ProfilePage() {
       <div
         className="w-full"
         style={{
-          background: "oklch(0.10 0.022 55)",
+          background: "#2D1B2E",
           borderBottom: "1px solid oklch(0.14 0.012 280)",
         }}
       >
@@ -544,7 +544,7 @@ export default function ProfilePage() {
                 <div
                   className="w-36 h-36 rounded-2xl overflow-hidden bg-[oklch(0.14_0.013_280)] flex items-center justify-center"
                   style={{
-                    outline: "3px solid oklch(0.10 0.022 55)",
+                    outline: "3px solid #2D1B2E",
                     border: "1.5px solid rgba(212,175,55,0.25)",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                   }}
@@ -947,7 +947,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/upload")}
                 className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "#A78BFA" }}
               >
                 <Upload size={11} /> Upload
               </button>
@@ -1038,7 +1038,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/archive")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "#A78BFA" }}
               >
                 Manage in Archive
               </button>
@@ -1114,7 +1114,7 @@ export default function ProfilePage() {
                 <button
                   onClick={() => markAllRead.mutate()}
                   className="text-[11px] font-body px-3 py-1 rounded-lg transition-all"
-                  style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+                  style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "#A78BFA" }}
                 >
                   Mark all read
                 </button>
@@ -1293,7 +1293,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/field-notes")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "#A78BFA" }}
               >
                 Open Field Notes
               </button>
@@ -1346,7 +1346,7 @@ export default function ProfilePage() {
             {/* Add Testimony Modal */}
             {showAddTestimony && createPortal(
               <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
-                <div className="w-full max-w-lg rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.013 280)", border: "1px solid oklch(0.22 0.02 280)" }}>
+                <div className="w-full max-w-lg rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.013 280)", border: "1px solid #4A2C2A" }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-[16px] font-heading text-white">Add Testimony</h3>
@@ -1365,7 +1365,7 @@ export default function ProfilePage() {
                       rows={6}
                       maxLength={5000}
                       className="w-full rounded-xl px-3 py-2.5 text-[13px] font-body text-white/85 resize-none focus:outline-none focus:ring-1"
-                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid oklch(0.25 0.02 280)", caretColor: "#D4AF37" }}
+                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid #5C3530", caretColor: "#D4AF37" }}
                     />
                     <div className="text-right text-[10px] font-body text-white/25 mt-1">{testimonyContent.length}/5000</div>
                   </div>
@@ -1377,7 +1377,7 @@ export default function ProfilePage() {
                       type="text"
                       placeholder="WID-MUS-XXXXXXXX-YYYYYYYY (comma-separated)"
                       className="w-full rounded-xl px-3 py-2 text-[12px] font-body text-white/70 focus:outline-none focus:ring-1"
-                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid oklch(0.25 0.02 280)" }}
+                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid #5C3530" }}
                       onChange={e => {
                         const wids = e.target.value.split(",").map(w => w.trim()).filter(Boolean);
                         setTestimonyLinkedWorks(wids);
@@ -1397,7 +1397,7 @@ export default function ProfilePage() {
                     <button
                       onClick={() => setShowAddTestimony(false)}
                       className="flex-1 py-2 rounded-xl text-[13px] font-body text-white/40 transition-all"
-                      style={{ border: "1px solid oklch(0.22 0.02 280)" }}
+                      style={{ border: "1px solid #4A2C2A" }}
                     >
                       Cancel
                     </button>
@@ -1471,7 +1471,7 @@ export default function ProfilePage() {
           <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">SETTINGS</div>
           {/* ── Lights On / Lights Dim toggle ────────────────────────────────── */}
           <div className="mb-4 flex items-center justify-between px-4 py-3 rounded-xl"
-            style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)" }}>
+            style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A" }}>
             <div>
               <div className="text-[12px] font-heading tracking-wide" style={{ color: "oklch(0.82 0.155 75)" }}>
                 {lightsMode === 'on' ? '☀️ Lights On' : '🌙 Lights Dim'}
@@ -1489,7 +1489,7 @@ export default function ProfilePage() {
               style={{
                 background: lightsMode === 'on'
                   ? "oklch(0.58 0.14 58 / 0.20)"
-                  : "oklch(0.22 0.02 280)",
+                  : "#4A2C2A",
                 border: lightsMode === 'on'
                   ? "1px solid oklch(0.58 0.14 58 / 0.50)"
                   : "1px solid oklch(0.30 0.02 280)",
@@ -1509,27 +1509,27 @@ export default function ProfilePage() {
             <button
               onClick={() => navigate("/redeem")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.65 0.12 85)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "oklch(0.65 0.12 85)" }}
             >
               <Zap size={11} /> Redeem Code
             </button>
             <button
               onClick={() => navigate("/learn")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.03 280)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "oklch(0.55 0.03 280)" }}
             >
               <ScrollText size={11} /> WID Spec &amp; Lexicon
             </button>
             <button
               onClick={() => navigate("/founders")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.03 280)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "oklch(0.55 0.03 280)" }}
             >
               <Star size={11} /> Founders
             </button>
           </div>
           {/* ── Data Rights ─────────────────────────────────────── */}
-          <div className="mt-6 pt-5" style={{ borderTop: "1px solid oklch(0.22 0.02 280)" }}>
+          <div className="mt-6 pt-5" style={{ borderTop: "1px solid #4A2C2A" }}>
             <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">DATA RIGHTS</div>
             <p className="text-[11px] font-body text-white/35 mb-3 leading-relaxed">
               Per our Privacy Policy, you have the right to export your data or request account deletion. Deletion requests are processed within 90 days.
@@ -1649,7 +1649,7 @@ function ExportDataButton() {
       onClick={handleExport}
       disabled={loading}
       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all disabled:opacity-50"
-      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.55 0.12 200)" }}
+      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "oklch(0.55 0.12 200)" }}
     >
       {loading ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
       Export My Data
@@ -1693,7 +1693,7 @@ function RequestDeletionButton() {
     <button
       onClick={() => setConfirming(true)}
       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.45 0.03 280)" }}
+      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "oklch(0.45 0.03 280)" }}
     >
       <Trash2 size={11} /> Request Account Deletion
     </button>

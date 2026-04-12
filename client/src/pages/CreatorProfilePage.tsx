@@ -84,7 +84,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
     <>
       <div
         className="fixed z-50 min-w-[200px] rounded-xl overflow-hidden shadow-2xl py-1"
-        style={{ top: position.y, left: position.x, background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}
+        style={{ top: position.y, left: position.x, background: "oklch(0.14 0.015 280)", border: "1px solid #5C3530" }}
       >
         <Link href={`/song/${song.id}`} onClick={onClose}>
           <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
@@ -174,8 +174,8 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
             style={{ background: "oklch(0.84 0.155 85)" }}
           >
             {isPlaying
-              ? <Pause className="w-5 h-5" style={{ color: "oklch(0.08 0.015 280)" }} />
-              : <Play className="w-5 h-5 ml-0.5" style={{ color: "oklch(0.08 0.015 280)" }} />}
+              ? <Pause className="w-5 h-5" style={{ color: "#FFF8E7" }} />
+              : <Play className="w-5 h-5 ml-0.5" style={{ color: "#FFF8E7" }} />}
           </button>
         </div>
         {song.durationSeconds && (
@@ -345,7 +345,7 @@ function BannerUploadCTA({ onFocalDetected }: { onFocalDetected?: (focal: { x: n
   return (
     <label
       className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
-      style={{ background: "linear-gradient(135deg, oklch(0.10 0.03 270), oklch(0.12 0.04 280))" }}
+      style={{ background: "linear-gradient(135deg, #3A2030, oklch(0.12 0.04 280))" }}
     >
       <div
         className="absolute inset-0 opacity-[0.06] pointer-events-none"
@@ -582,7 +582,7 @@ export default function CreatorProfilePage() {
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.10 0.022 55)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#2D1B2E" }}>
       <div className="space-y-2 text-center">
         <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "oklch(0.75 0.18 85 / 0.3)" }} />
         <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>Loading profile...</p>
@@ -591,11 +591,11 @@ export default function CreatorProfilePage() {
   );
 
   if (!data) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.10 0.022 55)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#2D1B2E" }}>
       <div className="text-center">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Creator not found.</p>
         <Link href="/">
-          <Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Go Home</Button>
+          <Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}>Go Home</Button>
         </Link>
       </div>
     </div>
@@ -628,7 +628,7 @@ export default function CreatorProfilePage() {
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.10 0.022 55)" }}>
+    <div className="min-h-screen" style={{ background: "#2D1B2E" }}>
       <Helmet>
         <title>{profileTitle}</title>
         <meta name="description" content={profileDesc} />
@@ -736,7 +736,7 @@ export default function CreatorProfilePage() {
             style={{
               background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
               /* Ring: dark bg outline so avatar pops off the banner */
-              outline: "4px solid oklch(0.10 0.022 55)",
+              outline: "4px solid #2D1B2E",
               boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.25)",
             }}
           >
@@ -770,7 +770,7 @@ export default function CreatorProfilePage() {
       <div
         className="w-full"
         style={{
-          background: "oklch(0.10 0.022 55)",
+          background: "#2D1B2E",
           borderBottom: "1px solid oklch(0.15 0.015 280)",
         }}
       >
@@ -991,7 +991,7 @@ export default function CreatorProfilePage() {
                     <button
                       onClick={() => setTipOpen(true)}
                       className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                      style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "oklch(0.08 0.015 280)" }}
+                      style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "#FFF8E7" }}
                     >
                       <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
                     </button>
@@ -1187,7 +1187,7 @@ export default function CreatorProfilePage() {
                   <button
                     onClick={() => setTipOpen(true)}
                     className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                    style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "oklch(0.08 0.015 280)" }}
+                    style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "#FFF8E7" }}
                   >
                     <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
                   </button>
@@ -1249,7 +1249,7 @@ export default function CreatorProfilePage() {
                       {project.bannerUrl ? (
                         <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover object-center" />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1025] to-[#080d14] flex items-center justify-center">
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1025] to-[#2D1B2E] flex items-center justify-center">
                           <span className="text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85 / 0.2)" }}>{project.title[0]}</span>
                         </div>
                       )}
@@ -1298,11 +1298,11 @@ export default function CreatorProfilePage() {
         {isOwner && (creatorProjects as any[]).length === 0 && (
           <section className="py-6">
             <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Projects</h2>
-            <div className="text-center py-10 rounded-xl" style={{ border: "1px dashed oklch(0.25 0.02 280)" }}>
+            <div className="text-center py-10 rounded-xl" style={{ border: "1px dashed #5C3530" }}>
               <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
               <p className="text-sm mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>No projects yet.</p>
               <Link href="/my-projects">
-                <Button style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Start a Project</Button>
+                <Button style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}>Start a Project</Button>
               </Link>
             </div>
           </section>
@@ -1362,7 +1362,7 @@ export default function CreatorProfilePage() {
                   const albumCoverX = collection?.coverPositionX ?? albumSongs[0]?.coverPositionX ?? 50;
                   const albumCoverY = collection?.coverPositionY ?? albumSongs[0]?.coverPositionY ?? 50;
                   return (
-                  <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                  <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid #4A2C2A" }}>
                     <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid oklch(0.16 0.01 280)" }}>
                       {albumCoverUrl ? (
                         <img src={albumCoverUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" style={{ objectPosition: `${albumCoverX}% ${albumCoverY}%` }} />
@@ -1491,7 +1491,7 @@ export default function CreatorProfilePage() {
             <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>No public songs yet.</p>
             {isOwner && (
               <Link href="/upload">
-                <Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
+                <Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}>
                   Upload Your First Track
                 </Button>
               </Link>
@@ -1507,7 +1507,7 @@ export default function CreatorProfilePage() {
             </h2>
             <div className="space-y-3">
               {(creatorTestimonies as any[]).map((t: any) => (
-                <div key={t.id} className="p-4 rounded-xl" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                <div key={t.id} className="p-4 rounded-xl" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid #4A2C2A" }}>
                   <div className="flex items-center justify-between mb-2">
                     <span
                       className="font-mono text-[10px] px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
@@ -1540,7 +1540,7 @@ export default function CreatorProfilePage() {
 
       {/* ── Tip Modal ── */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
-        <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}>
+        <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid #5C3530" }}>
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
               Gift {creator.artistHandle || creator.name}
@@ -1558,8 +1558,8 @@ export default function CreatorProfilePage() {
                   className="py-2 rounded-lg text-sm font-medium transition-all"
                   style={{
                     background: tipAmount === amt ? "oklch(0.84 0.155 85)" : "oklch(0.11 0.025 270)",
-                    color: tipAmount === amt ? "oklch(0.08 0.015 280)" : "oklch(0.7 0.04 280)",
-                    border: "1px solid oklch(0.25 0.02 280)",
+                    color: tipAmount === amt ? "#FFF8E7" : "oklch(0.7 0.04 280)",
+                    border: "1px solid #5C3530",
                   }}
                 >
                   ${amt}
@@ -1573,13 +1573,13 @@ export default function CreatorProfilePage() {
               onChange={e => setTipAmount(e.target.value)}
               min="1"
               step="0.01"
-              style={{ background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)", color: "oklch(0.9 0.01 280)" }}
+              style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #5C3530", color: "oklch(0.9 0.01 280)" }}
             />
             <Button
               className="w-full"
               onClick={handleTip}
               disabled={tipMutation.isPending}
-              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}
             >
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Gift`}
             </Button>
@@ -1591,7 +1591,7 @@ export default function CreatorProfilePage() {
       <Dialog open={showPromptStudio} onOpenChange={(open) => { setShowPromptStudio(open); if (!open) { setPsTab("identity_regen"); setPsResult(null); } }}>
         <DialogContent
           className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-          style={{ background: "oklch(0.10 0.04 265)", border: "1px solid rgba(139,92,246,0.25)" }}
+          style={{ background: "#3A2030", border: "1px solid rgba(139,92,246,0.25)" }}
         >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2" style={{ fontFamily: "'Cinzel', serif", color: "#a78bfa" }}>

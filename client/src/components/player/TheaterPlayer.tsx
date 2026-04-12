@@ -458,7 +458,7 @@ export default function TheaterPlayer() {
                   <button
                     onClick={togglePlay}
                     className="w-12 h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                    style={{ background: "oklch(0.94 0.025 75)", color: "oklch(0.10 0.02 55)" }}
+                    style={{ background: "oklch(0.94 0.025 75)", color: "#2D1B2E" }}
                   >
                     {state.isPlaying
                       ? <Pause size={20} fill="currentColor" />
@@ -746,7 +746,7 @@ export default function TheaterPlayer() {
                       onClick={submitComment}
                       disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                       className="px-3 py-2 rounded-lg text-[12px] font-semibold transition-colors disabled:opacity-40"
-                      style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.10 0.02 55)" }}
+                      style={{ background: "oklch(0.80 0.145 82)", color: "#2D1B2E" }}
                     >
                       Post
                     </button>

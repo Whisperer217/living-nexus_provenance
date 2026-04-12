@@ -129,7 +129,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     <div
                       className="w-full h-full flex items-center justify-center"
                       style={{
-                        background: "linear-gradient(135deg, oklch(0.14 0.04 280), oklch(0.10 0.02 270))",
+                        background: "linear-gradient(135deg, #3A2030, #3A2030)",
                       }}
                     >
                       <span
@@ -146,7 +146,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     className="absolute inset-0"
                     style={{
                       background:
-                        "linear-gradient(to top, oklch(0.08 0.02 275 / 0.92) 0%, oklch(0 0 0 / 0.20) 50%, transparent 100%)",
+                        "linear-gradient(to top, #2D1B2E / 0.92) 0%, oklch(0 0 0 / 0.20) 50%, transparent 100%)",
                     }}
                   />
 

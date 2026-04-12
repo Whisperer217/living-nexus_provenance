@@ -291,7 +291,7 @@ export default function LearnPage() {
   const [activeSection, setActiveSection] = useState<"wid-spec" | "lexicon">("wid-spec");
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.10 0.022 55)" }}>
+    <div className="min-h-screen" style={{ background: "#2D1B2E" }}>
       <div className="container py-10 max-w-3xl mx-auto px-4"
         style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
@@ -312,7 +312,7 @@ export default function LearnPage() {
             onClick={() => setActiveSection("wid-spec")}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
             style={activeSection === "wid-spec"
-              ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
+              ? { background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }
               : { color: "oklch(0.6 0.03 280)" }}
           >
             <Fingerprint size={13} /> WID Specification
@@ -321,7 +321,7 @@ export default function LearnPage() {
             onClick={() => setActiveSection("lexicon")}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
             style={activeSection === "lexicon"
-              ? { background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }
+              ? { background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }
               : { color: "oklch(0.6 0.03 280)" }}
           >
             <BookOpen size={13} /> Lexicon

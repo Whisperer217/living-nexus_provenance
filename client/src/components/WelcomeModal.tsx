@@ -100,7 +100,7 @@ export default function WelcomeModal() {
             <Button
               className="flex-1 font-semibold"
               onClick={handleDismiss}
-              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}
             >
               Enter the Sanctuary
             </Button>
@@ -191,7 +191,7 @@ export default function WelcomeModal() {
           <Button
             className="flex-1 font-semibold"
             onClick={handleDismiss}
-            style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+            style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}
           >
             Get Started
           </Button>

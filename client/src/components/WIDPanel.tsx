@@ -258,7 +258,7 @@ export function WIDPanel({
         <DialogContent
           className="max-w-lg"
           style={{
-            background: "oklch(0.09 0.025 278)",
+            background: "#2D1B2E",
             border: "1px solid oklch(0.65 0.2 300 / 0.3)",
             color: "oklch(0.92 0.02 85)",
           }}

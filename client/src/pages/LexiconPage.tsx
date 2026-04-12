@@ -208,7 +208,7 @@ export default function LexiconPage() {
   const categories: LexiconEntry["category"][] = ["identity", "record", "action", "space", "economy"];
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.10 0.022 55)" }}>
+    <div className="min-h-screen" style={{ background: "#2D1B2E" }}>
       {/* ── Header ── */}
       <div
         className="relative px-6 py-16 text-center border-b"
@@ -354,7 +354,7 @@ export default function LexiconPage() {
               className="px-8 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90"
               style={{
                 background: "oklch(0.75 0.18 85)",
-                color: "oklch(0.08 0.015 280)",
+                color: "#FFF8E7",
               }}
             >
               Register a Work →

@@ -711,7 +711,7 @@ export default function MobilePlayerLayer() {
       )}
       {videoUrl && showVideo && (
         <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
-          style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "oklch(0.10 0.02 55)" }}>
+          style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "#2D1B2E" }}>
           <Video size={9} /> Live
         </div>
       )}
@@ -743,7 +743,7 @@ export default function MobilePlayerLayer() {
           height: large ? "64px" : "52px",
           background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))",
           boxShadow: "0 4px 20px oklch(0.84 0.155 85 / 0.35)",
-          color: "oklch(0.10 0.02 55)",
+          color: "#2D1B2E",
         }}
       >
         {state.isPlaying
@@ -927,8 +927,8 @@ export default function MobilePlayerLayer() {
           }}
         >
           {state.isPlaying
-            ? <Pause size={18} fill="currentColor" style={{ color: "oklch(0.10 0.02 55)" }} />
-            : <Play size={18} fill="currentColor" style={{ color: "oklch(0.10 0.02 55)", marginLeft: "2px" }} />}
+            ? <Pause size={18} fill="currentColor" style={{ color: "#2D1B2E" }} />
+            : <Play size={18} fill="currentColor" style={{ color: "#2D1B2E", marginLeft: "2px" }} />}
         </button>
         {/* Next */}
         <button
@@ -1064,7 +1064,7 @@ export default function MobilePlayerLayer() {
     <div
       className="md:hidden fixed inset-0 z-[9010] flex flex-col"
       style={{
-        background: "oklch(0.08 0.02 275)",
+        background: "#2D1B2E)",
         transform: `translateY(${expandedDragOffset}px)`,
         transition: expandedDragOffset === 0 ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "none",
         paddingTop: "env(safe-area-inset-top, 0px)",
@@ -1121,7 +1121,7 @@ export default function MobilePlayerLayer() {
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
           height: 0,
           minHeight: 0,
-          background: "oklch(0.08 0.02 275)",
+          background: "#2D1B2E)",
         }}
       >
 
@@ -1608,7 +1608,7 @@ export default function MobilePlayerLayer() {
                   className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 disabled:opacity-40"
                   style={{
                     background: "oklch(0.84 0.155 85)",
-                    color: "oklch(0.10 0.02 55)",
+                    color: "#2D1B2E",
                   }}
                 >
                   <Send size={14} />
@@ -1746,7 +1746,7 @@ export default function MobilePlayerLayer() {
                 <div className="text-[11px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
               </div>
               <button type="button" onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
-                style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))", color: "oklch(0.10 0.02 55)" }}>
+                style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))", color: "#2D1B2E" }}>
                 {state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
               </button>
               <div className="flex-1">

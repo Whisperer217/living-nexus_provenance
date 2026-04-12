@@ -628,12 +628,12 @@ export default function UploadPage() {
   };
 
   if (!isAuthenticated) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "oklch(0.08 0.015 280)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#FFF8E7" }}>
       <div className="text-center max-w-sm mx-auto px-6">
         <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />
         <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Sign In Required</h2>
         <p className="text-sm mb-6" style={{ color: "#E2E8F0" }}>Sign in to upload tracks to Living Nexus.</p>
-        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>Sign In</Button>
+        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}>Sign In</Button>
       </div>
     </div>
   );
@@ -646,7 +646,7 @@ export default function UploadPage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.08 0.015 280)" }}>
+    <div className="min-h-screen" style={{ background: "#FFF8E7" }}>
       <div className="container py-10 max-w-2xl">
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
@@ -657,7 +657,7 @@ export default function UploadPage() {
             <button
               onClick={() => navigate("/batch-upload")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body flex-shrink-0 transition-all"
-              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid oklch(0.22 0.02 280)", color: "oklch(0.65 0.12 85)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #4A2C2A", color: "oklch(0.65 0.12 85)" }}
             >
               <Upload size={12} /> Batch Upload
             </button>
@@ -686,7 +686,7 @@ export default function UploadPage() {
               <div key={s.n} className="flex items-center gap-1 flex-1">
                 <div className="flex-1 flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
-                    style={{ background: isDone ? "oklch(0.65 0.18 145)" : isActive ? "oklch(0.84 0.155 85)" : "oklch(0.158 0.030 50)", color: isDone || isActive ? "oklch(0.08 0.015 280)" : "oklch(0.45 0.03 280)" }}>
+                    style={{ background: isDone ? "oklch(0.65 0.18 145)" : isActive ? "oklch(0.84 0.155 85)" : "oklch(0.158 0.030 50)", color: isDone || isActive ? "#FFF8E7" : "oklch(0.45 0.03 280)" }}>
                     {isDone ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
                   </div>
                   <span className="text-xs hidden sm:block" style={{ color: isActive ? "oklch(0.84 0.155 85)" : isDone ? "oklch(0.65 0.18 145)" : "oklch(0.45 0.03 280)" }}>{s.label}</span>
@@ -882,7 +882,7 @@ export default function UploadPage() {
                   !documentFile
                 }
                 onClick={() => setStep(2)}
-                style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7", fontFamily: "'Cinzel', serif" }}>
                 Next: Metadata <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
@@ -1143,7 +1143,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7", fontFamily: "'Cinzel', serif" }}>
                   Next: Witness ID <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1167,7 +1167,7 @@ export default function UploadPage() {
                   </div>
                   <p className="text-sm mb-1 font-medium" style={{ color: "oklch(0.7 0.04 280)" }}>Generate your Witness ID</p>
                   <p className="text-xs mb-5" style={{ color: "#E2E8F0" }}>SHA-256 hash + ECDSA P-256 signature + harmonic frequency derivation</p>
-                  <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                  <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7", fontFamily: "'Cinzel', serif" }}>
                     {generatingWid ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : <><Zap className="w-4 h-4 mr-2" /> Generate Witness ID</>}
                   </Button>
                 </div>
@@ -1206,11 +1206,11 @@ export default function UploadPage() {
                     </div>
                   </div>
                   <HarmonicWaveform frequencies={witnessData.frequencies} active={waveformActive} />
-                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #4A2C2A" }}>
                     <p className="text-xs mb-1" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>{uploadMode === "lyrics" ? "SHA-256 LYRICS HASH" : "SHA-256 FILE HASH"}</p>
                     <p className="text-xs font-mono truncate" style={{ color: "oklch(0.6 0.04 280)" }}>{witnessData.fileHash}</p>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #4A2C2A" }}>
                     <p className="text-xs mb-2" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>HARMONIC SIGNATURE</p>
                     <div className="flex flex-wrap gap-1.5">
                       {witnessData.frequencies.map((f, i) => (
@@ -1218,7 +1218,7 @@ export default function UploadPage() {
                       ))}
                     </div>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid oklch(0.18 0.015 280)" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #4A2C2A" }}>
                     <p className="text-xs mb-2" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>AI CONSENT DECLARATION</p>
                     <Badge style={{ background: aiConsent === "prohibited" ? "oklch(0.65 0.18 25 / 0.2)" : aiConsent === "permitted_attribution" ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.65 0.18 145 / 0.2)", color: aiConsent === "prohibited" ? "oklch(0.65 0.18 25)" : aiConsent === "permitted_attribution" ? "oklch(0.84 0.155 85)" : "oklch(0.65 0.18 145)" }}>
                       {aiConsent === "prohibited" ? "AI TRAINING PROHIBITED" : aiConsent === "permitted_attribution" ? "PERMITTED WITH ATTRIBUTION" : "FREELY PERMITTED"}
@@ -1325,7 +1325,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(2)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={() => setStep(4)} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" onClick={() => setStep(4)} style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7", fontFamily: "'Cinzel', serif" }}>
                   {witnessData ? "Next: Publish" : "Skip & Publish"} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1400,7 +1400,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(3)} disabled={uploadPhase === "uploading" || uploadPhase === "processing"} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7", fontFamily: "'Cinzel', serif" }}>
                   {(uploadMutation.isPending || uploadPhase === "processing") ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Upload className="w-4 h-4 mr-2" /> {uploadMode === "manuscript" || uploadMode === "comic" ? "Publish Work" : "Publish Track"}</>}
                 </Button>
               </div>

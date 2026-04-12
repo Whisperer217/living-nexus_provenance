@@ -144,7 +144,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.25 0.02 280) transparent", overscrollBehavior: "contain" }}>
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "#5C3530 transparent", overscrollBehavior: "contain" }}>
 
           {/* NOW PLAYING TAB */}
           {tab === "playing" && (

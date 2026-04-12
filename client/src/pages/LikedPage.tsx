@@ -97,7 +97,7 @@ export default function LikedPage() {
         </div>
       ) : !likedTracks || likedTracks.length === 0 ? (
         <div className="rounded-2xl p-16 text-center"
-          style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #4A2C2A" }}>
           <Heart className="w-14 h-14 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
           <p className="text-base font-semibold mb-2"
             style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.8 0.02 85)" }}>
@@ -108,14 +108,14 @@ export default function LikedPage() {
           </p>
           <Link href="/explore">
             <Button size="sm"
-              style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}>
+              style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}>
               Explore Tracks
             </Button>
           </Link>
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden"
-          style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.18 0.015 280)" }}>
+          style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #4A2C2A" }}>
           <div className="divide-y" style={{ borderColor: "oklch(0.15 0.01 280)" }}>
             {likedTracks.map((item: any, idx: number) => {
               const song = item.song;

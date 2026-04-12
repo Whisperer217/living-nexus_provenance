@@ -127,8 +127,8 @@ function ExploreCard({
               borderTopLeftRadius: "inherit",
             }}
           >
-            <Crown size={9} style={{ color: "oklch(0.10 0.02 55)" }} />
-            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "oklch(0.10 0.02 55)" }}>
+            <Crown size={9} style={{ color: "#2D1B2E" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#2D1B2E" }}>
               {(song.playCount ?? 0) >= 1000
                 ? `${Math.floor((song.playCount ?? 0) / 1000)}K PLAYS`
                 : `${song.playCount} PLAYS`}
@@ -791,7 +791,7 @@ export default function ExplorePage() {
             <div className="fixed inset-0 z-40" onClick={closeMenu} />
             <div
               className="fixed z-50 min-w-[190px] rounded-xl overflow-hidden shadow-2xl py-1"
-              style={{ top: menuPos.y, left: menuPos.x, background: "oklch(0.14 0.015 280)", border: "1px solid oklch(0.25 0.02 280)" }}
+              style={{ top: menuPos.y, left: menuPos.x, background: "oklch(0.14 0.015 280)", border: "1px solid #5C3530" }}
             >
               {menuSong.song.fileUrl && (
                 <button

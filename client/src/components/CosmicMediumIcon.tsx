@@ -27,9 +27,9 @@ interface CosmicMediumIconProps {
 // ── Color tokens per medium ────────────────────────────────────────────────────
 export const MEDIUM_COLORS: Record<MediumType, { primary: string; glow: string; bg: string; border: string }> = {
   audio:      { primary: "oklch(0.68 0.22 295)",  glow: "oklch(0.68 0.22 295 / 0.35)", bg: "oklch(0.10 0.06 295 / 0.6)",  border: "oklch(0.68 0.22 295 / 0.25)" },
-  lyrics:     { primary: "oklch(0.82 0.18 85)",   glow: "oklch(0.82 0.18 85 / 0.35)",  bg: "oklch(0.10 0.05 85 / 0.6)",   border: "oklch(0.82 0.18 85 / 0.25)"  },
-  manuscript: { primary: "oklch(0.72 0.18 155)",  glow: "oklch(0.72 0.18 155 / 0.35)", bg: "oklch(0.10 0.05 155 / 0.6)",  border: "oklch(0.72 0.18 155 / 0.25)" },
-  comic:      { primary: "oklch(0.72 0.20 35)",   glow: "oklch(0.72 0.20 35 / 0.35)",  bg: "oklch(0.10 0.05 35 / 0.6)",   border: "oklch(0.72 0.20 35 / 0.25)"  },
+  lyrics:     { primary: "oklch(0.82 0.18 85)",   glow: "oklch(0.82 0.18 85 / 0.35)",  bg: "rgba(74, 44, 42, 0.6)",   border: "oklch(0.82 0.18 85 / 0.25)"  },
+  manuscript: { primary: "oklch(0.72 0.18 155)",  glow: "oklch(0.72 0.18 155 / 0.35)", bg: "rgba(74, 44, 42, 0.6)",  border: "oklch(0.72 0.18 155 / 0.25)" },
+  comic:      { primary: "oklch(0.72 0.20 35)",   glow: "oklch(0.72 0.20 35 / 0.35)",  bg: "rgba(74, 44, 42, 0.6)",   border: "oklch(0.72 0.20 35 / 0.25)"  },
 };
 
 // ── SVG Glyphs ────────────────────────────────────────────────────────────────
@@ -184,7 +184,7 @@ export function CosmicMediumIcon({
         onClick={onClick}
         className="relative flex flex-col items-center justify-center gap-2 rounded-xl p-3 transition-all duration-300 cursor-pointer"
         style={{
-          background: active ? colors.bg : "oklch(0.07 0.02 280)",
+          background: active ? colors.bg : "#2D1B2E",
           border: `1px solid ${active ? colors.border.replace("0.25", "0.6") : colors.border}`,
           boxShadow: active ? `0 0 18px ${colors.glow}, inset 0 0 12px ${colors.glow.replace("0.35", "0.08")}` : "none",
         }}

@@ -256,7 +256,7 @@ function WIDTrustLayer() {
                       boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.5)",
                     }}
                   >
-                    <Play size={20} fill="oklch(0.10 0.02 55)" style={{ color: "oklch(0.10 0.02 55)", marginLeft: "2px" }} />
+                    <Play size={20} fill="#2D1B2E" style={{ color: "#2D1B2E", marginLeft: "2px" }} />
                   </div>
                 </button>
 

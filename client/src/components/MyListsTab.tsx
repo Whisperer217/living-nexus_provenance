@@ -94,7 +94,7 @@ function ManageTrackRow({
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors select-none"
       style={{
         background: "oklch(0.125 0.028 52)",
-        border: "1px solid oklch(0.18 0.015 280)",
+        border: "1px solid #4A2C2A",
         cursor: "grab",
       }}
     >
@@ -115,7 +115,7 @@ function ManageTrackRow({
       {/* Cover art */}
       <div
         className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0"
-        style={{ background: "oklch(0.10 0.025 270)" }}
+        style={{ background: "#3A2030" }}
       >
         {track.coverArtUrl ? (
           <img
@@ -172,7 +172,7 @@ function VersionHistoryPanel({ playlistId }: { playlistId: number }) {
           <div
             key={i}
             className="h-10 rounded-lg animate-pulse"
-            style={{ background: "oklch(0.10 0.03 270)" }}
+            style={{ background: "#3A2030" }}
           />
         ))}
       </div>
@@ -183,7 +183,7 @@ function VersionHistoryPanel({ playlistId }: { playlistId: number }) {
     return (
       <div
         className="mt-3 rounded-xl p-4 text-center"
-        style={{ background: "oklch(0.10 0.03 270 / 0.6)", border: "1px dashed oklch(0.25 0.02 280)" }}
+        style={{ background: "oklch(0.10 0.03 270 / 0.6)", border: "1px dashed #5C3530" }}
       >
         <p className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
           No versions saved yet. Save a version to create an immutable snapshot of this list's ordering.
@@ -198,7 +198,7 @@ function VersionHistoryPanel({ playlistId }: { playlistId: number }) {
         <div
           key={v.id}
           className="flex items-start gap-3 rounded-xl px-3 py-2.5"
-          style={{ background: "oklch(0.10 0.03 270 / 0.6)", border: "1px solid oklch(0.18 0.015 280)" }}
+          style={{ background: "oklch(0.10 0.03 270 / 0.6)", border: "1px solid #4A2C2A" }}
         >
           <div
             className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
@@ -301,7 +301,7 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
       {items.length === 0 ? (
         <div
           className="rounded-xl p-4 text-center"
-          style={{ background: "oklch(0.10 0.03 270 / 0.5)", border: "1px dashed oklch(0.25 0.02 280)" }}
+          style={{ background: "oklch(0.10 0.03 270 / 0.5)", border: "1px dashed #5C3530" }}
         >
           <p className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
             No tracks in this list yet.
@@ -337,8 +337,8 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
             maxLength={256}
             className="flex-1 rounded-lg px-3 py-1.5 text-[12px] outline-none"
             style={{
-              background: "oklch(0.10 0.03 270)",
-              border: "1px solid oklch(0.22 0.02 280)",
+              background: "#3A2030",
+              border: "1px solid #4A2C2A",
               color: "oklch(0.85 0.02 85)",
             }}
           />
@@ -450,7 +450,7 @@ export default function MyListsTab() {
             size="sm"
             disabled={!newName.trim() || createPlaylist.isPending}
             onClick={() => createPlaylist.mutate({ name: newName.trim() })}
-            style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.015 280)" }}
+            style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}
           >
             Create
           </Button>
@@ -468,7 +468,7 @@ export default function MyListsTab() {
           className="flex items-center gap-2 w-full rounded-xl px-3 py-2.5 transition-colors hover:brightness-110"
           style={{
             background: "oklch(0.115 0.055 278 / 0.5)",
-            border: "1px dashed oklch(0.25 0.02 280)",
+            border: "1px dashed #5C3530",
             color: "oklch(0.65 0.2 300)",
           }}
         >
@@ -481,7 +481,7 @@ export default function MyListsTab() {
       {(!playlists || playlists.length === 0) && (
         <div
           className="rounded-xl p-8 text-center"
-          style={{ background: "oklch(0.10 0.03 270 / 0.5)", border: "1px dashed oklch(0.22 0.02 280)" }}
+          style={{ background: "oklch(0.10 0.03 270 / 0.5)", border: "1px dashed #4A2C2A" }}
         >
           <Music size={28} className="mx-auto mb-2 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
           <p className="text-[12px]" style={{ color: "oklch(0.5 0.03 280)" }}>
@@ -497,7 +497,7 @@ export default function MyListsTab() {
           <div
             key={pl.id}
             className="rounded-xl overflow-hidden"
-            style={{ border: `1px solid ${isExpanded ? "oklch(0.65 0.2 300 / 0.3)" : "oklch(0.18 0.015 280)"}` }}
+            style={{ border: `1px solid ${isExpanded ? "oklch(0.65 0.2 300 / 0.3)" : "#4A2C2A"}` }}
           >
             {/* Header row */}
             <div
@@ -515,7 +515,7 @@ export default function MyListsTab() {
               {/* Cover art */}
               <div
                 className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0"
-                style={{ background: "oklch(0.10 0.025 270)" }}
+                style={{ background: "#3A2030" }}
               >
                 {pl.coverArtUrl ? (
                   <img src={pl.coverArtUrl} alt={pl.name} className="w-full h-full object-cover" />

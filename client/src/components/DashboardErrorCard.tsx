@@ -38,7 +38,7 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
     <div
       className="rounded-2xl p-6 flex flex-col items-center text-center gap-4"
       style={{
-        background: "oklch(0.10 0.04 25 / 0.35)",
+        background: "rgba(74, 44, 42, 0.35)",
         border: "1px solid oklch(0.65 0.18 25 / 0.3)",
       }}
     >
@@ -71,7 +71,7 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-heading text-[12px] tracking-wide transition-all hover:brightness-110 active:scale-95"
           style={{
             background: "oklch(0.84 0.155 85)",
-            color: "oklch(0.08 0.015 280)",
+            color: "#FFF8E7",
           }}
         >
           <RefreshCw size={13} />

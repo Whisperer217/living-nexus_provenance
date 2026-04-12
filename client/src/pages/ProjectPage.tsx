@@ -207,7 +207,7 @@ function BannerDropZone({
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-[#080d14] flex items-center justify-center"
+      className="relative w-full overflow-hidden bg-[#2D1B2E] flex items-center justify-center"
       style={{ minHeight: "clamp(14rem, 42vw, 34rem)" }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -225,7 +225,7 @@ function BannerDropZone({
           onClick={() => !editMode && setLightboxOpen(true)}
         />
       ) : (
-        <div className="w-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#080d14]" style={{ height: "clamp(14rem, 42vw, 34rem)" }} />
+        <div className="w-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#2D1B2E]" style={{ height: "clamp(14rem, 42vw, 34rem)" }} />
       )}
       {/* Lightbox */}
       {lightboxOpen && bannerUrl && (
@@ -245,7 +245,7 @@ function BannerDropZone({
           />
         </div>
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#080d14]/40 to-[#080d14]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#2D1B2E]/40 to-[#2D1B2E]" />
 
       {/* Drag-over overlay */}
       {editMode && isDragOver && (
@@ -1531,14 +1531,14 @@ export default function ProjectPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#080d14] flex items-center justify-center">
+      <div className="min-h-screen bg-[#2D1B2E] flex items-center justify-center">
         <div className="animate-pulse text-white/40">Loading project…</div>
       </div>
     );
   }
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#080d14] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen bg-[#2D1B2E] flex flex-col items-center justify-center gap-4">
         <p className="text-white/60">Project not found.</p>
         <Link href="/"><Button variant="outline" className="border-white/20 text-white">Go Home</Button></Link>
       </div>
@@ -1553,7 +1553,7 @@ export default function ProjectPage() {
   const displayedUpdates = updatesExpanded ? updates : updates.slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-[#080d14] text-white">
+    <div className="min-h-screen bg-[#2D1B2E] text-white">
       {/* ── Banner (drag-and-drop in edit mode) ── */}
       <BannerDropZone
         bannerUrl={project.bannerUrl ?? null}

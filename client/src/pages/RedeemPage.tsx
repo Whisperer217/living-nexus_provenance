@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
 const GOLD = "oklch(0.84 0.155 85)";
-const BG = "oklch(0.08 0.015 280)";
+const BG = "#FFF8E7";
 const CARD = "oklch(0.12 0.015 280)";
 const BORDER = "oklch(0.2 0.02 280)";
 const TEXT = "#E2E8F0";

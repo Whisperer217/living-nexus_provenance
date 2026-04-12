@@ -25,7 +25,7 @@ type SortDir = "asc" | "desc";
 type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation" | "data_rights";
 
 const GOLD = "oklch(0.84 0.155 85)";
-const BG = "oklch(0.08 0.015 280)";
+const BG = "#FFF8E7";
 const CARD = "oklch(0.12 0.015 280)";
 const BORDER = "oklch(0.2 0.02 280)";
 const MUTED = "#64748B";
@@ -197,7 +197,7 @@ function UsersTab() {
                     <td className={tdStyle}>
                       <Badge style={u.licenseStatus === "licensed"
                         ? { background: "oklch(0.75 0.18 145 / 0.2)", color: "oklch(0.75 0.18 145)", border: "1px solid oklch(0.75 0.18 145 / 0.3)" }
-                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid oklch(0.25 0.02 280)` }}>
+                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid #5C3530` }}>
                         {u.licenseStatus === "licensed" ? "Licensed" : "Free"}
                       </Badge>
                     </td>
@@ -451,7 +451,7 @@ function PromoCodesTab() {
                     <td className="px-4 py-3">
                       <Badge style={c.isActive
                         ? { background: "oklch(0.75 0.18 145 / 0.2)", color: "oklch(0.75 0.18 145)", border: "1px solid oklch(0.75 0.18 145 / 0.3)" }
-                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid oklch(0.25 0.02 280)` }}>
+                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid #5C3530` }}>
                         {c.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
@@ -543,7 +543,7 @@ function EmbedVideoTab() {
 
         {/* Progress log */}
         {progress.log.length > 0 && (
-          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "oklch(0.10 0.02 55)", border: `1px solid ${BORDER}` }}>
+          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "#2D1B2E", border: `1px solid ${BORDER}` }}>
             {progress.log.map((line, i) => (
               <p key={i} style={{ color: line.startsWith("Error") ? "oklch(0.65 0.18 25)" : "oklch(0.65 0.18 145)" }}>
                 {line.startsWith("Error") ? "✗" : "✓"} {line}
@@ -1053,7 +1053,7 @@ function BillingResetTab() {
                 </div>
                 {confirmFounder === u.id ? (
                   <div className="flex gap-2">
-                    <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: "oklch(0.08 0.015 280)" }}
+                    <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: "#FFF8E7" }}
                       onClick={() => grantFounderFree.mutate({ userId: u.id })}>
                       Confirm Grant
                     </Button>

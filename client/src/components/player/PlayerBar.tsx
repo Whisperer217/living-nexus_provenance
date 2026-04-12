@@ -258,7 +258,7 @@ export default function PlayerBar() {
           {!isExpanded && commentsData && commentsData.length > 0 && (
             <span
               className="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold leading-none"
-              style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.10 0.02 55)" }}
+              style={{ background: "oklch(0.80 0.145 82)", color: "#2D1B2E" }}
             >
               {commentsData.length} {commentsData.length === 1 ? "witness" : "witnesses"}
             </span>
@@ -352,7 +352,7 @@ export default function PlayerBar() {
               <button
                 onClick={togglePlay}
                 className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-105"
-                style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.10 0.02 55)" }}
+                style={{ background: "oklch(0.80 0.145 82)", color: "#2D1B2E" }}
               >
                 {state.isPlaying ? <Pause size={24} /> : <Play size={24} fill="currentColor" />}
               </button>
@@ -514,7 +514,7 @@ export default function PlayerBar() {
                 <button
                   onClick={togglePlay}
                   className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                  style={{ background: "oklch(0.94 0.025 75)", color: "oklch(0.10 0.02 55)" }}
+                  style={{ background: "oklch(0.94 0.025 75)", color: "#2D1B2E" }}
                 >
                   {state.isPlaying
                     ? <Pause size={17} fill="currentColor" />
@@ -684,7 +684,7 @@ export default function PlayerBar() {
                 onClick={submitComment}
                 disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                 className="px-2.5 py-1.5 rounded-md text-[10px] font-bold transition-colors disabled:opacity-40"
-                style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.10 0.02 55)" }}
+                style={{ background: "oklch(0.80 0.145 82)", color: "#2D1B2E" }}
               >
                 Post
               </button>
@@ -778,7 +778,7 @@ export default function PlayerBar() {
               <button
                 onClick={togglePlay}
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                style={{ background: "oklch(0.94 0.025 75)", color: "oklch(0.10 0.02 55)" }}
+                style={{ background: "oklch(0.94 0.025 75)", color: "#2D1B2E" }}
               >
                 {state.isPlaying
                   ? <Pause size={17} fill="currentColor" />

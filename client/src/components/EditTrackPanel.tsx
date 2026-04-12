@@ -428,7 +428,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         className="relative ml-auto w-full max-w-md flex flex-col"
         style={{
           height: "100dvh",
-          background: "linear-gradient(180deg, #0d1520 0%, #080d14 100%)",
+          background: "linear-gradient(180deg, #3A2030 0%, #2D1B2E 100%)",
           borderLeft: "1px solid rgba(212,175,55,0.2)",
           boxShadow: "-8px 0 40px rgba(0,0,0,0.6)",
           minWidth: 0,
@@ -438,7 +438,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 sm:px-6 py-4 sticky top-0 z-10"
-          style={{ background: "#0d1520", borderBottom: "1px solid rgba(212,175,55,0.15)" }}
+          style={{ background: "#3A2030", borderBottom: "1px solid rgba(212,175,55,0.15)" }}
         >
           <div>
             <h2 className="text-white font-semibold text-lg leading-tight">
@@ -480,7 +480,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             <div className="flex flex-col items-start gap-3">
               <div
                 className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 group relative cursor-pointer"
-                style={{ border: "1px solid rgba(212,175,55,0.3)", background: "#0a0f1a" }}
+                style={{ border: "1px solid rgba(212,175,55,0.3)", background: "#3A2030" }}
                 onClick={() => coverArtUrl && setShowCoverPositioner(true)}
               >
                 {coverArtUrl ? (
@@ -604,7 +604,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 >
                   <SelectValue placeholder="Select genre…" />
                 </SelectTrigger>
-                <SelectContent style={{ background: "#0d1520", border: "1px solid rgba(212,175,55,0.2)" }}>
+                <SelectContent style={{ background: "#3A2030", border: "1px solid rgba(212,175,55,0.2)" }}>
                   {GENRES.map((g) => (
                     <SelectItem key={g} value={g} className="text-white hover:bg-white/10">
                       {g}
@@ -654,7 +654,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ background: "#0d1520", border: "1px solid rgba(212,175,55,0.2)" }}>
+              <SelectContent style={{ background: "#3A2030", border: "1px solid rgba(212,175,55,0.2)" }}>
                 <SelectItem value="prohibited" className="text-white hover:bg-white/10">
                   Human-Made — No AI Training
                 </SelectItem>
@@ -684,7 +684,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ background: "#0d1520", border: "1px solid rgba(212,175,55,0.2)" }}>
+              <SelectContent style={{ background: "#3A2030", border: "1px solid rgba(212,175,55,0.2)" }}>
                 {Object.entries(STATUS_LABELS).map(([val, label]) => (
                   <SelectItem key={val} value={val} className="text-white hover:bg-white/10">
                     <span style={{ color: STATUS_COLORS[val] }}>{label}</span>
@@ -1038,7 +1038,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
             {/* Current video preview */}
             {currentVideoUrl && (
-              <div className="rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", background: "#0a0f1a" }}>
+              <div className="rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", background: "#3A2030" }}>
                 <video src={currentVideoUrl} className="w-full h-full object-contain" controls playsInline />
               </div>
             )}
@@ -1210,7 +1210,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         <div
           className="flex-shrink-0 px-4 sm:px-6 py-4 flex gap-3"
           style={{
-            background: "#0d1520",
+            background: "#3A2030",
             borderTop: "1px solid rgba(212,175,55,0.15)",
             paddingBottom: "max(16px, env(safe-area-inset-bottom))",
           }}

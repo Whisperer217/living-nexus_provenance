@@ -190,8 +190,8 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
               borderTopLeftRadius: "inherit",
             }}
           >
-            <Crown size={9} style={{ color: "oklch(0.10 0.02 55)" }} />
-            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "oklch(0.10 0.02 55)" }}>
+            <Crown size={9} style={{ color: "#2D1B2E" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#2D1B2E" }}>
               {(track.plays ?? 0) >= 1000
                 ? `${Math.floor((track.plays ?? 0) / 1000)}K PLAYS`
                 : `${track.plays} PLAYS`}

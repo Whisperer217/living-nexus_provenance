@@ -64,76 +64,84 @@
 }
 
 :root {
-  /* ── Lantern Light Palette — Charred Oak + Candlelight Amber + Warm Parchment ── */
-  /* Like reading by candlelight in 1930s · lighthouse beam · lantern glow */
-  --void:   oklch(0.10 0.022 55);   /* charred oak — warm dark brown, not cold black */
-  --void-2: oklch(0.125 0.028 52);  /* aged timber — sidebar / nav */
-  --void-3: oklch(0.148 0.032 50);  /* dark parchment — cards / surfaces */
-  --void-4: oklch(0.195 0.038 48);  /* warm elevated surface — modals */
+  /* ══════════════════════════════════════════════════════════════════
+     LIVING NEXUS — Cosmic Warmth Palette
+     "Floating in warm amniotic fluid inside a universe" — Doc Seraph Mercer
+     Aubergine Void base · Solar Flare Cream text · Honeyed Stardust gold
+     ══════════════════════════════════════════════════════════════════ */
 
-  --gold:     oklch(0.82 0.155 75);  /* candlelight amber — warm bright gold */
-  --gold-dim: oklch(0.70 0.13 72);   /* dimmed lantern — secondary gold */
-  --teal:     oklch(0.78 0.12 175);  /* sage green — softer accent, less electric */
-  --teal-dim: oklch(0.65 0.09 172);  /* muted sage */
-  --violet:     oklch(0.52 0.16 40); /* warm amber-rust — replaces cold purple */
-  --violet-dim: oklch(0.65 0.12 42); /* soft rust */
+  /* ── Depth Steps (the gallery walls) ── */
+  --void:   #2D1B2E;   /* Aubergine Void — deepest base, old photograph purple-brown */
+  --void-2: #3A2030;   /* Deeper Aubergine — sidebar / nav */
+  --void-3: #4A2C2A;   /* Burned Sienna Space — cards / surfaces, warm dark matter */
+  --void-4: #5C3530;   /* Lifted Sienna — modals / elevated surfaces */
+
+  /* ── Accent Palette ── */
+  --gold:       #D4AF37;   /* Honeyed Stardust — gold that feels earned, not gilded */
+  --gold-dim:   #B87333;   /* Aged Copper — oxidized starlight, ancient and terrestrial */
+  --gold-glow:  #FF8C42;   /* Nebula Amber — sunset through dust clouds */
+  --rose:       #E8B4B8;   /* Rose Gold Cosmos — blush of first light */
+  --terra:      #E2725B;   /* Terra Cotta Orbit — Mars warmth, ancestral earth */
+  --teal:       #B87333;   /* Aged Copper (reused as warm accent) */
+  --teal-dim:   #9A6228;   /* Deeper copper */
+  --violet:     #E2725B;   /* Terra Cotta as warm highlight */
+  --violet-dim: #C45A44;   /* Deeper terra */
 
   /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
-  /* Gold = Authority / WID / Primary actions — candlelight amber */
-  --lnx-gold:       #E8A830;   /* warm amber gold */
-  --lnx-gold-glow:  #F5C451;   /* brighter candle flame for glows */
-  --lnx-gold-muted: #A07820;   /* aged gold */
+  --lnx-gold:       #D4AF37;   /* Honeyed Stardust */
+  --lnx-gold-glow:  #FF8C42;   /* Nebula Amber — glow states */
+  --lnx-gold-muted: #B87333;   /* Aged Copper — muted gold */
   /* Green = Verified / Published / Alive */
   --lnx-green:      #4ADE80;
   --lnx-green-soft: #86EFAC;
   /* Orange = Draft / In Progress / Transition */
-  --lnx-orange:     #FB923C;
-  --lnx-orange-soft:#FDBA74;
+  --lnx-orange:     #FF8C42;   /* Nebula Amber */
+  --lnx-orange-soft:#F5B87A;
   /* Red = Destructive / Warning / Irreversible */
   --lnx-red:        #F87171;
   --lnx-red-soft:   #FCA5A5;
-  /* Foundation — warm dark backgrounds */
-  --lnx-bg:         #0D0A06;   /* charred wood — deepest bg */
-  --lnx-bg-2:       #141008;   /* dark oak */
-  --lnx-bg-3:       #1C160C;   /* aged timber */
-  --lnx-text:       #F5EDD6;   /* warm parchment white */
-  --lnx-text-muted: #B8A882;   /* aged paper — muted text */
+  /* Foundation — cosmic warm backgrounds */
+  --lnx-bg:         #2D1B2E;   /* Aubergine Void */
+  --lnx-bg-2:       #3A2030;   /* Deeper Aubergine */
+  --lnx-bg-3:       #4A2C2A;   /* Burned Sienna Space */
+  --lnx-text:       #FFF8E7;   /* Solar Flare Cream — old parchment yellow-white */
+  --lnx-text-muted: #E8B4B8;   /* Rose Gold Cosmos — soft pink metallic warmth */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
   --background: var(--void);
-  --foreground: oklch(0.94 0.025 75);  /* warm parchment — readable candlelight */
+  --foreground: #FFF8E7;        /* Solar Flare Cream — not white, parchment warmth */
   --card: var(--void-3);
-  --card-foreground: oklch(0.94 0.025 75);
+  --card-foreground: #FFF8E7;
   --popover: var(--void-2);
-  --popover-foreground: oklch(0.94 0.025 75);
+  --popover-foreground: #FFF8E7;
   --primary: var(--gold);
-  --primary-foreground: oklch(0.10 0.02 55);
+  --primary-foreground: #2D1B2E;
   --secondary: var(--void-4);
-  --secondary-foreground: oklch(0.94 0.025 75);
+  --secondary-foreground: #FFF8E7;
   --muted: var(--void-3);
-  --muted-foreground: oklch(0.65 0.04 65); /* warm grey-amber — visible in ambient light */
-  --accent: var(--teal);
-  --accent-foreground: oklch(0.10 0.02 55);
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.30 0.04 60 / 70%); /* warm amber-brown border */
-  --input: oklch(0.30 0.04 60 / 50%);
+  --muted-foreground: #E8B4B8;  /* Rose Gold Cosmos — muted labels */
+  --accent: var(--gold-glow);   /* Nebula Amber — secondary accent */
+  --accent-foreground: #2D1B2E;
+  --destructive: #E2725B;       /* Terra Cotta Orbit — warm destructive */
+  --destructive-foreground: #FFF8E7;
+  --border: rgba(212, 175, 55, 0.25);  /* Honeyed Stardust border at low opacity */
+  --input:  rgba(212, 175, 55, 0.15);
   --ring: var(--gold);
 
-  --chart-1: var(--gold);
-  --chart-2: var(--teal);
-  --chart-3: oklch(0.65 0.18 145);
-  --chart-4: oklch(0.70 0.20 40);
-  --chart-5: var(--violet-dim);
+  --chart-1: #D4AF37;   /* Honeyed Stardust */
+  --chart-2: #FF8C42;   /* Nebula Amber */
+  --chart-3: #E8B4B8;   /* Rose Gold Cosmos */
+  --chart-4: #E2725B;   /* Terra Cotta Orbit */
+  --chart-5: #B87333;   /* Aged Copper */
 
   --sidebar: var(--void-2);
-  --sidebar-foreground: oklch(0.94 0.025 75);
+  --sidebar-foreground: #FFF8E7;
   --sidebar-primary: var(--gold);
-  --sidebar-primary-foreground: oklch(0.10 0.02 55);
+  --sidebar-primary-foreground: #2D1B2E;
   --sidebar-accent: var(--void-4);
-  --sidebar-accent-foreground: oklch(0.94 0.025 75);
-  --sidebar-border: oklch(0.30 0.04 60 / 50%);
+  --sidebar-accent-foreground: #FFF8E7;
+  --sidebar-border: rgba(212, 175, 55, 0.20);
   --sidebar-ring: var(--gold);
 }
 
@@ -144,57 +152,60 @@
    Saved to user profile and localStorage for flash-free load.
 ================================================================= */
 
-/* ── DARK THEME (default — Lantern Light, Charred Oak) ── */
+/* ── DARK THEME (default — Cosmic Warmth) ── */
 [data-theme="dark"] {
   /* Surface depth steps */
-  --void:   oklch(0.10 0.022 55);
-  --void-2: oklch(0.125 0.028 52);
-  --void-3: oklch(0.148 0.032 50);
-  --void-4: oklch(0.195 0.038 48);
+  --void:   #2D1B2E;
+  --void-2: #3A2030;
+  --void-3: #4A2C2A;
+  --void-4: #5C3530;
 
   /* Accent tokens */
-  --gold:     oklch(0.82 0.155 75);
-  --gold-dim: oklch(0.70 0.13 72);
-  --teal:     oklch(0.78 0.12 175);
-  --teal-dim: oklch(0.65 0.09 172);
+  --gold:       #D4AF37;
+  --gold-dim:   #B87333;
+  --gold-glow:  #FF8C42;
+  --rose:       #E8B4B8;
+  --terra:      #E2725B;
+  --teal:       #B87333;
+  --teal-dim:   #9A6228;
 
   /* Semantic tokens */
   --background:          var(--void);
-  --foreground:          oklch(0.94 0.025 75);
+  --foreground:          #FFF8E7;
   --card:                var(--void-3);
-  --card-foreground:     oklch(0.94 0.025 75);
+  --card-foreground:     #FFF8E7;
   --popover:             var(--void-2);
-  --popover-foreground:  oklch(0.94 0.025 75);
+  --popover-foreground:  #FFF8E7;
   --primary:             var(--gold);
-  --primary-foreground:  oklch(0.10 0.02 55);
+  --primary-foreground:  #2D1B2E;
   --secondary:           var(--void-4);
-  --secondary-foreground:oklch(0.94 0.025 75);
+  --secondary-foreground:#FFF8E7;
   --muted:               var(--void-3);
-  --muted-foreground:    oklch(0.65 0.04 65);
-  --accent:              var(--teal);
-  --accent-foreground:   oklch(0.10 0.02 55);
-  --border:              oklch(0.30 0.04 60 / 70%);
-  --input:               oklch(0.30 0.04 60 / 50%);
+  --muted-foreground:    #E8B4B8;
+  --accent:              var(--gold-glow);
+  --accent-foreground:   #2D1B2E;
+  --border:              rgba(212, 175, 55, 0.25);
+  --input:               rgba(212, 175, 55, 0.15);
   --ring:                var(--gold);
 
   /* Living Nexus custom tokens */
-  --lnx-bg:         #0D0A06;
-  --lnx-bg-2:       #141008;
-  --lnx-bg-3:       #1C160C;
-  --lnx-text:       #F5EDD6;
-  --lnx-text-muted: #B8A882;
-  --lnx-gold:       #E8A830;
-  --lnx-gold-glow:  #F5C451;
-  --lnx-gold-muted: #A07820;
+  --lnx-bg:         #2D1B2E;
+  --lnx-bg-2:       #3A2030;
+  --lnx-bg-3:       #4A2C2A;
+  --lnx-text:       #FFF8E7;
+  --lnx-text-muted: #E8B4B8;
+  --lnx-gold:       #D4AF37;
+  --lnx-gold-glow:  #FF8C42;
+  --lnx-gold-muted: #B87333;
 
   /* Sidebar */
   --sidebar:                    var(--void-2);
-  --sidebar-foreground:         oklch(0.94 0.025 75);
+  --sidebar-foreground:         #FFF8E7;
   --sidebar-primary:            var(--gold);
-  --sidebar-primary-foreground: oklch(0.10 0.02 55);
+  --sidebar-primary-foreground: #2D1B2E;
   --sidebar-accent:             var(--void-4);
-  --sidebar-accent-foreground:  oklch(0.94 0.025 75);
-  --sidebar-border:             oklch(0.30 0.04 60 / 50%);
+  --sidebar-accent-foreground:  #FFF8E7;
+  --sidebar-border:             rgba(212, 175, 55, 0.20);
   --sidebar-ring:               var(--gold);
 }
 
@@ -231,7 +242,7 @@
   html, body {
     height: 100%;
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
-    background-color: oklch(0.10 0.022 55); /* match app bg — no black void on overscroll */
+    background-color: #2D1B2E; /* Aubergine Void — match app bg, no void on overscroll */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
   /* NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals by clipping
@@ -637,7 +648,7 @@ html body[data-scroll-locked] {
         oklch(0.16 0.04 60 / 0.08) 50%,
         transparent 80%
       ),
-      oklch(0.10 0.022 55);
+      #2D1B2E;
   }
 
   /* ── CTA button glow — lantern warmth ── */

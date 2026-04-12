@@ -671,7 +671,7 @@ export default function MobilePlayerPanel() {
                 hover:scale-105 active:scale-95 shadow-xl"
               style={{
                 background: "oklch(0.94 0.006 280)",
-                color: "oklch(0.10 0.02 55)",
+                color: "#2D1B2E",
                 boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.25)",
               }}
             >
@@ -1036,7 +1036,7 @@ export default function MobilePlayerPanel() {
                     onClick={submitComment}
                     disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                     className="px-3 py-2 rounded-xl text-[12px] font-semibold transition-colors disabled:opacity-40 active:scale-95"
-                    style={{ background: "oklch(0.80 0.145 82)", color: "oklch(0.10 0.02 55)" }}
+                    style={{ background: "oklch(0.80 0.145 82)", color: "#2D1B2E" }}
                   >
                     Post
                   </button>
