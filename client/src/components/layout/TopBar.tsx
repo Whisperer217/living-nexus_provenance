@@ -124,18 +124,18 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
 
   // Warm mode: very subtle steel tint — dark base fully dominates, just a faint cool cast
   const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(44,52,56,0.97)";
-  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(44,52,56,0.45)";
+  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(203,177,131,0.28)";  /* gold-vein bottom border */
   const DRAWER_BG = isWarm ? "rgba(42,55,70,0.80)" : "rgba(44,52,56,0.98)";
-  const DRAWER_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "rgba(44,52,56,0.5)";
-  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "#AA8E64";
-  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "#3F4A50";
-  const NAV_SECTION_LABEL = isWarm ? "rgba(148,165,185,0.45)" : "rgba(203,177,131,0.7)";
-  const NAV_SECTION_BORDER = isWarm ? "rgba(100,125,150,0.15)" : "rgba(203,177,131,0.10)";
-  const NAV_ACTIVE_BG = isWarm ? "rgba(100,125,150,0.18)" : "rgba(230,205,174,0.12)";
-  const NAV_ACTIVE_BORDER = isWarm ? "rgba(120,148,178,0.32)" : "rgba(230,205,174,0.22)";
-  const NAV_ACTIVE_TEXT = isWarm ? "rgba(180,202,230,0.95)" : "#E6CDAE";
-  const LOGO_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(44,52,56,0.35)";
-  const RIGHT_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(44,52,56,0.35)";
+  const DRAWER_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "rgba(203,177,131,0.18)";
+  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "#CBB183";           /* quartzite gold — etched */
+  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "#AA8E64";     /* shadow stone — drawer items */
+  const NAV_SECTION_LABEL = isWarm ? "rgba(148,165,185,0.45)" : "rgba(203,177,131,0.85)";
+  const NAV_SECTION_BORDER = isWarm ? "rgba(100,125,150,0.15)" : "rgba(203,177,131,0.20)";
+  const NAV_ACTIVE_BG = isWarm ? "rgba(100,125,150,0.18)" : "rgba(203,177,131,0.12)";
+  const NAV_ACTIVE_BORDER = isWarm ? "rgba(120,148,178,0.32)" : "rgba(203,177,131,0.35)";
+  const NAV_ACTIVE_TEXT = isWarm ? "rgba(180,202,230,0.95)" : "#E6CDAE";    /* pearl on active */
+  const LOGO_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(203,177,131,0.20)";
+  const RIGHT_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(203,177,131,0.20)";
 
   // ── Drawer item renderer ─────────────────────────────────────────
   const renderDrawerItem = (item: {
@@ -179,12 +179,15 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         style={{
           background: active ? NAV_ACTIVE_BG : "transparent",
           color: active ? NAV_ACTIVE_TEXT : NAV_TEXT_MUTED,
+          fontFamily: "'Cinzel', serif",
+          fontSize: "11px",
+          letterSpacing: "0.05em",
         }}
-        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(120,145,170,0.18)" : "rgba(44,52,56,0.6)"; (e.currentTarget as HTMLElement).style.color = isWarm ? "rgba(210,225,245,0.95)" : "#DACAAA"; } }}
+        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(120,145,170,0.18)" : "rgba(63,74,80,0.5)"; (e.currentTarget as HTMLElement).style.color = "#E6CDAE"; } }}
         onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = NAV_TEXT_MUTED; } }}
       >
-        <Icon size={13} className="flex-shrink-0" style={{ color: active ? "#CBB183" : "inherit" }} />
-        <span className="text-[12px] font-body flex-1">{item.label}</span>
+        <Icon size={13} className="flex-shrink-0" style={{ color: active ? "#D0A15F" : "#CBB183" }} />
+        <span className="flex-1">{item.label}</span>
         {badge}
       </button>
     );
@@ -204,15 +207,14 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         }}
       >
         {/* Logo zone */}
-        <div
-          className="flex items-center gap-2.5 px-4 flex-shrink-0 cursor-pointer"
+        <div className="flex items-center gap-2.5 px-4 flex-shrink-0 cursor-pointer"
           style={{ borderRight: `1px solid ${LOGO_DIVIDER}`, height: "100%", paddingRight: "16px" }}
           onClick={() => goTo("/")}
         >
           <img src={LOGO_URL} alt="Living Nexus" className="w-8 h-8 object-contain" />
           <div>
-            <div className="font-display text-sm gold-shimmer leading-tight">Living Nexus</div>
-            <div className="text-[8px] tracking-widest font-heading" style={{ color: "#AA8E64" }}>CREATIVE PROVENANCE</div>
+            <div className="font-display text-sm gold-shimmer leading-tight" style={{ letterSpacing: "0.04em" }}>Living Nexus</div>
+            <div className="text-[8px] tracking-[0.18em] font-heading" style={{ color: "#CBB183" }}>CREATIVE PROVENANCE</div>
           </div>
         </div>
 
@@ -229,17 +231,26 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               <button
                 key={item.label}
                 onClick={() => goTo(item.path)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all whitespace-nowrap flex-shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all whitespace-nowrap flex-shrink-0 group relative"
                 style={{
-                  fontSize: "12px",
-                  fontWeight: 500,
+                  fontSize: "11px",
+                  fontFamily: "'Cinzel', serif",
+                  fontWeight: active ? 600 : 500,
+                  letterSpacing: "0.06em",
                   background: active ? NAV_ACTIVE_BG : "transparent",
                   border: active ? `1px solid ${NAV_ACTIVE_BORDER}` : "1px solid transparent",
-                  color: active ? NAV_ACTIVE_TEXT : NAV_TEXT,
+                  color: active ? "#E6CDAE" : NAV_TEXT,
+                  textShadow: active ? "0 0 12px rgba(203,177,131,0.35)" : "none",
                 }}
+                onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "#E6CDAE"; (e.currentTarget as HTMLElement).style.textShadow = "0 0 10px rgba(203,177,131,0.25)"; } }}
+                onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = NAV_TEXT; (e.currentTarget as HTMLElement).style.textShadow = "none"; } }}
               >
-                <item.icon size={13} style={{ color: active ? "#CBB183" : "inherit" }} />
+                <item.icon size={13} style={{ color: active ? "#D0A15F" : "#CBB183" }} />
                 <span>{item.label}</span>
+                {/* gold underline on active */}
+                {active && (
+                  <span className="absolute bottom-0 left-3 right-3 h-[1px]" style={{ background: "linear-gradient(90deg, transparent, #CBB183, transparent)" }} />
+                )}
                 {archiveBadge && (
                   <span className="text-[9px] font-bold px-1 py-0.5 rounded-full"
                     style={{ background: "rgba(230,205,174,0.18)", color: "#E8A830" }}>
@@ -252,9 +263,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         </nav>
 
         {/* Right zone */}
-        <div
-          className="flex items-center gap-2 px-4 flex-shrink-0"
-          style={{ borderLeft: `1px solid ${RIGHT_DIVIDER}`, height: "100%" }}
+        <div className="flex items-center gap-2 px-4 flex-shrink-0"
+          style={{ borderLeft: `1px solid ${RIGHT_DIVIDER}`, height: "100%", paddingLeft: "16px" }}
         >
           {/* Prompt Generator quick button */}
           {user && userId && (
@@ -262,13 +272,18 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               onClick={() => goTo(`/creator/${userId}?openPromptStudio=1`)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
               style={{
-                fontSize: "11px", fontWeight: 600,
+                fontSize: "11px",
+                fontFamily: "'Cinzel', serif",
+                fontWeight: 500,
+                letterSpacing: "0.05em",
                 background: "transparent",
-                border: "1px solid rgba(44,52,56,0.5)",
-                color: "#AA8E64",
+                border: "1px solid rgba(203,177,131,0.22)",
+                color: "#CBB183",
               }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#E6CDAE"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(203,177,131,0.45)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#CBB183"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(203,177,131,0.22)"; }}
             >
-              <Zap size={12} />
+              <Zap size={12} style={{ color: "#D0A15F" }} />
               <span>Prompt Gen</span>
             </button>
           )}
@@ -376,8 +391,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
 
             {/* NAVIGATE */}
             <div>
-              <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
+              <div className="text-[9px] font-heading tracking-[0.18em] uppercase mb-3 pb-2"
+                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}`, fontFamily: "'Cinzel', serif", letterSpacing: "0.18em" }}>
                 Navigate
               </div>
               <div className="space-y-0.5">
@@ -387,8 +402,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
 
             {/* CREATE */}
             <div>
-              <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
+              <div className="text-[9px] font-heading tracking-[0.18em] uppercase mb-3 pb-2"
+                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}`, fontFamily: "'Cinzel', serif", letterSpacing: "0.18em" }}>
                 Create
               </div>
               <div className="space-y-0.5">
@@ -398,8 +413,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
 
             {/* DISCOVER */}
             <div>
-              <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
+              <div className="text-[9px] font-heading tracking-[0.18em] uppercase mb-3 pb-2"
+                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}`, fontFamily: "'Cinzel', serif", letterSpacing: "0.18em" }}>
                 Discover
               </div>
               <div className="space-y-0.5">
@@ -409,8 +424,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
 
             {/* ACCOUNT */}
             <div>
-              <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
+              <div className="text-[9px] font-heading tracking-[0.18em] uppercase mb-3 pb-2"
+                style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}`, fontFamily: "'Cinzel', serif", letterSpacing: "0.18em" }}>
                 Account
               </div>
               <div className="space-y-0.5">
@@ -432,8 +447,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             {/* USER CARD */}
             <div className="flex flex-col justify-between">
               <div>
-                <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-3 pb-2"
-                  style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}` }}>
+                <div className="text-[9px] font-heading tracking-[0.18em] uppercase mb-3 pb-2"
+                  style={{ color: NAV_SECTION_LABEL, borderBottom: `1px solid ${NAV_SECTION_BORDER}`, fontFamily: "'Cinzel', serif", letterSpacing: "0.18em" }}>
                   {user ? "Signed In As" : "Platform"}
                 </div>
                 {!authLoading && user ? (
