@@ -308,9 +308,29 @@
   p, span, li, td, th, label, input, textarea, select {
     font-weight: 450;
   }
-  h1, h2, h3, h4, h5, h6 {
-    color: oklch(0.94 0.025 75);
+  /* h1/h2 — Cinzel for section titles (etched stone caps)
+     h3/h4 — Cormorant Garamond for editorial subheadings
+     h5/h6 — DM Sans for utility labels */
+  h1, h2 {
+    font-family: 'Cinzel', serif;
+    color: #E6CDAE;           /* Pale Quartzite */
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  h3, h4 {
+    font-family: 'Cormorant Garamond', serif;
+    color: #DACAAA;           /* Warm Quartzite */
     letter-spacing: 0.02em;
+    font-weight: 500;
+    font-size: 1.1em;
+  }
+  h5, h6 {
+    font-family: 'DM Sans', sans-serif;
+    color: #AA8E64;           /* Shadow Stone */
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8em;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -387,7 +407,12 @@ html body[data-scroll-locked] {
     .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; }
   }
 
-  /* ── Divine Typography ── */
+  /* ── Divine Typography ──
+     Cinzel Decorative  — wordmark / hero display
+     Cinzel             — section headings, labels, badges
+     Cormorant Garamond — editorial subheadings, descriptions, pull quotes
+     DM Sans            — body copy, UI text
+  ────────────────────────────────────────────────────────────────── */
   .font-display {
     font-family: 'Cinzel Decorative', serif;
     letter-spacing: 0.04em;
@@ -396,8 +421,68 @@ html body[data-scroll-locked] {
     font-family: 'Cinzel', serif;
     letter-spacing: 0.06em;
   }
+  .font-subheading {
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+  .font-editorial {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
   .font-body {
     font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── MUSEUM SECTION TITLE — Cinzel caps with quartzite gold underline ── */
+  .museum-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;         /* 12px — compact, authoritative */
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #CBB183;             /* Quartzite Gold */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .museum-section-title::before {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #CBB183);
+    flex-shrink: 0;
+  }
+  .museum-section-title::after {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    background: linear-gradient(to left, transparent, #CBB183);
+    flex-shrink: 0;
+  }
+
+  /* ── MUSEUM SECTION HEADER — larger display heading ── */
+  .museum-section-header {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;            /* 16px */
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #E6CDAE;             /* Pale Quartzite */
+  }
+
+  /* ── MUSEUM CAPTION — Cormorant Garamond for descriptions / pull quotes ── */
+  .museum-caption {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9375rem;       /* 15px */
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: #DACAAA;             /* Warm Quartzite */
+    line-height: 1.6;
   }
 
   /* ── Gold gradient text — candlelight amber ── */

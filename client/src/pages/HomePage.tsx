@@ -301,7 +301,7 @@ function FeaturedCreatorsCarousel() {
   return (
     <div className="px-6 pb-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-heading text-[13px] tracking-[0.14em] uppercase" style={{ color: "rgba(255,255,255,0.65)" }}>
+        <h2 className="museum-section-title">
           <Users size={13} className="inline mr-1.5 opacity-70" />
           Creators
         </h2>
@@ -371,7 +371,7 @@ function NewVoicesCarousel() {
   return (
     <div className="px-6 pb-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-heading text-[13px] tracking-[0.14em] uppercase" style={{ color: "rgba(255,255,255,0.65)" }}>
+        <h2 className="museum-section-title">
           <Sparkles size={13} className="inline mr-1.5" style={{ color: "oklch(0.75 0.18 145)" }} />
           New Voices
         </h2>
@@ -1014,7 +1014,7 @@ export default function HomePage() {
       {(isAuthenticated || (publicProjects as any[]).length > 0) && (
         <div className="px-6 pt-5 pb-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-[16px] tracking-wider" style={{ color: "oklch(0.94 0.025 75)" }}>Featured Projects</h2>
+            <h2 className="museum-section-header">Featured Projects</h2>
             <Link href="/projects">
               <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>See all</span>
             </Link>
@@ -1034,7 +1034,7 @@ export default function HomePage() {
       <div className="px-6 py-5">
         {/* Genre icon cards */}
         <div className="mb-7">
-          <h2 className="font-heading text-[13px] tracking-[0.14em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.65)" }}>Browse Genres</h2>
+          <h2 className="museum-section-title mb-3">Browse Genres</h2>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
             {GENRE_CARDS.map(g => (
               <button
@@ -1074,7 +1074,7 @@ export default function HomePage() {
 
         {/* Discover Tracks header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading text-[16px] tracking-wider text-white">
+          <h2 className="museum-section-header">
             {activeGenre === "All" ? "Discover Tracks" : activeGenre}
           </h2>
           <Link href="/explore">
@@ -1100,7 +1100,7 @@ export default function HomePage() {
           <>
             <div className="gold-divider mb-6" />
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-heading text-[16px] tracking-wider text-white">Trending Now</h2>
+              <h2 className="museum-section-header">Trending Now</h2>
               <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "oklch(0.55 0.03 280)" }}>By plays + likes + recency</span>
             </div>
 
