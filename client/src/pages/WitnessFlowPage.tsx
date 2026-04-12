@@ -13,8 +13,9 @@
 
 import { useState, useEffect } from "react";
 import { useRoute, Link } from "wouter";
-import { Shield, User, Music, GitCommit, Award, Copy, Check, ExternalLink, ChevronRight, Loader2, AlertCircle } from "lucide-react";
+import { Shield, User, Music, GitCommit, Award, Copy, Check, ExternalLink, ChevronRight, Loader2, AlertCircle, Eye } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -102,14 +103,20 @@ function HashDisplay({ label, value }: { label: string; value: string }) {
 // ─── Step Panels ─────────────────────────────────────────────────
 
 function IdentityPanel({ song }: { song: any }) {
-  const creator = song?.creator;
+  // song.artistName and song.artistHandle come from the verifyWid server response
+  // song.creatorId is the numeric user id returned by the fixed verifyWid handler
+  const displayName = song?.artistName || "Unknown Creator";
+  const handle = song?.artistHandle;
+  const platformId = song?.creatorId != null
+    ? `LN-${String(song.creatorId).padStart(6, "0")}`
+    : "LN-??????";
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        {creator?.profilePhotoUrl ? (
+        {song?.profilePhotoUrl ? (
           <img
-            src={creator.profilePhotoUrl}
-            alt={creator.name}
+            src={song.profilePhotoUrl}
+            alt={displayName}
             className="w-14 h-14 rounded-full border-2 border-blue-400/40 object-cover"
           />
         ) : (
@@ -118,20 +125,20 @@ function IdentityPanel({ song }: { song: any }) {
           </div>
         )}
         <div>
-          <p className="font-semibold text-white text-lg">{creator?.name ?? "Unknown Creator"}</p>
-          {creator?.artistHandle && (
-            <p className="text-sm text-zinc-400">@{creator.artistHandle}</p>
+          <p className="font-semibold text-white text-lg">{displayName}</p>
+          {handle && (
+            <p className="text-sm text-zinc-400">@{handle}</p>
           )}
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
         <div className="bg-zinc-900 rounded-lg p-3">
           <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Platform ID</p>
-          <p className="font-mono text-sm text-blue-300">LN-{String(creator?.id ?? "???").padStart(6, "0")}</p>
+          <p className="font-mono text-sm text-blue-300">{platformId}</p>
         </div>
         <div className="bg-zinc-900 rounded-lg p-3">
           <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">AI Disclosure</p>
-          <p className="text-sm text-white capitalize">{creator?.aiDisclosure?.replace(/_/g, " ") ?? "Not specified"}</p>
+          <p className="text-sm text-white capitalize">{(song?.aiDisclosure as string | null | undefined)?.replace(/_/g, " ") ?? "Not specified"}</p>
         </div>
       </div>
       <div className="bg-blue-400/5 border border-blue-400/20 rounded-lg p-3 text-xs text-zinc-400">
@@ -340,6 +347,7 @@ export default function WitnessFlowPage() {
   const [, params] = useRoute("/witness-flow/:witnessId");
   const [, songParams] = useRoute("/witness-flow/song/:songId");
   const [activeStep, setActiveStep] = useState<StepKey>("identity");
+  const { user } = useAuth();
 
   const witnessId = params?.witnessId;
   const songId = songParams?.songId ? parseInt(songParams.songId, 10) : undefined;
@@ -357,6 +365,12 @@ export default function WitnessFlowPage() {
 
   const song = songByWid ?? songById;
   const isLoading = loadingWid || loadingId;
+
+  // Owner check: the authenticated user owns this work if their id matches creatorUserId
+  const isOwner = !!user && !!song && (
+    (song as any).creatorUserId === user.id ||
+    (song as any).creatorId === user.id
+  );
 
   // Fetch play audit stats
   const { data: playStats } = trpc.songs.playAuditStats.useQuery(
@@ -405,6 +419,12 @@ export default function WitnessFlowPage() {
             <Shield size={20} className="text-amber-400" />
             <span className="font-semibold text-sm tracking-wide">Witness Flow</span>
             <span className="text-zinc-600 text-xs hidden sm:block">Provenance Chain</span>
+            {!isOwner && (
+              <span className="hidden sm:flex items-center gap-1 text-xs bg-zinc-800 border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded-full">
+                <Eye size={10} />
+                View Only
+              </span>
+            )}
           </div>
           {song?.witnessId && (
             <div className="flex items-center gap-1.5">

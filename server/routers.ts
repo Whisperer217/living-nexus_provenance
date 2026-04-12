@@ -594,6 +594,8 @@ export const appRouter = router({
         artistName: currentArtistName,
         artistHandle: creator?.artistHandle,
         profilePhotoUrl: creator?.profilePhotoUrl,
+        creatorId: creator?.id ?? null,
+        creatorUserId: song.userId,
         songId: song.id,
         registeredAt: song.createdAt,
         fileHash: song.fileHash,
