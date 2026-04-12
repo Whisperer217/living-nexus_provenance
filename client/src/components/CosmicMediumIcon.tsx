@@ -26,10 +26,10 @@ interface CosmicMediumIconProps {
 
 // ── Color tokens per medium ────────────────────────────────────────────────────
 export const MEDIUM_COLORS: Record<MediumType, { primary: string; glow: string; bg: string; border: string }> = {
-  audio:      { primary: "#CBB183",  glow: "rgba(203,177,131,0.35)", bg: "rgba(44,52,56,0.6)",  border: "rgba(203,177,131,0.25)" },
-  lyrics:     { primary: "#E6CDAE",   glow: "rgba(230,205,174,0.35)",  bg: "rgba(63, 74, 80, 0.6)",   border: "rgba(230,205,174,0.25)"  },
-  manuscript: { primary: "#4ADE80",  glow: "rgba(74,222,128,0.35)", bg: "rgba(63, 74, 80, 0.6)",  border: "rgba(74,222,128,0.25)" },
-  comic:      { primary: "#EF4444",   glow: "rgba(239,68,68,0.35)",  bg: "rgba(63, 74, 80, 0.6)",   border: "rgba(239,68,68,0.25)"  },
+  audio:      { primary: "#CBB183",  glow: "rgba(203,177,131,0.30)", bg: "rgba(44,52,56,0.7)",  border: "rgba(203,177,131,0.28)" },
+  lyrics:     { primary: "#D0A15F",  glow: "rgba(208,161,95,0.30)",  bg: "rgba(44,52,56,0.7)",  border: "rgba(208,161,95,0.28)"  },
+  manuscript: { primary: "#DACAAA",  glow: "rgba(218,202,170,0.28)", bg: "rgba(44,52,56,0.7)",  border: "rgba(218,202,170,0.25)" },
+  comic:      { primary: "#AA8E64",  glow: "rgba(170,142,100,0.28)", bg: "rgba(44,52,56,0.7)",  border: "rgba(170,142,100,0.25)" },
 };
 
 // ── SVG Glyphs ────────────────────────────────────────────────────────────────

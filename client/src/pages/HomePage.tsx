@@ -85,13 +85,14 @@ function WIDTrustLayer() {
   };
 
   return (
-    <div className="px-6 pt-4 pb-6 space-y-5">
+    <div className="px-6 pt-4 pb-6 space-y-4">
       {/* ── Animated WID counter ── */}
       <div
         className="flex items-center gap-4 rounded-2xl px-5 py-4"
         style={{
-          background: "#3F4A50",
+          background: "#2C3438",
           border: "1px solid rgba(203,177,131,0.32)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.30)",
         }}
       >
         <div
@@ -128,7 +129,7 @@ function WIDTrustLayer() {
       <div
         className="rounded-2xl px-5 py-4 relative overflow-hidden"
         style={{
-          background: "#3F4A50",
+          background: "#2C3438",
           border: "1px solid rgba(203,177,131,0.28)",
           boxShadow: "0 2px 12px rgba(0,0,0,0.30)",
         }}
