@@ -630,6 +630,57 @@ html body[data-scroll-locked] {
     padding: 0.75rem;
   }
 
+  /* ── MUSEUM PAN ROW — standardized horizontal scroll row ──
+     All asset carousels use this class for consistent behavior.
+     - Smooth momentum scroll on mobile
+     - Hidden scrollbar (aesthetic)
+     - Fade-out edges (gunmetal gradient mask)
+     - Snap to card boundaries
+  ────────────────────────────────────────────────────────────────── */
+  .museum-pan-row {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 0.5rem;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    /* Hide scrollbar — all browsers */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .museum-pan-row::-webkit-scrollbar {
+    display: none;
+  }
+  .museum-pan-row > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  /* Wrapper with fade-out edges */
+  .museum-pan-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+  .museum-pan-wrapper::before,
+  .museum-pan-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2.5rem;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .museum-pan-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, #353E43, transparent);
+  }
+  .museum-pan-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, #353E43, transparent);
+  }
+
   /* ── MUSEUM GRID — 3-column max, consistent gutter ── */
   .museum-grid {
     display: grid;

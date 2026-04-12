@@ -182,7 +182,7 @@ function WIDTrustLayer() {
           </div>
           {/* Horizontal scroll container — negative margin to break out of px-6 padding */}
           <div
-            className="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6"
+            className="museum-pan-row -mx-6 px-6"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {voices.slice(0, 10).map((v: any) => (
@@ -312,7 +312,7 @@ function FeaturedCreatorsCarousel() {
         </Link>
       </div>
       <div
-        className="flex gap-3 overflow-x-auto pb-2"
+        className="museum-pan-row"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {creators.map((creator: any) => (
@@ -382,7 +382,7 @@ function NewVoicesCarousel() {
         </Link>
       </div>
       <div
-        className="flex gap-3 overflow-x-auto pb-2"
+        className="museum-pan-row"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {creators.map((creator: any) => (
@@ -451,7 +451,7 @@ function HorizontalTrackGrid({
   if (loading) {
     return (
       <div
-        className="flex gap-4 overflow-x-auto pb-2"
+        className="museum-pan-row"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {Array.from({ length: 8 }).map((_, i) => (
@@ -494,7 +494,7 @@ function HorizontalTrackGrid({
     <div className="space-y-4">
       {/* Row 1 */}
       <div
-        className="flex gap-4 overflow-x-auto pb-1"
+        className="museum-pan-row"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {row1.map((track, idx) => (
@@ -507,7 +507,7 @@ function HorizontalTrackGrid({
       {/* Row 2 — only shown if there are enough tracks */}
       {row2.length > 0 && (
         <div
-          className="flex gap-4 overflow-x-auto pb-1"
+          className="museum-pan-row"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {row2.map((track, idx) => (
@@ -556,7 +556,7 @@ function TrendingHorizontalGrid({
   return (
     <div className="space-y-4">
       <div
-        className="flex gap-4 overflow-x-auto pb-1"
+        className="museum-pan-row"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {row1.map((track, idx) => (
@@ -567,7 +567,7 @@ function TrendingHorizontalGrid({
       </div>
       {row2.length > 0 && (
         <div
-          className="flex gap-4 overflow-x-auto pb-1"
+          className="museum-pan-row"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {row2.map((track, idx) => (

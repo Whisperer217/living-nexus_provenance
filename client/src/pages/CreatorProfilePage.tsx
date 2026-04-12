@@ -1238,7 +1238,7 @@ export default function CreatorProfilePage() {
               )}
             </div>
             {/* Netflix-style horizontal scroll on mobile, grid on desktop */}
-            <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
+            <div className="museum-pan-row -mx-4 px-4">
               <div className="flex gap-4 pb-2" style={{ minWidth: "max-content" }}>
                 {(creatorProjects as any[]).map((project: any) => (
                   <Link key={project.id} href={`/project/${project.slug}`}>

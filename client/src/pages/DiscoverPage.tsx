@@ -521,7 +521,7 @@ export default function DiscoverPage() {
             </div>
           ) : (
             <div
-              className="flex gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory"
+              className="museum-pan-row"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {creators.filter((c: any) => c.name && c.name.trim().length > 0).slice(0, 24).map((creator: any) => {
