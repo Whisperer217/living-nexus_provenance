@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — Lantern Light Design System
+   LIVING NEXUS — Digital Sacred Museum Design System
    Philosophy: Sacred Technology × Sovereign Witness
-   Colors: Charred Oak + Candlelight Amber + Warm Parchment
-   Typography: Cinzel (proclamation) + DM Sans (clarity)
+   Colors: Quartzite Stone + Aged Gold Veining + Aubergine Depth
+   Typography: Cinzel (wordmark) + Cormorant Garamond (headings) + DM Sans (body)
    Doctrine: Laminin/Logos v0.1 — He holds all things together
-   Aesthetic: 1930s reading lamp · lighthouse beam · candle in the dark
+   Aesthetic: Museum exhibit hall · quartzite walls · gold-veined stone
 ═══════════════════════════════════════════════════════════════════ */
 
 @import "tailwindcss";
@@ -65,83 +65,91 @@
 
 :root {
   /* ══════════════════════════════════════════════════════════════════
-     LIVING NEXUS — Cosmic Warmth Palette
-     "Floating in warm amniotic fluid inside a universe" — Doc Seraph Mercer
-     Aubergine Void base · Solar Flare Cream text · Honeyed Stardust gold
+     LIVING NEXUS — Quartzite Stone Palette
+     "A museum of multimedia assets in a digital system" — Doc Seraph Mercer
+     Aubergine Void depth · Quartzite Pearl surfaces · Aged Gold veining
      ══════════════════════════════════════════════════════════════════ */
 
-  /* ── Depth Steps (the gallery walls) ── */
-  --void:   #2D1B2E;   /* Aubergine Void — deepest base, old photograph purple-brown */
-  --void-2: #3A2030;   /* Deeper Aubergine — sidebar / nav */
-  --void-3: #4A2C2A;   /* Burned Sienna Space — cards / surfaces, warm dark matter */
-  --void-4: #5C3530;   /* Lifted Sienna — modals / elevated surfaces */
+  /* ── Depth Steps (the museum walls — dark aubergine foundation) ── */
+  --void:   #1E1020;   /* Deep Aubergine — deepest gallery floor */
+  --void-2: #2D1B2E;   /* Aubergine Void — sidebar / nav */
+  --void-3: #3D2440;   /* Lifted Aubergine — cards / surfaces */
+  --void-4: #4A2D52;   /* Elevated Aubergine — modals / elevated surfaces */
 
-  /* ── Accent Palette ── */
-  --gold:       #D4AF37;   /* Honeyed Stardust — gold that feels earned, not gilded */
-  --gold-dim:   #B87333;   /* Aged Copper — oxidized starlight, ancient and terrestrial */
-  --gold-glow:  #FF8C42;   /* Nebula Amber — sunset through dust clouds */
-  --rose:       #E8B4B8;   /* Rose Gold Cosmos — blush of first light */
-  --terra:      #E2725B;   /* Terra Cotta Orbit — Mars warmth, ancestral earth */
-  --teal:       #B87333;   /* Aged Copper (reused as warm accent) */
-  --teal-dim:   #9A6228;   /* Deeper copper */
-  --violet:     #E2725B;   /* Terra Cotta as warm highlight */
-  --violet-dim: #C45A44;   /* Deeper terra */
+  /* ── Quartzite Stone Palette (from reference image) ── */
+  --stone-light:  #E6CDAE;   /* Pale Quartzite — lightest stone face, near-pearl */
+  --stone-mid:    #DACAAA;   /* Warm Quartzite — mid-tone stone */
+  --stone-warm:   #C3AB7D;   /* Honey Quartzite — warm center vein */
+  --stone-deep:   #BD9B63;   /* Amber Quartzite — deep stone, aged honey */
+  --stone-shadow: #AA8E64;   /* Shadow Quartzite — stone in shadow */
+
+  /* ── Accent Palette (gold veining through the stone) ── */
+  --gold:       #CBB183;   /* Quartzite Gold — the mean tone of the stone, warm and earned */
+  --gold-dim:   #AA8E64;   /* Shadow Stone — muted gold, ancient */
+  --gold-glow:  #D0A15F;   /* Bright Vein — the warmest highlight in the stone */
+  --gold-bright:#E6CDAE;   /* Pearl Stone — near-white highlight */
+  --rose:       #D6C597;   /* Pale Vein — subtle warm highlight */
+  --terra:      #BD9B63;   /* Amber Stone — warm accent */
+  --teal:       #AA8E64;   /* Stone Shadow (warm accent) */
+  --teal-dim:   #8A7250;   /* Deeper stone shadow */
+  --violet:     #C3AB7D;   /* Honey Quartzite as warm highlight */
+  --violet-dim: #A8926A;   /* Deeper honey */
 
   /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
-  --lnx-gold:       #D4AF37;   /* Honeyed Stardust */
-  --lnx-gold-glow:  #FF8C42;   /* Nebula Amber — glow states */
-  --lnx-gold-muted: #B87333;   /* Aged Copper — muted gold */
+  --lnx-gold:       #CBB183;   /* Quartzite Gold */
+  --lnx-gold-glow:  #D0A15F;   /* Bright Vein — glow states */
+  --lnx-gold-muted: #AA8E64;   /* Shadow Stone — muted gold */
   /* Green = Verified / Published / Alive */
   --lnx-green:      #4ADE80;
   --lnx-green-soft: #86EFAC;
   /* Orange = Draft / In Progress / Transition */
-  --lnx-orange:     #FF8C42;   /* Nebula Amber */
-  --lnx-orange-soft:#F5B87A;
+  --lnx-orange:     #D0A15F;   /* Bright Vein */
+  --lnx-orange-soft:#E6CDAE;   /* Pearl Stone */
   /* Red = Destructive / Warning / Irreversible */
   --lnx-red:        #F87171;
   --lnx-red-soft:   #FCA5A5;
-  /* Foundation — cosmic warm backgrounds */
-  --lnx-bg:         #2D1B2E;   /* Aubergine Void */
-  --lnx-bg-2:       #3A2030;   /* Deeper Aubergine */
-  --lnx-bg-3:       #4A2C2A;   /* Burned Sienna Space */
-  --lnx-text:       #FFF8E7;   /* Solar Flare Cream — old parchment yellow-white */
-  --lnx-text-muted: #E8B4B8;   /* Rose Gold Cosmos — soft pink metallic warmth */
+  /* Foundation — museum depth backgrounds */
+  --lnx-bg:         #1E1020;   /* Deep Aubergine */
+  --lnx-bg-2:       #2D1B2E;   /* Aubergine Void */
+  --lnx-bg-3:       #3D2440;   /* Lifted Aubergine */
+  --lnx-text:       #E6CDAE;   /* Pale Quartzite — warm stone white */
+  --lnx-text-muted: #C3AB7D;   /* Honey Quartzite — muted stone warmth */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
   --background: var(--void);
-  --foreground: #FFF8E7;        /* Solar Flare Cream — not white, parchment warmth */
+  --foreground: #E6CDAE;        /* Pale Quartzite — warm stone white, not cold */
   --card: var(--void-3);
-  --card-foreground: #FFF8E7;
+  --card-foreground: #E6CDAE;
   --popover: var(--void-2);
-  --popover-foreground: #FFF8E7;
+  --popover-foreground: #E6CDAE;
   --primary: var(--gold);
-  --primary-foreground: #2D1B2E;
+  --primary-foreground: #1E1020;
   --secondary: var(--void-4);
-  --secondary-foreground: #FFF8E7;
+  --secondary-foreground: #E6CDAE;
   --muted: var(--void-3);
-  --muted-foreground: #E8B4B8;  /* Rose Gold Cosmos — muted labels */
-  --accent: var(--gold-glow);   /* Nebula Amber — secondary accent */
-  --accent-foreground: #2D1B2E;
-  --destructive: #E2725B;       /* Terra Cotta Orbit — warm destructive */
-  --destructive-foreground: #FFF8E7;
-  --border: rgba(212, 175, 55, 0.25);  /* Honeyed Stardust border at low opacity */
-  --input:  rgba(212, 175, 55, 0.15);
+  --muted-foreground: #C3AB7D;  /* Honey Quartzite — muted labels */
+  --accent: var(--gold-glow);   /* Bright Vein — secondary accent */
+  --accent-foreground: #1E1020;
+  --destructive: #E2725B;       /* Terra Cotta — warm destructive */
+  --destructive-foreground: #E6CDAE;
+  --border: rgba(203, 177, 131, 0.28);  /* Quartzite Gold border at low opacity */
+  --input:  rgba(203, 177, 131, 0.16);
   --ring: var(--gold);
 
-  --chart-1: #D4AF37;   /* Honeyed Stardust */
-  --chart-2: #FF8C42;   /* Nebula Amber */
-  --chart-3: #E8B4B8;   /* Rose Gold Cosmos */
-  --chart-4: #E2725B;   /* Terra Cotta Orbit */
-  --chart-5: #B87333;   /* Aged Copper */
+  --chart-1: #CBB183;   /* Quartzite Gold */
+  --chart-2: #D0A15F;   /* Bright Vein */
+  --chart-3: #E6CDAE;   /* Pale Quartzite */
+  --chart-4: #BD9B63;   /* Amber Stone */
+  --chart-5: #AA8E64;   /* Shadow Stone */
 
   --sidebar: var(--void-2);
-  --sidebar-foreground: #FFF8E7;
+  --sidebar-foreground: #E6CDAE;
   --sidebar-primary: var(--gold);
-  --sidebar-primary-foreground: #2D1B2E;
+  --sidebar-primary-foreground: #1E1020;
   --sidebar-accent: var(--void-4);
-  --sidebar-accent-foreground: #FFF8E7;
-  --sidebar-border: rgba(212, 175, 55, 0.20);
+  --sidebar-accent-foreground: #E6CDAE;
+  --sidebar-border: rgba(203, 177, 131, 0.22);
   --sidebar-ring: var(--gold);
 }
 
@@ -152,60 +160,60 @@
    Saved to user profile and localStorage for flash-free load.
 ================================================================= */
 
-/* ── DARK THEME (default — Cosmic Warmth) ── */
+/* ── DARK THEME (default — Quartzite Museum) ── */
 [data-theme="dark"] {
   /* Surface depth steps */
-  --void:   #2D1B2E;
-  --void-2: #3A2030;
-  --void-3: #4A2C2A;
-  --void-4: #5C3530;
+  --void:   #1E1020;
+  --void-2: #2D1B2E;
+  --void-3: #3D2440;
+  --void-4: #4A2D52;
 
   /* Accent tokens */
-  --gold:       #D4AF37;
-  --gold-dim:   #B87333;
-  --gold-glow:  #FF8C42;
-  --rose:       #E8B4B8;
-  --terra:      #E2725B;
-  --teal:       #B87333;
-  --teal-dim:   #9A6228;
+  --gold:       #CBB183;
+  --gold-dim:   #AA8E64;
+  --gold-glow:  #D0A15F;
+  --rose:       #D6C597;
+  --terra:      #BD9B63;
+  --teal:       #AA8E64;
+  --teal-dim:   #8A7250;
 
   /* Semantic tokens */
   --background:          var(--void);
-  --foreground:          #FFF8E7;
+  --foreground:          #E6CDAE;
   --card:                var(--void-3);
-  --card-foreground:     #FFF8E7;
+  --card-foreground:     #E6CDAE;
   --popover:             var(--void-2);
-  --popover-foreground:  #FFF8E7;
+  --popover-foreground:  #E6CDAE;
   --primary:             var(--gold);
-  --primary-foreground:  #2D1B2E;
+  --primary-foreground:  #1E1020;
   --secondary:           var(--void-4);
-  --secondary-foreground:#FFF8E7;
+  --secondary-foreground:#E6CDAE;
   --muted:               var(--void-3);
-  --muted-foreground:    #E8B4B8;
+  --muted-foreground:    #C3AB7D;
   --accent:              var(--gold-glow);
-  --accent-foreground:   #2D1B2E;
-  --border:              rgba(212, 175, 55, 0.25);
-  --input:               rgba(212, 175, 55, 0.15);
+  --accent-foreground:   #1E1020;
+  --border:              rgba(203, 177, 131, 0.28);
+  --input:               rgba(203, 177, 131, 0.16);
   --ring:                var(--gold);
 
   /* Living Nexus custom tokens */
-  --lnx-bg:         #2D1B2E;
-  --lnx-bg-2:       #3A2030;
-  --lnx-bg-3:       #4A2C2A;
-  --lnx-text:       #FFF8E7;
-  --lnx-text-muted: #E8B4B8;
-  --lnx-gold:       #D4AF37;
-  --lnx-gold-glow:  #FF8C42;
-  --lnx-gold-muted: #B87333;
+  --lnx-bg:         #1E1020;
+  --lnx-bg-2:       #2D1B2E;
+  --lnx-bg-3:       #3D2440;
+  --lnx-text:       #E6CDAE;
+  --lnx-text-muted: #C3AB7D;
+  --lnx-gold:       #CBB183;
+  --lnx-gold-glow:  #D0A15F;
+  --lnx-gold-muted: #AA8E64;
 
   /* Sidebar */
   --sidebar:                    var(--void-2);
-  --sidebar-foreground:         #FFF8E7;
+  --sidebar-foreground:         #E6CDAE;
   --sidebar-primary:            var(--gold);
-  --sidebar-primary-foreground: #2D1B2E;
+  --sidebar-primary-foreground: #1E1020;
   --sidebar-accent:             var(--void-4);
-  --sidebar-accent-foreground:  #FFF8E7;
-  --sidebar-border:             rgba(212, 175, 55, 0.20);
+  --sidebar-accent-foreground:  #E6CDAE;
+  --sidebar-border:             rgba(203, 177, 131, 0.22);
   --sidebar-ring:               var(--gold);
 }
 
@@ -242,7 +250,7 @@
   html, body {
     height: 100%;
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
-    background-color: #2D1B2E; /* Aubergine Void — match app bg, no void on overscroll */
+    background-color: #1E1020; /* Deep Aubergine — match app bg, no void on overscroll */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
   /* NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals by clipping
@@ -639,16 +647,16 @@ html body[data-scroll-locked] {
   .cosmic-bg {
     background:
       radial-gradient(ellipse 80% 50% at 50% 0%,
-        oklch(0.35 0.08 75 / 0.15) 0%,
-        oklch(0.22 0.05 65 / 0.10) 40%,
+        rgba(203, 177, 131, 0.08) 0%,
+        rgba(189, 155, 99, 0.05) 40%,
         transparent 70%
       ),
       radial-gradient(ellipse 60% 40% at 50% 100%,
-        oklch(0.25 0.06 72 / 0.12) 0%,
-        oklch(0.16 0.04 60 / 0.08) 50%,
+        rgba(170, 142, 100, 0.06) 0%,
+        rgba(61, 36, 64, 0.04) 50%,
         transparent 80%
       ),
-      #2D1B2E;
+      #1E1020;
   }
 
   /* ── CTA button glow — lantern warmth ── */
