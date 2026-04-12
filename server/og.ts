@@ -15,7 +15,7 @@
 import { type Express } from "express";
 import fs from "fs";
 import path from "path";
-import { getSongWithCreator, getCreatorForOg, getCollectionByWid, getUserById, getProjectBySlug } from "./db";
+import { getSongWithCreator, getCreatorForOg, getCollectionByWid, getUserById, getProjectBySlug, getSongByWitnessId } from "./db";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
 
 /** Canonical production origin — always use this for og:url */
@@ -196,8 +196,11 @@ function injectOg(html: string, ogBlock: string, pageTitle: string, canonicalUrl
   let extraLinks = "";
   if (canonicalUrl) {
     const oembedUrl = `${CANONICAL_ORIGIN}/api/oembed?url=${encodeURIComponent(canonicalUrl)}`;
-    extraLinks = `\n    <link rel="alternate" type="application/json+oembed" href="${escAttr(oembedUrl)}" title="Living Nexus oEmbed" />`;
+    extraLinks = `\n    <link rel="canonical" href="${escAttr(canonicalUrl)}" />`;
+    extraLinks += `\n    <link rel="alternate" type="application/json+oembed" href="${escAttr(oembedUrl)}" title="Living Nexus oEmbed" />`;
   }
+  // Remove any stale canonical tags that may have been injected by a previous pass
+  out = out.replace(/<link\s+rel="canonical"[^>]*\/?>/gi, "");
   // Inject before </head>
   out = out.replace("</head>", `    ${ogBlock}${extraLinks}\n  </head>`);
   return out;
@@ -257,6 +260,16 @@ async function getHtmlTemplate(isDev: boolean): Promise<string> {
  */
 export function registerOgRoutes(app: Express) {
   const isDev = process.env.NODE_ENV === "development";
+
+  // ── /track/:id → /song/:id permanent redirect ────────────────────────────
+  // /track/:id is a legacy URL pattern. Google Search Console flagged it as
+  // "Duplicate, Google chose different canonical than user" because the page
+  // returns 200 with no canonical tag. A 301 redirect to /song/:id tells Google
+  // definitively which URL is canonical and consolidates link equity.
+  app.get("/track/:id", (req, res) => {
+    const id = req.params.id;
+    res.redirect(301, `${CANONICAL_ORIGIN}/song/${id}`);
+  });
 
   // ── /song/:id ──────────────────────────────────────────────────────────────
   // NOTE: We serve OG-injected HTML for ALL requests (not just crawlers) because
@@ -418,19 +431,23 @@ export function registerOgRoutes(app: Express) {
 
   for (const route of STATIC_OG_ROUTES) {
     app.get(route.path, async (req, res, next) => {
-      const ua = req.headers["user-agent"] || "";
-      if (!isCrawler(ua)) return next();
+      // Always inject OG + canonical for static pages — not just for crawlers.
+      // Google Googlebot does not always identify as a crawler UA, and we need
+      // <link rel="canonical"> in every response to prevent soft-404 and
+      // duplicate-canonical issues in Search Console.
+      const canonicalUrl = `${CANONICAL_ORIGIN}${route.path === "/" ? "" : route.path}`;
+      const finalCanonical = route.path === "/" ? `${CANONICAL_ORIGIN}/` : canonicalUrl;
       try {
         const ogBlock = buildSongOgTags({
           title: route.title,
           description: route.description,
           image: route.image || FALLBACK_IMAGE,
-          url: `${CANONICAL_ORIGIN}${route.path}`,
+          url: finalCanonical,
           siteName: "Living Nexus",
         });
         const html = await getHtmlTemplate(isDev);
         if (!html) return next();
-        const page = injectOg(html, ogBlock, route.title);
+        const page = injectOg(html, ogBlock, route.title, finalCanonical);
         res.status(200).set({ "Content-Type": "text/html" }).end(page);
       } catch (err) {
         console.error("[OG] Error generating meta tags for", route.path, err);
@@ -454,7 +471,52 @@ export function registerOgRoutes(app: Express) {
     const witnessId = decodeURIComponent(req.params.witnessId || "").trim();
     if (!witnessId) return next();
 
-    // Only handle WID-ALB- collection IDs here — individual WIDs fall through
+    // ── WID-MUS individual track: inject canonical + OG, point Google at /song/:id ──
+    if (witnessId.startsWith("WID-MUS-")) {
+      try {
+        const result = await getSongByWitnessId(witnessId);
+        const ogUrl = `${CANONICAL_ORIGIN}/verify/${encodeURIComponent(witnessId)}`;
+        let ogBlock: string;
+        let pageTitle: string;
+        if (result) {
+          const { song, creator } = result;
+          const artistName =
+            (creator as any)?.artistHandle?.trim() ||
+            (creator as any)?.name?.trim() ||
+            "Unknown Artist";
+          pageTitle = `${song.title} — ${artistName} | Living Nexus`;
+          const description = `Witness ID verified. "${song.title}" by ${artistName} — cryptographic provenance on Living Nexus. WID: ${witnessId}`;
+          const image = (song.coverArtUrl?.trim()) || FALLBACK_IMAGE;
+          ogBlock = buildSongOgTags({
+            title: pageTitle,
+            description,
+            image,
+            url: ogUrl,
+            siteName: "Living Nexus",
+            songId: song.id,
+          });
+        } else {
+          pageTitle = `Verify Witness ID | Living Nexus`;
+          ogBlock = buildSongOgTags({
+            title: pageTitle,
+            description: `Look up any Witness ID to verify the origin and provenance of a work on Living Nexus.`,
+            image: FALLBACK_IMAGE,
+            url: ogUrl,
+            siteName: "Living Nexus",
+          });
+        }
+        const html = await getHtmlTemplate(isDev);
+        if (!html) return next();
+        const page = injectOg(html, ogBlock, pageTitle, ogUrl);
+        res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      } catch (err) {
+        console.error("[OG] Error generating meta tags for WID-MUS", witnessId, err);
+        next();
+      }
+      return;
+    }
+
+    // Only handle WID-ALB- collection IDs below — other prefixes fall through
     if (!witnessId.startsWith("WID-ALB-")) return next();
 
     try {

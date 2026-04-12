@@ -18,6 +18,7 @@ import { oembedRouter } from "../oembedRoute";
 import { ogApiRouter } from "../ogApiRoutes";
 import { shareRouter } from "../shareRoute";
 import { workRouter } from "../workRoute";
+import { sitemapRouter } from "../sitemapRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startVisualWorker, backfillVisualQueue } from "../visualQueue";
@@ -49,6 +50,26 @@ async function startServer() {
 
   // Gzip compression — saves 60-80% on JSON/HTML payloads
   app.use(compression({ level: 6, threshold: 1024 }));
+
+  // ── Canonical domain enforcement ──────────────────────────────────────────
+  // Redirect all http:// and non-www requests to https://www.livingnexus.org
+  // This fixes Google Search Console "Crawled - currently not indexed" for:
+  //   http://livingnexus.org/
+  //   http://www.livingnexus.org/creator/180001
+  // Only enforce in production to avoid breaking local dev.
+  if (process.env.NODE_ENV === "production") {
+    app.use((req, res, next) => {
+      const host = req.headers["x-forwarded-host"] as string || req.headers.host || "";
+      const proto = (req.headers["x-forwarded-proto"] as string || req.protocol || "http").split(",")[0].trim();
+      const isHttps = proto === "https";
+      const isWww = host.startsWith("www.");
+      if (!isHttps || !isWww) {
+        const wwwHost = isWww ? host : `www.${host.replace(/^www\./, "")}`;
+        return res.redirect(301, `https://${wwwHost}${req.originalUrl}`);
+      }
+      next();
+    });
+  }
 
   // Embed iframe routes MUST be registered BEFORE the X-Frame-Options header
   // so Discord can load /embed/song/:id inside an iframe for inline playback.
@@ -115,6 +136,8 @@ async function startServer() {
       createContext,
     })
   );
+  // Sitemap — must be before Vite/static so /sitemap.xml is served by Express
+  app.use(sitemapRouter);
   // Open Graph meta tag injection for /song/:id (must be before Vite/static)
   registerOgRoutes(app);
   // development mode uses Vite, production mode uses static files

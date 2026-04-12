@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Block admin and API routes from indexing
+Disallow: /admin/
+Disallow: /api/
+Disallow: /batch-upload
+Disallow: /upload
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /settings/
+Disallow: /prompt/
+
+Sitemap: https://www.livingnexus.org/sitemap.xml
