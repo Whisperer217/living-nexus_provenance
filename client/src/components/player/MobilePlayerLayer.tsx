@@ -724,14 +724,14 @@ export default function MobilePlayerLayer() {
       <button
         onClick={toggleShuffle}
         className="transition-all active:scale-90"
-        style={{ color: state.isShuffle ? "#CBB183" : "#3F4A50" }}
+        style={{ color: state.isShuffle ? "#D0A15F" : "rgba(203,177,131,0.40)" }}
       >
         <Shuffle size={large ? 20 : 16} />
       </button>
       <button
         onClick={prevTrack}
         className="transition-all active:scale-90"
-        style={{ color: overlay ? "white" : "#DACAAA" }}
+        style={{ color: overlay ? "white" : "#CBB183", filter: overlay ? "none" : "drop-shadow(0 1px 3px rgba(203,177,131,0.30))" }}
       >
         <SkipBack size={large ? 28 : 22} fill="currentColor" />
       </button>
@@ -741,8 +741,8 @@ export default function MobilePlayerLayer() {
         style={{
           width: large ? "64px" : "52px",
           height: large ? "64px" : "52px",
-          background: "linear-gradient(135deg, #CBB183, #CBB183)",
-          boxShadow: "0 4px 20px rgba(203,177,131,0.32)",
+          background: "linear-gradient(135deg, #F5E6C8 0%, #D0A15F 45%, #CBB183 100%)",
+          boxShadow: "0 4px 24px rgba(203,177,131,0.50), 0 0 0 1px rgba(245,230,200,0.18)",
           color: "#2C3438",
         }}
       >
@@ -753,14 +753,14 @@ export default function MobilePlayerLayer() {
       <button
         onClick={nextTrack}
         className="transition-all active:scale-90"
-        style={{ color: overlay ? "white" : "#DACAAA" }}
+        style={{ color: overlay ? "white" : "#CBB183", filter: overlay ? "none" : "drop-shadow(0 1px 3px rgba(203,177,131,0.30))" }}
       >
         <SkipForward size={large ? 28 : 22} fill="currentColor" />
       </button>
       <button
         onClick={toggleRepeat}
         className="transition-all active:scale-90"
-        style={{ color: state.isRepeat ? "#CBB183" : "#3F4A50" }}
+        style={{ color: state.isRepeat ? "#D0A15F" : "rgba(203,177,131,0.40)" }}
       >
         <Repeat size={large ? 20 : 16} />
       </button>
@@ -915,9 +915,9 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleToggleLike}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
-          style={{ color: isLiked ? "#EF4444" : "#2C3438" }}
+          style={{ color: isLiked ? "#EF4444" : "rgba(203,177,131,0.45)" }}
         >
-          <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
+          <Heart size={22} fill={isLiked ? "currentColor" : "none"} />
         </button>
         {/* Play/Pause */}
         <button
@@ -1137,12 +1137,24 @@ export default function MobilePlayerLayer() {
           <ChevronDown size={22} />
         </button>
         <div className="text-center">
-          <div className="text-[10px] font-heading tracking-[0.18em] uppercase"
-            style={{ color: "rgba(230,205,174,0.7)" }}>
+          <div
+            style={{
+              fontFamily: "'Cinzel', serif",
+              fontSize: "10px",
+              fontWeight: 600,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              background: "linear-gradient(135deg, #F5E6C8 0%, #CBB183 60%, #D0A15F 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))",
+            }}
+          >
             Now Playing
           </div>
           {queueContextLabel && (
-            <div className="text-[9px] mt-0.5" style={{ color: "rgba(203,177,131,0.40)", fontFamily: "'Cinzel', serif" }}>
+            <div className="text-[9px] mt-0.5" style={{ color: "rgba(203,177,131,0.50)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>
               {queueContextLabel}
             </div>
           )}
@@ -1161,8 +1173,8 @@ export default function MobilePlayerLayer() {
       <div
         className="flex-shrink-0 flex items-center gap-1 mx-8 mb-4 p-1 rounded-2xl"
         style={{
-          background: "rgba(44,52,56,0.8)",
-          border: "1px solid rgba(44,52,56,0.5)",
+          background: "rgba(30,45,58,0.85)",
+          border: "1px solid rgba(203,177,131,0.15)",
         }}
       >
         {(["playing", "discover"] as const).map((tab) => (
@@ -1172,7 +1184,7 @@ export default function MobilePlayerLayer() {
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all text-[11px] font-heading tracking-wide"
             style={{
               background: expandedTab === tab ? "rgba(203,177,131,0.12)" : "transparent",
-              color: expandedTab === tab ? "#CBB183" : "#3F4A50",
+              color: expandedTab === tab ? "#D0A15F" : "rgba(203,177,131,0.35)",
               border: expandedTab === tab ? "1px solid rgba(203,177,131,0.28)" : "1px solid transparent",
             }}
           >
@@ -1240,15 +1252,35 @@ export default function MobilePlayerLayer() {
       {/* Track info */}
       <div className="flex-shrink-0 px-8 pb-4 flex items-center justify-between">
         <div className="min-w-0 flex-1">
-          <div className="text-[18px] font-heading text-white truncate leading-tight">
+          {/* Track title — 24k gold-etched */}
+          <div
+            className="text-[20px] truncate leading-tight"
+            style={{
+              fontFamily: "'Cinzel', serif",
+              fontWeight: 700,
+              background: "linear-gradient(135deg, #F5E6C8 0%, #CBB183 40%, #D0A15F 70%, #CBB183 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              textShadow: "none",
+              filter: "drop-shadow(0 1px 2px rgba(203,177,131,0.35))",
+              letterSpacing: "0.02em",
+            }}
+          >
             {currentTrack.title || "Unknown Track"}
           </div>
           {/* Creator name — clickable, with founder crown badge */}
           {creatorId ? (
             <button
               onClick={() => { setPlayerState("mini"); navigate(`/creator/${creatorId}`); }}
-              className="flex items-center gap-1.5 text-[13px] mt-1 truncate transition-colors hover:text-white text-left"
-              style={{ color: "#3F4A50" }}
+              className="flex items-center gap-1.5 text-[13px] mt-1.5 truncate text-left transition-all active:opacity-70"
+              style={{
+                fontFamily: "'Cinzel', serif",
+                fontWeight: 400,
+                color: "#AA8E64",
+                letterSpacing: "0.04em",
+                textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+              }}
             >
               {currentTrack.creatorRole === "founder" && (
                 <Crown size={11} style={{ color: "#CBB183", flexShrink: 0 }} />
@@ -1256,7 +1288,16 @@ export default function MobilePlayerLayer() {
               {currentTrack.artist || "Unknown Artist"}
             </button>
           ) : (
-            <div className="flex items-center gap-1.5 text-[13px] mt-1 truncate" style={{ color: "#3F4A50" }}>
+            <div
+              className="flex items-center gap-1.5 text-[13px] mt-1.5 truncate"
+              style={{
+                fontFamily: "'Cinzel', serif",
+                fontWeight: 400,
+                color: "#AA8E64",
+                letterSpacing: "0.04em",
+                textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+              }}
+            >
               {currentTrack.creatorRole === "founder" && (
                 <Crown size={11} style={{ color: "#CBB183", flexShrink: 0 }} />
               )}
@@ -1297,18 +1338,18 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleShare}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: copied ? "#4ADE80" : "#3F4A50" }}
+          style={{ color: copied ? "#4ADE80" : "rgba(203,177,131,0.55)" }}
         >
           {copied ? <Check size={18} /> : <Share2 size={18} />}
-          <span className="text-[9px] font-heading tracking-wide">{copied ? "Copied" : "Share"}</span>
+          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{copied ? "Copied" : "Share"}</span>
         </button>
         <button
           onClick={() => setGiftOpen(true)}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "#3F4A50" }}
+          style={{ color: "rgba(203,177,131,0.55)" }}
         >
           <DollarSign size={18} />
-          <span className="text-[9px] font-heading tracking-wide">Tip</span>
+          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>Tip</span>
         </button>
         <button
           onClick={() => {
@@ -1318,10 +1359,10 @@ export default function MobilePlayerLayer() {
             }
           }}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "#3F4A50" }}
+          style={{ color: "rgba(203,177,131,0.55)" }}
         >
           <ListMusic size={18} />
-          <span className="text-[9px] font-heading tracking-wide">Details</span>
+          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>Details</span>
         </button>
         {/* Volume */}
         <div className="relative flex flex-col items-center">
@@ -1359,10 +1400,10 @@ export default function MobilePlayerLayer() {
           <button
             onClick={() => setShowMobileVolume(v => !v)}
             className="flex flex-col items-center gap-1 transition-all active:scale-90"
-            style={{ color: state.isMuted ? "#EF4444" : "#3F4A50" }}
+            style={{ color: state.isMuted ? "#EF4444" : "rgba(203,177,131,0.55)" }}
           >
             {state.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-            <span className="text-[9px] font-heading tracking-wide">{state.isMuted ? "Muted" : "Vol"}</span>
+            <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{state.isMuted ? "Muted" : "Vol"}</span>
           </button>
         </div>
       </div>
