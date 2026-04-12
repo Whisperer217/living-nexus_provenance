@@ -103,7 +103,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
       {/* Track info card — fully dissected */}
       <div
         className="mx-4 mb-4 rounded-xl overflow-hidden"
-        style={{ background: "oklch(0.82 0.05 75)", border: "1px solid oklch(0.84 0.05 75)" }}
+        style={{ background: "oklch(0.32 0.015 200)", border: "1px solid oklch(0.30 0.015 200)" }}
       >
         {/* Cover + title row */}
         <div className="flex items-center gap-3 p-3">
@@ -156,7 +156,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
                 <span
                   className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
                   style={{
-                    background: "oklch(0.86 0.04 75)",
+                    background: "oklch(0.24 0.015 200)",
                     color: "oklch(0.50 0.04 280)",
                     border: "1px solid oklch(0.24 0.03 275)",
                   }}
@@ -195,8 +195,8 @@ export default function TipModal({ track, onClose, originRect }: Props) {
             onClick={() => { setSelected(amt); setCustom(""); }}
             className={`py-2 rounded-lg text-[13px] font-bold transition-all
               ${selected === amt && !custom
-                ? "bg-[#8A6A2A]/10 border border-[#8A6A2A] text-[#8A6A2A]"
-                : "bg-white/[0.04] border border-white/[0.08] text-white/50 hover:border-[#8A6A2A]/40 hover:text-[#8A6A2A]"
+                ? "bg-[#CBB183]/10 border border-[#CBB183] text-[#CBB183]"
+                : "bg-white/[0.04] border border-white/[0.08] text-white/50 hover:border-[#CBB183]/40 hover:text-[#CBB183]"
               }`}
           >
             {amt}
@@ -216,7 +216,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
           onChange={e => { setCustom(e.target.value); setSelected(""); }}
           className="w-full pl-7 pr-4 py-2.5 rounded-lg text-[13px] font-body text-white/80
             bg-white/[0.04] border border-white/[0.08] outline-none
-            focus:border-[#8A6A2A]/50 transition-colors placeholder:text-white/40"
+            focus:border-[#CBB183]/50 transition-colors placeholder:text-white/40"
         />
       </div>
 
@@ -236,7 +236,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
           className="w-full py-2.5 rounded-xl font-heading text-[13px] tracking-wider text-black font-bold
             transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(232,197,71,0.4)]
             disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-          style={{ background: "linear-gradient(135deg, #8A6A2A, #c9a227)" }}
+          style={{ background: "linear-gradient(135deg, #CBB183, #c9a227)" }}
         >
           {tipMutation.isPending
             ? "Opening Checkout…"

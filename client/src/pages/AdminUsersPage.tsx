@@ -25,7 +25,7 @@ type SortDir = "asc" | "desc";
 type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation" | "data_rights";
 
 const GOLD = "oklch(0.84 0.155 85)";
-const BG = "#1E1020";
+const BG = "#E6CDAE";
 const CARD = "oklch(0.12 0.015 280)";
 const BORDER = "oklch(0.2 0.02 280)";
 const MUTED = "#64748B";
@@ -178,8 +178,8 @@ function UsersTab() {
                   </tr>
                 ) : sorted.map((u: any, i: number) => (
                   <tr key={u.id} style={{
-                    background: i % 2 === 0 ? "oklch(0.80 0.05 75)" : "oklch(0.11 0.015 280)",
-                    borderBottom: `1px solid oklch(0.84 0.05 75)`,
+                    background: i % 2 === 0 ? "oklch(0.22 0.015 200)" : "oklch(0.11 0.015 280)",
+                    borderBottom: `1px solid oklch(0.30 0.015 200)`,
                   }}>
                     <td className={tdStyle}>
                       <div className="font-medium" style={{ color: TEXT }}>{u.artistHandle ? `@${u.artistHandle}` : u.name ?? "—"}</div>
@@ -197,7 +197,7 @@ function UsersTab() {
                     <td className={tdStyle}>
                       <Badge style={u.licenseStatus === "licensed"
                         ? { background: "oklch(0.75 0.18 145 / 0.2)", color: "oklch(0.75 0.18 145)", border: "1px solid oklch(0.75 0.18 145 / 0.3)" }
-                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid #3D2440` }}>
+                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid #C3AB7D` }}>
                         {u.licenseStatus === "licensed" ? "Licensed" : "Free"}
                       </Badge>
                     </td>
@@ -262,7 +262,7 @@ function UsersTab() {
             </table>
           </div>
           {sorted.length > 0 && (
-            <div className="px-4 py-3 text-xs border-t flex items-center justify-between" style={{ color: MUTED, borderColor: BORDER, background: "oklch(0.80 0.05 75)" }}>
+            <div className="px-4 py-3 text-xs border-t flex items-center justify-between" style={{ color: MUTED, borderColor: BORDER, background: "oklch(0.22 0.015 200)" }}>
               <span>Showing {sorted.length} of {totalUsers} users (page {page + 1} of {totalPages || 1})</span>
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ function PromoCodesTab() {
                 placeholder="BDDT-FREE"
                 value={form.code}
                 onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))}
-                style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -345,7 +345,7 @@ function PromoCodesTab() {
                 placeholder="e.g. Veterans access — March 2026"
                 value={form.description}
                 onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -357,7 +357,7 @@ function PromoCodesTab() {
                 placeholder="100"
                 value={form.slotsGranted}
                 onChange={e => setForm(p => ({ ...p, slotsGranted: e.target.value }))}
-                style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -368,7 +368,7 @@ function PromoCodesTab() {
                 placeholder="Unlimited"
                 value={form.maxUses}
                 onChange={e => setForm(p => ({ ...p, maxUses: e.target.value }))}
-                style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -377,7 +377,7 @@ function PromoCodesTab() {
                 type="date"
                 value={form.expiresAt}
                 onChange={e => setForm(p => ({ ...p, expiresAt: e.target.value }))}
-                style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
               />
             </div>
           </div>
@@ -427,8 +427,8 @@ function PromoCodesTab() {
               <tbody>
                 {codes.map((c: any, i: number) => (
                   <tr key={c.id} style={{
-                    background: i % 2 === 0 ? "oklch(0.80 0.05 75)" : "oklch(0.11 0.015 280)",
-                    borderBottom: `1px solid oklch(0.84 0.05 75)`,
+                    background: i % 2 === 0 ? "oklch(0.22 0.015 200)" : "oklch(0.11 0.015 280)",
+                    borderBottom: `1px solid oklch(0.30 0.015 200)`,
                   }}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -451,7 +451,7 @@ function PromoCodesTab() {
                     <td className="px-4 py-3">
                       <Badge style={c.isActive
                         ? { background: "oklch(0.75 0.18 145 / 0.2)", color: "oklch(0.75 0.18 145)", border: "1px solid oklch(0.75 0.18 145 / 0.3)" }
-                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid #3D2440` }}>
+                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid #C3AB7D` }}>
                         {c.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
@@ -543,7 +543,7 @@ function EmbedVideoTab() {
 
         {/* Progress log */}
         {progress.log.length > 0 && (
-          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "#DACAAA", border: `1px solid ${BORDER}` }}>
+          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "#2C3438", border: `1px solid ${BORDER}` }}>
             {progress.log.map((line, i) => (
               <p key={i} style={{ color: line.startsWith("Error") ? "oklch(0.65 0.18 25)" : "oklch(0.65 0.18 145)" }}>
                 {line.startsWith("Error") ? "✗" : "✓"} {line}
@@ -559,7 +559,7 @@ function EmbedVideoTab() {
       </div>
 
       {/* Info */}
-      <div className="rounded-xl p-4" style={{ background: "oklch(0.80 0.05 75)", border: `1px solid ${BORDER}` }}>
+      <div className="rounded-xl p-4" style={{ background: "oklch(0.22 0.015 200)", border: `1px solid ${BORDER}` }}>
         <div className="flex items-start gap-3">
           <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.65 0.18 145)" }} />
           <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
@@ -606,7 +606,7 @@ function StripeRecoveryTab() {
               value={userId}
               onChange={e => setUserId(e.target.value)}
               className="font-mono"
-              style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER, color: TEXT }}
+              style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
             />
           </div>
           <div>
@@ -614,7 +614,7 @@ function StripeRecoveryTab() {
             <Input
               value={returnUrl}
               onChange={e => setReturnUrl(e.target.value)}
-              style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER, color: TEXT }}
+              style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
             />
           </div>
           <Button
@@ -640,7 +640,7 @@ function StripeRecoveryTab() {
               readOnly
               value={result.onboardingUrl}
               className="font-mono text-xs flex-1"
-              style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER, color: TEXT }}
+              style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
             />
             <Button
               size="sm"
@@ -1053,7 +1053,7 @@ function BillingResetTab() {
                 </div>
                 {confirmFounder === u.id ? (
                   <div className="flex gap-2">
-                    <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: "#1E1020" }}
+                    <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: "#E6CDAE" }}
                       onClick={() => grantFounderFree.mutate({ userId: u.id })}>
                       Confirm Grant
                     </Button>
@@ -1258,7 +1258,7 @@ function FounderControlTab() {
           <div className="space-y-2">
             {(foundersData?.founders ?? []).map((f: any) => (
               <div key={f.id} className="flex items-center justify-between gap-4 rounded-xl p-4 border"
-                style={{ background: "oklch(0.80 0.05 75)", borderColor: "oklch(0.25 0.12 85 / 0.4)" }}>
+                style={{ background: "oklch(0.22 0.015 200)", borderColor: "oklch(0.25 0.12 85 / 0.4)" }}>
                 <div className="flex items-center gap-3 min-w-0">
                   {f.profilePhotoUrl ? (
                     <img src={f.profilePhotoUrl} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
@@ -1573,7 +1573,7 @@ function MediaGenerationTab() {
 
       {/* Live job queue table */}
       <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "oklch(0.80 0.05 75)" }}>
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "oklch(0.22 0.015 200)" }}>
           <span className="text-xs font-semibold" style={{ color: TEXT }}>Recent Queue Jobs</span>
           <span className="text-xs" style={{ color: SUBTEXT }}>{jobs.length} shown · live</span>
         </div>
@@ -1636,7 +1636,7 @@ function MediaGenerationTab() {
       </div>
 
       {/* Info footer */}
-      <div className="rounded-xl p-4" style={{ background: "oklch(0.80 0.05 75)", border: `1px solid ${BORDER}` }}>
+      <div className="rounded-xl p-4" style={{ background: "oklch(0.22 0.015 200)", border: `1px solid ${BORDER}` }}>
         <div className="flex items-start gap-3">
           <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: GREEN }} />
           <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
@@ -1894,7 +1894,7 @@ function DataRightsTab() {
         ) : (
           <div className="rounded-xl border overflow-hidden" style={{ borderColor: BORDER }}>
             <table className="w-full">
-              <thead style={{ background: "oklch(0.80 0.05 75)", borderBottom: `1px solid ${BORDER}` }}>
+              <thead style={{ background: "oklch(0.22 0.015 200)", borderBottom: `1px solid ${BORDER}` }}>
                 <tr>
                   {["Creator", "Email", "Requested On", "Days Elapsed", "Action"].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: SUBTEXT }}>{h}</th>
@@ -1908,8 +1908,8 @@ function DataRightsTab() {
                   const isUrgent = daysElapsed >= 80;
                   return (
                     <tr key={req.id} style={{
-                      background: i % 2 === 0 ? "oklch(0.80 0.05 75)" : "oklch(0.11 0.015 280)",
-                      borderBottom: `1px solid oklch(0.84 0.05 75)`,
+                      background: i % 2 === 0 ? "oklch(0.22 0.015 200)" : "oklch(0.11 0.015 280)",
+                      borderBottom: `1px solid oklch(0.30 0.015 200)`,
                     }}>
                       <td className="px-4 py-3 text-sm">
                         <div className="font-medium" style={{ color: TEXT }}>
@@ -1966,7 +1966,7 @@ function DataRightsTab() {
             <span className="text-sm" style={{ color: SUBTEXT }}>Loading current status…</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 mb-6 p-4 rounded-xl border" style={{ background: "oklch(0.80 0.05 75)", borderColor: BORDER }}>
+          <div className="flex items-center gap-3 mb-6 p-4 rounded-xl border" style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER }}>
             <div className="w-3 h-3 rounded-full" style={{ background: stageColors[migrationData?.stage ?? "hosted"] }} />
             <div>
               <div className="text-sm font-semibold" style={{ color: TEXT }}>

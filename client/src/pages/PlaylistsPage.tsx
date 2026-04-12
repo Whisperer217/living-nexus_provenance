@@ -47,7 +47,7 @@ function CreatePlaylistDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-[oklch(0.12_0.02_280)] border border-white/[0.08] text-white max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#8A6A2A]">New Playlist</DialogTitle>
+          <DialogTitle className="font-heading text-[#CBB183]">New Playlist</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div>
@@ -89,7 +89,7 @@ function CreatePlaylistDialog({
           <Button
             onClick={() => create.mutate({ name, description, isPublic, isCollaborative })}
             disabled={!name.trim() || create.isPending}
-            className="bg-[#8A6A2A] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+            className="bg-[#CBB183] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
           >
             {create.isPending ? <Loader2 size={14} className="animate-spin" /> : "Create"}
           </Button>
@@ -111,14 +111,14 @@ function PlaylistCard({
       onClick={onOpen}
       className="group flex items-center gap-3 p-3 rounded-xl cursor-pointer
         bg-[oklch(0.12_0.02_280)] border border-white/[0.06]
-        hover:border-[#8A6A2A]/30 hover:bg-[oklch(0.14_0.02_280)] transition-all"
+        hover:border-[#CBB183]/30 hover:bg-[oklch(0.14_0.02_280)] transition-all"
     >
       {/* Cover / icon */}
       <div className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden
         bg-[oklch(0.16_0.03_280)] flex items-center justify-center border border-white/[0.06]">
         {playlist.coverArtUrl
           ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover" />
-          : <ListMusic size={20} className="text-[#8A6A2A]/60" />}
+          : <ListMusic size={20} className="text-[#CBB183]/60" />}
       </div>
 
       <div className="flex-1 min-w-0">
@@ -182,7 +182,7 @@ function PlaylistDetail({
 
   if (isLoading) return (
     <div className="flex items-center justify-center py-20">
-      <Loader2 size={24} className="animate-spin text-[#8A6A2A]/50" />
+      <Loader2 size={24} className="animate-spin text-[#CBB183]/50" />
     </div>
   );
   if (!data) return null;
@@ -228,7 +228,7 @@ function PlaylistDetail({
           bg-[oklch(0.16_0.03_280)] flex items-center justify-center border border-white/[0.06]">
           {playlist.coverArtUrl
             ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover" />
-            : <ListMusic size={28} className="text-[#8A6A2A]/50" />}
+            : <ListMusic size={28} className="text-[#CBB183]/50" />}
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-heading text-white mb-1">{playlist.name}</h2>
@@ -252,7 +252,7 @@ function PlaylistDetail({
           onClick={playAll}
           disabled={!tracks.length}
           size="sm"
-          className="bg-[#8A6A2A] hover:bg-[var(--lnx-gold-muted)] text-black font-heading text-xs"
+          className="bg-[#CBB183] hover:bg-[var(--lnx-gold-muted)] text-black font-heading text-xs"
         >
           <Play size={12} className="mr-1" /> Play All
         </Button>
@@ -350,7 +350,7 @@ function PlaylistDetail({
               <button
                 onClick={() => { addAndPlay({ id: String(t.song.id), title: t.song.title, artist: t.creator?.artistHandle || t.creator?.name || String(t.song.userId), genre: t.song.genre || "", audioUrl: t.song.fileUrl, artUrl: t.song.coverArtUrl, witnessId: t.song.witnessId }); openNowPlayingPanel(); }}
                 className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
-                  bg-[#8A6A2A]/10 hover:bg-[#8A6A2A]/20 text-[#8A6A2A] transition-all"
+                  bg-[#CBB183]/10 hover:bg-[#CBB183]/20 text-[#CBB183] transition-all"
               >
                 <Play size={12} />
               </button>
@@ -392,9 +392,9 @@ export default function PlaylistsPage() {
     return (
       <div className="min-h-screen bg-[oklch(0.09_0.04_265)] flex items-center justify-center">
         <div className="text-center">
-          <ListMusic size={40} className="mx-auto mb-4 text-[#8A6A2A]/40" />
+          <ListMusic size={40} className="mx-auto mb-4 text-[#CBB183]/40" />
           <p className="text-white/50 mb-4">Sign in to access your playlists</p>
-          <Button onClick={() => navigate("/")} className="bg-[#8A6A2A] text-black font-heading">
+          <Button onClick={() => navigate("/")} className="bg-[#CBB183] text-black font-heading">
             Go Home
           </Button>
         </div>
@@ -424,7 +424,7 @@ export default function PlaylistsPage() {
             <Button
               onClick={() => setShowCreate(true)}
               size="sm"
-              className="bg-[#8A6A2A] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+              className="bg-[#CBB183] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
             >
               <Plus size={14} className="mr-1" /> New
             </Button>
@@ -436,16 +436,16 @@ export default function PlaylistsPage() {
           <PlaylistDetail playlistId={activePlaylistId} onBack={() => setActivePlaylistId(null)} />
         ) : isLoading ? (
           <div className="flex justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-[#8A6A2A]/50" />
+            <Loader2 size={24} className="animate-spin text-[#CBB183]/50" />
           </div>
         ) : playlists.length === 0 ? (
           <div className="text-center py-16">
-            <ListMusic size={40} className="mx-auto mb-4 text-[#8A6A2A]/20" />
+            <ListMusic size={40} className="mx-auto mb-4 text-[#CBB183]/20" />
             <p className="text-white/40 mb-2">No playlists yet</p>
             <p className="text-sm text-white/25 mb-6">Create one and invite collaborators to build it together</p>
             <Button
               onClick={() => setShowCreate(true)}
-              className="bg-[#8A6A2A] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+              className="bg-[#CBB183] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
             >
               <Plus size={14} className="mr-1" /> Create Your First Playlist
             </Button>

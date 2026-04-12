@@ -366,7 +366,7 @@ export default function MobilePlayerPanel() {
           <div className="flex items-end gap-[2px] h-3 pointer-events-none">
             {[0, 1, 2].map(i => (
               <div key={i} className="w-[3px] rounded-full"
-                style={{ background: "#8A6A2A", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
+                style={{ background: "#CBB183", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
             ))}
           </div>
         )}
@@ -575,7 +575,7 @@ export default function MobilePlayerPanel() {
               onClick={(e) => { e.stopPropagation(); navigate(`/verify/${videoWitnessId}`); }}
               className="absolute top-12 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide z-20"
               style={{
-                background: "oklch(0.84 0.05 75 / 0.88)",
+                background: "oklch(0.30 0.015 200 / 0.88)",
                 border: "1px solid oklch(0.55 0.18 145 / 0.5)",
                 color: "oklch(0.82 0.18 145)",
                 backdropFilter: "blur(4px)",
@@ -671,7 +671,7 @@ export default function MobilePlayerPanel() {
                 hover:scale-105 active:scale-95 shadow-xl"
               style={{
                 background: "oklch(0.94 0.006 280)",
-                color: "#DACAAA",
+                color: "#2C3438",
                 boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.25)",
               }}
             >
@@ -1036,7 +1036,7 @@ export default function MobilePlayerPanel() {
                     onClick={submitComment}
                     disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                     className="px-3 py-2 rounded-xl text-[12px] font-semibold transition-colors disabled:opacity-40 active:scale-95"
-                    style={{ background: "oklch(0.80 0.145 82)", color: "#DACAAA" }}
+                    style={{ background: "oklch(0.80 0.145 82)", color: "#2C3438" }}
                   >
                     Post
                   </button>

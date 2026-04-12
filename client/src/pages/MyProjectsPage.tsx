@@ -405,7 +405,7 @@ function ProjectCard({ project }: { project: ProjectRow }) {
       {project.bannerUrl && (
         <div className="relative h-32 overflow-hidden rounded-t-lg">
           <img src={project.bannerUrl} alt={project.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#DACAAA] to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2C3438] to-transparent" />
         </div>
       )}
       <CardContent className="p-5">
@@ -514,7 +514,7 @@ export default function MyProjectsPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen bg-[#DACAAA] flex items-center justify-center">
+      <div className="min-h-screen bg-[#2C3438] flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-[#d4a017]" />
       </div>
     );
@@ -526,7 +526,7 @@ export default function MyProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#DACAAA] text-white">
+    <div className="min-h-screen bg-[#2C3438] text-white">
       <div className="max-w-4xl mx-auto px-4 py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

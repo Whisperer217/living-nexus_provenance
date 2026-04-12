@@ -279,7 +279,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       }
                     </div>
                     {user?.licenseStatus === "licensed" && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#8A6A2A" }}>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#CBB183" }}>
                         <CheckCircle2 size={10} className="text-black" />
                       </div>
                     )}
@@ -288,8 +288,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     <div className="text-[14px] font-medium text-white/95 truncate">{user?.name || state.profileName || "Creator"}</div>
                     {user?.licenseStatus === "licensed" ? (
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <Fingerprint size={10} style={{ color: "#8A6A2A" }} />
-                        <span className="text-[10px] font-heading tracking-wider" style={{ color: "#8A6A2A" }}>WITNESSED</span>
+                        <Fingerprint size={10} style={{ color: "#CBB183" }} />
+                        <span className="text-[10px] font-heading tracking-wider" style={{ color: "#CBB183" }}>WITNESSED</span>
                       </div>
                     ) : (
                       <div className="text-[11px] text-white/35 mt-0.5">View Profile</div>

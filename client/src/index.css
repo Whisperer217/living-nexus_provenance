@@ -65,96 +65,91 @@
 
 :root {
   /* ══════════════════════════════════════════════════════════════════
-     LIVING NEXUS — Pearl Quartzite Light Palette
+     LIVING NEXUS — Gunmetal Museum Palette  (ANCHORED)
      "A museum of multimedia assets in a digital system" — Doc Seraph Mercer
-     Pearl Quartzite page · Deep Aubergine ink · Deep Gold veining
+     Gunmetal Gray walls · Pearl Quartzite text · Quartzite Gold veining
      ══════════════════════════════════════════════════════════════════ */
 
-  /* ── Surface Steps (museum stone walls — light quartzite) ── */
-  --void:   #E6CDAE;   /* Pale Quartzite — page background, the stone floor */
-  --void-2: #DACAAA;   /* Warm Quartzite — sidebar / nav surface */
-  --void-3: #CBB183;   /* Honey Quartzite — cards / raised surfaces */
-  --void-4: #C3AB7D;   /* Amber Quartzite — modals / elevated surfaces */
+  /* ── Surface Steps (gunmetal museum walls) ── */
+  --void:   #353E43;   /* Gunmetal Gray — page background, the museum floor */
+  --void-2: #2C3438;   /* Darker Gunmetal — sidebar / nav */
+  --void-3: #3F4A50;   /* Lifted Steel — cards / raised surfaces */
+  --void-4: #4A5560;   /* Elevated Steel — modals / popovers */
 
-  /* ── Quartzite Stone Reference Tones ── */
-  --stone-light:  #E6CDAE;   /* Pale Quartzite — page bg */
-  --stone-mid:    #DACAAA;   /* Warm Quartzite */
-  --stone-warm:   #CBB183;   /* Honey Quartzite */
-  --stone-deep:   #BD9B63;   /* Amber Quartzite */
-  --stone-shadow: #AA8E64;   /* Shadow Quartzite */
+  /* ── Quartzite Stone Tones (pearl text + accents on dark metal) ── */
+  --stone-light:  #E6CDAE;   /* Pale Quartzite — primary text */
+  --stone-mid:    #DACAAA;   /* Warm Quartzite — secondary text */
+  --stone-warm:   #CBB183;   /* Honey Quartzite — gold accent */
+  --stone-deep:   #BD9B63;   /* Amber Quartzite — deeper accent */
+  --stone-shadow: #AA8E64;   /* Shadow Quartzite — muted */
 
-  /* ── Ink / Text (dark aubergine on light stone) ── */
-  --ink:      #1E1020;   /* Deep Aubergine — primary text ink */
-  --ink-2:    #3D2440;   /* Lifted Aubergine — body copy */
-  --ink-3:    #4A2D52;   /* Muted Aubergine — labels / captions */
-
-  /* ── Gold Accent (deep enough to read on light stone) ── */
-  --gold:       #7A5A1E;   /* Deep Gold Vein — primary accent, readable on pearl */
-  --gold-dim:   #5E4418;   /* Dark Gold — muted accent */
-  --gold-glow:  #9A7228;   /* Warm Gold — hover / active states */
-  --gold-bright:#BD9B63;   /* Amber Stone — decorative highlight */
-  --rose:       #8A6A2A;   /* Aged Gold — secondary warm accent */
-  --terra:      #C0392B;   /* Deep Red — destructive / warning */
-  --teal:       #5E4418;   /* Dark Gold (warm accent) */
-  --teal-dim:   #4A3410;   /* Deeper dark gold */
-  --violet:     #3D2440;   /* Aubergine — secondary ink accent */
-  --violet-dim: #2D1B2E;   /* Deeper aubergine */
+  /* ── Gold Accent (quartzite veining on gunmetal) ── */
+  --gold:       #CBB183;   /* Quartzite Gold — primary accent */
+  --gold-dim:   #AA8E64;   /* Shadow Stone — muted gold */
+  --gold-glow:  #D0A15F;   /* Bright Vein — hover / active */
+  --gold-bright:#E6CDAE;   /* Pearl Stone — highlight */
+  --rose:       #CBB183;   /* Quartzite Gold (secondary) */
+  --terra:      #E2725B;   /* Terra Cotta — warm destructive */
+  --teal:       #AA8E64;   /* Shadow Stone (warm accent) */
+  --teal-dim:   #8A7250;   /* Deeper shadow stone */
+  --violet:     #CBB183;   /* Quartzite Gold (highlight) */
+  --violet-dim: #AA8E64;   /* Shadow Stone */
 
   /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
-  --lnx-gold:       #7A5A1E;   /* Deep Gold Vein */
-  --lnx-gold-glow:  #9A7228;   /* Warm Gold — glow states */
-  --lnx-gold-muted: #5E4418;   /* Dark Gold — muted */
+  --lnx-gold:       #CBB183;   /* Quartzite Gold */
+  --lnx-gold-glow:  #D0A15F;   /* Bright Vein — glow states */
+  --lnx-gold-muted: #AA8E64;   /* Shadow Stone — muted */
   /* Green = Verified / Published / Alive */
-  --lnx-green:      #166534;
-  --lnx-green-soft: #15803D;
+  --lnx-green:      #4ADE80;
+  --lnx-green-soft: #86EFAC;
   /* Orange = Draft / In Progress / Transition */
-  --lnx-orange:     #9A3412;   /* Deep Terra */
-  --lnx-orange-soft:#C2410C;
+  --lnx-orange:     #D0A15F;   /* Bright Vein */
+  --lnx-orange-soft:#E6CDAE;   /* Pearl Stone */
   /* Red = Destructive / Warning / Irreversible */
-  --lnx-red:        #B91C1C;
-  --lnx-red-soft:   #DC2626;
-  /* Foundation — light stone backgrounds */
-  --lnx-bg:         #E6CDAE;   /* Pale Quartzite — page bg */
-  --lnx-bg-2:       #DACAAA;   /* Warm Quartzite — nav/sidebar */
-  --lnx-bg-3:       #CBB183;   /* Honey Quartzite — cards */
-  --lnx-text:       #1E1020;   /* Deep Aubergine — primary text */
-  --lnx-text-muted: #4A2D52;   /* Muted Aubergine — secondary text */
+  --lnx-red:        #F87171;
+  --lnx-red-soft:   #FCA5A5;
+  /* Foundation — gunmetal backgrounds */
+  --lnx-bg:         #353E43;   /* Gunmetal Gray — page bg */
+  --lnx-bg-2:       #2C3438;   /* Darker Gunmetal — nav/sidebar */
+  --lnx-bg-3:       #3F4A50;   /* Lifted Steel — cards */
+  --lnx-text:       #E6CDAE;   /* Pale Quartzite — primary text */
+  --lnx-text-muted: #AA8E64;   /* Shadow Stone — muted text */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
-  --background: var(--void);          /* #E6CDAE — Pale Quartzite */
-  --foreground: #1E1020;              /* Deep Aubergine ink */
-  --card: var(--void-3);              /* Honey Quartzite */
-  --card-foreground: #1E1020;
-  --popover: var(--void-2);           /* Warm Quartzite */
-  --popover-foreground: #1E1020;
-  --primary: var(--gold);             /* Deep Gold Vein */
-  --primary-foreground: #E6CDAE;      /* Pearl on gold button */
-  --secondary: var(--void-4);         /* Amber Quartzite */
-  --secondary-foreground: #1E1020;
-  --muted: var(--void-2);             /* Warm Quartzite — muted surface */
-  --muted-foreground: #4A2D52;        /* Muted Aubergine */
-  --accent: var(--gold-glow);         /* Warm Gold */
-  --accent-foreground: #1E1020;
-  --destructive: #B91C1C;             /* Deep Red */
+  --background: var(--void);          /* #353E43 — Gunmetal Gray */
+  --foreground: #E6CDAE;              /* Pale Quartzite text */
+  --card: var(--void-3);              /* Lifted Steel */
+  --card-foreground: #E6CDAE;
+  --popover: var(--void-4);           /* Elevated Steel */
+  --popover-foreground: #E6CDAE;
+  --primary: var(--gold);             /* Quartzite Gold */
+  --primary-foreground: #2C3438;      /* Dark gunmetal on gold button */
+  --secondary: var(--void-2);         /* Darker Gunmetal */
+  --secondary-foreground: #E6CDAE;
+  --muted: var(--void-3);             /* Lifted Steel — muted surface */
+  --muted-foreground: #AA8E64;        /* Shadow Stone */
+  --accent: var(--gold-glow);         /* Bright Vein */
+  --accent-foreground: #2C3438;
+  --destructive: #E2725B;             /* Terra Cotta */
   --destructive-foreground: #E6CDAE;
-  --border: rgba(122, 90, 30, 0.30);  /* Deep Gold Vein border */
-  --input:  rgba(122, 90, 30, 0.15);
+  --border: rgba(203, 177, 131, 0.28); /* Quartzite Gold border */
+  --input:  rgba(203, 177, 131, 0.16);
   --ring: var(--gold);
 
-  --chart-1: #7A5A1E;   /* Deep Gold Vein */
-  --chart-2: #9A7228;   /* Warm Gold */
-  --chart-3: #BD9B63;   /* Amber Stone */
-  --chart-4: #3D2440;   /* Lifted Aubergine */
-  --chart-5: #4A2D52;   /* Muted Aubergine */
+  --chart-1: #CBB183;   /* Quartzite Gold */
+  --chart-2: #D0A15F;   /* Bright Vein */
+  --chart-3: #E6CDAE;   /* Pale Quartzite */
+  --chart-4: #AA8E64;   /* Shadow Stone */
+  --chart-5: #3F4A50;   /* Lifted Steel */
 
-  --sidebar: var(--void-2);           /* Warm Quartzite */
-  --sidebar-foreground: #1E1020;
+  --sidebar: var(--void-2);           /* Darker Gunmetal */
+  --sidebar-foreground: #E6CDAE;
   --sidebar-primary: var(--gold);
-  --sidebar-primary-foreground: #E6CDAE;
+  --sidebar-primary-foreground: #2C3438;
   --sidebar-accent: var(--void-3);
-  --sidebar-accent-foreground: #1E1020;
-  --sidebar-border: rgba(122, 90, 30, 0.25);
+  --sidebar-accent-foreground: #E6CDAE;
+  --sidebar-border: rgba(203, 177, 131, 0.22);
   --sidebar-ring: var(--gold);
 }
 
@@ -165,58 +160,53 @@
    Saved to user profile and localStorage for flash-free load.
 ================================================================= */
 
-/* ── DARK THEME (optional — deep aubergine museum night mode) ── */
+/* ── DARK THEME (mirrors :root — gunmetal is already dark) ── */
 [data-theme="dark"] {
-  /* Surface depth steps — aubergine night */
-  --void:   #1E1020;
-  --void-2: #2D1B2E;
-  --void-3: #3D2440;
-  --void-4: #4A2D52;
+  --void:   #353E43;
+  --void-2: #2C3438;
+  --void-3: #3F4A50;
+  --void-4: #4A5560;
 
-  /* Accent tokens — lighter gold for dark bg */
   --gold:       #CBB183;
   --gold-dim:   #AA8E64;
   --gold-glow:  #D0A15F;
-  --rose:       #D6C597;
-  --terra:      #BD9B63;
+  --rose:       #CBB183;
+  --terra:      #E2725B;
   --teal:       #AA8E64;
   --teal-dim:   #8A7250;
 
-  /* Semantic tokens */
   --background:          var(--void);
   --foreground:          #E6CDAE;
   --card:                var(--void-3);
   --card-foreground:     #E6CDAE;
-  --popover:             var(--void-2);
+  --popover:             var(--void-4);
   --popover-foreground:  #E6CDAE;
   --primary:             var(--gold);
-  --primary-foreground:  #1E1020;
-  --secondary:           var(--void-4);
+  --primary-foreground:  #2C3438;
+  --secondary:           var(--void-2);
   --secondary-foreground:#E6CDAE;
   --muted:               var(--void-3);
-  --muted-foreground:    #C3AB7D;
+  --muted-foreground:    #AA8E64;
   --accent:              var(--gold-glow);
-  --accent-foreground:   #1E1020;
+  --accent-foreground:   #2C3438;
   --border:              rgba(203, 177, 131, 0.28);
   --input:               rgba(203, 177, 131, 0.16);
   --ring:                var(--gold);
 
-  /* Living Nexus custom tokens */
-  --lnx-bg:         #1E1020;
-  --lnx-bg-2:       #2D1B2E;
-  --lnx-bg-3:       #3D2440;
+  --lnx-bg:         #353E43;
+  --lnx-bg-2:       #2C3438;
+  --lnx-bg-3:       #3F4A50;
   --lnx-text:       #E6CDAE;
-  --lnx-text-muted: #C3AB7D;
+  --lnx-text-muted: #AA8E64;
   --lnx-gold:       #CBB183;
   --lnx-gold-glow:  #D0A15F;
   --lnx-gold-muted: #AA8E64;
 
-  /* Sidebar */
   --sidebar:                    var(--void-2);
   --sidebar-foreground:         #E6CDAE;
   --sidebar-primary:            var(--gold);
-  --sidebar-primary-foreground: #1E1020;
-  --sidebar-accent:             var(--void-4);
+  --sidebar-primary-foreground: #2C3438;
+  --sidebar-accent:             var(--void-3);
   --sidebar-accent-foreground:  #E6CDAE;
   --sidebar-border:             rgba(203, 177, 131, 0.22);
   --sidebar-ring:               var(--gold);
@@ -255,7 +245,7 @@
   html, body {
     height: 100%;
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
-    background-color: #E6CDAE; /* Pale Quartzite — match app bg, no void on overscroll */
+    background-color: #353E43; /* Gunmetal Gray — match app bg, no void on overscroll */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
   /* NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals by clipping
@@ -652,16 +642,16 @@ html body[data-scroll-locked] {
   .cosmic-bg {
     background:
       radial-gradient(ellipse 80% 50% at 50% 0%,
-        rgba(122, 90, 30, 0.10) 0%,
-        rgba(61, 36, 64, 0.06) 40%,
+        rgba(203, 177, 131, 0.08) 0%,
+        rgba(208, 161, 95, 0.05) 40%,
         transparent 70%
       ),
       radial-gradient(ellipse 60% 40% at 50% 100%,
-        rgba(122, 90, 30, 0.07) 0%,
-        rgba(218, 202, 170, 0.04) 50%,
+        rgba(203, 177, 131, 0.06) 0%,
+        rgba(53, 62, 67, 0.04) 50%,
         transparent 80%
       ),
-      #E6CDAE;
+      #353E43;
   }
 
   /* ── CTA button glow — lantern warmth ── */
@@ -765,7 +755,7 @@ html body[data-scroll-locked] {
   .surface-base     { background: var(--lnx-bg); }
   .surface-raised   { background: var(--lnx-bg-2); }
   .surface-elevated { background: var(--lnx-bg-3); }
-  .surface-modal    { background: oklch(0.88 0.04 75); backdrop-filter: blur(12px); }
+  .surface-modal    { background: #4A5560; backdrop-filter: blur(12px); }
 
   /* ── SEMANTIC TEXT COLORS — use these instead of hardcoded values ── */
   .text-lnx-gold   { color: var(--lnx-gold); }

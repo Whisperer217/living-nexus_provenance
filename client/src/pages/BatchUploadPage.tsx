@@ -189,7 +189,7 @@ function TrackCardUI({
       className="rounded-2xl overflow-hidden transition-all"
       style={{
         background: "oklch(0.125 0.028 52)",
-        border: `1px solid ${card.audioStatus === "done" ? "oklch(0.65 0.18 160 / 0.5)" : "#8A6A2A"}`,
+        border: `1px solid ${card.audioStatus === "done" ? "oklch(0.65 0.18 160 / 0.5)" : "#CBB183"}`,
       }}
     >
       {/* Card header */}
@@ -260,7 +260,7 @@ function TrackCardUI({
                   background: card.audioDragging ? "oklch(0.84 0.155 85 / 0.08)" : "oklch(0.09 0.03 270)",
                   border: `1.5px dashed ${card.audioDragging
                     ? "oklch(0.84 0.155 85 / 0.7)"
-                    : card.audioFile ? "oklch(0.65 0.18 160 / 0.5)" : "#3D2440"}`,
+                    : card.audioFile ? "oklch(0.65 0.18 160 / 0.5)" : "#C3AB7D"}`,
                 }}
               >
                 <input
@@ -329,7 +329,7 @@ function TrackCardUI({
                 value={card.title}
                 onChange={e => onChange(card.id, { title: e.target.value })}
                 className="h-9 text-sm"
-                style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #8A6A2A", color: "#FFFFFF" }}
+                style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #CBB183", color: "#FFFFFF" }}
               />
 
               {/* Genre + AI consent */}
@@ -339,13 +339,13 @@ function TrackCardUI({
                     className="h-9 text-xs"
                     style={{
                       background: "oklch(0.09 0.03 270)",
-                      border: "1px solid #8A6A2A",
+                      border: "1px solid #CBB183",
                       color: card.genre ? "#FFFFFF" : "oklch(0.4 0.02 280)",
                     }}
                   >
                     <SelectValue placeholder="Genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #8A6A2A" }}>
+                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #CBB183" }}>
                     {GENRES.map(g => (
                       <SelectItem key={g} value={g} className="text-xs" style={{ color: "#FFFFFF" }}>{g}</SelectItem>
                     ))}
@@ -357,11 +357,11 @@ function TrackCardUI({
                 >
                   <SelectTrigger
                     className="h-9 text-xs"
-                    style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #8A6A2A", color: "#FFFFFF" }}
+                    style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #CBB183", color: "#FFFFFF" }}
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #8A6A2A" }}>
+                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #CBB183" }}>
                     {AI_OPTIONS.map(o => (
                       <SelectItem key={o.value} value={o.value} className="text-xs" style={{ color: "#FFFFFF" }}>
                         {o.label}
@@ -388,7 +388,7 @@ function TrackCardUI({
                   background: card.coverPreview ? "transparent" : "oklch(0.09 0.03 270)",
                   border: `1.5px dashed ${card.coverDragging
                     ? "oklch(0.84 0.155 85 / 0.7)"
-                    : card.coverPreview ? "oklch(0.65 0.18 160 / 0.4)" : "#3D2440"}`,
+                    : card.coverPreview ? "oklch(0.65 0.18 160 / 0.4)" : "#C3AB7D"}`,
                 }}
               >
                 <input
@@ -638,7 +638,7 @@ export default function BatchUploadPage() {
             {collectionResult.trackCount} track{collectionResult.trackCount > 1 ? "s" : ""} registered to the Living Nexus Archive
           </p>
         </div>
-        <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #8A6A2A" }}>
+        <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}>
           <div>
             <p className="text-[10px] font-heading tracking-widest uppercase mb-1" style={{ color: "oklch(0.72 0.04 280)" }}>
               Collection WID
@@ -690,7 +690,7 @@ export default function BatchUploadPage() {
             }}
             variant="outline"
             className="flex-1 gap-2"
-            style={{ border: "1px solid #3D2440", color: "oklch(0.6 0.04 280)" }}
+            style={{ border: "1px solid #C3AB7D", color: "oklch(0.6 0.04 280)" }}
           >
             <Upload size={16} /> New Batch
           </Button>
@@ -752,7 +752,7 @@ export default function BatchUploadPage() {
       {/* Album info */}
       <div
         className="rounded-2xl p-4 space-y-3"
-        style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #8A6A2A" }}
+        style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}
       >
         <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.72 0.04 280)" }}>
           Collection / Album
@@ -764,7 +764,7 @@ export default function BatchUploadPage() {
               value={albumName}
               onChange={e => setAlbumName(e.target.value)}
               className="h-10"
-              style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #8A6A2A", color: "#FFFFFF" }}
+              style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #CBB183", color: "#FFFFFF" }}
             />
             <p className="text-[10px]" style={{ color: "oklch(0.72 0.04 280)" }}>
               Shared collection name. Individual tracks can override genre and AI consent below.
@@ -777,7 +777,7 @@ export default function BatchUploadPage() {
             style={{
               minHeight: 80,
               background: albumCoverPreview ? "transparent" : "oklch(0.09 0.03 270)",
-              border: `1.5px dashed ${albumCoverPreview ? "oklch(0.65 0.18 160 / 0.4)" : "#3D2440"}`,
+              border: `1.5px dashed ${albumCoverPreview ? "oklch(0.65 0.18 160 / 0.4)" : "#C3AB7D"}`,
             }}
           >
             <input
@@ -824,7 +824,7 @@ export default function BatchUploadPage() {
       {/* Batch fill panel */}
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #8A6A2A" }}
+        style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}
       >
         <button
           onClick={() => setBatchFillOpen(o => !o)}
@@ -842,7 +842,7 @@ export default function BatchUploadPage() {
           </div>
         </button>
         {batchFillOpen && (
-          <div className="px-4 pb-4 space-y-3 border-t" style={{ borderColor: "#8A6A2A" }}>
+          <div className="px-4 pb-4 space-y-3 border-t" style={{ borderColor: "#CBB183" }}>
             <p className="text-[10px] pt-3" style={{ color: "oklch(0.75 0.04 280)" }}>
               Set values here, then click Apply — they will be pushed to every track card. Individual cards can still be edited after.
             </p>
@@ -854,13 +854,13 @@ export default function BatchUploadPage() {
                     className="h-9 text-xs"
                     style={{
                       background: "oklch(0.09 0.03 270)",
-                      border: "1px solid #8A6A2A",
+                      border: "1px solid #CBB183",
                       color: batchGenre ? "#FFFFFF" : "oklch(0.75 0.04 280)",
                     }}
                   >
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #8A6A2A" }}>
+                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #CBB183" }}>
                     {GENRES.map(g => (
                       <SelectItem key={g} value={g} className="text-xs" style={{ color: "#FFFFFF" }}>{g}</SelectItem>
                     ))}
@@ -872,11 +872,11 @@ export default function BatchUploadPage() {
                 <Select value={batchAiConsent} onValueChange={v => setBatchAiConsent(v as TrackCard["aiConsent"])}>
                   <SelectTrigger
                     className="h-9 text-xs"
-                    style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #8A6A2A", color: "#FFFFFF" }}
+                    style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #CBB183", color: "#FFFFFF" }}
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #8A6A2A" }}>
+                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #CBB183" }}>
                     {AI_OPTIONS.map(o => (
                       <SelectItem key={o.value} value={o.value} className="text-xs" style={{ color: "#FFFFFF" }}>
                         {o.label}
@@ -969,7 +969,7 @@ export default function BatchUploadPage() {
           disabled={isUploading || readyCount === 0 || !albumName.trim()}
           className="gap-2 px-6"
           style={{
-            background: readyCount > 0 && albumName.trim() ? "oklch(0.84 0.155 85)" : "#3D2440",
+            background: readyCount > 0 && albumName.trim() ? "oklch(0.84 0.155 85)" : "#C3AB7D",
             color: readyCount > 0 && albumName.trim() ? "oklch(0.08 0.02 280)" : "oklch(0.45 0.02 280)",
           }}
         >

@@ -68,7 +68,7 @@ function ConfirmDeleteModal({
       <div
         className="rounded-2xl p-6 max-w-sm w-full"
         style={{
-          background: "#DACAAA",
+          background: "#2C3438",
           border: "1px solid color-mix(in srgb, var(--lnx-red) 35%, transparent)",
         }}
         onClick={(e) => e.stopPropagation()}
@@ -123,7 +123,7 @@ function ConfirmDeleteModal({
             onClick={onCancel}
             disabled={isPending}
             className="flex-1 py-2.5 rounded-xl text-sm"
-            style={{ border: "1px solid #3D2440", color: "#E2E8F0" }}
+            style={{ border: "1px solid #C3AB7D", color: "#E2E8F0" }}
           >
             Cancel
           </button>
@@ -335,7 +335,7 @@ export default function ArchivePage() {
 
   if (loading || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#DACAAA" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#2C3438" }}>
         <div className="w-8 h-8 rounded-full border-2 animate-spin"
           style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
       </div>
@@ -347,7 +347,7 @@ export default function ArchivePage() {
 
   return (
     <>
-    <div className="min-h-screen" style={{ background: "#DACAAA" }}>
+    <div className="min-h-screen" style={{ background: "#2C3438" }}>
       <div className="container py-10 max-w-4xl mx-auto px-4" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
         {/* ── Breadcrumb ──────────────────────────────────────────── */}
@@ -372,7 +372,7 @@ export default function ArchivePage() {
           </div>
           <div className="flex items-center gap-2">
             <Link href="/upload">
-              <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}>
+              <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
                 <Upload className="w-3 h-3 mr-1" /> Upload New
               </Button>
             </Link>
@@ -433,7 +433,7 @@ export default function ArchivePage() {
               onClick={() => setActiveTab(tab)}
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
               style={activeTab === tab
-                ? { background: "oklch(0.84 0.155 85)", color: "#1E1020" }
+                ? { background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }
                 : { color: "oklch(0.6 0.03 280)" }}
             >
               {tab === "tracks" && <><Music size={13} /> My Tracks</>}
@@ -458,8 +458,8 @@ export default function ArchivePage() {
                 onClick={() => setBatchMode(b => !b)}
                 className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-all"
                 style={batchMode
-                  ? { background: "oklch(0.84 0.155 85 / 0.15)", color: "#8A6A2A", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }
-                  : { color: "oklch(0.5 0.03 280)", border: "1px solid #8A6A2A" }
+                  ? { background: "oklch(0.84 0.155 85 / 0.15)", color: "#CBB183", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }
+                  : { color: "oklch(0.5 0.03 280)", border: "1px solid #CBB183" }
                 }
               >
                 <CheckSquare className="w-3 h-3" />
@@ -470,7 +470,7 @@ export default function ArchivePage() {
                   <button
                     onClick={selectAll}
                     className="text-xs px-2 py-1 rounded-lg transition-all"
-                    style={{ color: "oklch(0.5 0.03 280)", border: "1px solid #8A6A2A" }}
+                    style={{ color: "oklch(0.5 0.03 280)", border: "1px solid #CBB183" }}
                   >
                     All
                   </button>
@@ -478,7 +478,7 @@ export default function ArchivePage() {
                     <button
                       onClick={clearSelection}
                       className="text-xs px-2 py-1 rounded-lg transition-all"
-                      style={{ color: "oklch(0.5 0.03 280)", border: "1px solid #8A6A2A" }}
+                      style={{ color: "oklch(0.5 0.03 280)", border: "1px solid #CBB183" }}
                     >
                       Clear ({selectedIds.size})
                     </button>
@@ -508,13 +508,13 @@ export default function ArchivePage() {
         {/* ── Empty state ────────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length === 0 && (
           <div className="text-center py-20 rounded-xl"
-            style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #3D2440" }}>
+            style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
             <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
             <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>
               You have not uploaded any tracks yet.
             </p>
             <Link href="/upload">
-              <Button style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}>
+              <Button style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
                 Upload Your First Track
               </Button>
             </Link>
@@ -550,7 +550,7 @@ export default function ArchivePage() {
                       : isDeleted ? "oklch(0.09 0.02 265)" : "oklch(0.125 0.028 52)",
                     border: isSelected
                       ? "1px solid oklch(0.84 0.155 85 / 0.35)"
-                      : `1px solid ${isDeleted ? "color-mix(in srgb, var(--lnx-red) 20%, transparent)" : "#8A6A2A"}`,
+                      : `1px solid ${isDeleted ? "color-mix(in srgb, var(--lnx-red) 20%, transparent)" : "#CBB183"}`,
                     cursor: batchMode ? (isDeleted ? "default" : "pointer") : (hasAudio && !isDeleted ? "pointer" : "default"),
                     opacity: isDeleted ? 0.6 : 1,
                   }}
@@ -562,7 +562,7 @@ export default function ArchivePage() {
                       onClick={(e) => { e.stopPropagation(); if (!isDeleted) toggleSelect(song.id); }}
                     >
                       {isSelected
-                        ? <CheckSquare className="w-4 h-4" style={{ color: "#8A6A2A" }} />
+                        ? <CheckSquare className="w-4 h-4" style={{ color: "#CBB183" }} />
                         : <Square className="w-4 h-4" style={{ color: "oklch(0.4 0.02 280)" }} />
                       }
                     </div>
@@ -658,7 +658,7 @@ export default function ArchivePage() {
                           className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all"
                           style={{
                             background: "rgba(212,175,55,0.1)",
-                            color: "#8A6A2A",
+                            color: "#CBB183",
                             border: "1px solid rgba(212,175,55,0.3)",
                           }}
                         >

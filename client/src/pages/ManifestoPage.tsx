@@ -202,7 +202,7 @@ export default function ManifestoPage() {
         <div
           className="rounded-2xl p-8 mb-16 text-center"
           style={{
-            background: "#DACAAA",
+            background: "#2C3438",
             border: "1px solid oklch(0.84 0.155 85 / 0.15)",
           }}
         >
@@ -332,7 +332,7 @@ export default function ManifestoPage() {
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
               style={{
                 background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.14 75))",
-                color: "#DACAAA",
+                color: "#2C3438",
               }}
             >
               <Music size={14} /> Upload Your Music

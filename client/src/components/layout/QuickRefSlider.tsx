@@ -113,7 +113,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
         audioUrl: t.fileUrl ?? t.song?.fileUrl ?? undefined,
         witnessId: t.witnessId ?? t.song?.witnessId ?? undefined,
         genre: t.genre ?? "",
-        bg: "oklch(0.88 0.04 75)",
+        bg: "oklch(0.28 0.015 200)",
         emoji: "🎵",
         coverPositionX: t.coverPositionX ?? t.song?.coverPositionX ?? 50,
         coverPositionY: t.coverPositionY ?? t.song?.coverPositionY ?? 50,
@@ -216,11 +216,11 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                 className="w-full pl-8 pr-3 py-2 rounded-lg text-[12px] font-body outline-none transition-all"
                 style={{
                   background: "oklch(0.14 0.02 278)",
-                  border: "1px solid oklch(0.84 0.05 75)",
+                  border: "1px solid oklch(0.30 0.015 200)",
                   color: "oklch(0.88 0.01 280)",
                 }}
                 onFocus={e => (e.currentTarget.style.borderColor = "oklch(0.80 0.145 82 / 0.5)")}
-                onBlur={e => (e.currentTarget.style.borderColor = "oklch(0.84 0.05 75)")}
+                onBlur={e => (e.currentTarget.style.borderColor = "oklch(0.30 0.015 200)")}
               />
             </div>
           </form>
@@ -263,9 +263,9 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
             <div className="space-y-2 flex-1">
               {[0, 1, 2, 4].map(i => (
                 <div key={i} className="flex items-center gap-2 animate-pulse">
-                  <div className="w-8 h-8 rounded flex-shrink-0" style={{ background: "oklch(0.84 0.05 75)" }} />
+                  <div className="w-8 h-8 rounded flex-shrink-0" style={{ background: "oklch(0.30 0.015 200)" }} />
                   <div className="flex-1 space-y-1">
-                    <div className="h-2 rounded" style={{ background: "oklch(0.84 0.05 75)", width: "70%" }} />
+                    <div className="h-2 rounded" style={{ background: "oklch(0.30 0.015 200)", width: "70%" }} />
                     <div className="h-2 rounded" style={{ background: "oklch(0.14 0.02 280)", width: "45%" }} />
                   </div>
                 </div>
@@ -297,7 +297,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded flex-shrink-0 flex items-center justify-center text-sm"
-                      style={{ background: "oklch(0.88 0.04 75)" }}>
+                      style={{ background: "oklch(0.28 0.015 200)" }}>
                       🎵
                     </div>
                   )}

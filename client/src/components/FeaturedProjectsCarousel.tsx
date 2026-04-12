@@ -129,7 +129,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     <div
                       className="w-full h-full flex items-center justify-center"
                       style={{
-                        background: "linear-gradient(135deg, #DACAAA, #DACAAA)",
+                        background: "linear-gradient(135deg, #2C3438, #2C3438)",
                       }}
                     >
                       <span
@@ -146,7 +146,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     className="absolute inset-0"
                     style={{
                       background:
-                        "linear-gradient(to top, #DACAAA / 0.92) 0%, oklch(0 0 0 / 0.20) 50%, transparent 100%)",
+                        "linear-gradient(to top, #2C3438 / 0.92) 0%, oklch(0 0 0 / 0.20) 50%, transparent 100%)",
                     }}
                   />
 
@@ -202,7 +202,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                       <div
                         className="w-4 h-4 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-[8px] font-bold"
                         style={{
-                          background: "oklch(0.84 0.05 75)",
+                          background: "oklch(0.30 0.015 200)",
                           border: "1px solid oklch(0.84 0.155 85 / 0.35)",
                         }}
                       >
@@ -252,7 +252,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                         </span>
                         <DollarSign size={7} style={{ color: "oklch(0.84 0.155 85 / 0.6)" }} />
                       </div>
-                      <div className="h-0.5 rounded-full overflow-hidden" style={{ background: "oklch(0.86 0.04 75 / 0.6)" }}>
+                      <div className="h-0.5 rounded-full overflow-hidden" style={{ background: "oklch(0.24 0.015 200 / 0.6)" }}>
                         <div
                           className="h-full rounded-full"
                           style={{

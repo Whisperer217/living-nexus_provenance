@@ -411,12 +411,12 @@ export default function UploadPage() {
 
   const downloadCertificate = () => {
     if (!witnessData) return;
-    const consentColor = aiConsent === "prohibited" ? "#ef4444" : aiConsent === "permitted_attribution" ? "#8A6A2A" : "#22c55e";
+    const consentColor = aiConsent === "prohibited" ? "#ef4444" : aiConsent === "permitted_attribution" ? "#CBB183" : "#22c55e";
     const consentLabel = aiConsent === "prohibited" ? "AI TRAINING PROHIBITED" : aiConsent === "permitted_attribution" ? "PERMITTED WITH ATTRIBUTION" : "FREELY PERMITTED";
     const freqChips = witnessData.frequencies.map(f => `<span style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:20px;padding:4px 12px;font-size:11px;color:#A78BFA">${f} Hz</span>`).join(" ");
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Witness Certificate — ${witnessData.wid}</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
-<style>body{background:#0a0a0a;color:#e0e0e0;font-family:'Share Tech Mono',monospace;padding:40px}.cert{max-width:780px;margin:0 auto;border:1px solid rgba(212,175,55,0.4);border-radius:12px;overflow:hidden}.header{background:linear-gradient(135deg,#0f0f0f,#1a1a1a);padding:32px 40px;border-bottom:1px solid rgba(212,175,55,0.2)}.org{font-family:'Orbitron',sans-serif;font-size:10px;color:#8A6A2A;letter-spacing:0.15em;margin-bottom:4px}.title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:#fff}.body{padding:32px 40px}.wid-box{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.25);border-radius:8px;padding:20px;margin-bottom:28px;text-align:center}.wid-label{font-size:10px;letter-spacing:0.15em;color:#8A6A2A;margin-bottom:8px}.wid-value{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:#8A6A2A}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}.field{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:12px}.field-label{font-size:9px;letter-spacing:0.14em;color:rgba(255,255,255,0.35);margin-bottom:4px}.field-value{font-size:13px}.consent-box{background:rgba(0,0,0,0.3);border:2px solid ${consentColor};border-radius:8px;padding:16px;margin-bottom:24px;text-align:center}.consent-label{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:${consentColor}}.section-title{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:0.14em;color:rgba(255,255,255,0.3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06)}.mono-block{background:#0d0d0d;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:12px;font-size:10px;color:rgba(255,255,255,0.5);word-break:break-all;margin-bottom:20px;line-height:1.6}.footer{background:#0d0d0d;border-top:1px solid rgba(212,175,55,0.15);padding:20px 40px;display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.25)}</style></head>
+<style>body{background:#0a0a0a;color:#e0e0e0;font-family:'Share Tech Mono',monospace;padding:40px}.cert{max-width:780px;margin:0 auto;border:1px solid rgba(212,175,55,0.4);border-radius:12px;overflow:hidden}.header{background:linear-gradient(135deg,#0f0f0f,#1a1a1a);padding:32px 40px;border-bottom:1px solid rgba(212,175,55,0.2)}.org{font-family:'Orbitron',sans-serif;font-size:10px;color:#CBB183;letter-spacing:0.15em;margin-bottom:4px}.title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:#fff}.body{padding:32px 40px}.wid-box{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.25);border-radius:8px;padding:20px;margin-bottom:28px;text-align:center}.wid-label{font-size:10px;letter-spacing:0.15em;color:#CBB183;margin-bottom:8px}.wid-value{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:#CBB183}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}.field{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:12px}.field-label{font-size:9px;letter-spacing:0.14em;color:rgba(255,255,255,0.35);margin-bottom:4px}.field-value{font-size:13px}.consent-box{background:rgba(0,0,0,0.3);border:2px solid ${consentColor};border-radius:8px;padding:16px;margin-bottom:24px;text-align:center}.consent-label{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:${consentColor}}.section-title{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:0.14em;color:rgba(255,255,255,0.3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06)}.mono-block{background:#0d0d0d;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:12px;font-size:10px;color:rgba(255,255,255,0.5);word-break:break-all;margin-bottom:20px;line-height:1.6}.footer{background:#0d0d0d;border-top:1px solid rgba(212,175,55,0.15);padding:20px 40px;display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.25)}</style></head>
 <body><div class="cert"><div class="header"><div class="org">COMMAND DOMAINS LLC / BDDT PUBLISHING — SOVEREIGN SHUTTER™ FRAMEWORK</div><div class="title">MUSIC WITNESS CERTIFICATE</div></div>
 <div class="body"><div class="wid-box"><div class="wid-label">WITNESS ID</div><div class="wid-value">${witnessData.wid}</div></div>
 <div class="grid"><div class="field"><div class="field-label">CREATOR</div><div class="field-value">${user?.name || "—"}</div></div><div class="field"><div class="field-label">SONG TITLE</div><div class="field-value">${title || "—"}</div></div><div class="field"><div class="field-label">ALBUM</div><div class="field-value">${albumName || "—"}</div></div><div class="field"><div class="field-label">GENRE</div><div class="field-value">${genre || "—"}</div></div><div class="field"><div class="field-label">BPM / KEY</div><div class="field-value">${bpm || "—"} / ${keySignature || "—"}</div></div><div class="field"><div class="field-label">RELEASE DATE</div><div class="field-value">${releaseDate || "—"}</div></div><div class="field"><div class="field-label">BMI MEMBER #</div><div class="field-value">${bmiNumber || "—"}</div></div><div class="field"><div class="field-label">ISRC CODE</div><div class="field-value">${isrc || "—"}</div></div></div>
@@ -628,12 +628,12 @@ export default function UploadPage() {
   };
 
   if (!isAuthenticated) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#1E1020" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#E6CDAE" }}>
       <div className="text-center max-w-sm mx-auto px-6">
         <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "oklch(0.84 0.155 85)" }} />
         <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Sign In Required</h2>
         <p className="text-sm mb-6" style={{ color: "#E2E8F0" }}>Sign in to upload tracks to Living Nexus.</p>
-        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}>Sign In</Button>
+        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>Sign In</Button>
       </div>
     </div>
   );
@@ -646,7 +646,7 @@ export default function UploadPage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: "#1E1020" }}>
+    <div className="min-h-screen" style={{ background: "#E6CDAE" }}>
       <div className="container py-10 max-w-2xl">
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
@@ -657,7 +657,7 @@ export default function UploadPage() {
             <button
               onClick={() => navigate("/batch-upload")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body flex-shrink-0 transition-all"
-              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "oklch(0.65 0.12 85)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #CBB183", color: "oklch(0.65 0.12 85)" }}
             >
               <Upload size={12} /> Batch Upload
             </button>
@@ -686,7 +686,7 @@ export default function UploadPage() {
               <div key={s.n} className="flex items-center gap-1 flex-1">
                 <div className="flex-1 flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
-                    style={{ background: isDone ? "oklch(0.65 0.18 145)" : isActive ? "oklch(0.84 0.155 85)" : "oklch(0.158 0.030 50)", color: isDone || isActive ? "#1E1020" : "oklch(0.45 0.03 280)" }}>
+                    style={{ background: isDone ? "oklch(0.65 0.18 145)" : isActive ? "oklch(0.84 0.155 85)" : "oklch(0.158 0.030 50)", color: isDone || isActive ? "#E6CDAE" : "oklch(0.45 0.03 280)" }}>
                     {isDone ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
                   </div>
                   <span className="text-xs hidden sm:block" style={{ color: isActive ? "oklch(0.84 0.155 85)" : isDone ? "oklch(0.65 0.18 145)" : "oklch(0.45 0.03 280)" }}>{s.label}</span>
@@ -882,7 +882,7 @@ export default function UploadPage() {
                   !documentFile
                 }
                 onClick={() => setStep(2)}
-                style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020", fontFamily: "'Cinzel', serif" }}>
+                style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                 Next: Metadata <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
@@ -1143,7 +1143,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                   Next: Witness ID <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1167,7 +1167,7 @@ export default function UploadPage() {
                   </div>
                   <p className="text-sm mb-1 font-medium" style={{ color: "oklch(0.7 0.04 280)" }}>Generate your Witness ID</p>
                   <p className="text-xs mb-5" style={{ color: "#E2E8F0" }}>SHA-256 hash + ECDSA P-256 signature + harmonic frequency derivation</p>
-                  <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020", fontFamily: "'Cinzel', serif" }}>
+                  <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                     {generatingWid ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : <><Zap className="w-4 h-4 mr-2" /> Generate Witness ID</>}
                   </Button>
                 </div>
@@ -1206,11 +1206,11 @@ export default function UploadPage() {
                     </div>
                   </div>
                   <HarmonicWaveform frequencies={witnessData.frequencies} active={waveformActive} />
-                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #8A6A2A" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #CBB183" }}>
                     <p className="text-xs mb-1" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>{uploadMode === "lyrics" ? "SHA-256 LYRICS HASH" : "SHA-256 FILE HASH"}</p>
                     <p className="text-xs font-mono truncate" style={{ color: "oklch(0.6 0.04 280)" }}>{witnessData.fileHash}</p>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #8A6A2A" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #CBB183" }}>
                     <p className="text-xs mb-2" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>HARMONIC SIGNATURE</p>
                     <div className="flex flex-wrap gap-1.5">
                       {witnessData.frequencies.map((f, i) => (
@@ -1218,7 +1218,7 @@ export default function UploadPage() {
                       ))}
                     </div>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #8A6A2A" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #CBB183" }}>
                     <p className="text-xs mb-2" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>AI CONSENT DECLARATION</p>
                     <Badge style={{ background: aiConsent === "prohibited" ? "oklch(0.65 0.18 25 / 0.2)" : aiConsent === "permitted_attribution" ? "oklch(0.75 0.18 85 / 0.2)" : "oklch(0.65 0.18 145 / 0.2)", color: aiConsent === "prohibited" ? "oklch(0.65 0.18 25)" : aiConsent === "permitted_attribution" ? "oklch(0.84 0.155 85)" : "oklch(0.65 0.18 145)" }}>
                       {aiConsent === "prohibited" ? "AI TRAINING PROHIBITED" : aiConsent === "permitted_attribution" ? "PERMITTED WITH ATTRIBUTION" : "FREELY PERMITTED"}
@@ -1258,7 +1258,7 @@ export default function UploadPage() {
                             onClick={handleGenerateCaption}
                             disabled={!title}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
-                            style={{ background: "oklch(0.75 0.18 85 / 0.15)", border: "1px solid oklch(0.75 0.18 85 / 0.4)", color: "#8A6A2A" }}
+                            style={{ background: "oklch(0.75 0.18 85 / 0.15)", border: "1px solid oklch(0.75 0.18 85 / 0.4)", color: "#CBB183" }}
                           >
                             <Sparkles size={11} /> Generate Caption
                           </button>
@@ -1274,7 +1274,7 @@ export default function UploadPage() {
                     )}
                     {captionState === "loading" && (
                       <div className="flex items-center gap-2 py-2">
-                        <Loader2 size={13} className="animate-spin" style={{ color: "#8A6A2A" }} />
+                        <Loader2 size={13} className="animate-spin" style={{ color: "#CBB183" }} />
                         <span className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>Generating caption — only title and genre sent to AI...</span>
                       </div>
                     )}
@@ -1285,7 +1285,7 @@ export default function UploadPage() {
                           <button type="button" onClick={handleAcceptCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.4)", color: "oklch(0.75 0.18 145)" }}>
                             <CheckCircle2 size={11} /> Accept
                           </button>
-                          <button type="button" onClick={() => { const edited = window.prompt("Edit the caption:", captionSuggestion); if (edited !== null) { setCaption(edited); setCaptionState("accepted"); setCaptionSuggestion(null); toast.success("Caption saved"); } }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.75 0.18 85 / 0.1)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "#8A6A2A" }}>
+                          <button type="button" onClick={() => { const edited = window.prompt("Edit the caption:", captionSuggestion); if (edited !== null) { setCaption(edited); setCaptionState("accepted"); setCaptionSuggestion(null); toast.success("Caption saved"); } }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(0.75 0.18 85 / 0.1)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "#CBB183" }}>
                             <RefreshCw size={11} /> Edit
                           </button>
                           <button type="button" onClick={handleIgnoreCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "oklch(1 0 0 / 0.04)", border: "1px solid oklch(1 0 0 / 0.1)", color: "oklch(0.5 0.03 280)" }}>
@@ -1325,7 +1325,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(2)} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={() => setStep(4)} style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" onClick={() => setStep(4)} style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                   {witnessData ? "Next: Publish" : "Skip & Publish"} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1400,7 +1400,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(3)} disabled={uploadPhase === "uploading" || uploadPhase === "processing"} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                   {(uploadMutation.isPending || uploadPhase === "processing") ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Upload className="w-4 h-4 mr-2" /> {uploadMode === "manuscript" || uploadMode === "comic" ? "Publish Work" : "Publish Track"}</>}
                 </Button>
               </div>
