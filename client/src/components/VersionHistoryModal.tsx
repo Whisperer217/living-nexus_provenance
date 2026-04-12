@@ -124,7 +124,7 @@ export function VersionHistoryModal({
       <DialogContent
         className="max-w-2xl max-h-[85vh] overflow-y-auto"
         style={{
-          background: "#3A2030",
+          background: "#2D1B2E",
           border: "1px solid oklch(0.84 0.155 85 / 0.25)",
           color: "#f1f5f9",
         }}
@@ -188,7 +188,7 @@ export function VersionHistoryModal({
                   />
                   <div
                     className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                    style={{ background: "oklch(0.16 0.04 270)", border: "1px dashed oklch(0.84 0.155 85 / 0.3)" }}
+                    style={{ background: "oklch(0.13 0.04 285)", border: "1px dashed oklch(0.84 0.155 85 / 0.3)" }}
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload size={16} style={{ color: "oklch(0.84 0.155 85)" }} />
@@ -233,7 +233,7 @@ export function VersionHistoryModal({
                     >
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent style={{ background: "#3A2030", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}>
+                    <SelectContent style={{ background: "#2D1B2E", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}>
                       <SelectItem value="original" className="text-white">Human-Made — No AI Used</SelectItem>
                       <SelectItem value="ai_assisted" className="text-white">AI-Assisted — Human + AI Tools</SelectItem>
                       <SelectItem value="ai_generated" className="text-white">AI-Generated — AI-Created</SelectItem>

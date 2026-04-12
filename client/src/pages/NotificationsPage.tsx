@@ -20,12 +20,12 @@ import { formatDistanceToNow } from "date-fns";
 /* ── Notification type → icon + color ──────────────────────────── */
 function NotifIcon({ type }: { type: string }) {
   const map: Record<string, { icon: React.ReactNode; color: string }> = {
-    witness:        { icon: <Eye size={14} />,          color: "text-[#D4AF37] bg-[#D4AF37]/10" },
+    witness:        { icon: <Eye size={14} />,          color: "text-[#CBB183] bg-[#CBB183]/10" },
     comment:        { icon: <MessageSquare size={14} />, color: "text-[#A78BFA] bg-[#A78BFA]/10" },
     like:           { icon: <Heart size={14} />,         color: "text-rose-400 bg-rose-400/10" },
     tip:            { icon: <Coins size={14} />,         color: "text-emerald-400 bg-emerald-400/10" },
     playlist_invite:{ icon: <ListMusic size={14} />,     color: "text-sky-400 bg-sky-400/10" },
-    new_track:      { icon: <Music size={14} />,         color: "text-[#D4AF37] bg-[#D4AF37]/10" },
+    new_track:      { icon: <Music size={14} />,         color: "text-[#CBB183] bg-[#CBB183]/10" },
     system:         { icon: <Megaphone size={14} />,     color: "text-white/50 bg-white/5" },
   };
   const { icon, color } = map[type] ?? map.system;
@@ -59,7 +59,7 @@ function NotifRow({
       className={`group flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all
         ${notif.isRead
           ? "bg-[oklch(0.11_0.015_280)] border border-white/[0.04] hover:border-white/[0.08]"
-          : "bg-[oklch(0.13_0.025_280)] border border-[#D4AF37]/10 hover:border-[#D4AF37]/20"
+          : "bg-[oklch(0.13_0.025_280)] border border-[#CBB183]/10 hover:border-[#CBB183]/20"
         }`}
       onClick={handleClick}
     >
@@ -73,7 +73,7 @@ function NotifRow({
           <NotifIcon type={notif.type} />
         )}
         {!notif.isRead && (
-          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#D4AF37] border-2 border-[oklch(0.09_0.04_265)]" />
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#CBB183] border-2 border-[oklch(0.09_0.04_265)]" />
         )}
       </div>
 
@@ -205,9 +205,9 @@ export default function NotificationsPage() {
     return (
       <div className="min-h-screen bg-[oklch(0.09_0.04_265)] flex items-center justify-center">
         <div className="text-center">
-          <Bell size={40} className="mx-auto mb-4 text-[#D4AF37]/40" />
+          <Bell size={40} className="mx-auto mb-4 text-[#CBB183]/40" />
           <p className="text-white/50 mb-4">Sign in to see your notifications</p>
-          <Button onClick={() => navigate("/")} className="bg-[#D4AF37] text-black font-heading">
+          <Button onClick={() => navigate("/")} className="bg-[#CBB183] text-black font-heading">
             Go Home
           </Button>
         </div>
@@ -228,7 +228,7 @@ export default function NotificationsPage() {
               Signals
               {unread.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-xs font-heading
-                  bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37]">
+                  bg-[#CBB183]/10 border border-[#CBB183]/20 text-[#CBB183]">
                   {unread.length}
                 </span>
               )}
@@ -257,7 +257,7 @@ export default function NotificationsPage() {
               onClick={() => setTab(t)}
               className={`flex-1 py-1.5 rounded-lg text-xs font-heading transition-all ${
                 tab === t
-                  ? "bg-[#D4AF37] text-black"
+                  ? "bg-[#CBB183] text-black"
                   : "text-white/40 hover:text-white/70"
               }`}
             >
@@ -269,11 +269,11 @@ export default function NotificationsPage() {
         {/* Notification list */}
         {isLoading ? (
           <div className="flex justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-[#D4AF37]/50" />
+            <Loader2 size={24} className="animate-spin text-[#CBB183]/50" />
           </div>
         ) : displayed.length === 0 ? (
           <div className="text-center py-16">
-            <Bell size={36} className="mx-auto mb-4 text-[#D4AF37]/20" />
+            <Bell size={36} className="mx-auto mb-4 text-[#CBB183]/20" />
             <p className="text-white/40 mb-1">
               {tab === "inbox" ? "You're all caught up" : "No notifications yet"}
             </p>

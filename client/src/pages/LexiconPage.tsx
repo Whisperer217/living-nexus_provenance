@@ -354,7 +354,7 @@ export default function LexiconPage() {
               className="px-8 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90"
               style={{
                 background: "oklch(0.75 0.18 85)",
-                color: "#FFF8E7",
+                color: "#E6CDAE",
               }}
             >
               Register a Work →

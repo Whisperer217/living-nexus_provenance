@@ -245,7 +245,7 @@ export default function DiscoverPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-10"
-            style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #5C3530", color: "oklch(0.9 0.01 280)" }}
+            style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #4A2D52", color: "oklch(0.9 0.01 280)" }}
           />
         </div>
 
@@ -453,7 +453,7 @@ export default function DiscoverPage() {
             <div className="fixed inset-0 z-40" onClick={closeMenu} />
             <div
               className="fixed z-50 min-w-[190px] rounded-xl overflow-hidden shadow-2xl py-1"
-              style={{ top: menuPos.y, left: menuPos.x, background: "oklch(0.14 0.015 280)", border: "1px solid #5C3530" }}
+              style={{ top: menuPos.y, left: menuPos.x, background: "oklch(0.14 0.015 280)", border: "1px solid #4A2D52" }}
             >
               {menuSong.song.fileUrl && (
                 <button type="button" onClick={handlePlayNextFromMenu} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
@@ -571,7 +571,7 @@ export default function DiscoverPage() {
         {/* ── Footer ── */}
         <div className="py-8 border-t text-center" style={{ borderColor: "oklch(0.2 0.015 280)" }}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-4">
-            <Link href="/contributors" className="flex items-center gap-2 text-sm transition-all hover:opacity-100 opacity-60 hover:opacity-100" style={{ color: "#D4AF37" }}>
+            <Link href="/contributors" className="flex items-center gap-2 text-sm transition-all hover:opacity-100 opacity-60 hover:opacity-100" style={{ color: "#CBB183" }}>
               <Star size={14} />
               Founding Creators
             </Link>

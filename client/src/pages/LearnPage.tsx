@@ -312,7 +312,7 @@ export default function LearnPage() {
             onClick={() => setActiveSection("wid-spec")}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
             style={activeSection === "wid-spec"
-              ? { background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }
+              ? { background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }
               : { color: "oklch(0.6 0.03 280)" }}
           >
             <Fingerprint size={13} /> WID Specification
@@ -321,7 +321,7 @@ export default function LearnPage() {
             onClick={() => setActiveSection("lexicon")}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
             style={activeSection === "lexicon"
-              ? { background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }
+              ? { background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }
               : { color: "oklch(0.6 0.03 280)" }}
           >
             <BookOpen size={13} /> Lexicon

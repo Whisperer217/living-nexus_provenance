@@ -178,7 +178,7 @@ export function AiDisclosurePill({
           className="max-w-[240px] text-xs"
           style={{
             background: "oklch(0.12 0.015 280)",
-            border: "1px solid #5C3530",
+            border: "1px solid #4A2D52",
             color: "oklch(0.85 0.01 280)",
           }}
         >
@@ -236,7 +236,7 @@ export function AiConsentPill({
           className="max-w-[240px] text-xs"
           style={{
             background: "oklch(0.12 0.015 280)",
-            border: "1px solid #5C3530",
+            border: "1px solid #4A2D52",
             color: "oklch(0.85 0.01 280)",
           }}
         >

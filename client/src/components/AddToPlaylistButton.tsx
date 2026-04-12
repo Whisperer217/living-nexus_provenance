@@ -75,7 +75,7 @@ export default function AddToPlaylistButton({ songId, variant = "compact", class
         title={title}
         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-body transition-all
           ${inPlaylist
-            ? "bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/40 hover:bg-[#D4AF37]/25"
+            ? "bg-[#CBB183]/15 text-[#CBB183] border border-[#CBB183]/40 hover:bg-[#CBB183]/25"
             : "bg-white/[0.06] text-white/70 border border-white/[0.12] hover:bg-white/[0.10] hover:text-white"
           } ${className}`}
       >
@@ -98,7 +98,7 @@ export default function AddToPlaylistButton({ songId, variant = "compact", class
       title={title}
       className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
         ${inPlaylist
-          ? "bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/40 hover:bg-[#D4AF37]/25"
+          ? "bg-[#CBB183]/15 text-[#CBB183] border border-[#CBB183]/40 hover:bg-[#CBB183]/25"
           : "bg-white/[0.06] text-white/50 border border-white/[0.08] hover:bg-white/[0.10] hover:text-white"
         } ${className}`}
     >

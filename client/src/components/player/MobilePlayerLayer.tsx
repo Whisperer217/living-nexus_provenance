@@ -207,7 +207,7 @@ function DiscoverPanel({
             className="flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-[0.98] text-left"
             style={{
               background: "oklch(0.12 0.025 275 / 0.6)",
-              border: "1px solid oklch(0.22 0.03 275 / 0.5)",
+              border: "1px solid oklch(0.18 0.05 285 / 0.5)",
             }}
           >
             {/* Art */}
@@ -1160,7 +1160,7 @@ export default function MobilePlayerLayer() {
         className="flex-shrink-0 flex items-center gap-1 mx-8 mb-4 p-1 rounded-2xl"
         style={{
           background: "oklch(0.12 0.025 275 / 0.8)",
-          border: "1px solid oklch(0.22 0.03 275 / 0.5)",
+          border: "1px solid oklch(0.18 0.05 285 / 0.5)",
         }}
       >
         {(["playing", "discover"] as const).map((tab) => (
@@ -1214,7 +1214,7 @@ export default function MobilePlayerLayer() {
               onClick={() => setWidPanelOpen(true)}
               className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
               style={{
-                background: "oklch(0.22 0.08 145 / 0.88)",
+                background: "oklch(0.18 0.05 285 / 0.88)",
                 border: "1px solid oklch(0.55 0.18 145 / 0.5)",
                 color: "oklch(0.82 0.18 145)",
                 backdropFilter: "blur(4px)",
@@ -1388,7 +1388,7 @@ export default function MobilePlayerLayer() {
               </span>
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
-                  background: "oklch(0.22 0.08 145 / 0.5)",
+                  background: "oklch(0.18 0.05 285 / 0.5)",
                   color: "oklch(0.82 0.18 145)",
                   border: "1px solid oklch(0.45 0.18 145 / 0.3)",
                 }}>
@@ -1460,7 +1460,7 @@ export default function MobilePlayerLayer() {
             style={{ color: "oklch(0.58 0.05 280)" }}>
             Signals
           </div>
-          <div className="flex-1 h-px" style={{ background: "oklch(0.22 0.03 275 / 0.5)" }} />
+          <div className="flex-1 h-px" style={{ background: "oklch(0.18 0.05 285 / 0.5)" }} />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {EMOJI_REACTIONS.map(({ type, emoji, label }) => {
@@ -1517,7 +1517,7 @@ export default function MobilePlayerLayer() {
       <div className="flex-shrink-0 mx-8 mb-4 rounded-2xl overflow-hidden"
         style={{
           background: "oklch(0.10 0.02 275 / 0.6)",
-          border: "1px solid oklch(0.22 0.03 275 / 0.5)",
+          border: "1px solid oklch(0.18 0.05 285 / 0.5)",
         }}
       >
         {/* Header */}
@@ -1726,7 +1726,7 @@ export default function MobilePlayerLayer() {
               onClick={(e) => { e.stopPropagation(); setPlayerState("expanded"); setWidPanelOpen(true); }}
               className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
               style={{
-                background: "oklch(0.22 0.08 145 / 0.88)",
+                background: "oklch(0.18 0.05 285 / 0.88)",
                 border: "1px solid oklch(0.55 0.18 145 / 0.5)",
                 color: "oklch(0.82 0.18 145)",
                 backdropFilter: "blur(4px)",

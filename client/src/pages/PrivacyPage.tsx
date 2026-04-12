@@ -125,7 +125,7 @@ function SovereignMigrationTracker() {
                 <span className="text-[9px] mt-1 whitespace-nowrap" style={{ color: done ? "oklch(0.75 0.18 85)" : "oklch(0.40 0.04 280)" }}>{step.label}</span>
               </div>
               {i < arr.length - 1 && (
-                <div className="flex-1 h-px mx-1 mb-3" style={{ background: done ? "oklch(0.75 0.18 85 / 0.40)" : "#5C3530" }} />
+                <div className="flex-1 h-px mx-1 mb-3" style={{ background: done ? "oklch(0.75 0.18 85 / 0.40)" : "#4A2D52" }} />
               )}
             </div>
           );

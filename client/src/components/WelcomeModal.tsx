@@ -65,7 +65,7 @@ export default function WelcomeModal() {
       <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
         <DialogContent
           className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
-          style={{ background: "oklch(0.10 0.015 280)", borderColor: "oklch(0.84 0.155 85 / 0.4)" }}
+          style={{ background: "oklch(0.10 0.04 285)", borderColor: "oklch(0.84 0.155 85 / 0.4)" }}
         >
           <DialogDescription className="sr-only">
             Welcome back, Founder's Era supporter.
@@ -100,7 +100,7 @@ export default function WelcomeModal() {
             <Button
               className="flex-1 font-semibold"
               onClick={handleDismiss}
-              style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
             >
               Enter the Sanctuary
             </Button>
@@ -124,7 +124,7 @@ export default function WelcomeModal() {
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
       <DialogContent
         className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
-        style={{ background: "oklch(0.10 0.015 280)", borderColor: "oklch(0.22 0.025 280)" }}
+        style={{ background: "oklch(0.10 0.04 285)", borderColor: "oklch(0.18 0.05 285)" }}
       >
         {/* Hidden accessibility description */}
         <DialogDescription className="sr-only">
@@ -132,7 +132,7 @@ export default function WelcomeModal() {
         </DialogDescription>
 
         {/* Gold header band */}
-        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid oklch(0.22 0.025 280)" }}>
+        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid oklch(0.18 0.05 285)" }}>
           <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
             style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
             <Music2 className="w-7 h-7" style={{ color: "oklch(0.84 0.155 85)" }} />
@@ -191,7 +191,7 @@ export default function WelcomeModal() {
           <Button
             className="flex-1 font-semibold"
             onClick={handleDismiss}
-            style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7" }}
+            style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
           >
             Get Started
           </Button>

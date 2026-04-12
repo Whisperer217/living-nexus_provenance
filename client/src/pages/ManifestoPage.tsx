@@ -202,7 +202,7 @@ export default function ManifestoPage() {
         <div
           className="rounded-2xl p-8 mb-16 text-center"
           style={{
-            background: "#3A2030",
+            background: "#2D1B2E",
             border: "1px solid oklch(0.84 0.155 85 / 0.15)",
           }}
         >

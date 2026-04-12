@@ -276,7 +276,7 @@ export default function GiftModal({
                   style={{
                     background: !useCustom && selectedCents === cents
                       ? "oklch(0.84 0.155 85)"
-                      : "oklch(0.16 0.025 275)",
+                      : "oklch(0.13 0.035 285)",
                     color: !useCustom && selectedCents === cents
                       ? "#2D1B2E"
                       : "oklch(0.65 0.04 280)",
@@ -290,7 +290,7 @@ export default function GiftModal({
                 onClick={() => setUseCustom(true)}
                 className="px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95"
                 style={{
-                  background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.16 0.025 275)",
+                  background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.13 0.035 285)",
                   color: useCustom ? "#2D1B2E" : "oklch(0.65 0.04 280)",
                   border: `1px solid ${useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
                 }}

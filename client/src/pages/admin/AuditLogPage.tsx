@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const GOLD = "oklch(0.84 0.155 85)";
-const BG = "#FFF8E7";
+const BG = "#E6CDAE";
 const CARD = "oklch(0.12 0.015 280)";
 const BORDER = "oklch(0.2 0.02 280)";
 const TEXT = "#E2E8F0";

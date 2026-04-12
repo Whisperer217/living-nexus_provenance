@@ -298,7 +298,7 @@ export default function TheaterPlayer() {
                   onClick={() => setWidPanelOpen(v => !v)}
                   className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide transition-all z-20"
                   style={{
-                    background: "oklch(0.22 0.08 145 / 0.88)",
+                    background: "oklch(0.18 0.05 285 / 0.88)",
                     border: "1px solid oklch(0.55 0.18 145 / 0.5)",
                     color: "oklch(0.82 0.18 145)",
                     backdropFilter: "blur(6px)",
@@ -608,7 +608,7 @@ export default function TheaterPlayer() {
                     <div className="text-[10px] font-heading tracking-[0.15em] uppercase" style={{ color: "oklch(0.58 0.05 280)" }}>
                       Signal this work
                     </div>
-                    <div className="flex-1 h-px" style={{ background: "oklch(0.22 0.03 275 / 0.5)" }} />
+                    <div className="flex-1 h-px" style={{ background: "oklch(0.18 0.05 285 / 0.5)" }} />
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {THEATER_EMOJI_REACTIONS.map(({ type, emoji, label }) => {

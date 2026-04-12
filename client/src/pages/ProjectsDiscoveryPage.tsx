@@ -26,7 +26,7 @@ function ProjectCard({ project }: { project: any }) {
       <div
         className="group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
         style={{
-          background: "#3A2030",
+          background: "#2D1B2E",
           border: "1px solid oklch(0.84 0.155 85 / 0.08)",
           boxShadow: "0 4px 24px oklch(0 0 0 / 0.4)",
         }}
@@ -316,7 +316,7 @@ export default function ProjectsDiscoveryPage() {
               <div
                 key={i}
                 className="rounded-2xl overflow-hidden animate-pulse"
-                style={{ background: "#3A2030", height: "340px" }}
+                style={{ background: "#2D1B2E", height: "340px" }}
               />
             ))}
           </div>

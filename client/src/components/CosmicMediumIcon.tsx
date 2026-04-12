@@ -27,9 +27,9 @@ interface CosmicMediumIconProps {
 // ── Color tokens per medium ────────────────────────────────────────────────────
 export const MEDIUM_COLORS: Record<MediumType, { primary: string; glow: string; bg: string; border: string }> = {
   audio:      { primary: "oklch(0.68 0.22 295)",  glow: "oklch(0.68 0.22 295 / 0.35)", bg: "oklch(0.10 0.06 295 / 0.6)",  border: "oklch(0.68 0.22 295 / 0.25)" },
-  lyrics:     { primary: "oklch(0.82 0.18 85)",   glow: "oklch(0.82 0.18 85 / 0.35)",  bg: "rgba(74, 44, 42, 0.6)",   border: "oklch(0.82 0.18 85 / 0.25)"  },
-  manuscript: { primary: "oklch(0.72 0.18 155)",  glow: "oklch(0.72 0.18 155 / 0.35)", bg: "rgba(74, 44, 42, 0.6)",  border: "oklch(0.72 0.18 155 / 0.25)" },
-  comic:      { primary: "oklch(0.72 0.20 35)",   glow: "oklch(0.72 0.20 35 / 0.35)",  bg: "rgba(74, 44, 42, 0.6)",   border: "oklch(0.72 0.20 35 / 0.25)"  },
+  lyrics:     { primary: "oklch(0.82 0.18 85)",   glow: "oklch(0.82 0.18 85 / 0.35)",  bg: "rgba(61, 36, 64, 0.6)",   border: "oklch(0.82 0.18 85 / 0.25)"  },
+  manuscript: { primary: "oklch(0.72 0.18 155)",  glow: "oklch(0.72 0.18 155 / 0.35)", bg: "rgba(61, 36, 64, 0.6)",  border: "oklch(0.72 0.18 155 / 0.25)" },
+  comic:      { primary: "oklch(0.72 0.20 35)",   glow: "oklch(0.72 0.20 35 / 0.35)",  bg: "rgba(61, 36, 64, 0.6)",   border: "oklch(0.72 0.20 35 / 0.25)"  },
 };
 
 // ── SVG Glyphs ────────────────────────────────────────────────────────────────

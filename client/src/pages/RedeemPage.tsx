@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
 const GOLD = "oklch(0.84 0.155 85)";
-const BG = "#FFF8E7";
+const BG = "#E6CDAE";
 const CARD = "oklch(0.12 0.015 280)";
 const BORDER = "oklch(0.2 0.02 280)";
 const TEXT = "#E2E8F0";
@@ -161,7 +161,7 @@ export default function RedeemPage() {
                     value={code}
                     onChange={e => setCode(e.target.value.toUpperCase())}
                     className="text-center text-lg font-mono tracking-widest uppercase"
-                    style={{ background: "oklch(0.10 0.015 280)", borderColor: BORDER, color: TEXT, letterSpacing: "0.15em" }}
+                    style={{ background: "oklch(0.10 0.04 285)", borderColor: BORDER, color: TEXT, letterSpacing: "0.15em" }}
                     autoFocus
                     autoComplete="off"
                     spellCheck={false}

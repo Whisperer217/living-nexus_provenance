@@ -393,7 +393,7 @@ export default function PlayerBar() {
                 onClick={() => navigate(`/verify/${videoWitnessId}`)}
                 className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide transition-all z-20"
                 style={{
-                  background: "oklch(0.22 0.08 145 / 0.88)",
+                  background: "oklch(0.18 0.05 285 / 0.88)",
                   border: "1px solid oklch(0.55 0.18 145 / 0.5)",
                   color: "oklch(0.82 0.18 145)",
                   backdropFilter: "blur(4px)",
@@ -707,7 +707,7 @@ export default function PlayerBar() {
               disabled={!currentSongId}
               className="w-14 h-14 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl
                 transition-opacity hover:opacity-80 disabled:cursor-default"
-              style={{ background: currentTrack?.bg || "oklch(0.195 0.038 48)" }}
+              style={{ background: currentTrack?.bg || "oklch(0.14 0.045 285)" }}
               title={currentTrack?.title || ""}
             >
               {currentTrack?.artUrl && currentTrack.artType !== "video"

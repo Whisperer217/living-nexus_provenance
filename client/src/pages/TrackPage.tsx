@@ -160,7 +160,7 @@ export default function TrackPage() {
           <button
             onClick={handlePlay}
             className="absolute bottom-4 left-4 w-12 h-12 rounded-full flex items-center justify-center
-              bg-[#D4AF37] hover:bg-[#D4AF37]/90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20"
+              bg-[#CBB183] hover:bg-[#CBB183]/90 active:scale-95 transition-all shadow-lg shadow-[#CBB183]/20"
           >
             {isPlaying
               ? <Pause size={20} className="text-black" />
@@ -259,7 +259,7 @@ export default function TrackPage() {
             <button
               onClick={copyLink}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-body transition-all border
-                bg-white/[0.04] border-white/[0.08] text-white/40 hover:border-[#D4AF37]/30 hover:text-[#D4AF37]"
+                bg-white/[0.04] border-white/[0.08] text-white/40 hover:border-[#CBB183]/30 hover:text-[#CBB183]"
             >
               <Link2 size={13} /> Copy Link
             </button>
@@ -281,10 +281,10 @@ export default function TrackPage() {
       </div>
 
       {/* ── Gift Jar ── */}
-      <div className={`rounded-2xl border p-5 mb-5 ${tipsEnabled ? "border-[#D4AF37]/20 bg-[oklch(0.11_0.012_280)]" : "border-white/[0.06] bg-[oklch(0.10_0.008_280)]"}`}>
+      <div className={`rounded-2xl border p-5 mb-5 ${tipsEnabled ? "border-[#CBB183]/20 bg-[oklch(0.11_0.012_280)]" : "border-white/[0.06] bg-[oklch(0.10_0.008_280)]"}`}>
         <div className="flex items-center gap-2 mb-2">
-          <DollarSign size={15} className={tipsEnabled ? "text-[#D4AF37]" : "text-white/20"} />
-          <span className={`font-heading text-[13px] tracking-wider ${tipsEnabled ? "text-[#D4AF37]" : "text-white/25"}`}>
+          <DollarSign size={15} className={tipsEnabled ? "text-[#CBB183]" : "text-white/20"} />
+          <span className={`font-heading text-[13px] tracking-wider ${tipsEnabled ? "text-[#CBB183]" : "text-white/25"}`}>
             Tip the Artist
           </span>
           {tipTotal > 0 && (
@@ -303,8 +303,8 @@ export default function TrackPage() {
                   onClick={() => { setTipSelected(amt); setCustomTip(""); }}
                   className={`py-2 rounded-xl text-[12px] font-heading transition-all border
                     ${tipSelected === amt
-                      ? "bg-[#D4AF37]/15 border-[#D4AF37] text-[#D4AF37]"
-                      : "bg-[oklch(0.14_0.013_280)] border-white/[0.08] text-white/45 hover:border-[#D4AF37]/40 hover:text-[#D4AF37]"
+                      ? "bg-[#CBB183]/15 border-[#CBB183] text-[#CBB183]"
+                      : "bg-[oklch(0.14_0.013_280)] border-white/[0.08] text-white/45 hover:border-[#CBB183]/40 hover:text-[#CBB183]"
                     }`}
                 >
                   ${amt}
@@ -319,13 +319,13 @@ export default function TrackPage() {
                 onChange={e => { setCustomTip(e.target.value); setTipSelected(null); }}
                 className="flex-1 px-3 py-2 rounded-xl text-[12px] font-body text-white/70
                   bg-[oklch(0.14_0.013_280)] border border-white/[0.08] outline-none
-                  focus:border-[#D4AF37]/50 placeholder:text-white/60"
+                  focus:border-[#CBB183]/50 placeholder:text-white/60"
               />
               <button
                 onClick={sendTip}
                 className="px-4 py-2 rounded-xl font-heading text-[12px] tracking-wider transition-all
-                  bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37]
-                  hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 active:scale-[0.98]"
+                  bg-[#CBB183]/10 border border-[#CBB183]/30 text-[#CBB183]
+                  hover:bg-[#CBB183]/20 hover:border-[#CBB183]/60 active:scale-[0.98]"
               >
                 Send ✦
               </button>

@@ -366,7 +366,7 @@ export default function MobilePlayerPanel() {
           <div className="flex items-end gap-[2px] h-3 pointer-events-none">
             {[0, 1, 2].map(i => (
               <div key={i} className="w-[3px] rounded-full"
-                style={{ background: "#D4AF37", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
+                style={{ background: "#CBB183", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
             ))}
           </div>
         )}
@@ -575,7 +575,7 @@ export default function MobilePlayerPanel() {
               onClick={(e) => { e.stopPropagation(); navigate(`/verify/${videoWitnessId}`); }}
               className="absolute top-12 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide z-20"
               style={{
-                background: "oklch(0.22 0.08 145 / 0.88)",
+                background: "oklch(0.18 0.05 285 / 0.88)",
                 border: "1px solid oklch(0.55 0.18 145 / 0.5)",
                 color: "oklch(0.82 0.18 145)",
                 backdropFilter: "blur(4px)",

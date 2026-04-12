@@ -760,7 +760,7 @@ html body[data-scroll-locked] {
   .surface-base     { background: var(--lnx-bg); }
   .surface-raised   { background: var(--lnx-bg-2); }
   .surface-elevated { background: var(--lnx-bg-3); }
-  .surface-modal    { background: oklch(0.195 0.038 48); backdrop-filter: blur(12px); }
+  .surface-modal    { background: oklch(0.14 0.045 285); backdrop-filter: blur(12px); }
 
   /* ── SEMANTIC TEXT COLORS — use these instead of hardcoded values ── */
   .text-lnx-gold   { color: var(--lnx-gold); }

@@ -73,7 +73,7 @@ function TruncatedMono({ value, label }: { value: string; label: string }) {
 
 function Field({ icon: Icon, label, children }: { icon: React.ElementType; label: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #4A2C2A" }}>
+    <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #3D2440" }}>
       <div className="flex items-center gap-1.5 mb-2">
         <Icon className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
         <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>{label}</p>
@@ -175,7 +175,7 @@ function CollectionVerifyView({
       </Field>
 
       {/* ── Included tracks ── */}
-      <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #4A2C2A" }}>
+      <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #3D2440" }}>
         <div className="flex items-center gap-1.5 mb-3">
           <Music className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
           <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>
@@ -222,7 +222,7 @@ function CollectionVerifyView({
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-bold"
-              style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7", fontFamily: "'Cinzel', serif" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
             >
               <Download className="w-4 h-4" /> Download Certificate
             </a>
@@ -317,14 +317,14 @@ function TrackVerifyView({
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
   body { background: #0a0a0a; color: #e2e8f0; font-family: 'Share Tech Mono', monospace; margin: 0; padding: 40px; }
-  .cert { max-width: 800px; margin: 0 auto; border: 1px solid #D4AF37; padding: 40px; position: relative; }
+  .cert { max-width: 800px; margin: 0 auto; border: 1px solid #CBB183; padding: 40px; position: relative; }
   .cert::before { content: ''; position: absolute; inset: 6px; border: 1px solid rgba(201,168,76,0.2); pointer-events: none; }
-  h1 { font-family: 'Orbitron', monospace; color: #D4AF37; font-size: 22px; letter-spacing: 4px; margin: 0 0 4px; }
+  h1 { font-family: 'Orbitron', monospace; color: #CBB183; font-size: 22px; letter-spacing: 4px; margin: 0 0 4px; }
   h2 { font-family: 'Orbitron', monospace; color: #6ee7f7; font-size: 13px; letter-spacing: 3px; margin: 0 0 32px; }
-  .divider { border: none; border-top: 1px solid #D4AF37; margin: 24px 0; opacity: 0.4; }
+  .divider { border: none; border-top: 1px solid #CBB183; margin: 24px 0; opacity: 0.4; }
   .label { color: #6ee7f7; font-size: 11px; letter-spacing: 2px; margin-bottom: 2px; }
   .value { color: #e2e8f0; font-size: 14px; margin-bottom: 16px; word-break: break-all; }
-  .wid { font-family: 'Orbitron', monospace; color: #D4AF37; font-size: 18px; letter-spacing: 3px; }
+  .wid { font-family: 'Orbitron', monospace; color: #CBB183; font-size: 18px; letter-spacing: 3px; }
   .consent { display: inline-block; padding: 6px 16px; border: 1px solid ${consentColor}; color: ${consentColor}; font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 2px; margin-bottom: 16px; }
   .sig { font-size: 10px; color: rgba(226,232,240,0.5); word-break: break-all; line-height: 1.6; }
   .provenance-badge { display: inline-block; padding: 4px 12px; border: 1px solid rgba(201,168,76,0.4); color: #c9a84c; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; }
@@ -339,7 +339,7 @@ function TrackVerifyView({
   <hr class="divider">
 
   <div class="label">WORK TITLE</div>
-  <div class="value" style="font-size:18px;color:#D4AF37;">${data.title}</div>
+  <div class="value" style="font-size:18px;color:#CBB183;">${data.title}</div>
 
   <div class="label">CREATOR (CURRENT NAME)</div>
   <div class="value">${data.artistName}</div>
@@ -515,7 +515,7 @@ function TrackVerifyView({
 
       {/* ── Audio Version History ── */}
       {audioVersionHistory && audioVersionHistory.length > 0 && (
-        <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #4A2C2A" }}>
+        <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #3D2440" }}>
           <div className="flex items-center gap-1.5 mb-3">
             <History className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
             <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>Audio Version History</p>
@@ -649,7 +649,7 @@ function TrackVerifyView({
           <Button
             className="flex-1"
             onClick={() => navigate(`/songs/${data.songId}`)}
-            style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7", fontFamily: "'Cinzel', serif" }}
+            style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
           >
             <ExternalLink className="w-4 h-4 mr-2" /> View Track
           </Button>
@@ -729,7 +729,7 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#FFF8E7" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#E6CDAE" }}>
 
       {/* ── Header ── */}
       <header className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: "oklch(0.15 0.015 280)" }}>
@@ -768,7 +768,7 @@ export default function VerifyPage() {
             <Button
               onClick={handleSearch}
               disabled={!inputWid.trim()}
-              style={{ background: "oklch(0.84 0.155 85)", color: "#FFF8E7", fontFamily: "'Cinzel', serif" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
             >
               <Search className="w-4 h-4" />
             </Button>
@@ -785,7 +785,7 @@ export default function VerifyPage() {
 
           {/* Empty state — no query yet */}
           {!queryWid && (
-            <div className="text-center py-12 rounded-2xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #4A2C2A" }}>
+            <div className="text-center py-12 rounded-2xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #3D2440" }}>
               <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
               <p className="text-sm" style={{ color: "oklch(0.42 0.03 280)" }}>
                 Enter a Witness ID or Collection ID above to verify a registered work.
