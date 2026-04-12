@@ -375,24 +375,13 @@ export default function ArchivePage() {
           <span style={{ color: "#E6CDAE" }}>Archive</span>
         </nav>
 
-        {/* ── Header ─────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold"
-              style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
-              LNA — Archive
-            </h1>
-            <p className="text-sm mt-1" style={{ color: "#E2E8F0" }}>
-              All tracks you have uploaded to Living Nexus
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/upload">
-              <Button size="sm" style={{ background: "#CBB183", color: "#E6CDAE" }}>
-                <Upload className="w-3 h-3 mr-1" /> Upload New
-              </Button>
-            </Link>
-          </div>
+        {/* ── Upload action ─────────────────────────────────────────────── */}
+        <div className="flex items-center justify-end mb-6">
+          <Link href="/upload">
+            <Button size="sm" style={{ background: "#CBB183", color: "#E6CDAE" }}>
+              <Upload className="w-3 h-3 mr-1" /> Upload New
+            </Button>
+          </Link>
         </div>
 
         {/* ── Slot Usage Bar ─────────────────────────────────────────── */}

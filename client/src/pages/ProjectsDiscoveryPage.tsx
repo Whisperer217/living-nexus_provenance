@@ -210,77 +210,22 @@ export default function ProjectsDiscoveryPage() {
         <div className="absolute bottom-0 left-0 p-6">
           <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
           <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Creator Projects</h1>
-          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#DACAAA" }}>Campaigns from independent creators. Every project provenance-sealed with a Witness ID.</p>
-        </div>
-      </div>
-      {/* Header */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          background: "linear-gradient(180deg, #2C3438 0%, #2C3438 100%)",
-          borderBottom: "1px solid rgba(203,177,131,0.08)",
-        }}
-      >
-        {/* Ambient glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 60% 80% at 50% 0%, rgba(203,177,131,0.04) 0%, transparent 70%)",
-          }}
-        />
-        <div className="relative max-w-6xl mx-auto px-6 py-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(203,177,131,0.10)", border: "1px solid rgba(203,177,131,0.28)" }}
-            >
-              <Compass size={20} style={{ color: "#CBB183" }} />
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] font-heading" style={{ color: "rgba(203,177,131,0.55)" }}>
-                Living Nexus
-              </p>
-              <h1 className="font-display text-[28px] leading-none" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
-                Creator Projects
-              </h1>
-            </div>
+          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#DACAAA" }}>Campaigns from independent creators. Every project is provenance-sealed with a Witness ID at launch. Support directly — 90% goes to the creator.</p>
+          <div className="mt-3">
+            {user ? (
+              <Link href="/my-projects">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-heading tracking-wide transition-all" style={{ background: "rgba(203,177,131,0.15)", border: "1px solid rgba(203,177,131,0.5)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                  <Rocket size={13} /> Launch Your Project
+                </button>
+              </Link>
+            ) : (
+              <a href={getLoginUrl("/my-projects")}>
+                <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-heading tracking-wide transition-all" style={{ background: "rgba(203,177,131,0.15)", border: "1px solid rgba(203,177,131,0.5)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                  <Rocket size={13} /> Launch Your Project
+                </button>
+              </a>
+            )}
           </div>
-          <p className="text-[14px] max-w-lg" style={{ color: "#AA8E64" }}>
-            Campaigns from independent creators. Every project is provenance-sealed with a Witness ID at launch.
-            Support directly — 90% goes to the creator.
-          </p>
-
-          {/* CTA for logged-in creators */}
-          {user && (
-            <Link href="/my-projects">
-              <Button
-                className="mt-5 flex items-center gap-2 font-heading tracking-wide text-[12px]"
-                style={{
-                  background: "#CBB183",
-                  color: "#2C3438",
-                  border: "none",
-                }}
-              >
-                <Rocket size={14} />
-                Launch Your Project
-              </Button>
-            </Link>
-          )}
-          {!user && (
-            <a href={getLoginUrl("/my-projects")}>
-              <Button
-                className="mt-5 flex items-center gap-2 font-heading tracking-wide text-[12px]"
-                style={{
-                  background: "#CBB183",
-                  color: "#2C3438",
-                  border: "none",
-                }}
-              >
-                <Rocket size={14} />
-                Launch Your Project
-              </Button>
-            </a>
-          )}
         </div>
       </div>
 

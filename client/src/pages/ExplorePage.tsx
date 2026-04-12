@@ -577,15 +577,6 @@ export default function ExplorePage() {
           <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#DACAAA" }}>Music, lyrics, manuscripts, comics — every witnessed work, at your fingertips</p>
         </div>
       </div>
-      {/* Header */}
-      <div className="relative h-[160px] overflow-hidden">
-        <img src={DISCOVER_IMG} alt="Explore" className="w-full h-full object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#2C3438] via-[#2C3438/50] to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-5">
-          <h1 className="font-heading text-2xl text-white tracking-wider">Explore the Cosmos</h1>
-          <p className="text-[12px] font-body mt-1" style={{ color: "#E2E8F0" }}>Music, lyrics, manuscripts, comics — every witnessed work, at your fingertips</p>
-        </div>
-      </div>
 
       <div className="px-6 py-5">
         {/* Search */}

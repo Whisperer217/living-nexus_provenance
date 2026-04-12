@@ -285,13 +285,8 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Creator Dashboard</h1>
-            <p className="text-sm mt-1" style={{ color: "#E2E8F0" }}>Welcome back, {user?.name || "Creator"}</p>
-          </div>
-          <div className="flex gap-2">
+        {/* Action buttons */}
+        <div className="flex items-center justify-end mb-8 gap-2">
             <Link href={`/creator/${user?.id}`}>
               <Button size="sm" variant="outline" style={{ borderColor: "#3F4A50", color: "#DACAAA" }}>
                 <ExternalLink className="w-3 h-3 mr-1" /> View Profile
@@ -303,7 +298,6 @@ export default function DashboardPage() {
               </Button>
             </Link>
           </div>
-        </div>
 
         {/* Pre-Onboarding Checklist Modal */}
         <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
