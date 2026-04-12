@@ -789,7 +789,7 @@ export default function HomePage() {
                 </em>
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
+              <div className="museum-grid mt-2">
                 {([
                   {
                     Icon: ShieldCheck,
@@ -916,7 +916,7 @@ export default function HomePage() {
             Witness IDs help creators preserve verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration.
           </blockquote>
           {/* Three-column breakdown */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 relative">
+          <div className="museum-grid mb-4 relative">
             {([
               {
                 icon: "✓",
@@ -1311,7 +1311,7 @@ export default function HomePage() {
           </div>
 
           {/* Three value pillars */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+          <div className="museum-grid mt-6">
             {[
               { icon: Fingerprint, color: "#F5C451", bg: "rgba(245,196,81,0.08)", border: "rgba(245,196,81,0.2)", title: "Your Work, Witnessed", body: "Every upload receives a Witness ID — a cryptographic timestamp that proves you created it first. Not a certificate. A deed." },
               { icon: ShieldCheck, color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "Creator-First Commerce", body: "Direct tipping and Living Archive subscriptions. The platform takes 10% on tips only. Everything else is yours." },

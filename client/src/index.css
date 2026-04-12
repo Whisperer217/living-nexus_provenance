@@ -498,6 +498,71 @@ html body[data-scroll-locked] {
     transform: translateY(-1px);
   }
 
+  /* ── MUSEUM CARD SYSTEM — Phase 2 exhibit frames ──
+     Gunmetal wall · Gilded border · Pearl info panel · 3D shadow lift
+     The card sits on the gunmetal wall like a framed exhibit.
+     Cover art fills the top. Info panel below has a pearl-stone face.
+  ────────────────────────────────────────────────────────────────── */
+  .museum-card {
+    background: #3F4A50;                         /* Lifted Steel — card body */
+    border: 1px solid rgba(203, 177, 131, 0.32); /* Quartzite Gold border */
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.35),
+      0 1px 3px rgba(0, 0, 0, 0.25);
+  }
+  .museum-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(203, 177, 131, 0.65);     /* Gold vein brightens on hover */
+    box-shadow:
+      0 12px 32px rgba(0, 0, 0, 0.50),           /* deep shadow for 3D lift */
+      0 4px 12px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(203, 177, 131, 0.20),        /* outer gold ring */
+      inset 0 1px 0 rgba(230, 205, 174, 0.08);   /* pearl top-edge sheen */
+  }
+  /* Active track — gold frame glows */
+  .museum-card--active {
+    border-color: rgba(203, 177, 131, 0.70) !important;
+    box-shadow:
+      0 0 0 1px rgba(203, 177, 131, 0.35),
+      0 8px 28px rgba(0, 0, 0, 0.45),
+      0 0 20px rgba(208, 161, 95, 0.18);
+  }
+  /* Hot track — gold banner treatment preserved */
+  .museum-card--hot {
+    border-color: rgba(208, 161, 95, 0.65) !important;
+  }
+  /* Info panel — pearl stone face below the cover art */
+  .museum-card-info {
+    background: linear-gradient(
+      to bottom,
+      #3F4A50 0%,          /* matches card body at top */
+      #384249 60%,         /* slight deepening */
+      #323C42 100%         /* darkest at bottom — grounds the card */
+    );
+    padding: 0.75rem;
+  }
+
+  /* ── MUSEUM GRID — 3-column max, consistent gutter ── */
+  .museum-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  @media (min-width: 640px) {
+    .museum-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 1280px) {
+    .museum-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
   /* ── Gold banner — tracks with 50+ plays earn a luminous gold border treatment ── */
   .gold-banner {
     border-color: oklch(0.78 0.16 78 / 0.65) !important;

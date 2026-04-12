@@ -78,7 +78,7 @@ function ExploreCard({
     <>
     <div
       className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
-        border bg-[oklch(0.148_0.032_50)] track-card-glow parchment-grain
+        museum-card parchment-grain
         ${isActive && !isNonAudio
           ? "border-[#E8A830]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.5),0_0_24px_oklch(0.82_0.14_85_/_0.12)]"
           : isHot
@@ -731,7 +731,7 @@ export default function ExplorePage() {
 
         {/* Loading skeleton — first page only */}
         {isLoading && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+          <div className="museum-grid">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
               <div key={i} className="rounded-xl overflow-hidden border border-white/[0.06] bg-[oklch(0.14_0.013_280)] animate-pulse">
                 <div className="bg-white/[0.04]" style={{ height: "240px" }} />
@@ -747,7 +747,7 @@ export default function ExplorePage() {
         {/* Grid */}
         {!isLoading && songs.length > 0 && (
           <div
-            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5"
+            className="museum-grid"
             style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
           >
             {songs.map((item: any) => {

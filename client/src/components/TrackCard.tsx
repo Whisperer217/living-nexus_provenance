@@ -125,13 +125,13 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
   return (
     <>
     <div
-      className={`group relative rounded-xl overflow-hidden transition-all duration-200
-        border bg-[oklch(0.148_0.032_50)] track-card-glow parchment-grain
+      className={`group relative rounded-xl overflow-hidden transition-all duration-300
+        museum-card parchment-grain
         ${isActive
-          ? "border-[#E8A830]/40 track-active-glow shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+          ? "museum-card--active"
           : isHot
-            ? "gold-banner"
-            : "border-[oklch(0.28_0.04_60/0.25)] hover:border-[oklch(0.55_0.10_72/0.40)]"
+            ? "museum-card--hot gold-banner"
+            : ""
         }`}
     >
       {/* ── Zone 1: Cover Art — plays in global player ── */}
@@ -281,15 +281,15 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         <Link
           href={`/track/${track.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          className="block text-[13px] font-heading text-white/90 truncate tracking-wide
-            hover:text-[#CBB183] transition-colors cursor-pointer"
+          className="block text-[13px] font-heading truncate tracking-wide
+            text-[#E6CDAE] hover:text-[#D0A15F] transition-colors cursor-pointer"
           title={`Open ${track.title}`}
         >
           {track.title}
         </Link>
 
         {/* Zone 3: Artist name → creator profile page */}
-        <div className="flex items-center gap-2 text-[11px] text-white/75">
+        <div className="flex items-center gap-2 text-[11px] text-[#AA8E64]">
           <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold
             bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
             {track.artist.charAt(0)}
@@ -325,7 +325,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           {/* Like button */}
           <button
             onClick={e => toggleLike(e)}
-            className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-white/50 hover:text-pink-400"}`}
+            className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-[#AA8E64] hover:text-pink-400"}`}
             title={isLiked ? "Unlike" : "Like"}
           >
             <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
@@ -341,7 +341,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(track, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
-                className="p-1 text-white/50 hover:text-[#CBB183] transition-colors"
+                className="p-1 text-[#AA8E64] hover:text-[#CBB183] transition-colors"
                 title="Send a gift"
               >
                 <DollarSign size={12} />
@@ -355,7 +355,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                     playNext(track);
                     toast.success(`"${track.title}" plays next`);
                   }}
-                  className="p-1 text-white/50 hover:text-[#CBB183] transition-colors"
+                  className="p-1 text-[#AA8E64] hover:text-[#CBB183] transition-colors"
                   title="Play next"
                 >
                   <SkipForward size={12} />
@@ -366,7 +366,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                     setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
                     setShowAddToList(true);
                   }}
-                  className="p-1 text-white/50 hover:text-[#CBB183] transition-colors"
+                  className="p-1 text-[#AA8E64] hover:text-[#CBB183] transition-colors"
                   title="Add to my list"
                 >
                   <ListPlus size={12} />
@@ -375,7 +375,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             )}
             <button
               onClick={e => { e.stopPropagation(); navigate(`/track/${track.id}`); }}
-              className="p-1 text-white/50 hover:text-[#A78BFA] transition-colors"
+              className="p-1 text-[#AA8E64] hover:text-[#D0A15F] transition-colors"
               title="Open track page"
             >
               <ExternalLink size={12} />
