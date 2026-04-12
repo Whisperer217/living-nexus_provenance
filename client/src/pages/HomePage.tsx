@@ -593,7 +593,7 @@ const GENRE_CARDS = [
   { label: "Metal",     icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#ef4444" },
 ];
 
-const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-hero-76TJneE6NXajYSDJWHEXPg.webp";
+const HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png";
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
@@ -682,12 +682,12 @@ export default function HomePage() {
           src={HERO_IMG}
           alt="Living Nexus"
           className="absolute inset-0 w-full h-full object-cover object-center"
-          style={{ filter: "saturate(1.35) contrast(1.12) brightness(1.05)" }}
+          style={{ filter: "saturate(1.2) contrast(1.08) brightness(1.0)" }}
         />
         {/* Left text-legibility scrim — only covers the text area, image breathes on the right */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(44,52,56,0.88) 0%, rgba(53,62,67,0.60) 38%, rgba(63,74,80,0.10) 65%, transparent 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.82) 0%, rgba(30,16,40,0.55) 38%, rgba(40,20,50,0.10) 65%, transparent 100%)" }} />
         {/* Bottom scrim — anchors content, lighter than before */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(44,52,56,0.80) 0%, rgba(53,62,67,0.25) 35%, transparent 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(20,10,30,0.75) 0%, rgba(30,16,40,0.20) 35%, transparent 100%)" }} />
         {/* Warm gold radial — subtle lantern glow, doesn't kill image color */}
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 55% at 28% 52%, rgba(203,177,131,0.08) 0%, transparent 65%)" }} />
         {/* Edge vignette — lighter, just frames the corners */}
