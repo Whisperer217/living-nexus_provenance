@@ -881,7 +881,7 @@ export default function HomePage() {
       ══════════════════════════════════════════════════════════════ */}
       <div className="px-6 pb-2">
         <div
-          className="rounded-2xl p-5 relative overflow-hidden"
+          className="rounded-2xl p-5 relative overflow-hidden sg-hero-frame"
           style={{
             background: "linear-gradient(135deg, #3F4A50 0%, #2C3438 100%)",
             border: "1px solid rgba(203,177,131,0.25)",
@@ -1003,10 +1003,26 @@ export default function HomePage() {
           FEATURED CREATORS — horizontal panning carousel
       ══════════════════════════════════════════════════════════════ */}
       <FeaturedCreatorsCarousel />
+
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center">
+          <div className="sg-divider-wide-center-dot" />
+        </div>
+      </div>
+
       {/* ══════════════════════════════════════════════════════════════
           NEW VOICES — recently joined creators
       ══════════════════════════════════════════════════════════════ */}
       <NewVoicesCarousel />
+
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center">
+          <div className="sg-divider-wide-center-dot" />
+        </div>
+      </div>
+
       {/* ══════════════════════════════════════════════════════════════
           FEATURED PROJECTS — wireframe redesign (Phase 81)
           Cards: banner + artist avatar/name + AI/$/♥/WID badges
@@ -1025,12 +1041,20 @@ export default function HomePage() {
             projects={(publicProjects as any[])}
             isAuthenticated={isAuthenticated}
           />
-          <div className="gold-divider mt-4" />
+          {/* sg-divider inside featured projects */}
+          <div className="sg-divider mt-4"><div className="sg-divider-pip" /></div>
         </div>
       )}
       {/* ══════════════════════════════════════════════════════════════
           GENRE FILTERS + DISCOVER TRACKS (side-pane horizontal scroll)
       ══════════════════════════════════════════════════════════════ */}
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center">
+          <div className="sg-divider-wide-center-dot" />
+        </div>
+      </div>
+
       <div className="px-6 py-5">
         {/* Genre icon cards */}
         <div className="mb-7">
@@ -1094,6 +1118,9 @@ export default function HomePage() {
             likeMap={bulkLikes}
           />
         </div>
+
+        {/* ── Sacred Geometry Divider ── */}
+        <div className="sg-divider"><div className="sg-divider-pip" /></div>
 
         {/* ── Trending section ── */}
         {trendingTracks.length > 0 && (

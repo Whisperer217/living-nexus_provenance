@@ -699,6 +699,118 @@ html body[data-scroll-locked] {
     }
   }
 
+  /* ── SACRED GEOMETRY DIVIDERS — section separators with gold vein lines ──
+     Three variants:
+     .sg-divider        — simple centered gold line with diamond pip
+     .sg-divider-wide   — full-width with flanking ornamental lines
+     .sg-hero-frame     — corner-bracket overlay for hero/featured sections
+  ────────────────────────────────────────────────────────────────── */
+
+  /* Simple divider: ─────── ◆ ─────── */
+  .sg-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+    opacity: 0.6;
+  }
+  .sg-divider::before,
+  .sg-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to var(--sg-dir, right), transparent, rgba(203,177,131,0.55), transparent);
+  }
+  .sg-divider::before { --sg-dir: right; }
+  .sg-divider::after  { --sg-dir: left; }
+  .sg-divider-pip {
+    width: 6px;
+    height: 6px;
+    background: #CBB183;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(203,177,131,0.5);
+  }
+
+  /* Wide divider with ornamental flanking lines */
+  .sg-divider-wide {
+    position: relative;
+    height: 1.5rem;
+    margin: 2rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sg-divider-wide::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(to right,
+      transparent 0%,
+      rgba(203,177,131,0.15) 10%,
+      rgba(203,177,131,0.45) 35%,
+      rgba(203,177,131,0.55) 50%,
+      rgba(203,177,131,0.45) 65%,
+      rgba(203,177,131,0.15) 90%,
+      transparent 100%
+    );
+  }
+  .sg-divider-wide-center {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
+    background: #353E43;
+  }
+  .sg-divider-wide-center::before,
+  .sg-divider-wide-center::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: rgba(203,177,131,0.65);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+  .sg-divider-wide-center-dot {
+    width: 5px;
+    height: 5px;
+    background: #CBB183;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(203,177,131,0.6);
+  }
+
+  /* Hero frame: corner brackets on featured section containers */
+  .sg-hero-frame {
+    position: relative;
+  }
+  .sg-hero-frame::before,
+  .sg-hero-frame::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0.55;
+  }
+  .sg-hero-frame::before {
+    top: 8px;
+    left: 8px;
+    border-top: 1.5px solid #CBB183;
+    border-left: 1.5px solid #CBB183;
+  }
+  .sg-hero-frame::after {
+    bottom: 8px;
+    right: 8px;
+    border-bottom: 1.5px solid #CBB183;
+    border-right: 1.5px solid #CBB183;
+  }
+
   /* ── Gold banner — tracks with 50+ plays earn a luminous gold border treatment ── */
   .gold-banner {
     border-color: oklch(0.78 0.16 78 / 0.65) !important;
