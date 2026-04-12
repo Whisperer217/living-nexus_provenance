@@ -350,6 +350,7 @@ html body[data-scroll-locked] {
   position: fixed !important;
   top: 50% !important;
   left: 50% !important;
+  translate: none !important;  /* prevent Tailwind v4 CSS translate property from composing */
   transform: translate(-50%, -50%) !important;
 }
 
