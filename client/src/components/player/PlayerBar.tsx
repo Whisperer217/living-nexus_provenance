@@ -228,9 +228,7 @@ export default function PlayerBar() {
         height: isCinematic ? "100dvh" : isExpanded ? "256px" : "68px",
         overflow: "visible",
         background: isCinematic ? "#000" : "#2C3438",
-        borderTop: isExpanded && !isCinematic
-          ? "1px solid rgba(203,177,131,0.2)"
-          : isCinematic ? "none" : "1px solid rgba(44,52,56,0.5)",
+          borderTop: isCinematic ? "none" : "1px solid rgba(203,177,131,0.28)",
         boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px rgba(203,177,131,0.16), 0 -1px 8px rgba(203,177,131,0.20)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
@@ -508,7 +506,9 @@ export default function PlayerBar() {
                 <button type="button" onClick={toggleShuffle} className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}>
                   <Shuffle size={14} />
                 </button>
-                <button type="button" onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+                <button type="button" onClick={prevTrack} className="p-1.5 transition-colors" style={{ color: "#AA8E64" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}>
                   <SkipBack size={18} />
                 </button>
                 <button
@@ -521,7 +521,9 @@ export default function PlayerBar() {
                     : <Play size={17} fill="currentColor" className="ml-0.5" />
                   }
                 </button>
-                <button type="button" onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+                <button type="button" onClick={nextTrack} className="p-1.5 transition-colors" style={{ color: "#AA8E64" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}>
                   <SkipForward size={18} />
                 </button>
                 <button type="button" onClick={toggleRepeat} className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}>
@@ -697,7 +699,7 @@ export default function PlayerBar() {
       {!isExpanded && (
         <div
           className="flex items-center gap-4"
-          style={{ height: "68px", backgroundColor: "#282020", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible" }}
+          style={{ height: "68px", backgroundColor: "#2C3438", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible" }}
         >
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
@@ -723,9 +725,9 @@ export default function PlayerBar() {
               <button
                 onClick={goToSong}
                 disabled={!currentSongId}
-                className="text-[13.5px] font-semibold truncate font-body block w-full text-left
+                className="text-[13.5px] font-semibold truncate block w-full text-left
                   transition-colors hover:text-[#CBB183] disabled:cursor-default"
-                style={{ color: "#E6CDAE" }}
+                style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif", letterSpacing: "0.03em" }}
               >
                 {currentTrack?.title || "No track selected"}
               </button>
@@ -733,9 +735,9 @@ export default function PlayerBar() {
               <button
                 onClick={goToCreator}
                 disabled={!currentTrack}
-                className="text-[11px] truncate font-body block w-full text-left
+                className="text-[11px] truncate block w-full text-left
                   transition-colors hover:opacity-80 disabled:cursor-default"
-                style={{ color: "#4ADE80" }}
+                style={{ color: "#AA8E64" }}
               >
                 {currentTrack?.artist || "—"}
               </button>
@@ -768,7 +770,8 @@ export default function PlayerBar() {
             <div className="flex items-center gap-4" style={{ marginTop: "6px" }}>
               <button
                 onClick={toggleShuffle}
-                className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}
+                className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#D0A15F]" : "hover:text-[#CBB183]"}`}
+                style={{ color: state.isShuffle ? "#D0A15F" : "#AA8E64" }}
               >
                 <Shuffle size={14} />
               </button>
@@ -785,12 +788,15 @@ export default function PlayerBar() {
                   : <Play size={17} fill="currentColor" className="ml-0.5" />
                 }
               </button>
-              <button type="button" onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
+              <button type="button" onClick={nextTrack} className="p-1.5 transition-colors" style={{ color: "#AA8E64" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}>
                 <SkipForward size={18} />
               </button>
               <button
                 onClick={toggleRepeat}
-                className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}
+                className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#D0A15F]" : "hover:text-[#CBB183]"}`}
+                style={{ color: state.isRepeat ? "#D0A15F" : "#AA8E64" }}
               >
                 <Repeat size={14} />
               </button>

@@ -682,15 +682,16 @@ export default function HomePage() {
           src={HERO_IMG}
           alt="Living Nexus"
           className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ filter: "saturate(1.35) contrast(1.12) brightness(1.05)" }}
         />
-        {/* Warm directional overlay — left-to-right fade, lantern-lit from left */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(44,52,56,0.96) 0%, rgba(53,62,67,0.82) 45%, rgba(63,74,80,0.40) 100%)" }} />
-        {/* Bottom scrim — pulls content up from dark base */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(44,52,56,0.95) 0%, rgba(53,62,67,0.45) 40%, transparent 100%)" }} />
-        {/* Candlelight radial — warm amber glow emanating from center-left, fading to dark edges */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 75% 65% at 30% 55%, rgba(203,177,131,0.12) 0%, rgba(170,142,100,0.07) 40%, transparent 70%)" }} />
-        {/* Edge vignette — dark corners like candlelight in a room */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 30%, rgba(44,52,56,0.55) 75%, rgba(44,52,56,0.85) 100%)" }} />
+        {/* Left text-legibility scrim — only covers the text area, image breathes on the right */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(44,52,56,0.88) 0%, rgba(53,62,67,0.60) 38%, rgba(63,74,80,0.10) 65%, transparent 100%)" }} />
+        {/* Bottom scrim — anchors content, lighter than before */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(44,52,56,0.80) 0%, rgba(53,62,67,0.25) 35%, transparent 100%)" }} />
+        {/* Warm gold radial — subtle lantern glow, doesn't kill image color */}
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 55% at 28% 52%, rgba(203,177,131,0.08) 0%, transparent 65%)" }} />
+        {/* Edge vignette — lighter, just frames the corners */}
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(44,52,56,0.35) 80%, rgba(44,52,56,0.65) 100%)" }} />
 
         <div className="relative z-10 flex flex-col justify-end px-6 pb-10 pt-16 max-w-3xl">
           <div className="flex items-center gap-2 mb-4">
@@ -721,8 +722,9 @@ export default function HomePage() {
               <button
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
-                  background: "#3F4A50",
-                  color: "#2C3438",
+                  background: "#CBB183",
+                  color: "#1E1020",
+                  boxShadow: "0 2px 16px rgba(203,177,131,0.30)",
                 }}
               >
                 <Upload size={13} />
