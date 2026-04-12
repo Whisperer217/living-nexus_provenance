@@ -90,32 +90,32 @@ function WIDTrustLayer() {
       <div
         className="flex items-center gap-4 rounded-2xl px-5 py-4"
         style={{
-          background: "oklch(0.10 0.04 270 / 0.7)",
-          border: "1px solid oklch(0.65 0.2 300 / 0.2)",
+          background: "#3F4A50",
+          border: "1px solid rgba(203,177,131,0.32)",
         }}
       >
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "oklch(0.65 0.2 300 / 0.12)", border: "1px solid oklch(0.65 0.2 300 / 0.3)" }}
+          style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.35)" }}
         >
-          <Shield size={18} style={{ color: "oklch(0.65 0.2 300)" }} />
+          <Shield size={18} style={{ color: "#CBB183" }} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] uppercase tracking-widest mb-0.5 font-heading" style={{ color: "oklch(0.55 0.03 280)" }}>
+          <p className="museum-section-title mb-0.5">
             Works Witnessed
           </p>
-          <p className="font-display text-[22px] leading-none" style={{ color: "oklch(0.65 0.2 300)" }}>
+          <p className="font-display text-[22px] leading-none" style={{ color: "#E6CDAE" }}>
             <AnimatedCounter target={total} />
-            <span className="text-[14px] ml-1.5 font-body" style={{ color: "oklch(0.5 0.03 280)" }}>and counting</span>
+            <span className="text-[14px] ml-1.5 font-body" style={{ color: "#AA8E64" }}>and counting</span>
           </p>
         </div>
         <Link href="/verify">
           <button
             className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
             style={{
-              background: "oklch(0.65 0.2 300 / 0.1)",
-              border: "1px solid oklch(0.65 0.2 300 / 0.3)",
-              color: "oklch(0.65 0.2 300)",
+              background: "rgba(203,177,131,0.12)",
+              border: "1px solid rgba(203,177,131,0.40)",
+              color: "#CBB183",
             }}
           >
             <Fingerprint size={12} />
@@ -128,21 +128,20 @@ function WIDTrustLayer() {
       <div
         className="rounded-2xl px-5 py-4 relative overflow-hidden"
         style={{
-          background: "oklch(0.08 0.04 270 / 0.85)",
-          border: "1px solid oklch(0.84 0.155 85 / 0.10)",
-          boxShadow: "0 0 40px oklch(0.68 0.22 295 / 0.06), 0 0 80px oklch(0.82 0.18 85 / 0.04)",
+          background: "#3F4A50",
+          border: "1px solid rgba(203,177,131,0.28)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.30)",
         }}
       >
         {/* Deep space background shimmer */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 20% 50%, oklch(0.68 0.22 295 / 0.05) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, oklch(0.82 0.18 85 / 0.04) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse at 20% 50%, rgba(203,177,131,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(208,161,95,0.04) 0%, transparent 60%)",
           }}
         />
         <p
-          className="text-[10px] uppercase tracking-[0.2em] mb-3 font-heading relative"
-          style={{ color: "oklch(0.45 0.03 280)" }}
+          className="museum-section-title mb-3 relative"
         >
           Witnessed Works
         </p>
@@ -162,7 +161,7 @@ function WIDTrustLayer() {
             />
           ))}
         </div>
-        <p className="text-[10px] mt-3 relative" style={{ color: "oklch(0.32 0.02 280)" }}>
+        <p className="text-[10px] mt-3 relative museum-caption" style={{ fontSize: "0.6875rem" }}>
           Every medium. One registry. Your proof of origin — sealed at the moment of creation.
         </p>
       </div>
@@ -171,11 +170,11 @@ function WIDTrustLayer() {
       {voices && voices.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[11px] uppercase tracking-widest font-heading" style={{ color: "oklch(0.55 0.03 280)" }}>
+            <p className="museum-section-title">
               Witnessed Voices
             </p>
             <Link href="/explore">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>
                 See all
               </span>
             </Link>
@@ -192,8 +191,9 @@ function WIDTrustLayer() {
                 style={{
                   width: "148px",
                   height: "196px",
-                  background: "oklch(0.09 0.03 270)",
-                  boxShadow: "0 4px 24px oklch(0 0 0 / 0.5)",
+                  background: "#2C3438",
+                  border: "1px solid rgba(203,177,131,0.25)",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.50)",
                 }}
               >
                 {/* Cover art */}
@@ -205,23 +205,23 @@ function WIDTrustLayer() {
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center"
-                    style={{ background: "oklch(0.12 0.04 270)" }}>
-                    <Fingerprint size={28} style={{ color: "oklch(0.65 0.2 300 / 0.35)" }} />
+                    style={{ background: "#2C3438" }}>
+                    <Fingerprint size={28} style={{ color: "rgba(203,177,131,0.35)" }} />
                   </div>
                 )}
 
                 {/* Gradient overlay — bottom 65% */}
                 <div className="absolute inset-0"
-                  style={{ background: "linear-gradient(to top, oklch(0 0 0 / 0.88) 0%, oklch(0 0 0 / 0.3) 50%, transparent 100%)" }}
+                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.30) 50%, transparent 100%)" }}
                 />
 
                 {/* WID badge — top left */}
                 <div
                   className="absolute top-2 left-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold z-10"
                   style={{
-                    background: "oklch(0.65 0.2 300 / 0.2)",
-                    border: "1px solid oklch(0.65 0.2 300 / 0.5)",
-                    color: "oklch(0.78 0.18 300)",
+                    background: "rgba(203,177,131,0.18)",
+                    border: "1px solid rgba(203,177,131,0.50)",
+                    color: "#CBB183",
                     backdropFilter: "blur(6px)",
                   }}
                 >
@@ -235,7 +235,7 @@ function WIDTrustLayer() {
                     src={v.profilePhotoUrl}
                     alt={v.artistHandle || v.userName}
                     className="absolute top-2 right-2 w-7 h-7 rounded-full object-cover z-10"
-                    style={{ border: "1.5px solid oklch(0.84 0.155 85 / 0.6)" }}
+                    style={{ border: "1.5px solid rgba(203,177,131,0.55)" }}
                   />
                 )}
 
@@ -247,13 +247,13 @@ function WIDTrustLayer() {
                     handleVoicePlay(v.songId);
                   }}
                   className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ background: "oklch(0 0 0 / 0.15)" }}
+                  style={{ background: "rgba(0,0,0,0.15)" }}
                 >
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
                     style={{
-                      background: "oklch(0.84 0.155 85)",
-                      boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.5)",
+                      background: "#CBB183",
+                      boxShadow: "0 0 24px rgba(203,177,131,0.45)",
                     }}
                   >
                     <Play size={20} fill="#2C3438" style={{ color: "#2C3438", marginLeft: "2px" }} />
@@ -273,9 +273,9 @@ function WIDTrustLayer() {
                   <div className="flex items-center gap-1.5 mt-1">
                     {!v.profilePhotoUrl && (
                       <div className="w-4 h-4 rounded-full flex-shrink-0"
-                        style={{ background: "oklch(0.65 0.2 300 / 0.3)" }} />
+                        style={{ background: "rgba(203,177,131,0.25)" }} />
                     )}
-                    <p className="font-body text-[9px] truncate" style={{ color: "oklch(0.65 0.025 280)" }}>
+                    <p className="font-body text-[9px] truncate" style={{ color: "#AA8E64" }}>
                       {v.artistHandle || v.userName}
                     </p>
                   </div>
@@ -306,7 +306,7 @@ function FeaturedCreatorsCarousel() {
           Creators
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>
             See all
           </span>
         </Link>
@@ -321,26 +321,26 @@ function FeaturedCreatorsCarousel() {
               className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
               style={{
                 width: "88px",
-                background: "oklch(0.10 0.04 270 / 0.7)",
-                border: "1px solid oklch(1 0 0 / 0.06)",
+                background: "#3F4A50",
+                border: "1px solid rgba(203,177,131,0.18)",
               }}
             >
               <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
-                style={{ border: "2px solid oklch(0.84 0.155 85 / 0.3)" }}>
+                style={{ border: "2px solid rgba(203,177,131,0.28)" }}>
                 {creator.profilePhotoUrl ? (
                   <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[16px] font-bold"
-                    style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)" }}>
+                    style={{ background: "rgba(203,177,131,0.18)", color: "#CBB183" }}>
                     {(creator.artistHandle || creator.name || "?")[0].toUpperCase()}
                   </div>
                 )}
               </div>
               <div className="text-center min-w-0 w-full">
-                <p className="font-heading text-[10px] truncate w-full" style={{ color: "oklch(0.92 0.01 280)" }}>
+                <p className="font-heading text-[10px] truncate w-full" style={{ color: "#E6CDAE" }}>
                   {creator.artistHandle || creator.name}
                 </p>
-                <p className="font-body text-[9px] mt-0.5" style={{ color: "oklch(0.55 0.03 280)" }}>
+                <p className="font-body text-[9px] mt-0.5" style={{ color: "#AA8E64" }}>
                   {creator.publishedCount ?? 0} tracks
                 </p>
               </div>
@@ -372,11 +372,11 @@ function NewVoicesCarousel() {
     <div className="px-6 pb-6">
       <div className="flex items-center justify-between mb-3">
         <h2 className="museum-section-title">
-          <Sparkles size={13} className="inline mr-1.5" style={{ color: "oklch(0.75 0.18 145)" }} />
+          <Sparkles size={13} className="inline mr-1.5" style={{ color: "#4ADE80" }} />
           New Voices
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>
             See all
           </span>
         </Link>
@@ -391,31 +391,31 @@ function NewVoicesCarousel() {
               className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
               style={{
                 width: "88px",
-                background: "oklch(0.10 0.04 145 / 0.5)",
-                border: "1px solid oklch(0.75 0.18 145 / 0.15)",
+                background: "rgba(63,74,80,0.7)",
+                border: "1px solid rgba(74,222,128,0.15)",
               }}
             >
               <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
-                style={{ border: "2px solid oklch(0.75 0.18 145 / 0.4)" }}>
+                style={{ border: "2px solid rgba(74,222,128,0.35)" }}>
                 {creator.profilePhotoUrl ? (
                   <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[16px] font-bold"
-                    style={{ background: "oklch(0.75 0.18 145 / 0.15)", color: "oklch(0.75 0.18 145)" }}>
+                    style={{ background: "rgba(74,222,128,0.15)", color: "#4ADE80" }}>
                     {(creator.artistHandle || creator.name || "?")[0].toUpperCase()}
                   </div>
                 )}
                 {/* NEW badge */}
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: "oklch(0.75 0.18 145)", border: "1.5px solid oklch(0.08 0.02 280)" }}>
-                  <Sparkles size={8} style={{ color: "oklch(0.08 0.02 280)" }} />
+                  style={{ background: "#4ADE80", border: "1.5px solid #2C3438" }}>
+                  <Sparkles size={8} style={{ color: "#2C3438" }} />
                 </div>
               </div>
               <div className="text-center min-w-0 w-full">
-                <p className="font-heading text-[10px] truncate w-full" style={{ color: "oklch(0.92 0.01 280)" }}>
+                <p className="font-heading text-[10px] truncate w-full" style={{ color: "#E6CDAE" }}>
                   {creator.artistHandle || creator.name}
                 </p>
-                <p className="font-body text-[9px] mt-0.5" style={{ color: "oklch(0.75 0.18 145 / 0.8)" }}>New</p>
+                <p className="font-body text-[9px] mt-0.5" style={{ color: "rgba(74,222,128,0.75)" }}>New</p>
               </div>
             </div>
           </Link>
@@ -458,7 +458,7 @@ function HorizontalTrackGrid({
           <div
             key={i}
             className="flex-shrink-0 rounded-2xl animate-pulse"
-            style={{ width: "160px", height: "220px", background: "oklch(0.125 0.028 52)" }}
+            style={{ width: "160px", height: "220px", background: "#2C3438" }}
           />
         ))}
       </div>
@@ -469,9 +469,9 @@ function HorizontalTrackGrid({
     return (
       <div
         className="flex flex-col items-center justify-center py-12 rounded-2xl mb-4"
-        style={{ background: "oklch(0.10 0.03 270 / 0.5)", border: "1px dashed oklch(1 0 0 / 0.08)" }}
+        style={{ background: "rgba(44,52,56,0.7)", border: "1px dashed rgba(203,177,131,0.20)" }}
       >
-        <p className="font-heading text-[14px] mb-1" style={{ color: "oklch(0.55 0.03 280)" }}>
+        <p className="font-heading text-[14px] mb-1" style={{ color: "#AA8E64" }}>
           {emptyMessage}
         </p>
       </div>
@@ -684,13 +684,13 @@ export default function HomePage() {
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
         {/* Warm directional overlay — left-to-right fade, lantern-lit from left */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, oklch(0.08 0.025 50 / 0.96) 0%, oklch(0.09 0.022 52 / 0.82) 45%, oklch(0.10 0.018 55 / 0.40) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(44,52,56,0.96) 0%, rgba(53,62,67,0.82) 45%, rgba(63,74,80,0.40) 100%)" }} />
         {/* Bottom scrim — pulls content up from dark base */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, oklch(0.08 0.022 50 / 0.95) 0%, oklch(0.09 0.020 52 / 0.45) 40%, transparent 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(44,52,56,0.95) 0%, rgba(53,62,67,0.45) 40%, transparent 100%)" }} />
         {/* Candlelight radial — warm amber glow emanating from center-left, fading to dark edges */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 75% 65% at 30% 55%, oklch(0.55 0.12 72 / 0.14) 0%, oklch(0.30 0.08 60 / 0.08) 40%, transparent 70%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 75% 65% at 30% 55%, rgba(203,177,131,0.12) 0%, rgba(170,142,100,0.07) 40%, transparent 70%)" }} />
         {/* Edge vignette — dark corners like candlelight in a room */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 30%, oklch(0.06 0.015 50 / 0.55) 75%, oklch(0.05 0.010 50 / 0.85) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 30%, rgba(44,52,56,0.55) 75%, rgba(44,52,56,0.85) 100%)" }} />
 
         <div className="relative z-10 flex flex-col justify-end px-6 pb-10 pt-16 max-w-3xl">
           <div className="flex items-center gap-2 mb-4">
@@ -704,15 +704,15 @@ export default function HomePage() {
             className="font-display leading-tight mb-3"
             style={{
               fontSize: "clamp(1.9rem, 5vw, 3rem)",
-              color: "oklch(0.97 0.006 80)",
-              textShadow: "0 2px 24px oklch(0 0 0 / 0.6)",
+              color: "#E6CDAE",
+              textShadow: "0 2px 24px rgba(0,0,0,0.60)",
             }}
           >
             Your work deserves to be<br />
-            <span style={{ color: "oklch(0.84 0.155 85)" }}>witnessed.</span>
+            <span style={{ color: "#CBB183" }}>witnessed.</span>
           </h1>
 
-          <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "oklch(0.72 0.035 68)" }}>
+          <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "#DACAAA" }}>
             Every work — music, lyrics, manuscripts, comics, video — carries a Witness ID. Cryptographic proof of origin that belongs to you before it belongs to anyone else.
           </p>
 
@@ -721,8 +721,8 @@ export default function HomePage() {
               <button
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
-                  background: "oklch(0.84 0.155 85)",
-                  color: "oklch(0.12 0.03 52)",
+                  background: "#CBB183",
+                  color: "#2C3438",
                 }}
               >
                 <Upload size={13} />
@@ -733,9 +733,9 @@ export default function HomePage() {
               <button
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
-                  background: "oklch(1 0 0 / 0.06)",
-                  border: "1px solid oklch(1 0 0 / 0.14)",
-                  color: "oklch(0.82 0.025 72)",
+                  background: "rgba(203,177,131,0.08)",
+                  border: "1px solid rgba(203,177,131,0.22)",
+                  color: "#E6CDAE",
                 }}
               >
                 <Compass size={13} />
@@ -753,38 +753,38 @@ export default function HomePage() {
         <div
           className="rounded-2xl p-5 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, oklch(0.10 0.04 270 / 0.9) 0%, oklch(0.08 0.06 290 / 0.9) 100%)",
-            border: "1px solid oklch(0.84 0.155 85 / 0.18)",
+            background: "linear-gradient(135deg, #3F4A50 0%, #2C3438 100%)",
+            border: "1px solid rgba(203,177,131,0.22)",
           }}
         >
           <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-5"
-            style={{ background: "radial-gradient(circle, oklch(0.84 0.155 85) 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
+            style={{ background: "radial-gradient(circle, rgba(203,177,131,0.5) 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-                style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.35)" }}>
-                <Star size={12} style={{ color: "oklch(0.84 0.155 85)" }} />
+                style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.32)" }}>
+                <Star size={12} style={{ color: "#CBB183" }} />
               </div>
-              <span className="text-[10px] font-heading tracking-[0.2em] uppercase" style={{ color: "oklch(0.84 0.155 85)" }}>
+              <span className="text-[10px] font-heading tracking-[0.2em] uppercase" style={{ color: "#CBB183" }}>
                 Founder's Era
               </span>
             </div>
 
-            <h2 className="font-display text-[18px] leading-tight mb-3" style={{ color: "oklch(0.95 0.01 80)" }}>
+            <h2 className="font-display text-[18px] leading-tight mb-3" style={{ color: "#E6CDAE" }}>
               The First Witnesses
             </h2>
 
-              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "oklch(0.72 0.025 280)" }}>
+              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#DACAAA" }}>
                 Founder's Era creators are the architects of this platform's provenance foundation —
                 establishing the first anchors of a cryptographically-verified creative record that cannot
                 be altered, disputed, or erased.
               </p>
 
-              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "oklch(0.72 0.025 280)" }}>
+              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#DACAAA" }}>
                 In an era where AI systems train on uncredited work and platforms routinely strip creator
                 metadata, a Founder's Era WID is a timestamped declaration of origin. It says:{" "}
-                <em style={{ color: "oklch(0.84 0.155 85)" }}>
+                <em style={{ color: "#CBB183" }}>
                   "I was here. This is mine. The record proves it."
                 </em>
               </p>
@@ -811,15 +811,15 @@ export default function HomePage() {
                     key={p.title}
                     className="rounded-xl p-3"
                     style={{
-                      background: "oklch(0.08 0.03 270 / 0.6)",
-                      border: "1px solid oklch(1 0 0 / 0.06)",
+                      background: "rgba(44,52,56,0.7)",
+                      border: "1px solid rgba(203,177,131,0.18)",
                     }}
                   >
-                    <div className="flex items-center gap-1.5 mb-1.5" style={{ color: "oklch(0.84 0.155 85)" }}>
+                    <div className="flex items-center gap-1.5 mb-1.5" style={{ color: "#CBB183" }}>
                       <p.Icon size={14} />
                       <span className="text-[11px] font-heading tracking-wide">{p.title}</span>
                     </div>
-                    <p className="text-[11px] font-body leading-relaxed" style={{ color: "oklch(0.62 0.025 280)" }}>
+                    <p className="text-[11px] font-body leading-relaxed" style={{ color: "#AA8E64" }}>
                       {p.desc}
                     </p>
                   </div>
@@ -831,9 +831,9 @@ export default function HomePage() {
                   <button
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                     style={{
-                      background: "oklch(0.84 0.155 85 / 0.12)",
-                      border: "1px solid oklch(0.84 0.155 85 / 0.4)",
-                      color: "oklch(0.84 0.155 85)",
+                      background: "rgba(203,177,131,0.10)",
+                      border: "1px solid rgba(203,177,131,0.35)",
+                      color: "#CBB183",
                     }}
                   >
                     <Upload size={13} />
@@ -844,9 +844,9 @@ export default function HomePage() {
                   <button
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                     style={{
-                      background: "oklch(0.08 0.03 270 / 0.6)",
-                      border: "1px solid oklch(1 0 0 / 0.12)",
-                      color: "oklch(0.78 0.02 280)",
+                      background: "rgba(44,52,56,0.7)",
+                      border: "1px solid rgba(203,177,131,0.18)",
+                      color: "#AA8E64",
                     }}
                   >
                     <Users size={13} />
@@ -857,9 +857,9 @@ export default function HomePage() {
                   <button
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                     style={{
-                      background: "oklch(0.08 0.03 270 / 0.6)",
-                      border: "1px solid oklch(0.84 0.155 85 / 0.2)",
-                      color: "oklch(0.84 0.155 85 / 0.8)",
+                      background: "rgba(44,52,56,0.7)",
+                      border: "1px solid rgba(203,177,131,0.22)",
+                      color: "rgba(203,177,131,0.80)",
                     }}
                   >
                     <Heart size={13} />
@@ -883,24 +883,24 @@ export default function HomePage() {
         <div
           className="rounded-2xl p-5 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, oklch(0.11 0.025 68 / 0.85) 0%, oklch(0.09 0.018 52 / 0.85) 100%)",
-            border: "1px solid oklch(0.84 0.155 85 / 0.22)",
-            boxShadow: "0 0 40px oklch(0.84 0.155 85 / 0.06)",
+            background: "linear-gradient(135deg, #3F4A50 0%, #2C3438 100%)",
+            border: "1px solid rgba(203,177,131,0.25)",
+            boxShadow: "0 0 40px rgba(203,177,131,0.06)",
           }}
         >
           {/* Ambient glow */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: "radial-gradient(ellipse 60% 40% at 50% 0%, oklch(0.84 0.155 85 / 0.07) 0%, transparent 70%)",
+              background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(203,177,131,0.07) 0%, transparent 70%)",
             }}
           />
           {/* Header */}
           <div className="flex items-center gap-2.5 mb-4 relative">
-            <ShieldCheck className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.84 0.155 85)" }} />
+            <ShieldCheck className="w-5 h-5 flex-shrink-0" style={{ color: "#CBB183" }} />
             <span
               className="font-heading text-[11px] tracking-[0.2em] uppercase"
-              style={{ color: "oklch(0.84 0.155 85)" }}
+              style={{ color: "#CBB183" }}
             >
               What a Witness ID Is — and Is Not
             </span>
@@ -909,8 +909,8 @@ export default function HomePage() {
           <blockquote
             className="font-body text-[14px] leading-relaxed mb-4 pl-4 relative"
             style={{
-              color: "oklch(0.88 0.03 72)",
-              borderLeft: "3px solid oklch(0.84 0.155 85 / 0.5)",
+              color: "#E6CDAE",
+              borderLeft: "3px solid rgba(203,177,131,0.50)",
             }}
           >
             Witness IDs help creators preserve verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration.
@@ -981,7 +981,7 @@ export default function HomePage() {
           {/* Disclaimer footer */}
           <p
             className="text-[11px] font-body leading-relaxed relative"
-            style={{ color: "oklch(0.45 0.025 68)" }}
+            style={{ color: "#AA8E64" }}
           >
             Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records issued by this platform and do not constitute legal copyright registration. For official copyright protection, visit{" "}
             <a
@@ -989,7 +989,7 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:text-[#CBB183] transition-colors"
-              style={{ color: "oklch(0.65 0.08 85)" }}
+              style={{ color: "#CBB183" }}
             >
               copyright.gov/registration
             </a>
@@ -1016,7 +1016,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="museum-section-header">Featured Projects</h2>
             <Link href="/projects">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>See all</span>
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>See all</span>
             </Link>
           </div>
 
@@ -1043,7 +1043,7 @@ export default function HomePage() {
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
                   ${activeGenre === g.label
                     ? "border-[#CBB183]/40 bg-[#CBB183]/[0.07]"
-                    : "border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.14] hover:bg-white/[0.04]"
+                    : "border-[rgba(203,177,131,0.12)] bg-[#3F4A50] hover:border-[rgba(203,177,131,0.25)] hover:bg-[#4A5560]"
                   }`}
               >
                 {g.icon ? (
@@ -1101,7 +1101,7 @@ export default function HomePage() {
             <div className="gold-divider mb-6" />
             <div className="flex items-center justify-between mb-4">
               <h2 className="museum-section-header">Trending Now</h2>
-              <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "oklch(0.55 0.03 280)" }}>By plays + likes + recency</span>
+              <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "#AA8E64" }}>By plays + likes + recency</span>
             </div>
 
             {/* Trending — horizontal 2-row scroll */}
