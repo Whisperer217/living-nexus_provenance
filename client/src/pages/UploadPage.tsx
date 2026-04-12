@@ -32,9 +32,9 @@ import {
 } from "@shared/contentTypes";
 
 const AI_CONSENT_OPTIONS = [
-  { value: "prohibited" as const, label: "AI Training PROHIBITED", color: "#EF4444", desc: "No AI system may train on this work" },
-  { value: "permitted_attribution" as const, label: "Permitted with Attribution", color: "#CBB183", desc: "AI training allowed only with full credit" },
-  { value: "permitted" as const, label: "Freely Permitted", color: "#4ADE80", desc: "Open for AI training and derivative use" },
+  { value: "prohibited" as const, label: "AI Training PROHIBITED", color: "#EF4444", activeColor: "rgba(239,68,68,0.12)", activeBorder: "rgba(239,68,68,0.4)", desc: "No AI system may train on this work" },
+  { value: "permitted_attribution" as const, label: "Permitted with Attribution", color: "#CBB183", activeColor: "rgba(203,177,131,0.12)", activeBorder: "rgba(203,177,131,0.45)", desc: "AI training allowed only with full credit" },
+  { value: "permitted" as const, label: "Freely Permitted", color: "#CBB183", activeColor: "rgba(203,177,131,0.08)", activeBorder: "rgba(203,177,131,0.35)", desc: "Open for AI training and derivative use" },
 ];
 
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
@@ -242,7 +242,7 @@ export default function UploadPage() {
     if (!title) { toast.error("Add a track title first"); return; }
     setCaptionState("loading");
     // Only title and genre are sent — lyrics are WID-protected and never sent to AI
-    generateCaptionMutation.mutate({ title, genre: genre || undefined });
+    generateCaptionMutation.mutate({ title, genre: genre || undefined, workType: uploadMode === "manuscript" ? "manuscript" : uploadMode === "comic" ? "comic" : uploadMode === "lyrics" ? "lyrics" : "audio" });
   };
 
   const handleAcceptCaption = () => {
@@ -685,8 +685,12 @@ export default function UploadPage() {
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Upload Track</h1>
-              <p className="text-sm" style={{ color: "#E2E8F0" }}>Publish your music with cryptographic provenance — BDDT Publishing / Command Domains LLC</p>
+              <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                {uploadMode === "audio" ? "Upload Track" : uploadMode === "lyrics" ? "Upload Lyrics" : uploadMode === "manuscript" ? "Upload Manuscript" : "Upload Comic / Novel"}
+              </h1>
+              <p className="text-sm" style={{ color: "#E2E8F0" }}>
+                {uploadMode === "audio" ? "Publish your music with cryptographic provenance — BDDT Publishing / Command Domains LLC" : uploadMode === "lyrics" ? "Register your lyrics with a cryptographic Witness ID — authorship sealed at creation" : uploadMode === "manuscript" ? "Seal your manuscript with provenance — every word, dated and verified" : "Register your comic or novel — art and story, sealed with a Witness ID"}
+              </p>
             </div>
             <button
               onClick={() => navigate("/batch-upload")}
@@ -1098,12 +1102,12 @@ export default function UploadPage() {
                 <div className="space-y-2">
                   {AI_CONSENT_OPTIONS.map(opt => (
                     <button type="button" key={opt.value} onClick={() => setAiConsent(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
-                      style={{ background: aiConsent === opt.value ? `${opt.color.replace(")", " / 0.08)")}` : "#2C3438", border: `1px solid ${aiConsent === opt.value ? opt.color.replace(")", " / 0.35)") : "rgba(203,177,131,0.15)"}` }}>
+                      style={{ background: aiConsent === opt.value ? opt.activeColor : "#2C3438", border: `1px solid ${aiConsent === opt.value ? opt.activeBorder : "rgba(203,177,131,0.15)"}` }}>
                       <div className="w-4 h-4 rounded-full mt-0.5 flex-shrink-0 transition-all"
-                        style={{ background: aiConsent === opt.value ? opt.color : "transparent", border: `2px solid ${opt.color}` }} />
+                        style={{ background: aiConsent === opt.value ? opt.color : "transparent", border: `2px solid ${aiConsent === opt.value ? opt.color : "rgba(203,177,131,0.35)"}` }} />
                       <div>
-                        <p className="text-sm font-medium" style={{ color: opt.color }}>{opt.label}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>{opt.desc}</p>
+                        <p className="text-sm font-medium" style={{ color: aiConsent === opt.value ? opt.color : "#E6CDAE" }}>{opt.label}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>{opt.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -1114,18 +1118,18 @@ export default function UploadPage() {
                 <label className="text-xs mb-2 block font-medium" style={{ color: "#AA8E64" }}>AI AUTHORSHIP DISCLOSURE</label>
                 <div className="space-y-2">
                   {([
-                    { value: "original" as const, label: "Human Original", color: "#4ADE80", desc: "Entirely human-made. No AI tools used in creation." },
-                    { value: "ai_assisted" as const, label: "AI-Assisted", color: "#CBB183", desc: "AI used as a production aid. Human vision, human direction." },
-                    { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "#CBB183", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
-                    { value: "ai_generated" as const, label: "AI-Generated", color: "#EF4444", desc: "AI generated the primary content." },
+                    { value: "original" as const, label: "Human Original", color: "#CBB183", activeColor: "rgba(203,177,131,0.12)", activeBorder: "rgba(203,177,131,0.45)", desc: "Entirely human-made. No AI tools used in creation." },
+                    { value: "ai_assisted" as const, label: "AI-Assisted", color: "#CBB183", activeColor: "rgba(203,177,131,0.1)", activeBorder: "rgba(203,177,131,0.4)", desc: "AI used as a production aid. Human vision, human direction." },
+                    { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "#CBB183", activeColor: "rgba(203,177,131,0.1)", activeBorder: "rgba(203,177,131,0.4)", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
+                    { value: "ai_generated" as const, label: "AI-Generated", color: "#EF4444", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "AI generated the primary content." },
                   ] as const).map(opt => (
                     <button type="button" key={opt.value} onClick={() => setAiDisclosure(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
-                      style={{ background: aiDisclosure === opt.value ? `${opt.color.replace(")", " / 0.08)")}` : "#2C3438", border: `1px solid ${aiDisclosure === opt.value ? opt.color.replace(")", " / 0.35)") : "rgba(203,177,131,0.15)"}` }}>
+                      style={{ background: aiDisclosure === opt.value ? opt.activeColor : "#2C3438", border: `1px solid ${aiDisclosure === opt.value ? opt.activeBorder : "rgba(203,177,131,0.15)"}` }}>
                       <div className="w-4 h-4 rounded-full mt-0.5 flex-shrink-0 transition-all"
-                        style={{ background: aiDisclosure === opt.value ? opt.color : "transparent", border: `2px solid ${opt.color}` }} />
+                        style={{ background: aiDisclosure === opt.value ? opt.color : "transparent", border: `2px solid ${aiDisclosure === opt.value ? opt.color : "rgba(203,177,131,0.35)"}` }} />
                       <div>
-                        <p className="text-sm font-medium" style={{ color: opt.color }}>{opt.label}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>{opt.desc}</p>
+                        <p className="text-sm font-medium" style={{ color: aiDisclosure === opt.value ? opt.color : "#E6CDAE" }}>{opt.label}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>{opt.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -1278,14 +1282,16 @@ export default function UploadPage() {
                   <div className="rounded-xl p-4 mt-2" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.22)" }}>
                     <div className="flex items-center gap-2 mb-2">
                       <Shield className="w-4 h-4" style={{ color: "#CBB183" }} />
-                      <span className="text-sm font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>Your track is now WID Protected 🔐</span>
+                      <span className="text-sm font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>
+                      {uploadMode === "audio" ? "Your track is now WID Protected" : uploadMode === "lyrics" ? "Your lyrics are now WID Protected" : uploadMode === "manuscript" ? "Your manuscript is now WID Protected" : "Your comic is now WID Protected"} 🔐
+                    </span>
                     </div>
                     {captionState === "idle" && !caption && (
                       <>
                         <p className="text-xs mb-1" style={{ color: "#DACAAA" }}>Would you like AI to suggest a caption?</p>
                         <p className="text-[11px] mb-3 leading-relaxed" style={{ color: "#AA8E64" }}>
-                          Note: This sends your <strong style={{ color: "#AA8E64" }}>track title and genre only</strong> — NOT your lyrics — to an AI system to generate a description.<br />
-                          Your lyrics and audio are never sent. This is optional and can be skipped.
+                          Note: This sends your <strong style={{ color: "#AA8E64" }}>{uploadMode === "audio" ? "track title and genre" : uploadMode === "lyrics" ? "lyrics title and genre" : uploadMode === "manuscript" ? "manuscript title and category" : "comic title and category"} only</strong> — NOT your {uploadMode === "audio" || uploadMode === "lyrics" ? "lyrics or audio" : "manuscript content"} — to an AI system to generate a description.<br />
+                          Your {uploadMode === "audio" || uploadMode === "lyrics" ? "lyrics and audio are" : "content is"} never sent. This is optional and can be skipped.
                         </p>
                         <div className="flex gap-2">
                           <button
@@ -1309,7 +1315,7 @@ export default function UploadPage() {
                     {captionState === "loading" && (
                       <div className="flex items-center gap-2 py-2">
                         <Loader2 size={13} className="animate-spin" style={{ color: "#CBB183" }} />
-                        <span className="text-xs" style={{ color: "#AA8E64" }}>Generating caption — only title and genre sent to AI...</span>
+                        <span className="text-xs" style={{ color: "#AA8E64" }}>Generating caption — only {uploadMode === "audio" ? "title and genre" : uploadMode === "lyrics" ? "title and genre" : "title and category"} sent to AI...</span>
                       </div>
                     )}
                     {captionState === "suggested" && captionSuggestion && (

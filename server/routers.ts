@@ -1422,22 +1422,27 @@ export const appRouter = router({
       .input(z.object({
         title: z.string().min(1).max(255),
         genre: z.string().optional(),
-        // NOTE: lyrics are intentionally NOT accepted here.
-        // Per platform policy, only title and genre are sent to AI.
-        // Lyrics are WID-protected and must never be sent to external AI systems.
+        workType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional(),
+        // NOTE: content is intentionally NOT accepted here.
+        // Per platform policy, only title and genre/category are sent to AI.
+        // Lyrics, manuscripts, and audio are WID-protected and must never be sent to external AI systems.
       }))
       .mutation(async ({ input }) => {
-        const systemPrompt = `You are a music caption writer for Living Nexus, a sovereign music platform built on cryptographic provenance. Your job is to write a short, compelling caption/description for a music track that a creator is uploading. The caption should:
+        const workType = input.workType ?? "audio";
+        const workLabel = workType === "audio" ? "music track" : workType === "lyrics" ? "lyrics work" : workType === "manuscript" ? "manuscript or book" : "comic or graphic novel";
+        const creatorLabel = workType === "audio" || workType === "lyrics" ? "musician/songwriter" : workType === "manuscript" ? "author" : "comic creator";
+        const systemPrompt = `You are a caption writer for Living Nexus, a sovereign creative provenance platform. Your job is to write a short, compelling caption/description for a ${workLabel} that a creator is uploading. The caption should:
 - Be 1-3 sentences (50-150 words max)
-- Capture the spirit and feel of the track based on its title and genre only
+- Capture the spirit and feel of the work based on its title and category only
 - Sound authentic and creator-voiced — not corporate or generic
 - Avoid clichés like "a journey" or "sonic landscape"
-- Optionally reference the genre or mood naturally
-- End with energy — make someone want to listen
+- Match the medium: for a ${workLabel}, speak as if introducing a ${creatorLabel}'s work
+- End with energy — make someone want to experience it
 Return ONLY the caption text. No quotes. No labels. No explanation.`;
 
-        // IMPORTANT: Only title and genre are sent. Lyrics and audio are NEVER sent.
-        const userMessage = `Track title: "${input.title}"\nGenre: ${input.genre || "Not specified"}`;
+        // IMPORTANT: Only title and genre/category are sent. Content is NEVER sent.
+        const userMessage = `${workType === "manuscript" || workType === "comic" ? "Work" : "Track"} title: "${input.title}"
+${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${input.genre || "Not specified"}`;;
 
         const response = await invokeLLM({
           messages: [
