@@ -296,12 +296,12 @@ export default function ManifestoPage() {
               className="rounded-2xl p-6"
               style={{
                 background: "rgba(44,52,56,0.8)",
-                border: "1px solid rgba(63,74,80,0.3)",
+                border: "1px solid rgba(203,177,131,0.18)",
               }}
             >
               <p
                 className="text-xs uppercase tracking-wider font-heading mb-4"
-                style={{ color: "#DACAAA" }}
+                style={{ color: "#CBB183" }}
               >
                 For Fans
               </p>
@@ -313,7 +313,7 @@ export default function ManifestoPage() {
                   "No ads. No data harvesting. No extraction.",
                 ].map((line) => (
                   <li key={line} className="flex items-start gap-2 text-sm" style={{ color: "#DACAAA" }}>
-                    <span style={{ color: "#4ADE80" }} className="mt-0.5 flex-shrink-0">✓</span>
+                    <span style={{ color: "#CBB183" }} className="mt-0.5 flex-shrink-0">✓</span>
                     {line}
                   </li>
                 ))}

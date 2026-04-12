@@ -920,7 +920,7 @@ export default function UploadPage() {
                   !documentFile
                 }
                 onClick={() => setStep(2)}
-                style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
                 Next: Metadata <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
@@ -1181,7 +1181,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
                   Next: Witness ID <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1205,7 +1205,7 @@ export default function UploadPage() {
                   </div>
                   <p className="text-sm mb-1 font-medium" style={{ color: "#DACAAA" }}>Generate your Witness ID</p>
                   <p className="text-xs mb-5" style={{ color: "#E2E8F0" }}>SHA-256 hash + ECDSA P-256 signature + harmonic frequency derivation</p>
-                  <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                  <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
                     {generatingWid ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : <><Zap className="w-4 h-4 mr-2" /> Generate Witness ID</>}
                   </Button>
                 </div>
@@ -1365,7 +1365,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(2)} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={() => setStep(4)} style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" onClick={() => setStep(4)} style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
                   {witnessData ? "Next: Publish" : "Skip & Publish"} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1440,7 +1440,7 @@ export default function UploadPage() {
                 <Button variant="outline" onClick={() => setStep(3)} disabled={uploadPhase === "uploading" || uploadPhase === "processing"} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
                   {(uploadMutation.isPending || uploadPhase === "processing") ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Upload className="w-4 h-4 mr-2" /> {uploadMode === "manuscript" || uploadMode === "comic" ? "Publish Work" : "Publish Track"}</>}
                 </Button>
               </div>

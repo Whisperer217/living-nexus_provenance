@@ -144,8 +144,21 @@ export default function DownloadPage() {
       {/* Back link */}
       <a
         href="/"
-        className="mt-8 text-xs transition-colors hover:underline"
-        style={{ color: "#AA8E64" }}
+        className="mt-8 transition-all hover:opacity-80 active:scale-95"
+        style={{
+          color: "#E6CDAE",
+          fontFamily: "'Cinzel', serif",
+          fontSize: "11px",
+          letterSpacing: "0.06em",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
+          padding: "7px 14px",
+          border: "1px solid rgba(203,177,131,0.35)",
+          borderRadius: "8px",
+          background: "rgba(44,52,56,0.7)",
+          textDecoration: "none",
+        }}
       >
         ← Back to Living Nexus
       </a>

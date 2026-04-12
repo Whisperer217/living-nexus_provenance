@@ -413,9 +413,12 @@ export default function PlaylistDrawer() {
                 onClick={() => setActiveTab(id)}
                 className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-all text-[10px] font-heading tracking-wide"
                 style={{
-                  background: isActive ? "rgba(203,177,131,0.10)" : "transparent",
-                  color: isActive ? "#CBB183" : "#3F4A50",
-                  border: isActive ? "1px solid rgba(203,177,131,0.22)" : "1px solid transparent",
+                  background: isActive ? "rgba(203,177,131,0.14)" : "rgba(44,52,56,0.60)",
+                  color: isActive ? "#E6CDAE" : "#AA8E64",
+                  border: isActive ? "1px solid rgba(203,177,131,0.40)" : "1px solid rgba(203,177,131,0.10)",
+                  fontFamily: "'Cinzel', serif",
+                  letterSpacing: "0.06em",
+                  fontSize: "9px",
                 }}
               >
                 <Icon size={13} />
