@@ -792,9 +792,11 @@ export default function MobilePlayerLayer() {
           height: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
           /* Solid background — no bleed-through from content below */
-          background: isLightsOn ? "rgb(28,38,52)" : "#2C3438",
+          background: isLightsOn
+            ? "linear-gradient(180deg, #1a2a3a 0%, #1e2d3a 100%)"
+            : "linear-gradient(180deg, #1E2D3A 0%, #2C3438 100%)",
           backdropFilter: "blur(12px) saturate(1.2)",
-          borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(203,177,131,0.10)",
+          borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(203,177,131,0.12)",
         }}
       >
         <div className="flex items-center justify-around h-14 px-2">
@@ -839,13 +841,13 @@ export default function MobilePlayerLayer() {
         paddingBottom: 0,
         /* Solid background — no bleed-through */
         background: isLightsOn
-          ? "rgb(32,44,58)"
-          : "#2C3438",
-        backdropFilter: "blur(12px) saturate(1.2)",
+          ? "linear-gradient(180deg, #1a2a3a 0%, #1e2d3a 100%)"
+          : "linear-gradient(180deg, #1E2D3A 0%, #2C3438 100%)",
+        backdropFilter: "blur(16px) saturate(1.3)",
         borderTop: isLightsOn
           ? "1px solid rgba(255,255,255,0.15)"
-          : "1px solid rgba(203,177,131,0.2)",
-        boxShadow: "0 -8px 40px rgba(0,0,0,0.60), 0 -1px 0 rgba(203,177,131,0.08)",
+          : "1px solid rgba(203,177,131,0.22)",
+        boxShadow: "0 -8px 40px rgba(0,0,0,0.75), 0 -1px 0 rgba(203,177,131,0.10)",
       }}
       onTouchStart={onMiniTouchStart}
       onTouchEnd={onMiniTouchEnd}
@@ -1064,7 +1066,7 @@ export default function MobilePlayerLayer() {
     <div
       className="md:hidden fixed inset-0 z-[9010] flex flex-col"
       style={{
-        background: "#2C3438)",
+        background: "linear-gradient(180deg, #1E2D3A 0%, #232E35 35%, #2C3438 100%)",
         transform: `translateY(${expandedDragOffset}px)`,
         transition: expandedDragOffset === 0 ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "none",
         paddingTop: "env(safe-area-inset-top, 0px)",
@@ -1121,7 +1123,7 @@ export default function MobilePlayerLayer() {
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
           height: 0,
           minHeight: 0,
-          background: "#2C3438)",
+          background: "linear-gradient(180deg, #1E2D3A 0%, #232E35 35%, #2C3438 100%)",
         }}
       >
 
