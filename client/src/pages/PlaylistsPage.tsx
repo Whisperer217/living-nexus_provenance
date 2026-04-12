@@ -45,7 +45,7 @@ function CreatePlaylistDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-[oklch(0.12_0.02_280)] border border-white/[0.08] text-white max-w-md">
+      <DialogContent className="bg-[#2C3438] border border-white/[0.08] text-white max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading text-[#CBB183]">New Playlist</DialogTitle>
         </DialogHeader>
@@ -56,7 +56,7 @@ function CreatePlaylistDialog({
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Name your playlist..."
-              className="bg-[oklch(0.14_0.013_280)] border-white/[0.08] text-white placeholder:text-white/30"
+              className="bg-[#2C3438] border-white/[0.08] text-white placeholder:text-white/30"
             />
           </div>
           <div>
@@ -66,7 +66,7 @@ function CreatePlaylistDialog({
               onChange={e => setDescription(e.target.value)}
               placeholder="What's this playlist about?"
               rows={2}
-              className="bg-[oklch(0.14_0.013_280)] border-white/[0.08] text-white placeholder:text-white/30 resize-none"
+              className="bg-[#2C3438] border-white/[0.08] text-white placeholder:text-white/30 resize-none"
             />
           </div>
           <div className="flex items-center justify-between">
@@ -89,7 +89,7 @@ function CreatePlaylistDialog({
           <Button
             onClick={() => create.mutate({ name, description, isPublic, isCollaborative })}
             disabled={!name.trim() || create.isPending}
-            className="bg-[#CBB183] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+            className="bg-[#3F4A50] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
           >
             {create.isPending ? <Loader2 size={14} className="animate-spin" /> : "Create"}
           </Button>
@@ -110,12 +110,12 @@ function PlaylistCard({
     <div
       onClick={onOpen}
       className="group flex items-center gap-3 p-3 rounded-xl cursor-pointer
-        bg-[oklch(0.12_0.02_280)] border border-white/[0.06]
-        hover:border-[#CBB183]/30 hover:bg-[oklch(0.14_0.02_280)] transition-all"
+        bg-[#2C3438] border border-white/[0.06]
+        hover:border-[#CBB183]/30 hover:bg-[#2C3438] transition-all"
     >
       {/* Cover / icon */}
       <div className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden
-        bg-[oklch(0.16_0.03_280)] flex items-center justify-center border border-white/[0.06]">
+        bg-[#2C3438] flex items-center justify-center border border-white/[0.06]">
         {playlist.coverArtUrl
           ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover" />
           : <ListMusic size={20} className="text-[#CBB183]/60" />}
@@ -225,7 +225,7 @@ function PlaylistDetail({
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <div className="w-20 h-20 rounded-xl flex-shrink-0 overflow-hidden
-          bg-[oklch(0.16_0.03_280)] flex items-center justify-center border border-white/[0.06]">
+          bg-[#2C3438] flex items-center justify-center border border-white/[0.06]">
           {playlist.coverArtUrl
             ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover" />
             : <ListMusic size={28} className="text-[#CBB183]/50" />}
@@ -252,7 +252,7 @@ function PlaylistDetail({
           onClick={playAll}
           disabled={!tracks.length}
           size="sm"
-          className="bg-[#CBB183] hover:bg-[var(--lnx-gold-muted)] text-black font-heading text-xs"
+          className="bg-[#3F4A50] hover:bg-[var(--lnx-gold-muted)] text-black font-heading text-xs"
         >
           <Play size={12} className="mr-1" /> Play All
         </Button>
@@ -275,7 +275,7 @@ function PlaylistDetail({
             value={inviteHandle}
             onChange={e => setInviteHandle(e.target.value)}
             placeholder="Artist handle or name..."
-            className="bg-[oklch(0.14_0.013_280)] border-white/[0.08] text-white placeholder:text-white/30 text-sm"
+            className="bg-[#2C3438] border-white/[0.08] text-white placeholder:text-white/30 text-sm"
             onKeyDown={e => e.key === "Enter" && handleInvite()}
           />
           <Button
@@ -296,8 +296,8 @@ function PlaylistDetail({
           <div className="flex flex-wrap gap-2">
             {collaborators.map((c: any) => (
               <div key={c.id} className="flex items-center gap-1.5 px-2 py-1 rounded-full
-                bg-[oklch(0.14_0.02_280)] border border-white/[0.06]">
-                <div className="w-5 h-5 rounded-full overflow-hidden bg-[oklch(0.18_0.03_280)]">
+                bg-[#2C3438] border border-white/[0.06]">
+                <div className="w-5 h-5 rounded-full overflow-hidden bg-[#2C3438]">
                   {c.user.profilePhotoUrl
                     ? <img src={c.user.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
                     : <span className="w-full h-full flex items-center justify-center text-[8px] text-white/50">
@@ -333,10 +333,10 @@ function PlaylistDetail({
             <div
               key={t.id}
               className="group flex items-center gap-3 p-2.5 rounded-xl
-                hover:bg-[oklch(0.14_0.02_280)] transition-colors"
+                hover:bg-[#2C3438] transition-colors"
             >
               <span className="text-[11px] text-white/20 w-5 text-right flex-shrink-0">{i + 1}</span>
-              <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-[oklch(0.16_0.03_280)]">
+              <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-[#2C3438]">
                 {t.song.coverArtUrl
                   ? <img src={t.song.coverArtUrl} alt="" className="w-full h-full object-cover" />
                   : <Music size={14} className="m-auto text-white/20 mt-2.5" />}
@@ -350,7 +350,7 @@ function PlaylistDetail({
               <button
                 onClick={() => { addAndPlay({ id: String(t.song.id), title: t.song.title, artist: t.creator?.artistHandle || t.creator?.name || String(t.song.userId), genre: t.song.genre || "", audioUrl: t.song.fileUrl, artUrl: t.song.coverArtUrl, witnessId: t.song.witnessId }); openNowPlayingPanel(); }}
                 className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
-                  bg-[#CBB183]/10 hover:bg-[#CBB183]/20 text-[#CBB183] transition-all"
+                  bg-[#3F4A50]/10 hover:bg-[#3F4A50]/20 text-[#CBB183] transition-all"
               >
                 <Play size={12} />
               </button>
@@ -390,11 +390,11 @@ export default function PlaylistsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[oklch(0.09_0.04_265)] flex items-center justify-center">
+      <div className="min-h-screen bg-[#2C3438] flex items-center justify-center">
         <div className="text-center">
           <ListMusic size={40} className="mx-auto mb-4 text-[#CBB183]/40" />
           <p className="text-white/50 mb-4">Sign in to access your playlists</p>
-          <Button onClick={() => navigate("/")} className="bg-[#CBB183] text-black font-heading">
+          <Button onClick={() => navigate("/")} className="bg-[#3F4A50] text-black font-heading">
             Go Home
           </Button>
         </div>
@@ -403,7 +403,7 @@ export default function PlaylistsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[oklch(0.09_0.04_265)] pb-32">
+    <div className="min-h-screen bg-[#2C3438] pb-32">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
         {activePlaylistId ? (
@@ -424,7 +424,7 @@ export default function PlaylistsPage() {
             <Button
               onClick={() => setShowCreate(true)}
               size="sm"
-              className="bg-[#CBB183] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+              className="bg-[#3F4A50] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
             >
               <Plus size={14} className="mr-1" /> New
             </Button>
@@ -445,7 +445,7 @@ export default function PlaylistsPage() {
             <p className="text-sm text-white/25 mb-6">Create one and invite collaborators to build it together</p>
             <Button
               onClick={() => setShowCreate(true)}
-              className="bg-[#CBB183] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+              className="bg-[#3F4A50] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
             >
               <Plus size={14} className="mr-1" /> Create Your First Playlist
             </Button>

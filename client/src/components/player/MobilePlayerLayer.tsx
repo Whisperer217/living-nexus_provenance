@@ -74,7 +74,7 @@ function Scrubber({
     <div className="w-full select-none">
       <div
         className={`relative w-full rounded-full cursor-pointer ${thin ? "h-0.5" : "h-1"} group`}
-        style={{ background: "oklch(1 0 0 / 0.12)" }}
+        style={{ background: "rgba(203,177,131,0.14)" }}
         onClick={onSeek}
         onTouchMove={onSeekTouch}
         onTouchStart={onSeekTouch}
@@ -83,7 +83,7 @@ function Scrubber({
           className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-100"
           style={{
             width: `${Math.min(100, progress)}%`,
-            background: "linear-gradient(90deg, oklch(0.84 0.155 85), oklch(0.75 0.18 85))",
+            background: "linear-gradient(90deg, #CBB183, #CBB183)",
           }}
         />
         {!thin && (
@@ -91,18 +91,18 @@ function Scrubber({
             className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             style={{
               left: `calc(${Math.min(100, progress)}% - 6px)`,
-              background: "oklch(0.84 0.155 85)",
-              boxShadow: "0 0 6px oklch(0.84 0.155 85 / 0.6)",
+              background: "#CBB183",
+              boxShadow: "0 0 6px rgba(203,177,131,0.55)",
             }}
           />
         )}
       </div>
       {!thin && (
         <div className="flex justify-between mt-1.5">
-          <span className="text-[10px] font-mono" style={{ color: "oklch(0.45 0.03 280)" }}>
+          <span className="text-[10px] font-mono" style={{ color: "#AA8E64" }}>
             {fmtTime(currentTime)}
           </span>
-          <span className="text-[10px] font-mono" style={{ color: "oklch(0.45 0.03 280)" }}>
+          <span className="text-[10px] font-mono" style={{ color: "#AA8E64" }}>
             {fmtTime(duration)}
           </span>
         </div>
@@ -156,7 +156,7 @@ function DiscoverPanel({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 size={20} className="animate-spin" style={{ color: "oklch(0.55 0.04 280)" }} />
+        <Loader2 size={20} className="animate-spin" style={{ color: "#3F4A50" }} />
       </div>
     );
   }
@@ -164,11 +164,11 @@ function DiscoverPanel({
   if (!tracks.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-8 text-center gap-3">
-        <Sparkles size={24} style={{ color: "oklch(0.30 0.03 280)" }} />
-        <div className="text-[12px] font-heading" style={{ color: "oklch(0.40 0.03 280)" }}>
+        <Sparkles size={24} style={{ color: "#2C3438" }} />
+        <div className="text-[12px] font-heading" style={{ color: "#3F4A50" }}>
           No related tracks found
         </div>
-        <div className="text-[10px]" style={{ color: "oklch(0.30 0.02 280)" }}>
+        <div className="text-[10px]" style={{ color: "#2C3438" }}>
           Try exploring other genres
         </div>
       </div>
@@ -180,7 +180,7 @@ function DiscoverPanel({
       {/* Section header */}
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-heading tracking-[0.18em] uppercase"
-          style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}>
+          style={{ color: "rgba(203,177,131,0.55)" }}>
           Related Tracks
         </div>
         {tracks.length > 1 && (
@@ -188,9 +188,9 @@ function DiscoverPanel({
             onClick={() => onPlayAll(tracks)}
             className="flex items-center gap-1.5 text-[10px] font-heading tracking-wide px-3 py-1.5 rounded-full transition-all active:scale-95"
             style={{
-              background: "oklch(0.84 0.155 85 / 0.12)",
-              border: "1px solid oklch(0.84 0.155 85 / 0.3)",
-              color: "oklch(0.84 0.155 85)",
+              background: "rgba(203,177,131,0.10)",
+              border: "1px solid rgba(203,177,131,0.28)",
+              color: "#CBB183",
             }}
           >
             <Play size={10} fill="currentColor" />
@@ -206,20 +206,20 @@ function DiscoverPanel({
             onClick={() => onPlay(track)}
             className="flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-[0.98] text-left"
             style={{
-              background: "oklch(0.12 0.025 275 / 0.6)",
-              border: "1px solid oklch(0.30 0.015 200 / 0.5)",
+              background: "rgba(44,52,56,0.6)",
+              border: "1px solid rgba(44,52,56,0.5)",
             }}
           >
             {/* Art */}
             <div
               className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden"
-              style={{ background: "oklch(0.18 0.04 280)" }}
+              style={{ background: "#2C3438" }}
             >
               {track.artUrl ? (
                 <img src={track.artUrl} alt="" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Music size={16} style={{ color: "oklch(0.40 0.03 280)" }} />
+                  <Music size={16} style={{ color: "#3F4A50" }} />
                 </div>
               )}
             </div>
@@ -228,16 +228,16 @@ function DiscoverPanel({
               <div className="text-[13px] font-heading text-white truncate leading-tight">
                 {track.title}
               </div>
-              <div className="text-[11px] truncate mt-0.5" style={{ color: "oklch(0.50 0.04 280)" }}>
+              <div className="text-[11px] truncate mt-0.5" style={{ color: "#3F4A50" }}>
                 {track.artist}
               </div>
               {track.genre && (
                 <div
                   className="inline-block mt-1 text-[9px] font-heading tracking-wide px-1.5 py-0.5 rounded-full"
                   style={{
-                    background: "oklch(0.84 0.155 85 / 0.10)",
-                    color: "oklch(0.84 0.155 85 / 0.7)",
-                    border: "1px solid oklch(0.84 0.155 85 / 0.2)",
+                    background: "rgba(203,177,131,0.10)",
+                    color: "rgba(230,205,174,0.7)",
+                    border: "1px solid rgba(203,177,131,0.18)",
                   }}
                 >
                   {track.genre}
@@ -245,7 +245,7 @@ function DiscoverPanel({
               )}
             </div>
             {/* Play icon */}
-            <Play size={14} style={{ color: "oklch(0.84 0.155 85 / 0.5)", flexShrink: 0 }} />
+            <Play size={14} style={{ color: "rgba(203,177,131,0.45)", flexShrink: 0 }} />
           </button>
         ))}
       </div>
@@ -686,7 +686,7 @@ export default function MobilePlayerLayer() {
       {isVisualPending && (
         <div
           className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-1.5 py-1.5 px-3"
-          style={{ background: "linear-gradient(to top, oklch(0.08 0.01 280 / 0.82), transparent)" }}
+          style={{ background: "linear-gradient(to top, rgba(44,52,56,0.82), transparent)" }}
         >
           <div className="flex gap-0.5 items-center">
             {[0, 1, 2].map(i => (
@@ -694,7 +694,7 @@ export default function MobilePlayerLayer() {
                 key={i}
                 className="w-1 h-1 rounded-full"
                 style={{
-                  background: "oklch(0.84 0.155 85 / 0.65)",
+                  background: "rgba(203,177,131,0.60)",
                   animationName: "pulse",
                   animationDuration: "2s",
                   animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
@@ -704,14 +704,14 @@ export default function MobilePlayerLayer() {
               />
             ))}
           </div>
-          <span className="text-[9px] font-heading tracking-wider" style={{ color: "oklch(0.84 0.155 85 / 0.65)" }}>
+          <span className="text-[9px] font-heading tracking-wider" style={{ color: "rgba(203,177,131,0.60)" }}>
             generating visual…
           </span>
         </div>
       )}
       {videoUrl && showVideo && (
         <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
-          style={{ background: "oklch(0.84 0.155 85 / 0.9)", color: "#2C3438" }}>
+          style={{ background: "rgba(230,205,174,0.9)", color: "#2C3438" }}>
           <Video size={9} /> Live
         </div>
       )}
@@ -724,14 +724,14 @@ export default function MobilePlayerLayer() {
       <button
         onClick={toggleShuffle}
         className="transition-all active:scale-90"
-        style={{ color: state.isShuffle ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)" }}
+        style={{ color: state.isShuffle ? "#CBB183" : "#3F4A50" }}
       >
         <Shuffle size={large ? 20 : 16} />
       </button>
       <button
         onClick={prevTrack}
         className="transition-all active:scale-90"
-        style={{ color: overlay ? "white" : "oklch(0.75 0.04 280)" }}
+        style={{ color: overlay ? "white" : "#DACAAA" }}
       >
         <SkipBack size={large ? 28 : 22} fill="currentColor" />
       </button>
@@ -741,8 +741,8 @@ export default function MobilePlayerLayer() {
         style={{
           width: large ? "64px" : "52px",
           height: large ? "64px" : "52px",
-          background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))",
-          boxShadow: "0 4px 20px oklch(0.84 0.155 85 / 0.35)",
+          background: "linear-gradient(135deg, #CBB183, #CBB183)",
+          boxShadow: "0 4px 20px rgba(203,177,131,0.32)",
           color: "#2C3438",
         }}
       >
@@ -753,14 +753,14 @@ export default function MobilePlayerLayer() {
       <button
         onClick={nextTrack}
         className="transition-all active:scale-90"
-        style={{ color: overlay ? "white" : "oklch(0.75 0.04 280)" }}
+        style={{ color: overlay ? "white" : "#DACAAA" }}
       >
         <SkipForward size={large ? 28 : 22} fill="currentColor" />
       </button>
       <button
         onClick={toggleRepeat}
         className="transition-all active:scale-90"
-        style={{ color: state.isRepeat ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)" }}
+        style={{ color: state.isRepeat ? "#CBB183" : "#3F4A50" }}
       >
         <Repeat size={large ? 20 : 16} />
       </button>
@@ -792,9 +792,9 @@ export default function MobilePlayerLayer() {
           height: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
           /* Solid background — no bleed-through from content below */
-          background: isLightsOn ? "rgb(28,38,52)" : "oklch(0.08 0.022 275)",
+          background: isLightsOn ? "rgb(28,38,52)" : "#2C3438",
           backdropFilter: "blur(12px) saturate(1.2)",
-          borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid oklch(0.84 0.155 85 / 0.12)",
+          borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(203,177,131,0.10)",
         }}
       >
         <div className="flex items-center justify-around h-14 px-2">
@@ -805,7 +805,7 @@ export default function MobilePlayerLayer() {
                 key={path}
                 onClick={() => { try { navigator.vibrate?.(5); } catch {} navigate(path); }}
                 className="relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all active:scale-90"
-                style={{ color: isActive ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)" }}
+                style={{ color: isActive ? "#CBB183" : "#AA8E64" }}
                 aria-label={label}
               >
                 <div className="relative">
@@ -813,13 +813,13 @@ export default function MobilePlayerLayer() {
                   {badge && (
                     <span
                       className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-1"
-                      style={{ background: "oklch(0.65 0.22 25)", color: "white" }}
+                      style={{ background: "#EF4444", color: "white" }}
                     >{badge}</span>
                   )}
                 </div>
                 <span className="text-[9px] font-heading tracking-wide uppercase" style={{ lineHeight: 1 }}>{label}</span>
                 {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full" style={{ background: "oklch(0.84 0.155 85)" }} />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full" style={{ background: "#CBB183" }} />
                 )}
               </button>
             );
@@ -840,24 +840,24 @@ export default function MobilePlayerLayer() {
         /* Solid background — no bleed-through */
         background: isLightsOn
           ? "rgb(32,44,58)"
-          : "oklch(0.10 0.025 275)",
+          : "#2C3438",
         backdropFilter: "blur(12px) saturate(1.2)",
         borderTop: isLightsOn
           ? "1px solid rgba(255,255,255,0.15)"
-          : "1px solid oklch(0.84 0.155 85 / 0.20)",
-        boxShadow: "0 -8px 40px oklch(0 0 0 / 0.6), 0 -1px 0 oklch(0.84 0.155 85 / 0.08)",
+          : "1px solid rgba(203,177,131,0.2)",
+        boxShadow: "0 -8px 40px rgba(0,0,0,0.60), 0 -1px 0 rgba(203,177,131,0.08)",
       }}
       onTouchStart={onMiniTouchStart}
       onTouchEnd={onMiniTouchEnd}
     >
       {/* Progress line at top of mini bar */}
       <div className="absolute top-0 left-0 right-0 h-[2px]"
-        style={{ background: "oklch(1 0 0 / 0.06)" }}>
+        style={{ background: "rgba(203,177,131,0.08)" }}>
         <div
           className="h-full transition-[width] duration-300"
           style={{
             width: `${Math.min(100, progress)}%`,
-            background: "linear-gradient(90deg, oklch(0.84 0.155 85), oklch(0.75 0.18 85))",
+            background: "linear-gradient(90deg, #CBB183, #CBB183)",
           }}
         />
       </div>
@@ -867,25 +867,25 @@ export default function MobilePlayerLayer() {
         <button
           onClick={() => setPlayerState("expanded")}
           className="flex-shrink-0 w-10 h-10 rounded-xl overflow-hidden relative"
-          style={{ boxShadow: "0 2px 12px oklch(0 0 0 / 0.5)" }}
+          style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.50)" }}
         >
           {currentTrack.artUrl ? (
             <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
-              style={{ background: "oklch(0.158 0.030 50)" }}>
-              <Music size={16} style={{ color: "oklch(0.45 0.03 280)" }} />
+              style={{ background: "#2C3438" }}>
+              <Music size={16} style={{ color: "#AA8E64" }} />
             </div>
           )}
           {/* Live wave indicator */}
           {state.isPlaying && (
             <div className="absolute inset-0 flex items-end justify-center pb-1 gap-[2px]"
-              style={{ background: "oklch(0 0 0 / 0.35)" }}>
+              style={{ background: "rgba(0,0,0,0.35)" }}>
               {[1,2,3,4].map(i => (
                 <span key={i} className="w-[2px] rounded-full"
                   style={{
                     height: "6px",
-                    background: "oklch(0.84 0.155 85)",
+                    background: "#CBB183",
                     animationName: "mobileWave",
                     animationDuration: `${0.4 + i * 0.1}s`,
                     animationTimingFunction: "ease-in-out",
@@ -905,7 +905,7 @@ export default function MobilePlayerLayer() {
           <div className="text-[13px] font-heading text-white truncate leading-tight">
             {currentTrack.title || "Unknown Track"}
           </div>
-          <div className="text-[11px] truncate mt-0.5" style={{ color: "oklch(0.62 0.05 280)" }}>
+          <div className="text-[11px] truncate mt-0.5" style={{ color: "#AA8E64" }}>
             {currentTrack.artist || "Unknown Artist"}
           </div>
         </button>
@@ -913,7 +913,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleToggleLike}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
-          style={{ color: isLiked ? "oklch(0.65 0.22 15)" : "oklch(0.35 0.02 280)" }}
+          style={{ color: isLiked ? "#EF4444" : "#2C3438" }}
         >
           <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
         </button>
@@ -922,8 +922,8 @@ export default function MobilePlayerLayer() {
           onClick={togglePlay}
           className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-all active:scale-90"
           style={{
-            background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))",
-            boxShadow: "0 2px 10px oklch(0.84 0.155 85 / 0.25)",
+            background: "linear-gradient(135deg, #CBB183, #CBB183)",
+            boxShadow: "0 2px 10px rgba(203,177,131,0.22)",
           }}
         >
           {state.isPlaying
@@ -934,7 +934,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={nextTrack}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
-          style={{ color: "oklch(0.45 0.03 280)" }}
+          style={{ color: "#AA8E64" }}
         >
           <SkipForward size={18} fill="currentColor" />
         </button>
@@ -947,7 +947,7 @@ export default function MobilePlayerLayer() {
                 key={i}
                 className="w-[2px] rounded-full"
                 style={{
-                  background: "oklch(0.84 0.155 85 / 0.7)",
+                  background: "rgba(230,205,174,0.7)",
                   animationName: "mobileWave",
                   animationDuration: `${0.35 + i * 0.09}s`,
                   animationTimingFunction: "ease-in-out",
@@ -967,7 +967,7 @@ export default function MobilePlayerLayer() {
           <button
             onClick={(e) => { e.stopPropagation(); setShowMiniMenu(v => !v); }}
             className="w-7 h-8 flex items-center justify-center transition-all active:scale-90"
-            style={{ color: "oklch(0.45 0.03 280)" }}
+            style={{ color: "#AA8E64" }}
             aria-label="Track options"
           >
             <MoreVertical size={16} />
@@ -984,17 +984,17 @@ export default function MobilePlayerLayer() {
               <div
                 className="absolute bottom-full right-0 mb-2 w-52 rounded-2xl overflow-hidden z-[23]"
                 style={{
-                  background: "oklch(0.13 0.025 275 / 0.97)",
+                  background: "rgba(44,52,56,0.97)",
                   backdropFilter: "blur(20px)",
-                  border: "1px solid oklch(0.84 0.155 85 / 0.18)",
-                  boxShadow: "0 8px 40px oklch(0 0 0 / 0.7)",
+                  border: "1px solid rgba(203,177,131,0.16)",
+                  boxShadow: "0 8px 40px rgba(0,0,0,0.70)",
                 }}
                 onClick={e => e.stopPropagation()}
               >
                 {/* Track header */}
-                <div className="px-4 py-3 border-b" style={{ borderColor: "oklch(0.84 0.155 85 / 0.10)" }}>
+                <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(203,177,131,0.10)" }}>
                   <p className="text-[12px] font-heading text-white/90 truncate">{currentTrack.title}</p>
-                  <p className="text-[10px] mt-0.5 truncate" style={{ color: "oklch(0.55 0.04 280)" }}>{currentTrack.artist}</p>
+                  <p className="text-[10px] mt-0.5 truncate" style={{ color: "#3F4A50" }}>{currentTrack.artist}</p>
                 </div>
 
                 {/* Menu items */}
@@ -1043,9 +1043,9 @@ export default function MobilePlayerLayer() {
                     key={item.label}
                     onClick={item.action}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all hover:bg-white/5 active:bg-white/10"
-                    style={{ color: item.danger ? "oklch(0.65 0.18 15)" : "oklch(0.80 0.03 280)" }}
+                    style={{ color: item.danger ? "#EF4444" : "#DACAAA" }}
                   >
-                    <span style={{ color: item.danger ? "oklch(0.65 0.18 15)" : "oklch(0.84 0.155 85 / 0.7)" }}>{item.icon}</span>
+                    <span style={{ color: item.danger ? "#EF4444" : "rgba(230,205,174,0.7)" }}>{item.icon}</span>
                     <span className="text-[13px] font-body">{item.label}</span>
                   </button>
                 ))}
@@ -1085,7 +1085,7 @@ export default function MobilePlayerLayer() {
         onTouchMove={onExpandedTouchMove}
         onTouchEnd={onExpandedTouchEnd}
       >
-        <div className="w-10 h-1 rounded-full" style={{ background: "oklch(1 0 0 / 0.15)" }} />
+        <div className="w-10 h-1 rounded-full" style={{ background: "rgba(203,177,131,0.15)" }} />
       </div>
 
       {/* Scroll-to-top button — floats over content when user has scrolled down */}
@@ -1094,9 +1094,9 @@ export default function MobilePlayerLayer() {
           onClick={() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
           className="absolute bottom-24 right-4 z-10 flex items-center justify-center w-9 h-9 rounded-full shadow-lg transition-all active:scale-90"
           style={{
-            background: "oklch(0.84 0.155 85 / 0.15)",
-            border: "1px solid oklch(0.84 0.155 85 / 0.3)",
-            color: "oklch(0.84 0.155 85)",
+            background: "rgba(203,177,131,0.12)",
+            border: "1px solid rgba(203,177,131,0.28)",
+            color: "#CBB183",
             backdropFilter: "blur(8px)",
           }}
           aria-label="Scroll to top"
@@ -1130,17 +1130,17 @@ export default function MobilePlayerLayer() {
         <button
           onClick={() => setPlayerState("mini")}
           className="p-2 rounded-xl transition-all active:scale-90"
-          style={{ color: "oklch(0.45 0.03 280)" }}
+          style={{ color: "#AA8E64" }}
         >
           <ChevronDown size={22} />
         </button>
         <div className="text-center">
           <div className="text-[10px] font-heading tracking-[0.18em] uppercase"
-            style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>
+            style={{ color: "rgba(230,205,174,0.7)" }}>
             Now Playing
           </div>
           {queueContextLabel && (
-            <div className="text-[9px] mt-0.5" style={{ color: "oklch(0.84 0.155 85 / 0.45)", fontFamily: "'Cinzel', serif" }}>
+            <div className="text-[9px] mt-0.5" style={{ color: "rgba(203,177,131,0.40)", fontFamily: "'Cinzel', serif" }}>
               {queueContextLabel}
             </div>
           )}
@@ -1148,7 +1148,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={() => setPlayerState("cinematic")}
           className="p-2 rounded-xl transition-all active:scale-90"
-          style={{ color: "oklch(0.45 0.03 280)" }}
+          style={{ color: "#AA8E64" }}
           title="Cinematic mode"
         >
           <Maximize2 size={18} />
@@ -1159,8 +1159,8 @@ export default function MobilePlayerLayer() {
       <div
         className="flex-shrink-0 flex items-center gap-1 mx-8 mb-4 p-1 rounded-2xl"
         style={{
-          background: "oklch(0.12 0.025 275 / 0.8)",
-          border: "1px solid oklch(0.30 0.015 200 / 0.5)",
+          background: "rgba(44,52,56,0.8)",
+          border: "1px solid rgba(44,52,56,0.5)",
         }}
       >
         {(["playing", "discover"] as const).map((tab) => (
@@ -1169,9 +1169,9 @@ export default function MobilePlayerLayer() {
             onClick={() => setExpandedTab(tab)}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all text-[11px] font-heading tracking-wide"
             style={{
-              background: expandedTab === tab ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
-              color: expandedTab === tab ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)",
-              border: expandedTab === tab ? "1px solid oklch(0.84 0.155 85 / 0.3)" : "1px solid transparent",
+              background: expandedTab === tab ? "rgba(203,177,131,0.12)" : "transparent",
+              color: expandedTab === tab ? "#CBB183" : "#3F4A50",
+              border: expandedTab === tab ? "1px solid rgba(203,177,131,0.28)" : "1px solid transparent",
             }}
           >
             {tab === "playing" ? <ListMusic size={12} /> : <Sparkles size={12} />}
@@ -1186,7 +1186,7 @@ export default function MobilePlayerLayer() {
           className="w-full rounded-2xl relative"
           style={{
             aspectRatio: "1 / 1",
-            boxShadow: "0 16px 64px oklch(0 0 0 / 0.6), 0 4px 16px oklch(0.84 0.155 85 / 0.08)",
+            boxShadow: "0 16px 64px rgba(0,0,0,0.60), 0 4px 16px rgba(203,177,131,0.08)",
             overflow: artZoomed ? "visible" : "hidden",
             zIndex: artZoomed ? 20 : "auto",
           }}
@@ -1214,9 +1214,9 @@ export default function MobilePlayerLayer() {
               onClick={() => setWidPanelOpen(true)}
               className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
               style={{
-                background: "oklch(0.30 0.015 200 / 0.88)",
-                border: "1px solid oklch(0.55 0.18 145 / 0.5)",
-                color: "oklch(0.82 0.18 145)",
+                background: "rgba(44,52,56,0.88)",
+                border: "1px solid rgba(74,222,128,0.5)",
+                color: "#4ADE80",
                 backdropFilter: "blur(4px)",
               }}
             >
@@ -1246,17 +1246,17 @@ export default function MobilePlayerLayer() {
             <button
               onClick={() => { setPlayerState("mini"); navigate(`/creator/${creatorId}`); }}
               className="flex items-center gap-1.5 text-[13px] mt-1 truncate transition-colors hover:text-white text-left"
-              style={{ color: "oklch(0.55 0.04 280)" }}
+              style={{ color: "#3F4A50" }}
             >
               {currentTrack.creatorRole === "founder" && (
-                <Crown size={11} style={{ color: "oklch(0.84 0.155 85)", flexShrink: 0 }} />
+                <Crown size={11} style={{ color: "#CBB183", flexShrink: 0 }} />
               )}
               {currentTrack.artist || "Unknown Artist"}
             </button>
           ) : (
-            <div className="flex items-center gap-1.5 text-[13px] mt-1 truncate" style={{ color: "oklch(0.55 0.04 280)" }}>
+            <div className="flex items-center gap-1.5 text-[13px] mt-1 truncate" style={{ color: "#3F4A50" }}>
               {currentTrack.creatorRole === "founder" && (
-                <Crown size={11} style={{ color: "oklch(0.84 0.155 85)", flexShrink: 0 }} />
+                <Crown size={11} style={{ color: "#CBB183", flexShrink: 0 }} />
               )}
               {currentTrack.artist || "Unknown Artist"}
             </div>
@@ -1266,8 +1266,8 @@ export default function MobilePlayerLayer() {
           onClick={handleToggleLike}
           className="flex-shrink-0 ml-4 p-2 rounded-full transition-all active:scale-90"
           style={{
-            color: isLiked ? "oklch(0.65 0.22 15)" : "oklch(0.40 0.03 280)",
-            background: isLiked ? "oklch(0.65 0.22 15 / 0.12)" : "transparent",
+            color: isLiked ? "#EF4444" : "#3F4A50",
+            background: isLiked ? "rgba(239,68,68,0.12)" : "transparent",
           }}
         >
           <Heart size={22} fill={isLiked ? "currentColor" : "none"} />
@@ -1295,7 +1295,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleShare}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: copied ? "oklch(0.70 0.18 145)" : "oklch(0.40 0.03 280)" }}
+          style={{ color: copied ? "#4ADE80" : "#3F4A50" }}
         >
           {copied ? <Check size={18} /> : <Share2 size={18} />}
           <span className="text-[9px] font-heading tracking-wide">{copied ? "Copied" : "Share"}</span>
@@ -1303,7 +1303,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={() => setGiftOpen(true)}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "oklch(0.40 0.03 280)" }}
+          style={{ color: "#3F4A50" }}
         >
           <DollarSign size={18} />
           <span className="text-[9px] font-heading tracking-wide">Tip</span>
@@ -1316,7 +1316,7 @@ export default function MobilePlayerLayer() {
             }
           }}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "oklch(0.40 0.03 280)" }}
+          style={{ color: "#3F4A50" }}
         >
           <ListMusic size={18} />
           <span className="text-[9px] font-heading tracking-wide">Details</span>
@@ -1326,9 +1326,9 @@ export default function MobilePlayerLayer() {
           {showMobileVolume && (
             <div
               className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-2xl p-3 shadow-2xl z-50 flex flex-col items-center gap-2"
-              style={{ background: "oklch(0.12 0.03 275)", border: "1px solid oklch(0.30 0.04 270 / 60%)" }}
+              style={{ background: "#2C3438", border: "1px solid rgba(44,52,56,0.6)" }}
             >
-              <span className="text-[10px] font-mono" style={{ color: "oklch(0.80 0.145 82)" }}>
+              <span className="text-[10px] font-mono" style={{ color: "#CBB183" }}>
                 {state.isMuted ? "0" : Math.round(state.volume * 100)}%
               </span>
               <input
@@ -1338,9 +1338,9 @@ export default function MobilePlayerLayer() {
                 onChange={e => { setVolume(parseFloat(e.target.value)); }}
                 className="volume-slider-vertical"
                 style={{
-                  background: `linear-gradient(to top, oklch(0.80 0.145 82) ${
+                  background: `linear-gradient(to top, #CBB183 ${
                     state.isMuted ? 0 : state.volume * 100
-                  }%, oklch(0.30 0.04 60 / 70%) ${
+                  }%, rgba(44,52,56,0.7) ${
                     state.isMuted ? 0 : state.volume * 100
                   }%)`,
                 }}
@@ -1348,7 +1348,7 @@ export default function MobilePlayerLayer() {
               <button
                 onClick={toggleMute}
                 className="p-1 transition-colors"
-                style={{ color: state.isMuted ? "oklch(0.80 0.145 82)" : "oklch(0.50 0.02 280)" }}
+                style={{ color: state.isMuted ? "#CBB183" : "#3F4A50" }}
               >
                 <VolumeX size={12} />
               </button>
@@ -1357,7 +1357,7 @@ export default function MobilePlayerLayer() {
           <button
             onClick={() => setShowMobileVolume(v => !v)}
             className="flex flex-col items-center gap-1 transition-all active:scale-90"
-            style={{ color: state.isMuted ? "oklch(0.65 0.22 15)" : "oklch(0.40 0.03 280)" }}
+            style={{ color: state.isMuted ? "#EF4444" : "#3F4A50" }}
           >
             {state.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
             <span className="text-[9px] font-heading tracking-wide">{state.isMuted ? "Muted" : "Vol"}</span>
@@ -1371,8 +1371,8 @@ export default function MobilePlayerLayer() {
       {widBadge && (
         <div className="flex-shrink-0 mx-8 mb-4 rounded-2xl overflow-hidden"
           style={{
-            background: "oklch(0.10 0.03 145 / 0.6)",
-            border: "1px solid oklch(0.45 0.18 145 / 0.35)",
+            background: "rgba(44,52,56,0.6)",
+            border: "1px solid rgba(74,222,128,0.35)",
           }}
         >
           {/* Header — always visible */}
@@ -1381,16 +1381,16 @@ export default function MobilePlayerLayer() {
             onClick={() => setWidPanelOpen(v => !v)}
           >
             <div className="flex items-center gap-2">
-              <Fingerprint size={14} style={{ color: "oklch(0.72 0.18 145)" }} />
+              <Fingerprint size={14} style={{ color: "#4ADE80" }} />
               <span className="text-[11px] font-heading tracking-[0.12em] uppercase"
-                style={{ color: "oklch(0.72 0.18 145)" }}>
+                style={{ color: "#4ADE80" }}>
                 Origin Proof
               </span>
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
-                  background: "oklch(0.30 0.015 200 / 0.5)",
-                  color: "oklch(0.82 0.18 145)",
-                  border: "1px solid oklch(0.45 0.18 145 / 0.3)",
+                  background: "rgba(44,52,56,0.5)",
+                  color: "#4ADE80",
+                  border: "1px solid rgba(74,222,128,0.3)",
                 }}>
                 ✓ WID
               </span>
@@ -1398,7 +1398,7 @@ export default function MobilePlayerLayer() {
             <ChevronRight
               size={14}
               style={{
-                color: "oklch(0.45 0.04 280)",
+                color: "#3F4A50",
                 transform: widPanelOpen ? "rotate(90deg)" : "rotate(0deg)",
                 transition: "transform 0.2s",
               }}
@@ -1407,24 +1407,24 @@ export default function MobilePlayerLayer() {
           {/* Expanded content */}
           {widPanelOpen && (
             <div className="px-4 pb-4 space-y-3 border-t"
-              style={{ borderColor: "oklch(0.45 0.18 145 / 0.2)" }}>
+              style={{ borderColor: "rgba(34,197,94,0.2)" }}>
               <div className="pt-3">
                 <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
-                  style={{ color: "oklch(0.40 0.03 280)" }}>
+                  style={{ color: "#3F4A50" }}>
                   Witness ID
                 </div>
                 <div className="text-[11px] font-mono break-all"
-                  style={{ color: "oklch(0.75 0.14 145)" }}>
+                  style={{ color: "#4ADE80" }}>
                   {widBadge}
                 </div>
               </div>
               {currentTrack.title && (
                 <div>
                   <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
-                    style={{ color: "oklch(0.40 0.03 280)" }}>
+                    style={{ color: "#3F4A50" }}>
                     Work
                   </div>
-                  <div className="text-[12px]" style={{ color: "oklch(0.75 0.04 280)" }}>
+                  <div className="text-[12px]" style={{ color: "#DACAAA" }}>
                     {currentTrack.title}
                   </div>
                 </div>
@@ -1432,10 +1432,10 @@ export default function MobilePlayerLayer() {
               {currentTrack.artist && (
                 <div>
                   <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
-                    style={{ color: "oklch(0.40 0.03 280)" }}>
+                    style={{ color: "#3F4A50" }}>
                     Creator
                   </div>
-                  <div className="text-[12px]" style={{ color: "oklch(0.75 0.04 280)" }}>
+                  <div className="text-[12px]" style={{ color: "#DACAAA" }}>
                     {currentTrack.artist}
                   </div>
                 </div>
@@ -1443,7 +1443,7 @@ export default function MobilePlayerLayer() {
               <button
                 onClick={() => { setPlayerState("mini"); navigate(`/verify/${widBadge}`); }}
                 className="flex items-center gap-1.5 text-[10px] font-heading tracking-wide transition-all active:scale-95"
-                style={{ color: "oklch(0.72 0.18 145)" }}
+                style={{ color: "#4ADE80" }}
               >
                 <ExternalLink size={11} />
                 Verify on-chain provenance
@@ -1457,10 +1457,10 @@ export default function MobilePlayerLayer() {
       <div className="flex-shrink-0 mx-8 mb-4">
         <div className="flex items-center gap-2 mb-2">
           <div className="text-[9px] font-heading tracking-[0.15em] uppercase"
-            style={{ color: "oklch(0.58 0.05 280)" }}>
+            style={{ color: "#AA8E64" }}>
             Signals
           </div>
-          <div className="flex-1 h-px" style={{ background: "oklch(0.30 0.015 200 / 0.5)" }} />
+          <div className="flex-1 h-px" style={{ background: "rgba(44,52,56,0.5)" }} />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {EMOJI_REACTIONS.map(({ type, emoji, label }) => {
@@ -1474,15 +1474,15 @@ export default function MobilePlayerLayer() {
                 title={label}
                 style={{
                   background: isActive
-                    ? "oklch(0.22 0.06 85 / 0.6)"
-                    : "oklch(0.14 0.03 275 / 0.8)",
-                  border: `1px solid ${isActive ? "oklch(0.84 0.155 85 / 0.5)" : "oklch(0.25 0.03 275 / 0.6)"}`,
+                    ? "rgba(122,90,30,0.6)"
+                    : "rgba(44,52,56,0.8)",
+                  border: `1px solid ${isActive ? "rgba(203,177,131,0.45)" : "rgba(44,52,56,0.6)"}`,
                 }}
               >
                 <span className="text-[14px] leading-none">{emoji}</span>
                 {count > 0 && (
                   <span className="text-[10px] font-mono"
-                    style={{ color: isActive ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 280)" }}>
+                    style={{ color: isActive ? "#CBB183" : "#3F4A50" }}>
                     {count}
                   </span>
                 )}
@@ -1497,14 +1497,14 @@ export default function MobilePlayerLayer() {
         <div
           className="flex-shrink-0 mx-8 mb-3 flex items-center justify-center gap-2 py-2 px-4 rounded-full animate-fade-in"
           style={{
-            background: "oklch(0.10 0.02 275 / 0.5)",
-            border: "1px solid oklch(0.22 0.03 275 / 0.4)",
+            background: "rgba(44,52,56,0.5)",
+            border: "1px solid rgba(44,52,56,0.4)",
           }}
         >
           <span className="text-[13px]">🎧</span>
           <span
             className="text-[12px] font-medium tracking-wide"
-            style={{ color: "oklch(0.65 0.06 280)" }}
+            style={{ color: "#AA8E64" }}
           >
             {listenerCount === 1
               ? "1 person currently listening"
@@ -1516,8 +1516,8 @@ export default function MobilePlayerLayer() {
       {/* Comments Panel */}
       <div className="flex-shrink-0 mx-8 mb-4 rounded-2xl overflow-hidden"
         style={{
-          background: "oklch(0.10 0.02 275 / 0.6)",
-          border: "1px solid oklch(0.30 0.015 200 / 0.5)",
+          background: "rgba(44,52,56,0.6)",
+          border: "1px solid rgba(44,52,56,0.5)",
         }}
       >
         {/* Header */}
@@ -1526,16 +1526,16 @@ export default function MobilePlayerLayer() {
           onClick={() => setCommentsPanelOpen(v => !v)}
         >
           <div className="flex items-center gap-2">
-            <MessageCircle size={14} style={{ color: "oklch(0.55 0.04 280)" }} />
+            <MessageCircle size={14} style={{ color: "#3F4A50" }} />
             <span className="text-[11px] font-heading tracking-[0.12em] uppercase"
-              style={{ color: "oklch(0.55 0.04 280)" }}>
+              style={{ color: "#3F4A50" }}>
               Comments
             </span>
             {comments.length > 0 && (
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
-                  background: "oklch(0.18 0.03 275 / 0.8)",
-                  color: "oklch(0.55 0.04 280)",
+                  background: "rgba(44,52,56,0.8)",
+                  color: "#3F4A50",
                 }}>
                 {comments.length}
               </span>
@@ -1544,7 +1544,7 @@ export default function MobilePlayerLayer() {
           <ChevronRight
             size={14}
             style={{
-              color: "oklch(0.35 0.02 280)",
+              color: "#2C3438",
               transform: commentsPanelOpen ? "rotate(90deg)" : "rotate(0deg)",
               transition: "transform 0.2s",
             }}
@@ -1552,32 +1552,32 @@ export default function MobilePlayerLayer() {
         </button>
         {/* Expanded content */}
         {commentsPanelOpen && (
-          <div className="border-t" style={{ borderColor: "oklch(0.22 0.03 275 / 0.4)" }}>
+          <div className="border-t" style={{ borderColor: "rgba(44,52,56,0.4)" }}>
             {/* Comment list */}
             <div className="max-h-48 overflow-y-auto px-4 py-3 space-y-3">
               {comments.length === 0 ? (
-                <p className="text-[11px] text-center py-2" style={{ color: "oklch(0.35 0.02 280)" }}>
+                <p className="text-[11px] text-center py-2" style={{ color: "#2C3438" }}>
                   No comments yet. Be the first.
                 </p>
               ) : (
                 comments.slice(0, 20).map((c: any, i: number) => (
                   <div key={c.id ?? i} className="flex gap-2">
                     <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px]"
-                      style={{ background: "oklch(0.18 0.04 280)", color: "oklch(0.55 0.04 280)" }}>
+                      style={{ background: "#2C3438", color: "#3F4A50" }}>
                       {(c.authorName || c.userName || "?")[0]?.toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline gap-1.5">
-                        <span className="text-[10px] font-heading" style={{ color: "oklch(0.65 0.04 280)" }}>
+                        <span className="text-[10px] font-heading" style={{ color: "#AA8E64" }}>
                           {c.authorName || c.userName || "Anonymous"}
                         </span>
                         {c.createdAt && (
-                          <span className="text-[9px]" style={{ color: "oklch(0.35 0.02 280)" }}>
+                          <span className="text-[9px]" style={{ color: "#2C3438" }}>
                             {new Date(c.createdAt).toLocaleDateString()}
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "oklch(0.65 0.04 280)" }}>
+                      <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "#AA8E64" }}>
                         {c.content}
                       </p>
                     </div>
@@ -1586,7 +1586,7 @@ export default function MobilePlayerLayer() {
               )}
             </div>
             {/* Comment input */}
-            <div className="px-4 pb-3 border-t" style={{ borderColor: "oklch(0.18 0.03 275 / 0.5)" }}>
+            <div className="px-4 pb-3 border-t" style={{ borderColor: "rgba(44,52,56,0.5)" }}>
               <div className="flex gap-2 pt-3">
                 <input
                   type="text"
@@ -1597,9 +1597,9 @@ export default function MobilePlayerLayer() {
                   disabled={!user || commentSubmitting}
                   className="flex-1 text-[11px] px-3 py-2 rounded-xl outline-none transition-all"
                   style={{
-                    background: "oklch(0.14 0.03 275 / 0.8)",
-                    border: "1px solid oklch(0.25 0.03 275 / 0.6)",
-                    color: "oklch(0.75 0.04 280)",
+                    background: "rgba(44,52,56,0.8)",
+                    border: "1px solid rgba(44,52,56,0.6)",
+                    color: "#DACAAA",
                   }}
                 />
                 <button
@@ -1607,7 +1607,7 @@ export default function MobilePlayerLayer() {
                   disabled={!user || !commentText.trim() || commentSubmitting}
                   className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 disabled:opacity-40"
                   style={{
-                    background: "oklch(0.84 0.155 85)",
+                    background: "#CBB183",
                     color: "#2C3438",
                   }}
                 >
@@ -1623,11 +1623,11 @@ export default function MobilePlayerLayer() {
       {lyricsText && (
         <div className="flex-shrink-0 px-8 pb-6">
           <div className="text-[11px] font-heading tracking-[0.12em] uppercase mb-3"
-            style={{ color: "oklch(0.35 0.02 280)" }}>
+            style={{ color: "#2C3438" }}>
             Lyrics
           </div>
           <div className="text-[13px] font-body leading-relaxed whitespace-pre-wrap"
-            style={{ color: "oklch(0.55 0.04 280)" }}>
+            style={{ color: "#3F4A50" }}>
             {lyricsText}
           </div>
         </div>
@@ -1680,7 +1680,7 @@ export default function MobilePlayerLayer() {
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
           height: isLandscape ? "35%" : "45%",
-          background: "linear-gradient(to top, oklch(0 0 0 / 0.85) 0%, transparent 100%)",
+          background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)",
           transition: "opacity 0.4s",
           opacity: overlayVisible ? 1 : 0,
         }}
@@ -1690,7 +1690,7 @@ export default function MobilePlayerLayer() {
         className="absolute inset-x-0 top-0 pointer-events-none"
         style={{
           height: "20%",
-          background: "linear-gradient(to bottom, oklch(0 0 0 / 0.6) 0%, transparent 100%)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.60) 0%, transparent 100%)",
           transition: "opacity 0.4s",
           opacity: overlayVisible ? 1 : 0,
         }}
@@ -1711,7 +1711,7 @@ export default function MobilePlayerLayer() {
           <button
             onClick={(e) => { e.stopPropagation(); setPlayerState("expanded"); }}
             className="p-2 rounded-xl transition-all active:scale-90"
-            style={{ color: "rgba(255,255,255,0.7)", background: "oklch(0 0 0 / 0.3)", backdropFilter: "blur(8px)" }}
+            style={{ color: "rgba(255,255,255,0.7)", background: "rgba(0,0,0,0.30)", backdropFilter: "blur(8px)" }}
           >
             <ChevronDown size={22} />
           </button>
@@ -1726,9 +1726,9 @@ export default function MobilePlayerLayer() {
               onClick={(e) => { e.stopPropagation(); setPlayerState("expanded"); setWidPanelOpen(true); }}
               className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
               style={{
-                background: "oklch(0.30 0.015 200 / 0.88)",
-                border: "1px solid oklch(0.55 0.18 145 / 0.5)",
-                color: "oklch(0.82 0.18 145)",
+                background: "rgba(44,52,56,0.88)",
+                border: "1px solid rgba(74,222,128,0.5)",
+                color: "#4ADE80",
                 backdropFilter: "blur(4px)",
               }}
             >
@@ -1746,7 +1746,7 @@ export default function MobilePlayerLayer() {
                 <div className="text-[11px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
               </div>
               <button type="button" onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
-                style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))", color: "#2C3438" }}>
+                style={{ background: "linear-gradient(135deg, #CBB183, #CBB183)", color: "#2C3438" }}>
                 {state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
               </button>
               <div className="flex-1">
@@ -1776,7 +1776,7 @@ export default function MobilePlayerLayer() {
                 <div className="text-[12px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
               </div>
               <button type="button" onClick={handleToggleLike} className="flex-shrink-0 ml-3 p-2"
-                style={{ color: isLiked ? "oklch(0.65 0.22 15)" : "rgba(255,255,255,0.4)" }}>
+                style={{ color: isLiked ? "#EF4444" : "rgba(255,255,255,0.4)" }}>
                 <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
               </button>
             </div>
@@ -1796,7 +1796,7 @@ export default function MobilePlayerLayer() {
                 style={{ color: "rgba(255,255,255,0.55)" }}
               >
                 <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
+                  style={{ background: "rgba(203,177,131,0.10)", backdropFilter: "blur(8px)" }}>
                   <DollarSign size={16} />
                 </div>
                 <span className="text-[9px] font-heading tracking-widest uppercase">Tip</span>
@@ -1807,8 +1807,8 @@ export default function MobilePlayerLayer() {
                 style={{ color: "rgba(255,255,255,0.55)" }}
               >
                 <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
-                  {copied ? <Check size={16} style={{ color: "oklch(0.84 0.155 85)" }} /> : <Share2 size={16} />}
+                  style={{ background: "rgba(203,177,131,0.10)", backdropFilter: "blur(8px)" }}>
+                  {copied ? <Check size={16} style={{ color: "#CBB183" }} /> : <Share2 size={16} />}
                 </div>
                 <span className="text-[9px] font-heading tracking-widest uppercase">{copied ? "Copied" : "Share"}</span>
               </button>
@@ -1818,7 +1818,7 @@ export default function MobilePlayerLayer() {
                 style={{ color: "rgba(255,255,255,0.55)" }}
               >
                 <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "oklch(1 0 0 / 0.08)", backdropFilter: "blur(8px)" }}>
+                  style={{ background: "rgba(203,177,131,0.10)", backdropFilter: "blur(8px)" }}>
                   <ListMusic size={16} />
                 </div>
                 <span className="text-[9px] font-heading tracking-widest uppercase">Details</span>

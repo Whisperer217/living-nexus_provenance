@@ -197,11 +197,11 @@ const CATEGORY_LABELS: Record<LexiconEntry["category"], string> = {
 };
 
 const CATEGORY_COLORS: Record<LexiconEntry["category"], string> = {
-  identity: "oklch(0.75 0.18 85)",    // gold
-  action: "oklch(0.65 0.15 200)",     // teal
-  record: "oklch(0.65 0.12 280)",     // indigo
-  space: "oklch(0.65 0.14 320)",      // violet
-  economy: "oklch(0.65 0.14 150)",    // sage
+  identity: "#CBB183",    // gold
+  action: "#4ADE80",     // teal
+  record: "#CBB183",     // indigo
+  space: "#CBB183",      // violet
+  economy: "#4ADE80",    // sage
 };
 
 export default function LexiconPage() {
@@ -212,31 +212,31 @@ export default function LexiconPage() {
       {/* ── Header ── */}
       <div
         className="relative px-6 py-16 text-center border-b"
-        style={{ borderColor: "oklch(0.75 0.18 85 / 0.15)" }}
+        style={{ borderColor: "rgba(203,177,131,0.12)" }}
       >
         {/* subtle grid background */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: "linear-gradient(oklch(0.75 0.18 85) 1px, transparent 1px), linear-gradient(90deg, oklch(0.75 0.18 85) 1px, transparent 1px)",
+            backgroundImage: "linear-gradient(#CBB183 1px, transparent 1px), linear-gradient(90deg, #CBB183 1px, transparent 1px)",
             backgroundSize: "40px 40px",
           }}
         />
         <div className="relative max-w-3xl mx-auto">
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium tracking-widest uppercase mb-6"
-            style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.75 0.18 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+            style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}
           >
             <BookOpen className="w-3.5 h-3.5" />
             Platform Language
           </div>
           <h1
             className="text-4xl sm:text-5xl font-bold tracking-tight mb-4"
-            style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.04 85)" }}
+            style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
           >
             The Living Nexus Lexicon
           </h1>
-          <p className="text-base leading-relaxed max-w-xl mx-auto" style={{ color: "oklch(0.6 0.04 280)" }}>
+          <p className="text-base leading-relaxed max-w-xl mx-auto" style={{ color: "#AA8E64" }}>
             This platform speaks a different language. Not because it's trying to be different — but because the words we use shape what we believe about creation, identity, and value. Here is the legend.
           </p>
         </div>
@@ -246,11 +246,11 @@ export default function LexiconPage() {
       <div className="max-w-3xl mx-auto px-6 pt-12 pb-4">
         <blockquote
           className="text-center text-lg italic leading-relaxed"
-          style={{ color: "oklch(0.7 0.06 280)", borderLeft: "none" }}
+          style={{ color: "#AA8E64", borderLeft: "none" }}
         >
           "Words have power. Power has meaning. Meaning is what changes the internal state of the witness."
         </blockquote>
-        <p className="text-center text-xs mt-2" style={{ color: "oklch(0.45 0.04 280)" }}>— Command Domains LLC</p>
+        <p className="text-center text-xs mt-2" style={{ color: "#3F4A50" }}>— Command Domains LLC</p>
       </div>
 
       {/* ── Term sections by category ── */}
@@ -282,8 +282,8 @@ export default function LexiconPage() {
                     key={entry.nexus}
                     className="rounded-xl p-5 flex flex-col sm:flex-row sm:items-start gap-4"
                     style={{
-                      background: "oklch(0.12 0.03 280 / 0.6)",
-                      border: "1px solid oklch(0.2 0.04 280 / 0.5)",
+                      background: "rgba(44,52,56,0.6)",
+                      border: "1px solid rgba(44,52,56,0.5)",
                     }}
                   >
                     {/* Standard → Nexus */}
@@ -291,18 +291,18 @@ export default function LexiconPage() {
                       <div className="text-center">
                         <p
                           className="text-xs font-medium tracking-wide uppercase mb-0.5"
-                          style={{ color: "oklch(0.45 0.04 280)" }}
+                          style={{ color: "#3F4A50" }}
                         >
                           Elsewhere
                         </p>
                         <p
                           className="text-sm font-semibold line-through"
-                          style={{ color: "oklch(0.5 0.04 280)", textDecorationColor: "oklch(0.5 0.04 280 / 0.5)" }}
+                          style={{ color: "#3F4A50", textDecorationColor: "rgba(63,74,80,0.5)" }}
                         >
                           {entry.standard}
                         </p>
                       </div>
-                      <ArrowRight className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.4 0.04 280)" }} />
+                      <ArrowRight className="w-4 h-4 flex-shrink-0" style={{ color: "#3F4A50" }} />
                       <div className="text-center">
                         <p
                           className="text-xs font-medium tracking-wide uppercase mb-0.5"
@@ -312,7 +312,7 @@ export default function LexiconPage() {
                         </p>
                         <p
                           className="text-sm font-bold"
-                          style={{ color: "oklch(0.92 0.04 85)" }}
+                          style={{ color: "#E6CDAE" }}
                         >
                           {entry.nexus}
                         </p>
@@ -322,13 +322,13 @@ export default function LexiconPage() {
                     {/* Divider */}
                     <div
                       className="hidden sm:block w-px self-stretch"
-                      style={{ background: "oklch(0.2 0.04 280 / 0.5)" }}
+                      style={{ background: "rgba(44,52,56,0.5)" }}
                     />
 
                     {/* Meaning */}
                     <p
                       className="text-sm leading-relaxed flex-1"
-                      style={{ color: "oklch(0.65 0.04 280)" }}
+                      style={{ color: "#AA8E64" }}
                     >
                       {entry.meaning}
                     </p>
@@ -343,29 +343,29 @@ export default function LexiconPage() {
       {/* ── Footer CTA ── */}
       <div
         className="border-t px-6 py-16 text-center"
-        style={{ borderColor: "oklch(0.75 0.18 85 / 0.15)" }}
+        style={{ borderColor: "rgba(203,177,131,0.12)" }}
       >
         <div className="max-w-xl mx-auto">
-          <p className="text-base mb-6" style={{ color: "oklch(0.6 0.04 280)" }}>
+          <p className="text-base mb-6" style={{ color: "#AA8E64" }}>
             Ready to register your first Work and receive your Witness ID?
           </p>
           <Link href="/upload">
             <button
               className="px-8 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90"
               style={{
-                background: "oklch(0.75 0.18 85)",
+                background: "#CBB183",
                 color: "#E6CDAE",
               }}
             >
               Register a Work →
             </button>
           </Link>
-          <div className="mt-6 flex items-center justify-center gap-4 text-xs" style={{ color: "oklch(0.4 0.04 280)" }}>
-            <Link href="/doctrine/wid-spec" className="hover:underline" style={{ color: "oklch(0.55 0.06 280)" }}>
+          <div className="mt-6 flex items-center justify-center gap-4 text-xs" style={{ color: "#3F4A50" }}>
+            <Link href="/doctrine/wid-spec" className="hover:underline" style={{ color: "#3F4A50" }}>
               Read the WID Specification
             </Link>
             <span>·</span>
-            <Link href="/manifesto" className="hover:underline" style={{ color: "oklch(0.55 0.06 280)" }}>
+            <Link href="/manifesto" className="hover:underline" style={{ color: "#3F4A50" }}>
               Read the Manifesto
             </Link>
           </div>

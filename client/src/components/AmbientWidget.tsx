@@ -85,7 +85,7 @@ export default function AmbientWidget() {
       className="fixed bottom-24 right-4 z-50 flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 transition-all duration-300"
       style={{
         width: minimized ? 260 : 320,
-        background: "oklch(0.1 0.04 280 / 0.95)",
+        background: "rgba(44,52,56,0.95)",
         backdropFilter: "blur(20px)",
       }}
     >
@@ -210,7 +210,7 @@ export default function AmbientWidget() {
               ) : (
                 <div
                   className="w-full rounded-lg flex items-center justify-center"
-                  style={{ height: 80, background: "oklch(0.15 0.05 280)" }}
+                  style={{ height: 80, background: "#2C3438" }}
                 >
                   <Music2 className="w-8 h-8 text-white/20" />
                 </div>

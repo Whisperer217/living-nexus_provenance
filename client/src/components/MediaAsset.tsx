@@ -105,7 +105,7 @@ function CardMedia({
       ) : (
         <div
           className="absolute inset-0 flex items-center justify-center text-4xl"
-          style={{ background: bg ?? "oklch(0.12 0.06 270)" }}
+          style={{ background: bg ?? "#2C3438" }}
         >
           {emoji ?? <Music className="w-1/3 h-1/3 opacity-20 text-white" />}
         </div>
@@ -172,7 +172,7 @@ function PlayerMedia({
       ) : (
         <div
           className="absolute inset-0 flex items-center justify-center text-5xl z-10"
-          style={{ background: bg ?? "oklch(0.12 0.06 270)" }}
+          style={{ background: bg ?? "#2C3438" }}
         >
           {emoji ?? "🎵"}
         </div>
@@ -246,7 +246,7 @@ function CinematicMedia({
     <div
       ref={containerRef}
       className="absolute inset-0 overflow-hidden"
-      style={{ background: bg ?? "oklch(0.05 0.02 270)" }}
+      style={{ background: bg ?? "#2C3438" }}
     >
       {/* Video layer — full bleed, always cover */}
       {videoUrl && !videoError && (
@@ -280,7 +280,7 @@ function CinematicMedia({
       ) : (
         <div
           className="absolute inset-0 flex items-center justify-center text-6xl z-0"
-          style={{ background: bg ?? "oklch(0.12 0.06 270)" }}
+          style={{ background: bg ?? "#2C3438" }}
         >
           {emoji ?? "🎵"}
         </div>
@@ -292,17 +292,17 @@ function CinematicMedia({
           {/* Bottom gradient — darkens lower 60% for controls/text */}
           <div
             className="absolute inset-x-0 bottom-0 z-20 pointer-events-none"
-            style={{ height: "70%", background: "linear-gradient(to top, oklch(0.04 0.02 270 / 0.95) 0%, oklch(0.04 0.02 270 / 0.4) 50%, transparent 100%)" }}
+            style={{ height: "70%", background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)" }}
           />
           {/* Top vignette — subtle darkening for header area */}
           <div
             className="absolute inset-x-0 top-0 z-20 pointer-events-none"
-            style={{ height: "30%", background: "linear-gradient(to bottom, oklch(0.04 0.02 270 / 0.7) 0%, transparent 100%)" }}
+            style={{ height: "30%", background: "linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)" }}
           />
           {/* Edge vignette */}
           <div
             className="absolute inset-0 z-20 pointer-events-none"
-            style={{ boxShadow: "inset 0 0 80px oklch(0 0 0 / 0.5)" }}
+            style={{ boxShadow: "inset 0 0 80px rgba(0,0,0,0.50)" }}
           />
         </>
       )}

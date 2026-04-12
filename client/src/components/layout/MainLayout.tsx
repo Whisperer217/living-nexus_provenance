@@ -87,10 +87,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   // Warm theme tokens for mobile chrome only
   // Warm mode: very subtle steel tint — dark base fully dominates, just a faint cool cast
-  const MOBILE_HEADER_BG = isWarm ? "rgba(55,68,85,0.72)" : "oklch(0.125 0.028 52)";
-  const MOBILE_HEADER_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "oklch(0.30 0.04 60 / 0.35)";
-  const MOBILE_SIDEBAR_BG = isWarm ? "rgba(42,55,70,0.80)" : "oklch(0.125 0.028 52)";
-  const MOBILE_SIDEBAR_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "oklch(0.30 0.04 60 / 0.35)";
+  const MOBILE_HEADER_BG = isWarm ? "rgba(55,68,85,0.72)" : "#2C3438";
+  const MOBILE_HEADER_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(44,52,56,0.35)";
+  const MOBILE_SIDEBAR_BG = isWarm ? "rgba(42,55,70,0.80)" : "#2C3438";
+  const MOBILE_SIDEBAR_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "rgba(44,52,56,0.35)";
   const MOBILE_TEXT = isWarm ? "rgba(200,212,228,0.85)" : undefined;
   const MOBILE_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : undefined;
 
@@ -130,7 +130,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const pulseBadge = signalsBadge;
     const countBadge = archiveBadge;
     const staticBadge = !pulseBadge && !archiveBadge && isLive ? item.badge : null;
-    const labelColor = item.goldLabel ? (active ? "#E8A830" : "oklch(0.72 0.13 72 / 0.7)") : undefined;
+    const labelColor = item.goldLabel ? (active ? "#E8A830" : "rgba(203,177,131,0.7)") : undefined;
 
     const warmActiveBg = "rgba(100,125,150,0.18)";
     const warmHoverBg = "rgba(100,125,150,0.12)";
@@ -144,9 +144,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onClick={() => goTo(item.path)}
         title={item.label}
         className={`w-full flex items-center gap-3 transition-all duration-150 relative px-4 py-3 text-[14px]
-          ${!isWarm ? (active ? "text-white/95" : "text-white/40 hover:text-[oklch(0.82_0.155_75)] hover:bg-[oklch(0.82_0.155_75/0.06)]") : ""}`}
+          ${!isWarm ? (active ? "text-white/95" : "text-white/40 hover:text-[#CBB183] hover:bg-[rgba(203,177,131,0.06)]") : ""}`}
         style={{
-          background: active ? (isWarm ? warmActiveBg : "oklch(0.82 0.155 75 / 0.10)") : "transparent",
+          background: active ? (isWarm ? warmActiveBg : "rgba(230,205,174,0.1)") : "transparent",
           color: isWarm ? (active ? warmActiveText : warmMutedText) : undefined,
           transition: "background 0.3s ease, color 0.3s ease",
         }}
@@ -156,19 +156,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <Icon size={16} style={{
           color: isWarm
             ? (active ? warmActiveText : warmMutedText)
-            : (active ? (item.goldLabel ? "#E8A830" : "oklch(0.82 0.155 75)") : (item.goldLabel ? "oklch(0.72 0.13 72 / 0.7)" : "inherit")),
+            : (active ? (item.goldLabel ? "#E8A830" : "#CBB183") : (item.goldLabel ? "rgba(203,177,131,0.7)" : "inherit")),
           opacity: (!isWarm && !active && !item.goldLabel) ? 0.6 : 1,
         }} />
         <span className="flex-1 text-left font-body" style={isWarm ? { color: active ? warmActiveText : warmMutedText } : (labelColor ? { color: labelColor } : undefined)}>{item.label}</span>
-        {pulseBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse" style={{ background: "oklch(0.65 0.22 25)", color: "white" }}>{pulseBadge}</span>}
-        {!pulseBadge && countBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center" style={isArchive ? { background: "oklch(0.82 0.155 75 / 0.18)", color: "#E8A830", border: "1px solid oklch(0.82 0.155 75 / 0.3)" } : { background: "oklch(0.82 0.155 75)", color: "oklch(0.12 0.02 55)" }}>{countBadge}</span>}
-        {!pulseBadge && !countBadge && staticBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto" style={{ background: "oklch(0.78 0.12 175 / 0.20)", color: "oklch(0.78 0.12 175)", border: "1px solid oklch(0.78 0.12 175 / 0.30)" }}>{staticBadge}</span>}
+        {pulseBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse" style={{ background: "#EF4444", color: "white" }}>{pulseBadge}</span>}
+        {!pulseBadge && countBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center" style={isArchive ? { background: "rgba(230,205,174,0.18)", color: "#E8A830", border: "1px solid rgba(203,177,131,0.28)" } : { background: "#CBB183", color: "#2C3438" }}>{countBadge}</span>}
+        {!pulseBadge && !countBadge && staticBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto" style={{ background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)" }}>{staticBadge}</span>}
       </button>
     );
   };
 
   return (
-    <div className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[oklch(0.10_0.022_55)] relative" style={{ overscrollBehavior: "none" }}>
+    <div className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[#2C3438] relative" style={{ overscrollBehavior: "none" }}>
 
       {/* ── Quick Reference Slider — temporarily hidden per user request (Phase 77) ── */}
 
@@ -217,7 +217,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           >
             <Bell size={18} />
             {(unreadCount as number) > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse" style={{ background: "oklch(0.65 0.22 25)" }} />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse" style={{ background: "#EF4444" }} />
             )}
           </button>
         )}
@@ -228,7 +228,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <div
         className="md:hidden fixed inset-0 z-[8000]"
         style={{
-          background: "oklch(0 0 0 / 0.72)",
+          background: "rgba(0,0,0,0.72)",
           backdropFilter: "blur(4px)",
           opacity: mobileMenuOpen ? 1 : 0,
           pointerEvents: mobileMenuOpen ? "auto" : "none",
@@ -243,7 +243,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           width: "min(85vw, 320px)",
           height: "100dvh",
           minHeight: "100dvh",
-          background: isWarm ? "rgba(28,38,52,0.98)" : "oklch(0.125 0.028 52)",
+          background: isWarm ? "rgba(28,38,52,0.98)" : "#2C3438",
           borderRight: `1px solid ${MOBILE_SIDEBAR_BORDER}`,
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))",
@@ -251,7 +251,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
           overflowY: "auto",
           overscrollBehavior: "contain",
-          boxShadow: mobileMenuOpen ? "4px 0 40px oklch(0 0 0 / 0.6)" : "none",
+          boxShadow: mobileMenuOpen ? "4px 0 40px rgba(0,0,0,0.60)" : "none",
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -262,7 +262,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <div className="px-3 pt-3 pb-3" style={{ borderBottom: `1px solid ${MOBILE_SIDEBAR_BORDER}` }}>
                 <button
                   className="flex items-center gap-3 p-3 rounded-xl w-full text-left"
-                  style={{ background: "oklch(0.148 0.030 50 / 60%)" }}
+                  style={{ background: "rgba(44,52,56,0.6)" }}
                   onClick={() => goTo("/profile")}
                 >
                   <div className="relative flex-shrink-0">
@@ -270,7 +270,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold text-white overflow-hidden"
                       style={{
                         background: "linear-gradient(135deg, #8B5E1A, #C8954A)",
-                        boxShadow: user?.licenseStatus === "licensed" ? "0 0 0 2px #E8A830, 0 0 14px oklch(0.82 0.155 75 / 0.4)" : "none",
+                        boxShadow: user?.licenseStatus === "licensed" ? "0 0 0 2px #E8A830, 0 0 14px rgba(203,177,131,0.4)" : "none",
                       }}
                     >
                       {user?.profilePhotoUrl || state.profileAvatar
@@ -279,7 +279,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       }
                     </div>
                     {user?.licenseStatus === "licensed" && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#CBB183" }}>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#3F4A50" }}>
                         <CheckCircle2 size={10} className="text-black" />
                       </div>
                     )}
@@ -334,7 +334,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       key={item.label}
                       onClick={() => goTo(item.path)}
                       className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors"
-                      style={{ background: active ? "oklch(0.82 0.155 75 / 0.10)" : "transparent", color: active ? "oklch(0.82 0.155 75)" : "oklch(0.55 0.04 60)" }}
+                      style={{ background: active ? "rgba(230,205,174,0.1)" : "transparent", color: active ? "#CBB183" : "#3F4A50" }}
                     >
                       <Icon size={14} className="flex-shrink-0" />
                       <span className="text-[13px] font-body">{item.label}</span>
@@ -345,24 +345,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             {/* Mobile account footer */}
-            <div className="px-4 pb-4 border-t border-[oklch(0.30_0.04_60/0.35)] pt-3">
+            <div className="px-4 pb-4 border-t border-[rgba(44,52,56,0.35)] pt-3">
               <button
                 onClick={closeMobileMenu}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#E8A830] hover:bg-[oklch(0.82_0.155_75/0.06)]"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#E8A830] hover:bg-[rgba(203,177,131,0.06)]"
               >
                 <Sparkles size={15} className="flex-shrink-0" />
                 <span className="text-[13px] font-body">What's New</span>
-                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.82 0.155 75 / 0.12)", color: "oklch(0.75 0.13 72)" }}>v2.24</span>
+                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(230,205,174,0.12)", color: "#CBB183" }}>v2.24</span>
               </button>
               {!authLoading && !user ? (
                 <a
                   href={getLoginUrl()}
                   className="flex items-center gap-3 p-3 rounded-xl w-full transition-all"
-                  style={{ background: "oklch(0.82 0.155 75 / 0.12)", border: "1px solid oklch(0.82 0.155 75 / 0.25)" }}
+                  style={{ background: "rgba(230,205,174,0.12)", border: "1px solid rgba(203,177,131,0.22)" }}
                 >
-                  <LogIn size={16} style={{ color: "oklch(0.82 0.155 75)" }} />
+                  <LogIn size={16} style={{ color: "#CBB183" }} />
                   <div>
-                    <div className="text-[13px] font-medium" style={{ color: "oklch(0.88 0.12 75)" }}>Sign In</div>
+                    <div className="text-[13px] font-medium" style={{ color: "#E6CDAE" }}>Sign In</div>
                     <div className="text-[11px] text-white/35">Upload &amp; earn tips</div>
                   </div>
                 </a>

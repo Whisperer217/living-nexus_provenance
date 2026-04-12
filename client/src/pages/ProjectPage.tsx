@@ -250,10 +250,10 @@ function BannerDropZone({
       {/* Drag-over overlay */}
       {editMode && isDragOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10"
-          style={{ background: "oklch(0.84 0.155 85 / 0.15)", backdropFilter: "blur(4px)", border: "2px dashed oklch(0.84 0.155 85 / 0.6)" }}
+          style={{ background: "rgba(203,177,131,0.12)", backdropFilter: "blur(4px)", border: "2px dashed rgba(203,177,131,0.55)" }}
         >
-          <Upload className="w-10 h-10" style={{ color: "oklch(0.84 0.155 85)" }} />
-          <p className="text-sm font-heading" style={{ color: "oklch(0.84 0.155 85)" }}>Drop to set as banner</p>
+          <Upload className="w-10 h-10" style={{ color: "#CBB183" }} />
+          <p className="text-sm font-heading" style={{ color: "#CBB183" }}>Drop to set as banner</p>
         </div>
       )}
 
@@ -262,8 +262,8 @@ function BannerDropZone({
         className="absolute bottom-0 left-0 right-0 h-1 pointer-events-none"
         style={{
           background: witnessId
-            ? "linear-gradient(to right, oklch(0.55 0.18 145 / 0.8), oklch(0.84 0.155 85 / 0.6), transparent)"
-            : "linear-gradient(to right, oklch(0.84 0.155 85 / 0.4), transparent)",
+            ? "linear-gradient(to right, rgba(74,222,128,0.8), rgba(203,177,131,0.55), transparent)"
+            : "linear-gradient(to right, rgba(203,177,131,0.35), transparent)",
         }}
       />
 
@@ -276,9 +276,9 @@ function BannerDropZone({
             onClick={e => e.stopPropagation()}
             className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide transition-all hover:opacity-90"
             style={{
-              background: "oklch(0.22 0.08 145 / 0.92)",
-              border: "1px solid oklch(0.55 0.18 145 / 0.6)",
-              color: "oklch(0.82 0.18 145)",
+              background: "rgba(44,52,56,0.92)",
+              border: "1px solid rgba(74,222,128,0.6)",
+              color: "#4ADE80",
               backdropFilter: "blur(6px)",
               textDecoration: "none",
             }}
@@ -293,16 +293,16 @@ function BannerDropZone({
           className="font-bold px-3 py-1 text-sm"
           style={{
             background: status === "draft"
-              ? "oklch(0.25 0.02 280 / 0.9)"
+              ? "rgba(44,52,56,0.9)"
               : status === "completed"
-              ? "oklch(0.22 0.08 145 / 0.9)"
-              : "oklch(0.55 0.18 85 / 0.9)",
-            color: status === "draft" ? "oklch(0.65 0.04 280)" : status === "completed" ? "oklch(0.82 0.18 145)" : "oklch(0.12 0.03 60)",
+              ? "rgba(44,52,56,0.9)"
+              : "rgba(170,142,100,0.9)",
+            color: status === "draft" ? "#AA8E64" : status === "completed" ? "#4ADE80" : "#2C3438",
             border: status === "draft"
-              ? "1px solid oklch(0.35 0.03 280 / 0.5)"
+              ? "1px solid rgba(44,52,56,0.5)"
               : status === "completed"
-              ? "1px solid oklch(0.55 0.18 145 / 0.4)"
-              : "1px solid oklch(0.84 0.155 85 / 0.5)",
+              ? "1px solid rgba(74,222,128,0.4)"
+              : "1px solid rgba(203,177,131,0.45)",
             backdropFilter: "blur(6px)",
           }}
         >

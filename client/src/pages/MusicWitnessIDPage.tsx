@@ -580,7 +580,7 @@ export default function MusicWitnessIDPage() {
                   onClick={() => toggleMood(mood)}
                   className={`px-3 py-1 text-xs border transition-all duration-150 ${
                     meta.moodTags.includes(mood)
-                      ? "border-[#CBB183] text-[#CBB183] bg-[#CBB183]/10"
+                      ? "border-[#CBB183] text-[#CBB183] bg-[#3F4A50]/10"
                       : "border-white/10 text-white/40 hover:border-[#CBB183]/40"
                   }`}
                   style={{ fontFamily: "'Share Tech Mono', monospace", letterSpacing: "1px" }}
@@ -595,7 +595,7 @@ export default function MusicWitnessIDPage() {
           <Field label="Co-Writers" className="mt-4">
             <div className="flex gap-2 mb-2">
               <Input value={coWriterInput} onChange={setCoWriterInput} placeholder="Add co-writer name" onKeyDown={e => e.key === "Enter" && addCoWriter()} />
-              <button type="button" onClick={addCoWriter} className="px-3 border border-[#CBB183]/30 text-[#CBB183] hover:bg-[#CBB183]/10 transition-colors">
+              <button type="button" onClick={addCoWriter} className="px-3 border border-[#CBB183]/30 text-[#CBB183] hover:bg-[#3F4A50]/10 transition-colors">
                 <Plus size={14} />
               </button>
             </div>
@@ -678,7 +678,7 @@ export default function MusicWitnessIDPage() {
         <button
           onClick={generate}
           disabled={!meta.creatorName || !meta.songTitle || generating}
-          className="w-full py-4 border border-[#CBB183] text-[#CBB183] hover:bg-[#CBB183]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+          className="w-full py-4 border border-[#CBB183] text-[#CBB183] hover:bg-[#3F4A50]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
           style={{ fontFamily: "'Orbitron', monospace", letterSpacing: "3px", fontSize: "13px" }}
         >
           {generating ? "GENERATING WITNESS ID..." : "GENERATE WITNESS ID"}
@@ -757,7 +757,7 @@ export default function MusicWitnessIDPage() {
               <button
                 onClick={playHarmonics}
                 disabled={playing}
-                className="mt-4 flex items-center gap-2 px-4 py-2 border border-[#CBB183]/30 text-[#CBB183] hover:bg-[#CBB183]/10 disabled:opacity-50 transition-colors"
+                className="mt-4 flex items-center gap-2 px-4 py-2 border border-[#CBB183]/30 text-[#CBB183] hover:bg-[#3F4A50]/10 disabled:opacity-50 transition-colors"
                 style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: "12px", letterSpacing: "2px" }}
               >
                 <Play size={14} fill={playing ? "currentColor" : "none"} />
@@ -788,7 +788,7 @@ export default function MusicWitnessIDPage() {
             <div className="flex flex-wrap gap-3 pt-2 border-t border-white/[0.06]">
               <button
                 onClick={downloadCertificate}
-                className="flex items-center gap-2 px-5 py-3 border border-[#CBB183] text-[#CBB183] hover:bg-[#CBB183]/10 transition-colors"
+                className="flex items-center gap-2 px-5 py-3 border border-[#CBB183] text-[#CBB183] hover:bg-[#3F4A50]/10 transition-colors"
                 style={{ fontFamily: "'Orbitron', monospace", fontSize: "11px", letterSpacing: "2px" }}
               >
                 <Download size={14} />

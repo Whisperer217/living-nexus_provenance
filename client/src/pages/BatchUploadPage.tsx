@@ -167,12 +167,12 @@ function TrackCardUI({
   };
 
   const statusColor = {
-    empty: "oklch(0.35 0.02 280)",
-    hashing: "oklch(0.75 0.12 85)",
-    ready: "oklch(0.65 0.18 160)",
-    uploading: "oklch(0.75 0.12 85)",
-    done: "oklch(0.65 0.18 160)",
-    error: "oklch(0.65 0.22 25)",
+    empty: "#2C3438",
+    hashing: "#CBB183",
+    ready: "#4ADE80",
+    uploading: "#CBB183",
+    done: "#4ADE80",
+    error: "#EF4444",
   }[card.audioStatus];
 
   const statusLabel = {
@@ -188,31 +188,31 @@ function TrackCardUI({
     <div
       className="rounded-2xl overflow-hidden transition-all"
       style={{
-        background: "oklch(0.125 0.028 52)",
-        border: `1px solid ${card.audioStatus === "done" ? "oklch(0.65 0.18 160 / 0.5)" : "#CBB183"}`,
+        background: "#2C3438",
+        border: `1px solid ${card.audioStatus === "done" ? "rgba(74,222,128,0.5)" : "#CBB183"}`,
       }}
     >
       {/* Card header */}
       <div
         className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none"
-        style={{ background: "oklch(0.10 0.04 270 / 60%)" }}
+        style={{ background: "rgba(44,52,56,0.6)" }}
         onClick={() => onChange(card.id, { expanded: !card.expanded })}
       >
         <div
           className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-          style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}
+          style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", fontFamily: "'Cinzel', serif" }}
         >
           {index + 1}
         </div>
         <div className="flex-1 min-w-0">
           <p
             className="text-sm font-semibold truncate"
-            style={{ color: card.title ? "#FFFFFF" : "oklch(0.72 0.04 280)", fontFamily: "'Cinzel', serif" }}
+            style={{ color: card.title ? "#FFFFFF" : "#DACAAA", fontFamily: "'Cinzel', serif" }}
           >
             {card.title || "Untitled Track"}
           </p>
           {card.wid && (
-            <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>
+            <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "rgba(230,205,174,0.7)" }}>
               {card.wid}
             </p>
           )}
@@ -228,13 +228,13 @@ function TrackCardUI({
         </div>
         <div className="flex items-center gap-1 ml-2">
           {card.expanded
-            ? <ChevronUp size={14} style={{ color: "oklch(0.72 0.04 280)" }} />
-            : <ChevronDown size={14} style={{ color: "oklch(0.72 0.04 280)" }} />}
+            ? <ChevronUp size={14} style={{ color: "#DACAAA" }} />
+            : <ChevronDown size={14} style={{ color: "#DACAAA" }} />}
           {total > 1 && (
             <button
               onClick={e => { e.stopPropagation(); onRemove(card.id); }}
               className="p-1 rounded-md hover:bg-white/[0.08] transition-colors ml-1"
-              style={{ color: "oklch(0.72 0.04 280)" }}
+              style={{ color: "#DACAAA" }}
               title="Remove track"
             >
               <X size={13} />
@@ -257,10 +257,10 @@ function TrackCardUI({
                 onClick={() => !card.audioFile && audioInputRef.current?.click()}
                 className="relative rounded-xl flex items-center gap-3 px-4 py-3 cursor-pointer transition-all"
                 style={{
-                  background: card.audioDragging ? "oklch(0.84 0.155 85 / 0.08)" : "oklch(0.09 0.03 270)",
+                  background: card.audioDragging ? "rgba(230,205,174,0.08)" : "#2C3438",
                   border: `1.5px dashed ${card.audioDragging
-                    ? "oklch(0.84 0.155 85 / 0.7)"
-                    : card.audioFile ? "oklch(0.65 0.18 160 / 0.5)" : "#C3AB7D"}`,
+                    ? "rgba(230,205,174,0.7)"
+                    : card.audioFile ? "rgba(74,222,128,0.5)" : "#C3AB7D"}`,
                 }}
               >
                 <input
@@ -275,16 +275,16 @@ function TrackCardUI({
                   }}
                 />
                 {card.audioStatus === "hashing"
-                  ? <Loader2 size={18} className="animate-spin flex-shrink-0" style={{ color: "oklch(0.84 0.155 85)" }} />
+                  ? <Loader2 size={18} className="animate-spin flex-shrink-0" style={{ color: "#CBB183" }} />
                   : card.audioFile
-                    ? <Music size={18} className="flex-shrink-0" style={{ color: "oklch(0.65 0.18 160)" }} />
-                    : <Upload size={18} className="flex-shrink-0" style={{ color: "oklch(0.72 0.04 280)" }} />}
+                    ? <Music size={18} className="flex-shrink-0" style={{ color: "#4ADE80" }} />
+                    : <Upload size={18} className="flex-shrink-0" style={{ color: "#DACAAA" }} />}
                 <div className="flex-1 min-w-0">
                   {card.audioFile
                     ? <p className="text-sm truncate" style={{ color: "#FFFFFF" }}>{card.audioFile.name}</p>
-                    : <p className="text-sm" style={{ color: "oklch(0.78 0.04 280)" }}>Drop audio or click to browse</p>}
+                    : <p className="text-sm" style={{ color: "#DACAAA" }}>Drop audio or click to browse</p>}
                   {card.audioFile && (
-                    <p className="text-[10px] mt-0.5" style={{ color: "oklch(0.72 0.04 280)" }}>
+                    <p className="text-[10px] mt-0.5" style={{ color: "#DACAAA" }}>
                       {(card.audioFile.size / 1024 / 1024).toFixed(1)} MB
                     </p>
                   )}
@@ -296,7 +296,7 @@ function TrackCardUI({
                       onChange(card.id, { audioFile: null, audioStatus: "empty", wid: undefined, fileHash: undefined });
                     }}
                     className="p-1 rounded-md hover:bg-white/[0.08]"
-                    style={{ color: "oklch(0.72 0.04 280)" }}
+                    style={{ color: "#DACAAA" }}
                   >
                     <X size={13} />
                   </button>
@@ -307,16 +307,16 @@ function TrackCardUI({
               {card.wid && (
                 <div
                   className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                  style={{ background: "oklch(0.84 0.155 85 / 0.06)", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}
+                  style={{ background: "rgba(203,177,131,0.06)", border: "1px solid rgba(203,177,131,0.18)" }}
                 >
-                  <Fingerprint size={13} style={{ color: "oklch(0.84 0.155 85)" }} />
-                  <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "oklch(0.84 0.155 85)" }}>
+                  <Fingerprint size={13} style={{ color: "#CBB183" }} />
+                  <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "#CBB183" }}>
                     {card.wid}
                   </span>
                   <button
                     onClick={() => { navigator.clipboard.writeText(card.wid!); toast.success("WID copied"); }}
                     className="p-1 rounded hover:bg-white/[0.08]"
-                    style={{ color: "oklch(0.6 0.04 280)" }}
+                    style={{ color: "#AA8E64" }}
                   >
                     <Copy size={11} />
                   </button>
@@ -329,7 +329,7 @@ function TrackCardUI({
                 value={card.title}
                 onChange={e => onChange(card.id, { title: e.target.value })}
                 className="h-9 text-sm"
-                style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #CBB183", color: "#FFFFFF" }}
+                style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#FFFFFF" }}
               />
 
               {/* Genre + AI consent */}
@@ -338,14 +338,14 @@ function TrackCardUI({
                   <SelectTrigger
                     className="h-9 text-xs"
                     style={{
-                      background: "oklch(0.09 0.03 270)",
+                      background: "#2C3438",
                       border: "1px solid #CBB183",
-                      color: card.genre ? "#FFFFFF" : "oklch(0.4 0.02 280)",
+                      color: card.genre ? "#FFFFFF" : "#3F4A50",
                     }}
                   >
                     <SelectValue placeholder="Genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #CBB183" }}>
+                  <SelectContent style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
                     {GENRES.map(g => (
                       <SelectItem key={g} value={g} className="text-xs" style={{ color: "#FFFFFF" }}>{g}</SelectItem>
                     ))}
@@ -357,11 +357,11 @@ function TrackCardUI({
                 >
                   <SelectTrigger
                     className="h-9 text-xs"
-                    style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #CBB183", color: "#FFFFFF" }}
+                    style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#FFFFFF" }}
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #CBB183" }}>
+                  <SelectContent style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
                     {AI_OPTIONS.map(o => (
                       <SelectItem key={o.value} value={o.value} className="text-xs" style={{ color: "#FFFFFF" }}>
                         {o.label}
@@ -374,7 +374,7 @@ function TrackCardUI({
 
             {/* Right: per-track cover art */}
             <div className="flex flex-col gap-2">
-              <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.72 0.04 280)" }}>
+              <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "#DACAAA" }}>
                 Cover Art
               </p>
               <div
@@ -385,10 +385,10 @@ function TrackCardUI({
                 className="relative rounded-xl overflow-hidden cursor-pointer transition-all flex-1"
                 style={{
                   minHeight: 120,
-                  background: card.coverPreview ? "transparent" : "oklch(0.09 0.03 270)",
+                  background: card.coverPreview ? "transparent" : "#2C3438",
                   border: `1.5px dashed ${card.coverDragging
-                    ? "oklch(0.84 0.155 85 / 0.7)"
-                    : card.coverPreview ? "oklch(0.65 0.18 160 / 0.4)" : "#C3AB7D"}`,
+                    ? "rgba(230,205,174,0.7)"
+                    : card.coverPreview ? "rgba(74,222,128,0.4)" : "#C3AB7D"}`,
                 }}
               >
                 <input
@@ -414,22 +414,22 @@ function TrackCardUI({
                         onChange(card.id, { coverFile: null, coverPreview: null, coverUrl: undefined });
                       }}
                       className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                      style={{ background: "oklch(0.10 0.04 270 / 80%)" }}
+                      style={{ background: "rgba(44,52,56,0.8)" }}
                     >
                       <X size={10} className="text-white" />
                     </button>
                   </>
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-                    <ImageIcon size={20} style={{ color: "oklch(0.65 0.04 280)" }} />
-                    <p className="text-[9px] text-center px-2" style={{ color: "oklch(0.72 0.04 280)" }}>
+                    <ImageIcon size={20} style={{ color: "#AA8E64" }} />
+                    <p className="text-[9px] text-center px-2" style={{ color: "#DACAAA" }}>
                       {card.coverDragging ? "Drop image" : "Drop or click"}
                     </p>
                   </div>
                 )}
               </div>
               {!card.coverPreview && (
-                <p className="text-[9px] text-center" style={{ color: "oklch(0.68 0.04 280)" }}>
+                <p className="text-[9px] text-center" style={{ color: "#AA8E64" }}>
                   Falls back to album art
                 </p>
               )}
@@ -473,10 +473,10 @@ export default function BatchUploadPage() {
   if (!authLoading && !isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p style={{ color: "oklch(0.6 0.04 280)" }}>Sign in to upload music</p>
+        <p style={{ color: "#AA8E64" }}>Sign in to upload music</p>
         <Button
           onClick={() => { window.location.href = getLoginUrl("/batch-upload"); }}
-          style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.02 280)" }}
+          style={{ background: "#CBB183", color: "#2C3438" }}
         >
           Sign In
         </Button>
@@ -627,38 +627,38 @@ export default function BatchUploadPage() {
         <div className="text-center space-y-3">
           <div
             className="w-16 h-16 rounded-full mx-auto flex items-center justify-center"
-            style={{ background: "oklch(0.65 0.18 160 / 0.15)", border: "2px solid oklch(0.65 0.18 160 / 0.4)" }}
+            style={{ background: "rgba(74,222,128,0.15)", border: "2px solid rgba(74,222,128,0.4)" }}
           >
-            <CheckCircle size={32} style={{ color: "oklch(0.65 0.18 160)" }} />
+            <CheckCircle size={32} style={{ color: "#4ADE80" }} />
           </div>
           <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#FFFFFF" }}>
             Collection Witnessed
           </h1>
-          <p style={{ color: "oklch(0.6 0.04 280)" }}>
+          <p style={{ color: "#AA8E64" }}>
             {collectionResult.trackCount} track{collectionResult.trackCount > 1 ? "s" : ""} registered to the Living Nexus Archive
           </p>
         </div>
-        <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}>
+        <div className="rounded-2xl p-6 space-y-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
           <div>
-            <p className="text-[10px] font-heading tracking-widest uppercase mb-1" style={{ color: "oklch(0.72 0.04 280)" }}>
+            <p className="text-[10px] font-heading tracking-widest uppercase mb-1" style={{ color: "#DACAAA" }}>
               Collection WID
             </p>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>{collectionResult.collectionWid}</p>
+              <p className="text-sm font-mono" style={{ color: "#CBB183" }}>{collectionResult.collectionWid}</p>
               <button
                 onClick={() => { navigator.clipboard.writeText(collectionResult.collectionWid); toast.success("Copied"); }}
                 className="p-1 rounded hover:bg-white/[0.06]"
-                style={{ color: "oklch(0.6 0.04 280)" }}
+                style={{ color: "#AA8E64" }}
               >
                 <Copy size={12} />
               </button>
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-heading tracking-widest uppercase mb-1" style={{ color: "oklch(0.72 0.04 280)" }}>
+            <p className="text-[10px] font-heading tracking-widest uppercase mb-1" style={{ color: "#DACAAA" }}>
               Collective Hash
             </p>
-            <p className="text-xs font-mono break-all" style={{ color: "oklch(0.78 0.04 280)" }}>
+            <p className="text-xs font-mono break-all" style={{ color: "#DACAAA" }}>
               {collectionResult.collectiveHash}
             </p>
           </div>
@@ -667,7 +667,7 @@ export default function BatchUploadPage() {
           <Button
             onClick={() => navigate("/archive")}
             className="flex-1 gap-2"
-            style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.08 0.02 280)" }}
+            style={{ background: "#CBB183", color: "#2C3438" }}
           >
             <Library size={16} /> View Archive
           </Button>
@@ -675,7 +675,7 @@ export default function BatchUploadPage() {
             onClick={() => navigate(`/verify/${collectionResult.collectionWid}`)}
             variant="outline"
             className="flex-1 gap-2"
-            style={{ border: "1px solid oklch(0.84 0.155 85 / 0.4)", color: "oklch(0.84 0.155 85)" }}
+            style={{ border: "1px solid rgba(203,177,131,0.35)", color: "#CBB183" }}
           >
             <ExternalLink size={16} /> Verify Collection
           </Button>
@@ -690,7 +690,7 @@ export default function BatchUploadPage() {
             }}
             variant="outline"
             className="flex-1 gap-2"
-            style={{ border: "1px solid #C3AB7D", color: "oklch(0.6 0.04 280)" }}
+            style={{ border: "1px solid #C3AB7D", color: "#AA8E64" }}
           >
             <Upload size={16} /> New Batch
           </Button>
@@ -714,14 +714,14 @@ export default function BatchUploadPage() {
       {isDraggingGlobal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
-          style={{ background: "oklch(0.08 0.04 270 / 85%)", backdropFilter: "blur(4px)" }}
+          style={{ background: "rgba(44,52,56,0.85)", backdropFilter: "blur(4px)" }}
         >
           <div className="text-center space-y-3">
-            <Upload size={48} style={{ color: "oklch(0.84 0.155 85)", margin: "0 auto" }} />
+            <Upload size={48} style={{ color: "#CBB183", margin: "0 auto" }} />
             <p className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#FFFFFF" }}>
               Drop all audio files here
             </p>
-            <p style={{ color: "oklch(0.6 0.04 280)" }}>Each file gets its own track card</p>
+            <p style={{ color: "#AA8E64" }}>Each file gets its own track card</p>
           </div>
         </div>
       )}
@@ -729,22 +729,22 @@ export default function BatchUploadPage() {
       {/* Page header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
-          <Layers size={20} style={{ color: "oklch(0.84 0.155 85)" }} />
+          <Layers size={20} style={{ color: "#CBB183" }} />
           <h1 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#FFFFFF" }}>
             Batch Upload
           </h1>
           <Badge
             className="text-[9px] font-mono"
             style={{
-              background: "oklch(0.84 0.155 85 / 0.15)",
-              color: "oklch(0.84 0.155 85)",
-              border: "1px solid oklch(0.84 0.155 85 / 0.3)",
+              background: "rgba(203,177,131,0.12)",
+              color: "#CBB183",
+              border: "1px solid rgba(203,177,131,0.28)",
             }}
           >
             {totalFilled}/{cards.length} tracks
           </Badge>
         </div>
-        <p className="text-sm" style={{ color: "oklch(0.78 0.04 280)" }}>
+        <p className="text-sm" style={{ color: "#DACAAA" }}>
           Each track gets its own cover art, WID, and metadata. Drop multiple files anywhere to auto-fill cards.
         </p>
       </div>
@@ -752,9 +752,9 @@ export default function BatchUploadPage() {
       {/* Album info */}
       <div
         className="rounded-2xl p-4 space-y-3"
-        style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}
+        style={{ background: "#2C3438", border: "1px solid #CBB183" }}
       >
-        <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.72 0.04 280)" }}>
+        <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "#DACAAA" }}>
           Collection / Album
         </p>
         <div className="grid grid-cols-1 md:grid-cols-[1fr_120px] gap-3">
@@ -764,9 +764,9 @@ export default function BatchUploadPage() {
               value={albumName}
               onChange={e => setAlbumName(e.target.value)}
               className="h-10"
-              style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #CBB183", color: "#FFFFFF" }}
+              style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#FFFFFF" }}
             />
-            <p className="text-[10px]" style={{ color: "oklch(0.72 0.04 280)" }}>
+            <p className="text-[10px]" style={{ color: "#DACAAA" }}>
               Shared collection name. Individual tracks can override genre and AI consent below.
             </p>
           </div>
@@ -776,8 +776,8 @@ export default function BatchUploadPage() {
             className="relative rounded-xl overflow-hidden cursor-pointer transition-all"
             style={{
               minHeight: 80,
-              background: albumCoverPreview ? "transparent" : "oklch(0.09 0.03 270)",
-              border: `1.5px dashed ${albumCoverPreview ? "oklch(0.65 0.18 160 / 0.4)" : "#C3AB7D"}`,
+              background: albumCoverPreview ? "transparent" : "#2C3438",
+              border: `1.5px dashed ${albumCoverPreview ? "rgba(74,222,128,0.4)" : "#C3AB7D"}`,
             }}
           >
             <input
@@ -806,15 +806,15 @@ export default function BatchUploadPage() {
                     setAlbumCoverUrl(undefined);
                   }}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                  style={{ background: "oklch(0.10 0.04 270 / 80%)" }}
+                  style={{ background: "rgba(44,52,56,0.8)" }}
                 >
                   <X size={10} className="text-white" />
                 </button>
               </>
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-                <ImageIcon size={18} style={{ color: "oklch(0.65 0.04 280)" }} />
-                <p className="text-[9px]" style={{ color: "oklch(0.72 0.04 280)" }}>Album art</p>
+                <ImageIcon size={18} style={{ color: "#AA8E64" }} />
+                <p className="text-[9px]" style={{ color: "#DACAAA" }}>Album art</p>
               </div>
             )}
           </div>
@@ -824,43 +824,43 @@ export default function BatchUploadPage() {
       {/* Batch fill panel */}
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}
+        style={{ background: "#2C3438", border: "1px solid #CBB183" }}
       >
         <button
           onClick={() => setBatchFillOpen(o => !o)}
           className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.03]"
         >
-          <Sparkles size={15} style={{ color: "oklch(0.84 0.155 85)" }} />
+          <Sparkles size={15} style={{ color: "#CBB183" }} />
           <span className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>Batch Fill</span>
-          <span className="text-xs ml-1" style={{ color: "oklch(0.75 0.04 280)" }}>
+          <span className="text-xs ml-1" style={{ color: "#DACAAA" }}>
             — push shared values to all tracks
           </span>
           <div className="ml-auto">
             {batchFillOpen
-              ? <ChevronUp size={14} style={{ color: "oklch(0.72 0.04 280)" }} />
-              : <ChevronDown size={14} style={{ color: "oklch(0.72 0.04 280)" }} />}
+              ? <ChevronUp size={14} style={{ color: "#DACAAA" }} />
+              : <ChevronDown size={14} style={{ color: "#DACAAA" }} />}
           </div>
         </button>
         {batchFillOpen && (
           <div className="px-4 pb-4 space-y-3 border-t" style={{ borderColor: "#CBB183" }}>
-            <p className="text-[10px] pt-3" style={{ color: "oklch(0.75 0.04 280)" }}>
+            <p className="text-[10px] pt-3" style={{ color: "#DACAAA" }}>
               Set values here, then click Apply — they will be pushed to every track card. Individual cards can still be edited after.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "oklch(0.72 0.04 280)" }}>Genre</p>
+                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "#DACAAA" }}>Genre</p>
                 <Select value={batchGenre} onValueChange={setBatchGenre}>
                   <SelectTrigger
                     className="h-9 text-xs"
                     style={{
-                      background: "oklch(0.09 0.03 270)",
+                      background: "#2C3438",
                       border: "1px solid #CBB183",
-                      color: batchGenre ? "#FFFFFF" : "oklch(0.75 0.04 280)",
+                      color: batchGenre ? "#FFFFFF" : "#DACAAA",
                     }}
                   >
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #CBB183" }}>
+                  <SelectContent style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
                     {GENRES.map(g => (
                       <SelectItem key={g} value={g} className="text-xs" style={{ color: "#FFFFFF" }}>{g}</SelectItem>
                     ))}
@@ -868,15 +868,15 @@ export default function BatchUploadPage() {
                 </Select>
               </div>
               <div>
-                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "oklch(0.72 0.04 280)" }}>AI Consent</p>
+                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "#DACAAA" }}>AI Consent</p>
                 <Select value={batchAiConsent} onValueChange={v => setBatchAiConsent(v as TrackCard["aiConsent"])}>
                   <SelectTrigger
                     className="h-9 text-xs"
-                    style={{ background: "oklch(0.09 0.03 270)", border: "1px solid #CBB183", color: "#FFFFFF" }}
+                    style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#FFFFFF" }}
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #CBB183" }}>
+                  <SelectContent style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
                     {AI_OPTIONS.map(o => (
                       <SelectItem key={o.value} value={o.value} className="text-xs" style={{ color: "#FFFFFF" }}>
                         {o.label}
@@ -891,9 +891,9 @@ export default function BatchUploadPage() {
               size="sm"
               className="gap-2"
               style={{
-                background: "oklch(0.84 0.155 85 / 0.15)",
-                color: "oklch(0.84 0.155 85)",
-                border: "1px solid oklch(0.84 0.155 85 / 0.3)",
+                background: "rgba(203,177,131,0.12)",
+                color: "#CBB183",
+                border: "1px solid rgba(203,177,131,0.28)",
               }}
             >
               <Sparkles size={13} /> Apply to All Tracks
@@ -905,16 +905,16 @@ export default function BatchUploadPage() {
       {/* Track cards */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.72 0.04 280)" }}>
+          <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "#DACAAA" }}>
             Tracks — {cards.length} card{cards.length !== 1 ? "s" : ""}
           </p>
           {readyCount > 0 && (
             <Badge
               className="text-[9px]"
               style={{
-                background: "oklch(0.65 0.18 160 / 0.15)",
-                color: "oklch(0.65 0.18 160)",
-                border: "1px solid oklch(0.65 0.18 160 / 0.3)",
+                background: "rgba(74,222,128,0.15)",
+                color: "#4ADE80",
+                border: "1px solid rgba(74,222,128,0.3)",
               }}
             >
               {readyCount} ready
@@ -938,7 +938,7 @@ export default function BatchUploadPage() {
         <button
           onClick={addCard}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl transition-all hover:bg-white/[0.04]"
-          style={{ border: "1.5px dashed oklch(0.35 0.02 280)", color: "oklch(0.75 0.04 280)" }}
+          style={{ border: "1.5px dashed #2C3438", color: "#DACAAA" }}
         >
           <Plus size={16} />
           <span className="text-sm">Add Track</span>
@@ -949,8 +949,8 @@ export default function BatchUploadPage() {
       <div
         className="sticky bottom-4 rounded-2xl p-4 flex items-center gap-4"
         style={{
-          background: "oklch(0.12 0.05 270 / 95%)",
-          border: "1px solid oklch(0.84 0.155 85 / 0.25)",
+          background: "rgba(44,52,56,0.95)",
+          border: "1px solid rgba(203,177,131,0.22)",
           backdropFilter: "blur(12px)",
         }}
       >
@@ -960,7 +960,7 @@ export default function BatchUploadPage() {
               ? `${readyCount} track${readyCount > 1 ? "s" : ""} ready to witness`
               : "Add audio files to begin"}
           </p>
-          <p className="text-[11px] mt-0.5" style={{ color: "oklch(0.75 0.04 280)" }}>
+          <p className="text-[11px] mt-0.5" style={{ color: "#DACAAA" }}>
             {albumName ? `"${albumName}"` : "Set a collection name above"}
           </p>
         </div>
@@ -969,8 +969,8 @@ export default function BatchUploadPage() {
           disabled={isUploading || readyCount === 0 || !albumName.trim()}
           className="gap-2 px-6"
           style={{
-            background: readyCount > 0 && albumName.trim() ? "oklch(0.84 0.155 85)" : "#C3AB7D",
-            color: readyCount > 0 && albumName.trim() ? "oklch(0.08 0.02 280)" : "oklch(0.45 0.02 280)",
+            background: readyCount > 0 && albumName.trim() ? "#CBB183" : "#C3AB7D",
+            color: readyCount > 0 && albumName.trim() ? "#2C3438" : "#3F4A50",
           }}
         >
           {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Fingerprint size={16} />}

@@ -239,9 +239,9 @@ export function WIDPanel({
         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-mono transition-all
           hover:scale-105 active:scale-95 cursor-pointer select-none ${className}`}
         style={{
-          background: "oklch(0.65 0.2 300 / 0.12)",
-          border: "1px solid oklch(0.65 0.2 300 / 0.35)",
-          color: "oklch(0.75 0.18 300)",
+          background: "rgba(203,177,131,0.10)",
+          border: "1px solid rgba(203,177,131,0.30)",
+          color: "#CBB183",
         }}
         title="View Witness ID provenance record"
       >
@@ -259,14 +259,14 @@ export function WIDPanel({
           className="max-w-lg"
           style={{
             background: "#2C3438",
-            border: "1px solid oklch(0.65 0.2 300 / 0.3)",
-            color: "oklch(0.92 0.02 85)",
+            border: "1px solid rgba(203,177,131,0.25)",
+            color: "#E6CDAE",
           }}
         >
           <DialogHeader>
             <DialogTitle
               className="flex items-center gap-2"
-              style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.2 300)" }}
+              style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}
             >
               <Shield className="w-5 h-5" />
               Witness ID Record
@@ -281,20 +281,20 @@ export function WIDPanel({
                   src={coverArtUrl}
                   alt={songTitle || "Cover art"}
                   className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-                  style={{ border: "1px solid oklch(0.65 0.2 300 / 0.2)" }}
+                  style={{ border: "1px solid rgba(203,177,131,0.18)" }}
                 />
               )}
               <div className="min-w-0">
                 {songTitle && (
                   <p
                     className="font-semibold text-sm truncate"
-                    style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}
+                    style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
                   >
                     {songTitle}
                   </p>
                 )}
                 {creatorName && (
-                  <p className="text-xs mt-0.5" style={{ color: "oklch(0.6 0.04 280)" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>
                     {creatorName}
                   </p>
                 )}
@@ -305,15 +305,15 @@ export function WIDPanel({
           {/* Provenance record table */}
           <div
             className="rounded-xl p-4 space-y-3 text-xs font-mono"
-            style={{ background: "oklch(0.065 0.02 278)", border: "1px solid oklch(0.65 0.2 300 / 0.15)" }}
+            style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.12)" }}
           >
             {/* WID */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "oklch(0.5 0.03 280)" }}>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#AA8E64" }}>
                 Witness ID
               </p>
               <div className="flex items-center gap-2">
-                <p className="break-all flex-1" style={{ color: "oklch(0.75 0.18 300)" }}>
+                <p className="break-all flex-1" style={{ color: "#CBB183" }}>
                   {witnessId}
                 </p>
                 <button
@@ -322,31 +322,31 @@ export function WIDPanel({
                   title="Copy WID"
                 >
                   {copied ? (
-                    <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "oklch(0.65 0.18 145)" }} />
+                    <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#4ADE80" }} />
                   ) : (
-                    <Copy className="w-3.5 h-3.5" style={{ color: "oklch(0.5 0.03 280)" }} />
+                    <Copy className="w-3.5 h-3.5" style={{ color: "#AA8E64" }} />
                   )}
                 </button>
               </div>
             </div>
 
             {/* Divider */}
-            <div style={{ borderTop: "1px solid oklch(0.65 0.2 300 / 0.1)" }} />
+            <div style={{ borderTop: "1px solid rgba(203,177,131,0.10)" }} />
 
             {/* Registration date */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "oklch(0.5 0.03 280)" }}>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#AA8E64" }}>
                 Registered
               </p>
               <p style={{ color: "#E2E8F0" }}>{formatDate(registeredAt)}</p>
             </div>
 
             {/* Divider */}
-            <div style={{ borderTop: "1px solid oklch(0.65 0.2 300 / 0.1)" }} />
+            <div style={{ borderTop: "1px solid rgba(203,177,131,0.10)" }} />
 
             {/* Verify URL */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "oklch(0.5 0.03 280)" }}>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#AA8E64" }}>
                 Verify
               </p>
               <a
@@ -354,7 +354,7 @@ export function WIDPanel({
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1 hover:underline"
-                style={{ color: "oklch(0.65 0.2 300)" }}
+                style={{ color: "#CBB183" }}
               >
                 livingnexus.org/verify/{witnessId.slice(0, 20)}…
                 <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -365,9 +365,9 @@ export function WIDPanel({
             {(haaiVisualConcept || haaiStyleLanguage || haaiInstrumentation ||
               haaiVocalConveyance || haaiLyricalInspiration || haaiEmotionalTone) && (
               <>
-                <div style={{ borderTop: "1px solid oklch(0.65 0.2 300 / 0.1)" }} />
+                <div style={{ borderTop: "1px solid rgba(203,177,131,0.10)" }} />
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "oklch(0.75 0.18 85)" }}>
+                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#CBB183" }}>
                     HAAI Authorship Declaration
                   </p>
                   <div className="space-y-1.5 font-sans">
@@ -380,16 +380,16 @@ export function WIDPanel({
                       { label: "Emotional Tone",      value: haaiEmotionalTone },
                     ].filter(f => f.value).map(f => (
                       <div key={f.label}>
-                        <span className="text-[9px] uppercase tracking-wider" style={{ color: "oklch(0.55 0.04 280)" }}>
+                        <span className="text-[9px] uppercase tracking-wider" style={{ color: "#3F4A50" }}>
                           {f.label}
                         </span>
-                        <p className="text-[11px] leading-snug mt-0.5" style={{ color: "oklch(0.82 0.04 280)" }}>
+                        <p className="text-[11px] leading-snug mt-0.5" style={{ color: "#DACAAA" }}>
                           {f.value}
                         </p>
                       </div>
                     ))}
                     {haaiDeclaredAt && (
-                      <p className="text-[9px] mt-1" style={{ color: "oklch(0.45 0.03 280)" }}>
+                      <p className="text-[9px] mt-1" style={{ color: "#AA8E64" }}>
                         Declaration sealed {formatDate(haaiDeclaredAt)}
                       </p>
                     )}
@@ -404,9 +404,9 @@ export function WIDPanel({
             <div
               className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs"
               style={{
-                background: "oklch(0.65 0.18 145 / 0.12)",
-                border: "1px solid oklch(0.65 0.18 145 / 0.3)",
-                color: "oklch(0.65 0.18 145)",
+                background: "rgba(74,222,128,0.12)",
+                border: "1px solid rgba(74,222,128,0.28)",
+                color: "#4ADE80",
               }}
             >
               <CheckCircle2 className="w-3 h-3" />
@@ -423,8 +423,8 @@ export function WIDPanel({
               onClick={handleShare}
               className="flex-1"
               style={{
-                borderColor: "oklch(0.65 0.2 300 / 0.3)",
-                color: "oklch(0.65 0.2 300)",
+                borderColor: "rgba(203,177,131,0.25)",
+                color: "#CBB183",
                 background: "transparent",
               }}
             >
@@ -439,8 +439,8 @@ export function WIDPanel({
               onClick={handleCopyLink}
               className="flex-1"
               style={{
-                borderColor: "oklch(0.65 0.2 300 / 0.3)",
-                color: "oklch(0.65 0.2 300)",
+                borderColor: "rgba(203,177,131,0.25)",
+                color: "#CBB183",
                 background: "transparent",
               }}
             >
@@ -455,8 +455,8 @@ export function WIDPanel({
               onClick={handleDownload}
               className="flex-1"
               style={{
-                borderColor: "oklch(0.65 0.2 300 / 0.3)",
-                color: "oklch(0.65 0.2 300)",
+                borderColor: "rgba(203,177,131,0.25)",
+                color: "#CBB183",
                 background: "transparent",
               }}
             >
@@ -471,8 +471,8 @@ export function WIDPanel({
                   size="sm"
                   className="w-full"
                   style={{
-                    borderColor: "oklch(0.65 0.2 300 / 0.3)",
-                    color: "oklch(0.65 0.2 300)",
+                    borderColor: "rgba(203,177,131,0.25)",
+                    color: "#CBB183",
                     background: "transparent",
                   }}
                 >
@@ -488,9 +488,9 @@ export function WIDPanel({
                 size="sm"
                 className="w-full"
                 style={{
-                  borderColor: "oklch(0.65 0.18 145 / 0.4)",
-                  color: "oklch(0.65 0.18 145)",
-                  background: "oklch(0.65 0.18 145 / 0.05)",
+                  borderColor: "rgba(74,222,128,0.4)",
+                  color: "#4ADE80",
+                  background: "rgba(74,222,128,0.05)",
                 }}
               >
                 <GitBranch className="w-3.5 h-3.5 mr-1.5" />

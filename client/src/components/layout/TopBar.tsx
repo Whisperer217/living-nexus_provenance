@@ -123,19 +123,19 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
   const isWarm = lightsMode === "on";
 
   // Warm mode: very subtle steel tint — dark base fully dominates, just a faint cool cast
-  const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "oklch(0.115 0.025 52 / 0.97)";
-  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "oklch(0.30 0.04 60 / 45%)";
-  const DRAWER_BG = isWarm ? "rgba(42,55,70,0.80)" : "oklch(0.09 0.018 280 / 0.98)";
-  const DRAWER_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "oklch(0.28 0.04 270 / 50%)";
-  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "oklch(0.62 0.04 65)";
-  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "oklch(0.55 0.02 280)";
-  const NAV_SECTION_LABEL = isWarm ? "rgba(148,165,185,0.45)" : "oklch(0.75 0.12 85 / 0.7)";
-  const NAV_SECTION_BORDER = isWarm ? "rgba(100,125,150,0.15)" : "oklch(0.84 0.155 85 / 0.10)";
-  const NAV_ACTIVE_BG = isWarm ? "rgba(100,125,150,0.18)" : "oklch(0.82 0.155 75 / 0.12)";
-  const NAV_ACTIVE_BORDER = isWarm ? "rgba(120,148,178,0.32)" : "oklch(0.82 0.155 75 / 0.22)";
-  const NAV_ACTIVE_TEXT = isWarm ? "rgba(180,202,230,0.95)" : "oklch(0.88 0.14 75)";
-  const LOGO_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "oklch(0.30 0.04 60 / 35%)";
-  const RIGHT_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "oklch(0.30 0.04 60 / 35%)";
+  const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(44,52,56,0.97)";
+  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(44,52,56,0.45)";
+  const DRAWER_BG = isWarm ? "rgba(42,55,70,0.80)" : "rgba(44,52,56,0.98)";
+  const DRAWER_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "rgba(44,52,56,0.5)";
+  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "#AA8E64";
+  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "#3F4A50";
+  const NAV_SECTION_LABEL = isWarm ? "rgba(148,165,185,0.45)" : "rgba(203,177,131,0.7)";
+  const NAV_SECTION_BORDER = isWarm ? "rgba(100,125,150,0.15)" : "rgba(203,177,131,0.10)";
+  const NAV_ACTIVE_BG = isWarm ? "rgba(100,125,150,0.18)" : "rgba(230,205,174,0.12)";
+  const NAV_ACTIVE_BORDER = isWarm ? "rgba(120,148,178,0.32)" : "rgba(230,205,174,0.22)";
+  const NAV_ACTIVE_TEXT = isWarm ? "rgba(180,202,230,0.95)" : "#E6CDAE";
+  const LOGO_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(44,52,56,0.35)";
+  const RIGHT_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(44,52,56,0.35)";
 
   // ── Drawer item renderer ─────────────────────────────────────────
   const renderDrawerItem = (item: {
@@ -156,17 +156,17 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
 
     const badge = item.badge === "LIVE" ? (
       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto"
-        style={{ background: "oklch(0.65 0.18 160 / 0.20)", color: "oklch(0.65 0.18 160)", border: "1px solid oklch(0.65 0.18 160 / 0.30)" }}>
+        style={{ background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)" }}>
         LIVE
       </span>
     ) : item.archiveBadge && archiveSongCount > 0 ? (
       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center"
-        style={{ background: "oklch(0.84 0.155 85 / 0.18)", color: "#CBB183", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
+        style={{ background: "rgba(203,177,131,0.16)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.28)" }}>
         {archiveSongCount > 99 ? "99+" : archiveSongCount}
       </span>
     ) : item.notifBadge && unreadCount > 0 ? (
       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center animate-pulse"
-        style={{ background: "oklch(0.65 0.22 25)", color: "white" }}>
+        style={{ background: "#EF4444", color: "white" }}>
         {unreadCount > 99 ? "99+" : unreadCount}
       </span>
     ) : null;
@@ -180,10 +180,10 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           background: active ? NAV_ACTIVE_BG : "transparent",
           color: active ? NAV_ACTIVE_TEXT : NAV_TEXT_MUTED,
         }}
-        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(120,145,170,0.18)" : "oklch(0.20 0.02 280 / 0.6)"; (e.currentTarget as HTMLElement).style.color = isWarm ? "rgba(210,225,245,0.95)" : "oklch(0.85 0.02 280)"; } }}
+        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(120,145,170,0.18)" : "rgba(44,52,56,0.6)"; (e.currentTarget as HTMLElement).style.color = isWarm ? "rgba(210,225,245,0.95)" : "#DACAAA"; } }}
         onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = NAV_TEXT_MUTED; } }}
       >
-        <Icon size={13} className="flex-shrink-0" style={{ color: active ? "oklch(0.80 0.145 82)" : "inherit" }} />
+        <Icon size={13} className="flex-shrink-0" style={{ color: active ? "#CBB183" : "inherit" }} />
         <span className="text-[12px] font-body flex-1">{item.label}</span>
         {badge}
       </button>
@@ -212,7 +212,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           <img src={LOGO_URL} alt="Living Nexus" className="w-8 h-8 object-contain" />
           <div>
             <div className="font-display text-sm gold-shimmer leading-tight">Living Nexus</div>
-            <div className="text-[8px] tracking-widest font-heading" style={{ color: "oklch(0.58 0.06 65)" }}>CREATIVE PROVENANCE</div>
+            <div className="text-[8px] tracking-widest font-heading" style={{ color: "#AA8E64" }}>CREATIVE PROVENANCE</div>
           </div>
         </div>
 
@@ -238,11 +238,11 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                   color: active ? NAV_ACTIVE_TEXT : NAV_TEXT,
                 }}
               >
-                <item.icon size={13} style={{ color: active ? "oklch(0.82 0.155 75)" : "inherit" }} />
+                <item.icon size={13} style={{ color: active ? "#CBB183" : "inherit" }} />
                 <span>{item.label}</span>
                 {archiveBadge && (
                   <span className="text-[9px] font-bold px-1 py-0.5 rounded-full"
-                    style={{ background: "oklch(0.82 0.155 75 / 0.18)", color: "#E8A830" }}>
+                    style={{ background: "rgba(230,205,174,0.18)", color: "#E8A830" }}>
                     {archiveBadge}
                   </span>
                 )}
@@ -264,8 +264,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               style={{
                 fontSize: "11px", fontWeight: 600,
                 background: "transparent",
-                border: "1px solid oklch(0.30 0.04 60 / 50%)",
-                color: "oklch(0.62 0.04 65)",
+                border: "1px solid rgba(44,52,56,0.5)",
+                color: "#AA8E64",
               }}
             >
               <Zap size={12} />
@@ -293,13 +293,13 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             <button
               onClick={() => goTo("/notifications")}
               className="relative flex items-center justify-center rounded-lg transition-all"
-              style={{ color: "oklch(0.62 0.04 65)", minWidth: 44, minHeight: 44, padding: "0 10px" }}
+              style={{ color: "#AA8E64", minWidth: 44, minHeight: 44, padding: "0 10px" }}
             >
               <Bell size={18} />
               {(unreadCount as number) > 0 && (
                 <span
                   className="absolute top-1 right-1 w-2 h-2 rounded-full animate-pulse"
-                  style={{ background: "oklch(0.65 0.22 25)" }}
+                  style={{ background: "#EF4444" }}
                 />
               )}
             </button>
@@ -316,7 +316,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden"
                 style={{
                   background: "linear-gradient(135deg, #8B5E1A, #C8954A)",
-                  boxShadow: hasWid ? "0 0 0 2px #E8A830, 0 0 10px oklch(0.82 0.155 75 / 0.35)" : "none",
+                  boxShadow: hasWid ? "0 0 0 2px #E8A830, 0 0 10px rgba(203,177,131,0.35)" : "none",
                 }}
               >
                 {avatar
@@ -336,9 +336,9 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
               style={{
                 fontSize: "11px", fontWeight: 600,
-                background: "oklch(0.82 0.155 75 / 0.12)",
-                border: "1px solid oklch(0.82 0.155 75 / 0.25)",
-                color: "oklch(0.88 0.12 75)",
+                background: "rgba(230,205,174,0.12)",
+                border: "1px solid rgba(203,177,131,0.22)",
+                color: "#E6CDAE",
               }}
             >
               <LogIn size={12} />
@@ -350,7 +350,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           <button
             onClick={() => setDrawerOpen(o => !o)}
             className="flex flex-col gap-1 p-2 rounded-lg transition-all"
-            style={{ color: drawerOpen ? "oklch(0.88 0.14 75)" : "oklch(0.62 0.04 65)" }}
+            style={{ color: drawerOpen ? "#E6CDAE" : "#AA8E64" }}
             aria-label="Open navigation menu"
           >
             {drawerOpen ? <X size={18} /> : <Menu size={18} />}
@@ -418,13 +418,13 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 <button
                   onClick={() => { setWhatsNewOpen(true); setDrawerOpen(false); }}
                   className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-left transition-all"
-                  style={{ color: "oklch(0.55 0.02 280)" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "oklch(0.20 0.02 280 / 0.6)"; (e.currentTarget as HTMLElement).style.color = "oklch(0.85 0.02 280)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "oklch(0.55 0.02 280)"; }}
+                  style={{ color: "#3F4A50" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(44,52,56,0.6)"; (e.currentTarget as HTMLElement).style.color = "#DACAAA"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#3F4A50"; }}
                 >
                   <Sparkles size={13} className="flex-shrink-0" />
                   <span className="text-[12px] font-body flex-1">What's New</span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.75 0.12 85)" }}>v2.24</span>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183" }}>v2.24</span>
                 </button>
               </div>
             </div>
@@ -439,7 +439,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 {!authLoading && user ? (
                   <div
                     className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all"
-                    style={{ background: "oklch(0.14 0.04 270 / 60%)", border: "1px solid oklch(0.28 0.04 270 / 50%)" }}
+                    style={{ background: "rgba(44,52,56,0.6)", border: "1px solid rgba(44,52,56,0.5)" }}
                     onClick={() => goTo("/profile")}
                   >
                     <div className="relative flex-shrink-0">
@@ -462,28 +462,28 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-medium truncate" style={{ color: "oklch(0.90 0.02 280)" }}>{displayName}</div>
+                      <div className="text-[13px] font-medium truncate" style={{ color: "#E6CDAE" }}>{displayName}</div>
                       {hasWid ? (
                         <div className="flex items-center gap-1 mt-0.5">
                           <Fingerprint size={9} style={{ color: "#CBB183" }} />
                           <span className="text-[9px] font-heading tracking-wider" style={{ color: "#CBB183" }}>WITNESSED</span>
                         </div>
                       ) : (
-                        <div className="text-[10px] mt-0.5" style={{ color: "oklch(0.45 0.02 280)" }}>Creator</div>
+                        <div className="text-[10px] mt-0.5" style={{ color: "#3F4A50" }}>Creator</div>
                       )}
                     </div>
-                    <ChevronRight size={13} style={{ color: "oklch(0.40 0.02 280)", flexShrink: 0 }} />
+                    <ChevronRight size={13} style={{ color: "#3F4A50", flexShrink: 0 }} />
                   </div>
                 ) : !authLoading ? (
                   <a
                     href={getLoginUrl()}
                     className="flex items-center gap-3 p-3 rounded-xl transition-all"
-                    style={{ background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+                    style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.22)" }}
                   >
-                    <LogIn size={16} style={{ color: "oklch(0.75 0.18 85)" }} />
+                    <LogIn size={16} style={{ color: "#CBB183" }} />
                     <div>
-                      <div className="text-[13px] font-medium" style={{ color: "oklch(0.85 0.1 85)" }}>Sign In</div>
-                      <div className="text-[11px]" style={{ color: "oklch(0.45 0.02 280)" }}>Upload &amp; earn tips</div>
+                      <div className="text-[13px] font-medium" style={{ color: "#E6CDAE" }}>Sign In</div>
+                      <div className="text-[11px]" style={{ color: "#3F4A50" }}>Upload &amp; earn tips</div>
                     </div>
                   </a>
                 ) : null}
@@ -493,8 +493,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all mt-3"
-                  style={{ color: "oklch(0.50 0.10 25)", border: "1px solid oklch(0.50 0.10 25 / 0.20)" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "oklch(0.50 0.10 25 / 0.10)"; }}
+                  style={{ color: "#AA8E64", border: "1px solid rgba(63,74,80,0.2)" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(170,142,100,0.1)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                 >
                   <LogOut size={13} className="flex-shrink-0" />

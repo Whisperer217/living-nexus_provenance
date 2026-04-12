@@ -67,25 +67,25 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                   height: "200px",
                   scrollSnapAlign: "start",
                   background: "transparent",
-                  border: "1.5px dashed oklch(0.84 0.155 85 / 0.30)",
+                  border: "1.5px dashed rgba(203,177,131,0.3)",
                 }}
               >
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center"
                   style={{
-                    background: "oklch(0.84 0.155 85 / 0.10)",
-                    border: "1px solid oklch(0.84 0.155 85 / 0.28)",
+                    background: "rgba(203,177,131,0.10)",
+                    border: "1px solid rgba(203,177,131,0.28)",
                   }}
                 >
-                  <span style={{ color: "oklch(0.84 0.155 85)", fontSize: "20px", lineHeight: 1 }}>+</span>
+                  <span style={{ color: "#CBB183", fontSize: "20px", lineHeight: 1 }}>+</span>
                 </div>
                 <p
                   className="text-[11px] font-semibold text-center px-2"
-                  style={{ color: "oklch(0.84 0.155 85 / 0.85)", fontFamily: "'Cinzel', serif" }}
+                  style={{ color: "rgba(230,205,174,0.85)", fontFamily: "'Cinzel', serif" }}
                 >
                   Start a Project
                 </p>
-                <p className="text-[9px] text-center px-3" style={{ color: "oklch(0.50 0.03 280)" }}>
+                <p className="text-[9px] text-center px-3" style={{ color: "#AA8E64" }}>
                   Launch with a Witness ID
                 </p>
               </div>
@@ -113,8 +113,8 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
               <div
                 className="relative rounded-2xl overflow-hidden group cursor-pointer active:scale-[0.97] transition-transform"
                 style={{
-                  background: "oklch(0.11 0.025 270)",
-                  boxShadow: "0 4px 28px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(0.84 0.155 85 / 0.08)",
+                  background: "#2C3438",
+                  boxShadow: "0 4px 28px rgba(0,0,0,0.55), 0 0 0 1px rgba(203,177,131,0.08)",
                 }}
               >
                 {/* Image — locked 4:5 ratio via prov-card-img-wrap */}
@@ -134,7 +134,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     >
                       <span
                         className="text-3xl font-bold"
-                        style={{ color: "oklch(0.84 0.155 85 / 0.18)", fontFamily: "'Cinzel', serif" }}
+                        style={{ color: "rgba(203,177,131,0.16)", fontFamily: "'Cinzel', serif" }}
                       >
                         {project.title?.[0] ?? "P"}
                       </span>
@@ -146,7 +146,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     className="absolute inset-0"
                     style={{
                       background:
-                        "linear-gradient(to top, #2C3438 / 0.92) 0%, oklch(0 0 0 / 0.20) 50%, transparent 100%)",
+                        "linear-gradient(to top, #2C3438 / 0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)",
                     }}
                   />
 
@@ -154,7 +154,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                   {isNew && (
                     <div
                       className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full z-10"
-                      style={{ background: "oklch(0.55 0.22 145 / 0.90)", backdropFilter: "blur(4px)" }}
+                      style={{ background: "rgba(74,222,128,0.9)", backdropFilter: "blur(4px)" }}
                     >
                       <Sparkles size={7} className="text-white" />
                       <span className="text-[8px] font-mono text-white font-bold">NEW</span>
@@ -187,7 +187,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                   <div className="absolute bottom-0 left-0 right-0 px-2 pb-2 pt-4">
                     <p
                       className="text-[11px] font-semibold leading-tight line-clamp-2"
-                      style={{ color: "oklch(0.97 0.01 280)", fontFamily: "'Cinzel', serif" }}
+                      style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
                     >
                       {project.title}
                     </p>
@@ -202,19 +202,19 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                       <div
                         className="w-4 h-4 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-[8px] font-bold"
                         style={{
-                          background: "oklch(0.30 0.015 200)",
-                          border: "1px solid oklch(0.84 0.155 85 / 0.35)",
+                          background: "#2C3438",
+                          border: "1px solid rgba(203,177,131,0.32)",
                         }}
                       >
                         {project.creatorAvatarUrl ? (
                           <img src={project.creatorAvatarUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
-                          <span style={{ color: "oklch(0.84 0.155 85)" }}>
+                          <span style={{ color: "#CBB183" }}>
                             {(project.creatorName || project.creatorHandle || "?")[0].toUpperCase()}
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] truncate" style={{ color: "oklch(0.70 0.04 280)" }}>
+                      <p className="text-[10px] truncate" style={{ color: "#AA8E64" }}>
                         {project.creatorName || project.creatorHandle || "Creator"}
                       </p>
                     </div>
@@ -225,17 +225,17 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                         <div
                           className="flex items-center gap-0.5 px-1 py-0.5 rounded-md"
                           style={{
-                            background: "oklch(0.55 0.18 280 / 0.30)",
-                            border: "1px solid oklch(0.55 0.18 280 / 0.5)",
+                            background: "rgba(203,177,131,0.3)",
+                            border: "1px solid rgba(203,177,131,0.5)",
                           }}
                         >
-                          <Cpu size={7} style={{ color: "oklch(0.72 0.18 280)" }} />
+                          <Cpu size={7} style={{ color: "#CBB183" }} />
                         </div>
                       )}
                       <button
                         type="button"
                         className="p-0.5 rounded-md transition-all hover:scale-110"
-                        style={{ color: "oklch(0.65 0.18 0 / 0.7)" }}
+                        style={{ color: "rgba(239,68,68,0.7)" }}
                         onClick={(e) => e.preventDefault()}
                       >
                         <Heart size={10} />
@@ -247,17 +247,17 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                   {pct !== null && (
                     <div className="mt-1.5">
                       <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-[8px] font-mono" style={{ color: "oklch(0.84 0.155 85 / 0.75)" }}>
+                        <span className="text-[8px] font-mono" style={{ color: "rgba(230,205,174,0.75)" }}>
                           {pct}% funded
                         </span>
-                        <DollarSign size={7} style={{ color: "oklch(0.84 0.155 85 / 0.6)" }} />
+                        <DollarSign size={7} style={{ color: "rgba(203,177,131,0.55)" }} />
                       </div>
-                      <div className="h-0.5 rounded-full overflow-hidden" style={{ background: "oklch(0.24 0.015 200 / 0.6)" }}>
+                      <div className="h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(44,52,56,0.6)" }}>
                         <div
                           className="h-full rounded-full"
                           style={{
                             width: `${pct}%`,
-                            background: "linear-gradient(90deg, oklch(0.62 0.18 55), oklch(0.84 0.155 85))",
+                            background: "linear-gradient(90deg, #AA8E64, #CBB183)",
                           }}
                         />
                       </div>

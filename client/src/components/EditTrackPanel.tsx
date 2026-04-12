@@ -583,9 +583,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                     onClick={() => setGenre(cat === genre ? "" : cat)}
                     className="px-3 py-1 rounded-full text-xs transition-all"
                     style={{
-                      background: genre === cat ? "oklch(0.65 0.2 300 / 0.25)" : "rgba(255,255,255,0.05)",
-                      color: genre === cat ? "oklch(0.75 0.2 300)" : "#94a3b8",
-                      border: `1px solid ${genre === cat ? "oklch(0.65 0.2 300 / 0.5)" : "rgba(255,255,255,0.12)"}`,
+                      background: genre === cat ? "rgba(203,177,131,0.25)" : "rgba(255,255,255,0.05)",
+                      color: genre === cat ? "#CBB183" : "#94a3b8",
+                      border: `1px solid ${genre === cat ? "rgba(203,177,131,0.45)" : "rgba(255,255,255,0.12)"}`,
                     }}
                   >
                     {cat}
@@ -1029,7 +1029,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <Label className="text-white text-sm font-medium flex items-center gap-2">
-              <Video size={14} style={{ color: "oklch(0.65 0.18 200)" }} />
+              <Video size={14} style={{ color: "#4ADE80" }} />
               Music Video
             </Label>
             <p className="text-xs" style={{ color: "#64748b" }}>
@@ -1046,7 +1046,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             {/* Current video WID */}
             {currentVideoWid && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono"
-                style={{ background: "oklch(0.65 0.18 200 / 0.08)", border: "1px solid oklch(0.65 0.18 200 / 0.25)", color: "oklch(0.65 0.18 200)" }}>
+                style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.25)", color: "#4ADE80" }}>
                 🔐 Video WID: {currentVideoWid}
               </div>
             )}
@@ -1056,8 +1056,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               onClick={() => videoInputRef.current?.click()}
               className="rounded-xl p-4 text-center cursor-pointer transition-all hover:bg-white/5"
               style={{
-                border: `2px dashed ${videoFile ? "oklch(0.65 0.18 200)" : "rgba(255,255,255,0.12)"}`,
-                background: videoFile ? "oklch(0.65 0.18 200 / 0.05)" : "transparent",
+                border: `2px dashed ${videoFile ? "#4ADE80" : "rgba(255,255,255,0.12)"}`,
+                background: videoFile ? "rgba(74,222,128,0.05)" : "transparent",
               }}
             >
               <input
@@ -1074,14 +1074,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               />
               {videoFile ? (
                 <div className="flex items-center justify-center gap-2">
-                  <Video size={14} style={{ color: "oklch(0.65 0.18 200)" }} />
-                  <span className="text-sm" style={{ color: "oklch(0.65 0.18 200)" }}>{videoFile.name}</span>
+                  <Video size={14} style={{ color: "#4ADE80" }} />
+                  <span className="text-sm" style={{ color: "#4ADE80" }}>{videoFile.name}</span>
                   <span className="text-xs" style={{ color: "#94a3b8" }}>({(videoFile.size/1024/1024).toFixed(1)} MB)</span>
                   <button type="button" onClick={e => { e.stopPropagation(); setVideoFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
                 </div>
               ) : (
                 <>
-                  <Video size={20} className="mx-auto mb-1" style={{ color: "oklch(0.65 0.18 200)", opacity: 0.4 }} />
+                  <Video size={20} className="mx-auto mb-1" style={{ color: "#4ADE80", opacity: 0.4 }} />
                   <p className="text-sm" style={{ color: "#94a3b8" }}>{currentVideoUrl ? "Replace video" : "Upload music video"}</p>
                   <p className="text-xs mt-0.5" style={{ color: "#475569" }}>MP4, MOV — max 500 MB</p>
                 </>
@@ -1094,7 +1094,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 onClick={handleVideoUpload}
                 disabled={videoUploading}
                 className="w-full text-sm font-semibold"
-                style={{ background: "oklch(0.65 0.18 200 / 0.15)", color: "oklch(0.65 0.18 200)", border: "1px solid oklch(0.65 0.18 200 / 0.3)" }}
+                style={{ background: "rgba(74,222,128,0.15)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)" }}
               >
                 {videoUploading ? "Uploading video…" : "Upload & Witness Video"}
               </Button>

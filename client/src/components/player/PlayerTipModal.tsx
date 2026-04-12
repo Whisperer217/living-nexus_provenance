@@ -44,9 +44,9 @@ function GenrePillRow({ genre }: { genre: string | undefined | null }) {
           key={tag}
           className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
-            background: "oklch(0.20 0.05 275 / 0.8)",
-            color: "oklch(0.75 0.08 280)",
-            border: "1px solid oklch(0.32 0.05 275 / 0.6)",
+            background: "rgba(44,52,56,0.8)",
+            color: "#E6CDAE",
+            border: "1px solid rgba(44,52,56,0.6)",
           }}
         >
           <Tag size={7} />
@@ -57,9 +57,9 @@ function GenrePillRow({ genre }: { genre: string | undefined | null }) {
         <span
           className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
-            background: "oklch(0.14 0.03 275 / 0.6)",
-            color: "oklch(0.55 0.04 280)",
-            border: "1px solid oklch(0.25 0.03 275 / 0.4)",
+            background: "rgba(44,52,56,0.6)",
+            color: "#3F4A50",
+            border: "1px solid rgba(44,52,56,0.4)",
           }}
         >
           +{overflow}
@@ -122,16 +122,16 @@ export default function PlayerTipModal({
       <div
         className="w-full max-w-sm mx-4 mb-4 md:mb-0 rounded-2xl p-5 flex flex-col gap-4"
         style={{
-          background: "oklch(0.11 0.025 275)",
-          border: "1px solid oklch(0.84 0.155 85 / 0.25)",
-          boxShadow: "0 0 40px oklch(0.84 0.155 85 / 0.12), 0 8px 48px oklch(0 0 0 / 0.7)",
+          background: "#2C3438",
+          border: "1px solid rgba(203,177,131,0.22)",
+          boxShadow: "0 0 40px rgba(203,177,131,0.10), 0 8px 48px rgba(0,0,0,0.70)",
         }}
       >
         {/* Header */}
         <div className="flex items-center justify-between">
           <p
             className="text-[11px] font-bold tracking-widest uppercase"
-            style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}
+            style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}
           >
             Send a Gift
           </p>
@@ -146,7 +146,7 @@ export default function PlayerTipModal({
         {/* Track info block — cover + title + artist + genre pills */}
         <div
           className="flex items-start gap-3 rounded-xl p-3"
-          style={{ background: "oklch(0.15 0.04 275)" }}
+          style={{ background: "#2C3438" }}
         >
           {/* Cover thumbnail */}
           <div
@@ -167,11 +167,11 @@ export default function PlayerTipModal({
           {/* Title + artist + genre */}
           <div className="min-w-0 flex-1">
             {songTitle && (
-              <div className="text-[13px] font-semibold font-body truncate" style={{ color: "oklch(0.92 0.01 80)" }}>
+              <div className="text-[13px] font-semibold font-body truncate" style={{ color: "#E6CDAE" }}>
                 {songTitle}
               </div>
             )}
-            <div className={`font-body truncate ${songTitle ? "text-[11px] mt-0.5" : "text-[13px]"}`} style={{ color: "oklch(0.65 0.03 280)" }}>
+            <div className={`font-body truncate ${songTitle ? "text-[11px] mt-0.5" : "text-[13px]"}`} style={{ color: "#AA8E64" }}>
               {artistName}
             </div>
             <GenrePillRow genre={genre} />
@@ -182,7 +182,7 @@ export default function PlayerTipModal({
           /* Gifts not enabled */
           <div
             className="rounded-xl p-4 text-center"
-            style={{ background: "oklch(0.14 0.02 275)", border: "1px solid oklch(0.22 0.02 275)" }}
+            style={{ background: "#2C3438", border: "1px solid #2C3438" }}
           >
             <DollarSign size={24} className="mx-auto mb-2 opacity-30 text-white" />
             <p className="text-sm text-white/40">Gifts not enabled yet</p>
@@ -201,12 +201,12 @@ export default function PlayerTipModal({
                   className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                   style={{
                     background: !useCustom && selectedCents === cents
-                      ? "oklch(0.84 0.155 85)"
-                      : "oklch(0.30 0.015 200)",
+                      ? "#CBB183"
+                      : "#2C3438",
                     color: !useCustom && selectedCents === cents
                       ? "#2C3438"
-                      : "oklch(0.65 0.04 280)",
-                    border: `1px solid ${!useCustom && selectedCents === cents ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
+                      : "#AA8E64",
+                    border: `1px solid ${!useCustom && selectedCents === cents ? "#CBB183" : "#2C3438"}`,
                   }}
                 >
                   ${(cents / 100).toFixed(0)}
@@ -216,9 +216,9 @@ export default function PlayerTipModal({
                 onClick={() => setUseCustom(true)}
                 className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                 style={{
-                  background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.30 0.015 200)",
-                  color: useCustom ? "#2C3438" : "oklch(0.65 0.04 280)",
-                  border: `1px solid ${useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
+                  background: useCustom ? "#CBB183" : "#2C3438",
+                  color: useCustom ? "#2C3438" : "#AA8E64",
+                  border: `1px solid ${useCustom ? "#CBB183" : "#2C3438"}`,
                 }}
               >
                 Custom
@@ -238,7 +238,7 @@ export default function PlayerTipModal({
                   value={customInput}
                   onChange={(e) => setCustomInput(e.target.value)}
                   className="flex-1 bg-transparent border-b text-white text-sm py-1 outline-none"
-                  style={{ borderColor: "oklch(0.84 0.155 85 / 0.4)" }}
+                  style={{ borderColor: "rgba(203,177,131,0.35)" }}
                   autoFocus
                 />
               </div>
@@ -251,7 +251,7 @@ export default function PlayerTipModal({
               className="w-full py-3 rounded-xl text-sm font-bold tracking-wide transition-all
                 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
-                background: "oklch(0.84 0.155 85)",
+                background: "#CBB183",
                 color: "#2C3438",
                 fontFamily: "'Cinzel', serif",
               }}

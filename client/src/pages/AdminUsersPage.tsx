@@ -24,15 +24,15 @@ type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus
 type SortDir = "asc" | "desc";
 type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation" | "data_rights";
 
-const GOLD = "oklch(0.84 0.155 85)";
+const GOLD = "#CBB183";
 const BG = "#E6CDAE";
-const CARD = "oklch(0.12 0.015 280)";
-const BORDER = "oklch(0.2 0.02 280)";
+const CARD = "#2C3438";
+const BORDER = "#2C3438";
 const MUTED = "#64748B";
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";
-const GREEN = "oklch(0.65 0.18 145)";
-const RED = "oklch(0.65 0.18 25)";
+const GREEN = "#4ADE80";
+const RED = "#EF4444";
 
 function formatDate(d: Date | string | null | undefined) {
   if (!d) return "—";
@@ -178,26 +178,26 @@ function UsersTab() {
                   </tr>
                 ) : sorted.map((u: any, i: number) => (
                   <tr key={u.id} style={{
-                    background: i % 2 === 0 ? "oklch(0.22 0.015 200)" : "oklch(0.11 0.015 280)",
-                    borderBottom: `1px solid oklch(0.30 0.015 200)`,
+                    background: i % 2 === 0 ? "#2C3438" : "#2C3438",
+                    borderBottom: `1px solid #2C3438`,
                   }}>
                     <td className={tdStyle}>
                       <div className="font-medium" style={{ color: TEXT }}>{u.artistHandle ? `@${u.artistHandle}` : u.name ?? "—"}</div>
                       {u.artistHandle && u.name && <div className="text-xs mt-0.5" style={{ color: MUTED }}>{u.name}</div>}
                       {u.email && <div className="text-xs mt-0.5" style={{ color: MUTED }}>{u.email}</div>}
-                      <div className="text-xs mt-0.5 font-mono" style={{ color: "oklch(0.5 0.02 280)" }}>ID: {u.id}</div>
+                      <div className="text-xs mt-0.5 font-mono" style={{ color: "#3F4A50" }}>ID: {u.id}</div>
                     </td>
                     <td className={tdStyle} style={{ color: SUBTEXT }}>{formatDate(u.createdAt)}</td>
                     <td className={tdStyle}>
                       <span className="font-mono font-semibold" style={{ color: u.trackCount > 0 ? GOLD : MUTED }}>{u.trackCount}</span>
                     </td>
                     <td className={tdStyle}>
-                      <span className="font-mono font-semibold" style={{ color: u.widCount > 0 ? "oklch(0.75 0.18 145)" : MUTED }}>{u.widCount}</span>
+                      <span className="font-mono font-semibold" style={{ color: u.widCount > 0 ? "#4ADE80" : MUTED }}>{u.widCount}</span>
                     </td>
                     <td className={tdStyle}>
                       <Badge style={u.licenseStatus === "licensed"
-                        ? { background: "oklch(0.75 0.18 145 / 0.2)", color: "oklch(0.75 0.18 145)", border: "1px solid oklch(0.75 0.18 145 / 0.3)" }
-                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid #C3AB7D` }}>
+                        ? { background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
+                        : { background: "#3F4A50", color: MUTED, border: `1px solid #C3AB7D` }}>
                         {u.licenseStatus === "licensed" ? "Licensed" : "Free"}
                       </Badge>
                     </td>
@@ -214,7 +214,7 @@ function UsersTab() {
                             value={grantSlots[u.id] ?? "100"}
                             onChange={e => setGrantSlots(prev => ({ ...prev, [u.id]: e.target.value }))}
                             className="w-20 h-7 text-xs"
-                            style={{ background: "oklch(0.15 0.015 280)", borderColor: BORDER, color: TEXT }}
+                            style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
                           />
                           <Button
                             size="sm"
@@ -246,7 +246,7 @@ function UsersTab() {
                         className="h-7 text-xs mt-1"
                         title={u.isPinned ? "Unpin from Featured Creators" : "Pin to top of Featured Creators"}
                         style={u.isPinned
-                          ? { borderColor: "oklch(0.75 0.18 145)", color: "oklch(0.75 0.18 145)" }
+                          ? { borderColor: "#4ADE80", color: "#4ADE80" }
                           : { borderColor: BORDER, color: MUTED }
                         }
                         disabled={togglePin.isPending}
@@ -262,7 +262,7 @@ function UsersTab() {
             </table>
           </div>
           {sorted.length > 0 && (
-            <div className="px-4 py-3 text-xs border-t flex items-center justify-between" style={{ color: MUTED, borderColor: BORDER, background: "oklch(0.22 0.015 200)" }}>
+            <div className="px-4 py-3 text-xs border-t flex items-center justify-between" style={{ color: MUTED, borderColor: BORDER, background: "#2C3438" }}>
               <span>Showing {sorted.length} of {totalUsers} users (page {page + 1} of {totalPages || 1})</span>
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ function PromoCodesTab() {
                 placeholder="BDDT-FREE"
                 value={form.code}
                 onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))}
-                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -345,7 +345,7 @@ function PromoCodesTab() {
                 placeholder="e.g. Veterans access — March 2026"
                 value={form.description}
                 onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -357,7 +357,7 @@ function PromoCodesTab() {
                 placeholder="100"
                 value={form.slotsGranted}
                 onChange={e => setForm(p => ({ ...p, slotsGranted: e.target.value }))}
-                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -368,7 +368,7 @@ function PromoCodesTab() {
                 placeholder="Unlimited"
                 value={form.maxUses}
                 onChange={e => setForm(p => ({ ...p, maxUses: e.target.value }))}
-                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -377,7 +377,7 @@ function PromoCodesTab() {
                 type="date"
                 value={form.expiresAt}
                 onChange={e => setForm(p => ({ ...p, expiresAt: e.target.value }))}
-                style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
+                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
               />
             </div>
           </div>
@@ -427,8 +427,8 @@ function PromoCodesTab() {
               <tbody>
                 {codes.map((c: any, i: number) => (
                   <tr key={c.id} style={{
-                    background: i % 2 === 0 ? "oklch(0.22 0.015 200)" : "oklch(0.11 0.015 280)",
-                    borderBottom: `1px solid oklch(0.30 0.015 200)`,
+                    background: i % 2 === 0 ? "#2C3438" : "#2C3438",
+                    borderBottom: `1px solid #2C3438`,
                   }}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -450,22 +450,22 @@ function PromoCodesTab() {
                     </td>
                     <td className="px-4 py-3">
                       <Badge style={c.isActive
-                        ? { background: "oklch(0.75 0.18 145 / 0.2)", color: "oklch(0.75 0.18 145)", border: "1px solid oklch(0.75 0.18 145 / 0.3)" }
-                        : { background: "oklch(0.3 0.02 280)", color: MUTED, border: `1px solid #C3AB7D` }}>
+                        ? { background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
+                        : { background: "#3F4A50", color: MUTED, border: `1px solid #C3AB7D` }}>
                         {c.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3">
                       {c.isActive ? (
                         <Button size="sm" variant="outline" className="h-7 text-xs"
-                          style={{ borderColor: "oklch(0.65 0.18 25)", color: "oklch(0.65 0.18 25)" }}
+                          style={{ borderColor: "#EF4444", color: "#EF4444" }}
                           disabled={deactivateCode.isPending}
                           onClick={() => deactivateCode.mutate({ id: c.id })}>
                           <XCircle className="w-3 h-3 mr-1" /> Deactivate
                         </Button>
                       ) : (
                         <Button size="sm" variant="outline" className="h-7 text-xs"
-                          style={{ borderColor: "oklch(0.75 0.18 145)", color: "oklch(0.75 0.18 145)" }}
+                          style={{ borderColor: "#4ADE80", color: "#4ADE80" }}
                           disabled={reactivateCode.isPending}
                           onClick={() => reactivateCode.mutate({ id: c.id })}>
                           <RotateCcw className="w-3 h-3 mr-1" /> Reactivate
@@ -514,8 +514,8 @@ function EmbedVideoTab() {
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Total Published", value: stats?.total ?? "—", color: GOLD },
-          { label: "Embed Ready", value: stats?.withEmbed ?? "—", color: "oklch(0.65 0.18 145)" },
-          { label: "Pending Generation", value: stats?.pending ?? "—", color: "oklch(0.65 0.18 25)" },
+          { label: "Embed Ready", value: stats?.withEmbed ?? "—", color: "#4ADE80" },
+          { label: "Pending Generation", value: stats?.pending ?? "—", color: "#EF4444" },
         ].map(s => (
           <div key={s.label} className="rounded-xl p-4 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
             <p className="text-2xl font-bold" style={{ color: s.color, fontFamily: "'Orbitron', sans-serif" }}>{s.value}</p>
@@ -545,7 +545,7 @@ function EmbedVideoTab() {
         {progress.log.length > 0 && (
           <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "#2C3438", border: `1px solid ${BORDER}` }}>
             {progress.log.map((line, i) => (
-              <p key={i} style={{ color: line.startsWith("Error") ? "oklch(0.65 0.18 25)" : "oklch(0.65 0.18 145)" }}>
+              <p key={i} style={{ color: line.startsWith("Error") ? "#EF4444" : "#4ADE80" }}>
                 {line.startsWith("Error") ? "✗" : "✓"} {line}
               </p>
             ))}
@@ -559,9 +559,9 @@ function EmbedVideoTab() {
       </div>
 
       {/* Info */}
-      <div className="rounded-xl p-4" style={{ background: "oklch(0.22 0.015 200)", border: `1px solid ${BORDER}` }}>
+      <div className="rounded-xl p-4" style={{ background: "#2C3438", border: `1px solid ${BORDER}` }}>
         <div className="flex items-start gap-3">
-          <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.65 0.18 145)" }} />
+          <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#4ADE80" }} />
           <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
             <p>Generation runs in the background — the page doesn't need to stay open.</p>
             <p>Each video takes ~30–60 seconds to generate. For 38 tracks, expect ~20–30 minutes total.</p>
@@ -606,7 +606,7 @@ function StripeRecoveryTab() {
               value={userId}
               onChange={e => setUserId(e.target.value)}
               className="font-mono"
-              style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
+              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
             />
           </div>
           <div>
@@ -614,7 +614,7 @@ function StripeRecoveryTab() {
             <Input
               value={returnUrl}
               onChange={e => setReturnUrl(e.target.value)}
-              style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
+              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
             />
           </div>
           <Button
@@ -629,10 +629,10 @@ function StripeRecoveryTab() {
       </div>
 
       {result && (
-        <div className="rounded-xl border p-6" style={{ background: "oklch(0.65 0.18 145 / 0.06)", borderColor: "oklch(0.65 0.18 145 / 0.35)" }}>
+        <div className="rounded-xl border p-6" style={{ background: "rgba(74,222,128,0.06)", borderColor: "rgba(74,222,128,0.35)" }}>
           <div className="flex items-center gap-2 mb-3">
-            <CheckCircle2 className="w-5 h-5" style={{ color: "oklch(0.65 0.18 145)" }} />
-            <span className="text-sm font-semibold" style={{ color: "oklch(0.65 0.18 145)" }}>Link Ready</span>
+            <CheckCircle2 className="w-5 h-5" style={{ color: "#4ADE80" }} />
+            <span className="text-sm font-semibold" style={{ color: "#4ADE80" }}>Link Ready</span>
           </div>
           <p className="text-xs mb-2" style={{ color: SUBTEXT }}>Stripe Account: <span className="font-mono" style={{ color: TEXT }}>{result.stripeAccountId}</span></p>
           <div className="flex items-center gap-2 mt-3">
@@ -640,7 +640,7 @@ function StripeRecoveryTab() {
               readOnly
               value={result.onboardingUrl}
               className="font-mono text-xs flex-1"
-              style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER, color: TEXT }}
+              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
             />
             <Button
               size="sm"
@@ -658,7 +658,7 @@ function StripeRecoveryTab() {
               <ExternalLink className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-xs mt-3" style={{ color: "oklch(0.45 0.03 280)" }}>
+          <p className="text-xs mt-3" style={{ color: "#AA8E64" }}>
             This link expires after one use or after ~24 hours. Regenerate if needed.
           </p>
         </div>
@@ -692,8 +692,8 @@ export default function AdminUsersPage() {
   if (user?.role !== "admin") return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
       <div className="text-center max-w-sm">
-        <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "oklch(0.65 0.18 25)" }} />
-        <p className="text-lg font-semibold mb-2" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>Access Denied</p>
+        <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "#EF4444" }} />
+        <p className="text-lg font-semibold mb-2" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>Access Denied</p>
         <p className="text-sm mb-6" style={{ color: SUBTEXT }}>This page is restricted to platform administrators.</p>
         <Button variant="outline" onClick={() => navigate("/")} style={{ borderColor: GOLD, color: GOLD }}>Back to Home</Button>
       </div>
@@ -711,8 +711,8 @@ export default function AdminUsersPage() {
     { id: "logs", label: "Audit Log", icon: <History className="w-4 h-4" /> },
     { id: "founders", label: "Founder Control", icon: <Crown className="w-4 h-4" /> },
     { id: "media", label: "Media Generation", icon: <Video className="w-4 h-4" /> },
-    { id: "moderation", label: "Covenant Moderation", icon: <Shield className="w-4 h-4" style={{ color: "oklch(0.65 0.18 30)" }} /> },
-    { id: "data_rights", label: "Data Rights", icon: <Database className="w-4 h-4" style={{ color: "oklch(0.65 0.18 200)" }} /> },
+    { id: "moderation", label: "Covenant Moderation", icon: <Shield className="w-4 h-4" style={{ color: "#EF4444" }} /> },
+    { id: "data_rights", label: "Data Rights", icon: <Database className="w-4 h-4" style={{ color: "#4ADE80" }} /> },
   ];
 
   return (
@@ -724,7 +724,7 @@ export default function AdminUsersPage() {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Shield className="w-6 h-6" style={{ color: GOLD }} />
-              <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+              <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
                 LN Command Center
               </h1>
             </div>
@@ -732,11 +732,11 @@ export default function AdminUsersPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate("/admin/self-improve")}
-              style={{ borderColor: "oklch(0.45 0.18 270)", color: "oklch(0.75 0.18 270)" }}>
+              style={{ borderColor: "#CBB183", color: "#CBB183" }}>
               🤖 Self-Improve
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/admin/payment-integrity")}
-              style={{ borderColor: "oklch(0.55 0.18 60)", color: "oklch(0.80 0.18 60)" }}>
+              style={{ borderColor: "#AA8E64", color: "#CBB183" }}>
               💳 Payment Integrity
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/")}
@@ -831,18 +831,18 @@ function WorksModerationTab() {
 
       <div className="space-y-2">
         {(works ?? []).map((w: any) => (
-          <div key={w.id} className="rounded-xl p-4 flex gap-4 items-start" style={{ background: CARD, border: `1px solid ${w.isFlagged ? "oklch(0.65 0.18 45)" : w.moderationStatus === "removed" ? "oklch(0.55 0.2 25)" : BORDER}` }}>
+          <div key={w.id} className="rounded-xl p-4 flex gap-4 items-start" style={{ background: CARD, border: `1px solid ${w.isFlagged ? "#AA8E64" : w.moderationStatus === "removed" ? "#EF4444" : BORDER}` }}>
             {w.coverArtUrl && <img src={w.coverArtUrl} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-sm" style={{ color: TEXT }}>{w.title}</span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: "oklch(0.15 0.04 85)", color: GOLD }}>{w.witnessId ?? "—"}</span>
-                {w.isFlagged && <span className="text-xs px-2 py-0.5 rounded" style={{ background: "oklch(0.2 0.05 45)", color: "oklch(0.75 0.15 45)" }}>FLAGGED</span>}
-                {w.moderationStatus === "removed" && <span className="text-xs px-2 py-0.5 rounded" style={{ background: "oklch(0.18 0.05 25)", color: "oklch(0.7 0.18 25)" }}>REMOVED</span>}
+                <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: "#2C3438", color: GOLD }}>{w.witnessId ?? "—"}</span>
+                {w.isFlagged && <span className="text-xs px-2 py-0.5 rounded" style={{ background: "#2C3438", color: "#E6CDAE" }}>FLAGGED</span>}
+                {w.moderationStatus === "removed" && <span className="text-xs px-2 py-0.5 rounded" style={{ background: "#2C3438", color: "#EF4444" }}>REMOVED</span>}
               </div>
               <div className="text-xs mt-1" style={{ color: SUBTEXT }}>
                 {w.contentType?.toUpperCase()} · {w.status} · {w.playCount ?? 0} plays
-                {w.flagReason && <span className="ml-2" style={{ color: "oklch(0.75 0.15 45)" }}>Reason: {w.flagReason}</span>}
+                {w.flagReason && <span className="ml-2" style={{ color: "#E6CDAE" }}>Reason: {w.flagReason}</span>}
               </div>
             </div>
             <div className="flex gap-2 shrink-0 flex-wrap">
@@ -851,7 +851,7 @@ function WorksModerationTab() {
                   <Input value={flagReason[w.id] ?? ""} onChange={e => setFlagReason(r => ({ ...r, [w.id]: e.target.value }))}
                     placeholder="Flag reason…" className="w-32 h-7 text-xs" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
                   <Button size="sm" variant="outline" className="h-7 text-xs"
-                    style={{ borderColor: "oklch(0.65 0.18 45)", color: "oklch(0.75 0.15 45)" }}
+                    style={{ borderColor: "#AA8E64", color: "#E6CDAE" }}
                     disabled={!flagReason[w.id]}
                     onClick={() => flagWork.mutate({ songId: w.id, reason: flagReason[w.id] })}>
                     Flag
@@ -868,14 +868,14 @@ function WorksModerationTab() {
               {w.moderationStatus !== "removed" ? (
                 confirmRemove === w.id ? (
                   <div className="flex gap-1">
-                    <Button size="sm" className="h-7 text-xs" style={{ background: "oklch(0.55 0.2 25)", color: "#fff" }}
+                    <Button size="sm" className="h-7 text-xs" style={{ background: "#EF4444", color: "#fff" }}
                       onClick={() => removeWork.mutate({ songId: w.id })}>Confirm Remove</Button>
                     <Button size="sm" variant="outline" className="h-7 text-xs" style={{ borderColor: BORDER, color: SUBTEXT }}
                       onClick={() => setConfirmRemove(null)}>Cancel</Button>
                   </div>
                 ) : (
                   <Button size="sm" variant="outline" className="h-7 text-xs"
-                    style={{ borderColor: "oklch(0.55 0.2 25)", color: "oklch(0.7 0.18 25)" }}
+                    style={{ borderColor: "#EF4444", color: "#EF4444" }}
                     onClick={() => setConfirmRemove(w.id)}>
                     Remove
                   </Button>
@@ -1030,7 +1030,7 @@ function BillingResetTab() {
     <div className="space-y-6">
 
       {/* ── Founder Free Tier Grant ── */}
-      <div className="rounded-xl p-4 space-y-3" style={{ background: "oklch(0.12 0.03 85 / 0.4)", border: "1px solid oklch(0.4 0.1 85 / 0.4)" }}>
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(44,52,56,0.4)", border: "1px solid rgba(122,90,30,0.4)" }}>
         <div>
           <p className="text-sm font-semibold mb-0.5" style={{ color: GOLD }}>👑 Grant Founder Free Tier</p>
           <p className="text-xs" style={{ color: SUBTEXT }}>Grants 100 permanent archive slots and Living Archive access at no charge. Use for founders, partners, and platform contributors. Logged to audit trail.</p>
@@ -1061,7 +1061,7 @@ function BillingResetTab() {
                       onClick={() => setConfirmFounder(null)}>Cancel</Button>
                   </div>
                 ) : (
-                  <Button size="sm" className="h-7 text-xs gap-1" style={{ background: "oklch(0.22 0.04 85)", border: `1px solid ${GOLD}`, color: GOLD }}
+                  <Button size="sm" className="h-7 text-xs gap-1" style={{ background: "#2C3438", border: `1px solid ${GOLD}`, color: GOLD }}
                     onClick={() => setConfirmFounder(u.id)}>
                     <Gift className="w-3 h-3" /> Grant Free Tier
                   </Button>
@@ -1072,8 +1072,8 @@ function BillingResetTab() {
         )}
       </div>
 
-      <div className="rounded-xl p-4" style={{ background: "oklch(0.12 0.03 25)", border: "1px solid oklch(0.3 0.1 25)" }}>
-        <p className="text-sm font-semibold mb-1" style={{ color: "oklch(0.75 0.15 25)" }}>⚠ Destructive Action</p>
+      <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+        <p className="text-sm font-semibold mb-1" style={{ color: "#EF4444" }}>⚠ Destructive Action</p>
         <p className="text-xs" style={{ color: SUBTEXT }}>Billing reset cancels the user's active Stripe subscription and clears their local Stripe customer/subscription IDs. The WID registry is never modified. Use only for refunds, fraud, or test account cleanup.</p>
       </div>
 
@@ -1099,7 +1099,7 @@ function BillingResetTab() {
               <div className="flex gap-2 flex-wrap">
                 <Input value={resetReason} onChange={e => setResetReason(e.target.value)} placeholder="Reason (optional)"
                   className="w-40 h-7 text-xs" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
-                <Button size="sm" className="h-7 text-xs" style={{ background: "oklch(0.55 0.2 25)", color: "#fff" }}
+                <Button size="sm" className="h-7 text-xs" style={{ background: "#EF4444", color: "#fff" }}
                   onClick={() => resetBilling.mutate({ userId: u.id, reason: resetReason || undefined })}>
                   Confirm Reset
                 </Button>
@@ -1108,7 +1108,7 @@ function BillingResetTab() {
               </div>
             ) : (
               <Button size="sm" variant="outline" className="h-7 text-xs"
-                style={{ borderColor: "oklch(0.55 0.2 25)", color: "oklch(0.7 0.18 25)" }}
+                style={{ borderColor: "#EF4444", color: "#EF4444" }}
                 onClick={() => setConfirmReset(u.id)}>
                 Reset Billing
               </Button>
@@ -1128,16 +1128,16 @@ function AuditLogTab() {
   const { data: logs, isLoading } = trpc.admin.getLogs.useQuery({ limit: 200 }, { retry: false });
 
   const ACTION_COLOR: Record<string, string> = {
-    flag_work: "oklch(0.75 0.15 45)",
-    unflag_work: "oklch(0.65 0.15 145)",
-    remove_work: "oklch(0.7 0.18 25)",
-    restore_work: "oklch(0.65 0.15 145)",
+    flag_work: "#E6CDAE",
+    unflag_work: "#4ADE80",
+    remove_work: "#EF4444",
+    restore_work: "#4ADE80",
     set_system_config: GOLD,
-    reset_billing: "oklch(0.7 0.18 25)",
+    reset_billing: "#EF4444",
     set_user_role: GOLD,
-    grant_license: "oklch(0.65 0.15 145)",
-    deactivate_code: "oklch(0.75 0.15 45)",
-    reactivate_code: "oklch(0.65 0.15 145)",
+    grant_license: "#4ADE80",
+    deactivate_code: "#E6CDAE",
+    reactivate_code: "#4ADE80",
   };
 
   return (
@@ -1210,7 +1210,7 @@ function FounderControlTab() {
       <div className="rounded-xl p-6 border" style={{ background: CARD, borderColor: BORDER }}>
         <div className="flex items-center gap-3 mb-4">
           <Crown className="w-6 h-6" style={{ color: GOLD }} />
-          <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+          <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
             Founder Control
           </h2>
         </div>
@@ -1222,19 +1222,19 @@ function FounderControlTab() {
         {/* Capacity bar */}
         <div className="mb-2 flex items-center justify-between text-xs" style={{ color: SUBTEXT }}>
           <span>Founder Seats Filled</span>
-          <span style={{ color: slotsLeft === 0 ? "oklch(0.65 0.18 25)" : GOLD }}>{count} / {max}</span>
+          <span style={{ color: slotsLeft === 0 ? "#EF4444" : GOLD }}>{count} / {max}</span>
         </div>
-        <div className="h-2 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: "#2C3438" }}>
           <div
             className="h-full rounded-full transition-all"
             style={{
               width: `${(count / max) * 100}%`,
-              background: slotsLeft === 0 ? "oklch(0.65 0.18 25)" : GOLD,
+              background: slotsLeft === 0 ? "#EF4444" : GOLD,
             }}
           />
         </div>
         {slotsLeft === 0 && (
-          <p className="text-xs mt-2" style={{ color: "oklch(0.65 0.18 25)" }}>
+          <p className="text-xs mt-2" style={{ color: "#EF4444" }}>
             All founder seats are filled. Revoke a founder before granting a new one.
           </p>
         )}
@@ -1258,20 +1258,20 @@ function FounderControlTab() {
           <div className="space-y-2">
             {(foundersData?.founders ?? []).map((f: any) => (
               <div key={f.id} className="flex items-center justify-between gap-4 rounded-xl p-4 border"
-                style={{ background: "oklch(0.22 0.015 200)", borderColor: "oklch(0.25 0.12 85 / 0.4)" }}>
+                style={{ background: "#2C3438", borderColor: "rgba(122,90,30,0.4)" }}>
                 <div className="flex items-center gap-3 min-w-0">
                   {f.profilePhotoUrl ? (
                     <img src={f.profilePhotoUrl} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                      style={{ background: "oklch(0.25 0.12 85 / 0.3)" }}>
+                      style={{ background: "rgba(122,90,30,0.3)" }}>
                       <Crown className="w-4 h-4" style={{ color: GOLD }} />
                     </div>
                   )}
                   <div className="min-w-0">
                     <div className="font-medium truncate" style={{ color: TEXT }}>{f.name ?? "—"}</div>
                     {f.email && <div className="text-xs truncate" style={{ color: MUTED }}>{f.email}</div>}
-                    <div className="text-xs font-mono" style={{ color: "oklch(0.5 0.02 280)" }}>
+                    <div className="text-xs font-mono" style={{ color: "#3F4A50" }}>
                       ID: {f.id} · {f.songSlotsUsed ?? 0} works uploaded
                     </div>
                   </div>
@@ -1280,7 +1280,7 @@ function FounderControlTab() {
                   size="sm"
                   variant="outline"
                   className="shrink-0 flex items-center gap-1.5 text-xs"
-                  style={{ borderColor: "oklch(0.65 0.18 25 / 0.5)", color: "oklch(0.65 0.18 25)" }}
+                  style={{ borderColor: "rgba(239,68,68,0.5)", color: "#EF4444" }}
                   disabled={revokeFounder.isPending}
                   onClick={() => revokeFounder.mutate({ userId: f.id })}
                 >
@@ -1318,13 +1318,13 @@ function FounderControlTab() {
               const isFounder = founderIds.has(u.id);
               return (
                 <div key={u.id} className="flex items-center justify-between gap-4 rounded-xl p-4 border"
-                  style={{ background: CARD, borderColor: isFounder ? "oklch(0.25 0.12 85 / 0.4)" : BORDER }}>
+                  style={{ background: CARD, borderColor: isFounder ? "rgba(122,90,30,0.4)" : BORDER }}>
                   <div className="flex items-center gap-3 min-w-0">
                     {u.profilePhotoUrl ? (
                       <img src={u.profilePhotoUrl} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
                     ) : (
                       <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                        style={{ background: "oklch(0.2 0.02 280)" }}>
+                        style={{ background: "#2C3438" }}>
                         <Users className="w-4 h-4" style={{ color: MUTED }} />
                       </div>
                     )}
@@ -1335,19 +1335,19 @@ function FounderControlTab() {
                         </span>
                         {isFounder && (
                           <span className="text-xs px-1.5 py-0.5 rounded font-semibold"
-                            style={{ background: "oklch(0.25 0.12 85 / 0.3)", color: GOLD }}>
+                            style={{ background: "rgba(122,90,30,0.3)", color: GOLD }}>
                             Founder
                           </span>
                         )}
                         {u.role === "admin" && (
                           <span className="text-xs px-1.5 py-0.5 rounded font-semibold"
-                            style={{ background: "oklch(0.25 0.18 25 / 0.3)", color: "oklch(0.65 0.18 25)" }}>
+                            style={{ background: "rgba(239,68,68,0.3)", color: "#EF4444" }}>
                             Admin
                           </span>
                         )}
                       </div>
                       {u.email && <div className="text-xs truncate" style={{ color: MUTED }}>{u.email}</div>}
-                      <div className="text-xs font-mono" style={{ color: "oklch(0.5 0.02 280)" }}>
+                      <div className="text-xs font-mono" style={{ color: "#3F4A50" }}>
                         ID: {u.id} · {u.songSlotsUsed ?? 0}/{u.songSlotsTotal ?? 1} slots used
                       </div>
                     </div>
@@ -1357,7 +1357,7 @@ function FounderControlTab() {
                       size="sm"
                       variant="outline"
                       className="shrink-0 flex items-center gap-1.5 text-xs"
-                      style={{ borderColor: "oklch(0.65 0.18 25 / 0.5)", color: "oklch(0.65 0.18 25)" }}
+                      style={{ borderColor: "rgba(239,68,68,0.5)", color: "#EF4444" }}
                       disabled={revokeFounder.isPending}
                       onClick={() => revokeFounder.mutate({ userId: u.id })}
                     >
@@ -1395,11 +1395,11 @@ function FounderControlTab() {
 // ── Media Generation Tab ──────────────────────────────────────────────────────
 function MediaGenerationTab() {
   const [enqueueId, setEnqueueId] = useState("");
-  const FOUNDER_GOLD = "oklch(0.84 0.155 85)";
-  const GREEN = "oklch(0.65 0.18 145)";
-  const RED = "oklch(0.65 0.18 25)";
-  const YELLOW = "oklch(0.78 0.14 85)";
-  const BLUE = "oklch(0.65 0.18 230)";
+  const FOUNDER_GOLD = "#CBB183";
+  const GREEN = "#4ADE80";
+  const RED = "#EF4444";
+  const YELLOW = "#CBB183";
+  const BLUE = "#38BDF8";
 
   // Live pipeline stats — auto-refresh every 10s
   const statsQuery = trpc.admin.visualPipelineStats.useQuery(undefined, {
@@ -1502,7 +1502,7 @@ function MediaGenerationTab() {
               {completionPct}%
             </span>
           </div>
-          <div className="w-full rounded-full h-2" style={{ background: "oklch(0.15 0.015 280)" }}>
+          <div className="w-full rounded-full h-2" style={{ background: "#2C3438" }}>
             <div
               className="h-2 rounded-full transition-all duration-500"
               style={{
@@ -1555,7 +1555,7 @@ function MediaGenerationTab() {
               value={enqueueId}
               onChange={e => setEnqueueId(e.target.value)}
               className="h-8 text-xs w-28"
-              style={{ background: "oklch(0.15 0.015 280)", borderColor: BORDER, color: TEXT }}
+              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
             />
             <Button
               size="sm"
@@ -1573,14 +1573,14 @@ function MediaGenerationTab() {
 
       {/* Live job queue table */}
       <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "oklch(0.22 0.015 200)" }}>
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#2C3438" }}>
           <span className="text-xs font-semibold" style={{ color: TEXT }}>Recent Queue Jobs</span>
           <span className="text-xs" style={{ color: SUBTEXT }}>{jobs.length} shown · live</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr style={{ background: "oklch(0.09 0.01 280)", borderBottom: `1px solid ${BORDER}` }}>
+              <tr style={{ background: "#2C3438", borderBottom: `1px solid ${BORDER}` }}>
                 {["Job ID", "Song ID", "Title", "Status", "Priority", "Attempts", "Queued", "Completed"].map(h => (
                   <th key={h} className="px-3 py-2 text-left font-medium" style={{ color: SUBTEXT }}>{h}</th>
                 ))}
@@ -1597,7 +1597,7 @@ function MediaGenerationTab() {
                 <tr
                   key={job.id}
                   style={{
-                    background: i % 2 === 0 ? CARD : "oklch(0.10 0.012 280)",
+                    background: i % 2 === 0 ? CARD : "#2C3438",
                     borderBottom: `1px solid ${BORDER}`,
                   }}
                 >
@@ -1624,7 +1624,7 @@ function MediaGenerationTab() {
           </table>
         </div>
         {jobs.some(j => j.errorMessage) && (
-          <div className="px-4 py-3 space-y-1" style={{ background: "oklch(0.09 0.01 280)", borderTop: `1px solid ${BORDER}` }}>
+          <div className="px-4 py-3 space-y-1" style={{ background: "#2C3438", borderTop: `1px solid ${BORDER}` }}>
             <p className="text-xs font-semibold mb-1" style={{ color: RED }}>Error Details</p>
             {jobs.filter(j => j.errorMessage).map(j => (
               <p key={j.id} className="text-xs font-mono" style={{ color: RED }}>
@@ -1636,7 +1636,7 @@ function MediaGenerationTab() {
       </div>
 
       {/* Info footer */}
-      <div className="rounded-xl p-4" style={{ background: "oklch(0.22 0.015 200)", border: `1px solid ${BORDER}` }}>
+      <div className="rounded-xl p-4" style={{ background: "#2C3438", border: `1px solid ${BORDER}` }}>
         <div className="flex items-start gap-3">
           <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: GREEN }} />
           <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
@@ -1695,10 +1695,10 @@ function ModerationQueueEmbed() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Pending", key: "pending", color: "oklch(0.85 0.18 85)" },
+          { label: "Pending", key: "pending", color: "#E6CDAE" },
           { label: "Cleared", key: "reviewed_ok", color: GREEN },
           { label: "Removed", key: "removed_violation", color: RED },
-          { label: "Escalated", key: "escalated", color: "oklch(0.75 0.18 50)" },
+          { label: "Escalated", key: "escalated", color: "#E6CDAE" },
         ].map(({ label, key, color }) => (
           <div key={key} className="rounded-xl p-4 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
             <div className="text-2xl font-bold" style={{ color }}>{statMap[key] ?? 0}</div>
@@ -1714,7 +1714,7 @@ function ModerationQueueEmbed() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
           className="text-sm rounded-lg px-3 py-1.5 border"
-          style={{ background: CARD, borderColor: BORDER, color: "oklch(0.92 0.02 85)" }}
+          style={{ background: CARD, borderColor: BORDER, color: "#E6CDAE" }}
         >
           <option value="pending">Pending Review</option>
           <option value="reviewed_ok">Cleared</option>
@@ -1750,22 +1750,22 @@ function ModerationQueueEmbed() {
             const severity = REASON_SEVERITY[flag.reason] ?? "medium";
             const isExpanded = expandedId === flag.id;
             return (
-              <div key={flag.id} className="rounded-xl overflow-hidden" style={{ background: CARD, border: `1px solid ${severity === "critical" ? "oklch(0.45 0.18 25)" : BORDER}` }}>
+              <div key={flag.id} className="rounded-xl overflow-hidden" style={{ background: CARD, border: `1px solid ${severity === "critical" ? "#EF4444" : BORDER}` }}>
                 <button type="button" className="w-full text-left p-4 flex items-center gap-4" onClick={() => setExpandedId(isExpanded ? null : flag.id)}>
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: severity === "critical" ? RED : "oklch(0.85 0.18 85)" }} />
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: severity === "critical" ? RED : "#E6CDAE" }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: severity === "critical" ? "oklch(0.25 0.1 25)" : "oklch(0.18 0.05 280)", color: severity === "critical" ? RED : SUBTEXT }}>
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: severity === "critical" ? "#2C3438" : "#2C3438", color: severity === "critical" ? RED : SUBTEXT }}>
                         {REASON_LABELS[flag.reason] ?? flag.reason}
                       </span>
                       <span className="text-xs capitalize" style={{ color: SUBTEXT }}>{flag.workType}</span>
-                      {flag.workTitle && <span className="text-xs truncate max-w-xs" style={{ color: "oklch(0.75 0.02 280)" }}>"{flag.workTitle}"</span>}
+                      {flag.workTitle && <span className="text-xs truncate max-w-xs" style={{ color: "#DACAAA" }}>"{flag.workTitle}"</span>}
                     </div>
                     <div className="text-xs mt-1" style={{ color: SUBTEXT }}>
                       Reported by {flag.reporterName} · {new Date(flag.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded" style={{ background: "oklch(0.15 0.01 280)", color: flag.status === "pending" ? "oklch(0.85 0.18 85)" : flag.status === "reviewed_ok" ? GREEN : flag.status === "removed_violation" ? RED : "oklch(0.75 0.18 50)" }}>
+                  <span className="text-xs px-2 py-0.5 rounded" style={{ background: "#2C3438", color: flag.status === "pending" ? "#E6CDAE" : flag.status === "reviewed_ok" ? GREEN : flag.status === "removed_violation" ? RED : "#E6CDAE" }}>
                     {flag.status.replace("_", " ")}
                   </span>
                 </button>
@@ -1775,7 +1775,7 @@ function ModerationQueueEmbed() {
                     {flag.details && (
                       <div>
                         <p className="text-xs uppercase tracking-wider mb-1" style={{ color: SUBTEXT }}>Reporter's details</p>
-                        <p className="text-sm rounded p-3" style={{ background: "oklch(0.09 0.01 280)", color: "oklch(0.82 0.02 280)" }}>{flag.details}</p>
+                        <p className="text-sm rounded p-3" style={{ background: "#2C3438", color: "#DACAAA" }}>{flag.details}</p>
                       </div>
                     )}
                     <p className="text-xs" style={{ color: SUBTEXT }}>Work ID: {flag.workId}</p>
@@ -1787,16 +1787,16 @@ function ModerationQueueEmbed() {
                           onChange={(e) => setAdminNotes(prev => ({ ...prev, [flag.id]: e.target.value }))}
                           rows={2}
                           className="w-full text-sm rounded-lg px-3 py-2 resize-none border"
-                          style={{ background: "oklch(0.09 0.01 280)", borderColor: BORDER, color: "oklch(0.88 0.02 280)" }}
+                          style={{ background: "#2C3438", borderColor: BORDER, color: "#E6CDAE" }}
                         />
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "reviewed_ok", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: "oklch(0.25 0.08 145)", color: GREEN, border: `1px solid oklch(0.35 0.1 145)` }}>
+                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "reviewed_ok", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: "#2C3438", color: GREEN, border: `1px solid #2C3438` }}>
                             ✓ Clear
                           </Button>
-                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "removed_violation", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: "oklch(0.22 0.08 25)", color: RED, border: `1px solid oklch(0.35 0.1 25)` }}>
+                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "removed_violation", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: "#2C3438", color: RED, border: `1px solid #2C3438` }}>
                             ✗ Remove
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "escalated", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ borderColor: "oklch(0.35 0.1 50)", color: "oklch(0.75 0.18 50)" }}>
+                          <Button size="sm" variant="outline" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "escalated", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ borderColor: "#2C3438", color: "#E6CDAE" }}>
                             Escalate
                           </Button>
                         </div>
@@ -1853,9 +1853,9 @@ function DataRightsTab() {
   });
 
   const stageColors: Record<string, string> = {
-    hosted: "oklch(0.65 0.18 50)",
-    migrating: "oklch(0.65 0.18 200)",
-    sovereign: "oklch(0.65 0.18 145)",
+    hosted: "#AA8E64",
+    migrating: "#4ADE80",
+    sovereign: "#4ADE80",
   };
 
   const stageLabels: Record<string, string> = {
@@ -1870,11 +1870,11 @@ function DataRightsTab() {
       <div className="rounded-xl border p-6" style={{ background: CARD, borderColor: BORDER }}>
         <div className="flex items-center gap-3 mb-4">
           <Trash2 className="w-5 h-5" style={{ color: RED }} />
-          <h2 className="text-lg font-bold" style={{ color: "oklch(0.95 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+          <h2 className="text-lg font-bold" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
             Data Deletion Requests
           </h2>
           {deletionRequests && deletionRequests.length > 0 && (
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.65 0.18 25 / 0.2)", color: RED, border: `1px solid oklch(0.65 0.18 25 / 0.4)` }}>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.2)", color: RED, border: `1px solid rgba(239,68,68,0.4)` }}>
               {deletionRequests.length} pending
             </span>
           )}
@@ -1894,7 +1894,7 @@ function DataRightsTab() {
         ) : (
           <div className="rounded-xl border overflow-hidden" style={{ borderColor: BORDER }}>
             <table className="w-full">
-              <thead style={{ background: "oklch(0.22 0.015 200)", borderBottom: `1px solid ${BORDER}` }}>
+              <thead style={{ background: "#2C3438", borderBottom: `1px solid ${BORDER}` }}>
                 <tr>
                   {["Creator", "Email", "Requested On", "Days Elapsed", "Action"].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: SUBTEXT }}>{h}</th>
@@ -1908,8 +1908,8 @@ function DataRightsTab() {
                   const isUrgent = daysElapsed >= 80;
                   return (
                     <tr key={req.id} style={{
-                      background: i % 2 === 0 ? "oklch(0.22 0.015 200)" : "oklch(0.11 0.015 280)",
-                      borderBottom: `1px solid oklch(0.30 0.015 200)`,
+                      background: i % 2 === 0 ? "#2C3438" : "#2C3438",
+                      borderBottom: `1px solid #2C3438`,
                     }}>
                       <td className="px-4 py-3 text-sm">
                         <div className="font-medium" style={{ color: TEXT }}>
@@ -1918,7 +1918,7 @@ function DataRightsTab() {
                         {req.artistHandle && req.name && (
                           <div className="text-xs mt-0.5" style={{ color: MUTED }}>{req.name}</div>
                         )}
-                        <div className="text-xs font-mono mt-0.5" style={{ color: "oklch(0.5 0.02 280)" }}>ID: {req.id}</div>
+                        <div className="text-xs font-mono mt-0.5" style={{ color: "#3F4A50" }}>ID: {req.id}</div>
                       </td>
                       <td className="px-4 py-3 text-sm" style={{ color: SUBTEXT }}>{req.email ?? "—"}</td>
                       <td className="px-4 py-3 text-sm" style={{ color: SUBTEXT }}>{formatDate(requestedAt)}</td>
@@ -1932,7 +1932,7 @@ function DataRightsTab() {
                           size="sm"
                           disabled={markProcessed.isPending}
                           onClick={() => markProcessed.mutate({ userId: req.id })}
-                          style={{ background: "oklch(0.25 0.08 145)", color: GREEN, border: `1px solid oklch(0.35 0.1 145)` }}
+                          style={{ background: "#2C3438", color: GREEN, border: `1px solid #2C3438` }}
                         >
                           {markProcessed.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
                           Mark Processed
@@ -1950,13 +1950,13 @@ function DataRightsTab() {
       {/* Section 2: Sovereign Migration Status */}
       <div className="rounded-xl border p-6" style={{ background: CARD, borderColor: BORDER }}>
         <div className="flex items-center gap-3 mb-4">
-          <Globe className="w-5 h-5" style={{ color: "oklch(0.65 0.18 200)" }} />
-          <h2 className="text-lg font-bold" style={{ color: "oklch(0.95 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+          <Globe className="w-5 h-5" style={{ color: "#4ADE80" }} />
+          <h2 className="text-lg font-bold" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
             Sovereign Infrastructure Migration
           </h2>
         </div>
         <p className="text-sm mb-6" style={{ color: SUBTEXT }}>
-          This status is displayed publicly on the <code className="text-xs px-1 py-0.5 rounded" style={{ background: "oklch(0.15 0.02 280)", color: GOLD }}>/privacy</code> page. Update it as the platform progresses toward sovereign infrastructure.
+          This status is displayed publicly on the <code className="text-xs px-1 py-0.5 rounded" style={{ background: "#2C3438", color: GOLD }}>/privacy</code> page. Update it as the platform progresses toward sovereign infrastructure.
         </p>
 
         {/* Current Status Display */}
@@ -1966,7 +1966,7 @@ function DataRightsTab() {
             <span className="text-sm" style={{ color: SUBTEXT }}>Loading current status…</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 mb-6 p-4 rounded-xl border" style={{ background: "oklch(0.22 0.015 200)", borderColor: BORDER }}>
+          <div className="flex items-center gap-3 mb-6 p-4 rounded-xl border" style={{ background: "#2C3438", borderColor: BORDER }}>
             <div className="w-3 h-3 rounded-full" style={{ background: stageColors[migrationData?.stage ?? "hosted"] }} />
             <div>
               <div className="text-sm font-semibold" style={{ color: TEXT }}>
@@ -2014,7 +2014,7 @@ function DataRightsTab() {
               value={migrationNotes}
               onChange={e => setMigrationNotes(e.target.value)}
               className="w-full text-sm rounded-lg px-3 py-2 resize-none border"
-              style={{ background: "oklch(0.09 0.01 280)", borderColor: BORDER, color: TEXT }}
+              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
             />
           </div>
 

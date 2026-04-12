@@ -122,7 +122,7 @@ export default function GiftModal({
   return (
     <div
       className="fixed inset-0 z-[10000] flex items-end justify-center"
-      style={{ background: "oklch(0 0 0 / 0.6)", backdropFilter: "blur(4px)" }}
+      style={{ background: "rgba(0,0,0,0.60)", backdropFilter: "blur(4px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Burst animation overlay */}
@@ -131,7 +131,7 @@ export default function GiftModal({
           className="fixed inset-0 pointer-events-none flex items-center justify-center z-[10001]"
           style={{ animation: "giftBurst 1.2s ease-out forwards" }}
         >
-          <span style={{ fontSize: "80px", filter: "drop-shadow(0 0 24px oklch(0.84 0.155 85 / 0.8))" }}>
+          <span style={{ fontSize: "80px", filter: "drop-shadow(0 0 24px rgba(203,177,131,0.75))" }}>
             {burstEmoji}
           </span>
         </div>
@@ -140,23 +140,23 @@ export default function GiftModal({
       <div
         className="w-full max-w-sm mx-4 mb-6 rounded-3xl overflow-hidden"
         style={{
-          background: "oklch(0.10 0.025 275)",
-          border: "1px solid oklch(0.84 0.155 85 / 0.20)",
-          boxShadow: "0 0 60px oklch(0.84 0.155 85 / 0.10), 0 24px 64px oklch(0 0 0 / 0.8)",
+          background: "#2C3438",
+          border: "1px solid rgba(203,177,131,0.2)",
+          boxShadow: "0 0 60px rgba(203,177,131,0.1), 0 24px 64px rgba(0,0,0,0.80)",
         }}
       >
         {/* Header */}
         <div
           className="px-5 pt-5 pb-4"
           style={{
-            background: "linear-gradient(180deg, oklch(0.14 0.04 275) 0%, transparent 100%)",
+            background: "linear-gradient(180deg, #2C3438 0%, transparent 100%)",
           }}
         >
           <div className="flex items-start justify-between">
             <div>
               <div
                 className="text-[11px] font-bold tracking-[0.2em] uppercase mb-1"
-                style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}
+                style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}
               >
                 Send a Gift
               </div>
@@ -165,7 +165,7 @@ export default function GiftModal({
             <button
               onClick={onClose}
               className="p-2 rounded-xl transition-all active:scale-90"
-              style={{ color: "oklch(0.40 0.03 280)" }}
+              style={{ color: "#3F4A50" }}
             >
               <X size={18} />
             </button>
@@ -175,15 +175,15 @@ export default function GiftModal({
           {tipsEnabled && (
             <div
               className="flex mt-4 rounded-xl p-1 gap-1"
-              style={{ background: "oklch(0.14 0.02 275)" }}
+              style={{ background: "#2C3438" }}
             >
               <button
                 onClick={() => setTab("appreciate")}
                 className="flex-1 py-2 rounded-lg text-[12px] font-heading tracking-wide transition-all"
                 style={{
-                  background: tab === "appreciate" ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
-                  color: tab === "appreciate" ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
-                  border: tab === "appreciate" ? "1px solid oklch(0.84 0.155 85 / 0.25)" : "1px solid transparent",
+                  background: tab === "appreciate" ? "rgba(203,177,131,0.12)" : "transparent",
+                  color: tab === "appreciate" ? "#CBB183" : "#AA8E64",
+                  border: tab === "appreciate" ? "1px solid rgba(203,177,131,0.22)" : "1px solid transparent",
                 }}
               >
                 ✨ Appreciate
@@ -192,9 +192,9 @@ export default function GiftModal({
                 onClick={() => setTab("tip")}
                 className="flex-1 py-2 rounded-lg text-[12px] font-heading tracking-wide transition-all"
                 style={{
-                  background: tab === "tip" ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
-                  color: tab === "tip" ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
-                  border: tab === "tip" ? "1px solid oklch(0.84 0.155 85 / 0.25)" : "1px solid transparent",
+                  background: tab === "tip" ? "rgba(203,177,131,0.12)" : "transparent",
+                  color: tab === "tip" ? "#CBB183" : "#AA8E64",
+                  border: tab === "tip" ? "1px solid rgba(203,177,131,0.22)" : "1px solid transparent",
                 }}
               >
                 💸 Tip
@@ -225,27 +225,27 @@ export default function GiftModal({
                     className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all active:scale-95"
                     style={{
                       background: isActive
-                        ? "oklch(0.84 0.155 85 / 0.12)"
-                        : "oklch(0.14 0.025 275)",
+                        ? "rgba(203,177,131,0.10)"
+                        : "#2C3438",
                       border: isActive
-                        ? "1px solid oklch(0.84 0.155 85 / 0.35)"
-                        : "1px solid oklch(0.20 0.02 275)",
+                        ? "1px solid rgba(203,177,131,0.32)"
+                        : "1px solid #2C3438",
                       boxShadow: isActive
-                        ? "0 0 16px oklch(0.84 0.155 85 / 0.10)"
+                        ? "0 0 16px rgba(203,177,131,0.1)"
                         : "none",
                     }}
                   >
                     <span style={{ fontSize: "28px", lineHeight: 1 }}>{emoji}</span>
                     <span
                       className="text-[10px] font-heading tracking-wide"
-                      style={{ color: isActive ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)" }}
+                      style={{ color: isActive ? "#CBB183" : "#3F4A50" }}
                     >
                       {label}
                     </span>
                     {count > 0 && (
                       <span
                         className="text-[9px] font-mono"
-                        style={{ color: "oklch(0.55 0.04 280)" }}
+                        style={{ color: "#3F4A50" }}
                       >
                         {count}
                       </span>
@@ -256,7 +256,7 @@ export default function GiftModal({
             </div>
 
             {!user && (
-              <p className="text-[11px] text-center" style={{ color: "oklch(0.40 0.03 280)" }}>
+              <p className="text-[11px] text-center" style={{ color: "#3F4A50" }}>
                 Sign in to send appreciation
               </p>
             )}
@@ -275,12 +275,12 @@ export default function GiftModal({
                   className="px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95"
                   style={{
                     background: !useCustom && selectedCents === cents
-                      ? "oklch(0.84 0.155 85)"
-                      : "oklch(0.30 0.015 200)",
+                      ? "#CBB183"
+                      : "#2C3438",
                     color: !useCustom && selectedCents === cents
                       ? "#2C3438"
-                      : "oklch(0.65 0.04 280)",
-                    border: `1px solid ${!useCustom && selectedCents === cents ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
+                      : "#AA8E64",
+                    border: `1px solid ${!useCustom && selectedCents === cents ? "#CBB183" : "#2C3438"}`,
                   }}
                 >
                   ${(cents / 100).toFixed(0)}
@@ -290,9 +290,9 @@ export default function GiftModal({
                 onClick={() => setUseCustom(true)}
                 className="px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95"
                 style={{
-                  background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.30 0.015 200)",
-                  color: useCustom ? "#2C3438" : "oklch(0.65 0.04 280)",
-                  border: `1px solid ${useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
+                  background: useCustom ? "#CBB183" : "#2C3438",
+                  color: useCustom ? "#2C3438" : "#AA8E64",
+                  border: `1px solid ${useCustom ? "#CBB183" : "#2C3438"}`,
                 }}
               >
                 Custom
@@ -302,7 +302,7 @@ export default function GiftModal({
             {useCustom && (
               <div
                 className="flex items-center gap-3 px-4 py-3 rounded-xl"
-                style={{ background: "oklch(0.14 0.02 275)", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}
+                style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.18)" }}
               >
                 <span className="text-white/50 text-sm font-mono">$</span>
                 <input
@@ -327,11 +327,11 @@ export default function GiftModal({
                 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98]"
               style={{
                 background: amountCents >= 100
-                  ? "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))"
-                  : "oklch(0.20 0.02 275)",
-                color: amountCents >= 100 ? "#2C3438" : "oklch(0.40 0.03 280)",
+                  ? "linear-gradient(135deg, #CBB183, #CBB183)"
+                  : "#2C3438",
+                color: amountCents >= 100 ? "#2C3438" : "#3F4A50",
                 fontFamily: "'Cinzel', serif",
-                boxShadow: amountCents >= 100 ? "0 4px 20px oklch(0.84 0.155 85 / 0.30)" : "none",
+                boxShadow: amountCents >= 100 ? "0 4px 20px rgba(203,177,131,0.3)" : "none",
               }}
             >
               {tipMutation.isPending ? (
@@ -344,7 +344,7 @@ export default function GiftModal({
               )}
             </button>
 
-            <p className="text-[10px] text-center" style={{ color: "oklch(0.35 0.02 280)" }}>
+            <p className="text-[10px] text-center" style={{ color: "#2C3438" }}>
               Goes directly to the creator. Living Nexus takes a small platform fee.
             </p>
           </div>

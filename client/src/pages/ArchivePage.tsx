@@ -26,12 +26,12 @@ import ExternalPlaylistsTab from "@/components/ExternalPlaylistsTab";
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
   Published: { bg: "color-mix(in srgb, var(--lnx-green) 15%, transparent)",  text: "var(--lnx-green-soft)"  },
   Draft:     { bg: "color-mix(in srgb, var(--lnx-orange) 15%, transparent)", text: "var(--lnx-orange-soft)" },
-  Unlisted:  { bg: "oklch(0.65 0.2 300 / 0.18)",                             text: "oklch(0.65 0.2 300)"   },
+  Unlisted:  { bg: "rgba(203,177,131,0.18)",                             text: "#CBB183"   },
   Deleted:   { bg: "color-mix(in srgb, var(--lnx-red) 15%, transparent)",    text: "var(--lnx-red-soft)"   },
 };
 
 function StatusTag({ status }: { status: string }) {
-  const s = STATUS_STYLES[status] ?? { bg: "oklch(0.5 0.03 280 / 0.18)", text: "oklch(0.5 0.03 280)" };
+  const s = STATUS_STYLES[status] ?? { bg: "rgba(63,74,80,0.18)", text: "#AA8E64" };
   return (
     <span
       className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold"
@@ -73,13 +73,13 @@ function ConfirmDeleteModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="font-bold text-lg mb-1" style={{ color: "oklch(0.75 0.18 25)", fontFamily: "'Cinzel', serif" }}>
+        <p className="font-bold text-lg mb-1" style={{ color: "#EF4444", fontFamily: "'Cinzel', serif" }}>
           Delete Track
         </p>
         <p className="text-sm mb-1" style={{ color: "#E2E8F0" }}>
           Are you sure you want to delete:
         </p>
-        <p className="font-semibold mb-4 truncate" style={{ color: "oklch(0.95 0.02 85)" }}>
+        <p className="font-semibold mb-4 truncate" style={{ color: "#E6CDAE" }}>
           "{song.title}"
         </p>
 
@@ -87,19 +87,19 @@ function ConfirmDeleteModal({
         <div
           className="rounded-xl p-3 mb-5"
           style={{
-            background: "oklch(0.84 0.155 85 / 0.08)",
-            border: "1px solid oklch(0.84 0.155 85 / 0.25)",
+            background: "rgba(230,205,174,0.08)",
+            border: "1px solid rgba(203,177,131,0.22)",
           }}
         >
           <div className="flex items-center gap-1.5 mb-1">
-            <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "oklch(0.84 0.155 85)" }} />
-            <p className="text-xs font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
+            <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#CBB183" }} />
+            <p className="text-xs font-bold" style={{ color: "#CBB183" }}>
               WID Preserved
             </p>
           </div>
           <p className="text-xs leading-relaxed" style={{ color: "#E2E8F0" }}>
             Your Witness ID{" "}
-            <span className="font-mono text-[10px]" style={{ color: "oklch(0.84 0.155 85)" }}>
+            <span className="font-mono text-[10px]" style={{ color: "#CBB183" }}>
               {song.witnessId}
             </span>{" "}
             remains on record permanently. The cryptographic proof of origin is never deleted — only the track is removed from public view.
@@ -114,7 +114,7 @@ function ConfirmDeleteModal({
             style={{
               background: "color-mix(in srgb, var(--lnx-red) 20%, transparent)",
               border: "1px solid color-mix(in srgb, var(--lnx-red) 50%, transparent)",
-              color: "oklch(0.75 0.18 25)",
+              color: "#EF4444",
             }}
           >
             {isPending ? "Deleting…" : "Delete Track"}
@@ -337,7 +337,7 @@ export default function ArchivePage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#2C3438" }}>
         <div className="w-8 h-8 rounded-full border-2 animate-spin"
-          style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
+          style={{ borderColor: "#CBB183", borderTopColor: "transparent" }} />
       </div>
     );
   }
@@ -353,17 +353,17 @@ export default function ArchivePage() {
         {/* ── Breadcrumb ──────────────────────────────────────────── */}
         <nav className="flex items-center gap-1.5 text-xs mb-5" style={{ color: "#E2E8F0" }}>
           <Link href="/dashboard">
-            <span className="hover:underline cursor-pointer" style={{ color: "oklch(0.84 0.155 85)" }}>Dashboard</span>
+            <span className="hover:underline cursor-pointer" style={{ color: "#CBB183" }}>Dashboard</span>
           </Link>
           <span>/</span>
-          <span style={{ color: "oklch(0.95 0.02 85)" }}>Archive</span>
+          <span style={{ color: "#E6CDAE" }}>Archive</span>
         </nav>
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold"
-              style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+              style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
               LNA — Archive
             </h1>
             <p className="text-sm mt-1" style={{ color: "#E2E8F0" }}>
@@ -372,7 +372,7 @@ export default function ArchivePage() {
           </div>
           <div className="flex items-center gap-2">
             <Link href="/upload">
-              <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+              <Button size="sm" style={{ background: "#CBB183", color: "#E6CDAE" }}>
                 <Upload className="w-3 h-3 mr-1" /> Upload New
               </Button>
             </Link>
@@ -391,50 +391,50 @@ export default function ArchivePage() {
               <div
                 className="flex items-center gap-3 mb-6 px-4 py-3 rounded-xl border cursor-pointer hover:border-amber-500/50 transition-colors"
                 style={{
-                  background: isFull ? "oklch(0.12 0.04 25 / 0.4)" : isNear ? "oklch(0.12 0.04 85 / 0.3)" : "oklch(0.125 0.028 52)",
-                  borderColor: isFull ? "oklch(0.55 0.2 25 / 0.4)" : isNear ? "oklch(0.75 0.15 85 / 0.4)" : "oklch(0.3 0.03 280 / 0.4)",
+                  background: isFull ? "rgba(44,52,56,0.4)" : isNear ? "rgba(44,52,56,0.3)" : "#2C3438",
+                  borderColor: isFull ? "rgba(239,68,68,0.4)" : isNear ? "rgba(203,177,131,0.4)" : "rgba(44,52,56,0.4)",
                 }}
               >
                 {isFull ? (
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.65 0.2 25)" }} />
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: "#EF4444" }} />
                 ) : (
-                  <Layers className="w-4 h-4 flex-shrink-0" style={{ color: "oklch(0.75 0.15 85)" }} />
+                  <Layers className="w-4 h-4 flex-shrink-0" style={{ color: "#CBB183" }} />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium" style={{ color: isFull ? "oklch(0.65 0.2 25)" : isNear ? "oklch(0.82 0.15 85)" : "oklch(0.75 0.03 280)" }}>
+                    <span className="text-xs font-medium" style={{ color: isFull ? "#EF4444" : isNear ? "#E6CDAE" : "#DACAAA" }}>
                       {isFull ? "Archive Full" : isNear ? "Approaching Slot Limit" : "Archive Slots"}
                     </span>
-                    <span className="text-xs" style={{ color: "oklch(0.65 0.03 280)" }}>
+                    <span className="text-xs" style={{ color: "#AA8E64" }}>
                       {nonDeletedCount} / {slotsTotal}
                     </span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full" style={{ background: "oklch(0.2 0.02 280)" }}>
+                  <div className="w-full h-1.5 rounded-full" style={{ background: "#2C3438" }}>
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
                         width: `${Math.min(slotPct, 100)}%`,
-                        background: isFull ? "oklch(0.55 0.2 25)" : isNear ? "oklch(0.75 0.15 85)" : "oklch(0.65 0.15 150)",
+                        background: isFull ? "#EF4444" : isNear ? "#CBB183" : "#4ADE80",
                       }}
                     />
                   </div>
                 </div>
-                <span className="text-xs flex-shrink-0" style={{ color: "oklch(0.55 0.03 280)" }}>Manage →</span>
+                <span className="text-xs flex-shrink-0" style={{ color: "#AA8E64" }}>Manage →</span>
               </div>
             </Link>
           );
         })()}
 
         {/* ── Tab switcher ───────────────────────────────────────── */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "oklch(0.125 0.028 52)" }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "#2C3438" }}>
           {(["tracks", "lists", "external"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
               style={activeTab === tab
-                ? { background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }
-                : { color: "oklch(0.6 0.03 280)" }}
+                ? { background: "#CBB183", color: "#E6CDAE" }
+                : { color: "#AA8E64" }}
             >
               {tab === "tracks" && <><Music size={13} /> My Tracks</>}
               {tab === "lists"  && <><ListMusic size={13} /> My Lists</>}
@@ -458,8 +458,8 @@ export default function ArchivePage() {
                 onClick={() => setBatchMode(b => !b)}
                 className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-all"
                 style={batchMode
-                  ? { background: "oklch(0.84 0.155 85 / 0.15)", color: "#CBB183", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }
-                  : { color: "oklch(0.5 0.03 280)", border: "1px solid #CBB183" }
+                  ? { background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.28)" }
+                  : { color: "#AA8E64", border: "1px solid #CBB183" }
                 }
               >
                 <CheckSquare className="w-3 h-3" />
@@ -470,7 +470,7 @@ export default function ArchivePage() {
                   <button
                     onClick={selectAll}
                     className="text-xs px-2 py-1 rounded-lg transition-all"
-                    style={{ color: "oklch(0.5 0.03 280)", border: "1px solid #CBB183" }}
+                    style={{ color: "#AA8E64", border: "1px solid #CBB183" }}
                   >
                     All
                   </button>
@@ -478,7 +478,7 @@ export default function ArchivePage() {
                     <button
                       onClick={clearSelection}
                       className="text-xs px-2 py-1 rounded-lg transition-all"
-                      style={{ color: "oklch(0.5 0.03 280)", border: "1px solid #CBB183" }}
+                      style={{ color: "#AA8E64", border: "1px solid #CBB183" }}
                     >
                       Clear ({selectedIds.size})
                     </button>
@@ -488,7 +488,7 @@ export default function ArchivePage() {
             </div>
             {/* Right: drag hint */}
             {!batchMode && (
-              <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
+              <p className="text-xs" style={{ color: "#AA8E64" }}>
                 Drag <GripVertical className="inline w-3 h-3" /> to reorder
               </p>
             )}
@@ -500,7 +500,7 @@ export default function ArchivePage() {
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-16 rounded-xl animate-pulse"
-                style={{ background: "oklch(0.125 0.028 52)" }} />
+                style={{ background: "#2C3438" }} />
             ))}
           </div>
         )}
@@ -508,13 +508,13 @@ export default function ArchivePage() {
         {/* ── Empty state ────────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length === 0 && (
           <div className="text-center py-20 rounded-xl"
-            style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
-            <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
+            style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+            <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
             <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>
               You have not uploaded any tracks yet.
             </p>
             <Link href="/upload">
-              <Button style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+              <Button style={{ background: "#CBB183", color: "#E6CDAE" }}>
                 Upload Your First Track
               </Button>
             </Link>
@@ -546,10 +546,10 @@ export default function ArchivePage() {
                   className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:brightness-110"
                   style={{
                     background: isSelected
-                      ? "oklch(0.84 0.155 85 / 0.08)"
-                      : isDeleted ? "oklch(0.09 0.02 265)" : "oklch(0.125 0.028 52)",
+                      ? "rgba(230,205,174,0.08)"
+                      : isDeleted ? "#2C3438" : "#2C3438",
                     border: isSelected
-                      ? "1px solid oklch(0.84 0.155 85 / 0.35)"
+                      ? "1px solid rgba(203,177,131,0.32)"
                       : `1px solid ${isDeleted ? "color-mix(in srgb, var(--lnx-red) 20%, transparent)" : "#CBB183"}`,
                     cursor: batchMode ? (isDeleted ? "default" : "pointer") : (hasAudio && !isDeleted ? "pointer" : "default"),
                     opacity: isDeleted ? 0.6 : 1,
@@ -563,7 +563,7 @@ export default function ArchivePage() {
                     >
                       {isSelected
                         ? <CheckSquare className="w-4 h-4" style={{ color: "#CBB183" }} />
-                        : <Square className="w-4 h-4" style={{ color: "oklch(0.4 0.02 280)" }} />
+                        : <Square className="w-4 h-4" style={{ color: "#3F4A50" }} />
                       }
                     </div>
                   ) : (
@@ -572,38 +572,38 @@ export default function ArchivePage() {
                       onClick={(e) => e.stopPropagation()}
                       title="Drag to reorder"
                     >
-                      <GripVertical className="w-4 h-4" style={{ color: "oklch(0.4 0.02 280)" }} />
+                      <GripVertical className="w-4 h-4" style={{ color: "#3F4A50" }} />
                     </div>
                   )}
 
                   {/* Track number */}
                   <span
                     className="text-xs w-5 text-center flex-shrink-0 font-mono tabular-nums"
-                    style={{ color: "oklch(0.45 0.03 280)" }}
+                    style={{ color: "#AA8E64" }}
                   >
                     {idx + 1}
                   </span>
 
                   {/* Cover art */}
                   <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
-                    style={{ background: "oklch(0.11 0.025 270)" }}>
+                    style={{ background: "#2C3438" }}>
                     {song.coverArtUrl
                       ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover"
                           style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-                      : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
+                      : <Music className="w-4 h-4 opacity-40" style={{ color: "#CBB183" }} />}
                   </div>
 
                   {/* Title + WID + genre */}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate"
-                      style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+                      style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                       {song.title}
                     </p>
                     {/* WID in monospace — always shown if present */}
                     {song.witnessId && (
                       <p
                         className="font-mono text-[10px] truncate mt-0.5 tracking-tight"
-                        style={{ color: "oklch(0.72 0.12 82 / 0.65)" }}
+                        style={{ color: "rgba(203,177,131,0.65)" }}
                         title={`Witness ID: ${song.witnessId}`}
                       >
                         {song.witnessId}
@@ -633,7 +633,7 @@ export default function ArchivePage() {
                       {/* Play indicator */}
                       {hasAudio && !isDeleted && (
                         <div className="w-7 h-7 rounded-full flex items-center justify-center"
-                          style={{ color: "oklch(0.84 0.155 85)" }} title="Click row to play">
+                          style={{ color: "#CBB183" }} title="Click row to play">
                           <Play className="w-3 h-3" />
                         </div>
                       )}
@@ -645,7 +645,7 @@ export default function ArchivePage() {
                             className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
                             title="View song page"
                           >
-                            <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                            <ExternalLink className="w-3 h-3" style={{ color: "#CBB183" }} />
                           </button>
                         </Link>
                       )}
@@ -674,23 +674,23 @@ export default function ArchivePage() {
                           none: {
                             icon: <Lock className="w-3 h-3" />,
                             label: "No DL",
-                            bg: "oklch(0.18 0.015 280 / 0.6)",
-                            color: "oklch(0.72 0.04 280)",
-                            border: "1px solid oklch(0.32 0.02 280)",
+                            bg: "rgba(44,52,56,0.6)",
+                            color: "#DACAAA",
+                            border: "1px solid #2C3438",
                           },
                           free: {
                             icon: <Download className="w-3 h-3" />,
                             label: "Free DL",
-                            bg: "oklch(0.65 0.18 145 / 0.12)",
-                            color: "oklch(0.65 0.18 145)",
-                            border: "1px solid oklch(0.65 0.18 145 / 0.35)",
+                            bg: "rgba(74,222,128,0.12)",
+                            color: "#4ADE80",
+                            border: "1px solid rgba(74,222,128,0.35)",
                           },
                           tipped: {
                             icon: <Coins className="w-3 h-3" />,
                             label: "Tip DL",
-                            bg: "oklch(0.84 0.155 85 / 0.12)",
-                            color: "oklch(0.84 0.155 85)",
-                            border: "1px solid oklch(0.84 0.155 85 / 0.35)",
+                            bg: "rgba(203,177,131,0.10)",
+                            color: "#CBB183",
+                            border: "1px solid rgba(203,177,131,0.32)",
                           },
                         };
                         const cfg = dlConfig[dlPerm] ?? dlConfig.none;
@@ -719,8 +719,8 @@ export default function ArchivePage() {
                           title={isPublished ? "Unpublish (set to Draft)" : "Publish"}
                           className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all disabled:opacity-50"
                           style={isPublished
-                            ? { background: "oklch(0.65 0.18 145 / 0.15)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.35)" }
-                            : { background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.35)" }
+                            ? { background: "rgba(74,222,128,0.15)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.35)" }
+                            : { background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }
                           }
                         >
                           {isPending ? (

@@ -75,7 +75,7 @@ function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
-        style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
+        style={{ borderColor: "#CBB183", borderTopColor: "transparent" }} />
     </div>
   );
 }
@@ -221,9 +221,9 @@ export default function App() {
               theme="dark"
               toastOptions={{
                 style: {
-                  background: "oklch(0.095 0.028 275)",
-                  border: "1px solid oklch(1 0 0 / 12%)",
-                  color: "oklch(0.94 0.006 280)",
+                  background: "#2C3438",
+                  border: "1px solid rgba(203,177,131,0.14)",
+                  color: "#E6CDAE",
                   fontFamily: "'DM Sans', sans-serif",
                 },
               }}

@@ -62,8 +62,8 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           top: "50%",
           left: open ? `${PANEL_WIDTH}px` : "0px",
           transform: "translateY(-50%)",
-          background: "oklch(0.10 0.018 280 / 0.95)",
-          border: "1px solid oklch(0.28 0.04 270 / 50%)",
+          background: "rgba(44,52,56,0.95)",
+          border: "1px solid rgba(44,52,56,0.5)",
           borderLeft: "none",
           borderRadius: "0 8px 8px 0",
           padding: "12px 6px",
@@ -80,7 +80,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
         />
         <span
           className="text-[9px] font-heading tracking-[0.12em] uppercase"
-          style={{ color: open ? "oklch(0.84 0.155 85)" : "oklch(0.50 0.03 280)" }}
+          style={{ color: open ? "#CBB183" : "#AA8E64" }}
         >
           Live
         </span>
@@ -94,8 +94,8 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           left: 0,
           width: `${PANEL_WIDTH}px`,
           bottom: "72px",
-          background: "oklch(0.09 0.018 280 / 0.97)",
-          borderRight: "1px solid oklch(0.28 0.04 270 / 50%)",
+          background: "rgba(44,52,56,0.97)",
+          borderRight: "1px solid rgba(44,52,56,0.5)",
           backdropFilter: "blur(16px)",
           transform: open ? "translateX(0)" : `translateX(-${PANEL_WIDTH}px)`,
           transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
@@ -104,25 +104,25 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-          style={{ borderBottom: "1px solid oklch(0.30 0.04 60 / 35%)" }}
+          style={{ borderBottom: "1px solid rgba(44,52,56,0.35)" }}
         >
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#ef4444", animation: "pulse 1.5s infinite" }} />
-            <span className="text-[10px] font-heading tracking-[0.12em] uppercase" style={{ color: "oklch(0.75 0.12 85 / 0.8)" }}>
+            <span className="text-[10px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(203,177,131,0.8)" }}>
               Live Activity
             </span>
           </div>
           <button
             onClick={onToggle}
             className="p-1 rounded transition-all"
-            style={{ color: "oklch(0.45 0.02 280)" }}
+            style={{ color: "#3F4A50" }}
           >
             <X size={14} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-shrink-0" style={{ borderBottom: "1px solid oklch(0.28 0.04 270 / 30%)" }}>
+        <div className="flex flex-shrink-0" style={{ borderBottom: "1px solid rgba(44,52,56,0.3)" }}>
           {([
             { key: "playing", label: "Playing", icon: Music },
             { key: "tips",    label: "Tips",    icon: Zap    },
@@ -133,8 +133,8 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 transition-all"
               style={{
                 fontSize: "10px", fontWeight: 600,
-                color: tab === t.key ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.02 280)",
-                borderBottom: tab === t.key ? "2px solid oklch(0.84 0.155 85)" : "2px solid transparent",
+                color: tab === t.key ? "#CBB183" : "#3F4A50",
+                borderBottom: tab === t.key ? "2px solid #CBB183" : "2px solid transparent",
               }}
             >
               <t.icon size={11} />
@@ -153,17 +153,17 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
               {currentTrack && (
                 <>
                   <div className="px-4 py-1.5">
-                    <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "oklch(0.45 0.02 280)" }}>
+                    <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "#3F4A50" }}>
                       Your Session
                     </span>
                   </div>
                   <div
                     className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-all"
-                    style={{ background: "oklch(0.80 0.145 82 / 0.06)" }}
+                    style={{ background: "rgba(203,177,131,0.06)" }}
                   >
                     <div
                       className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"
-                      style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid oklch(0.30 0.04 60 / 35%)" }}
+                      style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid rgba(44,52,56,0.35)" }}
                     >
                       {currentTrack.artUrl
                         ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover rounded-lg" />
@@ -171,7 +171,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                           <div className="flex gap-0.5 items-end h-3.5">
                             {[0, 1, 2].map(i => (
                               <div key={i} className="w-0.5 rounded-sm" style={{
-                                background: "#CBB183",
+                                background: "#3F4A50",
                                 height: `${[8, 14, 10][i]}px`,
                                 animationName: "bar-bounce",
                                 animationDuration: "0.8s",
@@ -186,13 +186,13 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                       }
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-semibold truncate" style={{ color: "oklch(0.90 0.02 280)" }}>{currentTrack.title}</div>
-                      <div className="text-[10px] truncate" style={{ color: "oklch(0.55 0.02 280)" }}>{currentTrack.artist}</div>
+                      <div className="text-[11px] font-semibold truncate" style={{ color: "#E6CDAE" }}>{currentTrack.title}</div>
+                      <div className="text-[10px] truncate" style={{ color: "#3F4A50" }}>{currentTrack.artist}</div>
                     </div>
                     <div className="flex gap-0.5 items-end h-3" style={{ flexShrink: 0 }}>
                       {[0, 1, 2].map(i => (
                         <div key={i} className="w-0.5 rounded-sm" style={{
-                          background: "#CBB183",
+                          background: "#3F4A50",
                           height: `${[6, 12, 8][i]}px`,
                           animationName: state.isPlaying ? "bar-bounce" : "none",
                           animationDuration: "0.8s",
@@ -204,13 +204,13 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                       ))}
                     </div>
                   </div>
-                  <div className="mx-4 my-1" style={{ height: "1px", background: "oklch(0.28 0.04 270 / 30%)" }} />
+                  <div className="mx-4 my-1" style={{ height: "1px", background: "rgba(44,52,56,0.3)" }} />
                 </>
               )}
 
               {/* Recent public tracks */}
               <div className="px-4 py-1.5">
-                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "oklch(0.45 0.02 280)" }}>
+                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "#3F4A50" }}>
                   Recently Registered
                 </span>
               </div>
@@ -222,30 +222,30 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                   key={s.id}
                   className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all"
                   onClick={() => navigate(`/song/${s.id}`)}
-                  style={{ borderBottom: "1px solid oklch(0.28 0.04 270 / 15%)" }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "oklch(0.14 0.02 280 / 0.6)"}
+                  style={{ borderBottom: "1px solid rgba(44,52,56,0.15)" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(44,52,56,0.6)"}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
                 >
                   <div
                     className="w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden"
-                    style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid oklch(0.28 0.04 270 / 30%)" }}
+                    style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid rgba(44,52,56,0.3)" }}
                   >
                     {s.coverArtUrl
                       ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover rounded-md" />
-                      : <Music size={12} style={{ color: "oklch(0.55 0.02 280)" }} />
+                      : <Music size={12} style={{ color: "#3F4A50" }} />
                     }
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-medium truncate" style={{ color: "oklch(0.85 0.02 280)" }}>{s.title}</div>
-                    <div className="text-[9px] truncate" style={{ color: "oklch(0.50 0.02 280)" }}>{c.name || c.artistHandle || "Unknown"}</div>
+                    <div className="text-[11px] font-medium truncate" style={{ color: "#DACAAA" }}>{s.title}</div>
+                    <div className="text-[9px] truncate" style={{ color: "#3F4A50" }}>{c.name || c.artistHandle || "Unknown"}</div>
                   </div>
                 </div>
                 );
               })}
               {(!recentSongs || recentSongs.length === 0) && (
                 <div className="px-4 py-6 text-center">
-                  <Music size={20} style={{ color: "oklch(0.30 0.02 280)", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "oklch(0.40 0.02 280)" }}>No tracks yet</div>
+                  <Music size={20} style={{ color: "#2C3438", margin: "0 auto 8px" }} />
+                  <div className="text-[11px]" style={{ color: "#3F4A50" }}>No tracks yet</div>
                 </div>
               )}
             </div>
@@ -255,7 +255,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           {tab === "tips" && (
             <div className="py-2">
               <div className="px-4 py-1.5">
-                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "oklch(0.45 0.02 280)" }}>
+                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "#3F4A50" }}>
                   Recent Tips
                 </span>
               </div>
@@ -263,25 +263,25 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                 <div
                   key={t.id}
                   className="flex items-start gap-3 px-4 py-2.5 transition-all"
-                  style={{ borderBottom: "1px solid oklch(0.28 0.04 270 / 15%)" }}
+                  style={{ borderBottom: "1px solid rgba(44,52,56,0.15)" }}
                 >
                   <div
                     className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                    style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "#CBB183" }}
+                    style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183" }}
                   >
                     {(t.fanName || "?").charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[11px]" style={{ color: "oklch(0.80 0.02 280)" }}>
-                      <span style={{ color: "oklch(0.84 0.155 85 / 0.9)", fontWeight: 600 }}>@{t.fanName || "fan"}</span>
+                    <div className="text-[11px]" style={{ color: "#DACAAA" }}>
+                      <span style={{ color: "rgba(230,205,174,0.9)", fontWeight: 600 }}>@{t.fanName || "fan"}</span>
                       {" tipped "}
-                      <span style={{ color: "oklch(0.80 0.02 280)", fontWeight: 500 }}>{t.creatorName}</span>
+                      <span style={{ color: "#DACAAA", fontWeight: 500 }}>{t.creatorName}</span>
                     </div>
-                    <div className="text-[10px] mt-0.5" style={{ color: "oklch(0.55 0.02 280)" }}>
+                    <div className="text-[10px] mt-0.5" style={{ color: "#3F4A50" }}>
                       {formatAmount(t.amountCents)} · "{t.songTitle}"
                     </div>
                     {t.createdAt && (
-                      <div className="text-[9px] mt-0.5" style={{ color: "oklch(0.40 0.02 280)" }}>
+                      <div className="text-[9px] mt-0.5" style={{ color: "#3F4A50" }}>
                         {timeAgo(new Date(t.createdAt).getTime())}
                       </div>
                     )}
@@ -292,9 +292,9 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                 </div>
               )) : (
                 <div className="px-4 py-6 text-center">
-                  <Zap size={20} style={{ color: "oklch(0.30 0.02 280)", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "oklch(0.40 0.02 280)" }}>No tips yet today</div>
-                  <div className="text-[10px] mt-1" style={{ color: "oklch(0.35 0.02 280)" }}>Be the first to support a creator</div>
+                  <Zap size={20} style={{ color: "#2C3438", margin: "0 auto 8px" }} />
+                  <div className="text-[11px]" style={{ color: "#3F4A50" }}>No tips yet today</div>
+                  <div className="text-[10px] mt-1" style={{ color: "#2C3438" }}>Be the first to support a creator</div>
                 </div>
               )}
             </div>

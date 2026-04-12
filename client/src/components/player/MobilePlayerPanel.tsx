@@ -339,10 +339,10 @@ export default function MobilePlayerPanel() {
           paddingTop: "10px",
           paddingBottom: "10px",
           borderRadius: "10px 0 0 10px",
-          background: "oklch(0.14 0.025 275)",
-          border: "1px solid oklch(0.22 0.02 275)",
+          background: "#2C3438",
+          border: "1px solid #2C3438",
           borderRight: "none",
-          boxShadow: "-4px 0 24px oklch(0 0 0 / 0.5), -2px 0 8px oklch(0.55 0.22 295 / 0.15)",
+          boxShadow: "-4px 0 24px rgba(0,0,0,0.50), -2px 0 8px rgba(203,177,131,0.15)",
           touchAction: "none",
           userSelect: "none",
         }}
@@ -350,7 +350,7 @@ export default function MobilePlayerPanel() {
         {/* Art thumbnail — visual only, no click */}
         <div
           className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center pointer-events-none"
-          style={{ background: currentTrack?.bg || "oklch(0.18 0.04 275)" }}
+          style={{ background: currentTrack?.bg || "#2C3438" }}
         >
           {currentTrack?.artUrl && currentTrack.artType !== "video" ? (
             <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover"
@@ -366,7 +366,7 @@ export default function MobilePlayerPanel() {
           <div className="flex items-end gap-[2px] h-3 pointer-events-none">
             {[0, 1, 2].map(i => (
               <div key={i} className="w-[3px] rounded-full"
-                style={{ background: "#CBB183", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
+                style={{ background: "#3F4A50", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
             ))}
           </div>
         )}
@@ -392,7 +392,7 @@ export default function MobilePlayerPanel() {
           className="md:hidden fixed z-[34]"
           style={{
             top: 0, left: 0, right: 0, bottom: "68px",
-            background: "oklch(0 0 0 / 0.55)",
+            background: "rgba(0,0,0,0.55)",
             backdropFilter: "blur(2px)",
           }}
           onClick={closeNowPlayingPanel}
@@ -412,8 +412,8 @@ export default function MobilePlayerPanel() {
           left: 0,
           right: 0,
           bottom: "68px",
-          background: "oklch(0.07 0.02 275)",
-          boxShadow: "0 -8px 48px oklch(0 0 0 / 0.8)",
+          background: "#2C3438",
+          boxShadow: "0 -8px 48px rgba(0,0,0,0.80)",
           transform: open ? "translateY(0)" : "translateY(100%)",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: 0,
@@ -446,7 +446,7 @@ export default function MobilePlayerPanel() {
           ) : (
             /* Placeholder — always show something, never blank */
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-              style={{ background: currentTrack?.bg || "oklch(0.12 0.04 275)" }}>
+              style={{ background: currentTrack?.bg || "#2C3438" }}>
               <Music className="w-16 h-16 opacity-20 text-white" />
               {currentTrack && (
                 <span className="text-[11px] opacity-30 text-white font-body px-4 text-center line-clamp-2">
@@ -458,7 +458,7 @@ export default function MobilePlayerPanel() {
 
           {/* Gradient fade — bottom of artwork into controls */}
           <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, transparent, oklch(0.07 0.02 275))" }} />
+            style={{ background: "linear-gradient(to bottom, transparent, #2C3438)" }} />
 
           {/* Tap zone — toggle controls overlay (identity always stays) */}
           <div className="absolute inset-0 z-10 cursor-pointer" onClick={handleArtTap} />
@@ -468,19 +468,19 @@ export default function MobilePlayerPanel() {
 
           {/* ── Swipe-down handle ── */}
           <div className="absolute top-2 inset-x-0 flex justify-center z-20 pointer-events-none">
-            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "oklch(1 0 0 / 0.25)" }} />
+            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "rgba(203,177,131,0.25)" }} />
           </div>
 
           {/* ── Header controls ── */}
           <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-8 z-20">
             <div className="flex flex-col gap-0.5">
               <span className="text-[9px] font-bold tracking-widest uppercase"
-                style={{ color: "oklch(0.84 0.155 85 / 0.6)", fontFamily: "'Cinzel', serif" }}>
+                style={{ color: "rgba(203,177,131,0.55)", fontFamily: "'Cinzel', serif" }}>
                 Now Playing
               </span>
               {queueContextLabel && (
                 <span className="text-[8px] tracking-wider"
-                  style={{ color: "oklch(0.84 0.155 85 / 0.35)", fontFamily: "'Cinzel', serif" }}>
+                  style={{ color: "rgba(203,177,131,0.32)", fontFamily: "'Cinzel', serif" }}>
                   {queueContextLabel}
                 </span>
               )}
@@ -488,12 +488,12 @@ export default function MobilePlayerPanel() {
             <div className="flex items-center gap-1">
               <button type="button" onClick={closeNowPlayingPanel}
                 className="p-1.5 rounded-lg text-white/30 hover:text-white/70 transition-all"
-                style={{ background: "oklch(0 0 0 / 0.35)", backdropFilter: "blur(4px)" }}>
+                style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)" }}>
                 <ChevronDown size={16} />
               </button>
               <button type="button" onClick={closeNowPlayingPanel}
                 className="p-1.5 rounded-lg text-white/30 hover:text-white transition-all"
-                style={{ background: "oklch(0 0 0 / 0.35)", backdropFilter: "blur(4px)" }}>
+                style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)" }}>
                 <X size={16} />
               </button>
             </div>
@@ -514,16 +514,16 @@ export default function MobilePlayerPanel() {
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  background: isLiked ? "oklch(0.65 0.22 10 / 0.25)" : "oklch(0 0 0 / 0.45)",
+                  background: isLiked ? "rgba(239,68,68,0.25)" : "rgba(0,0,0,0.45)",
                   backdropFilter: "blur(8px)",
-                  border: isLiked ? "1px solid oklch(0.65 0.22 10 / 0.5)" : "1px solid oklch(1 0 0 / 0.12)",
-                  boxShadow: isLiked ? "0 0 12px oklch(0.65 0.22 10 / 0.3)" : "none",
+                  border: isLiked ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(203,177,131,0.14)",
+                  boxShadow: isLiked ? "0 0 12px rgba(239,68,68,0.3)" : "none",
                 }}
               >
-                <Heart size={18} fill={isLiked ? "oklch(0.75 0.22 10)" : "none"}
-                  style={{ color: isLiked ? "oklch(0.75 0.22 10)" : "oklch(1 0 0 / 0.7)" }} />
+                <Heart size={18} fill={isLiked ? "#EF4444" : "none"}
+                  style={{ color: isLiked ? "#EF4444" : "rgba(203,177,131,0.7)" }} />
               </div>
-              <span className="text-[9px]" style={{ color: "oklch(1 0 0 / 0.45)" }}>Love</span>
+              <span className="text-[9px]" style={{ color: "rgba(203,177,131,0.45)" }}>Love</span>
             </button>
 
             {/* Share 🔁 */}
@@ -534,16 +534,16 @@ export default function MobilePlayerPanel() {
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  background: copied ? "oklch(0.84 0.155 85 / 0.2)" : "oklch(0 0 0 / 0.45)",
+                  background: copied ? "rgba(203,177,131,0.18)" : "rgba(0,0,0,0.45)",
                   backdropFilter: "blur(8px)",
-                  border: copied ? "1px solid oklch(0.84 0.155 85 / 0.4)" : "1px solid oklch(1 0 0 / 0.12)",
+                  border: copied ? "1px solid rgba(203,177,131,0.35)" : "1px solid rgba(203,177,131,0.14)",
                 }}
               >
                 {copied
-                  ? <Check size={18} style={{ color: "oklch(0.84 0.155 85)" }} />
-                  : <Share2 size={18} style={{ color: "oklch(1 0 0 / 0.7)" }} />}
+                  ? <Check size={18} style={{ color: "#CBB183" }} />
+                  : <Share2 size={18} style={{ color: "rgba(203,177,131,0.7)" }} />}
               </div>
-              <span className="text-[9px]" style={{ color: "oklch(1 0 0 / 0.45)" }}>
+              <span className="text-[9px]" style={{ color: "rgba(203,177,131,0.45)" }}>
                 {copied ? "Copied!" : "Share"}
               </span>
             </button>
@@ -556,14 +556,14 @@ export default function MobilePlayerPanel() {
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  background: (sheetOpen && sheetTab === "comments") ? "oklch(0.55 0.18 220 / 0.25)" : "oklch(0 0 0 / 0.45)",
+                  background: (sheetOpen && sheetTab === "comments") ? "rgba(56,189,248,0.25)" : "rgba(0,0,0,0.45)",
                   backdropFilter: "blur(8px)",
-                  border: (sheetOpen && sheetTab === "comments") ? "1px solid oklch(0.55 0.18 220 / 0.4)" : "1px solid oklch(1 0 0 / 0.12)",
+                  border: (sheetOpen && sheetTab === "comments") ? "1px solid rgba(56,189,248,0.4)" : "1px solid rgba(203,177,131,0.14)",
                 }}
               >
-                <MessageCircle size={18} style={{ color: (sheetOpen && sheetTab === "comments") ? "oklch(0.72 0.18 220)" : "oklch(1 0 0 / 0.7)" }} />
+                <MessageCircle size={18} style={{ color: (sheetOpen && sheetTab === "comments") ? "#38BDF8" : "rgba(203,177,131,0.7)" }} />
               </div>
-              <span className="text-[9px]" style={{ color: "oklch(1 0 0 / 0.45)" }}>
+              <span className="text-[9px]" style={{ color: "rgba(203,177,131,0.45)" }}>
                 {commentsData?.length ? commentsData.length : ""}Comment
               </span>
             </button>
@@ -575,9 +575,9 @@ export default function MobilePlayerPanel() {
               onClick={(e) => { e.stopPropagation(); navigate(`/verify/${videoWitnessId}`); }}
               className="absolute top-12 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide z-20"
               style={{
-                background: "oklch(0.30 0.015 200 / 0.88)",
-                border: "1px solid oklch(0.55 0.18 145 / 0.5)",
-                color: "oklch(0.82 0.18 145)",
+                background: "rgba(44,52,56,0.88)",
+                border: "1px solid rgba(74,222,128,0.5)",
+                color: "#4ADE80",
                 backdropFilter: "blur(4px)",
               }}
             >
@@ -594,7 +594,7 @@ export default function MobilePlayerPanel() {
             disabled={!currentSongId}
             className="text-xl font-semibold leading-snug line-clamp-1 text-left w-full
               transition-opacity hover:opacity-75 disabled:cursor-default"
-            style={{ color: "oklch(0.94 0.025 75)", fontFamily: "'Cinzel', serif" }}
+            style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
           >
             {currentTrack?.title || "No track selected"}
           </button>
@@ -603,7 +603,7 @@ export default function MobilePlayerPanel() {
             onClick={() => { if (creator?.id) navigate(`/creator/${creator.id}`); }}
             disabled={!creator?.id}
             className="text-sm truncate mt-0.5 text-left w-full transition-opacity hover:opacity-75 disabled:cursor-default"
-            style={{ color: "oklch(0.55 0.03 280)", fontFamily: "'Cinzel', serif" }}
+            style={{ color: "#AA8E64", fontFamily: "'Cinzel', serif" }}
           >
             {currentTrack?.artist || "—"}
           </button>
@@ -614,9 +614,9 @@ export default function MobilePlayerPanel() {
               className="mt-1.5 inline-flex items-center gap-1.5 text-[9px] font-mono px-2.5 py-1 rounded-full
                 transition-opacity hover:opacity-80"
               style={{
-                background: "oklch(0.80 0.145 82 / 0.12)",
-                color: "oklch(0.80 0.145 82)",
-                border: "1px solid oklch(0.80 0.145 82 / 0.3)",
+                background: "rgba(203,177,131,0.12)",
+                color: "#CBB183",
+                border: "1px solid rgba(203,177,131,0.28)",
               }}
               title="View Witness Certificate"
             >
@@ -630,20 +630,20 @@ export default function MobilePlayerPanel() {
         <div className="flex-shrink-0 px-6 pb-2">
           <div
             className="relative h-1 rounded-full cursor-pointer"
-            style={{ background: "oklch(1 0 0 / 0.1)" }}
+            style={{ background: "rgba(203,177,131,0.1)" }}
             onClick={handleSeek}
             onTouchMove={handleSeekTouch}
           >
             <div
               className="absolute top-0 left-0 h-full rounded-full transition-all"
-              style={{ width: `${progress}%`, background: "oklch(0.84 0.155 85)" }}
+              style={{ width: `${progress}%`, background: "#CBB183" }}
             />
           </div>
           <div className="flex justify-between mt-1">
-            <span className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+            <span className="text-[10px]" style={{ color: "#AA8E64" }}>
               {fmtTime(state.currentTime)}
             </span>
-            <span className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+            <span className="text-[10px]" style={{ color: "#AA8E64" }}>
               {fmtTime(state.duration)}
             </span>
           </div>
@@ -658,11 +658,11 @@ export default function MobilePlayerPanel() {
             <button
               onClick={toggleShuffle}
               className="p-2 transition-colors"
-              style={{ color: state.isShuffle ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)" }}
+              style={{ color: state.isShuffle ? "#CBB183" : "#3F4A50" }}
             >
               <Shuffle size={18} />
             </button>
-            <button type="button" onClick={prevTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
+            <button type="button" onClick={prevTrack} className="p-2" style={{ color: "#DACAAA" }}>
               <SkipBack size={24} />
             </button>
             <button
@@ -670,22 +670,22 @@ export default function MobilePlayerPanel() {
               className="w-14 h-14 rounded-full flex items-center justify-center transition-transform
                 hover:scale-105 active:scale-95 shadow-xl"
               style={{
-                background: "oklch(0.94 0.006 280)",
+                background: "#E6CDAE",
                 color: "#2C3438",
-                boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.25)",
+                boxShadow: "0 0 24px rgba(203,177,131,0.22)",
               }}
             >
               {state.isPlaying
                 ? <Pause size={22} fill="currentColor" />
                 : <Play size={22} fill="currentColor" className="ml-0.5" />}
             </button>
-            <button type="button" onClick={nextTrack} className="p-2" style={{ color: "oklch(0.75 0.03 280)" }}>
+            <button type="button" onClick={nextTrack} className="p-2" style={{ color: "#DACAAA" }}>
               <SkipForward size={24} />
             </button>
             <button
               onClick={toggleRepeat}
               className="p-2 transition-colors"
-              style={{ color: state.isRepeat ? "oklch(0.84 0.155 85)" : "oklch(0.38 0.03 280)" }}
+              style={{ color: state.isRepeat ? "#CBB183" : "#3F4A50" }}
             >
               <Repeat size={18} />
             </button>
@@ -705,9 +705,9 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed"
               style={{
-                background: tipsEnabled ? "oklch(0.84 0.155 85 / 0.12)" : "oklch(0.12 0.02 275)",
-                color: tipsEnabled ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)",
-                border: tipsEnabled ? "1px solid oklch(0.84 0.155 85 / 0.25)" : "1px solid oklch(0.20 0.02 275)",
+                background: tipsEnabled ? "rgba(203,177,131,0.10)" : "#2C3438",
+                color: tipsEnabled ? "#CBB183" : "#3F4A50",
+                border: tipsEnabled ? "1px solid rgba(203,177,131,0.22)" : "1px solid #2C3438",
                 fontFamily: "'Cinzel', serif",
               }}
               title={tipsEnabled ? "Gift creator" : "Tips not enabled"}
@@ -722,9 +722,9 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: (sheetOpen && sheetTab === "details") ? "oklch(0.55 0.18 220 / 0.15)" : "oklch(0.12 0.02 275)",
-                color: (sheetOpen && sheetTab === "details") ? "oklch(0.72 0.18 220)" : "oklch(0.55 0.03 280)",
-                border: (sheetOpen && sheetTab === "details") ? "1px solid oklch(0.55 0.18 220 / 0.35)" : "1px solid oklch(0.20 0.02 275)",
+                background: (sheetOpen && sheetTab === "details") ? "rgba(56,189,248,0.15)" : "#2C3438",
+                color: (sheetOpen && sheetTab === "details") ? "#38BDF8" : "#AA8E64",
+                border: (sheetOpen && sheetTab === "details") ? "1px solid rgba(56,189,248,0.35)" : "1px solid #2C3438",
                 fontFamily: "'Cinzel', serif",
               }}
             >
@@ -738,9 +738,9 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: (sheetOpen && sheetTab === "lyrics") ? "oklch(0.65 0.18 55 / 0.15)" : "oklch(0.12 0.02 275)",
-                color: (sheetOpen && sheetTab === "lyrics") ? "oklch(0.80 0.18 55)" : "oklch(0.55 0.03 280)",
-                border: (sheetOpen && sheetTab === "lyrics") ? "1px solid oklch(0.65 0.18 55 / 0.35)" : "1px solid oklch(0.20 0.02 275)",
+                background: (sheetOpen && sheetTab === "lyrics") ? "rgba(170,142,100,0.15)" : "#2C3438",
+                color: (sheetOpen && sheetTab === "lyrics") ? "#E6CDAE" : "#AA8E64",
+                border: (sheetOpen && sheetTab === "lyrics") ? "1px solid rgba(170,142,100,0.35)" : "1px solid #2C3438",
                 fontFamily: "'Cinzel', serif",
               }}
             >
@@ -754,9 +754,9 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: state.isMuted ? "oklch(0.55 0.18 25 / 0.12)" : "oklch(0.12 0.02 275)",
-                color: state.isMuted ? "oklch(0.75 0.18 25)" : "oklch(0.55 0.03 280)",
-                border: state.isMuted ? "1px solid oklch(0.55 0.18 25 / 0.3)" : "1px solid oklch(0.20 0.02 275)",
+                background: state.isMuted ? "rgba(239,68,68,0.12)" : "#2C3438",
+                color: state.isMuted ? "#EF4444" : "#AA8E64",
+                border: state.isMuted ? "1px solid rgba(239,68,68,0.3)" : "1px solid #2C3438",
                 fontFamily: "'Cinzel', serif",
               }}
             >
@@ -794,10 +794,10 @@ export default function MobilePlayerPanel() {
             width: "100vw",
             height: "72vh",
             maxHeight: "600px",
-            background: "oklch(0.10 0.025 275)",
-            borderTop: "1px solid oklch(0.22 0.02 275)",
+            background: "#2C3438",
+            borderTop: "1px solid #2C3438",
             borderRadius: "20px 20px 0 0",
-            boxShadow: "0 -8px 32px oklch(0 0 0 / 0.6)",
+            boxShadow: "0 -8px 32px rgba(0,0,0,0.60)",
             transform: sheetOpen ? "translateY(0)" : "translateY(100%)",
             paddingBottom: "env(safe-area-inset-bottom, 0px)",
           }}
@@ -806,7 +806,7 @@ export default function MobilePlayerPanel() {
         >
           {/* Sheet drag handle */}
           <div className="flex-shrink-0 flex flex-col items-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
-            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "oklch(0.28 0.02 275)" }} />
+            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "#2C3438" }} />
           </div>
 
           {/* Tab bar */}
@@ -817,9 +817,9 @@ export default function MobilePlayerPanel() {
                 onClick={() => setSheetTab(tab)}
                 className="flex-1 py-1.5 rounded-lg text-[11px] font-semibold capitalize transition-all"
                 style={{
-                  background: sheetTab === tab ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
-                  color: sheetTab === tab ? "oklch(0.84 0.155 85)" : "oklch(0.45 0.03 280)",
-                  border: sheetTab === tab ? "1px solid oklch(0.84 0.155 85 / 0.25)" : "1px solid transparent",
+                  background: sheetTab === tab ? "rgba(203,177,131,0.10)" : "transparent",
+                  color: sheetTab === tab ? "#CBB183" : "#AA8E64",
+                  border: sheetTab === tab ? "1px solid rgba(203,177,131,0.22)" : "1px solid transparent",
                   fontFamily: "'Cinzel', serif",
                 }}
               >
@@ -829,27 +829,27 @@ export default function MobilePlayerPanel() {
             <button
               onClick={() => setSheetOpen(false)}
               className="p-1.5 rounded-lg transition-colors"
-              style={{ color: "oklch(0.40 0.03 280)" }}
+              style={{ color: "#3F4A50" }}
             >
               <X size={14} />
             </button>
           </div>
 
           {/* Sheet content — scrollable */}
-          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent", overscrollBehavior: "contain" }}>
+          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "#2C3438 transparent", overscrollBehavior: "contain" }}>
 
             {/* ── DETAILS TAB ── */}
             {sheetTab === "details" && (
               <div className="px-4 pb-4 space-y-3">
                 {currentTrack?.witnessId && (
                   <div className="flex items-start gap-2.5">
-                    <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.80 0.145 82)" }} />
+                    <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#CBB183" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>Witness ID</div>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "#AA8E64" }}>Witness ID</div>
                       <button
                         onClick={() => { navigate(`/verify/${currentTrack.witnessId}`); setSheetOpen(false); }}
                         className="text-[11px] font-mono break-all text-left hover:opacity-75 transition-opacity"
-                        style={{ color: "oklch(0.80 0.145 82)" }}
+                        style={{ color: "#CBB183" }}
                       >
                         {currentTrack.witnessId}
                       </button>
@@ -858,13 +858,13 @@ export default function MobilePlayerPanel() {
                 )}
                 {creator && (
                   <div className="flex items-start gap-2.5">
-                    <User size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.72 0.155 175)" }} />
+                    <User size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#4ADE80" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>Creator</div>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "#AA8E64" }}>Creator</div>
                       <button
                         onClick={() => { if (creator.id) { navigate(`/creator/${creator.id}`); setSheetOpen(false); } }}
                         className="text-[12px] font-semibold hover:opacity-75 transition-opacity"
-                        style={{ color: "oklch(0.88 0.02 280)", fontFamily: "'Cinzel', serif" }}
+                        style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
                       >
                         {creator.artistHandle || creator.name || "Unknown"}
                       </button>
@@ -873,18 +873,18 @@ export default function MobilePlayerPanel() {
                 )}
                 {song?.licenseStatus && (
                   <div className="flex items-start gap-2.5">
-                    <FileText size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 55)" }} />
+                    <FileText size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#AA8E64" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>License</div>
-                      <span className="text-[12px] capitalize" style={{ color: "oklch(0.80 0.02 280)" }}>{song.licenseStatus}</span>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "#AA8E64" }}>License</div>
+                      <span className="text-[12px] capitalize" style={{ color: "#DACAAA" }}>{song.licenseStatus}</span>
                     </div>
                   </div>
                 )}
                 {currentTrack?.aiDisclosure && (
                   <div className="flex items-start gap-2.5">
-                    <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 25)" }} />
+                    <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#EF4444" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "oklch(0.45 0.03 280)" }}>AI Disclosure</div>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "#AA8E64" }}>AI Disclosure</div>
                       <AiDisclosurePill value={currentTrack.aiDisclosure as any} size="full" showTooltip={false} />
                     </div>
                   </div>
@@ -896,18 +896,18 @@ export default function MobilePlayerPanel() {
                   const overflow = tags.length - visible.length;
                   return (
                     <div className="flex items-start gap-2.5">
-                      <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "oklch(0.65 0.18 280)" }} />
+                      <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#CBB183" }} />
                       <div className="min-w-0">
-                        <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "oklch(0.45 0.03 280)" }}>Genre / Tags</div>
+                        <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "#AA8E64" }}>Genre / Tags</div>
                         <div className="flex flex-wrap gap-1">
                           {visible.map((tag: string) => (
                             <span
                               key={tag}
                               className="text-[10px] px-2 py-0.5 rounded-full font-body leading-none"
                               style={{
-                                background: "oklch(0.18 0.04 275 / 0.8)",
-                                color: "oklch(0.75 0.08 280)",
-                                border: "1px solid oklch(0.30 0.04 275 / 0.6)",
+                                background: "rgba(44,52,56,0.8)",
+                                color: "#E6CDAE",
+                                border: "1px solid rgba(44,52,56,0.6)",
                               }}
                             >
                               {tag}
@@ -917,9 +917,9 @@ export default function MobilePlayerPanel() {
                             <span
                               className="text-[10px] px-2 py-0.5 rounded-full font-body leading-none"
                               style={{
-                                background: "oklch(0.14 0.03 275 / 0.6)",
-                                color: "oklch(0.55 0.04 280)",
-                                border: "1px solid oklch(0.25 0.03 275 / 0.4)",
+                                background: "rgba(44,52,56,0.6)",
+                                color: "#3F4A50",
+                                border: "1px solid rgba(44,52,56,0.4)",
                               }}
                             >
                               +{overflow}
@@ -935,9 +935,9 @@ export default function MobilePlayerPanel() {
                     onClick={() => { navigate(`/song/${currentSongId}`); setSheetOpen(false); closeNowPlayingPanel(); }}
                     className="w-full mt-2 py-2 rounded-xl text-[11px] font-semibold tracking-wide transition-all active:scale-95"
                     style={{
-                      background: "oklch(0.84 0.155 85 / 0.10)",
-                      color: "oklch(0.84 0.155 85)",
-                      border: "1px solid oklch(0.84 0.155 85 / 0.20)",
+                      background: "rgba(203,177,131,0.10)",
+                      color: "#CBB183",
+                      border: "1px solid rgba(203,177,131,0.2)",
                       fontFamily: "'Cinzel', serif",
                     }}
                   >
@@ -956,21 +956,21 @@ export default function MobilePlayerPanel() {
                 {lyricsText ? (
                   <pre
                     className="text-[13px] leading-relaxed whitespace-pre-wrap font-body"
-                    style={{ color: "oklch(0.82 0.02 280)" }}
+                    style={{ color: "#DACAAA" }}
                   >
                     {lyricsText}
                   </pre>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 gap-3">
-                    <BookOpen size={28} className="opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
-                    <p className="text-[12px] italic text-center" style={{ color: "oklch(0.40 0.02 280)" }}>
+                    <BookOpen size={28} className="opacity-20" style={{ color: "#CBB183" }} />
+                    <p className="text-[12px] italic text-center" style={{ color: "#3F4A50" }}>
                       No lyrics available for this track.
                     </p>
                     {currentSongId && (
                       <button
                         onClick={() => { navigate(`/song/${currentSongId}`); setSheetOpen(false); closeNowPlayingPanel(); }}
                         className="text-[11px] px-3 py-1.5 rounded-lg transition-all"
-                        style={{ color: "oklch(0.80 0.145 82)", border: "1px solid oklch(0.80 0.145 82 / 0.3)" }}
+                        style={{ color: "#CBB183", border: "1px solid rgba(203,177,131,0.28)" }}
                       >
                         View song page
                       </button>
@@ -988,19 +988,19 @@ export default function MobilePlayerPanel() {
                     commentsData.map((c: any) => (
                       <div key={c.id} className="flex gap-2.5">
                         <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
-                          style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "oklch(0.84 0.155 85)" }}>
+                          style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183" }}>
                           {(c.authorName ?? "A")[0].toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-2 mb-0.5">
-                            <span className="text-[11px] font-semibold" style={{ color: "oklch(0.82 0.155 175)" }}>
+                            <span className="text-[11px] font-semibold" style={{ color: "#4ADE80" }}>
                               {c.authorName ?? "Anonymous"}
                             </span>
-                            <span className="text-[9px]" style={{ color: "oklch(0.40 0.02 280)" }}>
+                            <span className="text-[9px]" style={{ color: "#3F4A50" }}>
                               {new Date(c.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          <p className="text-[12px] leading-relaxed" style={{ color: "oklch(0.78 0.02 280)" }}>
+                          <p className="text-[12px] leading-relaxed" style={{ color: "#AA8E64" }}>
                             {c.content}
                           </p>
                         </div>
@@ -1008,8 +1008,8 @@ export default function MobilePlayerPanel() {
                     ))
                   ) : (
                     <div className="text-center py-6">
-                      <MessageCircle size={20} className="mx-auto mb-1.5 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
-                      <p className="text-[12px] italic" style={{ color: "oklch(0.40 0.02 280)" }}>
+                      <MessageCircle size={20} className="mx-auto mb-1.5 opacity-20" style={{ color: "#CBB183" }} />
+                      <p className="text-[12px] italic" style={{ color: "#3F4A50" }}>
                         No comments yet. Be the first.
                       </p>
                     </div>
@@ -1017,7 +1017,7 @@ export default function MobilePlayerPanel() {
                 </div>
                 {/* Comment input — pinned to bottom of sheet */}
                 <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2"
-                  style={{ borderTop: "1px solid oklch(0.18 0.02 275)" }}>
+                  style={{ borderTop: "1px solid #2C3438" }}>
                   <input
                     value={newComment}
                     onChange={e => setNewComment(e.target.value)}
@@ -1027,16 +1027,16 @@ export default function MobilePlayerPanel() {
                     maxLength={1000}
                     className="flex-1 rounded-xl px-3 py-2 text-[12px] outline-none transition-colors disabled:opacity-50"
                     style={{
-                      background: "oklch(0.12 0.04 270)",
-                      border: "1px solid oklch(0.22 0.04 270)",
-                      color: "oklch(0.88 0.02 280)",
+                      background: "#2C3438",
+                      border: "1px solid #2C3438",
+                      color: "#E6CDAE",
                     }}
                   />
                   <button
                     onClick={submitComment}
                     disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                     className="px-3 py-2 rounded-xl text-[12px] font-semibold transition-colors disabled:opacity-40 active:scale-95"
-                    style={{ background: "oklch(0.80 0.145 82)", color: "#2C3438" }}
+                    style={{ background: "#CBB183", color: "#2C3438" }}
                   >
                     Post
                   </button>

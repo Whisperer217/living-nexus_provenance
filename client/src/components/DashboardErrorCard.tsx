@@ -39,26 +39,26 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
       className="rounded-2xl p-6 flex flex-col items-center text-center gap-4"
       style={{
         background: "rgba(63, 74, 80, 0.35)",
-        border: "1px solid oklch(0.65 0.18 25 / 0.3)",
+        border: "1px solid rgba(239,68,68,0.28)",
       }}
     >
       <div
         className="w-12 h-12 rounded-full flex items-center justify-center"
-        style={{ background: "oklch(0.65 0.18 25 / 0.12)" }}
+        style={{ background: "rgba(239,68,68,0.12)" }}
       >
-        <AlertTriangle size={22} style={{ color: "oklch(0.75 0.18 45)" }} />
+        <AlertTriangle size={22} style={{ color: "#E6CDAE" }} />
       </div>
 
       <div>
         <p
           className="font-heading text-[15px] mb-1"
-          style={{ color: "oklch(0.92 0.015 80)" }}
+          style={{ color: "#E6CDAE" }}
         >
           We couldn't load your dashboard right now
         </p>
         <p
           className="text-[12px] font-body"
-          style={{ color: "oklch(0.58 0.03 280)" }}
+          style={{ color: "#AA8E64" }}
         >
           There was a problem loading {section}. Your data is safe — this is a temporary issue.
         </p>
@@ -70,7 +70,7 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
           onClick={onRetry}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-heading text-[12px] tracking-wide transition-all hover:brightness-110 active:scale-95"
           style={{
-            background: "oklch(0.84 0.155 85)",
+            background: "#CBB183",
             color: "#E6CDAE",
           }}
         >
@@ -83,9 +83,9 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
           <button
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-heading text-[12px] tracking-wide transition-all hover:brightness-110 active:scale-95"
             style={{
-              background: "oklch(0.12 0.04 270 / 0.8)",
-              border: "1px solid oklch(0.84 0.155 85 / 0.3)",
-              color: "oklch(0.84 0.155 85)",
+              background: "rgba(44,52,56,0.8)",
+              border: "1px solid rgba(203,177,131,0.28)",
+              color: "#CBB183",
             }}
           >
             <Music size={13} />
@@ -103,8 +103,8 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-heading text-[12px] tracking-wide transition-all hover:brightness-110 active:scale-95"
             style={{
               background: "transparent",
-              border: "1px solid oklch(0.65 0.18 25 / 0.4)",
-              color: "oklch(0.65 0.18 25)",
+              border: "1px solid rgba(239,68,68,0.4)",
+              color: "#EF4444",
             }}
           >
             <Flag size={13} />

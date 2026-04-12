@@ -112,9 +112,9 @@ function FounderCard({
       className="relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300"
       style={{
         background:
-          "linear-gradient(160deg, oklch(0.13 0.018 280) 0%, oklch(0.10 0.012 280) 100%)",
-        border: "1px solid oklch(1 0 0 / 0.08)",
-        boxShadow: "0 4px 24px oklch(0 0 0 / 0.4)",
+          "linear-gradient(160deg, #2C3438 0%, #2C3438 100%)",
+        border: "1px solid rgba(203,177,131,0.10)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.40)",
       }}
     >
       {/* Gold top accent line */}
@@ -133,7 +133,7 @@ function FounderCard({
           <span
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
             style={{
-              background: "oklch(0.75 0.18 85 / 0.15)",
+              background: "rgba(203,177,131,0.12)",
               border: "1px solid #CBB183",
               color: "#CBB183",
               boxShadow: "0 0 10px #CBB18355, 0 0 20px #CBB18322",
@@ -169,14 +169,14 @@ function FounderCard({
             </p>
             {/* Discord name on its own line */}
             {founder.discordName && (
-              <p className="text-xs leading-snug" style={{ color: "oklch(0.65 0.06 280)" }}>
+              <p className="text-xs leading-snug" style={{ color: "#AA8E64" }}>
                 ({founder.discordName})
               </p>
             )}
             {/* Date on its own line */}
             <p
               className="text-[10px] tracking-widest uppercase leading-snug"
-              style={{ color: "oklch(0.45 0.04 280)" }}
+              style={{ color: "#3F4A50" }}
             >
               March 20, 2026
             </p>
@@ -190,9 +190,9 @@ function FounderCard({
               key={tag}
               className="px-3 py-1 rounded-full text-[11px] font-medium leading-none"
               style={{
-                background: "oklch(1 0 0 / 0.06)",
-                border: "1px solid oklch(1 0 0 / 0.12)",
-                color: "oklch(0.82 0.04 280)",
+                background: "rgba(203,177,131,0.08)",
+                border: "1px solid rgba(203,177,131,0.14)",
+                color: "#DACAAA",
               }}
             >
               {tag}
@@ -208,10 +208,10 @@ function FounderCard({
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
               background: matchedCreator?.id
-                ? "oklch(0.75 0.18 85 / 0.12)"
-                : "oklch(1 0 0 / 0.05)",
-              border: `1px solid ${matchedCreator?.id ? "#CBB18366" : "oklch(1 0 0 / 0.08)"}`,
-              color: matchedCreator?.id ? "#CBB183" : "oklch(0.6 0.04 280)",
+                ? "rgba(203,177,131,0.12)"
+                : "rgba(203,177,131,0.05)",
+              border: `1px solid ${matchedCreator?.id ? "#CBB18366" : "rgba(203,177,131,0.10)"}`,
+              color: matchedCreator?.id ? "#CBB183" : "#AA8E64",
             }}
           >
             <ExternalLink size={13} />
@@ -240,8 +240,8 @@ export default function ContributorsPage() {
         className="relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(160deg, oklch(0.14 0.04 290) 0%, oklch(0.09 0.02 280) 100%)",
-          borderBottom: "1px solid oklch(1 0 0 / 0.07)",
+            "linear-gradient(160deg, #2C3438 0%, #2C3438 100%)",
+          borderBottom: "1px solid rgba(230,205,174,0.07)",
         }}
       >
         {/* Decorative gold glow */}
@@ -259,7 +259,7 @@ export default function ContributorsPage() {
             <span
               className="px-4 py-1.5 rounded-full text-xs font-bold tracking-[0.15em] uppercase"
               style={{
-                background: "oklch(0.75 0.18 85 / 0.12)",
+                background: "rgba(203,177,131,0.12)",
                 border: "1px solid #CBB183",
                 color: "#CBB183",
                 boxShadow: "0 0 16px #CBB18333",
@@ -284,7 +284,7 @@ export default function ContributorsPage() {
 
           <blockquote
             className="max-w-2xl mx-auto text-lg sm:text-xl leading-relaxed font-body italic"
-            style={{ color: "oklch(0.78 0.04 280)" }}
+            style={{ color: "#DACAAA" }}
           >
             "These are the ones who showed up first. Before the platform was finished.
             Before the world knew. They came anyway."
@@ -332,11 +332,11 @@ export default function ContributorsPage() {
             </div>
             <p
               className="text-sm font-body italic"
-              style={{ color: "oklch(0.5 0.04 280)" }}
+              style={{ color: "#3F4A50" }}
             >
               Living Nexus — Sovereign music. Cryptographic provenance. Creator-owned.
             </p>
-            <p className="text-xs mt-1" style={{ color: "oklch(0.4 0.03 280)" }}>
+            <p className="text-xs mt-1" style={{ color: "#3F4A50" }}>
               Genesis Day · March 20, 2026
             </p>
           </div>

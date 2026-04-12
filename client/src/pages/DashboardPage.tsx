@@ -168,9 +168,9 @@ export default function DashboardPage() {
   const statusColor = (s: string) => ({
     Draft: "var(--lnx-orange)",
     Published: "var(--lnx-green)",
-    Unlisted: "oklch(0.65 0.2 300)",
+    Unlisted: "#CBB183",
     Deleted: "var(--lnx-red)",
-  }[s] ?? "oklch(0.5 0.03 280)");
+  }[s] ?? "#AA8E64");
   const licenseMutation = trpc.livingArchive.purchaseLicenseOneTime.useMutation({
     onSuccess: (data: { url: string | null }) => { if (data.url) window.open(data.url, "_blank"); toast.info("Redirecting to checkout..."); },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -188,10 +188,10 @@ export default function DashboardPage() {
   });
 
   if (!isAuthenticated) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#E6CDAE" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#353E43" }}>
       <div className="text-center">
-        <p style={{ color: "oklch(0.6 0.04 280)" }}>Please sign in to access your dashboard.</p>
-        <Link href="/"><Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>Go Home</Button></Link>
+        <p style={{ color: "#AA8E64" }}>Please sign in to access your dashboard.</p>
+        <Link href="/"><Button className="mt-4" style={{ background: "#CBB183", color: "#E6CDAE" }}>Go Home</Button></Link>
       </div>
     </div>
   );
@@ -225,7 +225,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#E6CDAE" }}>
+    <div className="min-h-screen" style={{ background: "#353E43" }}>
       <div className="container py-10" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
         {/* ── No-Works Onboarding Banner ─────────────────────────────────────── */}
@@ -233,26 +233,26 @@ export default function DashboardPage() {
           <div
             className="mb-8 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-6"
             style={{
-              background: "linear-gradient(135deg, oklch(0.11 0.04 280), oklch(0.09 0.025 270))",
-              border: "1px solid oklch(0.84 0.155 85 / 0.25)",
+              background: "linear-gradient(135deg, #2C3438, #2C3438)",
+              border: "1px solid rgba(203,177,131,0.22)",
             }}
           >
             {/* Icon */}
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+              style={{ background: "rgba(203,177,131,0.10)", border: "1px solid rgba(203,177,131,0.28)" }}
             >
-              <Shield size={28} style={{ color: "oklch(0.84 0.155 85)" }} />
+              <Shield size={28} style={{ color: "#CBB183" }} />
             </div>
             {/* Copy */}
             <div className="flex-1 text-center md:text-left">
               <p
                 className="text-lg font-bold mb-1"
-                style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}
+                style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
               >
                 Upload your first piece and get your WID
               </p>
-              <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>
+              <p className="text-sm" style={{ color: "#AA8E64" }}>
                 Every work you upload receives a cryptographic Witness ID — your permanent, immutable proof of origin.
                 No algorithms. No ownership loss. Just creation, proven.
               </p>
@@ -261,7 +261,7 @@ export default function DashboardPage() {
             <Link href="/upload">
               <Button
                 className="flex-shrink-0"
-                style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload &amp; Witness Your Work
@@ -273,17 +273,17 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>Creator Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Creator Dashboard</h1>
             <p className="text-sm mt-1" style={{ color: "#E2E8F0" }}>Welcome back, {user?.name || "Creator"}</p>
           </div>
           <div className="flex gap-2">
             <Link href={`/creator/${user?.id}`}>
-              <Button size="sm" variant="outline" style={{ borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.7 0.04 280)" }}>
+              <Button size="sm" variant="outline" style={{ borderColor: "#3F4A50", color: "#DACAAA" }}>
                 <ExternalLink className="w-3 h-3 mr-1" /> View Profile
               </Button>
             </Link>
             <Link href="/upload">
-              <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+              <Button size="sm" style={{ background: "#CBB183", color: "#E6CDAE" }}>
                 <Upload className="w-3 h-3 mr-1" /> Upload Track
               </Button>
             </Link>
@@ -292,35 +292,35 @@ export default function DashboardPage() {
 
         {/* Pre-Onboarding Checklist Modal */}
         <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
-          <DialogContent style={{ background: "oklch(0.1 0.03 280)", border: "1px solid oklch(0.25 0.03 280)", color: "oklch(0.95 0.02 85)" }}>
+          <DialogContent style={{ background: "#2C3438", border: "1px solid #2C3438", color: "#E6CDAE" }}>
             <DialogHeader>
-              <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>
+              <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>
                 Before You Start — Have These Ready
               </DialogTitle>
             </DialogHeader>
-            <p className="text-sm mb-4" style={{ color: "oklch(0.7 0.04 280)" }}>
+            <p className="text-sm mb-4" style={{ color: "#DACAAA" }}>
               Stripe's verification takes about 5 minutes. Having these items ready prevents interruptions.
             </p>
             <div className="space-y-3">
               {ONBOARDING_CHECKLIST.map((item) => (
-                <div key={item.label} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: "oklch(0.13 0.04 280)" }}>
+                <div key={item.label} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: "#2C3438" }}>
                   <span className="text-xl flex-shrink-0">{item.icon}</span>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: "oklch(0.9 0.02 85)" }}>{item.label}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "oklch(0.6 0.04 280)" }}>{item.detail}</p>
+                    <p className="text-sm font-semibold" style={{ color: "#E6CDAE" }}>{item.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>{item.detail}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <Separator className="my-4" style={{ background: "oklch(0.2 0.02 280)" }} />
-            <p className="text-xs mb-4" style={{ color: "oklch(0.55 0.04 280)" }}>
+            <Separator className="my-4" style={{ background: "#2C3438" }} />
+            <p className="text-xs mb-4" style={{ color: "#3F4A50" }}>
               Living Nexus uses Stripe Connect for secure payouts. Your information goes directly to Stripe — we never store your SSN or bank details.
             </p>
             <Button
               className="w-full font-bold"
               onClick={() => { setShowChecklist(false); connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` }); }}
               disabled={connectMutation.isPending}
-              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
+              style={{ background: "#CBB183", color: "#E6CDAE" }}
             >
               {connectMutation.isPending ? "Opening Stripe..." : "I'm Ready — Start Setup"}
             </Button>
@@ -331,15 +331,15 @@ export default function DashboardPage() {
         {(connectData?.status === "pending" || connectData?.status === "not_connected") && (
           <div
             className="w-full rounded-xl mb-6 overflow-hidden"
-            style={{ border: "1px solid oklch(0.75 0.18 85)" }}
+            style={{ border: "1px solid #CBB183" }}
           >
             {/* Top row: main call to action */}
             <div
               className="flex items-center justify-between gap-4 px-4 py-3"
-              style={{ background: "oklch(0.84 0.155 85)" }}
+              style={{ background: "#CBB183" }}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.15 0.03 280)" }} />
+                <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "#2C3438" }} />
                 <span className="text-sm font-semibold leading-snug" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                   {connectData?.status === "pending"
                     ? "Your gift account is incomplete. Finish setup to receive gifts."
@@ -351,14 +351,14 @@ export default function DashboardPage() {
                 onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
                 disabled={connectMutation.isPending}
                 className="flex-shrink-0 font-bold text-sm"
-                style={{ background: "#E6CDAE", color: "oklch(0.84 0.155 85)", border: "none" }}
+                style={{ background: "#353E43", color: "#CBB183", border: "none" }}
               >
                 {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Complete Setup" : "Enable Gifts"}
               </Button>
             </div>
             {/* Bottom row: plain-English requirements when pending */}
             {connectData?.status === "pending" && connectData?.requirementsLabels && connectData.requirementsLabels.length > 0 && (
-              <div className="px-4 py-3" style={{ background: "oklch(0.1 0.03 280)" }}>
+              <div className="px-4 py-3" style={{ background: "#2C3438" }}>
                 <p className="text-xs font-semibold mb-2" style={{ color: "var(--lnx-orange)" }}>Still needed to activate your account:</p>
                 <div className="flex flex-wrap gap-2">
                   {(connectData.requirementsLabels as string[]).map((label: string) => (
@@ -379,12 +379,12 @@ export default function DashboardPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "oklch(0.84 0.155 85)", delta: null },
-            { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "oklch(0.65 0.2 300)", delta: (dashboardDeltas as any)?.newPlays ?? 0 },
+            { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "#CBB183", delta: null },
+            { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "#CBB183", delta: (dashboardDeltas as any)?.newPlays ?? 0 },
             { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "var(--lnx-green)", delta: null },
-            { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "oklch(0.55 0.18 160)", delta: (dashboardDeltas as any)?.newTips ?? 0 },
+            { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "#4ADE80", delta: (dashboardDeltas as any)?.newTips ?? 0 },
           ].map(({ label, value, icon: Icon, color, delta }) => (
-            <div key={label} className="rounded-xl p-4 relative" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
+            <div key={label} className="rounded-xl p-4 relative" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4" style={{ color }} />
                 <span className="text-xs" style={{ color: "#E2E8F0" }}>{label}</span>
@@ -407,10 +407,10 @@ export default function DashboardPage() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           {/* License Status */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <Shield className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
-              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Creator License</h3>
+              <Shield className="w-4 h-4" style={{ color: "#CBB183" }} />
+              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Creator License</h3>
             </div>
             {isLicensed ? (
               <div className="flex items-center gap-2">
@@ -420,8 +420,8 @@ export default function DashboardPage() {
             ) : (
               <>
                 <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Unlock 100 song slots, commercial license, and Witness ID provenance certificates.</p>
-                <p className="text-lg font-bold mb-3" style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>$89.98 <span className="text-xs font-normal" style={{ color: "#E2E8F0" }}>one-time</span></p>
-                <Button size="sm" className="w-full" onClick={() => licenseMutation.mutate({ origin: window.location.origin })} disabled={licenseMutation.isPending} style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+                <p className="text-lg font-bold mb-3" style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}>$89.98 <span className="text-xs font-normal" style={{ color: "#E2E8F0" }}>one-time</span></p>
+                <Button size="sm" className="w-full" onClick={() => licenseMutation.mutate({ origin: window.location.origin })} disabled={licenseMutation.isPending} style={{ background: "#CBB183", color: "#E6CDAE" }}>
                   {licenseMutation.isPending ? "Processing..." : "Purchase License"}
                 </Button>
               </>
@@ -429,30 +429,30 @@ export default function DashboardPage() {
           </div>
 
           {/* Song Slots */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <Music className="w-4 h-4" style={{ color: "oklch(0.65 0.2 300)" }} />
-              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Song Slots</h3>
+              <Music className="w-4 h-4" style={{ color: "#CBB183" }} />
+              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Song Slots</h3>
             </div>
             <div className="mb-2">
               <div className="flex justify-between text-xs mb-1" style={{ color: "#E2E8F0" }}>
                 <span>{slotsUsed} used</span><span>{slotsTotal} total</span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: "oklch(0.158 0.030 50)" }}>
-                <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "var(--lnx-red)" : "oklch(0.65 0.2 300)" }} />
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: "#2C3438" }}>
+                <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "var(--lnx-red)" : "#CBB183" }} />
               </div>
             </div>
             <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Need more? Choose a package — one-time, no subscription.</p>
             <div className="grid grid-cols-3 gap-1 mb-2">
               {(["micro_10", "micro_30", "micro_50"] as const).map((pkg) => (
-                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "oklch(0.65 0.2 300 / 0.5)", color: "oklch(0.65 0.2 300)", fontSize: "11px", padding: "4px 2px" }}>
+                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "rgba(203,177,131,0.45)", color: "#CBB183", fontSize: "11px", padding: "4px 2px" }}>
                   {pkg === "micro_10" ? "10 · $8.80" : pkg === "micro_30" ? "30 · $26.40" : "50 · $44"}
                 </Button>
               ))}
             </div>
             <div className="grid grid-cols-3 gap-1">
               {(["bulk_100", "bulk_300", "bulk_500"] as const).map((pkg) => (
-                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "oklch(0.65 0.2 300 / 0.5)", color: "oklch(0.65 0.2 300)", fontSize: "11px", padding: "4px 2px" }}>
+                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "rgba(203,177,131,0.45)", color: "#CBB183", fontSize: "11px", padding: "4px 2px" }}>
                   {pkg === "bulk_100" ? "100 · $88" : pkg === "bulk_300" ? "300 · $264" : "500 · $440"}
                 </Button>
               ))}
@@ -460,10 +460,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Tips / Stripe Connect */}
-          <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
+          <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="w-4 h-4" style={{ color: "var(--lnx-orange)" }} />
-              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Gift Payments</h3>
+              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Gift Payments</h3>
             </div>
             {tipsEnabled ? (
               <div className="flex items-center gap-2">
@@ -483,12 +483,12 @@ export default function DashboardPage() {
                     <p className="text-xs font-semibold mb-1" style={{ color: "var(--lnx-orange)" }}>Still needed:</p>
                     <ul className="space-y-0.5">
                       {(connectData.requirementsLabels as string[]).slice(0, 3).map((label: string) => (
-                        <li key={label} className="text-xs flex items-center gap-1" style={{ color: "oklch(0.7 0.12 45)" }}>
+                        <li key={label} className="text-xs flex items-center gap-1" style={{ color: "#AA8E64" }}>
                           <AlertCircle className="w-3 h-3 flex-shrink-0" />{label}
                         </li>
                       ))}
                       {(connectData.requirementsLabels as string[]).length > 3 && (
-                        <li className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>+{(connectData.requirementsLabels as string[]).length - 3} more</li>
+                        <li className="text-xs" style={{ color: "#3F4A50" }}>+{(connectData.requirementsLabels as string[]).length - 3} more</li>
                       )}
                     </ul>
                   </div>
@@ -497,7 +497,7 @@ export default function DashboardPage() {
                   size="sm" className="w-full" variant="outline"
                   onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
                   disabled={connectMutation.isPending}
-                  style={{ borderColor: "oklch(0.65 0.18 145 / 0.5)", color: "var(--lnx-green)" }}
+                  style={{ borderColor: "rgba(74,222,128,0.45)", color: "var(--lnx-green)" }}
                 >
                   {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Continue Setup" : "Enable Gifts"}
                 </Button>
@@ -507,13 +507,13 @@ export default function DashboardPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
           <button
             onClick={() => setActiveTab("songs")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "songs" ? "oklch(0.84 0.155 85)" : "transparent",
-              color: activeTab === "songs" ? "#E6CDAE" : "oklch(0.6 0.04 280)",
+              background: activeTab === "songs" ? "#CBB183" : "transparent",
+              color: activeTab === "songs" ? "#E6CDAE" : "#AA8E64",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -525,8 +525,8 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("transforms")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "transforms" ? "oklch(0.65 0.2 300)" : "transparent",
-              color: activeTab === "transforms" ? "white" : "oklch(0.6 0.04 280)",
+              background: activeTab === "transforms" ? "#CBB183" : "transparent",
+              color: activeTab === "transforms" ? "white" : "#AA8E64",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -539,7 +539,7 @@ export default function DashboardPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative"
             style={{
               background: activeTab === "activity" ? "var(--lnx-orange)" : "transparent",
-              color: activeTab === "activity" ? "#E6CDAE" : "oklch(0.6 0.04 280)",
+              color: activeTab === "activity" ? "#E6CDAE" : "#AA8E64",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -548,7 +548,7 @@ export default function DashboardPage() {
             {(newEventCount as number) > 0 && activeTab !== "activity" ? (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse"
-                style={{ background: "oklch(0.65 0.22 25)", color: "white" }}
+                style={{ background: "#EF4444", color: "white" }}
               >{(newEventCount as number) > 99 ? "99+" : String(newEventCount)}</span>
             ) : activityEvents?.length ? (
               <span className="text-xs opacity-70">({activityEvents.length})</span>
@@ -558,9 +558,9 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("collections")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "collections" ? "oklch(0.84 0.155 85 / 0.15)" : "transparent",
-              color: activeTab === "collections" ? "oklch(0.84 0.155 85)" : "oklch(0.6 0.04 280)",
-              border: activeTab === "collections" ? "1px solid oklch(0.84 0.155 85 / 0.4)" : "1px solid transparent",
+              background: activeTab === "collections" ? "rgba(203,177,131,0.12)" : "transparent",
+              color: activeTab === "collections" ? "#CBB183" : "#AA8E64",
+              border: activeTab === "collections" ? "1px solid rgba(203,177,131,0.35)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -572,9 +572,9 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("archive")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "archive" ? "oklch(0.55 0.18 220 / 0.2)" : "transparent",
-              color: activeTab === "archive" ? "oklch(0.7 0.15 220)" : "oklch(0.6 0.04 280)",
-              border: activeTab === "archive" ? "1px solid oklch(0.55 0.18 220 / 0.4)" : "1px solid transparent",
+              background: activeTab === "archive" ? "rgba(56,189,248,0.2)" : "transparent",
+              color: activeTab === "archive" ? "#38BDF8" : "#AA8E64",
+              border: activeTab === "archive" ? "1px solid rgba(56,189,248,0.4)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -585,9 +585,9 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("analytics")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "analytics" ? "oklch(0.55 0.18 260 / 0.2)" : "transparent",
-              color: activeTab === "analytics" ? "oklch(0.75 0.15 260)" : "oklch(0.6 0.04 280)",
-              border: activeTab === "analytics" ? "1px solid oklch(0.55 0.18 260 / 0.4)" : "1px solid transparent",
+              background: activeTab === "analytics" ? "rgba(56,189,248,0.2)" : "transparent",
+              color: activeTab === "analytics" ? "#38BDF8" : "#AA8E64",
+              border: activeTab === "analytics" ? "1px solid rgba(56,189,248,0.4)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -598,9 +598,9 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("widcache")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "widcache" ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
-              color: activeTab === "widcache" ? "oklch(0.84 0.155 85)" : "oklch(0.6 0.04 280)",
-              border: activeTab === "widcache" ? "1px solid oklch(0.84 0.155 85 / 0.35)" : "1px solid transparent",
+              background: activeTab === "widcache" ? "rgba(203,177,131,0.10)" : "transparent",
+              color: activeTab === "widcache" ? "#CBB183" : "#AA8E64",
+              border: activeTab === "widcache" ? "1px solid rgba(203,177,131,0.32)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -611,9 +611,9 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("discord")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "discord" ? "oklch(0.45 0.2 265 / 0.2)" : "transparent",
-              color: activeTab === "discord" ? "oklch(0.75 0.18 265)" : "oklch(0.6 0.04 280)",
-              border: activeTab === "discord" ? "1px solid oklch(0.45 0.2 265 / 0.4)" : "1px solid transparent",
+              background: activeTab === "discord" ? "rgba(203,177,131,0.2)" : "transparent",
+              color: activeTab === "discord" ? "#CBB183" : "#AA8E64",
+              border: activeTab === "discord" ? "1px solid rgba(203,177,131,0.4)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -625,9 +625,9 @@ export default function DashboardPage() {
         {activeTab === "songs" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>My Songs</h2>
+              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>My Songs</h2>
               <Link href="/upload">
-                <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+                <Button size="sm" style={{ background: "#CBB183", color: "#E6CDAE" }}>
                   <Upload className="w-3 h-3 mr-1" /> Upload New
                 </Button>
               </Link>
@@ -640,26 +640,26 @@ export default function DashboardPage() {
                 route="/dashboard#songs"
               />
             ) : !songs?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
-                <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
-                <p className="text-sm mb-2" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>Upload your first piece and get your WID</p>
-                <p className="text-xs mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>Every work you upload receives a cryptographic Witness ID — your permanent proof of origin.</p>
+              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+                <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
+                <p className="text-sm mb-2" style={{ color: "#DACAAA", fontFamily: "'Cinzel', serif" }}>Upload your first piece and get your WID</p>
+                <p className="text-xs mb-4" style={{ color: "#AA8E64" }}>Every work you upload receives a cryptographic Witness ID — your permanent proof of origin.</p>
                 <Link href="/upload">
-                  <Button style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>Upload &amp; Witness Your Work</Button>
+                  <Button style={{ background: "#CBB183", color: "#E6CDAE" }}>Upload &amp; Witness Your Work</Button>
                 </Link>
               </div>
             ) : (
               <div className="space-y-2">
                 {songs.map((song: any, idx: number) => (
-                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}>
+                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
                     {/* Top row: index + cover + title + actions */}
                     <div className="flex items-center gap-3">
                       <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#E2E8F0", minWidth: "20px" }}>{idx + 1}</span>
-                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "oklch(0.11 0.025 270)" }}>
-                        {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} /> : <Music className="w-4 h-4 opacity-40" style={{ color: "oklch(0.84 0.155 85)" }} />}
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "#2C3438" }}>
+                        {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} /> : <Music className="w-4 h-4 opacity-40" style={{ color: "#CBB183" }} />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif", fontSize: "13px" }}>{song.title}</p>
+                        <p className="font-medium text-sm truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif", fontSize: "13px" }}>{song.title}</p>
                         {song.genre && (
                           <p className="text-xs truncate mt-0.5" style={{ color: "#E2E8F0", fontSize: "12px" }}>{song.genre}</p>
                         )}
@@ -668,15 +668,15 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <Link href={`/song/${song.id}`}>
                           <button type="button" className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">
-                            <ExternalLink className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                            <ExternalLink className="w-3 h-3" style={{ color: "#CBB183" }} />
                           </button>
                         </Link>
                         <button
-                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#CBB183]/10"
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#3F4A50]/10"
                           title="Edit track (cover art, metadata, position)"
                           onClick={() => setEditingSong(song)}
                         >
-                          <Pencil className="w-3 h-3" style={{ color: "oklch(0.84 0.155 85)" }} />
+                          <Pencil className="w-3 h-3" style={{ color: "#CBB183" }} />
                         </button>
                         <button
                           className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/10"
@@ -684,7 +684,7 @@ export default function DashboardPage() {
                           onClick={() => { setDeletingId(song.id); deleteMutation.mutate({ songId: song.id }); }}
                           disabled={deletingId === song.id}
                         >
-                          <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "oklch(0.5 0.03 280)" : "var(--lnx-red)" }} />
+                          <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "#AA8E64" : "var(--lnx-red)" }} />
                         </button>
                       </div>
                     </div>
@@ -721,7 +721,7 @@ export default function DashboardPage() {
                         disabled={updateStatusMutation.isPending}
                         title="Track status"
                         style={{
-                          background: "oklch(0.13 0.04 270)",
+                          background: "#2C3438",
                           color: statusColor(song.status ?? "Published"),
                           border: `1px solid ${statusColor(song.status ?? "Published")}44`,
                           borderRadius: "6px",
@@ -733,7 +733,7 @@ export default function DashboardPage() {
                         }}
                       >
                         {["Draft", "Published", "Unlisted", "Deleted"].map(s => (
-                          <option key={s} value={s} style={{ background: "oklch(0.13 0.04 270)", color: statusColor(s) }}>{s}</option>
+                          <option key={s} value={s} style={{ background: "#2C3438", color: statusColor(s) }}>{s}</option>
                         ))}
                       </select>
                     </div>
@@ -749,7 +749,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Activity Feed</h2>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Activity Feed</h2>
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>All interactions on your songs — gifts, comments, and witnesses. Auto-refreshes every 30s.</p>
               </div>
             </div>
@@ -762,13 +762,13 @@ export default function DashboardPage() {
               />
             ) : activityLoading ? (
               <div className="text-center py-16">
-                <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
+                <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "#CBB183", borderTopColor: "transparent" }} />
               </div>
             ) : !activityEvents?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
-                <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
+              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+                <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No activity yet.</p>
-                <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Gifts, comments, and witnesses on your songs will appear here.</p>
+                <p className="text-xs" style={{ color: "#3F4A50" }}>Gifts, comments, and witnesses on your songs will appear here.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -776,14 +776,14 @@ export default function DashboardPage() {
                   const isTip = evt.type === "TIP";
                   const isComment = evt.type === "COMMENT";
                   const payload = evt.payload as any ?? {};
-                  const accentColor = isTip ? "oklch(0.84 0.155 85)" : isComment ? "oklch(0.65 0.2 300)" : "var(--lnx-green)";
+                  const accentColor = isTip ? "#CBB183" : isComment ? "#CBB183" : "var(--lnx-green)";
                   return (
                     <div
                       key={evt.id}
                       className="rounded-xl p-3 flex gap-3 items-start"
                       style={{
-                        background: isTip ? "oklch(0.84 0.155 85 / 0.06)" : "oklch(0.125 0.028 52)",
-                        border: `1px solid ${isTip ? "oklch(0.84 0.155 85 / 0.25)" : "#CBB183"}`,
+                        background: isTip ? "rgba(203,177,131,0.06)" : "#2C3438",
+                        border: `1px solid ${isTip ? "rgba(203,177,131,0.22)" : "#CBB183"}`,
                       }}
                     >
                       {/* Icon */}
@@ -803,11 +803,11 @@ export default function DashboardPage() {
                              isComment ? "Comment" : evt.type.replace(/_/g, " ")}
                           </span>
                           {evt.actorName && (
-                            <span className="text-xs" style={{ color: "oklch(0.7 0.03 280)" }}>by {evt.actorName}</span>
+                            <span className="text-xs" style={{ color: "#AA8E64" }}>by {evt.actorName}</span>
                           )}
                           {evt.songTitle && (
                             <Link href={(evt as any).projectSlug ? `/project/${(evt as any).projectSlug}` : ((evt as any).songLink ?? `/song/${evt.workId}`)}>
-                              <span className="text-xs hover:underline truncate" style={{ color: "oklch(0.55 0.04 280)" }}>on "{evt.songTitle}"</span>
+                              <span className="text-xs hover:underline truncate" style={{ color: "#3F4A50" }}>on "{evt.songTitle}"</span>
                             </Link>
                           )}
                         </div>
@@ -816,7 +816,7 @@ export default function DashboardPage() {
                             {payload.message || payload.text}
                           </p>
                         )}
-                        <p className="text-xs mt-0.5" style={{ color: "oklch(0.38 0.02 280)" }}>
+                        <p className="text-xs mt-0.5" style={{ color: "#3F4A50" }}>
                           {new Date(evt.createdAt).toLocaleString()}
                         </p>
                       </div>
@@ -839,7 +839,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>My AI Transforms</h2>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>My AI Transforms</h2>
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>AI-generated derivatives of your songs, linked to their original Witness IDs.</p>
               </div>
             </div>
@@ -851,33 +851,33 @@ export default function DashboardPage() {
                 route="/dashboard#transforms"
               />
             ) : !transforms?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
-                <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
+              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+                <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No AI transforms yet.</p>
-                <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Open any song page and use the AI Transform button to create a derivative.</p>
+                <p className="text-xs" style={{ color: "#3F4A50" }}>Open any song page and use the AI Transform button to create a derivative.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {transforms.map((t: any) => {
                   const { label, color } = transformStatusLabel(t.status);
                   return (
-                    <div key={t.id} className="rounded-xl p-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}>
+                    <div key={t.id} className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
                       <div className="flex items-start gap-4">
                         {/* Status icon */}
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.11 0.025 270)" }}>
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2C3438" }}>
                           {transformStatusIcon(t.status)}
                         </div>
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-sm truncate" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+                            <p className="font-medium text-sm truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                               Transform of "{t.originalSongTitle || `Song #${t.originalSongId}`}"
                             </p>
                             <Badge className="text-xs px-1.5 py-0 flex-shrink-0" style={{ background: `${color}20`, color, fontSize: "9px" }}>
                               {label}
                             </Badge>
                           </div>
-                          <p className="text-xs mb-1 line-clamp-2" style={{ color: "oklch(0.6 0.04 280)" }}>
+                          <p className="text-xs mb-1 line-clamp-2" style={{ color: "#AA8E64" }}>
                             <span style={{ color: "#E2E8F0" }}>Prompt: </span>{t.prompt}
                           </p>
                           <div className="flex items-center gap-3 flex-wrap">
@@ -886,12 +886,12 @@ export default function DashboardPage() {
                             )}
                             {t.originalWitnessId && (
                               <Link href={`/verify/${t.originalWitnessId}`}>
-                                <span className="text-xs cursor-pointer hover:underline" style={{ color: "oklch(0.65 0.2 300)" }}>
+                                <span className="text-xs cursor-pointer hover:underline" style={{ color: "#CBB183" }}>
                                   WID: {t.originalWitnessId.slice(0, 12)}…
                                 </span>
                               </Link>
                             )}
-                            <span className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>
+                            <span className="text-xs" style={{ color: "#3F4A50" }}>
                               {new Date(t.createdAt).toLocaleDateString()}
                             </span>
                           </div>
@@ -908,7 +908,7 @@ export default function DashboardPage() {
                                   className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
                                   title="Play transform"
                                 >
-                                  <Play className="w-3 h-3" style={{ color: "oklch(0.84 0.155 85)" }} />
+                                  <Play className="w-3 h-3" style={{ color: "#CBB183" }} />
                                 </button>
                               </a>
                               <a href={t.outputUrl} download>
@@ -916,7 +916,7 @@ export default function DashboardPage() {
                                   className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
                                   title="Download transform"
                                 >
-                                  <Download className="w-3 h-3" style={{ color: "oklch(0.65 0.2 300)" }} />
+                                  <Download className="w-3 h-3" style={{ color: "#CBB183" }} />
                                 </button>
                               </a>
                             </>
@@ -944,13 +944,13 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>My Collections</h2>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>My Collections</h2>
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>Albums and batch-registered works with a collective Witness ID binding all tracks together.</p>
               </div>
               <Link href="/batch-upload">
                 <button
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                  style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                  style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
                 >
                   <Upload className="w-3 h-3" /> New Collection
                 </button>
@@ -968,14 +968,14 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 border-2 border-[#CBB183]/30 border-t-[#CBB183] rounded-full animate-spin mx-auto" />
               </div>
             ) : !myCollections?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
-                <Library className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
+              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+                <Library className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No collections yet.</p>
-                <p className="text-xs mb-4" style={{ color: "oklch(0.4 0.03 280)" }}>Upload an album or batch of songs to generate a Collection WID that binds all works into one origin record.</p>
+                <p className="text-xs mb-4" style={{ color: "#3F4A50" }}>Upload an album or batch of songs to generate a Collection WID that binds all works into one origin record.</p>
                 <Link href="/batch-upload">
                   <button
                     className="px-4 py-2 rounded-lg text-sm font-semibold"
-                    style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                    style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
                   >
                     Upload Your First Collection
                   </button>
@@ -998,13 +998,13 @@ export default function DashboardPage() {
                   <div
                     key={col.id}
                     className="rounded-xl p-5"
-                    style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}
+                    style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.22)" }}
                   >
                     <div className="flex items-start gap-4">
                       {/* Cover art thumbnail */}
                       <div
                         className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 group relative cursor-pointer"
-                        style={{ border: "1px solid oklch(0.84 0.155 85 / 0.3)", background: "oklch(0.09 0.02 280)" }}
+                        style={{ border: "1px solid rgba(203,177,131,0.28)", background: "#2C3438" }}
                         onClick={() => {
                           if (col.coverArtUrl) {
                             setCollectionCoverState({ collectionId: col.id, currentUrl: col.coverArtUrl, pendingUrl: null, position: { x: col.coverPositionX ?? 50, y: col.coverPositionY ?? 50 } });
@@ -1029,22 +1029,22 @@ export default function DashboardPage() {
                           </>
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                            <Camera className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }} />
-                            <span className="text-[8px]" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }}>Add Cover</span>
+                            <Camera className="w-4 h-4" style={{ color: "rgba(203,177,131,0.45)" }} />
+                            <span className="text-[8px]" style={{ color: "rgba(203,177,131,0.45)" }}>Add Cover</span>
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-base mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                        <p className="font-bold text-base mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
                           {col.name}
                         </p>
-                        <p className="text-xs font-mono mb-2" style={{ color: "oklch(0.84 0.155 85)" }}>
+                        <p className="text-xs font-mono mb-2" style={{ color: "#CBB183" }}>
                           {col.collectionWid}
                         </p>
-                        <p className="text-xs mb-3" style={{ color: "oklch(0.5 0.04 280)" }}>
+                        <p className="text-xs mb-3" style={{ color: "#3F4A50" }}>
                           {col.trackCount ?? "?"} tracks &middot; Registered {new Date(col.createdAt).toLocaleDateString()}
                         </p>
-                        <p className="text-[10px] font-mono break-all" style={{ color: "oklch(0.38 0.02 280)" }}>
+                        <p className="text-[10px] font-mono break-all" style={{ color: "#3F4A50" }}>
                           Hash: {col.collectiveHash?.slice(0, 32)}…
                         </p>
                       </div>
@@ -1053,7 +1053,7 @@ export default function DashboardPage() {
                         {col.coverArtUrl && (
                           <button
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                            style={{ border: "1px solid oklch(0.84 0.155 85 / 0.3)", color: "oklch(0.84 0.155 85 / 0.8)", background: "transparent" }}
+                            style={{ border: "1px solid rgba(203,177,131,0.28)", color: "rgba(203,177,131,0.75)", background: "transparent" }}
                             onClick={() => { (coverInputRef.current as any)._activeCol = col; coverInputRef.current?.click(); }}
                           >
                             <Camera className="w-3 h-3" /> Change Cover
@@ -1062,7 +1062,7 @@ export default function DashboardPage() {
                         <a href={`/verify/${col.collectionWid}`} target="_blank" rel="noopener noreferrer">
                           <button
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                            style={{ border: "1px solid oklch(0.84 0.155 85 / 0.5)", color: "oklch(0.84 0.155 85)", background: "transparent" }}
+                            style={{ border: "1px solid rgba(203,177,131,0.45)", color: "#CBB183", background: "transparent" }}
                           >
                             <ExternalLink className="w-3 h-3" /> Verify
                           </button>
@@ -1071,7 +1071,7 @@ export default function DashboardPage() {
                           <a href={col.pdfUrl} target="_blank" rel="noopener noreferrer">
                             <button
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
+                              style={{ background: "#CBB183", color: "#E6CDAE" }}
                             >
                               <Download className="w-3 h-3" /> Certificate
                             </button>
@@ -1079,7 +1079,7 @@ export default function DashboardPage() {
                         )}
                         <button
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                          style={{ border: "1px solid oklch(0.3 0.02 280)", color: "oklch(0.55 0.04 280)", background: "transparent" }}
+                          style={{ border: "1px solid rgba(203,177,131,0.25)", color: "#3F4A50", background: "transparent" }}
                           onClick={() => regenCertMutation.mutate({ collectionWid: col.collectionWid })}
                           disabled={regenCertMutation.isPending}
                           title="Regenerate Certificate"
@@ -1121,8 +1121,8 @@ export default function DashboardPage() {
         {activeTab === "analytics" && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Creator Analytics</h2>
-              <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>All-time data · Updated in real time</p>
+              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Creator Analytics</h2>
+              <p className="text-xs" style={{ color: "#AA8E64" }}>All-time data · Updated in real time</p>
             </div>
             {analyticsError ? (
               <DashboardErrorCard
@@ -1133,69 +1133,69 @@ export default function DashboardPage() {
               />
             ) : analyticsLoading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "oklch(0.75 0.15 260)", borderTopColor: "transparent" }} />
+                <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#38BDF8", borderTopColor: "transparent" }} />
               </div>
             ) : !analyticsData ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
-                <LineChart className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.15 260)" }} />
-                <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>No analytics data available yet.</p>
+              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+                <LineChart className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#38BDF8" }} />
+                <p className="text-sm" style={{ color: "#AA8E64" }}>No analytics data available yet.</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {/* Summary stat cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { label: "Total Plays", value: analyticsData.totalPlays, icon: Play, color: "oklch(0.84 0.155 85)" },
-                    { label: "Total Likes", value: analyticsData.totalLikes, icon: Heart, color: "oklch(0.65 0.2 25)" },
-                    { label: "Gifts Received", value: analyticsData.totalGiftsReceived, icon: Gift, color: "oklch(0.55 0.18 160)" },
-                    { label: "Downloads", value: analyticsData.totalDownloads, icon: Download, color: "oklch(0.65 0.18 220)" },
+                    { label: "Total Plays", value: analyticsData.totalPlays, icon: Play, color: "#CBB183" },
+                    { label: "Total Likes", value: analyticsData.totalLikes, icon: Heart, color: "#EF4444" },
+                    { label: "Gifts Received", value: analyticsData.totalGiftsReceived, icon: Gift, color: "#4ADE80" },
+                    { label: "Downloads", value: analyticsData.totalDownloads, icon: Download, color: "#38BDF8" },
                   ].map(({ label, value, icon: Icon, color }) => (
-                    <div key={label} className="rounded-xl p-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                    <div key={label} className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
                       <div className="flex items-center gap-2 mb-2">
                         <Icon className="w-4 h-4" style={{ color }} />
-                        <span className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{label}</span>
+                        <span className="text-xs" style={{ color: "#AA8E64" }}>{label}</span>
                       </div>
                       <p className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color }}>{value.toLocaleString()}</p>
                     </div>
                   ))}
                 </div>
                 {/* 30-day activity trend */}
-                <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
                   <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-4 h-4" style={{ color: "oklch(0.75 0.15 260)" }} />
-                    <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>30-Day Activity Trend</h3>
-                    <span className="text-xs ml-auto" style={{ color: "oklch(0.5 0.03 280)" }}>Likes · Gifts · Comments · Witnesses</span>
+                    <TrendingUp className="w-4 h-4" style={{ color: "#38BDF8" }} />
+                    <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>30-Day Activity Trend</h3>
+                    <span className="text-xs ml-auto" style={{ color: "#AA8E64" }}>Likes · Gifts · Comments · Witnesses</span>
                   </div>
                   <ResponsiveContainer width="100%" height={180}>
                     <AreaChart data={analyticsData.playTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="analyticsGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="oklch(0.75 0.15 260)" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="oklch(0.75 0.15 260)" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#38BDF8" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.2 0.02 280)" />
-                      <XAxis dataKey="date" tick={{ fill: "oklch(0.45 0.03 280)", fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} />
-                      <YAxis tick={{ fill: "oklch(0.45 0.03 280)", fontSize: 10 }} allowDecimals={false} />
-                      <Tooltip contentStyle={{ background: "oklch(0.1 0.03 280)", border: "1px solid #C3AB7D", borderRadius: "8px", color: "oklch(0.9 0.02 85)" }} />
-                      <Area type="monotone" dataKey="plays" stroke="oklch(0.75 0.15 260)" fill="url(#analyticsGrad)" strokeWidth={2} dot={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2C3438" />
+                      <XAxis dataKey="date" tick={{ fill: "#AA8E64", fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} />
+                      <YAxis tick={{ fill: "#AA8E64", fontSize: 10 }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "#2C3438", border: "1px solid #C3AB7D", borderRadius: "8px", color: "#E6CDAE" }} />
+                      <Area type="monotone" dataKey="plays" stroke="#38BDF8" fill="url(#analyticsGrad)" strokeWidth={2} dot={false} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
                 {/* Plays by track */}
                 {analyticsData.playsByTrack.filter((t: { plays: number }) => t.plays > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                  <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
                     <div className="flex items-center gap-2 mb-4">
-                      <Play className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
-                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Plays by Track</h3>
+                      <Play className="w-4 h-4" style={{ color: "#CBB183" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Plays by Track</h3>
                     </div>
                     <div className="space-y-2">
                       {[...analyticsData.playsByTrack].sort((a, b) => b.plays - a.plays).slice(0, 10).map((track) => (
                         <div key={track.trackId} className="flex items-center gap-3">
-                          <span className="text-xs flex-1 truncate" style={{ color: "oklch(0.7 0.04 280)" }}>{track.title}</span>
+                          <span className="text-xs flex-1 truncate" style={{ color: "#DACAAA" }}>{track.title}</span>
                           <div className="flex items-center gap-2">
-                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.plays / Math.max(...analyticsData.playsByTrack.map((t: { plays: number }) => t.plays), 1)) * 120))}px`, background: "oklch(0.84 0.155 85)" }} />
-                            <span className="text-xs font-mono w-8 text-right" style={{ color: "oklch(0.84 0.155 85)" }}>{track.plays}</span>
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.plays / Math.max(...analyticsData.playsByTrack.map((t: { plays: number }) => t.plays), 1)) * 120))}px`, background: "#CBB183" }} />
+                            <span className="text-xs font-mono w-8 text-right" style={{ color: "#CBB183" }}>{track.plays}</span>
                           </div>
                         </div>
                       ))}
@@ -1204,18 +1204,18 @@ export default function DashboardPage() {
                 )}
                 {/* Likes by track */}
                 {analyticsData.likesByTrack.filter((t: { likes: number }) => t.likes > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                  <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
                     <div className="flex items-center gap-2 mb-4">
-                      <Heart className="w-4 h-4" style={{ color: "oklch(0.65 0.2 25)" }} />
-                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Likes by Track</h3>
+                      <Heart className="w-4 h-4" style={{ color: "#EF4444" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Likes by Track</h3>
                     </div>
                     <div className="space-y-2">
                       {[...analyticsData.likesByTrack].sort((a, b) => b.likes - a.likes).slice(0, 10).map((track) => (
                         <div key={track.trackId} className="flex items-center gap-3">
-                          <span className="text-xs flex-1 truncate" style={{ color: "oklch(0.7 0.04 280)" }}>{track.title}</span>
+                          <span className="text-xs flex-1 truncate" style={{ color: "#DACAAA" }}>{track.title}</span>
                           <div className="flex items-center gap-2">
-                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.likes / Math.max(...analyticsData.likesByTrack.map((t: { likes: number }) => t.likes), 1)) * 120))}px`, background: "oklch(0.65 0.2 25)" }} />
-                            <span className="text-xs font-mono w-8 text-right" style={{ color: "oklch(0.65 0.2 25)" }}>{track.likes}</span>
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.likes / Math.max(...analyticsData.likesByTrack.map((t: { likes: number }) => t.likes), 1)) * 120))}px`, background: "#EF4444" }} />
+                            <span className="text-xs font-mono w-8 text-right" style={{ color: "#EF4444" }}>{track.likes}</span>
                           </div>
                         </div>
                       ))}
@@ -1224,17 +1224,17 @@ export default function DashboardPage() {
                 )}
                 {/* Gifts by track */}
                 {analyticsData.giftsByTrack.filter((t: { giftCount: number }) => t.giftCount > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}>
+                  <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
                     <div className="flex items-center gap-2 mb-4">
-                      <Gift className="w-4 h-4" style={{ color: "oklch(0.55 0.18 160)" }} />
-                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Gifts by Track</h3>
+                      <Gift className="w-4 h-4" style={{ color: "#4ADE80" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Gifts by Track</h3>
                     </div>
                     <div className="space-y-2">
                       {[...analyticsData.giftsByTrack].sort((a, b) => b.giftCount - a.giftCount).slice(0, 10).map((track) => (
                         <div key={track.trackId} className="flex items-center gap-3">
-                          <span className="text-xs flex-1 truncate" style={{ color: "oklch(0.7 0.04 280)" }}>{track.title}</span>
+                          <span className="text-xs flex-1 truncate" style={{ color: "#DACAAA" }}>{track.title}</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs" style={{ color: "oklch(0.55 0.18 160)" }}>{track.giftCount} gift{track.giftCount !== 1 ? 's' : ''}</span>
+                            <span className="text-xs" style={{ color: "#4ADE80" }}>{track.giftCount} gift{track.giftCount !== 1 ? 's' : ''}</span>
                             <span className="text-xs font-mono" style={{ color: "var(--lnx-green)" }}>${(track.totalAmount / 100).toFixed(2)}</span>
                           </div>
                         </div>
@@ -1244,15 +1244,15 @@ export default function DashboardPage() {
                 )}
                 {/* Total gifts revenue */}
                 {analyticsData.totalAmountReceived > 0 && (
-                  <div className="rounded-xl p-4 flex items-center gap-4" style={{ background: "oklch(0.55 0.18 160 / 0.08)", border: "1px solid oklch(0.55 0.18 160 / 0.3)" }}>
-                    <DollarSign className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.55 0.18 160)" }} />
+                  <div className="rounded-xl p-4 flex items-center gap-4" style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.3)" }}>
+                    <DollarSign className="w-5 h-5 flex-shrink-0" style={{ color: "#4ADE80" }} />
                     <div>
-                      <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>Total Gift Revenue (gross)</p>
+                      <p className="text-xs" style={{ color: "#AA8E64" }}>Total Gift Revenue (gross)</p>
                       <p className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--lnx-green)" }}>${(analyticsData.totalAmountReceived / 100).toFixed(2)}</p>
                     </div>
                     <div className="ml-auto text-right">
-                      <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>Your cut (90%)</p>
-                      <p className="text-lg font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>${(analyticsData.totalAmountReceived * 0.9 / 100).toFixed(2)}</p>
+                      <p className="text-xs" style={{ color: "#AA8E64" }}>Your cut (90%)</p>
+                      <p className="text-lg font-bold" style={{ color: "#CBB183" }}>${(analyticsData.totalAmountReceived * 0.9 / 100).toFixed(2)}</p>
                     </div>
                   </div>
                 )}
@@ -1286,28 +1286,28 @@ const DISCORD_EVENTS = [
     label: "WID Minted",
     description: "Fires when a new Witness ID is issued for a track",
     icon: "🔐",
-    color: "oklch(0.84 0.155 85)",
+    color: "#CBB183",
   },
   {
     key: "track_upload" as const,
     label: "Track Uploaded",
     description: "Fires when a new track is successfully uploaded",
     icon: "🎵",
-    color: "oklch(0.75 0.18 140)",
+    color: "#4ADE80",
   },
   {
     key: "tip_received" as const,
     label: "Tip Received",
     description: "Fires when a fan sends you a gift on one of your tracks",
     icon: "💛",
-    color: "oklch(0.84 0.155 85)",
+    color: "#CBB183",
   },
   {
     key: "like_surge" as const,
     label: "Like Surge",
     description: "Fires when a track hits 10, 50, 100, or 500 likes",
     icon: "🔥",
-    color: "oklch(0.75 0.18 30)",
+    color: "#EF4444",
   },
 ] as const;
 
@@ -1342,12 +1342,12 @@ function DiscordIntegrationTab() {
   return (
     <div className="space-y-6 py-4">
       {/* Header */}
-      <div className="flex items-start gap-4 p-5 rounded-xl" style={{ background: "oklch(0.45 0.2 265 / 0.12)", border: "1px solid oklch(0.45 0.2 265 / 0.3)" }}>
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: "oklch(0.45 0.2 265 / 0.2)" }}>🔔</div>
+      <div className="flex items-start gap-4 p-5 rounded-xl" style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.3)" }}>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: "rgba(203,177,131,0.2)" }}>🔔</div>
         <div>
-          <h2 className="text-lg font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Discord Webhook Integration</h2>
-          <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>Get real-time notifications in your Discord server when platform events happen. Paste a Discord webhook URL for each event you want to track.</p>
-          <a href="https://support.discord.com/hc/en-us/articles/228383668" target="_blank" rel="noopener noreferrer" className="text-xs mt-2 inline-flex items-center gap-1" style={{ color: "oklch(0.75 0.18 265)" }}>
+          <h2 className="text-lg font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Discord Webhook Integration</h2>
+          <p className="text-sm" style={{ color: "#AA8E64" }}>Get real-time notifications in your Discord server when platform events happen. Paste a Discord webhook URL for each event you want to track.</p>
+          <a href="https://support.discord.com/hc/en-us/articles/228383668" target="_blank" rel="noopener noreferrer" className="text-xs mt-2 inline-flex items-center gap-1" style={{ color: "#CBB183" }}>
             <ExternalLink className="w-3 h-3" /> How to create a Discord webhook
           </a>
         </div>
@@ -1359,21 +1359,21 @@ function DiscordIntegrationTab() {
         const url = urls[ev.key] ?? "";
         const isDirty = url !== (saved?.webhookUrl ?? "");
         return (
-          <div key={ev.key} className="p-5 rounded-xl" style={{ background: "oklch(0.12 0.02 280 / 0.6)", border: "1px solid oklch(0.2 0.03 280)" }}>
+          <div key={ev.key} className="p-5 rounded-xl" style={{ background: "rgba(44,52,56,0.6)", border: "1px solid #2C3438" }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{ev.icon}</span>
                 <div>
                   <p className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: ev.color }}>{ev.label}</p>
-                  <p className="text-xs" style={{ color: "oklch(0.55 0.03 280)" }}>{ev.description}</p>
+                  <p className="text-xs" style={{ color: "#AA8E64" }}>{ev.description}</p>
                 </div>
               </div>
               {saved && (
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <span className="text-xs" style={{ color: "oklch(0.55 0.03 280)" }}>{saved.enabled ? "Enabled" : "Disabled"}</span>
+                  <span className="text-xs" style={{ color: "#AA8E64" }}>{saved.enabled ? "Enabled" : "Disabled"}</span>
                   <div
                     className="relative w-10 h-5 rounded-full transition-colors cursor-pointer"
-                    style={{ background: saved.enabled ? ev.color : "oklch(0.25 0.03 280)" }}
+                    style={{ background: saved.enabled ? ev.color : "#2C3438" }}
                     onClick={() => toggleWebhook.mutate({ event: ev.key, enabled: !saved.enabled })}
                   >
                     <div className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform" style={{ transform: saved.enabled ? "translateX(22px)" : "translateX(2px)" }} />
@@ -1389,9 +1389,9 @@ function DiscordIntegrationTab() {
                 onChange={e => setUrls(prev => ({ ...prev, [ev.key]: e.target.value }))}
                 className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
                 style={{
-                  background: "#E6CDAE",
-                  border: "1px solid oklch(0.22 0.03 280)",
-                  color: "oklch(0.85 0.02 85)",
+                  background: "#353E43",
+                  border: "1px solid #2C3438",
+                  color: "#DACAAA",
                   fontFamily: "monospace",
                 }}
               />
@@ -1399,7 +1399,7 @@ function DiscordIntegrationTab() {
                 size="sm"
                 disabled={!url || !isDirty || saveWebhook.isPending}
                 onClick={() => saveWebhook.mutate({ event: ev.key, webhookUrl: url, enabled: saved?.enabled ?? true })}
-                style={{ background: isDirty && url ? ev.color : "oklch(0.2 0.03 280)", color: "#E6CDAE", opacity: (!url || !isDirty) ? 0.5 : 1 }}
+                style={{ background: isDirty && url ? ev.color : "#2C3438", color: "#E6CDAE", opacity: (!url || !isDirty) ? 0.5 : 1 }}
               >
                 {saveWebhook.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
                 Save
@@ -1415,7 +1415,7 @@ function DiscordIntegrationTab() {
                       await testWebhook.mutateAsync({ event: ev.key, webhookUrl: saved.webhookUrl });
                       setTesting(null);
                     }}
-                    style={{ borderColor: "oklch(0.3 0.04 280)", color: "oklch(0.7 0.04 280)" }}
+                    style={{ borderColor: "#2C3438", color: "#DACAAA" }}
                   >
                     {testing === ev.key ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
                     Test
@@ -1424,7 +1424,7 @@ function DiscordIntegrationTab() {
                     size="sm"
                     variant="outline"
                     onClick={() => deleteWebhook.mutate({ event: ev.key })}
-                    style={{ borderColor: "oklch(0.4 0.15 30 / 0.4)", color: "oklch(0.65 0.15 30)" }}
+                    style={{ borderColor: "rgba(239,68,68,0.4)", color: "#EF4444" }}
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -1432,7 +1432,7 @@ function DiscordIntegrationTab() {
               )}
             </div>
             {saved && (
-              <p className="text-xs mt-2" style={{ color: "oklch(0.5 0.03 280)" }}>
+              <p className="text-xs mt-2" style={{ color: "#AA8E64" }}>
                 Last updated: {new Date(saved.updatedAt).toLocaleString()}
               </p>
             )}
@@ -1441,7 +1441,7 @@ function DiscordIntegrationTab() {
       })}
 
       {/* Rate limit note */}
-      <p className="text-xs text-center" style={{ color: "oklch(0.45 0.03 280)" }}>
+      <p className="text-xs text-center" style={{ color: "#AA8E64" }}>
         Webhooks are rate-limited to 30 requests per minute per event. Failures are silent and will not affect platform operations.
       </p>
     </div>
@@ -1497,22 +1497,22 @@ function ArchiveTab() {
   if (loading) return (
     <div className="text-center py-16">
       <div className="w-8 h-8 border-2 border-[#CBB183]/30 border-t-[#CBB183] rounded-full animate-spin mx-auto" />
-      <p className="text-sm mt-3" style={{ color: "oklch(0.6 0.04 280)" }}>Loading your archive…</p>
+      <p className="text-sm mt-3" style={{ color: "#AA8E64" }}>Loading your archive…</p>
     </div>
   );
 
   if (error) return (
-    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed oklch(0.65 0.18 25 / 0.4)" }}>
+    <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed rgba(239,68,68,0.4)" }}>
       <FileArchive className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--lnx-red)" }} />
       <p className="text-sm" style={{ color: "var(--lnx-red)" }}>{error}</p>
     </div>
   );
 
   if (!batchInfo || batchInfo.totalTracks === 0) return (
-    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
-      <PackageOpen className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.7 0.15 220)" }} />
+    <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+      <PackageOpen className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#38BDF8" }} />
       <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No tracks in your archive yet.</p>
-      <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Upload songs to build your archive. Each batch of up to 10 tracks can be downloaded as a ZIP with ID3-tagged audio and WID certificates.</p>
+      <p className="text-xs" style={{ color: "#3F4A50" }}>Upload songs to build your archive. Each batch of up to 10 tracks can be downloaded as a ZIP with ID3-tagged audio and WID certificates.</p>
     </div>
   );
 
@@ -1521,7 +1521,7 @@ function ArchiveTab() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Download My Archive</h2>
+          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Download My Archive</h2>
           <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>
             {batchInfo.totalTracks} track{batchInfo.totalTracks !== 1 ? "s" : ""} across {batchInfo.batches.length} batch{batchInfo.batches.length !== 1 ? "es" : ""}.
             Each ZIP includes ID3-tagged audio with embedded WID metadata and provenance certificates.
@@ -1532,12 +1532,12 @@ function ArchiveTab() {
       {/* Info callout */}
       <div
         className="rounded-xl p-4 mb-6 flex gap-3 items-start"
-        style={{ background: "oklch(0.55 0.18 220 / 0.08)", border: "1px solid oklch(0.55 0.18 220 / 0.25)" }}
+        style={{ background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.25)" }}
       >
-        <FileArchive className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "oklch(0.7 0.15 220)" }} />
+        <FileArchive className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#38BDF8" }} />
         <div>
-          <p className="text-sm font-semibold mb-0.5" style={{ color: "oklch(0.85 0.08 220)", fontFamily: "'Cinzel', serif" }}>Your WID travels with every file</p>
-          <p className="text-xs" style={{ color: "oklch(0.6 0.04 280)" }}>
+          <p className="text-sm font-semibold mb-0.5" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>Your WID travels with every file</p>
+          <p className="text-xs" style={{ color: "#AA8E64" }}>
             Every downloaded MP3 has your Witness ID embedded in its ID3 tags (TXXX:LNWID, TXXX:LN_VERIFY_URL).
             The ZIP also includes your WID certificate PDFs so provenance is always bundled with the music.
           </p>
@@ -1550,22 +1550,22 @@ function ArchiveTab() {
           <div
             key={batch.index}
             className="rounded-xl overflow-hidden"
-            style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.015 280)" }}
+            style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}
           >
             {/* Batch header row */}
             <div className="flex items-center justify-between gap-4 p-4">
               <div className="flex items-center gap-3 min-w-0">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: "oklch(0.55 0.18 220 / 0.15)", border: "1px solid oklch(0.55 0.18 220 / 0.3)" }}
+                  style={{ background: "rgba(56,189,248,0.15)", border: "1px solid rgba(56,189,248,0.3)" }}
                 >
-                  <FileArchive className="w-5 h-5" style={{ color: "oklch(0.7 0.15 220)" }} />
+                  <FileArchive className="w-5 h-5" style={{ color: "#38BDF8" }} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                  <p className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
                     Batch {batch.index + 1}
                   </p>
-                  <p className="text-xs" style={{ color: "oklch(0.55 0.04 280)" }}>
+                  <p className="text-xs" style={{ color: "#3F4A50" }}>
                     Tracks {batch.start}–{batch.end} &middot; {batch.trackCount} file{batch.trackCount !== 1 ? "s" : ""}
                   </p>
                 </div>
@@ -1573,7 +1573,7 @@ function ArchiveTab() {
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   className="text-xs px-2 py-1 rounded transition-colors"
-                  style={{ color: "oklch(0.55 0.04 280)", background: "transparent" }}
+                  style={{ color: "#3F4A50", background: "transparent" }}
                   onClick={() => setExpandedBatch(expandedBatch === batch.index ? null : batch.index)}
                 >
                   {expandedBatch === batch.index ? "▲ Hide" : "▼ Tracks"}
@@ -1581,7 +1581,7 @@ function ArchiveTab() {
                 <button
                   className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
                   style={{
-                    background: downloading === batch.index ? "oklch(0.55 0.18 220 / 0.3)" : "oklch(0.55 0.18 220)",
+                    background: downloading === batch.index ? "rgba(56,189,248,0.3)" : "#38BDF8",
                     color: "white",
                     fontFamily: "'Cinzel', serif",
                     opacity: downloading !== null && downloading !== batch.index ? 0.5 : 1,
@@ -1613,24 +1613,24 @@ function ArchiveTab() {
                     key={track.id}
                     className="flex items-center gap-3 px-4 py-2.5"
                     style={{
-                      borderBottom: ti < batch.tracks.length - 1 ? "1px solid oklch(0.15 0.01 280)" : "none",
+                      borderBottom: ti < batch.tracks.length - 1 ? "1px solid #2C3438" : "none",
                     }}
                   >
-                    <span className="text-xs w-5 text-right flex-shrink-0" style={{ color: "oklch(0.38 0.02 280)" }}>
+                    <span className="text-xs w-5 text-right flex-shrink-0" style={{ color: "#3F4A50" }}>
                       {batch.start + ti}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate" style={{ color: "oklch(0.85 0.02 85)" }}>{track.title}</p>
+                      <p className="text-sm truncate" style={{ color: "#DACAAA" }}>{track.title}</p>
                       {track.witnessId && (
-                        <p className="text-[10px] font-mono" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>{track.witnessId}</p>
+                        <p className="text-[10px] font-mono" style={{ color: "rgba(230,205,174,0.7)" }}>{track.witnessId}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       {track.hasAudio && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.55 0.18 145 / 0.15)", color: "var(--lnx-green)" }}>MP3</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(74,222,128,0.15)", color: "var(--lnx-green)" }}>MP3</span>
                       )}
                       {track.hasCertificate && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.12)", color: "oklch(0.84 0.155 85)" }}>WID</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183" }}>WID</span>
                       )}
                     </div>
                   </div>
@@ -1669,20 +1669,20 @@ function WIDCacheTab() {
   };
 
   const MEDIUM_COLOR: Record<string, string> = {
-    audio: "oklch(0.84 0.155 85)",
-    lyrics: "oklch(0.65 0.2 300)",
+    audio: "#CBB183",
+    lyrics: "#CBB183",
     manuscript: "var(--lnx-orange)",
-    comic: "oklch(0.65 0.18 220)",
+    comic: "#38BDF8",
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
             Witness Cache
           </h2>
-          <p className="text-xs mt-0.5" style={{ color: "oklch(0.5 0.03 280)" }}>
+          <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>
             Local offline proof memory · Stored on this device · 24-hour TTL · Max 50 entries
           </p>
         </div>
@@ -1692,7 +1692,7 @@ function WIDCacheTab() {
             variant="outline"
             onClick={handleClear}
             className="text-xs"
-            style={{ borderColor: "oklch(0.3 0.02 280)", color: "oklch(0.5 0.03 280)" }}
+            style={{ borderColor: "#3F4A50", color: "#AA8E64" }}
           >
             <Trash2 className="w-3 h-3 mr-1" /> Clear Cache
           </Button>
@@ -1700,10 +1700,10 @@ function WIDCacheTab() {
       </div>
 
       {snapshots.length === 0 ? (
-        <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #C3AB7D" }}>
-          <Fingerprint className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
-          <p className="text-sm mb-1" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>No witness records cached</p>
-          <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>
+        <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+          <Fingerprint className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
+          <p className="text-sm mb-1" style={{ color: "#DACAAA", fontFamily: "'Cinzel', serif" }}>No witness records cached</p>
+          <p className="text-xs" style={{ color: "#AA8E64" }}>
             After you publish a work, its WID will appear here as an offline proof record.
           </p>
         </div>
@@ -1712,12 +1712,12 @@ function WIDCacheTab() {
           {snapshots.map((snap) => {
             const Icon = MEDIUM_ICON[snap.contentType] ?? Fingerprint;
             const label = MEDIUM_LABEL[snap.contentType] ?? "WID";
-            const color = MEDIUM_COLOR[snap.contentType] ?? "oklch(0.84 0.155 85)";
+            const color = MEDIUM_COLOR[snap.contentType] ?? "#CBB183";
             return (
               <div
                 key={snap.wid}
                 className="flex items-start gap-4 p-4 rounded-xl"
-                style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.2 0.02 280)" }}
+                style={{ background: "#2C3438", border: "1px solid #2C3438" }}
               >
                 {/* Medium icon */}
                 <div
@@ -1739,13 +1739,13 @@ function WIDCacheTab() {
                     <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--lnx-green)" }} />
                     <span className="text-[10px]" style={{ color: "var(--lnx-green)" }}>Verified</span>
                   </div>
-                  <p className="text-sm font-semibold truncate mb-1" style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>
+                  <p className="text-sm font-semibold truncate mb-1" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                     {snap.title}
                   </p>
-                  <p className="text-[10px] font-mono break-all mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>
+                  <p className="text-[10px] font-mono break-all mb-1" style={{ color: "#3F4A50" }}>
                     {snap.wid}
                   </p>
-                  <p className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+                  <p className="text-[10px]" style={{ color: "#AA8E64" }}>
                     Witnessed {new Date(snap.timestamp).toLocaleString()}
                   </p>
                 </div>

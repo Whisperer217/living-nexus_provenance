@@ -65,20 +65,20 @@ export default function WelcomeModal() {
       <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
         <DialogContent
           className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
-          style={{ background: "oklch(0.22 0.015 200)", borderColor: "oklch(0.84 0.155 85 / 0.4)" }}
+          style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.35)" }}
         >
           <DialogDescription className="sr-only">
             Welcome back, Founder's Era supporter.
           </DialogDescription>
 
           {/* Gold header band */}
-          <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid oklch(0.84 0.155 85 / 0.2)" }}>
+          <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid rgba(203,177,131,0.18)" }}>
             <div className="text-4xl mb-3">{TIER_ICON[tier]}</div>
             <DialogTitle className="text-xl font-bold mb-1"
-              style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+              style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
               Welcome back, {TIER_LABEL[tier]}.
             </DialogTitle>
-            <p className="text-sm" style={{ color: "oklch(0.84 0.155 85)" }}>
+            <p className="text-sm" style={{ color: "#CBB183" }}>
               You kept the light on.
             </p>
           </div>
@@ -89,7 +89,7 @@ export default function WelcomeModal() {
               Your name is written in the story of Living Nexus. The sanctuary stands because you were here in the founding generation.
             </p>
             {supporterStatus && (
-              <p className="text-xs mt-3" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>
+              <p className="text-xs mt-3" style={{ color: "rgba(230,205,174,0.7)" }}>
                 Total gifted: ${supporterStatus.totalGifted.toFixed(2)}
               </p>
             )}
@@ -100,7 +100,7 @@ export default function WelcomeModal() {
             <Button
               className="flex-1 font-semibold"
               onClick={handleDismiss}
-              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
+              style={{ background: "#CBB183", color: "#E6CDAE" }}
             >
               Enter the Sanctuary
             </Button>
@@ -108,7 +108,7 @@ export default function WelcomeModal() {
               <Button
                 variant="outline"
                 className="w-full"
-                style={{ borderColor: "oklch(0.84 0.155 85 / 0.4)", color: "oklch(0.84 0.155 85)" }}
+                style={{ borderColor: "rgba(203,177,131,0.35)", color: "#CBB183" }}
               >
                 View Supporters Wall
               </Button>
@@ -124,7 +124,7 @@ export default function WelcomeModal() {
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
       <DialogContent
         className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
-        style={{ background: "oklch(0.22 0.015 200)", borderColor: "oklch(0.30 0.015 200)" }}
+        style={{ background: "#2C3438", borderColor: "#2C3438" }}
       >
         {/* Hidden accessibility description */}
         <DialogDescription className="sr-only">
@@ -132,13 +132,13 @@ export default function WelcomeModal() {
         </DialogDescription>
 
         {/* Gold header band */}
-        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid oklch(0.30 0.015 200)" }}>
+        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid #2C3438" }}>
           <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-            style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
-            <Music2 className="w-7 h-7" style={{ color: "oklch(0.84 0.155 85)" }} />
+            style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)" }}>
+            <Music2 className="w-7 h-7" style={{ color: "#CBB183" }} />
           </div>
           <DialogTitle className="text-xl font-bold mb-1"
-            style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}>
+            style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
             Welcome to Living Nexus
           </DialogTitle>
           <p className="text-sm" style={{ color: "#94A3B8" }}>
@@ -150,17 +150,17 @@ export default function WelcomeModal() {
         <div className="px-6 py-5 space-y-4">
           {[
             {
-              icon: <Shield className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.75 0.18 145)" }} />,
+              icon: <Shield className="w-5 h-5 flex-shrink-0" style={{ color: "#4ADE80" }} />,
               title: "Your music, protected",
               desc: "Every track you upload receives a Witness ID (WID) — a cryptographic timestamp that proves you created it first. WIDs support, but do not replace, official copyright registration.",
             },
             {
-              icon: <Music2 className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.84 0.155 85)" }} />,
+              icon: <Music2 className="w-5 h-5 flex-shrink-0" style={{ color: "#CBB183" }} />,
               title: "Upload and share",
               desc: "Add songs, attach lyrics, set AI consent, and share directly with your audience — no algorithm deciding who hears you.",
             },
             {
-              icon: <Users className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.7 0.18 260)" }} />,
+              icon: <Users className="w-5 h-5 flex-shrink-0" style={{ color: "#38BDF8" }} />,
               title: "Join the community",
               desc: "Connect with other independent artists, get feedback, and stay updated on new features in our Discord.",
             },
@@ -175,11 +175,11 @@ export default function WelcomeModal() {
           ))}
 
           {/* Founder's Era CTA for new users */}
-          <div className="rounded-xl border px-4 py-3 mt-2" style={{ background: "oklch(0.125 0.028 52)", borderColor: "oklch(0.84 0.155 85 / 0.25)" }}>
-            <p className="text-xs font-bold mb-0.5" style={{ color: "oklch(0.84 0.155 85)" }}>✦ Founder's Era — Genesis Day, March 2026</p>
+          <div className="rounded-xl border px-4 py-3 mt-2" style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.22)" }}>
+            <p className="text-xs font-bold mb-0.5" style={{ color: "#CBB183" }}>✦ Founder's Era — Genesis Day, March 2026</p>
             <p className="text-xs" style={{ color: "#94A3B8" }}>
               Support the platform during its founding 90 days. Your name lives here forever.{" "}
-              <Link href="/founders" onClick={handleDismiss} className="underline" style={{ color: "oklch(0.84 0.155 85)" }}>
+              <Link href="/founders" onClick={handleDismiss} className="underline" style={{ color: "#CBB183" }}>
                 Learn more →
               </Link>
             </p>
@@ -191,7 +191,7 @@ export default function WelcomeModal() {
           <Button
             className="flex-1 font-semibold"
             onClick={handleDismiss}
-            style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
+            style={{ background: "#CBB183", color: "#E6CDAE" }}
           >
             Get Started
           </Button>
@@ -205,7 +205,7 @@ export default function WelcomeModal() {
             <Button
               variant="outline"
               className="w-full gap-2"
-              style={{ borderColor: "oklch(0.7 0.18 260 / 0.5)", color: "oklch(0.7 0.18 260)" }}
+              style={{ borderColor: "rgba(56,189,248,0.5)", color: "#38BDF8" }}
             >
               <ExternalLink className="w-4 h-4" />
               Join Discord

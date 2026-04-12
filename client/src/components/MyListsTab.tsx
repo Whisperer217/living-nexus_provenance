@@ -93,7 +93,7 @@ function ManageTrackRow({
       onDragOver={(e) => e.preventDefault()}
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors select-none"
       style={{
-        background: "oklch(0.125 0.028 52)",
+        background: "#2C3438",
         border: "1px solid #CBB183",
         cursor: "grab",
       }}
@@ -101,13 +101,13 @@ function ManageTrackRow({
       {/* Drag handle */}
       <GripVertical
         size={14}
-        style={{ color: "oklch(0.45 0.03 280)", flexShrink: 0 }}
+        style={{ color: "#AA8E64", flexShrink: 0 }}
       />
 
       {/* Position */}
       <span
         className="text-[11px] w-4 text-center flex-shrink-0"
-        style={{ color: "oklch(0.5 0.03 280)" }}
+        style={{ color: "#AA8E64" }}
       >
         {idx + 1}
       </span>
@@ -125,7 +125,7 @@ function ManageTrackRow({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Music size={10} style={{ color: "oklch(0.84 0.155 85 / 0.5)" }} />
+            <Music size={10} style={{ color: "rgba(203,177,131,0.45)" }} />
           </div>
         )}
       </div>
@@ -134,7 +134,7 @@ function ManageTrackRow({
       <div className="flex-1 min-w-0">
         <p
           className="text-[12px] font-medium truncate"
-          style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}
+          style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
         >
           {track.title}
         </p>
@@ -152,7 +152,7 @@ function ManageTrackRow({
         className="w-6 h-6 rounded-full flex items-center justify-center transition-colors hover:badge-error flex-shrink-0"
         title="Remove from list"
       >
-        <Trash2 size={11} style={{ color: "oklch(0.65 0.18 25)" }} />
+        <Trash2 size={11} style={{ color: "#EF4444" }} />
       </button>
     </div>
   );
@@ -183,9 +183,9 @@ function VersionHistoryPanel({ playlistId }: { playlistId: number }) {
     return (
       <div
         className="mt-3 rounded-xl p-4 text-center"
-        style={{ background: "oklch(0.10 0.03 270 / 0.6)", border: "1px dashed #C3AB7D" }}
+        style={{ background: "rgba(44,52,56,0.6)", border: "1px dashed #C3AB7D" }}
       >
-        <p className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+        <p className="text-[11px]" style={{ color: "#AA8E64" }}>
           No versions saved yet. Save a version to create an immutable snapshot of this list's ordering.
         </p>
       </div>
@@ -198,34 +198,34 @@ function VersionHistoryPanel({ playlistId }: { playlistId: number }) {
         <div
           key={v.id}
           className="flex items-start gap-3 rounded-xl px-3 py-2.5"
-          style={{ background: "oklch(0.10 0.03 270 / 0.6)", border: "1px solid #CBB183" }}
+          style={{ background: "rgba(44,52,56,0.6)", border: "1px solid #CBB183" }}
         >
           <div
             className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-            style={{ background: "oklch(0.65 0.2 300 / 0.12)", border: "1px solid oklch(0.65 0.2 300 / 0.25)" }}
+            style={{ background: "rgba(203,177,131,0.10)", border: "1px solid rgba(203,177,131,0.25)" }}
           >
-            <Hash size={10} style={{ color: "oklch(0.65 0.2 300)" }} />
+            <Hash size={10} style={{ color: "#CBB183" }} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span
                 className="text-[11px] font-semibold"
-                style={{ color: "oklch(0.65 0.2 300)" }}
+                style={{ color: "#CBB183" }}
               >
                 v{v.versionNum}
               </span>
-              <span className="text-[10px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+              <span className="text-[10px]" style={{ color: "#AA8E64" }}>
                 {(v.widArray as string[]).length} tracks
               </span>
               {v.note && (
-                <span className="text-[10px] truncate" style={{ color: "oklch(0.6 0.04 280)" }}>
+                <span className="text-[10px] truncate" style={{ color: "#AA8E64" }}>
                   — {v.note}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-1 mt-0.5">
-              <Clock size={9} style={{ color: "oklch(0.45 0.03 280)" }} />
-              <span className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+              <Clock size={9} style={{ color: "#AA8E64" }} />
+              <span className="text-[10px]" style={{ color: "#AA8E64" }}>
                 {new Date(v.savedAt).toLocaleString()} by {v.savedByHandle || v.savedByName || "you"}
               </span>
             </div>
@@ -288,7 +288,7 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
           <div
             key={i}
             className="h-12 rounded-xl animate-pulse"
-            style={{ background: "oklch(0.125 0.028 52)" }}
+            style={{ background: "#2C3438" }}
           />
         ))}
       </div>
@@ -301,9 +301,9 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
       {items.length === 0 ? (
         <div
           className="rounded-xl p-4 text-center"
-          style={{ background: "oklch(0.10 0.03 270 / 0.5)", border: "1px dashed #C3AB7D" }}
+          style={{ background: "rgba(44,52,56,0.5)", border: "1px dashed #C3AB7D" }}
         >
-          <p className="text-[11px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+          <p className="text-[11px]" style={{ color: "#AA8E64" }}>
             No tracks in this list yet.
           </p>
         </div>
@@ -339,7 +339,7 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
             style={{
               background: "#2C3438",
               border: "1px solid #CBB183",
-              color: "oklch(0.85 0.02 85)",
+              color: "#DACAAA",
             }}
           />
           <Button
@@ -352,9 +352,9 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
               })
             }
             style={{
-              background: "oklch(0.65 0.2 300 / 0.15)",
-              border: "1px solid oklch(0.65 0.2 300 / 0.35)",
-              color: "oklch(0.65 0.2 300)",
+              background: "rgba(203,177,131,0.12)",
+              border: "1px solid rgba(203,177,131,0.30)",
+              color: "#CBB183",
             }}
           >
             <Save size={12} className="mr-1.5" />
@@ -367,7 +367,7 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
       <button
         onClick={() => setShowHistory((v) => !v)}
         className="flex items-center gap-1.5 mt-3 text-[11px] transition-colors hover:opacity-80"
-        style={{ color: "oklch(0.55 0.03 280)" }}
+        style={{ color: "#AA8E64" }}
       >
         <History size={12} />
         {showHistory ? "Hide" : "Show"} version history
@@ -415,7 +415,7 @@ export default function MyListsTab() {
           <div
             key={i}
             className="h-16 rounded-xl animate-pulse"
-            style={{ background: "oklch(0.125 0.028 52)" }}
+            style={{ background: "#2C3438" }}
           />
         ))}
       </div>
@@ -428,7 +428,7 @@ export default function MyListsTab() {
       {showCreate ? (
         <div
           className="flex items-center gap-2 rounded-xl px-3 py-2.5"
-          style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.65 0.2 300 / 0.25)" }}
+          style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.25)" }}
         >
           <input
             autoFocus
@@ -444,20 +444,20 @@ export default function MyListsTab() {
             }}
             maxLength={128}
             className="flex-1 bg-transparent outline-none text-[13px]"
-            style={{ color: "oklch(0.9 0.02 85)" }}
+            style={{ color: "#E6CDAE" }}
           />
           <Button
             size="sm"
             disabled={!newName.trim() || createPlaylist.isPending}
             onClick={() => createPlaylist.mutate({ name: newName.trim() })}
-            style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
+            style={{ background: "#CBB183", color: "#E6CDAE" }}
           >
             Create
           </Button>
           <button
             onClick={() => setShowCreate(false)}
             className="text-[11px] px-2"
-            style={{ color: "oklch(0.5 0.03 280)" }}
+            style={{ color: "#AA8E64" }}
           >
             Cancel
           </button>
@@ -467,9 +467,9 @@ export default function MyListsTab() {
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-2 w-full rounded-xl px-3 py-2.5 transition-colors hover:brightness-110"
           style={{
-            background: "oklch(0.115 0.055 278 / 0.5)",
+            background: "rgba(44,52,56,0.5)",
             border: "1px dashed #C3AB7D",
-            color: "oklch(0.65 0.2 300)",
+            color: "#CBB183",
           }}
         >
           <Plus size={14} />
@@ -481,10 +481,10 @@ export default function MyListsTab() {
       {(!playlists || playlists.length === 0) && (
         <div
           className="rounded-xl p-8 text-center"
-          style={{ background: "oklch(0.10 0.03 270 / 0.5)", border: "1px dashed #CBB183" }}
+          style={{ background: "rgba(44,52,56,0.5)", border: "1px dashed #CBB183" }}
         >
-          <Music size={28} className="mx-auto mb-2 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
-          <p className="text-[12px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+          <Music size={28} className="mx-auto mb-2 opacity-20" style={{ color: "#CBB183" }} />
+          <p className="text-[12px]" style={{ color: "#AA8E64" }}>
             You have no lists yet. Create one to start curating.
           </p>
         </div>
@@ -497,19 +497,19 @@ export default function MyListsTab() {
           <div
             key={pl.id}
             className="rounded-xl overflow-hidden"
-            style={{ border: `1px solid ${isExpanded ? "oklch(0.65 0.2 300 / 0.3)" : "#CBB183"}` }}
+            style={{ border: `1px solid ${isExpanded ? "rgba(203,177,131,0.25)" : "#CBB183"}` }}
           >
             {/* Header row */}
             <div
               className="flex items-center gap-3 px-3 py-3 cursor-pointer transition-colors hover:brightness-110"
-              style={{ background: "oklch(0.125 0.028 52)" }}
+              style={{ background: "#2C3438" }}
               onClick={() => setExpandedId(isExpanded ? null : pl.id)}
             >
               {/* Expand icon */}
               {isExpanded ? (
-                <ChevronDown size={14} style={{ color: "oklch(0.65 0.2 300)", flexShrink: 0 }} />
+                <ChevronDown size={14} style={{ color: "#CBB183", flexShrink: 0 }} />
               ) : (
-                <ChevronRight size={14} style={{ color: "oklch(0.5 0.03 280)", flexShrink: 0 }} />
+                <ChevronRight size={14} style={{ color: "#AA8E64", flexShrink: 0 }} />
               )}
 
               {/* Cover art */}
@@ -521,7 +521,7 @@ export default function MyListsTab() {
                   <img src={pl.coverArtUrl} alt={pl.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Music size={12} style={{ color: "oklch(0.84 0.155 85 / 0.4)" }} />
+                    <Music size={12} style={{ color: "rgba(203,177,131,0.35)" }} />
                   </div>
                 )}
               </div>
@@ -530,11 +530,11 @@ export default function MyListsTab() {
               <div className="flex-1 min-w-0">
                 <p
                   className="text-[13px] font-medium truncate"
-                  style={{ color: "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}
+                  style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
                 >
                   {pl.name}
                 </p>
-                <p className="text-[10px]" style={{ color: "oklch(0.5 0.03 280)" }}>
+                <p className="text-[10px]" style={{ color: "#AA8E64" }}>
                   {pl.isPublic ? "Public" : "Private"} · {pl.isCollaborative ? "Collaborative" : "Solo"}
                 </p>
               </div>
@@ -550,7 +550,7 @@ export default function MyListsTab() {
                 className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:badge-error flex-shrink-0"
                 title="Delete list"
               >
-                <Trash2 size={12} style={{ color: "oklch(0.65 0.18 25 / 0.7)" }} />
+                <Trash2 size={12} style={{ color: "rgba(239,68,68,0.7)" }} />
               </button>
             </div>
 
@@ -558,7 +558,7 @@ export default function MyListsTab() {
             {isExpanded && (
               <div
                 className="px-3 pb-4"
-                style={{ background: "oklch(0.10 0.03 270 / 0.5)" }}
+                style={{ background: "rgba(44,52,56,0.5)" }}
               >
                 <PlaylistManagePanel playlist={pl} />
               </div>

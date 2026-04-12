@@ -223,13 +223,13 @@ export default function TheaterPlayer() {
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 32, stiffness: 280 }}
           className="fixed inset-0 z-[9015] flex flex-col md:flex-row overflow-hidden"
-          style={{ background: "oklch(0.075 0.04 268)" }}
+          style={{ background: "#2C3438" }}
         >
           {/* ── LEFT — Media + Controls ── */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Art / Video */}
             <div className="relative flex-1 min-h-0 flex items-center justify-center overflow-hidden"
-              style={{ background: "oklch(0.09 0.04 268)" }}>
+              style={{ background: "#2C3438" }}>
               {/* Background video — always muted, fades in when playing + buffered */}
               {videoUrl && (
                 <video
@@ -258,7 +258,7 @@ export default function TheaterPlayer() {
                 <div
                   className="absolute inset-0 w-full h-full flex items-center justify-center text-8xl transition-opacity duration-500"
                   style={{
-                    background: currentTrack?.bg || "oklch(0.12 0.06 270)",
+                    background: currentTrack?.bg || "#2C3438",
                     opacity: (videoUrl && showVideo) ? 0 : 1,
                   }}
                 >
@@ -269,7 +269,7 @@ export default function TheaterPlayer() {
               {currentTrack && currentTrack.visualReady === false && !videoUrl && (
                 <div
                   className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 py-2 px-4"
-                  style={{ background: "linear-gradient(to top, oklch(0.07 0.03 268 / 0.88), transparent)" }}
+                  style={{ background: "linear-gradient(to top, rgba(44,52,56,0.88), transparent)" }}
                 >
                   <div className="flex gap-1 items-center">
                     {[0, 1, 2].map(i => (
@@ -277,7 +277,7 @@ export default function TheaterPlayer() {
                         key={i}
                         className="w-1.5 h-1.5 rounded-full"
                         style={{
-                          background: "oklch(0.84 0.155 85 / 0.6)",
+                          background: "rgba(203,177,131,0.55)",
                           animationName: "pulse",
                           animationDuration: "2s",
                           animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
@@ -287,7 +287,7 @@ export default function TheaterPlayer() {
                       />
                     ))}
                   </div>
-                  <span className="text-[10px] font-heading tracking-wider" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}>
+                  <span className="text-[10px] font-heading tracking-wider" style={{ color: "rgba(203,177,131,0.55)" }}>
                     generating visual…
                   </span>
                 </div>
@@ -298,9 +298,9 @@ export default function TheaterPlayer() {
                   onClick={() => setWidPanelOpen(v => !v)}
                   className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide transition-all z-20"
                   style={{
-                    background: "oklch(0.30 0.015 200 / 0.88)",
-                    border: "1px solid oklch(0.55 0.18 145 / 0.5)",
-                    color: "oklch(0.82 0.18 145)",
+                    background: "rgba(44,52,56,0.88)",
+                    border: "1px solid rgba(74,222,128,0.5)",
+                    color: "#4ADE80",
                     backdropFilter: "blur(6px)",
                   }}
                   title="Cryptographically witnessed — click to expand"
@@ -314,27 +314,27 @@ export default function TheaterPlayer() {
                 <div
                   className="absolute bottom-0 left-0 right-0 z-30 p-4"
                   style={{
-                    background: "oklch(0.08 0.03 145 / 0.95)",
+                    background: "rgba(44,52,56,0.95)",
                     backdropFilter: "blur(12px)",
-                    borderTop: "1px solid oklch(0.45 0.18 145 / 0.3)",
+                    borderTop: "1px solid rgba(74,222,128,0.3)",
                   }}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Fingerprint size={14} style={{ color: "oklch(0.72 0.18 145)" }} />
-                      <span className="text-[11px] font-heading tracking-[0.12em] uppercase" style={{ color: "oklch(0.72 0.18 145)" }}>
+                      <Fingerprint size={14} style={{ color: "#4ADE80" }} />
+                      <span className="text-[11px] font-heading tracking-[0.12em] uppercase" style={{ color: "#4ADE80" }}>
                         Origin Proof
                       </span>
                     </div>
-                    <button type="button" onClick={() => setWidPanelOpen(false)} className="text-[10px]" style={{ color: "oklch(0.45 0.04 280)" }}>✕</button>
+                    <button type="button" onClick={() => setWidPanelOpen(false)} className="text-[10px]" style={{ color: "#3F4A50" }}>✕</button>
                   </div>
-                  <div className="text-[10px] font-mono break-all mb-2" style={{ color: "oklch(0.72 0.14 145)" }}>{widBadge}</div>
+                  <div className="text-[10px] font-mono break-all mb-2" style={{ color: "#4ADE80" }}>{widBadge}</div>
                   <div className="flex items-center gap-3">
-                    {currentTrack?.title && <span className="text-[11px]" style={{ color: "oklch(0.65 0.04 280)" }}>{currentTrack.title}</span>}
+                    {currentTrack?.title && <span className="text-[11px]" style={{ color: "#AA8E64" }}>{currentTrack.title}</span>}
                     <button
                       onClick={() => { closeTheater(); navigate(`/verify/${widBadge}`); }}
                       className="flex items-center gap-1 text-[10px] ml-auto transition-all hover:opacity-80"
-                      style={{ color: "oklch(0.72 0.18 145)" }}
+                      style={{ color: "#4ADE80" }}
                     >
                       <ExternalLink size={10} />
                       Verify
@@ -345,18 +345,18 @@ export default function TheaterPlayer() {
               {/* Gradient overlay at bottom */}
               <div
                 className="absolute inset-x-0 bottom-0 h-32 pointer-events-none"
-                style={{ background: "linear-gradient(to top, oklch(0.075 0.04 268), transparent)" }}
+                style={{ background: "linear-gradient(to top, #2C3438, transparent)" }}
               />
             </div>
 
             {/* Track info + controls */}
-            <div className="px-6 py-5 flex-shrink-0" style={{ background: "oklch(0.075 0.04 268)" }}>
+            <div className="px-6 py-5 flex-shrink-0" style={{ background: "#2C3438" }}>
               {/* Title / Artist / WID */}
               <div className="flex items-start justify-between mb-4">
                 <div className="min-w-0 flex-1 mr-4">
                   <h2
                     className="text-xl font-bold truncate mb-0.5"
-                    style={{ color: "oklch(0.94 0.025 75)", fontFamily: "'Cinzel', serif" }}
+                    style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
                   >
                     {currentTrack?.title || "No track selected"}
                   </h2>
@@ -364,10 +364,10 @@ export default function TheaterPlayer() {
                     onClick={goToCreator}
                     disabled={!songDetail?.creator?.id}
                     className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-80 disabled:cursor-default"
-                    style={{ color: "oklch(0.72 0.08 280)" }}
+                    style={{ color: "#E6CDAE" }}
                   >
                     {currentTrack?.creatorRole === "founder" && (
-                      <Crown size={11} style={{ color: "oklch(0.84 0.155 85)", flexShrink: 0 }} />
+                      <Crown size={11} style={{ color: "#CBB183", flexShrink: 0 }} />
                     )}
                     {currentTrack?.artist || "—"}
                   </button>
@@ -375,7 +375,7 @@ export default function TheaterPlayer() {
                     <button
                       onClick={goToVerify}
                       className="block text-[10px] font-mono mt-1 transition-opacity hover:opacity-80"
-                      style={{ color: "oklch(0.80 0.145 82 / 0.6)" }}
+                      style={{ color: "rgba(203,177,131,0.6)" }}
                       title="View Witness Certificate"
                     >
                       WID: {currentTrack.witnessId.slice(0, 20)}…
@@ -387,7 +387,7 @@ export default function TheaterPlayer() {
                   <button
                     onClick={() => { if (user && currentSongId && !isNaN(currentSongId)) toggleLikeMutation.mutate({ songId: currentSongId }); }}
                     disabled={!user || toggleLikeMutation.isPending}
-                    className={`p-2 transition-colors ${isLiked ? "text-[oklch(0.82_0.155_175)]" : "text-white/30 hover:text-white/60"} disabled:opacity-40`}
+                    className={`p-2 transition-colors ${isLiked ? "text-[#4ADE80]" : "text-white/30 hover:text-white/60"} disabled:opacity-40`}
                     title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
                   >
                     <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
@@ -396,7 +396,7 @@ export default function TheaterPlayer() {
                     <button
                       onClick={() => setTipOpen(true)}
                       disabled={!tipsEnabled}
-                      className={`p-2 transition-colors ${tipsEnabled ? "text-[oklch(0.80_0.145_82)] hover:text-[oklch(0.88_0.16_85)]" : "text-white/15 cursor-not-allowed"}`}
+                      className={`p-2 transition-colors ${tipsEnabled ? "text-[#CBB183] hover:text-[#E6CDAE]" : "text-white/15 cursor-not-allowed"}`}
                       title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled"}
                     >
                       <DollarSign size={18} />
@@ -405,7 +405,7 @@ export default function TheaterPlayer() {
                   <button
                     onClick={handleShare}
                     className="p-2 transition-colors"
-                    style={{ color: copied ? "oklch(0.80 0.145 82)" : "oklch(0.45 0.02 280)" }}
+                    style={{ color: copied ? "#CBB183" : "#3F4A50" }}
                     title={copied ? "Link copied!" : "Share track"}
                   >
                     {copied ? <Check size={18} /> : <Share2 size={18} />}
@@ -415,30 +415,30 @@ export default function TheaterPlayer() {
 
               {/* Progress bar */}
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "oklch(0.65 0.04 65)" }}>
+                <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "#AA8E64" }}>
                   {fmtTime(state.currentTime)}
                 </span>
                 <div
                   className="flex-1 h-1.5 rounded-full cursor-pointer relative group"
-                  style={{ background: "oklch(0.22 0.04 270)" }}
+                  style={{ background: "#2C3438" }}
                   onClick={handleSeek}
                 >
                   <div
                     className="h-full rounded-full relative"
                     style={{
                       width: `${progress}%`,
-                      background: "linear-gradient(90deg, oklch(0.55 0.16 45), oklch(0.80 0.145 82))",
+                      background: "linear-gradient(90deg, #3F4A50, #CBB183)",
                     }}
                   >
                     {state.isPlaying && (
                       <div
                         className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full progress-playhead"
-                        style={{ background: "oklch(0.80 0.145 82)", boxShadow: "0 0 6px 2px oklch(0.80 0.145 82 / 0.7)" }}
+                        style={{ background: "#CBB183", boxShadow: "0 0 6px 2px rgba(203,177,131,0.7)" }}
                       />
                     )}
                   </div>
                 </div>
-                <span className="text-[11px] w-8 tabular-nums" style={{ color: "oklch(0.65 0.04 65)" }}>
+                <span className="text-[11px] w-8 tabular-nums" style={{ color: "#AA8E64" }}>
                   {fmtTime(state.duration)}
                 </span>
               </div>
@@ -448,7 +448,7 @@ export default function TheaterPlayer() {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={toggleShuffle}
-                    className={`p-1.5 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}
+                    className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}
                   >
                     <Shuffle size={16} />
                   </button>
@@ -458,7 +458,7 @@ export default function TheaterPlayer() {
                   <button
                     onClick={togglePlay}
                     className="w-12 h-12 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                    style={{ background: "oklch(0.94 0.025 75)", color: "#2C3438" }}
+                    style={{ background: "#E6CDAE", color: "#2C3438" }}
                   >
                     {state.isPlaying
                       ? <Pause size={20} fill="currentColor" />
@@ -470,7 +470,7 @@ export default function TheaterPlayer() {
                   </button>
                   <button
                     onClick={toggleRepeat}
-                    className={`p-1.5 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}
+                    className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}
                   >
                     <Repeat size={16} />
                   </button>
@@ -483,11 +483,11 @@ export default function TheaterPlayer() {
                     onClick={toggleMute}
                     className="p-1 transition-all rounded-full"
                     style={{
-                      color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.65 0.04 65)",
-                      background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                      color: state.isMuted ? "#CBB183" : "#AA8E64",
+                      background: state.isMuted ? "rgba(230,205,174,0.12)" : "transparent",
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.94 0.025 75)")}
-                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.65 0.04 65)")}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
+                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "#CBB183" : "#AA8E64")}
                     title={state.isMuted ? "Unmute" : "Mute"}
                   >
                     {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
@@ -500,15 +500,15 @@ export default function TheaterPlayer() {
                     onChange={e => { setVolume(parseFloat(e.target.value)); }}
                     className="volume-slider-theater"
                     style={{
-                      background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
+                      background: `linear-gradient(to top, #E6CDAE ${
                         state.isMuted ? 0 : state.volume * 100
-                      }%, oklch(0.18 0.04 55 / 85%) ${
+                      }%, rgba(44,52,56,0.85) ${
                         state.isMuted ? 0 : state.volume * 100
                       }%)`,
                     }}
                   />
                   {/* Volume % readout */}
-                  <span className="text-[9px] font-mono tracking-widest" style={{ color: "oklch(0.70 0.10 72)" }}>
+                  <span className="text-[9px] font-mono tracking-widest" style={{ color: "#CBB183" }}>
                     {state.isMuted ? "0" : Math.round(state.volume * 100)}%
                   </span>
                 </div>
@@ -519,12 +519,12 @@ export default function TheaterPlayer() {
           {/* ── RIGHT — Lyrics + Comments + Signals ── */}
           <div
             className="w-full md:w-[380px] flex flex-col flex-shrink-0 overflow-hidden"
-            style={{ borderLeft: "1px solid oklch(0.22 0.04 270 / 60%)" }}
+            style={{ borderLeft: "1px solid rgba(44,52,56,0.6)" }}
           >
             {/* Tab bar */}
             <div
               className="flex flex-shrink-0"
-              style={{ borderBottom: "1px solid oklch(0.22 0.04 270 / 60%)" }}
+              style={{ borderBottom: "1px solid rgba(44,52,56,0.6)" }}
             >
               {(["lyrics", "signals", "comments"] as const).map(tab => (
                 <button
@@ -532,8 +532,8 @@ export default function TheaterPlayer() {
                   onClick={() => setActiveTab(tab)}
                   className="flex-1 py-3 text-xs font-medium capitalize transition-colors flex items-center justify-center gap-1"
                   style={{
-                    color: activeTab === tab ? "oklch(0.80 0.145 82)" : "oklch(0.55 0.02 280)",
-                    borderBottom: activeTab === tab ? "2px solid oklch(0.80 0.145 82)" : "2px solid transparent",
+                    color: activeTab === tab ? "#CBB183" : "#3F4A50",
+                    borderBottom: activeTab === tab ? "2px solid #CBB183" : "2px solid transparent",
                     fontFamily: "'Cinzel', serif",
                     letterSpacing: "0.05em",
                   }}
@@ -554,7 +554,7 @@ export default function TheaterPlayer() {
                       fontFamily: "'Inter', Georgia, serif",
                       fontSize: "15px",
                       lineHeight: "2",
-                      color: "oklch(0.88 0.02 280)",
+                      color: "#E6CDAE",
                       letterSpacing: "0.01em",
                     }}
                   >
@@ -564,14 +564,14 @@ export default function TheaterPlayer() {
                   <div
                     className="rounded-xl p-6 text-center mt-4"
                     style={{
-                      background: "oklch(0.10 0.02 275)",
-                      border: "1px dashed oklch(0.22 0.02 275)",
+                      background: "#2C3438",
+                      border: "1px dashed #2C3438",
                     }}
                   >
-                    <p className="text-[13px] italic mb-1.5" style={{ color: "oklch(0.50 0.02 280)" }}>
+                    <p className="text-[13px] italic mb-1.5" style={{ color: "#3F4A50" }}>
                       No lyrics registered
                     </p>
-                    <p className="text-[12px]" style={{ color: "oklch(0.84 0.155 85)" }}>
+                    <p className="text-[12px]" style={{ color: "#CBB183" }}>
                       Upload lyrics to protect your words.
                     </p>
                   </div>
@@ -587,14 +587,14 @@ export default function TheaterPlayer() {
                   <div
                     className="mb-4 flex items-center justify-center gap-2 py-2 px-4 rounded-full animate-fade-in"
                     style={{
-                      background: "oklch(0.10 0.02 275 / 0.5)",
-                      border: "1px solid oklch(0.22 0.03 275 / 0.4)",
+                      background: "rgba(44,52,56,0.5)",
+                      border: "1px solid rgba(44,52,56,0.4)",
                     }}
                   >
                     <span className="text-[13px]">🎧</span>
                     <span
                       className="text-[12px] font-medium tracking-wide"
-                      style={{ color: "oklch(0.65 0.06 280)" }}
+                      style={{ color: "#AA8E64" }}
                     >
                       {listenerCount === 1
                         ? "1 person currently listening"
@@ -605,10 +605,10 @@ export default function TheaterPlayer() {
                 {/* Emoji reactions grid */}
                 <div className="mb-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="text-[10px] font-heading tracking-[0.15em] uppercase" style={{ color: "oklch(0.58 0.05 280)" }}>
+                    <div className="text-[10px] font-heading tracking-[0.15em] uppercase" style={{ color: "#AA8E64" }}>
                       Signal this work
                     </div>
-                    <div className="flex-1 h-px" style={{ background: "oklch(0.30 0.015 200 / 0.5)" }} />
+                    <div className="flex-1 h-px" style={{ background: "rgba(44,52,56,0.5)" }} />
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {THEATER_EMOJI_REACTIONS.map(({ type, emoji, label }) => {
@@ -620,17 +620,17 @@ export default function TheaterPlayer() {
                           onClick={() => handleToggleReaction(type)}
                           className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-all hover:scale-105 active:scale-95"
                           style={{
-                            background: isActive ? "oklch(0.22 0.06 85 / 0.5)" : "oklch(0.12 0.03 275 / 0.8)",
-                            border: `1px solid ${isActive ? "oklch(0.80 0.145 82 / 0.5)" : "oklch(0.22 0.03 275 / 0.6)"}`,
+                            background: isActive ? "rgba(122,90,30,0.5)" : "rgba(44,52,56,0.8)",
+                            border: `1px solid ${isActive ? "rgba(203,177,131,0.5)" : "rgba(44,52,56,0.6)"}`,
                           }}
                           title={label}
                         >
                           <span className="text-[22px] leading-none">{emoji}</span>
-                          <span className="text-[10px] font-heading" style={{ color: isActive ? "oklch(0.80 0.145 82)" : "oklch(0.50 0.02 280)" }}>
+                          <span className="text-[10px] font-heading" style={{ color: isActive ? "#CBB183" : "#3F4A50" }}>
                             {label}
                           </span>
                           {count > 0 && (
-                            <span className="text-[10px] font-mono" style={{ color: isActive ? "oklch(0.80 0.145 82)" : "oklch(0.45 0.02 280)" }}>
+                            <span className="text-[10px] font-mono" style={{ color: isActive ? "#CBB183" : "#3F4A50" }}>
                               {count}
                             </span>
                           )}
@@ -641,13 +641,13 @@ export default function TheaterPlayer() {
                 </div>
                 {/* Total signals summary */}
                 {Object.keys(reactionCounts).length > 0 && (
-                  <div className="rounded-xl p-4" style={{ background: "oklch(0.10 0.02 275)", border: "1px solid oklch(0.18 0.03 275)" }}>
-                    <div className="text-[10px] font-heading tracking-[0.15em] uppercase mb-2" style={{ color: "oklch(0.40 0.03 280)" }}>
+                  <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+                    <div className="text-[10px] font-heading tracking-[0.15em] uppercase mb-2" style={{ color: "#3F4A50" }}>
                       Total signals
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {THEATER_EMOJI_REACTIONS.filter(r => (reactionCounts as Record<string, number>)[r.type] > 0).map(({ type, emoji }) => (
-                        <span key={type} className="flex items-center gap-1 text-[12px]" style={{ color: "oklch(0.65 0.04 280)" }}>
+                        <span key={type} className="flex items-center gap-1 text-[12px]" style={{ color: "#AA8E64" }}>
                           {emoji} {(reactionCounts as Record<string, number>)[type]}
                         </span>
                       ))}
@@ -655,7 +655,7 @@ export default function TheaterPlayer() {
                   </div>
                 )}
                 {!user && (
-                  <p className="text-[12px] mt-4 text-center" style={{ color: "oklch(0.40 0.03 280)" }}>
+                  <p className="text-[12px] mt-4 text-center" style={{ color: "#3F4A50" }}>
                     Sign in to send signals
                   </p>
                 )}
@@ -670,14 +670,14 @@ export default function TheaterPlayer() {
                   <div
                     className="mx-4 mt-4 flex items-center justify-center gap-2 py-2 px-4 rounded-full animate-fade-in"
                     style={{
-                      background: "oklch(0.10 0.02 275 / 0.5)",
-                      border: "1px solid oklch(0.22 0.03 275 / 0.4)",
+                      background: "rgba(44,52,56,0.5)",
+                      border: "1px solid rgba(44,52,56,0.4)",
                     }}
                   >
                     <span className="text-[13px]">🎧</span>
                     <span
                       className="text-[12px] font-medium tracking-wide"
-                      style={{ color: "oklch(0.65 0.06 280)" }}
+                      style={{ color: "#AA8E64" }}
                     >
                       {listenerCount === 1
                         ? "1 person currently listening"
@@ -691,20 +691,20 @@ export default function TheaterPlayer() {
                       <div key={c.id} className="flex gap-2.5">
                         <div
                           className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                          style={{ background: "oklch(0.22 0.08 270)", color: "oklch(0.80 0.145 82)" }}
+                          style={{ background: "#2C3438", color: "#CBB183" }}
                         >
                           {(c.authorName ?? "?")[0].toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-2 mb-0.5">
-                            <span className="text-[12px] font-semibold" style={{ color: "oklch(0.82 0.155 175)" }}>
+                            <span className="text-[12px] font-semibold" style={{ color: "#4ADE80" }}>
                               {c.authorName ?? "Anonymous"}
                             </span>
-                            <span className="text-[10px]" style={{ color: "oklch(0.45 0.02 280)" }}>
+                            <span className="text-[10px]" style={{ color: "#3F4A50" }}>
                               {new Date(c.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          <p className="text-[13px] leading-relaxed" style={{ color: "oklch(0.80 0.02 280)" }}>
+                          <p className="text-[13px] leading-relaxed" style={{ color: "#DACAAA" }}>
                             {c.content}
                           </p>
                         </div>
@@ -712,8 +712,8 @@ export default function TheaterPlayer() {
                     ))
                   ) : (
                     <div className="text-center py-8">
-                      <MessageCircle size={28} className="mx-auto mb-2 opacity-20" style={{ color: "oklch(0.80 0.145 82)" }} />
-                      <p className="text-[13px] italic" style={{ color: "oklch(0.45 0.02 280)" }}>
+                      <MessageCircle size={28} className="mx-auto mb-2 opacity-20" style={{ color: "#CBB183" }} />
+                      <p className="text-[13px] italic" style={{ color: "#3F4A50" }}>
                         No comments yet. Be the first.
                       </p>
                     </div>
@@ -723,7 +723,7 @@ export default function TheaterPlayer() {
                 {/* Comment input */}
                 <div
                   className="p-3 flex-shrink-0"
-                  style={{ borderTop: "1px solid oklch(0.22 0.04 270 / 60%)" }}
+                  style={{ borderTop: "1px solid rgba(44,52,56,0.6)" }}
                 >
                   <div className="flex gap-2">
                     <input
@@ -735,18 +735,18 @@ export default function TheaterPlayer() {
                       maxLength={1000}
                       className="flex-1 rounded-lg px-3 py-2 text-[13px] outline-none transition-colors disabled:opacity-50"
                       style={{
-                        background: "oklch(0.12 0.04 270)",
-                        border: "1px solid oklch(0.22 0.04 270)",
-                        color: "oklch(0.88 0.02 280)",
+                        background: "#2C3438",
+                        border: "1px solid #2C3438",
+                        color: "#E6CDAE",
                       }}
-                      onFocus={e => (e.currentTarget.style.borderColor = "oklch(0.80 0.145 82 / 0.5)")}
-                      onBlur={e => (e.currentTarget.style.borderColor = "oklch(0.22 0.04 270)")}
+                      onFocus={e => (e.currentTarget.style.borderColor = "rgba(203,177,131,0.5)")}
+                      onBlur={e => (e.currentTarget.style.borderColor = "#2C3438")}
                     />
                     <button
                       onClick={submitComment}
                       disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                       className="px-3 py-2 rounded-lg text-[12px] font-semibold transition-colors disabled:opacity-40"
-                      style={{ background: "oklch(0.80 0.145 82)", color: "#2C3438" }}
+                      style={{ background: "#CBB183", color: "#2C3438" }}
                     >
                       Post
                     </button>
@@ -761,12 +761,12 @@ export default function TheaterPlayer() {
             onClick={closeTheater}
             className="absolute top-4 right-4 rounded-full p-2 transition-colors z-10"
             style={{
-              background: "oklch(0.12 0.04 270 / 80%)",
-              color: "oklch(0.65 0.04 65)",
-              border: "1px solid oklch(0.22 0.04 270)",
+              background: "rgba(44,52,56,0.8)",
+              color: "#AA8E64",
+              border: "1px solid #2C3438",
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.94 0.025 75)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.65 0.04 65)")}
+            onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}
             title="Close Theater"
           >
             <X size={18} />
@@ -777,9 +777,9 @@ export default function TheaterPlayer() {
             onClick={closeTheater}
             className="absolute bottom-[220px] left-1/2 -translate-x-1/2 rounded-full px-4 py-1.5 text-[11px] flex items-center gap-1.5 transition-colors md:hidden"
             style={{
-              background: "oklch(0.12 0.04 270 / 80%)",
-              color: "oklch(0.65 0.04 65)",
-              border: "1px solid oklch(0.22 0.04 270)",
+              background: "rgba(44,52,56,0.8)",
+              color: "#AA8E64",
+              border: "1px solid #2C3438",
             }}
           >
             <ChevronDown size={12} />

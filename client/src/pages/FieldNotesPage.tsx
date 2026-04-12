@@ -63,7 +63,7 @@ function NoteCard({
   return (
     <div
       className="rounded-2xl border transition-all"
-      style={{ background: "oklch(0.10 0.04 280)", borderColor: "oklch(0.30 0.015 200)" }}
+      style={{ background: "#2C3438", borderColor: "#2C3438" }}
     >
       {/* Cover image */}
       {note.coverImageUrl && (
@@ -87,8 +87,8 @@ function NoteCard({
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body"
                   style={
                     note.isPublic
-                      ? { background: "oklch(0.65 0.18 145 / 0.12)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }
-                      : { background: "oklch(0.5 0.05 280 / 0.15)", color: "oklch(0.6 0.05 280)", border: "1px solid oklch(0.5 0.05 280 / 0.3)" }
+                      ? { background: "rgba(74,222,128,0.12)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
+                      : { background: "rgba(63,74,80,0.15)", color: "#AA8E64", border: "1px solid rgba(63,74,80,0.3)" }
                   }
                 >
                   {note.isPublic ? <Globe size={8} /> : <Lock size={8} />}
@@ -184,7 +184,7 @@ function NoteForm({
   return (
     <div
       className="rounded-2xl border p-5 space-y-4"
-      style={{ background: "oklch(0.11 0.05 280)", borderColor: "oklch(0.28 0.08 280)" }}
+      style={{ background: "#2C3438", borderColor: "#2C3438" }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ function NoteForm({
               style={
                 active
                   ? { background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}50` }
-                  : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
+                  : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
               }
             >
               <Icon size={10} />
@@ -246,8 +246,8 @@ function NoteForm({
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-body transition-all"
           style={
             isPublic
-              ? { background: "oklch(0.65 0.18 145 / 0.12)", color: "oklch(0.65 0.18 145)", border: "1px solid oklch(0.65 0.18 145 / 0.3)" }
-              : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
+              ? { background: "rgba(74,222,128,0.12)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
+              : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
           }
         >
           {isPublic ? <><Eye size={11} /> Public — visible to all</> : <><EyeOff size={11} /> Private — only you</>}
@@ -360,7 +360,7 @@ export default function FieldNotesPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.08 0.04 280)" }}>
+    <div className="min-h-screen" style={{ background: "#2C3438" }}>
       <div className="max-w-2xl mx-auto px-4 py-8 pb-32">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -418,7 +418,7 @@ export default function FieldNotesPage() {
               style={
                 activeFilter === "all"
                   ? { background: "#CBB18322", color: "#CBB183", border: "1px solid #CBB18350" }
-                  : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
+                  : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
               }
             >
               All
@@ -435,7 +435,7 @@ export default function FieldNotesPage() {
                   style={
                     activeFilter === cat.value
                       ? { background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}50` }
-                      : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
+                      : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
                   }
                 >
                   <Icon size={9} />
@@ -450,7 +450,7 @@ export default function FieldNotesPage() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 rounded-2xl animate-pulse" style={{ background: "oklch(0.13 0.04 280)" }} />
+              <div key={i} className="h-32 rounded-2xl animate-pulse" style={{ background: "#2C3438" }} />
             ))}
           </div>
         ) : filtered.length === 0 ? (

@@ -74,26 +74,26 @@ function MiniTrackRow({
       onClick={onPlay}
       className="w-full flex items-center gap-3 px-4 py-2.5 transition-all active:scale-[0.98] text-left group"
       style={{
-        background: isActive ? "oklch(0.84 0.155 85 / 0.08)" : "transparent",
-        borderLeft: isActive ? "2px solid oklch(0.84 0.155 85)" : "2px solid transparent",
+        background: isActive ? "rgba(230,205,174,0.08)" : "transparent",
+        borderLeft: isActive ? "2px solid #CBB183" : "2px solid transparent",
       }}
     >
       {/* Artwork */}
       <div
         className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden relative"
-        style={{ background: "oklch(0.18 0.04 280)" }}
+        style={{ background: "#2C3438" }}
       >
         {track.artUrl ? (
           <img src={track.artUrl} alt="" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Music size={14} style={{ color: "oklch(0.45 0.03 280)" }} />
+            <Music size={14} style={{ color: "#AA8E64" }} />
           </div>
         )}
         {isActive && (
           <div
             className="absolute inset-0 flex items-end justify-center pb-1 gap-[2px]"
-            style={{ background: "oklch(0 0 0 / 0.35)" }}
+            style={{ background: "rgba(0,0,0,0.35)" }}
           >
             {[1, 2, 3].map((i) => (
               <span
@@ -101,7 +101,7 @@ function MiniTrackRow({
                 className="w-[2px] rounded-full"
                 style={{
                   height: "6px",
-                  background: "oklch(0.84 0.155 85)",
+                  background: "#CBB183",
                   animation: `drawerWave ${0.4 + i * 0.12}s ease-in-out infinite alternate`,
                   animationDelay: `${i * 0.08}s`,
                 }}
@@ -114,18 +114,18 @@ function MiniTrackRow({
       <div className="flex-1 min-w-0">
         <div
           className="text-[12px] font-heading truncate leading-tight"
-          style={{ color: isActive ? "oklch(0.84 0.155 85)" : "oklch(0.88 0.02 280)" }}
+          style={{ color: isActive ? "#CBB183" : "#E6CDAE" }}
         >
           {track.title}
         </div>
-        <div className="text-[10px] truncate mt-0.5" style={{ color: "oklch(0.50 0.03 280)" }}>
+        <div className="text-[10px] truncate mt-0.5" style={{ color: "#AA8E64" }}>
           {track.artist}
         </div>
       </div>
       {/* Play icon on hover */}
       <div
         className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ color: "oklch(0.84 0.155 85)" }}
+        style={{ color: "#CBB183" }}
       >
         <Play size={12} fill="currentColor" />
       </div>
@@ -140,15 +140,15 @@ function BuildYourOwn({ onClose }: { onClose: () => void }) {
     <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-4">
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center"
-        style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+        style={{ background: "rgba(203,177,131,0.10)", border: "1px solid rgba(203,177,131,0.28)" }}
       >
-        <Plus size={24} style={{ color: "oklch(0.84 0.155 85)" }} />
+        <Plus size={24} style={{ color: "#CBB183" }} />
       </div>
       <div>
-        <div className="text-[14px] font-heading mb-1" style={{ color: "oklch(0.90 0.02 280)" }}>
+        <div className="text-[14px] font-heading mb-1" style={{ color: "#E6CDAE" }}>
           Custom Playlists
         </div>
-        <div className="text-[11px] leading-relaxed" style={{ color: "oklch(0.45 0.03 280)" }}>
+        <div className="text-[11px] leading-relaxed" style={{ color: "#AA8E64" }}>
           Build and save your own playlists. Curate tracks from any creator on the platform.
         </div>
       </div>
@@ -156,16 +156,16 @@ function BuildYourOwn({ onClose }: { onClose: () => void }) {
         onClick={() => { onClose(); navigate("/explore"); }}
         className="px-4 py-2 rounded-xl text-[11px] font-heading tracking-wide transition-all active:scale-95"
         style={{
-          background: "oklch(0.84 0.155 85 / 0.15)",
-          border: "1px solid oklch(0.84 0.155 85 / 0.4)",
-          color: "oklch(0.84 0.155 85)",
+          background: "rgba(203,177,131,0.12)",
+          border: "1px solid rgba(203,177,131,0.35)",
+          color: "#CBB183",
         }}
       >
         Browse Tracks
       </button>
       <div
         className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-full"
-        style={{ background: "oklch(0.18 0.04 280)", color: "oklch(0.45 0.03 280)" }}
+        style={{ background: "#2C3438", color: "#AA8E64" }}
       >
         <Sparkles size={10} />
         Full playlist builder coming soon
@@ -324,7 +324,7 @@ export default function PlaylistDrawer() {
       {isOpen && (
         <div
           className="md:hidden fixed inset-0 z-[30]"
-          style={{ background: "oklch(0 0 0 / 0.45)", backdropFilter: "blur(2px)" }}
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -344,14 +344,14 @@ export default function PlaylistDrawer() {
           height: "64px",
           borderRadius: "8px 0 0 8px",
           background: isOpen
-            ? "oklch(0.84 0.155 85 / 0.25)"
-            : "oklch(0.14 0.03 275 / 0.92)",
-          border: "1px solid oklch(0.84 0.155 85 / 0.25)",
+            ? "rgba(203,177,131,0.22)"
+            : "rgba(44,52,56,0.92)",
+          border: "1px solid rgba(203,177,131,0.22)",
           borderRight: "none",
           backdropFilter: "blur(12px)",
-          boxShadow: "-2px 0 16px oklch(0 0 0 / 0.4)",
+          boxShadow: "-2px 0 16px rgba(0,0,0,0.40)",
           transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s",
-          color: "oklch(0.84 0.155 85)",
+          color: "#CBB183",
           // When any dialog/modal is open: always disable pointer events on the handle
           // This prevents the handle from intercepting taps on dialogs (e.g. Prompt Studio)
           pointerEvents: dialogOpen ? "none" : "auto",
@@ -367,12 +367,12 @@ export default function PlaylistDrawer() {
         className={`fixed top-0 right-0 h-full z-[31] flex flex-col${isOpen ? "" : " pointer-events-none"}`}
         style={{
           width: "280px",
-          background: "oklch(0.09 0.022 275 / 0.97)",
-          borderLeft: "1px solid oklch(0.84 0.155 85 / 0.12)",
+          background: "rgba(44,52,56,0.97)",
+          borderLeft: "1px solid rgba(203,177,131,0.10)",
           backdropFilter: "blur(20px)",
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
-          boxShadow: "-8px 0 40px oklch(0 0 0 / 0.6)",
+          boxShadow: "-8px 0 40px rgba(0,0,0,0.60)",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
           overscrollBehavior: "contain", // prevent panel from escaping its bounds on mobile momentum scroll
@@ -383,18 +383,18 @@ export default function PlaylistDrawer() {
         {/* Header */}
         <div
           className="flex-shrink-0 flex items-center justify-between px-4 py-4"
-          style={{ borderBottom: "1px solid oklch(0.84 0.155 85 / 0.08)" }}
+          style={{ borderBottom: "1px solid rgba(203,177,131,0.08)" }}
         >
           <div className="flex items-center gap-2">
-            <ListMusic size={14} style={{ color: "oklch(0.84 0.155 85)" }} />
-            <span className="text-[12px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.84 0.155 85)" }}>
+            <ListMusic size={14} style={{ color: "#CBB183" }} />
+            <span className="text-[12px] font-heading tracking-widest uppercase" style={{ color: "#CBB183" }}>
               Quick Play
             </span>
           </div>
           <button
             onClick={() => setIsOpen(false)}
             className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:bg-white/5 active:scale-90"
-            style={{ color: "oklch(0.45 0.03 280)" }}
+            style={{ color: "#AA8E64" }}
           >
             <X size={14} />
           </button>
@@ -403,7 +403,7 @@ export default function PlaylistDrawer() {
         {/* Tab bar */}
         <div
           className="flex-shrink-0 flex items-center gap-1 px-3 py-2"
-          style={{ borderBottom: "1px solid oklch(0.84 0.155 85 / 0.06)" }}
+          style={{ borderBottom: "1px solid rgba(203,177,131,0.06)" }}
         >
           {TABS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
@@ -413,9 +413,9 @@ export default function PlaylistDrawer() {
                 onClick={() => setActiveTab(id)}
                 className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-all text-[10px] font-heading tracking-wide"
                 style={{
-                  background: isActive ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
-                  color: isActive ? "oklch(0.84 0.155 85)" : "oklch(0.40 0.03 280)",
-                  border: isActive ? "1px solid oklch(0.84 0.155 85 / 0.25)" : "1px solid transparent",
+                  background: isActive ? "rgba(203,177,131,0.10)" : "transparent",
+                  color: isActive ? "#CBB183" : "#3F4A50",
+                  border: isActive ? "1px solid rgba(203,177,131,0.22)" : "1px solid transparent",
                 }}
               >
                 <Icon size={13} />
@@ -431,19 +431,19 @@ export default function PlaylistDrawer() {
             <BuildYourOwn onClose={() => setIsOpen(false)} />
           ) : activeTab === "liked" && !user ? (
             <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-3">
-              <Lock size={20} style={{ color: "oklch(0.40 0.03 280)" }} />
-              <div className="text-[12px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+              <Lock size={20} style={{ color: "#3F4A50" }} />
+              <div className="text-[12px]" style={{ color: "#AA8E64" }}>
                 Sign in to see your liked tracks
               </div>
             </div>
           ) : isLoading ? (
             <div className="flex items-center justify-center h-32">
-              <Loader2 size={18} className="animate-spin" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }} />
+              <Loader2 size={18} className="animate-spin" style={{ color: "rgba(203,177,131,0.45)" }} />
             </div>
           ) : tracks.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 gap-2">
-              <Music size={18} style={{ color: "oklch(0.30 0.02 280)" }} />
-              <div className="text-[11px]" style={{ color: "oklch(0.35 0.02 280)" }}>
+              <Music size={18} style={{ color: "#2C3438" }} />
+              <div className="text-[11px]" style={{ color: "#2C3438" }}>
                 {activeTab === "liked" ? "No liked tracks yet" : "No tracks found"}
               </div>
             </div>
@@ -453,17 +453,17 @@ export default function PlaylistDrawer() {
               <button
                 onClick={() => tracks.length > 0 && handlePlay(tracks[0], tracks)}
                 className="w-full flex items-center gap-2 px-4 py-2 mb-1 transition-all hover:bg-white/5 active:scale-[0.98]"
-                style={{ color: "oklch(0.84 0.155 85)" }}
+                style={{ color: "#CBB183" }}
               >
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+                  style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)" }}
                 >
                   <Play size={11} fill="currentColor" />
                 </div>
                 <span className="text-[11px] font-heading tracking-wide">Play All ({tracks.length})</span>
               </button>
-              <div className="h-px mx-4 mb-1" style={{ background: "oklch(0.84 0.155 85 / 0.06)" }} />
+              <div className="h-px mx-4 mb-1" style={{ background: "rgba(203,177,131,0.06)" }} />
               {tracks.map((track) => (
                 <MiniTrackRow
                   key={track.id}

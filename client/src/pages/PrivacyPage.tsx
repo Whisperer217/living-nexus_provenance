@@ -7,15 +7,15 @@ function Section({ icon, label, children }: { icon: React.ReactNode; label: stri
   return (
     <div
       className="rounded-xl p-6 mb-4"
-      style={{ background: "oklch(0.10 0.025 275)", border: "1px solid oklch(1 0 0 / 8%)" }}
+      style={{ background: "#2C3438", border: "1px solid rgba(230,205,174,0.08)" }}
     >
       <div className="flex items-center gap-2 mb-4">
-        <span style={{ color: "oklch(0.75 0.18 85)" }}>{icon}</span>
-        <h2 className="text-sm font-heading tracking-widest uppercase" style={{ color: "oklch(0.75 0.18 85)" }}>
+        <span style={{ color: "#CBB183" }}>{icon}</span>
+        <h2 className="text-sm font-heading tracking-widest uppercase" style={{ color: "#CBB183" }}>
           {label}
         </h2>
       </div>
-      <div className="text-sm leading-relaxed space-y-3" style={{ color: "oklch(0.72 0.04 280)" }}>
+      <div className="text-sm leading-relaxed space-y-3" style={{ color: "#DACAAA" }}>
         {children}
       </div>
     </div>
@@ -25,10 +25,10 @@ function Section({ icon, label, children }: { icon: React.ReactNode; label: stri
 // ── Highlight callout ────────────────────────────────────────────────────────
 function Callout({ color, icon, title, children }: { color: "amber" | "green" | "blue" | "red"; icon: React.ReactNode; title: string; children: React.ReactNode }) {
   const colors = {
-    amber: { bg: "oklch(0.35 0.08 75 / 0.25)", border: "oklch(0.75 0.15 75 / 0.35)", text: "oklch(0.88 0.12 75)" },
-    green: { bg: "oklch(0.25 0.08 145 / 0.25)", border: "oklch(0.65 0.15 145 / 0.35)", text: "oklch(0.80 0.12 145)" },
-    blue:  { bg: "oklch(0.25 0.06 240 / 0.25)", border: "oklch(0.60 0.12 240 / 0.35)", text: "oklch(0.78 0.10 240)" },
-    red:   { bg: "oklch(0.25 0.08 25 / 0.25)",  border: "oklch(0.60 0.15 25 / 0.35)",  text: "oklch(0.80 0.12 25)"  },
+    amber: { bg: "rgba(122,90,30,0.25)", border: "rgba(203,177,131,0.35)", text: "#E6CDAE" },
+    green: { bg: "rgba(44,52,56,0.25)", border: "rgba(74,222,128,0.35)", text: "#4ADE80" },
+    blue:  { bg: "rgba(44,52,56,0.25)", border: "rgba(56,189,248,0.35)", text: "#E6CDAE" },
+    red:   { bg: "rgba(44,52,56,0.25)",  border: "rgba(239,68,68,0.35)",  text: "#EF4444"  },
   };
   const c = colors[color];
   return (
@@ -49,14 +49,14 @@ function ProcessorRow({ name, purpose, dataShared, policy }: { name: string; pur
   return (
     <div
       className="grid grid-cols-1 sm:grid-cols-4 gap-2 p-3 rounded-lg text-xs"
-      style={{ background: "oklch(0.12 0.02 275)", border: "1px solid oklch(1 0 0 / 6%)" }}
+      style={{ background: "#2C3438", border: "1px solid rgba(230,205,174,0.06)" }}
     >
-      <div className="font-semibold" style={{ color: "oklch(0.82 0.155 85)" }}>{name}</div>
-      <div style={{ color: "oklch(0.72 0.04 280)" }}>{purpose}</div>
-      <div style={{ color: "oklch(0.72 0.04 280)" }}>{dataShared}</div>
+      <div className="font-semibold" style={{ color: "#E6CDAE" }}>{name}</div>
+      <div style={{ color: "#DACAAA" }}>{purpose}</div>
+      <div style={{ color: "#DACAAA" }}>{dataShared}</div>
       <a href={policy} target="_blank" rel="noopener noreferrer"
         className="underline underline-offset-2 hover:opacity-80 transition-opacity"
-        style={{ color: "oklch(0.65 0.12 240)" }}>
+        style={{ color: "#38BDF8" }}>
         Privacy Policy ↗
       </a>
     </div>
@@ -84,9 +84,9 @@ function SovereignMigrationTracker() {
   ];
 
   const stageBadgeStyle: Record<string, React.CSSProperties> = {
-    hosted:    { background: "oklch(0.35 0.08 75 / 0.30)",  color: "oklch(0.88 0.12 75)",  border: "1px solid oklch(0.75 0.15 75 / 0.30)" },
-    migrating: { background: "oklch(0.25 0.08 200 / 0.30)", color: "oklch(0.78 0.12 200)", border: "1px solid oklch(0.65 0.15 200 / 0.30)" },
-    sovereign: { background: "oklch(0.25 0.08 145 / 0.30)", color: "oklch(0.80 0.12 145)", border: "1px solid oklch(0.65 0.15 145 / 0.30)" },
+    hosted:    { background: "rgba(122,90,30,0.3)",  color: "#E6CDAE",  border: "1px solid rgba(203,177,131,0.3)" },
+    migrating: { background: "rgba(44,52,56,0.3)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)" },
+    sovereign: { background: "rgba(44,52,56,0.3)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)" },
   };
 
   const stageDescriptions: Record<string, string> = {
@@ -96,11 +96,11 @@ function SovereignMigrationTracker() {
   };
 
   return (
-    <div className="mt-5 rounded-xl p-4" style={{ background: "#2C3438)", border: "1px solid oklch(0.75 0.18 85 / 0.20)" }}>
+    <div className="mt-5 rounded-xl p-4" style={{ background: "#2C3438)", border: "1px solid rgba(203,177,131,0.2)" }}>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.75 0.18 85)" }}>Sovereign Migration Status</p>
+        <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "#CBB183" }}>Sovereign Migration Status</p>
         {isLoading ? (
-          <Loader2 className="w-3 h-3 animate-spin" style={{ color: "oklch(0.55 0.04 280)" }} />
+          <Loader2 className="w-3 h-3 animate-spin" style={{ color: "#3F4A50" }} />
         ) : (
           <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase" style={stageBadgeStyle[stage] ?? stageBadgeStyle.hosted}>
             {stage}
@@ -116,22 +116,22 @@ function SovereignMigrationTracker() {
               <div className="flex flex-col items-center">
                 <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold"
                   style={{
-                    background: done ? "oklch(0.75 0.18 85)" : "oklch(0.15 0.02 275)",
-                    border: current ? "2px solid oklch(0.88 0.12 75)" : done ? "none" : "1px solid oklch(0.30 0.04 280)",
-                    color: done ? "#2C3438)" : "oklch(0.40 0.04 280)",
+                    background: done ? "#CBB183" : "#2C3438",
+                    border: current ? "2px solid #E6CDAE" : done ? "none" : "1px solid #2C3438",
+                    color: done ? "#2C3438)" : "#3F4A50",
                   }}>
                   {done ? "✓" : i + 1}
                 </div>
-                <span className="text-[9px] mt-1 whitespace-nowrap" style={{ color: done ? "oklch(0.75 0.18 85)" : "oklch(0.40 0.04 280)" }}>{step.label}</span>
+                <span className="text-[9px] mt-1 whitespace-nowrap" style={{ color: done ? "#CBB183" : "#3F4A50" }}>{step.label}</span>
               </div>
               {i < arr.length - 1 && (
-                <div className="flex-1 h-px mx-1 mb-3" style={{ background: done ? "oklch(0.75 0.18 85 / 0.40)" : "#C3AB7D" }} />
+                <div className="flex-1 h-px mx-1 mb-3" style={{ background: done ? "rgba(203,177,131,0.4)" : "#C3AB7D" }} />
               )}
             </div>
           );
         })}
       </div>
-      <p className="text-[10px] leading-relaxed" style={{ color: "oklch(0.50 0.04 280)" }}>
+      <p className="text-[10px] leading-relaxed" style={{ color: "#3F4A50" }}>
         {stageDescriptions[stage]}
         {notes && <><br /><span className="italic">{notes}</span></>}
       </p>
@@ -147,7 +147,7 @@ export default function PrivacyPage() {
       {/* Back nav */}
       <Link href="/terms">
         <span className="inline-flex items-center gap-1.5 text-xs mb-6 cursor-pointer hover:opacity-80 transition-opacity"
-          style={{ color: "oklch(0.55 0.04 280)" }}>
+          style={{ color: "#3F4A50" }}>
           <ChevronLeft className="w-3.5 h-3.5" />
           Back to Terms of Service
         </span>
@@ -156,24 +156,24 @@ export default function PrivacyPage() {
       {/* Header */}
       <div
         className="rounded-2xl p-8 mb-6"
-        style={{ background: "oklch(0.10 0.025 275)", border: "1px solid oklch(0.75 0.18 85 / 0.15)" }}
+        style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}
       >
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}>
-            <Shield className="w-5 h-5" style={{ color: "oklch(0.82 0.155 85)" }} />
+            style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.22)" }}>
+            <Shield className="w-5 h-5" style={{ color: "#E6CDAE" }} />
           </div>
           <div>
-            <h1 className="text-xl font-heading tracking-widest uppercase" style={{ color: "oklch(0.82 0.155 85)" }}>
+            <h1 className="text-xl font-heading tracking-widest uppercase" style={{ color: "#E6CDAE" }}>
               Privacy Policy
             </h1>
-            <p className="text-xs mt-0.5" style={{ color: "oklch(0.50 0.04 280)" }}>
+            <p className="text-xs mt-0.5" style={{ color: "#3F4A50" }}>
               Living Nexus · BDDT Publishing / Command Domains LLC · Version 1.0 · April 2026
             </p>
           </div>
         </div>
 
-        <div className="space-y-3 text-sm leading-relaxed" style={{ color: "oklch(0.72 0.04 280)" }}>
+        <div className="space-y-3 text-sm leading-relaxed" style={{ color: "#DACAAA" }}>
           <p>
             This Privacy Policy describes how Living Nexus, operated by BDDT Publishing / Command Domains LLC
             ("we," "us," or "the platform"), collects, uses, stores, and protects information about creators and
@@ -196,17 +196,17 @@ export default function PrivacyPage() {
 
          {/* ── Sovereign Migration Status Tracker (live from DB) ── */}
         <SovereignMigrationTracker />
-        <div className="mt-5 pt-4 flex flex-wrap gap-4" style={{ borderTop: "1px solid oklch(0.75 0.18 85 / 0.12)" }}>
+        <div className="mt-5 pt-4 flex flex-wrap gap-4" style={{ borderTop: "1px solid rgba(203,177,131,0.12)" }}>
           <Link href="/terms">
             <span className="inline-flex items-center gap-1.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
-              style={{ color: "oklch(0.65 0.12 85)" }}>
+              style={{ color: "#CBB183" }}>
               <FileText className="w-3.5 h-3.5" />
               Terms of Service →
             </span>
           </Link>
           <Link href="/terms/compare">
             <span className="inline-flex items-center gap-1.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
-              style={{ color: "oklch(0.65 0.12 85)" }}>
+              style={{ color: "#CBB183" }}>
               <Eye className="w-3.5 h-3.5" />
               Compare Platform TOS →
             </span>
@@ -229,9 +229,9 @@ export default function PrivacyPage() {
             { label: "Usage Data", detail: "Page views, play counts, download counts, and interaction events (likes, reactions, comments) associated with your account. Used to operate the platform and display your dashboard analytics." },
             { label: "Technical Data", detail: "IP address, browser type, and session cookies necessary to authenticate your session and operate the platform securely. Not used for advertising profiling." },
           ].map(item => (
-            <div key={item.label} className="rounded-lg p-3" style={{ background: "oklch(0.12 0.02 275)", border: "1px solid oklch(1 0 0 / 6%)" }}>
-              <p className="text-xs font-semibold mb-0.5" style={{ color: "oklch(0.82 0.155 85)" }}>{item.label}</p>
-              <p className="text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>{item.detail}</p>
+            <div key={item.label} className="rounded-lg p-3" style={{ background: "#2C3438", border: "1px solid rgba(230,205,174,0.06)" }}>
+              <p className="text-xs font-semibold mb-0.5" style={{ color: "#E6CDAE" }}>{item.label}</p>
+              <p className="text-xs" style={{ color: "#AA8E64" }}>{item.detail}</p>
             </div>
           ))}
         </div>
@@ -250,8 +250,8 @@ export default function PrivacyPage() {
             "Detecting and preventing abuse, fraud, or violations of the Terms of Service.",
             "Improving platform performance and reliability through aggregated, anonymized usage analytics.",
           ].map((item, i) => (
-            <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>
-              <span className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.75 0.18 85)", marginTop: "5px" }} />
+            <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "#AA8E64" }}>
+              <span className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: "#CBB183", marginTop: "5px" }} />
               {item}
             </li>
           ))}
@@ -266,7 +266,7 @@ export default function PrivacyPage() {
       {/* Section 3 — AI Training Consent */}
       <Section icon={<Lock className="w-4 h-4" />} label="3. AI Training Consent">
         <p>
-          Living Nexus operates a voluntary AI training consent system. Your creative works are <strong style={{ color: "oklch(0.82 0.155 85)" }}>never</strong> used
+          Living Nexus operates a voluntary AI training consent system. Your creative works are <strong style={{ color: "#E6CDAE" }}>never</strong> used
           to train AI models by default. Consent is opt-in only, granular, and revocable.
         </p>
         <p>
@@ -294,9 +294,9 @@ export default function PrivacyPage() {
             { label: "CDN", detail: "Profile photos, banners, and cover art are served via Amazon CloudFront CDN (d2xsxph8kpxj0f.cloudfront.net) for performance. Files are cached at edge nodes globally." },
             { label: "Payment Data", detail: "All payment and billing data is stored exclusively by Stripe, Inc. in their PCI-DSS compliant infrastructure. We store only Stripe resource IDs as references." },
           ].map(item => (
-            <div key={item.label} className="rounded-lg p-3" style={{ background: "oklch(0.12 0.02 275)", border: "1px solid oklch(1 0 0 / 6%)" }}>
-              <p className="text-xs font-semibold mb-0.5" style={{ color: "oklch(0.82 0.155 85)" }}>{item.label}</p>
-              <p className="text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>{item.detail}</p>
+            <div key={item.label} className="rounded-lg p-3" style={{ background: "#2C3438", border: "1px solid rgba(230,205,174,0.06)" }}>
+              <p className="text-xs font-semibold mb-0.5" style={{ color: "#E6CDAE" }}>{item.label}</p>
+              <p className="text-xs" style={{ color: "#AA8E64" }}>{item.detail}</p>
             </div>
           ))}
         </div>
@@ -318,12 +318,12 @@ export default function PrivacyPage() {
             { label: "Payment Records", period: "7 years (legal/tax requirement)", detail: "Transaction records are retained for tax and legal compliance purposes. Card data is never stored by us." },
             { label: "Usage Logs", period: "90 days rolling", detail: "Access logs and usage analytics are retained for 90 days for security and performance monitoring, then deleted." },
           ].map(item => (
-            <div key={item.label} className="rounded-lg p-3" style={{ background: "oklch(0.12 0.02 275)", border: "1px solid oklch(1 0 0 / 6%)" }}>
+            <div key={item.label} className="rounded-lg p-3" style={{ background: "#2C3438", border: "1px solid rgba(230,205,174,0.06)" }}>
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <p className="text-xs font-semibold" style={{ color: "oklch(0.82 0.155 85)" }}>{item.label}</p>
-                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.75 0.18 85)" }}>{item.period}</span>
+                <p className="text-xs font-semibold" style={{ color: "#E6CDAE" }}>{item.label}</p>
+                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183" }}>{item.period}</span>
               </div>
-              <p className="text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>{item.detail}</p>
+              <p className="text-xs" style={{ color: "#AA8E64" }}>{item.detail}</p>
             </div>
           ))}
         </div>
@@ -337,7 +337,7 @@ export default function PrivacyPage() {
         </p>
         <div className="space-y-2 mt-3">
           <div className="grid grid-cols-4 gap-2 px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider"
-            style={{ color: "oklch(0.50 0.04 280)" }}>
+            style={{ color: "#3F4A50" }}>
             <span>Processor</span><span>Purpose</span><span>Data Shared</span><span>Policy</span>
           </div>
           <ProcessorRow
@@ -388,9 +388,9 @@ export default function PrivacyPage() {
             { right: "AI Consent Revocation", detail: "Revoke AI training consent for any or all of your works at any time from your creator dashboard. Changes take effect within 30 days." },
             { right: "Objection", detail: "Object to any processing of your data that you believe is not covered by this policy or your consent. We will investigate and respond within 30 days." },
           ].map(item => (
-            <div key={item.right} className="rounded-lg p-3" style={{ background: "oklch(0.12 0.02 275)", border: "1px solid oklch(1 0 0 / 6%)" }}>
-              <p className="text-xs font-semibold mb-0.5" style={{ color: "oklch(0.82 0.155 85)" }}>Right to {item.right}</p>
-              <p className="text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>{item.detail}</p>
+            <div key={item.right} className="rounded-lg p-3" style={{ background: "#2C3438", border: "1px solid rgba(230,205,174,0.06)" }}>
+              <p className="text-xs font-semibold mb-0.5" style={{ color: "#E6CDAE" }}>Right to {item.right}</p>
+              <p className="text-xs" style={{ color: "#AA8E64" }}>{item.detail}</p>
             </div>
           ))}
         </div>
@@ -407,12 +407,12 @@ export default function PrivacyPage() {
             { name: "Session Cookie", type: "Strictly Necessary", detail: "A signed JWT session cookie set after OAuth login. Required to authenticate your requests. Expires after 30 days of inactivity." },
             { name: "Analytics Cookie", type: "Performance (Anonymous)", detail: "A first-party analytics cookie that tracks page views and play counts in aggregate. No personal identifiers. Used to display your dashboard stats." },
           ].map(item => (
-            <div key={item.name} className="rounded-lg p-3" style={{ background: "oklch(0.12 0.02 275)", border: "1px solid oklch(1 0 0 / 6%)" }}>
+            <div key={item.name} className="rounded-lg p-3" style={{ background: "#2C3438", border: "1px solid rgba(230,205,174,0.06)" }}>
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <p className="text-xs font-semibold" style={{ color: "oklch(0.82 0.155 85)" }}>{item.name}</p>
-                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.75 0.18 85)" }}>{item.type}</span>
+                <p className="text-xs font-semibold" style={{ color: "#E6CDAE" }}>{item.name}</p>
+                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183" }}>{item.type}</span>
               </div>
-              <p className="text-xs" style={{ color: "oklch(0.65 0.04 280)" }}>{item.detail}</p>
+              <p className="text-xs" style={{ color: "#AA8E64" }}>{item.detail}</p>
             </div>
           ))}
         </div>
@@ -424,13 +424,13 @@ export default function PrivacyPage() {
           For privacy requests, data export requests, or questions about this policy, contact BDDT Publishing /
           Command Domains LLC at:
         </p>
-        <div className="rounded-lg p-4 mt-2" style={{ background: "oklch(0.12 0.02 275)", border: "1px solid oklch(1 0 0 / 6%)" }}>
-          <p className="text-xs" style={{ color: "oklch(0.72 0.04 280)" }}>
-            <strong style={{ color: "oklch(0.82 0.155 85)" }}>BDDT Publishing / Command Domains LLC</strong><br />
+        <div className="rounded-lg p-4 mt-2" style={{ background: "#2C3438", border: "1px solid rgba(230,205,174,0.06)" }}>
+          <p className="text-xs" style={{ color: "#DACAAA" }}>
+            <strong style={{ color: "#E6CDAE" }}>BDDT Publishing / Command Domains LLC</strong><br />
             Website: <a href="https://blooddirtductape.com" target="_blank" rel="noopener noreferrer"
-              className="underline underline-offset-2" style={{ color: "oklch(0.65 0.12 240)" }}>blooddirtductape.com</a><br />
+              className="underline underline-offset-2" style={{ color: "#38BDF8" }}>blooddirtductape.com</a><br />
             Platform: <a href="https://livingnexus.org" target="_blank" rel="noopener noreferrer"
-              className="underline underline-offset-2" style={{ color: "oklch(0.65 0.12 240)" }}>livingnexus.org</a>
+              className="underline underline-offset-2" style={{ color: "#38BDF8" }}>livingnexus.org</a>
           </p>
         </div>
         <p className="mt-3">

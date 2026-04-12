@@ -343,9 +343,9 @@
 
   /* Scrollbar styling — warm amber tint */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-thumb { background: oklch(0.55 0.08 70 / 40%); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(203,177,131,0.40); border-radius: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-   * { scrollbar-width: thin; scrollbar-color: oklch(0.55 0.08 70 / 40%) transparent; }
+   * { scrollbar-width: thin; scrollbar-color: rgba(203,177,131,0.40) transparent; }
 }
 
 /* ── Radix Dialog scroll-lock compatibility ──────────────────────────────
@@ -514,7 +514,7 @@ html body[data-scroll-locked] {
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 22px 4px oklch(0.82 0.155 75 / 0.22), 0 0 8px 1px oklch(0.82 0.155 75 / 0.30);
+    box-shadow: 0 0 22px 4px rgba(203,177,131,0.20), 0 0 8px 1px rgba(203,177,131,0.28);
     pointer-events: none;
     z-index: 0;
   }
@@ -526,7 +526,7 @@ html body[data-scroll-locked] {
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 22px 3px oklch(0.70 0.14 55 / 0.22), 0 0 8px 1px oklch(0.75 0.12 60 / 0.28);
+    box-shadow: 0 0 22px 3px rgba(203,177,131,0.18), 0 0 8px 1px rgba(203,177,131,0.25);
     pointer-events: none;
     z-index: 0;
   }
@@ -535,10 +535,10 @@ html body[data-scroll-locked] {
   .hero-radial {
     background:
       radial-gradient(ellipse 80% 60% at 50% 40%,
-        oklch(0.10 0.022 55 / 0.0) 0%,
-        oklch(0.10 0.022 55 / 0.6) 45%,
-        oklch(0.09 0.025 50 / 0.85) 70%,
-        oklch(0.08 0.028 45 / 1.0) 100%
+        rgba(53,62,67,0.0) 0%,
+        rgba(53,62,67,0.6) 45%,
+        rgba(44,52,56,0.85) 70%,
+        rgba(44,52,56,1.0) 100%
       );
     pointer-events: none;
   }
@@ -546,9 +546,9 @@ html body[data-scroll-locked] {
   /* ── Player bar ambient glow — warm amber lantern uplight ── */
   .player-glow {
     box-shadow:
-      0 -4px 32px oklch(0.82 0.155 75 / 0.18),
-      0 -1px 8px oklch(0.82 0.155 75 / 0.25),
-      0 -8px 48px oklch(0.70 0.13 72 / 0.10);
+      0 -4px 32px rgba(203,177,131,0.16),
+      0 -1px 8px rgba(203,177,131,0.22),
+      0 -8px 48px rgba(203,177,131,0.08);
   }
 
   /* ── Sage glow for teal-accented elements ── */
@@ -560,7 +560,7 @@ html body[data-scroll-locked] {
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 18px 2px oklch(0.78 0.12 175 / 0.20), 0 0 6px 0px oklch(0.78 0.12 175 / 0.28);
+    box-shadow: 0 0 18px 2px rgba(74,222,128,0.18), 0 0 6px 0px rgba(74,222,128,0.25);
     pointer-events: none;
     z-index: 0;
   }
@@ -568,10 +568,10 @@ html body[data-scroll-locked] {
   /* ── WID badge ambient glow — candlelight amber halo ── */
   .wid-glow {
     box-shadow:
-      0 0 16px 4px oklch(0.82 0.155 75 / 0.55),
-      0 0 6px 1px oklch(0.82 0.155 75 / 0.40),
-      0 0 32px 8px oklch(0.70 0.13 72 / 0.25);
-    border-color: oklch(0.82 0.155 75 / 0.65) !important;
+      0 0 16px 4px rgba(203,177,131,0.50),
+      0 0 6px 1px rgba(203,177,131,0.35),
+      0 0 32px 8px rgba(203,177,131,0.20);
+    border-color: rgba(203,177,131,0.60) !important;
   }
 
   /* ── Track card ambient glow on hover — warm lantern lift ── */
@@ -579,7 +579,7 @@ html body[data-scroll-locked] {
     transition: box-shadow 0.25s ease, transform 0.2s ease;
   }
   .track-card-glow:hover {
-    box-shadow: 0 4px 28px oklch(0.70 0.13 72 / 0.22), 0 2px 10px oklch(0.82 0.155 75 / 0.18);
+    box-shadow: 0 4px 28px rgba(203,177,131,0.18), 0 2px 10px rgba(203,177,131,0.16);
     transform: translateY(-1px);
   }
 
@@ -813,18 +813,18 @@ html body[data-scroll-locked] {
 
   /* ── Gold banner — tracks with 50+ plays earn a luminous gold border treatment ── */
   .gold-banner {
-    border-color: oklch(0.78 0.16 78 / 0.65) !important;
+    border-color: rgba(203,177,131,0.60) !important;
     box-shadow:
-      0 0 0 1px oklch(0.82 0.155 75 / 0.30),
-      0 0 18px 2px oklch(0.75 0.14 72 / 0.20),
-      inset 0 0 12px 0 oklch(0.82 0.155 75 / 0.04);
+      0 0 0 1px rgba(203,177,131,0.28),
+      0 0 18px 2px rgba(203,177,131,0.18),
+      inset 0 0 12px 0 rgba(203,177,131,0.04);
   }
   .gold-banner:hover {
-    border-color: oklch(0.84 0.18 80 / 0.80) !important;
+    border-color: rgba(203,177,131,0.75) !important;
     box-shadow:
-      0 0 0 1px oklch(0.84 0.18 80 / 0.45),
-      0 0 28px 4px oklch(0.78 0.16 76 / 0.30),
-      inset 0 0 16px 0 oklch(0.82 0.155 75 / 0.06);
+      0 0 0 1px rgba(203,177,131,0.40),
+      0 0 28px 4px rgba(203,177,131,0.28),
+      inset 0 0 16px 0 rgba(203,177,131,0.06);
     transform: translateY(-2px);
   }
   @keyframes goldShimmer {
@@ -833,11 +833,11 @@ html body[data-scroll-locked] {
   }
   .gold-banner-ribbon {
     background: linear-gradient(90deg,
-      oklch(0.62 0.14 60) 0%,
-      oklch(0.88 0.18 82) 40%,
-      oklch(0.96 0.14 88) 55%,
-      oklch(0.88 0.18 82) 70%,
-      oklch(0.62 0.14 60) 100%
+      #AA8E64 0%,
+      #E6CDAE 40%,
+      #E6CDAE 55%,
+      #E6CDAE 70%,
+      #AA8E64 100%
     );
     background-size: 200% auto;
     animation: goldShimmer 2.8s linear infinite;
@@ -878,7 +878,7 @@ html body[data-scroll-locked] {
   /* ── Gold divider line — candlelight amber ── */
   .gold-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, oklch(0.82 0.155 75 / 45%), transparent);
+    background: linear-gradient(90deg, transparent, rgba(203,177,131,0.45), transparent);
   }
 
   /* ── Live wave animation ── */
@@ -910,8 +910,8 @@ html body[data-scroll-locked] {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: oklch(0.82 0.155 75);
-    box-shadow: 0 0 10px oklch(0.82 0.155 75 / 0.7);
+    background: #CBB183;
+    box-shadow: 0 0 10px rgba(203,177,131,0.7);
     animation: pulseDot 1.5s ease-in-out infinite;
   }
   @keyframes pulseDot {
@@ -944,8 +944,8 @@ html body[data-scroll-locked] {
 
   /* ── Animated gold progress glow — candlelight pulse ── */
   @keyframes progressGlow {
-    0%, 100% { box-shadow: 0 0 5px 2px oklch(0.82 0.155 75 / 0.55); }
-    50% { box-shadow: 0 0 10px 4px oklch(0.82 0.155 75 / 0.85); }
+    0%, 100% { box-shadow: 0 0 5px 2px rgba(203,177,131,0.50); }
+    50% { box-shadow: 0 0 10px 4px rgba(203,177,131,0.85); }
   }
   .progress-playhead {
     animation: progressGlow 1.8s ease-in-out infinite;
@@ -969,23 +969,23 @@ html body[data-scroll-locked] {
 
   /* ── CTA button glow — lantern warmth ── */
   .btn-gold-glow {
-    box-shadow: 0 0 0 0 oklch(0.82 0.155 75 / 0);
+    box-shadow: 0 0 0 0 rgba(203,177,131,0.0);
     transition: box-shadow 0.25s ease, transform 0.15s ease;
   }
   .btn-gold-glow:hover {
     box-shadow:
-      0 0 20px 5px oklch(0.82 0.155 75 / 0.40),
-      0 4px 18px oklch(0.82 0.155 75 / 0.25);
+      0 0 20px 5px rgba(203,177,131,0.35),
+      0 4px 18px rgba(203,177,131,0.22);
     transform: translateY(-1px);
   }
   .btn-violet-glow {
-    box-shadow: 0 0 0 0 oklch(0.70 0.14 55 / 0);
+    box-shadow: 0 0 0 0 rgba(170,142,100,0.0);
     transition: box-shadow 0.25s ease, transform 0.15s ease;
   }
   .btn-violet-glow:hover {
     box-shadow:
-      0 0 18px 4px oklch(0.70 0.14 55 / 0.35),
-      0 4px 16px oklch(0.75 0.12 60 / 0.22);
+      0 0 18px 4px rgba(170,142,100,0.35),
+      0 4px 16px rgba(203,177,131,0.22);
     transform: translateY(-1px);
   }
 
@@ -1018,7 +1018,7 @@ html body[data-scroll-locked] {
     transition: box-shadow 0.2s ease, transform 0.15s ease, background 0.2s ease;
   }
   .hover-elevate:hover {
-    box-shadow: 0 6px 24px oklch(0 0 0 / 0.4), 0 0 12px color-mix(in srgb, var(--lnx-gold) 10%, transparent);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.40), 0 0 12px color-mix(in srgb, var(--lnx-gold) 10%, transparent);
     transform: translateY(-1px);
   }
 
@@ -1079,9 +1079,9 @@ html body[data-scroll-locked] {
 
   /* ── Genre pill — warm amber ── */
   .genre-pill {
-    border: 1px solid oklch(0.82 0.155 75 / 0.30);
-    color: oklch(0.88 0.04 70);
-    background: oklch(0.82 0.155 75 / 0.08);
+    border: 1px solid rgba(203,177,131,0.28);
+    color: #DACAAA;
+    background: rgba(203,177,131,0.08);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.6875rem;
     padding: 0.125rem 0.625rem;
@@ -1089,9 +1089,9 @@ html body[data-scroll-locked] {
     transition: border-color 0.2s, color 0.2s, background 0.2s;
   }
   .genre-pill:hover, .genre-pill.active {
-    border-color: oklch(0.82 0.155 75 / 0.65);
-    color: oklch(0.82 0.155 75);
-    background: oklch(0.82 0.155 75 / 0.14);
+    border-color: rgba(203,177,131,0.60);
+    color: #CBB183;
+    background: rgba(203,177,131,0.14);
   }
 }
 
@@ -1099,8 +1099,8 @@ html body[data-scroll-locked] {
 /* Used by PlayerBar and MobilePlayerLayer vertical volume controls          */
 
 @keyframes flamePulse {
-  0%, 100% { box-shadow: 0 0 6px 2px oklch(0.82 0.155 75 / 0.55), 0 0 14px 4px oklch(0.72 0.18 60 / 0.30); }
-  50%       { box-shadow: 0 0 12px 5px oklch(0.88 0.18 82 / 0.80), 0 0 24px 10px oklch(0.72 0.18 60 / 0.50); }
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(203,177,131,0.50), 0 0 14px 4px rgba(203,177,131,0.3); }
+  50%       { box-shadow: 0 0 12px 5px rgba(230,205,174,0.8), 0 0 24px 10px rgba(203,177,131,0.5); }
 }
 
 /* ── Standard vertical slider (bottom bar + expanded bar) ── */
@@ -1122,7 +1122,7 @@ input[type="range"].volume-slider-vertical {
 input[type="range"].volume-slider-vertical::-webkit-slider-runnable-track {
   width: 8px;
   border-radius: 9999px;
-  background: oklch(0.22 0.04 55 / 80%);
+  background: rgba(44,52,56,0.8);
 }
 input[type="range"].volume-slider-vertical::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -1130,8 +1130,8 @@ input[type="range"].volume-slider-vertical::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, oklch(0.96 0.10 90), oklch(0.82 0.155 75) 55%, oklch(0.62 0.18 55));
-  border: 2px solid oklch(0.94 0.06 82 / 0.95);
+  background: radial-gradient(circle at 40% 35%, #E6CDAE, #CBB183 55%, #AA8E64);
+  border: 2px solid rgba(230,205,174,0.95);
   margin-left: -5px;
   cursor: pointer;
   animation: flamePulse 2.4s ease-in-out infinite;
@@ -1143,16 +1143,16 @@ input[type="range"].volume-slider-vertical::-webkit-slider-thumb:hover {
 input[type="range"].volume-slider-vertical::-moz-range-track {
   height: 8px;
   border-radius: 9999px;
-  background: oklch(0.28 0.04 60 / 80%);
+  background: rgba(44,52,56,0.8);
 }
 input[type="range"].volume-slider-vertical::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, oklch(0.96 0.10 90), oklch(0.82 0.155 75) 55%, oklch(0.62 0.18 55));
-  border: 2px solid oklch(0.94 0.06 82 / 0.95);
+  background: radial-gradient(circle at 40% 35%, #E6CDAE, #CBB183 55%, #AA8E64);
+  border: 2px solid rgba(230,205,174,0.95);
   cursor: pointer;
-  box-shadow: 0 0 8px 3px oklch(0.82 0.155 75 / 0.55);
+  box-shadow: 0 0 8px 3px rgba(203,177,131,0.50);
 }
 
 /* ── Theater-mode vertical slider — taller, organ-pipe style ──────────── */
@@ -1174,7 +1174,7 @@ input[type="range"].volume-slider-theater {
 input[type="range"].volume-slider-theater::-webkit-slider-runnable-track {
   width: 10px;
   border-radius: 9999px;
-  background: oklch(0.22 0.04 270 / 80%);
+  background: rgba(44,52,56,0.8);
 }
 input[type="range"].volume-slider-theater::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -1182,8 +1182,8 @@ input[type="range"].volume-slider-theater::-webkit-slider-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, oklch(0.98 0.08 92), oklch(0.85 0.16 78) 50%, oklch(0.58 0.20 52));
-  border: 2px solid oklch(0.96 0.08 85 / 0.95);
+  background: radial-gradient(circle at 38% 32%, #E6CDAE, #CBB183 50%, #3F4A50);
+  border: 2px solid rgba(230,205,174,0.95);
   margin-left: -6px;
   cursor: pointer;
   animation: flamePulse 2.0s ease-in-out infinite;
@@ -1195,16 +1195,16 @@ input[type="range"].volume-slider-theater::-webkit-slider-thumb:hover {
 input[type="range"].volume-slider-theater::-moz-range-track {
   height: 10px;
   border-radius: 9999px;
-  background: oklch(0.22 0.04 270 / 80%);
+  background: rgba(44,52,56,0.8);
 }
 input[type="range"].volume-slider-theater::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, oklch(0.98 0.08 92), oklch(0.85 0.16 78) 50%, oklch(0.58 0.20 52));
-  border: 2px solid oklch(0.96 0.08 85 / 0.95);
+  background: radial-gradient(circle at 38% 32%, #E6CDAE, #CBB183 50%, #3F4A50);
+  border: 2px solid rgba(230,205,174,0.95);
   cursor: pointer;
-  box-shadow: 0 0 10px 4px oklch(0.82 0.155 75 / 0.6);
+  box-shadow: 0 0 10px 4px rgba(203,177,131,0.6);
 }
 
 /* ── TrackCard visual-pending shimmer animations ── */

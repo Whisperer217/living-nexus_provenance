@@ -227,11 +227,11 @@ export default function PlayerBar() {
         right: 0,
         height: isCinematic ? "100dvh" : isExpanded ? "256px" : "68px",
         overflow: "visible",
-        background: isCinematic ? "#000" : "oklch(0.125 0.028 52)",
+        background: isCinematic ? "#000" : "#2C3438",
         borderTop: isExpanded && !isCinematic
-          ? "1px solid oklch(0.80 0.145 82 / 0.20)"
-          : isCinematic ? "none" : "1px solid oklch(0.30 0.04 60 / 50%)",
-        boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px oklch(0.82 0.155 75 / 0.18), 0 -1px 8px oklch(0.82 0.155 75 / 0.22)",
+          ? "1px solid rgba(203,177,131,0.2)"
+          : isCinematic ? "none" : "1px solid rgba(44,52,56,0.5)",
+        boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px rgba(203,177,131,0.16), 0 -1px 8px rgba(203,177,131,0.20)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
         zIndex: isCinematic ? 9020 : isExpanded ? 9010 : 9001,
@@ -244,13 +244,13 @@ export default function PlayerBar() {
           className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-1 text-[11px] font-semibold transition-all duration-200 rounded-t-lg z-10"
           style={{
             top: "-26px",
-            background: "oklch(0.125 0.028 52)",
-            border: "1px solid oklch(0.30 0.04 60 / 50%)",
+            background: "#2C3438",
+            border: "1px solid rgba(44,52,56,0.5)",
             borderBottom: "none",
-            color: isExpanded ? "oklch(0.82 0.155 75)" : "oklch(0.58 0.04 60)",
+            color: isExpanded ? "#CBB183" : "#AA8E64",
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.82 0.155 75)")}
-          onMouseLeave={e => (e.currentTarget.style.color = isExpanded ? "oklch(0.82 0.155 75)" : "oklch(0.58 0.04 60)")}
+          onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
+          onMouseLeave={e => (e.currentTarget.style.color = isExpanded ? "#CBB183" : "#AA8E64")}
           title={isExpanded ? "Collapse player" : "Expand player"}
         >
           {isExpanded ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
@@ -258,7 +258,7 @@ export default function PlayerBar() {
           {!isExpanded && commentsData && commentsData.length > 0 && (
             <span
               className="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold leading-none"
-              style={{ background: "oklch(0.80 0.145 82)", color: "#2C3438" }}
+              style={{ background: "#CBB183", color: "#2C3438" }}
             >
               {commentsData.length} {commentsData.length === 1 ? "witness" : "witnesses"}
             </span>
@@ -294,9 +294,9 @@ export default function PlayerBar() {
             onClick={() => setIsCinematic(false)}
             className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
             style={{
-              background: "oklch(0.10 0.04 270)",
-              border: "1px solid oklch(0.40 0.04 270 / 60%)",
-              color: "oklch(0.80 0.145 82)",
+              background: "#3F4A50",
+              border: "1px solid rgba(63,74,80,0.6)",
+              color: "#CBB183",
               backdropFilter: "blur(8px)",
             }}
           >
@@ -304,17 +304,17 @@ export default function PlayerBar() {
           </button>
           {/* Track info — top left */}
           <div className="absolute top-4 left-4 z-20">
-            <div className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.97 0.008 270)" }}>
+            <div className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
               {currentTrack.title}
             </div>
-            <div className="text-sm mt-1" style={{ color: "oklch(0.82 0.155 175)" }}>
+            <div className="text-sm mt-1" style={{ color: "#4ADE80" }}>
               {currentTrack.artist}
             </div>
             {currentTrack.witnessId && (
               <button
                 onClick={goToVerify}
                 className="text-[9px] font-mono mt-1 block transition-opacity hover:opacity-80"
-                style={{ color: "oklch(0.80 0.145 82 / 0.7)" }}
+                style={{ color: "rgba(203,177,131,0.7)" }}
               >
                 WID: {currentTrack.witnessId.slice(0, 24)}…
               </button>
@@ -324,26 +324,26 @@ export default function PlayerBar() {
           <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center gap-4 px-8">
             {/* Progress bar */}
             <div className="w-full flex items-center gap-3">
-              <span className="text-[11px] tabular-nums w-8" style={{ color: "oklch(0.65 0.04 65)" }}>{fmtTime(state.currentTime)}</span>
+              <span className="text-[11px] tabular-nums w-8" style={{ color: "#AA8E64" }}>{fmtTime(state.currentTime)}</span>
               <div
                 className="flex-1 h-1 rounded-full cursor-pointer group relative"
-                style={{ background: "oklch(0.30 0.04 60 / 50%)" }}
+                style={{ background: "rgba(44,52,56,0.5)" }}
                 onClick={handleSeek}
               >
                 <div
                   className="h-full rounded-full"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, oklch(0.42 0.14 38) 0%, oklch(0.62 0.18 55) 50%, oklch(0.88 0.18 82) 100%)",
-                    boxShadow: progress > 2 ? "0 0 8px 1px oklch(0.82 0.155 75 / 0.45)" : "none",
+                    background: "linear-gradient(90deg, #EF4444 0%, #AA8E64 50%, #E6CDAE 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(203,177,131,0.40)" : "none",
                   }}
                 />
               </div>
-              <span className="text-[11px] tabular-nums w-8" style={{ color: "oklch(0.65 0.04 65)" }}>{fmtTime(state.duration)}</span>
+              <span className="text-[11px] tabular-nums w-8" style={{ color: "#AA8E64" }}>{fmtTime(state.duration)}</span>
             </div>
             {/* Playback controls */}
             <div className="flex items-center gap-6">
-              <button type="button" onClick={toggleShuffle} className={`p-2 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/40 hover:text-white/80"}`}>
+              <button type="button" onClick={toggleShuffle} className={`p-2 transition-colors ${state.isShuffle ? "text-[#CBB183]" : "text-white/40 hover:text-white/80"}`}>
                 <Shuffle size={18} />
               </button>
               <button type="button" onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
@@ -352,14 +352,14 @@ export default function PlayerBar() {
               <button
                 onClick={togglePlay}
                 className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-105"
-                style={{ background: "oklch(0.80 0.145 82)", color: "#2C3438" }}
+                style={{ background: "#CBB183", color: "#2C3438" }}
               >
                 {state.isPlaying ? <Pause size={24} /> : <Play size={24} fill="currentColor" />}
               </button>
               <button type="button" onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
                 <SkipForward size={22} />
               </button>
-              <button type="button" onClick={toggleRepeat} className={`p-2 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/40 hover:text-white/80"}`}>
+              <button type="button" onClick={toggleRepeat} className={`p-2 transition-colors ${state.isRepeat ? "text-[#CBB183]" : "text-white/40 hover:text-white/80"}`}>
                 <Repeat size={18} />
               </button>
             </div>
@@ -393,9 +393,9 @@ export default function PlayerBar() {
                 onClick={() => navigate(`/verify/${videoWitnessId}`)}
                 className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide transition-all z-20"
                 style={{
-                  background: "oklch(0.30 0.015 200 / 0.88)",
-                  border: "1px solid oklch(0.55 0.18 145 / 0.5)",
-                  color: "oklch(0.82 0.18 145)",
+                  background: "rgba(44,52,56,0.88)",
+                  border: "1px solid rgba(74,222,128,0.5)",
+                  color: "#4ADE80",
                   backdropFilter: "blur(4px)",
                 }}
                 title="Video cryptographically witnessed — click to verify"
@@ -406,7 +406,7 @@ export default function PlayerBar() {
             {/* Gold gradient fade to center */}
             <div
               className="absolute inset-0 pointer-events-none z-10"
-              style={{ background: "linear-gradient(to right, transparent 60%, oklch(0.125 0.028 52))" }}
+              style={{ background: "linear-gradient(to right, transparent 60%, #2C3438)" }}
             />
           </div>
 
@@ -417,8 +417,8 @@ export default function PlayerBar() {
               <button
                 onClick={goToSong}
                 disabled={!currentSongId}
-                className="text-lg font-bold truncate block w-full text-left transition-colors hover:text-[oklch(0.80_0.145_82)] disabled:cursor-default mb-0.5"
-                style={{ color: "oklch(0.94 0.025 75)", fontFamily: "'Cinzel', serif" }}
+                className="text-lg font-bold truncate block w-full text-left transition-colors hover:text-[#CBB183] disabled:cursor-default mb-0.5"
+                style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
               >
                 {currentTrack.title}
               </button>
@@ -426,7 +426,7 @@ export default function PlayerBar() {
                 onClick={goToCreator}
                 disabled={!currentTrack}
                 className="text-sm truncate block w-full text-left transition-opacity hover:opacity-80 disabled:cursor-default mb-1"
-                style={{ color: "oklch(0.82 0.155 175)" }}
+                style={{ color: "#4ADE80" }}
               >
                 {currentTrack.artist || "—"}
               </button>
@@ -434,7 +434,7 @@ export default function PlayerBar() {
                 <button
                   onClick={goToVerify}
                   className="text-[9px] font-mono truncate block text-left transition-opacity hover:opacity-80 mb-2"
-                  style={{ color: "oklch(0.80 0.145 82 / 0.6)" }}
+                  style={{ color: "rgba(203,177,131,0.6)" }}
                   title="View Witness Certificate"
                 >
                   WID: {currentTrack.witnessId.slice(0, 22)}…
@@ -445,7 +445,7 @@ export default function PlayerBar() {
                 <button
                   onClick={() => { if (user && currentSongId && !isNaN(currentSongId)) toggleLikeMutation.mutate({ songId: currentSongId }); }}
                   disabled={!user || toggleLikeMutation.isPending}
-                  className={`p-1.5 transition-colors ${isLiked ? "text-[oklch(0.82_0.155_175)]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
+                  className={`p-1.5 transition-colors ${isLiked ? "text-[#4ADE80]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
                   title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
                 >
                   <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
@@ -453,7 +453,7 @@ export default function PlayerBar() {
                 {tipsEnabled && (
                   <button
                     onClick={() => setTipOpen(true)}
-                    className="p-1.5 transition-colors text-[oklch(0.80_0.145_82)] hover:text-[oklch(0.88_0.16_85)]"
+                    className="p-1.5 transition-colors text-[#CBB183] hover:text-[#E6CDAE]"
                     title={`Tip ${currentTrack.artist}`}
                   >
                     <DollarSign size={15} />
@@ -462,7 +462,7 @@ export default function PlayerBar() {
                 {currentSongId && (
                   <button
                     onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setAddToListOpen(true); }}
-                    className="p-1.5 transition-colors text-white/50 hover:text-[oklch(0.80_0.145_82)]"
+                    className="p-1.5 transition-colors text-white/50 hover:text-[#CBB183]"
                     title="Add to My List"
                   >
                     <ListPlus size={15} />
@@ -473,31 +473,31 @@ export default function PlayerBar() {
 
             {/* Progress bar */}
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "oklch(0.65 0.04 65)" }}>
+              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "#AA8E64" }}>
                 {fmtTime(state.currentTime)}
               </span>
               <div
                 className="flex-1 h-1.5 rounded-full cursor-pointer relative group"
-                style={{ background: "oklch(0.30 0.04 60 / 70%)" }}
+                style={{ background: "rgba(44,52,56,0.7)" }}
                 onClick={handleSeek}
               >
                 <div
                   className="h-full rounded-full relative transition-all"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, oklch(0.42 0.14 38) 0%, oklch(0.62 0.18 55) 50%, oklch(0.88 0.18 82) 100%)",
-                    boxShadow: progress > 2 ? "0 0 8px 1px oklch(0.82 0.155 75 / 0.45)" : "none",
+                    background: "linear-gradient(90deg, #EF4444 0%, #AA8E64 50%, #E6CDAE 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(203,177,131,0.40)" : "none",
                   }}
                 >
                   {state.isPlaying && (
                     <div
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full progress-playhead"
-                      style={{ background: "oklch(0.92 0.16 82)", boxShadow: "0 0 8px 3px oklch(0.82 0.155 75 / 0.80)" }}
+                      style={{ background: "#E6CDAE", boxShadow: "0 0 8px 3px rgba(203,177,131,0.8)" }}
                     />
                   )}
                 </div>
               </div>
-              <span className="text-[11px] w-8 tabular-nums" style={{ color: "oklch(0.65 0.04 65)" }}>
+              <span className="text-[11px] w-8 tabular-nums" style={{ color: "#AA8E64" }}>
                 {fmtTime(state.duration)}
               </span>
             </div>
@@ -505,7 +505,7 @@ export default function PlayerBar() {
             {/* Playback controls */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <button type="button" onClick={toggleShuffle} className={`p-1.5 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
+                <button type="button" onClick={toggleShuffle} className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}>
                   <Shuffle size={14} />
                 </button>
                 <button type="button" onClick={prevTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
@@ -514,7 +514,7 @@ export default function PlayerBar() {
                 <button
                   onClick={togglePlay}
                   className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                  style={{ background: "oklch(0.94 0.025 75)", color: "#2C3438" }}
+                  style={{ background: "#E6CDAE", color: "#2C3438" }}
                 >
                   {state.isPlaying
                     ? <Pause size={17} fill="currentColor" />
@@ -524,7 +524,7 @@ export default function PlayerBar() {
                 <button type="button" onClick={nextTrack} className="p-1.5 text-white/50 hover:text-white transition-colors">
                   <SkipForward size={18} />
                 </button>
-                <button type="button" onClick={toggleRepeat} className={`p-1.5 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}>
+                <button type="button" onClick={toggleRepeat} className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}>
                   <Repeat size={14} />
                 </button>
               </div>
@@ -535,9 +535,9 @@ export default function PlayerBar() {
                   <button
                     onClick={() => setShowVolume(v => !v)}
                     className="p-1 transition-colors"
-                    style={{ color: state.isMuted ? "oklch(0.50 0.04 55)" : "oklch(0.65 0.04 65)" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.94 0.025 75)")}
-                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "oklch(0.50 0.04 55)" : "oklch(0.65 0.04 65)")}
+                    style={{ color: state.isMuted ? "#3F4A50" : "#AA8E64" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
+                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "#3F4A50" : "#AA8E64")}
                     title="Volume"
                   >
                     {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -546,16 +546,16 @@ export default function PlayerBar() {
                     <div
                       className="absolute bottom-12 left-1/2 -translate-x-1/2 rounded-2xl shadow-2xl z-50"
                       style={{
-                        background: "oklch(0.12 0.030 52)",
-                        border: "1px solid oklch(0.38 0.08 68 / 60%)",
-                        boxShadow: "0 0 24px 4px oklch(0.82 0.155 75 / 0.18), 0 8px 32px oklch(0.10 0.02 55 / 0.8)",
+                        background: "#2C3438",
+                        border: "1px solid rgba(122,90,30,0.6)",
+                        boxShadow: "0 0 24px 4px rgba(203,177,131,0.16), 0 8px 32px rgba(44,52,56,0.8)",
                         padding: "12px 14px 10px",
                         minWidth: "140px",
                       }}
                     >
                       {/* Volume % label */}
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "oklch(0.82 0.155 75)" }}>
+                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "#CBB183" }}>
                           {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
                         </span>
                         {/* Mute toggle */}
@@ -563,8 +563,8 @@ export default function PlayerBar() {
                           onClick={toggleMute}
                           className="p-1 rounded-full transition-all"
                           style={{
-                            color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.45 0.04 55)",
-                            background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                            color: state.isMuted ? "#CBB183" : "#3F4A50",
+                            background: state.isMuted ? "rgba(230,205,174,0.12)" : "transparent",
                           }}
                           title={state.isMuted ? "Unmute" : "Mute"}
                         >
@@ -580,9 +580,9 @@ export default function PlayerBar() {
                           onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
                           className="volume-slider-vertical"
                           style={{
-                            background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
+                            background: `linear-gradient(to top, #E6CDAE ${
                               state.isMuted ? 0 : state.volume * 100
-                            }%, oklch(0.22 0.04 55 / 80%) ${
+                            }%, rgba(44,52,56,0.8) ${
                               state.isMuted ? 0 : state.volume * 100
                             }%)`,
                           }}
@@ -594,9 +594,9 @@ export default function PlayerBar() {
                 <button
                   onClick={openTheater}
                   className="p-1.5 transition-colors ml-1"
-                  style={{ color: "oklch(0.65 0.04 65)" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.65 0.04 65)")}
+                  style={{ color: "#AA8E64" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}
                   title="Open Theater Player"
                 >
                   <Maximize2 size={14} />
@@ -608,17 +608,17 @@ export default function PlayerBar() {
           {/* RIGHT — Live comment feed (272px) */}
           <div
             className="w-72 flex flex-col flex-shrink-0 overflow-hidden"
-            style={{ borderLeft: "1px solid oklch(0.25 0.04 60 / 55%)" }}
+            style={{ borderLeft: "1px solid rgba(44,52,56,0.55)" }}
           >
             {/* Header */}
             <div
               className="px-3 py-2 flex items-center gap-2 flex-shrink-0"
-              style={{ borderBottom: "1px solid oklch(0.25 0.04 60 / 55%)" }}
+              style={{ borderBottom: "1px solid rgba(44,52,56,0.55)" }}
             >
-              <MessageCircle size={11} style={{ color: "oklch(0.80 0.145 82)" }} />
+              <MessageCircle size={11} style={{ color: "#CBB183" }} />
               <span
                 className="text-[10px] font-bold tracking-widest uppercase"
-                style={{ color: "oklch(0.80 0.145 82)", fontFamily: "'Cinzel', serif" }}
+                style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}
               >
                 Live Feed
               </span>
@@ -628,22 +628,22 @@ export default function PlayerBar() {
             <div
               ref={commentListRef}
               className="flex-1 overflow-y-auto px-3 py-2 space-y-2"
-              style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.22 0.02 275) transparent" }}
+              style={{ scrollbarWidth: "thin", scrollbarColor: "#2C3438 transparent" }}
             >
               {commentsData && commentsData.length > 0 ? (
                 commentsData.map((c: any) => (
                   <div key={c.id} className="flex gap-2">
                     <div
                       className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold mt-0.5"
-                      style={{ background: "oklch(0.22 0.06 55)", color: "oklch(0.82 0.155 75)" }}
+                      style={{ background: "#2C3438", color: "#CBB183" }}
                     >
                       {(c.authorName ?? "?")[0].toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="text-[10px] font-semibold mr-1.5" style={{ color: "oklch(0.82 0.155 175)" }}>
+                      <span className="text-[10px] font-semibold mr-1.5" style={{ color: "#4ADE80" }}>
                         {c.authorName ?? "Anonymous"}
                       </span>
-                      <span className="text-[11px] leading-relaxed" style={{ color: "oklch(0.72 0.04 65)" }}>
+                      <span className="text-[11px] leading-relaxed" style={{ color: "#DACAAA" }}>
                         {c.content}
                       </span>
                     </div>
@@ -651,8 +651,8 @@ export default function PlayerBar() {
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center h-full py-4 opacity-40">
-                  <MessageCircle size={20} style={{ color: "oklch(0.80 0.145 82)" }} className="mb-1.5" />
-                  <p className="text-[11px] italic" style={{ color: "oklch(0.58 0.04 60)" }}>
+                  <MessageCircle size={20} style={{ color: "#CBB183" }} className="mb-1.5" />
+                  <p className="text-[11px] italic" style={{ color: "#AA8E64" }}>
                     No witnesses yet.
                   </p>
                 </div>
@@ -662,7 +662,7 @@ export default function PlayerBar() {
             {/* Comment input */}
             <div
               className="p-2 flex gap-1.5 flex-shrink-0"
-              style={{ borderTop: "1px solid oklch(0.25 0.04 60 / 55%)" }}
+              style={{ borderTop: "1px solid rgba(44,52,56,0.55)" }}
             >
               <input
                 value={newComment}
@@ -673,18 +673,18 @@ export default function PlayerBar() {
                 maxLength={500}
                 className="flex-1 rounded-md px-2.5 py-1.5 text-[11px] outline-none transition-colors disabled:opacity-50"
                 style={{
-                  background: "oklch(0.14 0.03 52)",
-                  border: "1px solid oklch(0.25 0.04 60)",
-                  color: "oklch(0.88 0.025 72)",
+                  background: "#2C3438",
+                  border: "1px solid #2C3438",
+                  color: "#E6CDAE",
                 }}
-                onFocus={e => (e.currentTarget.style.borderColor = "oklch(0.80 0.145 82 / 0.5)")}
-                onBlur={e => (e.currentTarget.style.borderColor = "oklch(0.25 0.04 60)")}
+                onFocus={e => (e.currentTarget.style.borderColor = "rgba(203,177,131,0.5)")}
+                onBlur={e => (e.currentTarget.style.borderColor = "#2C3438")}
               />
               <button
                 onClick={submitComment}
                 disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                 className="px-2.5 py-1.5 rounded-md text-[10px] font-bold transition-colors disabled:opacity-40"
-                style={{ background: "oklch(0.80 0.145 82)", color: "#2C3438" }}
+                style={{ background: "#CBB183", color: "#2C3438" }}
               >
                 Post
               </button>
@@ -707,7 +707,7 @@ export default function PlayerBar() {
               disabled={!currentSongId}
               className="w-14 h-14 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl
                 transition-opacity hover:opacity-80 disabled:cursor-default"
-              style={{ background: currentTrack?.bg || "oklch(0.28 0.015 200)" }}
+              style={{ background: currentTrack?.bg || "#2C3438" }}
               title={currentTrack?.title || ""}
             >
               {currentTrack?.artUrl && currentTrack.artType !== "video"
@@ -724,8 +724,8 @@ export default function PlayerBar() {
                 onClick={goToSong}
                 disabled={!currentSongId}
                 className="text-[13.5px] font-semibold truncate font-body block w-full text-left
-                  transition-colors hover:text-[oklch(0.80_0.145_82)] disabled:cursor-default"
-                style={{ color: "oklch(0.94 0.025 75)" }}
+                  transition-colors hover:text-[#CBB183] disabled:cursor-default"
+                style={{ color: "#E6CDAE" }}
               >
                 {currentTrack?.title || "No track selected"}
               </button>
@@ -735,7 +735,7 @@ export default function PlayerBar() {
                 disabled={!currentTrack}
                 className="text-[11px] truncate font-body block w-full text-left
                   transition-colors hover:opacity-80 disabled:cursor-default"
-                style={{ color: "oklch(0.82 0.155 175)" }}
+                style={{ color: "#4ADE80" }}
               >
                 {currentTrack?.artist || "—"}
               </button>
@@ -744,7 +744,7 @@ export default function PlayerBar() {
                 <button
                   onClick={goToVerify}
                   className="text-[9px] font-mono truncate block text-left transition-opacity hover:opacity-80 mt-0.5"
-                  style={{ color: "oklch(0.80 0.145 82 / 0.6)" }}
+                  style={{ color: "rgba(203,177,131,0.6)" }}
                   title="View Witness Certificate"
                 >
                   {currentTrack.witnessId.slice(0, 18)}…
@@ -756,7 +756,7 @@ export default function PlayerBar() {
             <button
               onClick={() => { if (user && currentSongId && !isNaN(currentSongId)) toggleLikeMutation.mutate({ songId: currentSongId }); }}
               disabled={!user || toggleLikeMutation.isPending}
-              className={`p-1 transition-colors flex-shrink-0 ${isLiked ? "text-[oklch(0.82_0.155_175)]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
+              className={`p-1 transition-colors flex-shrink-0 ${isLiked ? "text-[#4ADE80]" : "text-white/25 hover:text-white/60"} disabled:opacity-40`}
               title={!user ? "Sign in to like" : isLiked ? "Unlike" : "Like"}
             >
               <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
@@ -768,7 +768,7 @@ export default function PlayerBar() {
             <div className="flex items-center gap-4" style={{ marginTop: "6px" }}>
               <button
                 onClick={toggleShuffle}
-                className={`p-1.5 transition-colors ${state.isShuffle ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}
+                className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}
               >
                 <Shuffle size={14} />
               </button>
@@ -778,7 +778,7 @@ export default function PlayerBar() {
               <button
                 onClick={togglePlay}
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                style={{ background: "oklch(0.94 0.025 75)", color: "#2C3438" }}
+                style={{ background: "#E6CDAE", color: "#2C3438" }}
               >
                 {state.isPlaying
                   ? <Pause size={17} fill="currentColor" />
@@ -790,7 +790,7 @@ export default function PlayerBar() {
               </button>
               <button
                 onClick={toggleRepeat}
-                className={`p-1.5 transition-colors ${state.isRepeat ? "text-[oklch(0.80_0.145_82)]" : "text-white/30 hover:text-white/70"}`}
+                className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}
               >
                 <Repeat size={14} />
               </button>
@@ -798,38 +798,38 @@ export default function PlayerBar() {
 
             {/* Progress bar with animated gold playhead */}
             <div className="flex items-center gap-2 w-full max-w-[520px]">
-              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "oklch(0.65 0.04 65)" }}>
+              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "#AA8E64" }}>
                 {fmtTime(state.currentTime)}
               </span>
               <div
                 className="flex-1 h-1.5 rounded-full cursor-pointer relative group"
-                style={{ background: "oklch(0.30 0.04 60 / 70%)" }}
+                style={{ background: "rgba(44,52,56,0.7)" }}
                 onClick={handleSeek}
               >
                 <div
                   className="h-full rounded-full relative transition-all"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, oklch(0.42 0.14 38) 0%, oklch(0.62 0.18 55) 50%, oklch(0.88 0.18 82) 100%)",
-                    boxShadow: progress > 2 ? "0 0 8px 1px oklch(0.82 0.155 75 / 0.45)" : "none",
+                    background: "linear-gradient(90deg, #EF4444 0%, #AA8E64 50%, #E6CDAE 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(203,177,131,0.40)" : "none",
                   }}
                 >
                   {state.isPlaying && (
                     <div
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full progress-playhead"
-                      style={{ background: "oklch(0.92 0.16 82)", boxShadow: "0 0 8px 3px oklch(0.82 0.155 75 / 0.80)" }}
+                      style={{ background: "#E6CDAE", boxShadow: "0 0 8px 3px rgba(203,177,131,0.8)" }}
                     />
                   )}
                   {!state.isPlaying && (
                     <div
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full
                         opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: "oklch(0.94 0.025 75)" }}
+                      style={{ background: "#E6CDAE" }}
                     />
                   )}
                 </div>
               </div>
-              <span className="text-[11px] w-8 tabular-nums" style={{ color: "oklch(0.65 0.04 65)" }}>
+              <span className="text-[11px] w-8 tabular-nums" style={{ color: "#AA8E64" }}>
                 {fmtTime(state.duration)}
               </span>
             </div>
@@ -851,7 +851,7 @@ export default function PlayerBar() {
                 disabled={!tipsEnabled}
                 className={`p-1.5 transition-colors ${
                   tipsEnabled
-                    ? "text-[oklch(0.80_0.145_82)] hover:text-[oklch(0.88_0.16_85)]"
+                    ? "text-[#CBB183] hover:text-[#E6CDAE]"
                     : "text-white/15 cursor-not-allowed"
                 }`}
                 title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
@@ -880,9 +880,9 @@ export default function PlayerBar() {
                   } catch {}
                 }}
                 className="p-1.5 transition-colors"
-                style={{ color: "oklch(0.65 0.04 65)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.65 0.04 65)")}
+                style={{ color: "#AA8E64" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}
                 title={`Share: ${currentTrack.title}`}
               >
                 <Share2 size={14} />
@@ -905,9 +905,9 @@ export default function PlayerBar() {
                 <button
                   onClick={triggerDownload}
                   className="p-1.5 transition-colors"
-                  style={{ color: "oklch(0.65 0.04 65)" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.65 0.04 65)")}
+                  style={{ color: "#AA8E64" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}
                   title={dlPerm === "tipped" ? "Download (tip required)" : "Download track — WID travels with the file 🔐"}
                 >
                   <Download size={14} />
@@ -920,9 +920,9 @@ export default function PlayerBar() {
               <button
                 onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setAddToListOpen(true); }}
                 className="p-1.5 transition-colors flex-shrink-0"
-                style={{ color: "oklch(0.80 0.145 82)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.92 0.16 85)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
+                style={{ color: "#CBB183" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#CBB183")}
                 title="Add to My List"
               >
                 <ListPlus size={15} />
@@ -935,9 +935,9 @@ export default function PlayerBar() {
               <button
                 onClick={() => setShowVolume(v => !v)}
                 className="p-1 transition-colors"
-                style={{ color: state.isMuted ? "oklch(0.50 0.04 55)" : "oklch(0.65 0.04 65)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.94 0.025 75)")}
-                onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "oklch(0.50 0.02 280)" : "oklch(0.65 0.04 65)")}
+                style={{ color: state.isMuted ? "#3F4A50" : "#AA8E64" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
+                onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "#3F4A50" : "#AA8E64")}
                 title="Volume"
               >
                 {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -947,24 +947,24 @@ export default function PlayerBar() {
                   className="absolute bottom-12 right-0 rounded-2xl shadow-2xl"
                   style={{
                     zIndex: 9990,
-                    background: "oklch(0.12 0.030 52)",
-                    border: "1px solid oklch(0.38 0.08 68 / 60%)",
-                    boxShadow: "0 0 24px 4px oklch(0.82 0.155 75 / 0.18), 0 8px 32px oklch(0.10 0.02 55 / 0.8)",
+                    background: "#2C3438",
+                    border: "1px solid rgba(122,90,30,0.6)",
+                    boxShadow: "0 0 24px 4px rgba(203,177,131,0.16), 0 8px 32px rgba(44,52,56,0.8)",
                     padding: "12px 14px 10px",
                     minWidth: "140px",
                   }}
                 >
                   {/* Header row: label + mute */}
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "oklch(0.82 0.155 75)" }}>
+                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "#CBB183" }}>
                       {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
                     </span>
                     <button
                       onClick={toggleMute}
                       className="p-1 rounded-full transition-all"
                       style={{
-                        color: state.isMuted ? "oklch(0.82 0.155 75)" : "oklch(0.45 0.04 55)",
-                        background: state.isMuted ? "oklch(0.82 0.155 75 / 0.12)" : "transparent",
+                        color: state.isMuted ? "#CBB183" : "#3F4A50",
+                        background: state.isMuted ? "rgba(230,205,174,0.12)" : "transparent",
                       }}
                       title={state.isMuted ? "Unmute" : "Mute"}
                     >
@@ -980,9 +980,9 @@ export default function PlayerBar() {
                       onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
                       className="volume-slider-vertical"
                       style={{
-                        background: `linear-gradient(to top, oklch(0.88 0.18 82) ${
+                        background: `linear-gradient(to top, #E6CDAE ${
                           state.isMuted ? 0 : state.volume * 100
-                        }%, oklch(0.22 0.04 55 / 80%) ${
+                        }%, rgba(44,52,56,0.8) ${
                           state.isMuted ? 0 : state.volume * 100
                         }%)`,
                       }}
@@ -996,9 +996,9 @@ export default function PlayerBar() {
             <button
               onClick={() => { setIsCinematic(c => !c); setIsExpanded(false); }}
               className="p-1.5 transition-colors ml-1"
-              style={{ color: isCinematic ? "oklch(0.80 0.145 82)" : "oklch(0.65 0.04 65)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.80 0.145 82)")}
-              onMouseLeave={e => (e.currentTarget.style.color = isCinematic ? "oklch(0.80 0.145 82)" : "oklch(0.65 0.04 65)")}
+              style={{ color: isCinematic ? "#CBB183" : "#AA8E64" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
+              onMouseLeave={e => (e.currentTarget.style.color = isCinematic ? "#CBB183" : "#AA8E64")}
               title={isCinematic ? "Exit Cinematic View" : "Cinematic View"}
             >
               {isCinematic ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -1010,9 +1010,9 @@ export default function PlayerBar() {
                 onClick={cycleSpeed}
                 className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all ml-1"
                 style={{
-                  color: playbackRate !== 1 ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 65)",
-                  background: playbackRate !== 1 ? "oklch(0.84 0.155 85 / 0.12)" : "transparent",
-                  border: `1px solid ${playbackRate !== 1 ? "oklch(0.84 0.155 85 / 0.40)" : "oklch(0.35 0.04 60 / 0.50)"}`,
+                  color: playbackRate !== 1 ? "#CBB183" : "#3F4A50",
+                  background: playbackRate !== 1 ? "rgba(203,177,131,0.10)" : "transparent",
+                  border: `1px solid ${playbackRate !== 1 ? "rgba(230,205,174,0.4)" : "rgba(44,52,56,0.5)"}`,
                   minWidth: "30px",
                 }}
                 title="Cycle playback speed"
@@ -1027,9 +1027,9 @@ export default function PlayerBar() {
                 <button
                   onClick={() => setShowContextMenu(v => !v)}
                   className="p-1.5 rounded transition-all"
-                  style={{ color: showContextMenu ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 65)" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "oklch(0.84 0.155 85)")}
-                  onMouseLeave={e => (e.currentTarget.style.color = showContextMenu ? "oklch(0.84 0.155 85)" : "oklch(0.55 0.04 65)")}
+                  style={{ color: showContextMenu ? "#CBB183" : "#3F4A50" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
+                  onMouseLeave={e => (e.currentTarget.style.color = showContextMenu ? "#CBB183" : "#3F4A50")}
                   title="More options"
                 >
                   <MoreHorizontal size={16} />
@@ -1039,9 +1039,9 @@ export default function PlayerBar() {
                     className="absolute bottom-12 right-0 rounded-2xl shadow-2xl overflow-hidden"
                     style={{
                       zIndex: 9990,
-                      background: "oklch(0.13 0.030 52)",
-                      border: "1px solid oklch(0.38 0.08 68 / 55%)",
-                      boxShadow: "0 0 28px 4px oklch(0.82 0.155 75 / 0.15), 0 8px 32px oklch(0.10 0.02 55 / 0.85)",
+                      background: "#2C3438",
+                      border: "1px solid rgba(122,90,30,0.55)",
+                      boxShadow: "0 0 28px 4px rgba(203,177,131,0.15), 0 8px 32px rgba(44,52,56,0.85)",
                       minWidth: "160px",
                     }}
                   >
@@ -1049,9 +1049,9 @@ export default function PlayerBar() {
                     <button
                       onClick={() => { setShowContextMenu(false); goToSong(); }}
                       className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                      style={{ color: "oklch(0.85 0.025 75)" }}
+                      style={{ color: "#DACAAA" }}
                     >
-                      <ExternalLink size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                      <ExternalLink size={13} style={{ color: "#AA8E64" }} />
                       Go to Song
                     </button>
                     {/* Share */}
@@ -1063,9 +1063,9 @@ export default function PlayerBar() {
                         try { await navigator.clipboard.writeText(url); } catch {}
                       }}
                       className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                      style={{ color: "oklch(0.85 0.025 75)" }}
+                      style={{ color: "#DACAAA" }}
                     >
-                      <Share2 size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                      <Share2 size={13} style={{ color: "#AA8E64" }} />
                       Share
                     </button>
                     {/* Download */}
@@ -1084,9 +1084,9 @@ export default function PlayerBar() {
                             document.body.removeChild(a);
                           }}
                           className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                          style={{ color: "oklch(0.85 0.025 75)" }}
+                          style={{ color: "#DACAAA" }}
                         >
-                          <Download size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                          <Download size={13} style={{ color: "#AA8E64" }} />
                           Download
                         </button>
                       );
@@ -1100,9 +1100,9 @@ export default function PlayerBar() {
                           setAddToListOpen(true);
                         }}
                         className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                        style={{ color: "oklch(0.85 0.025 75)" }}
+                        style={{ color: "#DACAAA" }}
                       >
-                        <ListPlus size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                        <ListPlus size={13} style={{ color: "#AA8E64" }} />
                         Add to List
                       </button>
                     )}
@@ -1110,9 +1110,9 @@ export default function PlayerBar() {
                     <button
                       onClick={() => { setShowContextMenu(false); navigate("/archive"); }}
                       className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left border-t"
-                      style={{ color: "oklch(0.85 0.025 75)", borderColor: "oklch(0.25 0.04 60 / 0.5)" }}
+                      style={{ color: "#DACAAA", borderColor: "rgba(44,52,56,0.5)" }}
                     >
-                      <List size={13} style={{ color: "oklch(0.65 0.04 65)" }} />
+                      <List size={13} style={{ color: "#AA8E64" }} />
                       View Queue
                     </button>
                   </div>

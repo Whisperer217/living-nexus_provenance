@@ -83,7 +83,7 @@ export default function PlaylistPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85 / 0.25), oklch(0.55 0.2 290 / 0.25))", border: "1px solid oklch(0.84 0.155 85 / 0.35)" }}>
+          style={{ background: "linear-gradient(135deg, rgba(203,177,131,0.22), rgba(203,177,131,0.25))", border: "1px solid rgba(203,177,131,0.32)" }}>
           <ListMusic size={22} style={{ color: "#CBB183" }} />
         </div>
         <div>
@@ -123,7 +123,7 @@ export default function PlaylistPage() {
       {!isLoading && items.length === 0 && (
         <div className="text-center py-20">
           <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-            style={{ background: "oklch(0.148 0.025 52)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            style={{ background: "#2C3438", border: "1px solid rgba(255,255,255,0.08)" }}>
             <BookmarkX size={28} style={{ color: "rgba(255,255,255,0.25)" }} />
           </div>
           <div className="font-heading text-[17px] text-white/40 mb-2">Your playlist is empty</div>
@@ -152,8 +152,8 @@ export default function PlaylistPage() {
                 className={`group flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all
                   border
                   ${isActive
-                    ? "border-[#CBB183]/30 bg-[#CBB183]/[0.07]"
-                    : "border-white/[0.06] bg-[oklch(0.115_0.055_278)] hover:border-[#A78BFA]/25 hover:bg-white/[0.05]"
+                    ? "border-[#CBB183]/30 bg-[#3F4A50]/[0.07]"
+                    : "border-white/[0.06] bg-[#2C3438] hover:border-[#A78BFA]/25 hover:bg-white/[0.05]"
                   }`}
                 onClick={() => handlePlay(song.id)}
               >
@@ -162,7 +162,7 @@ export default function PlaylistPage() {
                   {isActive && playerState.isPlaying ? (
                     <div className="flex items-end justify-center gap-[2px] h-4">
                       {[1,2,3].map(i => (
-                        <div key={i} className="w-[2.5px] rounded-full bg-[#CBB183]"
+                        <div key={i} className="w-[2.5px] rounded-full bg-[#3F4A50]"
                           style={{ height: "40%", animation: `waveBar 0.8s ease-in-out ${i * 0.15}s infinite alternate` }} />
                       ))}
                     </div>
@@ -178,7 +178,7 @@ export default function PlaylistPage() {
 
                 {/* Cover art */}
                 <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
-                  style={{ background: "oklch(0.158 0.030 50)" }}>
+                  style={{ background: "#2C3438" }}>
                   {song.coverArtUrl ? (
                     <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
                   ) : (
@@ -208,7 +208,7 @@ export default function PlaylistPage() {
                 {/* WID badge */}
                 {song.witnessId && (
                   <div className="hidden sm:flex text-[9px] font-bold px-2 py-0.5 rounded flex-shrink-0 font-heading tracking-wider wid-glow"
-                    style={{ color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.55)", background: "rgba(0,0,0,0.5)" }}>
+                    style={{ color: "#CBB183", border: "1px solid rgba(203,177,131,0.55)", background: "rgba(0,0,0,0.5)" }}>
                     WID
                   </div>
                 )}

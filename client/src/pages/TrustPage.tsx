@@ -7,15 +7,15 @@ import { trpc } from "@/lib/trpc";
 import { Shield, CheckCircle2, AlertTriangle, XCircle, Minus, Copy, ExternalLink, Lock, Eye } from "lucide-react";
 import { toast } from "sonner";
 
-const GOLD = "oklch(0.84 0.155 85)";
-const BG = "oklch(0.06 0.015 280)";
-const CARD = "oklch(0.22 0.015 200)";
-const BORDER = "oklch(0.18 0.02 280)";
+const GOLD = "#CBB183";
+const BG = "#2C3438";
+const CARD = "#2C3438";
+const BORDER = "#2C3438";
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";
-const GREEN = "oklch(0.65 0.18 145)";
-const YELLOW = "oklch(0.78 0.18 85)";
-const RED = "oklch(0.65 0.18 25)";
+const GREEN = "#4ADE80";
+const YELLOW = "#CBB183";
+const RED = "#EF4444";
 
 const LAYER_INFO: { key: string; label: string; description: string }[] = [
   { key: "layer2Status",  label: "Infrastructure & Hosting",    description: "Server uptime, CDN, redundancy, and deployment integrity" },
@@ -45,9 +45,9 @@ function StatusIcon({ status, size = 16 }: { status: LayerStatus; size?: number 
 function OverallBadge({ status }: { status: string | null | undefined }) {
   if (!status) return null;
   const config = {
-    pass: { label: "AUDIT PASSED", color: GREEN, bg: "oklch(0.65 0.18 145 / 0.12)" },
-    conditional_pass: { label: "CONDITIONAL PASS", color: YELLOW, bg: "oklch(0.78 0.18 85 / 0.12)" },
-    fail: { label: "AUDIT FAILED", color: RED, bg: "oklch(0.65 0.18 25 / 0.12)" },
+    pass: { label: "AUDIT PASSED", color: GREEN, bg: "rgba(74,222,128,0.12)" },
+    conditional_pass: { label: "CONDITIONAL PASS", color: YELLOW, bg: "rgba(203,177,131,0.12)" },
+    fail: { label: "AUDIT FAILED", color: RED, bg: "rgba(239,68,68,0.12)" },
   }[status] ?? { label: status.toUpperCase(), color: SUBTEXT, bg: "transparent" };
 
   return (
@@ -98,7 +98,7 @@ export default function TrustPage() {
     <div style={{ background: BG, minHeight: "100vh", color: TEXT }}>
       {/* Hero */}
       <div style={{
-        background: `linear-gradient(180deg, oklch(0.10 0.025 280) 0%, ${BG} 100%)`,
+        background: `linear-gradient(180deg, #2C3438 0%, ${BG} 100%)`,
         borderBottom: `1px solid ${BORDER}`,
         padding: "60px 24px 48px",
         textAlign: "center",
@@ -106,7 +106,7 @@ export default function TrustPage() {
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
           <div style={{
             width: 64, height: 64, borderRadius: "50%",
-            background: `oklch(0.84 0.155 85 / 0.12)`,
+            background: `rgba(203,177,131,0.10)`,
             border: `2px solid ${GOLD}`,
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>

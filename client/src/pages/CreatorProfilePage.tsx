@@ -84,21 +84,21 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
     <>
       <div
         className="fixed z-50 min-w-[200px] rounded-xl overflow-hidden shadow-2xl py-1"
-        style={{ top: position.y, left: position.x, background: "oklch(0.14 0.015 280)", border: "1px solid #C3AB7D" }}
+        style={{ top: position.y, left: position.x, background: "#2C3438", border: "1px solid #C3AB7D" }}
       >
         <Link href={`/song/${song.id}`} onClick={onClose}>
-          <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
+          <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "#DACAAA" }}>
             <ExternalLink className="w-4 h-4 opacity-60" /> Song Page
           </button>
         </Link>
 
         {/* ── Queue / Collection actions ── */}
-        <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
+        <div className="my-1 border-t" style={{ borderColor: "rgba(203,177,131,0.15)" }} />
         {song.audioUrl && (
           <button
             onClick={handlePlayNext}
             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-            style={{ color: "oklch(0.85 0.02 280)" }}
+            style={{ color: "#DACAAA" }}
           >
             <Play className="w-4 h-4 opacity-60" /> Play Next
           </button>
@@ -106,36 +106,36 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
         <button
           onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-          style={{ color: "oklch(0.85 0.02 280)" }}
+          style={{ color: "#DACAAA" }}
         >
           <Library className="w-4 h-4 opacity-60" /> Add to My List
         </button>
 
-        <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
-        <button type="button" onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.85 0.02 280)" }}>
+        <div className="my-1 border-t" style={{ borderColor: "rgba(203,177,131,0.15)" }} />
+        <button type="button" onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "#DACAAA" }}>
           <Copy className="w-4 h-4 opacity-60" /> Copy Link
         </button>
         <button
           onClick={() => { downloadMutation.mutate({ songId: song.id }); }}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-          style={{ color: "oklch(0.85 0.02 280)" }}
+          style={{ color: "#DACAAA" }}
         >
           <Download className="w-4 h-4 opacity-60" /> Download
         </button>
         {song.witnessId && (
           <Link href={`/verify/${song.witnessId}`} onClick={onClose}>
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "oklch(0.65 0.2 300)" }}>
+            <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "#CBB183" }}>
               <Shield className="w-4 h-4" /> View Witness ID
             </button>
           </Link>
         )}
         {isOwner && (
           <>
-            <div className="my-1 border-t" style={{ borderColor: "oklch(0.2 0.015 280)" }} />
+            <div className="my-1 border-t" style={{ borderColor: "rgba(203,177,131,0.15)" }} />
             <button
               onClick={() => { onDelete?.(song.id); onClose(); }}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-500/10 transition-colors text-left"
-              style={{ color: "oklch(0.65 0.18 25)" }}
+              style={{ color: "#EF4444" }}
             >
               <Trash2 className="w-4 h-4" /> Delete Song
             </button>
@@ -171,7 +171,7 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
           <button
             onClick={(e) => { e.preventDefault(); onPlay(); }}
             className="w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100"
-            style={{ background: "oklch(0.84 0.155 85)" }}
+            style={{ background: "#CBB183" }}
           >
             {isPlaying
               ? <Pause className="w-5 h-5" style={{ color: "#E6CDAE" }} />
@@ -179,23 +179,23 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
           </button>
         </div>
         {song.durationSeconds && (
-          <div className="absolute bottom-2 left-2 text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(0,0,0,0.7)", color: "oklch(0.85 0.02 280)" }}>
+          <div className="absolute bottom-2 left-2 text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(0,0,0,0.7)", color: "#DACAAA" }}>
             {Math.floor(song.durationSeconds / 60)}:{String(Math.round(song.durationSeconds % 60)).padStart(2, "0")}
           </div>
         )}
         {song.witnessId && (
-          <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.2 300 / 0.9)" }}>
+          <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(203,177,131,0.9)" }}>
             <Shield className="w-3 h-3 text-white" />
           </div>
         )}
         {song.aiConsent === "prohibited" && (
-          <div className="absolute top-2 left-2 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "oklch(0.65 0.18 25 / 0.85)", color: "white" }}>
+          <div className="absolute top-2 left-2 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
             AI OFF
           </div>
         )}
         <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-          <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
-          {song.genre && <p className="text-[10px] truncate" style={{ color: "oklch(0.6 0.04 280)" }}>{song.genre}</p>}
+          <p className="text-xs font-semibold truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+          {song.genre && <p className="text-[10px] truncate" style={{ color: "#AA8E64" }}>{song.genre}</p>}
         </div>
       </div>
     </Link>
@@ -235,7 +235,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
               {[1, 2, 3].map(i => (
                 <div key={i} className="w-0.5 rounded-full" style={{
                   height: `${8 + i * 3}px`,
-                  background: "oklch(0.84 0.155 85)",
+                  background: "#CBB183",
                   animationName: "pulse",
                   animationDuration: "2s",
                   animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
@@ -247,7 +247,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           ) : (
             <>
               <span className="text-xs group-hover:hidden" style={{ color: "#E2E8F0" }}>{index + 1}</span>
-              <Play className="w-3.5 h-3.5 hidden group-hover:block" style={{ color: "oklch(0.84 0.155 85)" }} />
+              <Play className="w-3.5 h-3.5 hidden group-hover:block" style={{ color: "#CBB183" }} />
             </>
           )}
         </div>
@@ -263,15 +263,15 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate" style={{ color: isPlaying ? "oklch(0.84 0.155 85)" : "oklch(0.9 0.02 85)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+          <p className="text-sm font-medium truncate" style={{ color: isPlaying ? "#CBB183" : "#E6CDAE", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            {song.genre && <span className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>{song.genre}</span>}
+            {song.genre && <span className="text-xs" style={{ color: "#AA8E64" }}>{song.genre}</span>}
             {song.witnessId && (
               <Link
                 href={`/verify/${song.witnessId}`}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
-                <Badge className="text-[9px] px-1 py-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "oklch(0.65 0.2 300 / 0.2)", color: "oklch(0.65 0.2 300)", border: "1px solid oklch(0.65 0.2 300 / 0.3)" }}>
+                <Badge className="text-[9px] px-1 py-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "rgba(203,177,131,0.18)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.25)" }}>
                   <Shield className="w-2.5 h-2.5 mr-0.5" /> WID
                 </Badge>
               </Link>
@@ -292,7 +292,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           onClick={openMenu}
           className="w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white/10"
         >
-          <MoreHorizontal className="w-4 h-4" style={{ color: "oklch(0.6 0.04 280)" }} />
+          <MoreHorizontal className="w-4 h-4" style={{ color: "#AA8E64" }} />
         </button>
       </div>
       {menuOpen && (
@@ -345,7 +345,7 @@ function BannerUploadCTA({ onFocalDetected }: { onFocalDetected?: (focal: { x: n
   return (
     <label
       className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
-      style={{ background: "linear-gradient(135deg, #2C3438, oklch(0.12 0.04 280))" }}
+      style={{ background: "linear-gradient(135deg, #2C3438, #2C3438)" }}
     >
       <div
         className="absolute inset-0 opacity-[0.06] pointer-events-none"
@@ -584,8 +584,8 @@ export default function CreatorProfilePage() {
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#2C3438" }}>
       <div className="space-y-2 text-center">
-        <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "oklch(0.75 0.18 85 / 0.3)" }} />
-        <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>Loading profile...</p>
+        <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "rgba(203,177,131,0.28)" }} />
+        <p className="text-sm" style={{ color: "#AA8E64" }}>Loading profile...</p>
       </div>
     </div>
   );
@@ -593,9 +593,9 @@ export default function CreatorProfilePage() {
   if (!data) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#2C3438" }}>
       <div className="text-center">
-        <p style={{ color: "oklch(0.6 0.04 280)" }}>Creator not found.</p>
+        <p style={{ color: "#AA8E64" }}>Creator not found.</p>
         <Link href="/">
-          <Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>Go Home</Button>
+          <Button className="mt-4" style={{ background: "#CBB183", color: "#E6CDAE" }}>Go Home</Button>
         </Link>
       </div>
     </div>
@@ -684,12 +684,12 @@ export default function CreatorProfilePage() {
         ) : (
           <div
             className="absolute inset-0 z-0"
-            style={{ background: "linear-gradient(135deg, oklch(0.12 0.04 280) 0%, oklch(0.1 0.03 300) 40%, oklch(0.08 0.02 85) 100%)" }}
+            style={{ background: "linear-gradient(135deg, #2C3438 0%, #2C3438 40%, #2C3438 100%)" }}
           >
             <div
               className="w-full h-full opacity-10"
               style={{
-                backgroundImage: "linear-gradient(oklch(0.75 0.18 85 / 0.3) 1px, transparent 1px), linear-gradient(90deg, oklch(0.75 0.18 85 / 0.3) 1px, transparent 1px)",
+                backgroundImage: "linear-gradient(rgba(203,177,131,0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(203,177,131,0.28) 1px, transparent 1px)",
                 backgroundSize: "40px 40px",
               }}
             />
@@ -697,7 +697,7 @@ export default function CreatorProfilePage() {
         )}
 
         {/* ── z-10: Bottom fade gradient ── */}
-        <div className="absolute inset-x-0 bottom-0 h-24 z-10 bg-gradient-to-t from-[oklch(0.08_0.01_280)] to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-24 z-10 bg-gradient-to-t from-[#2C3438] to-transparent pointer-events-none" />
 
         {/* ── z-10: Gold corner accents ── */}
         <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none z-10" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
@@ -734,7 +734,7 @@ export default function CreatorProfilePage() {
           <div
             className="w-full h-full rounded-2xl overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, oklch(0.2 0.04 280), oklch(0.25 0.06 300))",
+              background: "linear-gradient(135deg, #2C3438, #2C3438)",
               /* Ring: dark bg outline so avatar pops off the banner */
               outline: "4px solid #2C3438",
               boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.25)",
@@ -743,7 +743,7 @@ export default function CreatorProfilePage() {
             {creator.profilePhotoUrl
               ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
                   style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
-              : <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
+              : <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: "#CBB183" }}>
                   {(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}
                 </div>}
           </div>
@@ -771,7 +771,7 @@ export default function CreatorProfilePage() {
         className="w-full"
         style={{
           background: "#2C3438",
-          borderBottom: "1px solid oklch(0.15 0.015 280)",
+          borderBottom: "1px solid #2C3438",
         }}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -795,7 +795,7 @@ export default function CreatorProfilePage() {
                 {/* Name — single line, never wraps mid-word */}
                 <h1
                   className="text-2xl sm:text-4xl font-bold leading-tight select-text"
-                  style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                  style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
                 >
                   {creator.name || creator.artistHandle}
                 </h1>
@@ -806,7 +806,7 @@ export default function CreatorProfilePage() {
                       <span
                         title="Founding Creator"
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
-                        style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}
+                        style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}
                       >
                         <Crown className="w-3 h-3" />
                         FOUNDER
@@ -815,7 +815,7 @@ export default function CreatorProfilePage() {
                     {creator.licenseStatus === "licensed" && (
                       <span
                         className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
-                        style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+                        style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}
                       >
                         LICENSED
                       </span>
@@ -827,7 +827,7 @@ export default function CreatorProfilePage() {
                 {creator.artistHandle && (
                   <button
                     className="mt-0.5 text-sm font-mono transition-colors hover:text-[#CBB183] focus:outline-none"
-                    style={{ color: "oklch(0.55 0.04 280)", letterSpacing: "0.01em" }}
+                    style={{ color: "#3F4A50", letterSpacing: "0.01em" }}
                     title="Copy profile link"
                     onClick={() => {
                       const url = `${window.location.origin}/creator/${creator.id}`;
@@ -844,7 +844,7 @@ export default function CreatorProfilePage() {
                 {creator.bio && (
                   <p
                     className="text-sm mt-2 line-clamp-2"
-                    style={{ color: "oklch(0.55 0.03 280)" }}
+                    style={{ color: "#AA8E64" }}
                   >
                     {creator.bio}
                   </p>
@@ -856,7 +856,7 @@ export default function CreatorProfilePage() {
                     {creator.website && (
                       <a href={creator.website} target="_blank" rel="noreferrer"
                         className="opacity-40 hover:opacity-80 transition-opacity"
-                        style={{ color: "oklch(0.75 0.03 280)" }}
+                        style={{ color: "#DACAAA" }}
                         title={creator.website}
                       >
                         <Globe className="w-4 h-4" />
@@ -865,7 +865,7 @@ export default function CreatorProfilePage() {
                     {creator.twitterHandle && (
                       <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer"
                         className="opacity-40 hover:opacity-80 transition-opacity"
-                        style={{ color: "oklch(0.75 0.03 280)" }}
+                        style={{ color: "#DACAAA" }}
                       >
                         <Twitter className="w-4 h-4" />
                       </a>
@@ -873,7 +873,7 @@ export default function CreatorProfilePage() {
                     {creator.instagramHandle && (
                       <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer"
                         className="opacity-40 hover:opacity-80 transition-opacity"
-                        style={{ color: "oklch(0.75 0.03 280)" }}
+                        style={{ color: "#DACAAA" }}
                       >
                         <Instagram className="w-4 h-4" />
                       </a>
@@ -881,7 +881,7 @@ export default function CreatorProfilePage() {
                     {creator.youtubeHandle && (
                       <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer"
                         className="opacity-40 hover:opacity-80 transition-opacity"
-                        style={{ color: "oklch(0.75 0.03 280)" }}
+                        style={{ color: "#DACAAA" }}
                       >
                         <Youtube className="w-4 h-4" />
                       </a>
@@ -942,13 +942,13 @@ export default function CreatorProfilePage() {
                       WITNESSED &middot; {witnessedWorksCount}
                     </span>
                   )}
-                  <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
-                    <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>
+                  <span className="text-sm" style={{ color: "#AA8E64" }}>
+                    <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>
                     {" "}tracks
                   </span>
                   {witnessCount > 0 && (
-                    <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
-                      <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>
+                    <span className="text-sm" style={{ color: "#AA8E64" }}>
+                      <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>
                       {" "}witnesses
                     </span>
                   )}
@@ -971,7 +971,7 @@ export default function CreatorProfilePage() {
                       <Link href="/dashboard">
                         <button
                           className="px-4 py-2 rounded-lg text-xs transition-colors"
-                          style={{ border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.6 0.03 280)", background: "transparent" }}
+                          style={{ border: "1px solid rgba(203,177,131,0.20)", color: "#AA8E64", background: "transparent" }}
                         >
                           Edit Profile
                         </button>
@@ -981,7 +981,7 @@ export default function CreatorProfilePage() {
                           onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
                           disabled={connectMutation.isPending}
                           className="px-4 py-2 rounded-lg text-xs transition-colors"
-                          style={{ border: "1px solid oklch(0.65 0.18 145 / 0.3)", color: "oklch(0.65 0.18 145)", background: "oklch(0.65 0.18 145 / 0.08)" }}
+                          style={{ border: "1px solid rgba(74,222,128,0.28)", color: "#4ADE80", background: "rgba(74,222,128,0.08)" }}
                         >
                           <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
                         </button>
@@ -1002,8 +1002,8 @@ export default function CreatorProfilePage() {
                       disabled={witnessToggle.isPending}
                       className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
                       style={isWitnessingCreator
-                        ? { background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "oklch(0.84 0.155 85)" }
-                        : { border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }
+                        ? { background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)", color: "#CBB183" }
+                        : { border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }
                       }
                       title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
                     >
@@ -1023,7 +1023,7 @@ export default function CreatorProfilePage() {
                     trigger={
                       <button
                         className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                        style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
+                        style={{ border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }}
                         title="Share identity card"
                       >
                         <Share2 className="w-4 h-4" />
@@ -1041,7 +1041,7 @@ export default function CreatorProfilePage() {
               {/* Name — single line, never wraps mid-word */}
               <h1
                 className="text-2xl font-bold leading-tight select-text"
-                style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
               >
                 {creator.name || creator.artistHandle}
               </h1>
@@ -1052,7 +1052,7 @@ export default function CreatorProfilePage() {
                     <span
                       title="Founding Creator"
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
-                      style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.4)" }}
+                      style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}
                     >
                       <Crown className="w-3 h-3" />
                       FOUNDER
@@ -1061,7 +1061,7 @@ export default function CreatorProfilePage() {
                   {creator.licenseStatus === "licensed" && (
                     <span
                       className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
-                      style={{ background: "oklch(0.75 0.18 85 / 0.12)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.75 0.18 85 / 0.25)" }}
+                      style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}
                     >
                       LICENSED
                     </span>
@@ -1073,7 +1073,7 @@ export default function CreatorProfilePage() {
               {creator.artistHandle && (
                 <button
                   className="-mt-1 text-sm font-mono transition-colors hover:text-[#CBB183] focus:outline-none text-left"
-                  style={{ color: "oklch(0.55 0.04 280)", letterSpacing: "0.01em" }}
+                  style={{ color: "#3F4A50", letterSpacing: "0.01em" }}
                   title="Copy profile link"
                   onClick={() => {
                     const url = `${window.location.origin}/creator/${creator.id}`;
@@ -1102,24 +1102,24 @@ export default function CreatorProfilePage() {
                     WITNESSED &middot; {witnessedWorksCount}
                   </span>
                 )}
-                <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
-                  <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}tracks
+                <span className="text-sm" style={{ color: "#AA8E64" }}>
+                  <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}tracks
                 </span>
                 {totalPlays > 0 && (
-                  <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
-                    <span style={{ color: "oklch(0.84 0.155 85)", fontVariantNumeric: "tabular-nums" }}>{totalPlays.toLocaleString()}</span>{" "}plays
+                  <span className="text-sm" style={{ color: "#AA8E64" }}>
+                    <span style={{ color: "#CBB183", fontVariantNumeric: "tabular-nums" }}>{totalPlays.toLocaleString()}</span>{" "}plays
                   </span>
                 )}
                 {witnessCount > 0 && (
-                  <span className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>
-                    <span style={{ color: "oklch(0.75 0.03 280)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
+                  <span className="text-sm" style={{ color: "#AA8E64" }}>
+                    <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
                   </span>
                 )}
               </div>
 
               {/* Bio */}
               {creator.bio && (
-                <p className="text-sm leading-relaxed" style={{ color: "oklch(0.55 0.03 280)" }}>
+                <p className="text-sm leading-relaxed" style={{ color: "#AA8E64" }}>
                   {creator.bio}
                 </p>
               )}
@@ -1128,22 +1128,22 @@ export default function CreatorProfilePage() {
               {(creator.website || creator.twitterHandle || creator.instagramHandle || creator.youtubeHandle) && (
                 <div className="flex items-center gap-3">
                   {creator.website && (
-                    <a href={creator.website} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "oklch(0.75 0.03 280)" }}>
+                    <a href={creator.website} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "#DACAAA" }}>
                       <Globe className="w-4 h-4" />
                     </a>
                   )}
                   {creator.twitterHandle && (
-                    <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "oklch(0.75 0.03 280)" }}>
+                    <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "#DACAAA" }}>
                       <Twitter className="w-4 h-4" />
                     </a>
                   )}
                   {creator.instagramHandle && (
-                    <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "oklch(0.75 0.03 280)" }}>
+                    <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "#DACAAA" }}>
                       <Instagram className="w-4 h-4" />
                     </a>
                   )}
                   {creator.youtubeHandle && (
-                    <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "oklch(0.75 0.03 280)" }}>
+                    <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "#DACAAA" }}>
                       <Youtube className="w-4 h-4" />
                     </a>
                   )}
@@ -1167,7 +1167,7 @@ export default function CreatorProfilePage() {
                     <Link href="/dashboard">
                       <button
                         className="px-4 py-2 rounded-lg text-xs transition-colors"
-                        style={{ border: "1px solid oklch(0.22 0.015 280)", color: "oklch(0.6 0.03 280)", background: "transparent" }}
+                        style={{ border: "1px solid rgba(203,177,131,0.20)", color: "#AA8E64", background: "transparent" }}
                       >
                         Edit Profile
                       </button>
@@ -1177,7 +1177,7 @@ export default function CreatorProfilePage() {
                         onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
                         disabled={connectMutation.isPending}
                         className="px-4 py-2 rounded-lg text-xs transition-colors"
-                        style={{ border: "1px solid oklch(0.65 0.18 145 / 0.3)", color: "oklch(0.65 0.18 145)", background: "oklch(0.65 0.18 145 / 0.08)" }}
+                        style={{ border: "1px solid rgba(74,222,128,0.28)", color: "#4ADE80", background: "rgba(74,222,128,0.08)" }}
                       >
                         <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
                       </button>
@@ -1198,8 +1198,8 @@ export default function CreatorProfilePage() {
                     disabled={witnessToggle.isPending}
                     className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
                     style={isWitnessingCreator
-                      ? { background: "oklch(0.75 0.18 85 / 0.12)", border: "1px solid oklch(0.75 0.18 85 / 0.3)", color: "oklch(0.84 0.155 85)" }
-                      : { border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }
+                      ? { background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)", color: "#CBB183" }
+                      : { border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }
                     }
                     title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
                   >
@@ -1209,7 +1209,7 @@ export default function CreatorProfilePage() {
                 <button
                   onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Profile link copied!"); }}
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                  style={{ border: "1px solid oklch(0.2 0.015 280)", color: "oklch(0.5 0.03 280)", background: "transparent" }}
+                  style={{ border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }}
                   title="Copy profile link"
                 >
                   <Share2 className="w-4 h-4" />
@@ -1226,12 +1226,12 @@ export default function CreatorProfilePage() {
         {(creatorProjects as any[]).length > 0 && (
           <section className="py-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
                 Projects
               </h2>
               {isOwner && (
                 <Link href="/my-projects">
-                  <button type="button" className="text-xs px-3 py-1 rounded-lg transition-colors" style={{ color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.28 0.08 80)" }}>
+                  <button type="button" className="text-xs px-3 py-1 rounded-lg transition-colors" style={{ color: "#CBB183", border: "1px solid #7A5A1E" }}>
                     Manage Projects
                   </button>
                 </Link>
@@ -1250,41 +1250,41 @@ export default function CreatorProfilePage() {
                         <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover object-center" />
                       ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-[#1a1025] to-[#2C3438] flex items-center justify-center">
-                          <span className="text-4xl font-bold" style={{ color: "oklch(0.84 0.155 85 / 0.2)" }}>{project.title[0]}</span>
+                          <span className="text-4xl font-bold" style={{ color: "rgba(203,177,131,0.18)" }}>{project.title[0]}</span>
                         </div>
                       )}
                       <div className="prov-card-gradient" />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200" />
                       <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
-                        <p className="text-xs font-semibold truncate" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>{project.title}</p>
+                        <p className="text-xs font-semibold truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>{project.title}</p>
                         <div className="flex items-center justify-between mt-1">
-                          <span className="text-[10px]" style={{ color: "oklch(0.6 0.04 280)" }}>
+                          <span className="text-[10px]" style={{ color: "#AA8E64" }}>
                             ${((project.raisedAmountCents || 0) / 100).toLocaleString()} raised
                           </span>
                           <span
                             className="text-[9px] px-1.5 py-0.5 rounded font-medium"
                             style={{
-                              background: project.status === "active" ? "oklch(0.35 0.12 145 / 0.8)" : "oklch(0.18 0.02 280 / 0.8)",
-                              color: project.status === "active" ? "oklch(0.85 0.15 145)" : "oklch(0.6 0.03 280)",
+                              background: project.status === "active" ? "rgba(34,197,94,0.8)" : "rgba(44,52,56,0.8)",
+                              color: project.status === "active" ? "#4ADE80" : "#AA8E64",
                             }}
                           >
                             {project.status === "active" ? "Funding" : project.status === "completed" ? "Done" : "Draft"}
                           </span>
                         </div>
                         {project.goalAmountCents && project.raisedAmountCents > 0 && (
-                          <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: "oklch(0.2 0.02 280)" }}>
+                          <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: "#2C3438" }}>
                             <div
                               className="h-full rounded-full"
                               style={{
                                 width: `${Math.min(100, Math.round((project.raisedAmountCents / project.goalAmountCents) * 100))}%`,
-                                background: "oklch(0.84 0.155 85)",
+                                background: "#CBB183",
                               }}
                             />
                           </div>
                         )}
                       </div>
                       {project.linkedWitnessId && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "oklch(0.65 0.2 300 / 0.9)" }}>
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(203,177,131,0.9)" }}>
                           <Shield className="w-3 h-3 text-white" />
                         </div>
                       )}
@@ -1297,12 +1297,12 @@ export default function CreatorProfilePage() {
         )}
         {isOwner && (creatorProjects as any[]).length === 0 && (
           <section className="py-6">
-            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Projects</h2>
+            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Projects</h2>
             <div className="text-center py-10 rounded-xl" style={{ border: "1px dashed #C3AB7D" }}>
-              <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
-              <p className="text-sm mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>No projects yet.</p>
+              <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
+              <p className="text-sm mb-3" style={{ color: "#AA8E64" }}>No projects yet.</p>
               <Link href="/my-projects">
-                <Button style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>Start a Project</Button>
+                <Button style={{ background: "#CBB183", color: "#E6CDAE" }}>Start a Project</Button>
               </Link>
             </div>
           </section>
@@ -1311,11 +1311,11 @@ export default function CreatorProfilePage() {
         {featuredSongs.length > 0 && (
           <section className="py-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
                 Featured Songs
               </h2>
               {songs.length > 8 && (
-                <button type="button" className="flex items-center gap-1 text-xs hover:opacity-80 transition-opacity" style={{ color: "oklch(0.65 0.2 300)" }}>
+                <button type="button" className="flex items-center gap-1 text-xs hover:opacity-80 transition-opacity" style={{ color: "#CBB183" }}>
                   See All <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -1353,7 +1353,7 @@ export default function CreatorProfilePage() {
           if (!albumEntries.length) return null;
           return (
             <section className="py-4">
-              <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>Albums</h2>
+              <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Albums</h2>
               <div className="space-y-5">
                 {albumEntries.map(([albumName, albumSongs]) => {
                   // Prefer the collection's own cover art; fall back to first track's cover
@@ -1362,18 +1362,18 @@ export default function CreatorProfilePage() {
                   const albumCoverX = collection?.coverPositionX ?? albumSongs[0]?.coverPositionX ?? 50;
                   const albumCoverY = collection?.coverPositionY ?? albumSongs[0]?.coverPositionY ?? 50;
                   return (
-                  <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid #CBB183" }}>
-                    <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid oklch(0.16 0.01 280)" }}>
+                  <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+                    <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid #2C3438" }}>
                       {albumCoverUrl ? (
                         <img src={albumCoverUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" style={{ objectPosition: `${albumCoverX}% ${albumCoverY}%` }} />
                       ) : (
-                        <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.75 0.18 85 / 0.15)" }}>
-                          <Music className="w-6 h-6" style={{ color: "oklch(0.84 0.155 85)" }} />
+                        <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(203,177,131,0.12)" }}>
+                          <Music className="w-6 h-6" style={{ color: "#CBB183" }} />
                         </div>
                       )}
                       <div>
-                        <p className="font-bold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>{albumName}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "oklch(0.5 0.03 280)" }}>{albumSongs.length} track{albumSongs.length !== 1 ? "s" : ""}</p>
+                        <p className="font-bold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>{albumName}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>{albumSongs.length} track{albumSongs.length !== 1 ? "s" : ""}</p>
                       </div>
                     </div>
                     <div className="space-y-0.5 p-2">
@@ -1426,7 +1426,7 @@ export default function CreatorProfilePage() {
         {/* ── Registered Collections ── */}
         {creatorCollections && creatorCollections.length > 0 && (
           <section className="py-4">
-            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.84 0.155 85)" }}>
+            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>
               <Library className="inline w-4 h-4 mr-2 mb-0.5" />
               Registered Collections
             </h2>
@@ -1436,27 +1436,27 @@ export default function CreatorProfilePage() {
                   key={col.id}
                   href={`/verify/${col.collectionWid}`}
                   className="flex items-center gap-4 p-3 rounded-xl transition-colors hover:bg-white/5"
-                  style={{ border: "1px solid oklch(0.84 0.155 85 / 0.2)", background: "oklch(0.10 0.04 280)" }}
+                  style={{ border: "1px solid rgba(203,177,131,0.18)", background: "#2C3438" }}
                 >
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: "oklch(0.84 0.155 85 / 0.12)" }}
+                    style={{ background: "rgba(203,177,131,0.10)" }}
                   >
-                    <Library className="w-5 h-5" style={{ color: "oklch(0.84 0.155 85)" }} />
+                    <Library className="w-5 h-5" style={{ color: "#CBB183" }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+                    <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
                       {col.name}
                     </p>
-                    <p className="text-xs font-mono truncate mt-0.5" style={{ color: "oklch(0.84 0.155 85)" }}>
+                    <p className="text-xs font-mono truncate mt-0.5" style={{ color: "#CBB183" }}>
                       {col.collectionWid}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs" style={{ color: "oklch(0.5 0.04 280)" }}>
+                    <p className="text-xs" style={{ color: "#3F4A50" }}>
                       {col.trackCount ?? "?"} tracks
                     </p>
-                    <ExternalLink className="w-3.5 h-3.5 mt-1 ml-auto" style={{ color: "oklch(0.84 0.155 85 / 0.5)" }} />
+                    <ExternalLink className="w-3.5 h-3.5 mt-1 ml-auto" style={{ color: "rgba(203,177,131,0.45)" }} />
                   </div>
                 </a>
               ))}
@@ -1466,7 +1466,7 @@ export default function CreatorProfilePage() {
         {/* ── Full Song List (all songs in compact row format) ── */}
         {songs.length > 0 && (
           <section className="py-4 pb-32">
-            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
               All Songs
             </h2>
             <div className="space-y-0.5">
@@ -1487,11 +1487,11 @@ export default function CreatorProfilePage() {
 
         {songs.length === 0 && (
           <div className="text-center py-24">
-            <Music className="w-16 h-16 mx-auto mb-4 opacity-10" style={{ color: "oklch(0.84 0.155 85)" }} />
-            <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>No public songs yet.</p>
+            <Music className="w-16 h-16 mx-auto mb-4 opacity-10" style={{ color: "#CBB183" }} />
+            <p className="text-sm" style={{ color: "#AA8E64" }}>No public songs yet.</p>
             {isOwner && (
               <Link href="/upload">
-                <Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+                <Button className="mt-4" style={{ background: "#CBB183", color: "#E6CDAE" }}>
                   Upload Your First Track
                 </Button>
               </Link>
@@ -1502,34 +1502,34 @@ export default function CreatorProfilePage() {
         {/* ── Witness Testimonies ── */}
         {(creatorTestimonies as any[]).length > 0 && (
           <section className="py-6 pb-12">
-            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
               Testimonies
             </h2>
             <div className="space-y-3">
               {(creatorTestimonies as any[]).map((t: any) => (
-                <div key={t.id} className="p-4 rounded-xl" style={{ background: "oklch(0.10 0.04 280)", border: "1px solid #CBB183" }}>
+                <div key={t.id} className="p-4 rounded-xl" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
                   <div className="flex items-center justify-between mb-2">
                     <span
                       className="font-mono text-[10px] px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
-                      style={{ background: "oklch(0.18 0.04 80)", color: "#CBB183", border: "1px solid oklch(0.28 0.08 80)" }}
+                      style={{ background: "#2C3438", color: "#CBB183", border: "1px solid #7A5A1E" }}
                       onClick={() => { navigator.clipboard.writeText(t.wid); toast.success("WID-TST copied!"); }}
                       title="Click to copy WID"
                     >
                       {t.wid}
                     </span>
-                    <span className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>{new Date(t.createdAt).toLocaleDateString()}</span>
+                    <span className="text-[10px]" style={{ color: "#AA8E64" }}>{new Date(t.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "oklch(0.75 0.03 280)" }}>{t.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#DACAAA" }}>{t.content}</p>
                   {t.linkedWorks && (t.linkedWorks as string[]).length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {(t.linkedWorks as string[]).map((wid: string) => (
-                        <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.14 0.02 280)", color: "oklch(0.5 0.06 280)", border: "1px solid oklch(0.2 0.03 280)" }}>{wid}</span>
+                        <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }}>{wid}</span>
                       ))}
                     </div>
                   )}
                   <div className="mt-2 flex items-center gap-1">
-                    <Shield className="w-3 h-3" style={{ color: "oklch(0.4 0.03 280)" }} />
-                    <span className="text-[9px]" style={{ color: "oklch(0.4 0.03 280)" }}>Immutable — sealed at creation</span>
+                    <Shield className="w-3 h-3" style={{ color: "#3F4A50" }} />
+                    <span className="text-[9px]" style={{ color: "#3F4A50" }}>Immutable — sealed at creation</span>
                   </div>
                 </div>
               ))}
@@ -1540,14 +1540,14 @@ export default function CreatorProfilePage() {
 
       {/* ── Tip Modal ── */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
-        <DialogContent style={{ background: "oklch(0.12 0.015 280)", border: "1px solid #C3AB7D" }}>
+        <DialogContent style={{ background: "#2C3438", border: "1px solid #C3AB7D" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
               Gift {creator.artistHandle || creator.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm" style={{ color: "oklch(0.6 0.04 280)" }}>
+            <p className="text-sm" style={{ color: "#AA8E64" }}>
               90% goes directly to the artist. 10% supports the Living Nexus platform.
             </p>
             <div className="grid grid-cols-4 gap-2">
@@ -1557,8 +1557,8 @@ export default function CreatorProfilePage() {
                   onClick={() => setTipAmount(amt)}
                   className="py-2 rounded-lg text-sm font-medium transition-all"
                   style={{
-                    background: tipAmount === amt ? "oklch(0.84 0.155 85)" : "oklch(0.11 0.025 270)",
-                    color: tipAmount === amt ? "#E6CDAE" : "oklch(0.7 0.04 280)",
+                    background: tipAmount === amt ? "#CBB183" : "#2C3438",
+                    color: tipAmount === amt ? "#E6CDAE" : "#DACAAA",
                     border: "1px solid #C3AB7D",
                   }}
                 >
@@ -1573,13 +1573,13 @@ export default function CreatorProfilePage() {
               onChange={e => setTipAmount(e.target.value)}
               min="1"
               step="0.01"
-              style={{ background: "oklch(0.14 0.015 280)", border: "1px solid #C3AB7D", color: "oklch(0.9 0.01 280)" }}
+              style={{ background: "#2C3438", border: "1px solid #C3AB7D", color: "#E6CDAE" }}
             />
             <Button
               className="w-full"
               onClick={handleTip}
               disabled={tipMutation.isPending}
-              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
+              style={{ background: "#CBB183", color: "#E6CDAE" }}
             >
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Gift`}
             </Button>

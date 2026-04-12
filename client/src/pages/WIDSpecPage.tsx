@@ -40,14 +40,14 @@ const interopRows = [
 
 export default function WIDSpecPage() {
   return (
-    <div className="min-h-screen" style={{ background: "oklch(0.08 0.015 260)" }}>
+    <div className="min-h-screen" style={{ background: "#2C3438" }}>
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 80% 60% at 50% 0%, oklch(0.18 0.06 280 / 0.35) 0%, transparent 70%)",
+              "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(44,52,56,0.35) 0%, transparent 70%)",
           }}
         />
         <div className="relative max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
@@ -55,9 +55,9 @@ export default function WIDSpecPage() {
           <div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-widest mb-6"
             style={{
-              background: "oklch(0.18 0.04 280 / 0.6)",
-              border: "1px solid oklch(0.75 0.18 85 / 0.4)",
-              color: "oklch(0.75 0.18 85)",
+              background: "rgba(44,52,56,0.6)",
+              border: "1px solid rgba(203,177,131,0.35)",
+              color: "#CBB183",
             }}
           >
             <FileText className="w-3 h-3" />
@@ -66,18 +66,18 @@ export default function WIDSpecPage() {
 
           <h1
             className="text-4xl sm:text-5xl font-bold tracking-tight mb-4"
-            style={{ fontFamily: "'Orbitron', sans-serif", color: "oklch(0.92 0.04 80)" }}
+            style={{ fontFamily: "'Orbitron', sans-serif", color: "#E6CDAE" }}
           >
             Witness ID
           </h1>
           <h2
             className="text-xl sm:text-2xl mb-6"
-            style={{ color: "oklch(0.75 0.18 85)", fontFamily: "'Orbitron', sans-serif" }}
+            style={{ color: "#CBB183", fontFamily: "'Orbitron', sans-serif" }}
           >
             Public Specification
           </h2>
 
-          <p className="text-base max-w-2xl mx-auto mb-3" style={{ color: "oklch(0.72 0.04 260)" }}>
+          <p className="text-base max-w-2xl mx-auto mb-3" style={{ color: "#DACAAA" }}>
             A sovereign creative provenance protocol. A behavioral contract that establishes what the
             WID system requires, what it produces, and what it guarantees — without exposing the
             internal mechanism.
@@ -85,7 +85,7 @@ export default function WIDSpecPage() {
 
           <blockquote
             className="text-sm italic mb-8"
-            style={{ color: "oklch(0.6 0.04 260)" }}
+            style={{ color: "#AA8E64" }}
           >
             "It's cool getting a DOI, but getting a WID." — Doc Seraph Mercer, Founder
           </blockquote>
@@ -96,8 +96,8 @@ export default function WIDSpecPage() {
               size="lg"
               className="gap-2 text-sm font-semibold px-8 py-3"
               style={{
-                background: "linear-gradient(135deg, oklch(0.65 0.18 85), oklch(0.55 0.15 75))",
-                color: "oklch(0.08 0.015 260)",
+                background: "linear-gradient(135deg, #AA8E64, #7A5A1E)",
+                color: "#2C3438",
                 border: "none",
               }}
             >
@@ -106,7 +106,7 @@ export default function WIDSpecPage() {
             </Button>
           </a>
 
-          <p className="text-xs mt-3" style={{ color: "oklch(0.45 0.03 260)" }}>
+          <p className="text-xs mt-3" style={{ color: "#3F4A50" }}>
             Command Domains LLC / BDDT Publishing · livingnexus.org
           </p>
         </div>
@@ -116,7 +116,7 @@ export default function WIDSpecPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <h3
           className="text-xs font-mono tracking-widest mb-6 text-center"
-          style={{ color: "oklch(0.75 0.18 85)" }}
+          style={{ color: "#CBB183" }}
         >
           LAYERED DISCLOSURE MODEL
         </h3>
@@ -126,25 +126,25 @@ export default function WIDSpecPage() {
               key={title}
               className="rounded-xl p-5"
               style={{
-                background: "oklch(0.11 0.02 270 / 0.8)",
-                border: "1px solid oklch(0.22 0.04 270 / 0.6)",
+                background: "rgba(44,52,56,0.8)",
+                border: "1px solid rgba(44,52,56,0.6)",
               }}
             >
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: "oklch(0.75 0.18 85 / 0.12)" }}
+                  style={{ background: "rgba(203,177,131,0.12)" }}
                 >
-                  <Icon className="w-4 h-4" style={{ color: "oklch(0.75 0.18 85)" }} />
+                  <Icon className="w-4 h-4" style={{ color: "#CBB183" }} />
                 </div>
                 <span
                   className="text-sm font-semibold"
-                  style={{ color: "oklch(0.88 0.04 80)" }}
+                  style={{ color: "#E6CDAE" }}
                 >
                   {title}
                 </span>
               </div>
-              <p className="text-xs leading-relaxed" style={{ color: "oklch(0.62 0.04 260)" }}>
+              <p className="text-xs leading-relaxed" style={{ color: "#AA8E64" }}>
                 {description}
               </p>
             </div>
@@ -156,26 +156,26 @@ export default function WIDSpecPage() {
       <div className="max-w-4xl mx-auto px-6 pb-12">
         <h3
           className="text-xs font-mono tracking-widest mb-6 text-center"
-          style={{ color: "oklch(0.75 0.18 85)" }}
+          style={{ color: "#CBB183" }}
         >
           RELATIONSHIP TO EXISTING SYSTEMS
         </h3>
         <div
           className="rounded-xl overflow-hidden"
-          style={{ border: "1px solid oklch(0.22 0.04 270 / 0.6)" }}
+          style={{ border: "1px solid rgba(44,52,56,0.6)" }}
         >
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ background: "oklch(0.13 0.03 270 / 0.8)" }}>
+              <tr style={{ background: "rgba(44,52,56,0.8)" }}>
                 <th
                   className="text-left px-5 py-3 text-xs font-mono tracking-wider"
-                  style={{ color: "oklch(0.75 0.18 85)" }}
+                  style={{ color: "#CBB183" }}
                 >
                   SYSTEM
                 </th>
                 <th
                   className="text-left px-5 py-3 text-xs font-mono tracking-wider"
-                  style={{ color: "oklch(0.75 0.18 85)" }}
+                  style={{ color: "#CBB183" }}
                 >
                   RELATIONSHIP TO WID
                 </th>
@@ -188,18 +188,18 @@ export default function WIDSpecPage() {
                   style={{
                     background:
                       i % 2 === 0
-                        ? "oklch(0.10 0.02 270 / 0.5)"
-                        : "oklch(0.12 0.02 270 / 0.3)",
-                    borderTop: "1px solid oklch(0.18 0.03 270 / 0.4)",
+                        ? "rgba(44,52,56,0.5)"
+                        : "rgba(44,52,56,0.3)",
+                    borderTop: "1px solid rgba(44,52,56,0.4)",
                   }}
                 >
                   <td
                     className="px-5 py-3 font-medium text-xs"
-                    style={{ color: "oklch(0.82 0.04 80)" }}
+                    style={{ color: "#DACAAA" }}
                   >
                     {row.system}
                   </td>
-                  <td className="px-5 py-3 text-xs" style={{ color: "oklch(0.62 0.04 260)" }}>
+                  <td className="px-5 py-3 text-xs" style={{ color: "#AA8E64" }}>
                     {row.relationship}
                   </td>
                 </tr>
@@ -214,11 +214,11 @@ export default function WIDSpecPage() {
         <div
           className="rounded-2xl p-8 text-center"
           style={{
-            background: "oklch(0.11 0.02 270 / 0.8)",
-            border: "1px solid oklch(0.75 0.18 85 / 0.2)",
+            background: "rgba(44,52,56,0.8)",
+            border: "1px solid rgba(203,177,131,0.2)",
           }}
         >
-          <p className="text-base leading-relaxed mb-6" style={{ color: "oklch(0.72 0.04 260)" }}>
+          <p className="text-base leading-relaxed mb-6" style={{ color: "#DACAAA" }}>
             Every day, young creators produce original work and submit it to platforms before that
             work has any formal record of origin. A 15-year-old who has spent years writing music
             and uploads it to a streaming platform has no mechanism to establish that the work was
@@ -226,7 +226,7 @@ export default function WIDSpecPage() {
           </p>
           <p
             className="text-base font-semibold leading-relaxed"
-            style={{ color: "oklch(0.88 0.04 80)" }}
+            style={{ color: "#E6CDAE" }}
           >
             The Witness ID system exists to close that gap — protect the origin, protect it early,
             before the platforms, before the businesses, before the algorithms.
@@ -238,8 +238,8 @@ export default function WIDSpecPage() {
                 size="sm"
                 className="gap-2 text-xs"
                 style={{
-                  borderColor: "oklch(0.75 0.18 85 / 0.4)",
-                  color: "oklch(0.75 0.18 85)",
+                  borderColor: "rgba(203,177,131,0.35)",
+                  color: "#CBB183",
                   background: "transparent",
                 }}
               >
@@ -252,9 +252,9 @@ export default function WIDSpecPage() {
                 size="sm"
                 className="gap-2 text-xs"
                 style={{
-                  background: "oklch(0.75 0.18 85 / 0.15)",
-                  color: "oklch(0.75 0.18 85)",
-                  border: "1px solid oklch(0.75 0.18 85 / 0.3)",
+                  background: "rgba(203,177,131,0.12)",
+                  color: "#CBB183",
+                  border: "1px solid rgba(203,177,131,0.28)",
                 }}
               >
                 <ExternalLink className="w-3 h-3" />

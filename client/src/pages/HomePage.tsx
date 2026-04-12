@@ -252,7 +252,7 @@ function WIDTrustLayer() {
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
                     style={{
-                      background: "#CBB183",
+                      background: "#3F4A50",
                       boxShadow: "0 0 24px rgba(203,177,131,0.45)",
                     }}
                   >
@@ -721,7 +721,7 @@ export default function HomePage() {
               <button
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
-                  background: "#CBB183",
+                  background: "#3F4A50",
                   color: "#2C3438",
                 }}
               >
@@ -1066,7 +1066,7 @@ export default function HomePage() {
                 onClick={() => setActiveGenre(g.label)}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
                   ${activeGenre === g.label
-                    ? "border-[#CBB183]/40 bg-[#CBB183]/[0.07]"
+                    ? "border-[#CBB183]/40 bg-[#3F4A50]/[0.07]"
                     : "border-[rgba(203,177,131,0.12)] bg-[#3F4A50] hover:border-[rgba(203,177,131,0.25)] hover:bg-[#4A5560]"
                   }`}
               >

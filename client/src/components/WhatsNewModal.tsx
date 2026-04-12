@@ -346,8 +346,8 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
       <DialogContent
         className="flex flex-col p-0 overflow-hidden rounded-2xl w-[calc(100vw-32px)] max-w-md"
         style={{
-          background: "oklch(0.09 0.02 270)",
-          border: "1px solid oklch(0.84 0.155 85 / 0.2)",
+          background: "#2C3438",
+          border: "1px solid rgba(203,177,131,0.18)",
           maxHeight: "min(88vh, 640px)",
         }}
       >
@@ -358,16 +358,16 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
         <div
           className="flex-shrink-0 px-4 pt-4 pb-3"
           style={{
-            background: "linear-gradient(135deg, oklch(0.11 0.04 270), oklch(0.09 0.02 270))",
-            borderBottom: "1px solid oklch(0.84 0.155 85 / 0.12)",
+            background: "linear-gradient(135deg, #2C3438, #2C3438)",
+            borderBottom: "1px solid rgba(203,177,131,0.10)",
           }}
         >
           <div
             className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase mb-2 px-2.5 py-1 rounded-full"
             style={{
-              background: "oklch(0.84 0.155 85 / 0.1)",
-              border: "1px solid oklch(0.84 0.155 85 / 0.25)",
-              color: "oklch(0.84 0.155 85)",
+              background: "rgba(230,205,174,0.1)",
+              border: "1px solid rgba(203,177,131,0.22)",
+              color: "#CBB183",
               fontFamily: "'Orbitron', sans-serif",
             }}
           >
@@ -375,11 +375,11 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
           </div>
           <DialogTitle
             className="text-base font-bold leading-snug"
-            style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.95 0.02 85)" }}
+            style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
           >
             What's New on Living Nexus
           </DialogTitle>
-          <p className="text-xs mt-0.5" style={{ color: "oklch(0.50 0.03 280)" }}>
+          <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>
             Platform updates and a quick guide to get started.
           </p>
         </div>
@@ -387,7 +387,7 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
         {/* Tab bar */}
         <div
           className="flex-shrink-0 flex border-b"
-          style={{ borderColor: "oklch(0.84 0.155 85 / 0.1)" }}
+          style={{ borderColor: "rgba(230,205,174,0.1)" }}
         >
           {(["updates", "howto"] as const).map((t) => (
             <button
@@ -395,8 +395,8 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
               onClick={() => setTab(t)}
               className="flex-1 py-2.5 text-xs font-semibold transition-all"
               style={{
-                color: tab === t ? "oklch(0.84 0.155 85)" : "oklch(0.42 0.03 280)",
-                borderBottom: tab === t ? "2px solid oklch(0.84 0.155 85)" : "2px solid transparent",
+                color: tab === t ? "#CBB183" : "#3F4A50",
+                borderBottom: tab === t ? "2px solid #CBB183" : "2px solid transparent",
                 background: "transparent",
               }}
             >
@@ -412,15 +412,15 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
               <div className="flex items-center gap-2 mb-2.5">
                 <span
                   className="text-[11px] font-bold"
-                  style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Orbitron', sans-serif" }}
+                  style={{ color: "#CBB183", fontFamily: "'Orbitron', sans-serif" }}
                 >
                   {release.version}
                 </span>
-                <span className="text-[11px]" style={{ color: "oklch(0.42 0.03 280)" }}>{release.date}</span>
+                <span className="text-[11px]" style={{ color: "#3F4A50" }}>{release.date}</span>
                 {release.label && (
                   <span
                     className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                    style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "oklch(0.84 0.155 85)" }}
+                    style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183" }}
                   >
                     {release.label}
                   </span>
@@ -433,11 +433,11 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
                     <div key={i} className="flex items-start gap-2.5">
                       <div
                         className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center mt-0.5"
-                        style={{ background: "oklch(0.84 0.155 85 / 0.1)", border: "1px solid oklch(0.84 0.155 85 / 0.2)" }}
+                        style={{ background: "rgba(230,205,174,0.1)", border: "1px solid rgba(203,177,131,0.18)" }}
                       >
-                        <Icon size={11} style={{ color: "oklch(0.84 0.155 85)" }} />
+                        <Icon size={11} style={{ color: "#CBB183" }} />
                       </div>
-                      <p className="text-xs leading-relaxed" style={{ color: "oklch(0.66 0.03 280)" }}>
+                      <p className="text-xs leading-relaxed" style={{ color: "#AA8E64" }}>
                         {item.text}
                       </p>
                     </div>
@@ -455,12 +455,12 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
                   <div
                     key={step.step}
                     className="rounded-xl p-3 flex gap-3"
-                    style={{ background: "oklch(0.11 0.02 270)", border: "1px solid oklch(0.84 0.155 85 / 0.08)" }}
+                    style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.08)" }}
                   >
                     <div
                       className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black"
                       style={{
-                        background: "oklch(0.84 0.155 85)",
+                        background: "#CBB183",
                         color: "#2C3438",
                         fontFamily: "'Orbitron', sans-serif",
                       }}
@@ -469,12 +469,12 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <Icon size={11} style={{ color: "oklch(0.84 0.155 85)" }} />
-                        <span className="text-xs font-bold" style={{ color: "oklch(0.88 0.03 85)" }}>
+                        <Icon size={11} style={{ color: "#CBB183" }} />
+                        <span className="text-xs font-bold" style={{ color: "#E6CDAE" }}>
                           {step.title}
                         </span>
                       </div>
-                      <p className="text-xs leading-relaxed" style={{ color: "oklch(0.56 0.03 280)" }}>
+                      <p className="text-xs leading-relaxed" style={{ color: "#AA8E64" }}>
                         {step.body}
                       </p>
                     </div>
@@ -488,13 +488,13 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
         {/* Footer */}
         <div
           className="flex-shrink-0 px-4 py-3 flex items-center justify-between gap-3"
-          style={{ borderTop: "1px solid oklch(0.84 0.155 85 / 0.1)" }}
+          style={{ borderTop: "1px solid rgba(203,177,131,0.10)" }}
         >
           <Link
             href="/manifesto"
             onClick={handleClose}
             className="text-[11px] flex items-center gap-1 hover:underline whitespace-nowrap"
-            style={{ color: "oklch(0.50 0.04 280)" }}
+            style={{ color: "#3F4A50" }}
           >
             Read the Manifesto <ChevronRight size={10} />
           </Link>
@@ -503,7 +503,7 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
             size="sm"
             className="font-semibold text-xs px-5 h-8 flex-shrink-0"
             style={{
-              background: "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.14 75))",
+              background: "linear-gradient(135deg, #CBB183, #CBB183)",
               color: "#2C3438",
             }}
           >

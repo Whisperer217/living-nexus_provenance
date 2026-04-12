@@ -26,10 +26,10 @@ interface CosmicMediumIconProps {
 
 // ── Color tokens per medium ────────────────────────────────────────────────────
 export const MEDIUM_COLORS: Record<MediumType, { primary: string; glow: string; bg: string; border: string }> = {
-  audio:      { primary: "oklch(0.68 0.22 295)",  glow: "oklch(0.68 0.22 295 / 0.35)", bg: "oklch(0.10 0.06 295 / 0.6)",  border: "oklch(0.68 0.22 295 / 0.25)" },
-  lyrics:     { primary: "oklch(0.82 0.18 85)",   glow: "oklch(0.82 0.18 85 / 0.35)",  bg: "rgba(63, 74, 80, 0.6)",   border: "oklch(0.82 0.18 85 / 0.25)"  },
-  manuscript: { primary: "oklch(0.72 0.18 155)",  glow: "oklch(0.72 0.18 155 / 0.35)", bg: "rgba(63, 74, 80, 0.6)",  border: "oklch(0.72 0.18 155 / 0.25)" },
-  comic:      { primary: "oklch(0.72 0.20 35)",   glow: "oklch(0.72 0.20 35 / 0.35)",  bg: "rgba(63, 74, 80, 0.6)",   border: "oklch(0.72 0.20 35 / 0.25)"  },
+  audio:      { primary: "#CBB183",  glow: "rgba(203,177,131,0.35)", bg: "rgba(44,52,56,0.6)",  border: "rgba(203,177,131,0.25)" },
+  lyrics:     { primary: "#E6CDAE",   glow: "rgba(230,205,174,0.35)",  bg: "rgba(63, 74, 80, 0.6)",   border: "rgba(230,205,174,0.25)"  },
+  manuscript: { primary: "#4ADE80",  glow: "rgba(74,222,128,0.35)", bg: "rgba(63, 74, 80, 0.6)",  border: "rgba(74,222,128,0.25)" },
+  comic:      { primary: "#EF4444",   glow: "rgba(239,68,68,0.35)",  bg: "rgba(63, 74, 80, 0.6)",   border: "rgba(239,68,68,0.25)"  },
 };
 
 // ── SVG Glyphs ────────────────────────────────────────────────────────────────
@@ -201,7 +201,7 @@ export function CosmicMediumIcon({
         <Glyph color={colors.primary} size={size} />
         <span
           className="text-xs font-semibold tracking-wide leading-none"
-          style={{ fontFamily: "'Cinzel', serif", color: active ? colors.primary : "oklch(0.55 0.03 280)" }}
+          style={{ fontFamily: "'Cinzel', serif", color: active ? colors.primary : "#AA8E64" }}
         >
           {displayLabel}
         </span>
@@ -243,7 +243,7 @@ export function CosmicMediumIcon({
         </p>
         <p
           className="text-[12px] font-mono mt-1 tabular-nums font-bold"
-          style={{ color: count && count !== "—" ? "oklch(0.85 0.02 280)" : "oklch(0.40 0.02 280)" }}
+          style={{ color: count && count !== "—" ? "#DACAAA" : "#3F4A50" }}
         >
           {count ?? "—"}
         </p>

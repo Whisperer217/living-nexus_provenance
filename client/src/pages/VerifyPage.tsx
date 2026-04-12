@@ -43,7 +43,7 @@ function ShareVerifyButton({ witnessId, title }: { witnessId: string; title: str
     <button
       onClick={handleShare}
       className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all hover:opacity-80 active:scale-95"
-      style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.5)", color: "oklch(0.65 0.18 145)" }}
+      style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.45)", color: "#4ADE80" }}
     >
       {copied ? (
         <><CheckCircle2 className="w-4 h-4" /> Copied!</>
@@ -57,7 +57,7 @@ function ShareVerifyButton({ witnessId, title }: { witnessId: string; title: str
 function TruncatedMono({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex items-start gap-2 group">
-      <p className="text-xs font-mono break-all flex-1 leading-5" style={{ color: "oklch(0.6 0.04 280)" }}>
+      <p className="text-xs font-mono break-all flex-1 leading-5" style={{ color: "#AA8E64" }}>
         {value}
       </p>
       <button
@@ -65,7 +65,7 @@ function TruncatedMono({ value, label }: { value: string; label: string }) {
         className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5"
         title={`Copy ${label}`}
       >
-        <Copy className="w-3.5 h-3.5" style={{ color: "oklch(0.5 0.04 280)" }} />
+        <Copy className="w-3.5 h-3.5" style={{ color: "#3F4A50" }} />
       </button>
     </div>
   );
@@ -73,10 +73,10 @@ function TruncatedMono({ value, label }: { value: string; label: string }) {
 
 function Field({ icon: Icon, label, children }: { icon: React.ElementType; label: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #CBB183" }}>
+    <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
       <div className="flex items-center gap-1.5 mb-2">
-        <Icon className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
-        <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>{label}</p>
+        <Icon className="w-3.5 h-3.5" style={{ color: "#3F4A50" }} />
+        <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>{label}</p>
       </div>
       {children}
     </div>
@@ -101,23 +101,23 @@ function CollectionVerifyView({
   if (isLoading) {
     return (
       <div className="text-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "oklch(0.84 0.155 85)" }} />
-        <p className="text-sm" style={{ color: "oklch(0.48 0.03 280)" }}>Querying collection provenance ledger…</p>
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "#CBB183" }} />
+        <p className="text-sm" style={{ color: "#3F4A50" }}>Querying collection provenance ledger…</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
-        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "oklch(0.65 0.18 25)" }} />
-        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 25)" }}>
+      <div className="rounded-2xl p-8 text-center" style={{ background: "#2C3438", border: "1px solid rgba(239,68,68,0.35)" }}>
+        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "#EF4444" }} />
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#EF4444" }}>
           Collection Not Found
         </h2>
-        <p className="text-sm mb-6" style={{ color: "oklch(0.5 0.03 280)" }}>
+        <p className="text-sm mb-6" style={{ color: "#AA8E64" }}>
           No collection found for this WID-ALB. The ID may be incorrect or the collection was not registered on Living Nexus.
         </p>
-        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
+        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
           Try Another WID
         </Button>
       </div>
@@ -128,25 +128,25 @@ function CollectionVerifyView({
     <div className="space-y-5">
 
       {/* ── Verified badge ── */}
-      <div className="rounded-2xl p-6 text-center" style={{ background: "oklch(0.84 0.155 85 / 0.06)", border: "2px solid oklch(0.84 0.155 85 / 0.35)" }}>
+      <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(203,177,131,0.06)", border: "2px solid rgba(203,177,131,0.32)" }}>
         {(data as any).coverArtUrl ? (
-          <div className="w-28 h-28 rounded-xl mx-auto mb-4 overflow-hidden" style={{ border: "2px solid oklch(0.84 0.155 85 / 0.5)", boxShadow: "0 0 20px oklch(0.84 0.155 85 / 0.15)" }}>
+          <div className="w-28 h-28 rounded-xl mx-auto mb-4 overflow-hidden" style={{ border: "2px solid rgba(203,177,131,0.45)", boxShadow: "0 0 20px rgba(203,177,131,0.12)" }}>
             <img src={(data as any).coverArtUrl} alt={data.name} className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "2px solid oklch(0.84 0.155 85 / 0.4)" }}>
-            <Library className="w-10 h-10" style={{ color: "oklch(0.84 0.155 85)" }} />
+          <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(203,177,131,0.10)", border: "2px solid rgba(203,177,131,0.35)" }}>
+            <Library className="w-10 h-10" style={{ color: "#CBB183" }} />
           </div>
         )}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.5)" }}>
-          <CheckCircle2 className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
-          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "oklch(0.65 0.18 145)", fontFamily: "'Cinzel', serif" }}>Collection Verified</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.45)" }}>
+          <CheckCircle2 className="w-4 h-4" style={{ color: "#4ADE80" }} />
+          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "#4ADE80", fontFamily: "'Cinzel', serif" }}>Collection Verified</span>
         </div>
-        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}>
+        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
           {data.name}
         </h2>
-        <p className="text-sm mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>by {data.creatorName}</p>
-        <p className="text-xs mt-2" style={{ color: "oklch(0.45 0.03 280)" }}>
+        <p className="text-sm mb-1" style={{ color: "#3F4A50" }}>by {data.creatorName}</p>
+        <p className="text-xs mt-2" style={{ color: "#AA8E64" }}>
           {data.trackCount} {data.trackCount === 1 ? "work" : "works"} collectively witnessed
         </p>
       </div>
@@ -158,7 +158,7 @@ function CollectionVerifyView({
 
       {/* ── Registration date ── */}
       <Field icon={Calendar} label="Registration Date">
-        <p className="text-sm font-medium" style={{ color: "oklch(0.78 0.03 280)" }}>
+        <p className="text-sm font-medium" style={{ color: "#DACAAA" }}>
           {new Date(data.createdAt).toLocaleString("en-US", {
             year: "numeric", month: "long", day: "numeric",
             hour: "2-digit", minute: "2-digit", timeZoneName: "short",
@@ -169,16 +169,16 @@ function CollectionVerifyView({
       {/* ── Collective Hash ── */}
       <Field icon={Hash} label="Collective Hash (SHA-256 of all sorted WIDs)">
         <TruncatedMono value={`sha256:${data.collectiveHash}`} label="Collective Hash" />
-        <p className="text-[10px] mt-1.5" style={{ color: "oklch(0.38 0.02 280)" }}>
+        <p className="text-[10px] mt-1.5" style={{ color: "#3F4A50" }}>
           Computed as SHA-256 of all individual Witness IDs sorted lexicographically and joined by '|'
         </p>
       </Field>
 
       {/* ── Included tracks ── */}
-      <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #CBB183" }}>
+      <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
         <div className="flex items-center gap-1.5 mb-3">
-          <Music className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
-          <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>
+          <Music className="w-3.5 h-3.5" style={{ color: "#3F4A50" }} />
+          <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>
             Included Works ({data.tracks.length})
           </p>
         </div>
@@ -187,25 +187,25 @@ function CollectionVerifyView({
             <div
               key={track.id}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5"
-              style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}
+              style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}
             >
-              <span className="text-[10px] font-mono w-5 text-right flex-shrink-0" style={{ color: "oklch(0.45 0.03 280)" }}>
+              <span className="text-[10px] font-mono w-5 text-right flex-shrink-0" style={{ color: "#AA8E64" }}>
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: "oklch(0.82 0.03 280)" }}>{track.title}</p>
+                <p className="text-sm font-medium truncate" style={{ color: "#DACAAA" }}>{track.title}</p>
                 {track.witnessId && (
-                  <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }}>{track.witnessId}</p>
+                  <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "rgba(230,205,174,0.7)" }}>{track.witnessId}</p>
                 )}
               </div>
               {track.witnessId && (
                 <button
                   onClick={() => navigate(`/verify/${encodeURIComponent(track.witnessId!)}`)}
                   className="flex-shrink-0 p-1.5 rounded hover:opacity-80 transition-opacity"
-                  style={{ background: "oklch(0.84 0.155 85 / 0.1)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+                  style={{ background: "rgba(230,205,174,0.1)", border: "1px solid rgba(203,177,131,0.28)" }}
                   title="Verify individual track"
                 >
-                  <Link2 className="w-3 h-3" style={{ color: "oklch(0.84 0.155 85)" }} />
+                  <Link2 className="w-3 h-3" style={{ color: "#CBB183" }} />
                 </button>
               )}
             </div>
@@ -222,7 +222,7 @@ function CollectionVerifyView({
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-bold"
-              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+              style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
             >
               <Download className="w-4 h-4" /> Download Certificate
             </a>
@@ -231,7 +231,7 @@ function CollectionVerifyView({
             variant="outline"
             onClick={onVerifyAnother}
             className={data.pdfUrl ? "" : "flex-1"}
-            style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}
+            style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}
           >
             <Search className="w-4 h-4 mr-2" /> Verify Another
           </Button>
@@ -239,25 +239,25 @@ function CollectionVerifyView({
       </div>
 
       {/* ── Covenant Declaration ── */}
-      <div className="rounded-2xl px-5 py-5" style={{ background: "oklch(0.12 0.04 85 / 0.10)", border: "1px solid oklch(0.75 0.18 85 / 0.15)" }}>
-        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "oklch(0.75 0.18 85 / 0.7)", fontFamily: "'Cinzel', serif" }}>
+      <div className="rounded-2xl px-5 py-5" style={{ background: "rgba(44,52,56,0.1)", border: "1px solid rgba(203,177,131,0.15)" }}>
+        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "rgba(203,177,131,0.7)", fontFamily: "'Cinzel', serif" }}>
           Covenant Declaration
         </p>
-        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>
+        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "#AA8E64" }}>
           This collection record was sealed by Living Nexus at the moment of batch registration.
           The Collection WID cryptographically binds all included works into a single origin record
           under the Sovereign Shutter™ framework. The collective hash is immutable.
         </p>
-        <p className="text-[11px] italic" style={{ color: "oklch(0.4 0.03 280)" }}>
+        <p className="text-[11px] italic" style={{ color: "#3F4A50" }}>
           "He is before all things, and in Him all things hold together." — Colossians 1:17
         </p>
       </div>
 
       {/* ── Footer note ── */}
-      <p className="text-center text-xs pt-2" style={{ color: "oklch(0.35 0.02 280)" }}>
+      <p className="text-center text-xs pt-2" style={{ color: "#2C3438" }}>
         BDDT Publishing · Command Domains LLC · Living Nexus Witness Registry
       </p>
-      <p className="text-center text-[10px] pb-2" style={{ color: "oklch(0.28 0.02 280)" }}>
+      <p className="text-center text-[10px] pb-2" style={{ color: "rgba(203,177,131,0.22)" }}>
         Laminin/Logos Doctrine v0.1 · Sovereign Shutter™ Framework
       </p>
     </div>
@@ -397,10 +397,10 @@ function TrackVerifyView({
   };
 
   const aiConsentLabel = (v?: string) => {
-    if (v === "prohibited") return { text: "AI Training Prohibited", color: "oklch(0.65 0.18 25)" };
-    if (v === "permitted_attribution") return { text: "Permitted with Attribution", color: "oklch(0.84 0.155 85)" };
-    if (v === "permitted") return { text: "Freely Permitted", color: "oklch(0.65 0.18 145)" };
-    return { text: "Not specified", color: "oklch(0.45 0.03 280)" };
+    if (v === "prohibited") return { text: "AI Training Prohibited", color: "#EF4444" };
+    if (v === "permitted_attribution") return { text: "Permitted with Attribution", color: "#CBB183" };
+    if (v === "permitted") return { text: "Freely Permitted", color: "#4ADE80" };
+    return { text: "Not specified", color: "#AA8E64" };
   };
 
   const consent = aiConsentLabel(data?.aiConsent ?? undefined);
@@ -408,23 +408,23 @@ function TrackVerifyView({
   if (isLoading) {
     return (
       <div className="text-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "oklch(0.84 0.155 85)" }} />
-        <p className="text-sm" style={{ color: "oklch(0.48 0.03 280)" }}>Querying provenance ledger…</p>
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "#CBB183" }} />
+        <p className="text-sm" style={{ color: "#3F4A50" }}>Querying provenance ledger…</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid oklch(0.65 0.18 25 / 0.35)" }}>
-        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "oklch(0.65 0.18 25)" }} />
-        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.65 0.18 25)" }}>
+      <div className="rounded-2xl p-8 text-center" style={{ background: "#2C3438", border: "1px solid rgba(239,68,68,0.35)" }}>
+        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "#EF4444" }} />
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#EF4444" }}>
           Not Verified
         </h2>
-        <p className="text-sm mb-6" style={{ color: "oklch(0.5 0.03 280)" }}>
+        <p className="text-sm mb-6" style={{ color: "#AA8E64" }}>
           No record found for this Witness ID. The ID may be incorrect or the work was not registered on Living Nexus.
         </p>
-        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}>
+        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
           Try Another WID
         </Button>
       </div>
@@ -435,22 +435,22 @@ function TrackVerifyView({
     <div className="space-y-5">
 
       {/* ── Verified badge ── */}
-      <div className="rounded-2xl p-6 text-center" style={{ background: "oklch(0.65 0.18 145 / 0.07)", border: "2px solid oklch(0.65 0.18 145 / 0.4)" }}>
-        <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "2px solid oklch(0.65 0.18 145 / 0.5)" }}>
-          <ShieldCheck className="w-10 h-10" style={{ color: "oklch(0.65 0.18 145)" }} />
+      <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(74,222,128,0.07)", border: "2px solid rgba(74,222,128,0.4)" }}>
+        <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(74,222,128,0.15)", border: "2px solid rgba(74,222,128,0.45)" }}>
+          <ShieldCheck className="w-10 h-10" style={{ color: "#4ADE80" }} />
         </div>
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "oklch(0.65 0.18 145 / 0.15)", border: "1px solid oklch(0.65 0.18 145 / 0.5)" }}>
-          <CheckCircle2 className="w-4 h-4" style={{ color: "oklch(0.65 0.18 145)" }} />
-          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "oklch(0.65 0.18 145)", fontFamily: "'Cinzel', serif" }}>Verified</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.45)" }}>
+          <CheckCircle2 className="w-4 h-4" style={{ color: "#4ADE80" }} />
+          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "#4ADE80", fontFamily: "'Cinzel', serif" }}>Verified</span>
         </div>
-        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}>
+        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
           {data.title}
         </h2>
-        <p className="text-sm mb-1" style={{ color: "oklch(0.55 0.04 280)" }}>by {data.artistName}</p>
+        <p className="text-sm mb-1" style={{ color: "#3F4A50" }}>by {data.artistName}</p>
 
         {/* Name at time of witnessing */}
         {data.nameAtWitnessing && data.nameAtWitnessing !== data.artistName && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs" style={{ background: "oklch(0.84 0.155 85 / 0.1)", border: "1px solid oklch(0.84 0.155 85 / 0.3)", color: "oklch(0.75 0.12 85)" }}>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs" style={{ background: "rgba(230,205,174,0.1)", border: "1px solid rgba(203,177,131,0.28)", color: "#CBB183" }}>
             <UserCheck className="w-3 h-3" />
             <span>Registered as: <strong>{data.nameAtWitnessing}</strong></span>
           </div>
@@ -460,10 +460,10 @@ function TrackVerifyView({
         {(() => {
           const ct = data.contentType ?? (data.isLyricsOnly ? "lyrics" : "audio");
           const mediumMap: Record<string, { label: string; wid: string; desc: string; icon: React.ReactNode; bg: string; color: string; border: string }> = {
-            audio:      { label: "Audio Registration",      wid: "WID-MUS", desc: "Cryptographic proof of origin for an audio recording.",           icon: <Music className="w-3.5 h-3.5" />,    bg: "oklch(0.65 0.2 300 / 0.15)",  color: "oklch(0.65 0.2 300)",  border: "oklch(0.65 0.2 300 / 0.4)" },
-            lyrics:     { label: "Lyrics Registration",     wid: "WID-LYR", desc: "Standalone lyric sheet — words witnessed before the music.",     icon: <FileText className="w-3.5 h-3.5" />, bg: "oklch(0.75 0.18 85 / 0.15)",   color: "oklch(0.84 0.155 85)",  border: "oklch(0.75 0.18 85 / 0.4)" },
-            manuscript: { label: "Manuscript Registration", wid: "WID-MAN", desc: "Novel, screenplay, or written work — sealed at first draft.",    icon: <BookOpen className="w-3.5 h-3.5" />, bg: "oklch(0.65 0.18 145 / 0.15)",  color: "oklch(0.65 0.18 145)",  border: "oklch(0.65 0.18 145 / 0.4)" },
-            comic:      { label: "Comic / Graphic Novel",   wid: "WID-CMX", desc: "Sequential art — pages, script, and cover witnessed together.",  icon: <FileText className="w-3.5 h-3.5" />, bg: "oklch(0.65 0.18 25 / 0.15)",   color: "oklch(0.75 0.18 25)",   border: "oklch(0.65 0.18 25 / 0.4)" },
+            audio:      { label: "Audio Registration",      wid: "WID-MUS", desc: "Cryptographic proof of origin for an audio recording.",           icon: <Music className="w-3.5 h-3.5" />,    bg: "rgba(203,177,131,0.12)",  color: "#CBB183",  border: "rgba(203,177,131,0.4)" },
+            lyrics:     { label: "Lyrics Registration",     wid: "WID-LYR", desc: "Standalone lyric sheet — words witnessed before the music.",     icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(203,177,131,0.12)",   color: "#CBB183",  border: "rgba(203,177,131,0.35)" },
+            manuscript: { label: "Manuscript Registration", wid: "WID-MAN", desc: "Novel, screenplay, or written work — sealed at first draft.",    icon: <BookOpen className="w-3.5 h-3.5" />, bg: "rgba(74,222,128,0.15)",  color: "#4ADE80",  border: "rgba(74,222,128,0.4)" },
+            comic:      { label: "Comic / Graphic Novel",   wid: "WID-CMX", desc: "Sequential art — pages, script, and cover witnessed together.",  icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(239,68,68,0.15)",   color: "#EF4444",   border: "rgba(239,68,68,0.4)" },
           };
           const m = mediumMap[ct] ?? mediumMap.audio;
           return (
@@ -472,16 +472,16 @@ function TrackVerifyView({
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: m.bg, color: m.color, border: `1px solid ${m.border}` }}>
                   {m.icon} {m.label}
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold" style={{ background: "oklch(0.84 0.155 85 / 0.08)", color: "oklch(0.84 0.155 85)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold" style={{ background: "rgba(230,205,174,0.08)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}>
                   {m.wid}
                 </span>
                 {data.genre && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs" style={{ background: "oklch(0.14 0.015 280)", color: "oklch(0.5 0.03 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs" style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid rgba(203,177,131,0.15)" }}>
                     <Tag className="w-3 h-3" /> {data.genre}
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-center" style={{ color: "oklch(0.45 0.03 280)" }}>{m.desc}</p>
+              <p className="text-[11px] text-center" style={{ color: "#AA8E64" }}>{m.desc}</p>
             </div>
           );
         })()}
@@ -493,17 +493,17 @@ function TrackVerifyView({
 
       {/* ── Collection back-reference ── */}
       {collectionData && (
-        <div className="rounded-xl p-4" style={{ background: "oklch(0.84 0.155 85 / 0.05)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+        <div className="rounded-xl p-4" style={{ background: "rgba(230,205,174,0.05)", border: "1px solid rgba(203,177,131,0.22)" }}>
           <div className="flex items-center gap-1.5 mb-2">
-            <Library className="w-3.5 h-3.5" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }} />
-            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.65 0.1 85)" }}>Part of Collection</p>
+            <Library className="w-3.5 h-3.5" style={{ color: "rgba(230,205,174,0.7)" }} />
+            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>Part of Collection</p>
           </div>
           <button
             onClick={() => navigate(`/verify/${encodeURIComponent(collectionData.collectionWid)}`)}
             className="text-left hover:opacity-80 transition-opacity"
           >
-            <p className="text-sm font-semibold" style={{ color: "oklch(0.84 0.155 85)" }}>{collectionData.name}</p>
-            <p className="text-[10px] font-mono mt-0.5" style={{ color: "oklch(0.75 0.12 85 / 0.7)" }}>{collectionData.collectionWid}</p>
+            <p className="text-sm font-semibold" style={{ color: "#CBB183" }}>{collectionData.name}</p>
+            <p className="text-[10px] font-mono mt-0.5" style={{ color: "rgba(203,177,131,0.7)" }}>{collectionData.collectionWid}</p>
           </button>
         </div>
       )}
@@ -515,31 +515,31 @@ function TrackVerifyView({
 
       {/* ── Audio Version History ── */}
       {audioVersionHistory && audioVersionHistory.length > 0 && (
-        <div className="rounded-xl p-4" style={{ background: "oklch(0.09 0.01 280)", border: "1px solid #CBB183" }}>
+        <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
           <div className="flex items-center gap-1.5 mb-3">
-            <History className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.04 280)" }} />
-            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>Audio Version History</p>
-            <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.155 85 / 0.1)", color: "oklch(0.75 0.12 85)" }}>
+            <History className="w-3.5 h-3.5" style={{ color: "#3F4A50" }} />
+            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>Audio Version History</p>
+            <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(230,205,174,0.1)", color: "#CBB183" }}>
               {audioVersionHistory.length} archived version{audioVersionHistory.length !== 1 ? "s" : ""}
             </span>
           </div>
-          <p className="text-[10px] mb-3" style={{ color: "oklch(0.4 0.03 280)" }}>
+          <p className="text-[10px] mb-3" style={{ color: "#3F4A50" }}>
             Each version below was superseded by a new upload. All WID-MUS proofs are permanently preserved.
           </p>
           <div className="space-y-2">
             {audioVersionHistory.map((v: any, i: number) => (
               <div key={v.id} className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg"
-                style={{ background: "oklch(0.12 0.015 280)", border: "1px solid oklch(0.2 0.015 280)" }}>
+                style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
                 <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5"
-                  style={{ background: "oklch(0.84 0.155 85 / 0.1)", color: "oklch(0.75 0.12 85)", border: "1px solid oklch(0.84 0.155 85 / 0.25)" }}>
+                  style={{ background: "rgba(230,205,174,0.1)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}>
                   v{audioVersionHistory.length - i}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-mono break-all" style={{ color: "oklch(0.6 0.04 280)" }}>{v.witnessId}</p>
+                  <p className="text-[11px] font-mono break-all" style={{ color: "#AA8E64" }}>{v.witnessId}</p>
                   {v.versionNote && (
-                    <p className="text-xs mt-0.5 font-medium" style={{ color: "oklch(0.78 0.03 280)" }}>{v.versionNote}</p>
+                    <p className="text-xs mt-0.5 font-medium" style={{ color: "#DACAAA" }}>{v.versionNote}</p>
                   )}
-                  <p className="text-[10px] mt-0.5" style={{ color: "oklch(0.38 0.02 280)" }}>
+                  <p className="text-[10px] mt-0.5" style={{ color: "#3F4A50" }}>
                     Archived {new Date(v.replacedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                   </p>
                 </div>
@@ -555,14 +555,14 @@ function TrackVerifyView({
           <div className="space-y-1.5">
             <TruncatedMono value={(data as any).lyricsWid} label="WID-LYR" />
             {(data as any).lyricsFileName && (
-              <p className="text-xs" style={{ color: "oklch(0.7 0.04 280)" }}>
+              <p className="text-xs" style={{ color: "#DACAAA" }}>
                 File: {(data as any).lyricsFileName}
                 {(data as any).lyricsAddedAt
                   ? ` · ${new Date((data as any).lyricsAddedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`
                   : ""}
               </p>
             )}
-            <p className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>
+            <p className="text-[10px]" style={{ color: "#AA8E64" }}>
               Separate cryptographic proof for the lyrical content of this work.
             </p>
           </div>
@@ -571,7 +571,7 @@ function TrackVerifyView({
 
       {/* ── Registration date ── */}
       <Field icon={Calendar} label="Registration Date">
-        <p className="text-sm font-medium" style={{ color: "oklch(0.78 0.03 280)" }}>
+        <p className="text-sm font-medium" style={{ color: "#DACAAA" }}>
           {data.registeredAt
             ? new Date(data.registeredAt).toLocaleString("en-US", {
                 year: "numeric", month: "long", day: "numeric",
@@ -612,7 +612,7 @@ function TrackVerifyView({
       {/* ── ISRC ── */}
       {data.isrc && (
         <Field icon={Tag} label="ISRC">
-          <p className="text-sm font-mono" style={{ color: "oklch(0.7 0.04 280)" }}>{data.isrc}</p>
+          <p className="text-sm font-mono" style={{ color: "#DACAAA" }}>{data.isrc}</p>
         </Field>
       )}
 
@@ -622,18 +622,18 @@ function TrackVerifyView({
           <div className="space-y-2">
             {data.nameHistory.map((entry: { oldName: string | null; newName: string; changedAt: Date }, i: number) => (
               <div key={i} className="flex items-start gap-2 text-xs">
-                <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: i === 0 ? "oklch(0.65 0.18 145)" : "oklch(0.35 0.02 280)", marginTop: "5px" }} />
+                <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: i === 0 ? "#4ADE80" : "#2C3438", marginTop: "5px" }} />
                 <div className="flex-1">
                   {entry.oldName ? (
-                    <span style={{ color: "oklch(0.6 0.04 280)" }}>
-                      <span style={{ color: "oklch(0.45 0.03 280)" }}>{entry.oldName}</span>
+                    <span style={{ color: "#AA8E64" }}>
+                      <span style={{ color: "#AA8E64" }}>{entry.oldName}</span>
                       {" → "}
-                      <span style={{ color: "oklch(0.78 0.03 280)", fontWeight: 600 }}>{entry.newName}</span>
+                      <span style={{ color: "#DACAAA", fontWeight: 600 }}>{entry.newName}</span>
                     </span>
                   ) : (
-                    <span style={{ color: "oklch(0.78 0.03 280)", fontWeight: 600 }}>Registered as: {entry.newName}</span>
+                    <span style={{ color: "#DACAAA", fontWeight: 600 }}>Registered as: {entry.newName}</span>
                   )}
-                  <span className="ml-2" style={{ color: "oklch(0.38 0.02 280)" }}>
+                  <span className="ml-2" style={{ color: "#3F4A50" }}>
                     {new Date(entry.changedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                   </span>
                 </div>
@@ -649,14 +649,14 @@ function TrackVerifyView({
           <Button
             className="flex-1"
             onClick={() => navigate(`/songs/${data.songId}`)}
-            style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+            style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
           >
             <ExternalLink className="w-4 h-4 mr-2" /> View Track
           </Button>
           <Button
             variant="outline"
             onClick={onVerifyAnother}
-            style={{ borderColor: "oklch(0.28 0.02 280)", color: "oklch(0.6 0.04 280)" }}
+            style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}
           >
             <Search className="w-4 h-4 mr-2" /> Verify Another
           </Button>
@@ -665,32 +665,32 @@ function TrackVerifyView({
           variant="outline"
           className="w-full"
           onClick={downloadCertificate}
-          style={{ borderColor: "oklch(0.84 0.155 85 / 0.4)", color: "oklch(0.75 0.12 85)", fontFamily: "'Cinzel', serif" }}
+          style={{ borderColor: "rgba(203,177,131,0.35)", color: "#CBB183", fontFamily: "'Cinzel', serif" }}
         >
           <Download className="w-4 h-4 mr-2" /> Download Certificate
         </Button>
       </div>
 
       {/* ── Covenant Declaration ── */}
-      <div className="rounded-2xl px-5 py-5" style={{ background: "oklch(0.12 0.04 85 / 0.10)", border: "1px solid oklch(0.75 0.18 85 / 0.15)" }}>
-        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "oklch(0.75 0.18 85 / 0.7)", fontFamily: "'Cinzel', serif" }}>
+      <div className="rounded-2xl px-5 py-5" style={{ background: "rgba(44,52,56,0.1)", border: "1px solid rgba(203,177,131,0.15)" }}>
+        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "rgba(203,177,131,0.7)", fontFamily: "'Cinzel', serif" }}>
           Covenant Declaration
         </p>
-        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "oklch(0.5 0.03 280)" }}>
+        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "#AA8E64" }}>
           This record was sealed by Living Nexus at the moment of creation. The Witness ID is
           cryptographically bound to the original file and cannot be transferred or reassigned.
           The creator owns this proof. The platform hosts it.
         </p>
-        <p className="text-[11px] italic" style={{ color: "oklch(0.4 0.03 280)" }}>
+        <p className="text-[11px] italic" style={{ color: "#3F4A50" }}>
           "He is before all things, and in Him all things hold together." — Colossians 1:17
         </p>
       </div>
 
       {/* ── Footer note ── */}
-      <p className="text-center text-xs pt-2" style={{ color: "oklch(0.35 0.02 280)" }}>
+      <p className="text-center text-xs pt-2" style={{ color: "#2C3438" }}>
         BDDT Publishing · Command Domains LLC · Living Nexus Witness Registry
       </p>
-      <p className="text-center text-[10px] pb-2" style={{ color: "oklch(0.28 0.02 280)" }}>
+      <p className="text-center text-[10px] pb-2" style={{ color: "rgba(203,177,131,0.22)" }}>
         Laminin/Logos Doctrine v0.1 · Sovereign Shutter™ Framework
       </p>
     </div>
@@ -729,16 +729,16 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#E6CDAE" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#353E43" }}>
 
       {/* ── Header ── */}
-      <header className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: "oklch(0.15 0.015 280)" }}>
+      <header className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: "#2C3438" }}>
         <button type="button" onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <img src={LOGO_URL} alt="Living Nexus" className="w-8 h-8 object-contain" />
-          <span className="font-display text-base" style={{ color: "oklch(0.82 0.14 85)", fontFamily: "'Cinzel', serif" }}>Living Nexus</span>
+          <span className="font-display text-base" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>Living Nexus</span>
         </button>
         <div className="flex-1" />
-        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "oklch(0.45 0.03 280)" }}>Provenance Verification</span>
+        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>Provenance Verification</span>
       </header>
 
       {/* ── Main ── */}
@@ -747,10 +747,10 @@ export default function VerifyPage() {
 
           {/* Title */}
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.92 0.02 85)" }}>
+            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
               Verify Witness ID
             </h1>
-            <p className="text-sm" style={{ color: "oklch(0.48 0.03 280)" }}>
+            <p className="text-sm" style={{ color: "#3F4A50" }}>
               Enter a Witness ID (WID-…) or Collection ID (WID-ALB-…) to verify cryptographic provenance.
             </p>
           </div>
@@ -763,12 +763,12 @@ export default function VerifyPage() {
               onKeyDown={e => e.key === "Enter" && handleSearch()}
               placeholder="WID-… or WID-ALB-…"
               className="font-mono text-sm flex-1"
-              style={{ background: "oklch(0.12 0.015 280)", borderColor: "oklch(0.22 0.015 280)", color: "oklch(0.88 0.01 280)" }}
+              style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.18)", color: "#E6CDAE" }}
             />
             <Button
               onClick={handleSearch}
               disabled={!inputWid.trim()}
-              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+              style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
             >
               <Search className="w-4 h-4" />
             </Button>
@@ -785,9 +785,9 @@ export default function VerifyPage() {
 
           {/* Empty state — no query yet */}
           {!queryWid && (
-            <div className="text-center py-12 rounded-2xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #CBB183" }}>
-              <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
-              <p className="text-sm" style={{ color: "oklch(0.42 0.03 280)" }}>
+            <div className="text-center py-12 rounded-2xl" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+              <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "#CBB183" }} />
+              <p className="text-sm" style={{ color: "#3F4A50" }}>
                 Enter a Witness ID or Collection ID above to verify a registered work.
               </p>
             </div>

@@ -12,10 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Zap, Package, Star, ChevronRight, Info, CheckCircle2 } from "lucide-react";
 
-const GOLD = "oklch(0.82 0.15 85)";
-const SURFACE = "oklch(0.10 0.015 268)";
-const BORDER = "oklch(0.20 0.015 268)";
-const SUBTEXT = "oklch(0.65 0.01 268)";
+const GOLD = "#E6CDAE";
+const SURFACE = "#2C3438";
+const BORDER = "#2C3438";
+const SUBTEXT = "#AA8E64";
 
 const MICRO_PACKAGES = [
   { id: "micro_10",  slots: 10,  priceCents: 880,   label: "Micro 10" },
@@ -74,7 +74,7 @@ export default function LivingArchiveBillingPage() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen py-12 px-4" style={{ background: "oklch(0.07 0.02 268)" }}>
+      <div className="min-h-screen py-12 px-4" style={{ background: "#2C3438" }}>
         <div className="max-w-3xl mx-auto space-y-10">
 
           {/* Header */}
@@ -110,7 +110,7 @@ export default function LivingArchiveBillingPage() {
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${pct}%`,
-                      background: pct >= 90 ? "oklch(0.65 0.2 25)" : GOLD,
+                      background: pct >= 90 ? "#EF4444" : GOLD,
                     }}
                   />
                 </div>
@@ -176,7 +176,7 @@ export default function LivingArchiveBillingPage() {
                   key={pkg.id}
                   className="border relative"
                   style={{
-                    background: pkg.badge === "Popular" ? "oklch(0.13 0.04 85 / 0.6)" : SURFACE,
+                    background: pkg.badge === "Popular" ? "rgba(44,52,56,0.6)" : SURFACE,
                     borderColor: pkg.badge ? GOLD : BORDER,
                   }}
                 >
@@ -217,7 +217,7 @@ export default function LivingArchiveBillingPage() {
               "Slots never expire — buy once, use whenever",
             ].map((item) => (
               <div key={item} className="flex items-start gap-2">
-                <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" style={{ color: "oklch(0.7 0.15 145)" }} />
+                <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" style={{ color: "#4ADE80" }} />
                 <span className="text-sm" style={{ color: SUBTEXT }}>{item}</span>
               </div>
             ))}
@@ -227,7 +227,7 @@ export default function LivingArchiveBillingPage() {
           {!isFounder && (
             <div
               className="rounded-xl p-6 border text-center"
-              style={{ background: "oklch(0.12 0.04 85 / 0.3)", borderColor: GOLD }}
+              style={{ background: "rgba(44,52,56,0.3)", borderColor: GOLD }}
             >
               <Star size={20} style={{ color: GOLD }} className="mx-auto mb-2" />
               <h3 className="font-bold text-white mb-1">Want unlimited slots forever?</h3>

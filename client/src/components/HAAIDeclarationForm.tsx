@@ -344,25 +344,25 @@ export function HAAIDeclarationForm({
       <div
         className="rounded-xl px-4 py-3 mb-4"
         style={{
-          background: "oklch(0.14 0.025 280)",
-          border: "1px solid oklch(0.84 0.155 85 / 0.25)",
+          background: "#2C3438",
+          border: "1px solid rgba(203,177,131,0.22)",
         }}
       >
         <div className="flex items-start gap-3">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-            style={{ background: "oklch(0.84 0.155 85 / 0.15)" }}
+            style={{ background: "rgba(203,177,131,0.12)" }}
           >
-            <Feather className="w-4 h-4" style={{ color: "oklch(0.84 0.155 85)" }} />
+            <Feather className="w-4 h-4" style={{ color: "#CBB183" }} />
           </div>
           <div>
             <p
               className="text-sm font-semibold font-heading"
-              style={{ color: "oklch(0.84 0.155 85)" }}
+              style={{ color: "#CBB183" }}
             >
               {header.title}
             </p>
-            <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "oklch(0.60 0.03 280)" }}>
+            <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "#AA8E64" }}>
               {header.subtitle}
             </p>
           </div>
@@ -376,9 +376,9 @@ export function HAAIDeclarationForm({
             <Label
               htmlFor={`haai-${key}`}
               className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "oklch(0.75 0.04 280)" }}
+              style={{ color: "#DACAAA" }}
             >
-              <Icon className="w-3.5 h-3.5" style={{ color: "oklch(0.84 0.155 85 / 0.7)" }} />
+              <Icon className="w-3.5 h-3.5" style={{ color: "rgba(230,205,174,0.7)" }} />
               {label}
             </Label>
             <Textarea
@@ -389,12 +389,12 @@ export function HAAIDeclarationForm({
               rows={compact ? 2 : 3}
               className="resize-none text-sm"
               style={{
-                background: "oklch(0.11 0.015 280)",
+                background: "#2C3438",
                 border: "1px solid #CBB183",
-                color: "oklch(0.88 0.02 280)",
+                color: "#E6CDAE",
               }}
             />
-            <p className="text-[11px] leading-relaxed" style={{ color: "oklch(0.48 0.03 280)" }}>
+            <p className="text-[11px] leading-relaxed" style={{ color: "#3F4A50" }}>
               {hint}
             </p>
           </div>
@@ -405,11 +405,11 @@ export function HAAIDeclarationForm({
       <div
         className="rounded-lg px-3 py-2 mt-4"
         style={{
-          background: "oklch(0.65 0.2 300 / 0.08)",
-          border: "1px solid oklch(0.65 0.2 300 / 0.2)",
+          background: "rgba(203,177,131,0.08)",
+          border: "1px solid rgba(203,177,131,0.18)",
         }}
       >
-        <p className="text-[11px] leading-relaxed" style={{ color: "oklch(0.65 0.2 300 / 0.9)" }}>
+        <p className="text-[11px] leading-relaxed" style={{ color: "rgba(203,177,131,0.9)" }}>
           <strong>Legal note:</strong> This declaration is stored as part of your Witness ID
           provenance record and supports — but does not replace — official copyright registration.
           The authorship of this work is attributed to you as the human director and author of

@@ -27,8 +27,8 @@ function ProjectCard({ project }: { project: any }) {
         className="group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
         style={{
           background: "#2C3438",
-          border: "1px solid oklch(0.84 0.155 85 / 0.08)",
-          boxShadow: "0 4px 24px oklch(0 0 0 / 0.4)",
+          border: "1px solid rgba(203,177,131,0.08)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.40)",
         }}
       >
         {/* Banner — 4:5 locked, object-cover, always-on gradient (CARD_STANDARDS) */}
@@ -43,12 +43,12 @@ function ProjectCard({ project }: { project: any }) {
             <div
               className="absolute inset-0 w-full h-full flex items-center justify-center"
               style={{
-                background: "linear-gradient(135deg, oklch(0.14 0.06 280), oklch(0.10 0.04 270), oklch(0.12 0.05 300))",
+                background: "linear-gradient(135deg, #2C3438, #2C3438, #2C3438)",
               }}
             >
               <span
                 className="text-7xl font-bold select-none"
-                style={{ color: "oklch(0.84 0.155 85 / 0.12)", fontFamily: "'Cinzel', serif" }}
+                style={{ color: "rgba(203,177,131,0.10)", fontFamily: "'Cinzel', serif" }}
               >
                 {project.title?.[0] ?? "P"}
               </span>
@@ -81,12 +81,12 @@ function ProjectCard({ project }: { project: any }) {
             className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-heading tracking-wider uppercase z-10"
             style={{
               background: project.status === "funded"
-                ? "oklch(0.55 0.18 145 / 0.85)"
+                ? "rgba(74,222,128,0.85)"
                 : project.status === "completed"
-                ? "oklch(0.55 0.15 250 / 0.85)"
-                : "oklch(0.84 0.155 85 / 0.85)",
+                ? "rgba(56,189,248,0.85)"
+                : "rgba(230,205,174,0.85)",
               backdropFilter: "blur(8px)",
-              color: project.status === "active" ? "oklch(0.15 0.04 60)" : "white",
+              color: project.status === "active" ? "#2C3438" : "white",
             }}
           >
             {project.status}
@@ -97,12 +97,12 @@ function ProjectCard({ project }: { project: any }) {
         <div className="p-3">
           <h3
             className="font-heading text-[13px] leading-tight mb-1 truncate tracking-wide"
-            style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}
+            style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
           >
             {project.title}
           </h3>
           {project.tagline && (
-            <p className="text-[11px] mb-1.5 line-clamp-2" style={{ color: "oklch(0.55 0.03 280)" }}>
+            <p className="text-[11px] mb-1.5 line-clamp-2" style={{ color: "#AA8E64" }}>
               {project.tagline}
             </p>
           )}
@@ -111,17 +111,17 @@ function ProjectCard({ project }: { project: any }) {
           <div className="flex items-center gap-1.5 mb-1.5">
             <div
               className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 overflow-hidden"
-              style={{ background: "oklch(0.84 0.155 85 / 0.15)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+              style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)" }}
             >
               {project.creatorPhotoUrl ? (
                 <img src={project.creatorPhotoUrl} alt="" className="w-full h-full object-cover" />
               ) : (
-                <span style={{ color: "oklch(0.84 0.155 85)" }}>
+                <span style={{ color: "#CBB183" }}>
                   {(project.creatorName || project.creatorHandle || "?")[0].toUpperCase()}
                 </span>
               )}
             </div>
-            <span className="text-[11px] truncate" style={{ color: "oklch(0.6 0.04 280)" }}>
+            <span className="text-[11px] truncate" style={{ color: "#AA8E64" }}>
               {project.creatorName || project.creatorHandle || "Creator"}
             </span>
           </div>
@@ -130,33 +130,33 @@ function ProjectCard({ project }: { project: any }) {
           {goalCents > 0 ? (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-mono" style={{ color: "oklch(0.84 0.155 85)" }}>
+                <span className="text-[11px] font-mono" style={{ color: "#CBB183" }}>
                   {raisedDollars} raised
                 </span>
-                <span className="text-[11px] font-mono font-bold" style={{ color: "oklch(0.84 0.155 85)" }}>
+                <span className="text-[11px] font-mono font-bold" style={{ color: "#CBB183" }}>
                   {pct}%
                 </span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "oklch(0.18 0.02 280)" }}>
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#2C3438" }}>
                 <div
                   className="h-full rounded-full transition-all duration-700"
                   style={{
                     width: `${pct}%`,
-                    background: "linear-gradient(90deg, oklch(0.75 0.18 85), oklch(0.84 0.155 85))",
+                    background: "linear-gradient(90deg, #CBB183, #CBB183)",
                   }}
                 />
               </div>
-              <p className="text-[10px] mt-1" style={{ color: "oklch(0.45 0.03 280)" }}>
+              <p className="text-[10px] mt-1" style={{ color: "#AA8E64" }}>
                 of {goalDollars} goal
               </p>
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
-              <DollarSign size={11} style={{ color: "oklch(0.84 0.155 85)" }} />
-              <span className="text-[11px]" style={{ color: "oklch(0.84 0.155 85)" }}>
+              <DollarSign size={11} style={{ color: "#CBB183" }} />
+              <span className="text-[11px]" style={{ color: "#CBB183" }}>
                 {raisedDollars} raised
               </span>
-              <span className="text-[10px]" style={{ color: "oklch(0.45 0.03 280)" }}>· open goal</span>
+              <span className="text-[10px]" style={{ color: "#AA8E64" }}>· open goal</span>
             </div>
           )}
         </div>
@@ -201,35 +201,35 @@ export default function ProjectsDiscoveryPage() {
       <div
         className="relative overflow-hidden"
         style={{
-          background: "linear-gradient(180deg, oklch(0.08 0.04 270) 0%, oklch(0.06 0.03 270) 100%)",
-          borderBottom: "1px solid oklch(0.84 0.155 85 / 0.08)",
+          background: "linear-gradient(180deg, #2C3438 0%, #2C3438 100%)",
+          borderBottom: "1px solid rgba(203,177,131,0.08)",
         }}
       >
         {/* Ambient glow */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 60% 80% at 50% 0%, oklch(0.84 0.155 85 / 0.04) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse 60% 80% at 50% 0%, rgba(203,177,131,0.04) 0%, transparent 70%)",
           }}
         />
         <div className="relative max-w-6xl mx-auto px-6 py-12">
           <div className="flex items-center gap-3 mb-4">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: "oklch(0.84 0.155 85 / 0.12)", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}
+              style={{ background: "rgba(203,177,131,0.10)", border: "1px solid rgba(203,177,131,0.28)" }}
             >
-              <Compass size={20} style={{ color: "oklch(0.84 0.155 85)" }} />
+              <Compass size={20} style={{ color: "#CBB183" }} />
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] font-heading" style={{ color: "oklch(0.84 0.155 85 / 0.6)" }}>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-heading" style={{ color: "rgba(203,177,131,0.55)" }}>
                 Living Nexus
               </p>
-              <h1 className="font-display text-[28px] leading-none" style={{ color: "oklch(0.95 0.01 280)", fontFamily: "'Cinzel', serif" }}>
+              <h1 className="font-display text-[28px] leading-none" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
                 Creator Projects
               </h1>
             </div>
           </div>
-          <p className="text-[14px] max-w-lg" style={{ color: "oklch(0.55 0.03 280)" }}>
+          <p className="text-[14px] max-w-lg" style={{ color: "#AA8E64" }}>
             Campaigns from independent creators. Every project is provenance-sealed with a Witness ID at launch.
             Support directly — 90% goes to the creator.
           </p>
@@ -240,8 +240,8 @@ export default function ProjectsDiscoveryPage() {
               <Button
                 className="mt-5 flex items-center gap-2 font-heading tracking-wide text-[12px]"
                 style={{
-                  background: "oklch(0.84 0.155 85)",
-                  color: "oklch(0.12 0.04 60)",
+                  background: "#CBB183",
+                  color: "#2C3438",
                   border: "none",
                 }}
               >
@@ -255,8 +255,8 @@ export default function ProjectsDiscoveryPage() {
               <Button
                 className="mt-5 flex items-center gap-2 font-heading tracking-wide text-[12px]"
                 style={{
-                  background: "oklch(0.84 0.155 85)",
-                  color: "oklch(0.12 0.04 60)",
+                  background: "#CBB183",
+                  color: "#2C3438",
                   border: "none",
                 }}
               >
@@ -273,23 +273,23 @@ export default function ProjectsDiscoveryPage() {
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mb-8">
           {/* Search */}
           <div className="relative flex-1 max-w-sm">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "oklch(0.45 0.03 280)" }} />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#AA8E64" }} />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search projects or creators…"
               className="pl-9 text-[13px] h-9"
               style={{
-                background: "oklch(0.12 0.03 270)",
-                border: "1px solid oklch(0.84 0.155 85 / 0.12)",
-                color: "oklch(0.85 0.02 280)",
+                background: "#2C3438",
+                border: "1px solid rgba(203,177,131,0.10)",
+                color: "#DACAAA",
               }}
             />
           </div>
 
           {/* Status filter */}
           <div className="flex items-center gap-2">
-            <Filter size={12} style={{ color: "oklch(0.45 0.03 280)" }} />
+            <Filter size={12} style={{ color: "#AA8E64" }} />
             <div className="flex gap-1.5">
               {statusOptions.map((opt) => (
                 <button
@@ -297,9 +297,9 @@ export default function ProjectsDiscoveryPage() {
                   onClick={() => setStatusFilter(opt.value)}
                   className="px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all"
                   style={{
-                    background: statusFilter === opt.value ? "oklch(0.84 0.155 85)" : "oklch(0.12 0.03 270)",
-                    color: statusFilter === opt.value ? "oklch(0.12 0.04 60)" : "oklch(0.55 0.03 280)",
-                    border: `1px solid ${statusFilter === opt.value ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.155 85 / 0.12)"}`,
+                    background: statusFilter === opt.value ? "#CBB183" : "#2C3438",
+                    color: statusFilter === opt.value ? "#2C3438" : "#AA8E64",
+                    border: `1px solid ${statusFilter === opt.value ? "#CBB183" : "rgba(203,177,131,0.10)"}`,
                   }}
                 >
                   {opt.label}
@@ -324,14 +324,14 @@ export default function ProjectsDiscoveryPage() {
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: "oklch(0.84 0.155 85 / 0.08)", border: "1px solid oklch(0.84 0.155 85 / 0.15)" }}
+              style={{ background: "rgba(230,205,174,0.08)", border: "1px solid rgba(203,177,131,0.12)" }}
             >
-              <Rocket size={28} style={{ color: "oklch(0.84 0.155 85 / 0.4)" }} />
+              <Rocket size={28} style={{ color: "rgba(203,177,131,0.35)" }} />
             </div>
-            <p className="font-heading text-[16px] mb-2" style={{ color: "oklch(0.6 0.03 280)" }}>
+            <p className="font-heading text-[16px] mb-2" style={{ color: "#AA8E64" }}>
               {search || statusFilter !== "all" ? "No projects match your filters" : "No projects yet"}
             </p>
-            <p className="text-[13px] max-w-xs" style={{ color: "oklch(0.4 0.02 280)" }}>
+            <p className="text-[13px] max-w-xs" style={{ color: "#3F4A50" }}>
               {search || statusFilter !== "all"
                 ? "Try adjusting your search or filter."
                 : "Be the first to launch a project on Living Nexus."}
@@ -340,7 +340,7 @@ export default function ProjectsDiscoveryPage() {
               <Link href="/my-projects">
                 <Button
                   className="mt-6 font-heading tracking-wide text-[12px]"
-                  style={{ background: "oklch(0.84 0.155 85)", color: "oklch(0.12 0.04 60)", border: "none" }}
+                  style={{ background: "#CBB183", color: "#2C3438", border: "none" }}
                 >
                   Launch Your Project
                 </Button>
@@ -350,8 +350,8 @@ export default function ProjectsDiscoveryPage() {
         ) : (
           <>
             <div className="flex items-center gap-2 mb-5">
-              <Users size={13} style={{ color: "oklch(0.55 0.03 280)" }} />
-              <span className="text-[12px]" style={{ color: "oklch(0.55 0.03 280)" }}>
+              <Users size={13} style={{ color: "#AA8E64" }} />
+              <span className="text-[12px]" style={{ color: "#AA8E64" }}>
                 {filtered.length} project{filtered.length !== 1 ? "s" : ""}
                 {statusFilter !== "all" ? ` · ${statusFilter}` : ""}
                 {search ? ` matching "${search}"` : ""}

@@ -273,7 +273,7 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
           backgroundSize: bgSize,
           backgroundPosition: bgPos,
           backgroundRepeat: "no-repeat",
-          backgroundColor: "oklch(0.06 0.02 280)",
+          backgroundColor: "#2C3438",
           cursor: cursorStyle,
           touchAction: "none",
         }}
@@ -344,7 +344,7 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
       <div
         className="flex flex-col rounded-b-xl"
         style={{
-          background: "oklch(0.11 0.015 280)",
+          background: "#2C3438",
           borderLeft: "1px solid rgba(201,168,76,0.15)",
           borderRight: "1px solid rgba(201,168,76,0.15)",
           borderBottom: "1px solid rgba(201,168,76,0.15)",

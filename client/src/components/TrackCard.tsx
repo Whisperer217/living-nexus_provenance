@@ -173,7 +173,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {/* Play button */}
         <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
           transition-all duration-200 z-10
-          ${isActive ? "opacity-100 bg-[#CBB183]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+          ${isActive ? "opacity-100 bg-[#3F4A50]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
         >
           {isPlaying
             ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
@@ -185,7 +185,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {isHot && !track.isOwn && (
           <div className="absolute top-0 left-0 z-20 flex items-center gap-0.5 px-2 py-0.5"
             style={{
-              background: "linear-gradient(90deg, oklch(0.55 0.14 60 / 0.92), oklch(0.80 0.17 80 / 0.88))",
+              background: "linear-gradient(90deg, rgba(122,90,30,0.92), rgba(203,177,131,0.88))",
               borderBottomRightRadius: "8px",
               borderTopLeftRadius: "inherit",
             }}
