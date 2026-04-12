@@ -65,91 +65,96 @@
 
 :root {
   /* ══════════════════════════════════════════════════════════════════
-     LIVING NEXUS — Quartzite Stone Palette
+     LIVING NEXUS — Pearl Quartzite Light Palette
      "A museum of multimedia assets in a digital system" — Doc Seraph Mercer
-     Aubergine Void depth · Quartzite Pearl surfaces · Aged Gold veining
+     Pearl Quartzite page · Deep Aubergine ink · Deep Gold veining
      ══════════════════════════════════════════════════════════════════ */
 
-  /* ── Depth Steps (the museum walls — dark aubergine foundation) ── */
-  --void:   #1E1020;   /* Deep Aubergine — deepest gallery floor */
-  --void-2: #2D1B2E;   /* Aubergine Void — sidebar / nav */
-  --void-3: #3D2440;   /* Lifted Aubergine — cards / surfaces */
-  --void-4: #4A2D52;   /* Elevated Aubergine — modals / elevated surfaces */
+  /* ── Surface Steps (museum stone walls — light quartzite) ── */
+  --void:   #E6CDAE;   /* Pale Quartzite — page background, the stone floor */
+  --void-2: #DACAAA;   /* Warm Quartzite — sidebar / nav surface */
+  --void-3: #CBB183;   /* Honey Quartzite — cards / raised surfaces */
+  --void-4: #C3AB7D;   /* Amber Quartzite — modals / elevated surfaces */
 
-  /* ── Quartzite Stone Palette (from reference image) ── */
-  --stone-light:  #E6CDAE;   /* Pale Quartzite — lightest stone face, near-pearl */
-  --stone-mid:    #DACAAA;   /* Warm Quartzite — mid-tone stone */
-  --stone-warm:   #C3AB7D;   /* Honey Quartzite — warm center vein */
-  --stone-deep:   #BD9B63;   /* Amber Quartzite — deep stone, aged honey */
-  --stone-shadow: #AA8E64;   /* Shadow Quartzite — stone in shadow */
+  /* ── Quartzite Stone Reference Tones ── */
+  --stone-light:  #E6CDAE;   /* Pale Quartzite — page bg */
+  --stone-mid:    #DACAAA;   /* Warm Quartzite */
+  --stone-warm:   #CBB183;   /* Honey Quartzite */
+  --stone-deep:   #BD9B63;   /* Amber Quartzite */
+  --stone-shadow: #AA8E64;   /* Shadow Quartzite */
 
-  /* ── Accent Palette (gold veining through the stone) ── */
-  --gold:       #CBB183;   /* Quartzite Gold — the mean tone of the stone, warm and earned */
-  --gold-dim:   #AA8E64;   /* Shadow Stone — muted gold, ancient */
-  --gold-glow:  #D0A15F;   /* Bright Vein — the warmest highlight in the stone */
-  --gold-bright:#E6CDAE;   /* Pearl Stone — near-white highlight */
-  --rose:       #D6C597;   /* Pale Vein — subtle warm highlight */
-  --terra:      #BD9B63;   /* Amber Stone — warm accent */
-  --teal:       #AA8E64;   /* Stone Shadow (warm accent) */
-  --teal-dim:   #8A7250;   /* Deeper stone shadow */
-  --violet:     #C3AB7D;   /* Honey Quartzite as warm highlight */
-  --violet-dim: #A8926A;   /* Deeper honey */
+  /* ── Ink / Text (dark aubergine on light stone) ── */
+  --ink:      #1E1020;   /* Deep Aubergine — primary text ink */
+  --ink-2:    #3D2440;   /* Lifted Aubergine — body copy */
+  --ink-3:    #4A2D52;   /* Muted Aubergine — labels / captions */
+
+  /* ── Gold Accent (deep enough to read on light stone) ── */
+  --gold:       #7A5A1E;   /* Deep Gold Vein — primary accent, readable on pearl */
+  --gold-dim:   #5E4418;   /* Dark Gold — muted accent */
+  --gold-glow:  #9A7228;   /* Warm Gold — hover / active states */
+  --gold-bright:#BD9B63;   /* Amber Stone — decorative highlight */
+  --rose:       #8A6A2A;   /* Aged Gold — secondary warm accent */
+  --terra:      #C0392B;   /* Deep Red — destructive / warning */
+  --teal:       #5E4418;   /* Dark Gold (warm accent) */
+  --teal-dim:   #4A3410;   /* Deeper dark gold */
+  --violet:     #3D2440;   /* Aubergine — secondary ink accent */
+  --violet-dim: #2D1B2E;   /* Deeper aubergine */
 
   /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
-  --lnx-gold:       #CBB183;   /* Quartzite Gold */
-  --lnx-gold-glow:  #D0A15F;   /* Bright Vein — glow states */
-  --lnx-gold-muted: #AA8E64;   /* Shadow Stone — muted gold */
+  --lnx-gold:       #7A5A1E;   /* Deep Gold Vein */
+  --lnx-gold-glow:  #9A7228;   /* Warm Gold — glow states */
+  --lnx-gold-muted: #5E4418;   /* Dark Gold — muted */
   /* Green = Verified / Published / Alive */
-  --lnx-green:      #4ADE80;
-  --lnx-green-soft: #86EFAC;
+  --lnx-green:      #166534;
+  --lnx-green-soft: #15803D;
   /* Orange = Draft / In Progress / Transition */
-  --lnx-orange:     #D0A15F;   /* Bright Vein */
-  --lnx-orange-soft:#E6CDAE;   /* Pearl Stone */
+  --lnx-orange:     #9A3412;   /* Deep Terra */
+  --lnx-orange-soft:#C2410C;
   /* Red = Destructive / Warning / Irreversible */
-  --lnx-red:        #F87171;
-  --lnx-red-soft:   #FCA5A5;
-  /* Foundation — museum depth backgrounds */
-  --lnx-bg:         #1E1020;   /* Deep Aubergine */
-  --lnx-bg-2:       #2D1B2E;   /* Aubergine Void */
-  --lnx-bg-3:       #3D2440;   /* Lifted Aubergine */
-  --lnx-text:       #E6CDAE;   /* Pale Quartzite — warm stone white */
-  --lnx-text-muted: #C3AB7D;   /* Honey Quartzite — muted stone warmth */
+  --lnx-red:        #B91C1C;
+  --lnx-red-soft:   #DC2626;
+  /* Foundation — light stone backgrounds */
+  --lnx-bg:         #E6CDAE;   /* Pale Quartzite — page bg */
+  --lnx-bg-2:       #DACAAA;   /* Warm Quartzite — nav/sidebar */
+  --lnx-bg-3:       #CBB183;   /* Honey Quartzite — cards */
+  --lnx-text:       #1E1020;   /* Deep Aubergine — primary text */
+  --lnx-text-muted: #4A2D52;   /* Muted Aubergine — secondary text */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
-  --background: var(--void);
-  --foreground: #E6CDAE;        /* Pale Quartzite — warm stone white, not cold */
-  --card: var(--void-3);
-  --card-foreground: #E6CDAE;
-  --popover: var(--void-2);
-  --popover-foreground: #E6CDAE;
-  --primary: var(--gold);
-  --primary-foreground: #1E1020;
-  --secondary: var(--void-4);
-  --secondary-foreground: #E6CDAE;
-  --muted: var(--void-3);
-  --muted-foreground: #C3AB7D;  /* Honey Quartzite — muted labels */
-  --accent: var(--gold-glow);   /* Bright Vein — secondary accent */
+  --background: var(--void);          /* #E6CDAE — Pale Quartzite */
+  --foreground: #1E1020;              /* Deep Aubergine ink */
+  --card: var(--void-3);              /* Honey Quartzite */
+  --card-foreground: #1E1020;
+  --popover: var(--void-2);           /* Warm Quartzite */
+  --popover-foreground: #1E1020;
+  --primary: var(--gold);             /* Deep Gold Vein */
+  --primary-foreground: #E6CDAE;      /* Pearl on gold button */
+  --secondary: var(--void-4);         /* Amber Quartzite */
+  --secondary-foreground: #1E1020;
+  --muted: var(--void-2);             /* Warm Quartzite — muted surface */
+  --muted-foreground: #4A2D52;        /* Muted Aubergine */
+  --accent: var(--gold-glow);         /* Warm Gold */
   --accent-foreground: #1E1020;
-  --destructive: #E2725B;       /* Terra Cotta — warm destructive */
+  --destructive: #B91C1C;             /* Deep Red */
   --destructive-foreground: #E6CDAE;
-  --border: rgba(203, 177, 131, 0.28);  /* Quartzite Gold border at low opacity */
-  --input:  rgba(203, 177, 131, 0.16);
+  --border: rgba(122, 90, 30, 0.30);  /* Deep Gold Vein border */
+  --input:  rgba(122, 90, 30, 0.15);
   --ring: var(--gold);
 
-  --chart-1: #CBB183;   /* Quartzite Gold */
-  --chart-2: #D0A15F;   /* Bright Vein */
-  --chart-3: #E6CDAE;   /* Pale Quartzite */
-  --chart-4: #BD9B63;   /* Amber Stone */
-  --chart-5: #AA8E64;   /* Shadow Stone */
+  --chart-1: #7A5A1E;   /* Deep Gold Vein */
+  --chart-2: #9A7228;   /* Warm Gold */
+  --chart-3: #BD9B63;   /* Amber Stone */
+  --chart-4: #3D2440;   /* Lifted Aubergine */
+  --chart-5: #4A2D52;   /* Muted Aubergine */
 
-  --sidebar: var(--void-2);
-  --sidebar-foreground: #E6CDAE;
+  --sidebar: var(--void-2);           /* Warm Quartzite */
+  --sidebar-foreground: #1E1020;
   --sidebar-primary: var(--gold);
-  --sidebar-primary-foreground: #1E1020;
-  --sidebar-accent: var(--void-4);
-  --sidebar-accent-foreground: #E6CDAE;
-  --sidebar-border: rgba(203, 177, 131, 0.22);
+  --sidebar-primary-foreground: #E6CDAE;
+  --sidebar-accent: var(--void-3);
+  --sidebar-accent-foreground: #1E1020;
+  --sidebar-border: rgba(122, 90, 30, 0.25);
   --sidebar-ring: var(--gold);
 }
 
@@ -160,15 +165,15 @@
    Saved to user profile and localStorage for flash-free load.
 ================================================================= */
 
-/* ── DARK THEME (default — Quartzite Museum) ── */
+/* ── DARK THEME (optional — deep aubergine museum night mode) ── */
 [data-theme="dark"] {
-  /* Surface depth steps */
+  /* Surface depth steps — aubergine night */
   --void:   #1E1020;
   --void-2: #2D1B2E;
   --void-3: #3D2440;
   --void-4: #4A2D52;
 
-  /* Accent tokens */
+  /* Accent tokens — lighter gold for dark bg */
   --gold:       #CBB183;
   --gold-dim:   #AA8E64;
   --gold-glow:  #D0A15F;
@@ -250,7 +255,7 @@
   html, body {
     height: 100%;
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
-    background-color: #1E1020; /* Deep Aubergine — match app bg, no void on overscroll */
+    background-color: #E6CDAE; /* Pale Quartzite — match app bg, no void on overscroll */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
   /* NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals by clipping
@@ -647,16 +652,16 @@ html body[data-scroll-locked] {
   .cosmic-bg {
     background:
       radial-gradient(ellipse 80% 50% at 50% 0%,
-        rgba(203, 177, 131, 0.08) 0%,
-        rgba(189, 155, 99, 0.05) 40%,
+        rgba(122, 90, 30, 0.10) 0%,
+        rgba(61, 36, 64, 0.06) 40%,
         transparent 70%
       ),
       radial-gradient(ellipse 60% 40% at 50% 100%,
-        rgba(170, 142, 100, 0.06) 0%,
-        rgba(61, 36, 64, 0.04) 50%,
+        rgba(122, 90, 30, 0.07) 0%,
+        rgba(218, 202, 170, 0.04) 50%,
         transparent 80%
       ),
-      #1E1020;
+      #E6CDAE;
   }
 
   /* ── CTA button glow — lantern warmth ── */
@@ -760,7 +765,7 @@ html body[data-scroll-locked] {
   .surface-base     { background: var(--lnx-bg); }
   .surface-raised   { background: var(--lnx-bg-2); }
   .surface-elevated { background: var(--lnx-bg-3); }
-  .surface-modal    { background: oklch(0.14 0.045 285); backdrop-filter: blur(12px); }
+  .surface-modal    { background: oklch(0.88 0.04 75); backdrop-filter: blur(12px); }
 
   /* ── SEMANTIC TEXT COLORS — use these instead of hardcoded values ── */
   .text-lnx-gold   { color: var(--lnx-gold); }

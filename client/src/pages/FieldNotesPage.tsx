@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 const CATEGORIES = [
-  { value: "doctrine", label: "Doctrine", color: "#CBB183", icon: BookOpen },
+  { value: "doctrine", label: "Doctrine", color: "#8A6A2A", icon: BookOpen },
   { value: "journal", label: "Journal", color: "#A78BFA", icon: ScrollText },
   { value: "update", label: "Update", color: "#60a5fa", icon: Zap },
   { value: "concept", label: "Concept", color: "#fb923c", icon: Layers },
@@ -63,7 +63,7 @@ function NoteCard({
   return (
     <div
       className="rounded-2xl border transition-all"
-      style={{ background: "oklch(0.10 0.04 280)", borderColor: "oklch(0.18 0.05 285)" }}
+      style={{ background: "oklch(0.10 0.04 280)", borderColor: "oklch(0.84 0.05 75)" }}
     >
       {/* Cover image */}
       {note.coverImageUrl && (
@@ -102,7 +102,7 @@ function NoteCard({
             <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={() => onEdit(note)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-[#CBB183] hover:bg-white/[0.06] transition-all"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-[#8A6A2A] hover:bg-white/[0.06] transition-all"
               >
                 <Edit2 size={12} />
               </button>
@@ -142,7 +142,7 @@ function NoteCard({
           {(hasMore || note.videoUrl) && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="flex items-center gap-1 text-[11px] font-body text-white/40 hover:text-[#CBB183] transition-colors"
+              className="flex items-center gap-1 text-[11px] font-body text-white/40 hover:text-[#8A6A2A] transition-colors"
             >
               {expanded ? <><ChevronUp size={11} /> Collapse</> : <><ChevronDown size={11} /> Read more</>}
             </button>
@@ -188,7 +188,7 @@ function NoteForm({
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText size={15} className="text-[#CBB183]" />
+          <FileText size={15} className="text-[#8A6A2A]" />
           <span className="font-heading text-[14px] text-white/90 tracking-wide">
             {initial?.id ? "Edit Field Note" : "New Field Note"}
           </span>
@@ -287,7 +287,7 @@ function NoteForm({
           onClick={() => onSave({ title, body, category, isPublic, videoUrl: videoUrl as string, coverImageUrl: coverImageUrl as string })}
           disabled={!canSave || isSaving}
           className="flex-1 font-heading text-[13px] tracking-wider"
-          style={{ background: "linear-gradient(135deg, #CBB183, #B8960C)", color: "#0a0a0f" }}
+          style={{ background: "linear-gradient(135deg, #8A6A2A, #B8960C)", color: "#0a0a0f" }}
         >
           {isSaving ? "Saving…" : initial?.id ? "Update Note" : "Publish Note"}
         </Button>
@@ -366,7 +366,7 @@ export default function FieldNotesPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <ScrollText size={18} className="text-[#CBB183]" />
+              <ScrollText size={18} className="text-[#8A6A2A]" />
               <h1 className="font-heading text-[22px] text-white/95 tracking-wide">Field Notes</h1>
             </div>
             <p className="font-body text-[12px] text-white/40">
@@ -378,7 +378,7 @@ export default function FieldNotesPage() {
               onClick={() => setShowForm(true)}
               size="sm"
               className="flex items-center gap-1.5 font-heading text-[12px] tracking-wider"
-              style={{ background: "linear-gradient(135deg, #CBB183, #B8960C)", color: "#0a0a0f" }}
+              style={{ background: "linear-gradient(135deg, #8A6A2A, #B8960C)", color: "#0a0a0f" }}
             >
               <Plus size={13} />
               New Note
@@ -417,7 +417,7 @@ export default function FieldNotesPage() {
               className="px-3 py-1 rounded-xl text-[11px] font-body font-semibold tracking-wider uppercase transition-all"
               style={
                 activeFilter === "all"
-                  ? { background: "#CBB18322", color: "#CBB183", border: "1px solid #CBB18350" }
+                  ? { background: "#8A6A2A22", color: "#8A6A2A", border: "1px solid #8A6A2A50" }
                   : { background: "oklch(0.158 0.030 50)", color: "oklch(0.55 0.04 280)", border: "1px solid oklch(0.25 0.04 280)" }
               }
             >
@@ -469,7 +469,7 @@ export default function FieldNotesPage() {
                 onClick={() => setShowForm(true)}
                 size="sm"
                 className="font-heading text-[12px] tracking-wider"
-                style={{ background: "linear-gradient(135deg, #CBB183, #B8960C)", color: "#0a0a0f" }}
+                style={{ background: "linear-gradient(135deg, #8A6A2A, #B8960C)", color: "#0a0a0f" }}
               >
                 <Plus size={13} className="mr-1.5" />
                 Write Your First Note

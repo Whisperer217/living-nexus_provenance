@@ -144,7 +144,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "#4A2D52 transparent", overscrollBehavior: "contain" }}>
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "#3D2440 transparent", overscrollBehavior: "contain" }}>
 
           {/* NOW PLAYING TAB */}
           {tab === "playing" && (
@@ -171,7 +171,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                           <div className="flex gap-0.5 items-end h-3.5">
                             {[0, 1, 2].map(i => (
                               <div key={i} className="w-0.5 rounded-sm" style={{
-                                background: "#CBB183",
+                                background: "#8A6A2A",
                                 height: `${[8, 14, 10][i]}px`,
                                 animationName: "bar-bounce",
                                 animationDuration: "0.8s",
@@ -192,7 +192,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                     <div className="flex gap-0.5 items-end h-3" style={{ flexShrink: 0 }}>
                       {[0, 1, 2].map(i => (
                         <div key={i} className="w-0.5 rounded-sm" style={{
-                          background: "#CBB183",
+                          background: "#8A6A2A",
                           height: `${[6, 12, 8][i]}px`,
                           animationName: state.isPlaying ? "bar-bounce" : "none",
                           animationDuration: "0.8s",
@@ -267,7 +267,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                 >
                   <div
                     className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                    style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "#CBB183" }}
+                    style={{ background: "oklch(0.84 0.155 85 / 0.15)", color: "#8A6A2A" }}
                   >
                     {(t.fanName || "?").charAt(0).toUpperCase()}
                   </div>
@@ -286,7 +286,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                       </div>
                     )}
                   </div>
-                  <div className="text-[12px] font-bold flex-shrink-0" style={{ color: "#CBB183" }}>
+                  <div className="text-[12px] font-bold flex-shrink-0" style={{ color: "#8A6A2A" }}>
                     {formatAmount(t.amountCents)}
                   </div>
                 </div>

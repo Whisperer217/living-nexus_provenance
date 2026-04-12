@@ -75,7 +75,7 @@ function EditableField({
             onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
           />
         )}
-        <button type="button" onClick={save} className="p-2 text-[#CBB183] hover:text-[#CBB183]/80 flex-shrink-0">
+        <button type="button" onClick={save} className="p-2 text-[#8A6A2A] hover:text-[#8A6A2A]/80 flex-shrink-0">
           <Check size={14} />
         </button>
         <button type="button" onClick={cancel} className="p-2 text-white/70 hover:text-white/60 flex-shrink-0">
@@ -116,7 +116,7 @@ function HandleField({ value, onSave }: { value: string; onSave: (v: string) => 
           autoFocus
           onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
         />
-        <button type="button" onClick={save} className="p-1.5 text-[#CBB183] hover:text-[#CBB183]/80 flex-shrink-0">
+        <button type="button" onClick={save} className="p-1.5 text-[#8A6A2A] hover:text-[#8A6A2A]/80 flex-shrink-0">
           <Check size={13} />
         </button>
         <button type="button" onClick={cancel} className="p-1.5 text-white/70 hover:text-white/60 flex-shrink-0">
@@ -383,7 +383,7 @@ export default function ProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-white/40 font-body text-[14px]">Sign in to view your profile</p>
-        <a href={getLoginUrl()} className="px-5 py-2.5 rounded-xl bg-[#CBB183]/10 border border-[#CBB183]/30 text-[#CBB183] font-heading text-[13px] tracking-wider hover:bg-[#CBB183]/20 transition-all">
+        <a href={getLoginUrl()} className="px-5 py-2.5 rounded-xl bg-[#8A6A2A]/10 border border-[#8A6A2A]/30 text-[#8A6A2A] font-heading text-[13px] tracking-wider hover:bg-[#8A6A2A]/20 transition-all">
           Sign In
         </a>
       </div>
@@ -420,7 +420,7 @@ export default function ProfilePage() {
           <div
             className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
             style={{
-              background: "linear-gradient(135deg, #2D1B2E, oklch(0.12 0.04 280))",
+              background: "linear-gradient(135deg, #DACAAA, oklch(0.12 0.04 280))",
             }}
             onClick={() => bannerRef.current?.click()}
           >
@@ -531,7 +531,7 @@ export default function ProfilePage() {
       <div
         className="w-full"
         style={{
-          background: "#2D1B2E",
+          background: "#DACAAA",
           borderBottom: "1px solid oklch(0.14 0.012 280)",
         }}
       >
@@ -544,7 +544,7 @@ export default function ProfilePage() {
                 <div
                   className="w-36 h-36 rounded-2xl overflow-hidden bg-[oklch(0.14_0.013_280)] flex items-center justify-center"
                   style={{
-                    outline: "3px solid #2D1B2E",
+                    outline: "3px solid #DACAAA",
                     border: "1.5px solid rgba(212,175,55,0.25)",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                   }}
@@ -576,7 +576,7 @@ export default function ProfilePage() {
                   {profile?.profilePhotoUrl && (
                     <button
                       onClick={() => setShowAvatarPositioner(true)}
-                      className="flex items-center gap-1 text-white/70 hover:text-[#CBB183] text-[10px] font-body transition-colors"
+                      className="flex items-center gap-1 text-white/70 hover:text-[#8A6A2A] text-[10px] font-body transition-colors"
                     >
                       <Edit2 size={12} />
                       <span>Adjust</span>
@@ -633,7 +633,7 @@ export default function ProfilePage() {
                   placeholder="Your artist name"
                 />
                 <span className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono flex-shrink-0"
-                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)", color: "#CBB183" }}
+                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)", color: "#8A6A2A" }}
                 >
                   ARTIST
                 </span>
@@ -808,7 +808,7 @@ export default function ProfilePage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`relative flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading tracking-wider whitespace-nowrap transition-all border-b-2 -mb-px flex-shrink-0
                     ${activeTab === tab.id
-                      ? "border-[#CBB183] text-[#CBB183]"
+                      ? "border-[#8A6A2A] text-[#8A6A2A]"
                       : "border-transparent text-white/40 hover:text-white/65"
                     }`}
                 >
@@ -833,7 +833,7 @@ export default function ProfilePage() {
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Total Plays", value: (analytics?.totalPlays ?? totalPlays).toLocaleString(), sub: analytics?.playsThisWeek ? `+${analytics.playsThisWeek} this week` : "across all tracks", color: "#CBB183" },
+                { label: "Total Plays", value: (analytics?.totalPlays ?? totalPlays).toLocaleString(), sub: analytics?.playsThisWeek ? `+${analytics.playsThisWeek} this week` : "across all tracks", color: "#8A6A2A" },
                 { label: "Total Likes", value: (analytics?.totalLikes ?? 0).toLocaleString(), sub: analytics?.likesThisWeek ? `+${analytics.likesThisWeek} this week` : "across all tracks", color: "#f472b6" },
                 { label: "Tracks Published", value: dbSongs.filter((s: any) => s.status === "Published").length, sub: "live on Explore", color: "#A78BFA" },
                 { label: "Gifts Received", value: analytics?.totalGiftsReceived ?? 0, sub: analytics?.totalAmountReceived ? `$${((analytics.totalAmountReceived) / 100).toFixed(2)} total` : "tip income", color: "#4ade80" },
@@ -851,7 +851,7 @@ export default function ProfilePage() {
             <div className="p-4 rounded-xl border border-white/[0.07] bg-[oklch(0.11_0.012_280)]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <DollarSign size={14} className="text-[#CBB183]" />
+                  <DollarSign size={14} className="text-[#8A6A2A]" />
                   <span className="font-heading text-[13px] text-white/80 tracking-wide">Stripe Connect</span>
                 </div>
                 {connectData?.status === "enabled" ? (
@@ -863,7 +863,7 @@ export default function ProfilePage() {
                     onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` })}
                     disabled={connectMutation.isPending}
                     className="text-[11px] px-3 py-1 rounded-lg font-body text-black disabled:opacity-50"
-                    style={{ background: "#CBB183" }}
+                    style={{ background: "#8A6A2A" }}
                   >
                     {connectMutation.isPending ? "Connecting…" : "Connect Stripe"}
                   </button>
@@ -886,11 +886,11 @@ export default function ProfilePage() {
                       TIP: { icon: DollarSign, color: "#4ade80", label: "Gift received" },
                       COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Comment" },
                       LIKE: { icon: Heart, color: "#f472b6", label: "Like" },
-                      WITNESS_REGISTERED: { icon: Fingerprint, color: "#CBB183", label: "WID Registered" },
-                      WITNESS_VERIFIED: { icon: CheckCircle, color: "#CBB183", label: "WID Verified" },
+                      WITNESS_REGISTERED: { icon: Fingerprint, color: "#8A6A2A", label: "WID Registered" },
+                      WITNESS_VERIFIED: { icon: CheckCircle, color: "#8A6A2A", label: "WID Verified" },
                       WORK_REFERENCED: { icon: Layers, color: "#fb923c", label: "Work Referenced" },
                       SYSTEM_UPDATE: { icon: Zap, color: "#60a5fa", label: "System Update" },
-                      PRESERVATION_MODE: { icon: Star, color: "#CBB183", label: "Preservation Mode" },
+                      PRESERVATION_MODE: { icon: Star, color: "#8A6A2A", label: "Preservation Mode" },
                       PROJECT_PUBLISHED: { icon: Layers, color: "#34d399", label: "Project Published" },
                       PROJECT_FUNDED: { icon: DollarSign, color: "#34d399", label: "Project Funded" },
                       FOLLOW: { icon: Users, color: "#f472b6", label: "New Follower" },
@@ -947,7 +947,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/upload")}
                 className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "#A78BFA" }}
               >
                 <Upload size={11} /> Upload
               </button>
@@ -1020,7 +1020,7 @@ export default function ProfilePage() {
                         <Shield size={12} />
                       </button>
                     )}
-                    <button type="button" onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#CBB183] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
+                    <button type="button" onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#8A6A2A] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
                   </div>
                 </div>
               ))
@@ -1038,7 +1038,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/archive")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "#A78BFA" }}
               >
                 Manage in Archive
               </button>
@@ -1114,7 +1114,7 @@ export default function ProfilePage() {
                 <button
                   onClick={() => markAllRead.mutate()}
                   className="text-[11px] font-body px-3 py-1 rounded-lg transition-all"
-                  style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "#A78BFA" }}
+                  style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "#A78BFA" }}
                 >
                   Mark all read
                 </button>
@@ -1196,11 +1196,11 @@ export default function ProfilePage() {
                                 title={isSignalActive ? "Now playing" : "Play track"}
                               >
                                 {isSignalPlaying ? (
-                                  <div className="live-wave scale-75" style={{ "--gold": "#CBB183" } as React.CSSProperties}>
+                                  <div className="live-wave scale-75" style={{ "--gold": "#8A6A2A" } as React.CSSProperties}>
                                     <span /><span /><span /><span /><span />
                                   </div>
                                 ) : isSignalActive ? (
-                                  <div className="live-wave paused scale-75" style={{ "--gold": "#CBB183" } as React.CSSProperties}>
+                                  <div className="live-wave paused scale-75" style={{ "--gold": "#8A6A2A" } as React.CSSProperties}>
                                     <span /><span /><span /><span /><span />
                                   </div>
                                 ) : (
@@ -1221,7 +1221,7 @@ export default function ProfilePage() {
                           }}
                           className="mt-1.5 text-[10px] font-body px-2 py-0.5 rounded-md transition-all"
                           style={{
-                            background: replyingTo === n.id ? "oklch(0.22 0.04 280)" : "oklch(0.13 0.035 285)",
+                            background: replyingTo === n.id ? "oklch(0.22 0.04 280)" : "oklch(0.84 0.05 75)",
                             border: "1px solid oklch(0.28 0.04 280)",
                             color: replyingTo === n.id ? "#A78BFA" : "oklch(0.65 0.05 280)",
                           }}
@@ -1293,7 +1293,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/field-notes")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "#A78BFA" }}
+                style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "#A78BFA" }}
               >
                 Open Field Notes
               </button>
@@ -1337,7 +1337,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => setShowAddTestimony(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body transition-all"
-                style={{ background: "oklch(0.18 0.04 80)", border: "1px solid oklch(0.28 0.08 80)", color: "#CBB183" }}
+                style={{ background: "oklch(0.18 0.04 80)", border: "1px solid oklch(0.28 0.08 80)", color: "#8A6A2A" }}
               >
                 <Fingerprint size={11} /> Add Testimony
               </button>
@@ -1346,7 +1346,7 @@ export default function ProfilePage() {
             {/* Add Testimony Modal */}
             {showAddTestimony && createPortal(
               <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
-                <div className="w-full max-w-lg rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.013 280)", border: "1px solid #3D2440" }}>
+                <div className="w-full max-w-lg rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.013 280)", border: "1px solid #8A6A2A" }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-[16px] font-heading text-white">Add Testimony</h3>
@@ -1365,7 +1365,7 @@ export default function ProfilePage() {
                       rows={6}
                       maxLength={5000}
                       className="w-full rounded-xl px-3 py-2.5 text-[13px] font-body text-white/85 resize-none focus:outline-none focus:ring-1"
-                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid #4A2D52", caretColor: "#CBB183" }}
+                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid #3D2440", caretColor: "#8A6A2A" }}
                     />
                     <div className="text-right text-[10px] font-body text-white/25 mt-1">{testimonyContent.length}/5000</div>
                   </div>
@@ -1377,7 +1377,7 @@ export default function ProfilePage() {
                       type="text"
                       placeholder="WID-MUS-XXXXXXXX-YYYYYYYY (comma-separated)"
                       className="w-full rounded-xl px-3 py-2 text-[12px] font-body text-white/70 focus:outline-none focus:ring-1"
-                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid #4A2D52" }}
+                      style={{ background: "oklch(0.16 0.013 280)", border: "1px solid #3D2440" }}
                       onChange={e => {
                         const wids = e.target.value.split(",").map(w => w.trim()).filter(Boolean);
                         setTestimonyLinkedWorks(wids);
@@ -1389,7 +1389,7 @@ export default function ProfilePage() {
                   {/* WID preview */}
                   <div className="rounded-xl p-3" style={{ background: "oklch(0.14 0.02 80)", border: "1px solid oklch(0.22 0.05 80)" }}>
                     <div className="text-[10px] font-heading tracking-widest text-white/30 mb-1">WILL GENERATE</div>
-                    <div className="font-mono text-[13px]" style={{ color: "#CBB183" }}>WID-TST-XXXXXXXX-YYYYYYYY</div>
+                    <div className="font-mono text-[13px]" style={{ color: "#8A6A2A" }}>WID-TST-XXXXXXXX-YYYYYYYY</div>
                     <div className="text-[10px] font-body text-white/30 mt-0.5">A unique Witness ID sealed to your identity and this content</div>
                   </div>
 
@@ -1397,7 +1397,7 @@ export default function ProfilePage() {
                     <button
                       onClick={() => setShowAddTestimony(false)}
                       className="flex-1 py-2 rounded-xl text-[13px] font-body text-white/40 transition-all"
-                      style={{ border: "1px solid #3D2440" }}
+                      style={{ border: "1px solid #8A6A2A" }}
                     >
                       Cancel
                     </button>
@@ -1423,7 +1423,7 @@ export default function ProfilePage() {
                 <p className="text-[11px] font-body text-white/20 mb-4 max-w-xs mx-auto">A testimony is a permanent statement of why your work exists. It cannot be changed — only added to.</p>
                 <button
                   onClick={() => setShowAddTestimony(true)}
-                  className="text-[#CBB183] hover:underline text-[12px] font-body"
+                  className="text-[#8A6A2A] hover:underline text-[12px] font-body"
                 >
                   Add your first testimony
                 </button>
@@ -1436,7 +1436,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between mb-2">
                       <span
                         className="font-mono text-[10px] px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
-                        style={{ background: "oklch(0.18 0.04 80)", color: "#CBB183", border: "1px solid oklch(0.28 0.08 80)" }}
+                        style={{ background: "oklch(0.18 0.04 80)", color: "#8A6A2A", border: "1px solid oklch(0.28 0.08 80)" }}
                         onClick={() => { navigator.clipboard.writeText(t.wid); toast.success("WID-TST copied!"); }}
                         title="Click to copy WID"
                       >
@@ -1450,7 +1450,7 @@ export default function ProfilePage() {
                     {t.linkedWorks && (t.linkedWorks as string[]).length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {(t.linkedWorks as string[]).map((wid: string) => (
-                          <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.13 0.035 285)", color: "oklch(0.55 0.08 280)", border: "1px solid oklch(0.22 0.03 280)" }}>{wid}</span>
+                          <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.84 0.05 75)", color: "oklch(0.55 0.08 280)", border: "1px solid oklch(0.22 0.03 280)" }}>{wid}</span>
                         ))}
                       </div>
                     )}
@@ -1471,7 +1471,7 @@ export default function ProfilePage() {
           <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">SETTINGS</div>
           {/* ── Lights On / Lights Dim toggle ────────────────────────────────── */}
           <div className="mb-4 flex items-center justify-between px-4 py-3 rounded-xl"
-            style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440" }}>
+            style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A" }}>
             <div>
               <div className="text-[12px] font-heading tracking-wide" style={{ color: "oklch(0.82 0.155 75)" }}>
                 {lightsMode === 'on' ? '☀️ Lights On' : '🌙 Lights Dim'}
@@ -1489,7 +1489,7 @@ export default function ProfilePage() {
               style={{
                 background: lightsMode === 'on'
                   ? "oklch(0.58 0.14 58 / 0.20)"
-                  : "#3D2440",
+                  : "#8A6A2A",
                 border: lightsMode === 'on'
                   ? "1px solid oklch(0.58 0.14 58 / 0.50)"
                   : "1px solid oklch(0.30 0.02 280)",
@@ -1509,27 +1509,27 @@ export default function ProfilePage() {
             <button
               onClick={() => navigate("/redeem")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "oklch(0.65 0.12 85)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "oklch(0.65 0.12 85)" }}
             >
               <Zap size={11} /> Redeem Code
             </button>
             <button
               onClick={() => navigate("/learn")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "oklch(0.55 0.03 280)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "oklch(0.55 0.03 280)" }}
             >
               <ScrollText size={11} /> WID Spec &amp; Lexicon
             </button>
             <button
               onClick={() => navigate("/founders")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "oklch(0.55 0.03 280)" }}
+              style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "oklch(0.55 0.03 280)" }}
             >
               <Star size={11} /> Founders
             </button>
           </div>
           {/* ── Data Rights ─────────────────────────────────────── */}
-          <div className="mt-6 pt-5" style={{ borderTop: "1px solid #3D2440" }}>
+          <div className="mt-6 pt-5" style={{ borderTop: "1px solid #8A6A2A" }}>
             <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">DATA RIGHTS</div>
             <p className="text-[11px] font-body text-white/35 mb-3 leading-relaxed">
               Per our Privacy Policy, you have the right to export your data or request account deletion. Deletion requests are processed within 90 days.
@@ -1602,7 +1602,7 @@ function SocialsEditor({
       <div className="col-span-2 flex gap-2">
         <button
           onClick={() => { onSave(t, i, y); setEditing(false); }}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] bg-[#CBB183]/10 border border-[#CBB183]/30 text-[#CBB183]"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] bg-[#8A6A2A]/10 border border-[#8A6A2A]/30 text-[#8A6A2A]"
         >
           <Check size={12} /> Save
         </button>
@@ -1649,7 +1649,7 @@ function ExportDataButton() {
       onClick={handleExport}
       disabled={loading}
       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all disabled:opacity-50"
-      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "oklch(0.55 0.12 200)" }}
+      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "oklch(0.55 0.12 200)" }}
     >
       {loading ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
       Export My Data
@@ -1693,7 +1693,7 @@ function RequestDeletionButton() {
     <button
       onClick={() => setConfirming(true)}
       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #3D2440", color: "oklch(0.45 0.03 280)" }}
+      style={{ background: "oklch(0.148 0.025 52)", border: "1px solid #8A6A2A", color: "oklch(0.45 0.03 280)" }}
     >
       <Trash2 size={11} /> Request Account Deletion
     </button>

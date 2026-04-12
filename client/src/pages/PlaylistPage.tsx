@@ -73,7 +73,7 @@ export default function PlaylistPage() {
   if (loading || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-2 border-[#CBB183]/30 border-t-[#CBB183] animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-[#8A6A2A]/30 border-t-[#8A6A2A] animate-spin" />
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function PlaylistPage() {
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl flex items-center justify-center"
           style={{ background: "linear-gradient(135deg, oklch(0.84 0.155 85 / 0.25), oklch(0.55 0.2 290 / 0.25))", border: "1px solid oklch(0.84 0.155 85 / 0.35)" }}>
-          <ListMusic size={22} style={{ color: "#CBB183" }} />
+          <ListMusic size={22} style={{ color: "#8A6A2A" }} />
         </div>
         <div>
           <h1 className="font-heading text-2xl text-white tracking-wider">My Playlist</h1>
@@ -102,7 +102,7 @@ export default function PlaylistPage() {
               }
             }}
             className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl font-heading text-[13px] tracking-wider transition-all"
-            style={{ background: "linear-gradient(135deg, #CBB183, #B8860B)", color: "#000" }}
+            style={{ background: "linear-gradient(135deg, #8A6A2A, #B8860B)", color: "#000" }}
           >
             <Play size={14} fill="currentColor" />
             Play All
@@ -132,7 +132,7 @@ export default function PlaylistPage() {
           </div>
           <Link href="/explore">
             <button type="button" className="px-5 py-2.5 rounded-xl font-heading text-[13px] tracking-wider transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #CBB183, #B8860B)", color: "#000" }}>
+              style={{ background: "linear-gradient(135deg, #8A6A2A, #B8860B)", color: "#000" }}>
               Explore Tracks
             </button>
           </Link>
@@ -152,7 +152,7 @@ export default function PlaylistPage() {
                 className={`group flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all
                   border
                   ${isActive
-                    ? "border-[#CBB183]/30 bg-[#CBB183]/[0.07]"
+                    ? "border-[#8A6A2A]/30 bg-[#8A6A2A]/[0.07]"
                     : "border-white/[0.06] bg-[oklch(0.115_0.055_278)] hover:border-[#A78BFA]/25 hover:bg-white/[0.05]"
                   }`}
                 onClick={() => handlePlay(song.id)}
@@ -162,12 +162,12 @@ export default function PlaylistPage() {
                   {isActive && playerState.isPlaying ? (
                     <div className="flex items-end justify-center gap-[2px] h-4">
                       {[1,2,3].map(i => (
-                        <div key={i} className="w-[2.5px] rounded-full bg-[#CBB183]"
+                        <div key={i} className="w-[2.5px] rounded-full bg-[#8A6A2A]"
                           style={{ height: "40%", animation: `waveBar 0.8s ease-in-out ${i * 0.15}s infinite alternate` }} />
                       ))}
                     </div>
                   ) : (
-                    <span className={`text-[12px] font-body group-hover:hidden ${isActive ? "text-[#CBB183]" : "text-white/30"}`}>
+                    <span className={`text-[12px] font-body group-hover:hidden ${isActive ? "text-[#8A6A2A]" : "text-white/30"}`}>
                       {idx + 1}
                     </span>
                   )}
@@ -190,7 +190,7 @@ export default function PlaylistPage() {
 
                 {/* Title + artist */}
                 <div className="flex-1 min-w-0">
-                  <div className={`text-[13px] font-heading truncate ${isActive ? "text-[#CBB183]" : "text-white"}`}>
+                  <div className={`text-[13px] font-heading truncate ${isActive ? "text-[#8A6A2A]" : "text-white"}`}>
                     {song.title}
                   </div>
                   <div className="text-[11px] font-body truncate mt-0.5" style={{ color: "rgba(255,255,255,0.50)" }}>

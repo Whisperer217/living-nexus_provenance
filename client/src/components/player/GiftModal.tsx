@@ -276,9 +276,9 @@ export default function GiftModal({
                   style={{
                     background: !useCustom && selectedCents === cents
                       ? "oklch(0.84 0.155 85)"
-                      : "oklch(0.13 0.035 285)",
+                      : "oklch(0.84 0.05 75)",
                     color: !useCustom && selectedCents === cents
-                      ? "#2D1B2E"
+                      ? "#DACAAA"
                       : "oklch(0.65 0.04 280)",
                     border: `1px solid ${!useCustom && selectedCents === cents ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
                   }}
@@ -290,8 +290,8 @@ export default function GiftModal({
                 onClick={() => setUseCustom(true)}
                 className="px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95"
                 style={{
-                  background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.13 0.035 285)",
-                  color: useCustom ? "#2D1B2E" : "oklch(0.65 0.04 280)",
+                  background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.05 75)",
+                  color: useCustom ? "#DACAAA" : "oklch(0.65 0.04 280)",
                   border: `1px solid ${useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
                 }}
               >
@@ -329,7 +329,7 @@ export default function GiftModal({
                 background: amountCents >= 100
                   ? "linear-gradient(135deg, oklch(0.84 0.155 85), oklch(0.72 0.18 75))"
                   : "oklch(0.20 0.02 275)",
-                color: amountCents >= 100 ? "#2D1B2E" : "oklch(0.40 0.03 280)",
+                color: amountCents >= 100 ? "#DACAAA" : "oklch(0.40 0.03 280)",
                 fontFamily: "'Cinzel', serif",
                 boxShadow: amountCents >= 100 ? "0 4px 20px oklch(0.84 0.155 85 / 0.30)" : "none",
               }}

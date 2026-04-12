@@ -173,7 +173,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {/* Play button */}
         <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
           transition-all duration-200 z-10
-          ${isActive ? "opacity-100 bg-[#CBB183]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+          ${isActive ? "opacity-100 bg-[#8A6A2A]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
         >
           {isPlaying
             ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
@@ -190,8 +190,8 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
               borderTopLeftRadius: "inherit",
             }}
           >
-            <Crown size={9} style={{ color: "#2D1B2E" }} />
-            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#2D1B2E" }}>
+            <Crown size={9} style={{ color: "#DACAAA" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#DACAAA" }}>
               {(track.plays ?? 0) >= 1000
                 ? `${Math.floor((track.plays ?? 0) / 1000)}K PLAYS`
                 : `${track.plays} PLAYS`}
@@ -202,7 +202,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {/* YOURS badge — top-left */}
         {track.isOwn && (
           <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
-            bg-black/70 text-[#CBB183] border border-[#CBB183]/30 z-10 font-heading tracking-wider">
+            bg-black/70 text-[#8A6A2A] border border-[#8A6A2A]/30 z-10 font-heading tracking-wider">
             YOURS
           </div>
         )}
@@ -282,7 +282,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           href={`/track/${track.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
           className="block text-[13px] font-heading text-white/90 truncate tracking-wide
-            hover:text-[#CBB183] transition-colors cursor-pointer"
+            hover:text-[#8A6A2A] transition-colors cursor-pointer"
           title={`Open ${track.title}`}
         >
           {track.title}
@@ -298,7 +298,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             <Link
               href={`/creator/${track.creatorId}`}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="truncate hover:text-[#CBB183] transition-colors cursor-pointer"
+              className="truncate hover:text-[#8A6A2A] transition-colors cursor-pointer"
               title={`View ${track.artist}'s profile`}
             >
               {track.artist}
@@ -341,7 +341,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(track, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
-                className="p-1 text-white/50 hover:text-[#CBB183] transition-colors"
+                className="p-1 text-white/50 hover:text-[#8A6A2A] transition-colors"
                 title="Send a gift"
               >
                 <DollarSign size={12} />
@@ -355,7 +355,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                     playNext(track);
                     toast.success(`"${track.title}" plays next`);
                   }}
-                  className="p-1 text-white/50 hover:text-[#CBB183] transition-colors"
+                  className="p-1 text-white/50 hover:text-[#8A6A2A] transition-colors"
                   title="Play next"
                 >
                   <SkipForward size={12} />
@@ -366,7 +366,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                     setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
                     setShowAddToList(true);
                   }}
-                  className="p-1 text-white/50 hover:text-[#CBB183] transition-colors"
+                  className="p-1 text-white/50 hover:text-[#8A6A2A] transition-colors"
                   title="Add to my list"
                 >
                   <ListPlus size={12} />

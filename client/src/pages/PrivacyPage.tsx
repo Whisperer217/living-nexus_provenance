@@ -96,7 +96,7 @@ function SovereignMigrationTracker() {
   };
 
   return (
-    <div className="mt-5 rounded-xl p-4" style={{ background: "#2D1B2E)", border: "1px solid oklch(0.75 0.18 85 / 0.20)" }}>
+    <div className="mt-5 rounded-xl p-4" style={{ background: "#DACAAA)", border: "1px solid oklch(0.75 0.18 85 / 0.20)" }}>
       <div className="flex items-center justify-between mb-3">
         <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "oklch(0.75 0.18 85)" }}>Sovereign Migration Status</p>
         {isLoading ? (
@@ -118,14 +118,14 @@ function SovereignMigrationTracker() {
                   style={{
                     background: done ? "oklch(0.75 0.18 85)" : "oklch(0.15 0.02 275)",
                     border: current ? "2px solid oklch(0.88 0.12 75)" : done ? "none" : "1px solid oklch(0.30 0.04 280)",
-                    color: done ? "#2D1B2E)" : "oklch(0.40 0.04 280)",
+                    color: done ? "#DACAAA)" : "oklch(0.40 0.04 280)",
                   }}>
                   {done ? "✓" : i + 1}
                 </div>
                 <span className="text-[9px] mt-1 whitespace-nowrap" style={{ color: done ? "oklch(0.75 0.18 85)" : "oklch(0.40 0.04 280)" }}>{step.label}</span>
               </div>
               {i < arr.length - 1 && (
-                <div className="flex-1 h-px mx-1 mb-3" style={{ background: done ? "oklch(0.75 0.18 85 / 0.40)" : "#4A2D52" }} />
+                <div className="flex-1 h-px mx-1 mb-3" style={{ background: done ? "oklch(0.75 0.18 85 / 0.40)" : "#3D2440" }} />
               )}
             </div>
           );

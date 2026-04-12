@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const GOLD = "oklch(0.84 0.155 85)";
 const BG = "oklch(0.06 0.015 280)";
-const CARD = "oklch(0.10 0.04 285)";
+const CARD = "oklch(0.80 0.05 75)";
 const BORDER = "oklch(0.18 0.02 280)";
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";

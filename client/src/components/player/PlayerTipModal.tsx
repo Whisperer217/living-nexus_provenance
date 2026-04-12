@@ -202,9 +202,9 @@ export default function PlayerTipModal({
                   style={{
                     background: !useCustom && selectedCents === cents
                       ? "oklch(0.84 0.155 85)"
-                      : "oklch(0.13 0.035 285)",
+                      : "oklch(0.84 0.05 75)",
                     color: !useCustom && selectedCents === cents
-                      ? "#2D1B2E"
+                      ? "#DACAAA"
                       : "oklch(0.65 0.04 280)",
                     border: `1px solid ${!useCustom && selectedCents === cents ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
                   }}
@@ -216,8 +216,8 @@ export default function PlayerTipModal({
                 onClick={() => setUseCustom(true)}
                 className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                 style={{
-                  background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.13 0.035 285)",
-                  color: useCustom ? "#2D1B2E" : "oklch(0.65 0.04 280)",
+                  background: useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.84 0.05 75)",
+                  color: useCustom ? "#DACAAA" : "oklch(0.65 0.04 280)",
                   border: `1px solid ${useCustom ? "oklch(0.84 0.155 85)" : "oklch(0.24 0.02 275)"}`,
                 }}
               >
@@ -252,7 +252,7 @@ export default function PlayerTipModal({
                 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
                 background: "oklch(0.84 0.155 85)",
-                color: "#2D1B2E",
+                color: "#DACAAA",
                 fontFamily: "'Cinzel', serif",
               }}
             >

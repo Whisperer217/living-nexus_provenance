@@ -428,7 +428,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         className="relative ml-auto w-full max-w-md flex flex-col"
         style={{
           height: "100dvh",
-          background: "linear-gradient(180deg, #2D1B2E 0%, #2D1B2E 100%)",
+          background: "linear-gradient(180deg, #DACAAA 0%, #DACAAA 100%)",
           borderLeft: "1px solid rgba(212,175,55,0.2)",
           boxShadow: "-8px 0 40px rgba(0,0,0,0.6)",
           minWidth: 0,
@@ -438,7 +438,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 sm:px-6 py-4 sticky top-0 z-10"
-          style={{ background: "#2D1B2E", borderBottom: "1px solid rgba(212,175,55,0.15)" }}
+          style={{ background: "#DACAAA", borderBottom: "1px solid rgba(212,175,55,0.15)" }}
         >
           <div>
             <h2 className="text-white font-semibold text-lg leading-tight">
@@ -462,9 +462,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           className="mx-4 sm:mx-6 mt-4 px-4 py-3 rounded-lg flex items-start gap-3"
           style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)" }}
         >
-          <Lock size={16} style={{ color: "#CBB183", marginTop: 2, flexShrink: 0 }} />
+          <Lock size={16} style={{ color: "#8A6A2A", marginTop: 2, flexShrink: 0 }} />
           <div>
-            <p className="text-xs font-semibold" style={{ color: "#CBB183" }}>WID IS IMMUTABLE</p>
+            <p className="text-xs font-semibold" style={{ color: "#8A6A2A" }}>WID IS IMMUTABLE</p>
             <p className="text-xs mt-0.5" style={{ color: "#94a3b8" }}>
               Editing metadata never changes the cryptographic proof. The Witness ID{song.witnessId ? ` (${song.witnessId.slice(0, 12)}…)` : ""} is permanently locked.
             </p>
@@ -480,7 +480,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             <div className="flex flex-col items-start gap-3">
               <div
                 className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 group relative cursor-pointer"
-                style={{ border: "1px solid rgba(212,175,55,0.3)", background: "#2D1B2E" }}
+                style={{ border: "1px solid rgba(212,175,55,0.3)", background: "#DACAAA" }}
                 onClick={() => coverArtUrl && setShowCoverPositioner(true)}
               >
                 {coverArtUrl ? (
@@ -508,7 +508,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                   onClick={() => coverInputRef.current?.click()}
                   disabled={coverUploading}
                   className="w-full text-sm"
-                  style={{ borderColor: "rgba(212,175,55,0.3)", color: "#CBB183", background: "transparent" }}
+                  style={{ borderColor: "rgba(212,175,55,0.3)", color: "#8A6A2A", background: "transparent" }}
                 >
                   {coverUploading ? "Uploading…" : "Replace Cover Art"}
                 </Button>
@@ -604,7 +604,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 >
                   <SelectValue placeholder="Select genre…" />
                 </SelectTrigger>
-                <SelectContent style={{ background: "#2D1B2E", border: "1px solid rgba(212,175,55,0.2)" }}>
+                <SelectContent style={{ background: "#DACAAA", border: "1px solid rgba(212,175,55,0.2)" }}>
                   {GENRES.map((g) => (
                     <SelectItem key={g} value={g} className="text-white hover:bg-white/10">
                       {g}
@@ -640,7 +640,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           {/* AI Disclosure */}
           <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium flex items-center gap-2">
-              <Shield size={14} style={{ color: "#CBB183" }} />
+              <Shield size={14} style={{ color: "#8A6A2A" }} />
               AI Disclosure
             </Label>
             <Select value={aiConsent} onValueChange={(v) => setAiConsent(v as any)}>
@@ -654,7 +654,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ background: "#2D1B2E", border: "1px solid rgba(212,175,55,0.2)" }}>
+              <SelectContent style={{ background: "#DACAAA", border: "1px solid rgba(212,175,55,0.2)" }}>
                 <SelectItem value="prohibited" className="text-white hover:bg-white/10">
                   Human-Made — No AI Training
                 </SelectItem>
@@ -684,7 +684,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ background: "#2D1B2E", border: "1px solid rgba(212,175,55,0.2)" }}>
+              <SelectContent style={{ background: "#DACAAA", border: "1px solid rgba(212,175,55,0.2)" }}>
                 {Object.entries(STATUS_LABELS).map(([val, label]) => (
                   <SelectItem key={val} value={val} className="text-white hover:bg-white/10">
                     <span style={{ color: STATUS_COLORS[val] }}>{label}</span>
@@ -791,7 +791,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <Label className="text-white text-sm font-medium flex items-center gap-2">
-              <FileText size={14} style={{ color: "#CBB183" }} />
+              <FileText size={14} style={{ color: "#8A6A2A" }} />
               {isWritten ? "Synopsis / Full Text" : "Lyrics"}
             </Label>
             <p className="text-xs" style={{ color: "#64748b" }}>
@@ -824,7 +824,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 onClick={handleSaveLyrics}
                 disabled={lyricsSaving}
                 className="text-sm font-semibold"
-                style={{ background: "rgba(212,175,55,0.15)", color: "#CBB183", border: "1px solid rgba(212,175,55,0.3)" }}
+                style={{ background: "rgba(212,175,55,0.15)", color: "#8A6A2A", border: "1px solid rgba(212,175,55,0.3)" }}
               >
                 {lyricsSaving ? "Saving…" : "Save Lyrics"}
               </Button>
@@ -837,8 +837,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             style={{ background: "rgba(212,175,55,0.04)", border: "1px solid rgba(212,175,55,0.18)" }}
           >
             <Label className="text-white text-sm font-medium flex items-center gap-2">
-              <BookOpen size={14} style={{ color: "#CBB183" }} />
-              Lyrics Witness ID <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.12)", color: "#CBB183" }}>WID-LYR</span>
+              <BookOpen size={14} style={{ color: "#8A6A2A" }} />
+              Lyrics Witness ID <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.12)", color: "#8A6A2A" }}>WID-LYR</span>
             </Label>
             <p className="text-xs" style={{ color: "#64748b" }}>
               Upload your lyrics as a <strong style={{ color: "#94a3b8" }}>.txt</strong> file to generate a cryptographic Witness ID (WID-LYR) — a separate provenance proof for your words, independent of the audio WID.
@@ -848,7 +848,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             {lyricsWid && (
               <div className="space-y-1">
                 <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono"
-                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.3)", color: "#CBB183" }}>
+                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.3)", color: "#8A6A2A" }}>
                   <span>🔐</span>
                   <span className="flex-1 break-all">{lyricsWid}</span>
                 </div>
@@ -863,7 +863,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               onClick={() => lyricsFileInputRef.current?.click()}
               className="rounded-xl p-4 text-center cursor-pointer transition-all hover:bg-white/5"
               style={{
-                border: `2px dashed ${lyricsFile ? "#CBB183" : "rgba(212,175,55,0.2)"}`,
+                border: `2px dashed ${lyricsFile ? "#8A6A2A" : "rgba(212,175,55,0.2)"}`,
                 background: lyricsFile ? "rgba(212,175,55,0.05)" : "transparent",
               }}
             >
@@ -881,14 +881,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               />
               {lyricsFile ? (
                 <div className="flex items-center justify-center gap-2">
-                  <FileText size={14} style={{ color: "#CBB183" }} />
-                  <span className="text-sm" style={{ color: "#CBB183" }}>{lyricsFile.name}</span>
+                  <FileText size={14} style={{ color: "#8A6A2A" }} />
+                  <span className="text-sm" style={{ color: "#8A6A2A" }}>{lyricsFile.name}</span>
                   <span className="text-xs" style={{ color: "#94a3b8" }}>({(lyricsFile.size / 1024).toFixed(1)} KB)</span>
                   <button type="button" onClick={e => { e.stopPropagation(); setLyricsFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
                 </div>
               ) : (
                 <>
-                  <BookOpen size={20} className="mx-auto mb-1" style={{ color: "#CBB183", opacity: 0.4 }} />
+                  <BookOpen size={20} className="mx-auto mb-1" style={{ color: "#8A6A2A", opacity: 0.4 }} />
                   <p className="text-sm" style={{ color: "#94a3b8" }}>{lyricsWid ? "Replace lyrics file" : "Upload lyrics .txt file"}</p>
                   <p className="text-xs mt-0.5" style={{ color: "#475569" }}>.txt — max 500 KB</p>
                 </>
@@ -901,7 +901,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 onClick={handleWitnessLyrics}
                 disabled={lyricsWidLoading}
                 className="w-full text-sm font-semibold"
-                style={{ background: "rgba(212,175,55,0.15)", color: "#CBB183", border: "1px solid rgba(212,175,55,0.4)" }}
+                style={{ background: "rgba(212,175,55,0.15)", color: "#8A6A2A", border: "1px solid rgba(212,175,55,0.4)" }}
               >
                 {lyricsWidLoading ? "Witnessing…" : "Witness Lyrics & Generate WID-LYR"}
               </Button>
@@ -914,9 +914,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             style={{ background: "rgba(212,175,55,0.04)", border: "1px solid rgba(212,175,55,0.18)" }}
           >
             <Label className="text-white text-sm font-medium flex items-center gap-2">
-              <RotateCcw size={14} style={{ color: "#CBB183" }} />
+              <RotateCcw size={14} style={{ color: "#8A6A2A" }} />
               Replace Audio
-              <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.12)", color: "#CBB183" }}>WID-MUS</span>
+              <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.12)", color: "#8A6A2A" }}>WID-MUS</span>
             </Label>
             <p className="text-xs" style={{ color: "#64748b" }}>
               Upload a new master or mix. The current audio is archived with its WID-MUS intact — nothing is lost. A new Witness ID is generated for the replacement.
@@ -925,7 +925,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             {/* Current WID badge */}
             {currentWitnessId && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono"
-                style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.25)", color: "#CBB183" }}>
+                style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.25)", color: "#8A6A2A" }}>
                 <span>🔐</span>
                 <span className="flex-1 break-all">Current: {currentWitnessId}</span>
               </div>
@@ -978,7 +978,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               onClick={() => replaceAudioInputRef.current?.click()}
               className="rounded-xl p-4 text-center cursor-pointer transition-all hover:bg-white/5"
               style={{
-                border: `2px dashed ${replaceAudioFile ? "#CBB183" : "rgba(212,175,55,0.2)"}`,
+                border: `2px dashed ${replaceAudioFile ? "#8A6A2A" : "rgba(212,175,55,0.2)"}`,
                 background: replaceAudioFile ? "rgba(212,175,55,0.05)" : "transparent",
               }}
             >
@@ -996,14 +996,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               />
               {replaceAudioFile ? (
                 <div className="flex items-center justify-center gap-2">
-                  <RotateCcw size={14} style={{ color: "#CBB183" }} />
-                  <span className="text-sm" style={{ color: "#CBB183" }}>{replaceAudioFile.name}</span>
+                  <RotateCcw size={14} style={{ color: "#8A6A2A" }} />
+                  <span className="text-sm" style={{ color: "#8A6A2A" }}>{replaceAudioFile.name}</span>
                   <span className="text-xs" style={{ color: "#94a3b8" }}>({(replaceAudioFile.size/1024/1024).toFixed(1)} MB)</span>
                   <button type="button" onClick={e => { e.stopPropagation(); setReplaceAudioFile(null); }} className="text-xs hover:underline ml-1" style={{ color: "#94a3b8" }}>Remove</button>
                 </div>
               ) : (
                 <>
-                  <RotateCcw size={20} className="mx-auto mb-1" style={{ color: "#CBB183", opacity: 0.4 }} />
+                  <RotateCcw size={20} className="mx-auto mb-1" style={{ color: "#8A6A2A", opacity: 0.4 }} />
                   <p className="text-sm" style={{ color: "#94a3b8" }}>Upload replacement audio file</p>
                   <p className="text-xs mt-0.5" style={{ color: "#475569" }}>MP3, WAV, FLAC, AAC — max 200 MB</p>
                 </>
@@ -1016,7 +1016,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 onClick={handleReplaceAudio}
                 disabled={replaceAudioLoading}
                 className="w-full text-sm font-semibold"
-                style={{ background: "rgba(212,175,55,0.15)", color: "#CBB183", border: "1px solid rgba(212,175,55,0.4)" }}
+                style={{ background: "rgba(212,175,55,0.15)", color: "#8A6A2A", border: "1px solid rgba(212,175,55,0.4)" }}
               >
                 {replaceAudioLoading ? "Replacing & Witnessing…" : "Replace Audio & Generate New WID-MUS"}
               </Button>
@@ -1038,7 +1038,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
             {/* Current video preview */}
             {currentVideoUrl && (
-              <div className="rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", background: "#2D1B2E" }}>
+              <div className="rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", background: "#DACAAA" }}>
                 <video src={currentVideoUrl} className="w-full h-full object-contain" controls playsInline />
               </div>
             )}
@@ -1108,14 +1108,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           >
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="text-sm font-semibold" style={{ color: "#CBB183" }}>Credits</h3>
+                <h3 className="text-sm font-semibold" style={{ color: "#8A6A2A" }}>Credits</h3>
                 <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>Add producers, engineers, co-writers, and featured artists.</p>
               </div>
               <Button
                 size="sm"
                 variant="outline"
                 className="h-7 text-xs gap-1"
-                style={{ borderColor: "rgba(212,175,55,0.3)", color: "#CBB183", background: "transparent" }}
+                style={{ borderColor: "rgba(212,175,55,0.3)", color: "#8A6A2A", background: "transparent" }}
                 onClick={() => setCredits(prev => [...prev, { role: "", name: "" }])}
               >
                 <Plus size={12} /> Add
@@ -1171,7 +1171,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 <Link2 size={14} style={{ color: "#64748b" }} />
                 <span className="text-sm font-medium" style={{ color: "#94a3b8" }}>Lineage</span>
                 {parentSongId.trim() !== "" && (
-                  <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.15)", color: "#CBB183" }}>linked</span>
+                  <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.15)", color: "#8A6A2A" }}>linked</span>
                 )}
               </div>
               <ChevronDown
@@ -1210,7 +1210,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         <div
           className="flex-shrink-0 px-4 sm:px-6 py-4 flex gap-3"
           style={{
-            background: "#2D1B2E",
+            background: "#DACAAA",
             borderTop: "1px solid rgba(212,175,55,0.15)",
             paddingBottom: "max(16px, env(safe-area-inset-bottom))",
           }}
@@ -1228,7 +1228,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             onClick={handleSave}
             disabled={saving || coverUploading}
             style={{
-              background: "linear-gradient(135deg, #CBB183, #b8941f)",
+              background: "linear-gradient(135deg, #8A6A2A, #b8941f)",
               color: "#000",
               boxShadow: saving ? "none" : "0 0 16px rgba(212,175,55,0.4)",
             }}

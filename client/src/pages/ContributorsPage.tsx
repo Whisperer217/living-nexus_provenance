@@ -121,7 +121,7 @@ function FounderCard({
       <div
         className="absolute top-0 left-0 right-0 h-[2px]"
         style={{
-          background: "linear-gradient(90deg, transparent, #CBB183, transparent)",
+          background: "linear-gradient(90deg, transparent, #8A6A2A, transparent)",
         }}
       />
 
@@ -134,9 +134,9 @@ function FounderCard({
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
             style={{
               background: "oklch(0.75 0.18 85 / 0.15)",
-              border: "1px solid #CBB183",
-              color: "#CBB183",
-              boxShadow: "0 0 10px #CBB18355, 0 0 20px #CBB18322",
+              border: "1px solid #8A6A2A",
+              color: "#8A6A2A",
+              boxShadow: "0 0 10px #8A6A2A55, 0 0 20px #8A6A2A22",
             }}
           >
             <Award size={10} />
@@ -210,8 +210,8 @@ function FounderCard({
               background: matchedCreator?.id
                 ? "oklch(0.75 0.18 85 / 0.12)"
                 : "oklch(1 0 0 / 0.05)",
-              border: `1px solid ${matchedCreator?.id ? "#CBB18366" : "oklch(1 0 0 / 0.08)"}`,
-              color: matchedCreator?.id ? "#CBB183" : "oklch(0.6 0.04 280)",
+              border: `1px solid ${matchedCreator?.id ? "#8A6A2A66" : "oklch(1 0 0 / 0.08)"}`,
+              color: matchedCreator?.id ? "#8A6A2A" : "oklch(0.6 0.04 280)",
             }}
           >
             <ExternalLink size={13} />
@@ -249,7 +249,7 @@ export default function ContributorsPage() {
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse at center, #CBB18315 0%, transparent 70%)",
+              "radial-gradient(ellipse at center, #8A6A2A15 0%, transparent 70%)",
           }}
         />
 
@@ -260,9 +260,9 @@ export default function ContributorsPage() {
               className="px-4 py-1.5 rounded-full text-xs font-bold tracking-[0.15em] uppercase"
               style={{
                 background: "oklch(0.75 0.18 85 / 0.12)",
-                border: "1px solid #CBB183",
-                color: "#CBB183",
-                boxShadow: "0 0 16px #CBB18333",
+                border: "1px solid #8A6A2A",
+                color: "#8A6A2A",
+                boxShadow: "0 0 16px #8A6A2A33",
               }}
             >
               <Award size={11} className="inline mr-1.5 -mt-0.5" />
@@ -273,7 +273,7 @@ export default function ContributorsPage() {
           <h1
             className="font-display text-4xl sm:text-5xl md:text-6xl mb-6 leading-tight"
             style={{
-              background: "linear-gradient(135deg, #FFFFFF 30%, #CBB183 100%)",
+              background: "linear-gradient(135deg, #FFFFFF 30%, #8A6A2A 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -293,12 +293,12 @@ export default function ContributorsPage() {
           <div className="mt-8 flex items-center justify-center gap-3">
             <div
               className="h-px w-16"
-              style={{ background: "linear-gradient(90deg, transparent, #CBB183)" }}
+              style={{ background: "linear-gradient(90deg, transparent, #8A6A2A)" }}
             />
-            <span className="text-[#CBB183] text-lg">✦</span>
+            <span className="text-[#8A6A2A] text-lg">✦</span>
             <div
               className="h-px w-16"
-              style={{ background: "linear-gradient(90deg, #CBB183, transparent)" }}
+              style={{ background: "linear-gradient(90deg, #8A6A2A, transparent)" }}
             />
           </div>
         </div>
@@ -319,14 +319,14 @@ export default function ContributorsPage() {
               <div
                 className="h-px w-24"
                 style={{
-                  background: "linear-gradient(90deg, transparent, #CBB18355)",
+                  background: "linear-gradient(90deg, transparent, #8A6A2A55)",
                 }}
               />
-              <span style={{ color: "#CBB183", opacity: 0.6 }}>✦</span>
+              <span style={{ color: "#8A6A2A", opacity: 0.6 }}>✦</span>
               <div
                 className="h-px w-24"
                 style={{
-                  background: "linear-gradient(90deg, #CBB18355, transparent)",
+                  background: "linear-gradient(90deg, #8A6A2A55, transparent)",
                 }}
               />
             </div>

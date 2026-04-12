@@ -130,13 +130,13 @@ export default function PricingCovenantPage() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: "#2D1B2E", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
+      style={{ background: "#DACAAA", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
     >
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <div
         className="relative overflow-hidden"
         style={{
-          background: "linear-gradient(180deg, oklch(0.10 0.06 270) 0%, #2D1B2E 100%)",
+          background: "linear-gradient(180deg, oklch(0.10 0.06 270) 0%, #DACAAA 100%)",
           borderBottom: "1px solid oklch(0.22 0.04 270 / 40%)",
         }}
       >
@@ -225,14 +225,14 @@ export default function PricingCovenantPage() {
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.99] disabled:opacity-60"
                 style={{
                   background: "linear-gradient(135deg, oklch(0.80 0.145 82), oklch(0.72 0.18 75))",
-                  color: "#2D1B2E",
+                  color: "#DACAAA",
                   boxShadow: "0 4px 24px oklch(0.80 0.145 82 / 0.35)",
                   fontFamily: "'Cinzel', serif",
                 }}
               >
                 {licenseMutation.isPending ? (
                   <>
-                    <div className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "#2D1B2E", borderTopColor: "transparent" }} />
+                    <div className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "#DACAAA", borderTopColor: "transparent" }} />
                     Processing...
                   </>
                 ) : (
@@ -361,7 +361,7 @@ export default function PricingCovenantPage() {
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.99] disabled:opacity-60"
             style={{
               background: "linear-gradient(135deg, oklch(0.80 0.145 82), oklch(0.72 0.18 75))",
-              color: "#2D1B2E",
+              color: "#DACAAA",
               boxShadow: "0 4px 24px oklch(0.80 0.145 82 / 0.30)",
               fontFamily: "'Cinzel', serif",
             }}

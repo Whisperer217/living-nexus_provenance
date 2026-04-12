@@ -188,10 +188,10 @@ export default function DashboardPage() {
   });
 
   if (!isAuthenticated) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#E6CDAE" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#1E1020" }}>
       <div className="text-center">
         <p style={{ color: "oklch(0.6 0.04 280)" }}>Please sign in to access your dashboard.</p>
-        <Link href="/"><Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>Go Home</Button></Link>
+        <Link href="/"><Button className="mt-4" style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}>Go Home</Button></Link>
       </div>
     </div>
   );
@@ -225,7 +225,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#E6CDAE" }}>
+    <div className="min-h-screen" style={{ background: "#1E1020" }}>
       <div className="container py-10" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
         {/* ── No-Works Onboarding Banner ─────────────────────────────────────── */}
@@ -261,7 +261,7 @@ export default function DashboardPage() {
             <Link href="/upload">
               <Button
                 className="flex-shrink-0"
-                style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020", fontFamily: "'Cinzel', serif" }}
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload &amp; Witness Your Work
@@ -283,7 +283,7 @@ export default function DashboardPage() {
               </Button>
             </Link>
             <Link href="/upload">
-              <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+              <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}>
                 <Upload className="w-3 h-3 mr-1" /> Upload Track
               </Button>
             </Link>
@@ -320,7 +320,7 @@ export default function DashboardPage() {
               className="w-full font-bold"
               onClick={() => { setShowChecklist(false); connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` }); }}
               disabled={connectMutation.isPending}
-              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
+              style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}
             >
               {connectMutation.isPending ? "Opening Stripe..." : "I'm Ready — Start Setup"}
             </Button>
@@ -340,7 +340,7 @@ export default function DashboardPage() {
             >
               <div className="flex items-center gap-3 min-w-0">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "oklch(0.15 0.03 280)" }} />
-                <span className="text-sm font-semibold leading-snug" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                <span className="text-sm font-semibold leading-snug" style={{ color: "#1E1020", fontFamily: "'Cinzel', serif" }}>
                   {connectData?.status === "pending"
                     ? "Your gift account is incomplete. Finish setup to receive gifts."
                     : "Enable gifts to start receiving direct payments from fans."}
@@ -351,7 +351,7 @@ export default function DashboardPage() {
                 onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
                 disabled={connectMutation.isPending}
                 className="flex-shrink-0 font-bold text-sm"
-                style={{ background: "#E6CDAE", color: "oklch(0.84 0.155 85)", border: "none" }}
+                style={{ background: "#1E1020", color: "oklch(0.84 0.155 85)", border: "none" }}
               >
                 {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Complete Setup" : "Enable Gifts"}
               </Button>
@@ -421,7 +421,7 @@ export default function DashboardPage() {
               <>
                 <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Unlock 100 song slots, commercial license, and Witness ID provenance certificates.</p>
                 <p className="text-lg font-bold mb-3" style={{ color: "oklch(0.84 0.155 85)", fontFamily: "'Cinzel', serif" }}>$89.98 <span className="text-xs font-normal" style={{ color: "#E2E8F0" }}>one-time</span></p>
-                <Button size="sm" className="w-full" onClick={() => licenseMutation.mutate({ origin: window.location.origin })} disabled={licenseMutation.isPending} style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+                <Button size="sm" className="w-full" onClick={() => licenseMutation.mutate({ origin: window.location.origin })} disabled={licenseMutation.isPending} style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}>
                   {licenseMutation.isPending ? "Processing..." : "Purchase License"}
                 </Button>
               </>
@@ -513,7 +513,7 @@ export default function DashboardPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
               background: activeTab === "songs" ? "oklch(0.84 0.155 85)" : "transparent",
-              color: activeTab === "songs" ? "#E6CDAE" : "oklch(0.6 0.04 280)",
+              color: activeTab === "songs" ? "#1E1020" : "oklch(0.6 0.04 280)",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -539,7 +539,7 @@ export default function DashboardPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative"
             style={{
               background: activeTab === "activity" ? "var(--lnx-orange)" : "transparent",
-              color: activeTab === "activity" ? "#E6CDAE" : "oklch(0.6 0.04 280)",
+              color: activeTab === "activity" ? "#1E1020" : "oklch(0.6 0.04 280)",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -627,7 +627,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "oklch(0.9 0.02 85)" }}>My Songs</h2>
               <Link href="/upload">
-                <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>
+                <Button size="sm" style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}>
                   <Upload className="w-3 h-3 mr-1" /> Upload New
                 </Button>
               </Link>
@@ -640,18 +640,18 @@ export default function DashboardPage() {
                 route="/dashboard#songs"
               />
             ) : !songs?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #4A2D52" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #3D2440" }}>
                 <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
                 <p className="text-sm mb-2" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>Upload your first piece and get your WID</p>
                 <p className="text-xs mb-4" style={{ color: "oklch(0.5 0.03 280)" }}>Every work you upload receives a cryptographic Witness ID — your permanent proof of origin.</p>
                 <Link href="/upload">
-                  <Button style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}>Upload &amp; Witness Your Work</Button>
+                  <Button style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}>Upload &amp; Witness Your Work</Button>
                 </Link>
               </div>
             ) : (
               <div className="space-y-2">
                 {songs.map((song: any, idx: number) => (
-                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #3D2440" }}>
+                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #8A6A2A" }}>
                     {/* Top row: index + cover + title + actions */}
                     <div className="flex items-center gap-3">
                       <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#E2E8F0", minWidth: "20px" }}>{idx + 1}</span>
@@ -672,7 +672,7 @@ export default function DashboardPage() {
                           </button>
                         </Link>
                         <button
-                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#CBB183]/10"
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#8A6A2A]/10"
                           title="Edit track (cover art, metadata, position)"
                           onClick={() => setEditingSong(song)}
                         >
@@ -765,7 +765,7 @@ export default function DashboardPage() {
                 <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "oklch(0.84 0.155 85)", borderTopColor: "transparent" }} />
               </div>
             ) : !activityEvents?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #4A2D52" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #3D2440" }}>
                 <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No activity yet.</p>
                 <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Gifts, comments, and witnesses on your songs will appear here.</p>
@@ -783,7 +783,7 @@ export default function DashboardPage() {
                       className="rounded-xl p-3 flex gap-3 items-start"
                       style={{
                         background: isTip ? "oklch(0.84 0.155 85 / 0.06)" : "oklch(0.125 0.028 52)",
-                        border: `1px solid ${isTip ? "oklch(0.84 0.155 85 / 0.25)" : "#3D2440"}`,
+                        border: `1px solid ${isTip ? "oklch(0.84 0.155 85 / 0.25)" : "#8A6A2A"}`,
                       }}
                     >
                       {/* Icon */}
@@ -851,7 +851,7 @@ export default function DashboardPage() {
                 route="/dashboard#transforms"
               />
             ) : !transforms?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #4A2D52" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #3D2440" }}>
                 <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.65 0.2 300)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No AI transforms yet.</p>
                 <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Open any song page and use the AI Transform button to create a derivative.</p>
@@ -861,7 +861,7 @@ export default function DashboardPage() {
                 {transforms.map((t: any) => {
                   const { label, color } = transformStatusLabel(t.status);
                   return (
-                    <div key={t.id} className="rounded-xl p-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #3D2440" }}>
+                    <div key={t.id} className="rounded-xl p-4" style={{ background: "oklch(0.125 0.028 52)", border: "1px solid #8A6A2A" }}>
                       <div className="flex items-start gap-4">
                         {/* Status icon */}
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "oklch(0.11 0.025 270)" }}>
@@ -950,7 +950,7 @@ export default function DashboardPage() {
               <Link href="/batch-upload">
                 <button
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                  style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                  style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020", fontFamily: "'Cinzel', serif" }}
                 >
                   <Upload className="w-3 h-3" /> New Collection
                 </button>
@@ -965,17 +965,17 @@ export default function DashboardPage() {
               />
             ) : collectionsLoading ? (
               <div className="text-center py-16">
-                <div className="w-8 h-8 border-2 border-[#CBB183]/30 border-t-[#CBB183] rounded-full animate-spin mx-auto" />
+                <div className="w-8 h-8 border-2 border-[#8A6A2A]/30 border-t-[#8A6A2A] rounded-full animate-spin mx-auto" />
               </div>
             ) : !myCollections?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #4A2D52" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #3D2440" }}>
                 <Library className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No collections yet.</p>
                 <p className="text-xs mb-4" style={{ color: "oklch(0.4 0.03 280)" }}>Upload an album or batch of songs to generate a Collection WID that binds all works into one origin record.</p>
                 <Link href="/batch-upload">
                   <button
                     className="px-4 py-2 rounded-lg text-sm font-semibold"
-                    style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                    style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020", fontFamily: "'Cinzel', serif" }}
                   >
                     Upload Your First Collection
                   </button>
@@ -1071,7 +1071,7 @@ export default function DashboardPage() {
                           <a href={col.pdfUrl} target="_blank" rel="noopener noreferrer">
                             <button
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                              style={{ background: "oklch(0.84 0.155 85)", color: "#E6CDAE" }}
+                              style={{ background: "oklch(0.84 0.155 85)", color: "#1E1020" }}
                             >
                               <Download className="w-3 h-3" /> Certificate
                             </button>
@@ -1136,7 +1136,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "oklch(0.75 0.15 260)", borderTopColor: "transparent" }} />
               </div>
             ) : !analyticsData ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #4A2D52" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #3D2440" }}>
                 <LineChart className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.75 0.15 260)" }} />
                 <p className="text-sm" style={{ color: "oklch(0.5 0.03 280)" }}>No analytics data available yet.</p>
               </div>
@@ -1177,7 +1177,7 @@ export default function DashboardPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.2 0.02 280)" />
                       <XAxis dataKey="date" tick={{ fill: "oklch(0.45 0.03 280)", fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} />
                       <YAxis tick={{ fill: "oklch(0.45 0.03 280)", fontSize: 10 }} allowDecimals={false} />
-                      <Tooltip contentStyle={{ background: "oklch(0.1 0.03 280)", border: "1px solid #4A2D52", borderRadius: "8px", color: "oklch(0.9 0.02 85)" }} />
+                      <Tooltip contentStyle={{ background: "oklch(0.1 0.03 280)", border: "1px solid #3D2440", borderRadius: "8px", color: "oklch(0.9 0.02 85)" }} />
                       <Area type="monotone" dataKey="plays" stroke="oklch(0.75 0.15 260)" fill="url(#analyticsGrad)" strokeWidth={2} dot={false} />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -1389,7 +1389,7 @@ function DiscordIntegrationTab() {
                 onChange={e => setUrls(prev => ({ ...prev, [ev.key]: e.target.value }))}
                 className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
                 style={{
-                  background: "#E6CDAE",
+                  background: "#1E1020",
                   border: "1px solid oklch(0.22 0.03 280)",
                   color: "oklch(0.85 0.02 85)",
                   fontFamily: "monospace",
@@ -1399,7 +1399,7 @@ function DiscordIntegrationTab() {
                 size="sm"
                 disabled={!url || !isDirty || saveWebhook.isPending}
                 onClick={() => saveWebhook.mutate({ event: ev.key, webhookUrl: url, enabled: saved?.enabled ?? true })}
-                style={{ background: isDirty && url ? ev.color : "oklch(0.2 0.03 280)", color: "#E6CDAE", opacity: (!url || !isDirty) ? 0.5 : 1 }}
+                style={{ background: isDirty && url ? ev.color : "oklch(0.2 0.03 280)", color: "#1E1020", opacity: (!url || !isDirty) ? 0.5 : 1 }}
               >
                 {saveWebhook.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
                 Save
@@ -1496,7 +1496,7 @@ function ArchiveTab() {
 
   if (loading) return (
     <div className="text-center py-16">
-      <div className="w-8 h-8 border-2 border-[#CBB183]/30 border-t-[#CBB183] rounded-full animate-spin mx-auto" />
+      <div className="w-8 h-8 border-2 border-[#8A6A2A]/30 border-t-[#8A6A2A] rounded-full animate-spin mx-auto" />
       <p className="text-sm mt-3" style={{ color: "oklch(0.6 0.04 280)" }}>Loading your archive…</p>
     </div>
   );
@@ -1509,7 +1509,7 @@ function ArchiveTab() {
   );
 
   if (!batchInfo || batchInfo.totalTracks === 0) return (
-    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #4A2D52" }}>
+    <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #3D2440" }}>
       <PackageOpen className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.7 0.15 220)" }} />
       <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No tracks in your archive yet.</p>
       <p className="text-xs" style={{ color: "oklch(0.4 0.03 280)" }}>Upload songs to build your archive. Each batch of up to 10 tracks can be downloaded as a ZIP with ID3-tagged audio and WID certificates.</p>
@@ -1607,7 +1607,7 @@ function ArchiveTab() {
 
             {/* Expandable track list */}
             {expandedBatch === batch.index && (
-              <div style={{ borderTop: "1px solid #3D2440" }}>
+              <div style={{ borderTop: "1px solid #8A6A2A" }}>
                 {batch.tracks.map((track, ti) => (
                   <div
                     key={track.id}
@@ -1700,7 +1700,7 @@ function WIDCacheTab() {
       </div>
 
       {snapshots.length === 0 ? (
-        <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #4A2D52" }}>
+        <div className="text-center py-16 rounded-xl" style={{ background: "oklch(0.125 0.028 52)", border: "1px dashed #3D2440" }}>
           <Fingerprint className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "oklch(0.84 0.155 85)" }} />
           <p className="text-sm mb-1" style={{ color: "oklch(0.85 0.02 85)", fontFamily: "'Cinzel', serif" }}>No witness records cached</p>
           <p className="text-xs" style={{ color: "oklch(0.5 0.03 280)" }}>

@@ -258,7 +258,7 @@ export default function PlayerBar() {
           {!isExpanded && commentsData && commentsData.length > 0 && (
             <span
               className="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold leading-none"
-              style={{ background: "oklch(0.80 0.145 82)", color: "#2D1B2E" }}
+              style={{ background: "oklch(0.80 0.145 82)", color: "#DACAAA" }}
             >
               {commentsData.length} {commentsData.length === 1 ? "witness" : "witnesses"}
             </span>
@@ -352,7 +352,7 @@ export default function PlayerBar() {
               <button
                 onClick={togglePlay}
                 className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-105"
-                style={{ background: "oklch(0.80 0.145 82)", color: "#2D1B2E" }}
+                style={{ background: "oklch(0.80 0.145 82)", color: "#DACAAA" }}
               >
                 {state.isPlaying ? <Pause size={24} /> : <Play size={24} fill="currentColor" />}
               </button>
@@ -393,7 +393,7 @@ export default function PlayerBar() {
                 onClick={() => navigate(`/verify/${videoWitnessId}`)}
                 className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide transition-all z-20"
                 style={{
-                  background: "oklch(0.18 0.05 285 / 0.88)",
+                  background: "oklch(0.84 0.05 75 / 0.88)",
                   border: "1px solid oklch(0.55 0.18 145 / 0.5)",
                   color: "oklch(0.82 0.18 145)",
                   backdropFilter: "blur(4px)",
@@ -514,7 +514,7 @@ export default function PlayerBar() {
                 <button
                   onClick={togglePlay}
                   className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                  style={{ background: "oklch(0.94 0.025 75)", color: "#2D1B2E" }}
+                  style={{ background: "oklch(0.94 0.025 75)", color: "#DACAAA" }}
                 >
                   {state.isPlaying
                     ? <Pause size={17} fill="currentColor" />
@@ -684,7 +684,7 @@ export default function PlayerBar() {
                 onClick={submitComment}
                 disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                 className="px-2.5 py-1.5 rounded-md text-[10px] font-bold transition-colors disabled:opacity-40"
-                style={{ background: "oklch(0.80 0.145 82)", color: "#2D1B2E" }}
+                style={{ background: "oklch(0.80 0.145 82)", color: "#DACAAA" }}
               >
                 Post
               </button>
@@ -707,7 +707,7 @@ export default function PlayerBar() {
               disabled={!currentSongId}
               className="w-14 h-14 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl
                 transition-opacity hover:opacity-80 disabled:cursor-default"
-              style={{ background: currentTrack?.bg || "oklch(0.14 0.045 285)" }}
+              style={{ background: currentTrack?.bg || "oklch(0.88 0.04 75)" }}
               title={currentTrack?.title || ""}
             >
               {currentTrack?.artUrl && currentTrack.artType !== "video"
@@ -778,7 +778,7 @@ export default function PlayerBar() {
               <button
                 onClick={togglePlay}
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                style={{ background: "oklch(0.94 0.025 75)", color: "#2D1B2E" }}
+                style={{ background: "oklch(0.94 0.025 75)", color: "#DACAAA" }}
               >
                 {state.isPlaying
                   ? <Pause size={17} fill="currentColor" />

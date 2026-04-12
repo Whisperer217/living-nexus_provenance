@@ -109,7 +109,7 @@ function ExploreCard({
           transition-all duration-200 z-10
           ${isNonAudio
             ? "opacity-0 group-hover:opacity-100 bg-[oklch(0.65_0.18_145)]"
-            : isActive ? "opacity-100 bg-[#CBB183]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+            : isActive ? "opacity-100 bg-[#8A6A2A]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
         >
           {isNonAudio
             ? <ExternalLink size={14} className="text-white" />
@@ -127,8 +127,8 @@ function ExploreCard({
               borderTopLeftRadius: "inherit",
             }}
           >
-            <Crown size={9} style={{ color: "#2D1B2E" }} />
-            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#2D1B2E" }}>
+            <Crown size={9} style={{ color: "#DACAAA" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#DACAAA" }}>
               {(song.playCount ?? 0) >= 1000
                 ? `${Math.floor((song.playCount ?? 0) / 1000)}K PLAYS`
                 : `${song.playCount} PLAYS`}
@@ -162,7 +162,7 @@ function ExploreCard({
         <Link
           href={`/song/${song.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#CBB183] transition-colors cursor-pointer"
+          className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#8A6A2A] transition-colors cursor-pointer"
           title={`Open ${song.title}`}
         >
           {song.title}
@@ -178,7 +178,7 @@ function ExploreCard({
             <Link
               href={`/creator/${creator.id}`}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="truncate hover:text-[#CBB183] transition-colors cursor-pointer"
+              className="truncate hover:text-[#8A6A2A] transition-colors cursor-pointer"
               title={`View ${artistName}'s profile`}
             >
               {artistName}
@@ -203,7 +203,7 @@ function ExploreCard({
             {(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length > 3 && (
               <span
                 className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
-                style={{ background: "oklch(0.13 0.04 285)", color: "oklch(0.50 0.04 280)", border: "1px solid oklch(0.24 0.03 275)" }}
+                style={{ background: "oklch(0.86 0.04 75)", color: "oklch(0.50 0.04 280)", border: "1px solid oklch(0.24 0.03 275)" }}
               >
                 +{(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length - 3}
               </span>
@@ -228,7 +228,7 @@ function ExploreCard({
             {/* Gift */}
             <button
               onClick={e => { e.stopPropagation(); onTip(item, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
-               className="p-1 text-white/70 hover:text-[#CBB183] transition-colors"
+               className="p-1 text-white/70 hover:text-[#8A6A2A] transition-colors"
                title="Send a gift"
             >
               <DollarSign size={12} />
@@ -254,7 +254,7 @@ function ExploreCard({
                 });
                 toast.success(`"${song.title}" plays next`);
               }}
-              className="p-1 text-white/70 hover:text-[#CBB183] transition-colors"
+              className="p-1 text-white/70 hover:text-[#8A6A2A] transition-colors"
               title="Play next"
             >
               <SkipForward size={12} />
@@ -262,7 +262,7 @@ function ExploreCard({
             {/* Add to list */}
             <button
               onClick={e => { e.stopPropagation(); setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
-              className="p-1 text-white/70 hover:text-[#CBB183] transition-colors"
+              className="p-1 text-white/70 hover:text-[#8A6A2A] transition-colors"
               title="Add to my list"
             >
               <ListPlus size={12} />
@@ -614,8 +614,8 @@ export default function ExplorePage() {
                 onClick={() => setActiveGenre(g.label)}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
                   ${activeGenre === g.label
-                    ? "border-[#CBB183]/60 bg-[#CBB183]/[0.10]"
-                    : "border-white/[0.12] bg-[oklch(0.115_0.055_278)] hover:border-[#CBB183]/40 hover:bg-white/[0.06]"
+                    ? "border-[#8A6A2A]/60 bg-[#8A6A2A]/[0.10]"
+                    : "border-white/[0.12] bg-[oklch(0.115_0.055_278)] hover:border-[#8A6A2A]/40 hover:bg-white/[0.06]"
                   }`}
               >
                 {g.icon ? (
@@ -629,7 +629,7 @@ export default function ExplorePage() {
                   </div>
                 ) : (
                   <div className="w-9 h-9 flex items-center justify-center rounded-lg"
-                    style={{ background: "linear-gradient(135deg, #CBB183, #7C3AED)" }}>
+                    style={{ background: "linear-gradient(135deg, #8A6A2A, #7C3AED)" }}>
                     <span className="text-[10px] font-heading font-bold text-black">ALL</span>
                   </div>
                 )}
@@ -773,7 +773,7 @@ export default function ExplorePage() {
           <div ref={loaderRef} className="py-8 flex justify-center">
             {(isFetchingMore || pageFetching) && hasMore && (
               <div className="flex items-center gap-2 text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>
-                <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#CBB183] animate-spin" />
+                <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#8A6A2A] animate-spin" />
                 Loading more…
               </div>
             )}
@@ -791,7 +791,7 @@ export default function ExplorePage() {
             <div className="fixed inset-0 z-40" onClick={closeMenu} />
             <div
               className="fixed z-50 min-w-[190px] rounded-xl overflow-hidden shadow-2xl py-1"
-              style={{ top: menuPos.y, left: menuPos.x, background: "oklch(0.14 0.015 280)", border: "1px solid #4A2D52" }}
+              style={{ top: menuPos.y, left: menuPos.x, background: "oklch(0.14 0.015 280)", border: "1px solid #3D2440" }}
             >
               {menuSong.song.fileUrl && (
                 <button

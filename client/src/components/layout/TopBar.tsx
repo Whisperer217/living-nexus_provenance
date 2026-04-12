@@ -161,7 +161,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
       </span>
     ) : item.archiveBadge && archiveSongCount > 0 ? (
       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center"
-        style={{ background: "oklch(0.84 0.155 85 / 0.18)", color: "#CBB183", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
+        style={{ background: "oklch(0.84 0.155 85 / 0.18)", color: "#8A6A2A", border: "1px solid oklch(0.84 0.155 85 / 0.3)" }}>
         {archiveSongCount > 99 ? "99+" : archiveSongCount}
       </span>
     ) : item.notifBadge && unreadCount > 0 ? (
@@ -447,7 +447,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                         className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden"
                         style={{
                           background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
-                          boxShadow: hasWid ? "0 0 0 2px #CBB183" : "none",
+                          boxShadow: hasWid ? "0 0 0 2px #8A6A2A" : "none",
                         }}
                       >
                         {avatar
@@ -465,8 +465,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                       <div className="text-[13px] font-medium truncate" style={{ color: "oklch(0.90 0.02 280)" }}>{displayName}</div>
                       {hasWid ? (
                         <div className="flex items-center gap-1 mt-0.5">
-                          <Fingerprint size={9} style={{ color: "#CBB183" }} />
-                          <span className="text-[9px] font-heading tracking-wider" style={{ color: "#CBB183" }}>WITNESSED</span>
+                          <Fingerprint size={9} style={{ color: "#8A6A2A" }} />
+                          <span className="text-[9px] font-heading tracking-wider" style={{ color: "#8A6A2A" }}>WITNESSED</span>
                         </div>
                       ) : (
                         <div className="text-[10px] mt-0.5" style={{ color: "oklch(0.45 0.02 280)" }}>Creator</div>

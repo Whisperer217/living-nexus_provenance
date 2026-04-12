@@ -390,7 +390,7 @@ export function HAAIDeclarationForm({
               className="resize-none text-sm"
               style={{
                 background: "oklch(0.11 0.015 280)",
-                border: "1px solid #3D2440",
+                border: "1px solid #8A6A2A",
                 color: "oklch(0.88 0.02 280)",
               }}
             />

@@ -7,7 +7,7 @@ export default function DownloadPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-4"
-      style={{ background: "#E6CDAE" }}
+      style={{ background: "#1E1020" }}
     >
       {/* App Icon */}
       <img
@@ -49,7 +49,7 @@ export default function DownloadPage() {
         className="flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-bold transition-all mb-4 hover:scale-105 active:scale-95"
         style={{
           background: "oklch(0.84 0.155 85)",
-          color: "#E6CDAE",
+          color: "#1E1020",
           fontFamily: "'Cinzel', serif",
           boxShadow: "0 4px 24px oklch(0.84 0.155 85 / 0.35)",
           textDecoration: "none",

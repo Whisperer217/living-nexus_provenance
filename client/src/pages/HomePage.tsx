@@ -175,7 +175,7 @@ function WIDTrustLayer() {
               Witnessed Voices
             </p>
             <Link href="/explore">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#8A6A2A]" style={{ color: "oklch(0.55 0.03 280)" }}>
                 See all
               </span>
             </Link>
@@ -256,7 +256,7 @@ function WIDTrustLayer() {
                       boxShadow: "0 0 24px oklch(0.84 0.155 85 / 0.5)",
                     }}
                   >
-                    <Play size={20} fill="#2D1B2E" style={{ color: "#2D1B2E", marginLeft: "2px" }} />
+                    <Play size={20} fill="#DACAAA" style={{ color: "#DACAAA", marginLeft: "2px" }} />
                   </div>
                 </button>
 
@@ -306,7 +306,7 @@ function FeaturedCreatorsCarousel() {
           Creators
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#8A6A2A]" style={{ color: "oklch(0.55 0.03 280)" }}>
             See all
           </span>
         </Link>
@@ -376,7 +376,7 @@ function NewVoicesCarousel() {
           New Voices
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#8A6A2A]" style={{ color: "oklch(0.55 0.03 280)" }}>
             See all
           </span>
         </Link>
@@ -694,8 +694,8 @@ export default function HomePage() {
 
         <div className="relative z-10 flex flex-col justify-end px-6 pb-10 pt-16 max-w-3xl">
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles size={13} className="text-[#CBB183]" />
-            <span className="text-[10px] font-heading tracking-[0.22em] uppercase text-[#CBB183]">
+            <Sparkles size={13} className="text-[#8A6A2A]" />
+            <span className="text-[10px] font-heading tracking-[0.22em] uppercase text-[#8A6A2A]">
               Living Nexus — Creative Provenance Platform
             </span>
           </div>
@@ -988,7 +988,7 @@ export default function HomePage() {
               href="https://www.copyright.gov/registration/"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-[#CBB183] transition-colors"
+              className="underline hover:text-[#8A6A2A] transition-colors"
               style={{ color: "oklch(0.65 0.08 85)" }}
             >
               copyright.gov/registration
@@ -1016,7 +1016,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-[16px] tracking-wider" style={{ color: "oklch(0.94 0.025 75)" }}>Featured Projects</h2>
             <Link href="/projects">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "oklch(0.55 0.03 280)" }}>See all</span>
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#8A6A2A]" style={{ color: "oklch(0.55 0.03 280)" }}>See all</span>
             </Link>
           </div>
 
@@ -1042,7 +1042,7 @@ export default function HomePage() {
                 onClick={() => setActiveGenre(g.label)}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
                   ${activeGenre === g.label
-                    ? "border-[#CBB183]/40 bg-[#CBB183]/[0.07]"
+                    ? "border-[#8A6A2A]/40 bg-[#8A6A2A]/[0.07]"
                     : "border-white/[0.06] bg-[oklch(0.14_0.013_280)] hover:border-white/[0.14] hover:bg-white/[0.04]"
                   }`}
               >
@@ -1057,7 +1057,7 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="w-10 h-10 flex items-center justify-center rounded-lg"
-                    style={{ background: "linear-gradient(135deg, #CBB183, #7C3AED)" }}>
+                    style={{ background: "linear-gradient(135deg, #8A6A2A, #7C3AED)" }}>
                     <span className="text-[11px] font-heading font-bold text-black">ALL</span>
                   </div>
                 )}
@@ -1078,7 +1078,7 @@ export default function HomePage() {
             {activeGenre === "All" ? "Discover Tracks" : activeGenre}
           </h2>
           <Link href="/explore">
-            <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#CBB183] transition-colors font-body">
+            <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#8A6A2A] transition-colors font-body">
               See all
             </span>
           </Link>
@@ -1335,7 +1335,7 @@ export default function HomePage() {
               <button
                 className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
-                  background: "linear-gradient(135deg, #F5C451, #CBB183)",
+                  background: "linear-gradient(135deg, #F5C451, #8A6A2A)",
                   color: "#0a0812",
                   boxShadow: "0 0 24px rgba(245,196,81,0.25)",
                 }}

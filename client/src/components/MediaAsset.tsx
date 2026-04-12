@@ -127,7 +127,7 @@ function PlayerMedia({
   return (
     <div
       className="absolute inset-0 flex items-center justify-center overflow-hidden"
-      style={{ background: "#2D1B2E" }}
+      style={{ background: "#DACAAA" }}
     >
       {/* Blurred background fill */}
       {src && (
@@ -181,7 +181,7 @@ function PlayerMedia({
       {showGradient !== false && (
         <div
           className="absolute inset-x-0 bottom-0 z-20 pointer-events-none"
-          style={{ height: "60%", background: "linear-gradient(to top, #2D1B2E 0%, transparent 100%)" }}
+          style={{ height: "60%", background: "linear-gradient(to top, #DACAAA 0%, transparent 100%)" }}
         />
       )}
       {children && <div className="absolute inset-0 z-30">{children}</div>}
