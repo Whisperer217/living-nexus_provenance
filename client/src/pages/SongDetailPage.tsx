@@ -31,6 +31,7 @@ import { WIDPanel } from "@/components/WIDPanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
 import { VersionHistoryModal } from "@/components/VersionHistoryModal";
 import { safeAudioUrl } from "@shared/const";
+import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { QRShareModal } from "@/components/QRIdentityCard";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
@@ -532,8 +533,10 @@ export default function SongDetailPage() {
                       </div>
                     </Link>
                   )}
+                  {(() => { const _ctc = getContentTypeColors((song as any).contentType ?? "audio"); return (
                   <div className="flex flex-wrap gap-1.5 mb-3">
-                    {song.genre && <Badge style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid #CBB183", fontSize: "11px" }}>{song.genre}</Badge>}
+                    <Badge style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{_ctc.icon} {_ctc.label}</Badge>
+                    {song.genre && <Badge style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{song.genre}</Badge>}
                     {song.bpm && <Badge style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid #CBB183", fontSize: "11px" }}>{song.bpm} BPM</Badge>}
                     {song.keySignature && <Badge style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid #CBB183", fontSize: "11px" }}>{song.keySignature}</Badge>}
                     {song.witnessId && (
@@ -570,6 +573,7 @@ export default function SongDetailPage() {
                       );
                     })()}
                   </div>
+                  ); })()}
                   <div className="flex items-center gap-4 text-xs" style={{ color: "#E2E8F0" }}>
                     <span className="flex items-center gap-1"><Headphones className="w-3.5 h-3.5" />{song.playCount || 0} plays</span>
                     <span className="flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" />{comments?.length || 0} comments</span>

@@ -17,6 +17,7 @@ import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLike } from "@/hooks/useLike";
 import TipModal from "@/components/TipModal";
 import FeaturedProjectsCarousel from "@/components/FeaturedProjectsCarousel";
+import { getContentTypeColors } from "@/lib/contentTypeColors";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -70,6 +71,7 @@ function ExploreCard({
   // Non-audio types navigate to song detail page instead of playing audio
   const isNonAudio = song.contentType === "manuscript" || song.contentType === "comic";
   const isHot = (song.playCount ?? 0) >= 50;
+  const ctColors = getContentTypeColors(song.contentType ?? "audio");
   const handleCardClick = () => {
     if (isNonAudio) { navigate(`/book/${song.id}`); } else { onPlay(item); }
   };
@@ -83,8 +85,9 @@ function ExploreCard({
           ? "border-[#E8A830]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.5),0_0_24px_rgba(203,177,131,0.12)]"
           : isHot
             ? "gold-banner"
-            : "border-[rgba(44,52,56,0.25)] hover:border-[rgba(122,90,30,0.4)]"
+            : ""
         }`}
+      style={isActive ? undefined : { borderColor: ctColors.dim, boxShadow: `0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px ${ctColors.dim}` }}
       onClick={handleCardClick}
       onContextMenu={e => { e.preventDefault(); }}
     >
@@ -190,13 +193,22 @@ function ExploreCard({
         </div>
 
         {/* Genre pills — own row, never competes with actions */}
+        {/* Content-type chip */}
+        <div className="flex flex-wrap gap-1 mb-1 items-center">
+          <span
+            className="text-[8px] px-1.5 py-0.5 rounded-full font-heading tracking-widest leading-none uppercase"
+            style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
+          >
+            {ctColors.icon} {ctColors.label}
+          </span>
+        </div>
         {song.genre && (
           <div className="flex flex-wrap gap-1 mb-2">
             {(song.genre as string).split(/[,/|]+/).map((t: string) => t.trim()).filter(Boolean).slice(0, 3).map((tag: string) => (
               <span
                 key={tag}
                 className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
-                style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid #2C3438" }}
+                style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
               >
                 {tag}
               </span>

@@ -19,6 +19,7 @@ import { useLike } from "@/hooks/useLike";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { MediaAsset } from "@/components/MediaAsset";
+import { getContentTypeColors } from "@/lib/contentTypeColors";
 
 interface Props {
   track: Track;
@@ -44,7 +45,13 @@ function parseGenreTags(genre: string | undefined | null): string[] {
 }
 
 /** Render genre tags as individual pills. Shows max `maxVisible` with an overflow count. */
-function GenrePills({ genre, maxVisible = 4 }: { genre: string | undefined | null; maxVisible?: number }) {
+function GenrePills({ genre, maxVisible = 4, chipBg, chipBorder, textColor }: {
+  genre: string | undefined | null;
+  maxVisible?: number;
+  chipBg?: string;
+  chipBorder?: string;
+  textColor?: string;
+}) {
   const tags = parseGenreTags(genre);
   if (tags.length === 0) return null;
   const visible = tags.slice(0, maxVisible);
@@ -56,9 +63,9 @@ function GenrePills({ genre, maxVisible = 4 }: { genre: string | undefined | nul
           key={tag}
           className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
-            background: "rgba(20,18,40,0.8)",
-            color: "#9b8fc0",
-            border: "1px solid rgba(50,45,80,0.6)",
+            background: chipBg ?? "rgba(20,18,40,0.8)",
+            color: textColor ?? "#9b8fc0",
+            border: `1px solid ${chipBorder ?? "rgba(50,45,80,0.6)"}`,
           }}
         >
           {tag}
@@ -121,6 +128,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
   const hasWid = !!track.witnessId;
   const hasAiDisclosure = !!track.aiDisclosure;
   const isHot = (track.plays ?? 0) >= 50;
+  const ctColors = getContentTypeColors((track as any).contentType ?? "audio");
 
   return (
     <>
@@ -133,6 +141,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             ? "museum-card--hot gold-banner"
             : ""
         }`}
+      style={isActive ? undefined : { borderColor: ctColors.dim, boxShadow: `0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px ${ctColors.dim}` }}
     >
       {/* ── Zone 1: Cover Art — plays in global player ── */}
       <div
@@ -318,8 +327,16 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           )}
         </div>
 
-        {/* Genre pills — own row, always visible */}
-        <GenrePills genre={track.genre} maxVisible={4} />
+        {/* Content-type chip + genre pills */}
+        <div className="flex flex-wrap gap-1 items-center">
+          <span
+            className="text-[8px] px-1.5 py-0.5 rounded-full font-heading tracking-widest leading-none uppercase"
+            style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
+          >
+            {ctColors.icon} {ctColors.label}
+          </span>
+        </div>
+        <GenrePills genre={track.genre} maxVisible={3} chipBg={ctColors.chipBg} chipBorder={ctColors.chipBorder} textColor={ctColors.text} />
 
         {/* Actions row — always visible, no opacity-0 hiding */}
         <div className="flex items-center justify-between pt-0.5">
