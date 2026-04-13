@@ -237,6 +237,28 @@ export default function BookDetailPage() {
               )}
             </div>
 
+            {/* Credits (Publisher, Author, etc.) */}
+            {(() => {
+              const rawCredits = (song as any)?.creditsJson;
+              if (!rawCredits) return null;
+              let credits: { role: string; name: string }[] = [];
+              try { credits = JSON.parse(rawCredits); } catch { return null; }
+              if (credits.length === 0) return null;
+              return (
+                <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.12)" }}>
+                  <p className="text-[9px] uppercase tracking-widest font-heading mb-3" style={{ color: "rgba(203,177,131,0.55)" }}>Credits</p>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                    {credits.map((c: { role: string; name: string }, i: number) => (
+                      <div key={i} className="flex items-baseline gap-2">
+                        <span className="text-[10px] uppercase tracking-widest flex-shrink-0" style={{ color: "#3F4A50", minWidth: "72px" }}>{c.role}</span>
+                        <span className="text-sm" style={{ color: "#DACAAA" }}>{c.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* WID Panel */}
             {song.witnessId && (
               <WIDPanel witnessId={song.witnessId} />

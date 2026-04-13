@@ -533,7 +533,7 @@ export default function CreatorProfilePage() {
     // Build queue from all this creator's public songs so playback continues
     const creatorSongs = (data?.songs || []).filter((s: any) => !!s.fileUrl);
     if (creatorSongs.length > 1) {
-      const queue = creatorSongs.map((s: { id: number; title: string; fileUrl: string; coverArtUrl?: string; genre?: string; witnessId?: string; coverPositionX?: number; coverPositionY?: number; visualReady?: boolean; autoVideoUrl?: string | null }) => ({
+      const queue = creatorSongs.map((s: { id: number; title: string; fileUrl: string; coverArtUrl?: string; genre?: string; witnessId?: string; coverPositionX?: number; coverPositionY?: number; visualReady?: boolean; autoVideoUrl?: string | null; contentType?: string }) => ({
         id: String(s.id),
         title: s.title,
         artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
@@ -548,6 +548,7 @@ export default function CreatorProfilePage() {
           visualReady: s.visualReady ?? false,
           autoVideoUrl: s.autoVideoUrl ?? undefined,
           creatorRole: (data?.creator as any)?.role ?? undefined,
+          contentType: (s.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
       }));
       const startIdx = queue.findIndex((t: any) => t.id === String(song.id));
       playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
@@ -566,6 +567,7 @@ export default function CreatorProfilePage() {
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
         creatorRole: (data?.creator as any)?.role ?? undefined,
+        contentType: (song.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
       });
     }
     playMutation.mutate({ songId: song.id });
@@ -1401,6 +1403,7 @@ export default function CreatorProfilePage() {
                                 autoVideoUrl: s.autoVideoUrl ?? undefined,
                                 creatorId: (data?.creator as any)?.id ?? undefined,
                                 creatorRole: (data?.creator as any)?.role ?? undefined,
+                                contentType: ((s as any).contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
                               }));
                             if (albumQueue.length > 1) {
                               const startIdx = albumQueue.findIndex((t: any) => t.id === String(song.id));

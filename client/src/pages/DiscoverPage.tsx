@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -27,9 +27,32 @@ const GENRE_ICONS: Record<string, string> = {
   "Ambient": "https://cdn.manus.space/icons/icon-book.png",
 };
 
+type ContentType = "audio" | "lyrics" | "manuscript" | "comic";
+
+const TYPE_PARAM_MAP: Record<string, ContentType> = {
+  music: "audio",
+  audio: "audio",
+  lyrics: "lyrics",
+  manuscripts: "manuscript",
+  manuscript: "manuscript",
+  comics: "comic",
+  comic: "comic",
+};
+
 export default function DiscoverPage() {
   const [search, setSearch] = useState("");
   const [activeGenre, setActiveGenre] = useState<string | undefined>();
+  const [activeContentType, setActiveContentType] = useState<ContentType | undefined>(() => {
+    if (typeof window === "undefined") return undefined;
+    const param = new URLSearchParams(window.location.search).get("type");
+    return param ? (TYPE_PARAM_MAP[param.toLowerCase()] ?? undefined) : undefined;
+  });
+
+  // Sync activeContentType when the URL ?type= param changes (e.g. browser back/forward)
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("type");
+    setActiveContentType(param ? (TYPE_PARAM_MAP[param.toLowerCase()] ?? undefined) : undefined);
+  }, [typeof window !== "undefined" ? window.location.search : ""]);
   const { addAndPlay, playQueueAt, playNext, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
   const [menuSong, setMenuSong] = useState<any | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
@@ -69,7 +92,7 @@ export default function DiscoverPage() {
   };
 
   const { data: songs, isLoading: songsLoading } = trpc.songs.discover.useQuery(
-    { genre: activeGenre, search: search || undefined, limit: 24 },
+    { genre: activeGenre, search: search || undefined, limit: 24, contentType: activeContentType },
     { refetchOnWindowFocus: false }
   );
   const { data: creators, isLoading: creatorsLoading } = trpc.profile.allCreators.useQuery(undefined, { refetchOnWindowFocus: false });
@@ -215,17 +238,31 @@ export default function DiscoverPage() {
           ].map(({ type: ct, label, icon: Icon, widLabel, color, href }) => {
             const { data: countData } = trpc.songs.getCountsByContentType.useQuery(undefined, { staleTime: 300_000 });
             const count = countData ? (countData as any)[ct] ?? 0 : null;
+            const isActive = activeContentType === ct;
             return (
-              <Link key={ct} href={href}>
+              <Link key={ct} href={href}
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault();
+                  // Toggle: clicking the active type clears the filter
+                  setActiveContentType(prev => prev === ct ? undefined : ct);
+                  window.history.pushState({}, "", isActive ? "/discover" : href);
+                  // Scroll to the results section
+                  setTimeout(() => document.getElementById("section-new-releases")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+                }}
+              >
                 <div
                   className="rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] hover:opacity-90"
-                  style={{ background: "#2C3438", border: `1px solid ${color}33` }}
+                  style={{
+                    background: isActive ? `${color}18` : "#2C3438",
+                    border: `1px solid ${isActive ? color : color + "33"}`,
+                    boxShadow: isActive ? `0 0 14px ${color}22` : undefined,
+                  }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <Icon size={18} style={{ color }} />
                     <span className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: `${color}22`, color, border: `1px solid ${color}55` }}>{widLabel}</span>
                   </div>
-                  <p className="text-sm font-bold" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{label}</p>
+                  <p className="text-sm font-bold" style={{ color: isActive ? color : "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{label}</p>
                   {count !== null && (
                     <p className="text-[11px] mt-0.5" style={{ color: "#3F4A50" }}>{count.toLocaleString()} witnessed</p>
                   )}
@@ -337,7 +374,12 @@ export default function DiscoverPage() {
         <div id="section-new-releases">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
-              {activeGenre ? `${activeGenre} Tracks` : "Latest Releases"}
+              {activeGenre
+                ? `${activeGenre} ${activeContentType === "manuscript" ? "Manuscripts" : activeContentType === "comic" ? "Comics" : activeContentType === "lyrics" ? "Lyrics" : "Tracks"}`
+                : activeContentType === "manuscript" ? "Witnessed Manuscripts"
+                : activeContentType === "comic" ? "Witnessed Comics"
+                : activeContentType === "lyrics" ? "Witnessed Lyrics"
+                : "Latest Releases"}
             </h2>
             <Link href="/explore" className="flex items-center gap-1 text-sm" style={{ color: "#CBB183" }}>
               View all <ChevronRight className="w-4 h-4" />

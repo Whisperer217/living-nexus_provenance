@@ -662,6 +662,9 @@ export default function MobilePlayerLayer() {
   // Don't render if no track
   if (!currentTrack) return null;
 
+  // Non-audio works (manuscript, comic, lyrics) should not show scrubber or timestamps
+  const isNonAudio = currentTrack.contentType === "manuscript" || currentTrack.contentType === "comic" || currentTrack.contentType === "lyrics";
+
   // visualReady gate: true when the auto-video MP4 is still being generated
   const isVisualPending = currentTrack.visualReady === false && !videoUrl;
 
@@ -1317,16 +1320,18 @@ export default function MobilePlayerLayer() {
         </button>
       </div>
 
-      {/* Scrubber */}
-      <div className="flex-shrink-0 px-8 pb-5">
-        <Scrubber
-          progress={progress}
-          currentTime={state.currentTime}
-          duration={state.duration}
-          onSeek={handleSeek}
-          onSeekTouch={handleSeekTouch}
-        />
-      </div>
+      {/* Scrubber — hidden for non-audio content types */}
+      {!isNonAudio && (
+        <div className="flex-shrink-0 px-8 pb-5">
+          <Scrubber
+            progress={progress}
+            currentTime={state.currentTime}
+            duration={state.duration}
+            onSeek={handleSeek}
+            onSeekTouch={handleSeekTouch}
+          />
+        </div>
+      )}
 
       {/* Controls */}
       <div className="flex-shrink-0 px-8 pb-6">
@@ -1792,19 +1797,23 @@ export default function MobilePlayerLayer() {
                 style={{ background: "linear-gradient(135deg, #CBB183, #CBB183)", color: "#2C3438" }}>
                 {state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
               </button>
-              <div className="flex-1">
-                <Scrubber
-                  progress={progress}
-                  currentTime={state.currentTime}
-                  duration={state.duration}
-                  onSeek={handleSeek}
-                  onSeekTouch={handleSeekTouch}
-                  thin
-                />
-              </div>
-              <span className="text-[10px] font-mono text-white/50 flex-shrink-0">
-                {fmtTime(state.duration)}
-              </span>
+              {!isNonAudio && (
+                <div className="flex-1">
+                  <Scrubber
+                    progress={progress}
+                    currentTime={state.currentTime}
+                    duration={state.duration}
+                    onSeek={handleSeek}
+                    onSeekTouch={handleSeekTouch}
+                    thin
+                  />
+                </div>
+              )}
+              {!isNonAudio && (
+                <span className="text-[10px] font-mono text-white/50 flex-shrink-0">
+                  {fmtTime(state.duration)}
+                </span>
+              )}
               <button type="button" onClick={nextTrack} style={{ color: "rgba(255,255,255,0.6)" }}>
                 <SkipForward size={20} fill="currentColor" />
               </button>
@@ -1823,13 +1832,15 @@ export default function MobilePlayerLayer() {
                 <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
               </button>
             </div>
-            <Scrubber
-              progress={progress}
-              currentTime={state.currentTime}
-              duration={state.duration}
-              onSeek={handleSeek}
-              onSeekTouch={handleSeekTouch}
-            />
+            {!isNonAudio && (
+              <Scrubber
+                progress={progress}
+                currentTime={state.currentTime}
+                duration={state.duration}
+                onSeek={handleSeek}
+                onSeekTouch={handleSeekTouch}
+              />
+            )}
             <ControlsRow large overlay />
             {/* Action tray */}
             <div className="flex items-center justify-around pt-1">
