@@ -226,13 +226,20 @@ export default function AttributionPage() {
             Join the Living Nexus Discord. Test things. Break things. Tell us what you find. The platform gets better because real people use it and speak up.
           </p>
           <a
-            href="https://discord.gg/livingnexus"
+            href="https://discord.gg/ADF9dtVA"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-colors"
             style={{ background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.3)", color: "#CBB183" }}
           >
             Join the Discord
+          </a>
+          <a
+            href="mailto:Jacob@commanddomains.com"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-amber-700/40 text-amber-300/80 hover:text-amber-200 hover:border-amber-600/60 transition-colors text-sm font-medium"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Jacob@commanddomains.com
           </a>
         </div>
       </div>
