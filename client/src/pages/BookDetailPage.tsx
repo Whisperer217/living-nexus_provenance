@@ -30,6 +30,7 @@ export default function BookDetailPage() {
   const [commentText, setCommentText] = useState("");
   const [copied, setCopied] = useState(false);
   const [viewerMode, setViewerMode] = useState<"preview" | "fullscreen">("preview");
+  const [showFullText, setShowFullText] = useState(false);
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: bookId },
@@ -120,6 +121,24 @@ export default function BookDetailPage() {
           {typeLabel.toUpperCase()}
         </div>
         <div className="flex items-center gap-2">
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-bold tracking-wide transition-all hover:opacity-90"
+              style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}55` }}>
+              <Download size={13} />
+              <span className="hidden sm:inline">Open PDF</span>
+              <span className="sm:hidden">PDF</span>
+            </a>
+          )}
+          {(song as any)?.lyricsText && (
+            <button
+              onClick={() => setShowFullText(v => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-bold tracking-wide transition-all hover:opacity-90"
+              style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}>
+              <BookOpen size={13} />
+              Read
+            </button>
+          )}
           <button onClick={handleCopyLink} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#AA8E64" }} title="Copy link">
             {copied ? <Check size={16} style={{ color: "#4ADE80" }} /> : <Copy size={16} />}
           </button>
@@ -293,26 +312,27 @@ export default function BookDetailPage() {
             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(203,177,131,0.12)" }}>
               <div className="flex items-center gap-2">
                 <FileText size={15} style={{ color: accentColor }} />
-                <span className="text-sm font-heading font-bold tracking-wide" style={{ color: "#E6CDAE" }}>Document Preview</span>
+                <span className="text-sm font-heading font-bold tracking-wide" style={{ color: "#E6CDAE" }}>Document</span>
               </div>
               <div className="flex items-center gap-2">
+                {/* Desktop: toggle iframe expand */}
                 <button
                   onClick={() => setViewerMode(v => v === "preview" ? "fullscreen" : "preview")}
-                  className="text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
+                  className="hidden md:block text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
                   style={{ color: "#AA8E64" }}>
                   {viewerMode === "preview" ? "EXPAND" : "COLLAPSE"}
                 </button>
                 <a href={fileUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
+                  className="flex items-center gap-1.5 text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
                   style={{ color: "#AA8E64" }}>
                   OPEN ↗
                 </a>
               </div>
             </div>
 
-            {isPdf ? (
-              /* PDF inline viewer */
-              <div style={{ height: viewerMode === "fullscreen" ? "80vh" : "520px" }}>
+            {/* Desktop: PDF iframe viewer */}
+            {isPdf && (
+              <div className="hidden md:block" style={{ height: viewerMode === "fullscreen" ? "80vh" : "520px" }}>
                 <iframe
                   src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=1`}
                   className="w-full h-full"
@@ -320,19 +340,52 @@ export default function BookDetailPage() {
                   style={{ border: "none", background: "#1A2530" }}
                 />
               </div>
-            ) : (
-              /* Non-PDF: show download prompt */
-              <div className="flex flex-col items-center justify-center py-16 gap-4">
-                <FileText className="w-14 h-14 opacity-25" style={{ color: "#CBB183" }} />
-                <p className="text-sm font-heading" style={{ color: "#AA8E64" }}>
-                  This document format requires a dedicated viewer.
+            )}
+
+            {/* Mobile: PDF iframe doesn't work — show open/download buttons instead */}
+            <div className={isPdf ? "md:hidden" : ""}>
+              <div className="flex flex-col items-center justify-center py-10 gap-4 px-4">
+                <FileText className="w-12 h-12 opacity-20" style={{ color: accentColor }} />
+                <p className="text-sm text-center font-heading" style={{ color: "#AA8E64" }}>
+                  {isPdf ? "Tap below to open the PDF in your browser or download it." : "This document format requires a dedicated viewer."}
                 </p>
-                <a href={fileUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
-                  style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}55` }}>
-                  <Download size={14} />
-                  Download Document
-                </a>
+                <div className="flex gap-3 flex-wrap justify-center">
+                  <a href={fileUrl} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
+                    style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}55` }}>
+                    <ExternalLink size={14} />
+                    Open PDF
+                  </a>
+                  <a href={fileUrl} download target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
+                    style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.30)" }}>
+                    <Download size={14} />
+                    Download
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Full Text Reader (lyricsText) ── */}
+        {(song as any)?.lyricsText && (
+          <div className="rounded-2xl overflow-hidden" style={{ background: "#1A2530", border: "1px solid rgba(203,177,131,0.18)" }}>
+            <button
+              onClick={() => setShowFullText(v => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 transition-colors hover:bg-white/5"
+              style={{ borderBottom: showFullText ? "1px solid rgba(203,177,131,0.12)" : "none" }}>
+              <div className="flex items-center gap-2">
+                <BookOpen size={15} style={{ color: "#CBB183" }} />
+                <span className="text-sm font-heading font-bold tracking-wide" style={{ color: "#E6CDAE" }}>Read Full Text</span>
+              </div>
+              <span className="text-xs font-heading" style={{ color: "#AA8E64" }}>{showFullText ? "COLLAPSE ▲" : "EXPAND ▼"}</span>
+            </button>
+            {showFullText && (
+              <div className="px-5 py-6 prose prose-invert max-w-none" style={{ color: "#DACAAA", fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", lineHeight: "1.85" }}>
+                {((song as any).lyricsText as string).split("\n").map((para: string, i: number) =>
+                  para.trim() ? <p key={i} className="mb-4">{para}</p> : <br key={i} />
+                )}
               </div>
             )}
           </div>
