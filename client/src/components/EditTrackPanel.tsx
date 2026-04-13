@@ -138,6 +138,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     try { return JSON.parse(json); } catch { return []; }
   };
   const [credits, setCredits] = useState<CreditEntry[]>(() => parseCredits(song.creditsJson));
+  // Sync credits state when the song prop changes (e.g. after a save + refetch)
+  useEffect(() => {
+    setCredits(parseCredits(song.creditsJson));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song.creditsJson]);
 
   const utils = trpc.useUtils();
   const updateDownloadPermission = trpc.songDownload.updatePermission.useMutation({

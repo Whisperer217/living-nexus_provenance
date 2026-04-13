@@ -1010,9 +1010,9 @@ export const appRouter = router({
         ...fields,
         haaiDeclaredAt: isHaaiComplete ? new Date() : undefined,
       });
-      // Save credits separately if provided
-      if (creditsJson !== undefined && creditsJson !== null) {
-        await updateSongCredits(songId, creditsJson);
+      // Save credits separately if provided (null = clear all credits, empty string = clear)
+      if (creditsJson !== undefined) {
+        await updateSongCredits(songId, creditsJson ?? "");
       }
       return { success: true };
     }),
