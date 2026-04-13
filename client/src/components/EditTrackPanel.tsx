@@ -549,8 +549,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           {/* Caption / Synopsis */}
           <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium">
-              {isWritten ? "Synopsis / Description" : "Caption / Description"}
+              {isWritten ? "Short Description" : "Caption / Description"}
             </Label>
+            {isWritten && (
+              <p className="text-xs" style={{ color: "#64748b" }}>Shown on archive cards and the public detail page. Keep it to 1–3 sentences.</p>
+            )}
             <Textarea
               value={caption}
               onChange={(e) => {
@@ -797,11 +800,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           >
             <Label className="text-white text-sm font-medium flex items-center gap-2">
               <FileText size={14} style={{ color: "#CBB183" }} />
-              {isWritten ? "Synopsis / Full Text" : "Lyrics"}
+              {isWritten ? "Full Synopsis / Excerpt" : "Lyrics"}
             </Label>
             <p className="text-xs" style={{ color: "#64748b" }}>
               {isWritten
-                ? "Add or update the synopsis or body text for this work. Included in the provenance record."
+                ? "A longer excerpt or full synopsis embedded in the provenance record. This is separate from the short description shown on cards."
                 : "Add or update the lyrics for this track. Lyrics are displayed in the Now Playing panel and serve as a timestamped record of your words."}
             </p>
             <textarea
@@ -1114,7 +1117,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="text-sm font-semibold" style={{ color: "#CBB183" }}>Credits</h3>
-                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>Add producers, engineers, co-writers, and featured artists.</p>
+                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  {(song as any).contentType === "manuscript" || (song as any).contentType === "comic"
+                    ? "Add publisher, author, editor, or illustrator credits."
+                    : "Add producers, engineers, co-writers, and featured artists."}
+                </p>
               </div>
               <Button
                 size="sm"
@@ -1125,6 +1132,18 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <Plus size={12} /> Add
               </Button>
+              {((song as any).contentType === "manuscript" || (song as any).contentType === "comic") &&
+                !credits.some(c => c.role.toLowerCase() === "publisher") && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs gap-1 ml-1"
+                  style={{ borderColor: "rgba(212,175,55,0.3)", color: "#CBB183", background: "transparent" }}
+                  onClick={() => setCredits(prev => [{ role: "Publisher", name: "" }, ...prev])}
+                >
+                  + Publisher
+                </Button>
+              )}
             </div>
             {credits.length === 0 ? (
               <p className="text-xs text-center py-3" style={{ color: "#475569" }}>No credits yet. Hit Add to give collaborators recognition.</p>

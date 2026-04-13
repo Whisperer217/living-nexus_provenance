@@ -549,11 +549,17 @@ export default function UploadPage() {
           const { url } = await uploadFileToS3(compressed, "cover");
           coverArtUrl = url;
         }
+        // For manuscript/comic: merge bmiNumber as a Publisher credit entry
+        const baseCredits = credits.filter(c => c.role && c.name);
+        const publisherCredit = (uploadMode === "manuscript" || uploadMode === "comic") && bmiNumber.trim()
+          ? [{ role: "Publisher", name: bmiNumber.trim() }]
+          : [];
+        const mergedCredits = [...publisherCredit, ...baseCredits.filter(c => c.role.toLowerCase() !== "publisher")];
         uploadMutation.mutate({
           fileUrl, fileKey, coverArtUrl, title, genre: genre || undefined,
           albumName: albumName || undefined, releaseDate: releaseDate || undefined,
           isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
-          creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
+          creditsJson: mergedCredits.length > 0 ? JSON.stringify(mergedCredits) : undefined,
           caption: caption || undefined,
           contentType: uploadMode,
           fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,

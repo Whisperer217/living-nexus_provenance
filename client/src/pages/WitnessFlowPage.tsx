@@ -209,6 +209,28 @@ function WorkPanel({ song }: { song: any }) {
         )}
       </div>
 
+      {/* Credits (Publisher, Author, etc.) */}
+      {(() => {
+        const rawCredits = song?.creditsJson;
+        if (!rawCredits) return null;
+        let creds: { role: string; name: string }[] = [];
+        try { creds = JSON.parse(rawCredits); } catch { return null; }
+        if (creds.length === 0) return null;
+        return (
+          <div className="bg-zinc-900 rounded-lg p-3">
+            <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Credits</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              {creds.map((c: { role: string; name: string }, i: number) => (
+                <div key={i} className="flex items-baseline gap-2">
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-600 flex-shrink-0" style={{ minWidth: "64px" }}>{c.role}</span>
+                  <span className="text-sm text-amber-200">{c.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="bg-amber-400/5 border border-amber-400/20 rounded-lg p-3 text-xs text-zinc-400">
         <Shield size={12} className="inline mr-1 text-amber-400" />
         File hash is computed client-side at upload and sealed into the WID. Any modification to the file would produce a different hash, making tampering detectable.
