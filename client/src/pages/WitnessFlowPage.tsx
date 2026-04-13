@@ -250,6 +250,11 @@ function ContributionPanel({ song, playStats }: { song: any; playStats: any }) {
         </div>
       </div>
 
+      {(playStats?.total ?? 0) === 0 && (song?.playCount ?? 0) > 0 && (
+        <div className="bg-amber-400/5 border border-amber-400/20 rounded-lg p-3 text-xs text-zinc-400">
+          <span className="text-amber-400 font-semibold">Note:</span> Page visits are counted in "Total Plays" above. Qualified plays (≥ 30 s through the audio player) will appear once listeners engage via the embedded player.
+        </div>
+      )}
       <div className="bg-emerald-400/5 border border-emerald-400/20 rounded-lg p-3 text-xs text-zinc-400">
         <GitCommit size={12} className="inline mr-1 text-emerald-400" />
         Every qualified play is recorded in the <code className="text-emerald-400">playEvents</code> table with the WID of the track at time of play. This creates an immutable interaction log linked to the provenance chain.
@@ -363,7 +368,20 @@ export default function WitnessFlowPage() {
     { enabled: !!songId }
   );
 
-  const song = songByWid ?? songById;
+  // Normalize songById (nested { song, creator }) to a flat shape matching verifyWid
+  const normalizedSongById = songById
+    ? {
+        ...(songById as any).song,
+        artistName: (songById as any).creator?.artistHandle || (songById as any).creator?.name || undefined,
+        artistHandle: (songById as any).creator?.artistHandle ?? undefined,
+        profilePhotoUrl: (songById as any).creator?.profilePhotoUrl ?? undefined,
+        aiDisclosure: (songById as any).creator?.aiDisclosure ?? null,
+        creatorId: (songById as any).creator?.id ?? null,
+        creatorUserId: (songById as any).song?.userId ?? null,
+      }
+    : undefined;
+
+  const song = songByWid ?? normalizedSongById;
   const isLoading = loadingWid || loadingId;
 
   // Owner check: the authenticated user owns this work if their id matches creatorUserId

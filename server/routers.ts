@@ -614,6 +614,7 @@ export const appRouter = router({
         lyricsFileName: song.lyricsFileName ?? null,
         lyricsAddedAt: song.lyricsAddedAt ?? null,
         contentType: (song.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
+        aiDisclosure: (song as any).aiDisclosure ?? null,
       };
     }),
     // Public counters for homepage trust layer
