@@ -21,8 +21,8 @@ const EARLY_BELIEVERS = [
   {
     handle: "Doc Seraph Mercer",
     role: "Founder — BDDT Publishing / Living Nexus",
-    note: "Combat medic. Creator. The reason any of this exists. He read the story to his kids the night before Slimdoggy found the bug.",
-    since: "July 2025",
+    note: "Prior service combat medic. The platform exists because he recognized a problem that the technology industry had not named: the seven-step extraction — diagnosis, testimony, routing, stripping of context, compounding, monetization — the same mechanism whether the institution is a hospital, a pharmaceutical company, or an AI training pipeline. He built the counter-architecture before the legal community had articulated the problem. The Witness ID system, the HAAI declaration, the Sovereign Stamp — these are doctrine made code. The doctrine: truth enters through witnesses, survives through return, and collapses when systems sever it from its origin. Living Nexus is the system that cannot sever it.",
+    since: "January 2026",
   },
 ];
 
