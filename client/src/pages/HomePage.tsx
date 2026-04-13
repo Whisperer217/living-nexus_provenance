@@ -14,6 +14,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TrackCard from "@/components/TrackCard";
+import BookCard from "@/components/BookCard";
 import TipModal from "@/components/TipModal";
 import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart, DollarSign, Cpu, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
@@ -500,7 +501,14 @@ function HorizontalTrackGrid({
       >
         {row1.map((track, idx) => (
           <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
-            <TrackCard track={track} index={idx} onTip={onTip} onPlay={handleSectionPlay} {...getPrefetch(track)} />
+            {(track.contentType === "manuscript" || track.contentType === "comic") ? (
+              <BookCard
+                item={{ song: { id: track.songId ?? parseInt(track.id, 10), title: track.title, coverArtUrl: track.artUrl, witnessId: track.witnessId, genre: track.genre, contentType: track.contentType }, creator: { id: track.creatorId, name: track.artist, artistHandle: track.artistHandle } }}
+                {...getPrefetch(track)}
+              />
+            ) : (
+              <TrackCard track={track} index={idx} onTip={onTip} onPlay={handleSectionPlay} {...getPrefetch(track)} />
+            )}
           </div>
         ))}
       </div>
@@ -513,7 +521,14 @@ function HorizontalTrackGrid({
         >
           {row2.map((track, idx) => (
             <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
-              <TrackCard track={track} index={12 + idx} onTip={onTip} onPlay={handleSectionPlay} {...getPrefetch(track)} />
+              {(track.contentType === "manuscript" || track.contentType === "comic") ? (
+                <BookCard
+                  item={{ song: { id: track.songId ?? parseInt(track.id, 10), title: track.title, coverArtUrl: track.artUrl, witnessId: track.witnessId, genre: track.genre, contentType: track.contentType }, creator: { id: track.creatorId, name: track.artist, artistHandle: track.artistHandle } }}
+                  {...getPrefetch(track)}
+                />
+              ) : (
+                <TrackCard track={track} index={12 + idx} onTip={onTip} onPlay={handleSectionPlay} {...getPrefetch(track)} />
+              )}
             </div>
           ))}
         </div>
@@ -640,6 +655,8 @@ export default function HomePage() {
       artistHandle: creator?.artistHandle ?? undefined,
       profilePhotoUrl: creator?.profilePhotoUrl ?? undefined,
       creatorId: creator?.id ?? undefined,
+      contentType: song.contentType ?? "audio",
+      songId: song.id,
     };
   };
 

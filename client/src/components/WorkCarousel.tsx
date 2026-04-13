@@ -143,7 +143,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
           {(works as any[]).map((item: any) => {
             const isActive = type === "audio" && currentTrackId === String(item.song.id);
             const isPlaying = isActive && playerState.isPlaying;
-            const href = `/song/${item.song.id}`;
+            const href = (type === "manuscript" || type === "comic") ? `/book/${item.song.id}` : `/song/${item.song.id}`;
             return (
               <div
                 key={item.song.id}

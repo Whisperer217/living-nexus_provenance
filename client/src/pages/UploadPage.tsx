@@ -776,6 +776,91 @@ export default function UploadPage() {
                 </div>
               </div>
 
+              {/* ── What You'll Need — medium-aware pre-upload checklist ── */}
+              {(() => {
+                const checklists: Record<string, { icon: string; color: string; title: string; items: { label: string; note?: string; required: boolean }[] }> = {
+                  audio: {
+                    icon: "🎵",
+                    color: "#CBB183",
+                    title: "Before You Upload Music",
+                    items: [
+                      { label: "Audio file (MP3, WAV, FLAC, M4A, OGG)", note: "Up to 375 MB", required: true },
+                      { label: "Cover art image (JPG, PNG, WebP)", note: "Square preferred — 1:1 or 4:5", required: true },
+                      { label: "Track title", required: true },
+                      { label: "ISRC code", note: "If you have one — leave blank if not", required: false },
+                      { label: "BPM, key, and genre", note: "Helps with discovery", required: false },
+                      { label: "Co-writer / producer credits", note: "Optional but recommended", required: false },
+                    ],
+                  },
+                  lyrics: {
+                    icon: "📝",
+                    color: "#A78BFA",
+                    title: "Before You Upload Lyrics",
+                    items: [
+                      { label: "Lyrics text or .txt / .pdf file", required: true },
+                      { label: "Song title", required: true },
+                      { label: "Cover art image", note: "Optional but recommended for display", required: false },
+                      { label: "Genre / mood tags", required: false },
+                      { label: "Co-writer credits", note: "If applicable", required: false },
+                    ],
+                  },
+                  manuscript: {
+                    icon: "📖",
+                    color: "#4ADE80",
+                    title: "Before You Upload a Manuscript",
+                    items: [
+                      { label: "Document file (PDF, DOCX, TXT, EPUB)", note: "PDF strongly recommended for best display", required: true },
+                      { label: "Cover art / book cover image", note: "Portrait 3:4 ratio recommended", required: true },
+                      { label: "Title and author name", required: true },
+                      { label: "ISBN", note: "Enter in the ISRC field — leave blank if unpublished", required: false },
+                      { label: "Genre / category", note: "e.g. Fiction, Non-Fiction, Children's, Academic", required: false },
+                      { label: "Series name", note: "If part of a series — enter in Album/Collection field", required: false },
+                      { label: "Publisher name", note: "Self-published is fine", required: false },
+                    ],
+                  },
+                  comic: {
+                    icon: "🎨",
+                    color: "#EF4444",
+                    title: "Before You Upload a Comic / Novel",
+                    items: [
+                      { label: "Document file (PDF preferred)", note: "All pages in a single PDF for best inline preview", required: true },
+                      { label: "Cover art image", note: "Portrait 3:4 ratio — the cover page of your comic", required: true },
+                      { label: "Title and creator name", required: true },
+                      { label: "ISBN", note: "Enter in the ISRC field — leave blank if self-published", required: false },
+                      { label: "Issue / volume number", note: "Enter in the Album/Series field", required: false },
+                      { label: "Genre / themes", note: "e.g. Superhero, Horror, Fantasy, Slice of Life", required: false },
+                    ],
+                  },
+                };
+                const cl = checklists[uploadMode];
+                if (!cl) return null;
+                return (
+                  <div className="rounded-xl overflow-hidden" style={{ background: "rgba(0,0,0,0.28)", border: `1px solid ${cl.color}30` }}>
+                    <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: `1px solid ${cl.color}20`, background: `${cl.color}0a` }}>
+                      <span className="text-base">{cl.icon}</span>
+                      <span className="text-[11px] font-heading font-bold tracking-widest uppercase" style={{ color: cl.color }}>{cl.title}</span>
+                    </div>
+                    <div className="px-4 py-3 space-y-2">
+                      {cl.items.map((item, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <div className="mt-0.5 flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                            style={{ background: item.required ? `${cl.color}22` : "rgba(255,255,255,0.05)", border: `1px solid ${item.required ? cl.color + "55" : "rgba(255,255,255,0.10)"}`, color: item.required ? cl.color : "#6B7280" }}>
+                            {item.required ? "!" : "○"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs font-medium" style={{ color: item.required ? "#E6CDAE" : "#8B9BA3" }}>{item.label}</span>
+                            {item.note && <span className="text-[10px] ml-1.5" style={{ color: "#5A6A72" }}>{item.note}</span>}
+                          </div>
+                        </div>
+                      ))}
+                      <p className="text-[9px] pt-1" style={{ color: "#3F4A50" }}>
+                        <span style={{ color: cl.color + "99" }}>!</span> = required &nbsp;·&nbsp; ○ = optional but recommended
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {uploadMode === "audio" && (
                 <div
                   onClick={() => audioInputRef.current?.click()}

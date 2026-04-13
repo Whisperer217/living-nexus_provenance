@@ -69,6 +69,7 @@ const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const ProjectPage = lazy(() => import("./pages/ProjectPage"));
 const MyProjectsPage = lazy(() => import("./pages/MyProjectsPage"));
 const ProjectsDiscoveryPage = lazy(() => import("./pages/ProjectsDiscoveryPage"));
+const BookDetailPage = lazy(() => import("./pages/BookDetailPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -156,6 +157,7 @@ function Router() {
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />
                 <Route path="/song/:id" component={SongDetailPage} />
+                <Route path="/book/:id" component={BookDetailPage} />
                 <Route path="/songs/:id" component={SongDetailPage} />
                 <Route path="/track/:id" component={TrackPage} />
                 <Route path="/creator/:id" component={CreatorProfilePage} />

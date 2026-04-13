@@ -71,7 +71,7 @@ function ExploreCard({
   const isNonAudio = song.contentType === "manuscript" || song.contentType === "comic";
   const isHot = (song.playCount ?? 0) >= 50;
   const handleCardClick = () => {
-    if (isNonAudio) { navigate(`/song/${song.id}`); } else { onPlay(item); }
+    if (isNonAudio) { navigate(`/book/${song.id}`); } else { onPlay(item); }
   };
 
   return (
@@ -158,9 +158,9 @@ function ExploreCard({
 
       {/* ── Info panel ── */}
       <div className="p-3">
-        {/* Song title → song detail page */}
+        {/* Song title → song/book detail page */}
         <Link
-          href={`/song/${song.id}`}
+          href={isNonAudio ? `/book/${song.id}` : `/song/${song.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
           className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#CBB183] transition-colors cursor-pointer"
           title={`Open ${song.title}`}
