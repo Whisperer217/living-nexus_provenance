@@ -1587,7 +1587,7 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),
     add: publicProcedure.input(z.object({ songId: z.number(), content: z.string().min(1).max(1000), authorName: z.string().max(128).optional() })).mutation(async ({ ctx, input }) => {
       // Events is the primary write target
-      const actorName = input.authorName || ctx.user?.name || "Anonymous";
+      const actorName = input.authorName || ctx.user?.artistHandle || ctx.user?.name || "Anonymous";
       await createEvent({
         type: "COMMENT",
         workId: input.songId,
@@ -1625,7 +1625,7 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         authorName: z.string().max(128).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const actorName = input.authorName || ctx.user?.name || "Anonymous";
+        const actorName = input.authorName || ctx.user?.artistHandle || ctx.user?.name || "Anonymous";
         // Insert reply with parentId
         await addComment({
           songId: input.songId,

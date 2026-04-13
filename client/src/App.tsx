@@ -41,6 +41,7 @@ const VerifyPage = lazy(() => import("./pages/VerifyPage"));
 const ContributorsPage = lazy(() => import("./pages/ContributorsPage"));
 const PlaylistPage = lazy(() => import("./pages/PlaylistPage"));
 const ManifestoPage = lazy(() => import("./pages/ManifestoPage"));
+const AttributionPage = lazy(() => import("./pages/AttributionPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
 const ModerationQueuePage = lazy(() => import("./pages/admin/ModerationQueuePage"));
 const AuditLogPage = lazy(() => import("./pages/admin/AuditLogPage"));
@@ -166,6 +167,7 @@ function Router() {
                 <Route path="/contributors" component={ContributorsPage} />
                 <Route path="/playlist" component={PlaylistPage} />
                 <Route path="/manifesto" component={ManifestoPage} />
+                <Route path="/attribution" component={AttributionPage} />
                 <Route path="/admin/users" component={AdminUsersPage} />
                 <Route path="/admin/normalization" component={ArtworkNormalizationPage} />
                 <Route path="/admin/moderation" component={ModerationQueuePage} />

@@ -363,6 +363,18 @@ export default function ManifestoPage() {
           >
             <ExternalLink size={14} /> Read the Doctrine
           </a>
+          <Link href="/attribution">
+            <a
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(63,74,80,0.4)",
+                color: "#3F4A50",
+              }}
+            >
+              <Users size={14} /> Community Attribution
+            </a>
+          </Link>
         </div>
       </div>
     </div>
