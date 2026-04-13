@@ -431,10 +431,12 @@ export function registerOgRoutes(app: Express) {
 
   for (const route of STATIC_OG_ROUTES) {
     app.get(route.path, async (req, res, next) => {
-      // Always inject OG + canonical for static pages — not just for crawlers.
-      // Google Googlebot does not always identify as a crawler UA, and we need
-      // <link rel="canonical"> in every response to prevent soft-404 and
-      // duplicate-canonical issues in Search Console.
+      // Only intercept for crawlers — regular browsers fall through to the React SPA.
+      // This preserves the SPA experience while giving Google/Discord/Slack/iMessage
+      // a fully-formed HTML page with OG tags and a self-referencing canonical tag.
+      const ua = req.headers["user-agent"] || "";
+      if (!isCrawler(ua)) return next();
+
       const canonicalUrl = `${CANONICAL_ORIGIN}${route.path === "/" ? "" : route.path}`;
       const finalCanonical = route.path === "/" ? `${CANONICAL_ORIGIN}/` : canonicalUrl;
       try {
