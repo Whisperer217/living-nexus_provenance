@@ -91,6 +91,7 @@ function ExploreCard({
       {/* ── Zone 1: Cover Art ── */}
       <div
         className="prov-card-img-wrap cursor-pointer"
+        style={{ maxHeight: "200px" }}
         onClick={e => { e.stopPropagation(); handleCardClick(); }}
       >
         <MediaAsset

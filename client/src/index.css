@@ -1229,6 +1229,7 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   width: 100%;
   overflow: hidden;
   border-radius: 0.75rem; /* rounded-xl — consistent across all cards */
+  max-height: 240px;     /* hard cap — prevents tall images from stretching cards */
 }
 
 /* Bottom gradient overlay: always present, cinematic fade */

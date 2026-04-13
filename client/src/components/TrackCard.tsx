@@ -137,6 +137,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
       {/* ── Zone 1: Cover Art — plays in global player ── */}
       <div
         className="relative overflow-hidden cursor-pointer w-full"
+        style={{ maxHeight: "200px" }}
         onClick={handleCoverClick}
         title="Play this track"
       >

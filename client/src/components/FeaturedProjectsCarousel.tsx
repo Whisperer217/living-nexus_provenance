@@ -117,8 +117,8 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                   boxShadow: "0 4px 28px rgba(0,0,0,0.55), 0 0 0 1px rgba(203,177,131,0.08)",
                 }}
               >
-                {/* Image — locked 4:5 ratio via prov-card-img-wrap */}
-                <div className="prov-card-img-wrap" style={{ paddingBottom: "125%" }}>
+                {/* Image — locked 4:5 ratio, max 200px tall */}
+                <div className="prov-card-img-wrap" style={{ paddingBottom: "125%", maxHeight: "200px" }}>
                   {project.bannerUrl ? (
                     <img
                       src={project.bannerUrl}
