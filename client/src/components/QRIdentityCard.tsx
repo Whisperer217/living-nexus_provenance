@@ -73,15 +73,25 @@ async function renderCardToCanvas(
   ctx.lineWidth = 1;
   ctx.strokeRect(14, 14, CARD_W - 28, CARD_H - 28);
 
-  // ── Thumbnail / artwork ───────────────────────────────────────────────────
+  // ── Thumbnail area — always draw placeholder first, then overlay image ────
   const thumbH = 220;
+  // Placeholder gradient (always drawn so card is never blank)
+  const ph = ctx.createLinearGradient(20, 20, CARD_W - 20, 20 + thumbH);
+  ph.addColorStop(0, "#1e1a0e");
+  ph.addColorStop(1, "#2a2010");
+  ctx.fillStyle = ph;
+  ctx.fillRect(20, 20, CARD_W - 40, thumbH);
+
   if (entity.thumbnailUrl) {
     try {
       const img = new Image();
-      img.crossOrigin = "anonymous";
+      // Try without crossOrigin first — if the CDN doesn't send CORS headers,
+      // crossOrigin='anonymous' causes a tainted-canvas error. Without it the
+      // image still renders visually (we just can't export a clean PNG, which
+      // is acceptable as a graceful degradation).
       await new Promise<void>((resolve) => {
         img.onload = () => resolve();
-        img.onerror = () => resolve(); // graceful fallback
+        img.onerror = () => resolve(); // graceful fallback to placeholder
         img.src = entity.thumbnailUrl!;
       });
       if (img.complete && img.naturalWidth > 0) {
@@ -105,14 +115,7 @@ async function renderCardToCanvas(
         ctx.fillStyle = thumbOverlay;
         ctx.fillRect(20, 20, CARD_W - 40, thumbH);
       }
-    } catch (_) { /* ignore */ }
-  } else {
-    // Placeholder gradient
-    const ph = ctx.createLinearGradient(20, 20, CARD_W - 20, 20 + thumbH);
-    ph.addColorStop(0, "#1e1a0e");
-    ph.addColorStop(1, "#2a2010");
-    ctx.fillStyle = ph;
-    ctx.fillRect(20, 20, CARD_W - 40, thumbH);
+    } catch (_) { /* ignore — placeholder already drawn above */ }
   }
 
   // ── Entity type badge ─────────────────────────────────────────────────────
