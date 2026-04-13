@@ -1176,7 +1176,22 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 ))}
               </div>
             )}
-            <p className="text-xs mt-2" style={{ color: "#475569" }}>Credits are saved when you click Save Changes below.</p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-xs" style={{ color: "#475569" }}>Credits save with the rest of your metadata.</p>
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={saving || coverUploading}
+                className="text-xs h-7 px-3 font-semibold"
+                style={{
+                  background: saving ? "rgba(203,177,131,0.3)" : "linear-gradient(135deg, #CBB183, #b8941f)",
+                  color: "#000",
+                  boxShadow: saving ? "none" : "0 0 10px rgba(212,175,55,0.3)",
+                }}
+              >
+                {saving ? "Saving…" : "Save Changes"}
+              </Button>
+            </div>
           </div>
 
           {/* ── Lineage ─────────────────────────────────────────────────────────────────────────────────────────── */}
