@@ -72,8 +72,17 @@ function deriveHarmonicFrequencies(hashHex: string): number[] {
   });
 }
 
-function formatWID(hashHex: string): string {
-  return `WID-MUS-${hashHex.slice(0, 8).toUpperCase()}-${hashHex.slice(8, 16).toUpperCase()}`;
+function widPrefixForMode(mode: string): string {
+  switch (mode) {
+    case "lyrics":     return "WID-LYR";
+    case "manuscript": return "WID-MAN";
+    case "comic":      return "WID-COM";
+    default:           return "WID-MUS";
+  }
+}
+function formatWID(hashHex: string, mode = "audio"): string {
+  const prefix = widPrefixForMode(mode);
+  return `${prefix}-${hashHex.slice(0, 8).toUpperCase()}-${hashHex.slice(8, 16).toUpperCase()}`;
 }
 
 function HarmonicWaveform({ frequencies, active }: { frequencies: number[]; active: boolean }) {
@@ -337,7 +346,7 @@ export default function UploadPage() {
       try {
         const buffer = await documentFile.arrayBuffer();
         const fileHash = await sha256Hex(buffer);
-        const prefix = uploadMode === "manuscript" ? "WID-MAN" : "WID-CMX";
+        const prefix = widPrefixForMode(uploadMode);
         const wid = `${prefix}-${fileHash.slice(0, 8).toUpperCase()}-${fileHash.slice(8, 16).toUpperCase()}`;
         const frequencies = deriveHarmonicFrequencies(fileHash);
         const keypair = await generateECDSAKeypair();
@@ -362,7 +371,7 @@ export default function UploadPage() {
         const enc = new TextEncoder();
         const buffer = enc.encode(lyrics);
         const fileHash = await sha256Hex(buffer.buffer as ArrayBuffer);
-        const wid = formatWID(fileHash);
+        const wid = formatWID(fileHash, "lyrics");
         const frequencies = deriveHarmonicFrequencies(fileHash);
         const keypair = await generateECDSAKeypair();
         const payload = `${wid}|${title}|${user?.name || ""}|${Date.now()}|LYRICS:${lyrics.slice(0, 500)}`;
@@ -386,7 +395,7 @@ export default function UploadPage() {
       const meta = await runUploadPipeline(audioFile, "audio");
       setPipelineMeta(meta);
       const fileHash = meta.fileHash;
-      const wid = formatWID(fileHash);
+      const wid = formatWID(fileHash, uploadMode);
       const frequencies = deriveHarmonicFrequencies(fileHash);
       const keypair = await generateECDSAKeypair();
       const payload = `${wid}|${title || audioFile.name}|${user?.name || ""}|${Date.now()}${lyrics ? `|LYRICS:${lyrics.slice(0, 500)}` : ""}`;

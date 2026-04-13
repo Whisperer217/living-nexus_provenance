@@ -463,7 +463,7 @@ function TrackVerifyView({
             audio:      { label: "Audio Registration",      wid: "WID-MUS", desc: "Cryptographic proof of origin for an audio recording.",           icon: <Music className="w-3.5 h-3.5" />,    bg: "rgba(203,177,131,0.12)",  color: "#CBB183",  border: "rgba(203,177,131,0.4)" },
             lyrics:     { label: "Lyrics Registration",     wid: "WID-LYR", desc: "Standalone lyric sheet — words witnessed before the music.",     icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(203,177,131,0.12)",   color: "#CBB183",  border: "rgba(203,177,131,0.35)" },
             manuscript: { label: "Manuscript Registration", wid: "WID-MAN", desc: "Novel, screenplay, or written work — sealed at first draft.",    icon: <BookOpen className="w-3.5 h-3.5" />, bg: "rgba(74,222,128,0.15)",  color: "#4ADE80",  border: "rgba(74,222,128,0.4)" },
-            comic:      { label: "Comic / Graphic Novel",   wid: "WID-CMX", desc: "Sequential art — pages, script, and cover witnessed together.",  icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(239,68,68,0.15)",   color: "#EF4444",   border: "rgba(239,68,68,0.4)" },
+            comic:      { label: "Comic / Graphic Novel",   wid: "WID-COM", desc: "Sequential art — pages, script, and cover witnessed together.",  icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(239,68,68,0.15)",   color: "#EF4444",   border: "rgba(239,68,68,0.4)" },
           };
           const m = mediumMap[ct] ?? mediumMap.audio;
           return (
@@ -648,10 +648,20 @@ function TrackVerifyView({
         <div className="flex gap-3">
           <Button
             className="flex-1"
-            onClick={() => navigate(`/songs/${data.songId}`)}
+            onClick={() => {
+              const ct3 = data.contentType ?? (data.isLyricsOnly ? "lyrics" : "audio");
+              const path = (ct3 === "manuscript" || ct3 === "comic") ? `/book/${data.songId}` : `/songs/${data.songId}`;
+              navigate(path);
+            }}
             style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
           >
-            <ExternalLink className="w-4 h-4 mr-2" /> View Track
+            <ExternalLink className="w-4 h-4 mr-2" /> {(() => {
+              const ct2 = data.contentType ?? (data.isLyricsOnly ? "lyrics" : "audio");
+              if (ct2 === "manuscript") return "View Manuscript";
+              if (ct2 === "comic") return "View Comic";
+              if (ct2 === "lyrics") return "View Lyrics";
+              return "View Track";
+            })()}
           </Button>
           <Button
             variant="outline"

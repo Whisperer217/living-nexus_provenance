@@ -53,8 +53,9 @@ function deriveHarmonicFrequencies(hashHex: string): number[] {
     return Math.round(base * (0.85 + ratio * 0.3) * 10) / 10;
   });
 }
-function formatWID(hashHex: string): string {
-  return `WID-MUS-${hashHex.slice(0, 8).toUpperCase()}-${hashHex.slice(8, 16).toUpperCase()}`;
+function formatWID(hashHex: string, mode = "audio"): string {
+  const prefix = mode === "lyrics" ? "WID-LYR" : mode === "manuscript" ? "WID-MAN" : mode === "comic" ? "WID-COM" : "WID-MUS";
+  return `${prefix}-${hashHex.slice(0, 8).toUpperCase()}-${hashHex.slice(8, 16).toUpperCase()}`;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
