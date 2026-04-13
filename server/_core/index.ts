@@ -59,6 +59,9 @@ async function startServer() {
   // Only enforce in production to avoid breaking local dev.
   if (process.env.NODE_ENV === "production") {
     app.use((req, res, next) => {
+      // Skip redirect for all API routes — especially /api/oauth/callback.
+      // Redirecting the OAuth callback strips the code/state params and breaks login.
+      if (req.path.startsWith("/api/")) return next();
       const host = req.headers["x-forwarded-host"] as string || req.headers.host || "";
       const proto = (req.headers["x-forwarded-proto"] as string || req.protocol || "http").split(",")[0].trim();
       const isHttps = proto === "https";
