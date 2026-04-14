@@ -2482,7 +2482,7 @@ export async function toggleSongReaction(
 
 // ── Trending Works ─────────────────────────────────────────────────────────
 // Score: playCount * 1 + likeCount * 3 + recency bonus (7d=+50, 30d=+20)
-export async function getTrendingWorks(opts?: { genre?: string; limit?: number }) {
+export async function getTrendingWorks(opts?: { genre?: string; limit?: number; contentType?: string }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 20;
@@ -2491,6 +2491,7 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number }
     eq(songs.status, "Published") as ReturnType<typeof eq>,
   ];
   if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
+  if (opts?.contentType) conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
 
   const rows = await db.select({
     song: songs,

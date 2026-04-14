@@ -353,9 +353,9 @@ export default function ExplorePage() {
     { enabled: mode === "new", refetchOnWindowFocus: false, staleTime: 120_000 }
   );
 
-  // Trending query
+  // Trending query — respects the active content-type chip
   const { data: trendingData, isLoading: trendingLoading } = trpc.songs.trending.useQuery(
-    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 50 },
+    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 50, contentType: serverContentType },
     { enabled: mode === "trending", refetchOnWindowFocus: false, staleTime: 120_000 }
   );
 
