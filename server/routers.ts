@@ -1394,7 +1394,7 @@ export const appRouter = router({
      * to avoid HTTP 414 URI Too Long errors on large track lists.
      */
     getBulkLikeStatuses: publicProcedure
-      .input(z.object({ songIds: z.array(z.number()).max(100) }))
+      .input(z.object({ songIds: z.array(z.number()).max(500) }))
       .query(async ({ ctx, input }) => {
         const userId = ctx.user?.id ?? null;
         return getBulkLikeStatuses(userId, input.songIds);

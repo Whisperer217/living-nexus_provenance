@@ -454,7 +454,8 @@ export default function ExplorePage() {
   const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : mode === "trending" ? trendingLoading : mode === "new" ? newThisWeekLoading : randomLoading;
 
   // Bulk like status — one query for all visible songs instead of per-card queries
-  const songIds = useMemo(() => songs.map((s: any) => s.song.id as number), [songs]);
+  // Slice to 500 to stay within the server cap (getBulkLikeStatuses max=500)
+  const songIds = useMemo(() => songs.map((s: any) => s.song.id as number).slice(0, 500), [songs]);
   const { data: bulkLikeData } = trpc.songs.getBulkLikeStatuses.useQuery(
     { songIds },
     { enabled: songIds.length > 0, staleTime: 30_000 }

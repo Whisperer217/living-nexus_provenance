@@ -3389,3 +3389,7 @@
 ## Bug Report — Apr 14 2026 (book/-1 crash)
 
 - [x] /book/-1 crash: songs.getById called with id=-1 (invalid sentinel); server returns undefined → React Query error "Query data cannot be undefined" — fixed: server now returns null, client guards with bookId > 0; same fix applied to SongDetailPage
+
+## Bug Report — Apr 14 2026 (Explore songIds too_big)
+
+- [x] Explore page: "Too big: expected array to have <=100 items" on songIds batch query — fixed: server cap raised from 100 to 500; client-side slice(0, 500) guard added on ExplorePage
