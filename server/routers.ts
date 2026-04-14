@@ -624,9 +624,12 @@ export const appRouter = router({
     getWitnessedCount: publicProcedure.query(async () => {
       const { getDb } = await import("./db");
       const { songs: songsTable } = await import("../drizzle/schema");
-      const { count, isNotNull } = await import("drizzle-orm");
+      const { count, isNotNull, eq: eqOp, and: andOp } = await import("drizzle-orm");
       const db = await getDb();
-      const [row] = await db.select({ total: count() }).from(songsTable).where(isNotNull(songsTable.witnessId));
+      // Only count Published, public witnessed songs — respects archive/unpublish toggle
+      const [row] = await db.select({ total: count() }).from(songsTable).where(
+        andOp(isNotNull(songsTable.witnessId), eqOp(songsTable.status, "Published"), eqOp(songsTable.isPublic, true))
+      );
       return { count: row?.total ?? 0 };
     }),
     getCountsByContentType: publicProcedure.query(async () => {
@@ -654,9 +657,9 @@ export const appRouter = router({
     getWitnessedVoices: publicProcedure.query(async () => {
       const { getDb } = await import("./db");
       const { songs: songsTable, users: usersTable } = await import("../drizzle/schema");
-      const { isNotNull, desc: descOp, eq: eqOp } = await import("drizzle-orm");
+      const { isNotNull, desc: descOp, eq: eqOp, and: andOp } = await import("drizzle-orm");
       const db = await getDb();
-      // Grab up to 10 most recent publicly-visible witnessed songs with creator info
+      // Only return Published, public, audio-type witnessed songs — respects creator archive/unpublish toggle
       const rows = await db
         .select({
           songId: songsTable.id,
@@ -673,7 +676,12 @@ export const appRouter = router({
         })
         .from(songsTable)
         .innerJoin(usersTable, eqOp(songsTable.userId, usersTable.id))
-        .where(isNotNull(songsTable.witnessId))
+        .where(andOp(
+          isNotNull(songsTable.witnessId),
+          eqOp(songsTable.status, "Published"),
+          eqOp(songsTable.isPublic, true),
+          eqOp(songsTable.contentType as any, "audio"),
+        ))
         .orderBy(descOp(songsTable.createdAt))
         .limit(10);
       return rows;

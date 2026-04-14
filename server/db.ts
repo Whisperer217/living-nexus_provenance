@@ -477,7 +477,9 @@ export async function updateSongStatus(
 ) {
   const db = await getDb();
   if (!db) return;
-  await db.update(songs).set({ status, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+  // Keep isPublic in sync: only Published songs are publicly visible in any feed
+  const isPublic = status === "Published";
+  await db.update(songs).set({ status, isPublic, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
 export async function updateSongMetadata(
