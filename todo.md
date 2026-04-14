@@ -3338,8 +3338,8 @@
 
 ## Donation Feature Bug Fixes
 
-- [ ] Fix donation total not updating — $100 payment shows as $0 in goal progress display
-- [ ] Fix mobile swipe-up panel cutoff — large black dead zone below content on mobile
+- [x] Fix donation total not updating — $100 payment shows as $0 in goal progress display
+- [x] Fix mobile swipe-up panel cutoff — large black dead zone below content on mobile
 
 ## Payment Integrity Monitor Worker (Apr 8 2026)
 - [x] Add paymentReconciliationLog table to drizzle schema and push migration
@@ -3351,8 +3351,8 @@
 - [x] Add 💳 Payment Integrity button to LN Command Center admin header
 
 ## Mobile Bug Fixes (Apr 8 2026)
-- [ ] Fix Provenance Prompt Generator button triggering Quick Play panel instead of navigating to prompt studio
-- [ ] Fix large black dead zone below bottom nav bar on mobile screens
+- [x] Fix Provenance Prompt Generator button triggering Quick Play panel instead of navigating to prompt studio
+- [x] Fix large black dead zone below bottom nav bar on mobile screens
 
 ## Bug Fixes
 - [x] Fix GiftModal wrong song — $ button passes index to parent, parent uses tracks[index] which is wrong when Discover and Trending share the same handler; fix by passing the track object directly instead of index

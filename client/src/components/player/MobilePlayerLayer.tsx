@@ -517,6 +517,23 @@ export default function MobilePlayerLayer() {
   // WID — prefer track.witnessId, fall back to videoWitnessId
   const widBadge = currentTrack?.witnessId || videoWitnessId || null;
 
+  // ── Sync --player-height CSS token so scroll area padding is exact ──────────
+  // When no track is loaded the MiniBar is hidden, so the bottom stack should
+  // only account for the nav bar — not the extra 64px mini-player height.
+  // This eliminates the "black dead zone" gap below content on mobile.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (currentTrack) {
+      root.style.setProperty("--player-height", "64px");
+    } else {
+      root.style.setProperty("--player-height", "0px");
+    }
+    return () => {
+      // Restore default on unmount (desktop fallback)
+      root.style.removeProperty("--player-height");
+    };
+  }, [!!currentTrack]);
+
   // Like state
   const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(
     { songId: currentSongId! },

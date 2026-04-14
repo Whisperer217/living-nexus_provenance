@@ -329,11 +329,15 @@ export default function PlaylistDrawer() {
         />
       )}
 
-      {/* Tab trigger — right edge, visible on all screen sizes */}
+      {/* Tab trigger — right edge, desktop only.
+           Hidden on mobile (md:hidden) because the fixed handle overlaps page
+           content at the right edge and intercepts taps on buttons like the
+           Provenance Prompt Generator, triggering the drawer instead of the
+           intended action. On mobile the drawer is opened via the sidebar. */}
       {/* Slides fully off-screen when any dialog/modal is open to prevent accidental activation */}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed z-[32] flex items-center justify-center active:scale-95"
+        className="md:flex hidden fixed z-[32] items-center justify-center active:scale-95"
         style={{
           // When drawer open: peeking left of the drawer panel
           // When drawer closed + no dialog: peek 4px into screen (visible handle)

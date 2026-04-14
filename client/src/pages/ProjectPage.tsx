@@ -1343,17 +1343,39 @@ export default function ProjectPage() {
     { enabled: !!slug }
   );
 
-  // After returning from Stripe checkout with ?donation=success, refetch the project
-  // after a short delay to allow the webhook to process and update raisedAmountCents
+  // After returning from Stripe checkout with ?donation=success:
+  // Call confirmDonation immediately — idempotent fallback for when the webhook is delayed.
+  // This ensures raisedAmountCents updates even in test/dev environments without webhooks.
+  const confirmDonationMutation = trpc.projects.confirmDonation.useMutation({
+    onSuccess: (result) => {
+      if (result.credited) {
+        // Donation recorded — refetch quickly to show updated total
+        setTimeout(() => refetchProject(), 800);
+      } else {
+        // Webhook may still be in flight — refetch after 3s
+        setTimeout(() => refetchProject(), 3000);
+      }
+    },
+    onError: () => {
+      // Fallback: just refetch after 3s
+      setTimeout(() => refetchProject(), 3000);
+    },
+  });
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("donation") === "success") {
-      const timer = setTimeout(() => {
-        refetchProject();
-      }, 3000); // 3s delay for webhook to process
+    if (params.get("donation") !== "success") return;
+    const sessionId = params.get("session_id");
+    const projectId = data?.project?.id;
+    if (sessionId && projectId) {
+      // Confirm via Stripe session — idempotent, safe even if webhook already fired
+      confirmDonationMutation.mutate({ sessionId, projectId });
+    } else if (!sessionId) {
+      // No session_id in URL — fall back to timed refetch
+      const timer = setTimeout(() => refetchProject(), 3000);
       return () => clearTimeout(timer);
     }
-  }, [refetchProject]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.project?.id]);
   const { data: rawBlocks } = trpc.projects.getBlocks.useQuery(
     { projectId: data?.project.id ?? 0 },
     { enabled: !!data?.project.id }
