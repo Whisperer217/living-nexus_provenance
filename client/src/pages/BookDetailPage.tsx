@@ -20,6 +20,7 @@ import { useLike } from "@/hooks/useLike";
 import { WIDPanel } from "@/components/WIDPanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
 import { HorizontalBookReader, type BookPage } from "@/components/reader/HorizontalBookReader";
+import { StoryboardBuilder, type StoryboardPage } from "@/components/reader/StoryboardBuilder";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
 
@@ -33,6 +34,8 @@ export default function BookDetailPage() {
   const [viewerMode, setViewerMode] = useState<"preview" | "fullscreen">("preview");
   const [showFullText, setShowFullText] = useState(false);
   const [readerOpen, setReaderOpen] = useState(false);
+  const [editPagesOpen, setEditPagesOpen] = useState(false);
+  const [editedPagesJson, setEditedPagesJson] = useState<string | null>(null);
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: bookId },
@@ -49,6 +52,24 @@ export default function BookDetailPage() {
   });
 
   const { liked, toggle: toggleLike } = useLike(bookId);
+
+  const updatePagesMutation = trpc.songs.updateMetadata.useMutation({
+    onSuccess: () => {
+      toast.success("Pages saved!");
+      setEditPagesOpen(false);
+      setEditedPagesJson(null);
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+
+  function handleSavePages() {
+    if (editedPagesJson === null && storyboardPages.length > 0) {
+      // No changes made — just close
+      setEditPagesOpen(false);
+      return;
+    }
+    updatePagesMutation.mutate({ songId: bookId, pagesJson: editedPagesJson });
+  }
 
   const song = songData?.song;
   const creator = songData?.creator;
@@ -77,6 +98,13 @@ export default function BookDetailPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  }
+
+  // Guard: redirect immediately if the id segment is non-numeric, NaN, or not a positive integer
+  // e.g. /book/abc, /book/-1, /book/0 all redirect to /explore
+  if (!id || isNaN(bookId) || bookId <= 0) {
+    navigate("/explore", { replace: true });
+    return null;
   }
 
   if (isLoading) {
@@ -304,12 +332,21 @@ export default function BookDetailPage() {
                 </a>
               )}
               {isOwner && (
-                <Link href={`/dashboard`}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
-                  style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.30)" }}>
-                  <FileText size={14} />
-                  Manage
-                </Link>
+                <>
+                  <button
+                    onClick={() => setEditPagesOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
+                    style={{ background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}44` }}>
+                    <BookOpen size={14} />
+                    Edit Pages
+                  </button>
+                  <Link href={`/dashboard`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
+                    style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.30)" }}>
+                    <FileText size={14} />
+                    Manage
+                  </Link>
+                </>
               )}
               <FlagContentButton workId={bookId} workType={isComic ? "comic" : "manuscript"} />
             </div>
@@ -540,6 +577,53 @@ export default function BookDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Edit Pages Modal (owner only) ── */}
+      {editPagesOpen && isOwner && (
+        <div
+          className="fixed inset-0 z-[9999] flex flex-col"
+          style={{ background: "rgba(13,20,25,0.97)", backdropFilter: "blur(12px)" }}
+        >
+          {/* Header bar */}
+          <div
+            className="flex items-center justify-between px-5 py-4 flex-shrink-0"
+            style={{ borderBottom: "1px solid rgba(203,177,131,0.18)" }}
+          >
+            <div className="flex items-center gap-3">
+              <BookOpen size={18} style={{ color: accentColor }} />
+              <div>
+                <p className="text-sm font-heading font-bold tracking-wide" style={{ color: "#E6CDAE" }}>Edit Pages</p>
+                <p className="text-[10px]" style={{ color: "#5A6A72" }}>{song?.title}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setEditPagesOpen(false); setEditedPagesJson(null); }}
+                className="px-4 py-2 rounded-xl text-xs font-heading font-bold tracking-wide transition-all hover:bg-white/5"
+                style={{ color: "#AA8E64", border: "1px solid rgba(255,255,255,0.10)" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSavePages}
+                disabled={updatePagesMutation.isPending}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-heading font-bold tracking-wide transition-all hover:opacity-90 disabled:opacity-50"
+                style={{ background: accentColor, color: "#fff" }}
+              >
+                {updatePagesMutation.isPending ? "Saving…" : "Save Pages"}
+              </button>
+            </div>
+          </div>
+          {/* Builder scroll area */}
+          <div className="flex-1 overflow-y-auto px-5 py-6">
+            <StoryboardBuilder
+              initialPages={storyboardPages as StoryboardPage[]}
+              onChange={setEditedPagesJson}
+              disabled={updatePagesMutation.isPending}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

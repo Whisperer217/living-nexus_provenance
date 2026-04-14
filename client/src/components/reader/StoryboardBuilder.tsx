@@ -33,6 +33,8 @@ export interface StoryboardPage {
 interface Props {
   onChange: (pagesJson: string | null) => void;
   disabled?: boolean;
+  /** Pre-load existing pages (e.g. when editing after initial upload) */
+  initialPages?: StoryboardPage[];
 }
 
 // ─── S3 upload helper (mirrors uploadPipeline.ts pattern) ────────────────────
@@ -48,8 +50,8 @@ async function uploadPageImage(file: File): Promise<string> {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function StoryboardBuilder({ onChange, disabled = false }: Props) {
-  const [pages, setPages] = useState<StoryboardPage[]>([]);
+export function StoryboardBuilder({ onChange, disabled = false, initialPages }: Props) {
+  const [pages, setPages] = useState<StoryboardPage[]>(initialPages ?? []);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);

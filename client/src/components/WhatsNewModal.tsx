@@ -10,14 +10,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.27.0";
+const CURRENT_VERSION = "v2.28.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.27.0",
+    version: "v2.28.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: BookOpen, text: "Comic Book Reader — Comics and novels now open in a full-screen horizontal page-turn reader. Pages slide left and right with a CSS 3D page-curl animation. Desktop shows a two-page spread; mobile shows one page at a time. The chrome fades away after a few seconds so nothing stands between you and the art. Swipe on mobile, arrow keys on desktop, Escape to close." },
+      { icon: Gift, text: "Creator-Level Gifting — The Send a Gift button on a creator’s profile now goes directly to the creator — not attached to any specific track. Support the artist, not just the song." },
+      { icon: Users, text: "Witness Network Modal — Clicking the Witnessing or Witnesses count on a creator profile now opens a panel showing the full list of creators they follow and who follows them. Each entry links directly to that creator’s profile." },
+      { icon: Compass, text: "Storyboard Builder — When uploading a comic or novel, a new Storyboard step lets you drag individual page images into order, set a cover, and add per-page captions before publishing. The reader uses your layout exactly as arranged." },
+      { icon: LayoutGrid, text: "Unified Card Standard — Every track, comic, and project card across the platform — Home, Discover, Creator Profile, and Explore — now shares the same size, border, hover lift, and texture. One visual language, everywhere." },
+    ],
+  },
+  {
+    version: "v2.27.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: FileText, text: "HAAI Work-Type Declarations — The Human-Authored via AI Instrument disclosure form now speaks your language. When uploading audio, the form uses music-native terms: Instrumentation, Vocal Conveyance, Lyrical Inspiration. When uploading a manuscript, it shifts to Structural Concept, Narrative Voice, Thematic Elements, Core Subject / Thesis. Lyrics use Imagery & Metaphor, Rhythmic Mechanics, and Intended Delivery. Comics use Composition & Framing, Color Palette & Lighting, and Atmosphere & Mood. The doctrine is the same — the vocabulary is yours." },
       { icon: Shield, text: "Auto-Advance Queue — Tap any track in Quick Access or a Work Carousel and the full list becomes your queue. Songs advance automatically when one ends — no button press needed. Lock screen and notification shade controls on mobile now skip forward and back within the queue." },
