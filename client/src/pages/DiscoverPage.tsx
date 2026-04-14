@@ -398,7 +398,7 @@ export default function DiscoverPage() {
               <Link href="/upload"><Button className="mt-4" style={{ background: "#CBB183", color: "#2C3438" }}>Upload Now</Button></Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="museum-grid">
               {songs.map((item: any) => {
                 const isActive = currentTrackId === String(item.song.id);
                 return (
@@ -406,13 +406,10 @@ export default function DiscoverPage() {
                   key={item.song.id}
                   onClick={() => handlePlay(item)}
                   onContextMenu={(e) => openMenu(e, item)}
-                  className="group relative rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02]"
-                  style={{
-                    background: "#2C3438",
-                    border: `1px solid ${isActive ? "rgba(203,177,131,0.8)" : "rgba(203,177,131,0.15)"}`,
-                    outline: isActive ? "2px solid rgba(203,177,131,0.6)" : "none",
-                    outlineOffset: "1px"
-                  }}
+                  className={`group museum-card parchment-grain cursor-pointer ${
+                    isActive ? "museum-card--active" : ""
+                  }`}
+                  style={isActive ? undefined : { borderColor: "rgba(203,177,131,0.22)", boxShadow: "0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px rgba(203,177,131,0.18)" }}
                 >
                   <div className="prov-card-img-wrap">
                     <MediaAsset

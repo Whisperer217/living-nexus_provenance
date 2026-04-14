@@ -10,6 +10,7 @@
 import { useRef } from "react";
 import { Link } from "wouter";
 import { Fingerprint, Cpu, DollarSign, Heart, Sparkles } from "lucide-react";
+import { CARD_PAN_W } from "@/lib/cardTokens";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -63,8 +64,8 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
               <div
                 className="flex-shrink-0 flex flex-col items-center justify-center gap-2 rounded-2xl cursor-pointer transition-all hover:brightness-110 active:scale-[0.97]"
                 style={{
-                  width: "160px",
-                  height: "200px",
+                  width: CARD_PAN_W,
+                  height: 200,
                   scrollSnapAlign: "start",
                   background: "transparent",
                   border: "1.5px dashed rgba(203,177,131,0.3)",
@@ -106,16 +107,12 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
         return (
           <div
             key={project.id}
-            className="flex-shrink-0"
-            style={{ width: "160px", scrollSnapAlign: "start" }}
+            className="flex-shrink-0 snap-start"
+            style={{ width: CARD_PAN_W }}
           >
             <Link href={`/project/${project.slug}`}>
               <div
-                className="relative rounded-2xl overflow-hidden group cursor-pointer active:scale-[0.97] transition-transform"
-                style={{
-                  background: "#2C3438",
-                  boxShadow: "0 4px 28px rgba(0,0,0,0.55), 0 0 0 1px rgba(203,177,131,0.08)",
-                }}
+                className="museum-card parchment-grain group cursor-pointer active:scale-[0.97]"
               >
                 {/* Image — locked 4:5 ratio, max 200px tall */}
                 <div className="prov-card-img-wrap" style={{ paddingBottom: "125%", maxHeight: "200px" }}>

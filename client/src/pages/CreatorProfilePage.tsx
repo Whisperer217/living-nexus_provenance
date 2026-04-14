@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet-async";
 import { useParams, Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { CARD_PAN_W } from "@/lib/cardTokens";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -158,49 +159,59 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
 // ─── Featured Song Card ────────────────────────────────────────────────────────
 function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => void; isPlaying: boolean }) {
   return (
-    <Link href={`/song/${song.id}`}>
-      <div className="prov-card-img-wrap cursor-pointer group">
-        <MediaAsset
-          src={song.coverArtUrl}
-          alt={song.title}
-          mode="card"
-          aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
-          focalX={song.coverPositionX ?? 50}
-          focalY={song.coverPositionY ?? 50}
-        />
-        <div className="prov-card-gradient" />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center">
-          <button
-            onClick={(e) => { e.preventDefault(); onPlay(); }}
-            className="w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100"
-            style={{ background: "#CBB183" }}
-          >
-            {isPlaying
-              ? <Pause className="w-5 h-5" style={{ color: "#E6CDAE" }} />
-              : <Play className="w-5 h-5 ml-0.5" style={{ color: "#E6CDAE" }} />}
-          </button>
+    <div
+      className={`group museum-card parchment-grain cursor-pointer ${
+        isPlaying ? "museum-card--active" : ""
+      }`}
+      style={isPlaying ? undefined : { borderColor: "rgba(203,177,131,0.22)", boxShadow: "0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px rgba(203,177,131,0.18)" }}
+    >
+      <Link href={`/song/${song.id}`}>
+        <div className="prov-card-img-wrap">
+          <MediaAsset
+            src={song.coverArtUrl}
+            alt={song.title}
+            mode="card"
+            aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
+            focalX={song.coverPositionX ?? 50}
+            focalY={song.coverPositionY ?? 50}
+          />
+          <div className="prov-card-gradient" />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center">
+            <button
+              onClick={(e) => { e.preventDefault(); onPlay(); }}
+              className="w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100"
+              style={{ background: "#CBB183" }}
+            >
+              {isPlaying
+                ? <Pause className="w-5 h-5" style={{ color: "#E6CDAE" }} />
+                : <Play className="w-5 h-5 ml-0.5" style={{ color: "#E6CDAE" }} />}
+            </button>
+          </div>
+          {song.durationSeconds && (
+            <div className="absolute bottom-2 left-2 text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(0,0,0,0.7)", color: "#DACAAA" }}>
+              {Math.floor(song.durationSeconds / 60)}:{String(Math.round(song.durationSeconds % 60)).padStart(2, "0")}
+            </div>
+          )}
+          {song.witnessId && (
+            <Link href={`/verify/${song.witnessId}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100"
+              style={{ background: "rgba(0,0,0,0.72)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.55)" }}
+            >
+              <Shield size={8} /><span>WID</span>
+            </Link>
+          )}
+          {song.aiConsent === "prohibited" && (
+            <div className="absolute top-2 left-2 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
+              AI OFF
+            </div>
+          )}
         </div>
-        {song.durationSeconds && (
-          <div className="absolute bottom-2 left-2 text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(0,0,0,0.7)", color: "#DACAAA" }}>
-            {Math.floor(song.durationSeconds / 60)}:{String(Math.round(song.durationSeconds % 60)).padStart(2, "0")}
-          </div>
-        )}
-        {song.witnessId && (
-          <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(203,177,131,0.9)" }}>
-            <Shield className="w-3 h-3 text-white" />
-          </div>
-        )}
-        {song.aiConsent === "prohibited" && (
-          <div className="absolute top-2 left-2 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
-            AI OFF
-          </div>
-        )}
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-          <p className="text-xs font-semibold truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+        <div className="p-3">
+          <p className="text-[13px] font-heading text-white/90 truncate mb-0.5 tracking-wide hover:text-[#CBB183] transition-colors" style={{ fontFamily: "'Cinzel', serif" }}>{song.title}</p>
           {song.genre && <p className="text-[10px] truncate" style={{ color: "#AA8E64" }}>{song.genre}</p>}
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
@@ -1265,7 +1276,7 @@ export default function CreatorProfilePage() {
                   <Link key={project.id} href={`/project/${project.slug}`}>
                     <div
                       className="prov-card-img-wrap cursor-pointer group flex-shrink-0"
-                      style={{ width: "160px" }}
+                      style={{ width: CARD_PAN_W }}
                     >
                       {project.bannerUrl ? (
                         <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover object-center" />
@@ -1383,7 +1394,7 @@ export default function CreatorProfilePage() {
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+            <div className="museum-grid">
               {featuredSongs.map((song: any) => (
                 <FeaturedCard key={song.id} song={song} onPlay={() => handlePlay(song)} isPlaying={playingId === song.id} />
               ))}

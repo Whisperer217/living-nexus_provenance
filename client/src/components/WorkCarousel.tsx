@@ -9,6 +9,7 @@
 import { useRef } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { CARD_PAN_W } from "@/lib/cardTokens";
 import { Play, Pause, FileText, BookOpen, Layers, Music, ChevronRight } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -131,7 +132,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
       {isLoading ? (
         <div className="flex gap-3 overflow-hidden">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: 160, height: 200, background: "#0e0c1f" }} />
+            <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: CARD_PAN_W, height: 200, background: "#2C3438" }} />
           ))}
         </div>
       ) : (
@@ -147,14 +148,10 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
             return (
               <div
                 key={item.song.id}
-                className="flex-shrink-0 snap-start rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] group"
-                style={{
-                  width: 160,
-                  background: "#0e0c1f",
-                  border: `1px solid ${isActive ? widColor + "cc" : "#2a2840"}`,
-                  outline: isActive ? `2px solid ${widColor}55` : "none",
-                  outlineOffset: "1px",
-                }}
+                className={`flex-shrink-0 snap-start museum-card parchment-grain cursor-pointer group ${
+                  isActive ? "museum-card--active" : ""
+                }`}
+                style={{ width: CARD_PAN_W }}
                 onClick={() => type === "audio" ? handlePlay(item) : undefined}
               >
                 {/* Cover / thumbnail */}

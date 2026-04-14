@@ -16,6 +16,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import TrackCard from "@/components/TrackCard";
 import BookCard from "@/components/BookCard";
 import TipModal from "@/components/TipModal";
+import { CARD_PAN_W } from "@/lib/cardTokens";
 import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart, DollarSign, Cpu, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
@@ -460,7 +461,7 @@ function HorizontalTrackGrid({
           <div
             key={i}
             className="flex-shrink-0 rounded-2xl animate-pulse"
-            style={{ width: "160px", height: "220px", background: "#2C3438" }}
+            style={{ width: CARD_PAN_W, height: 220, background: "#2C3438" }}
           />
         ))}
       </div>
@@ -500,7 +501,7 @@ function HorizontalTrackGrid({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {row1.map((track, idx) => (
-          <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
+          <div key={track.id} className="flex-shrink-0" style={{ width: CARD_PAN_W }}>
             {(track.contentType === "manuscript" || track.contentType === "comic") ? (
               <BookCard
                 item={{ song: { id: track.songId ?? parseInt(track.id, 10), title: track.title, coverArtUrl: track.artUrl, witnessId: track.witnessId, genre: track.genre, contentType: track.contentType }, creator: { id: track.creatorId, name: track.artist, artistHandle: track.artistHandle } }}
@@ -520,7 +521,7 @@ function HorizontalTrackGrid({
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {row2.map((track, idx) => (
-            <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
+            <div key={track.id} className="flex-shrink-0" style={{ width: CARD_PAN_W }}>
               {(track.contentType === "manuscript" || track.contentType === "comic") ? (
                 <BookCard
                   item={{ song: { id: track.songId ?? parseInt(track.id, 10), title: track.title, coverArtUrl: track.artUrl, witnessId: track.witnessId, genre: track.genre, contentType: track.contentType }, creator: { id: track.creatorId, name: track.artist, artistHandle: track.artistHandle } }}
@@ -576,7 +577,7 @@ function TrendingHorizontalGrid({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {row1.map((track, idx) => (
-          <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
+          <div key={track.id} className="flex-shrink-0" style={{ width: CARD_PAN_W }}>
             <TrackCard track={track} index={idx} onTip={onTip} onPlay={handleTrendingPlay} {...getPrefetch(track)} />
           </div>
         ))}
@@ -587,7 +588,7 @@ function TrendingHorizontalGrid({
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {row2.map((track, idx) => (
-            <div key={track.id} className="flex-shrink-0" style={{ width: "160px" }}>
+            <div key={track.id} className="flex-shrink-0" style={{ width: CARD_PAN_W }}>
               <TrackCard track={track} index={12 + idx} onTip={onTip} onPlay={handleTrendingPlay} {...getPrefetch(track)} />
             </div>
           ))}
