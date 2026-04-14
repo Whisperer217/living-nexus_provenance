@@ -163,19 +163,19 @@ export default function SongDetailPage() {
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: songId },
-    { enabled: !!songId, refetchOnWindowFocus: false }
+    { enabled: songId > 0, refetchOnWindowFocus: false }
   );
   const { data: comments, refetch: refetchComments } = trpc.comments.list.useQuery(
     { songId },
-    { enabled: !!songId }
+    { enabled: songId > 0 }
   );
   const { data: eventThread, refetch: refetchEvents } = trpc.events.getByWork.useQuery(
     { workId: songId },
-    { enabled: !!songId }
+    { enabled: songId > 0 }
   );
   const { data: relatedData } = trpc.songs.getRelated.useQuery(
     { songId, genre: songData?.song?.genre || undefined },
-    { enabled: !!songId && !!songData }
+    { enabled: songId > 0 && !!songData }
   );
 
   const song = songData?.song;

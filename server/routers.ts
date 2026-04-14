@@ -511,7 +511,10 @@ export const appRouter = router({
       const total = await getCreatorTotalPlays(input.creatorId);
       return { total };
     }),
-    getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => getSongWithCreator(input.id)),
+    getById: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => {
+      const result = await getSongWithCreator(input.id);
+      return result ?? null;
+    }),
     verifyWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
       // Handle WID-TST (testimony) lookups
       if (input.witnessId.startsWith("WID-TST-")) {

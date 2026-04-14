@@ -3385,3 +3385,7 @@
 - [x] #S5 — Bio section has invisible border artifact; creator name truncates ("DOC SERAPH MER...") on profile page — fixed: name now break-words, bio border cleared
 - [x] #S6 — "Send a Gift" from creator profile attaches to the first song in the Featured Songs list instead of being creator-level — fixed: new createCreatorTipCheckout procedure, no songId required
 - [x] #S7 — PayPal not available as a payment method (Stripe-only); documented: Stripe handles card payments; PayPal integration is a future roadmap item
+
+## Bug Report — Apr 14 2026 (book/-1 crash)
+
+- [x] /book/-1 crash: songs.getById called with id=-1 (invalid sentinel); server returns undefined → React Query error "Query data cannot be undefined" — fixed: server now returns null, client guards with bookId > 0; same fix applied to SongDetailPage

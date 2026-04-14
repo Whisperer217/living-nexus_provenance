@@ -36,11 +36,11 @@ export default function BookDetailPage() {
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: bookId },
-    { enabled: !!bookId, refetchOnWindowFocus: false }
+    { enabled: bookId > 0, refetchOnWindowFocus: false }
   );
   const { data: comments, refetch: refetchComments } = trpc.comments.list.useQuery(
     { songId: bookId },
-    { enabled: !!bookId }
+    { enabled: bookId > 0 }
   );
 
   const commentMutation = trpc.comments.add.useMutation({
