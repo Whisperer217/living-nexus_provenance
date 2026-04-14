@@ -449,6 +449,13 @@ export default function CreatorProfilePage() {
   });
   const playMutation = trpc.songs.play.useMutation();
 
+  // ── Build stats — admin profile only ──────────────────────────────────────
+  const isAdminProfile = (data as any)?.creator?.role === "admin";
+  const buildStatsQuery = trpc.platform.getBuildStats.useQuery(undefined, {
+    enabled: isAdminProfile,
+    staleTime: Infinity,
+  });
+
   // ── Witness Network — MUST be before any early returns (Rules of Hooks) ──────
   const utils = trpc.useUtils();
   const creatorIdForWitness = data?.creator?.id ?? 0;
@@ -979,6 +986,17 @@ export default function CreatorProfilePage() {
                       {" "}witnesses
                     </button>
                   )}
+                  {/* Bug-kill tracker — admin profile only */}
+                  {isAdminProfile && buildStatsQuery.data && (
+                    <span
+                      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest select-none cursor-default"
+                      style={{ background: "rgba(239,68,68,0.10)", color: "#f87171", border: "1px solid rgba(239,68,68,0.30)" }}
+                      title={`${buildStatsQuery.data.bugsFixed} bugs squashed across ${buildStatsQuery.data.totalCommits} commits`}
+                    >
+                      <span style={{ fontSize: "10px" }}>🐛</span>
+                      BUGS KILLED &middot; {buildStatsQuery.data.bugsFixed}
+                    </span>
+                  )}
                 </div>
 
                 {/* Actions — button row */}
@@ -1147,8 +1165,18 @@ export default function CreatorProfilePage() {
                     <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
                   </button>
                 )}
+                {/* Bug-kill tracker — admin profile only */}
+                {isAdminProfile && buildStatsQuery.data && (
+                  <span
+                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest select-none cursor-default"
+                    style={{ background: "rgba(239,68,68,0.10)", color: "#f87171", border: "1px solid rgba(239,68,68,0.30)" }}
+                    title={`${buildStatsQuery.data.bugsFixed} bugs squashed across ${buildStatsQuery.data.totalCommits} commits`}
+                  >
+                    <span style={{ fontSize: "10px" }}>🐛</span>
+                    BUGS KILLED &middot; {buildStatsQuery.data.bugsFixed}
+                  </span>
+                )}
               </div>
-
               {/* Bio */}
               {creator.bio && (
                 <p className="text-sm leading-relaxed" style={{ color: "#AA8E64" }}>

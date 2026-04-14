@@ -95,6 +95,10 @@ import { notifyOwner } from "./_core/notification";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
 const PLATFORM_FEE_PERCENT = 10;
 
+// ── Build stats — updated via env vars on each deploy ──
+const BUGS_FIXED = parseInt(process.env.BUGS_FIXED ?? "222", 10);
+const TOTAL_COMMITS = parseInt(process.env.TOTAL_COMMITS ?? "554", 10);
+
 export async function handleStripeWebhook(req: any, res: any) {
   const sig = req.headers["stripe-signature"];
   let event: Stripe.Event;
@@ -280,6 +284,13 @@ export async function handleStripeWebhook(req: any, res: any) {
 export const appRouter = router({
   system: systemRouter,
   qr: qrRouter,
+  platform: router({
+    /** Public — returns build stats shown on the founder's creator card */
+    getBuildStats: publicProcedure.query(() => ({
+      bugsFixed: BUGS_FIXED,
+      totalCommits: TOTAL_COMMITS,
+    })),
+  }),
 
   // ─── Witness Testimony ────────────────────────────────────────────────────────
   testimony: router({
