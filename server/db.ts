@@ -502,6 +502,7 @@ export async function updateSongMetadata(
     haaiEmotionalTone?: string | null;
     haaiDeclaredAt?: Date | null;
     parentSongId?: number | null;
+    pagesJson?: string | null;
   }
 ) {
   const db = await getDb();
@@ -524,6 +525,7 @@ export async function updateSongMetadata(
   if (fields.haaiEmotionalTone !== undefined) updateSet.haaiEmotionalTone = fields.haaiEmotionalTone;
   if (fields.haaiDeclaredAt !== undefined) updateSet.haaiDeclaredAt = fields.haaiDeclaredAt;
   if (fields.parentSongId !== undefined) updateSet.parentSongId = fields.parentSongId;
+  if (fields.pagesJson !== undefined) updateSet.pagesJson = fields.pagesJson;
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 

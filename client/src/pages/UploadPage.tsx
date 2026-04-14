@@ -23,6 +23,7 @@ import { addWIDSnapshot } from "@/lib/lnxCache";
 import { runUploadPipeline, type UploadMetadata } from "@/lib/uploadPipeline";
 import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
 import { HAAIDeclarationForm, EMPTY_HAAI } from "@/components/HAAIDeclarationForm";
+import { StoryboardBuilder } from "@/components/reader/StoryboardBuilder";
 import {
   UPLOAD_GENRES as GENRES,
   MOODS,
@@ -195,6 +196,7 @@ export default function UploadPage() {
   const [uploadMode, setUploadMode] = useState<"audio" | "lyrics" | "manuscript" | "comic">("audio");
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
+  const [storyboardPagesJson, setStoryboardPagesJson] = useState<string | null>(null);
   const [witnessData, setWitnessData] = useState<WitnessData | null>(null);
   const [generatingWid, setGeneratingWid] = useState(false);
   const [waveformActive, setWaveformActive] = useState(false);
@@ -567,6 +569,7 @@ export default function UploadPage() {
           ecdsaSignature: witnessData?.signature,
           aiDisclosure,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
+          pagesJson: storyboardPagesJson || undefined,
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
@@ -924,6 +927,16 @@ export default function UploadPage() {
                   {lyrics.trim() && (
                     <p className="text-xs mt-2" style={{ color: "#E2E8F0" }}>{lyrics.trim().split(/\s+/).length} words · {lyrics.length} characters</p>
                   )}
+                </div>
+              )}
+
+              {/* ── Storyboard Builder (comic/novel only) ── */}
+              {uploadMode === "comic" && (
+                <div className="rounded-xl p-4" style={{ background: "#1A2530", border: "1px solid rgba(203,177,131,0.18)" }}>
+                  <StoryboardBuilder
+                    onChange={json => setStoryboardPagesJson(json)}
+                    disabled={uploadMutation.isPending}
+                  />
                 </div>
               )}
 

@@ -14,11 +14,12 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   Shield, ChevronLeft, Share2, Copy, Heart, BookOpen,
-  FileText, Download, ExternalLink, MessageSquare, Check,
+  FileText, Download, ExternalLink, MessageSquare, Check, Play,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
 import { WIDPanel } from "@/components/WIDPanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
+import { HorizontalBookReader, type BookPage } from "@/components/reader/HorizontalBookReader";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
 
@@ -31,6 +32,7 @@ export default function BookDetailPage() {
   const [copied, setCopied] = useState(false);
   const [viewerMode, setViewerMode] = useState<"preview" | "fullscreen">("preview");
   const [showFullText, setShowFullText] = useState(false);
+  const [readerOpen, setReaderOpen] = useState(false);
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: bookId },
@@ -61,6 +63,14 @@ export default function BookDetailPage() {
   // Determine if the fileUrl is a PDF we can embed
   const fileUrl = (song as any)?.fileUrl as string | undefined;
   const isPdf = fileUrl?.toLowerCase().includes(".pdf") || fileUrl?.toLowerCase().includes("pdf");
+
+  // Storyboard pages — parsed from pagesJson if available
+  const pagesJson = (song as any)?.pagesJson as string | undefined;
+  const storyboardPages: BookPage[] = (() => {
+    if (!pagesJson) return [];
+    try { return JSON.parse(pagesJson) as BookPage[]; } catch { return []; }
+  })();
+  const hasStoryboard = storyboardPages.length > 0;
 
   function handleCopyLink() {
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -306,8 +316,70 @@ export default function BookDetailPage() {
           </div>
         </div>
 
-        {/* ── Document Viewer ── */}
-        {fileUrl && (
+        {/* ── Storyboard Reader (primary) ── */}
+        {hasStoryboard && (
+          <div
+            className="rounded-2xl overflow-hidden relative group cursor-pointer"
+            style={{ background: "#0D1419", border: "1px solid rgba(203,177,131,0.22)" }}
+            onClick={() => setReaderOpen(true)}
+          >
+            {/* Preview: first page as hero */}
+            <div className="relative" style={{ aspectRatio: "16/9", overflow: "hidden" }}>
+              <img
+                src={storyboardPages[0].imageUrl}
+                alt={`${song.title} — page 1`}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              {/* Dark overlay */}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 60%, transparent 100%)" }} />
+              {/* Play button */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div
+                  className="flex items-center gap-3 px-6 py-3 rounded-full transition-all duration-300 group-hover:scale-105"
+                  style={{
+                    background: "rgba(0,0,0,0.65)",
+                    border: `1px solid ${accentColor}55`,
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  <Play size={18} fill={accentColor} style={{ color: accentColor }} />
+                  <span className="text-sm font-heading font-bold tracking-widest" style={{ color: accentColor }}>
+                    READ NOW
+                  </span>
+                </div>
+              </div>
+              {/* Page count badge */}
+              <div
+                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-heading font-bold tracking-wider"
+                style={{ background: "rgba(0,0,0,0.65)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}
+              >
+                <BookOpen size={10} />
+                {storyboardPages.length} PAGES
+              </div>
+            </div>
+            {/* Footer strip */}
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid rgba(203,177,131,0.12)" }}>
+              <span className="text-xs font-heading tracking-widest" style={{ color: "#AA8E64" }}>
+                HORIZONTAL READER · SWIPE OR CLICK TO NAVIGATE
+              </span>
+              {fileUrl && (
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  className="flex items-center gap-1.5 text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
+                  style={{ color: "#AA8E64" }}
+                >
+                  PDF ↗
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Fallback Document Viewer (legacy PDF, no storyboard) ── */}
+        {!hasStoryboard && fileUrl && (
           <div className="rounded-2xl overflow-hidden" style={{ background: "#1A2530", border: "1px solid rgba(203,177,131,0.18)" }}>
             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(203,177,131,0.12)" }}>
               <div className="flex items-center gap-2">
@@ -315,7 +387,6 @@ export default function BookDetailPage() {
                 <span className="text-sm font-heading font-bold tracking-wide" style={{ color: "#E6CDAE" }}>Document</span>
               </div>
               <div className="flex items-center gap-2">
-                {/* Desktop: toggle iframe expand */}
                 <button
                   onClick={() => setViewerMode(v => v === "preview" ? "fullscreen" : "preview")}
                   className="hidden md:block text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
@@ -329,8 +400,6 @@ export default function BookDetailPage() {
                 </a>
               </div>
             </div>
-
-            {/* Desktop: PDF iframe viewer */}
             {isPdf && (
               <div className="hidden md:block" style={{ height: viewerMode === "fullscreen" ? "80vh" : "520px" }}>
                 <iframe
@@ -341,8 +410,6 @@ export default function BookDetailPage() {
                 />
               </div>
             )}
-
-            {/* Mobile: PDF iframe doesn't work — show open/download buttons instead */}
             <div className={isPdf ? "md:hidden" : ""}>
               <div className="flex flex-col items-center justify-center py-10 gap-4 px-4">
                 <FileText className="w-12 h-12 opacity-20" style={{ color: accentColor }} />
@@ -366,6 +433,15 @@ export default function BookDetailPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ── Full-screen Reader Portal ── */}
+        {readerOpen && hasStoryboard && (
+          <HorizontalBookReader
+            pages={storyboardPages}
+            title={song.title}
+            onClose={() => setReaderOpen(false)}
+          />
         )}
 
         {/* ── Full Text Reader (lyricsText) ── */}

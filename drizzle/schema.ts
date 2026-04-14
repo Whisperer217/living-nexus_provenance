@@ -229,6 +229,12 @@ export const songs = mysqlTable("songs", {
   flagReason: varchar("flagReason", { length: 512 }),
   moderationStatus: mysqlEnum("moderationStatus", ["clear", "flagged", "removed"]).default("clear").notNull(),
 
+  // ─── Storyboard / Comic Book Reader ─────────────────────────────────────────────
+  // JSON array of { pageNumber: number; imageUrl: string; caption?: string }
+  // Populated by the Storyboard Builder during upload (comic/manuscript only).
+  // null = no storyboard (legacy PDF-only works fall back to iframe viewer).
+  pagesJson: text("pagesJson"),
+
   // ─── Sovereign Stamp ─────────────────────────────────────────────────────────
   // Authorship tone injection system — BDDT Publishing / Command Domains LLC
   // null = not yet stamped; set = stamped audio file with embedded provenance tone

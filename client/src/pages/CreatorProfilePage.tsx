@@ -29,6 +29,8 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { MediaAsset } from "@/components/MediaAsset";
 import { QRShareModal } from "@/components/QRIdentityCard";
+import { FeaturedBookModel } from "@/components/reader/FeaturedBookModel";
+import { HorizontalBookReader, type BookPage } from "@/components/reader/HorizontalBookReader";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -481,6 +483,8 @@ export default function CreatorProfilePage() {
     { enabled: creatorId > 0, staleTime: 300_000 }
   );
   const [showDeclarationModal, setShowDeclarationModal] = useState(false);
+  // Inline book reader
+  const [readerSong, setReaderSong] = useState<{ id: number; title: string; pagesJson: string } | null>(null);
 
   const generateExpressionMutation = trpc.promptStudio.generateFromProfile.useMutation({
     onSuccess: (result) => { setPsResult({ ...result, promptMode: "identity_regen" }); refetchExpression(); },
@@ -1325,6 +1329,48 @@ export default function CreatorProfilePage() {
           </section>
         )}
         {/* ── Featured Songs Grid ── */}
+        {/* ── Featured Books (comic / manuscript) ── */}
+        {(() => {
+          const bookWorks = songs.filter((s: any) => s.contentType === "comic" || s.contentType === "manuscript");
+          if (!bookWorks.length) return null;
+          return (
+            <section className="py-6">
+              <h2 className="text-base font-bold mb-5" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                Works
+              </h2>
+              <div className="flex flex-wrap gap-6">
+                {bookWorks.map((s: any) => (
+                  <FeaturedBookModel
+                    key={s.id}
+                    song={s}
+                    onRead={() => {
+                      if (s.pagesJson) {
+                        setReaderSong({ id: s.id, title: s.title, pagesJson: s.pagesJson });
+                      } else {
+                        navigate(`/book/${s.id}`);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* ── Inline Book Reader Portal ── */}
+        {readerSong && (() => {
+          let pages: BookPage[] = [];
+          try { pages = JSON.parse(readerSong.pagesJson) as BookPage[]; } catch { /* ignore */ }
+          if (!pages.length) return null;
+          return (
+            <HorizontalBookReader
+              pages={pages}
+              title={readerSong.title}
+              onClose={() => setReaderSong(null)}
+            />
+          );
+        })()}
+
         {featuredSongs.length > 0 && (
           <section className="py-6">
             <div className="flex items-center justify-between mb-4">
