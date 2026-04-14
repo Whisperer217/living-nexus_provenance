@@ -18,6 +18,8 @@ import { useLike } from "@/hooks/useLike";
 import TipModal from "@/components/TipModal";
 import FeaturedProjectsCarousel from "@/components/FeaturedProjectsCarousel";
 import { getContentTypeColors } from "@/lib/contentTypeColors";
+import TrackCard from "@/components/TrackCard";
+import { CARD_PAN_W } from "@/lib/cardTokens";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -525,6 +527,37 @@ export default function ExplorePage() {
     closeMenu();
   };
 
+  // ── Group songs by creator for pan-row display ──────────────────
+  const creatorGroups = useMemo(() => {
+    const map = new Map<number, { creator: any; items: any[] }>();
+    for (const item of songs) {
+      const cid: number = item.creator?.id ?? 0;
+      if (!map.has(cid)) map.set(cid, { creator: item.creator, items: [] });
+      map.get(cid)!.items.push(item);
+    }
+    return Array.from(map.values());
+  }, [songs]);
+
+  /** Convert an explore item to a Track shape for TrackCard / PlayerContext */
+  const itemToTrack = (s: any) => ({
+    id: String(s.song.id),
+    title: s.song.title,
+    artist: s.creator?.artistHandle || s.creator?.name || "Unknown",
+    genre: s.song.genre || "",
+    audioUrl: s.song.fileUrl || undefined,
+    artUrl: s.song.coverArtUrl || undefined,
+    witnessId: s.song.witnessId || undefined,
+    aiDisclosure: s.creator?.aiDisclosure || undefined,
+    creatorHandle: s.creator?.id ? String(s.creator.id) : undefined,
+    creatorId: s.creator?.id ?? undefined,
+    coverPositionX: s.song.coverPositionX ?? 50,
+    coverPositionY: s.song.coverPositionY ?? 50,
+    visualReady: s.song.visualReady ?? false,
+    autoVideoUrl: s.song.autoVideoUrl ?? undefined,
+    creatorRole: s.creator?.role ?? undefined,
+    contentType: s.song.contentType ?? "audio",
+  });
+
   const handlePlay = (item: any) => {
     const song = item.song;
     const creator = item.creator;
@@ -749,40 +782,109 @@ export default function ExplorePage() {
           </div>
         </div>
 
-        {/* Loading skeleton — first page only */}
+        {/* Loading skeleton — pan-row style */}
         {isLoading && (
-          <div className="museum-grid">
-            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-              <div key={i} className="rounded-xl overflow-hidden border border-white/[0.06] bg-[#2C3438] animate-pulse">
-                <div className="bg-white/[0.04]" style={{ height: "240px" }} />
-                <div className="p-3 space-y-2">
-                  <div className="h-3 bg-white/[0.06] rounded w-3/4" />
-                  <div className="h-2.5 bg-white/[0.04] rounded w-1/2" />
+          <div className="space-y-7">
+            {Array.from({ length: 3 }).map((_, gi) => (
+              <div key={gi}>
+                <div className="flex items-center gap-3 mb-3 animate-pulse">
+                  <div className="w-8 h-8 rounded-full bg-white/[0.08] flex-shrink-0" />
+                  <div className="h-3 bg-white/[0.06] rounded w-32" />
+                </div>
+                <div className="museum-pan-row -mx-6 px-6">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="flex-shrink-0 rounded-xl overflow-hidden border border-white/[0.06] bg-[#2C3438] animate-pulse" style={{ width: CARD_PAN_W }}>
+                      <div className="bg-white/[0.04]" style={{ height: "200px" }} />
+                      <div className="p-3 space-y-2">
+                        <div className="h-3 bg-white/[0.06] rounded w-3/4" />
+                        <div className="h-2.5 bg-white/[0.04] rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Grid */}
+        {/* Creator-grouped pan-rows */}
         {!isLoading && songs.length > 0 && (
           <div
-            className="museum-grid"
+            className="space-y-8"
             style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
           >
-            {songs.map((item: any) => {
-              const likeEntry = (likeMap as any)[item.song.id];
+            {creatorGroups.map(({ creator, items }) => {
+              const artistName = creator?.artistHandle || creator?.name || "Unknown";
+              const initial = artistName.charAt(0).toUpperCase();
+              const creatorQueue = items
+                .filter((s: any) => !!s.song.fileUrl)
+                .map(itemToTrack);
+              const handleCreatorPlay = (track: any) => {
+                const startIdx = creatorQueue.findIndex((t: any) => t.id === track.id);
+                if (creatorQueue.length > 0) {
+                  playQueueAt(creatorQueue, startIdx >= 0 ? startIdx : 0, "EXPLORE");
+                } else {
+                  addAndPlay(track);
+                }
+                openNowPlayingPanel();
+              };
               return (
-                <ExploreCard
-                  key={item.song.id}
-                  item={item}
-                  isActive={currentTrackId === String(item.song.id)}
-                  isPlaying={playerState.isPlaying}
-                  onPlay={handlePlay}
-                  onTip={(item, rect) => { setTipItem(item); setTipRect(rect); }}
-                  prefetchedLiked={likeEntry?.liked}
-                  prefetchedLikeCount={likeEntry?.count}
-                />
+                <div key={creator?.id ?? artistName}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                        style={{ background: "linear-gradient(135deg, #7C3AED, #A78BFA)", color: "#fff" }}
+                      >
+                        {initial}
+                      </div>
+                      {creator?.id ? (
+                        <Link
+                          href={`/creator/${creator.id}`}
+                          className="font-heading text-[13px] tracking-wide hover:text-[#CBB183] transition-colors"
+                          style={{ color: "#E6CDAE" }}
+                        >
+                          {artistName}
+                        </Link>
+                      ) : (
+                        <span className="font-heading text-[13px] tracking-wide" style={{ color: "#E6CDAE" }}>{artistName}</span>
+                      )}
+                      <span className="text-[10px] font-body" style={{ color: "rgba(255,255,255,0.30)" }}>
+                        {items.length} track{items.length === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                    {creator?.id && (
+                      <Link
+                        href={`/creator/${creator.id}`}
+                        className="text-[11px] font-body transition-colors hover:text-[#CBB183]"
+                        style={{ color: "rgba(255,255,255,0.35)" }}
+                      >
+                        View all →
+                      </Link>
+                    )}
+                  </div>
+                  <div className="museum-pan-row -mx-6 px-6">
+                    {items.map((item: any, idx: number) => {
+                      const likeEntry = (likeMap as any)[item.song.id];
+                      const track = itemToTrack(item);
+                      return (
+                        <div key={item.song.id} className="flex-shrink-0" style={{ width: CARD_PAN_W }}>
+                          <TrackCard
+                            track={track}
+                            index={idx}
+                            onPlay={handleCreatorPlay}
+                            onTip={(_track, rect) => {
+                              setTipItem(item);
+                              setTipRect(rect);
+                            }}
+                            prefetchedLiked={likeEntry?.liked}
+                            prefetchedLikeCount={likeEntry?.count}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>
