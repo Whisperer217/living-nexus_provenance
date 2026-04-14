@@ -44,14 +44,22 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
 
 
 
-  // Recent tracks from explore (for "Now Playing" context)
-  const { data: recentSongs } = trpc.songs.discover.useQuery(
-    { limit: 8, offset: 0 },
+  // Recent audio tracks from explore (for "Now Playing" context) — filter to audio only
+  const { data: recentSongsRaw } = trpc.songs.discover.useQuery(
+    { limit: 12, offset: 0, contentType: "audio" },
     { staleTime: 60_000, refetchOnWindowFocus: false }
   );
+  const recentSongs = recentSongsRaw?.filter((item: any) => {
+    const s = item.song ?? item;
+    return !s.contentType || s.contentType === "audio";
+  }).slice(0, 6);
 
   const tracks = allTracks();
-  const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
+  const rawCurrentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
+  // Only show audio tracks in "Now Playing" — manuscripts, comics, and lyrics are not audio
+  const isAudioTrack = (t: typeof rawCurrentTrack) =>
+    !t || !t.contentType || t.contentType === "audio";
+  const currentTrack = isAudioTrack(rawCurrentTrack) ? rawCurrentTrack : null;
 
   return (
     <>
@@ -214,7 +222,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                   Recently Registered
                 </span>
               </div>
-              {recentSongs?.slice(0, 6).map((item: any) => {
+              {recentSongs?.map((item: any) => {
                 const s = item.song ?? item;
                 const c = item.creator ?? {};
                 return (

@@ -1789,6 +1789,31 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       return { url: session.url };
     }),
 
+    /** Creator-level tip: gift directly to a creator without tying to a specific song */
+    createCreatorTipCheckout: publicProcedure.input(z.object({ creatorId: z.number().int().positive(), amountCents: z.number().min(100).max(50000), origin: z.string().url() })).mutation(async ({ ctx, input }) => {
+      const creator = await getUserById(input.creatorId);
+      if (!creator) throw new TRPCError({ code: "NOT_FOUND", message: "Creator not found" });
+      if (!creator.stripeAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "This creator has not enabled gifts yet." });
+      try {
+        const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+        if (!acct.charges_enabled) throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's Stripe account is still being verified. Gifts will be available once their onboarding is complete." });
+      } catch (e: any) {
+        if (e instanceof TRPCError) throw e;
+        throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's payment account is not yet active. Please try again later." });
+      }
+      const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
+      const creatorHandle = creator.artistHandle || creator.name || "this creator";
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment", payment_method_types: ["card"],
+        line_items: [{ price_data: { currency: "usd", product_data: { name: `Gift for ${creatorHandle}`, description: `Supporting ${creatorHandle} on Living Nexus` }, unit_amount: input.amountCents }, quantity: 1 }],
+        metadata: { type: "tip", songId: "0", userId: ctx.user?.id?.toString() || "", tipperName: ctx.user?.name || "", creatorId: input.creatorId.toString() },
+        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
+        success_url: `${input.origin}/creator/${input.creatorId}?tip=success`,
+        cancel_url: `${input.origin}/creator/${input.creatorId}`,
+        allow_promotion_codes: false,
+      });
+      return { url: session.url };
+    }),
     createTipCheckout: publicProcedure.input(z.object({ songId: z.number(), amountCents: z.number().min(100).max(50000), origin: z.string().url() })).mutation(async ({ ctx, input }) => {
       const songData = await getSongWithCreator(input.songId);
       if (!songData) throw new Error("Song not found");
@@ -2505,6 +2530,12 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     network: protectedProcedure.query(async ({ ctx }) => {
       return getWitnessNetwork(ctx.user.id);
     }),
+    /** Get a public creator's witness network (visible to everyone) */
+    publicNetwork: publicProcedure
+      .input(z.object({ creatorId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return getWitnessNetwork(input.creatorId);
+      }),
   }),
 
   // ── Creative References ────────────────────────────────────────────────────

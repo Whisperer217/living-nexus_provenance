@@ -381,6 +381,8 @@ export default function CreatorProfilePage() {
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
+  const [witnessNetworkOpen, setWitnessNetworkOpen] = useState(false);
+  const [witnessNetworkTab, setWitnessNetworkTab] = useState<"witnessing" | "witnesses">("witnesses");
   const [showBannerPositioner, setShowBannerPositioner] = useState(false);
   const [bannerPos, setBannerPos] = useState({ x: 50, y: 50 });
   // AI focal point — set when a new banner is uploaded via the BannerUploadCTA
@@ -417,7 +419,7 @@ export default function CreatorProfilePage() {
     { enabled: !!creatorId, refetchOnWindowFocus: false }
   );
 
-  const tipMutation = trpc.tips.createTipCheckout.useMutation({
+  const tipMutation = trpc.tips.createCreatorTipCheckout.useMutation({
     onSuccess: (d) => {
       if (d.url) { window.open(d.url, "_blank"); toast.info("Redirecting to checkout..."); }
       setTipOpen(false);
@@ -459,6 +461,11 @@ export default function CreatorProfilePage() {
   });
   const isWitnessingCreator = witnessStatusQuery.data?.witnessing ?? false;
   const witnessCount = witnessStatusQuery.data?.count ?? 0;
+  // Public witness network for this creator (witnessing list + witnesses list)
+  const { data: witnessNetwork } = trpc.witness.publicNetwork.useQuery(
+    { creatorId },
+    { enabled: witnessNetworkOpen && creatorId > 0, staleTime: 30_000 }
+  );
   // Fetch existing EID for this creator (public query)
   const { data: existingExpression, refetch: refetchExpression } = trpc.promptStudio.getProfileExpression.useQuery(
     { creatorId },
@@ -578,9 +585,7 @@ export default function CreatorProfilePage() {
   const handleTip = () => {
     const cents = Math.round(parseFloat(tipAmount) * 100);
     if (!cents || cents < 100) { toast.error("Minimum gift is $1.00"); return; }
-    const firstSong = songs[0];
-    if (!firstSong) { toast.error("No songs to gift on this profile"); return; }
-    tipMutation.mutate({ songId: (firstSong as any).id, amountCents: cents, origin: window.location.origin });
+    tipMutation.mutate({ creatorId: creator.id, amountCents: cents, origin: window.location.origin });
   };
 
   if (isLoading) return (
@@ -794,10 +799,10 @@ export default function CreatorProfilePage() {
 
               {/* ── Identity block ── */}
               <div className="flex-1 min-w-0 pt-1">
-                {/* Name — single line, never wraps mid-word */}
+                {/* Name — wraps gracefully on narrow screens */}
                 <h1
-                  className="text-2xl sm:text-4xl font-bold leading-tight select-text"
-                  style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                  className="text-2xl sm:text-4xl font-bold leading-tight select-text break-words"
+                  style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
                 >
                   {creator.name || creator.artistHandle}
                 </h1>
@@ -842,11 +847,11 @@ export default function CreatorProfilePage() {
                   </button>
                 )}
 
-                {/* Bio — single line, muted */}
+                {/* Bio — two lines max, muted */}
                 {creator.bio && (
                   <p
-                    className="text-sm mt-2 line-clamp-2"
-                    style={{ color: "#AA8E64" }}
+                    className="text-sm mt-2 line-clamp-3 leading-relaxed"
+                    style={{ color: "#AA8E64", border: "none", outline: "none" }}
                   >
                     {creator.bio}
                   </p>
@@ -949,10 +954,15 @@ export default function CreatorProfilePage() {
                     {" "}tracks
                   </span>
                   {witnessCount > 0 && (
-                    <span className="text-sm" style={{ color: "#AA8E64" }}>
+                    <button
+                      className="text-sm transition-colors hover:text-[#CBB183] focus:outline-none"
+                      style={{ color: "#AA8E64" }}
+                      onClick={() => { setWitnessNetworkTab("witnesses"); setWitnessNetworkOpen(true); }}
+                      title="View witnesses"
+                    >
                       <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>
                       {" "}witnesses
-                    </span>
+                    </button>
                   )}
                 </div>
 
@@ -970,7 +980,7 @@ export default function CreatorProfilePage() {
                   </button>
                   {isOwner ? (
                     <>
-                      <Link href="/dashboard">
+                      <Link href="/profile">
                         <button
                           className="px-4 py-2 rounded-lg text-xs transition-colors"
                           style={{ border: "1px solid rgba(203,177,131,0.20)", color: "#AA8E64", background: "transparent" }}
@@ -989,7 +999,7 @@ export default function CreatorProfilePage() {
                         </button>
                       )}
                     </>
-                  ) : tipsEnabled && songs.length > 0 ? (
+                  ) : tipsEnabled ? (
                     <button
                       onClick={() => setTipOpen(true)}
                       className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
@@ -1040,10 +1050,10 @@ export default function CreatorProfilePage() {
 
             {/* Mobile-only: full-width stacked layout */}
             <div className="sm:hidden flex flex-col gap-3">
-              {/* Name — single line, never wraps mid-word */}
+              {/* Name — wraps gracefully on narrow screens */}
               <h1
-                className="text-2xl font-bold leading-tight select-text"
-                style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                className="text-2xl font-bold leading-tight select-text break-words"
+                style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
               >
                 {creator.name || creator.artistHandle}
               </h1>
@@ -1113,9 +1123,14 @@ export default function CreatorProfilePage() {
                   </span>
                 )}
                 {witnessCount > 0 && (
-                  <span className="text-sm" style={{ color: "#AA8E64" }}>
+                  <button
+                    className="text-sm transition-colors hover:text-[#CBB183] focus:outline-none"
+                    style={{ color: "#AA8E64" }}
+                    onClick={() => { setWitnessNetworkTab("witnesses"); setWitnessNetworkOpen(true); }}
+                    title="View witnesses"
+                  >
                     <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
-                  </span>
+                  </button>
                 )}
               </div>
 
@@ -1166,7 +1181,7 @@ export default function CreatorProfilePage() {
                 </button>
                 {isOwner ? (
                   <>
-                    <Link href="/dashboard">
+                    <Link href="/profile">
                       <button
                         className="px-4 py-2 rounded-lg text-xs transition-colors"
                         style={{ border: "1px solid rgba(203,177,131,0.20)", color: "#AA8E64", background: "transparent" }}
@@ -1185,7 +1200,7 @@ export default function CreatorProfilePage() {
                       </button>
                     )}
                   </>
-                ) : tipsEnabled && songs.length > 0 ? (
+                ) : tipsEnabled ? (
                   <button
                     onClick={() => setTipOpen(true)}
                     className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
@@ -1586,6 +1601,90 @@ export default function CreatorProfilePage() {
             >
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Gift`}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Witness Network Modal ───────────────────────────────── */}
+      <Dialog open={witnessNetworkOpen} onOpenChange={setWitnessNetworkOpen}>
+        <DialogContent
+          className="max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col"
+          style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.25)" }}
+        >
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              {creator.artistHandle || creator.name} — Witness Network
+            </DialogTitle>
+          </DialogHeader>
+          {/* Tabs */}
+          <div className="flex flex-shrink-0 border-b" style={{ borderColor: "rgba(203,177,131,0.15)" }}>
+            {(["witnesses", "witnessing"] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setWitnessNetworkTab(tab)}
+                className="flex-1 py-2.5 text-xs font-semibold tracking-widest uppercase transition-colors"
+                style={witnessNetworkTab === tab
+                  ? { color: "#CBB183", borderBottom: "2px solid #CBB183" }
+                  : { color: "#3F4A50", borderBottom: "2px solid transparent" }
+                }
+              >
+                {tab === "witnesses"
+                  ? `Witnesses (${witnessNetwork?.witnessedBy?.length ?? 0})`
+                  : `Witnessing (${witnessNetwork?.witnessing?.length ?? 0})`
+                }
+              </button>
+            ))}
+          </div>
+          {/* List */}
+          <div className="flex-1 overflow-y-auto py-2">
+            {!witnessNetwork ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: "#CBB183", borderTopColor: "transparent" }} />
+              </div>
+            ) : (
+              (() => {
+                const list = witnessNetworkTab === "witnesses" ? witnessNetwork.witnessedBy : witnessNetwork.witnessing;
+                if (!list || list.length === 0) {
+                  return (
+                    <div className="text-center py-8">
+                      <Eye className="w-8 h-8 mx-auto mb-2" style={{ color: "#2C3438" }} />
+                      <p className="text-sm" style={{ color: "#3F4A50" }}>
+                        {witnessNetworkTab === "witnesses" ? "No witnesses yet" : "Not witnessing anyone yet"}
+                      </p>
+                    </div>
+                  );
+                }
+                return list.map((person: any) => (
+                  <button
+                    key={person.id}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all"
+                    style={{ borderBottom: "1px solid rgba(44,52,56,0.4)" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(203,177,131,0.06)"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                    onClick={() => { setWitnessNetworkOpen(false); navigate(`/creator/${person.id}`); }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
+                      style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.2)" }}
+                    >
+                      {person.profilePhotoUrl
+                        ? <img src={person.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                        : <span className="text-xs font-bold" style={{ color: "#CBB183" }}>{(person.artistHandle || person.name || "?")[0].toUpperCase()}</span>
+                      }
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                        {person.artistHandle || person.name}
+                      </div>
+                      {person.artistHandle && person.name && person.artistHandle !== person.name && (
+                        <div className="text-xs truncate" style={{ color: "#3F4A50" }}>{person.name}</div>
+                      )}
+                    </div>
+                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "#3F4A50" }} />
+                  </button>
+                ));
+              })()
+            )}
           </div>
         </DialogContent>
       </Dialog>

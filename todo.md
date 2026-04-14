@@ -3376,3 +3376,12 @@
 - [x] Step 2 — Extract shared constants to shared/contentTypes.ts
 - [x] Step 3 — Add parentSongId to songs table (lineage bridge)
 - [x] Step 4 — Add workType discriminator to events table
+
+## Slimdoggy Bug Report — Apr 13 2026
+
+- [x] #S1/#S4 — Witnessing/Witnesses counts on creator profile are not clickable; add modal showing the list of creators being witnessed / witnessing, each linking to their profile page
+- [x] #S2 — "Edit Profile" button on Artist Profile page redirects to Creator Dashboard instead of profile edit form — fixed: now routes to /profile
+- [x] #S3 — Non-audio works (manuscripts, comics, lyrics) appear in the "Now Playing" Live Activity panel; filter to audio-only — fixed: LiveActivityPanel filters to contentType=audio
+- [x] #S5 — Bio section has invisible border artifact; creator name truncates ("DOC SERAPH MER...") on profile page — fixed: name now break-words, bio border cleared
+- [x] #S6 — "Send a Gift" from creator profile attaches to the first song in the Featured Songs list instead of being creator-level — fixed: new createCreatorTipCheckout procedure, no songId required
+- [x] #S7 — PayPal not available as a payment method (Stripe-only); documented: Stripe handles card payments; PayPal integration is a future roadmap item
