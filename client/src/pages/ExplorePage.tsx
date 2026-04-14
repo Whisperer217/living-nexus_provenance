@@ -10,7 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles, BookOpen } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -37,13 +37,12 @@ const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7
 const PAGE_SIZE = 24;
 
 type ExploreMode = "infinite" | "randomize" | "trending" | "new";
-type ContentType = "audio" | "lyrics" | "manuscript" | "comic";
-
+type ContentType = "audio" | "lyrics" | "manuscript" | "comic" | "novel";
+// "novel" is a UI alias — the server maps it to contentType=manuscript
 const CONTENT_TABS: { id: ContentType; label: string; icon: string; color: string }[] = [
-  { id: "audio",      label: "Music",       icon: "🎵", color: "#CBB183" },
-  { id: "lyrics",     label: "Lyrics",      icon: "✍️", color: "#CBB183" },
-  { id: "manuscript", label: "Manuscripts", icon: "📖", color: "#4ADE80" },
-  { id: "comic",      label: "Comics",      icon: "🎨", color: "#EF4444" },
+  { id: "audio",  label: "Music",           icon: "🎵", color: "#CBB183" },
+  { id: "lyrics", label: "Lyrics",          icon: "✍️", color: "#CBB183" },
+  { id: "novel",  label: "Comics & Novels", icon: "📚", color: "#A78BFA" },
 ];
 
 // AiDisclosureBadge replaced by shared AiDisclosurePill component
@@ -347,7 +346,7 @@ export default function ExplorePage() {
 
   // New This Week query
   const { data: newThisWeekData, isLoading: newThisWeekLoading } = trpc.songs.newThisWeek.useQuery(
-    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 48, contentType },
+    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 48, contentType: serverContentType },
     { enabled: mode === "new", refetchOnWindowFocus: false, staleTime: 120_000 }
   );
 
@@ -364,7 +363,7 @@ export default function ExplorePage() {
       search: query || undefined,
       limit: PAGE_SIZE,
       offset,
-      contentType,
+      contentType: serverContentType,
     },
     {
       enabled: mode === "infinite",
@@ -434,7 +433,7 @@ export default function ExplorePage() {
       limit: PAGE_SIZE,
       randomize: true,
       seed,
-      contentType,
+      contentType: serverContentType,
     },
     {
       enabled: mode === "randomize",
@@ -450,15 +449,44 @@ export default function ExplorePage() {
   }, []);
 
   // Active songs list
+  // Map UI "novel" alias → server "manuscript" content type
+  const serverContentType = contentType === "novel" ? "manuscript" : contentType;
   const songs = mode === "infinite" ? allSongs : mode === "trending" ? (trendingData || []) : mode === "new" ? (newThisWeekData || []) : (randomData || []);
   const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : mode === "trending" ? trendingLoading : mode === "new" ? newThisWeekLoading : randomLoading;
 
-  // Bulk like status — one query for all visible songs instead of per-card queries
-  // Slice to 500 to stay within the server cap (getBulkLikeStatuses max=500)
-  const songIds = useMemo(() => songs.map((s: any) => s.song.id as number).slice(0, 500), [songs]);
+  // ── Lazy bulk-like: only fetch statuses for visible creator rows ────────────
+  // Each creator row registers itself via a ref callback; when it enters the
+  // viewport the row's song IDs are added to visibleSongIds.
+  const [visibleSongIds, setVisibleSongIds] = useState<Set<number>>(new Set());
+  const rowObserverRef = useRef<IntersectionObserver | null>(null);
+  useEffect(() => {
+    rowObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        const added: number[] = [];
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const ids = (entry.target as HTMLElement).dataset.songIds;
+            if (ids) ids.split(",").forEach(id => added.push(Number(id)));
+          }
+        });
+        if (added.length > 0) {
+          setVisibleSongIds(prev => {
+            const next = new Set(prev);
+            added.forEach(id => next.add(id));
+            return next;
+          });
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    return () => rowObserverRef.current?.disconnect();
+  }, []);
+  // Reset visible IDs when the song list changes (mode/filter change)
+  useEffect(() => { setVisibleSongIds(new Set()); }, [songs]);
+  const visibleIdArray = useMemo(() => Array.from(visibleSongIds).slice(0, 500), [visibleSongIds]);
   const { data: bulkLikeData } = trpc.songs.getBulkLikeStatuses.useQuery(
-    { songIds },
-    { enabled: songIds.length > 0, staleTime: 30_000 }
+    { songIds: visibleIdArray },
+    { enabled: visibleIdArray.length > 0, staleTime: 30_000 }
   );
   const likeMap = bulkLikeData ?? {};
 
@@ -830,7 +858,13 @@ export default function ExplorePage() {
                 openNowPlayingPanel();
               };
               return (
-                <div key={creator?.id ?? artistName}>
+                <div
+                  key={creator?.id ?? artistName}
+                  data-song-ids={items.map((i: any) => i.song.id).join(",")}
+                  ref={(el) => {
+                    if (el && rowObserverRef.current) rowObserverRef.current.observe(el);
+                  }}
+                >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5">
                       <div
@@ -841,7 +875,7 @@ export default function ExplorePage() {
                       </div>
                       {creator?.id ? (
                         <Link
-                          href={`/creator/${creator.id}`}
+                          href={`/creator/${creator.id}#works`}
                           className="font-heading text-[13px] tracking-wide hover:text-[#CBB183] transition-colors"
                           style={{ color: "#E6CDAE" }}
                         >
@@ -856,7 +890,7 @@ export default function ExplorePage() {
                     </div>
                     {creator?.id && (
                       <Link
-                        href={`/creator/${creator.id}`}
+                        href={`/creator/${creator.id}#works`}
                         className="text-[11px] font-body transition-colors hover:text-[#CBB183]"
                         style={{ color: "rgba(255,255,255,0.35)" }}
                       >
