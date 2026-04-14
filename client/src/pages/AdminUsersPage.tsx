@@ -25,10 +25,10 @@ type SortDir = "asc" | "desc";
 type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation" | "data_rights";
 
 const GOLD = "#CBB183";
-const BG = "#E6CDAE";
-const CARD = "#2C3438";
-const BORDER = "#2C3438";
-const MUTED = "#64748B";
+const BG = "#1C2326";       // dark page background
+const CARD = "#253035";       // slightly lighter card surface
+const BORDER = "#3A4A52";     // visible border on dark bg
+const MUTED = "#94A3B8";      // muted text — readable on dark
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";
 const GREEN = "#4ADE80";
@@ -178,14 +178,14 @@ function UsersTab() {
                   </tr>
                 ) : sorted.map((u: any, i: number) => (
                   <tr key={u.id} style={{
-                    background: i % 2 === 0 ? "#2C3438" : "#2C3438",
+                    background: i % 2 === 0 ? CARD : CARD,
                     borderBottom: `1px solid #2C3438`,
                   }}>
                     <td className={tdStyle}>
                       <div className="font-medium" style={{ color: TEXT }}>{u.artistHandle ? `@${u.artistHandle}` : u.name ?? "—"}</div>
                       {u.artistHandle && u.name && <div className="text-xs mt-0.5" style={{ color: MUTED }}>{u.name}</div>}
                       {u.email && <div className="text-xs mt-0.5" style={{ color: MUTED }}>{u.email}</div>}
-                      <div className="text-xs mt-0.5 font-mono" style={{ color: "#3F4A50" }}>ID: {u.id}</div>
+                      <div className="text-xs mt-0.5 font-mono" style={{ color: MUTED }}>ID: {u.id}</div>
                     </td>
                     <td className={tdStyle} style={{ color: SUBTEXT }}>{formatDate(u.createdAt)}</td>
                     <td className={tdStyle}>
@@ -197,7 +197,7 @@ function UsersTab() {
                     <td className={tdStyle}>
                       <Badge style={u.licenseStatus === "licensed"
                         ? { background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
-                        : { background: "#3F4A50", color: MUTED, border: `1px solid #C3AB7D` }}>
+                        : { background: MUTED, color: MUTED, border: `1px solid #C3AB7D` }}>
                         {u.licenseStatus === "licensed" ? "Licensed" : "Free"}
                       </Badge>
                     </td>
@@ -214,7 +214,7 @@ function UsersTab() {
                             value={grantSlots[u.id] ?? "100"}
                             onChange={e => setGrantSlots(prev => ({ ...prev, [u.id]: e.target.value }))}
                             className="w-20 h-7 text-xs"
-                            style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+                            style={{ background: CARD, borderColor: BORDER, color: TEXT }}
                           />
                           <Button
                             size="sm"
@@ -262,7 +262,7 @@ function UsersTab() {
             </table>
           </div>
           {sorted.length > 0 && (
-            <div className="px-4 py-3 text-xs border-t flex items-center justify-between" style={{ color: MUTED, borderColor: BORDER, background: "#2C3438" }}>
+            <div className="px-4 py-3 text-xs border-t flex items-center justify-between" style={{ color: MUTED, borderColor: BORDER, background: CARD }}>
               <span>Showing {sorted.length} of {totalUsers} users (page {page + 1} of {totalPages || 1})</span>
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ function PromoCodesTab() {
                 placeholder="BDDT-FREE"
                 value={form.code}
                 onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))}
-                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+                style={{ background: CARD, borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -345,7 +345,7 @@ function PromoCodesTab() {
                 placeholder="e.g. Veterans access — March 2026"
                 value={form.description}
                 onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+                style={{ background: CARD, borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -357,7 +357,7 @@ function PromoCodesTab() {
                 placeholder="100"
                 value={form.slotsGranted}
                 onChange={e => setForm(p => ({ ...p, slotsGranted: e.target.value }))}
-                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+                style={{ background: CARD, borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -368,7 +368,7 @@ function PromoCodesTab() {
                 placeholder="Unlimited"
                 value={form.maxUses}
                 onChange={e => setForm(p => ({ ...p, maxUses: e.target.value }))}
-                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+                style={{ background: CARD, borderColor: BORDER, color: TEXT }}
               />
             </div>
             <div>
@@ -377,7 +377,7 @@ function PromoCodesTab() {
                 type="date"
                 value={form.expiresAt}
                 onChange={e => setForm(p => ({ ...p, expiresAt: e.target.value }))}
-                style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+                style={{ background: CARD, borderColor: BORDER, color: TEXT }}
               />
             </div>
           </div>
@@ -427,7 +427,7 @@ function PromoCodesTab() {
               <tbody>
                 {codes.map((c: any, i: number) => (
                   <tr key={c.id} style={{
-                    background: i % 2 === 0 ? "#2C3438" : "#2C3438",
+                    background: i % 2 === 0 ? CARD : CARD,
                     borderBottom: `1px solid #2C3438`,
                   }}>
                     <td className="px-4 py-3">
@@ -451,7 +451,7 @@ function PromoCodesTab() {
                     <td className="px-4 py-3">
                       <Badge style={c.isActive
                         ? { background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
-                        : { background: "#3F4A50", color: MUTED, border: `1px solid #C3AB7D` }}>
+                        : { background: MUTED, color: MUTED, border: `1px solid #C3AB7D` }}>
                         {c.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
@@ -543,7 +543,7 @@ function EmbedVideoTab() {
 
         {/* Progress log */}
         {progress.log.length > 0 && (
-          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: "#2C3438", border: `1px solid ${BORDER}` }}>
+          <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
             {progress.log.map((line, i) => (
               <p key={i} style={{ color: line.startsWith("Error") ? "#EF4444" : "#4ADE80" }}>
                 {line.startsWith("Error") ? "✗" : "✓"} {line}
@@ -559,7 +559,7 @@ function EmbedVideoTab() {
       </div>
 
       {/* Info */}
-      <div className="rounded-xl p-4" style={{ background: "#2C3438", border: `1px solid ${BORDER}` }}>
+      <div className="rounded-xl p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
         <div className="flex items-start gap-3">
           <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#4ADE80" }} />
           <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
@@ -606,7 +606,7 @@ function StripeRecoveryTab() {
               value={userId}
               onChange={e => setUserId(e.target.value)}
               className="font-mono"
-              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+              style={{ background: CARD, borderColor: BORDER, color: TEXT }}
             />
           </div>
           <div>
@@ -614,7 +614,7 @@ function StripeRecoveryTab() {
             <Input
               value={returnUrl}
               onChange={e => setReturnUrl(e.target.value)}
-              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+              style={{ background: CARD, borderColor: BORDER, color: TEXT }}
             />
           </div>
           <Button
@@ -640,7 +640,7 @@ function StripeRecoveryTab() {
               readOnly
               value={result.onboardingUrl}
               className="font-mono text-xs flex-1"
-              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+              style={{ background: CARD, borderColor: BORDER, color: TEXT }}
             />
             <Button
               size="sm"
@@ -693,7 +693,7 @@ export default function AdminUsersPage() {
     <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
       <div className="text-center max-w-sm">
         <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "#EF4444" }} />
-        <p className="text-lg font-semibold mb-2" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>Access Denied</p>
+        <p className="text-lg font-semibold mb-2" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>Access Denied</p>
         <p className="text-sm mb-6" style={{ color: SUBTEXT }}>This page is restricted to platform administrators.</p>
         <Button variant="outline" onClick={() => navigate("/")} style={{ borderColor: GOLD, color: GOLD }}>Back to Home</Button>
       </div>
@@ -724,7 +724,7 @@ export default function AdminUsersPage() {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Shield className="w-6 h-6" style={{ color: GOLD }} />
-              <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: GOLD }}>
                 LN Command Center
               </h1>
             </div>
@@ -746,21 +746,23 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-          {tabs.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-              style={tab === t.id
-                ? { background: GOLD, color: BG }
-                : { color: SUBTEXT, background: "transparent" }}
-            >
-              {t.icon}
-              {t.label}
-            </button>
-          ))}
+        {/* Tabs — horizontally scrollable on mobile */}
+        <div className="overflow-x-auto mb-6 -mx-2 px-2">
+          <div className="flex gap-1 p-1 rounded-xl w-max" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            {tabs.map(t => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
+                style={tab === t.id
+                  ? { background: GOLD, color: BG }
+                  : { color: SUBTEXT, background: "transparent" }}
+              >
+                {t.icon}
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Tab Content */}
@@ -836,22 +838,22 @@ function WorksModerationTab() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-sm" style={{ color: TEXT }}>{w.title}</span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: "#2C3438", color: GOLD }}>{w.witnessId ?? "—"}</span>
-                {w.isFlagged && <span className="text-xs px-2 py-0.5 rounded" style={{ background: "#2C3438", color: "#E6CDAE" }}>FLAGGED</span>}
-                {w.moderationStatus === "removed" && <span className="text-xs px-2 py-0.5 rounded" style={{ background: "#2C3438", color: "#EF4444" }}>REMOVED</span>}
+                <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: CARD, color: GOLD }}>{w.witnessId ?? "—"}</span>
+                {w.isFlagged && <span className="text-xs px-2 py-0.5 rounded" style={{ background: CARD, color: GOLD }}>FLAGGED</span>}
+                {w.moderationStatus === "removed" && <span className="text-xs px-2 py-0.5 rounded" style={{ background: CARD, color: "#EF4444" }}>REMOVED</span>}
               </div>
               <div className="text-xs mt-1" style={{ color: SUBTEXT }}>
                 {w.contentType?.toUpperCase()} · {w.status} · {w.playCount ?? 0} plays
-                {w.flagReason && <span className="ml-2" style={{ color: "#E6CDAE" }}>Reason: {w.flagReason}</span>}
+                {w.flagReason && <span className="ml-2" style={{ color: GOLD }}>Reason: {w.flagReason}</span>}
               </div>
             </div>
             <div className="flex gap-2 shrink-0 flex-wrap">
               {!w.isFlagged && w.moderationStatus !== "removed" && (
                 <div className="flex gap-1">
                   <Input value={flagReason[w.id] ?? ""} onChange={e => setFlagReason(r => ({ ...r, [w.id]: e.target.value }))}
-                    placeholder="Flag reason…" className="w-32 h-7 text-xs" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+                    placeholder="Flag reason…" className="w-32 h-7 text-xs" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
                   <Button size="sm" variant="outline" className="h-7 text-xs"
-                    style={{ borderColor: "#AA8E64", color: "#E6CDAE" }}
+                    style={{ borderColor: "#AA8E64", color: GOLD }}
                     disabled={!flagReason[w.id]}
                     onClick={() => flagWork.mutate({ songId: w.id, reason: flagReason[w.id] })}>
                     Flag
@@ -945,11 +947,11 @@ function SystemConfigTab() {
         <p className="text-xs font-semibold" style={{ color: GOLD }}>ADD / UPDATE CONFIG KEY</p>
         <div className="flex gap-2 flex-wrap">
           <Input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="config.key"
-            className="flex-1 min-w-[160px]" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+            className="flex-1 min-w-[160px]" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
           <Input value={newValue} onChange={e => setNewValue(e.target.value)} placeholder="value"
-            className="w-32" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+            className="w-32" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
           <Input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="description (optional)"
-            className="flex-1 min-w-[160px]" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+            className="flex-1 min-w-[160px]" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
           <Button size="sm" disabled={!newKey || !newValue} style={{ background: GOLD, color: BG }}
             onClick={() => setConfig.mutate({ key: newKey, value: newValue, description: newDesc || undefined })}>
             Save
@@ -969,7 +971,7 @@ function SystemConfigTab() {
             {editKey === c.key ? (
               <div className="flex gap-2">
                 <Input value={editValue} onChange={e => setEditValue(e.target.value)} className="w-32 h-7 text-xs"
-                  style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+                  style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
                 <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: BG }}
                   onClick={() => setConfig.mutate({ key: c.key, value: editValue, description: editDesc || c.description })}>Save</Button>
                 <Button size="sm" variant="outline" className="h-7 text-xs" style={{ borderColor: BORDER, color: SUBTEXT }}
@@ -977,7 +979,7 @@ function SystemConfigTab() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <span className="font-mono text-sm px-3 py-1 rounded" style={{ background: BG, color: c.value === "true" ? "var(--lnx-green)" : c.value === "false" ? "var(--lnx-red)" : TEXT }}>{c.value}</span>
+                <span className="font-mono text-sm px-3 py-1 rounded" style={{ background: CARD, border: `1px solid ${BORDER}`, color: c.value === "true" ? "var(--lnx-green)" : c.value === "false" ? "var(--lnx-red)" : TEXT }}>{c.value}</span>
                 <Button size="sm" variant="outline" className="h-7 text-xs" style={{ borderColor: BORDER, color: SUBTEXT }}
                   onClick={() => { setEditKey(c.key); setEditValue(c.value); setEditDesc(c.description ?? ""); }}>Edit</Button>
               </div>
@@ -1043,7 +1045,7 @@ function BillingResetTab() {
         {founderSearch.length > 1 && (
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {filteredFounder.slice(0, 10).map((u: any) => (
-              <div key={u.id} className="rounded-lg p-3 flex items-center justify-between" style={{ background: BG, border: `1px solid ${BORDER}` }}>
+              <div key={u.id} className="rounded-lg p-3 flex items-center justify-between" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
                 <div>
                   <div className="text-sm font-medium" style={{ color: TEXT }}>{u.name ?? "—"}</div>
                   <div className="text-xs" style={{ color: SUBTEXT }}>{u.email ?? "no email"} · ID: {u.id}</div>
@@ -1053,7 +1055,7 @@ function BillingResetTab() {
                 </div>
                 {confirmFounder === u.id ? (
                   <div className="flex gap-2">
-                    <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: "#E6CDAE" }}
+                    <Button size="sm" className="h-7 text-xs" style={{ background: GOLD, color: GOLD }}
                       onClick={() => grantFounderFree.mutate({ userId: u.id })}>
                       Confirm Grant
                     </Button>
@@ -1061,7 +1063,7 @@ function BillingResetTab() {
                       onClick={() => setConfirmFounder(null)}>Cancel</Button>
                   </div>
                 ) : (
-                  <Button size="sm" className="h-7 text-xs gap-1" style={{ background: "#2C3438", border: `1px solid ${GOLD}`, color: GOLD }}
+                  <Button size="sm" className="h-7 text-xs gap-1" style={{ background: CARD, border: `1px solid ${GOLD}`, color: GOLD }}
                     onClick={() => setConfirmFounder(u.id)}>
                     <Gift className="w-3 h-3" /> Grant Free Tier
                   </Button>
@@ -1072,7 +1074,7 @@ function BillingResetTab() {
         )}
       </div>
 
-      <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+      <div className="rounded-xl p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
         <p className="text-sm font-semibold mb-1" style={{ color: "#EF4444" }}>⚠ Destructive Action</p>
         <p className="text-xs" style={{ color: SUBTEXT }}>Billing reset cancels the user's active Stripe subscription and clears their local Stripe customer/subscription IDs. The WID registry is never modified. Use only for refunds, fraud, or test account cleanup.</p>
       </div>
@@ -1098,7 +1100,7 @@ function BillingResetTab() {
             {confirmReset === u.id ? (
               <div className="flex gap-2 flex-wrap">
                 <Input value={resetReason} onChange={e => setResetReason(e.target.value)} placeholder="Reason (optional)"
-                  className="w-40 h-7 text-xs" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+                  className="w-40 h-7 text-xs" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
                 <Button size="sm" className="h-7 text-xs" style={{ background: "#EF4444", color: "#fff" }}
                   onClick={() => resetBilling.mutate({ userId: u.id, reason: resetReason || undefined })}>
                   Confirm Reset
@@ -1128,7 +1130,7 @@ function AuditLogTab() {
   const { data: logs, isLoading } = trpc.admin.getLogs.useQuery({ limit: 200 }, { retry: false });
 
   const ACTION_COLOR: Record<string, string> = {
-    flag_work: "#E6CDAE",
+    flag_work: GOLD,
     unflag_work: "#4ADE80",
     remove_work: "#EF4444",
     restore_work: "#4ADE80",
@@ -1136,7 +1138,7 @@ function AuditLogTab() {
     reset_billing: "#EF4444",
     set_user_role: GOLD,
     grant_license: "#4ADE80",
-    deactivate_code: "#E6CDAE",
+    deactivate_code: GOLD,
     reactivate_code: "#4ADE80",
   };
 
@@ -1210,7 +1212,7 @@ function FounderControlTab() {
       <div className="rounded-xl p-6 border" style={{ background: CARD, borderColor: BORDER }}>
         <div className="flex items-center gap-3 mb-4">
           <Crown className="w-6 h-6" style={{ color: GOLD }} />
-          <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+          <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: GOLD }}>
             Founder Control
           </h2>
         </div>
@@ -1224,7 +1226,7 @@ function FounderControlTab() {
           <span>Founder Seats Filled</span>
           <span style={{ color: slotsLeft === 0 ? "#EF4444" : GOLD }}>{count} / {max}</span>
         </div>
-        <div className="h-2 rounded-full overflow-hidden" style={{ background: "#2C3438" }}>
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: CARD }}>
           <div
             className="h-full rounded-full transition-all"
             style={{
@@ -1258,7 +1260,7 @@ function FounderControlTab() {
           <div className="space-y-2">
             {(foundersData?.founders ?? []).map((f: any) => (
               <div key={f.id} className="flex items-center justify-between gap-4 rounded-xl p-4 border"
-                style={{ background: "#2C3438", borderColor: "rgba(122,90,30,0.4)" }}>
+                style={{ background: CARD, borderColor: "rgba(122,90,30,0.4)" }}>
                 <div className="flex items-center gap-3 min-w-0">
                   {f.profilePhotoUrl ? (
                     <img src={f.profilePhotoUrl} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
@@ -1271,7 +1273,7 @@ function FounderControlTab() {
                   <div className="min-w-0">
                     <div className="font-medium truncate" style={{ color: TEXT }}>{f.name ?? "—"}</div>
                     {f.email && <div className="text-xs truncate" style={{ color: MUTED }}>{f.email}</div>}
-                    <div className="text-xs font-mono" style={{ color: "#3F4A50" }}>
+                    <div className="text-xs font-mono" style={{ color: MUTED }}>
                       ID: {f.id} · {f.songSlotsUsed ?? 0} works uploaded
                     </div>
                   </div>
@@ -1324,7 +1326,7 @@ function FounderControlTab() {
                       <img src={u.profilePhotoUrl} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
                     ) : (
                       <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                        style={{ background: "#2C3438" }}>
+                        style={{ background: CARD }}>
                         <Users className="w-4 h-4" style={{ color: MUTED }} />
                       </div>
                     )}
@@ -1347,7 +1349,7 @@ function FounderControlTab() {
                         )}
                       </div>
                       {u.email && <div className="text-xs truncate" style={{ color: MUTED }}>{u.email}</div>}
-                      <div className="text-xs font-mono" style={{ color: "#3F4A50" }}>
+                      <div className="text-xs font-mono" style={{ color: MUTED }}>
                         ID: {u.id} · {u.songSlotsUsed ?? 0}/{u.songSlotsTotal ?? 1} slots used
                       </div>
                     </div>
@@ -1502,7 +1504,7 @@ function MediaGenerationTab() {
               {completionPct}%
             </span>
           </div>
-          <div className="w-full rounded-full h-2" style={{ background: "#2C3438" }}>
+          <div className="w-full rounded-full h-2" style={{ background: CARD }}>
             <div
               className="h-2 rounded-full transition-all duration-500"
               style={{
@@ -1555,7 +1557,7 @@ function MediaGenerationTab() {
               value={enqueueId}
               onChange={e => setEnqueueId(e.target.value)}
               className="h-8 text-xs w-28"
-              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+              style={{ background: CARD, borderColor: BORDER, color: TEXT }}
             />
             <Button
               size="sm"
@@ -1573,14 +1575,14 @@ function MediaGenerationTab() {
 
       {/* Live job queue table */}
       <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#2C3438" }}>
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: CARD }}>
           <span className="text-xs font-semibold" style={{ color: TEXT }}>Recent Queue Jobs</span>
           <span className="text-xs" style={{ color: SUBTEXT }}>{jobs.length} shown · live</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr style={{ background: "#2C3438", borderBottom: `1px solid ${BORDER}` }}>
+              <tr style={{ background: CARD, borderBottom: `1px solid ${BORDER}` }}>
                 {["Job ID", "Song ID", "Title", "Status", "Priority", "Attempts", "Queued", "Completed"].map(h => (
                   <th key={h} className="px-3 py-2 text-left font-medium" style={{ color: SUBTEXT }}>{h}</th>
                 ))}
@@ -1597,7 +1599,7 @@ function MediaGenerationTab() {
                 <tr
                   key={job.id}
                   style={{
-                    background: i % 2 === 0 ? CARD : "#2C3438",
+                    background: i % 2 === 0 ? CARD : CARD,
                     borderBottom: `1px solid ${BORDER}`,
                   }}
                 >
@@ -1624,7 +1626,7 @@ function MediaGenerationTab() {
           </table>
         </div>
         {jobs.some(j => j.errorMessage) && (
-          <div className="px-4 py-3 space-y-1" style={{ background: "#2C3438", borderTop: `1px solid ${BORDER}` }}>
+          <div className="px-4 py-3 space-y-1" style={{ background: CARD, borderTop: `1px solid ${BORDER}` }}>
             <p className="text-xs font-semibold mb-1" style={{ color: RED }}>Error Details</p>
             {jobs.filter(j => j.errorMessage).map(j => (
               <p key={j.id} className="text-xs font-mono" style={{ color: RED }}>
@@ -1636,7 +1638,7 @@ function MediaGenerationTab() {
       </div>
 
       {/* Info footer */}
-      <div className="rounded-xl p-4" style={{ background: "#2C3438", border: `1px solid ${BORDER}` }}>
+      <div className="rounded-xl p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
         <div className="flex items-start gap-3">
           <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: GREEN }} />
           <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
@@ -1695,10 +1697,10 @@ function ModerationQueueEmbed() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Pending", key: "pending", color: "#E6CDAE" },
+          { label: "Pending", key: "pending", color: GOLD },
           { label: "Cleared", key: "reviewed_ok", color: GREEN },
           { label: "Removed", key: "removed_violation", color: RED },
-          { label: "Escalated", key: "escalated", color: "#E6CDAE" },
+          { label: "Escalated", key: "escalated", color: GOLD },
         ].map(({ label, key, color }) => (
           <div key={key} className="rounded-xl p-4 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
             <div className="text-2xl font-bold" style={{ color }}>{statMap[key] ?? 0}</div>
@@ -1714,7 +1716,7 @@ function ModerationQueueEmbed() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
           className="text-sm rounded-lg px-3 py-1.5 border"
-          style={{ background: CARD, borderColor: BORDER, color: "#E6CDAE" }}
+          style={{ background: CARD, borderColor: BORDER, color: GOLD }}
         >
           <option value="pending">Pending Review</option>
           <option value="reviewed_ok">Cleared</option>
@@ -1752,20 +1754,20 @@ function ModerationQueueEmbed() {
             return (
               <div key={flag.id} className="rounded-xl overflow-hidden" style={{ background: CARD, border: `1px solid ${severity === "critical" ? "#EF4444" : BORDER}` }}>
                 <button type="button" className="w-full text-left p-4 flex items-center gap-4" onClick={() => setExpandedId(isExpanded ? null : flag.id)}>
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: severity === "critical" ? RED : "#E6CDAE" }} />
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: severity === "critical" ? RED : GOLD }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: severity === "critical" ? "#2C3438" : "#2C3438", color: severity === "critical" ? RED : SUBTEXT }}>
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ background: severity === "critical" ? CARD : CARD, color: severity === "critical" ? RED : SUBTEXT }}>
                         {REASON_LABELS[flag.reason] ?? flag.reason}
                       </span>
                       <span className="text-xs capitalize" style={{ color: SUBTEXT }}>{flag.workType}</span>
-                      {flag.workTitle && <span className="text-xs truncate max-w-xs" style={{ color: "#DACAAA" }}>"{flag.workTitle}"</span>}
+                      {flag.workTitle && <span className="text-xs truncate max-w-xs" style={{ color: TEXT }}>"{flag.workTitle}"</span>}
                     </div>
                     <div className="text-xs mt-1" style={{ color: SUBTEXT }}>
                       Reported by {flag.reporterName} · {new Date(flag.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded" style={{ background: "#2C3438", color: flag.status === "pending" ? "#E6CDAE" : flag.status === "reviewed_ok" ? GREEN : flag.status === "removed_violation" ? RED : "#E6CDAE" }}>
+                  <span className="text-xs px-2 py-0.5 rounded" style={{ background: CARD, color: flag.status === "pending" ? GOLD : flag.status === "reviewed_ok" ? GREEN : flag.status === "removed_violation" ? RED : GOLD }}>
                     {flag.status.replace("_", " ")}
                   </span>
                 </button>
@@ -1775,7 +1777,7 @@ function ModerationQueueEmbed() {
                     {flag.details && (
                       <div>
                         <p className="text-xs uppercase tracking-wider mb-1" style={{ color: SUBTEXT }}>Reporter's details</p>
-                        <p className="text-sm rounded p-3" style={{ background: "#2C3438", color: "#DACAAA" }}>{flag.details}</p>
+                        <p className="text-sm rounded p-3" style={{ background: CARD, color: TEXT }}>{flag.details}</p>
                       </div>
                     )}
                     <p className="text-xs" style={{ color: SUBTEXT }}>Work ID: {flag.workId}</p>
@@ -1787,16 +1789,16 @@ function ModerationQueueEmbed() {
                           onChange={(e) => setAdminNotes(prev => ({ ...prev, [flag.id]: e.target.value }))}
                           rows={2}
                           className="w-full text-sm rounded-lg px-3 py-2 resize-none border"
-                          style={{ background: "#2C3438", borderColor: BORDER, color: "#E6CDAE" }}
+                          style={{ background: CARD, borderColor: BORDER, color: GOLD }}
                         />
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "reviewed_ok", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: "#2C3438", color: GREEN, border: `1px solid #2C3438` }}>
+                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "reviewed_ok", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: CARD, color: GREEN, border: `1px solid ${BORDER}` }}>
                             ✓ Clear
                           </Button>
-                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "removed_violation", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: "#2C3438", color: RED, border: `1px solid #2C3438` }}>
+                          <Button size="sm" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "removed_violation", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ background: CARD, color: RED, border: `1px solid ${BORDER}` }}>
                             ✗ Remove
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "escalated", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ borderColor: "#2C3438", color: "#E6CDAE" }}>
+                          <Button size="sm" variant="outline" onClick={() => resolveMutation.mutate({ flagId: flag.id, resolution: "escalated", adminNote: adminNotes[flag.id] })} disabled={resolveMutation.isPending} style={{ borderColor: BORDER, color: GOLD }}>
                             Escalate
                           </Button>
                         </div>
@@ -1870,7 +1872,7 @@ function DataRightsTab() {
       <div className="rounded-xl border p-6" style={{ background: CARD, borderColor: BORDER }}>
         <div className="flex items-center gap-3 mb-4">
           <Trash2 className="w-5 h-5" style={{ color: RED }} />
-          <h2 className="text-lg font-bold" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+          <h2 className="text-lg font-bold" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>
             Data Deletion Requests
           </h2>
           {deletionRequests && deletionRequests.length > 0 && (
@@ -1894,7 +1896,7 @@ function DataRightsTab() {
         ) : (
           <div className="rounded-xl border overflow-hidden" style={{ borderColor: BORDER }}>
             <table className="w-full">
-              <thead style={{ background: "#2C3438", borderBottom: `1px solid ${BORDER}` }}>
+              <thead style={{ background: CARD, borderBottom: `1px solid ${BORDER}` }}>
                 <tr>
                   {["Creator", "Email", "Requested On", "Days Elapsed", "Action"].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: SUBTEXT }}>{h}</th>
@@ -1908,7 +1910,7 @@ function DataRightsTab() {
                   const isUrgent = daysElapsed >= 80;
                   return (
                     <tr key={req.id} style={{
-                      background: i % 2 === 0 ? "#2C3438" : "#2C3438",
+                      background: i % 2 === 0 ? CARD : CARD,
                       borderBottom: `1px solid #2C3438`,
                     }}>
                       <td className="px-4 py-3 text-sm">
@@ -1918,7 +1920,7 @@ function DataRightsTab() {
                         {req.artistHandle && req.name && (
                           <div className="text-xs mt-0.5" style={{ color: MUTED }}>{req.name}</div>
                         )}
-                        <div className="text-xs font-mono mt-0.5" style={{ color: "#3F4A50" }}>ID: {req.id}</div>
+                        <div className="text-xs font-mono mt-0.5" style={{ color: MUTED }}>ID: {req.id}</div>
                       </td>
                       <td className="px-4 py-3 text-sm" style={{ color: SUBTEXT }}>{req.email ?? "—"}</td>
                       <td className="px-4 py-3 text-sm" style={{ color: SUBTEXT }}>{formatDate(requestedAt)}</td>
@@ -1932,7 +1934,7 @@ function DataRightsTab() {
                           size="sm"
                           disabled={markProcessed.isPending}
                           onClick={() => markProcessed.mutate({ userId: req.id })}
-                          style={{ background: "#2C3438", color: GREEN, border: `1px solid #2C3438` }}
+                          style={{ background: CARD, color: GREEN, border: `1px solid ${BORDER}` }}
                         >
                           {markProcessed.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
                           Mark Processed
@@ -1951,12 +1953,12 @@ function DataRightsTab() {
       <div className="rounded-xl border p-6" style={{ background: CARD, borderColor: BORDER }}>
         <div className="flex items-center gap-3 mb-4">
           <Globe className="w-5 h-5" style={{ color: "#4ADE80" }} />
-          <h2 className="text-lg font-bold" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+          <h2 className="text-lg font-bold" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>
             Sovereign Infrastructure Migration
           </h2>
         </div>
         <p className="text-sm mb-6" style={{ color: SUBTEXT }}>
-          This status is displayed publicly on the <code className="text-xs px-1 py-0.5 rounded" style={{ background: "#2C3438", color: GOLD }}>/privacy</code> page. Update it as the platform progresses toward sovereign infrastructure.
+          This status is displayed publicly on the <code className="text-xs px-1 py-0.5 rounded" style={{ background: CARD, color: GOLD }}>/privacy</code> page. Update it as the platform progresses toward sovereign infrastructure.
         </p>
 
         {/* Current Status Display */}
@@ -1966,7 +1968,7 @@ function DataRightsTab() {
             <span className="text-sm" style={{ color: SUBTEXT }}>Loading current status…</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 mb-6 p-4 rounded-xl border" style={{ background: "#2C3438", borderColor: BORDER }}>
+          <div className="flex items-center gap-3 mb-6 p-4 rounded-xl border" style={{ background: CARD, borderColor: BORDER }}>
             <div className="w-3 h-3 rounded-full" style={{ background: stageColors[migrationData?.stage ?? "hosted"] }} />
             <div>
               <div className="text-sm font-semibold" style={{ color: TEXT }}>
@@ -2014,7 +2016,7 @@ function DataRightsTab() {
               value={migrationNotes}
               onChange={e => setMigrationNotes(e.target.value)}
               className="w-full text-sm rounded-lg px-3 py-2 resize-none border"
-              style={{ background: "#2C3438", borderColor: BORDER, color: TEXT }}
+              style={{ background: CARD, borderColor: BORDER, color: TEXT }}
             />
           </div>
 

@@ -449,10 +449,15 @@ export default function CreatorProfilePage() {
   });
   const playMutation = trpc.songs.play.useMutation();
 
-  // ── Build stats — admin profile only ──────────────────────────────────────
+  // ── Build stats — admin profile + honored contributors ────────────────────
+  // Honored handles receive the 🐛 BUGS KILLED pill as a gift from the platform.
+  const HONORED_BUG_KILLERS = ["slimdoggy", "moshai"];
   const isAdminProfile = (data as any)?.creator?.role === "admin";
+  const profileHandle = ((data as any)?.creator?.artistHandle ?? "").toLowerCase();
+  const isHonoredBugKiller = HONORED_BUG_KILLERS.includes(profileHandle);
+  const showBugKillPill = isAdminProfile || isHonoredBugKiller;
   const buildStatsQuery = trpc.platform.getBuildStats.useQuery(undefined, {
-    enabled: isAdminProfile,
+    enabled: showBugKillPill,
     staleTime: Infinity,
   });
 
@@ -986,8 +991,8 @@ export default function CreatorProfilePage() {
                       {" "}witnesses
                     </button>
                   )}
-                  {/* Bug-kill tracker — admin profile only */}
-                  {isAdminProfile && buildStatsQuery.data && (
+                  {/* Bug-kill tracker — admin + honored contributors */}
+                  {showBugKillPill && buildStatsQuery.data && (
                     <span
                       className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest select-none cursor-default"
                       style={{ background: "rgba(239,68,68,0.10)", color: "#f87171", border: "1px solid rgba(239,68,68,0.30)" }}
@@ -1165,8 +1170,8 @@ export default function CreatorProfilePage() {
                     <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
                   </button>
                 )}
-                {/* Bug-kill tracker — admin profile only */}
-                {isAdminProfile && buildStatsQuery.data && (
+                {/* Bug-kill tracker — admin + honored contributors */}
+                {showBugKillPill && buildStatsQuery.data && (
                   <span
                     className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest select-none cursor-default"
                     style={{ background: "rgba(239,68,68,0.10)", color: "#f87171", border: "1px solid rgba(239,68,68,0.30)" }}
