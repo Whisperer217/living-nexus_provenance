@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ChevronLeft, Heart, Shield, Wrench, Star, Users } from "lucide-react";
+import { ChevronLeft, Heart, Shield, Wrench, Star, Users, Bug } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 /* ─── Contributor Data ───────────────────────────────────────────────────────
    To add a contributor: append an entry to the relevant section below.
@@ -138,8 +139,11 @@ function Section({
   );
 }
 
-/* ─── Page ───────────────────────────────────────────────────────────────── */
+/* ─── Page ─────────────────────────────────────────────────────────────────────────────────── */
 export default function AttributionPage() {
+  const { data: buildStats } = trpc.platform.getBuildStats.useQuery(undefined, {
+    staleTime: Infinity,
+  });
   return (
     <div className="min-h-screen" style={{ background: "#1A2226", color: "#e2e8f0" }}>
       {/* ── Hero ────────────────────────────────────────────────────────── */}
@@ -200,6 +204,38 @@ export default function AttributionPage() {
           subtitle="Community members who tested the platform rigorously and reported issues that made it better."
           contributors={QA_TESTERS}
         />
+
+        {/* ── Bug-Kill Tracker ─────────────────────────────────────────────────────────────────────── */}
+        {buildStats && (
+          <div
+            className="mb-12 rounded-xl p-5"
+            style={{ background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.18)" }}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <Bug size={16} style={{ color: "#f87171" }} />
+              <h2 className="text-sm font-semibold uppercase tracking-widest" style={{ color: "#f87171" }}>
+                Build Integrity
+              </h2>
+            </div>
+            <p className="text-xs mb-4" style={{ color: "#475569" }}>
+              Every bug reported by the QA team was triaged, reproduced, and resolved. This counter reflects the
+              cumulative build health of the platform across all sprints.
+            </p>
+            <div className="flex flex-wrap gap-4 items-center">
+              <div
+                className="flex items-center gap-2 px-4 py-2 rounded-full font-mono text-sm tracking-widest"
+                style={{ background: "rgba(220,38,38,0.12)", border: "1px solid rgba(220,38,38,0.3)", color: "#f87171" }}
+                title={`${buildStats.bugsFixed} bugs squashed across ${buildStats.totalCommits} commits`}
+              >
+                <Bug size={13} />
+                BUGS KILLED &middot; {buildStats.bugsFixed}
+              </div>
+              <span className="text-xs" style={{ color: "#475569" }}>
+                across {buildStats.totalCommits} commits
+              </span>
+            </div>
+          </div>
+        )}
         <Section
           icon={Shield}
           title="Founders & Architects"

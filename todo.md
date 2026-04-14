@@ -3393,3 +3393,8 @@
 ## Bug Report — Apr 14 2026 (Explore songIds too_big)
 
 - [x] Explore page: "Too big: expected array to have <=100 items" on songIds batch query — fixed: server cap raised from 100 to 500; client-side slice(0, 500) guard added on ExplorePage
+
+## Feature Request — Apr 14 2026 (Bug-Kill badge visibility)
+
+- [x] Show 🐛 BUGS KILLED badge on Moshai's and Slimdoggy's public creator profiles (not admin-only) — fixed: showBugBadge = isAdminProfile || isBuildContributor (handles: slimdoggy, moshai)
+- [x] Show 🐛 BUGS KILLED badge on the Attribution/About page — added Build Integrity section with live counter after QA Testers
