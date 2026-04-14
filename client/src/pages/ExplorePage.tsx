@@ -344,6 +344,9 @@ export default function ExplorePage() {
     { staleTime: 60_000, refetchOnWindowFocus: false }
   );
 
+  // Map UI "novel" alias → server "manuscript" content type (must be declared before queries)
+  const serverContentType = contentType === "novel" ? "manuscript" : contentType;
+
   // New This Week query
   const { data: newThisWeekData, isLoading: newThisWeekLoading } = trpc.songs.newThisWeek.useQuery(
     { genre: activeGenre === "All" ? undefined : activeGenre, limit: 48, contentType: serverContentType },
@@ -449,8 +452,6 @@ export default function ExplorePage() {
   }, []);
 
   // Active songs list
-  // Map UI "novel" alias → server "manuscript" content type
-  const serverContentType = contentType === "novel" ? "manuscript" : contentType;
   const songs = mode === "infinite" ? allSongs : mode === "trending" ? (trendingData || []) : mode === "new" ? (newThisWeekData || []) : (randomData || []);
   const isLoading = mode === "infinite" ? (pageLoading && allSongs.length === 0) : mode === "trending" ? trendingLoading : mode === "new" ? newThisWeekLoading : randomLoading;
 
