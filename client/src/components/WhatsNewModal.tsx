@@ -10,14 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.29.0";
+const CURRENT_VERSION = "v2.30.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.29.0",
+    version: "v2.30.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Music, text: "Lyrics Editor — Undo / Redo — Press Ctrl/Cmd+Z to undo and Ctrl/Cmd+Y (or Ctrl/Cmd+Shift+Z) to redo any change in the lyrics editor. Two toolbar buttons sit above the Save Lyrics row and grey out automatically at stack boundaries. History holds up to 200 entries per session." },
+      { icon: FileText, text: "Lyrics Editor — Auto-Save Draft — Every keystroke in the lyrics editor is saved to your browser. If you close the panel without saving, your unsaved lyrics are restored the next time you open it. A gold notice appears when a draft is present and clears automatically after a successful save." },
+      { icon: Star, text: "Lyrics Editor — Line & Syllable Stats — The character count row now shows the number of non-empty lines and the average syllable count per line, helping songwriters structure verses and choruses to a target length without leaving the editor." },
+      { icon: Users, text: "Contributors Strip — The home page now shows a contributors strip at the bottom with creator avatars and roles, linking through to the full Attribution page. Slimdoggy and thiiirdgenkill are now publicly credited for their QA work." },
+    ],
+  },
+  {
+    version: "v2.29.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Gift, text: "Gift Confirmation Banner — When you send a gift to a creator or tip a track and return from checkout, a gold-bordered confirmation banner now appears directly in the page — unmissable, auto-dismisses in 8 seconds, with a manual dismiss button. No more wondering if the payment went through." },
       { icon: Bell, text: "Notifications Repositioned — All site-wide toasts (tips, comments, errors, system messages) moved from top-center to bottom-center. They no longer compete with the header on mobile and sit cleanly above the mini player bar." },

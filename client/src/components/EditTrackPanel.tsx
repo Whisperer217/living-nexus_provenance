@@ -15,6 +15,31 @@ import {
 } from "@/components/ui/select";
 import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History, Plus, Trash2, ChevronDown, Link2 } from "lucide-react";
 import { toast } from "sonner";
+
+/* ── Lyrics editor utilities ──────────────────────────────────────────────── */
+/** Rough syllable count per word using vowel-group heuristic */
+function countSyllables(word: string): number {
+  word = word.toLowerCase().replace(/[^a-z]/g, "");
+  if (!word) return 0;
+  const vowelGroups = word.match(/[aeiouy]+/g);
+  let count = vowelGroups ? vowelGroups.length : 1;
+  // Silent 'e' at end
+  if (word.endsWith("e") && count > 1) count -= 1;
+  return Math.max(1, count);
+}
+function lyricsStats(text: string): { lines: number; avgSyllables: number } {
+  const lines = text.split("\n").filter((l) => l.trim().length > 0);
+  if (lines.length === 0) return { lines: 0, avgSyllables: 0 };
+  const totalSyllables = lines.reduce((acc, line) => {
+    const words = line.trim().split(/\s+/);
+    return acc + words.reduce((s, w) => s + countSyllables(w), 0);
+  }, 0);
+  return { lines: lines.length, avgSyllables: Math.round(totalSyllables / lines.length) };
+}
+function lyricsStorageKey(songId: number | string): string {
+  return `ln_lyrics_draft_${songId}`;
+}
+
 import {
   EDIT_GENRES as GENRES,
   MANUSCRIPT_CATEGORIES,
@@ -103,7 +128,17 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     ((song.downloadTipThresholdCents ?? 179) / 100).toFixed(2)
   );
   const [dlSaving, setDlSaving] = useState(false);
-  const [lyrics, setLyrics] = useState(song.lyricsText ?? "");
+  const [lyrics, setLyrics] = useState(() => {
+    // Restore unsaved draft from localStorage if present
+    try {
+      const draft = localStorage.getItem(lyricsStorageKey(song.id));
+      if (draft !== null) return draft;
+    } catch {}
+    return song.lyricsText ?? "";
+  });
+  const [hasDraft, setHasDraft] = useState(() => {
+    try { return localStorage.getItem(lyricsStorageKey(song.id)) !== null; } catch { return false; }
+  });
   const [lyricsSaving, setLyricsSaving] = useState(false);
   // Undo/redo history for the lyrics editor
   const lyricsHistory = useRef<string[]>([song.lyricsText ?? ""]);
@@ -125,6 +160,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     }
     lyricsHistoryIdx.current = lyricsHistory.current.length - 1;
     setLyrics(val);
+    // Auto-save draft to localStorage
+    try {
+      localStorage.setItem(lyricsStorageKey(song.id), val);
+      setHasDraft(true);
+    } catch {}
   };
 
   const handleLyricsUndo = () => {
@@ -388,6 +428,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       toast.success("Lyrics saved");
       utils.songs.mySongs.invalidate();
       setLyricsSaving(false);
+      // Clear draft after successful save
+      try { localStorage.removeItem(lyricsStorageKey(song.id)); setHasDraft(false); } catch {}
     },
     onError: (err: { message?: string }) => {
       toast.error(err.message || "Failed to save lyrics");
@@ -889,9 +931,26 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 Redo
               </button>
             </div>
+            {/* Draft indicator */}
+            {hasDraft && (
+              <p className="text-[10px] mb-1" style={{ color: "rgba(245,196,81,0.5)" }}>
+                Draft auto-saved — not yet committed to provenance record
+              </p>
+            )}
             <div className="flex items-center justify-between">
-              <span className="text-xs" style={{ color: "#475569" }}>
-                {lyrics.length} / 10,000 characters
+              <span className="text-xs flex items-center gap-3 flex-wrap" style={{ color: "#475569" }}>
+                <span>{lyrics.length} / 10,000 chars</span>
+                {lyrics.trim().length > 0 && (() => {
+                  const { lines, avgSyllables } = lyricsStats(lyrics);
+                  return (
+                    <>
+                      <span style={{ color: "rgba(100,116,139,0.6)" }}>·</span>
+                      <span>{lines} {lines === 1 ? "line" : "lines"}</span>
+                      <span style={{ color: "rgba(100,116,139,0.6)" }}>·</span>
+                      <span>~{avgSyllables} syl/line</span>
+                    </>
+                  );
+                })()}
               </span>
               <Button
                 size="sm"

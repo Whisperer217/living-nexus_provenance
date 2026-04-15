@@ -1409,6 +1409,9 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* ── Contributors Strip ──────────────────────────────────────────── */}
+      <ContributorsStrip />
+
       {/* Tip modal */}
       {tipTarget !== null && (
         <TipModal track={tipTrack} onClose={() => { setTipTarget(null); setTipRect(null); }} originRect={tipRect} />
@@ -1416,3 +1419,53 @@ export default function HomePage() {
     </div>
   );
 }
+
+/* ─── Contributors Strip ─────────────────────────────────────────────────── */
+const STRIP_CONTRIBUTORS = [
+  { handle: "Doc Seraph Mercer", role: "Founder", initial: "D" },
+  { handle: "Slimdoggy", role: "QA · Bug Hunter", initial: "S" },
+  { handle: "thiiirdgenkill", role: "QA · Feature Requests", initial: "T" },
+];
+
+function ContributorsStrip() {
+  return (
+    <div className="w-full max-w-3xl mx-auto px-4 py-10">
+      <div className="flex flex-col items-center gap-5">
+        <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(203,177,131,0.45)" }}>
+          Built with
+        </p>
+        <div className="flex items-center gap-6 flex-wrap justify-center">
+          {STRIP_CONTRIBUTORS.map(({ handle, role, initial }) => (
+            <Link key={handle} href="/attribution">
+              <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold transition-all group-hover:scale-105"
+                  style={{
+                    background: "rgba(212,175,55,0.10)",
+                    border: "1px solid rgba(212,175,55,0.20)",
+                    color: "#CBB183",
+                  }}
+                >
+                  {initial}
+                </div>
+                <div className="text-center">
+                  <p className="text-[11px] font-semibold" style={{ color: "#DACAAA" }}>{handle}</p>
+                  <p className="text-[9px] uppercase tracking-wider" style={{ color: "rgba(100,116,139,0.8)" }}>{role}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <Link href="/attribution">
+          <span
+            className="text-[10px] uppercase tracking-[0.15em] transition-opacity hover:opacity-80 cursor-pointer"
+            style={{ color: "rgba(203,177,131,0.5)" }}
+          >
+            View full attribution →
+          </span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+

@@ -16,6 +16,12 @@ const QA_TESTERS = [
     note: "Found more bugs in two weeks than most paid QA teams catch in a quarter. Reported the AI Disclosure display bug, the Discover filter dead-end, the publisher metadata drop, the anonymous comment attribution error, and the duration timestamp on non-audio works — all unprompted, all precise, all actionable. This platform is sharper because of him.",
     since: "April 2026",
   },
+  {
+    handle: "thiiirdgenkill",
+    role: "Quality Assurance — Discord",
+    note: "First to catch the missing tip confirmation on the song page — reported it immediately after donating, which led to the in-page gold banner and the site-wide toast repositioning. Also the voice behind the undo button on the lyrics editor. Every request was precise, practical, and creator-first.",
+    since: "April 2026",
+  },
 ];
 
 const EARLY_BELIEVERS = [
