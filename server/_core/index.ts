@@ -13,6 +13,7 @@ import { appRouter, handleStripeWebhook } from "../routers";
 import { uploadRouter } from "../uploadRoute";
 import { stampRouter } from "../stampRoute";
 import { downloadRouter } from "../downloadRoute";
+import { harmonicRouter } from "../harmonicRoute";
 import { publicApiRouter } from "../publicApiRoute";
 import { oembedRouter } from "../oembedRoute";
 import { ogApiRouter } from "../ogApiRoutes";
@@ -118,6 +119,8 @@ async function startServer() {
   app.use(stampRouter);
   // WID-tagged audio download endpoint
   app.use(downloadRouter);
+  // Harmonic Signature — GET /api/harmonic/:songId/audio and /api/harmonic/:songId/image
+  app.use("/api/harmonic", harmonicRouter);
   // Public REST API v1 (Plex/Jellyfin/external clients)
   app.use(publicApiRouter);
   // oEmbed discovery endpoint — Discord reads this to get song-specific metadata

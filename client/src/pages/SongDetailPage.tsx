@@ -760,6 +760,29 @@ export default function SongDetailPage() {
                         <ExternalLink className="w-3 h-3" />View Certificate
                       </a>
                     )}
+                    {/* Harmonic Signature Downloads */}
+                    {(song as any).harmonicSignature && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <a
+                          href={`/api/harmonic/${song.id}/audio`}
+                          download
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity"
+                          style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}
+                        >
+                          <Download className="w-3 h-3" />
+                          Harmonic Tone (.wav)
+                        </a>
+                        <a
+                          href={`/api/harmonic/${song.id}/image`}
+                          download
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity"
+                          style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}
+                        >
+                          <Download className="w-3 h-3" />
+                          Waveform Image (.png)
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
