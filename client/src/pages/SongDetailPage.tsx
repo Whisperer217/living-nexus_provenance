@@ -608,6 +608,12 @@ export default function SongDetailPage() {
                     <span className="flex items-center gap-1"><Headphones className="w-3.5 h-3.5" />{song.playCount || 0} plays</span>
                     <span className="flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" />{comments?.length || 0} comments</span>
                   </div>
+                  {(song as any).caption && (
+                    <p className="text-sm leading-relaxed mt-3"
+                      style={{ color: "var(--ln-smoke)", fontFamily: "'Lato', sans-serif", borderLeft: "2px solid rgba(196,154,40,0.35)", paddingLeft: "12px" }}>
+                      {(song as any).caption}
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {!isOwner && (
