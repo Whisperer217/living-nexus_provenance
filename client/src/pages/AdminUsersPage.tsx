@@ -22,7 +22,7 @@ import { getLoginUrl } from "@/const";
 
 type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus";
 type SortDir = "asc" | "desc";
-type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation" | "data_rights";
+type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation" | "data_rights" | "projects";
 
 const GOLD = "#CBB183";
 const BG = "#1C2326";       // dark page background
@@ -713,6 +713,7 @@ export default function AdminUsersPage() {
     { id: "media", label: "Media Generation", icon: <Video className="w-4 h-4" /> },
     { id: "moderation", label: "Covenant Moderation", icon: <Shield className="w-4 h-4" style={{ color: "#EF4444" }} /> },
     { id: "data_rights", label: "Data Rights", icon: <Database className="w-4 h-4" style={{ color: "#4ADE80" }} /> },
+    { id: "projects", label: "Projects / Donations", icon: <Gift className="w-4 h-4" style={{ color: GOLD }} /> },
   ];
 
   return (
@@ -778,6 +779,7 @@ export default function AdminUsersPage() {
         {tab === "media" && <MediaGenerationTab />}
         {tab === "moderation" && <ModerationQueueEmbed />}
         {tab === "data_rights" && <DataRightsTab />}
+        {tab === "projects" && <ProjectDonationsTab />}
       </div>
     </div>
   );
@@ -2028,6 +2030,164 @@ function DataRightsTab() {
             {updateMigration.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             Update Migration Status
           </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Projects / Donations Tab ──────────────────────────────────────────────────
+function ProjectDonationsTab() {
+  const utils = trpc.useUtils();
+  const [projectIdInput, setProjectIdInput] = useState("");
+  const [syncResult, setSyncResult] = useState<{ synced: number; skipped: number; totalCentsAdded: number } | null>(null);
+
+  // List all active projects so admin can pick one
+  const { data: projects, isLoading: projectsLoading } = trpc.projects.list.useQuery(undefined, { retry: false });
+
+  const syncDonations = trpc.admin.syncProjectDonations.useMutation({
+    onSuccess: (result) => {
+      setSyncResult(result);
+      const added = (result.totalCentsAdded / 100).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
+      if (result.synced > 0) {
+        toast.success(`Synced ${result.synced} donation${result.synced !== 1 ? "s" : ""} — ${added} added to project total.`);
+      } else {
+        toast.success(`All donations already recorded (${result.skipped} skipped). No changes needed.`);
+      }
+      utils.projects.listActive.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const projectId = parseInt(projectIdInput) || 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="rounded-xl p-5 border" style={{ background: CARD, borderColor: BORDER }}>
+        <h2 className="text-lg font-bold mb-1" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>
+          Projects &amp; Donation Sync
+        </h2>
+        <p className="text-sm" style={{ color: SUBTEXT }}>
+          If a donor paid via Stripe but closed the tab before returning to the project page,
+          their donation may not have been recorded in the database. Use the sync tool below
+          to reconcile Stripe sessions against the DB and backfill any missing donations.
+          This operation is idempotent — running it multiple times is safe.
+        </p>
+      </div>
+
+      {/* Project list */}
+      <div className="rounded-xl p-5 border" style={{ background: CARD, borderColor: BORDER }}>
+        <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: SUBTEXT }}>Active Projects</h3>
+        {projectsLoading && (
+          <div className="flex justify-center py-6">
+            <Loader2 className="w-5 h-5 animate-spin" style={{ color: GOLD }} />
+          </div>
+        )}
+        {!projectsLoading && (projects ?? []).length === 0 && (
+          <p className="text-sm text-center py-6" style={{ color: SUBTEXT }}>No active projects found.</p>
+        )}
+        <div className="space-y-2">
+          {(projects ?? []).map((p: any) => {
+            const raised = ((p.raisedAmountCents ?? 0) / 100).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
+            const goal = p.goalAmountCents ? ((p.goalAmountCents) / 100).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }) : null;
+            const pct = p.goalAmountCents ? Math.min(100, Math.round((p.raisedAmountCents / p.goalAmountCents) * 100)) : null;
+            return (
+              <div key={p.id} className="rounded-lg p-4 flex items-center gap-4 flex-wrap" style={{ background: BG, border: `1px solid ${BORDER}` }}>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm" style={{ color: TEXT }}>{p.title}</div>
+                  <div className="text-xs mt-0.5 font-mono" style={{ color: MUTED }}>
+                    ID: {p.id} · @{p.creatorHandle ?? "—"} · {p.donorCount ?? 0} donor{p.donorCount !== 1 ? "s" : ""}
+                  </div>
+                  <div className="text-xs mt-1" style={{ color: GOLD }}>
+                    {raised} raised{goal ? ` of ${goal} goal${pct !== null ? ` (${pct}%)` : ""}` : ""}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={syncDonations.isPending && projectId === p.id}
+                  onClick={() => {
+                    setProjectIdInput(String(p.id));
+                    setSyncResult(null);
+                    syncDonations.mutate({ projectId: p.id });
+                  }}
+                  style={{ borderColor: GOLD, color: GOLD }}
+                >
+                  {syncDonations.isPending && projectId === p.id
+                    ? <><Loader2 className="w-3 h-3 animate-spin mr-1" />Syncing…</>
+                    : <><RotateCcw className="w-3 h-3 mr-1" />Sync Donations</>}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Manual project ID sync */}
+      <div className="rounded-xl p-5 border" style={{ background: CARD, borderColor: BORDER }}>
+        <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: SUBTEXT }}>Manual Sync by Project ID</h3>
+        <div className="flex gap-3 items-end flex-wrap">
+          <div className="flex-1 min-w-[160px]">
+            <label className="block text-xs mb-1" style={{ color: MUTED }}>Project ID</label>
+            <Input
+              type="number"
+              min={1}
+              value={projectIdInput}
+              onChange={e => { setProjectIdInput(e.target.value); setSyncResult(null); }}
+              placeholder="e.g. 3"
+              style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }}
+            />
+          </div>
+          <Button
+            disabled={!projectId || syncDonations.isPending}
+            onClick={() => { setSyncResult(null); syncDonations.mutate({ projectId }); }}
+            style={{ background: GOLD, color: BG }}
+          >
+            {syncDonations.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RotateCcw className="w-4 h-4 mr-2" />}
+            Sync from Stripe
+          </Button>
+        </div>
+
+        {/* Result */}
+        {syncResult && (
+          <div className="mt-4 rounded-lg p-4 border" style={{ background: BG, borderColor: syncResult.synced > 0 ? GREEN : BORDER }}>
+            <div className="text-sm font-semibold mb-2" style={{ color: syncResult.synced > 0 ? GREEN : SUBTEXT }}>
+              {syncResult.synced > 0 ? "Sync complete — donations backfilled" : "Already up to date"}
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: "New Records", value: syncResult.synced, color: syncResult.synced > 0 ? GREEN : MUTED },
+                { label: "Already Recorded", value: syncResult.skipped, color: MUTED },
+                { label: "Amount Added", value: `$${(syncResult.totalCentsAdded / 100).toFixed(0)}`, color: syncResult.totalCentsAdded > 0 ? GOLD : MUTED },
+              ].map(({ label, value, color }) => (
+                <div key={label}>
+                  <div className="text-xl font-bold font-mono" style={{ color }}>{value}</div>
+                  <div className="text-xs uppercase tracking-wider" style={{ color: MUTED }}>{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Webhook setup reminder */}
+      <div className="rounded-xl p-5 border" style={{ background: CARD, borderColor: "#AA8E64" }}>
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: GOLD }} />
+          <div>
+            <div className="text-sm font-semibold mb-1" style={{ color: GOLD }}>Stripe Webhook Not Configured</div>
+            <p className="text-xs leading-relaxed" style={{ color: SUBTEXT }}>
+              Donations rely on the donor returning to the project page after checkout. If they close the tab,
+              the donation is not recorded automatically. To fix this permanently, add a Stripe webhook:
+            </p>
+            <ol className="text-xs mt-2 space-y-1 list-decimal list-inside" style={{ color: MUTED }}>
+              <li>Go to Stripe Dashboard → Developers → Webhooks → Add endpoint</li>
+              <li>Endpoint URL: <span className="font-mono" style={{ color: TEXT }}>{window.location.origin}/api/stripe/webhook</span></li>
+              <li>Select event: <span className="font-mono" style={{ color: TEXT }}>checkout.session.completed</span></li>
+              <li>Copy the signing secret and add it to Railway as <span className="font-mono" style={{ color: TEXT }}>STRIPE_WEBHOOK_SECRET</span></li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>

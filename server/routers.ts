@@ -2421,6 +2421,86 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         });
         return { ok: true, stage: input.stage };
       }),
+
+    /**
+     * Sync project donations from Stripe.
+     * Queries Stripe for all paid checkout.session.completed events of type
+     * project_donation for the given project, deduplicates against the DB,
+     * and backfills any missing records (e.g. donors who closed the tab before
+     * returning to the success URL so confirmDonation never fired).
+     */
+    syncProjectDonations: adminProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+
+        let synced = 0;
+        let skipped = 0;
+        let totalCentsAdded = 0;
+        let hasMore = true;
+        let startingAfter: string | undefined = undefined;
+
+        while (hasMore) {
+          const listParams: Stripe.Checkout.SessionListParams = { limit: 100 };
+          if (startingAfter) listParams.starting_after = startingAfter;
+          const sessions = await stripe.checkout.sessions.list(listParams);
+          hasMore = sessions.has_more;
+          if (sessions.data.length > 0) {
+            startingAfter = sessions.data[sessions.data.length - 1].id;
+          } else {
+            hasMore = false;
+          }
+
+          for (const session of sessions.data) {
+            const meta = session.metadata || {};
+            if (
+              meta.type !== "project_donation" ||
+              parseInt(meta.projectId || "0") !== input.projectId ||
+              session.payment_status !== "paid"
+            ) continue;
+
+            // Check if already recorded (idempotent)
+            const existing = await db.execute(
+              `SELECT id FROM projectDonations WHERE stripeSessionId = ? LIMIT 1`,
+              [session.id]
+            ) as any;
+            const rows = existing?.[0] as any[];
+            if (rows && rows.length > 0) { skipped++; continue; }
+
+            // Backfill the missing donation
+            const amountCents = session.amount_total ?? 0;
+            await recordProjectDonation({
+              projectId: input.projectId,
+              donorUserId: meta.userId ? parseInt(meta.userId) : undefined,
+              donorName: meta.anonymous === "true" ? "Anonymous" : (meta.donorName || undefined),
+              donorEmail: meta.donorEmail || undefined,
+              amountCents,
+              message: meta.message || undefined,
+              anonymous: meta.anonymous === "true",
+              stripeSessionId: session.id,
+              stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+            });
+            synced++;
+            totalCentsAdded += amountCents;
+          }
+        }
+
+        await logAdminAction({
+          adminId: ctx.user.id,
+          adminName: ctx.user.name,
+          action: "sync_project_donations",
+          targetType: "project",
+          targetId: String(input.projectId),
+          details: { synced, skipped, totalCentsAdded },
+        });
+
+        return { ok: true, synced, skipped, totalCentsAdded };
+      }),
   }),
   // ── Field Notes ────────────────────────────────────────────────────────────
   fieldNotes: router({
