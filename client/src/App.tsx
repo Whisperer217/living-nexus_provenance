@@ -223,7 +223,9 @@ export default function App() {
             <CommunityToastProvider />
             <Toaster
               theme="dark"
+              position="bottom-center"
               toastOptions={{
+                duration: 5000,
                 style: {
                   background: "#2C3438",
                   border: "1px solid rgba(203,177,131,0.14)",

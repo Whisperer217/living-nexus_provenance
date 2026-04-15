@@ -66,6 +66,7 @@ export default function SongDetailPage() {
   const songId = parseInt(id || "0");
 
   const [tipOpen, setTipOpen] = useState(false);
+  const [tipSuccess, setTipSuccess] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState<{ id: number; authorName: string } | null>(null);
@@ -235,11 +236,14 @@ export default function SongDetailPage() {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("tip") === "success") {
-      toast.success("🙏 Your gift was sent! The creator receives 90% directly.");
+      setTipSuccess(true);
+      toast.success("🙏 Your gift was sent! The creator receives 90% directly.", { duration: 8000 });
       // Invalidate ticker so it refreshes with the new tip
       utils.tips.recentTips.invalidate();
       utils.events.getByWork.invalidate({ workId: songId });
       window.history.replaceState({}, "", window.location.pathname);
+      // Auto-dismiss the in-page banner after 8 seconds
+      setTimeout(() => setTipSuccess(false), 8000);
     }
 
     if (params.get("download") === "unlocked") {
@@ -426,6 +430,32 @@ export default function SongDetailPage() {
           </button>
         </Link>
 
+        {/* ── Tip success banner ── */}
+        {tipSuccess && (
+          <div
+            className="mb-6 rounded-2xl p-5 text-center animate-fade-up"
+            style={{
+              background: "rgba(203,177,131,0.08)",
+              border: "1px solid rgba(203,177,131,0.35)",
+            }}
+          >
+            <div className="text-2xl mb-2">🙏</div>
+            <p className="font-heading text-base mb-1" style={{ color: "#CBB183" }}>
+              Gift received — thank you!
+            </p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+              The creator receives 90% of your gift directly. Your support is recorded on Living Nexus.
+            </p>
+            <button
+              type="button"
+              onClick={() => setTipSuccess(false)}
+              className="mt-3 text-xs opacity-50 hover:opacity-80 transition-opacity"
+              style={{ color: "#CBB183" }}
+            >
+              Dismiss ✕
+            </button>
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-5">
