@@ -342,17 +342,28 @@ export default function UploadPage() {
 
   const handleGenerateWid = async () => {
     if (uploadMode === "manuscript" || uploadMode === "comic") {
-      // Hash the document file for manuscript/comic
-      if (!documentFile) { toast.error("Please select a file first"); return; }
+      // For comic mode: hash documentFile if present, otherwise hash storyboardPagesJson
+      const hasContent = documentFile || (uploadMode === "comic" && storyboardPagesJson);
+      if (!hasContent) { toast.error(uploadMode === "comic" ? "Add storyboard pages or upload a file first" : "Please select a file first"); return; }
       setGeneratingWid(true);
       try {
-        const buffer = await documentFile.arrayBuffer();
+        let buffer: ArrayBuffer;
+        let sourceName: string;
+        if (documentFile) {
+          buffer = await documentFile.arrayBuffer();
+          sourceName = documentFile.name;
+        } else {
+          // Hash the storyboard pages JSON as the content fingerprint
+          const encoder = new TextEncoder();
+          buffer = encoder.encode(storyboardPagesJson!).buffer;
+          sourceName = title || "storyboard";
+        }
         const fileHash = await sha256Hex(buffer);
         const prefix = widPrefixForMode(uploadMode);
         const wid = `${prefix}-${fileHash.slice(0, 8).toUpperCase()}-${fileHash.slice(8, 16).toUpperCase()}`;
         const frequencies = deriveHarmonicFrequencies(fileHash);
         const keypair = await generateECDSAKeypair();
-        const payload = `${wid}|${title || documentFile.name}|${user?.name || ""}|${Date.now()}`;
+        const payload = `${wid}|${title || sourceName}|${user?.name || ""}|${Date.now()}`;
         const signature = await signPayload(keypair.privateKey, payload);
         const publicKeyJWK = await exportPublicKeyJWK(keypair.publicKey);
         const timestamp = new Date().toISOString();
@@ -537,15 +548,19 @@ export default function UploadPage() {
 
   const handlePublish = async () => {
     if (uploadMode === "manuscript" || uploadMode === "comic") {
-      if (!title || !documentFile) { toast.error("Title and file are required"); return; }
+      // For comic mode: documentFile is optional when storyboard pages are provided
+      const requiresDocFile = uploadMode === "manuscript" || (uploadMode === "comic" && !storyboardPagesJson);
+      if (!title || (requiresDocFile && !documentFile)) { toast.error(uploadMode === "comic" ? "Title is required — add storyboard pages or upload a file" : "Title and file are required"); return; }
       try {
         let fileUrl: string | undefined;
         let fileKey: string | undefined;
         let coverArtUrl: string | undefined;
-        // Upload the document file as a generic file
-        const { url: docUrl, key: docKey } = await uploadFileToS3(documentFile, "audio");
-        fileUrl = docUrl;
-        fileKey = docKey;
+        // Upload the document file if provided
+        if (documentFile) {
+          const { url: docUrl, key: docKey } = await uploadFileToS3(documentFile, "audio");
+          fileUrl = docUrl;
+          fileKey = docKey;
+        }
         if (coverFile) {
           const compressed = await compressCoverArt(coverFile);
           const { url } = await uploadFileToS3(compressed, "cover");
@@ -965,10 +980,10 @@ export default function UploadPage() {
                     <>
                       <span className="text-4xl block mb-3">{uploadMode === "manuscript" ? "📖" : "🎨"}</span>
                       <p className="font-medium text-sm mb-1" style={{ color: "var(--ln-parchment)" }}>
-                        {uploadMode === "manuscript" ? "Drop your manuscript here or click to browse" : "Drop your comic/novel file here or click to browse"}
+                        {uploadMode === "manuscript" ? "Drop your manuscript here or click to browse" : storyboardPagesJson ? "Add a full file too (optional)" : "Drop your comic/novel file here or click to browse"}
                       </p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>
-                        {uploadMode === "manuscript" ? "PDF, DOCX, TXT, EPUB — max 200 MB" : "PDF, CBZ, CBR, ZIP, or image files — max 200 MB"}
+                        {uploadMode === "manuscript" ? "PDF, DOCX, TXT, EPUB — max 200 MB" : storyboardPagesJson ? "PDF, CBZ, CBR, ZIP — optional alongside your storyboard pages" : "PDF, CBZ, CBR, ZIP, or image files — max 200 MB"}
                       </p>
                       <p className="text-xs mt-2 px-4" style={{ color: "var(--ln-smoke)" }}>
                         Your file will be SHA-256 hashed and registered with a Witness ID. The original file is stored privately.
@@ -1030,6 +1045,7 @@ export default function UploadPage() {
                 disabled={
                   uploadMode === "audio" ? !audioFile :
                   uploadMode === "lyrics" ? !lyrics.trim() :
+                  uploadMode === "comic" ? (!documentFile && !storyboardPagesJson) :
                   !documentFile
                 }
                 onClick={() => setStep(2)}
