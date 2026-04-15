@@ -519,6 +519,13 @@
       "when": 1776169189577,
       "tag": "0073_past_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "5",
+      "when": 1776285789703,
+      "tag": "0075_genre_text",
+      "breakpoints": true
     }
   ]
 }

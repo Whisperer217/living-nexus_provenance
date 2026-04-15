@@ -1009,7 +1009,7 @@ export const appRouter = router({
     updateMetadata: protectedProcedure.input(z.object({
       songId: z.number(),
       caption: z.string().max(2000).nullable().optional(),
-      genre: z.string().max(64).nullable().optional(),
+      genre: z.string().nullable().optional(),
       collectionTag: z.string().max(128).nullable().optional(),
       coverArtUrl: z.string().url().nullable().optional(),
       aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]).optional(),

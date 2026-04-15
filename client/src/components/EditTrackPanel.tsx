@@ -694,8 +694,6 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                     : [...selectedGenres, g];
                   // Truncate to fit varchar(64) — keep first N that fit
                   const mutable = [...next];
-                  let joined = mutable.join(", ");
-                  while (joined.length > 64 && mutable.length > 0) { mutable.pop(); joined = mutable.join(", "); }
                   setGenre(mutable.join(", "));
                 };
                 return (

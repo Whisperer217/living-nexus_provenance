@@ -33,7 +33,7 @@ export const users = mysqlTable("users", {
 
   // Creator AI & genre defaults
   aiDisclosure: mysqlEnum("aiDisclosure", ["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).default("original"),
-  primaryGenre: varchar("primaryGenre", { length: 64 }),
+  primaryGenre: text("primaryGenre"),
 
   // License & slots
   licenseStatus: mysqlEnum("licenseStatus", ["free", "licensed"]).default("free").notNull(),
@@ -98,7 +98,7 @@ export const songs = mysqlTable("songs", {
 
   // Metadata
   title: varchar("title", { length: 255 }).notNull(),
-  genre: varchar("genre", { length: 64 }),
+  genre: text("genre"),
   bpm: int("bpm"),
   keySignature: varchar("keySignature", { length: 16 }),
   moodTags: json("moodTags").$type<string[]>(),

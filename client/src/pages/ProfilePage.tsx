@@ -738,8 +738,6 @@ export default function ProfilePage() {
                     ? selected.filter((x: string) => x !== g)
                     : [...selected, g];
                   const mutable = [...next];
-                  let joined = mutable.join(", ");
-                  while (joined.length > 64 && mutable.length > 0) { mutable.pop(); joined = mutable.join(", "); }
                   save({ primaryGenre: mutable.join(", ") });
                 };
                 return (

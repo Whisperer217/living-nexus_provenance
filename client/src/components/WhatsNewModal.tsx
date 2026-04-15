@@ -10,14 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.30.0";
+const CURRENT_VERSION = "v2.31.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.30.0",
+    version: "v2.31.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Music, text: "Genre Multi-Select — The genre selector on track edit and creator profile is now a chip grid instead of a dropdown. Select as many genres as your work spans — Gospel, Trap, Power Metal, Neo-Soul, and 60+ other styles are available. Selections are stored as a comma-separated list and the 64-character cap has been removed entirely." },
+      { icon: BookOpen, text: "Comic Upload — Storyboard-Only Mode — Comics and novels can now be published using storyboard pages alone, without uploading a separate file. The Next: Metadata button unlocks as soon as pages are added, the Witness ID is generated from the page layout, and the file drop zone relabels itself as optional once pages are present." },
+      { icon: Eye, text: "Reader — Close and Fullscreen Fixed — The X and expand icons in the flip reader now register correctly on all devices. A CSS stacking context conflict caused the nav zone buttons to paint above the top bar, intercepting every tap. The top bar is now at a higher z-index and both buttons call stopPropagation." },
+      { icon: Star, text: "Credits — Role Badges — Role labels in the Credits section (Publisher, Co-Writer, Producer, etc.) are now pill badges with proper contrast. Publisher roles show in blue; all other roles show in gold. The previous near-black text color made them invisible against the dark background." },
+    ],
+  },
+  {
+    version: "v2.30.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Music, text: "Lyrics Editor — Undo / Redo — Press Ctrl/Cmd+Z to undo and Ctrl/Cmd+Y (or Ctrl/Cmd+Shift+Z) to redo any change in the lyrics editor. Two toolbar buttons sit above the Save Lyrics row and grey out automatically at stack boundaries. History holds up to 200 entries per session." },
       { icon: FileText, text: "Lyrics Editor — Auto-Save Draft — Every keystroke in the lyrics editor is saved to your browser. If you close the panel without saving, your unsaved lyrics are restored the next time you open it. A gold notice appears when a draft is present and clears automatically after a successful save." },
