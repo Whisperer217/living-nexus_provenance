@@ -349,13 +349,13 @@ export default function ExplorePage() {
 
   // New This Week query
   const { data: newThisWeekData, isLoading: newThisWeekLoading } = trpc.songs.newThisWeek.useQuery(
-    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 48, contentType: serverContentType },
+    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 500, contentType: serverContentType },
     { enabled: mode === "new", refetchOnWindowFocus: false, staleTime: 120_000 }
   );
 
   // Trending query — respects the active content-type chip
   const { data: trendingData, isLoading: trendingLoading } = trpc.songs.trending.useQuery(
-    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 50, contentType: serverContentType },
+    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 500, contentType: serverContentType },
     { enabled: mode === "trending", refetchOnWindowFocus: false, staleTime: 120_000 }
   );
 
@@ -433,7 +433,7 @@ export default function ExplorePage() {
     {
       genre: activeGenre === "All" ? undefined : activeGenre,
       search: query || undefined,
-      limit: PAGE_SIZE,
+      limit: 500,
       randomize: true,
       seed,
       contentType: serverContentType,
@@ -837,8 +837,8 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Creator-grouped pan-rows */}
-        {!isLoading && songs.length > 0 && (
+        {/* Creator-grouped pan-rows — infinite mode only */}
+        {!isLoading && songs.length > 0 && mode === "infinite" && (
           <div
             className="space-y-8"
             style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
@@ -926,6 +926,36 @@ export default function ExplorePage() {
           </div>
         )}
 
+        {/* Flat grid — randomize / trending / new modes: all tracks across all creators */}
+        {!isLoading && songs.length > 0 && mode !== "infinite" && (
+          <div
+            className="grid gap-4"
+            style={{
+              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+              opacity: isShuffling ? 0.5 : 1,
+              transition: "opacity 0.3s",
+            }}
+          >
+            {songs.map((item: any, idx: number) => {
+              const likeEntry = (likeMap as any)[item.song.id];
+              const track = itemToTrack(item);
+              return (
+                <TrackCard
+                  key={item.song.id}
+                  track={track}
+                  index={idx}
+                  onPlay={handlePlay}
+                  onTip={(_track, rect) => {
+                    setTipItem(item);
+                    setTipRect(rect);
+                  }}
+                  prefetchedLiked={likeEntry?.liked}
+                  prefetchedLikeCount={likeEntry?.count}
+                />
+              );
+            })}
+          </div>
+        )}
         {/* Infinite scroll sentinel — only rendered in infinite mode */}
         {mode === "infinite" && !isLoading && (
           <div ref={loaderRef} className="py-8 flex justify-center">

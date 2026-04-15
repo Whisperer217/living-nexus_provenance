@@ -2485,7 +2485,7 @@ export async function toggleSongReaction(
 export async function getTrendingWorks(opts?: { genre?: string; limit?: number; contentType?: string }) {
   const db = await getDb();
   if (!db) return [];
-  const limit = opts?.limit ?? 20;
+  const limit = opts?.limit ?? 500;
   const conditions: ReturnType<typeof eq>[] = [
     eq(songs.isPublic, true) as ReturnType<typeof eq>,
     eq(songs.status, "Published") as ReturnType<typeof eq>,
