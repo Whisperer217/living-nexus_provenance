@@ -10,14 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.28.0";
+const CURRENT_VERSION = "v2.29.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.28.0",
+    version: "v2.29.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Gift, text: "Gift Confirmation Banner — When you send a gift to a creator or tip a track and return from checkout, a gold-bordered confirmation banner now appears directly in the page — unmissable, auto-dismisses in 8 seconds, with a manual dismiss button. No more wondering if the payment went through." },
+      { icon: Bell, text: "Notifications Repositioned — All site-wide toasts (tips, comments, errors, system messages) moved from top-center to bottom-center. They no longer compete with the header on mobile and sit cleanly above the mini player bar." },
+      { icon: TrendingUp, text: "Explore — Unlimited Tracks — Randomize, Trending, and New This Week modes now load up to 500 tracks instead of the previous 24-track hard cap. All three modes display a flat responsive grid across all creators — no more per-creator grouping that hid most of the catalogue." },
+      { icon: Music, text: "Song Page Scroll Restored — Tapping play, like, or next on the mini player bar no longer freezes the page behind it. The scroll lock now only activates after a confirmed upward swipe of 8px or more, so tap targets work freely without locking the page." },
+    ],
+  },
+  {
+    version: "v2.28.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: BookOpen, text: "Comic Book Reader — Comics and novels now open in a full-screen horizontal page-turn reader. Pages slide left and right with a CSS 3D page-curl animation. Desktop shows a two-page spread; mobile shows one page at a time. The chrome fades away after a few seconds so nothing stands between you and the art. Swipe on mobile, arrow keys on desktop, Escape to close." },
       { icon: Gift, text: "Creator-Level Gifting — The Send a Gift button on a creator’s profile now goes directly to the creator — not attached to any specific track. Support the artist, not just the song." },

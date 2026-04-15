@@ -393,6 +393,7 @@ export default function CreatorProfilePage() {
   const [, navigate] = useLocation();
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
+  const [tipSuccess, setTipSuccess] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
   const [witnessNetworkOpen, setWitnessNetworkOpen] = useState(false);
   const [witnessNetworkTab, setWitnessNetworkTab] = useState<"witnessing" | "witnesses">("witnesses");
@@ -420,6 +421,16 @@ export default function CreatorProfilePage() {
       // Clean the query param from the URL without reload
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, "", cleanUrl);
+    }
+  }, []);
+  // Handle Stripe tip success redirect on creator profile
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tip") === "success") {
+      setTipSuccess(true);
+      toast.success("🙏 Your gift was sent! The creator receives 90% directly.", { duration: 8000 });
+      window.history.replaceState({}, "", window.location.pathname);
+      setTimeout(() => setTipSuccess(false), 8000);
     }
   }, []);
   const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
@@ -687,6 +698,34 @@ export default function CreatorProfilePage() {
              • Profile content: separate div below, pt accounts for avatar overhang
          ═══════════════════════════════════════════════════════════════ */}
 
+      {/* ── Tip success banner ── */}
+      {tipSuccess && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4">
+          <div
+            className="rounded-2xl p-5 text-center"
+            style={{
+              background: "rgba(203,177,131,0.08)",
+              border: "1px solid rgba(203,177,131,0.35)",
+            }}
+          >
+            <div className="text-2xl mb-2">🙏</div>
+            <p className="font-heading text-base mb-1" style={{ color: "#CBB183" }}>
+              Gift received — thank you!
+            </p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+              The creator receives 90% of your gift directly. Your support is recorded on Living Nexus.
+            </p>
+            <button
+              type="button"
+              onClick={() => setTipSuccess(false)}
+              className="mt-3 text-xs opacity-50 hover:opacity-80 transition-opacity"
+              style={{ color: "#CBB183" }}
+            >
+              Dismiss ✕
+            </button>
+          </div>
+        </div>
+      )}
       {/* ── Hero: banner (bg) + avatar (absolute overlay) ── */}
       <div
         className="relative w-full group"
