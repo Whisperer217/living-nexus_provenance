@@ -83,9 +83,9 @@ function NotifRow({
           {notif.title}
         </p>
         {notif.body && (
-          <p className="text-[11px] text-white/35 line-clamp-2">{notif.body}</p>
+          <p className="text-[11px] text-white/55 line-clamp-2">{notif.body}</p>
         )}
-        <p className="text-[10px] text-white/25 mt-1">
+        <p className="text-[10px] text-white/45 mt-1">
           {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
         </p>
         {/* Accept invite button */}
@@ -106,7 +106,7 @@ function NotifRow({
         {!notif.isRead && (
           <button
             onClick={e => { e.stopPropagation(); onRead(notif.id); }}
-            className="p-1 rounded hover:bg-white/5 text-white/20 hover:text-white/60 transition-colors"
+            className="p-1 rounded hover:bg-white/5 text-white/45 hover:text-white/60 transition-colors"
             title="Mark read"
           >
             <Check size={11} />
@@ -114,7 +114,7 @@ function NotifRow({
         )}
         <button
           onClick={e => { e.stopPropagation(); onArchive(notif.id); }}
-          className="p-1 rounded hover:bg-white/5 text-white/20 hover:text-white/40 transition-colors"
+          className="p-1 rounded hover:bg-white/5 text-white/45 hover:text-white/40 transition-colors"
           title="Archive"
         >
           <Archive size={11} />
@@ -277,7 +277,7 @@ export default function NotificationsPage() {
             <p className="text-white/40 mb-1">
               {tab === "inbox" ? "You're all caught up" : "No notifications yet"}
             </p>
-            <p className="text-sm text-white/25">
+            <p className="text-sm text-white/45">
               {tab === "inbox"
                 ? "Switch to All to see your full history"
                 : "Witness activity, comments, and invites will appear here"}

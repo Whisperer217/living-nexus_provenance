@@ -144,7 +144,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onClick={() => goTo(item.path)}
         title={item.label}
         className={`w-full flex items-center gap-3 transition-all duration-150 relative px-4 py-3 text-[14px]
-          ${!isWarm ? (active ? "text-white/95" : "text-white/40 hover:text-[#C49A28] hover:bg-[rgba(196,154,40,0.04)]") : ""}`}
+          ${!isWarm ? (active ? "text-white/95" : "text-white/70 hover:text-[#C49A28] hover:bg-[rgba(196,154,40,0.04)]") : ""}`}
         style={{
           background: active ? (isWarm ? warmActiveBg : "rgba(196,154,40,0.06)") : "transparent",
           color: isWarm ? (active ? warmActiveText : warmMutedText) : undefined,
@@ -157,7 +157,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           color: isWarm
             ? (active ? warmActiveText : warmMutedText)
             : (active ? (item.goldLabel ? "#E8A830" : "var(--ln-gold)") : (item.goldLabel ? "rgba(196,154,40,0.6)" : "inherit")),
-          opacity: (!isWarm && !active && !item.goldLabel) ? 0.6 : 1,
+          opacity: (!isWarm && !active && !item.goldLabel) ? 0.75 : 1,
         }} />
         <span className="flex-1 text-left font-body" style={isWarm ? { color: active ? warmActiveText : warmMutedText } : (labelColor ? { color: labelColor } : undefined)}>{item.label}</span>
         {pulseBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse" style={{ background: "var(--ln-ember)", color: "white" }}>{pulseBadge}</span>}
@@ -305,7 +305,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {PRIMARY_NAV.map(item => renderMobileNavItem(item))}
               {!authLoading && user && (
                 <div className="px-4 pt-4 pb-1">
-                  <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase">Creator Tools</p>
+                  <p className="text-[9px] font-heading tracking-widest text-white/45 uppercase">Creator Tools</p>
                 </div>
               )}
               {!authLoading && user && renderMobileNavItem({ label: "Upload", icon: Upload, path: "/upload" })}
@@ -316,7 +316,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {!authLoading && (user as any)?.role === "admin" && renderMobileNavItem({ label: "LN Command", icon: Terminal, path: "/admin" })}
 
               <div className="px-4 pt-4 pb-2">
-                <p className="text-[9px] font-heading tracking-widest text-white/20 uppercase mb-2">Discover</p>
+                <p className="text-[9px] font-heading tracking-widest text-white/45 uppercase mb-2">Discover</p>
                 {([
                   { label: "Manifesto",         icon: BookOpen, path: "/manifesto"        },
                   { label: "Terms of Service",  icon: Scale,    path: "/terms"            },
@@ -334,7 +334,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       key={item.label}
                       onClick={() => goTo(item.path)}
                       className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors"
-                      style={{ background: active ? "rgba(196,154,40,0.06)" : "transparent", color: active ? "var(--ln-gold)" : "var(--ln-iron)" }}
+                      style={{ background: active ? "rgba(196,154,40,0.06)" : "transparent", color: active ? "var(--ln-gold)" : "rgba(255,255,255,0.65)" }}
                     >
                       <Icon size={14} className="flex-shrink-0" />
                       <span className="text-[13px] font-body">{item.label}</span>
@@ -348,7 +348,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <div className="px-4 pb-4 border-t border-[rgba(44,52,56,0.35)] pt-3">
               <button
                 onClick={closeMobileMenu}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#E8A830] hover:bg-[rgba(196,154,40,0.04)]"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/65 hover:text-[#E8A830] hover:bg-[rgba(196,154,40,0.04)]"
               >
                 <Sparkles size={15} className="flex-shrink-0" />
                 <span className="text-[13px] font-body">What's New</span>
@@ -369,7 +369,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               ) : (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all text-white/35 hover:text-white/60 hover:bg-white/[0.04]"
+                  className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all text-white/60 hover:text-white/80 hover:bg-white/[0.04]"
                 >
                   <LogOut size={14} className="flex-shrink-0" />
                   <span className="text-[13px] font-body">Log Out</span>

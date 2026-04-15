@@ -56,7 +56,7 @@ function CreatePlaylistDialog({
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Name your playlist..."
-              className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/30"
+              className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/50"
             />
           </div>
           <div>
@@ -66,7 +66,7 @@ function CreatePlaylistDialog({
               onChange={e => setDescription(e.target.value)}
               placeholder="What's this playlist about?"
               rows={2}
-              className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/30 resize-none"
+              className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/50 resize-none"
             />
           </div>
           <div className="flex items-center justify-between">
@@ -129,8 +129,8 @@ function PlaylistCard({
               bg-[#A78BFA]/10 border border-[#A78BFA]/20 text-[#A78BFA]">COLLAB</span>
           )}
           {playlist.isPublic
-            ? <Globe size={10} className="flex-shrink-0 text-white/30" />
-            : <Lock size={10} className="flex-shrink-0 text-white/30" />}
+            ? <Globe size={10} className="flex-shrink-0 text-white/50" />
+            : <Lock size={10} className="flex-shrink-0 text-white/50" />}
         </div>
         {playlist.description && (
           <p className="text-[11px] text-white/40 truncate">{playlist.description}</p>
@@ -141,12 +141,12 @@ function PlaylistCard({
         {isOwner && (
           <button
             onClick={e => { e.stopPropagation(); onDelete(); }}
-            className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-lnx-red transition-colors"
+            className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/50 hover:text-lnx-red transition-colors"
           >
             <Trash2 size={13} />
           </button>
         )}
-        <ChevronRight size={14} className="text-white/30" />
+        <ChevronRight size={14} className="text-white/50" />
       </div>
     </div>
   );
@@ -234,14 +234,14 @@ function PlaylistDetail({
           <h2 className="text-xl font-heading text-white mb-1">{playlist.name}</h2>
           {playlist.description && <p className="text-sm text-white/50 mb-2">{playlist.description}</p>}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-white/30">{tracks.length} track{tracks.length !== 1 ? "s" : ""}</span>
+            <span className="text-xs text-white/50">{tracks.length} track{tracks.length !== 1 ? "s" : ""}</span>
             {playlist.isCollaborative && (
               <span className="px-1.5 py-0.5 rounded-full text-[9px] font-heading
                 bg-[#A78BFA]/10 border border-[#A78BFA]/20 text-[#A78BFA]">COLLABORATIVE</span>
             )}
             {playlist.isPublic
-              ? <span className="flex items-center gap-1 text-[10px] text-white/30"><Globe size={9} /> Public</span>
-              : <span className="flex items-center gap-1 text-[10px] text-white/30"><Lock size={9} /> Private</span>}
+              ? <span className="flex items-center gap-1 text-[10px] text-white/50"><Globe size={9} /> Public</span>
+              : <span className="flex items-center gap-1 text-[10px] text-white/50"><Lock size={9} /> Private</span>}
           </div>
         </div>
       </div>
@@ -275,7 +275,7 @@ function PlaylistDetail({
             value={inviteHandle}
             onChange={e => setInviteHandle(e.target.value)}
             placeholder="Artist handle or name..."
-            className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/30 text-sm"
+            className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/50 text-sm"
             onKeyDown={e => e.key === "Enter" && handleInvite()}
           />
           <Button
@@ -292,7 +292,7 @@ function PlaylistDetail({
       {/* Collaborators */}
       {collaborators.length > 0 && (
         <div className="mb-4">
-          <p className="text-[10px] text-white/30 font-heading tracking-wider mb-2">COLLABORATORS</p>
+          <p className="text-[10px] text-white/50 font-heading tracking-wider mb-2">COLLABORATORS</p>
           <div className="flex flex-wrap gap-2">
             {collaborators.map((c: any) => (
               <div key={c.id} className="flex items-center gap-1.5 px-2 py-1 rounded-full
@@ -309,7 +309,7 @@ function PlaylistDetail({
                 {isOwner && (
                   <button
                     onClick={() => removeCollab.mutate({ playlistId, userId: c.user.id })}
-                    className="text-white/20 hover:text-lnx-red transition-colors"
+                    className="text-white/45 hover:text-lnx-red transition-colors"
                   >
                     <X size={10} />
                   </button>
@@ -322,7 +322,7 @@ function PlaylistDetail({
 
       {/* Track list */}
       {tracks.length === 0 ? (
-        <div className="text-center py-12 text-white/30">
+        <div className="text-center py-12 text-white/50">
           <Music size={32} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">No tracks yet</p>
           {isMember && <p className="text-xs mt-1">Add tracks from any song page</p>}
@@ -335,11 +335,11 @@ function PlaylistDetail({
               className="group flex items-center gap-3 p-2.5 rounded-xl
                 hover:bg-[#111009] transition-colors"
             >
-              <span className="text-[11px] text-white/20 w-5 text-right flex-shrink-0">{i + 1}</span>
+              <span className="text-[11px] text-white/45 w-5 text-right flex-shrink-0">{i + 1}</span>
               <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-[#111009]">
                 {t.song.coverArtUrl
                   ? <img src={t.song.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                  : <Music size={14} className="m-auto text-white/20 mt-2.5" />}
+                  : <Music size={14} className="m-auto text-white/45 mt-2.5" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-white truncate">{t.song.title}</p>
@@ -358,7 +358,7 @@ function PlaylistDetail({
                 <button
                   onClick={() => removeTrack.mutate({ playlistTrackId: t.id, playlistId })}
                   className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
-                    hover:bg-red-500/10 text-white/20 hover:text-lnx-red transition-all"
+                    hover:bg-red-500/10 text-white/45 hover:text-lnx-red transition-all"
                 >
                   <X size={12} />
                 </button>
@@ -442,7 +442,7 @@ export default function PlaylistsPage() {
           <div className="text-center py-16">
             <ListMusic size={40} className="mx-auto mb-4 text-[#C49A28]/20" />
             <p className="text-white/40 mb-2">No playlists yet</p>
-            <p className="text-sm text-white/25 mb-6">Create one and invite collaborators to build it together</p>
+            <p className="text-sm text-white/45 mb-6">Create one and invite collaborators to build it together</p>
             <Button
               onClick={() => setShowCreate(true)}
               className="bg-[#1C1A14] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"

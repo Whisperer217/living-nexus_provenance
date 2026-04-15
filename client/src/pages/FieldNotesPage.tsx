@@ -203,7 +203,7 @@ function NoteForm({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title…"
-        className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/30 font-heading text-[14px]"
+        className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/50 font-heading text-[14px]"
         maxLength={256}
       />
 
@@ -236,7 +236,7 @@ function NoteForm({
         onChange={(e) => setBody(e.target.value)}
         placeholder="Write your field note, doctrine, or journal entry…"
         rows={7}
-        className="bg-white/[0.05] border-white/[0.1] text-white/85 placeholder:text-white/30 font-body text-[13px] leading-relaxed resize-none"
+        className="bg-white/[0.05] border-white/[0.1] text-white/85 placeholder:text-white/50 font-body text-[13px] leading-relaxed resize-none"
       />
 
       {/* Visibility toggle */}
@@ -257,7 +257,7 @@ function NoteForm({
       {/* Advanced (video / cover image) */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
-        className="flex items-center gap-1.5 text-[11px] font-body text-white/35 hover:text-white/60 transition-colors"
+        className="flex items-center gap-1.5 text-[11px] font-body text-white/55 hover:text-white/60 transition-colors"
       >
         <Video size={11} />
         {showAdvanced ? "Hide advanced" : "Add video or cover image"}
@@ -270,13 +270,13 @@ function NoteForm({
             value={videoUrl as string}
             onChange={(e) => setVideoUrl(e.target.value)}
             placeholder="YouTube URL (optional)…"
-            className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/30 font-body text-[12px]"
+            className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/50 font-body text-[12px]"
           />
           <Input
             value={coverImageUrl as string}
             onChange={(e) => setCoverImageUrl(e.target.value)}
             placeholder="Cover image CDN URL (optional)…"
-            className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/30 font-body text-[12px]"
+            className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/50 font-body text-[12px]"
           />
         </div>
       )}
@@ -456,10 +456,10 @@ export default function FieldNotesPage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
             <ScrollText size={32} className="mx-auto mb-4 text-white/10" />
-            <p className="font-heading text-[16px] text-white/30 mb-2">
+            <p className="font-heading text-[16px] text-white/50 mb-2">
               {activeFilter === "all" ? "No field notes yet" : `No ${activeFilter} notes`}
             </p>
-            <p className="font-body text-[12px] text-white/20 mb-6">
+            <p className="font-body text-[12px] text-white/45 mb-6">
               {activeFilter === "all"
                 ? "Start your doctrine, journal, or system log. This is your voice and authority layer."
                 : `Switch to a different category or create your first ${activeFilter} note.`}

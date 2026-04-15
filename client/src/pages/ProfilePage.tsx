@@ -869,15 +869,15 @@ export default function ProfilePage() {
                   </button>
                 )}
               </div>
-              <p className="text-[11px] font-body text-white/30 mt-2">Receive tips — you keep 90%</p>
+              <p className="text-[11px] font-body text-white/50 mt-2">Receive tips — you keep 90%</p>
             </div>
             {/* Recent activity */}
             <div>
-              <div className="text-[11px] font-heading tracking-widest text-white/30 mb-3">RECENT ACTIVITY</div>
+              <div className="text-[11px] font-heading tracking-widest text-white/50 mb-3">RECENT ACTIVITY</div>
               {myActivity.length === 0 ? (
                 <div className="text-center py-8">
                   <Activity size={24} className="mx-auto mb-2 text-white/15" />
-                  <p className="text-white/30 font-body text-[12px]">No activity yet</p>
+                  <p className="text-white/50 font-body text-[12px]">No activity yet</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -905,7 +905,7 @@ export default function ProfilePage() {
                       evtLink ? (
                         <Link href={evtLink} className="text-[11px] font-body text-[#A78BFA]/70 ml-1 truncate hover:text-[#A78BFA] transition-colors">— {evt.songTitle}</Link>
                       ) : (
-                        <span className="text-[11px] font-body text-white/35 ml-1 truncate">— {evt.songTitle}</span>
+                        <span className="text-[11px] font-body text-white/55 ml-1 truncate">— {evt.songTitle}</span>
                       )
                     ) : null;
                     return (
@@ -917,7 +917,7 @@ export default function ProfilePage() {
                           <span className="text-[12px] font-body text-white/65">{meta.label}</span>
                           {titleEl}
                         </div>
-                        <span className="text-[10px] font-body text-white/25 flex-shrink-0">
+                        <span className="text-[10px] font-body text-white/45 flex-shrink-0">
                           {new Date(evt.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </span>
                       </div>
@@ -926,7 +926,7 @@ export default function ProfilePage() {
                   {(myActivity as any[]).length > activityLimit && (
                     <button
                       onClick={() => setActivityLimit(prev => prev + 12)}
-                      className="w-full py-2 text-[11px] font-body text-white/35 hover:text-white/60 transition-colors rounded-xl border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04]"
+                      className="w-full py-2 text-[11px] font-body text-white/55 hover:text-white/60 transition-colors rounded-xl border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04]"
                     >
                       Show more ({(myActivity as any[]).length - activityLimit} remaining)
                     </button>
@@ -943,7 +943,7 @@ export default function ProfilePage() {
         {activeTab === "works" && (
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-heading tracking-widest text-white/30">{dbSongs.length} TRACKS</span>
+              <span className="text-[11px] font-heading tracking-widest text-white/50">{dbSongs.length} TRACKS</span>
               <button
                 onClick={() => navigate("/upload")}
                 className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
@@ -1006,7 +1006,7 @@ export default function ProfilePage() {
                           </span>
                         ) : null;
                       })()}
-                      {song.createdAt && <span className="text-[10px] text-white/35 font-body flex-shrink-0">{new Date(song.createdAt).toLocaleDateString()}</span>}
+                      {song.createdAt && <span className="text-[10px] text-white/55 font-body flex-shrink-0">{new Date(song.createdAt).toLocaleDateString()}</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1034,7 +1034,7 @@ export default function ProfilePage() {
         {activeTab === "collections" && (
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-heading tracking-widest text-white/30">{(myPlaylists as any[]).length} PLAYLISTS</span>
+              <span className="text-[11px] font-heading tracking-widest text-white/50">{(myPlaylists as any[]).length} PLAYLISTS</span>
               <button
                 onClick={() => navigate("/archive")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
@@ -1046,7 +1046,7 @@ export default function ProfilePage() {
             {(myPlaylists as any[]).length === 0 ? (
               <div className="text-center py-12">
                 <Music size={24} className="mx-auto mb-2 text-white/15" />
-                <p className="text-white/30 font-body text-[12px]">No playlists yet</p>
+                <p className="text-white/50 font-body text-[12px]">No playlists yet</p>
                 <button type="button" onClick={() => navigate("/archive")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Create one in Archive</button>
               </div>
             ) : (
@@ -1057,11 +1057,11 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-body text-white/80 truncate">{pl.name}</p>
-                    <p className="text-[11px] font-body text-white/35 mt-0.5">
+                    <p className="text-[11px] font-body text-white/55 mt-0.5">
                       {pl.isPublic ? "Public" : "Private"}{pl.isCollaborative ? " · Collaborative" : ""}
                     </p>
                   </div>
-                  <span className="text-[10px] font-body text-white/30 flex-shrink-0">{pl.trackCount ?? 0} tracks</span>
+                  <span className="text-[10px] font-body text-white/50 flex-shrink-0">{pl.trackCount ?? 0} tracks</span>
                 </div>
               ))
             )}
@@ -1073,11 +1073,11 @@ export default function ProfilePage() {
         ═══════════════════════════════════════════════════════════ */}
         {activeTab === "liked" && (
           <div className="space-y-3">
-            <span className="text-[11px] font-heading tracking-widest text-white/30 block mb-1">{(likedSongs as any[]).length} LIKED TRACKS</span>
+            <span className="text-[11px] font-heading tracking-widest text-white/50 block mb-1">{(likedSongs as any[]).length} LIKED TRACKS</span>
             {(likedSongs as any[]).length === 0 ? (
               <div className="text-center py-12">
                 <Heart size={24} className="mx-auto mb-2 text-white/15" />
-                <p className="text-white/30 font-body text-[12px]">No liked tracks yet</p>
+                <p className="text-white/50 font-body text-[12px]">No liked tracks yet</p>
                 <button type="button" onClick={() => navigate("/explore")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Explore music</button>
               </div>
             ) : (
@@ -1093,7 +1093,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-body text-white/80 truncate">{s.title}</p>
-                      <p className="text-[11px] font-body text-white/35 mt-0.5 truncate">{creatorName}</p>
+                      <p className="text-[11px] font-body text-white/55 mt-0.5 truncate">{creatorName}</p>
                     </div>
                     <button type="button" onClick={() => navigate(`/song/${s.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/40 hover:text-[#A78BFA] transition-all flex-shrink-0"><ExternalLink size={12} /></button>
                   </div>
@@ -1109,7 +1109,7 @@ export default function ProfilePage() {
         {activeTab === "signals" && (
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-heading tracking-widest text-white/30">{(notifications as any[]).length} SIGNALS</span>
+              <span className="text-[11px] font-heading tracking-widest text-white/50">{(notifications as any[]).length} SIGNALS</span>
               {(notifications as any[]).some((n: any) => !n.isRead) && (
                 <button
                   onClick={() => markAllRead.mutate()}
@@ -1123,7 +1123,7 @@ export default function ProfilePage() {
             {(notifications as any[]).length === 0 ? (
               <div className="text-center py-12">
                 <Zap size={24} className="mx-auto mb-2 text-white/15" />
-                <p className="text-white/30 font-body text-[12px]">No signals yet</p>
+                <p className="text-white/50 font-body text-[12px]">No signals yet</p>
               </div>
             ) : (
               (notifications as any[]).map((n) => (
@@ -1157,7 +1157,7 @@ export default function ProfilePage() {
                               {n.songCoverArtUrl ? (
                                 <img src={n.songCoverArtUrl} alt={n.songTitle} className="w-full h-full object-cover" />
                               ) : (
-                                <Music size={14} className="text-white/30" />
+                                <Music size={14} className="text-white/50" />
                               )}
                             </div>
                           </Link>
@@ -1167,7 +1167,7 @@ export default function ProfilePage() {
                               <p className="text-[11px] font-body text-white/80 truncate hover:text-[#A78BFA] transition-colors leading-tight">{n.songTitle}</p>
                             </Link>
                             {n.songArtistName && (
-                              <p className="text-[10px] font-body text-white/35 truncate leading-tight">{n.songArtistName}</p>
+                              <p className="text-[10px] font-body text-white/55 truncate leading-tight">{n.songArtistName}</p>
                             )}
                           </div>
                           {/* Play / Now-Playing indicator */}
@@ -1230,7 +1230,7 @@ export default function ProfilePage() {
                         </button>
                       )}
                     </div>
-                    <span className="text-[10px] font-body text-white/25 flex-shrink-0">
+                    <span className="text-[10px] font-body text-white/45 flex-shrink-0">
                       {new Date(n.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                     </span>
                   </div>
@@ -1259,7 +1259,7 @@ export default function ProfilePage() {
                         }}
                       />
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-body text-white/25">Cmd+Enter to send</span>
+                        <span className="text-[10px] font-body text-white/45">Cmd+Enter to send</span>
                         <button
                           onClick={() => {
                             if (replyText.trim()) replyMutation.mutate({ notificationId: n.id, content: replyText.trim() });
@@ -1289,7 +1289,7 @@ export default function ProfilePage() {
         {activeTab === "field-notes" && (
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-heading tracking-widest text-white/30">{(myFieldNotes as any[]).length} NOTES</span>
+              <span className="text-[11px] font-heading tracking-widest text-white/50">{(myFieldNotes as any[]).length} NOTES</span>
               <button
                 onClick={() => navigate("/field-notes")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
@@ -1301,7 +1301,7 @@ export default function ProfilePage() {
             {(myFieldNotes as any[]).length === 0 ? (
               <div className="text-center py-12">
                 <ScrollText size={24} className="mx-auto mb-2 text-white/15" />
-                <p className="text-white/30 font-body text-[12px]">No field notes yet</p>
+                <p className="text-white/50 font-body text-[12px]">No field notes yet</p>
                 <button type="button" onClick={() => navigate("/field-notes")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Write your first note</button>
               </div>
             ) : (
@@ -1310,11 +1310,11 @@ export default function ProfilePage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-body text-white/80 truncate">{note.title}</p>
-                      <p className="text-[11px] font-body text-white/35 mt-0.5 line-clamp-2">{note.body?.slice(0, 120)}{note.body?.length > 120 ? "…" : ""}</p>
+                      <p className="text-[11px] font-body text-white/55 mt-0.5 line-clamp-2">{note.body?.slice(0, 120)}{note.body?.length > 120 ? "…" : ""}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
                       <span className="text-[9px] px-1.5 py-0.5 rounded font-body capitalize" style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)" }}>{note.category}</span>
-                      <span className="text-[10px] font-body text-white/25">{new Date(note.createdAt).toLocaleDateString()}</span>
+                      <span className="text-[10px] font-body text-white/45">{new Date(note.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -1331,7 +1331,7 @@ export default function ProfilePage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[11px] font-heading tracking-widest text-white/30">{(myTestimonies as any[]).length} TESTIMONIES</span>
+                <span className="text-[11px] font-heading tracking-widest text-white/50">{(myTestimonies as any[]).length} TESTIMONIES</span>
                 <p className="text-[10px] font-body text-white/20 mt-0.5">Permanent, immutable statements of creator intent — each sealed with a WID-TST</p>
               </div>
               <button
@@ -1352,7 +1352,7 @@ export default function ProfilePage() {
                       <h3 className="text-[16px] font-heading text-white">Add Testimony</h3>
                       <p className="text-[11px] font-body text-white/40 mt-0.5">This statement is permanent and cannot be edited after creation.</p>
                     </div>
-                    <button type="button" onClick={() => setShowAddTestimony(false)} className="text-white/30 hover:text-white/70 transition-colors"><X size={18} /></button>
+                    <button type="button" onClick={() => setShowAddTestimony(false)} className="text-white/50 hover:text-white/70 transition-colors"><X size={18} /></button>
                   </div>
 
                   {/* Content */}
@@ -1367,7 +1367,7 @@ export default function ProfilePage() {
                       className="w-full rounded-xl px-3 py-2.5 text-[13px] font-body text-white/85 resize-none focus:outline-none focus:ring-1"
                       style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", caretColor: "var(--ln-gold)" }}
                     />
-                    <div className="text-right text-[10px] font-body text-white/25 mt-1">{testimonyContent.length}/5000</div>
+                    <div className="text-right text-[10px] font-body text-white/45 mt-1">{testimonyContent.length}/5000</div>
                   </div>
 
                   {/* Linked Works */}
@@ -1383,14 +1383,14 @@ export default function ProfilePage() {
                         setTestimonyLinkedWorks(wids);
                       }}
                     />
-                    <p className="text-[10px] font-body text-white/25 mt-1">Link this testimony to specific works by their Witness IDs</p>
+                    <p className="text-[10px] font-body text-white/45 mt-1">Link this testimony to specific works by their Witness IDs</p>
                   </div>
 
                   {/* WID preview */}
                   <div className="rounded-xl p-3" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
-                    <div className="text-[10px] font-heading tracking-widest text-white/30 mb-1">WILL GENERATE</div>
+                    <div className="text-[10px] font-heading tracking-widest text-white/50 mb-1">WILL GENERATE</div>
                     <div className="font-mono text-[13px]" style={{ color: "var(--ln-gold)" }}>WID-TST-XXXXXXXX-YYYYYYYY</div>
-                    <div className="text-[10px] font-body text-white/30 mt-0.5">A unique Witness ID sealed to your identity and this content</div>
+                    <div className="text-[10px] font-body text-white/50 mt-0.5">A unique Witness ID sealed to your identity and this content</div>
                   </div>
 
                   <div className="flex gap-2 pt-1">
@@ -1419,7 +1419,7 @@ export default function ProfilePage() {
             {(myTestimonies as any[]).length === 0 ? (
               <div className="text-center py-14">
                 <Fingerprint size={28} className="mx-auto mb-3 text-white/15" />
-                <p className="text-white/30 font-body text-[13px] mb-1">No testimonies yet</p>
+                <p className="text-white/50 font-body text-[13px] mb-1">No testimonies yet</p>
                 <p className="text-[11px] font-body text-white/20 mb-4 max-w-xs mx-auto">A testimony is a permanent statement of why your work exists. It cannot be changed — only added to.</p>
                 <button
                   onClick={() => setShowAddTestimony(true)}
@@ -1442,7 +1442,7 @@ export default function ProfilePage() {
                       >
                         {t.wid}
                       </span>
-                      <span className="text-[10px] font-body text-white/25">{new Date(t.createdAt).toLocaleDateString()}</span>
+                      <span className="text-[10px] font-body text-white/45">{new Date(t.createdAt).toLocaleDateString()}</span>
                     </div>
                     {/* Content */}
                     <p className="text-[13px] font-body text-white/75 leading-relaxed whitespace-pre-wrap">{t.content}</p>
@@ -1531,7 +1531,7 @@ export default function ProfilePage() {
           {/* ── Data Rights ─────────────────────────────────────── */}
           <div className="mt-6 pt-5" style={{ borderTop: "1px solid #C49A28" }}>
             <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">DATA RIGHTS</div>
-            <p className="text-[11px] font-body text-white/35 mb-3 leading-relaxed">
+            <p className="text-[11px] font-body text-white/55 mb-3 leading-relaxed">
               Per our Privacy Policy, you have the right to export your data or request account deletion. Deletion requests are processed within 90 days.
             </p>
             <div className="flex flex-wrap gap-2">

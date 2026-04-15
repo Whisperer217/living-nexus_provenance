@@ -283,8 +283,8 @@ export default function TrackPage() {
       {/* ── Gift Jar ── */}
       <div className={`rounded-2xl border p-5 mb-5 ${tipsEnabled ? "border-[#C49A28]/20 bg-[#111009]" : "border-white/[0.06] bg-[#111009]"}`}>
         <div className="flex items-center gap-2 mb-2">
-          <DollarSign size={15} className={tipsEnabled ? "text-[#C49A28]" : "text-white/20"} />
-          <span className={`font-heading text-[13px] tracking-wider ${tipsEnabled ? "text-[#C49A28]" : "text-white/25"}`}>
+          <DollarSign size={15} className={tipsEnabled ? "text-[#C49A28]" : "text-white/45"} />
+          <span className={`font-heading text-[13px] tracking-wider ${tipsEnabled ? "text-[#C49A28]" : "text-white/45"}`}>
             Tip the Artist
           </span>
           {tipTotal > 0 && (
@@ -332,7 +332,7 @@ export default function TrackPage() {
             </div>
           </>
         ) : (
-          <p className="text-[12px] text-white/30 font-body">
+          <p className="text-[12px] text-white/50 font-body">
             {track.artist} hasn't enabled gifts yet.
           </p>
         )}

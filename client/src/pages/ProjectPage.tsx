@@ -344,7 +344,7 @@ function BannerDropZone({
             </button>
           )}
           {!bannerUrl && (
-            <span className="text-white/30 text-xs">or drag &amp; drop an image here</span>
+            <span className="text-white/50 text-xs">or drag &amp; drop an image here</span>
           )}
         </div>
       )}
@@ -409,7 +409,7 @@ function VideoHero({ videoUrl, videoType, bannerUrl, title }: {
   }
   return (
     <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl bg-gradient-to-br from-[#1a1025] to-[#0a0812] flex items-center justify-center">
-      <span className="text-white/20 text-6xl font-bold">{title[0]}</span>
+      <span className="text-white/45 text-6xl font-bold">{title[0]}</span>
     </div>
   );
 }
@@ -606,12 +606,12 @@ function BlockEditor({ block, projectId, onChange, onDelete }: {
           <button
             {...attributes}
             {...listeners}
-            className="p-1 text-white/20 hover:text-white/60 transition-colors cursor-grab active:cursor-grabbing touch-none"
+            className="p-1 text-white/45 hover:text-white/60 transition-colors cursor-grab active:cursor-grabbing touch-none"
             title="Drag to reorder"
           >
             <GripVertical className="w-4 h-4" />
           </button>
-          <span className="text-white/30 text-xs uppercase tracking-widest font-mono">{block.type}</span>
+          <span className="text-white/50 text-xs uppercase tracking-widest font-mono">{block.type}</span>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button type="button" onClick={onDelete} className="p-1 text-red-400/60 hover:text-red-400 transition-colors" title="Delete block">
@@ -626,7 +626,7 @@ function BlockEditor({ block, projectId, onChange, onDelete }: {
           value={block.content || ""}
           onChange={(e) => onChange({ ...block, content: e.target.value })}
           placeholder={block.type === "quote" ? "Enter a quote or pull-out text…" : "Write your story here…"}
-          className="bg-white/5 border-white/10 text-white placeholder:text-white/25 resize-none min-h-[120px]"
+          className="bg-white/5 border-white/10 text-white placeholder:text-white/45 resize-none min-h-[120px]"
           rows={5}
         />
       )}
@@ -688,7 +688,7 @@ function BlockEditor({ block, projectId, onChange, onDelete }: {
                 <p className="text-white/40 text-sm">Uploading…</p>
               ) : (
                 <>
-                  <Upload className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                  <Upload className="w-8 h-8 text-white/45 mx-auto mb-2" />
                   <p className="text-white/40 text-sm">Click to upload image (max 8 MB)</p>
                 </>
               )}
@@ -705,7 +705,7 @@ function BlockEditor({ block, projectId, onChange, onDelete }: {
             value={block.imageCaption || ""}
             onChange={(e) => onChange({ ...block, imageCaption: e.target.value })}
             placeholder="Caption (optional)"
-            className="bg-white/5 border-white/10 text-white placeholder:text-white/25 text-sm"
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/45 text-sm"
           />
         </div>
       )}
@@ -735,13 +735,13 @@ function BlockEditor({ block, projectId, onChange, onDelete }: {
               : block.videoType === "vimeo" ? "https://vimeo.com/…"
               : "https://…/video.mp4"
             }
-            className="bg-white/5 border-white/10 text-white placeholder:text-white/25 text-sm"
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/45 text-sm"
           />
           <Input
             value={block.videoCaption || ""}
             onChange={(e) => onChange({ ...block, videoCaption: e.target.value })}
             placeholder="Caption (optional)"
-            className="bg-white/5 border-white/10 text-white placeholder:text-white/25 text-sm"
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/45 text-sm"
           />
         </div>
       )}
@@ -749,7 +749,7 @@ function BlockEditor({ block, projectId, onChange, onDelete }: {
       {block.type === "divider" && (
         <div className="flex items-center gap-3 py-2">
           <hr className="flex-1 border-white/10" />
-          <span className="text-white/20 text-xs">— divider —</span>
+          <span className="text-white/45 text-xs">— divider —</span>
           <hr className="flex-1 border-white/10" />
         </div>
       )}
@@ -782,14 +782,14 @@ function AddBlockBar({ onAdd }: { onAdd: (type: BlockType) => void }) {
               {t.label}
             </button>
           ))}
-          <button type="button" onClick={() => setOpen(false)} className="ml-2 text-white/30 hover:text-white transition-colors">
+          <button type="button" onClick={() => setOpen(false)} className="ml-2 text-white/50 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl border border-dashed border-white/15 text-white/30 hover:border-[#d4a017]/50 hover:text-[#d4a017]/70 transition-all text-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-2xl border border-dashed border-white/15 text-white/50 hover:border-[#d4a017]/50 hover:text-[#d4a017]/70 transition-all text-sm"
         >
           <Plus className="w-4 h-4" />
           Add block
@@ -856,13 +856,13 @@ function DonateDialog({ project, open, onClose }: {
             <Label className="text-white/70 text-sm mb-2 block">Message (optional)</Label>
             <Textarea value={message} onChange={(e) => setMessage(e.target.value)}
               placeholder="Leave a note for the creator…"
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 resize-none" rows={3} maxLength={500} />
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/50 resize-none" rows={3} maxLength={500} />
           </div>
           <div className="flex items-center gap-2">
             <Checkbox id="anon" checked={anonymous} onCheckedChange={(v) => setAnonymous(!!v)} className="border-white/20" />
             <Label htmlFor="anon" className="text-white/60 text-sm cursor-pointer">Donate anonymously</Label>
           </div>
-          <p className="text-white/30 text-xs">10% platform fee applies. Stripe processes payment securely.</p>
+          <p className="text-white/50 text-xs">10% platform fee applies. Stripe processes payment securely.</p>
           <Button onClick={handleSubmit} disabled={donate.isPending} className="w-full bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold">
             {donate.isPending ? "Processing…" : `Support with $${amount || "0"}`}
           </Button>
@@ -893,8 +893,8 @@ function InlineEdit({ value, onChange, placeholder, multiline, className }: {
         onClick={() => { setDraft(value); setEditing(true); }}
         className={`group cursor-text relative ${className}`}
       >
-        <span className={value ? "" : "text-white/25 italic"}>{value || placeholder}</span>
-        <Pencil className="w-3 h-3 text-white/20 group-hover:text-[#d4a017]/60 absolute -right-5 top-1 transition-colors" />
+        <span className={value ? "" : "text-white/45 italic"}>{value || placeholder}</span>
+        <Pencil className="w-3 h-3 text-white/45 group-hover:text-[#d4a017]/60 absolute -right-5 top-1 transition-colors" />
       </div>
     );
   }
@@ -906,7 +906,7 @@ function InlineEdit({ value, onChange, placeholder, multiline, className }: {
           autoFocus
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className={`bg-white/5 border-[#d4a017]/40 text-white placeholder:text-white/25 resize-none ${className}`}
+          className={`bg-white/5 border-[#d4a017]/40 text-white placeholder:text-white/45 resize-none ${className}`}
           placeholder={placeholder}
           rows={4}
         />
@@ -915,7 +915,7 @@ function InlineEdit({ value, onChange, placeholder, multiline, className }: {
           autoFocus
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className={`bg-white/5 border-[#d4a017]/40 text-white placeholder:text-white/25 ${className}`}
+          className={`bg-white/5 border-[#d4a017]/40 text-white placeholder:text-white/45 ${className}`}
           placeholder={placeholder}
           onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") cancel(); }}
         />
@@ -1073,9 +1073,9 @@ function VideoUploadPanel({ projectId, onUploaded }: {
         </div>
       ) : (
         <>
-          <FileVideo className="w-8 h-8 text-white/20 mx-auto mb-2" />
+          <FileVideo className="w-8 h-8 text-white/45 mx-auto mb-2" />
           <p className="text-white/40 text-sm">Click to upload video (MP4, MOV, WebM — max 500 MB)</p>
-          <p className="text-white/20 text-xs mt-1">Stored securely on CDN</p>
+          <p className="text-white/45 text-xs mt-1">Stored securely on CDN</p>
         </>
       )}
       <input
@@ -1114,7 +1114,7 @@ function SortableSongRow({ item, onRemove, editMode }: {
         <button
           {...attributes}
           {...listeners}
-          className="p-1 text-white/20 hover:text-white/60 cursor-grab active:cursor-grabbing touch-none"
+          className="p-1 text-white/45 hover:text-white/60 cursor-grab active:cursor-grabbing touch-none"
         >
           <GripVertical className="w-4 h-4" />
         </button>
@@ -1123,14 +1123,14 @@ function SortableSongRow({ item, onRemove, editMode }: {
         <img src={song.coverArtUrl} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
       ) : (
         <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-          <Music className="w-4 h-4 text-white/30" />
+          <Music className="w-4 h-4 text-white/50" />
         </div>
       )}
       <div className="flex-1 min-w-0">
         <p className="text-white text-sm font-medium truncate">{song?.title ?? "Unknown track"}</p>
         {song?.genre && <p className="text-white/40 text-xs">{song.genre}</p>}
       </div>
-      {dur && <span className="text-white/30 text-xs shrink-0">{dur}</span>}
+      {dur && <span className="text-white/50 text-xs shrink-0">{dur}</span>}
       {editMode && (
         <button
           onClick={onRemove}
@@ -1225,12 +1225,12 @@ function ProjectSongsPanel({ projectId, editMode, userId }: {
       {editMode && showPicker && (
         <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search your tracks…"
-              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/25 text-sm"
+              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/45 text-sm"
             />
           </div>
           <div className="space-y-1 max-h-64 overflow-y-auto">
@@ -1251,7 +1251,7 @@ function ProjectSongsPanel({ projectId, editMode, userId }: {
                   <img src={s.coverArtUrl} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
                 ) : (
                   <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center shrink-0">
-                    <Music className="w-3 h-3 text-white/30" />
+                    <Music className="w-3 h-3 text-white/50" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
@@ -1261,17 +1261,17 @@ function ProjectSongsPanel({ projectId, editMode, userId }: {
                 {linkedSongIds.has(s.id) ? (
                   <Check className="w-4 h-4 text-[#d4a017]/60 shrink-0" />
                 ) : (
-                  <Plus className="w-4 h-4 text-white/30 shrink-0" />
+                  <Plus className="w-4 h-4 text-white/50 shrink-0" />
                 )}
               </div>
             ))}
             {showPicker && (!mySongs || mySongs.length === 0) && (
-              <p className="text-white/30 text-sm text-center py-4">No tracks found</p>
+              <p className="text-white/50 text-sm text-center py-4">No tracks found</p>
             )}
           </div>
           <button
             onClick={() => setShowPicker(false)}
-            className="text-white/30 hover:text-white text-xs w-full text-center transition-colors"
+            className="text-white/50 hover:text-white text-xs w-full text-center transition-colors"
           >
             Done
           </button>
@@ -1673,7 +1673,7 @@ export default function ProjectPage() {
                 {localVideoType !== "none" && localVideoType !== "s3" && (
                   <Input value={localVideoUrl} onChange={(e) => setLocalVideoUrl(e.target.value)}
                     placeholder={localVideoType === "youtube" ? "https://www.youtube.com/watch?v=…" : "https://vimeo.com/…"}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/25 text-sm" />
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/45 text-sm" />
                 )}
                 {localVideoType === "s3" && (
                   localVideoUrl ? (
@@ -1770,7 +1770,7 @@ export default function ProjectPage() {
               </Link>
             )}
             {editMode && !project.linkedWitnessId && (
-              <p className="text-white/30 text-xs flex items-center gap-1">
+              <p className="text-white/50 text-xs flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
                 WID will be generated when you publish
               </p>
@@ -1826,7 +1826,7 @@ export default function ProjectPage() {
                 {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
               </Badge>
               <button
-                className="p-1.5 text-white/30 hover:text-[#d4a017] transition-colors rounded-lg"
+                className="p-1.5 text-white/50 hover:text-[#d4a017] transition-colors rounded-lg"
                 title="Share project"
                 onClick={() => setShareOpen(true)}
               >
@@ -1858,7 +1858,7 @@ export default function ProjectPage() {
         <div className="space-y-6 mb-10">
           {blocks.length === 0 && !editMode && (
             <Card className="bg-white/[0.03] border-white/10">
-              <CardContent className="p-8 text-center text-white/30 text-sm">
+              <CardContent className="p-8 text-center text-white/50 text-sm">
                 The creator hasn't added content yet.
               </CardContent>
             </Card>
@@ -1919,7 +1919,7 @@ export default function ProjectPage() {
                     {u.title && <h3 className="text-white font-medium mb-2">{u.title}</h3>}
                     <p className="text-white/60 text-sm leading-relaxed whitespace-pre-wrap">{u.body}</p>
                     {u.imageUrl && <img src={u.imageUrl} alt="Update" className="mt-3 rounded-lg max-h-64 object-cover w-full" />}
-                    <p className="text-white/30 text-xs mt-3">{formatDate(u.createdAt)}</p>
+                    <p className="text-white/50 text-xs mt-3">{formatDate(u.createdAt)}</p>
                   </CardContent>
                 </Card>
               ))}

@@ -3402,3 +3402,7 @@
 ## Bug Report — Apr 15 2026 (Explore infinite loop)
 
 - [x] /explore: "Maximum update depth exceeded" — fixed: replaced unstable [songs] dep with stable [mode, activeGenre, query, contentType, seed]; also fixed db.ts contentType enum cast and AdminUsersPage listActive → list invalidate
+
+## Bug Report — Apr 15 2026 (mobile contrast)
+
+- [x] Mobile sidebar DISCOVER nav items nearly invisible after --ln-void shift to #111009 — fixed: MainLayout nav items white/40→white/70, DISCOVER items ln-iron→rgba(255,255,255,0.65), section labels white/20→white/45, What's New white/40→white/65, Log Out white/35→white/60; TopBar NAV_TEXT_MUTED #6B6555→#A89880; ProfilePage/FieldNotesPage/5 other pages bulk-lifted white/20-35→white/45-55

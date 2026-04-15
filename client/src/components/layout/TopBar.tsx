@@ -127,8 +127,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
   const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.22)"; /* --ln-gold bottom accent */
   const DRAWER_BG = isWarm ? "rgba(42,55,70,0.80)" : "rgba(17,16,9,0.98)";   /* --ln-coal @ 98% */
   const DRAWER_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "rgba(196,154,40,0.15)";
-  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "#C9C0A8";            /* --ln-bone */
-  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "#6B6555";      /* --ln-smoke */
+  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "#D4C9B0";            /* --ln-bone — brighter for near-black bg */
+  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "#A89880";      /* --ln-smoke — lifted for near-black bg */
   const NAV_SECTION_LABEL = isWarm ? "rgba(148,165,185,0.45)" : "rgba(196,154,40,0.75)"; /* --ln-gold muted */
   const NAV_SECTION_BORDER = isWarm ? "rgba(100,125,150,0.15)" : "rgba(46,43,34,0.80)";  /* --ln-ash */
   const NAV_ACTIVE_BG = isWarm ? "rgba(100,125,150,0.18)" : "rgba(196,154,40,0.10)";     /* --ln-gold @ 10% */
@@ -186,7 +186,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(120,145,170,0.18)" : "rgba(63,74,80,0.5)"; (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)"; } }}
         onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = NAV_TEXT_MUTED; } }}
       >
-        <Icon size={13} className="flex-shrink-0" style={{ color: active ? "#E8B840" : "#C49A28" }} />
+        <Icon size={13} className="flex-shrink-0" style={{ color: active ? "#E8B840" : "#B08840" }} />
         <span className="flex-1">{item.label}</span>
         {badge}
       </button>
