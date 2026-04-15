@@ -166,6 +166,15 @@ export default function ProfilePage() {
   };
 
   // Load full profile from DB — always fetch fresh on mount so bio/photo updates are immediately visible
+  // Sync localGenres from server profile (only on initial load or external change)
+  useEffect(() => {
+    if (profile?.primaryGenre !== undefined && !genresInitialized) {
+      const raw = profile.primaryGenre || "";
+      setLocalGenres(raw ? raw.split(",").map((g: string) => g.trim()).filter(Boolean) : []);
+      setGenresInitialized(true);
+    }
+  }, [profile?.primaryGenre, genresInitialized]);
+
   const { data: profile, isLoading: profileLoading } = trpc.profile.me.useQuery(undefined, {
     enabled: !!user,
     staleTime: 0,           // treat cached data as immediately stale
@@ -220,6 +229,9 @@ export default function ProfilePage() {
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyText, setReplyText] = useState("");
   const [activityLimit, setActivityLimit] = useState(8);
+  // Local genre state — avoids stale-read bug when clicking chips in rapid succession
+  const [localGenres, setLocalGenres] = useState<string[]>([]);
+  const [genresInitialized, setGenresInitialized] = useState(false);
   const replyMutation = trpc.notifications.reply.useMutation({
     onSuccess: () => {
       utils.notifications.list.invalidate();
@@ -731,19 +743,17 @@ export default function ProfilePage() {
                 <span className="text-[10px] font-normal" style={{ color: "var(--ln-iron)" }}>select all that apply</span>
               </label>
               {(() => {
-                const raw = profile?.primaryGenre || "";
-                const selected = raw ? raw.split(",").map((g: string) => g.trim()).filter(Boolean) : [];
                 const toggle = (g: string) => {
-                  const next = selected.includes(g)
-                    ? selected.filter((x: string) => x !== g)
-                    : [...selected, g];
-                  const mutable = [...next];
-                  save({ primaryGenre: mutable.join(", ") });
+                  const next = localGenres.includes(g)
+                    ? localGenres.filter((x: string) => x !== g)
+                    : [...localGenres, g];
+                  setLocalGenres(next);
+                  save({ primaryGenre: next.join(", ") });
                 };
                 return (
                   <div className="flex flex-wrap gap-1.5">
                     {EDIT_GENRES.map((g) => {
-                      const active = selected.includes(g);
+                      const active = localGenres.includes(g);
                       return (
                         <button
                           key={g}
