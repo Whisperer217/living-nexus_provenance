@@ -16,6 +16,11 @@
  *
  * Panel names (extend as needed):
  *   "menu" | "quickplay" | "player-expanded" | "player-cinematic" | "gift" | "edit-track"
+ *
+ * Lock modes:
+ *   "full"  — full-screen takeover (expanded player, modals): sets overflow + touchAction:none + position:fixed
+ *   "light" — transient drag gesture: sets overflow only, NO touchAction change.
+ *             Use for mini-bar drag-to-expand so the scroll div behind it stays responsive.
  */
 
 type PanelName =
@@ -29,8 +34,11 @@ type PanelName =
   | "edit-track"
   | string;
 
+type LockMode = "full" | "light";
+
 // ── Internal state ──────────────────────────────────────────────────────────
 let _activePanel: PanelName | null = null;
+let _lockMode: LockMode = "full";
 let _savedScrollY = 0; // saved before position:fixed to restore on unlock
 const _listeners: Set<() => void> = new Set();
 
@@ -39,14 +47,26 @@ function _notify() {
 }
 
 // ── Scroll lock helpers ─────────────────────────────────────────────────────
-// iOS Safari requires position:fixed to prevent rubber-band scroll revealing
-// the black void behind the app. We save/restore scrollY to prevent page jump.
-function _lockScroll() {
-  _savedScrollY = window.scrollY;
-  document.body.style.overflow = "hidden";
-  document.body.style.touchAction = "none";
-  document.body.style.top = `-${_savedScrollY}px`;
-  document.body.classList.add("overlay-active");
+// "full" mode: iOS Safari requires position:fixed to prevent rubber-band scroll.
+// We save/restore scrollY to prevent page jump on unlock.
+//
+// "light" mode: used for transient drag gestures (mini-bar swipe-up).
+// Only sets overflow:hidden — does NOT set touchAction:none or position:fixed.
+// This prevents the body from scrolling during the gesture without killing
+// touch events on the scroll div behind the mini bar.
+function _lockScroll(mode: LockMode) {
+  _lockMode = mode;
+  if (mode === "full") {
+    _savedScrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    document.body.style.top = `-${_savedScrollY}px`;
+    document.body.classList.add("overlay-active");
+  } else {
+    // light: overflow only — no touchAction, no position:fixed
+    document.body.style.overflow = "hidden";
+    document.body.classList.add("overlay-active");
+  }
 }
 
 function _unlockScroll() {
@@ -54,8 +74,11 @@ function _unlockScroll() {
   document.body.style.touchAction = "";
   document.body.style.top = "";
   document.body.classList.remove("overlay-active");
-  // Restore scroll position — position:fixed resets it to 0
-  window.scrollTo(0, _savedScrollY);
+  if (_lockMode === "full") {
+    // Restore scroll position — position:fixed resets it to 0
+    window.scrollTo(0, _savedScrollY);
+  }
+  _lockMode = "full"; // reset to default
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────
@@ -63,14 +86,17 @@ function _unlockScroll() {
 /**
  * Open a panel. Closes any previously open panel first.
  * Locks body scroll and marks the backdrop as visible.
+ *
+ * @param panel  Panel name
+ * @param mode   "full" (default) for full-screen overlays; "light" for transient drags
  */
-export function overlayOpen(panel: PanelName) {
+export function overlayOpen(panel: PanelName, mode: LockMode = "full") {
   if (_activePanel && _activePanel !== panel) {
     // Close the previous panel silently (no unlock — we're about to re-lock)
     _activePanel = null;
   }
   _activePanel = panel;
-  _lockScroll();
+  _lockScroll(mode);
   _notify();
 }
 

@@ -406,18 +406,38 @@ export default function MobilePlayerLayer() {
 
   // ── Gesture: swipe-up on mini → expanded ──────────────────────
   const miniTouchStartY = useRef<number | null>(null);
+  const miniDragLocked = useRef(false);
   const onMiniTouchStart = (e: React.TouchEvent) => {
     miniTouchStartY.current = e.touches[0].clientY;
-    // Lock page scroll during mini-bar drag so underlying content doesn't scroll
-    overlayOpen("player-drag");
+    miniDragLocked.current = false;
+    // Do NOT lock scroll on touchStart — only lock when actual upward drag is detected
+    // in onMiniTouchMove. Locking here blocks the scroll div behind the mini bar.
+  };
+  const onMiniTouchMove = (e: React.TouchEvent) => {
+    if (miniTouchStartY.current === null) return;
+    const delta = miniTouchStartY.current - e.touches[0].clientY;
+    // Only lock scroll once the user has dragged upward ≥8px (intent confirmed)
+    if (!miniDragLocked.current && delta > 8) {
+      miniDragLocked.current = true;
+      // Use "light" mode: sets overflow:hidden only, does NOT set touchAction:none
+      // on body. This prevents body scroll without killing the scroll div behind.
+      overlayOpen("player-drag", "light");
+    }
   };
   const onMiniTouchEnd = (e: React.TouchEvent) => {
     // Always restore scroll on release
-    overlayClose("player-drag");
+    if (miniDragLocked.current) overlayClose("player-drag");
+    miniDragLocked.current = false;
     if (miniTouchStartY.current === null) return;
     const delta = miniTouchStartY.current - e.changedTouches[0].clientY;
     if (delta > 120) setPlayerState("cinematic");
     else if (delta > 40) setPlayerState("expanded");
+    miniTouchStartY.current = null;
+  };
+  const onMiniTouchCancel = () => {
+    // Touch cancelled (e.g. incoming call, notification) — always clean up
+    if (miniDragLocked.current) overlayClose("player-drag");
+    miniDragLocked.current = false;
     miniTouchStartY.current = null;
   };
 
@@ -466,8 +486,14 @@ export default function MobilePlayerLayer() {
     expandedTouchStartY.current = null;
     hapticFiredRef.current = false;
   };
-
-  // ── Gesture: swipe-down on cinematic → expanded ───────────────
+  const onExpandedTouchCancel = () => {
+    // Touch cancelled — always clean up to prevent stuck scroll lock
+    overlayClose("player-drag");
+    setExpandedDragOffset(0);
+    expandedTouchStartY.current = null;
+    hapticFiredRef.current = false;
+  };
+  // ── Gesture: swipe-down on cinematic → expanded ────────────────
   const cinematicTouchStartY = useRef<number | null>(null);
   const onCinematicTouchStart = (e: React.TouchEvent) => {
     cinematicTouchStartY.current = e.touches[0].clientY;
@@ -870,7 +896,9 @@ export default function MobilePlayerLayer() {
         boxShadow: "0 -8px 40px rgba(0,0,0,0.75), 0 -1px 0 rgba(203,177,131,0.10)",
       }}
       onTouchStart={onMiniTouchStart}
+      onTouchMove={onMiniTouchMove}
       onTouchEnd={onMiniTouchEnd}
+      onTouchCancel={onMiniTouchCancel}
     >
       {/* Progress line at top of mini bar */}
       <div className="absolute top-0 left-0 right-0 h-[2px]"
@@ -1106,6 +1134,7 @@ export default function MobilePlayerLayer() {
         onTouchStart={onExpandedTouchStart}
         onTouchMove={onExpandedTouchMove}
         onTouchEnd={onExpandedTouchEnd}
+        onTouchCancel={onExpandedTouchCancel}
       >
         <div className="w-10 h-1 rounded-full" style={{ background: "rgba(203,177,131,0.15)" }} />
       </div>
