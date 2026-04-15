@@ -25,6 +25,7 @@ import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
 import { usePlayer, Track } from "@/contexts/PlayerContext";
 
+import { EDIT_GENRES } from "@shared/contentTypes";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
 /* ── Editable inline field ─────────────────────────────────────── */
@@ -723,18 +724,48 @@ export default function ProfilePage() {
                 <option value="ai_generated">AI-Generated — AI-Created</option>
               </select>
             </div>
-            {/* Primary Genre */}
-            <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-              <label className="text-[11px] text-white/70 font-body">Primary Genre / Style</label>
-              <input
-                type="text"
-                defaultValue={profile?.primaryGenre || ""}
-                placeholder="e.g. Gospel, Hip-Hop, Ambient…"
-                maxLength={64}
-                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[#111009] border border-white/[0.1] outline-none placeholder:text-white/60 hover:border-[#A78BFA]/50 focus:border-[#A78BFA]/70 transition-colors"
-                onBlur={e => { const v = e.target.value.trim(); if (v !== (profile?.primaryGenre || "")) save({ primaryGenre: v }); }}
-                onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              />
+            {/* Primary Genre — multi-select chips */}
+            <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+              <label className="text-[11px] font-body flex items-center gap-2" style={{ color: "var(--ln-smoke)" }}>
+                Primary Genre / Style
+                <span className="text-[10px] font-normal" style={{ color: "var(--ln-iron)" }}>select all that apply</span>
+              </label>
+              {(() => {
+                const raw = profile?.primaryGenre || "";
+                const selected = raw ? raw.split(",").map((g: string) => g.trim()).filter(Boolean) : [];
+                const toggle = (g: string) => {
+                  const next = selected.includes(g)
+                    ? selected.filter((x: string) => x !== g)
+                    : [...selected, g];
+                  const mutable = [...next];
+                  let joined = mutable.join(", ");
+                  while (joined.length > 64 && mutable.length > 0) { mutable.pop(); joined = mutable.join(", "); }
+                  save({ primaryGenre: mutable.join(", ") });
+                };
+                return (
+                  <div className="flex flex-wrap gap-1.5">
+                    {EDIT_GENRES.map((g) => {
+                      const active = selected.includes(g);
+                      return (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => toggle(g)}
+                          className="px-2.5 py-1 rounded-full text-xs transition-all"
+                          style={{
+                            background: active ? "rgba(196,154,40,0.22)" : "rgba(255,255,255,0.06)",
+                            color: active ? "var(--ln-gold)" : "var(--ln-smoke)",
+                            border: `1px solid ${active ? "rgba(196,154,40,0.5)" : "rgba(255,255,255,0.15)"}`,
+                            fontWeight: active ? 600 : 400,
+                          }}
+                        >
+                          {active && <span className="mr-1 text-[10px]">✓</span>}{g}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

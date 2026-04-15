@@ -656,10 +656,15 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             <p className="text-xs text-right" style={{ color: "#475569" }}>{caption.length}/2000</p>
           </div>
 
-          {/* Genre (music) OR Category chips (manuscript/comic) */}
+          {/* Genre (music) OR Category chips (manuscript/comic) — multi-select for music */}
           <div className="space-y-2.5">
             <Label className="text-white text-sm font-medium">
-              {isWritten ? "Category" : "Genre"}
+              {isWritten ? "Category" : (
+                <span className="flex items-center gap-2">
+                  Genre
+                  <span className="text-[10px] font-normal" style={{ color: "var(--ln-iron)" }}>select all that apply</span>
+                </span>
+              )}
             </Label>
             {isWritten ? (
               <div className="flex flex-wrap gap-2">
@@ -671,8 +676,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                     className="px-3 py-1 rounded-full text-xs transition-all"
                     style={{
                       background: genre === cat ? "rgba(196,154,40,0.2)" : "rgba(255,255,255,0.05)",
-                      color: genre === cat ? "var(--ln-gold)" : "#94a3b8",
-                      border: `1px solid ${genre === cat ? "rgba(196,154,40,0.4)" : "rgba(255,255,255,0.12)"}`,
+                      color: genre === cat ? "var(--ln-gold)" : "var(--ln-smoke)",
+                      border: `1px solid ${genre === cat ? "rgba(196,154,40,0.4)" : "rgba(255,255,255,0.15)"}`,
                     }}
                   >
                     {cat}
@@ -680,25 +685,43 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 ))}
               </div>
             ) : (
-              <Select value={genre} onValueChange={setGenre}>
-                <SelectTrigger
-                  className="text-sm"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    color: genre ? "#f1f5f9" : "#64748b",
-                  }}
-                >
-                  <SelectValue placeholder="Select genre…" />
-                </SelectTrigger>
-                <SelectContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(212,175,55,0.2)" }}>
-                  {GENRES.map((g) => (
-                    <SelectItem key={g} value={g} className="text-white hover:bg-white/10">
-                      {g}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              /* Music: multi-select chip grid — stored as comma-separated in genre field */
+              (() => {
+                const selectedGenres = genre ? genre.split(",").map(g => g.trim()).filter(Boolean) : [];
+                const toggleGenre = (g: string) => {
+                  const next = selectedGenres.includes(g)
+                    ? selectedGenres.filter(x => x !== g)
+                    : [...selectedGenres, g];
+                  // Truncate to fit varchar(64) — keep first N that fit
+                  const mutable = [...next];
+                  let joined = mutable.join(", ");
+                  while (joined.length > 64 && mutable.length > 0) { mutable.pop(); joined = mutable.join(", "); }
+                  setGenre(mutable.join(", "));
+                };
+                return (
+                  <div className="flex flex-wrap gap-1.5">
+                    {GENRES.map((g) => {
+                      const active = selectedGenres.includes(g);
+                      return (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => toggleGenre(g)}
+                          className="px-2.5 py-1 rounded-full text-xs transition-all"
+                          style={{
+                            background: active ? "rgba(196,154,40,0.22)" : "rgba(255,255,255,0.06)",
+                            color: active ? "var(--ln-gold)" : "var(--ln-smoke)",
+                            border: `1px solid ${active ? "rgba(196,154,40,0.5)" : "rgba(255,255,255,0.15)"}`,
+                            fontWeight: active ? 600 : 400,
+                          }}
+                        >
+                          {active && <span className="mr-1 text-[10px]">✓</span>}{g}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()
             )}
           </div>
 
@@ -741,14 +764,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(212,175,55,0.2)" }}>
-                <SelectItem value="prohibited" className="text-white hover:bg-white/10">
+              <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.4)", color: "var(--ln-parchment)" }}>
+                <SelectItem value="prohibited" style={{ color: "var(--ln-parchment)" }}>
                   Human-Made — No AI Training
                 </SelectItem>
-                <SelectItem value="permitted_attribution" className="text-white hover:bg-white/10">
+                <SelectItem value="permitted_attribution" style={{ color: "var(--ln-parchment)" }}>
                   AI-Assisted — Attribution Required
                 </SelectItem>
-                <SelectItem value="permitted" className="text-white hover:bg-white/10">
+                <SelectItem value="permitted" style={{ color: "var(--ln-parchment)" }}>
                   AI-Generated — Open Training
                 </SelectItem>
               </SelectContent>
@@ -771,10 +794,10 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(212,175,55,0.2)" }}>
+              <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.4)", color: "var(--ln-parchment)" }}>
                 {Object.entries(STATUS_LABELS).map(([val, label]) => (
-                  <SelectItem key={val} value={val} className="text-white hover:bg-white/10">
-                    <span style={{ color: STATUS_COLORS[val] }}>{label}</span>
+                  <SelectItem key={val} value={val} style={{ color: STATUS_COLORS[val] ?? "var(--ln-parchment)" }}>
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>

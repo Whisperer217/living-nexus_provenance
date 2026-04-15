@@ -26,27 +26,79 @@ export const UPLOAD_GENRES = [
   "Other",
 ] as const;
 
-/** Granular single-genre labels used in the Edit Track panel */
+/**
+ * Granular genre labels used in the Edit Track panel and Batch Upload.
+ * Supports multi-select — stored as comma-separated string in songs.genre (max 64 chars).
+ * Sorted alphabetically within logical groups for easy scanning.
+ */
 export const EDIT_GENRES = [
+  // ── Faith & Spiritual ──
   "Gospel",
+  "Worship",
+  "Contemporary Christian",
+  "Spiritual / Devotional",
+  // ── Hip-Hop & Urban ──
   "Hip-Hop",
+  "Trap",
+  "Drill",
+  "Boom Bap",
+  "Conscious Hip-Hop",
+  "Spoken Word",
+  // ── R&B & Soul ──
   "R&B",
-  "Electronic",
-  "Rock",
-  "Classical",
-  "Jazz",
-  "Ambient",
-  "Pop",
-  "Country",
-  "Latin",
-  "Metal",
-  "Folk",
   "Soul",
+  "Neo-Soul",
   "Funk",
-  "Reggae",
-  "Blues",
-  "Indie",
+  "Motown",
+  // ── Electronic & Dance ──
+  "Electronic",
+  "House",
+  "Techno",
+  "Synthwave",
+  "Lo-fi",
+  "Ambient",
+  "EDM",
+  "Drum & Bass",
+  // ── Rock & Metal ──
+  "Rock",
+  "Indie Rock",
   "Alternative",
+  "Metal",
+  "Heavy Metal",
+  "Power Metal",
+  "Symphonic Metal",
+  "Punk",
+  "Hardcore",
+  // ── Pop & Mainstream ──
+  "Pop",
+  "Indie Pop",
+  "Dream Pop",
+  "K-Pop",
+  // ── Country & Americana ──
+  "Country",
+  "Bluegrass",
+  "Americana",
+  "Folk",
+  // ── Jazz & Classical ──
+  "Jazz",
+  "Blues",
+  "Classical",
+  "Orchestral",
+  "Cinematic / Score",
+  // ── World & Latin ──
+  "Latin",
+  "Reggae",
+  "Reggaeton",
+  "Afrobeats",
+  "Afropop",
+  "Dancehall",
+  "World Music",
+  // ── Other ──
+  "Experimental",
+  "Instrumental",
+  "Acoustic",
+  "A Cappella",
+  "Podcast / Spoken",
   "Other",
 ] as const;
 

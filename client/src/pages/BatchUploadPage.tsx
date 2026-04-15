@@ -22,6 +22,7 @@ import {
   Library, ExternalLink, Layers, Fingerprint, Sparkles, Copy,
 } from "lucide-react";
 
+import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
 // ── WID crypto helpers ────────────────────────────────────────────────────────
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
   const hashBuf = await crypto.subtle.digest("SHA-256", buffer);
@@ -59,11 +60,6 @@ function formatWID(hashHex: string, mode = "audio"): string {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const GENRES = [
-  "Gospel", "Classical", "Rock", "Hip-Hop", "Electronic", "R&B", "Ambient",
-  "Jazz", "Folk", "Pop", "Metal", "Country", "Blues", "Soul", "Reggae",
-  "Latin", "World", "Spoken Word", "Other",
-];
 const AI_OPTIONS = [
   { value: "prohibited", label: "Prohibited — No AI use" },
   { value: "permitted_attribution", label: "Permitted with attribution" },
@@ -346,9 +342,9 @@ function TrackCardUI({
                   >
                     <SelectValue placeholder="Genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
+                  <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
                     {GENRES.map(g => (
-                      <SelectItem key={g} value={g} className="text-xs" style={{ color: "#FFFFFF" }}>{g}</SelectItem>
+                      <SelectItem key={g} value={g} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>{g}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -362,9 +358,9 @@ function TrackCardUI({
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
+                  <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
                     {AI_OPTIONS.map(o => (
-                      <SelectItem key={o.value} value={o.value} className="text-xs" style={{ color: "#FFFFFF" }}>
+                      <SelectItem key={o.value} value={o.value} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>
                         {o.label}
                       </SelectItem>
                     ))}
@@ -639,7 +635,7 @@ export default function BatchUploadPage() {
             {collectionResult.trackCount} track{collectionResult.trackCount > 1 ? "s" : ""} registered to the Living Nexus Archive
           </p>
         </div>
-        <div className="p-6 space-y-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
+        <div className="p-6 space-y-4" style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
           <div>
             <p className="text-[10px] font-heading tracking-widest uppercase mb-1" style={{ color: "var(--ln-parchment)" }}>
               Collection WID
@@ -753,7 +749,7 @@ export default function BatchUploadPage() {
       {/* Album info */}
       <div
         className="p-4 space-y-3"
-        style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}
+        style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
       >
         <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>
           Collection / Album
@@ -825,7 +821,7 @@ export default function BatchUploadPage() {
       {/* Batch fill panel */}
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}
+        style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
       >
         <button
           onClick={() => setBatchFillOpen(o => !o)}
@@ -861,9 +857,9 @@ export default function BatchUploadPage() {
                   >
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
+                  <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
                     {GENRES.map(g => (
-                      <SelectItem key={g} value={g} className="text-xs" style={{ color: "#FFFFFF" }}>{g}</SelectItem>
+                      <SelectItem key={g} value={g} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>{g}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -877,9 +873,9 @@ export default function BatchUploadPage() {
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
+                  <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
                     {AI_OPTIONS.map(o => (
-                      <SelectItem key={o.value} value={o.value} className="text-xs" style={{ color: "#FFFFFF" }}>
+                      <SelectItem key={o.value} value={o.value} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>
                         {o.label}
                       </SelectItem>
                     ))}
