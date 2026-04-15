@@ -1123,8 +1123,17 @@ export default function SongDetailPage() {
               <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Credits</h3>
               <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                 {allCredits.map((c: { role: string; name: string }, i: number) => (
-                  <div key={i} className="flex items-baseline gap-2">
-                    <span className="text-[10px] uppercase tracking-widest flex-shrink-0" style={{ color: "var(--ln-iron)", minWidth: "80px" }}>{c.role}</span>
+                  <div key={i} className="flex items-center gap-2.5">
+                    <span
+                      className="text-[9px] uppercase tracking-widest flex-shrink-0 px-1.5 py-0.5 rounded"
+                      style={{
+                        background: c.role.toLowerCase() === "publisher" ? "rgba(59,130,246,0.18)" : "rgba(196,154,40,0.12)",
+                        color: c.role.toLowerCase() === "publisher" ? "#93C5FD" : "rgba(196,154,40,0.85)",
+                        border: `1px solid ${c.role.toLowerCase() === "publisher" ? "rgba(59,130,246,0.3)" : "rgba(196,154,40,0.2)"}`,
+                        minWidth: "64px",
+                        textAlign: "center",
+                      }}
+                    >{c.role}</span>
                     <span className="text-sm" style={{ color: "var(--ln-parchment)" }}>{c.name}</span>
                   </div>
                 ))}

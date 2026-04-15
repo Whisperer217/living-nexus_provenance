@@ -221,7 +221,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
 
       {/* ── Top bar (fades with controls) ── */}
       <div
-        className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 py-4 transition-opacity duration-500"
+        className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between px-5 py-4 transition-opacity duration-500"
         style={{
           opacity: showControls ? 1 : 0,
           pointerEvents: showControls ? "auto" : "none",
@@ -249,7 +249,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
           </span>
           {/* Fullscreen (desktop only) */}
           <button
-            onClick={toggleFullscreen}
+            onClick={e => { e.stopPropagation(); toggleFullscreen(); }}
             className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-white/10"
             style={{ color: "var(--ln-smoke)" }}
           >
@@ -257,7 +257,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
           </button>
           {/* Close */}
           <button
-            onClick={onClose}
+            onClick={e => { e.stopPropagation(); onClose(); }}
             className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-white/10"
             style={{ color: "var(--ln-smoke)" }}
           >
@@ -267,7 +267,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
       </div>
 
       {/* ── Page area ── */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden relative">
+      <div className="flex-1 flex items-center justify-center overflow-hidden relative" style={{ zIndex: 1 }}>
 
         {/* Left nav zone (desktop: left third; mobile: left half) */}
         <button
