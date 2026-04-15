@@ -3398,3 +3398,7 @@
 
 - [x] Show 🐛 BUGS KILLED badge on Moshai's and Slimdoggy's public creator profiles (not admin-only) — fixed: showBugBadge = isAdminProfile || isBuildContributor (handles: slimdoggy, moshai)
 - [x] Show 🐛 BUGS KILLED badge on the Attribution/About page — added Build Integrity section with live counter after QA Testers
+
+## Bug Report — Apr 15 2026 (Explore infinite loop)
+
+- [x] /explore: "Maximum update depth exceeded" — fixed: replaced unstable [songs] dep with stable [mode, activeGenre, query, contentType, seed]; also fixed db.ts contentType enum cast and AdminUsersPage listActive → list invalidate

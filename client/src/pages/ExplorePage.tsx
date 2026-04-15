@@ -482,8 +482,10 @@ export default function ExplorePage() {
     );
     return () => rowObserverRef.current?.disconnect();
   }, []);
-  // Reset visible IDs when the song list changes (mode/filter change)
-  useEffect(() => { setVisibleSongIds(new Set()); }, [songs]);
+  // Reset visible IDs when the filter/mode changes.
+  // NOTE: Do NOT use [songs] here — songs is a new array reference every render
+  // and would cause an infinite setState → re-render loop.
+  useEffect(() => { setVisibleSongIds(new Set()); }, [mode, activeGenre, query, contentType, seed]);
   const visibleIdArray = useMemo(() => Array.from(visibleSongIds).slice(0, 500), [visibleSongIds]);
   const { data: bulkLikeData } = trpc.songs.getBulkLikeStatuses.useQuery(
     { songIds: visibleIdArray },

@@ -2486,12 +2486,12 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number; 
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 500;
-  const conditions: ReturnType<typeof eq>[] = [
-    eq(songs.isPublic, true) as ReturnType<typeof eq>,
-    eq(songs.status, "Published") as ReturnType<typeof eq>,
+  const conditions: ReturnType<typeof sql>[] = [
+    eq(songs.isPublic, true),
+    eq(songs.status, "Published"),
   ];
-  if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
-  if (opts?.contentType) conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
+  if (opts?.genre) conditions.push(eq(songs.genre, opts.genre));
+  if (opts?.contentType) conditions.push(eq(songs.contentType, opts.contentType as "audio" | "lyrics" | "manuscript" | "comic"));
 
   const rows = await db.select({
     song: songs,

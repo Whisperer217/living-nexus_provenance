@@ -2054,7 +2054,7 @@ function ProjectDonationsTab() {
       } else {
         toast.success(`All donations already recorded (${result.skipped} skipped). No changes needed.`);
       }
-      utils.projects.listActive.invalidate();
+      utils.projects.list.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });
