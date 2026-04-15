@@ -7,7 +7,7 @@ export default function DownloadPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-4"
-      style={{ background: "#353E43" }}
+      style={{ background: "#111009" }}
     >
       {/* App Icon */}
       <img

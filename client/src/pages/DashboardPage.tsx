@@ -188,7 +188,7 @@ export default function DashboardPage() {
   });
 
   if (!isAuthenticated) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#353E43" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#111009" }}>
       <div className="text-center">
         <p style={{ color: "var(--ln-smoke)" }}>Please sign in to access your dashboard.</p>
         <Link href="/"><Button className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Go Home</Button></Link>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#353E43" }}>
+    <div className="min-h-screen" style={{ background: "#111009" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
         <img
@@ -360,7 +360,7 @@ export default function DashboardPage() {
                 onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
                 disabled={connectMutation.isPending}
                 className="flex-shrink-0 font-bold text-sm"
-                style={{ background: "#353E43", color: "var(--ln-gold)", border: "none" }}
+                style={{ background: "#111009", color: "var(--ln-gold)", border: "none" }}
               >
                 {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Complete Setup" : "Enable Gifts"}
               </Button>
@@ -1398,7 +1398,7 @@ function DiscordIntegrationTab() {
                 onChange={e => setUrls(prev => ({ ...prev, [ev.key]: e.target.value }))}
                 className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
                 style={{
-                  background: "#353E43",
+                  background: "#111009",
                   border: "1px solid #111009",
                   color: "var(--ln-parchment)",
                   fontFamily: "monospace",

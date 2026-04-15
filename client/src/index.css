@@ -73,7 +73,7 @@
      ══════════════════════════════════════════════════════════════════ */
 
   /* ── Surface Steps (gunmetal museum walls) ── */
-  --void:   #353E43;   /* Gunmetal Gray — page background, the museum floor */
+  --void:   #111009;   /* Near-black — page background */
   --void-2: #111009;   /* Darker Gunmetal — sidebar / nav */
   --void-3: #1C1A14;   /* Lifted Steel — cards / raised surfaces */
   --void-4: #4A5560;   /* Elevated Steel — modals / popovers */
@@ -111,7 +111,7 @@
   --lnx-red:        #F87171;
   --lnx-red-soft:   #FCA5A5;
   /* Foundation — gunmetal backgrounds */
-  --lnx-bg:         #353E43;   /* Gunmetal Gray — page bg */
+  --lnx-bg:         #111009;   /* Near-black — page bg */
   --lnx-bg-2:       #111009;   /* Darker Gunmetal — nav/sidebar */
   --lnx-bg-3:       #1C1A14;   /* Lifted Steel — cards */
   --lnx-text:       #E8DFC8;   /* Pale Quartzite — primary text */
@@ -119,7 +119,7 @@
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
-  --background: var(--void);          /* #353E43 — Gunmetal Gray */
+  --background: var(--void);          /* #111009 — Near-black */
   --foreground: #E8DFC8;              /* Pale Quartzite text */
   --card: var(--void-3);              /* Lifted Steel */
   --card-foreground: #E8DFC8;
@@ -164,7 +164,7 @@
 
 /* ── DARK THEME (mirrors :root — gunmetal is already dark) ── */
 [data-theme="dark"] {
-  --void:   #353E43;
+  --void:   #111009;
   --void-2: #111009;
   --void-3: #1C1A14;
   --void-4: #4A5560;
@@ -195,7 +195,7 @@
   --input:               rgba(203, 177, 131, 0.16);
   --ring:                var(--gold);
 
-  --lnx-bg:         #353E43;
+  --lnx-bg:         #111009;
   --lnx-bg-2:       #111009;
   --lnx-bg-3:       #1C1A14;
   --lnx-text:       #E8DFC8;
@@ -247,7 +247,7 @@
   html, body {
     height: 100%;
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
-    background-color: #353E43; /* Gunmetal Gray — match app bg, no void on overscroll */
+    background-color: #111009; /* Near-black — match app bg */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
   /* NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals by clipping
@@ -676,11 +676,11 @@ html body[data-scroll-locked] {
   }
   .museum-pan-wrapper::before {
     left: 0;
-    background: linear-gradient(to right, #353E43, transparent);
+    background: linear-gradient(to right, #111009, transparent);
   }
   .museum-pan-wrapper::after {
     right: 0;
-    background: linear-gradient(to left, #353E43, transparent);
+    background: linear-gradient(to left, #111009, transparent);
   }
 
   /* ── MUSEUM GRID — 3-column max, consistent gutter ── */
@@ -767,7 +767,7 @@ html body[data-scroll-locked] {
     align-items: center;
     gap: 0.5rem;
     padding: 0 0.75rem;
-    background: #353E43;
+    background: #111009;
   }
   .sg-divider-wide-center::before,
   .sg-divider-wide-center::after {
@@ -966,7 +966,7 @@ html body[data-scroll-locked] {
         rgba(53, 62, 67, 0.04) 50%,
         transparent 80%
       ),
-      #353E43;
+      #111009;
   }
 
   /* ── CTA button glow — lantern warmth ── */
