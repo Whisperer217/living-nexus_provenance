@@ -105,6 +105,43 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [dlSaving, setDlSaving] = useState(false);
   const [lyrics, setLyrics] = useState(song.lyricsText ?? "");
   const [lyricsSaving, setLyricsSaving] = useState(false);
+  // Undo/redo history for the lyrics editor
+  const lyricsHistory = useRef<string[]>([song.lyricsText ?? ""]);
+  const lyricsHistoryIdx = useRef<number>(0);
+  const lyricsSkipPush = useRef<boolean>(false);
+
+  const setLyricsWithHistory = (val: string) => {
+    if (lyricsSkipPush.current) {
+      lyricsSkipPush.current = false;
+      setLyrics(val);
+      return;
+    }
+    // Truncate forward history on new input
+    lyricsHistory.current = lyricsHistory.current.slice(0, lyricsHistoryIdx.current + 1);
+    lyricsHistory.current.push(val);
+    // Cap at 200 entries
+    if (lyricsHistory.current.length > 200) {
+      lyricsHistory.current.shift();
+    }
+    lyricsHistoryIdx.current = lyricsHistory.current.length - 1;
+    setLyrics(val);
+  };
+
+  const handleLyricsUndo = () => {
+    if (lyricsHistoryIdx.current > 0) {
+      lyricsHistoryIdx.current -= 1;
+      lyricsSkipPush.current = true;
+      setLyrics(lyricsHistory.current[lyricsHistoryIdx.current]);
+    }
+  };
+
+  const handleLyricsRedo = () => {
+    if (lyricsHistoryIdx.current < lyricsHistory.current.length - 1) {
+      lyricsHistoryIdx.current += 1;
+      lyricsSkipPush.current = true;
+      setLyrics(lyricsHistory.current[lyricsHistoryIdx.current]);
+    }
+  };
   const [lyricsFile, setLyricsFile] = useState<File | null>(null);
   const [lyricsWid, setLyricsWid] = useState<string | null>(song.lyricsWid ?? null);
   const [lyricsFileName, setLyricsFileName] = useState<string | null>(song.lyricsFileName ?? null);
@@ -809,7 +846,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             </p>
             <textarea
               value={lyrics}
-              onChange={(e) => setLyrics(e.target.value)}
+              onChange={(e) => setLyricsWithHistory(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "z") { e.preventDefault(); handleLyricsUndo(); }
+                if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"))) { e.preventDefault(); handleLyricsRedo(); }
+              }}
               placeholder={isWritten ? (isManuscript ? "Synopsis or excerpt…" : "Story synopsis or excerpt…") : "Paste or type your lyrics here…"}
               rows={10}
               className="w-full rounded-lg px-3 py-2.5 text-sm resize-y"
@@ -823,6 +864,31 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 minHeight: "160px",
               }}
             />
+            {/* Undo / Redo toolbar */}
+            <div className="flex items-center gap-1.5 mb-1">
+              <button
+                type="button"
+                onClick={handleLyricsUndo}
+                disabled={lyricsHistoryIdx.current <= 0}
+                title="Undo (Ctrl+Z)"
+                className="flex items-center gap-1 px-2 py-1 rounded text-xs transition-opacity disabled:opacity-30"
+                style={{ background: "rgba(255,255,255,0.05)", color: "#94A3B8", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                <RotateCcw size={11} />
+                Undo
+              </button>
+              <button
+                type="button"
+                onClick={handleLyricsRedo}
+                disabled={lyricsHistoryIdx.current >= lyricsHistory.current.length - 1}
+                title="Redo (Ctrl+Y)"
+                className="flex items-center gap-1 px-2 py-1 rounded text-xs transition-opacity disabled:opacity-30"
+                style={{ background: "rgba(255,255,255,0.05)", color: "#94A3B8", border: "1px solid rgba(255,255,255,0.08)", transform: "scaleX(-1)" }}
+              >
+                <RotateCcw size={11} />
+                Redo
+              </button>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-xs" style={{ color: "#475569" }}>
                 {lyrics.length} / 10,000 characters
