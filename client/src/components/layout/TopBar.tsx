@@ -122,20 +122,20 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
   const { mode: lightsMode } = useLightsMode();
   const isWarm = lightsMode === "on";
 
-  // Warm mode: very subtle steel tint — dark base fully dominates, just a faint cool cast
-  const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(44,52,56,0.97)";
-  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(203,177,131,0.28)";  /* gold-vein bottom border */
-  const DRAWER_BG = isWarm ? "rgba(42,55,70,0.80)" : "rgba(44,52,56,0.98)";
-  const DRAWER_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "rgba(203,177,131,0.18)";
-  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "#CBB183";           /* quartzite gold — etched */
-  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "#AA8E64";     /* shadow stone — drawer items */
-  const NAV_SECTION_LABEL = isWarm ? "rgba(148,165,185,0.45)" : "rgba(203,177,131,0.85)";
-  const NAV_SECTION_BORDER = isWarm ? "rgba(100,125,150,0.15)" : "rgba(203,177,131,0.20)";
-  const NAV_ACTIVE_BG = isWarm ? "rgba(100,125,150,0.18)" : "rgba(203,177,131,0.12)";
-  const NAV_ACTIVE_BORDER = isWarm ? "rgba(120,148,178,0.32)" : "rgba(203,177,131,0.35)";
-  const NAV_ACTIVE_TEXT = isWarm ? "rgba(180,202,230,0.95)" : "#E6CDAE";    /* pearl on active */
-  const LOGO_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(203,177,131,0.20)";
-  const RIGHT_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(203,177,131,0.20)";
+  // LN Identity Palette v2.31 — coal background, gold accent hierarchy
+  const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(10,8,6,0.97)";       /* --ln-void @ 97% */
+  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.22)"; /* --ln-gold bottom accent */
+  const DRAWER_BG = isWarm ? "rgba(42,55,70,0.80)" : "rgba(17,16,9,0.98)";   /* --ln-coal @ 98% */
+  const DRAWER_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "rgba(196,154,40,0.15)";
+  const NAV_TEXT = isWarm ? "rgba(200,212,228,0.85)" : "#C9C0A8";            /* --ln-bone */
+  const NAV_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : "#6B6555";      /* --ln-smoke */
+  const NAV_SECTION_LABEL = isWarm ? "rgba(148,165,185,0.45)" : "rgba(196,154,40,0.75)"; /* --ln-gold muted */
+  const NAV_SECTION_BORDER = isWarm ? "rgba(100,125,150,0.15)" : "rgba(46,43,34,0.80)";  /* --ln-ash */
+  const NAV_ACTIVE_BG = isWarm ? "rgba(100,125,150,0.18)" : "rgba(196,154,40,0.10)";     /* --ln-gold @ 10% */
+  const NAV_ACTIVE_BORDER = isWarm ? "rgba(120,148,178,0.32)" : "rgba(196,154,40,0.30)"; /* --ln-gold @ 30% */
+  const NAV_ACTIVE_TEXT = isWarm ? "rgba(180,202,230,0.95)" : "#E8B840";     /* --ln-gold-hot */
+  const LOGO_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(46,43,34,0.80)";  /* --ln-ash */
+  const RIGHT_DIVIDER = isWarm ? "rgba(100,125,150,0.20)" : "rgba(46,43,34,0.80)";
 
   // ── Drawer item renderer ─────────────────────────────────────────
   const renderDrawerItem = (item: {
@@ -186,7 +186,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
         onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(120,145,170,0.18)" : "rgba(63,74,80,0.5)"; (e.currentTarget as HTMLElement).style.color = "#E6CDAE"; } }}
         onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = NAV_TEXT_MUTED; } }}
       >
-        <Icon size={13} className="flex-shrink-0" style={{ color: active ? "#D0A15F" : "#CBB183" }} />
+        <Icon size={13} className="flex-shrink-0" style={{ color: active ? "#E8B840" : "#C49A28" }} />
         <span className="flex-1">{item.label}</span>
         {badge}
       </button>
@@ -214,7 +214,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           <img src={LOGO_URL} alt="Living Nexus" className="w-8 h-8 object-contain" />
           <div>
             <div className="font-display text-sm gold-shimmer leading-tight" style={{ letterSpacing: "0.04em" }}>Living Nexus</div>
-            <div className="text-[8px] tracking-[0.18em] font-heading" style={{ color: "#CBB183" }}>CREATIVE PROVENANCE</div>
+            <div className="text-[8px] tracking-[0.18em] font-heading" style={{ color: "#8B6914" }}>CREATIVE PROVENANCE</div>
           </div>
         </div>
 
@@ -245,11 +245,11 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "#E6CDAE"; (e.currentTarget as HTMLElement).style.textShadow = "0 0 10px rgba(203,177,131,0.25)"; } }}
                 onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = NAV_TEXT; (e.currentTarget as HTMLElement).style.textShadow = "none"; } }}
               >
-                <item.icon size={13} style={{ color: active ? "#D0A15F" : "#CBB183" }} />
+                <item.icon size={13} style={{ color: active ? "#E8B840" : "#C49A28" }} />
                 <span>{item.label}</span>
                 {/* gold underline on active */}
                 {active && (
-                  <span className="absolute bottom-0 left-3 right-3 h-[1px]" style={{ background: "linear-gradient(90deg, transparent, #CBB183, transparent)" }} />
+                  <span className="absolute bottom-0 left-3 right-3 h-[1px]" style={{ background: "linear-gradient(90deg, transparent, #C49A28, transparent)" }} />
                 )}
                 {archiveBadge && (
                   <span className="text-[9px] font-bold px-1 py-0.5 rounded-full"
@@ -294,9 +294,10 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
             style={{
               fontSize: "11px", fontWeight: 700,
-              background: "#E8A830",
-              color: "#000",
+              background: "#C49A28",
+              color: "#0A0806",
               border: "none",
+              borderRadius: "2px",
             }}
           >
             <Upload size={12} />
@@ -308,7 +309,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
             <button
               onClick={() => goTo("/notifications")}
               className="relative flex items-center justify-center rounded-lg transition-all"
-              style={{ color: "#AA8E64", minWidth: 44, minHeight: 44, padding: "0 10px" }}
+              style={{ color: "#6B6555", minWidth: 44, minHeight: 44, padding: "0 10px" }}
             >
               <Bell size={18} />
               {(unreadCount as number) > 0 && (
@@ -330,8 +331,8 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden"
                 style={{
-                  background: "linear-gradient(135deg, #8B5E1A, #C8954A)",
-                  boxShadow: hasWid ? "0 0 0 2px #E8A830, 0 0 10px rgba(203,177,131,0.35)" : "none",
+                  background: "linear-gradient(135deg, #1C1A14, #3D3A2E)",
+                  boxShadow: hasWid ? "0 0 0 2px #C49A28, 0 0 10px rgba(196,154,40,0.25)" : "none",
                 }}
               >
                 {avatar
@@ -340,7 +341,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 }
               </div>
               {hasWid && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: "#E8A830" }}>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: "#C49A28" }}>
                   <CheckCircle2 size={8} className="text-black" />
                 </div>
               )}
@@ -351,9 +352,9 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
               style={{
                 fontSize: "11px", fontWeight: 600,
-                background: "rgba(230,205,174,0.12)",
-                border: "1px solid rgba(203,177,131,0.22)",
-                color: "#E6CDAE",
+              background: "rgba(196,154,40,0.08)",
+              border: "1px solid rgba(196,154,40,0.20)",
+              color: "#C9C0A8",
               }}
             >
               <LogIn size={12} />
@@ -365,7 +366,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           <button
             onClick={() => setDrawerOpen(o => !o)}
             className="flex flex-col gap-1 p-2 rounded-lg transition-all"
-            style={{ color: drawerOpen ? "#E6CDAE" : "#AA8E64" }}
+            style={{ color: drawerOpen ? "#E8B840" : "#6B6555" }}
             aria-label="Open navigation menu"
           >
             {drawerOpen ? <X size={18} /> : <Menu size={18} />}
