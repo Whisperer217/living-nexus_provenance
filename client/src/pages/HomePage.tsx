@@ -92,33 +92,33 @@ function WIDTrustLayer() {
       <div
         className="flex items-center gap-4 rounded-2xl px-5 py-4"
         style={{
-          background: "#2C3438",
-          border: "1px solid rgba(203,177,131,0.32)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.30)",
+          background: "#111009",
+          border: "1px solid rgba(196,154,40,0.20)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.50)",
         }}
       >
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.35)" }}
+          style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)" }}
         >
-          <Shield size={18} style={{ color: "#CBB183" }} />
+          <Shield size={18} style={{ color: "#C49A28" }} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="museum-section-title mb-0.5">
             Works Witnessed
           </p>
-          <p className="font-display text-[22px] leading-none" style={{ color: "#E6CDAE" }}>
+          <p className="font-display text-[22px] leading-none" style={{ color: "#E8DFC8" }}>
             <AnimatedCounter target={total} />
-            <span className="text-[14px] ml-1.5 font-body" style={{ color: "#AA8E64" }}>and counting</span>
+            <span className="text-[14px] ml-1.5 font-body" style={{ color: "#6B6555" }}>and counting</span>
           </p>
         </div>
         <Link href="/verify">
           <button
             className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
             style={{
-              background: "rgba(203,177,131,0.12)",
-              border: "1px solid rgba(203,177,131,0.40)",
-              color: "#CBB183",
+              background: "rgba(196,154,40,0.06)",
+              border: "1px solid rgba(196,154,40,0.22)",
+              color: "#C49A28",
             }}
           >
             <Fingerprint size={12} />
@@ -131,16 +131,16 @@ function WIDTrustLayer() {
       <div
         className="rounded-2xl px-5 py-4 relative overflow-hidden"
         style={{
-          background: "#2C3438",
-          border: "1px solid rgba(203,177,131,0.28)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.30)",
+          background: "#111009",
+          border: "1px solid rgba(196,154,40,0.15)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.50)",
         }}
       >
         {/* Deep space background shimmer */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 20% 50%, rgba(203,177,131,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(208,161,95,0.04) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse at 20% 50%, rgba(196,154,40,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(196,154,40,0.03) 0%, transparent 60%)",
           }}
         />
         <p
@@ -177,7 +177,7 @@ function WIDTrustLayer() {
               Witnessed Voices
             </p>
             <Link href="/explore">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>
                 See all
               </span>
             </Link>
@@ -194,9 +194,9 @@ function WIDTrustLayer() {
                 style={{
                   width: "148px",
                   height: "196px",
-                  background: "#2C3438",
-                  border: "1px solid rgba(203,177,131,0.25)",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.50)",
+                  background: "#111009",
+                  border: "1px solid rgba(196,154,40,0.12)",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.70)",
                 }}
               >
                 {/* Cover art */}
@@ -208,8 +208,8 @@ function WIDTrustLayer() {
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center"
-                    style={{ background: "#2C3438" }}>
-                    <Fingerprint size={28} style={{ color: "rgba(203,177,131,0.35)" }} />
+                    style={{ background: "#111009" }}>
+                    <Fingerprint size={28} style={{ color: "rgba(196,154,40,0.25)" }} />
                   </div>
                 )}
 
@@ -222,9 +222,9 @@ function WIDTrustLayer() {
                 <div
                   className="absolute top-2 left-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold z-10"
                   style={{
-                    background: "rgba(203,177,131,0.18)",
-                    border: "1px solid rgba(203,177,131,0.50)",
-                    color: "#CBB183",
+                    background: "rgba(196,154,40,0.10)",
+                    border: "1px solid rgba(196,154,40,0.35)",
+                    color: "#C49A28",
                     backdropFilter: "blur(6px)",
                   }}
                 >
@@ -238,7 +238,7 @@ function WIDTrustLayer() {
                     src={v.profilePhotoUrl}
                     alt={v.artistHandle || v.userName}
                     className="absolute top-2 right-2 w-7 h-7 rounded-full object-cover z-10"
-                    style={{ border: "1.5px solid rgba(203,177,131,0.55)" }}
+                    style={{ border: "1.5px solid rgba(196,154,40,0.35)" }}
                   />
                 )}
 
@@ -255,11 +255,11 @@ function WIDTrustLayer() {
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
                     style={{
-                      background: "#3F4A50",
-                      boxShadow: "0 0 24px rgba(203,177,131,0.45)",
+                      background: "#1C1A14",
+                      boxShadow: "0 0 24px rgba(196,154,40,0.30)",
                     }}
                   >
-                    <Play size={20} fill="#2C3438" style={{ color: "#2C3438", marginLeft: "2px" }} />
+                    <Play size={20} fill="#0A0806" style={{ color: "#0A0806", marginLeft: "2px" }} />
                   </div>
                 </button>
 
@@ -276,9 +276,9 @@ function WIDTrustLayer() {
                   <div className="flex items-center gap-1.5 mt-1">
                     {!v.profilePhotoUrl && (
                       <div className="w-4 h-4 rounded-full flex-shrink-0"
-                        style={{ background: "rgba(203,177,131,0.25)" }} />
+                        style={{ background: "rgba(196,154,40,0.15)" }} />
                     )}
-                    <p className="font-body text-[9px] truncate" style={{ color: "#AA8E64" }}>
+                    <p className="font-body text-[9px] truncate" style={{ color: "#6B6555" }}>
                       {v.artistHandle || v.userName}
                     </p>
                   </div>
@@ -309,7 +309,7 @@ function FeaturedCreatorsCarousel() {
           Creators
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>
             See all
           </span>
         </Link>
@@ -324,26 +324,26 @@ function FeaturedCreatorsCarousel() {
               className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
               style={{
                 width: "88px",
-                background: "#3F4A50",
-                border: "1px solid rgba(203,177,131,0.18)",
+                background: "#1C1A14",
+                border: "1px solid rgba(196,154,40,0.12)",
               }}
             >
               <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
-                style={{ border: "2px solid rgba(203,177,131,0.28)" }}>
+                style={{ border: "2px solid rgba(196,154,40,0.20)" }}>
                 {creator.profilePhotoUrl ? (
                   <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[16px] font-bold"
-                    style={{ background: "rgba(203,177,131,0.18)", color: "#CBB183" }}>
+                    style={{ background: "rgba(196,154,40,0.10)", color: "#C49A28" }}>
                     {(creator.artistHandle || creator.name || "?")[0].toUpperCase()}
                   </div>
                 )}
               </div>
               <div className="text-center min-w-0 w-full">
-                <p className="font-heading text-[10px] truncate w-full" style={{ color: "#E6CDAE" }}>
+                <p className="font-heading text-[10px] truncate w-full" style={{ color: "#E8DFC8" }}>
                   {creator.artistHandle || creator.name}
                 </p>
-                <p className="font-body text-[9px] mt-0.5" style={{ color: "#AA8E64" }}>
+                <p className="font-body text-[9px] mt-0.5" style={{ color: "#6B6555" }}>
                   {creator.publishedCount ?? 0} tracks
                 </p>
               </div>
@@ -379,7 +379,7 @@ function NewVoicesCarousel() {
           New Voices
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>
             See all
           </span>
         </Link>
@@ -394,7 +394,7 @@ function NewVoicesCarousel() {
               className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
               style={{
                 width: "88px",
-                background: "rgba(63,74,80,0.7)",
+                background: "rgba(17,16,9,0.7)",
                 border: "1px solid rgba(74,222,128,0.15)",
               }}
             >
@@ -410,12 +410,12 @@ function NewVoicesCarousel() {
                 )}
                 {/* NEW badge */}
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: "#4ADE80", border: "1.5px solid #2C3438" }}>
-                  <Sparkles size={8} style={{ color: "#2C3438" }} />
+                  style={{ background: "#4ADE80", border: "1.5px solid #111009" }}>
+                  <Sparkles size={8} style={{ color: "#111009" }} />
                 </div>
               </div>
               <div className="text-center min-w-0 w-full">
-                <p className="font-heading text-[10px] truncate w-full" style={{ color: "#E6CDAE" }}>
+                <p className="font-heading text-[10px] truncate w-full" style={{ color: "#E8DFC8" }}>
                   {creator.artistHandle || creator.name}
                 </p>
                 <p className="font-body text-[9px] mt-0.5" style={{ color: "rgba(74,222,128,0.75)" }}>New</p>
@@ -461,7 +461,7 @@ function HorizontalTrackGrid({
           <div
             key={i}
             className="flex-shrink-0 rounded-2xl animate-pulse"
-            style={{ width: CARD_PAN_W, height: 220, background: "#2C3438" }}
+            style={{ width: CARD_PAN_W, height: 220, background: "#1C1A14" }}
           />
         ))}
       </div>
@@ -472,9 +472,9 @@ function HorizontalTrackGrid({
     return (
       <div
         className="flex flex-col items-center justify-center py-12 rounded-2xl mb-4"
-        style={{ background: "rgba(44,52,56,0.7)", border: "1px dashed rgba(203,177,131,0.20)" }}
+        style={{ background: "rgba(17,16,9,0.7)", border: "1px dashed rgba(196,154,40,0.15)" }}
       >
-        <p className="font-heading text-[14px] mb-1" style={{ color: "#AA8E64" }}>
+        <p className="font-heading text-[14px] mb-1" style={{ color: "#6B6555" }}>
           {emptyMessage}
         </p>
       </div>
@@ -708,14 +708,14 @@ export default function HomePage() {
         {/* Bottom scrim — anchors content, lighter than before */}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(20,10,30,0.75) 0%, rgba(30,16,40,0.20) 35%, transparent 100%)" }} />
         {/* Warm gold radial — subtle lantern glow, doesn't kill image color */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 55% at 28% 52%, rgba(203,177,131,0.08) 0%, transparent 65%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 55% at 28% 52%, rgba(196,154,40,0.06) 0%, transparent 65%)" }} />
         {/* Edge vignette — lighter, just frames the corners */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(44,52,56,0.35) 80%, rgba(44,52,56,0.65) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(10,8,6,0.35) 80%, rgba(10,8,6,0.65) 100%)" }} />
 
         <div className="relative z-10 flex flex-col justify-end px-6 pb-10 pt-16 max-w-3xl">
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles size={13} className="text-[#CBB183]" />
-            <span className="text-[10px] font-heading tracking-[0.22em] uppercase text-[#CBB183]">
+            <Sparkles size={13} className="text-[#C49A28]" />
+            <span className="text-[10px] font-heading tracking-[0.22em] uppercase text-[#8B6914]">
               Living Nexus — Creative Provenance Platform
             </span>
           </div>
@@ -724,15 +724,15 @@ export default function HomePage() {
             className="font-display leading-tight mb-3"
             style={{
               fontSize: "clamp(1.9rem, 5vw, 3rem)",
-              color: "#E6CDAE",
+              color: "#E8DFC8",
               textShadow: "0 2px 24px rgba(0,0,0,0.60)",
             }}
           >
             Your work deserves to be<br />
-            <span style={{ color: "#CBB183" }}>witnessed.</span>
+            <span style={{ color: "#C49A28" }}>witnessed.</span>
           </h1>
 
-          <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "#DACAAA" }}>
+          <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "#A09880" }}>
             Every work — music, lyrics, manuscripts, comics, video — carries a Witness ID. Cryptographic proof of origin that belongs to you before it belongs to anyone else.
           </p>
 
@@ -741,9 +741,9 @@ export default function HomePage() {
               <button
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
-                  background: "#CBB183",
-                  color: "#1E1020",
-                  boxShadow: "0 2px 16px rgba(203,177,131,0.30)",
+                  background: "#C49A28",
+                  color: "#0A0806",
+                  boxShadow: "0 2px 16px rgba(196,154,40,0.25)",
                 }}
               >
                 <Upload size={13} />
@@ -754,9 +754,9 @@ export default function HomePage() {
               <button
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
-                  background: "rgba(203,177,131,0.08)",
-                  border: "1px solid rgba(203,177,131,0.22)",
-                  color: "#E6CDAE",
+                  background: "rgba(196,154,40,0.06)",
+                  border: "1px solid rgba(196,154,40,0.18)",
+                  color: "#C9C0A8",
                 }}
               >
                 <Compass size={13} />
@@ -774,38 +774,38 @@ export default function HomePage() {
         <div
           className="rounded-2xl p-5 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, #3F4A50 0%, #2C3438 100%)",
-            border: "1px solid rgba(203,177,131,0.22)",
+            background: "linear-gradient(135deg, #1C1A14 0%, #111009 100%)",
+            border: "1px solid rgba(196,154,40,0.18)",
           }}
         >
           <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-5"
-            style={{ background: "radial-gradient(circle, rgba(203,177,131,0.5) 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
+            style={{ background: "radial-gradient(circle, rgba(196,154,40,0.4) 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-                style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.32)" }}>
-                <Star size={12} style={{ color: "#CBB183" }} />
+                style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)" }}>
+                <Star size={12} style={{ color: "#C49A28" }} />
               </div>
-              <span className="text-[10px] font-heading tracking-[0.2em] uppercase" style={{ color: "#CBB183" }}>
+              <span className="text-[10px] font-heading tracking-[0.2em] uppercase" style={{ color: "#8B6914" }}>
                 Founder's Era
               </span>
             </div>
 
-            <h2 className="font-display text-[18px] leading-tight mb-3" style={{ color: "#E6CDAE" }}>
+            <h2 className="font-display text-[18px] leading-tight mb-3" style={{ color: "#E8DFC8" }}>
               The First Witnesses
             </h2>
 
-              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#DACAAA" }}>
+              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#A09880" }}>
                 Founder's Era creators are the architects of this platform's provenance foundation —
                 establishing the first anchors of a cryptographically-verified creative record that cannot
                 be altered, disputed, or erased.
               </p>
 
-              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#DACAAA" }}>
+              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#A09880" }}>
                 In an era where AI systems train on uncredited work and platforms routinely strip creator
                 metadata, a Founder's Era WID is a timestamped declaration of origin. It says:{" "}
-                <em style={{ color: "#CBB183" }}>
+                <em style={{ color: "#C49A28" }}>
                   "I was here. This is mine. The record proves it."
                 </em>
               </p>
@@ -832,15 +832,15 @@ export default function HomePage() {
                     key={p.title}
                     className="rounded-xl p-3"
                     style={{
-                      background: "rgba(44,52,56,0.7)",
-                      border: "1px solid rgba(203,177,131,0.18)",
+                      background: "rgba(17,16,9,0.7)",
+                      border: "1px solid rgba(196,154,40,0.12)",
                     }}
                   >
-                    <div className="flex items-center gap-1.5 mb-1.5" style={{ color: "#CBB183" }}>
+                    <div className="flex items-center gap-1.5 mb-1.5" style={{ color: "#C49A28" }}>
                       <p.Icon size={14} />
                       <span className="text-[11px] font-heading tracking-wide">{p.title}</span>
                     </div>
-                    <p className="text-[11px] font-body leading-relaxed" style={{ color: "#AA8E64" }}>
+                    <p className="text-[11px] font-body leading-relaxed" style={{ color: "#6B6555" }}>
                       {p.desc}
                     </p>
                   </div>
@@ -852,9 +852,9 @@ export default function HomePage() {
                   <button
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                     style={{
-                      background: "rgba(203,177,131,0.10)",
-                      border: "1px solid rgba(203,177,131,0.35)",
-                      color: "#CBB183",
+                      background: "rgba(196,154,40,0.08)",
+                      border: "1px solid rgba(196,154,40,0.28)",
+                      color: "#C49A28",
                     }}
                   >
                     <Upload size={13} />
@@ -865,9 +865,9 @@ export default function HomePage() {
                   <button
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                     style={{
-                      background: "rgba(44,52,56,0.7)",
-                      border: "1px solid rgba(203,177,131,0.18)",
-                      color: "#AA8E64",
+                      background: "rgba(17,16,9,0.7)",
+                      border: "1px solid rgba(196,154,40,0.12)",
+                      color: "#6B6555",
                     }}
                   >
                     <Users size={13} />
@@ -878,9 +878,9 @@ export default function HomePage() {
                   <button
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                     style={{
-                      background: "rgba(44,52,56,0.7)",
-                      border: "1px solid rgba(203,177,131,0.22)",
-                      color: "rgba(203,177,131,0.80)",
+                      background: "rgba(17,16,9,0.7)",
+                      border: "1px solid rgba(196,154,40,0.16)",
+                      color: "rgba(196,154,40,0.70)",
                     }}
                   >
                     <Heart size={13} />
@@ -904,24 +904,24 @@ export default function HomePage() {
         <div
           className="rounded-2xl p-5 relative overflow-hidden sg-hero-frame"
           style={{
-            background: "linear-gradient(135deg, #3F4A50 0%, #2C3438 100%)",
-            border: "1px solid rgba(203,177,131,0.25)",
-            boxShadow: "0 0 40px rgba(203,177,131,0.06)",
+            background: "linear-gradient(135deg, #1C1A14 0%, #111009 100%)",
+            border: "1px solid rgba(196,154,40,0.18)",
+            boxShadow: "0 0 40px rgba(196,154,40,0.04)",
           }}
         >
           {/* Ambient glow */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(203,177,131,0.07) 0%, transparent 70%)",
+              background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(196,154,40,0.05) 0%, transparent 70%)",
             }}
           />
           {/* Header */}
           <div className="flex items-center gap-2.5 mb-4 relative">
-            <ShieldCheck className="w-5 h-5 flex-shrink-0" style={{ color: "#CBB183" }} />
+            <ShieldCheck className="w-5 h-5 flex-shrink-0" style={{ color: "#C49A28" }} />
             <span
               className="font-heading text-[11px] tracking-[0.2em] uppercase"
-              style={{ color: "#CBB183" }}
+              style={{ color: "#8B6914" }}
             >
               What a Witness ID Is — and Is Not
             </span>
@@ -930,8 +930,8 @@ export default function HomePage() {
           <blockquote
             className="font-body text-[14px] leading-relaxed mb-4 pl-4 relative"
             style={{
-              color: "#E6CDAE",
-              borderLeft: "3px solid rgba(203,177,131,0.50)",
+              color: "#E8DFC8",
+              borderLeft: "3px solid rgba(196,154,40,0.40)",
             }}
           >
             Witness IDs help creators preserve verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration.
@@ -1002,15 +1002,15 @@ export default function HomePage() {
           {/* Disclaimer footer */}
           <p
             className="text-[11px] font-body leading-relaxed relative"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "#6B6555" }}
           >
             Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records issued by this platform and do not constitute legal copyright registration. For official copyright protection, visit{" "}
             <a
               href="https://www.copyright.gov/registration/"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-[#CBB183] transition-colors"
-              style={{ color: "#CBB183" }}
+              className="underline hover:text-[#C49A28] transition-colors"
+              style={{ color: "#C49A28" }}
             >
               copyright.gov/registration
             </a>
@@ -1053,7 +1053,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="museum-section-header">Featured Projects</h2>
             <Link href="/projects">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>See all</span>
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>See all</span>
             </Link>
           </div>
 
@@ -1087,8 +1087,8 @@ export default function HomePage() {
                 onClick={() => setActiveGenre(g.label)}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
                   ${activeGenre === g.label
-                    ? "border-[#CBB183]/40 bg-[#3F4A50]/[0.07]"
-                    : "border-[rgba(203,177,131,0.12)] bg-[#3F4A50] hover:border-[rgba(203,177,131,0.25)] hover:bg-[#4A5560]"
+                    ? "border-[#C49A28]/40 bg-[#1C1A14]/[0.07]"
+                    : "border-[rgba(196,154,40,0.10)] bg-[#1C1A14] hover:border-[rgba(196,154,40,0.22)] hover:bg-[#252218]"
                   }`}
               >
                 {g.icon ? (
@@ -1102,7 +1102,7 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="w-10 h-10 flex items-center justify-center rounded-lg"
-                    style={{ background: "linear-gradient(135deg, #CBB183, #7C3AED)" }}>
+                    style={{ background: "linear-gradient(135deg, #C49A28, #7C3AED)" }}>
                     <span className="text-[11px] font-heading font-bold text-black">ALL</span>
                   </div>
                 )}
@@ -1123,7 +1123,7 @@ export default function HomePage() {
             {activeGenre === "All" ? "Discover Tracks" : activeGenre}
           </h2>
           <Link href="/explore">
-            <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#CBB183] transition-colors font-body">
+            <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#C49A28] transition-colors font-body">
               See all
             </span>
           </Link>
@@ -1149,7 +1149,7 @@ export default function HomePage() {
             <div className="gold-divider mb-6" />
             <div className="flex items-center justify-between mb-4">
               <h2 className="museum-section-header">Trending Now</h2>
-              <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "#AA8E64" }}>By plays + likes + recency</span>
+              <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "#6B6555" }}>By plays + likes + recency</span>
             </div>
 
             {/* Trending — horizontal 2-row scroll */}
@@ -1383,7 +1383,7 @@ export default function HomePage() {
               <button
                 className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                 style={{
-                  background: "linear-gradient(135deg, #F5C451, #CBB183)",
+                  background: "linear-gradient(135deg, #F5C451, #C49A28)",
                   color: "#0a0812",
                   boxShadow: "0 0 24px rgba(245,196,81,0.25)",
                 }}
@@ -1431,7 +1431,7 @@ function ContributorsStrip() {
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-10">
       <div className="flex flex-col items-center gap-5">
-        <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(203,177,131,0.45)" }}>
+        <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(139,105,20,0.70)" }}>
           Built with
         </p>
         <div className="flex items-center gap-6 flex-wrap justify-center">
@@ -1441,15 +1441,15 @@ function ContributorsStrip() {
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold transition-all group-hover:scale-105"
                   style={{
-                    background: "rgba(212,175,55,0.10)",
-                    border: "1px solid rgba(212,175,55,0.20)",
-                    color: "#CBB183",
+                    background: "rgba(196,154,40,0.08)",
+                    border: "1px solid rgba(196,154,40,0.18)",
+                    color: "#C49A28",
                   }}
                 >
                   {initial}
                 </div>
                 <div className="text-center">
-                  <p className="text-[11px] font-semibold" style={{ color: "#DACAAA" }}>{handle}</p>
+                  <p className="text-[11px] font-semibold" style={{ color: "#E8DFC8" }}>{handle}</p>
                   <p className="text-[9px] uppercase tracking-wider" style={{ color: "rgba(100,116,139,0.8)" }}>{role}</p>
                 </div>
               </div>
@@ -1459,7 +1459,7 @@ function ContributorsStrip() {
         <Link href="/attribution">
           <span
             className="text-[10px] uppercase tracking-[0.15em] transition-opacity hover:opacity-80 cursor-pointer"
-            style={{ color: "rgba(203,177,131,0.5)" }}
+            style={{ color: "rgba(139,105,20,0.65)" }}
           >
             View full attribution →
           </span>

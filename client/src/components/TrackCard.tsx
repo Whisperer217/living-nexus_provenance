@@ -183,7 +183,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {/* Play button */}
         <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
           transition-all duration-200 z-10
-          ${isActive ? "opacity-100 bg-[#3F4A50]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+          ${isActive ? "opacity-100 bg-[#1C1A14]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
         >
           {isPlaying
             ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
@@ -195,13 +195,13 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {isHot && !track.isOwn && (
           <div className="absolute top-0 left-0 z-20 flex items-center gap-0.5 px-2 py-0.5"
             style={{
-              background: "linear-gradient(90deg, rgba(122,90,30,0.92), rgba(203,177,131,0.88))",
+              background: "linear-gradient(90deg, rgba(100,74,10,0.95), rgba(196,154,40,0.90))",
               borderBottomRightRadius: "8px",
               borderTopLeftRadius: "inherit",
             }}
           >
-            <Crown size={9} style={{ color: "#2C3438" }} />
-            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#2C3438" }}>
+            <Crown size={9} style={{ color: "#0A0806" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#0A0806" }}>
               {(track.plays ?? 0) >= 1000
                 ? `${Math.floor((track.plays ?? 0) / 1000)}K PLAYS`
                 : `${track.plays} PLAYS`}
@@ -212,7 +212,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {/* YOURS badge — top-left */}
         {track.isOwn && (
           <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
-            bg-black/70 text-[#CBB183] border border-[#CBB183]/30 z-10 font-heading tracking-wider">
+            bg-black/70 text-[#C49A28] border border-[#C49A28]/30 z-10 font-heading tracking-wider">
             YOURS
           </div>
         )}
@@ -292,14 +292,14 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           href={`/track/${track.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
           className="block text-[13px] font-heading truncate tracking-wide
-            text-[#E6CDAE] hover:text-[#D0A15F] transition-colors cursor-pointer"
+            text-[#E8DFC8] hover:text-[#B8860B] transition-colors cursor-pointer"
           title={`Open ${track.title}`}
         >
           {track.title}
         </Link>
 
         {/* Zone 3: Artist name → creator profile page */}
-        <div className="flex items-center gap-2 text-[11px] text-[#AA8E64]">
+        <div className="flex items-center gap-2 text-[11px] text-[#6B6555]">
           <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold
             bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
             {track.artist.charAt(0)}
@@ -308,7 +308,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             <Link
               href={`/creator/${track.creatorId}`}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="truncate hover:text-[#CBB183] transition-colors cursor-pointer"
+              className="truncate hover:text-[#C49A28] transition-colors cursor-pointer"
               title={`View ${track.artist}'s profile`}
             >
               {track.artist}
@@ -343,7 +343,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           {/* Like button */}
           <button
             onClick={e => toggleLike(e)}
-            className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-[#AA8E64] hover:text-pink-400"}`}
+            className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-[#6B6555] hover:text-pink-400"}`}
             title={isLiked ? "Unlike" : "Like"}
           >
             <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
@@ -359,7 +359,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(track, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
-                className="p-1 text-[#AA8E64] hover:text-[#CBB183] transition-colors"
+                className="p-1 text-[#6B6555] hover:text-[#C49A28] transition-colors"
                 title="Send a gift"
               >
                 <DollarSign size={12} />
@@ -373,7 +373,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                     playNext(track);
                     toast.success(`"${track.title}" plays next`);
                   }}
-                  className="p-1 text-[#AA8E64] hover:text-[#CBB183] transition-colors"
+                  className="p-1 text-[#6B6555] hover:text-[#C49A28] transition-colors"
                   title="Play next"
                 >
                   <SkipForward size={12} />
@@ -384,7 +384,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                     setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
                     setShowAddToList(true);
                   }}
-                  className="p-1 text-[#AA8E64] hover:text-[#CBB183] transition-colors"
+                  className="p-1 text-[#6B6555] hover:text-[#C49A28] transition-colors"
                   title="Add to my list"
                 >
                   <ListPlus size={12} />
@@ -393,7 +393,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             )}
             <button
               onClick={e => { e.stopPropagation(); navigate(`/track/${track.id}`); }}
-              className="p-1 text-[#AA8E64] hover:text-[#D0A15F] transition-colors"
+              className="p-1 text-[#6B6555] hover:text-[#B8860B] transition-colors"
               title="Open track page"
             >
               <ExternalLink size={12} />

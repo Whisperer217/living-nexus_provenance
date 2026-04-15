@@ -74,7 +74,7 @@ function Scrubber({
     <div className="w-full select-none">
       <div
         className={`relative w-full rounded-full cursor-pointer ${thin ? "h-0.5" : "h-1"} group`}
-        style={{ background: "rgba(203,177,131,0.14)" }}
+        style={{ background: "rgba(196,154,40,0.14)" }}
         onClick={onSeek}
         onTouchMove={onSeekTouch}
         onTouchStart={onSeekTouch}
@@ -83,7 +83,7 @@ function Scrubber({
           className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-100"
           style={{
             width: `${Math.min(100, progress)}%`,
-            background: "linear-gradient(90deg, #CBB183, #CBB183)",
+            background: "linear-gradient(90deg, #C49A28, #C49A28)",
           }}
         />
         {!thin && (
@@ -91,18 +91,18 @@ function Scrubber({
             className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             style={{
               left: `calc(${Math.min(100, progress)}% - 6px)`,
-              background: "#CBB183",
-              boxShadow: "0 0 6px rgba(203,177,131,0.55)",
+              background: "#C49A28",
+              boxShadow: "0 0 6px rgba(196,154,40,0.42)",
             }}
           />
         )}
       </div>
       {!thin && (
         <div className="flex justify-between mt-1.5">
-          <span className="text-[10px] font-mono" style={{ color: "#AA8E64" }}>
+          <span className="text-[10px] font-mono" style={{ color: "#6B6555" }}>
             {fmtTime(currentTime)}
           </span>
-          <span className="text-[10px] font-mono" style={{ color: "#AA8E64" }}>
+          <span className="text-[10px] font-mono" style={{ color: "#6B6555" }}>
             {fmtTime(duration)}
           </span>
         </div>
@@ -156,7 +156,7 @@ function DiscoverPanel({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 size={20} className="animate-spin" style={{ color: "#3F4A50" }} />
+        <Loader2 size={20} className="animate-spin" style={{ color: "#1C1A14" }} />
       </div>
     );
   }
@@ -164,11 +164,11 @@ function DiscoverPanel({
   if (!tracks.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-8 text-center gap-3">
-        <Sparkles size={24} style={{ color: "#2C3438" }} />
-        <div className="text-[12px] font-heading" style={{ color: "#3F4A50" }}>
+        <Sparkles size={24} style={{ color: "#111009" }} />
+        <div className="text-[12px] font-heading" style={{ color: "#1C1A14" }}>
           No related tracks found
         </div>
-        <div className="text-[10px]" style={{ color: "#2C3438" }}>
+        <div className="text-[10px]" style={{ color: "#111009" }}>
           Try exploring other genres
         </div>
       </div>
@@ -180,7 +180,7 @@ function DiscoverPanel({
       {/* Section header */}
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-heading tracking-[0.18em] uppercase"
-          style={{ color: "rgba(203,177,131,0.55)" }}>
+          style={{ color: "rgba(196,154,40,0.42)" }}>
           Related Tracks
         </div>
         {tracks.length > 1 && (
@@ -188,9 +188,9 @@ function DiscoverPanel({
             onClick={() => onPlayAll(tracks)}
             className="flex items-center gap-1.5 text-[10px] font-heading tracking-wide px-3 py-1.5 rounded-full transition-all active:scale-95"
             style={{
-              background: "rgba(203,177,131,0.10)",
-              border: "1px solid rgba(203,177,131,0.28)",
-              color: "#CBB183",
+              background: "rgba(196,154,40,0.08)",
+              border: "1px solid rgba(196,154,40,0.20)",
+              color: "#C49A28",
             }}
           >
             <Play size={10} fill="currentColor" />
@@ -213,13 +213,13 @@ function DiscoverPanel({
             {/* Art */}
             <div
               className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden"
-              style={{ background: "#2C3438" }}
+              style={{ background: "#111009" }}
             >
               {track.artUrl ? (
                 <img src={track.artUrl} alt="" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Music size={16} style={{ color: "#3F4A50" }} />
+                  <Music size={16} style={{ color: "#1C1A14" }} />
                 </div>
               )}
             </div>
@@ -228,16 +228,16 @@ function DiscoverPanel({
               <div className="text-[13px] font-heading text-white truncate leading-tight">
                 {track.title}
               </div>
-              <div className="text-[11px] truncate mt-0.5" style={{ color: "#3F4A50" }}>
+              <div className="text-[11px] truncate mt-0.5" style={{ color: "#1C1A14" }}>
                 {track.artist}
               </div>
               {track.genre && (
                 <div
                   className="inline-block mt-1 text-[9px] font-heading tracking-wide px-1.5 py-0.5 rounded-full"
                   style={{
-                    background: "rgba(203,177,131,0.10)",
+                    background: "rgba(196,154,40,0.08)",
                     color: "rgba(230,205,174,0.7)",
-                    border: "1px solid rgba(203,177,131,0.18)",
+                    border: "1px solid rgba(196,154,40,0.12)",
                   }}
                 >
                   {track.genre}
@@ -245,7 +245,7 @@ function DiscoverPanel({
               )}
             </div>
             {/* Play icon */}
-            <Play size={14} style={{ color: "rgba(203,177,131,0.45)", flexShrink: 0 }} />
+            <Play size={14} style={{ color: "rgba(196,154,40,0.35)", flexShrink: 0 }} />
           </button>
         ))}
       </div>
@@ -740,7 +740,7 @@ export default function MobilePlayerLayer() {
                 key={i}
                 className="w-1 h-1 rounded-full"
                 style={{
-                  background: "rgba(203,177,131,0.60)",
+                  background: "rgba(196,154,40,0.46)",
                   animationName: "pulse",
                   animationDuration: "2s",
                   animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
@@ -750,14 +750,14 @@ export default function MobilePlayerLayer() {
               />
             ))}
           </div>
-          <span className="text-[9px] font-heading tracking-wider" style={{ color: "rgba(203,177,131,0.60)" }}>
+          <span className="text-[9px] font-heading tracking-wider" style={{ color: "rgba(196,154,40,0.46)" }}>
             generating visual…
           </span>
         </div>
       )}
       {videoUrl && showVideo && (
         <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
-          style={{ background: "rgba(230,205,174,0.9)", color: "#2C3438" }}>
+          style={{ background: "rgba(230,205,174,0.9)", color: "#111009" }}>
           <Video size={9} /> Live
         </div>
       )}
@@ -770,14 +770,14 @@ export default function MobilePlayerLayer() {
       <button
         onClick={toggleShuffle}
         className="transition-all active:scale-90"
-        style={{ color: state.isShuffle ? "#D0A15F" : "rgba(203,177,131,0.40)" }}
+        style={{ color: state.isShuffle ? "#D0A15F" : "rgba(196,154,40,0.30)" }}
       >
         <Shuffle size={large ? 20 : 16} />
       </button>
       <button
         onClick={prevTrack}
         className="transition-all active:scale-90"
-        style={{ color: overlay ? "white" : "#CBB183", filter: overlay ? "none" : "drop-shadow(0 1px 3px rgba(203,177,131,0.30))" }}
+        style={{ color: overlay ? "white" : "#C49A28", filter: overlay ? "none" : "drop-shadow(0 1px 3px rgba(196,154,40,0.22))" }}
       >
         <SkipBack size={large ? 28 : 22} fill="currentColor" />
       </button>
@@ -787,9 +787,9 @@ export default function MobilePlayerLayer() {
         style={{
           width: large ? "64px" : "52px",
           height: large ? "64px" : "52px",
-          background: "linear-gradient(135deg, #F5E6C8 0%, #D0A15F 45%, #CBB183 100%)",
-          boxShadow: "0 4px 24px rgba(203,177,131,0.50), 0 0 0 1px rgba(245,230,200,0.18)",
-          color: "#2C3438",
+          background: "linear-gradient(135deg, #F5E6C8 0%, #D0A15F 45%, #C49A28 100%)",
+          boxShadow: "0 4px 24px rgba(196,154,40,0.38), 0 0 0 1px rgba(245,230,200,0.18)",
+          color: "#111009",
         }}
       >
         {state.isPlaying
@@ -799,14 +799,14 @@ export default function MobilePlayerLayer() {
       <button
         onClick={nextTrack}
         className="transition-all active:scale-90"
-        style={{ color: overlay ? "white" : "#CBB183", filter: overlay ? "none" : "drop-shadow(0 1px 3px rgba(203,177,131,0.30))" }}
+        style={{ color: overlay ? "white" : "#C49A28", filter: overlay ? "none" : "drop-shadow(0 1px 3px rgba(196,154,40,0.22))" }}
       >
         <SkipForward size={large ? 28 : 22} fill="currentColor" />
       </button>
       <button
         onClick={toggleRepeat}
         className="transition-all active:scale-90"
-        style={{ color: state.isRepeat ? "#D0A15F" : "rgba(203,177,131,0.40)" }}
+        style={{ color: state.isRepeat ? "#D0A15F" : "rgba(196,154,40,0.30)" }}
       >
         <Repeat size={large ? 20 : 16} />
       </button>
@@ -840,9 +840,9 @@ export default function MobilePlayerLayer() {
           /* Solid background — no bleed-through from content below */
           background: isLightsOn
             ? "linear-gradient(180deg, #1a2a3a 0%, #1e2d3a 100%)"
-            : "linear-gradient(180deg, #1E2D3A 0%, #2C3438 100%)",
+            : "linear-gradient(180deg, #1E2D3A 0%, #111009 100%)",
           backdropFilter: "blur(12px) saturate(1.2)",
-          borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(203,177,131,0.12)",
+          borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(196,154,40,0.08)",
         }}
       >
         <div className="flex items-center justify-around h-14 px-2">
@@ -853,7 +853,7 @@ export default function MobilePlayerLayer() {
                 key={path}
                 onClick={() => { try { navigator.vibrate?.(5); } catch {} navigate(path); }}
                 className="relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all active:scale-90"
-                style={{ color: isActive ? "#CBB183" : "#AA8E64" }}
+                style={{ color: isActive ? "#C49A28" : "#6B6555" }}
                 aria-label={label}
               >
                 <div className="relative">
@@ -867,7 +867,7 @@ export default function MobilePlayerLayer() {
                 </div>
                 <span className="text-[9px] font-heading tracking-wide uppercase" style={{ lineHeight: 1 }}>{label}</span>
                 {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full" style={{ background: "#CBB183" }} />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full" style={{ background: "#C49A28" }} />
                 )}
               </button>
             );
@@ -888,12 +888,12 @@ export default function MobilePlayerLayer() {
         /* Solid background — no bleed-through */
         background: isLightsOn
           ? "linear-gradient(180deg, #1a2a3a 0%, #1e2d3a 100%)"
-          : "linear-gradient(180deg, #1E2D3A 0%, #2C3438 100%)",
+          : "linear-gradient(180deg, #1E2D3A 0%, #111009 100%)",
         backdropFilter: "blur(16px) saturate(1.3)",
         borderTop: isLightsOn
           ? "1px solid rgba(255,255,255,0.15)"
-          : "1px solid rgba(203,177,131,0.22)",
-        boxShadow: "0 -8px 40px rgba(0,0,0,0.75), 0 -1px 0 rgba(203,177,131,0.10)",
+          : "1px solid rgba(196,154,40,0.16)",
+        boxShadow: "0 -8px 40px rgba(0,0,0,0.75), 0 -1px 0 rgba(196,154,40,0.08)",
       }}
       onTouchStart={onMiniTouchStart}
       onTouchMove={onMiniTouchMove}
@@ -902,12 +902,12 @@ export default function MobilePlayerLayer() {
     >
       {/* Progress line at top of mini bar */}
       <div className="absolute top-0 left-0 right-0 h-[2px]"
-        style={{ background: "rgba(203,177,131,0.08)" }}>
+        style={{ background: "rgba(196,154,40,0.06)" }}>
         <div
           className="h-full transition-[width] duration-300"
           style={{
             width: `${Math.min(100, progress)}%`,
-            background: "linear-gradient(90deg, #CBB183, #CBB183)",
+            background: "linear-gradient(90deg, #C49A28, #C49A28)",
           }}
         />
       </div>
@@ -923,8 +923,8 @@ export default function MobilePlayerLayer() {
             <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
-              style={{ background: "#2C3438" }}>
-              <Music size={16} style={{ color: "#AA8E64" }} />
+              style={{ background: "#111009" }}>
+              <Music size={16} style={{ color: "#6B6555" }} />
             </div>
           )}
           {/* Live wave indicator */}
@@ -935,7 +935,7 @@ export default function MobilePlayerLayer() {
                 <span key={i} className="w-[2px] rounded-full"
                   style={{
                     height: "6px",
-                    background: "#CBB183",
+                    background: "#C49A28",
                     animationName: "mobileWave",
                     animationDuration: `${0.4 + i * 0.1}s`,
                     animationTimingFunction: "ease-in-out",
@@ -955,7 +955,7 @@ export default function MobilePlayerLayer() {
           <div className="text-[13px] font-heading text-white truncate leading-tight">
             {currentTrack.title || "Unknown Track"}
           </div>
-          <div className="text-[11px] truncate mt-0.5" style={{ color: "#AA8E64" }}>
+          <div className="text-[11px] truncate mt-0.5" style={{ color: "#6B6555" }}>
             {currentTrack.artist || "Unknown Artist"}
           </div>
         </button>
@@ -963,7 +963,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleToggleLike}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
-          style={{ color: isLiked ? "#EF4444" : "rgba(203,177,131,0.45)" }}
+          style={{ color: isLiked ? "#EF4444" : "rgba(196,154,40,0.35)" }}
         >
           <Heart size={22} fill={isLiked ? "currentColor" : "none"} />
         </button>
@@ -972,19 +972,19 @@ export default function MobilePlayerLayer() {
           onClick={togglePlay}
           className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-all active:scale-90"
           style={{
-            background: "linear-gradient(135deg, #CBB183, #CBB183)",
-            boxShadow: "0 2px 10px rgba(203,177,131,0.22)",
+            background: "linear-gradient(135deg, #C49A28, #C49A28)",
+            boxShadow: "0 2px 10px rgba(196,154,40,0.16)",
           }}
         >
           {state.isPlaying
-            ? <Pause size={18} fill="currentColor" style={{ color: "#2C3438" }} />
-            : <Play size={18} fill="currentColor" style={{ color: "#2C3438", marginLeft: "2px" }} />}
+            ? <Pause size={18} fill="currentColor" style={{ color: "#111009" }} />
+            : <Play size={18} fill="currentColor" style={{ color: "#111009", marginLeft: "2px" }} />}
         </button>
         {/* Next */}
         <button
           onClick={nextTrack}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
-          style={{ color: "#AA8E64" }}
+          style={{ color: "#6B6555" }}
         >
           <SkipForward size={18} fill="currentColor" />
         </button>
@@ -1017,7 +1017,7 @@ export default function MobilePlayerLayer() {
           <button
             onClick={(e) => { e.stopPropagation(); setShowMiniMenu(v => !v); }}
             className="w-7 h-8 flex items-center justify-center transition-all active:scale-90"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "#6B6555" }}
             aria-label="Track options"
           >
             <MoreVertical size={16} />
@@ -1036,15 +1036,15 @@ export default function MobilePlayerLayer() {
                 style={{
                   background: "rgba(44,52,56,0.97)",
                   backdropFilter: "blur(20px)",
-                  border: "1px solid rgba(203,177,131,0.16)",
+                  border: "1px solid rgba(196,154,40,0.16)",
                   boxShadow: "0 8px 40px rgba(0,0,0,0.70)",
                 }}
                 onClick={e => e.stopPropagation()}
               >
                 {/* Track header */}
-                <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(203,177,131,0.10)" }}>
+                <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(196,154,40,0.08)" }}>
                   <p className="text-[12px] font-heading text-white/90 truncate">{currentTrack.title}</p>
-                  <p className="text-[10px] mt-0.5 truncate" style={{ color: "#3F4A50" }}>{currentTrack.artist}</p>
+                  <p className="text-[10px] mt-0.5 truncate" style={{ color: "#1C1A14" }}>{currentTrack.artist}</p>
                 </div>
 
                 {/* Menu items */}
@@ -1114,7 +1114,7 @@ export default function MobilePlayerLayer() {
     <div
       className="md:hidden fixed inset-0 z-[9010] flex flex-col"
       style={{
-        background: "linear-gradient(180deg, #1E2D3A 0%, #232E35 35%, #2C3438 100%)",
+        background: "linear-gradient(180deg, #1E2D3A 0%, #232E35 35%, #111009 100%)",
         transform: `translateY(${expandedDragOffset}px)`,
         transition: expandedDragOffset === 0 ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "none",
         paddingTop: "env(safe-area-inset-top, 0px)",
@@ -1136,7 +1136,7 @@ export default function MobilePlayerLayer() {
         onTouchEnd={onExpandedTouchEnd}
         onTouchCancel={onExpandedTouchCancel}
       >
-        <div className="w-10 h-1 rounded-full" style={{ background: "rgba(203,177,131,0.15)" }} />
+        <div className="w-10 h-1 rounded-full" style={{ background: "rgba(196,154,40,0.10)" }} />
       </div>
 
       {/* Scroll-to-top button — floats over content when user has scrolled down */}
@@ -1145,9 +1145,9 @@ export default function MobilePlayerLayer() {
           onClick={() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
           className="absolute bottom-24 right-4 z-10 flex items-center justify-center w-9 h-9 rounded-full shadow-lg transition-all active:scale-90"
           style={{
-            background: "rgba(203,177,131,0.12)",
-            border: "1px solid rgba(203,177,131,0.28)",
-            color: "#CBB183",
+            background: "rgba(196,154,40,0.08)",
+            border: "1px solid rgba(196,154,40,0.20)",
+            color: "#C49A28",
             backdropFilter: "blur(8px)",
           }}
           aria-label="Scroll to top"
@@ -1172,7 +1172,7 @@ export default function MobilePlayerLayer() {
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
           height: 0,
           minHeight: 0,
-          background: "linear-gradient(180deg, #1E2D3A 0%, #232E35 35%, #2C3438 100%)",
+          background: "linear-gradient(180deg, #1E2D3A 0%, #232E35 35%, #111009 100%)",
         }}
       >
 
@@ -1181,7 +1181,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={() => setPlayerState("mini")}
           className="p-2 rounded-xl transition-all active:scale-90"
-          style={{ color: "#AA8E64" }}
+          style={{ color: "#6B6555" }}
         >
           <ChevronDown size={22} />
         </button>
@@ -1193,7 +1193,7 @@ export default function MobilePlayerLayer() {
               fontWeight: 600,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              background: "linear-gradient(135deg, #F5E6C8 0%, #CBB183 60%, #D0A15F 100%)",
+              background: "linear-gradient(135deg, #F5E6C8 0%, #C49A28 60%, #D0A15F 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -1203,7 +1203,7 @@ export default function MobilePlayerLayer() {
             Now Playing
           </div>
           {queueContextLabel && (
-            <div className="text-[9px] mt-0.5" style={{ color: "rgba(203,177,131,0.50)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>
+            <div className="text-[9px] mt-0.5" style={{ color: "rgba(196,154,40,0.38)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>
               {queueContextLabel}
             </div>
           )}
@@ -1211,7 +1211,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={() => setPlayerState("cinematic")}
           className="p-2 rounded-xl transition-all active:scale-90"
-          style={{ color: "#AA8E64" }}
+          style={{ color: "#6B6555" }}
           title="Cinematic mode"
         >
           <Maximize2 size={18} />
@@ -1223,7 +1223,7 @@ export default function MobilePlayerLayer() {
         className="flex-shrink-0 flex items-center gap-1 mx-8 mb-4 p-1 rounded-2xl"
         style={{
           background: "rgba(30,45,58,0.85)",
-          border: "1px solid rgba(203,177,131,0.15)",
+          border: "1px solid rgba(196,154,40,0.10)",
         }}
       >
         {(["playing", "discover"] as const).map((tab) => (
@@ -1232,9 +1232,9 @@ export default function MobilePlayerLayer() {
             onClick={() => setExpandedTab(tab)}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all text-[11px] font-heading tracking-wide"
             style={{
-              background: expandedTab === tab ? "rgba(203,177,131,0.12)" : "transparent",
-              color: expandedTab === tab ? "#D0A15F" : "rgba(203,177,131,0.35)",
-              border: expandedTab === tab ? "1px solid rgba(203,177,131,0.28)" : "1px solid transparent",
+              background: expandedTab === tab ? "rgba(196,154,40,0.08)" : "transparent",
+              color: expandedTab === tab ? "#D0A15F" : "rgba(196,154,40,0.26)",
+              border: expandedTab === tab ? "1px solid rgba(196,154,40,0.20)" : "1px solid transparent",
             }}
           >
             {tab === "playing" ? <ListMusic size={12} /> : <Sparkles size={12} />}
@@ -1249,7 +1249,7 @@ export default function MobilePlayerLayer() {
           className="w-full rounded-2xl relative"
           style={{
             aspectRatio: "1 / 1",
-            boxShadow: "0 16px 64px rgba(0,0,0,0.60), 0 4px 16px rgba(203,177,131,0.08)",
+            boxShadow: "0 16px 64px rgba(0,0,0,0.60), 0 4px 16px rgba(196,154,40,0.06)",
             overflow: artZoomed ? "visible" : "hidden",
             zIndex: artZoomed ? 20 : "auto",
           }}
@@ -1307,12 +1307,12 @@ export default function MobilePlayerLayer() {
             style={{
               fontFamily: "'Cinzel', serif",
               fontWeight: 700,
-              background: "linear-gradient(135deg, #F5E6C8 0%, #CBB183 40%, #D0A15F 70%, #CBB183 100%)",
+              background: "linear-gradient(135deg, #F5E6C8 0%, #C49A28 40%, #D0A15F 70%, #C49A28 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
               textShadow: "none",
-              filter: "drop-shadow(0 1px 2px rgba(203,177,131,0.35))",
+              filter: "drop-shadow(0 1px 2px rgba(196,154,40,0.26))",
               letterSpacing: "0.02em",
             }}
           >
@@ -1326,13 +1326,13 @@ export default function MobilePlayerLayer() {
               style={{
                 fontFamily: "'Cinzel', serif",
                 fontWeight: 400,
-                color: "#AA8E64",
+                color: "#6B6555",
                 letterSpacing: "0.04em",
                 textShadow: "0 1px 3px rgba(0,0,0,0.5)",
               }}
             >
               {currentTrack.creatorRole === "founder" && (
-                <Crown size={11} style={{ color: "#CBB183", flexShrink: 0 }} />
+                <Crown size={11} style={{ color: "#C49A28", flexShrink: 0 }} />
               )}
               {currentTrack.artist || "Unknown Artist"}
             </button>
@@ -1342,13 +1342,13 @@ export default function MobilePlayerLayer() {
               style={{
                 fontFamily: "'Cinzel', serif",
                 fontWeight: 400,
-                color: "#AA8E64",
+                color: "#6B6555",
                 letterSpacing: "0.04em",
                 textShadow: "0 1px 3px rgba(0,0,0,0.5)",
               }}
             >
               {currentTrack.creatorRole === "founder" && (
-                <Crown size={11} style={{ color: "#CBB183", flexShrink: 0 }} />
+                <Crown size={11} style={{ color: "#C49A28", flexShrink: 0 }} />
               )}
               {currentTrack.artist || "Unknown Artist"}
             </div>
@@ -1358,7 +1358,7 @@ export default function MobilePlayerLayer() {
           onClick={handleToggleLike}
           className="flex-shrink-0 ml-4 p-2 rounded-full transition-all active:scale-90"
           style={{
-            color: isLiked ? "#EF4444" : "#3F4A50",
+            color: isLiked ? "#EF4444" : "#1C1A14",
             background: isLiked ? "rgba(239,68,68,0.12)" : "transparent",
           }}
         >
@@ -1389,7 +1389,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleShare}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: copied ? "#4ADE80" : "rgba(203,177,131,0.55)" }}
+          style={{ color: copied ? "#4ADE80" : "rgba(196,154,40,0.42)" }}
         >
           {copied ? <Check size={18} /> : <Share2 size={18} />}
           <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{copied ? "Copied" : "Share"}</span>
@@ -1397,7 +1397,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={() => setGiftOpen(true)}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "rgba(203,177,131,0.55)" }}
+          style={{ color: "rgba(196,154,40,0.42)" }}
         >
           <DollarSign size={18} />
           <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>Tip</span>
@@ -1410,7 +1410,7 @@ export default function MobilePlayerLayer() {
             }
           }}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "rgba(203,177,131,0.55)" }}
+          style={{ color: "rgba(196,154,40,0.42)" }}
         >
           <ListMusic size={18} />
           <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>Details</span>
@@ -1420,9 +1420,9 @@ export default function MobilePlayerLayer() {
           {showMobileVolume && (
             <div
               className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-2xl p-3 shadow-2xl z-50 flex flex-col items-center gap-2"
-              style={{ background: "#2C3438", border: "1px solid rgba(44,52,56,0.6)" }}
+              style={{ background: "#111009", border: "1px solid rgba(44,52,56,0.6)" }}
             >
-              <span className="text-[10px] font-mono" style={{ color: "#CBB183" }}>
+              <span className="text-[10px] font-mono" style={{ color: "#C49A28" }}>
                 {state.isMuted ? "0" : Math.round(state.volume * 100)}%
               </span>
               <input
@@ -1432,7 +1432,7 @@ export default function MobilePlayerLayer() {
                 onChange={e => { setVolume(parseFloat(e.target.value)); }}
                 className="volume-slider-vertical"
                 style={{
-                  background: `linear-gradient(to top, #CBB183 ${
+                  background: `linear-gradient(to top, #C49A28 ${
                     state.isMuted ? 0 : state.volume * 100
                   }%, rgba(44,52,56,0.7) ${
                     state.isMuted ? 0 : state.volume * 100
@@ -1442,7 +1442,7 @@ export default function MobilePlayerLayer() {
               <button
                 onClick={toggleMute}
                 className="p-1 transition-colors"
-                style={{ color: state.isMuted ? "#CBB183" : "#3F4A50" }}
+                style={{ color: state.isMuted ? "#C49A28" : "#1C1A14" }}
               >
                 <VolumeX size={12} />
               </button>
@@ -1451,7 +1451,7 @@ export default function MobilePlayerLayer() {
           <button
             onClick={() => setShowMobileVolume(v => !v)}
             className="flex flex-col items-center gap-1 transition-all active:scale-90"
-            style={{ color: state.isMuted ? "#EF4444" : "rgba(203,177,131,0.55)" }}
+            style={{ color: state.isMuted ? "#EF4444" : "rgba(196,154,40,0.42)" }}
           >
             {state.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
             <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{state.isMuted ? "Muted" : "Vol"}</span>
@@ -1492,7 +1492,7 @@ export default function MobilePlayerLayer() {
             <ChevronRight
               size={14}
               style={{
-                color: "#3F4A50",
+                color: "#1C1A14",
                 transform: widPanelOpen ? "rotate(90deg)" : "rotate(0deg)",
                 transition: "transform 0.2s",
               }}
@@ -1504,7 +1504,7 @@ export default function MobilePlayerLayer() {
               style={{ borderColor: "rgba(34,197,94,0.2)" }}>
               <div className="pt-3">
                 <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
-                  style={{ color: "#3F4A50" }}>
+                  style={{ color: "#1C1A14" }}>
                   Witness ID
                 </div>
                 <div className="text-[11px] font-mono break-all"
@@ -1515,7 +1515,7 @@ export default function MobilePlayerLayer() {
               {currentTrack.title && (
                 <div>
                   <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
-                    style={{ color: "#3F4A50" }}>
+                    style={{ color: "#1C1A14" }}>
                     Work
                   </div>
                   <div className="text-[12px]" style={{ color: "#DACAAA" }}>
@@ -1526,7 +1526,7 @@ export default function MobilePlayerLayer() {
               {currentTrack.artist && (
                 <div>
                   <div className="text-[9px] font-heading tracking-[0.15em] uppercase mb-1"
-                    style={{ color: "#3F4A50" }}>
+                    style={{ color: "#1C1A14" }}>
                     Creator
                   </div>
                   <div className="text-[12px]" style={{ color: "#DACAAA" }}>
@@ -1551,7 +1551,7 @@ export default function MobilePlayerLayer() {
       <div className="flex-shrink-0 mx-8 mb-4">
         <div className="flex items-center gap-2 mb-2">
           <div className="text-[9px] font-heading tracking-[0.15em] uppercase"
-            style={{ color: "#AA8E64" }}>
+            style={{ color: "#6B6555" }}>
             Signals
           </div>
           <div className="flex-1 h-px" style={{ background: "rgba(44,52,56,0.5)" }} />
@@ -1570,13 +1570,13 @@ export default function MobilePlayerLayer() {
                   background: isActive
                     ? "rgba(122,90,30,0.6)"
                     : "rgba(44,52,56,0.8)",
-                  border: `1px solid ${isActive ? "rgba(203,177,131,0.45)" : "rgba(44,52,56,0.6)"}`,
+                  border: `1px solid ${isActive ? "rgba(196,154,40,0.35)" : "rgba(44,52,56,0.6)"}`,
                 }}
               >
                 <span className="text-[14px] leading-none">{emoji}</span>
                 {count > 0 && (
                   <span className="text-[10px] font-mono"
-                    style={{ color: isActive ? "#CBB183" : "#3F4A50" }}>
+                    style={{ color: isActive ? "#C49A28" : "#1C1A14" }}>
                     {count}
                   </span>
                 )}
@@ -1598,7 +1598,7 @@ export default function MobilePlayerLayer() {
           <span className="text-[13px]">🎧</span>
           <span
             className="text-[12px] font-medium tracking-wide"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "#6B6555" }}
           >
             {listenerCount === 1
               ? "1 person currently listening"
@@ -1620,16 +1620,16 @@ export default function MobilePlayerLayer() {
           onClick={() => setCommentsPanelOpen(v => !v)}
         >
           <div className="flex items-center gap-2">
-            <MessageCircle size={14} style={{ color: "#3F4A50" }} />
+            <MessageCircle size={14} style={{ color: "#1C1A14" }} />
             <span className="text-[11px] font-heading tracking-[0.12em] uppercase"
-              style={{ color: "#3F4A50" }}>
+              style={{ color: "#1C1A14" }}>
               Comments
             </span>
             {comments.length > 0 && (
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
                   background: "rgba(44,52,56,0.8)",
-                  color: "#3F4A50",
+                  color: "#1C1A14",
                 }}>
                 {comments.length}
               </span>
@@ -1638,7 +1638,7 @@ export default function MobilePlayerLayer() {
           <ChevronRight
             size={14}
             style={{
-              color: "#2C3438",
+              color: "#111009",
               transform: commentsPanelOpen ? "rotate(90deg)" : "rotate(0deg)",
               transition: "transform 0.2s",
             }}
@@ -1650,28 +1650,28 @@ export default function MobilePlayerLayer() {
             {/* Comment list */}
             <div className="max-h-48 overflow-y-auto px-4 py-3 space-y-3">
               {comments.length === 0 ? (
-                <p className="text-[11px] text-center py-2" style={{ color: "#2C3438" }}>
+                <p className="text-[11px] text-center py-2" style={{ color: "#111009" }}>
                   No comments yet. Be the first.
                 </p>
               ) : (
                 comments.slice(0, 20).map((c: any, i: number) => (
                   <div key={c.id ?? i} className="flex gap-2">
                     <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px]"
-                      style={{ background: "#2C3438", color: "#3F4A50" }}>
+                      style={{ background: "#111009", color: "#1C1A14" }}>
                       {(c.authorName || c.userName || "?")[0]?.toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline gap-1.5">
-                        <span className="text-[10px] font-heading" style={{ color: "#AA8E64" }}>
+                        <span className="text-[10px] font-heading" style={{ color: "#6B6555" }}>
                           {c.authorName || c.userName || "Anonymous"}
                         </span>
                         {c.createdAt && (
-                          <span className="text-[9px]" style={{ color: "#2C3438" }}>
+                          <span className="text-[9px]" style={{ color: "#111009" }}>
                             {new Date(c.createdAt).toLocaleDateString()}
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "#AA8E64" }}>
+                      <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "#6B6555" }}>
                         {c.content}
                       </p>
                     </div>
@@ -1701,8 +1701,8 @@ export default function MobilePlayerLayer() {
                   disabled={!user || !commentText.trim() || commentSubmitting}
                   className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 disabled:opacity-40"
                   style={{
-                    background: "#CBB183",
-                    color: "#2C3438",
+                    background: "#C49A28",
+                    color: "#111009",
                   }}
                 >
                   <Send size={14} />
@@ -1717,11 +1717,11 @@ export default function MobilePlayerLayer() {
       {lyricsText && (
         <div className="flex-shrink-0 px-8 pb-6">
           <div className="text-[11px] font-heading tracking-[0.12em] uppercase mb-3"
-            style={{ color: "#2C3438" }}>
+            style={{ color: "#111009" }}>
             Lyrics
           </div>
           <div className="text-[13px] font-body leading-relaxed whitespace-pre-wrap"
-            style={{ color: "#3F4A50" }}>
+            style={{ color: "#1C1A14" }}>
             {lyricsText}
           </div>
         </div>
@@ -1840,7 +1840,7 @@ export default function MobilePlayerLayer() {
                 <div className="text-[11px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
               </div>
               <button type="button" onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
-                style={{ background: "linear-gradient(135deg, #CBB183, #CBB183)", color: "#2C3438" }}>
+                style={{ background: "linear-gradient(135deg, #C49A28, #C49A28)", color: "#111009" }}>
                 {state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
               </button>
               {!isNonAudio && (
@@ -1896,7 +1896,7 @@ export default function MobilePlayerLayer() {
                 style={{ color: "rgba(255,255,255,0.55)" }}
               >
                 <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "rgba(203,177,131,0.10)", backdropFilter: "blur(8px)" }}>
+                  style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
                   <DollarSign size={16} />
                 </div>
                 <span className="text-[9px] font-heading tracking-widest uppercase">Tip</span>
@@ -1907,8 +1907,8 @@ export default function MobilePlayerLayer() {
                 style={{ color: "rgba(255,255,255,0.55)" }}
               >
                 <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "rgba(203,177,131,0.10)", backdropFilter: "blur(8px)" }}>
-                  {copied ? <Check size={16} style={{ color: "#CBB183" }} /> : <Share2 size={16} />}
+                  style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
+                  {copied ? <Check size={16} style={{ color: "#C49A28" }} /> : <Share2 size={16} />}
                 </div>
                 <span className="text-[9px] font-heading tracking-widest uppercase">{copied ? "Copied" : "Share"}</span>
               </button>
@@ -1918,7 +1918,7 @@ export default function MobilePlayerLayer() {
                 style={{ color: "rgba(255,255,255,0.55)" }}
               >
                 <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "rgba(203,177,131,0.10)", backdropFilter: "blur(8px)" }}>
+                  style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
                   <ListMusic size={16} />
                 </div>
                 <span className="text-[9px] font-heading tracking-widest uppercase">Details</span>

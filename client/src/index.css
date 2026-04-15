@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — Digital Sacred Museum Design System
    Philosophy: Sacred Technology × Sovereign Witness
@@ -72,83 +74,83 @@
 
   /* ── Surface Steps (gunmetal museum walls) ── */
   --void:   #353E43;   /* Gunmetal Gray — page background, the museum floor */
-  --void-2: #2C3438;   /* Darker Gunmetal — sidebar / nav */
-  --void-3: #3F4A50;   /* Lifted Steel — cards / raised surfaces */
+  --void-2: #111009;   /* Darker Gunmetal — sidebar / nav */
+  --void-3: #1C1A14;   /* Lifted Steel — cards / raised surfaces */
   --void-4: #4A5560;   /* Elevated Steel — modals / popovers */
 
   /* ── Quartzite Stone Tones (pearl text + accents on dark metal) ── */
-  --stone-light:  #E6CDAE;   /* Pale Quartzite — primary text */
+  --stone-light:  #E8DFC8;   /* Pale Quartzite — primary text */
   --stone-mid:    #DACAAA;   /* Warm Quartzite — secondary text */
-  --stone-warm:   #CBB183;   /* Honey Quartzite — gold accent */
+  --stone-warm:   #C49A28;   /* Honey Quartzite — gold accent */
   --stone-deep:   #BD9B63;   /* Amber Quartzite — deeper accent */
-  --stone-shadow: #AA8E64;   /* Shadow Quartzite — muted */
+  --stone-shadow: #6B6555;   /* Shadow Quartzite — muted */
 
   /* ── Gold Accent (quartzite veining on gunmetal) ── */
-  --gold:       #CBB183;   /* Quartzite Gold — primary accent */
-  --gold-dim:   #AA8E64;   /* Shadow Stone — muted gold */
+  --gold:       #C49A28;   /* Quartzite Gold — primary accent */
+  --gold-dim:   #6B6555;   /* Shadow Stone — muted gold */
   --gold-glow:  #D0A15F;   /* Bright Vein — hover / active */
-  --gold-bright:#E6CDAE;   /* Pearl Stone — highlight */
-  --rose:       #CBB183;   /* Quartzite Gold (secondary) */
+  --gold-bright:#E8DFC8;   /* Pearl Stone — highlight */
+  --rose:       #C49A28;   /* Quartzite Gold (secondary) */
   --terra:      #E2725B;   /* Terra Cotta — warm destructive */
-  --teal:       #AA8E64;   /* Shadow Stone (warm accent) */
+  --teal:       #6B6555;   /* Shadow Stone (warm accent) */
   --teal-dim:   #8A7250;   /* Deeper shadow stone */
-  --violet:     #CBB183;   /* Quartzite Gold (highlight) */
-  --violet-dim: #AA8E64;   /* Shadow Stone */
+  --violet:     #C49A28;   /* Quartzite Gold (highlight) */
+  --violet-dim: #6B6555;   /* Shadow Stone */
 
   /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
-  --lnx-gold:       #CBB183;   /* Quartzite Gold */
+  --lnx-gold:       #C49A28;   /* Quartzite Gold */
   --lnx-gold-glow:  #D0A15F;   /* Bright Vein — glow states */
-  --lnx-gold-muted: #AA8E64;   /* Shadow Stone — muted */
+  --lnx-gold-muted: #6B6555;   /* Shadow Stone — muted */
   /* Green = Verified / Published / Alive */
   --lnx-green:      #4ADE80;
   --lnx-green-soft: #86EFAC;
   /* Orange = Draft / In Progress / Transition */
   --lnx-orange:     #D0A15F;   /* Bright Vein */
-  --lnx-orange-soft:#E6CDAE;   /* Pearl Stone */
+  --lnx-orange-soft:#E8DFC8;   /* Pearl Stone */
   /* Red = Destructive / Warning / Irreversible */
   --lnx-red:        #F87171;
   --lnx-red-soft:   #FCA5A5;
   /* Foundation — gunmetal backgrounds */
   --lnx-bg:         #353E43;   /* Gunmetal Gray — page bg */
-  --lnx-bg-2:       #2C3438;   /* Darker Gunmetal — nav/sidebar */
-  --lnx-bg-3:       #3F4A50;   /* Lifted Steel — cards */
-  --lnx-text:       #E6CDAE;   /* Pale Quartzite — primary text */
-  --lnx-text-muted: #AA8E64;   /* Shadow Stone — muted text */
+  --lnx-bg-2:       #111009;   /* Darker Gunmetal — nav/sidebar */
+  --lnx-bg-3:       #1C1A14;   /* Lifted Steel — cards */
+  --lnx-text:       #E8DFC8;   /* Pale Quartzite — primary text */
+  --lnx-text-muted: #6B6555;   /* Shadow Stone — muted text */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
   --background: var(--void);          /* #353E43 — Gunmetal Gray */
-  --foreground: #E6CDAE;              /* Pale Quartzite text */
+  --foreground: #E8DFC8;              /* Pale Quartzite text */
   --card: var(--void-3);              /* Lifted Steel */
-  --card-foreground: #E6CDAE;
+  --card-foreground: #E8DFC8;
   --popover: var(--void-4);           /* Elevated Steel */
-  --popover-foreground: #E6CDAE;
+  --popover-foreground: #E8DFC8;
   --primary: var(--gold);             /* Quartzite Gold */
-  --primary-foreground: #2C3438;      /* Dark gunmetal on gold button */
+  --primary-foreground: #111009;      /* Dark gunmetal on gold button */
   --secondary: var(--void-2);         /* Darker Gunmetal */
-  --secondary-foreground: #E6CDAE;
+  --secondary-foreground: #E8DFC8;
   --muted: var(--void-3);             /* Lifted Steel — muted surface */
-  --muted-foreground: #AA8E64;        /* Shadow Stone */
+  --muted-foreground: #6B6555;        /* Shadow Stone */
   --accent: var(--gold-glow);         /* Bright Vein */
-  --accent-foreground: #2C3438;
+  --accent-foreground: #111009;
   --destructive: #E2725B;             /* Terra Cotta */
-  --destructive-foreground: #E6CDAE;
+  --destructive-foreground: #E8DFC8;
   --border: rgba(203, 177, 131, 0.28); /* Quartzite Gold border */
   --input:  rgba(203, 177, 131, 0.16);
   --ring: var(--gold);
 
-  --chart-1: #CBB183;   /* Quartzite Gold */
+  --chart-1: #C49A28;   /* Quartzite Gold */
   --chart-2: #D0A15F;   /* Bright Vein */
-  --chart-3: #E6CDAE;   /* Pale Quartzite */
-  --chart-4: #AA8E64;   /* Shadow Stone */
-  --chart-5: #3F4A50;   /* Lifted Steel */
+  --chart-3: #E8DFC8;   /* Pale Quartzite */
+  --chart-4: #6B6555;   /* Shadow Stone */
+  --chart-5: #1C1A14;   /* Lifted Steel */
 
   --sidebar: var(--void-2);           /* Darker Gunmetal */
-  --sidebar-foreground: #E6CDAE;
+  --sidebar-foreground: #E8DFC8;
   --sidebar-primary: var(--gold);
-  --sidebar-primary-foreground: #2C3438;
+  --sidebar-primary-foreground: #111009;
   --sidebar-accent: var(--void-3);
-  --sidebar-accent-foreground: #E6CDAE;
+  --sidebar-accent-foreground: #E8DFC8;
   --sidebar-border: rgba(203, 177, 131, 0.22);
   --sidebar-ring: var(--gold);
 }
@@ -163,51 +165,51 @@
 /* ── DARK THEME (mirrors :root — gunmetal is already dark) ── */
 [data-theme="dark"] {
   --void:   #353E43;
-  --void-2: #2C3438;
-  --void-3: #3F4A50;
+  --void-2: #111009;
+  --void-3: #1C1A14;
   --void-4: #4A5560;
 
-  --gold:       #CBB183;
-  --gold-dim:   #AA8E64;
+  --gold:       #C49A28;
+  --gold-dim:   #6B6555;
   --gold-glow:  #D0A15F;
-  --rose:       #CBB183;
+  --rose:       #C49A28;
   --terra:      #E2725B;
-  --teal:       #AA8E64;
+  --teal:       #6B6555;
   --teal-dim:   #8A7250;
 
   --background:          var(--void);
-  --foreground:          #E6CDAE;
+  --foreground:          #E8DFC8;
   --card:                var(--void-3);
-  --card-foreground:     #E6CDAE;
+  --card-foreground:     #E8DFC8;
   --popover:             var(--void-4);
-  --popover-foreground:  #E6CDAE;
+  --popover-foreground:  #E8DFC8;
   --primary:             var(--gold);
-  --primary-foreground:  #2C3438;
+  --primary-foreground:  #111009;
   --secondary:           var(--void-2);
-  --secondary-foreground:#E6CDAE;
+  --secondary-foreground:#E8DFC8;
   --muted:               var(--void-3);
-  --muted-foreground:    #AA8E64;
+  --muted-foreground:    #6B6555;
   --accent:              var(--gold-glow);
-  --accent-foreground:   #2C3438;
+  --accent-foreground:   #111009;
   --border:              rgba(203, 177, 131, 0.28);
   --input:               rgba(203, 177, 131, 0.16);
   --ring:                var(--gold);
 
   --lnx-bg:         #353E43;
-  --lnx-bg-2:       #2C3438;
-  --lnx-bg-3:       #3F4A50;
-  --lnx-text:       #E6CDAE;
-  --lnx-text-muted: #AA8E64;
-  --lnx-gold:       #CBB183;
+  --lnx-bg-2:       #111009;
+  --lnx-bg-3:       #1C1A14;
+  --lnx-text:       #E8DFC8;
+  --lnx-text-muted: #6B6555;
+  --lnx-gold:       #C49A28;
   --lnx-gold-glow:  #D0A15F;
-  --lnx-gold-muted: #AA8E64;
+  --lnx-gold-muted: #6B6555;
 
   --sidebar:                    var(--void-2);
-  --sidebar-foreground:         #E6CDAE;
+  --sidebar-foreground:         #E8DFC8;
   --sidebar-primary:            var(--gold);
-  --sidebar-primary-foreground: #2C3438;
+  --sidebar-primary-foreground: #111009;
   --sidebar-accent:             var(--void-3);
-  --sidebar-accent-foreground:  #E6CDAE;
+  --sidebar-accent-foreground:  #E8DFC8;
   --sidebar-border:             rgba(203, 177, 131, 0.22);
   --sidebar-ring:               var(--gold);
 }
@@ -313,7 +315,7 @@
      h5/h6 — DM Sans for utility labels */
   h1, h2 {
     font-family: 'Cinzel', serif;
-    color: #E6CDAE;           /* Pale Quartzite */
+    color: #E8DFC8;           /* Pale Quartzite */
     letter-spacing: 0.06em;
     font-weight: 600;
   }
@@ -326,7 +328,7 @@
   }
   h5, h6 {
     font-family: 'DM Sans', sans-serif;
-    color: #AA8E64;           /* Shadow Stone */
+    color: #6B6555;           /* Shadow Stone */
     letter-spacing: 0.04em;
     font-weight: 600;
     text-transform: uppercase;
@@ -343,9 +345,9 @@
 
   /* Scrollbar styling — warm amber tint */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-thumb { background: rgba(203,177,131,0.40); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(196,154,40,0.40); border-radius: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-   * { scrollbar-width: thin; scrollbar-color: rgba(203,177,131,0.40) transparent; }
+   * { scrollbar-width: thin; scrollbar-color: rgba(196,154,40,0.40) transparent; }
 }
 
 /* ── Radix Dialog scroll-lock compatibility ──────────────────────────────
@@ -443,7 +445,7 @@ html body[data-scroll-locked] {
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #CBB183;             /* Quartzite Gold */
+    color: #C49A28;             /* Quartzite Gold */
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -454,7 +456,7 @@ html body[data-scroll-locked] {
     display: inline-block;
     width: 1.5rem;
     height: 1px;
-    background: linear-gradient(to right, transparent, #CBB183);
+    background: linear-gradient(to right, transparent, #C49A28);
     flex-shrink: 0;
   }
   .museum-section-title::after {
@@ -462,7 +464,7 @@ html body[data-scroll-locked] {
     display: inline-block;
     width: 1.5rem;
     height: 1px;
-    background: linear-gradient(to left, transparent, #CBB183);
+    background: linear-gradient(to left, transparent, #C49A28);
     flex-shrink: 0;
   }
 
@@ -472,7 +474,7 @@ html body[data-scroll-locked] {
     font-size: 1rem;            /* 16px */
     font-weight: 600;
     letter-spacing: 0.08em;
-    color: #E6CDAE;             /* Pale Quartzite */
+    color: #E8DFC8;             /* Pale Quartzite */
   }
 
   /* ── MUSEUM CAPTION — Cormorant Garamond for descriptions / pull quotes ── */
@@ -514,7 +516,7 @@ html body[data-scroll-locked] {
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 22px 4px rgba(203,177,131,0.20), 0 0 8px 1px rgba(203,177,131,0.28);
+    box-shadow: 0 0 22px 4px rgba(196,154,40,0.20), 0 0 8px 1px rgba(196,154,40,0.28);
     pointer-events: none;
     z-index: 0;
   }
@@ -526,7 +528,7 @@ html body[data-scroll-locked] {
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 22px 3px rgba(203,177,131,0.18), 0 0 8px 1px rgba(203,177,131,0.25);
+    box-shadow: 0 0 22px 3px rgba(196,154,40,0.18), 0 0 8px 1px rgba(196,154,40,0.25);
     pointer-events: none;
     z-index: 0;
   }
@@ -546,9 +548,9 @@ html body[data-scroll-locked] {
   /* ── Player bar ambient glow — warm amber lantern uplight ── */
   .player-glow {
     box-shadow:
-      0 -4px 32px rgba(203,177,131,0.16),
-      0 -1px 8px rgba(203,177,131,0.22),
-      0 -8px 48px rgba(203,177,131,0.08);
+      0 -4px 32px rgba(196,154,40,0.16),
+      0 -1px 8px rgba(196,154,40,0.22),
+      0 -8px 48px rgba(196,154,40,0.08);
   }
 
   /* ── Sage glow for teal-accented elements ── */
@@ -568,10 +570,10 @@ html body[data-scroll-locked] {
   /* ── WID badge ambient glow — candlelight amber halo ── */
   .wid-glow {
     box-shadow:
-      0 0 16px 4px rgba(203,177,131,0.50),
-      0 0 6px 1px rgba(203,177,131,0.35),
-      0 0 32px 8px rgba(203,177,131,0.20);
-    border-color: rgba(203,177,131,0.60) !important;
+      0 0 16px 4px rgba(196,154,40,0.50),
+      0 0 6px 1px rgba(196,154,40,0.35),
+      0 0 32px 8px rgba(196,154,40,0.20);
+    border-color: rgba(196,154,40,0.60) !important;
   }
 
   /* ── Track card ambient glow on hover — warm lantern lift ── */
@@ -579,7 +581,7 @@ html body[data-scroll-locked] {
     transition: box-shadow 0.25s ease, transform 0.2s ease;
   }
   .track-card-glow:hover {
-    box-shadow: 0 4px 28px rgba(203,177,131,0.18), 0 2px 10px rgba(203,177,131,0.16);
+    box-shadow: 0 4px 28px rgba(196,154,40,0.18), 0 2px 10px rgba(196,154,40,0.16);
     transform: translateY(-1px);
   }
 
@@ -589,7 +591,7 @@ html body[data-scroll-locked] {
      Cover art fills the top. Info panel below has a pearl-stone face.
   ────────────────────────────────────────────────────────────────── */
   .museum-card {
-    background: #3F4A50;                         /* Lifted Steel — card body */
+    background: #1C1A14;                         /* Lifted Steel — card body */
     border: 1px solid rgba(203, 177, 131, 0.32); /* Quartzite Gold border */
     border-radius: 0.75rem;
     overflow: hidden;
@@ -623,7 +625,7 @@ html body[data-scroll-locked] {
   .museum-card-info {
     background: linear-gradient(
       to bottom,
-      #3F4A50 0%,          /* matches card body at top */
+      #1C1A14 0%,          /* matches card body at top */
       #384249 60%,         /* slight deepening */
       #323C42 100%         /* darkest at bottom — grounds the card */
     );
@@ -719,17 +721,17 @@ html body[data-scroll-locked] {
     content: '';
     flex: 1;
     height: 1px;
-    background: linear-gradient(to var(--sg-dir, right), transparent, rgba(203,177,131,0.55), transparent);
+    background: linear-gradient(to var(--sg-dir, right), transparent, rgba(196,154,40,0.55), transparent);
   }
   .sg-divider::before { --sg-dir: right; }
   .sg-divider::after  { --sg-dir: left; }
   .sg-divider-pip {
     width: 6px;
     height: 6px;
-    background: #CBB183;
+    background: #C49A28;
     transform: rotate(45deg);
     flex-shrink: 0;
-    box-shadow: 0 0 6px rgba(203,177,131,0.5);
+    box-shadow: 0 0 6px rgba(196,154,40,0.5);
   }
 
   /* Wide divider with ornamental flanking lines */
@@ -750,11 +752,11 @@ html body[data-scroll-locked] {
     height: 1px;
     background: linear-gradient(to right,
       transparent 0%,
-      rgba(203,177,131,0.15) 10%,
-      rgba(203,177,131,0.45) 35%,
-      rgba(203,177,131,0.55) 50%,
-      rgba(203,177,131,0.45) 65%,
-      rgba(203,177,131,0.15) 90%,
+      rgba(196,154,40,0.15) 10%,
+      rgba(196,154,40,0.45) 35%,
+      rgba(196,154,40,0.55) 50%,
+      rgba(196,154,40,0.45) 65%,
+      rgba(196,154,40,0.15) 90%,
       transparent 100%
     );
   }
@@ -772,16 +774,16 @@ html body[data-scroll-locked] {
     content: '';
     width: 4px;
     height: 4px;
-    background: rgba(203,177,131,0.65);
+    background: rgba(196,154,40,0.65);
     transform: rotate(45deg);
     flex-shrink: 0;
   }
   .sg-divider-wide-center-dot {
     width: 5px;
     height: 5px;
-    background: #CBB183;
+    background: #C49A28;
     border-radius: 50%;
-    box-shadow: 0 0 8px rgba(203,177,131,0.6);
+    box-shadow: 0 0 8px rgba(196,154,40,0.6);
   }
 
   /* Hero frame: corner brackets on featured section containers */
@@ -801,30 +803,30 @@ html body[data-scroll-locked] {
   .sg-hero-frame::before {
     top: 8px;
     left: 8px;
-    border-top: 1.5px solid #CBB183;
-    border-left: 1.5px solid #CBB183;
+    border-top: 1.5px solid #C49A28;
+    border-left: 1.5px solid #C49A28;
   }
   .sg-hero-frame::after {
     bottom: 8px;
     right: 8px;
-    border-bottom: 1.5px solid #CBB183;
-    border-right: 1.5px solid #CBB183;
+    border-bottom: 1.5px solid #C49A28;
+    border-right: 1.5px solid #C49A28;
   }
 
   /* ── Gold banner — tracks with 50+ plays earn a luminous gold border treatment ── */
   .gold-banner {
-    border-color: rgba(203,177,131,0.60) !important;
+    border-color: rgba(196,154,40,0.60) !important;
     box-shadow:
-      0 0 0 1px rgba(203,177,131,0.28),
-      0 0 18px 2px rgba(203,177,131,0.18),
-      inset 0 0 12px 0 rgba(203,177,131,0.04);
+      0 0 0 1px rgba(196,154,40,0.28),
+      0 0 18px 2px rgba(196,154,40,0.18),
+      inset 0 0 12px 0 rgba(196,154,40,0.04);
   }
   .gold-banner:hover {
-    border-color: rgba(203,177,131,0.75) !important;
+    border-color: rgba(196,154,40,0.75) !important;
     box-shadow:
-      0 0 0 1px rgba(203,177,131,0.40),
-      0 0 28px 4px rgba(203,177,131,0.28),
-      inset 0 0 16px 0 rgba(203,177,131,0.06);
+      0 0 0 1px rgba(196,154,40,0.40),
+      0 0 28px 4px rgba(196,154,40,0.28),
+      inset 0 0 16px 0 rgba(196,154,40,0.06);
     transform: translateY(-2px);
   }
   @keyframes goldShimmer {
@@ -833,11 +835,11 @@ html body[data-scroll-locked] {
   }
   .gold-banner-ribbon {
     background: linear-gradient(90deg,
-      #AA8E64 0%,
-      #E6CDAE 40%,
-      #E6CDAE 55%,
-      #E6CDAE 70%,
-      #AA8E64 100%
+      #6B6555 0%,
+      #E8DFC8 40%,
+      #E8DFC8 55%,
+      #E8DFC8 70%,
+      #6B6555 100%
     );
     background-size: 200% auto;
     animation: goldShimmer 2.8s linear infinite;
@@ -878,7 +880,7 @@ html body[data-scroll-locked] {
   /* ── Gold divider line — candlelight amber ── */
   .gold-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(203,177,131,0.45), transparent);
+    background: linear-gradient(90deg, transparent, rgba(196,154,40,0.45), transparent);
   }
 
   /* ── Live wave animation ── */
@@ -910,8 +912,8 @@ html body[data-scroll-locked] {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #CBB183;
-    box-shadow: 0 0 10px rgba(203,177,131,0.7);
+    background: #C49A28;
+    box-shadow: 0 0 10px rgba(196,154,40,0.7);
     animation: pulseDot 1.5s ease-in-out infinite;
   }
   @keyframes pulseDot {
@@ -944,8 +946,8 @@ html body[data-scroll-locked] {
 
   /* ── Animated gold progress glow — candlelight pulse ── */
   @keyframes progressGlow {
-    0%, 100% { box-shadow: 0 0 5px 2px rgba(203,177,131,0.50); }
-    50% { box-shadow: 0 0 10px 4px rgba(203,177,131,0.85); }
+    0%, 100% { box-shadow: 0 0 5px 2px rgba(196,154,40,0.50); }
+    50% { box-shadow: 0 0 10px 4px rgba(196,154,40,0.85); }
   }
   .progress-playhead {
     animation: progressGlow 1.8s ease-in-out infinite;
@@ -969,13 +971,13 @@ html body[data-scroll-locked] {
 
   /* ── CTA button glow — lantern warmth ── */
   .btn-gold-glow {
-    box-shadow: 0 0 0 0 rgba(203,177,131,0.0);
+    box-shadow: 0 0 0 0 rgba(196,154,40,0.0);
     transition: box-shadow 0.25s ease, transform 0.15s ease;
   }
   .btn-gold-glow:hover {
     box-shadow:
-      0 0 20px 5px rgba(203,177,131,0.35),
-      0 4px 18px rgba(203,177,131,0.22);
+      0 0 20px 5px rgba(196,154,40,0.35),
+      0 4px 18px rgba(196,154,40,0.22);
     transform: translateY(-1px);
   }
   .btn-violet-glow {
@@ -985,7 +987,7 @@ html body[data-scroll-locked] {
   .btn-violet-glow:hover {
     box-shadow:
       0 0 18px 4px rgba(170,142,100,0.35),
-      0 4px 16px rgba(203,177,131,0.22);
+      0 4px 16px rgba(196,154,40,0.22);
     transform: translateY(-1px);
   }
 
@@ -1079,9 +1081,9 @@ html body[data-scroll-locked] {
 
   /* ── Genre pill — warm amber ── */
   .genre-pill {
-    border: 1px solid rgba(203,177,131,0.28);
+    border: 1px solid rgba(196,154,40,0.28);
     color: #DACAAA;
-    background: rgba(203,177,131,0.08);
+    background: rgba(196,154,40,0.08);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.6875rem;
     padding: 0.125rem 0.625rem;
@@ -1089,9 +1091,9 @@ html body[data-scroll-locked] {
     transition: border-color 0.2s, color 0.2s, background 0.2s;
   }
   .genre-pill:hover, .genre-pill.active {
-    border-color: rgba(203,177,131,0.60);
-    color: #CBB183;
-    background: rgba(203,177,131,0.14);
+    border-color: rgba(196,154,40,0.60);
+    color: #C49A28;
+    background: rgba(196,154,40,0.14);
   }
 }
 
@@ -1099,8 +1101,14 @@ html body[data-scroll-locked] {
 /* Used by PlayerBar and MobilePlayerLayer vertical volume controls          */
 
 @keyframes flamePulse {
-  0%, 100% { box-shadow: 0 0 6px 2px rgba(203,177,131,0.50), 0 0 14px 4px rgba(203,177,131,0.3); }
-  50%       { box-shadow: 0 0 12px 5px rgba(230,205,174,0.8), 0 0 24px 10px rgba(203,177,131,0.5); }
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(196, 154, 40, 0);
+    border-color: var(--ln-gold-dim);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px rgba(196, 154, 40, 0.2);
+    border-color: var(--ln-gold-hot);
+  }
 }
 
 /* ── Standard vertical slider (bottom bar + expanded bar) ── */
@@ -1130,7 +1138,7 @@ input[type="range"].volume-slider-vertical::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #E6CDAE, #CBB183 55%, #AA8E64);
+  background: radial-gradient(circle at 40% 35%, #E8DFC8, #C49A28 55%, #6B6555);
   border: 2px solid rgba(230,205,174,0.95);
   margin-left: -5px;
   cursor: pointer;
@@ -1149,10 +1157,10 @@ input[type="range"].volume-slider-vertical::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #E6CDAE, #CBB183 55%, #AA8E64);
+  background: radial-gradient(circle at 40% 35%, #E8DFC8, #C49A28 55%, #6B6555);
   border: 2px solid rgba(230,205,174,0.95);
   cursor: pointer;
-  box-shadow: 0 0 8px 3px rgba(203,177,131,0.50);
+  box-shadow: 0 0 8px 3px rgba(196,154,40,0.50);
 }
 
 /* ── Theater-mode vertical slider — taller, organ-pipe style ──────────── */
@@ -1182,7 +1190,7 @@ input[type="range"].volume-slider-theater::-webkit-slider-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #E6CDAE, #CBB183 50%, #3F4A50);
+  background: radial-gradient(circle at 38% 32%, #E8DFC8, #C49A28 50%, #1C1A14);
   border: 2px solid rgba(230,205,174,0.95);
   margin-left: -6px;
   cursor: pointer;
@@ -1201,10 +1209,10 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #E6CDAE, #CBB183 50%, #3F4A50);
+  background: radial-gradient(circle at 38% 32%, #E8DFC8, #C49A28 50%, #1C1A14);
   border: 2px solid rgba(230,205,174,0.95);
   cursor: pointer;
-  box-shadow: 0 0 10px 4px rgba(203,177,131,0.6);
+  box-shadow: 0 0 10px 4px rgba(196,154,40,0.6);
 }
 
 /* ── TrackCard visual-pending shimmer animations ── */
@@ -1230,6 +1238,7 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   overflow: hidden;
   border-radius: 0.75rem; /* rounded-xl — consistent across all cards */
   max-height: 200px;     /* unified cap — matches pan-row and grid cards site-wide */
+  border: 1px solid rgba(196, 154, 40, 0.15);
 }
 
 /* Bottom gradient overlay: always present, cinematic fade */
@@ -1239,9 +1248,9 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   pointer-events: none;
   background: linear-gradient(
     to bottom,
-    transparent 40%,
-    rgba(0, 0, 0, 0.55) 75%,
-    rgba(0, 0, 0, 0.82) 100%
+    transparent 0%,
+    rgba(17, 16, 9, 0.6) 50%,
+    rgba(10, 8, 6, 0.95) 100%
   );
 }
 
@@ -1272,4 +1281,78 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   --ct-comic-primary:    #F87171;
   --ct-comic-dim:        #DC2626;
   --ct-comic-glow:       rgba(248,113,113,0.30);
+
+  /* ── Living Nexus Identity Palette ── */
+  --ln-void:          #0A0806;   /* deepest background */
+  --ln-coal:          #111009;   /* card/surface background */
+  --ln-iron:          #1C1A14;   /* secondary surface, hover bg */
+  --ln-ash:           #2E2B22;   /* borders, dividers */
+  --ln-steel:         #3D3A2E;   /* disabled states, muted borders */
+  --ln-smoke:         #6B6555;   /* secondary text, labels */
+  --ln-bone:          #C9C0A8;   /* primary body text */
+  --ln-parchment:     #E8DFC8;   /* headings, high-contrast text */
+
+  /* ── Gold Hierarchy (4 tiers — use intentionally) ── */
+  --ln-gold-dim:      #8B6914;   /* subdued accents, eyebrows, footnotes */
+  --ln-gold:          #C49A28;   /* primary CTA background, badges */
+  --ln-gold-hot:      #E8B840;   /* hero text accent, active states */
+  --ln-gold-flame:    #F5CC5A;   /* hover on gold elements only */
+
+  /* ── Semantic Accent Colors ── */
+  --ln-ember:         #C4440A;   /* warnings, live indicators, error states */
+  --ln-blood:         #8B1A0A;   /* deep error, destructive actions */
+  --ln-witness:       #2A6B8A;   /* WID supports panel, info states */
+  --ln-witness-bright:#4A9DBF;   /* WID icon, active witness indicators */
+  --ln-seal:          #1A4A2E;   /* WID proves panel, verified states */
+  --ln-seal-bright:   #3A8A56;   /* checkmark icons, confirmed badges */
+
+  /* ── Typography ── */
+  --font-display:     'Cinzel', 'Georgia', serif;
+  --font-body:        'DM Sans', system-ui, sans-serif;
+  --font-mono:        'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ── Base Typography (redesign v2.31) ── */
+body {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-display,
+.heading-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+
+/* Eyebrow / overline labels */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;       /* 11px */
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ln-gold-dim);
+}
+
+/* ── Tailwind v4 theme registration for LN identity tokens ── */
+@theme {
+  --color-void:          #0A0806;
+  --color-coal:          #111009;
+  --color-iron:          #1C1A14;
+  --color-ash:           #2E2B22;
+  --color-steel:         #3D3A2E;
+  --color-smoke:         #6B6555;
+  --color-bone:          #C9C0A8;
+  --color-parchment:     #E8DFC8;
+
+  --color-gold-dim:      #8B6914;
+  --color-gold:          #C49A28;
+  --color-gold-hot:      #E8B840;
+  --color-gold-flame:    #F5CC5A;
+
+  --color-ember:         #C4440A;
+  --color-witness:       #2A6B8A;
+  --color-witness-bright:#4A9DBF;
+  --color-seal:          #1A4A2E;
+  --color-seal-bright:   #3A8A56;
 }

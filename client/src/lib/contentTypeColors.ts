@@ -38,42 +38,42 @@ export interface ContentTypeColors {
 
 const COLORS: Record<string, ContentTypeColors> = {
   audio: {
-    primary:    "#A78BFA",
-    dim:        "#7C3AED",
-    glow:       "rgba(167,139,250,0.35)",
-    text:       "#C4B5FD",
-    chipBg:     "rgba(124,58,237,0.18)",
-    chipBorder: "rgba(167,139,250,0.45)",
+    primary:    "#C49A28",   // --ln-gold — the signature LN color for music
+    dim:        "#8B6914",   // --ln-gold-dim
+    glow:       "rgba(196,154,40,0.25)",
+    text:       "#E8B840",   // --ln-gold-hot
+    chipBg:     "rgba(196,154,40,0.08)",
+    chipBorder: "rgba(196,154,40,0.20)",
     label:      "Music",
     icon:       "🎵",
   },
   lyrics: {
-    primary:    "#F5C451",
-    dim:        "#D0A15F",
-    glow:       "rgba(245,196,81,0.35)",
-    text:       "#F5E6C8",
-    chipBg:     "rgba(208,161,95,0.18)",
-    chipBorder: "rgba(245,196,81,0.45)",
+    primary:    "#4A9DBF",   // --ln-witness-bright — intellectual, textual
+    dim:        "#2A6B8A",   // --ln-witness
+    glow:       "rgba(74,157,191,0.25)",
+    text:       "#7BBFD8",
+    chipBg:     "rgba(74,157,191,0.08)",
+    chipBorder: "rgba(74,157,191,0.20)",
     label:      "Lyrics",
     icon:       "✍️",
   },
   manuscript: {
-    primary:    "#4ADE80",
-    dim:        "#16A34A",
-    glow:       "rgba(74,222,128,0.30)",
-    text:       "#86EFAC",
-    chipBg:     "rgba(22,163,74,0.18)",
-    chipBorder: "rgba(74,222,128,0.45)",
+    primary:    "#C9C0A8",   // --ln-bone — literal paper/document color
+    dim:        "#6B6555",   // --ln-smoke
+    glow:       "rgba(201,192,168,0.20)",
+    text:       "#E8DFC8",   // --ln-parchment
+    chipBg:     "rgba(201,192,168,0.08)",
+    chipBorder: "rgba(201,192,168,0.20)",
     label:      "Manuscript",
     icon:       "📖",
   },
   comic: {
-    primary:    "#F87171",
-    dim:        "#DC2626",
-    glow:       "rgba(248,113,113,0.30)",
-    text:       "#FCA5A5",
-    chipBg:     "rgba(220,38,38,0.18)",
-    chipBorder: "rgba(248,113,113,0.45)",
+    primary:    "#C4440A",   // --ln-ember — energy, visual pop
+    dim:        "#8B1A0A",   // --ln-blood
+    glow:       "rgba(196,68,10,0.25)",
+    text:       "#E06030",
+    chipBg:     "rgba(196,68,10,0.08)",
+    chipBorder: "rgba(196,68,10,0.20)",
     label:      "Comic / Novel",
     icon:       "🎨",
   },
