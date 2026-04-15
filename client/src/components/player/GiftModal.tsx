@@ -131,7 +131,7 @@ export default function GiftModal({
           className="fixed inset-0 pointer-events-none flex items-center justify-center z-[10001]"
           style={{ animation: "giftBurst 1.2s ease-out forwards" }}
         >
-          <span style={{ fontSize: "80px", filter: "drop-shadow(0 0 24px rgba(203,177,131,0.75))" }}>
+          <span style={{ fontSize: "80px", filter: "drop-shadow(0 0 24px rgba(196,154,40,0.64))" }}>
             {burstEmoji}
           </span>
         </div>
@@ -140,23 +140,23 @@ export default function GiftModal({
       <div
         className="w-full max-w-sm mx-4 mb-6 rounded-3xl overflow-hidden"
         style={{
-          background: "#2C3438",
-          border: "1px solid rgba(203,177,131,0.2)",
-          boxShadow: "0 0 60px rgba(203,177,131,0.1), 0 24px 64px rgba(0,0,0,0.80)",
+          background: "var(--ln-coal)",
+          border: "1px solid rgba(196,154,40,0.17)",
+          boxShadow: "0 0 60px rgba(196,154,40,0.09), 0 24px 64px rgba(0,0,0,0.80)",
         }}
       >
         {/* Header */}
         <div
           className="px-5 pt-5 pb-4"
           style={{
-            background: "linear-gradient(180deg, #2C3438 0%, transparent 100%)",
+            background: "linear-gradient(180deg, #111009 0%, transparent 100%)",
           }}
         >
           <div className="flex items-start justify-between">
             <div>
               <div
                 className="text-[11px] font-bold tracking-[0.2em] uppercase mb-1"
-                style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}
+                style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
               >
                 Send a Gift
               </div>
@@ -165,7 +165,7 @@ export default function GiftModal({
             <button
               onClick={onClose}
               className="p-2 rounded-xl transition-all active:scale-90"
-              style={{ color: "#3F4A50" }}
+              style={{ color: "var(--ln-iron)" }}
             >
               <X size={18} />
             </button>
@@ -175,15 +175,15 @@ export default function GiftModal({
           {tipsEnabled && (
             <div
               className="flex mt-4 rounded-xl p-1 gap-1"
-              style={{ background: "#2C3438" }}
+              style={{ background: "var(--ln-coal)" }}
             >
               <button
                 onClick={() => setTab("appreciate")}
                 className="flex-1 py-2 rounded-lg text-[12px] font-heading tracking-wide transition-all"
                 style={{
-                  background: tab === "appreciate" ? "rgba(203,177,131,0.12)" : "transparent",
-                  color: tab === "appreciate" ? "#CBB183" : "#AA8E64",
-                  border: tab === "appreciate" ? "1px solid rgba(203,177,131,0.22)" : "1px solid transparent",
+                  background: tab === "appreciate" ? "rgba(196,154,40,0.08)" : "transparent",
+                  color: tab === "appreciate" ? "var(--ln-gold)" : "var(--ln-smoke)",
+                  border: tab === "appreciate" ? "1px solid rgba(196,154,40,0.2)" : "1px solid transparent",
                 }}
               >
                 ✨ Appreciate
@@ -192,9 +192,9 @@ export default function GiftModal({
                 onClick={() => setTab("tip")}
                 className="flex-1 py-2 rounded-lg text-[12px] font-heading tracking-wide transition-all"
                 style={{
-                  background: tab === "tip" ? "rgba(203,177,131,0.12)" : "transparent",
-                  color: tab === "tip" ? "#CBB183" : "#AA8E64",
-                  border: tab === "tip" ? "1px solid rgba(203,177,131,0.22)" : "1px solid transparent",
+                  background: tab === "tip" ? "rgba(196,154,40,0.08)" : "transparent",
+                  color: tab === "tip" ? "var(--ln-gold)" : "var(--ln-smoke)",
+                  border: tab === "tip" ? "1px solid rgba(196,154,40,0.2)" : "1px solid transparent",
                 }}
               >
                 💸 Tip
@@ -225,27 +225,27 @@ export default function GiftModal({
                     className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all active:scale-95"
                     style={{
                       background: isActive
-                        ? "rgba(203,177,131,0.10)"
-                        : "#2C3438",
+                        ? "rgba(196,154,40,0.08)"
+                        : "var(--ln-coal)",
                       border: isActive
-                        ? "1px solid rgba(203,177,131,0.32)"
-                        : "1px solid #2C3438",
+                        ? "1px solid rgba(196,154,40,0.3)"
+                        : "1px solid #111009",
                       boxShadow: isActive
-                        ? "0 0 16px rgba(203,177,131,0.1)"
+                        ? "0 0 16px rgba(196,154,40,0.09)"
                         : "none",
                     }}
                   >
                     <span style={{ fontSize: "28px", lineHeight: 1 }}>{emoji}</span>
                     <span
                       className="text-[10px] font-heading tracking-wide"
-                      style={{ color: isActive ? "#CBB183" : "#3F4A50" }}
+                      style={{ color: isActive ? "var(--ln-gold)" : "var(--ln-iron)" }}
                     >
                       {label}
                     </span>
                     {count > 0 && (
                       <span
                         className="text-[9px] font-mono"
-                        style={{ color: "#3F4A50" }}
+                        style={{ color: "var(--ln-iron)" }}
                       >
                         {count}
                       </span>
@@ -256,7 +256,7 @@ export default function GiftModal({
             </div>
 
             {!user && (
-              <p className="text-[11px] text-center" style={{ color: "#3F4A50" }}>
+              <p className="text-[11px] text-center" style={{ color: "var(--ln-iron)" }}>
                 Sign in to send appreciation
               </p>
             )}
@@ -275,12 +275,12 @@ export default function GiftModal({
                   className="px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95"
                   style={{
                     background: !useCustom && selectedCents === cents
-                      ? "#CBB183"
-                      : "#2C3438",
+                      ? "var(--ln-gold)"
+                      : "var(--ln-coal)",
                     color: !useCustom && selectedCents === cents
-                      ? "#2C3438"
-                      : "#AA8E64",
-                    border: `1px solid ${!useCustom && selectedCents === cents ? "#CBB183" : "#2C3438"}`,
+                      ? "var(--ln-coal)"
+                      : "var(--ln-smoke)",
+                    border: `1px solid ${!useCustom && selectedCents === cents ? "var(--ln-gold)" : "var(--ln-coal)"}`,
                   }}
                 >
                   ${(cents / 100).toFixed(0)}
@@ -290,9 +290,9 @@ export default function GiftModal({
                 onClick={() => setUseCustom(true)}
                 className="px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95"
                 style={{
-                  background: useCustom ? "#CBB183" : "#2C3438",
-                  color: useCustom ? "#2C3438" : "#AA8E64",
-                  border: `1px solid ${useCustom ? "#CBB183" : "#2C3438"}`,
+                  background: useCustom ? "var(--ln-gold)" : "var(--ln-coal)",
+                  color: useCustom ? "var(--ln-coal)" : "var(--ln-smoke)",
+                  border: `1px solid ${useCustom ? "var(--ln-gold)" : "var(--ln-coal)"}`,
                 }}
               >
                 Custom
@@ -302,7 +302,7 @@ export default function GiftModal({
             {useCustom && (
               <div
                 className="flex items-center gap-3 px-4 py-3 rounded-xl"
-                style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.18)" }}
+                style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}
               >
                 <span className="text-white/50 text-sm font-mono">$</span>
                 <input
@@ -327,11 +327,11 @@ export default function GiftModal({
                 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98]"
               style={{
                 background: amountCents >= 100
-                  ? "linear-gradient(135deg, #CBB183, #CBB183)"
-                  : "#2C3438",
-                color: amountCents >= 100 ? "#2C3438" : "#3F4A50",
+                  ? "linear-gradient(135deg, #C49A28, #C49A28)"
+                  : "var(--ln-coal)",
+                color: amountCents >= 100 ? "var(--ln-coal)" : "var(--ln-iron)",
                 fontFamily: "'Cinzel', serif",
-                boxShadow: amountCents >= 100 ? "0 4px 20px rgba(203,177,131,0.3)" : "none",
+                boxShadow: amountCents >= 100 ? "0 4px 20px rgba(196,154,40,0.26)" : "none",
               }}
             >
               {tipMutation.isPending ? (
@@ -344,7 +344,7 @@ export default function GiftModal({
               )}
             </button>
 
-            <p className="text-[10px] text-center" style={{ color: "#2C3438" }}>
+            <p className="text-[10px] text-center" style={{ color: "var(--ln-coal)" }}>
               Goes directly to the creator. Living Nexus takes a small platform fee.
             </p>
           </div>

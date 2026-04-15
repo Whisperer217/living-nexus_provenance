@@ -45,7 +45,7 @@ function GenrePillRow({ genre }: { genre: string | undefined | null }) {
           className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
             background: "rgba(44,52,56,0.8)",
-            color: "#E6CDAE",
+            color: "var(--ln-parchment)",
             border: "1px solid rgba(44,52,56,0.6)",
           }}
         >
@@ -58,7 +58,7 @@ function GenrePillRow({ genre }: { genre: string | undefined | null }) {
           className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
             background: "rgba(44,52,56,0.6)",
-            color: "#3F4A50",
+            color: "var(--ln-iron)",
             border: "1px solid rgba(44,52,56,0.4)",
           }}
         >
@@ -122,16 +122,16 @@ export default function PlayerTipModal({
       <div
         className="w-full max-w-sm mx-4 mb-4 md:mb-0 rounded-2xl p-5 flex flex-col gap-4"
         style={{
-          background: "#2C3438",
-          border: "1px solid rgba(203,177,131,0.22)",
-          boxShadow: "0 0 40px rgba(203,177,131,0.10), 0 8px 48px rgba(0,0,0,0.70)",
+          background: "var(--ln-coal)",
+          border: "1px solid rgba(196,154,40,0.2)",
+          boxShadow: "0 0 40px rgba(196,154,40,0.08), 0 8px 48px rgba(0,0,0,0.70)",
         }}
       >
         {/* Header */}
         <div className="flex items-center justify-between">
           <p
             className="text-[11px] font-bold tracking-widest uppercase"
-            style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}
+            style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
           >
             Send a Gift
           </p>
@@ -146,7 +146,7 @@ export default function PlayerTipModal({
         {/* Track info block — cover + title + artist + genre pills */}
         <div
           className="flex items-start gap-3 rounded-xl p-3"
-          style={{ background: "#2C3438" }}
+          style={{ background: "var(--ln-coal)" }}
         >
           {/* Cover thumbnail */}
           <div
@@ -167,11 +167,11 @@ export default function PlayerTipModal({
           {/* Title + artist + genre */}
           <div className="min-w-0 flex-1">
             {songTitle && (
-              <div className="text-[13px] font-semibold font-body truncate" style={{ color: "#E6CDAE" }}>
+              <div className="text-[13px] font-semibold font-body truncate" style={{ color: "var(--ln-parchment)" }}>
                 {songTitle}
               </div>
             )}
-            <div className={`font-body truncate ${songTitle ? "text-[11px] mt-0.5" : "text-[13px]"}`} style={{ color: "#AA8E64" }}>
+            <div className={`font-body truncate ${songTitle ? "text-[11px] mt-0.5" : "text-[13px]"}`} style={{ color: "var(--ln-smoke)" }}>
               {artistName}
             </div>
             <GenrePillRow genre={genre} />
@@ -182,7 +182,7 @@ export default function PlayerTipModal({
           /* Gifts not enabled */
           <div
             className="rounded-xl p-4 text-center"
-            style={{ background: "#2C3438", border: "1px solid #2C3438" }}
+            style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}
           >
             <DollarSign size={24} className="mx-auto mb-2 opacity-30 text-white" />
             <p className="text-sm text-white/40">Gifts not enabled yet</p>
@@ -201,12 +201,12 @@ export default function PlayerTipModal({
                   className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                   style={{
                     background: !useCustom && selectedCents === cents
-                      ? "#CBB183"
-                      : "#2C3438",
+                      ? "var(--ln-gold)"
+                      : "var(--ln-coal)",
                     color: !useCustom && selectedCents === cents
-                      ? "#2C3438"
-                      : "#AA8E64",
-                    border: `1px solid ${!useCustom && selectedCents === cents ? "#CBB183" : "#2C3438"}`,
+                      ? "var(--ln-coal)"
+                      : "var(--ln-smoke)",
+                    border: `1px solid ${!useCustom && selectedCents === cents ? "var(--ln-gold)" : "var(--ln-coal)"}`,
                   }}
                 >
                   ${(cents / 100).toFixed(0)}
@@ -216,9 +216,9 @@ export default function PlayerTipModal({
                 onClick={() => setUseCustom(true)}
                 className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                 style={{
-                  background: useCustom ? "#CBB183" : "#2C3438",
-                  color: useCustom ? "#2C3438" : "#AA8E64",
-                  border: `1px solid ${useCustom ? "#CBB183" : "#2C3438"}`,
+                  background: useCustom ? "var(--ln-gold)" : "var(--ln-coal)",
+                  color: useCustom ? "var(--ln-coal)" : "var(--ln-smoke)",
+                  border: `1px solid ${useCustom ? "var(--ln-gold)" : "var(--ln-coal)"}`,
                 }}
               >
                 Custom
@@ -238,7 +238,7 @@ export default function PlayerTipModal({
                   value={customInput}
                   onChange={(e) => setCustomInput(e.target.value)}
                   className="flex-1 bg-transparent border-b text-white text-sm py-1 outline-none"
-                  style={{ borderColor: "rgba(203,177,131,0.35)" }}
+                  style={{ borderColor: "rgba(196,154,40,0.3)" }}
                   autoFocus
                 />
               </div>
@@ -251,8 +251,8 @@ export default function PlayerTipModal({
               className="w-full py-3 rounded-xl text-sm font-bold tracking-wide transition-all
                 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
-                background: "#CBB183",
-                color: "#2C3438",
+                background: "var(--ln-gold)",
+                color: "var(--ln-coal)",
                 fontFamily: "'Cinzel', serif",
               }}
             >

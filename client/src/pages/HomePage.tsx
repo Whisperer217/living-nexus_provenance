@@ -375,7 +375,7 @@ function NewVoicesCarousel() {
     <div className="px-6 pb-6">
       <div className="flex items-center justify-between mb-3">
         <h2 className="museum-section-title">
-          <Sparkles size={13} className="inline mr-1.5" style={{ color: "#4ADE80" }} />
+          <Sparkles size={13} className="inline mr-1.5" style={{ color: "var(--ln-seal-bright)" }} />
           New Voices
         </h2>
         <Link href="/explore">
@@ -395,7 +395,7 @@ function NewVoicesCarousel() {
               style={{
                 width: "88px",
                 background: "rgba(17,16,9,0.7)",
-                border: "1px solid rgba(74,222,128,0.15)",
+                border: "1px solid rgba(58,138,86,0.15)",
               }}
             >
               <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
@@ -404,13 +404,13 @@ function NewVoicesCarousel() {
                   <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[16px] font-bold"
-                    style={{ background: "rgba(74,222,128,0.15)", color: "#4ADE80" }}>
+                    style={{ background: "rgba(58,138,86,0.15)", color: "var(--ln-seal-bright)" }}>
                     {(creator.artistHandle || creator.name || "?")[0].toUpperCase()}
                   </div>
                 )}
                 {/* NEW badge */}
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: "#4ADE80", border: "1.5px solid #111009" }}>
+                  style={{ background: "var(--ln-seal-bright)", border: "1.5px solid #111009" }}>
                   <Sparkles size={8} style={{ color: "#111009" }} />
                 </div>
               </div>

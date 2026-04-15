@@ -87,7 +87,7 @@ export default function FounderEraPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#2C3438] text-white">
+    <div className="min-h-screen bg-[#111009] text-white">
       {/* Back nav */}
       <div className="max-w-lg mx-auto px-4 pt-6">
         <div className="flex items-center justify-between mb-8">
@@ -110,7 +110,7 @@ export default function FounderEraPage() {
       <div className="max-w-lg mx-auto px-4 pb-16">
         {/* Success state */}
         {giftSuccess && (
-          <div className="mb-8 bg-[#c9a84c]/10 border border-[#c9a84c]/40 rounded-2xl p-6 text-center">
+          <div className="mb-8 bg-[#c9a84c]/10 border border-[#c9a84c]/40 p-6 text-center">
             <div className="text-3xl mb-3">✦</div>
             <h2 className="text-[#c9a84c] font-bold text-xl mb-2">Welcome to the founding generation.</h2>
             <p className="text-gray-400 text-sm">
@@ -166,7 +166,7 @@ export default function FounderEraPage() {
         )}
 
         {/* What you get */}
-        <div className="bg-white/5 rounded-2xl p-6 mb-8">
+        <div className="bg-white/5 p-6 mb-8">
           <p className="text-white font-bold text-sm mb-4">What founding supporters receive:</p>
           <div className="space-y-4">
             {TIERS.map((tier) => (

@@ -40,8 +40,8 @@ type ExploreMode = "infinite" | "randomize" | "trending" | "new";
 type ContentType = "audio" | "lyrics" | "manuscript" | "comic" | "novel";
 // "novel" is a UI alias — the server maps it to contentType=manuscript
 const CONTENT_TABS: { id: ContentType; label: string; icon: string; color: string }[] = [
-  { id: "audio",  label: "Music",           icon: "🎵", color: "#CBB183" },
-  { id: "lyrics", label: "Lyrics",          icon: "✍️", color: "#CBB183" },
+  { id: "audio",  label: "Music",           icon: "🎵", color: "var(--ln-gold)" },
+  { id: "lyrics", label: "Lyrics",          icon: "✍️", color: "var(--ln-gold)" },
   { id: "novel",  label: "Comics & Novels", icon: "📚", color: "#A78BFA" },
 ];
 
@@ -83,7 +83,7 @@ function ExploreCard({
       className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
         museum-card parchment-grain
         ${isActive && !isNonAudio
-          ? "border-[#E8A830]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.5),0_0_24px_rgba(203,177,131,0.12)]"
+          ? "border-[#E8A830]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.5),0_0_24px_rgba(196,154,40,0.08)]"
           : isHot
             ? "gold-banner"
             : ""
@@ -114,7 +114,7 @@ function ExploreCard({
           transition-all duration-200 z-10
           ${isNonAudio
             ? "opacity-0 group-hover:opacity-100 bg-[#4ADE80]"
-            : isActive ? "opacity-100 bg-[#3F4A50]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
+            : isActive ? "opacity-100 bg-[#1C1A14]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
         >
           {isNonAudio
             ? <ExternalLink size={14} className="text-white" />
@@ -127,13 +127,13 @@ function ExploreCard({
         {isHot && (
           <div className="absolute top-0 left-0 z-20 flex items-center gap-0.5 px-2 py-0.5"
             style={{
-              background: "linear-gradient(90deg, rgba(122,90,30,0.92), rgba(203,177,131,0.88))",
+              background: "linear-gradient(90deg, rgba(122,90,30,0.92), rgba(196,154,40,0.75))",
               borderBottomRightRadius: "8px",
               borderTopLeftRadius: "inherit",
             }}
           >
-            <Crown size={9} style={{ color: "#2C3438" }} />
-            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#2C3438" }}>
+            <Crown size={9} style={{ color: "var(--ln-coal)" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "var(--ln-coal)" }}>
               {(song.playCount ?? 0) >= 1000
                 ? `${Math.floor((song.playCount ?? 0) / 1000)}K PLAYS`
                 : `${song.playCount} PLAYS`}
@@ -147,7 +147,7 @@ function ExploreCard({
             href={`/verify/${song.witnessId}`}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
             className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow wid-origin-glow transition-opacity opacity-90 hover:opacity-100"
-            style={{ background: "rgba(0,0,0,0.72)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.55)" }}
+            style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
             title={`Verified Witness ID: ${song.witnessId}`}
           >
             <Shield size={8} /><span>WID</span>
@@ -167,7 +167,7 @@ function ExploreCard({
         <Link
           href={isNonAudio ? `/book/${song.id}` : `/song/${song.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#CBB183] transition-colors cursor-pointer"
+          className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#C49A28] transition-colors cursor-pointer"
           title={`Open ${song.title}`}
         >
           {song.title}
@@ -183,7 +183,7 @@ function ExploreCard({
             <Link
               href={`/creator/${creator.id}`}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="truncate hover:text-[#CBB183] transition-colors cursor-pointer"
+              className="truncate hover:text-[#C49A28] transition-colors cursor-pointer"
               title={`View ${artistName}'s profile`}
             >
               {artistName}
@@ -217,7 +217,7 @@ function ExploreCard({
             {(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length > 3 && (
               <span
                 className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
-                style={{ background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }}
+                style={{ background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }}
               >
                 +{(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length - 3}
               </span>
@@ -242,7 +242,7 @@ function ExploreCard({
             {/* Gift */}
             <button
               onClick={e => { e.stopPropagation(); onTip(item, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
-               className="p-1 text-white/70 hover:text-[#CBB183] transition-colors"
+               className="p-1 text-white/70 hover:text-[#C49A28] transition-colors"
                title="Send a gift"
             >
               <DollarSign size={12} />
@@ -268,7 +268,7 @@ function ExploreCard({
                 });
                 toast.success(`"${song.title}" plays next`);
               }}
-              className="p-1 text-white/70 hover:text-[#CBB183] transition-colors"
+              className="p-1 text-white/70 hover:text-[#C49A28] transition-colors"
               title="Play next"
             >
               <SkipForward size={12} />
@@ -276,7 +276,7 @@ function ExploreCard({
             {/* Add to list */}
             <button
               onClick={e => { e.stopPropagation(); setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
-              className="p-1 text-white/70 hover:text-[#CBB183] transition-colors"
+              className="p-1 text-white/70 hover:text-[#C49A28] transition-colors"
               title="Add to my list"
             >
               <ListPlus size={12} />
@@ -650,9 +650,9 @@ export default function ExplorePage() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.82) 0%, rgba(30,16,40,0.45) 45%, transparent 100%)" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(53,62,67,0.85) 0%, rgba(53,62,67,0.15) 40%, transparent 100%)" }} />
         <div className="absolute bottom-0 left-0 p-6">
-          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
-          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Explore the Cosmos</h1>
-          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#DACAAA" }}>Music, lyrics, manuscripts, comics — every witnessed work, at your fingertips</p>
+          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
+          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Explore the Cosmos</h1>
+          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-parchment)" }}>Music, lyrics, manuscripts, comics — every witnessed work, at your fingertips</p>
         </div>
       </div>
 
@@ -666,22 +666,22 @@ export default function ExplorePage() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl text-[13.5px] font-body text-white/80
-              bg-[#2C3438] border border-white/[0.08] outline-none
+              bg-[#111009] border border-white/[0.08] outline-none
               focus:border-[#A78BFA]/50 transition-colors placeholder:text-white/60
               max-w-[480px]"
           />
         </div>
 
         {/* Content-type tab bar */}
-        <div className="flex gap-1 mb-5 p-1 rounded-xl" style={{ background: "#2C3438", border: "1px solid rgba(44,52,56,0.4)" }}>
+        <div className="flex gap-1 mb-5 p-1 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px solid rgba(44,52,56,0.4)" }}>
           {CONTENT_TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => { setContentType(tab.id); setCache(CACHE_KEYS.EXPLORE_TAB, tab.id, TTL.UI_STATE); }}
               className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] font-heading font-bold tracking-wide transition-all"
               style={contentType === tab.id
-                ? { background: "#2C3438", color: tab.color, boxShadow: `0 0 12px ${tab.color}33` }
-                : { color: "#3F4A50" }
+                ? { background: "var(--ln-coal)", color: tab.color, boxShadow: `0 0 12px ${tab.color}33` }
+                : { color: "var(--ln-iron)" }
               }
             >
               <span className="text-[13px] leading-none">{tab.icon}</span>
@@ -699,8 +699,8 @@ export default function ExplorePage() {
                 onClick={() => setActiveGenre(g.label)}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
                   ${activeGenre === g.label
-                    ? "border-[#CBB183]/60 bg-[#3F4A50]/[0.10]"
-                    : "border-white/[0.12] bg-[#2C3438] hover:border-[#CBB183]/40 hover:bg-white/[0.06]"
+                    ? "border-[#C49A28]/60 bg-[#1C1A14]/[0.10]"
+                    : "border-white/[0.12] bg-[#111009] hover:border-[#C49A28]/40 hover:bg-white/[0.06]"
                   }`}
               >
                 {g.icon ? (
@@ -714,7 +714,7 @@ export default function ExplorePage() {
                   </div>
                 ) : (
                   <div className="w-9 h-9 flex items-center justify-center rounded-lg"
-                    style={{ background: "linear-gradient(135deg, #CBB183, #7C3AED)" }}>
+                    style={{ background: "linear-gradient(135deg, #C49A28, #7C3AED)" }}>
                     <span className="text-[10px] font-heading font-bold text-black">ALL</span>
                   </div>
                 )}
@@ -734,8 +734,8 @@ export default function ExplorePage() {
           <div className="mb-7">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Rocket size={15} style={{ color: "#CBB183" }} />
-                <h2 className="font-heading text-[13px] tracking-widest uppercase" style={{ color: "#CBB183" }}>Featured Projects</h2>
+                <Rocket size={15} style={{ color: "var(--ln-gold)" }} />
+                <h2 className="font-heading text-[13px] tracking-widest uppercase" style={{ color: "var(--ln-gold)" }}>Featured Projects</h2>
               </div>
               <Link href="/projects" className="text-[11px] font-body text-white/40 hover:text-white/70 transition-colors">
                 View all →
@@ -748,13 +748,13 @@ export default function ExplorePage() {
         {/* Mode toggle + controls */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           {/* Mode pills */}
-          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "#2C3438", border: "1px solid rgba(44,52,56,0.4)" }}>
+          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px solid rgba(44,52,56,0.4)" }}>
             <button
               onClick={() => setMode("infinite")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
                 mode === "infinite" ? "" : "text-white/40 hover:text-white/70"
               }`}
-              style={mode === "infinite" ? { background: "#2C3438", color: "#CBB183" } : {}}
+              style={mode === "infinite" ? { background: "var(--ln-coal)", color: "var(--ln-gold)" } : {}}
             >
               <Infinity size={12} />
               Infinite
@@ -764,7 +764,7 @@ export default function ExplorePage() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
                 mode === "randomize" ? "" : "text-white/40 hover:text-white/70"
               }`}
-              style={mode === "randomize" ? { background: "#2C3438", color: "#CBB183" } : {}}
+              style={mode === "randomize" ? { background: "var(--ln-coal)", color: "var(--ln-gold)" } : {}}
             >
               <Shuffle size={12} />
               Randomize
@@ -774,7 +774,7 @@ export default function ExplorePage() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
                 mode === "trending" ? "" : "text-white/40 hover:text-white/70"
               }`}
-              style={mode === "trending" ? { background: "#2C3438", color: "#fb923c" } : {}}
+              style={mode === "trending" ? { background: "var(--ln-coal)", color: "#fb923c" } : {}}
             >
               <TrendingUp size={12} />
               Trending
@@ -784,7 +784,7 @@ export default function ExplorePage() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
                 mode === "new" ? "" : "text-white/40 hover:text-white/70"
               }`}
-              style={mode === "new" ? { background: "#2C3438", color: "#4ADE80" } : {}}
+              style={mode === "new" ? { background: "var(--ln-coal)", color: "var(--ln-seal-bright)" } : {}}
             >
               <Sparkles size={12} />
               New
@@ -802,9 +802,9 @@ export default function ExplorePage() {
                 disabled={isShuffling || randomLoading}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95 disabled:opacity-60"
                 style={{
-                  background: "rgba(203,177,131,0.12)",
-                  border: "1px solid rgba(203,177,131,0.35)",
-                  color: "#CBB183",
+                  background: "rgba(196,154,40,0.08)",
+                  border: "1px solid rgba(196,154,40,0.3)",
+                  color: "var(--ln-gold)",
                 }}
               >
                 <Shuffle size={14} className={isShuffling ? "animate-spin" : ""} style={{ animationDuration: "0.4s" }} />
@@ -825,7 +825,7 @@ export default function ExplorePage() {
                 </div>
                 <div className="museum-pan-row -mx-6 px-6">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="flex-shrink-0 rounded-xl overflow-hidden border border-white/[0.06] bg-[#2C3438] animate-pulse" style={{ width: CARD_PAN_W }}>
+                    <div key={i} className="flex-shrink-0 rounded-xl overflow-hidden border border-white/[0.06] bg-[#111009] animate-pulse" style={{ width: CARD_PAN_W }}>
                       <div className="bg-white/[0.04]" style={{ height: "200px" }} />
                       <div className="p-3 space-y-2">
                         <div className="h-3 bg-white/[0.06] rounded w-3/4" />
@@ -879,13 +879,13 @@ export default function ExplorePage() {
                       {creator?.id ? (
                         <Link
                           href={`/creator/${creator.id}#works`}
-                          className="font-heading text-[13px] tracking-wide hover:text-[#CBB183] transition-colors"
-                          style={{ color: "#E6CDAE" }}
+                          className="font-heading text-[13px] tracking-wide hover:text-[#C49A28] transition-colors"
+                          style={{ color: "var(--ln-parchment)" }}
                         >
                           {artistName}
                         </Link>
                       ) : (
-                        <span className="font-heading text-[13px] tracking-wide" style={{ color: "#E6CDAE" }}>{artistName}</span>
+                        <span className="font-heading text-[13px] tracking-wide" style={{ color: "var(--ln-parchment)" }}>{artistName}</span>
                       )}
                       <span className="text-[10px] font-body" style={{ color: "rgba(255,255,255,0.30)" }}>
                         {items.length} track{items.length === 1 ? "" : "s"}
@@ -894,7 +894,7 @@ export default function ExplorePage() {
                     {creator?.id && (
                       <Link
                         href={`/creator/${creator.id}#works`}
-                        className="text-[11px] font-body transition-colors hover:text-[#CBB183]"
+                        className="text-[11px] font-body transition-colors hover:text-[#C49A28]"
                         style={{ color: "rgba(255,255,255,0.35)" }}
                       >
                         View all →
@@ -963,7 +963,7 @@ export default function ExplorePage() {
           <div ref={loaderRef} className="py-8 flex justify-center">
             {(isFetchingMore || pageFetching) && hasMore && (
               <div className="flex items-center gap-2 text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>
-                <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#CBB183] animate-spin" />
+                <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#C49A28] animate-spin" />
                 Loading more…
               </div>
             )}
@@ -981,13 +981,13 @@ export default function ExplorePage() {
             <div className="fixed inset-0 z-40" onClick={closeMenu} />
             <div
               className="fixed z-50 min-w-[190px] rounded-xl overflow-hidden shadow-2xl py-1"
-              style={{ top: menuPos.y, left: menuPos.x, background: "#2C3438", border: "1px solid #C3AB7D" }}
+              style={{ top: menuPos.y, left: menuPos.x, background: "var(--ln-coal)", border: "1px solid #C3AB7D" }}
             >
               {menuSong.song.fileUrl && (
                 <button
                   onClick={handlePlayNextFromMenu}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-                  style={{ color: "#DACAAA" }}
+                  style={{ color: "var(--ln-parchment)" }}
                 >
                   <Play className="w-4 h-4 opacity-60" /> Play Next
                 </button>
@@ -995,16 +995,16 @@ export default function ExplorePage() {
               <button
                 onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-                style={{ color: "#DACAAA" }}
+                style={{ color: "var(--ln-parchment)" }}
               >
                 <svg className="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 Add to My List
               </button>
-              <div className="my-1 border-t" style={{ borderColor: "rgba(203,177,131,0.15)" }} />
+              <div className="my-1 border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
               <Link href={`/song/${menuSong.song.id}`} onClick={closeMenu}>
-                <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "#DACAAA" }}>
+                <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>
                   <svg className="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
@@ -1014,7 +1014,7 @@ export default function ExplorePage() {
               <button
                 onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/song/${menuSong.song.id}`); toast.success("Link copied!"); closeMenu(); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-                style={{ color: "#DACAAA" }}
+                style={{ color: "var(--ln-parchment)" }}
               >
                 <svg className="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -1053,7 +1053,7 @@ export default function ExplorePage() {
                 </div>
                 <button
                   className="mt-5 text-xs px-4 py-2 rounded-full transition-colors"
-                  style={{ background: "#2C3438", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }}
+                  style={{ background: "var(--ln-coal)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)" }}
                   onClick={() => setMode("trending")}
                 >
                   Browse Trending instead

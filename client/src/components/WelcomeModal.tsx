@@ -65,20 +65,20 @@ export default function WelcomeModal() {
       <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
         <DialogContent
           className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
-          style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.35)" }}
+          style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.3)" }}
         >
           <DialogDescription className="sr-only">
             Welcome back, Founder's Era supporter.
           </DialogDescription>
 
           {/* Gold header band */}
-          <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid rgba(203,177,131,0.18)" }}>
+          <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid rgba(196,154,40,0.15)" }}>
             <div className="text-4xl mb-3">{TIER_ICON[tier]}</div>
             <DialogTitle className="text-xl font-bold mb-1"
-              style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               Welcome back, {TIER_LABEL[tier]}.
             </DialogTitle>
-            <p className="text-sm" style={{ color: "#CBB183" }}>
+            <p className="text-sm" style={{ color: "var(--ln-gold)" }}>
               You kept the light on.
             </p>
           </div>
@@ -89,7 +89,7 @@ export default function WelcomeModal() {
               Your name is written in the story of Living Nexus. The sanctuary stands because you were here in the founding generation.
             </p>
             {supporterStatus && (
-              <p className="text-xs mt-3" style={{ color: "rgba(230,205,174,0.7)" }}>
+              <p className="text-xs mt-3" style={{ color: "rgba(232,223,200,0.6)" }}>
                 Total gifted: ${supporterStatus.totalGifted.toFixed(2)}
               </p>
             )}
@@ -100,7 +100,7 @@ export default function WelcomeModal() {
             <Button
               className="flex-1 font-semibold"
               onClick={handleDismiss}
-              style={{ background: "#CBB183", color: "#E6CDAE" }}
+              style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
             >
               Enter the Sanctuary
             </Button>
@@ -108,7 +108,7 @@ export default function WelcomeModal() {
               <Button
                 variant="outline"
                 className="w-full"
-                style={{ borderColor: "rgba(203,177,131,0.35)", color: "#CBB183" }}
+                style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}
               >
                 View Supporters Wall
               </Button>
@@ -124,7 +124,7 @@ export default function WelcomeModal() {
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
       <DialogContent
         className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
-        style={{ background: "#2C3438", borderColor: "#2C3438" }}
+        style={{ background: "var(--ln-coal)", borderColor: "var(--ln-coal)" }}
       >
         {/* Hidden accessibility description */}
         <DialogDescription className="sr-only">
@@ -132,13 +132,13 @@ export default function WelcomeModal() {
         </DialogDescription>
 
         {/* Gold header band */}
-        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid #2C3438" }}>
+        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid #111009" }}>
           <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-            style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)" }}>
-            <Music2 className="w-7 h-7" style={{ color: "#CBB183" }} />
+            style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}>
+            <Music2 className="w-7 h-7" style={{ color: "var(--ln-gold)" }} />
           </div>
           <DialogTitle className="text-xl font-bold mb-1"
-            style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
             Welcome to Living Nexus
           </DialogTitle>
           <p className="text-sm" style={{ color: "#94A3B8" }}>
@@ -150,12 +150,12 @@ export default function WelcomeModal() {
         <div className="px-6 py-5 space-y-4">
           {[
             {
-              icon: <Shield className="w-5 h-5 flex-shrink-0" style={{ color: "#4ADE80" }} />,
+              icon: <Shield className="w-5 h-5 flex-shrink-0" style={{ color: "var(--ln-seal-bright)" }} />,
               title: "Your music, protected",
               desc: "Every track you upload receives a Witness ID (WID) — a cryptographic timestamp that proves you created it first. WIDs support, but do not replace, official copyright registration.",
             },
             {
-              icon: <Music2 className="w-5 h-5 flex-shrink-0" style={{ color: "#CBB183" }} />,
+              icon: <Music2 className="w-5 h-5 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />,
               title: "Upload and share",
               desc: "Add songs, attach lyrics, set AI consent, and share directly with your audience — no algorithm deciding who hears you.",
             },
@@ -175,11 +175,11 @@ export default function WelcomeModal() {
           ))}
 
           {/* Founder's Era CTA for new users */}
-          <div className="rounded-xl border px-4 py-3 mt-2" style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.22)" }}>
-            <p className="text-xs font-bold mb-0.5" style={{ color: "#CBB183" }}>✦ Founder's Era — Genesis Day, March 2026</p>
+          <div className="rounded-xl border px-4 py-3 mt-2" style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.2)" }}>
+            <p className="text-xs font-bold mb-0.5" style={{ color: "var(--ln-gold)" }}>✦ Founder's Era — Genesis Day, March 2026</p>
             <p className="text-xs" style={{ color: "#94A3B8" }}>
               Support the platform during its founding 90 days. Your name lives here forever.{" "}
-              <Link href="/founders" onClick={handleDismiss} className="underline" style={{ color: "#CBB183" }}>
+              <Link href="/founders" onClick={handleDismiss} className="underline" style={{ color: "var(--ln-gold)" }}>
                 Learn more →
               </Link>
             </p>
@@ -191,7 +191,7 @@ export default function WelcomeModal() {
           <Button
             className="flex-1 font-semibold"
             onClick={handleDismiss}
-            style={{ background: "#CBB183", color: "#E6CDAE" }}
+            style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
           >
             Get Started
           </Button>

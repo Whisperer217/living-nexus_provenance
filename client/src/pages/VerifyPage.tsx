@@ -42,8 +42,8 @@ function ShareVerifyButton({ witnessId, title }: { witnessId: string; title: str
   return (
     <button
       onClick={handleShare}
-      className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all hover:opacity-80 active:scale-95"
-      style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.45)", color: "#4ADE80" }}
+      className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold transition-all hover:opacity-80 active:scale-95"
+      style={{ background: "rgba(58,138,86,0.15)", border: "1px solid rgba(58,138,86,0.4)", color: "var(--ln-seal-bright)" }}
     >
       {copied ? (
         <><CheckCircle2 className="w-4 h-4" /> Copied!</>
@@ -57,7 +57,7 @@ function ShareVerifyButton({ witnessId, title }: { witnessId: string; title: str
 function TruncatedMono({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex items-start gap-2 group">
-      <p className="text-xs font-mono break-all flex-1 leading-5" style={{ color: "#AA8E64" }}>
+      <p className="text-xs font-mono break-all flex-1 leading-5" style={{ color: "var(--ln-smoke)" }}>
         {value}
       </p>
       <button
@@ -65,7 +65,7 @@ function TruncatedMono({ value, label }: { value: string; label: string }) {
         className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5"
         title={`Copy ${label}`}
       >
-        <Copy className="w-3.5 h-3.5" style={{ color: "#3F4A50" }} />
+        <Copy className="w-3.5 h-3.5" style={{ color: "var(--ln-iron)" }} />
       </button>
     </div>
   );
@@ -73,10 +73,10 @@ function TruncatedMono({ value, label }: { value: string; label: string }) {
 
 function Field({ icon: Icon, label, children }: { icon: React.ElementType; label: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+    <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.3)" }}>
       <div className="flex items-center gap-1.5 mb-2">
-        <Icon className="w-3.5 h-3.5" style={{ color: "#3F4A50" }} />
-        <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>{label}</p>
+        <Icon className="w-3.5 h-3.5" style={{ color: "var(--ln-iron)" }} />
+        <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--ln-smoke)" }}>{label}</p>
       </div>
       {children}
     </div>
@@ -101,23 +101,23 @@ function CollectionVerifyView({
   if (isLoading) {
     return (
       <div className="text-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "#CBB183" }} />
-        <p className="text-sm" style={{ color: "#3F4A50" }}>Querying collection provenance ledger…</p>
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "var(--ln-gold)" }} />
+        <p className="text-sm" style={{ color: "var(--ln-iron)" }}>Querying collection provenance ledger…</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ background: "#2C3438", border: "1px solid rgba(239,68,68,0.35)" }}>
-        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "#EF4444" }} />
-        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#EF4444" }}>
+      <div className="p-8 text-center" style={{ background: "var(--ln-coal)", border: "1px solid rgba(239,68,68,0.35)" }}>
+        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "var(--ln-ember)" }} />
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-ember)" }}>
           Collection Not Found
         </h2>
-        <p className="text-sm mb-6" style={{ color: "#AA8E64" }}>
+        <p className="text-sm mb-6" style={{ color: "var(--ln-smoke)" }}>
           No collection found for this WID-ALB. The ID may be incorrect or the collection was not registered on Living Nexus.
         </p>
-        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
+        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}>
           Try Another WID
         </Button>
       </div>
@@ -128,25 +128,25 @@ function CollectionVerifyView({
     <div className="space-y-5">
 
       {/* ── Verified badge ── */}
-      <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(203,177,131,0.06)", border: "2px solid rgba(203,177,131,0.32)" }}>
+      <div className="p-6 text-center" style={{ background: "rgba(196,154,40,0.04)", border: "2px solid rgba(196,154,40,0.3)" }}>
         {(data as any).coverArtUrl ? (
-          <div className="w-28 h-28 rounded-xl mx-auto mb-4 overflow-hidden" style={{ border: "2px solid rgba(203,177,131,0.45)", boxShadow: "0 0 20px rgba(203,177,131,0.12)" }}>
+          <div className="w-28 h-28 mx-auto mb-4 overflow-hidden" style={{ border: "2px solid rgba(196,154,40,0.4)", boxShadow: "0 0 20px rgba(196,154,40,0.08)" }}>
             <img src={(data as any).coverArtUrl} alt={data.name} className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(203,177,131,0.10)", border: "2px solid rgba(203,177,131,0.35)" }}>
-            <Library className="w-10 h-10" style={{ color: "#CBB183" }} />
+          <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(196,154,40,0.08)", border: "2px solid rgba(196,154,40,0.3)" }}>
+            <Library className="w-10 h-10" style={{ color: "var(--ln-gold)" }} />
           </div>
         )}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.45)" }}>
-          <CheckCircle2 className="w-4 h-4" style={{ color: "#4ADE80" }} />
-          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "#4ADE80", fontFamily: "'Cinzel', serif" }}>Collection Verified</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-3" style={{ background: "rgba(58,138,86,0.15)", border: "1px solid rgba(58,138,86,0.4)" }}>
+          <CheckCircle2 className="w-4 h-4" style={{ color: "var(--ln-seal-bright)" }} />
+          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "var(--ln-seal-bright)", fontFamily: "'Cinzel', serif" }}>Collection Verified</span>
         </div>
-        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
           {data.name}
         </h2>
-        <p className="text-sm mb-1" style={{ color: "#3F4A50" }}>by {data.creatorName}</p>
-        <p className="text-xs mt-2" style={{ color: "#AA8E64" }}>
+        <p className="text-sm mb-1" style={{ color: "var(--ln-iron)" }}>by {data.creatorName}</p>
+        <p className="text-xs mt-2" style={{ color: "var(--ln-smoke)" }}>
           {data.trackCount} {data.trackCount === 1 ? "work" : "works"} collectively witnessed
         </p>
       </div>
@@ -158,7 +158,7 @@ function CollectionVerifyView({
 
       {/* ── Registration date ── */}
       <Field icon={Calendar} label="Registration Date">
-        <p className="text-sm font-medium" style={{ color: "#DACAAA" }}>
+        <p className="text-sm font-medium" style={{ color: "var(--ln-parchment)" }}>
           {new Date(data.createdAt).toLocaleString("en-US", {
             year: "numeric", month: "long", day: "numeric",
             hour: "2-digit", minute: "2-digit", timeZoneName: "short",
@@ -169,16 +169,16 @@ function CollectionVerifyView({
       {/* ── Collective Hash ── */}
       <Field icon={Hash} label="Collective Hash (SHA-256 of all sorted WIDs)">
         <TruncatedMono value={`sha256:${data.collectiveHash}`} label="Collective Hash" />
-        <p className="text-[10px] mt-1.5" style={{ color: "#3F4A50" }}>
+        <p className="text-[10px] mt-1.5" style={{ color: "var(--ln-iron)" }}>
           Computed as SHA-256 of all individual Witness IDs sorted lexicographically and joined by '|'
         </p>
       </Field>
 
       {/* ── Included tracks ── */}
-      <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+      <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.3)" }}>
         <div className="flex items-center gap-1.5 mb-3">
-          <Music className="w-3.5 h-3.5" style={{ color: "#3F4A50" }} />
-          <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>
+          <Music className="w-3.5 h-3.5" style={{ color: "var(--ln-iron)" }} />
+          <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--ln-smoke)" }}>
             Included Works ({data.tracks.length})
           </p>
         </div>
@@ -186,26 +186,26 @@ function CollectionVerifyView({
           {data.tracks.map((track: typeof data.tracks[number], i: number) => (
             <div
               key={track.id}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5"
-              style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}
+              className="flex items-center gap-3 px-3 py-2.5"
+              style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}
             >
-              <span className="text-[10px] font-mono w-5 text-right flex-shrink-0" style={{ color: "#AA8E64" }}>
+              <span className="text-[10px] font-mono w-5 text-right flex-shrink-0" style={{ color: "var(--ln-smoke)" }}>
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: "#DACAAA" }}>{track.title}</p>
+                <p className="text-sm font-medium truncate" style={{ color: "var(--ln-parchment)" }}>{track.title}</p>
                 {track.witnessId && (
-                  <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "rgba(230,205,174,0.7)" }}>{track.witnessId}</p>
+                  <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "rgba(232,223,200,0.6)" }}>{track.witnessId}</p>
                 )}
               </div>
               {track.witnessId && (
                 <button
                   onClick={() => navigate(`/verify/${encodeURIComponent(track.witnessId!)}`)}
-                  className="flex-shrink-0 p-1.5 rounded hover:opacity-80 transition-opacity"
-                  style={{ background: "rgba(230,205,174,0.1)", border: "1px solid rgba(203,177,131,0.28)" }}
+                  className="flex-shrink-0 p-1.5 hover:opacity-80 transition-opacity"
+                  style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.25)" }}
                   title="Verify individual track"
                 >
-                  <Link2 className="w-3 h-3" style={{ color: "#CBB183" }} />
+                  <Link2 className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
                 </button>
               )}
             </div>
@@ -221,8 +221,8 @@ function CollectionVerifyView({
               href={data.pdfUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-bold"
-              style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold"
+              style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
             >
               <Download className="w-4 h-4" /> Download Certificate
             </a>
@@ -231,7 +231,7 @@ function CollectionVerifyView({
             variant="outline"
             onClick={onVerifyAnother}
             className={data.pdfUrl ? "" : "flex-1"}
-            style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}
+            style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}
           >
             <Search className="w-4 h-4 mr-2" /> Verify Another
           </Button>
@@ -239,25 +239,25 @@ function CollectionVerifyView({
       </div>
 
       {/* ── Covenant Declaration ── */}
-      <div className="rounded-2xl px-5 py-5" style={{ background: "rgba(44,52,56,0.1)", border: "1px solid rgba(203,177,131,0.15)" }}>
-        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "rgba(203,177,131,0.7)", fontFamily: "'Cinzel', serif" }}>
+      <div className="rounded-2xl px-5 py-5" style={{ background: "rgba(44,52,56,0.1)", border: "1px solid rgba(196,154,40,0.12)" }}>
+        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "rgba(196,154,40,0.6)", fontFamily: "'Cinzel', serif" }}>
           Covenant Declaration
         </p>
-        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "#AA8E64" }}>
+        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "var(--ln-smoke)" }}>
           This collection record was sealed by Living Nexus at the moment of batch registration.
           The Collection WID cryptographically binds all included works into a single origin record
           under the Sovereign Shutter™ framework. The collective hash is immutable.
         </p>
-        <p className="text-[11px] italic" style={{ color: "#3F4A50" }}>
+        <p className="text-[11px] italic" style={{ color: "var(--ln-iron)" }}>
           "He is before all things, and in Him all things hold together." — Colossians 1:17
         </p>
       </div>
 
       {/* ── Footer note ── */}
-      <p className="text-center text-xs pt-2" style={{ color: "#2C3438" }}>
+      <p className="text-center text-xs pt-2" style={{ color: "var(--ln-coal)" }}>
         BDDT Publishing · Command Domains LLC · Living Nexus Witness Registry
       </p>
-      <p className="text-center text-[10px] pb-2" style={{ color: "rgba(203,177,131,0.22)" }}>
+      <p className="text-center text-[10px] pb-2" style={{ color: "rgba(196,154,40,0.2)" }}>
         Laminin/Logos Doctrine v0.1 · Sovereign Shutter™ Framework
       </p>
     </div>
@@ -317,14 +317,14 @@ function TrackVerifyView({
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
   body { background: #0a0a0a; color: #e2e8f0; font-family: 'Share Tech Mono', monospace; margin: 0; padding: 40px; }
-  .cert { max-width: 800px; margin: 0 auto; border: 1px solid #CBB183; padding: 40px; position: relative; }
+  .cert { max-width: 800px; margin: 0 auto; border: 1px solid rgba(196,154,40,0.3); padding: 40px; position: relative; }
   .cert::before { content: ''; position: absolute; inset: 6px; border: 1px solid rgba(201,168,76,0.2); pointer-events: none; }
-  h1 { font-family: 'Orbitron', monospace; color: #CBB183; font-size: 22px; letter-spacing: 4px; margin: 0 0 4px; }
+  h1 { font-family: 'Orbitron', monospace; color: #C49A28; font-size: 22px; letter-spacing: 4px; margin: 0 0 4px; }
   h2 { font-family: 'Orbitron', monospace; color: #6ee7f7; font-size: 13px; letter-spacing: 3px; margin: 0 0 32px; }
-  .divider { border: none; border-top: 1px solid #CBB183; margin: 24px 0; opacity: 0.4; }
+  .divider { border: none; border-top: 1px solid rgba(196,154,40,0.3); margin: 24px 0; opacity: 0.4; }
   .label { color: #6ee7f7; font-size: 11px; letter-spacing: 2px; margin-bottom: 2px; }
   .value { color: #e2e8f0; font-size: 14px; margin-bottom: 16px; word-break: break-all; }
-  .wid { font-family: 'Orbitron', monospace; color: #CBB183; font-size: 18px; letter-spacing: 3px; }
+  .wid { font-family: 'Orbitron', monospace; color: #C49A28; font-size: 18px; letter-spacing: 3px; }
   .consent { display: inline-block; padding: 6px 16px; border: 1px solid ${consentColor}; color: ${consentColor}; font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 2px; margin-bottom: 16px; }
   .sig { font-size: 10px; color: rgba(226,232,240,0.5); word-break: break-all; line-height: 1.6; }
   .provenance-badge { display: inline-block; padding: 4px 12px; border: 1px solid rgba(201,168,76,0.4); color: #c9a84c; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; }
@@ -339,7 +339,7 @@ function TrackVerifyView({
   <hr class="divider">
 
   <div class="label">WORK TITLE</div>
-  <div class="value" style="font-size:18px;color:#CBB183;">${data.title}</div>
+  <div class="value" style="font-size:18px;color:#C49A28;">${data.title}</div>
 
   <div class="label">CREATOR (CURRENT NAME)</div>
   <div class="value">${data.artistName}</div>
@@ -397,10 +397,10 @@ function TrackVerifyView({
   };
 
   const aiConsentLabel = (v?: string) => {
-    if (v === "prohibited") return { text: "AI Training Prohibited", color: "#EF4444" };
-    if (v === "permitted_attribution") return { text: "Permitted with Attribution", color: "#CBB183" };
-    if (v === "permitted") return { text: "Freely Permitted", color: "#4ADE80" };
-    return { text: "Not specified", color: "#AA8E64" };
+    if (v === "prohibited") return { text: "AI Training Prohibited", color: "var(--ln-ember)" };
+    if (v === "permitted_attribution") return { text: "Permitted with Attribution", color: "var(--ln-gold)" };
+    if (v === "permitted") return { text: "Freely Permitted", color: "var(--ln-seal-bright)" };
+    return { text: "Not specified", color: "var(--ln-smoke)" };
   };
 
   const consent = aiConsentLabel(data?.aiConsent ?? undefined);
@@ -408,23 +408,23 @@ function TrackVerifyView({
   if (isLoading) {
     return (
       <div className="text-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "#CBB183" }} />
-        <p className="text-sm" style={{ color: "#3F4A50" }}>Querying provenance ledger…</p>
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: "var(--ln-gold)" }} />
+        <p className="text-sm" style={{ color: "var(--ln-iron)" }}>Querying provenance ledger…</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ background: "#2C3438", border: "1px solid rgba(239,68,68,0.35)" }}>
-        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "#EF4444" }} />
-        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#EF4444" }}>
+      <div className="p-8 text-center" style={{ background: "var(--ln-coal)", border: "1px solid rgba(239,68,68,0.35)" }}>
+        <ShieldX className="w-14 h-14 mx-auto mb-4" style={{ color: "var(--ln-ember)" }} />
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-ember)" }}>
           Not Verified
         </h2>
-        <p className="text-sm mb-6" style={{ color: "#AA8E64" }}>
+        <p className="text-sm mb-6" style={{ color: "var(--ln-smoke)" }}>
           No record found for this Witness ID. The ID may be incorrect or the work was not registered on Living Nexus.
         </p>
-        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
+        <Button variant="outline" onClick={onVerifyAnother} style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}>
           Try Another WID
         </Button>
       </div>
@@ -435,22 +435,22 @@ function TrackVerifyView({
     <div className="space-y-5">
 
       {/* ── Verified badge ── */}
-      <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(74,222,128,0.07)", border: "2px solid rgba(74,222,128,0.4)" }}>
-        <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(74,222,128,0.15)", border: "2px solid rgba(74,222,128,0.45)" }}>
-          <ShieldCheck className="w-10 h-10" style={{ color: "#4ADE80" }} />
+      <div className="p-6 text-center" style={{ background: "rgba(74,222,128,0.07)", border: "2px solid rgba(74,222,128,0.4)" }}>
+        <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(58,138,86,0.15)", border: "2px solid rgba(58,138,86,0.4)" }}>
+          <ShieldCheck className="w-10 h-10" style={{ color: "var(--ln-seal-bright)" }} />
         </div>
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3" style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.45)" }}>
-          <CheckCircle2 className="w-4 h-4" style={{ color: "#4ADE80" }} />
-          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "#4ADE80", fontFamily: "'Cinzel', serif" }}>Verified</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-3" style={{ background: "rgba(58,138,86,0.15)", border: "1px solid rgba(58,138,86,0.4)" }}>
+          <CheckCircle2 className="w-4 h-4" style={{ color: "var(--ln-seal-bright)" }} />
+          <span className="text-sm font-bold tracking-widest uppercase" style={{ color: "var(--ln-seal-bright)", fontFamily: "'Cinzel', serif" }}>Verified</span>
         </div>
-        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+        <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
           {data.title}
         </h2>
-        <p className="text-sm mb-1" style={{ color: "#3F4A50" }}>by {data.artistName}</p>
+        <p className="text-sm mb-1" style={{ color: "var(--ln-iron)" }}>by {data.artistName}</p>
 
         {/* Name at time of witnessing */}
         {data.nameAtWitnessing && data.nameAtWitnessing !== data.artistName && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs" style={{ background: "rgba(230,205,174,0.1)", border: "1px solid rgba(203,177,131,0.28)", color: "#CBB183" }}>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 text-xs" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>
             <UserCheck className="w-3 h-3" />
             <span>Registered as: <strong>{data.nameAtWitnessing}</strong></span>
           </div>
@@ -460,10 +460,10 @@ function TrackVerifyView({
         {(() => {
           const ct = data.contentType ?? (data.isLyricsOnly ? "lyrics" : "audio");
           const mediumMap: Record<string, { label: string; wid: string; desc: string; icon: React.ReactNode; bg: string; color: string; border: string }> = {
-            audio:      { label: "Audio Registration",      wid: "WID-MUS", desc: "Cryptographic proof of origin for an audio recording.",           icon: <Music className="w-3.5 h-3.5" />,    bg: "rgba(203,177,131,0.12)",  color: "#CBB183",  border: "rgba(203,177,131,0.4)" },
-            lyrics:     { label: "Lyrics Registration",     wid: "WID-LYR", desc: "Standalone lyric sheet — words witnessed before the music.",     icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(203,177,131,0.12)",   color: "#CBB183",  border: "rgba(203,177,131,0.35)" },
-            manuscript: { label: "Manuscript Registration", wid: "WID-MAN", desc: "Novel, screenplay, or written work — sealed at first draft.",    icon: <BookOpen className="w-3.5 h-3.5" />, bg: "rgba(74,222,128,0.15)",  color: "#4ADE80",  border: "rgba(74,222,128,0.4)" },
-            comic:      { label: "Comic / Graphic Novel",   wid: "WID-COM", desc: "Sequential art — pages, script, and cover witnessed together.",  icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(239,68,68,0.15)",   color: "#EF4444",   border: "rgba(239,68,68,0.4)" },
+            audio:      { label: "Audio Registration",      wid: "WID-MUS", desc: "Cryptographic proof of origin for an audio recording.",           icon: <Music className="w-3.5 h-3.5" />,    bg: "rgba(196,154,40,0.08)",  color: "var(--ln-gold)",  border: "rgba(196,154,40,0.34)" },
+            lyrics:     { label: "Lyrics Registration",     wid: "WID-LYR", desc: "Standalone lyric sheet — words witnessed before the music.",     icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(196,154,40,0.08)",   color: "var(--ln-gold)",  border: "rgba(196,154,40,0.3)" },
+            manuscript: { label: "Manuscript Registration", wid: "WID-MAN", desc: "Novel, screenplay, or written work — sealed at first draft.",    icon: <BookOpen className="w-3.5 h-3.5" />, bg: "rgba(58,138,86,0.15)",  color: "var(--ln-seal-bright)",  border: "rgba(74,222,128,0.4)" },
+            comic:      { label: "Comic / Graphic Novel",   wid: "WID-COM", desc: "Sequential art — pages, script, and cover witnessed together.",  icon: <FileText className="w-3.5 h-3.5" />, bg: "rgba(196,68,10,0.15)",   color: "var(--ln-ember)",   border: "rgba(239,68,68,0.4)" },
           };
           const m = mediumMap[ct] ?? mediumMap.audio;
           return (
@@ -472,16 +472,16 @@ function TrackVerifyView({
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: m.bg, color: m.color, border: `1px solid ${m.border}` }}>
                   {m.icon} {m.label}
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold" style={{ background: "rgba(230,205,174,0.08)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold" style={{ background: "rgba(196,154,40,0.05)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}>
                   {m.wid}
                 </span>
                 {data.genre && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs" style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid rgba(203,177,131,0.15)" }}>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs" style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.12)" }}>
                     <Tag className="w-3 h-3" /> {data.genre}
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-center" style={{ color: "#AA8E64" }}>{m.desc}</p>
+              <p className="text-[11px] text-center" style={{ color: "var(--ln-smoke)" }}>{m.desc}</p>
             </div>
           );
         })()}
@@ -493,17 +493,17 @@ function TrackVerifyView({
 
       {/* ── Collection back-reference ── */}
       {collectionData && (
-        <div className="rounded-xl p-4" style={{ background: "rgba(230,205,174,0.05)", border: "1px solid rgba(203,177,131,0.22)" }}>
+        <div className="p-4" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.2)" }}>
           <div className="flex items-center gap-1.5 mb-2">
-            <Library className="w-3.5 h-3.5" style={{ color: "rgba(230,205,174,0.7)" }} />
-            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>Part of Collection</p>
+            <Library className="w-3.5 h-3.5" style={{ color: "rgba(232,223,200,0.6)" }} />
+            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--ln-smoke)" }}>Part of Collection</p>
           </div>
           <button
             onClick={() => navigate(`/verify/${encodeURIComponent(collectionData.collectionWid)}`)}
             className="text-left hover:opacity-80 transition-opacity"
           >
-            <p className="text-sm font-semibold" style={{ color: "#CBB183" }}>{collectionData.name}</p>
-            <p className="text-[10px] font-mono mt-0.5" style={{ color: "rgba(203,177,131,0.7)" }}>{collectionData.collectionWid}</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--ln-gold)" }}>{collectionData.name}</p>
+            <p className="text-[10px] font-mono mt-0.5" style={{ color: "rgba(196,154,40,0.6)" }}>{collectionData.collectionWid}</p>
           </button>
         </div>
       )}
@@ -515,31 +515,31 @@ function TrackVerifyView({
 
       {/* ── Audio Version History ── */}
       {audioVersionHistory && audioVersionHistory.length > 0 && (
-        <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+        <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.3)" }}>
           <div className="flex items-center gap-1.5 mb-3">
-            <History className="w-3.5 h-3.5" style={{ color: "#3F4A50" }} />
-            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>Audio Version History</p>
-            <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(230,205,174,0.1)", color: "#CBB183" }}>
+            <History className="w-3.5 h-3.5" style={{ color: "var(--ln-iron)" }} />
+            <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--ln-smoke)" }}>Audio Version History</p>
+            <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.06)", color: "var(--ln-gold)" }}>
               {audioVersionHistory.length} archived version{audioVersionHistory.length !== 1 ? "s" : ""}
             </span>
           </div>
-          <p className="text-[10px] mb-3" style={{ color: "#3F4A50" }}>
+          <p className="text-[10px] mb-3" style={{ color: "var(--ln-iron)" }}>
             Each version below was superseded by a new upload. All WID-MUS proofs are permanently preserved.
           </p>
           <div className="space-y-2">
             {audioVersionHistory.map((v: any, i: number) => (
               <div key={v.id} className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg"
-                style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
+                style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>
                 <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5"
-                  style={{ background: "rgba(230,205,174,0.1)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}>
+                  style={{ background: "rgba(196,154,40,0.06)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}>
                   v{audioVersionHistory.length - i}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-mono break-all" style={{ color: "#AA8E64" }}>{v.witnessId}</p>
+                  <p className="text-[11px] font-mono break-all" style={{ color: "var(--ln-smoke)" }}>{v.witnessId}</p>
                   {v.versionNote && (
-                    <p className="text-xs mt-0.5 font-medium" style={{ color: "#DACAAA" }}>{v.versionNote}</p>
+                    <p className="text-xs mt-0.5 font-medium" style={{ color: "var(--ln-parchment)" }}>{v.versionNote}</p>
                   )}
-                  <p className="text-[10px] mt-0.5" style={{ color: "#3F4A50" }}>
+                  <p className="text-[10px] mt-0.5" style={{ color: "var(--ln-iron)" }}>
                     Archived {new Date(v.replacedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                   </p>
                 </div>
@@ -555,14 +555,14 @@ function TrackVerifyView({
           <div className="space-y-1.5">
             <TruncatedMono value={(data as any).lyricsWid} label="WID-LYR" />
             {(data as any).lyricsFileName && (
-              <p className="text-xs" style={{ color: "#DACAAA" }}>
+              <p className="text-xs" style={{ color: "var(--ln-parchment)" }}>
                 File: {(data as any).lyricsFileName}
                 {(data as any).lyricsAddedAt
                   ? ` · ${new Date((data as any).lyricsAddedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`
                   : ""}
               </p>
             )}
-            <p className="text-[10px]" style={{ color: "#AA8E64" }}>
+            <p className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>
               Separate cryptographic proof for the lyrical content of this work.
             </p>
           </div>
@@ -571,7 +571,7 @@ function TrackVerifyView({
 
       {/* ── Registration date ── */}
       <Field icon={Calendar} label="Registration Date">
-        <p className="text-sm font-medium" style={{ color: "#DACAAA" }}>
+        <p className="text-sm font-medium" style={{ color: "var(--ln-parchment)" }}>
           {data.registeredAt
             ? new Date(data.registeredAt).toLocaleString("en-US", {
                 year: "numeric", month: "long", day: "numeric",
@@ -612,7 +612,7 @@ function TrackVerifyView({
       {/* ── ISRC ── */}
       {data.isrc && (
         <Field icon={Tag} label="ISRC">
-          <p className="text-sm font-mono" style={{ color: "#DACAAA" }}>{data.isrc}</p>
+          <p className="text-sm font-mono" style={{ color: "var(--ln-parchment)" }}>{data.isrc}</p>
         </Field>
       )}
 
@@ -622,18 +622,18 @@ function TrackVerifyView({
           <div className="space-y-2">
             {data.nameHistory.map((entry: { oldName: string | null; newName: string; changedAt: Date }, i: number) => (
               <div key={i} className="flex items-start gap-2 text-xs">
-                <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: i === 0 ? "#4ADE80" : "#2C3438", marginTop: "5px" }} />
+                <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: i === 0 ? "var(--ln-seal-bright)" : "var(--ln-coal)", marginTop: "5px" }} />
                 <div className="flex-1">
                   {entry.oldName ? (
-                    <span style={{ color: "#AA8E64" }}>
-                      <span style={{ color: "#AA8E64" }}>{entry.oldName}</span>
+                    <span style={{ color: "var(--ln-smoke)" }}>
+                      <span style={{ color: "var(--ln-smoke)" }}>{entry.oldName}</span>
                       {" → "}
-                      <span style={{ color: "#DACAAA", fontWeight: 600 }}>{entry.newName}</span>
+                      <span style={{ color: "var(--ln-parchment)", fontWeight: 600 }}>{entry.newName}</span>
                     </span>
                   ) : (
-                    <span style={{ color: "#DACAAA", fontWeight: 600 }}>Registered as: {entry.newName}</span>
+                    <span style={{ color: "var(--ln-parchment)", fontWeight: 600 }}>Registered as: {entry.newName}</span>
                   )}
-                  <span className="ml-2" style={{ color: "#3F4A50" }}>
+                  <span className="ml-2" style={{ color: "var(--ln-iron)" }}>
                     {new Date(entry.changedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                   </span>
                 </div>
@@ -653,7 +653,7 @@ function TrackVerifyView({
               const path = (ct3 === "manuscript" || ct3 === "comic") ? `/book/${data.songId}` : `/songs/${data.songId}`;
               navigate(path);
             }}
-            style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+            style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
           >
             <ExternalLink className="w-4 h-4 mr-2" /> {(() => {
               const ct2 = data.contentType ?? (data.isLyricsOnly ? "lyrics" : "audio");
@@ -666,7 +666,7 @@ function TrackVerifyView({
           <Button
             variant="outline"
             onClick={onVerifyAnother}
-            style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}
+            style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}
           >
             <Search className="w-4 h-4 mr-2" /> Verify Another
           </Button>
@@ -675,32 +675,32 @@ function TrackVerifyView({
           variant="outline"
           className="w-full"
           onClick={downloadCertificate}
-          style={{ borderColor: "rgba(203,177,131,0.35)", color: "#CBB183", fontFamily: "'Cinzel', serif" }}
+          style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
         >
           <Download className="w-4 h-4 mr-2" /> Download Certificate
         </Button>
       </div>
 
       {/* ── Covenant Declaration ── */}
-      <div className="rounded-2xl px-5 py-5" style={{ background: "rgba(44,52,56,0.1)", border: "1px solid rgba(203,177,131,0.15)" }}>
-        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "rgba(203,177,131,0.7)", fontFamily: "'Cinzel', serif" }}>
+      <div className="rounded-2xl px-5 py-5" style={{ background: "rgba(44,52,56,0.1)", border: "1px solid rgba(196,154,40,0.12)" }}>
+        <p className="text-[11px] font-semibold tracking-widest uppercase mb-2" style={{ color: "rgba(196,154,40,0.6)", fontFamily: "'Cinzel', serif" }}>
           Covenant Declaration
         </p>
-        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "#AA8E64" }}>
+        <p className="text-[12px] leading-relaxed mb-3" style={{ color: "var(--ln-smoke)" }}>
           This record was sealed by Living Nexus at the moment of creation. The Witness ID is
           cryptographically bound to the original file and cannot be transferred or reassigned.
           The creator owns this proof. The platform hosts it.
         </p>
-        <p className="text-[11px] italic" style={{ color: "#3F4A50" }}>
+        <p className="text-[11px] italic" style={{ color: "var(--ln-iron)" }}>
           "He is before all things, and in Him all things hold together." — Colossians 1:17
         </p>
       </div>
 
       {/* ── Footer note ── */}
-      <p className="text-center text-xs pt-2" style={{ color: "#2C3438" }}>
+      <p className="text-center text-xs pt-2" style={{ color: "var(--ln-coal)" }}>
         BDDT Publishing · Command Domains LLC · Living Nexus Witness Registry
       </p>
-      <p className="text-center text-[10px] pb-2" style={{ color: "rgba(203,177,131,0.22)" }}>
+      <p className="text-center text-[10px] pb-2" style={{ color: "rgba(196,154,40,0.2)" }}>
         Laminin/Logos Doctrine v0.1 · Sovereign Shutter™ Framework
       </p>
     </div>
@@ -742,13 +742,13 @@ export default function VerifyPage() {
     <div className="min-h-screen flex flex-col" style={{ background: "#353E43" }}>
 
       {/* ── Header ── */}
-      <header className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: "#2C3438" }}>
+      <header className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: "var(--ln-coal)" }}>
         <button type="button" onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <img src={LOGO_URL} alt="Living Nexus" className="w-8 h-8 object-contain" />
-          <span className="font-display text-base" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>Living Nexus</span>
+          <span className="font-display text-base" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Living Nexus</span>
         </button>
         <div className="flex-1" />
-        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#AA8E64" }}>Provenance Verification</span>
+        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--ln-smoke)" }}>Provenance Verification</span>
       </header>
 
       {/* ── Main ── */}
@@ -757,10 +757,10 @@ export default function VerifyPage() {
 
           {/* Title */}
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               Verify Witness ID
             </h1>
-            <p className="text-sm" style={{ color: "#3F4A50" }}>
+            <p className="text-sm" style={{ color: "var(--ln-iron)" }}>
               Enter a Witness ID (WID-…) or Collection ID (WID-ALB-…) to verify cryptographic provenance.
             </p>
           </div>
@@ -773,12 +773,12 @@ export default function VerifyPage() {
               onKeyDown={e => e.key === "Enter" && handleSearch()}
               placeholder="WID-… or WID-ALB-…"
               className="font-mono text-sm flex-1"
-              style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.18)", color: "#E6CDAE" }}
+              style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }}
             />
             <Button
               onClick={handleSearch}
               disabled={!inputWid.trim()}
-              style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+              style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
             >
               <Search className="w-4 h-4" />
             </Button>
@@ -795,9 +795,9 @@ export default function VerifyPage() {
 
           {/* Empty state — no query yet */}
           {!queryWid && (
-            <div className="text-center py-12 rounded-2xl" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
-              <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "#CBB183" }} />
-              <p className="text-sm" style={{ color: "#3F4A50" }}>
+            <div className="text-center py-12 " style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.3)" }}>
+              <ShieldCheck className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "var(--ln-gold)" }} />
+              <p className="text-sm" style={{ color: "var(--ln-iron)" }}>
                 Enter a Witness ID or Collection ID above to verify a registered work.
               </p>
             </div>

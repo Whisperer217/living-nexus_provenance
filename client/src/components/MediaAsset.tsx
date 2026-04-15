@@ -105,7 +105,7 @@ function CardMedia({
       ) : (
         <div
           className="absolute inset-0 flex items-center justify-center text-4xl"
-          style={{ background: bg ?? "#2C3438" }}
+          style={{ background: bg ?? "var(--ln-coal)" }}
         >
           {emoji ?? <Music className="w-1/3 h-1/3 opacity-20 text-white" />}
         </div>
@@ -127,7 +127,7 @@ function PlayerMedia({
   return (
     <div
       className="absolute inset-0 flex items-center justify-center overflow-hidden"
-      style={{ background: "#2C3438" }}
+      style={{ background: "var(--ln-coal)" }}
     >
       {/* Blurred background fill */}
       {src && (
@@ -172,7 +172,7 @@ function PlayerMedia({
       ) : (
         <div
           className="absolute inset-0 flex items-center justify-center text-5xl z-10"
-          style={{ background: bg ?? "#2C3438" }}
+          style={{ background: bg ?? "var(--ln-coal)" }}
         >
           {emoji ?? "🎵"}
         </div>
@@ -181,7 +181,7 @@ function PlayerMedia({
       {showGradient !== false && (
         <div
           className="absolute inset-x-0 bottom-0 z-20 pointer-events-none"
-          style={{ height: "60%", background: "linear-gradient(to top, #2C3438 0%, transparent 100%)" }}
+          style={{ height: "60%", background: "linear-gradient(to top, var(--ln-coal) 0%, transparent 100%)" }}
         />
       )}
       {children && <div className="absolute inset-0 z-30">{children}</div>}
@@ -246,7 +246,7 @@ function CinematicMedia({
     <div
       ref={containerRef}
       className="absolute inset-0 overflow-hidden"
-      style={{ background: bg ?? "#2C3438" }}
+      style={{ background: bg ?? "var(--ln-coal)" }}
     >
       {/* Video layer — full bleed, always cover */}
       {videoUrl && !videoError && (
@@ -280,7 +280,7 @@ function CinematicMedia({
       ) : (
         <div
           className="absolute inset-0 flex items-center justify-center text-6xl z-0"
-          style={{ background: bg ?? "#2C3438" }}
+          style={{ background: bg ?? "var(--ln-coal)" }}
         >
           {emoji ?? "🎵"}
         </div>

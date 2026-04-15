@@ -24,32 +24,32 @@ const TIER_CONFIG: Record<Tier, { icon: string; label: string; style: React.CSSP
   covenant: {
     icon: "🔐",
     label: "Covenant Partner",
-    borderColor: "rgba(230,205,174,0.7)",
+    borderColor: "rgba(232,223,200,0.6)",
     style: {
-      background: "rgba(203,177,131,0.10)",
-      color: "#CBB183",
-      border: "1px solid rgba(203,177,131,0.7)",
-      boxShadow: "0 0 8px rgba(203,177,131,0.22)",
+      background: "rgba(196,154,40,0.08)",
+      color: "var(--ln-gold)",
+      border: "1px solid rgba(196,154,40,0.6)",
+      boxShadow: "0 0 8px rgba(196,154,40,0.2)",
     },
   },
   patron: {
     icon: "⟡",
     label: "Patron",
-    borderColor: "rgba(203,177,131,0.6)",
+    borderColor: "rgba(196,154,40,0.5)",
     style: {
-      background: "rgba(203,177,131,0.1)",
-      color: "#CBB183",
-      border: "1px solid rgba(203,177,131,0.6)",
+      background: "rgba(196,154,40,0.09)",
+      color: "var(--ln-gold)",
+      border: "1px solid rgba(196,154,40,0.5)",
     },
   },
   supporter: {
     icon: "✦",
     label: "Supporter",
-    borderColor: "rgba(203,177,131,0.32)",
+    borderColor: "rgba(196,154,40,0.3)",
     style: {
       background: "rgba(230,205,174,0.07)",
       color: "rgba(230,205,174,0.85)",
-      border: "1px solid rgba(203,177,131,0.32)",
+      border: "1px solid rgba(196,154,40,0.3)",
     },
   },
 };

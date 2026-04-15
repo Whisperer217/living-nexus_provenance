@@ -239,9 +239,9 @@ export function WIDPanel({
         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-mono transition-all
           hover:scale-105 active:scale-95 cursor-pointer select-none ${className}`}
         style={{
-          background: "rgba(203,177,131,0.10)",
-          border: "1px solid rgba(203,177,131,0.30)",
-          color: "#CBB183",
+          background: "rgba(196,154,40,0.08)",
+          border: "1px solid rgba(196,154,40,0.25)",
+          color: "var(--ln-gold)",
         }}
         title="View Witness ID provenance record"
       >
@@ -258,15 +258,15 @@ export function WIDPanel({
         <DialogContent
           className="max-w-lg"
           style={{
-            background: "#2C3438",
-            border: "1px solid rgba(203,177,131,0.25)",
-            color: "#E6CDAE",
+            background: "var(--ln-coal)",
+            border: "1px solid rgba(196,154,40,0.2)",
+            color: "var(--ln-parchment)",
           }}
         >
           <DialogHeader>
             <DialogTitle
               className="flex items-center gap-2"
-              style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}
+              style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}
             >
               <Shield className="w-5 h-5" />
               Witness ID Record
@@ -281,20 +281,20 @@ export function WIDPanel({
                   src={coverArtUrl}
                   alt={songTitle || "Cover art"}
                   className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-                  style={{ border: "1px solid rgba(203,177,131,0.18)" }}
+                  style={{ border: "1px solid rgba(196,154,40,0.15)" }}
                 />
               )}
               <div className="min-w-0">
                 {songTitle && (
                   <p
                     className="font-semibold text-sm truncate"
-                    style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
+                    style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
                   >
                     {songTitle}
                   </p>
                 )}
                 {creatorName && (
-                  <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>
                     {creatorName}
                   </p>
                 )}
@@ -304,16 +304,16 @@ export function WIDPanel({
 
           {/* Provenance record table */}
           <div
-            className="rounded-xl p-4 space-y-3 text-xs font-mono"
-            style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.12)" }}
+            className="p-4 space-y-3 text-xs font-mono"
+            style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.08)" }}
           >
             {/* WID */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#AA8E64" }}>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--ln-smoke)" }}>
                 Witness ID
               </p>
               <div className="flex items-center gap-2">
-                <p className="break-all flex-1" style={{ color: "#CBB183" }}>
+                <p className="break-all flex-1" style={{ color: "var(--ln-gold)" }}>
                   {witnessId}
                 </p>
                 <button
@@ -322,31 +322,31 @@ export function WIDPanel({
                   title="Copy WID"
                 >
                   {copied ? (
-                    <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#4ADE80" }} />
+                    <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "var(--ln-seal-bright)" }} />
                   ) : (
-                    <Copy className="w-3.5 h-3.5" style={{ color: "#AA8E64" }} />
+                    <Copy className="w-3.5 h-3.5" style={{ color: "var(--ln-smoke)" }} />
                   )}
                 </button>
               </div>
             </div>
 
             {/* Divider */}
-            <div style={{ borderTop: "1px solid rgba(203,177,131,0.10)" }} />
+            <div style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }} />
 
             {/* Registration date */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#AA8E64" }}>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--ln-smoke)" }}>
                 Registered
               </p>
               <p style={{ color: "#E2E8F0" }}>{formatDate(registeredAt)}</p>
             </div>
 
             {/* Divider */}
-            <div style={{ borderTop: "1px solid rgba(203,177,131,0.10)" }} />
+            <div style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }} />
 
             {/* Verify URL */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#AA8E64" }}>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--ln-smoke)" }}>
                 Verify
               </p>
               <a
@@ -354,7 +354,7 @@ export function WIDPanel({
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1 hover:underline"
-                style={{ color: "#CBB183" }}
+                style={{ color: "var(--ln-gold)" }}
               >
                 livingnexus.org/verify/{witnessId.slice(0, 20)}…
                 <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -365,9 +365,9 @@ export function WIDPanel({
             {(haaiVisualConcept || haaiStyleLanguage || haaiInstrumentation ||
               haaiVocalConveyance || haaiLyricalInspiration || haaiEmotionalTone) && (
               <>
-                <div style={{ borderTop: "1px solid rgba(203,177,131,0.10)" }} />
+                <div style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }} />
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#CBB183" }}>
+                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--ln-gold)" }}>
                     HAAI Authorship Declaration
                   </p>
                   <div className="space-y-1.5 font-sans">
@@ -380,16 +380,16 @@ export function WIDPanel({
                       { label: "Emotional Tone",      value: haaiEmotionalTone },
                     ].filter(f => f.value).map(f => (
                       <div key={f.label}>
-                        <span className="text-[9px] uppercase tracking-wider" style={{ color: "#3F4A50" }}>
+                        <span className="text-[9px] uppercase tracking-wider" style={{ color: "var(--ln-iron)" }}>
                           {f.label}
                         </span>
-                        <p className="text-[11px] leading-snug mt-0.5" style={{ color: "#DACAAA" }}>
+                        <p className="text-[11px] leading-snug mt-0.5" style={{ color: "var(--ln-parchment)" }}>
                           {f.value}
                         </p>
                       </div>
                     ))}
                     {haaiDeclaredAt && (
-                      <p className="text-[9px] mt-1" style={{ color: "#AA8E64" }}>
+                      <p className="text-[9px] mt-1" style={{ color: "var(--ln-smoke)" }}>
                         Declaration sealed {formatDate(haaiDeclaredAt)}
                       </p>
                     )}
@@ -406,7 +406,7 @@ export function WIDPanel({
               style={{
                 background: "rgba(74,222,128,0.12)",
                 border: "1px solid rgba(74,222,128,0.28)",
-                color: "#4ADE80",
+                color: "var(--ln-seal-bright)",
               }}
             >
               <CheckCircle2 className="w-3 h-3" />
@@ -423,8 +423,8 @@ export function WIDPanel({
               onClick={handleShare}
               className="flex-1"
               style={{
-                borderColor: "rgba(203,177,131,0.25)",
-                color: "#CBB183",
+                borderColor: "rgba(196,154,40,0.2)",
+                color: "var(--ln-gold)",
                 background: "transparent",
               }}
             >
@@ -439,8 +439,8 @@ export function WIDPanel({
               onClick={handleCopyLink}
               className="flex-1"
               style={{
-                borderColor: "rgba(203,177,131,0.25)",
-                color: "#CBB183",
+                borderColor: "rgba(196,154,40,0.2)",
+                color: "var(--ln-gold)",
                 background: "transparent",
               }}
             >
@@ -455,8 +455,8 @@ export function WIDPanel({
               onClick={handleDownload}
               className="flex-1"
               style={{
-                borderColor: "rgba(203,177,131,0.25)",
-                color: "#CBB183",
+                borderColor: "rgba(196,154,40,0.2)",
+                color: "var(--ln-gold)",
                 background: "transparent",
               }}
             >
@@ -471,8 +471,8 @@ export function WIDPanel({
                   size="sm"
                   className="w-full"
                   style={{
-                    borderColor: "rgba(203,177,131,0.25)",
-                    color: "#CBB183",
+                    borderColor: "rgba(196,154,40,0.2)",
+                    color: "var(--ln-gold)",
                     background: "transparent",
                   }}
                 >
@@ -489,7 +489,7 @@ export function WIDPanel({
                 className="w-full"
                 style={{
                   borderColor: "rgba(74,222,128,0.4)",
-                  color: "#4ADE80",
+                  color: "var(--ln-seal-bright)",
                   background: "rgba(74,222,128,0.05)",
                 }}
               >

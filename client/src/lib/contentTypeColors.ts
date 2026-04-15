@@ -10,7 +10,7 @@
  *
  * Palette:
  *   Music / Audio  → Purple  (#A78BFA / #7C3AED)
- *   Lyrics Only    → Gold    (#F5C451 / #D0A15F)   — existing WID gold, elevated
+ *   Lyrics Only    → Gold    (#F5C451 / #B8860B)   — existing WID gold, elevated
  *   Manuscript     → Green   (#4ADE80 / #16A34A)
  *   Comic / Novel  → Red     (#F87171 / #DC2626)
  */

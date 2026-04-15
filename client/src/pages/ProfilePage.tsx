@@ -58,7 +58,7 @@ function EditableField({
             rows={3}
             placeholder={placeholder}
             className="flex-1 px-3 py-2 rounded-xl text-[13px] font-body text-white/80
-              bg-[#2C3438] border border-[#A78BFA]/50 outline-none resize-none
+              bg-[#111009] border border-[#A78BFA]/50 outline-none resize-none
               placeholder:text-white/60 overflow-hidden"
             style={{ minHeight: "4.5rem" }}
             autoFocus
@@ -69,13 +69,13 @@ function EditableField({
             onChange={e => setVal(e.target.value)}
             placeholder={placeholder}
             className="flex-1 px-3 py-2 rounded-xl text-[13px] font-body text-white/80
-              bg-[#2C3438] border border-[#A78BFA]/50 outline-none
+              bg-[#111009] border border-[#A78BFA]/50 outline-none
               placeholder:text-white/60"
             autoFocus
             onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
           />
         )}
-        <button type="button" onClick={save} className="p-2 text-[#CBB183] hover:text-[#CBB183]/80 flex-shrink-0">
+        <button type="button" onClick={save} className="p-2 text-[#C49A28] hover:text-[#C49A28]/80 flex-shrink-0">
           <Check size={14} />
         </button>
         <button type="button" onClick={cancel} className="p-2 text-white/70 hover:text-white/60 flex-shrink-0">
@@ -111,12 +111,12 @@ function HandleField({ value, onSave }: { value: string; onSave: (v: string) => 
           onChange={e => setVal(e.target.value)}
           placeholder="artist-handle"
           className="flex-1 px-2 py-1 rounded-lg text-[13px] font-body text-white/80
-            bg-[#2C3438] border border-[#A78BFA]/50 outline-none
+            bg-[#111009] border border-[#A78BFA]/50 outline-none
             placeholder:text-white/60"
           autoFocus
           onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
         />
-        <button type="button" onClick={save} className="p-1.5 text-[#CBB183] hover:text-[#CBB183]/80 flex-shrink-0">
+        <button type="button" onClick={save} className="p-1.5 text-[#C49A28] hover:text-[#C49A28]/80 flex-shrink-0">
           <Check size={13} />
         </button>
         <button type="button" onClick={cancel} className="p-1.5 text-white/70 hover:text-white/60 flex-shrink-0">
@@ -383,7 +383,7 @@ export default function ProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-white/40 font-body text-[14px]">Sign in to view your profile</p>
-        <a href={getLoginUrl()} className="px-5 py-2.5 rounded-xl bg-[#3F4A50]/10 border border-[#CBB183]/30 text-[#CBB183] font-heading text-[13px] tracking-wider hover:bg-[#3F4A50]/20 transition-all">
+        <a href={getLoginUrl()} className="px-5 py-2.5 rounded-xl bg-[#1C1A14]/10 border border-[#C49A28]/30 text-[#C49A28] font-heading text-[13px] tracking-wider hover:bg-[#1C1A14]/20 transition-all">
           Sign In
         </a>
       </div>
@@ -420,7 +420,7 @@ export default function ProfilePage() {
           <div
             className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
             style={{
-              background: "linear-gradient(135deg, #2C3438, #2C3438)",
+              background: "linear-gradient(135deg, var(--ln-coal), #111009)",
             }}
             onClick={() => bannerRef.current?.click()}
           >
@@ -456,7 +456,7 @@ export default function ProfilePage() {
         )}
         {/* Bottom fade — only when banner is populated */}
         {profile?.bannerUrl && (
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#2C3438] to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#111009] to-transparent pointer-events-none" />
         )}
         {/* Gold corner accents */}
         <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
@@ -531,8 +531,8 @@ export default function ProfilePage() {
       <div
         className="w-full"
         style={{
-          background: "#2C3438",
-          borderBottom: "1px solid #2C3438",
+          background: "var(--ln-coal)",
+          borderBottom: "1px solid #111009",
         }}
       >
         <div className="px-6">
@@ -542,9 +542,9 @@ export default function ProfilePage() {
             <div className="-mt-20 flex-shrink-0">
               <div className="relative group">
                 <div
-                  className="w-36 h-36 rounded-2xl overflow-hidden bg-[#2C3438] flex items-center justify-center"
+                  className="w-36 h-36 rounded-2xl overflow-hidden bg-[#111009] flex items-center justify-center"
                   style={{
-                    outline: "3px solid #2C3438",
+                    outline: "3px solid #111009",
                     border: "1.5px solid rgba(212,175,55,0.25)",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                   }}
@@ -576,7 +576,7 @@ export default function ProfilePage() {
                   {profile?.profilePhotoUrl && (
                     <button
                       onClick={() => setShowAvatarPositioner(true)}
-                      className="flex items-center gap-1 text-white/70 hover:text-[#CBB183] text-[10px] font-body transition-colors"
+                      className="flex items-center gap-1 text-white/70 hover:text-[#C49A28] text-[10px] font-body transition-colors"
                     >
                       <Edit2 size={12} />
                       <span>Adjust</span>
@@ -633,7 +633,7 @@ export default function ProfilePage() {
                   placeholder="Your artist name"
                 />
                 <span className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono flex-shrink-0"
-                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)", color: "#CBB183" }}
+                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)", color: "var(--ln-gold)" }}
                 >
                   ARTIST
                 </span>
@@ -662,13 +662,13 @@ export default function ProfilePage() {
                 {(profile as any)?.supporterTier && (
                   <SupporterBadge tier={(profile as any).supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
                 )}
-                <span className="text-sm" style={{ color: "#AA8E64" }}>
-                  <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{dbSongs.length}</span>
+                <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
+                  <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{dbSongs.length}</span>
                   {" "}tracks
                 </span>
                 {totalPlays > 0 && (
-                  <span className="text-sm" style={{ color: "#AA8E64" }}>
-                    <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>
+                  <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
+                    <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>
                       {totalPlays >= 1000 ? `${(totalPlays/1000).toFixed(1)}k` : totalPlays}
                     </span>
                     {" "}plays
@@ -680,7 +680,7 @@ export default function ProfilePage() {
                 <button
                   onClick={copyProfileLink}
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                  style={{ border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }}
+                  style={{ border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-smoke)", background: "transparent" }}
                   title="Copy profile link"
                 >
                   <Copy size={15} />
@@ -688,7 +688,7 @@ export default function ProfilePage() {
                 <button
                   onClick={copyProfileLink}
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                  style={{ border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }}
+                  style={{ border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-smoke)", background: "transparent" }}
                   title="Share profile"
                 >
                   <Share2 size={15} />
@@ -703,7 +703,7 @@ export default function ProfilePage() {
       <div className="px-6 pt-5">
 
         {/* ── Creator Defaults: AI Disclosure + Primary Genre ── */}
-        <div className="mb-4 p-4 rounded-xl border border-white/[0.07] bg-[#2C3438]">
+        <div className="mb-4 p-4 rounded-xl border border-white/[0.07] bg-[#111009]">
           <p className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: "#E2E8F0", fontFamily: "'Cinzel', serif" }}>
             Creator Defaults — applied to every upload
           </p>
@@ -714,8 +714,8 @@ export default function ProfilePage() {
               <select
                 value={profile?.aiDisclosure || "original"}
                 onChange={e => save({ aiDisclosure: e.target.value as "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument" })}
-                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[#2C3438] border border-white/[0.1] outline-none cursor-pointer hover:border-[#A78BFA]/50 transition-colors"
-                style={{ background: "#2C3438" }}
+                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[#111009] border border-white/[0.1] outline-none cursor-pointer hover:border-[#A78BFA]/50 transition-colors"
+                style={{ background: "var(--ln-coal)" }}
               >
                 <option value="original">Human-Made — No AI Used</option>
                 <option value="ai_assisted">AI-Assisted — Human + AI Tools</option>
@@ -731,7 +731,7 @@ export default function ProfilePage() {
                 defaultValue={profile?.primaryGenre || ""}
                 placeholder="e.g. Gospel, Hip-Hop, Ambient…"
                 maxLength={64}
-                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[#2C3438] border border-white/[0.1] outline-none placeholder:text-white/60 hover:border-[#A78BFA]/50 focus:border-[#A78BFA]/70 transition-colors"
+                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[#111009] border border-white/[0.1] outline-none placeholder:text-white/60 hover:border-[#A78BFA]/50 focus:border-[#A78BFA]/70 transition-colors"
                 onBlur={e => { const v = e.target.value.trim(); if (v !== (profile?.primaryGenre || "")) save({ primaryGenre: v }); }}
                 onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
               />
@@ -765,19 +765,19 @@ export default function ProfilePage() {
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           {profile?.twitterHandle && (
             <a href={`https://twitter.com/${profile.twitterHandle}`} target="_blank" rel="noreferrer"
-              className="p-2 rounded-lg bg-[#2C3438] border border-white/[0.06] text-white/40 hover:text-[#1DA1F2] hover:border-[#1DA1F2]/30 transition-all">
+              className="p-2 rounded-lg bg-[#111009] border border-white/[0.06] text-white/40 hover:text-[#1DA1F2] hover:border-[#1DA1F2]/30 transition-all">
               <Twitter size={14} />
             </a>
           )}
           {profile?.instagramHandle && (
             <a href={`https://instagram.com/${profile.instagramHandle}`} target="_blank" rel="noreferrer"
-              className="p-2 rounded-lg bg-[#2C3438] border border-white/[0.06] text-white/40 hover:text-[#E1306C] hover:border-[#E1306C]/30 transition-all">
+              className="p-2 rounded-lg bg-[#111009] border border-white/[0.06] text-white/40 hover:text-[#E1306C] hover:border-[#E1306C]/30 transition-all">
               <Instagram size={14} />
             </a>
           )}
           {profile?.youtubeHandle && (
             <a href={`https://youtube.com/@${profile.youtubeHandle}`} target="_blank" rel="noreferrer"
-              className="p-2 rounded-lg bg-[#2C3438] border border-white/[0.06] text-white/40 hover:text-[#FF0000] hover:border-[#FF0000]/30 transition-all">
+              className="p-2 rounded-lg bg-[#111009] border border-white/[0.06] text-white/40 hover:text-[#FF0000] hover:border-[#FF0000]/30 transition-all">
               <Youtube size={14} />
             </a>
           )}
@@ -808,14 +808,14 @@ export default function ProfilePage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`relative flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading tracking-wider whitespace-nowrap transition-all border-b-2 -mb-px flex-shrink-0
                     ${activeTab === tab.id
-                      ? "border-[#CBB183] text-[#CBB183]"
+                      ? "border-[#C49A28] text-[#C49A28]"
                       : "border-transparent text-white/40 hover:text-white/65"
                     }`}
                 >
                   {tab.label}
                   {tab.badge && (
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center animate-pulse"
-                      style={{ background: "#EF4444", color: "white" }}>
+                      style={{ background: "var(--ln-ember)", color: "white" }}>
                       {tab.badge}
                     </span>
                   )}
@@ -833,14 +833,14 @@ export default function ProfilePage() {
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Total Plays", value: (analytics?.totalPlays ?? totalPlays).toLocaleString(), sub: analytics?.playsThisWeek ? `+${analytics.playsThisWeek} this week` : "across all tracks", color: "#CBB183" },
+                { label: "Total Plays", value: (analytics?.totalPlays ?? totalPlays).toLocaleString(), sub: analytics?.playsThisWeek ? `+${analytics.playsThisWeek} this week` : "across all tracks", color: "var(--ln-gold)" },
                 { label: "Total Likes", value: (analytics?.totalLikes ?? 0).toLocaleString(), sub: analytics?.likesThisWeek ? `+${analytics.likesThisWeek} this week` : "across all tracks", color: "#f472b6" },
                 { label: "Tracks Published", value: dbSongs.filter((s: any) => s.status === "Published").length, sub: "live on Explore", color: "#A78BFA" },
                 { label: "Gifts Received", value: analytics?.totalGiftsReceived ?? 0, sub: analytics?.totalAmountReceived ? `$${((analytics.totalAmountReceived) / 100).toFixed(2)} total` : "tip income", color: "#4ade80" },
                 { label: "Witnessing", value: witnessNetwork?.witnessing?.length ?? 0, sub: "creators you witness", color: "#60a5fa" },
                 { label: "Witnesses", value: witnessNetwork?.witnessedBy?.length ?? 0, sub: "creators witnessing you", color: "#fb923c" },
               ].map(s => (
-                <div key={s.label} className="p-4 rounded-xl bg-[#2C3438] border border-white/[0.06]">
+                <div key={s.label} className="p-4 rounded-xl bg-[#111009] border border-white/[0.06]">
                   <div className="text-[22px] font-heading mb-1" style={{ color: s.color }}>{s.value}</div>
                   <div className="text-[12px] font-body text-white/70">{s.label}</div>
                   <div className="text-[11px] font-body text-white/40 mt-0.5">{s.sub}</div>
@@ -848,22 +848,22 @@ export default function ProfilePage() {
               ))}
             </div>
             {/* Stripe Connect status card */}
-            <div className="p-4 rounded-xl border border-white/[0.07] bg-[#2C3438]">
+            <div className="p-4 rounded-xl border border-white/[0.07] bg-[#111009]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <DollarSign size={14} className="text-[#CBB183]" />
+                  <DollarSign size={14} className="text-[#C49A28]" />
                   <span className="font-heading text-[13px] text-white/80 tracking-wide">Stripe Connect</span>
                 </div>
                 {connectData?.status === "enabled" ? (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.12)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }}>Active</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.12)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)" }}>Active</span>
                 ) : connectData?.status === "pending" ? (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(170,142,100,0.12)", color: "#AA8E64", border: "1px solid rgba(170,142,100,0.3)" }}>Pending</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(170,142,100,0.12)", color: "var(--ln-smoke)", border: "1px solid rgba(170,142,100,0.3)" }}>Pending</span>
                 ) : (
                   <button
                     onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` })}
                     disabled={connectMutation.isPending}
                     className="text-[11px] px-3 py-1 rounded-lg font-body text-black disabled:opacity-50"
-                    style={{ background: "#3F4A50" }}
+                    style={{ background: "var(--ln-iron)" }}
                   >
                     {connectMutation.isPending ? "Connecting…" : "Connect Stripe"}
                   </button>
@@ -886,11 +886,11 @@ export default function ProfilePage() {
                       TIP: { icon: DollarSign, color: "#4ade80", label: "Gift received" },
                       COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Comment" },
                       LIKE: { icon: Heart, color: "#f472b6", label: "Like" },
-                      WITNESS_REGISTERED: { icon: Fingerprint, color: "#CBB183", label: "WID Registered" },
-                      WITNESS_VERIFIED: { icon: CheckCircle, color: "#CBB183", label: "WID Verified" },
+                      WITNESS_REGISTERED: { icon: Fingerprint, color: "var(--ln-gold)", label: "WID Registered" },
+                      WITNESS_VERIFIED: { icon: CheckCircle, color: "var(--ln-gold)", label: "WID Verified" },
                       WORK_REFERENCED: { icon: Layers, color: "#fb923c", label: "Work Referenced" },
                       SYSTEM_UPDATE: { icon: Zap, color: "#60a5fa", label: "System Update" },
-                      PRESERVATION_MODE: { icon: Star, color: "#CBB183", label: "Preservation Mode" },
+                      PRESERVATION_MODE: { icon: Star, color: "var(--ln-gold)", label: "Preservation Mode" },
                       PROJECT_PUBLISHED: { icon: Layers, color: "#34d399", label: "Project Published" },
                       PROJECT_FUNDED: { icon: DollarSign, color: "#34d399", label: "Project Funded" },
                       FOLLOW: { icon: Users, color: "#f472b6", label: "New Follower" },
@@ -947,7 +947,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/upload")}
                 className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#A78BFA" }}
+                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#A78BFA" }}
               >
                 <Upload size={11} /> Upload
               </button>
@@ -955,7 +955,7 @@ export default function ProfilePage() {
             {songsLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.04] bg-[#2C3438] animate-pulse">
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.04] bg-[#111009] animate-pulse">
                     <div className="w-11 h-11 rounded-lg flex-shrink-0 bg-white/[0.06]" />
                     <div className="flex-1 space-y-2">
                       <div className="h-3 rounded bg-white/[0.06] w-2/3" />
@@ -971,8 +971,8 @@ export default function ProfilePage() {
               </div>
             ) : (
               (dbSongs as any[]).map((song) => (
-                <div key={song.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#2C3438] hover:border-white/[0.12] transition-all group">
-                  <div className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[#2C3438]">
+                <div key={song.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all group">
+                  <div className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[#111009]">
                     {song.coverArtUrl
                       ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
                       : <div className="w-full h-full flex items-center justify-center text-white/60"><Music size={16} /></div>}
@@ -1014,13 +1014,13 @@ export default function ProfilePage() {
                     {song.witnessId && (
                       <button
                         onClick={() => navigate(`/song/${song.id}#witness-records`)}
-                        className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#CBB183] hover:bg-white/[0.1] transition-all"
+                        className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#C49A28] hover:bg-white/[0.1] transition-all"
                         title="View Witness Records"
                       >
                         <Shield size={12} />
                       </button>
                     )}
-                    <button type="button" onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#CBB183] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
+                    <button type="button" onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#C49A28] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
                   </div>
                 </div>
               ))
@@ -1038,7 +1038,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/archive")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#A78BFA" }}
+                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#A78BFA" }}
               >
                 Manage in Archive
               </button>
@@ -1051,8 +1051,8 @@ export default function ProfilePage() {
               </div>
             ) : (
               (myPlaylists as any[]).map((pl) => (
-                <div key={pl.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#2C3438] hover:border-white/[0.12] transition-all">
-                  <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+                <div key={pl.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all">
+                  <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
                     <Music size={14} className="text-white/40" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -1085,8 +1085,8 @@ export default function ProfilePage() {
                 const s = item.song ?? item;
                 const creatorName = item.creator?.artistHandle || item.creator?.name || artistName;
                 return (
-                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#2C3438] hover:border-white/[0.12] transition-all">
-                    <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-[#2C3438]">
+                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all">
+                    <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-[#111009]">
                       {s.coverArtUrl
                         ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover" />
                         : <div className="w-full h-full flex items-center justify-center"><Music size={14} className="text-white/40" /></div>}
@@ -1114,7 +1114,7 @@ export default function ProfilePage() {
                 <button
                   onClick={() => markAllRead.mutate()}
                   className="text-[11px] font-body px-3 py-1 rounded-lg transition-all"
-                  style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#A78BFA" }}
+                  style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#A78BFA" }}
                 >
                   Mark all read
                 </button>
@@ -1148,7 +1148,7 @@ export default function ProfilePage() {
                       {n.refId && n.refType === "song" && n.songTitle && (
                         <div
                           className="mt-2 flex items-center gap-2 rounded-lg overflow-hidden"
-                          style={{ background: "#2C3438", border: "1px solid #2C3438" }}
+                          style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           {/* Cover art — links to song page */}
@@ -1190,17 +1190,17 @@ export default function ProfilePage() {
                                 }}
                                 className="flex-shrink-0 w-8 h-8 mr-1 flex items-center justify-center rounded-full transition-all hover:scale-105"
                                 style={{
-                                  background: isSignalActive ? "#2C3438" : "#2C3438",
-                                  border: `1px solid ${isSignalActive ? "#AA8E64" : "#2C3438"}`,
+                                  background: isSignalActive ? "var(--ln-coal)" : "var(--ln-coal)",
+                                  border: `1px solid ${isSignalActive ? "var(--ln-smoke)" : "var(--ln-coal)"}`,
                                 }}
                                 title={isSignalActive ? "Now playing" : "Play track"}
                               >
                                 {isSignalPlaying ? (
-                                  <div className="live-wave scale-75" style={{ "--gold": "#CBB183" } as React.CSSProperties}>
+                                  <div className="live-wave scale-75" style={{ "--gold": "var(--ln-gold)" } as React.CSSProperties}>
                                     <span /><span /><span /><span /><span />
                                   </div>
                                 ) : isSignalActive ? (
-                                  <div className="live-wave paused scale-75" style={{ "--gold": "#CBB183" } as React.CSSProperties}>
+                                  <div className="live-wave paused scale-75" style={{ "--gold": "var(--ln-gold)" } as React.CSSProperties}>
                                     <span /><span /><span /><span /><span />
                                   </div>
                                 ) : (
@@ -1221,9 +1221,9 @@ export default function ProfilePage() {
                           }}
                           className="mt-1.5 text-[10px] font-body px-2 py-0.5 rounded-md transition-all"
                           style={{
-                            background: replyingTo === n.id ? "#2C3438" : "#2C3438",
-                            border: "1px solid #2C3438",
-                            color: replyingTo === n.id ? "#A78BFA" : "#AA8E64",
+                            background: replyingTo === n.id ? "var(--ln-coal)" : "var(--ln-coal)",
+                            border: "1px solid #111009",
+                            color: replyingTo === n.id ? "#A78BFA" : "var(--ln-smoke)",
                           }}
                         >
                           {replyingTo === n.id ? "Cancel" : "Reply"}
@@ -1247,8 +1247,8 @@ export default function ProfilePage() {
                         rows={3}
                         className="w-full px-3 py-2 rounded-xl text-[12px] font-body text-white/80 resize-none outline-none placeholder:text-white/40"
                         style={{
-                          background: "#2C3438",
-                          border: "1px solid #2C3438",
+                          background: "var(--ln-coal)",
+                          border: "1px solid #111009",
                         }}
                         autoFocus
                         onKeyDown={(e) => {
@@ -1267,8 +1267,8 @@ export default function ProfilePage() {
                           disabled={!replyText.trim() || replyMutation.isPending}
                           className="text-[11px] font-body px-3 py-1 rounded-lg transition-all disabled:opacity-40"
                           style={{
-                            background: "#2C3438",
-                            border: "1px solid #2C3438",
+                            background: "var(--ln-coal)",
+                            border: "1px solid #111009",
                             color: "#A78BFA",
                           }}
                         >
@@ -1293,7 +1293,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => navigate("/field-notes")}
                 className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#A78BFA" }}
+                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#A78BFA" }}
               >
                 Open Field Notes
               </button>
@@ -1306,14 +1306,14 @@ export default function ProfilePage() {
               </div>
             ) : (
               (myFieldNotes as any[]).map((note: any) => (
-                <div key={note.id} className="p-3 rounded-xl border border-white/[0.06] bg-[#2C3438] hover:border-white/[0.12] transition-all">
+                <div key={note.id} className="p-3 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-body text-white/80 truncate">{note.title}</p>
                       <p className="text-[11px] font-body text-white/35 mt-0.5 line-clamp-2">{note.body?.slice(0, 120)}{note.body?.length > 120 ? "…" : ""}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <span className="text-[9px] px-1.5 py-0.5 rounded font-body capitalize" style={{ background: "#2C3438", color: "#AA8E64" }}>{note.category}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded font-body capitalize" style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)" }}>{note.category}</span>
                       <span className="text-[10px] font-body text-white/25">{new Date(note.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -1337,7 +1337,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => setShowAddTestimony(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-body transition-all"
-                style={{ background: "#2C3438", border: "1px solid #7A5A1E", color: "#CBB183" }}
+                style={{ background: "var(--ln-coal)", border: "1px solid #7A5A1E", color: "var(--ln-gold)" }}
               >
                 <Fingerprint size={11} /> Add Testimony
               </button>
@@ -1346,7 +1346,7 @@ export default function ProfilePage() {
             {/* Add Testimony Modal */}
             {showAddTestimony && createPortal(
               <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
-                <div className="w-full max-w-lg rounded-2xl p-6 space-y-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+                <div className="w-full max-w-lg rounded-2xl p-6 space-y-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-[16px] font-heading text-white">Add Testimony</h3>
@@ -1365,7 +1365,7 @@ export default function ProfilePage() {
                       rows={6}
                       maxLength={5000}
                       className="w-full rounded-xl px-3 py-2.5 text-[13px] font-body text-white/85 resize-none focus:outline-none focus:ring-1"
-                      style={{ background: "#2C3438", border: "1px solid #C3AB7D", caretColor: "#CBB183" }}
+                      style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", caretColor: "var(--ln-gold)" }}
                     />
                     <div className="text-right text-[10px] font-body text-white/25 mt-1">{testimonyContent.length}/5000</div>
                   </div>
@@ -1377,7 +1377,7 @@ export default function ProfilePage() {
                       type="text"
                       placeholder="WID-MUS-XXXXXXXX-YYYYYYYY (comma-separated)"
                       className="w-full rounded-xl px-3 py-2 text-[12px] font-body text-white/70 focus:outline-none focus:ring-1"
-                      style={{ background: "#2C3438", border: "1px solid #C3AB7D" }}
+                      style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D" }}
                       onChange={e => {
                         const wids = e.target.value.split(",").map(w => w.trim()).filter(Boolean);
                         setTestimonyLinkedWorks(wids);
@@ -1387,9 +1387,9 @@ export default function ProfilePage() {
                   </div>
 
                   {/* WID preview */}
-                  <div className="rounded-xl p-3" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+                  <div className="rounded-xl p-3" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
                     <div className="text-[10px] font-heading tracking-widest text-white/30 mb-1">WILL GENERATE</div>
-                    <div className="font-mono text-[13px]" style={{ color: "#CBB183" }}>WID-TST-XXXXXXXX-YYYYYYYY</div>
+                    <div className="font-mono text-[13px]" style={{ color: "var(--ln-gold)" }}>WID-TST-XXXXXXXX-YYYYYYYY</div>
                     <div className="text-[10px] font-body text-white/30 mt-0.5">A unique Witness ID sealed to your identity and this content</div>
                   </div>
 
@@ -1397,7 +1397,7 @@ export default function ProfilePage() {
                     <button
                       onClick={() => setShowAddTestimony(false)}
                       className="flex-1 py-2 rounded-xl text-[13px] font-body text-white/40 transition-all"
-                      style={{ border: "1px solid #CBB183" }}
+                      style={{ border: "1px solid #C49A28" }}
                     >
                       Cancel
                     </button>
@@ -1405,7 +1405,7 @@ export default function ProfilePage() {
                       onClick={() => createTestimonyMutation.mutate({ content: testimonyContent, linkedWorks: testimonyLinkedWorks.length > 0 ? testimonyLinkedWorks : undefined })}
                       disabled={testimonyContent.length < 10 || createTestimonyMutation.isPending}
                       className="flex-1 py-2 rounded-xl text-[13px] font-heading tracking-wide transition-all disabled:opacity-40"
-                      style={{ background: "#AA8E64", color: "#2C3438" }}
+                      style={{ background: "var(--ln-smoke)", color: "var(--ln-coal)" }}
                     >
                       {createTestimonyMutation.isPending ? "Witnessing…" : "Seal Testimony"}
                     </button>
@@ -1423,7 +1423,7 @@ export default function ProfilePage() {
                 <p className="text-[11px] font-body text-white/20 mb-4 max-w-xs mx-auto">A testimony is a permanent statement of why your work exists. It cannot be changed — only added to.</p>
                 <button
                   onClick={() => setShowAddTestimony(true)}
-                  className="text-[#CBB183] hover:underline text-[12px] font-body"
+                  className="text-[#C49A28] hover:underline text-[12px] font-body"
                 >
                   Add your first testimony
                 </button>
@@ -1431,12 +1431,12 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-3">
                 {(myTestimonies as any[]).map((t: any) => (
-                  <div key={t.id} className="p-4 rounded-xl border border-white/[0.06] bg-[#2C3438] hover:border-white/[0.12] transition-all">
+                  <div key={t.id} className="p-4 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all">
                     {/* WID badge */}
                     <div className="flex items-center justify-between mb-2">
                       <span
                         className="font-mono text-[10px] px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
-                        style={{ background: "#2C3438", color: "#CBB183", border: "1px solid #7A5A1E" }}
+                        style={{ background: "var(--ln-coal)", color: "var(--ln-gold)", border: "1px solid #7A5A1E" }}
                         onClick={() => { navigator.clipboard.writeText(t.wid); toast.success("WID-TST copied!"); }}
                         title="Click to copy WID"
                       >
@@ -1450,7 +1450,7 @@ export default function ProfilePage() {
                     {t.linkedWorks && (t.linkedWorks as string[]).length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {(t.linkedWorks as string[]).map((wid: string) => (
-                          <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid #2C3438" }}>{wid}</span>
+                          <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #111009" }}>{wid}</span>
                         ))}
                       </div>
                     )}
@@ -1471,12 +1471,12 @@ export default function ProfilePage() {
           <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">SETTINGS</div>
           {/* ── Lights On / Lights Dim toggle ────────────────────────────────── */}
           <div className="mb-4 flex items-center justify-between px-4 py-3 rounded-xl"
-            style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+            style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
             <div>
-              <div className="text-[12px] font-heading tracking-wide" style={{ color: "#CBB183" }}>
+              <div className="text-[12px] font-heading tracking-wide" style={{ color: "var(--ln-gold)" }}>
                 {lightsMode === 'on' ? '☀️ Lights On' : '🌙 Lights Dim'}
               </div>
-              <div className="text-[10px] font-body mt-0.5" style={{ color: "#AA8E64" }}>
+              <div className="text-[10px] font-body mt-0.5" style={{ color: "var(--ln-smoke)" }}>
                 {lightsMode === 'on'
                   ? 'Espresso Crème — warm cream palette for all visitors'
                   : 'Lantern Mode — charred oak dark palette for all visitors'}
@@ -1489,11 +1489,11 @@ export default function ProfilePage() {
               style={{
                 background: lightsMode === 'on'
                   ? "rgba(170,142,100,0.2)"
-                  : "#CBB183",
+                  : "var(--ln-gold)",
                 border: lightsMode === 'on'
                   ? "1px solid rgba(170,142,100,0.5)"
-                  : "1px solid #2C3438",
-                color: lightsMode === 'on' ? "#AA8E64" : "#AA8E64",
+                  : "1px solid #111009",
+                color: lightsMode === 'on' ? "var(--ln-smoke)" : "var(--ln-smoke)",
               }}
             >
               {setLightsModeMutation.isPending ? (
@@ -1509,27 +1509,27 @@ export default function ProfilePage() {
             <button
               onClick={() => navigate("/redeem")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#CBB183" }}
+              style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-gold)" }}
             >
               <Zap size={11} /> Redeem Code
             </button>
             <button
               onClick={() => navigate("/learn")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#AA8E64" }}
+              style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-smoke)" }}
             >
               <ScrollText size={11} /> WID Spec &amp; Lexicon
             </button>
             <button
               onClick={() => navigate("/founders")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-              style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#AA8E64" }}
+              style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-smoke)" }}
             >
               <Star size={11} /> Founders
             </button>
           </div>
           {/* ── Data Rights ─────────────────────────────────────── */}
-          <div className="mt-6 pt-5" style={{ borderTop: "1px solid #CBB183" }}>
+          <div className="mt-6 pt-5" style={{ borderTop: "1px solid #C49A28" }}>
             <div className="text-[10px] font-heading tracking-widest text-white/20 mb-3">DATA RIGHTS</div>
             <p className="text-[11px] font-body text-white/35 mb-3 leading-relaxed">
               Per our Privacy Policy, you have the right to export your data or request account deletion. Deletion requests are processed within 90 days.
@@ -1574,7 +1574,7 @@ function SocialsEditor({
       <button
         onClick={() => setEditing(true)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-body
-          bg-[#2C3438] border border-white/[0.06] text-white/70
+          bg-[#111009] border border-white/[0.06] text-white/70
           hover:border-[#A78BFA]/30 hover:text-[#A78BFA] transition-all"
       >
         <Edit2 size={10} /> Edit Socials
@@ -1595,14 +1595,14 @@ function SocialsEditor({
           onChange={e => set(e.target.value)}
           placeholder={placeholder}
           className="px-3 py-1.5 rounded-lg text-[12px] font-body text-white/70
-            bg-[#2C3438] border border-white/[0.08] outline-none
+            bg-[#111009] border border-white/[0.08] outline-none
             focus:border-[#A78BFA]/50 placeholder:text-white/60"
         />
       ))}
       <div className="col-span-2 flex gap-2">
         <button
           onClick={() => { onSave(t, i, y); setEditing(false); }}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] bg-[#3F4A50]/10 border border-[#CBB183]/30 text-[#CBB183]"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] bg-[#1C1A14]/10 border border-[#C49A28]/30 text-[#C49A28]"
         >
           <Check size={12} /> Save
         </button>
@@ -1649,7 +1649,7 @@ function ExportDataButton() {
       onClick={handleExport}
       disabled={loading}
       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all disabled:opacity-50"
-      style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#4ADE80" }}
+      style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-seal-bright)" }}
     >
       {loading ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
       Export My Data
@@ -1671,7 +1671,7 @@ function RequestDeletionButton() {
     return (
       <div
         className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-body"
-        style={{ background: "#2C3438", border: "1px solid #EF4444", color: "#EF4444" }}
+        style={{ background: "var(--ln-coal)", border: "1px solid #EF4444", color: "var(--ln-ember)" }}
       >
         <AlertTriangle size={11} />
         <span>Confirm deletion request?</span>
@@ -1693,7 +1693,7 @@ function RequestDeletionButton() {
     <button
       onClick={() => setConfirming(true)}
       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body transition-all"
-      style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#AA8E64" }}
+      style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-smoke)" }}
     >
       <Trash2 size={11} /> Request Account Deletion
     </button>

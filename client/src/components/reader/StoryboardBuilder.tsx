@@ -160,7 +160,7 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-heading font-bold tracking-widest uppercase" style={{ color: "#CBB183" }}>
+          <p className="text-xs font-heading font-bold tracking-widest uppercase" style={{ color: "var(--ln-gold)" }}>
             Storyboard Builder
           </p>
           <p className="text-[10px] mt-0.5" style={{ color: "#5A6A72" }}>
@@ -170,7 +170,7 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
         {pages.length > 0 && (
           <span
             className="text-[10px] font-heading font-bold tracking-wider px-2.5 py-1 rounded-full"
-            style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.25)" }}
+            style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}
           >
             {pages.length} {pages.length === 1 ? "PAGE" : "PAGES"}
           </span>
@@ -185,8 +185,8 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
         onClick={() => !disabled && !uploading && fileInputRef.current?.click()}
         className="rounded-xl p-6 text-center cursor-pointer transition-all"
         style={{
-          border: `2px dashed ${dragOver ? "#CBB183" : "rgba(203,177,131,0.22)"}`,
-          background: dragOver ? "rgba(203,177,131,0.05)" : "#2C3438",
+          border: `2px dashed ${dragOver ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}`,
+          background: dragOver ? "rgba(196,154,40,0.04)" : "var(--ln-coal)",
           opacity: disabled ? 0.5 : 1,
           pointerEvents: disabled ? "none" : "auto",
         }}
@@ -201,13 +201,13 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
         />
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
-            <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#CBB183" }} />
-            <p className="text-xs font-heading" style={{ color: "#AA8E64" }}>Uploading pages…</p>
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--ln-gold)" }} />
+            <p className="text-xs font-heading" style={{ color: "var(--ln-smoke)" }}>Uploading pages…</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <ImagePlus className="w-8 h-8 opacity-40" style={{ color: "#CBB183" }} />
-            <p className="text-xs font-heading font-bold" style={{ color: "#E6CDAE" }}>
+            <ImagePlus className="w-8 h-8 opacity-40" style={{ color: "var(--ln-gold)" }} />
+            <p className="text-xs font-heading font-bold" style={{ color: "var(--ln-parchment)" }}>
               {pages.length === 0 ? "Drop page images here or click to browse" : "Add more pages"}
             </p>
             <p className="text-[10px]" style={{ color: "#5A6A72" }}>JPG · PNG · WEBP · up to 10 MB per page</p>
@@ -228,7 +228,7 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
               className="relative rounded-xl overflow-hidden group"
               style={{
                 background: "#1A2530",
-                border: idx === 0 ? "1px solid rgba(203,177,131,0.55)" : "1px solid rgba(255,255,255,0.08)",
+                border: idx === 0 ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(255,255,255,0.08)",
                 cursor: disabled ? "default" : "grab",
               }}
             >
@@ -245,13 +245,13 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                   style={{ background: "rgba(0,0,0,0.45)" }}
                 >
-                  <GripVertical size={20} style={{ color: "#CBB183" }} />
+                  <GripVertical size={20} style={{ color: "var(--ln-gold)" }} />
                 </div>
                 {/* Cover badge */}
                 {idx === 0 && (
                   <div
                     className="absolute top-1.5 left-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-heading font-bold tracking-wider"
-                    style={{ background: "rgba(0,0,0,0.75)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.55)" }}
+                    style={{ background: "rgba(0,0,0,0.75)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
                   >
                     <Crown size={8} />
                     COVER
@@ -260,7 +260,7 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
                 {/* Page number badge */}
                 <div
                   className="absolute bottom-1.5 left-1.5 text-[9px] font-heading font-bold px-1.5 py-0.5 rounded"
-                  style={{ background: "rgba(0,0,0,0.65)", color: "#AA8E64" }}
+                  style={{ background: "rgba(0,0,0,0.65)", color: "var(--ln-smoke)" }}
                 >
                   {page.pageNumber}
                 </div>
@@ -285,7 +285,7 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
                   disabled={disabled}
                   maxLength={200}
                   className="w-full bg-transparent text-[10px] outline-none placeholder:opacity-40 font-heading"
-                  style={{ color: "#DACAAA" }}
+                  style={{ color: "var(--ln-parchment)" }}
                 />
               </div>
             </div>
@@ -295,15 +295,15 @@ export function StoryboardBuilder({ onChange, disabled = false, initialPages }: 
           {!disabled && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-xl flex flex-col items-center justify-center gap-2 transition-all hover:border-[rgba(203,177,131,0.45)]"
+              className="rounded-xl flex flex-col items-center justify-center gap-2 transition-all hover:border-[rgba(196,154,40,0.4)]"
               style={{
                 aspectRatio: "3/4",
-                border: "2px dashed rgba(203,177,131,0.18)",
+                border: "2px dashed rgba(196,154,40,0.15)",
                 background: "transparent",
                 color: "#5A6A72",
               }}
             >
-              <Plus size={20} style={{ color: "#CBB183", opacity: 0.5 }} />
+              <Plus size={20} style={{ color: "var(--ln-gold)", opacity: 0.5 }} />
               <span className="text-[9px] font-heading tracking-wider" style={{ color: "#5A6A72" }}>ADD PAGE</span>
             </button>
           )}

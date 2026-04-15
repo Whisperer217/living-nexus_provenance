@@ -98,7 +98,7 @@ export function AddToMyListModal({
           <a
             href={getLoginUrl()}
             className="inline-block px-5 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: "#CBB183", color: "#2C3438" }}
+            style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
           >
             Sign In
           </a>
@@ -121,7 +121,7 @@ export function AddToMyListModal({
       <div className="flex flex-col px-4 pt-3 pb-2 border-b border-white/[0.08]">
         <span
           className="text-[11px] font-semibold tracking-widest uppercase"
-          style={{ fontFamily: "Cinzel, serif", color: "#CBB183" }}
+          style={{ fontFamily: "Cinzel, serif", color: "var(--ln-gold)" }}
         >
           Add to My List
         </span>
@@ -146,12 +146,12 @@ export function AddToMyListModal({
                 onClick={() => handleAddToExisting(pl.id)}
                 disabled={isBusy || isAdded}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] transition-colors text-left hover:bg-white/[0.06] disabled:opacity-60"
-                style={{ color: "#DACAAA" }}
+                style={{ color: "var(--ln-parchment)" }}
               >
                 {isAdded ? (
-                  <Check className="w-3.5 h-3.5 shrink-0" style={{ color: "#CBB183" }} />
+                  <Check className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--ln-gold)" }} />
                 ) : isAdding ? (
-                  <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" style={{ color: "#CBB183" }} />
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" style={{ color: "var(--ln-gold)" }} />
                 ) : (
                   <ListMusic className="w-3.5 h-3.5 shrink-0 opacity-40" />
                 )}
@@ -186,16 +186,16 @@ export function AddToMyListModal({
               maxLength={128}
               className="flex-1 bg-transparent text-[13px] rounded-lg px-3 py-1.5 outline-none focus:ring-1 text-white/90"
               style={{
-                border: "1px solid rgba(203,177,131,0.25)",
+                border: "1px solid rgba(196,154,40,0.2)",
                 // @ts-ignore
-                "--tw-ring-color": "#CBB183",
+                "--tw-ring-color": "var(--ln-gold)",
               }}
             />
             <button
               onClick={handleCreateAndAdd}
               disabled={isBusy || !newListName.trim()}
               className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors disabled:opacity-50"
-              style={{ background: "#CBB183", color: "#2C3438" }}
+              style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
             >
               {createMutation.isPending ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -208,7 +208,7 @@ export function AddToMyListModal({
           <button
             onClick={() => setShowCreateForm(true)}
             className="w-full flex items-center gap-3 px-4 py-3 text-[13px] transition-colors hover:bg-white/[0.05]"
-            style={{ color: "#CBB183" }}
+            style={{ color: "var(--ln-gold)" }}
           >
             <Plus className="w-3.5 h-3.5" />
             New list

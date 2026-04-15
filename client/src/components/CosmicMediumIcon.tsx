@@ -28,7 +28,7 @@ interface CosmicMediumIconProps {
 export const MEDIUM_COLORS: Record<MediumType, { primary: string; glow: string; bg: string; border: string }> = {
   audio:      { primary: "#A78BFA",  glow: "rgba(167,139,250,0.35)", bg: "rgba(124,58,237,0.12)",  border: "rgba(167,139,250,0.35)" },
   lyrics:     { primary: "#F5C451",  glow: "rgba(245,196,81,0.35)",  bg: "rgba(208,161,95,0.12)",  border: "rgba(245,196,81,0.40)"  },
-  manuscript: { primary: "#4ADE80",  glow: "rgba(74,222,128,0.30)",  bg: "rgba(22,163,74,0.12)",   border: "rgba(74,222,128,0.40)"  },
+  manuscript: { primary: "var(--ln-seal-bright)",  glow: "rgba(74,222,128,0.30)",  bg: "rgba(22,163,74,0.12)",   border: "rgba(74,222,128,0.40)"  },
   comic:      { primary: "#F87171",  glow: "rgba(248,113,113,0.30)", bg: "rgba(220,38,38,0.12)",   border: "rgba(248,113,113,0.40)" },
 };
 
@@ -184,7 +184,7 @@ export function CosmicMediumIcon({
         onClick={onClick}
         className="relative flex flex-col items-center justify-center gap-2 rounded-xl p-3 transition-all duration-300 cursor-pointer"
         style={{
-          background: active ? colors.bg : "#2C3438",
+          background: active ? colors.bg : "var(--ln-coal)",
           border: `1px solid ${active ? colors.border.replace("0.25", "0.6") : colors.border}`,
           boxShadow: active ? `0 0 18px ${colors.glow}, inset 0 0 12px ${colors.glow.replace("0.35", "0.08")}` : "none",
         }}
@@ -201,7 +201,7 @@ export function CosmicMediumIcon({
         <Glyph color={colors.primary} size={size} />
         <span
           className="text-xs font-semibold tracking-wide leading-none"
-          style={{ fontFamily: "'Cinzel', serif", color: active ? colors.primary : "#AA8E64" }}
+          style={{ fontFamily: "'Cinzel', serif", color: active ? colors.primary : "var(--ln-smoke)" }}
         >
           {displayLabel}
         </span>
@@ -243,7 +243,7 @@ export function CosmicMediumIcon({
         </p>
         <p
           className="text-[12px] font-mono mt-1 tabular-nums font-bold"
-          style={{ color: count && count !== "—" ? "#DACAAA" : "#3F4A50" }}
+          style={{ color: count && count !== "—" ? "var(--ln-parchment)" : "var(--ln-iron)" }}
         >
           {count ?? "—"}
         </p>

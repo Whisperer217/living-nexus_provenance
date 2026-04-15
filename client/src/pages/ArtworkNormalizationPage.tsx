@@ -54,7 +54,7 @@ function RecordRow({ record }: { record: FlaggedRecord }) {
     <div
       className="rounded-xl overflow-hidden transition-all"
       style={{
-        background: "#2C3438",
+        background: "var(--ln-coal)",
         border: `1px solid ${isMissing ? "rgba(239,68,68,0.35)" : "rgba(170,142,100,0.25)"}`,
       }}
     >
@@ -66,8 +66,8 @@ function RecordRow({ record }: { record: FlaggedRecord }) {
         <span
           className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-heading tracking-wide flex-shrink-0"
           style={{
-            background: "#2C3438",
-            color: "#AA8E64",
+            background: "var(--ln-coal)",
+            color: "var(--ln-smoke)",
           }}
         >
           {ENTITY_ICONS[record.entityType]}
@@ -80,7 +80,7 @@ function RecordRow({ record }: { record: FlaggedRecord }) {
         {/* Flag type */}
         <span
           className="flex items-center gap-1 text-[11px] flex-shrink-0"
-          style={{ color: isMissing ? "#EF4444" : "#CBB183" }}
+          style={{ color: isMissing ? "var(--ln-ember)" : "var(--ln-gold)" }}
         >
           {isMissing ? <ImageOff size={12} /> : <Crosshair size={12} />}
           {isMissing ? "Missing artwork" : "Default position"}
@@ -95,15 +95,15 @@ function RecordRow({ record }: { record: FlaggedRecord }) {
       {expanded && (
         <div
           className="px-4 pb-4 pt-1 border-t"
-          style={{ borderColor: "#2C3438" }}
+          style={{ borderColor: "var(--ln-coal)" }}
         >
           <div className="flex gap-4 items-start">
             {/* Thumbnail */}
             <div
               className="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center"
               style={{
-                background: "#2C3438",
-                border: `1px solid ${isMissing ? "rgba(239,68,68,0.3)" : "rgba(170,142,100,0.2)"}`,
+                background: "var(--ln-coal)",
+                border: `1px solid ${isMissing ? "rgba(196,68,10,0.3)" : "rgba(170,142,100,0.2)"}`,
               }}
             >
               {record.imageUrl ? (
@@ -123,17 +123,17 @@ function RecordRow({ record }: { record: FlaggedRecord }) {
 
             {/* Details */}
             <div className="flex-1 min-w-0 space-y-1.5">
-              <div className="text-[11px] font-body" style={{ color: "#3F4A50" }}>
+              <div className="text-[11px] font-body" style={{ color: "var(--ln-iron)" }}>
                 {record.flagReason}
               </div>
 
               {record.prevPositionX !== null && (
-                <div className="text-[11px] font-mono" style={{ color: "#3F4A50" }}>
+                <div className="text-[11px] font-mono" style={{ color: "var(--ln-iron)" }}>
                   Position: {record.prevPositionX}% × {record.prevPositionY}%
                 </div>
               )}
               {record.prevAvatarPosition && (
-                <div className="text-[11px] font-mono" style={{ color: "#3F4A50" }}>
+                <div className="text-[11px] font-mono" style={{ color: "var(--ln-iron)" }}>
                   Avatar position: {record.prevAvatarPosition}
                 </div>
               )}
@@ -155,12 +155,12 @@ function RecordRow({ record }: { record: FlaggedRecord }) {
                   </Link>
                 )}
                 {record.entityType === "collection" && (
-                  <span className="text-[11px]" style={{ color: "#3F4A50" }}>
+                  <span className="text-[11px]" style={{ color: "var(--ln-iron)" }}>
                     Collection #{record.entityId}
                   </span>
                 )}
 
-                <span className="text-[10px] ml-auto" style={{ color: "#3F4A50" }}>
+                <span className="text-[10px] ml-auto" style={{ color: "var(--ln-iron)" }}>
                   Creator #{record.creatorId}
                 </span>
               </div>
@@ -217,7 +217,7 @@ export default function ArtworkNormalizationPage() {
       <div className="mb-8">
         <Link href="/admin">
           <button type="button" className="flex items-center gap-1.5 text-[12px] mb-4 hover:opacity-80 transition-opacity"
-            style={{ color: "#3F4A50" }}>
+            style={{ color: "var(--ln-iron)" }}>
             <ArrowLeft size={13} /> Back to Admin
           </button>
         </Link>
@@ -225,10 +225,10 @@ export default function ArtworkNormalizationPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="font-heading text-2xl tracking-wider mb-1"
-              style={{ color: "#CBB183" }}>
+              style={{ color: "var(--ln-gold)" }}>
               Artwork Normalization
             </h1>
-            <p className="text-[13px] font-body" style={{ color: "#3F4A50" }}>
+            <p className="text-[13px] font-body" style={{ color: "var(--ln-iron)" }}>
               v2.17.0 aligned — metadata-only pass. No original assets modified.
               Flags records where position data was never manually set or artwork is missing.
             </p>
@@ -239,9 +239,9 @@ export default function ArtworkNormalizationPage() {
             disabled={running}
             className="flex-shrink-0 gap-2 font-heading tracking-wide text-[12px]"
             style={{
-              background: running ? "#2C3438" : "rgba(203,177,131,0.12)",
-              color: "#CBB183",
-              border: "1px solid rgba(203,177,131,0.35)",
+              background: running ? "var(--ln-coal)" : "rgba(196,154,40,0.08)",
+              color: "var(--ln-gold)",
+              border: "1px solid rgba(196,154,40,0.3)",
             }}
           >
             {running ? <RefreshCw size={13} className="animate-spin" /> : <ScanLine size={13} />}
@@ -254,12 +254,12 @@ export default function ArtworkNormalizationPage() {
       {report && (
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { label: "Records Scanned", value: report.totalScanned, icon: <ScanLine size={16} />, color: "#AA8E64" },
-            { label: "Clean", value: report.totalNormalized, icon: <CheckCircle2 size={16} />, color: "#4ADE80" },
-            { label: "Flagged", value: report.totalFlagged, icon: <AlertTriangle size={16} />, color: "#E6CDAE" },
+            { label: "Records Scanned", value: report.totalScanned, icon: <ScanLine size={16} />, color: "var(--ln-smoke)" },
+            { label: "Clean", value: report.totalNormalized, icon: <CheckCircle2 size={16} />, color: "var(--ln-seal-bright)" },
+            { label: "Flagged", value: report.totalFlagged, icon: <AlertTriangle size={16} />, color: "var(--ln-parchment)" },
           ].map(card => (
             <div key={card.label} className="rounded-xl p-4"
-              style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+              style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
               <div className="flex items-center gap-2 mb-2" style={{ color: card.color }}>
                 {card.icon}
                 <span className="text-[11px] font-heading tracking-wide uppercase">{card.label}</span>
@@ -274,9 +274,9 @@ export default function ArtworkNormalizationPage() {
       {report && (
         <div className="rounded-xl p-4 mb-8 font-mono text-[11px] whitespace-pre-wrap leading-relaxed"
           style={{
-            background: "#2C3438",
-            border: "1px solid #2C3438",
-            color: "#3F4A50",
+            background: "var(--ln-coal)",
+            border: "1px solid #111009",
+            color: "var(--ln-iron)",
           }}>
           {report.summary}
           {"\n\nLast run: "}{new Date(report.runAt).toLocaleString()}
@@ -287,7 +287,7 @@ export default function ArtworkNormalizationPage() {
       {!report && !running && (
         <div className="text-center py-20">
           <ScanLine size={32} className="mx-auto mb-4 opacity-20" />
-          <p className="text-[14px] font-body" style={{ color: "#3F4A50" }}>
+          <p className="text-[14px] font-body" style={{ color: "var(--ln-iron)" }}>
             No audit has been run yet. Click "Run Audit" to scan all artwork records.
           </p>
         </div>
@@ -297,8 +297,8 @@ export default function ArtworkNormalizationPage() {
       {flagged?.hasReport && (flagged.totalFlagged ?? 0) > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle size={14} style={{ color: "#E6CDAE" }} />
-            <h2 className="font-heading text-sm tracking-wider" style={{ color: "#E6CDAE" }}>
+            <AlertTriangle size={14} style={{ color: "var(--ln-parchment)" }} />
+            <h2 className="font-heading text-sm tracking-wider" style={{ color: "var(--ln-parchment)" }}>
               Flagged Records — {flagged.totalFlagged} requiring creator attention
             </h2>
           </div>
@@ -314,9 +314,9 @@ export default function ArtworkNormalizationPage() {
                 onClick={() => setActiveGroup(tab.key)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-heading tracking-wide transition-all"
                 style={{
-                  background: activeGroup === tab.key ? "rgba(203,177,131,0.12)" : "#2C3438",
-                  color: activeGroup === tab.key ? "#CBB183" : "#3F4A50",
-                  border: `1px solid ${activeGroup === tab.key ? "rgba(203,177,131,0.28)" : "#2C3438"}`,
+                  background: activeGroup === tab.key ? "rgba(196,154,40,0.08)" : "var(--ln-coal)",
+                  color: activeGroup === tab.key ? "var(--ln-gold)" : "var(--ln-iron)",
+                  border: `1px solid ${activeGroup === tab.key ? "rgba(196,154,40,0.25)" : "var(--ln-coal)"}`,
                 }}
               >
                 {tab.icon}
@@ -333,7 +333,7 @@ export default function ArtworkNormalizationPage() {
             {(activeGroup === "missing" ? missingRecords : defaultRecords).length === 0 && (
               <div className="text-center py-8">
                 <CheckCircle2 size={24} className="mx-auto mb-2" style={{ color: "rgba(74,222,128,0.5)" }} />
-                <p className="text-[13px] font-body" style={{ color: "#3F4A50" }}>
+                <p className="text-[13px] font-body" style={{ color: "var(--ln-iron)" }}>
                   No {activeGroup === "missing" ? "missing artwork" : "default position"} records found.
                 </p>
               </div>
@@ -346,10 +346,10 @@ export default function ArtworkNormalizationPage() {
       {flagged?.hasReport && (flagged.totalFlagged ?? 0) === 0 && (
         <div className="text-center py-16">
           <CheckCircle2 size={40} className="mx-auto mb-4" style={{ color: "rgba(74,222,128,0.6)" }} />
-          <h3 className="font-heading text-lg mb-2" style={{ color: "#4ADE80" }}>
+          <h3 className="font-heading text-lg mb-2" style={{ color: "var(--ln-seal-bright)" }}>
             All Records Normalized
           </h3>
-          <p className="text-[13px] font-body" style={{ color: "#3F4A50" }}>
+          <p className="text-[13px] font-body" style={{ color: "var(--ln-iron)" }}>
             Every artwork record has an image and a manually-set focal position.
           </p>
         </div>

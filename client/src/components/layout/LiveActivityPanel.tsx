@@ -88,7 +88,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
         />
         <span
           className="text-[9px] font-heading tracking-[0.12em] uppercase"
-          style={{ color: open ? "#CBB183" : "#AA8E64" }}
+          style={{ color: open ? "var(--ln-gold)" : "var(--ln-smoke)" }}
         >
           Live
         </span>
@@ -116,14 +116,14 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
         >
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#ef4444", animation: "pulse 1.5s infinite" }} />
-            <span className="text-[10px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(203,177,131,0.8)" }}>
+            <span className="text-[10px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.7)" }}>
               Live Activity
             </span>
           </div>
           <button
             onClick={onToggle}
             className="p-1 rounded transition-all"
-            style={{ color: "#3F4A50" }}
+            style={{ color: "var(--ln-iron)" }}
           >
             <X size={14} />
           </button>
@@ -141,8 +141,8 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 transition-all"
               style={{
                 fontSize: "10px", fontWeight: 600,
-                color: tab === t.key ? "#CBB183" : "#3F4A50",
-                borderBottom: tab === t.key ? "2px solid #CBB183" : "2px solid transparent",
+                color: tab === t.key ? "var(--ln-gold)" : "var(--ln-iron)",
+                borderBottom: tab === t.key ? "2px solid #C49A28" : "2px solid transparent",
               }}
             >
               <t.icon size={11} />
@@ -161,13 +161,13 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
               {currentTrack && (
                 <>
                   <div className="px-4 py-1.5">
-                    <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "#3F4A50" }}>
+                    <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "var(--ln-iron)" }}>
                       Your Session
                     </span>
                   </div>
                   <div
                     className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-all"
-                    style={{ background: "rgba(203,177,131,0.06)" }}
+                    style={{ background: "rgba(196,154,40,0.04)" }}
                   >
                     <div
                       className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"
@@ -179,7 +179,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                           <div className="flex gap-0.5 items-end h-3.5">
                             {[0, 1, 2].map(i => (
                               <div key={i} className="w-0.5 rounded-sm" style={{
-                                background: "#3F4A50",
+                                background: "var(--ln-iron)",
                                 height: `${[8, 14, 10][i]}px`,
                                 animationName: "bar-bounce",
                                 animationDuration: "0.8s",
@@ -194,13 +194,13 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                       }
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-semibold truncate" style={{ color: "#E6CDAE" }}>{currentTrack.title}</div>
-                      <div className="text-[10px] truncate" style={{ color: "#3F4A50" }}>{currentTrack.artist}</div>
+                      <div className="text-[11px] font-semibold truncate" style={{ color: "var(--ln-parchment)" }}>{currentTrack.title}</div>
+                      <div className="text-[10px] truncate" style={{ color: "var(--ln-iron)" }}>{currentTrack.artist}</div>
                     </div>
                     <div className="flex gap-0.5 items-end h-3" style={{ flexShrink: 0 }}>
                       {[0, 1, 2].map(i => (
                         <div key={i} className="w-0.5 rounded-sm" style={{
-                          background: "#3F4A50",
+                          background: "var(--ln-iron)",
                           height: `${[6, 12, 8][i]}px`,
                           animationName: state.isPlaying ? "bar-bounce" : "none",
                           animationDuration: "0.8s",
@@ -218,7 +218,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
 
               {/* Recent public tracks */}
               <div className="px-4 py-1.5">
-                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "#3F4A50" }}>
+                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "var(--ln-iron)" }}>
                   Recently Registered
                 </span>
               </div>
@@ -240,20 +240,20 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                   >
                     {s.coverArtUrl
                       ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover rounded-md" />
-                      : <Music size={12} style={{ color: "#3F4A50" }} />
+                      : <Music size={12} style={{ color: "var(--ln-iron)" }} />
                     }
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-medium truncate" style={{ color: "#DACAAA" }}>{s.title}</div>
-                    <div className="text-[9px] truncate" style={{ color: "#3F4A50" }}>{c.name || c.artistHandle || "Unknown"}</div>
+                    <div className="text-[11px] font-medium truncate" style={{ color: "var(--ln-parchment)" }}>{s.title}</div>
+                    <div className="text-[9px] truncate" style={{ color: "var(--ln-iron)" }}>{c.name || c.artistHandle || "Unknown"}</div>
                   </div>
                 </div>
                 );
               })}
               {(!recentSongs || recentSongs.length === 0) && (
                 <div className="px-4 py-6 text-center">
-                  <Music size={20} style={{ color: "#2C3438", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "#3F4A50" }}>No tracks yet</div>
+                  <Music size={20} style={{ color: "var(--ln-coal)", margin: "0 auto 8px" }} />
+                  <div className="text-[11px]" style={{ color: "var(--ln-iron)" }}>No tracks yet</div>
                 </div>
               )}
             </div>
@@ -263,7 +263,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           {tab === "tips" && (
             <div className="py-2">
               <div className="px-4 py-1.5">
-                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "#3F4A50" }}>
+                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "var(--ln-iron)" }}>
                   Recent Tips
                 </span>
               </div>
@@ -275,34 +275,34 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                 >
                   <div
                     className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                    style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183" }}
+                    style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}
                   >
                     {(t.fanName || "?").charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[11px]" style={{ color: "#DACAAA" }}>
+                    <div className="text-[11px]" style={{ color: "var(--ln-parchment)" }}>
                       <span style={{ color: "rgba(230,205,174,0.9)", fontWeight: 600 }}>@{t.fanName || "fan"}</span>
                       {" tipped "}
-                      <span style={{ color: "#DACAAA", fontWeight: 500 }}>{t.creatorName}</span>
+                      <span style={{ color: "var(--ln-parchment)", fontWeight: 500 }}>{t.creatorName}</span>
                     </div>
-                    <div className="text-[10px] mt-0.5" style={{ color: "#3F4A50" }}>
+                    <div className="text-[10px] mt-0.5" style={{ color: "var(--ln-iron)" }}>
                       {formatAmount(t.amountCents)} · "{t.songTitle}"
                     </div>
                     {t.createdAt && (
-                      <div className="text-[9px] mt-0.5" style={{ color: "#3F4A50" }}>
+                      <div className="text-[9px] mt-0.5" style={{ color: "var(--ln-iron)" }}>
                         {timeAgo(new Date(t.createdAt).getTime())}
                       </div>
                     )}
                   </div>
-                  <div className="text-[12px] font-bold flex-shrink-0" style={{ color: "#CBB183" }}>
+                  <div className="text-[12px] font-bold flex-shrink-0" style={{ color: "var(--ln-gold)" }}>
                     {formatAmount(t.amountCents)}
                   </div>
                 </div>
               )) : (
                 <div className="px-4 py-6 text-center">
-                  <Zap size={20} style={{ color: "#2C3438", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "#3F4A50" }}>No tips yet today</div>
-                  <div className="text-[10px] mt-1" style={{ color: "#2C3438" }}>Be the first to support a creator</div>
+                  <Zap size={20} style={{ color: "var(--ln-coal)", margin: "0 auto 8px" }} />
+                  <div className="text-[11px]" style={{ color: "var(--ln-iron)" }}>No tips yet today</div>
+                  <div className="text-[10px] mt-1" style={{ color: "var(--ln-coal)" }}>Be the first to support a creator</div>
                 </div>
               )}
             </div>

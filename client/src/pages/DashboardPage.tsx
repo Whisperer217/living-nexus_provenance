@@ -168,9 +168,9 @@ export default function DashboardPage() {
   const statusColor = (s: string) => ({
     Draft: "var(--lnx-orange)",
     Published: "var(--lnx-green)",
-    Unlisted: "#CBB183",
+    Unlisted: "var(--ln-gold)",
     Deleted: "var(--lnx-red)",
-  }[s] ?? "#AA8E64");
+  }[s] ?? "var(--ln-smoke)");
   const licenseMutation = trpc.livingArchive.purchaseLicenseOneTime.useMutation({
     onSuccess: (data: { url: string | null }) => { if (data.url) window.open(data.url, "_blank"); toast.info("Redirecting to checkout..."); },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -190,8 +190,8 @@ export default function DashboardPage() {
   if (!isAuthenticated) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#353E43" }}>
       <div className="text-center">
-        <p style={{ color: "#AA8E64" }}>Please sign in to access your dashboard.</p>
-        <Link href="/"><Button className="mt-4" style={{ background: "#CBB183", color: "#E6CDAE" }}>Go Home</Button></Link>
+        <p style={{ color: "var(--ln-smoke)" }}>Please sign in to access your dashboard.</p>
+        <Link href="/"><Button className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Go Home</Button></Link>
       </div>
     </div>
   );
@@ -237,8 +237,8 @@ export default function DashboardPage() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.82) 0%, rgba(30,16,40,0.45) 45%, transparent 100%)" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(53,62,67,0.85) 0%, rgba(53,62,67,0.15) 40%, transparent 100%)" }} />
         <div className="absolute bottom-0 left-0 p-6">
-          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
-          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Creator Dashboard</h1>
+          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
+          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Creator Dashboard</h1>
         </div>
       </div>
       <div className="container py-10" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
@@ -246,28 +246,28 @@ export default function DashboardPage() {
         {/* ── No-Works Onboarding Banner ─────────────────────────────────────── */}
         {hasNoWorks && (
           <div
-            className="mb-8 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-6"
+            className="mb-8 p-8 flex flex-col md:flex-row items-center gap-6"
             style={{
-              background: "linear-gradient(135deg, #2C3438, #2C3438)",
-              border: "1px solid rgba(203,177,131,0.22)",
+              background: "linear-gradient(135deg, var(--ln-coal), #111009)",
+              border: "1px solid rgba(196,154,40,0.2)",
             }}
           >
             {/* Icon */}
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(203,177,131,0.10)", border: "1px solid rgba(203,177,131,0.28)" }}
+              style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}
             >
-              <Shield size={28} style={{ color: "#CBB183" }} />
+              <Shield size={28} style={{ color: "var(--ln-gold)" }} />
             </div>
             {/* Copy */}
             <div className="flex-1 text-center md:text-left">
               <p
                 className="text-lg font-bold mb-1"
-                style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
+                style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
               >
                 Upload your first piece and get your WID
               </p>
-              <p className="text-sm" style={{ color: "#AA8E64" }}>
+              <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>
                 Every work you upload receives a cryptographic Witness ID — your permanent, immutable proof of origin.
                 No algorithms. No ownership loss. Just creation, proven.
               </p>
@@ -276,7 +276,7 @@ export default function DashboardPage() {
             <Link href="/upload">
               <Button
                 className="flex-shrink-0"
-                style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload &amp; Witness Your Work
@@ -288,12 +288,12 @@ export default function DashboardPage() {
         {/* Action buttons */}
         <div className="flex items-center justify-end mb-8 gap-2">
             <Link href={`/creator/${user?.id}`}>
-              <Button size="sm" variant="outline" style={{ borderColor: "#3F4A50", color: "#DACAAA" }}>
+              <Button size="sm" variant="outline" style={{ borderColor: "var(--ln-iron)", color: "var(--ln-parchment)" }}>
                 <ExternalLink className="w-3 h-3 mr-1" /> View Profile
               </Button>
             </Link>
             <Link href="/upload">
-              <Button size="sm" style={{ background: "#CBB183", color: "#E6CDAE" }}>
+              <Button size="sm" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
                 <Upload className="w-3 h-3 mr-1" /> Upload Track
               </Button>
             </Link>
@@ -301,35 +301,35 @@ export default function DashboardPage() {
 
         {/* Pre-Onboarding Checklist Modal */}
         <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
-          <DialogContent style={{ background: "#2C3438", border: "1px solid #2C3438", color: "#E6CDAE" }}>
+          <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #111009", color: "var(--ln-parchment)" }}>
             <DialogHeader>
-              <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>
+              <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
                 Before You Start — Have These Ready
               </DialogTitle>
             </DialogHeader>
-            <p className="text-sm mb-4" style={{ color: "#DACAAA" }}>
+            <p className="text-sm mb-4" style={{ color: "var(--ln-parchment)" }}>
               Stripe's verification takes about 5 minutes. Having these items ready prevents interruptions.
             </p>
             <div className="space-y-3">
               {ONBOARDING_CHECKLIST.map((item) => (
-                <div key={item.label} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: "#2C3438" }}>
+                <div key={item.label} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: "var(--ln-coal)" }}>
                   <span className="text-xl flex-shrink-0">{item.icon}</span>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: "#E6CDAE" }}>{item.label}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>{item.detail}</p>
+                    <p className="text-sm font-semibold" style={{ color: "var(--ln-parchment)" }}>{item.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>{item.detail}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <Separator className="my-4" style={{ background: "#2C3438" }} />
-            <p className="text-xs mb-4" style={{ color: "#3F4A50" }}>
+            <Separator className="my-4" style={{ background: "var(--ln-coal)" }} />
+            <p className="text-xs mb-4" style={{ color: "var(--ln-iron)" }}>
               Living Nexus uses Stripe Connect for secure payouts. Your information goes directly to Stripe — we never store your SSN or bank details.
             </p>
             <Button
               className="w-full font-bold"
               onClick={() => { setShowChecklist(false); connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` }); }}
               disabled={connectMutation.isPending}
-              style={{ background: "#CBB183", color: "#E6CDAE" }}
+              style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
             >
               {connectMutation.isPending ? "Opening Stripe..." : "I'm Ready — Start Setup"}
             </Button>
@@ -340,16 +340,16 @@ export default function DashboardPage() {
         {(connectData?.status === "pending" || connectData?.status === "not_connected") && (
           <div
             className="w-full rounded-xl mb-6 overflow-hidden"
-            style={{ border: "1px solid #CBB183" }}
+            style={{ border: "1px solid #C49A28" }}
           >
             {/* Top row: main call to action */}
             <div
               className="flex items-center justify-between gap-4 px-4 py-3"
-              style={{ background: "#CBB183" }}
+              style={{ background: "var(--ln-gold)" }}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "#2C3438" }} />
-                <span className="text-sm font-semibold leading-snug" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "var(--ln-coal)" }} />
+                <span className="text-sm font-semibold leading-snug" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
                   {connectData?.status === "pending"
                     ? "Your gift account is incomplete. Finish setup to receive gifts."
                     : "Enable gifts to start receiving direct payments from fans."}
@@ -360,14 +360,14 @@ export default function DashboardPage() {
                 onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
                 disabled={connectMutation.isPending}
                 className="flex-shrink-0 font-bold text-sm"
-                style={{ background: "#353E43", color: "#CBB183", border: "none" }}
+                style={{ background: "#353E43", color: "var(--ln-gold)", border: "none" }}
               >
                 {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Complete Setup" : "Enable Gifts"}
               </Button>
             </div>
             {/* Bottom row: plain-English requirements when pending */}
             {connectData?.status === "pending" && connectData?.requirementsLabels && connectData.requirementsLabels.length > 0 && (
-              <div className="px-4 py-3" style={{ background: "#2C3438" }}>
+              <div className="px-4 py-3" style={{ background: "var(--ln-coal)" }}>
                 <p className="text-xs font-semibold mb-2" style={{ color: "var(--lnx-orange)" }}>Still needed to activate your account:</p>
                 <div className="flex flex-wrap gap-2">
                   {(connectData.requirementsLabels as string[]).map((label: string) => (
@@ -388,12 +388,12 @@ export default function DashboardPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "#CBB183", delta: null },
-            { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "#CBB183", delta: (dashboardDeltas as any)?.newPlays ?? 0 },
+            { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "var(--ln-gold)", delta: null },
+            { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "var(--ln-gold)", delta: (dashboardDeltas as any)?.newPlays ?? 0 },
             { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "var(--lnx-green)", delta: null },
-            { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "#4ADE80", delta: (dashboardDeltas as any)?.newTips ?? 0 },
+            { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "var(--ln-seal-bright)", delta: (dashboardDeltas as any)?.newTips ?? 0 },
           ].map(({ label, value, icon: Icon, color, delta }) => (
-            <div key={label} className="rounded-xl p-4 relative" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
+            <div key={label} className="p-4 relative" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4" style={{ color }} />
                 <span className="text-xs" style={{ color: "#E2E8F0" }}>{label}</span>
@@ -416,10 +416,10 @@ export default function DashboardPage() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           {/* License Status */}
-          <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
+          <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <Shield className="w-4 h-4" style={{ color: "#CBB183" }} />
-              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Creator License</h3>
+              <Shield className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Creator License</h3>
             </div>
             {isLicensed ? (
               <div className="flex items-center gap-2">
@@ -429,8 +429,8 @@ export default function DashboardPage() {
             ) : (
               <>
                 <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Unlock 100 song slots, commercial license, and Witness ID provenance certificates.</p>
-                <p className="text-lg font-bold mb-3" style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}>$89.98 <span className="text-xs font-normal" style={{ color: "#E2E8F0" }}>one-time</span></p>
-                <Button size="sm" className="w-full" onClick={() => licenseMutation.mutate({ origin: window.location.origin })} disabled={licenseMutation.isPending} style={{ background: "#CBB183", color: "#E6CDAE" }}>
+                <p className="text-lg font-bold mb-3" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>$89.98 <span className="text-xs font-normal" style={{ color: "#E2E8F0" }}>one-time</span></p>
+                <Button size="sm" className="w-full" onClick={() => licenseMutation.mutate({ origin: window.location.origin })} disabled={licenseMutation.isPending} style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
                   {licenseMutation.isPending ? "Processing..." : "Purchase License"}
                 </Button>
               </>
@@ -438,30 +438,30 @@ export default function DashboardPage() {
           </div>
 
           {/* Song Slots */}
-          <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
+          <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <Music className="w-4 h-4" style={{ color: "#CBB183" }} />
-              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Song Slots</h3>
+              <Music className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Song Slots</h3>
             </div>
             <div className="mb-2">
               <div className="flex justify-between text-xs mb-1" style={{ color: "#E2E8F0" }}>
                 <span>{slotsUsed} used</span><span>{slotsTotal} total</span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: "#2C3438" }}>
-                <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "var(--lnx-red)" : "#CBB183" }} />
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--ln-coal)" }}>
+                <div className="h-full rounded-full transition-all" style={{ width: `${slotsPercent}%`, background: slotsPercent >= 90 ? "var(--lnx-red)" : "var(--ln-gold)" }} />
               </div>
             </div>
             <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Need more? Choose a package — one-time, no subscription.</p>
             <div className="grid grid-cols-3 gap-1 mb-2">
               {(["micro_10", "micro_30", "micro_50"] as const).map((pkg) => (
-                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "rgba(203,177,131,0.45)", color: "#CBB183", fontSize: "11px", padding: "4px 2px" }}>
+                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "rgba(196,154,40,0.4)", color: "var(--ln-gold)", fontSize: "11px", padding: "4px 2px" }}>
                   {pkg === "micro_10" ? "10 · $8.80" : pkg === "micro_30" ? "30 · $26.40" : "50 · $44"}
                 </Button>
               ))}
             </div>
             <div className="grid grid-cols-3 gap-1">
               {(["bulk_100", "bulk_300", "bulk_500"] as const).map((pkg) => (
-                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "rgba(203,177,131,0.45)", color: "#CBB183", fontSize: "11px", padding: "4px 2px" }}>
+                <Button key={pkg} size="sm" variant="outline" onClick={() => slotsMutation.mutate({ packageId: pkg, origin: window.location.origin })} disabled={slotsMutation.isPending} style={{ borderColor: "rgba(196,154,40,0.4)", color: "var(--ln-gold)", fontSize: "11px", padding: "4px 2px" }}>
                   {pkg === "bulk_100" ? "100 · $88" : pkg === "bulk_300" ? "300 · $264" : "500 · $440"}
                 </Button>
               ))}
@@ -469,10 +469,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Tips / Stripe Connect */}
-          <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
+          <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="w-4 h-4" style={{ color: "var(--lnx-orange)" }} />
-              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Gift Payments</h3>
+              <h3 className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Gift Payments</h3>
             </div>
             {tipsEnabled ? (
               <div className="flex items-center gap-2">
@@ -492,12 +492,12 @@ export default function DashboardPage() {
                     <p className="text-xs font-semibold mb-1" style={{ color: "var(--lnx-orange)" }}>Still needed:</p>
                     <ul className="space-y-0.5">
                       {(connectData.requirementsLabels as string[]).slice(0, 3).map((label: string) => (
-                        <li key={label} className="text-xs flex items-center gap-1" style={{ color: "#AA8E64" }}>
+                        <li key={label} className="text-xs flex items-center gap-1" style={{ color: "var(--ln-smoke)" }}>
                           <AlertCircle className="w-3 h-3 flex-shrink-0" />{label}
                         </li>
                       ))}
                       {(connectData.requirementsLabels as string[]).length > 3 && (
-                        <li className="text-xs" style={{ color: "#3F4A50" }}>+{(connectData.requirementsLabels as string[]).length - 3} more</li>
+                        <li className="text-xs" style={{ color: "var(--ln-iron)" }}>+{(connectData.requirementsLabels as string[]).length - 3} more</li>
                       )}
                     </ul>
                   </div>
@@ -506,7 +506,7 @@ export default function DashboardPage() {
                   size="sm" className="w-full" variant="outline"
                   onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
                   disabled={connectMutation.isPending}
-                  style={{ borderColor: "rgba(74,222,128,0.45)", color: "var(--lnx-green)" }}
+                  style={{ borderColor: "rgba(58,138,86,0.4)", color: "var(--lnx-green)" }}
                 >
                   {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Continue Setup" : "Enable Gifts"}
                 </Button>
@@ -516,13 +516,13 @@ export default function DashboardPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>
           <button
             onClick={() => setActiveTab("songs")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "songs" ? "#CBB183" : "transparent",
-              color: activeTab === "songs" ? "#E6CDAE" : "#AA8E64",
+              background: activeTab === "songs" ? "var(--ln-gold)" : "transparent",
+              color: activeTab === "songs" ? "var(--ln-parchment)" : "var(--ln-smoke)",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -534,8 +534,8 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("transforms")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "transforms" ? "#CBB183" : "transparent",
-              color: activeTab === "transforms" ? "white" : "#AA8E64",
+              background: activeTab === "transforms" ? "var(--ln-gold)" : "transparent",
+              color: activeTab === "transforms" ? "white" : "var(--ln-smoke)",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -548,7 +548,7 @@ export default function DashboardPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative"
             style={{
               background: activeTab === "activity" ? "var(--lnx-orange)" : "transparent",
-              color: activeTab === "activity" ? "#E6CDAE" : "#AA8E64",
+              color: activeTab === "activity" ? "var(--ln-parchment)" : "var(--ln-smoke)",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -557,7 +557,7 @@ export default function DashboardPage() {
             {(newEventCount as number) > 0 && activeTab !== "activity" ? (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse"
-                style={{ background: "#EF4444", color: "white" }}
+                style={{ background: "var(--ln-ember)", color: "white" }}
               >{(newEventCount as number) > 99 ? "99+" : String(newEventCount)}</span>
             ) : activityEvents?.length ? (
               <span className="text-xs opacity-70">({activityEvents.length})</span>
@@ -567,9 +567,9 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("collections")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "collections" ? "rgba(203,177,131,0.12)" : "transparent",
-              color: activeTab === "collections" ? "#CBB183" : "#AA8E64",
-              border: activeTab === "collections" ? "1px solid rgba(203,177,131,0.35)" : "1px solid transparent",
+              background: activeTab === "collections" ? "rgba(196,154,40,0.08)" : "transparent",
+              color: activeTab === "collections" ? "var(--ln-gold)" : "var(--ln-smoke)",
+              border: activeTab === "collections" ? "1px solid rgba(196,154,40,0.3)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -582,7 +582,7 @@ export default function DashboardPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
               background: activeTab === "archive" ? "rgba(56,189,248,0.2)" : "transparent",
-              color: activeTab === "archive" ? "#38BDF8" : "#AA8E64",
+              color: activeTab === "archive" ? "#38BDF8" : "var(--ln-smoke)",
               border: activeTab === "archive" ? "1px solid rgba(56,189,248,0.4)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
@@ -595,7 +595,7 @@ export default function DashboardPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
               background: activeTab === "analytics" ? "rgba(56,189,248,0.2)" : "transparent",
-              color: activeTab === "analytics" ? "#38BDF8" : "#AA8E64",
+              color: activeTab === "analytics" ? "#38BDF8" : "var(--ln-smoke)",
               border: activeTab === "analytics" ? "1px solid rgba(56,189,248,0.4)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
@@ -607,9 +607,9 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("widcache")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "widcache" ? "rgba(203,177,131,0.10)" : "transparent",
-              color: activeTab === "widcache" ? "#CBB183" : "#AA8E64",
-              border: activeTab === "widcache" ? "1px solid rgba(203,177,131,0.32)" : "1px solid transparent",
+              background: activeTab === "widcache" ? "rgba(196,154,40,0.08)" : "transparent",
+              color: activeTab === "widcache" ? "var(--ln-gold)" : "var(--ln-smoke)",
+              border: activeTab === "widcache" ? "1px solid rgba(196,154,40,0.3)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -620,9 +620,9 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("discord")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: activeTab === "discord" ? "rgba(203,177,131,0.2)" : "transparent",
-              color: activeTab === "discord" ? "#CBB183" : "#AA8E64",
-              border: activeTab === "discord" ? "1px solid rgba(203,177,131,0.4)" : "1px solid transparent",
+              background: activeTab === "discord" ? "rgba(196,154,40,0.17)" : "transparent",
+              color: activeTab === "discord" ? "var(--ln-gold)" : "var(--ln-smoke)",
+              border: activeTab === "discord" ? "1px solid rgba(196,154,40,0.34)" : "1px solid transparent",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -634,9 +634,9 @@ export default function DashboardPage() {
         {activeTab === "songs" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>My Songs</h2>
+              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>My Songs</h2>
               <Link href="/upload">
-                <Button size="sm" style={{ background: "#CBB183", color: "#E6CDAE" }}>
+                <Button size="sm" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
                   <Upload className="w-3 h-3 mr-1" /> Upload New
                 </Button>
               </Link>
@@ -649,26 +649,26 @@ export default function DashboardPage() {
                 route="/dashboard#songs"
               />
             ) : !songs?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
-                <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
-                <p className="text-sm mb-2" style={{ color: "#DACAAA", fontFamily: "'Cinzel', serif" }}>Upload your first piece and get your WID</p>
-                <p className="text-xs mb-4" style={{ color: "#AA8E64" }}>Every work you upload receives a cryptographic Witness ID — your permanent proof of origin.</p>
+              <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
+                <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
+                <p className="text-sm mb-2" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Upload your first piece and get your WID</p>
+                <p className="text-xs mb-4" style={{ color: "var(--ln-smoke)" }}>Every work you upload receives a cryptographic Witness ID — your permanent proof of origin.</p>
                 <Link href="/upload">
-                  <Button style={{ background: "#CBB183", color: "#E6CDAE" }}>Upload &amp; Witness Your Work</Button>
+                  <Button style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Upload &amp; Witness Your Work</Button>
                 </Link>
               </div>
             ) : (
               <div className="space-y-2">
                 {songs.map((song: any, idx: number) => (
-                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+                  <div key={song.id} className="p-3 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
                     {/* Top row: index + cover + title + actions */}
                     <div className="flex items-center gap-3">
                       <span className="text-xs w-5 text-center flex-shrink-0" style={{ color: "#E2E8F0", minWidth: "20px" }}>{idx + 1}</span>
-                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "#2C3438" }}>
-                        {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} /> : <Music className="w-4 h-4 opacity-40" style={{ color: "#CBB183" }} />}
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
+                        {song.coverArtUrl ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} /> : <Music className="w-4 h-4 opacity-40" style={{ color: "var(--ln-gold)" }} />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif", fontSize: "13px" }}>{song.title}</p>
+                        <p className="font-medium text-sm truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif", fontSize: "13px" }}>{song.title}</p>
                         {song.genre && (
                           <p className="text-xs truncate mt-0.5" style={{ color: "#E2E8F0", fontSize: "12px" }}>{song.genre}</p>
                         )}
@@ -677,15 +677,15 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <Link href={`/song/${song.id}`}>
                           <button type="button" className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10" title="View song page">
-                            <ExternalLink className="w-3 h-3" style={{ color: "#CBB183" }} />
+                            <ExternalLink className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
                           </button>
                         </Link>
                         <button
-                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#3F4A50]/10"
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#1C1A14]/10"
                           title="Edit track (cover art, metadata, position)"
                           onClick={() => setEditingSong(song)}
                         >
-                          <Pencil className="w-3 h-3" style={{ color: "#CBB183" }} />
+                          <Pencil className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
                         </button>
                         <button
                           className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/10"
@@ -693,7 +693,7 @@ export default function DashboardPage() {
                           onClick={() => { setDeletingId(song.id); deleteMutation.mutate({ songId: song.id }); }}
                           disabled={deletingId === song.id}
                         >
-                          <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "#AA8E64" : "var(--lnx-red)" }} />
+                          <Trash2 className="w-3 h-3" style={{ color: deletingId === song.id ? "var(--ln-smoke)" : "var(--lnx-red)" }} />
                         </button>
                       </div>
                     </div>
@@ -730,7 +730,7 @@ export default function DashboardPage() {
                         disabled={updateStatusMutation.isPending}
                         title="Track status"
                         style={{
-                          background: "#2C3438",
+                          background: "var(--ln-coal)",
                           color: statusColor(song.status ?? "Published"),
                           border: `1px solid ${statusColor(song.status ?? "Published")}44`,
                           borderRadius: "6px",
@@ -742,7 +742,7 @@ export default function DashboardPage() {
                         }}
                       >
                         {["Draft", "Published", "Unlisted", "Deleted"].map(s => (
-                          <option key={s} value={s} style={{ background: "#2C3438", color: statusColor(s) }}>{s}</option>
+                          <option key={s} value={s} style={{ background: "var(--ln-coal)", color: statusColor(s) }}>{s}</option>
                         ))}
                       </select>
                     </div>
@@ -758,7 +758,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Activity Feed</h2>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Activity Feed</h2>
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>All interactions on your songs — gifts, comments, and witnesses. Auto-refreshes every 30s.</p>
               </div>
             </div>
@@ -771,13 +771,13 @@ export default function DashboardPage() {
               />
             ) : activityLoading ? (
               <div className="text-center py-16">
-                <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "#CBB183", borderTopColor: "transparent" }} />
+                <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "var(--ln-gold)", borderTopColor: "transparent" }} />
               </div>
             ) : !activityEvents?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
-                <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
+              <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
+                <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No activity yet.</p>
-                <p className="text-xs" style={{ color: "#3F4A50" }}>Gifts, comments, and witnesses on your songs will appear here.</p>
+                <p className="text-xs" style={{ color: "var(--ln-iron)" }}>Gifts, comments, and witnesses on your songs will appear here.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -785,14 +785,14 @@ export default function DashboardPage() {
                   const isTip = evt.type === "TIP";
                   const isComment = evt.type === "COMMENT";
                   const payload = evt.payload as any ?? {};
-                  const accentColor = isTip ? "#CBB183" : isComment ? "#CBB183" : "var(--lnx-green)";
+                  const accentColor = isTip ? "var(--ln-gold)" : isComment ? "var(--ln-gold)" : "var(--lnx-green)";
                   return (
                     <div
                       key={evt.id}
-                      className="rounded-xl p-3 flex gap-3 items-start"
+                      className="p-3 flex gap-3 items-start"
                       style={{
-                        background: isTip ? "rgba(203,177,131,0.06)" : "#2C3438",
-                        border: `1px solid ${isTip ? "rgba(203,177,131,0.22)" : "#CBB183"}`,
+                        background: isTip ? "rgba(196,154,40,0.04)" : "var(--ln-coal)",
+                        border: `1px solid ${isTip ? "rgba(196,154,40,0.2)" : "var(--ln-gold)"}`,
                       }}
                     >
                       {/* Icon */}
@@ -812,11 +812,11 @@ export default function DashboardPage() {
                              isComment ? "Comment" : evt.type.replace(/_/g, " ")}
                           </span>
                           {evt.actorName && (
-                            <span className="text-xs" style={{ color: "#AA8E64" }}>by {evt.actorName}</span>
+                            <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>by {evt.actorName}</span>
                           )}
                           {evt.songTitle && (
                             <Link href={(evt as any).projectSlug ? `/project/${(evt as any).projectSlug}` : ((evt as any).songLink ?? `/song/${evt.workId}`)}>
-                              <span className="text-xs hover:underline truncate" style={{ color: "#3F4A50" }}>on "{evt.songTitle}"</span>
+                              <span className="text-xs hover:underline truncate" style={{ color: "var(--ln-iron)" }}>on "{evt.songTitle}"</span>
                             </Link>
                           )}
                         </div>
@@ -825,7 +825,7 @@ export default function DashboardPage() {
                             {payload.message || payload.text}
                           </p>
                         )}
-                        <p className="text-xs mt-0.5" style={{ color: "#3F4A50" }}>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ln-iron)" }}>
                           {new Date(evt.createdAt).toLocaleString()}
                         </p>
                       </div>
@@ -848,7 +848,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>My AI Transforms</h2>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>My AI Transforms</h2>
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>AI-generated derivatives of your songs, linked to their original Witness IDs.</p>
               </div>
             </div>
@@ -860,33 +860,33 @@ export default function DashboardPage() {
                 route="/dashboard#transforms"
               />
             ) : !transforms?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
-                <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
+              <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
+                <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No AI transforms yet.</p>
-                <p className="text-xs" style={{ color: "#3F4A50" }}>Open any song page and use the AI Transform button to create a derivative.</p>
+                <p className="text-xs" style={{ color: "var(--ln-iron)" }}>Open any song page and use the AI Transform button to create a derivative.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {transforms.map((t: any) => {
                   const { label, color } = transformStatusLabel(t.status);
                   return (
-                    <div key={t.id} className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+                    <div key={t.id} className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
                       <div className="flex items-start gap-4">
                         {/* Status icon */}
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2C3438" }}>
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "var(--ln-coal)" }}>
                           {transformStatusIcon(t.status)}
                         </div>
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-sm truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                            <p className="font-medium text-sm truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
                               Transform of "{t.originalSongTitle || `Song #${t.originalSongId}`}"
                             </p>
                             <Badge className="text-xs px-1.5 py-0 flex-shrink-0" style={{ background: `${color}20`, color, fontSize: "9px" }}>
                               {label}
                             </Badge>
                           </div>
-                          <p className="text-xs mb-1 line-clamp-2" style={{ color: "#AA8E64" }}>
+                          <p className="text-xs mb-1 line-clamp-2" style={{ color: "var(--ln-smoke)" }}>
                             <span style={{ color: "#E2E8F0" }}>Prompt: </span>{t.prompt}
                           </p>
                           <div className="flex items-center gap-3 flex-wrap">
@@ -895,12 +895,12 @@ export default function DashboardPage() {
                             )}
                             {t.originalWitnessId && (
                               <Link href={`/verify/${t.originalWitnessId}`}>
-                                <span className="text-xs cursor-pointer hover:underline" style={{ color: "#CBB183" }}>
+                                <span className="text-xs cursor-pointer hover:underline" style={{ color: "var(--ln-gold)" }}>
                                   WID: {t.originalWitnessId.slice(0, 12)}…
                                 </span>
                               </Link>
                             )}
-                            <span className="text-xs" style={{ color: "#3F4A50" }}>
+                            <span className="text-xs" style={{ color: "var(--ln-iron)" }}>
                               {new Date(t.createdAt).toLocaleDateString()}
                             </span>
                           </div>
@@ -917,7 +917,7 @@ export default function DashboardPage() {
                                   className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
                                   title="Play transform"
                                 >
-                                  <Play className="w-3 h-3" style={{ color: "#CBB183" }} />
+                                  <Play className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
                                 </button>
                               </a>
                               <a href={t.outputUrl} download>
@@ -925,7 +925,7 @@ export default function DashboardPage() {
                                   className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
                                   title="Download transform"
                                 >
-                                  <Download className="w-3 h-3" style={{ color: "#CBB183" }} />
+                                  <Download className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
                                 </button>
                               </a>
                             </>
@@ -953,13 +953,13 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>My Collections</h2>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>My Collections</h2>
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>Albums and batch-registered works with a collective Witness ID binding all tracks together.</p>
               </div>
               <Link href="/batch-upload">
                 <button
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                  style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                  style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
                 >
                   <Upload className="w-3 h-3" /> New Collection
                 </button>
@@ -974,17 +974,17 @@ export default function DashboardPage() {
               />
             ) : collectionsLoading ? (
               <div className="text-center py-16">
-                <div className="w-8 h-8 border-2 border-[#CBB183]/30 border-t-[#CBB183] rounded-full animate-spin mx-auto" />
+                <div className="w-8 h-8 border-2 border-[#C49A28]/30 border-t-[#C49A28] rounded-full animate-spin mx-auto" />
               </div>
             ) : !myCollections?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
-                <Library className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
+              <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
+                <Library className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No collections yet.</p>
-                <p className="text-xs mb-4" style={{ color: "#3F4A50" }}>Upload an album or batch of songs to generate a Collection WID that binds all works into one origin record.</p>
+                <p className="text-xs mb-4" style={{ color: "var(--ln-iron)" }}>Upload an album or batch of songs to generate a Collection WID that binds all works into one origin record.</p>
                 <Link href="/batch-upload">
                   <button
                     className="px-4 py-2 rounded-lg text-sm font-semibold"
-                    style={{ background: "#CBB183", color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                    style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
                   >
                     Upload Your First Collection
                   </button>
@@ -1007,13 +1007,13 @@ export default function DashboardPage() {
                   <div
                     key={col.id}
                     className="rounded-xl p-5"
-                    style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.22)" }}
+                    style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.2)" }}
                   >
                     <div className="flex items-start gap-4">
                       {/* Cover art thumbnail */}
                       <div
                         className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 group relative cursor-pointer"
-                        style={{ border: "1px solid rgba(203,177,131,0.28)", background: "#2C3438" }}
+                        style={{ border: "1px solid rgba(196,154,40,0.25)", background: "var(--ln-coal)" }}
                         onClick={() => {
                           if (col.coverArtUrl) {
                             setCollectionCoverState({ collectionId: col.id, currentUrl: col.coverArtUrl, pendingUrl: null, position: { x: col.coverPositionX ?? 50, y: col.coverPositionY ?? 50 } });
@@ -1038,22 +1038,22 @@ export default function DashboardPage() {
                           </>
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                            <Camera className="w-4 h-4" style={{ color: "rgba(203,177,131,0.45)" }} />
-                            <span className="text-[8px]" style={{ color: "rgba(203,177,131,0.45)" }}>Add Cover</span>
+                            <Camera className="w-4 h-4" style={{ color: "rgba(196,154,40,0.4)" }} />
+                            <span className="text-[8px]" style={{ color: "rgba(196,154,40,0.4)" }}>Add Cover</span>
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-base mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                        <p className="font-bold text-base mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                           {col.name}
                         </p>
-                        <p className="text-xs font-mono mb-2" style={{ color: "#CBB183" }}>
+                        <p className="text-xs font-mono mb-2" style={{ color: "var(--ln-gold)" }}>
                           {col.collectionWid}
                         </p>
-                        <p className="text-xs mb-3" style={{ color: "#3F4A50" }}>
+                        <p className="text-xs mb-3" style={{ color: "var(--ln-iron)" }}>
                           {col.trackCount ?? "?"} tracks &middot; Registered {new Date(col.createdAt).toLocaleDateString()}
                         </p>
-                        <p className="text-[10px] font-mono break-all" style={{ color: "#3F4A50" }}>
+                        <p className="text-[10px] font-mono break-all" style={{ color: "var(--ln-iron)" }}>
                           Hash: {col.collectiveHash?.slice(0, 32)}…
                         </p>
                       </div>
@@ -1062,7 +1062,7 @@ export default function DashboardPage() {
                         {col.coverArtUrl && (
                           <button
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                            style={{ border: "1px solid rgba(203,177,131,0.28)", color: "rgba(203,177,131,0.75)", background: "transparent" }}
+                            style={{ border: "1px solid rgba(196,154,40,0.25)", color: "rgba(196,154,40,0.64)", background: "transparent" }}
                             onClick={() => { (coverInputRef.current as any)._activeCol = col; coverInputRef.current?.click(); }}
                           >
                             <Camera className="w-3 h-3" /> Change Cover
@@ -1071,7 +1071,7 @@ export default function DashboardPage() {
                         <a href={`/verify/${col.collectionWid}`} target="_blank" rel="noopener noreferrer">
                           <button
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                            style={{ border: "1px solid rgba(203,177,131,0.45)", color: "#CBB183", background: "transparent" }}
+                            style={{ border: "1px solid rgba(196,154,40,0.4)", color: "var(--ln-gold)", background: "transparent" }}
                           >
                             <ExternalLink className="w-3 h-3" /> Verify
                           </button>
@@ -1080,7 +1080,7 @@ export default function DashboardPage() {
                           <a href={col.pdfUrl} target="_blank" rel="noopener noreferrer">
                             <button
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                              style={{ background: "#CBB183", color: "#E6CDAE" }}
+                              style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
                             >
                               <Download className="w-3 h-3" /> Certificate
                             </button>
@@ -1088,7 +1088,7 @@ export default function DashboardPage() {
                         )}
                         <button
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-full"
-                          style={{ border: "1px solid rgba(203,177,131,0.25)", color: "#3F4A50", background: "transparent" }}
+                          style={{ border: "1px solid rgba(196,154,40,0.2)", color: "var(--ln-iron)", background: "transparent" }}
                           onClick={() => regenCertMutation.mutate({ collectionWid: col.collectionWid })}
                           disabled={regenCertMutation.isPending}
                           title="Regenerate Certificate"
@@ -1130,8 +1130,8 @@ export default function DashboardPage() {
         {activeTab === "analytics" && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Creator Analytics</h2>
-              <p className="text-xs" style={{ color: "#AA8E64" }}>All-time data · Updated in real time</p>
+              <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Creator Analytics</h2>
+              <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>All-time data · Updated in real time</p>
             </div>
             {analyticsError ? (
               <DashboardErrorCard
@@ -1145,35 +1145,35 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#38BDF8", borderTopColor: "transparent" }} />
               </div>
             ) : !analyticsData ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+              <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
                 <LineChart className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#38BDF8" }} />
-                <p className="text-sm" style={{ color: "#AA8E64" }}>No analytics data available yet.</p>
+                <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>No analytics data available yet.</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {/* Summary stat cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { label: "Total Plays", value: analyticsData.totalPlays, icon: Play, color: "#CBB183" },
-                    { label: "Total Likes", value: analyticsData.totalLikes, icon: Heart, color: "#EF4444" },
-                    { label: "Gifts Received", value: analyticsData.totalGiftsReceived, icon: Gift, color: "#4ADE80" },
+                    { label: "Total Plays", value: analyticsData.totalPlays, icon: Play, color: "var(--ln-gold)" },
+                    { label: "Total Likes", value: analyticsData.totalLikes, icon: Heart, color: "var(--ln-ember)" },
+                    { label: "Gifts Received", value: analyticsData.totalGiftsReceived, icon: Gift, color: "var(--ln-seal-bright)" },
                     { label: "Downloads", value: analyticsData.totalDownloads, icon: Download, color: "#38BDF8" },
                   ].map(({ label, value, icon: Icon, color }) => (
-                    <div key={label} className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+                    <div key={label} className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
                       <div className="flex items-center gap-2 mb-2">
                         <Icon className="w-4 h-4" style={{ color }} />
-                        <span className="text-xs" style={{ color: "#AA8E64" }}>{label}</span>
+                        <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{label}</span>
                       </div>
                       <p className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color }}>{value.toLocaleString()}</p>
                     </div>
                   ))}
                 </div>
                 {/* 30-day activity trend */}
-                <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+                <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-4 h-4" style={{ color: "#38BDF8" }} />
-                    <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>30-Day Activity Trend</h3>
-                    <span className="text-xs ml-auto" style={{ color: "#AA8E64" }}>Likes · Gifts · Comments · Witnesses</span>
+                    <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>30-Day Activity Trend</h3>
+                    <span className="text-xs ml-auto" style={{ color: "var(--ln-smoke)" }}>Likes · Gifts · Comments · Witnesses</span>
                   </div>
                   <ResponsiveContainer width="100%" height={180}>
                     <AreaChart data={analyticsData.playTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
@@ -1183,28 +1183,28 @@ export default function DashboardPage() {
                           <stop offset="95%" stopColor="#38BDF8" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#2C3438" />
-                      <XAxis dataKey="date" tick={{ fill: "#AA8E64", fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} />
-                      <YAxis tick={{ fill: "#AA8E64", fontSize: 10 }} allowDecimals={false} />
-                      <Tooltip contentStyle={{ background: "#2C3438", border: "1px solid #C3AB7D", borderRadius: "8px", color: "#E6CDAE" }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--ln-coal)" />
+                      <XAxis dataKey="date" tick={{ fill: "var(--ln-smoke)", fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} />
+                      <YAxis tick={{ fill: "var(--ln-smoke)", fontSize: 10 }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", borderRadius: "8px", color: "var(--ln-parchment)" }} />
                       <Area type="monotone" dataKey="plays" stroke="#38BDF8" fill="url(#analyticsGrad)" strokeWidth={2} dot={false} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
                 {/* Plays by track */}
                 {analyticsData.playsByTrack.filter((t: { plays: number }) => t.plays > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
                     <div className="flex items-center gap-2 mb-4">
-                      <Play className="w-4 h-4" style={{ color: "#CBB183" }} />
-                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Plays by Track</h3>
+                      <Play className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Plays by Track</h3>
                     </div>
                     <div className="space-y-2">
                       {[...analyticsData.playsByTrack].sort((a, b) => b.plays - a.plays).slice(0, 10).map((track) => (
                         <div key={track.trackId} className="flex items-center gap-3">
-                          <span className="text-xs flex-1 truncate" style={{ color: "#DACAAA" }}>{track.title}</span>
+                          <span className="text-xs flex-1 truncate" style={{ color: "var(--ln-parchment)" }}>{track.title}</span>
                           <div className="flex items-center gap-2">
-                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.plays / Math.max(...analyticsData.playsByTrack.map((t: { plays: number }) => t.plays), 1)) * 120))}px`, background: "#CBB183" }} />
-                            <span className="text-xs font-mono w-8 text-right" style={{ color: "#CBB183" }}>{track.plays}</span>
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.plays / Math.max(...analyticsData.playsByTrack.map((t: { plays: number }) => t.plays), 1)) * 120))}px`, background: "var(--ln-gold)" }} />
+                            <span className="text-xs font-mono w-8 text-right" style={{ color: "var(--ln-gold)" }}>{track.plays}</span>
                           </div>
                         </div>
                       ))}
@@ -1213,18 +1213,18 @@ export default function DashboardPage() {
                 )}
                 {/* Likes by track */}
                 {analyticsData.likesByTrack.filter((t: { likes: number }) => t.likes > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
                     <div className="flex items-center gap-2 mb-4">
-                      <Heart className="w-4 h-4" style={{ color: "#EF4444" }} />
-                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Likes by Track</h3>
+                      <Heart className="w-4 h-4" style={{ color: "var(--ln-ember)" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Likes by Track</h3>
                     </div>
                     <div className="space-y-2">
                       {[...analyticsData.likesByTrack].sort((a, b) => b.likes - a.likes).slice(0, 10).map((track) => (
                         <div key={track.trackId} className="flex items-center gap-3">
-                          <span className="text-xs flex-1 truncate" style={{ color: "#DACAAA" }}>{track.title}</span>
+                          <span className="text-xs flex-1 truncate" style={{ color: "var(--ln-parchment)" }}>{track.title}</span>
                           <div className="flex items-center gap-2">
-                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.likes / Math.max(...analyticsData.likesByTrack.map((t: { likes: number }) => t.likes), 1)) * 120))}px`, background: "#EF4444" }} />
-                            <span className="text-xs font-mono w-8 text-right" style={{ color: "#EF4444" }}>{track.likes}</span>
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((track.likes / Math.max(...analyticsData.likesByTrack.map((t: { likes: number }) => t.likes), 1)) * 120))}px`, background: "var(--ln-ember)" }} />
+                            <span className="text-xs font-mono w-8 text-right" style={{ color: "var(--ln-ember)" }}>{track.likes}</span>
                           </div>
                         </div>
                       ))}
@@ -1233,17 +1233,17 @@ export default function DashboardPage() {
                 )}
                 {/* Gifts by track */}
                 {analyticsData.giftsByTrack.filter((t: { giftCount: number }) => t.giftCount > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
+                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
                     <div className="flex items-center gap-2 mb-4">
-                      <Gift className="w-4 h-4" style={{ color: "#4ADE80" }} />
-                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Gifts by Track</h3>
+                      <Gift className="w-4 h-4" style={{ color: "var(--ln-seal-bright)" }} />
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Gifts by Track</h3>
                     </div>
                     <div className="space-y-2">
                       {[...analyticsData.giftsByTrack].sort((a, b) => b.giftCount - a.giftCount).slice(0, 10).map((track) => (
                         <div key={track.trackId} className="flex items-center gap-3">
-                          <span className="text-xs flex-1 truncate" style={{ color: "#DACAAA" }}>{track.title}</span>
+                          <span className="text-xs flex-1 truncate" style={{ color: "var(--ln-parchment)" }}>{track.title}</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs" style={{ color: "#4ADE80" }}>{track.giftCount} gift{track.giftCount !== 1 ? 's' : ''}</span>
+                            <span className="text-xs" style={{ color: "var(--ln-seal-bright)" }}>{track.giftCount} gift{track.giftCount !== 1 ? 's' : ''}</span>
                             <span className="text-xs font-mono" style={{ color: "var(--lnx-green)" }}>${(track.totalAmount / 100).toFixed(2)}</span>
                           </div>
                         </div>
@@ -1253,15 +1253,15 @@ export default function DashboardPage() {
                 )}
                 {/* Total gifts revenue */}
                 {analyticsData.totalAmountReceived > 0 && (
-                  <div className="rounded-xl p-4 flex items-center gap-4" style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.3)" }}>
-                    <DollarSign className="w-5 h-5 flex-shrink-0" style={{ color: "#4ADE80" }} />
+                  <div className="p-4 flex items-center gap-4" style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(58,138,86,0.3)" }}>
+                    <DollarSign className="w-5 h-5 flex-shrink-0" style={{ color: "var(--ln-seal-bright)" }} />
                     <div>
-                      <p className="text-xs" style={{ color: "#AA8E64" }}>Total Gift Revenue (gross)</p>
+                      <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>Total Gift Revenue (gross)</p>
                       <p className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--lnx-green)" }}>${(analyticsData.totalAmountReceived / 100).toFixed(2)}</p>
                     </div>
                     <div className="ml-auto text-right">
-                      <p className="text-xs" style={{ color: "#AA8E64" }}>Your cut (90%)</p>
-                      <p className="text-lg font-bold" style={{ color: "#CBB183" }}>${(analyticsData.totalAmountReceived * 0.9 / 100).toFixed(2)}</p>
+                      <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>Your cut (90%)</p>
+                      <p className="text-lg font-bold" style={{ color: "var(--ln-gold)" }}>${(analyticsData.totalAmountReceived * 0.9 / 100).toFixed(2)}</p>
                     </div>
                   </div>
                 )}
@@ -1295,28 +1295,28 @@ const DISCORD_EVENTS = [
     label: "WID Minted",
     description: "Fires when a new Witness ID is issued for a track",
     icon: "🔐",
-    color: "#CBB183",
+    color: "var(--ln-gold)",
   },
   {
     key: "track_upload" as const,
     label: "Track Uploaded",
     description: "Fires when a new track is successfully uploaded",
     icon: "🎵",
-    color: "#4ADE80",
+    color: "var(--ln-seal-bright)",
   },
   {
     key: "tip_received" as const,
     label: "Tip Received",
     description: "Fires when a fan sends you a gift on one of your tracks",
     icon: "💛",
-    color: "#CBB183",
+    color: "var(--ln-gold)",
   },
   {
     key: "like_surge" as const,
     label: "Like Surge",
     description: "Fires when a track hits 10, 50, 100, or 500 likes",
     icon: "🔥",
-    color: "#EF4444",
+    color: "var(--ln-ember)",
   },
 ] as const;
 
@@ -1351,12 +1351,12 @@ function DiscordIntegrationTab() {
   return (
     <div className="space-y-6 py-4">
       {/* Header */}
-      <div className="flex items-start gap-4 p-5 rounded-xl" style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.3)" }}>
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: "rgba(203,177,131,0.2)" }}>🔔</div>
+      <div className="flex items-start gap-4 p-5 rounded-xl" style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.26)" }}>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: "rgba(196,154,40,0.17)" }}>🔔</div>
         <div>
-          <h2 className="text-lg font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Discord Webhook Integration</h2>
-          <p className="text-sm" style={{ color: "#AA8E64" }}>Get real-time notifications in your Discord server when platform events happen. Paste a Discord webhook URL for each event you want to track.</p>
-          <a href="https://support.discord.com/hc/en-us/articles/228383668" target="_blank" rel="noopener noreferrer" className="text-xs mt-2 inline-flex items-center gap-1" style={{ color: "#CBB183" }}>
+          <h2 className="text-lg font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Discord Webhook Integration</h2>
+          <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>Get real-time notifications in your Discord server when platform events happen. Paste a Discord webhook URL for each event you want to track.</p>
+          <a href="https://support.discord.com/hc/en-us/articles/228383668" target="_blank" rel="noopener noreferrer" className="text-xs mt-2 inline-flex items-center gap-1" style={{ color: "var(--ln-gold)" }}>
             <ExternalLink className="w-3 h-3" /> How to create a Discord webhook
           </a>
         </div>
@@ -1368,21 +1368,21 @@ function DiscordIntegrationTab() {
         const url = urls[ev.key] ?? "";
         const isDirty = url !== (saved?.webhookUrl ?? "");
         return (
-          <div key={ev.key} className="p-5 rounded-xl" style={{ background: "rgba(44,52,56,0.6)", border: "1px solid #2C3438" }}>
+          <div key={ev.key} className="p-5 rounded-xl" style={{ background: "rgba(44,52,56,0.6)", border: "1px solid #111009" }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{ev.icon}</span>
                 <div>
                   <p className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: ev.color }}>{ev.label}</p>
-                  <p className="text-xs" style={{ color: "#AA8E64" }}>{ev.description}</p>
+                  <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>{ev.description}</p>
                 </div>
               </div>
               {saved && (
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <span className="text-xs" style={{ color: "#AA8E64" }}>{saved.enabled ? "Enabled" : "Disabled"}</span>
+                  <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{saved.enabled ? "Enabled" : "Disabled"}</span>
                   <div
                     className="relative w-10 h-5 rounded-full transition-colors cursor-pointer"
-                    style={{ background: saved.enabled ? ev.color : "#2C3438" }}
+                    style={{ background: saved.enabled ? ev.color : "var(--ln-coal)" }}
                     onClick={() => toggleWebhook.mutate({ event: ev.key, enabled: !saved.enabled })}
                   >
                     <div className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform" style={{ transform: saved.enabled ? "translateX(22px)" : "translateX(2px)" }} />
@@ -1399,8 +1399,8 @@ function DiscordIntegrationTab() {
                 className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
                 style={{
                   background: "#353E43",
-                  border: "1px solid #2C3438",
-                  color: "#DACAAA",
+                  border: "1px solid #111009",
+                  color: "var(--ln-parchment)",
                   fontFamily: "monospace",
                 }}
               />
@@ -1408,7 +1408,7 @@ function DiscordIntegrationTab() {
                 size="sm"
                 disabled={!url || !isDirty || saveWebhook.isPending}
                 onClick={() => saveWebhook.mutate({ event: ev.key, webhookUrl: url, enabled: saved?.enabled ?? true })}
-                style={{ background: isDirty && url ? ev.color : "#2C3438", color: "#E6CDAE", opacity: (!url || !isDirty) ? 0.5 : 1 }}
+                style={{ background: isDirty && url ? ev.color : "var(--ln-coal)", color: "var(--ln-parchment)", opacity: (!url || !isDirty) ? 0.5 : 1 }}
               >
                 {saveWebhook.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
                 Save
@@ -1424,7 +1424,7 @@ function DiscordIntegrationTab() {
                       await testWebhook.mutateAsync({ event: ev.key, webhookUrl: saved.webhookUrl });
                       setTesting(null);
                     }}
-                    style={{ borderColor: "#2C3438", color: "#DACAAA" }}
+                    style={{ borderColor: "var(--ln-coal)", color: "var(--ln-parchment)" }}
                   >
                     {testing === ev.key ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
                     Test
@@ -1433,7 +1433,7 @@ function DiscordIntegrationTab() {
                     size="sm"
                     variant="outline"
                     onClick={() => deleteWebhook.mutate({ event: ev.key })}
-                    style={{ borderColor: "rgba(239,68,68,0.4)", color: "#EF4444" }}
+                    style={{ borderColor: "rgba(239,68,68,0.4)", color: "var(--ln-ember)" }}
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -1441,7 +1441,7 @@ function DiscordIntegrationTab() {
               )}
             </div>
             {saved && (
-              <p className="text-xs mt-2" style={{ color: "#AA8E64" }}>
+              <p className="text-xs mt-2" style={{ color: "var(--ln-smoke)" }}>
                 Last updated: {new Date(saved.updatedAt).toLocaleString()}
               </p>
             )}
@@ -1450,7 +1450,7 @@ function DiscordIntegrationTab() {
       })}
 
       {/* Rate limit note */}
-      <p className="text-xs text-center" style={{ color: "#AA8E64" }}>
+      <p className="text-xs text-center" style={{ color: "var(--ln-smoke)" }}>
         Webhooks are rate-limited to 30 requests per minute per event. Failures are silent and will not affect platform operations.
       </p>
     </div>
@@ -1505,23 +1505,23 @@ function ArchiveTab() {
 
   if (loading) return (
     <div className="text-center py-16">
-      <div className="w-8 h-8 border-2 border-[#CBB183]/30 border-t-[#CBB183] rounded-full animate-spin mx-auto" />
-      <p className="text-sm mt-3" style={{ color: "#AA8E64" }}>Loading your archive…</p>
+      <div className="w-8 h-8 border-2 border-[#C49A28]/30 border-t-[#C49A28] rounded-full animate-spin mx-auto" />
+      <p className="text-sm mt-3" style={{ color: "var(--ln-smoke)" }}>Loading your archive…</p>
     </div>
   );
 
   if (error) return (
-    <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed rgba(239,68,68,0.4)" }}>
+    <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed rgba(239,68,68,0.4)" }}>
       <FileArchive className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--lnx-red)" }} />
       <p className="text-sm" style={{ color: "var(--lnx-red)" }}>{error}</p>
     </div>
   );
 
   if (!batchInfo || batchInfo.totalTracks === 0) return (
-    <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
+    <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
       <PackageOpen className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#38BDF8" }} />
       <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No tracks in your archive yet.</p>
-      <p className="text-xs" style={{ color: "#3F4A50" }}>Upload songs to build your archive. Each batch of up to 10 tracks can be downloaded as a ZIP with ID3-tagged audio and WID certificates.</p>
+      <p className="text-xs" style={{ color: "var(--ln-iron)" }}>Upload songs to build your archive. Each batch of up to 10 tracks can be downloaded as a ZIP with ID3-tagged audio and WID certificates.</p>
     </div>
   );
 
@@ -1530,7 +1530,7 @@ function ArchiveTab() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Download My Archive</h2>
+          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Download My Archive</h2>
           <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>
             {batchInfo.totalTracks} track{batchInfo.totalTracks !== 1 ? "s" : ""} across {batchInfo.batches.length} batch{batchInfo.batches.length !== 1 ? "es" : ""}.
             Each ZIP includes ID3-tagged audio with embedded WID metadata and provenance certificates.
@@ -1540,13 +1540,13 @@ function ArchiveTab() {
 
       {/* Info callout */}
       <div
-        className="rounded-xl p-4 mb-6 flex gap-3 items-start"
+        className="p-4 mb-6 flex gap-3 items-start"
         style={{ background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.25)" }}
       >
         <FileArchive className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#38BDF8" }} />
         <div>
-          <p className="text-sm font-semibold mb-0.5" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>Your WID travels with every file</p>
-          <p className="text-xs" style={{ color: "#AA8E64" }}>
+          <p className="text-sm font-semibold mb-0.5" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Your WID travels with every file</p>
+          <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>
             Every downloaded MP3 has your Witness ID embedded in its ID3 tags (TXXX:LNWID, TXXX:LN_VERIFY_URL).
             The ZIP also includes your WID certificate PDFs so provenance is always bundled with the music.
           </p>
@@ -1559,7 +1559,7 @@ function ArchiveTab() {
           <div
             key={batch.index}
             className="rounded-xl overflow-hidden"
-            style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}
+            style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}
           >
             {/* Batch header row */}
             <div className="flex items-center justify-between gap-4 p-4">
@@ -1571,10 +1571,10 @@ function ArchiveTab() {
                   <FileArchive className="w-5 h-5" style={{ color: "#38BDF8" }} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                  <p className="font-semibold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                     Batch {batch.index + 1}
                   </p>
-                  <p className="text-xs" style={{ color: "#3F4A50" }}>
+                  <p className="text-xs" style={{ color: "var(--ln-iron)" }}>
                     Tracks {batch.start}–{batch.end} &middot; {batch.trackCount} file{batch.trackCount !== 1 ? "s" : ""}
                   </p>
                 </div>
@@ -1582,7 +1582,7 @@ function ArchiveTab() {
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   className="text-xs px-2 py-1 rounded transition-colors"
-                  style={{ color: "#3F4A50", background: "transparent" }}
+                  style={{ color: "var(--ln-iron)", background: "transparent" }}
                   onClick={() => setExpandedBatch(expandedBatch === batch.index ? null : batch.index)}
                 >
                   {expandedBatch === batch.index ? "▲ Hide" : "▼ Tracks"}
@@ -1616,30 +1616,30 @@ function ArchiveTab() {
 
             {/* Expandable track list */}
             {expandedBatch === batch.index && (
-              <div style={{ borderTop: "1px solid #CBB183" }}>
+              <div style={{ borderTop: "1px solid #C49A28" }}>
                 {batch.tracks.map((track, ti) => (
                   <div
                     key={track.id}
                     className="flex items-center gap-3 px-4 py-2.5"
                     style={{
-                      borderBottom: ti < batch.tracks.length - 1 ? "1px solid #2C3438" : "none",
+                      borderBottom: ti < batch.tracks.length - 1 ? "1px solid #111009" : "none",
                     }}
                   >
-                    <span className="text-xs w-5 text-right flex-shrink-0" style={{ color: "#3F4A50" }}>
+                    <span className="text-xs w-5 text-right flex-shrink-0" style={{ color: "var(--ln-iron)" }}>
                       {batch.start + ti}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate" style={{ color: "#DACAAA" }}>{track.title}</p>
+                      <p className="text-sm truncate" style={{ color: "var(--ln-parchment)" }}>{track.title}</p>
                       {track.witnessId && (
-                        <p className="text-[10px] font-mono" style={{ color: "rgba(230,205,174,0.7)" }}>{track.witnessId}</p>
+                        <p className="text-[10px] font-mono" style={{ color: "rgba(232,223,200,0.6)" }}>{track.witnessId}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       {track.hasAudio && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(74,222,128,0.15)", color: "var(--lnx-green)" }}>MP3</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(58,138,86,0.15)", color: "var(--lnx-green)" }}>MP3</span>
                       )}
                       {track.hasCertificate && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183" }}>WID</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}>WID</span>
                       )}
                     </div>
                   </div>
@@ -1678,8 +1678,8 @@ function WIDCacheTab() {
   };
 
   const MEDIUM_COLOR: Record<string, string> = {
-    audio: "#CBB183",
-    lyrics: "#CBB183",
+    audio: "var(--ln-gold)",
+    lyrics: "var(--ln-gold)",
     manuscript: "var(--lnx-orange)",
     comic: "#38BDF8",
   };
@@ -1688,10 +1688,10 @@ function WIDCacheTab() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
             Witness Cache
           </h2>
-          <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>
+          <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>
             Local offline proof memory · Stored on this device · 24-hour TTL · Max 50 entries
           </p>
         </div>
@@ -1701,7 +1701,7 @@ function WIDCacheTab() {
             variant="outline"
             onClick={handleClear}
             className="text-xs"
-            style={{ borderColor: "#3F4A50", color: "#AA8E64" }}
+            style={{ borderColor: "var(--ln-iron)", color: "var(--ln-smoke)" }}
           >
             <Trash2 className="w-3 h-3 mr-1" /> Clear Cache
           </Button>
@@ -1709,10 +1709,10 @@ function WIDCacheTab() {
       </div>
 
       {snapshots.length === 0 ? (
-        <div className="text-center py-16 rounded-xl" style={{ background: "#2C3438", border: "1px dashed #C3AB7D" }}>
-          <Fingerprint className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
-          <p className="text-sm mb-1" style={{ color: "#DACAAA", fontFamily: "'Cinzel', serif" }}>No witness records cached</p>
-          <p className="text-xs" style={{ color: "#AA8E64" }}>
+        <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
+          <Fingerprint className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
+          <p className="text-sm mb-1" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>No witness records cached</p>
+          <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>
             After you publish a work, its WID will appear here as an offline proof record.
           </p>
         </div>
@@ -1721,12 +1721,12 @@ function WIDCacheTab() {
           {snapshots.map((snap) => {
             const Icon = MEDIUM_ICON[snap.contentType] ?? Fingerprint;
             const label = MEDIUM_LABEL[snap.contentType] ?? "WID";
-            const color = MEDIUM_COLOR[snap.contentType] ?? "#CBB183";
+            const color = MEDIUM_COLOR[snap.contentType] ?? "var(--ln-gold)";
             return (
               <div
                 key={snap.wid}
                 className="flex items-start gap-4 p-4 rounded-xl"
-                style={{ background: "#2C3438", border: "1px solid #2C3438" }}
+                style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}
               >
                 {/* Medium icon */}
                 <div
@@ -1748,13 +1748,13 @@ function WIDCacheTab() {
                     <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--lnx-green)" }} />
                     <span className="text-[10px]" style={{ color: "var(--lnx-green)" }}>Verified</span>
                   </div>
-                  <p className="text-sm font-semibold truncate mb-1" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>
+                  <p className="text-sm font-semibold truncate mb-1" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
                     {snap.title}
                   </p>
-                  <p className="text-[10px] font-mono break-all mb-1" style={{ color: "#3F4A50" }}>
+                  <p className="text-[10px] font-mono break-all mb-1" style={{ color: "var(--ln-iron)" }}>
                     {snap.wid}
                   </p>
-                  <p className="text-[10px]" style={{ color: "#AA8E64" }}>
+                  <p className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>
                     Witnessed {new Date(snap.timestamp).toLocaleString()}
                   </p>
                 </div>

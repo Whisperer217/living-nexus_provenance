@@ -87,9 +87,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   // Warm theme tokens for mobile chrome only
   // Warm mode: very subtle steel tint — dark base fully dominates, just a faint cool cast
-  const MOBILE_HEADER_BG = isWarm ? "rgba(55,68,85,0.72)" : "#2C3438";
+  const MOBILE_HEADER_BG = isWarm ? "rgba(55,68,85,0.72)" : "var(--ln-coal)";
   const MOBILE_HEADER_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(44,52,56,0.35)";
-  const MOBILE_SIDEBAR_BG = isWarm ? "rgba(42,55,70,0.80)" : "#2C3438";
+  const MOBILE_SIDEBAR_BG = isWarm ? "rgba(42,55,70,0.80)" : "var(--ln-coal)";
   const MOBILE_SIDEBAR_BORDER = isWarm ? "rgba(100,125,150,0.18)" : "rgba(44,52,56,0.35)";
   const MOBILE_TEXT = isWarm ? "rgba(200,212,228,0.85)" : undefined;
   const MOBILE_TEXT_MUTED = isWarm ? "rgba(148,165,185,0.60)" : undefined;
@@ -130,7 +130,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const pulseBadge = signalsBadge;
     const countBadge = archiveBadge;
     const staticBadge = !pulseBadge && !archiveBadge && isLive ? item.badge : null;
-    const labelColor = item.goldLabel ? (active ? "#E8A830" : "rgba(203,177,131,0.7)") : undefined;
+    const labelColor = item.goldLabel ? (active ? "#E8A830" : "rgba(196,154,40,0.6)") : undefined;
 
     const warmActiveBg = "rgba(100,125,150,0.18)";
     const warmHoverBg = "rgba(100,125,150,0.12)";
@@ -144,9 +144,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onClick={() => goTo(item.path)}
         title={item.label}
         className={`w-full flex items-center gap-3 transition-all duration-150 relative px-4 py-3 text-[14px]
-          ${!isWarm ? (active ? "text-white/95" : "text-white/40 hover:text-[#CBB183] hover:bg-[rgba(203,177,131,0.06)]") : ""}`}
+          ${!isWarm ? (active ? "text-white/95" : "text-white/40 hover:text-[#C49A28] hover:bg-[rgba(196,154,40,0.04)]") : ""}`}
         style={{
-          background: active ? (isWarm ? warmActiveBg : "rgba(230,205,174,0.1)") : "transparent",
+          background: active ? (isWarm ? warmActiveBg : "rgba(196,154,40,0.06)") : "transparent",
           color: isWarm ? (active ? warmActiveText : warmMutedText) : undefined,
           transition: "background 0.3s ease, color 0.3s ease",
         }}
@@ -156,19 +156,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <Icon size={16} style={{
           color: isWarm
             ? (active ? warmActiveText : warmMutedText)
-            : (active ? (item.goldLabel ? "#E8A830" : "#CBB183") : (item.goldLabel ? "rgba(203,177,131,0.7)" : "inherit")),
+            : (active ? (item.goldLabel ? "#E8A830" : "var(--ln-gold)") : (item.goldLabel ? "rgba(196,154,40,0.6)" : "inherit")),
           opacity: (!isWarm && !active && !item.goldLabel) ? 0.6 : 1,
         }} />
         <span className="flex-1 text-left font-body" style={isWarm ? { color: active ? warmActiveText : warmMutedText } : (labelColor ? { color: labelColor } : undefined)}>{item.label}</span>
-        {pulseBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse" style={{ background: "#EF4444", color: "white" }}>{pulseBadge}</span>}
-        {!pulseBadge && countBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center" style={isArchive ? { background: "rgba(230,205,174,0.18)", color: "#E8A830", border: "1px solid rgba(203,177,131,0.28)" } : { background: "#CBB183", color: "#2C3438" }}>{countBadge}</span>}
-        {!pulseBadge && !countBadge && staticBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto" style={{ background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)" }}>{staticBadge}</span>}
+        {pulseBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse" style={{ background: "var(--ln-ember)", color: "white" }}>{pulseBadge}</span>}
+        {!pulseBadge && countBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center" style={isArchive ? { background: "rgba(230,205,174,0.18)", color: "#E8A830", border: "1px solid rgba(196,154,40,0.25)" } : { background: "var(--ln-gold)", color: "var(--ln-coal)" }}>{countBadge}</span>}
+        {!pulseBadge && !countBadge && staticBadge && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto" style={{ background: "rgba(74,222,128,0.2)", color: "var(--ln-seal-bright)", border: "1px solid rgba(58,138,86,0.3)" }}>{staticBadge}</span>}
       </button>
     );
   };
 
   return (
-    <div className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[#2C3438] relative" style={{ overscrollBehavior: "none" }}>
+    <div className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[#111009] relative" style={{ overscrollBehavior: "none" }}>
 
       {/* ── Quick Reference Slider — temporarily hidden per user request (Phase 77) ── */}
 
@@ -217,7 +217,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           >
             <Bell size={18} />
             {(unreadCount as number) > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse" style={{ background: "#EF4444" }} />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--ln-ember)" }} />
             )}
           </button>
         )}
@@ -243,7 +243,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           width: "min(85vw, 320px)",
           height: "100dvh",
           minHeight: "100dvh",
-          background: isWarm ? "rgba(28,38,52,0.98)" : "#2C3438",
+          background: isWarm ? "rgba(28,38,52,0.98)" : "var(--ln-coal)",
           borderRight: `1px solid ${MOBILE_SIDEBAR_BORDER}`,
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "max(80px, calc(80px + env(safe-area-inset-bottom, 0px)))",
@@ -270,7 +270,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold text-white overflow-hidden"
                       style={{
                         background: "linear-gradient(135deg, #8B5E1A, #C8954A)",
-                        boxShadow: user?.licenseStatus === "licensed" ? "0 0 0 2px #E8A830, 0 0 14px rgba(203,177,131,0.4)" : "none",
+                        boxShadow: user?.licenseStatus === "licensed" ? "0 0 0 2px #E8A830, 0 0 14px rgba(196,154,40,0.34)" : "none",
                       }}
                     >
                       {user?.profilePhotoUrl || state.profileAvatar
@@ -279,7 +279,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       }
                     </div>
                     {user?.licenseStatus === "licensed" && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#3F4A50" }}>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "var(--ln-iron)" }}>
                         <CheckCircle2 size={10} className="text-black" />
                       </div>
                     )}
@@ -288,8 +288,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     <div className="text-[14px] font-medium text-white/95 truncate">{user?.name || state.profileName || "Creator"}</div>
                     {user?.licenseStatus === "licensed" ? (
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <Fingerprint size={10} style={{ color: "#CBB183" }} />
-                        <span className="text-[10px] font-heading tracking-wider" style={{ color: "#CBB183" }}>WITNESSED</span>
+                        <Fingerprint size={10} style={{ color: "var(--ln-gold)" }} />
+                        <span className="text-[10px] font-heading tracking-wider" style={{ color: "var(--ln-gold)" }}>WITNESSED</span>
                       </div>
                     ) : (
                       <div className="text-[11px] text-white/35 mt-0.5">View Profile</div>
@@ -334,7 +334,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       key={item.label}
                       onClick={() => goTo(item.path)}
                       className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors"
-                      style={{ background: active ? "rgba(230,205,174,0.1)" : "transparent", color: active ? "#CBB183" : "#3F4A50" }}
+                      style={{ background: active ? "rgba(196,154,40,0.06)" : "transparent", color: active ? "var(--ln-gold)" : "var(--ln-iron)" }}
                     >
                       <Icon size={14} className="flex-shrink-0" />
                       <span className="text-[13px] font-body">{item.label}</span>
@@ -348,21 +348,21 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <div className="px-4 pb-4 border-t border-[rgba(44,52,56,0.35)] pt-3">
               <button
                 onClick={closeMobileMenu}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#E8A830] hover:bg-[rgba(203,177,131,0.06)]"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/40 hover:text-[#E8A830] hover:bg-[rgba(196,154,40,0.04)]"
               >
                 <Sparkles size={15} className="flex-shrink-0" />
                 <span className="text-[13px] font-body">What's New</span>
-                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(230,205,174,0.12)", color: "#CBB183" }}>v2.24</span>
+                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}>v2.24</span>
               </button>
               {!authLoading && !user ? (
                 <a
                   href={getLoginUrl()}
                   className="flex items-center gap-3 p-3 rounded-xl w-full transition-all"
-                  style={{ background: "rgba(230,205,174,0.12)", border: "1px solid rgba(203,177,131,0.22)" }}
+                  style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.2)" }}
                 >
-                  <LogIn size={16} style={{ color: "#CBB183" }} />
+                  <LogIn size={16} style={{ color: "var(--ln-gold)" }} />
                   <div>
-                    <div className="text-[13px] font-medium" style={{ color: "#E6CDAE" }}>Sign In</div>
+                    <div className="text-[13px] font-medium" style={{ color: "var(--ln-parchment)" }}>Sign In</div>
                     <div className="text-[11px] text-white/35">Upload &amp; earn tips</div>
                   </div>
                 </a>

@@ -83,7 +83,7 @@ function CommunityToastItem({
       className="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer select-none"
       style={{
         background: "rgba(44,52,56,0.96)",
-        border: "1px solid rgba(74,222,128,0.3)",
+        border: "1px solid rgba(58,138,86,0.3)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.50), 0 0 0 1px rgba(74,222,128,0.08)",
         backdropFilter: "blur(12px)",
         minWidth: "260px",
@@ -99,26 +99,26 @@ function CommunityToastItem({
       <div
         className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
         style={{
-          background: "rgba(74,222,128,0.15)",
-          border: "1px solid rgba(74,222,128,0.3)",
+          background: "rgba(58,138,86,0.15)",
+          border: "1px solid rgba(58,138,86,0.3)",
         }}
       >
-        <Users size={14} style={{ color: "#4ADE80" }} />
+        <Users size={14} style={{ color: "var(--ln-seal-bright)" }} />
       </div>
 
       {/* Text */}
       <div className="flex-1 min-w-0">
         <p
           className="text-[11px] font-semibold tracking-wide uppercase mb-0.5"
-          style={{ color: "#4ADE80" }}
+          style={{ color: "var(--ln-seal-bright)" }}
         >
           New Member
         </p>
         <p
           className="text-[13px] font-medium truncate"
-          style={{ color: "#E6CDAE" }}
+          style={{ color: "var(--ln-parchment)" }}
         >
-          <span style={{ color: "#CBB183" }}>
+          <span style={{ color: "var(--ln-gold)" }}>
             {toast.name}
           </span>{" "}
           just joined Living Nexus

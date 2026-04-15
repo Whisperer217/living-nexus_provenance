@@ -20,12 +20,12 @@ import { formatDistanceToNow } from "date-fns";
 /* ── Notification type → icon + color ──────────────────────────── */
 function NotifIcon({ type }: { type: string }) {
   const map: Record<string, { icon: React.ReactNode; color: string }> = {
-    witness:        { icon: <Eye size={14} />,          color: "text-[#CBB183] bg-[#3F4A50]/10" },
+    witness:        { icon: <Eye size={14} />,          color: "text-[#C49A28] bg-[#1C1A14]/10" },
     comment:        { icon: <MessageSquare size={14} />, color: "text-[#A78BFA] bg-[#A78BFA]/10" },
     like:           { icon: <Heart size={14} />,         color: "text-rose-400 bg-rose-400/10" },
     tip:            { icon: <Coins size={14} />,         color: "text-emerald-400 bg-emerald-400/10" },
     playlist_invite:{ icon: <ListMusic size={14} />,     color: "text-sky-400 bg-sky-400/10" },
-    new_track:      { icon: <Music size={14} />,         color: "text-[#CBB183] bg-[#3F4A50]/10" },
+    new_track:      { icon: <Music size={14} />,         color: "text-[#C49A28] bg-[#1C1A14]/10" },
     system:         { icon: <Megaphone size={14} />,     color: "text-white/50 bg-white/5" },
   };
   const { icon, color } = map[type] ?? map.system;
@@ -58,8 +58,8 @@ function NotifRow({
     <div
       className={`group flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all
         ${notif.isRead
-          ? "bg-[#2C3438] border border-white/[0.04] hover:border-white/[0.08]"
-          : "bg-[#2C3438] border border-[#CBB183]/10 hover:border-[#CBB183]/20"
+          ? "bg-[#111009] border border-white/[0.04] hover:border-white/[0.08]"
+          : "bg-[#111009] border border-[#C49A28]/10 hover:border-[#C49A28]/20"
         }`}
       onClick={handleClick}
     >
@@ -73,7 +73,7 @@ function NotifRow({
           <NotifIcon type={notif.type} />
         )}
         {!notif.isRead && (
-          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#3F4A50] border-2 border-[#2C3438]" />
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#1C1A14] border-2 border-[#111009]" />
         )}
       </div>
 
@@ -203,11 +203,11 @@ export default function NotificationsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#2C3438] flex items-center justify-center">
+      <div className="min-h-screen bg-[#111009] flex items-center justify-center">
         <div className="text-center">
-          <Bell size={40} className="mx-auto mb-4 text-[#CBB183]/40" />
+          <Bell size={40} className="mx-auto mb-4 text-[#C49A28]/40" />
           <p className="text-white/50 mb-4">Sign in to see your notifications</p>
-          <Button onClick={() => navigate("/")} className="bg-[#3F4A50] text-black font-heading">
+          <Button onClick={() => navigate("/")} className="bg-[#1C1A14] text-black font-heading">
             Go Home
           </Button>
         </div>
@@ -219,7 +219,7 @@ export default function NotificationsPage() {
   const displayed = tab === "inbox" ? unread : notifications;
 
   return (
-    <div className="min-h-screen bg-[#2C3438] pb-32">
+    <div className="min-h-screen bg-[#111009] pb-32">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -228,7 +228,7 @@ export default function NotificationsPage() {
               Signals
               {unread.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-xs font-heading
-                  bg-[#3F4A50]/10 border border-[#CBB183]/20 text-[#CBB183]">
+                  bg-[#1C1A14]/10 border border-[#C49A28]/20 text-[#C49A28]">
                   {unread.length}
                 </span>
               )}
@@ -250,14 +250,14 @@ export default function NotificationsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-5 p-1 rounded-xl bg-[#2C3438] border border-white/[0.06]">
+        <div className="flex gap-1 mb-5 p-1 rounded-xl bg-[#111009] border border-white/[0.06]">
           {(["inbox", "all"] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-1.5 rounded-lg text-xs font-heading transition-all ${
                 tab === t
-                  ? "bg-[#3F4A50] text-black"
+                  ? "bg-[#1C1A14] text-black"
                   : "text-white/40 hover:text-white/70"
               }`}
             >
@@ -269,11 +269,11 @@ export default function NotificationsPage() {
         {/* Notification list */}
         {isLoading ? (
           <div className="flex justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-[#CBB183]/50" />
+            <Loader2 size={24} className="animate-spin text-[#C49A28]/50" />
           </div>
         ) : displayed.length === 0 ? (
           <div className="text-center py-16">
-            <Bell size={36} className="mx-auto mb-4 text-[#CBB183]/20" />
+            <Bell size={36} className="mx-auto mb-4 text-[#C49A28]/20" />
             <p className="text-white/40 mb-1">
               {tab === "inbox" ? "You're all caught up" : "No notifications yet"}
             </p>

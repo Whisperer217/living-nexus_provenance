@@ -236,7 +236,7 @@ function DiscoverPanel({
                   className="inline-block mt-1 text-[9px] font-heading tracking-wide px-1.5 py-0.5 rounded-full"
                   style={{
                     background: "rgba(196,154,40,0.08)",
-                    color: "rgba(230,205,174,0.7)",
+                    color: "rgba(232,223,200,0.6)",
                     border: "1px solid rgba(196,154,40,0.12)",
                   }}
                 >
@@ -770,7 +770,7 @@ export default function MobilePlayerLayer() {
       <button
         onClick={toggleShuffle}
         className="transition-all active:scale-90"
-        style={{ color: state.isShuffle ? "#D0A15F" : "rgba(196,154,40,0.30)" }}
+        style={{ color: state.isShuffle ? "var(--ln-gold-dim)" : "rgba(196,154,40,0.30)" }}
       >
         <Shuffle size={large ? 20 : 16} />
       </button>
@@ -787,7 +787,7 @@ export default function MobilePlayerLayer() {
         style={{
           width: large ? "64px" : "52px",
           height: large ? "64px" : "52px",
-          background: "linear-gradient(135deg, #F5E6C8 0%, #D0A15F 45%, #C49A28 100%)",
+          background: "linear-gradient(135deg, #F5E6C8 0%, #B8860B 45%, #C49A28 100%)",
           boxShadow: "0 4px 24px rgba(196,154,40,0.38), 0 0 0 1px rgba(245,230,200,0.18)",
           color: "#111009",
         }}
@@ -806,7 +806,7 @@ export default function MobilePlayerLayer() {
       <button
         onClick={toggleRepeat}
         className="transition-all active:scale-90"
-        style={{ color: state.isRepeat ? "#D0A15F" : "rgba(196,154,40,0.30)" }}
+        style={{ color: state.isRepeat ? "var(--ln-gold-dim)" : "rgba(196,154,40,0.30)" }}
       >
         <Repeat size={large ? 20 : 16} />
       </button>
@@ -861,7 +861,7 @@ export default function MobilePlayerLayer() {
                   {badge && (
                     <span
                       className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-1"
-                      style={{ background: "#EF4444", color: "white" }}
+                      style={{ background: "var(--ln-ember)", color: "white" }}
                     >{badge}</span>
                   )}
                 </div>
@@ -963,7 +963,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleToggleLike}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
-          style={{ color: isLiked ? "#EF4444" : "rgba(196,154,40,0.35)" }}
+          style={{ color: isLiked ? "var(--ln-ember)" : "rgba(196,154,40,0.35)" }}
         >
           <Heart size={22} fill={isLiked ? "currentColor" : "none"} />
         </button>
@@ -997,7 +997,7 @@ export default function MobilePlayerLayer() {
                 key={i}
                 className="w-[2px] rounded-full"
                 style={{
-                  background: "rgba(230,205,174,0.7)",
+                  background: "rgba(232,223,200,0.6)",
                   animationName: "mobileWave",
                   animationDuration: `${0.35 + i * 0.09}s`,
                   animationTimingFunction: "ease-in-out",
@@ -1093,9 +1093,9 @@ export default function MobilePlayerLayer() {
                     key={item.label}
                     onClick={item.action}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all hover:bg-white/5 active:bg-white/10"
-                    style={{ color: item.danger ? "#EF4444" : "#DACAAA" }}
+                    style={{ color: item.danger ? "var(--ln-ember)" : "var(--ln-parchment)" }}
                   >
-                    <span style={{ color: item.danger ? "#EF4444" : "rgba(230,205,174,0.7)" }}>{item.icon}</span>
+                    <span style={{ color: item.danger ? "var(--ln-ember)" : "rgba(232,223,200,0.6)" }}>{item.icon}</span>
                     <span className="text-[13px] font-body">{item.label}</span>
                   </button>
                 ))}
@@ -1193,7 +1193,7 @@ export default function MobilePlayerLayer() {
               fontWeight: 600,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              background: "linear-gradient(135deg, #F5E6C8 0%, #C49A28 60%, #D0A15F 100%)",
+              background: "linear-gradient(135deg, #F5E6C8 0%, #C49A28 60%, #B8860B 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -1233,7 +1233,7 @@ export default function MobilePlayerLayer() {
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all text-[11px] font-heading tracking-wide"
             style={{
               background: expandedTab === tab ? "rgba(196,154,40,0.08)" : "transparent",
-              color: expandedTab === tab ? "#D0A15F" : "rgba(196,154,40,0.26)",
+              color: expandedTab === tab ? "var(--ln-gold-dim)" : "rgba(196,154,40,0.26)",
               border: expandedTab === tab ? "1px solid rgba(196,154,40,0.20)" : "1px solid transparent",
             }}
           >
@@ -1279,7 +1279,7 @@ export default function MobilePlayerLayer() {
               style={{
                 background: "rgba(44,52,56,0.88)",
                 border: "1px solid rgba(74,222,128,0.5)",
-                color: "#4ADE80",
+                color: "var(--ln-seal-bright)",
                 backdropFilter: "blur(4px)",
               }}
             >
@@ -1307,7 +1307,7 @@ export default function MobilePlayerLayer() {
             style={{
               fontFamily: "'Cinzel', serif",
               fontWeight: 700,
-              background: "linear-gradient(135deg, #F5E6C8 0%, #C49A28 40%, #D0A15F 70%, #C49A28 100%)",
+              background: "linear-gradient(135deg, #F5E6C8 0%, #C49A28 40%, #B8860B 70%, #C49A28 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -1358,7 +1358,7 @@ export default function MobilePlayerLayer() {
           onClick={handleToggleLike}
           className="flex-shrink-0 ml-4 p-2 rounded-full transition-all active:scale-90"
           style={{
-            color: isLiked ? "#EF4444" : "#1C1A14",
+            color: isLiked ? "var(--ln-ember)" : "#1C1A14",
             background: isLiked ? "rgba(239,68,68,0.12)" : "transparent",
           }}
         >
@@ -1389,7 +1389,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleShare}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: copied ? "#4ADE80" : "rgba(196,154,40,0.42)" }}
+          style={{ color: copied ? "var(--ln-seal-bright)" : "rgba(196,154,40,0.42)" }}
         >
           {copied ? <Check size={18} /> : <Share2 size={18} />}
           <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{copied ? "Copied" : "Share"}</span>
@@ -1451,7 +1451,7 @@ export default function MobilePlayerLayer() {
           <button
             onClick={() => setShowMobileVolume(v => !v)}
             className="flex flex-col items-center gap-1 transition-all active:scale-90"
-            style={{ color: state.isMuted ? "#EF4444" : "rgba(196,154,40,0.42)" }}
+            style={{ color: state.isMuted ? "var(--ln-ember)" : "rgba(196,154,40,0.42)" }}
           >
             {state.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
             <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{state.isMuted ? "Muted" : "Vol"}</span>
@@ -1475,16 +1475,16 @@ export default function MobilePlayerLayer() {
             onClick={() => setWidPanelOpen(v => !v)}
           >
             <div className="flex items-center gap-2">
-              <Fingerprint size={14} style={{ color: "#4ADE80" }} />
+              <Fingerprint size={14} style={{ color: "var(--ln-seal-bright)" }} />
               <span className="text-[11px] font-heading tracking-[0.12em] uppercase"
-                style={{ color: "#4ADE80" }}>
+                style={{ color: "var(--ln-seal-bright)" }}>
                 Origin Proof
               </span>
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
                   background: "rgba(44,52,56,0.5)",
-                  color: "#4ADE80",
-                  border: "1px solid rgba(74,222,128,0.3)",
+                  color: "var(--ln-seal-bright)",
+                  border: "1px solid rgba(58,138,86,0.3)",
                 }}>
                 ✓ WID
               </span>
@@ -1508,7 +1508,7 @@ export default function MobilePlayerLayer() {
                   Witness ID
                 </div>
                 <div className="text-[11px] font-mono break-all"
-                  style={{ color: "#4ADE80" }}>
+                  style={{ color: "var(--ln-seal-bright)" }}>
                   {widBadge}
                 </div>
               </div>
@@ -1518,7 +1518,7 @@ export default function MobilePlayerLayer() {
                     style={{ color: "#1C1A14" }}>
                     Work
                   </div>
-                  <div className="text-[12px]" style={{ color: "#DACAAA" }}>
+                  <div className="text-[12px]" style={{ color: "var(--ln-parchment)" }}>
                     {currentTrack.title}
                   </div>
                 </div>
@@ -1529,7 +1529,7 @@ export default function MobilePlayerLayer() {
                     style={{ color: "#1C1A14" }}>
                     Creator
                   </div>
-                  <div className="text-[12px]" style={{ color: "#DACAAA" }}>
+                  <div className="text-[12px]" style={{ color: "var(--ln-parchment)" }}>
                     {currentTrack.artist}
                   </div>
                 </div>
@@ -1537,7 +1537,7 @@ export default function MobilePlayerLayer() {
               <button
                 onClick={() => { setPlayerState("mini"); navigate(`/verify/${widBadge}`); }}
                 className="flex items-center gap-1.5 text-[10px] font-heading tracking-wide transition-all active:scale-95"
-                style={{ color: "#4ADE80" }}
+                style={{ color: "var(--ln-seal-bright)" }}
               >
                 <ExternalLink size={11} />
                 Verify on-chain provenance
@@ -1693,7 +1693,7 @@ export default function MobilePlayerLayer() {
                   style={{
                     background: "rgba(44,52,56,0.8)",
                     border: "1px solid rgba(44,52,56,0.6)",
-                    color: "#DACAAA",
+                    color: "var(--ln-parchment)",
                   }}
                 />
                 <button
@@ -1822,7 +1822,7 @@ export default function MobilePlayerLayer() {
               style={{
                 background: "rgba(44,52,56,0.88)",
                 border: "1px solid rgba(74,222,128,0.5)",
-                color: "#4ADE80",
+                color: "var(--ln-seal-bright)",
                 backdropFilter: "blur(4px)",
               }}
             >
@@ -1874,7 +1874,7 @@ export default function MobilePlayerLayer() {
                 <div className="text-[12px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
               </div>
               <button type="button" onClick={handleToggleLike} className="flex-shrink-0 ml-3 p-2"
-                style={{ color: isLiked ? "#EF4444" : "rgba(255,255,255,0.4)" }}>
+                style={{ color: isLiked ? "var(--ln-ember)" : "rgba(255,255,255,0.4)" }}>
                 <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
               </button>
             </div>

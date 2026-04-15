@@ -156,17 +156,17 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
 
     const badge = item.badge === "LIVE" ? (
       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded ml-auto"
-        style={{ background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.3)" }}>
+        style={{ background: "rgba(74,222,128,0.2)", color: "var(--ln-seal-bright)", border: "1px solid rgba(58,138,86,0.3)" }}>
         LIVE
       </span>
     ) : item.archiveBadge && archiveSongCount > 0 ? (
       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center"
-        style={{ background: "rgba(203,177,131,0.16)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.28)" }}>
+        style={{ background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }}>
         {archiveSongCount > 99 ? "99+" : archiveSongCount}
       </span>
     ) : item.notifBadge && unreadCount > 0 ? (
       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto min-w-[18px] text-center animate-pulse"
-        style={{ background: "#EF4444", color: "white" }}>
+        style={{ background: "var(--ln-ember)", color: "white" }}>
         {unreadCount > 99 ? "99+" : unreadCount}
       </span>
     ) : null;
@@ -183,7 +183,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           fontSize: "11px",
           letterSpacing: "0.05em",
         }}
-        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(120,145,170,0.18)" : "rgba(63,74,80,0.5)"; (e.currentTarget as HTMLElement).style.color = "#E6CDAE"; } }}
+        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = isWarm ? "rgba(120,145,170,0.18)" : "rgba(63,74,80,0.5)"; (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)"; } }}
         onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = NAV_TEXT_MUTED; } }}
       >
         <Icon size={13} className="flex-shrink-0" style={{ color: active ? "#E8B840" : "#C49A28" }} />
@@ -239,10 +239,10 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                   letterSpacing: "0.06em",
                   background: active ? NAV_ACTIVE_BG : "transparent",
                   border: active ? `1px solid ${NAV_ACTIVE_BORDER}` : "1px solid transparent",
-                  color: active ? "#E6CDAE" : NAV_TEXT,
-                  textShadow: active ? "0 0 12px rgba(203,177,131,0.35)" : "none",
+                  color: active ? "var(--ln-parchment)" : NAV_TEXT,
+                  textShadow: active ? "0 0 12px rgba(196,154,40,0.3)" : "none",
                 }}
-                onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "#E6CDAE"; (e.currentTarget as HTMLElement).style.textShadow = "0 0 10px rgba(203,177,131,0.25)"; } }}
+                onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)"; (e.currentTarget as HTMLElement).style.textShadow = "0 0 10px rgba(196,154,40,0.2)"; } }}
                 onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = NAV_TEXT; (e.currentTarget as HTMLElement).style.textShadow = "none"; } }}
               >
                 <item.icon size={13} style={{ color: active ? "#E8B840" : "#C49A28" }} />
@@ -277,13 +277,13 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 fontWeight: 500,
                 letterSpacing: "0.05em",
                 background: "transparent",
-                border: "1px solid rgba(203,177,131,0.22)",
-                color: "#CBB183",
+                border: "1px solid rgba(196,154,40,0.2)",
+                color: "var(--ln-gold)",
               }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#E6CDAE"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(203,177,131,0.45)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#CBB183"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(203,177,131,0.22)"; }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.4)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)"; }}
             >
-              <Zap size={12} style={{ color: "#D0A15F" }} />
+              <Zap size={12} style={{ color: "var(--ln-gold-dim)" }} />
               <span>Prompt Gen</span>
             </button>
           )}
@@ -315,7 +315,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
               {(unreadCount as number) > 0 && (
                 <span
                   className="absolute top-1 right-1 w-2 h-2 rounded-full animate-pulse"
-                  style={{ background: "#EF4444" }}
+                  style={{ background: "var(--ln-ember)" }}
                 />
               )}
             </button>
@@ -434,13 +434,13 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 <button
                   onClick={() => { setWhatsNewOpen(true); setDrawerOpen(false); }}
                   className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-left transition-all"
-                  style={{ color: "#3F4A50" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(44,52,56,0.6)"; (e.currentTarget as HTMLElement).style.color = "#DACAAA"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#3F4A50"; }}
+                  style={{ color: "var(--ln-iron)" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(44,52,56,0.6)"; (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--ln-iron)"; }}
                 >
                   <Sparkles size={13} className="flex-shrink-0" />
                   <span className="text-[12px] font-body flex-1">What's New</span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183" }}>v2.24</span>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}>v2.24</span>
                 </button>
               </div>
             </div>
@@ -463,7 +463,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                         className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden"
                         style={{
                           background: "linear-gradient(135deg, #7C3AED, #A78BFA)",
-                          boxShadow: hasWid ? "0 0 0 2px #CBB183" : "none",
+                          boxShadow: hasWid ? "0 0 0 2px #C49A28" : "none",
                         }}
                       >
                         {avatar
@@ -478,28 +478,28 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-medium truncate" style={{ color: "#E6CDAE" }}>{displayName}</div>
+                      <div className="text-[13px] font-medium truncate" style={{ color: "var(--ln-parchment)" }}>{displayName}</div>
                       {hasWid ? (
                         <div className="flex items-center gap-1 mt-0.5">
-                          <Fingerprint size={9} style={{ color: "#CBB183" }} />
-                          <span className="text-[9px] font-heading tracking-wider" style={{ color: "#CBB183" }}>WITNESSED</span>
+                          <Fingerprint size={9} style={{ color: "var(--ln-gold)" }} />
+                          <span className="text-[9px] font-heading tracking-wider" style={{ color: "var(--ln-gold)" }}>WITNESSED</span>
                         </div>
                       ) : (
-                        <div className="text-[10px] mt-0.5" style={{ color: "#3F4A50" }}>Creator</div>
+                        <div className="text-[10px] mt-0.5" style={{ color: "var(--ln-iron)" }}>Creator</div>
                       )}
                     </div>
-                    <ChevronRight size={13} style={{ color: "#3F4A50", flexShrink: 0 }} />
+                    <ChevronRight size={13} style={{ color: "var(--ln-iron)", flexShrink: 0 }} />
                   </div>
                 ) : !authLoading ? (
                   <a
                     href={getLoginUrl()}
                     className="flex items-center gap-3 p-3 rounded-xl transition-all"
-                    style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.22)" }}
+                    style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.2)" }}
                   >
-                    <LogIn size={16} style={{ color: "#CBB183" }} />
+                    <LogIn size={16} style={{ color: "var(--ln-gold)" }} />
                     <div>
-                      <div className="text-[13px] font-medium" style={{ color: "#E6CDAE" }}>Sign In</div>
-                      <div className="text-[11px]" style={{ color: "#3F4A50" }}>Upload &amp; earn tips</div>
+                      <div className="text-[13px] font-medium" style={{ color: "var(--ln-parchment)" }}>Sign In</div>
+                      <div className="text-[11px]" style={{ color: "var(--ln-iron)" }}>Upload &amp; earn tips</div>
                     </div>
                   </a>
                 ) : null}
@@ -509,7 +509,7 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-all mt-3"
-                  style={{ color: "#AA8E64", border: "1px solid rgba(63,74,80,0.2)" }}
+                  style={{ color: "var(--ln-smoke)", border: "1px solid rgba(63,74,80,0.2)" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(170,142,100,0.1)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                 >

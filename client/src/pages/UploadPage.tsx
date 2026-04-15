@@ -33,9 +33,9 @@ import {
 } from "@shared/contentTypes";
 
 const AI_CONSENT_OPTIONS = [
-  { value: "prohibited" as const, label: "AI Training PROHIBITED", color: "#EF4444", activeColor: "rgba(239,68,68,0.12)", activeBorder: "rgba(239,68,68,0.4)", desc: "No AI system may train on this work" },
-  { value: "permitted_attribution" as const, label: "Permitted with Attribution", color: "#CBB183", activeColor: "rgba(203,177,131,0.12)", activeBorder: "rgba(203,177,131,0.45)", desc: "AI training allowed only with full credit" },
-  { value: "permitted" as const, label: "Freely Permitted", color: "#CBB183", activeColor: "rgba(203,177,131,0.08)", activeBorder: "rgba(203,177,131,0.35)", desc: "Open for AI training and derivative use" },
+  { value: "prohibited" as const, label: "AI Training PROHIBITED", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.12)", activeBorder: "rgba(239,68,68,0.4)", desc: "No AI system may train on this work" },
+  { value: "permitted_attribution" as const, label: "Permitted with Attribution", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.08)", activeBorder: "rgba(196,154,40,0.4)", desc: "AI training allowed only with full credit" },
+  { value: "permitted" as const, label: "Freely Permitted", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.06)", activeBorder: "rgba(196,154,40,0.3)", desc: "Open for AI training and derivative use" },
 ];
 
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
@@ -125,7 +125,7 @@ function HarmonicWaveform({ frequencies, active }: { frequencies: number[]; acti
 
   return (
     <canvas ref={canvasRef} width={500} height={80} className="w-full rounded-xl"
-      style={{ background: "#2C3438" }} />
+      style={{ background: "var(--ln-coal)" }} />
   );
 }
 
@@ -422,12 +422,12 @@ export default function UploadPage() {
 
   const downloadCertificate = () => {
     if (!witnessData) return;
-    const consentColor = aiConsent === "prohibited" ? "#ef4444" : aiConsent === "permitted_attribution" ? "#CBB183" : "#22c55e";
+    const consentColor = aiConsent === "prohibited" ? "#ef4444" : aiConsent === "permitted_attribution" ? "var(--ln-gold)" : "#22c55e";
     const consentLabel = aiConsent === "prohibited" ? "AI TRAINING PROHIBITED" : aiConsent === "permitted_attribution" ? "PERMITTED WITH ATTRIBUTION" : "FREELY PERMITTED";
     const freqChips = witnessData.frequencies.map(f => `<span style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:20px;padding:4px 12px;font-size:11px;color:#A78BFA">${f} Hz</span>`).join(" ");
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Witness Certificate — ${witnessData.wid}</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
-<style>body{background:#0a0a0a;color:#e0e0e0;font-family:'Share Tech Mono',monospace;padding:40px}.cert{max-width:780px;margin:0 auto;border:1px solid rgba(212,175,55,0.4);border-radius:12px;overflow:hidden}.header{background:linear-gradient(135deg,#0f0f0f,#1a1a1a);padding:32px 40px;border-bottom:1px solid rgba(212,175,55,0.2)}.org{font-family:'Orbitron',sans-serif;font-size:10px;color:#CBB183;letter-spacing:0.15em;margin-bottom:4px}.title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:#fff}.body{padding:32px 40px}.wid-box{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.25);border-radius:8px;padding:20px;margin-bottom:28px;text-align:center}.wid-label{font-size:10px;letter-spacing:0.15em;color:#CBB183;margin-bottom:8px}.wid-value{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:#CBB183}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}.field{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:12px}.field-label{font-size:9px;letter-spacing:0.14em;color:rgba(255,255,255,0.35);margin-bottom:4px}.field-value{font-size:13px}.consent-box{background:rgba(0,0,0,0.3);border:2px solid ${consentColor};border-radius:8px;padding:16px;margin-bottom:24px;text-align:center}.consent-label{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:${consentColor}}.section-title{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:0.14em;color:rgba(255,255,255,0.3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06)}.mono-block{background:#0d0d0d;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:12px;font-size:10px;color:rgba(255,255,255,0.5);word-break:break-all;margin-bottom:20px;line-height:1.6}.footer{background:#0d0d0d;border-top:1px solid rgba(212,175,55,0.15);padding:20px 40px;display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.25)}</style></head>
+<style>body{background:#0a0a0a;color:#e0e0e0;font-family:'Share Tech Mono',monospace;padding:40px}.cert{max-width:780px;margin:0 auto;border:1px solid rgba(212,175,55,0.4);border-radius:12px;overflow:hidden}.header{background:linear-gradient(135deg,#0f0f0f,#1a1a1a);padding:32px 40px;border-bottom:1px solid rgba(212,175,55,0.2)}.org{font-family:'Orbitron',sans-serif;font-size:10px;color:#C49A28;letter-spacing:0.15em;margin-bottom:4px}.title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:#fff}.body{padding:32px 40px}.wid-box{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.25);border-radius:8px;padding:20px;margin-bottom:28px;text-align:center}.wid-label{font-size:10px;letter-spacing:0.15em;color:#C49A28;margin-bottom:8px}.wid-value{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:#C49A28}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}.field{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:12px}.field-label{font-size:9px;letter-spacing:0.14em;color:rgba(255,255,255,0.35);margin-bottom:4px}.field-value{font-size:13px}.consent-box{background:rgba(0,0,0,0.3);border:2px solid ${consentColor};border-radius:8px;padding:16px;margin-bottom:24px;text-align:center}.consent-label{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:${consentColor}}.section-title{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:0.14em;color:rgba(255,255,255,0.3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06)}.mono-block{background:#0d0d0d;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:12px;font-size:10px;color:rgba(255,255,255,0.5);word-break:break-all;margin-bottom:20px;line-height:1.6}.footer{background:#0d0d0d;border-top:1px solid rgba(212,175,55,0.15);padding:20px 40px;display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.25)}</style></head>
 <body><div class="cert"><div class="header"><div class="org">COMMAND DOMAINS LLC / BDDT PUBLISHING — SOVEREIGN SHUTTER™ FRAMEWORK</div><div class="title">MUSIC WITNESS CERTIFICATE</div></div>
 <div class="body"><div class="wid-box"><div class="wid-label">WITNESS ID</div><div class="wid-value">${witnessData.wid}</div></div>
 <div class="grid"><div class="field"><div class="field-label">CREATOR</div><div class="field-value">${user?.name || "—"}</div></div><div class="field"><div class="field-label">SONG TITLE</div><div class="field-value">${title || "—"}</div></div><div class="field"><div class="field-label">ALBUM</div><div class="field-value">${albumName || "—"}</div></div><div class="field"><div class="field-label">GENRE</div><div class="field-value">${genre || "—"}</div></div><div class="field"><div class="field-label">BPM / KEY</div><div class="field-value">${bpm || "—"} / ${keySignature || "—"}</div></div><div class="field"><div class="field-label">RELEASE DATE</div><div class="field-value">${releaseDate || "—"}</div></div><div class="field"><div class="field-label">BMI MEMBER #</div><div class="field-value">${bmiNumber || "—"}</div></div><div class="field"><div class="field-label">ISRC CODE</div><div class="field-value">${isrc || "—"}</div></div></div>
@@ -658,17 +658,17 @@ export default function UploadPage() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.82) 0%, rgba(30,16,40,0.45) 45%, transparent 100%)" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(53,62,67,0.85) 0%, rgba(53,62,67,0.15) 40%, transparent 100%)" }} />
         <div className="absolute bottom-0 left-0 p-6">
-          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
-          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Register Your Work</h1>
-          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#DACAAA" }}>Seal your creation with a cryptographic Witness ID</p>
+          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
+          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Register Your Work</h1>
+          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-parchment)" }}>Seal your creation with a cryptographic Witness ID</p>
         </div>
       </div>
       <div className="flex items-center justify-center" style={{ minHeight: "calc(100vh - 200px)" }}>
       <div className="text-center max-w-sm mx-auto px-6">
-        <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "#CBB183" }} />
-        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Sign In Required</h2>
+        <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "var(--ln-gold)" }} />
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Sign In Required</h2>
         <p className="text-sm mb-6" style={{ color: "#E2E8F0" }}>Sign in to upload tracks to Living Nexus.</p>
-        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: "#CBB183", color: "#E6CDAE" }}>Sign In</Button>
+        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Sign In</Button>
       </div>
       </div>
     </div>
@@ -694,16 +694,16 @@ export default function UploadPage() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.82) 0%, rgba(30,16,40,0.45) 45%, transparent 100%)" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(53,62,67,0.85) 0%, rgba(53,62,67,0.15) 40%, transparent 100%)" }} />
         <div className="absolute bottom-0 left-0 p-6">
-          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
-          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Register Your Work</h1>
-          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#DACAAA" }}>Seal your creation with a cryptographic Witness ID</p>
+          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
+          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Register Your Work</h1>
+          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-parchment)" }}>Seal your creation with a cryptographic Witness ID</p>
         </div>
       </div>
       <div className="container py-10 max-w-2xl">
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 {uploadMode === "audio" ? "Upload Track" : uploadMode === "lyrics" ? "Upload Lyrics" : uploadMode === "manuscript" ? "Upload Manuscript" : "Upload Comic / Novel"}
               </h1>
               <p className="text-sm" style={{ color: "#E2E8F0" }}>
@@ -713,7 +713,7 @@ export default function UploadPage() {
             <button
               onClick={() => navigate("/batch-upload")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body flex-shrink-0 transition-all"
-              style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#CBB183" }}
+              style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-gold)" }}
             >
               <Upload size={12} /> Batch Upload
             </button>
@@ -724,11 +724,11 @@ export default function UploadPage() {
         {newThisWeekData !== undefined && newThisWeekData.length === 0 && (
           <div
             className="flex items-center gap-3 px-4 py-3 rounded-xl mb-6 text-sm"
-            style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.28)" }}
+            style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.25)" }}
           >
-            <Sparkles className="w-4 h-4 flex-shrink-0" style={{ color: "#CBB183" }} />
-            <span style={{ color: "#DACAAA" }}>
-              Nothing dropped this week — <strong style={{ color: "#E6CDAE" }}>be the first.</strong>
+            <Sparkles className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+            <span style={{ color: "var(--ln-parchment)" }}>
+              Nothing dropped this week — <strong style={{ color: "var(--ln-parchment)" }}>be the first.</strong>
             </span>
           </div>
         )}
@@ -742,26 +742,26 @@ export default function UploadPage() {
               <div key={s.n} className="flex items-center gap-1 flex-1">
                 <div className="flex-1 flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
-                    style={{ background: isDone ? "#4ADE80" : isActive ? "#CBB183" : "#2C3438", color: isDone || isActive ? "#E6CDAE" : "#AA8E64" }}>
+                    style={{ background: isDone ? "var(--ln-seal-bright)" : isActive ? "var(--ln-gold)" : "var(--ln-coal)", color: isDone || isActive ? "var(--ln-parchment)" : "var(--ln-smoke)" }}>
                     {isDone ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
                   </div>
-                  <span className="text-xs hidden sm:block" style={{ color: isActive ? "#CBB183" : isDone ? "#4ADE80" : "#AA8E64" }}>{s.label}</span>
+                  <span className="text-xs hidden sm:block" style={{ color: isActive ? "var(--ln-gold)" : isDone ? "var(--ln-seal-bright)" : "var(--ln-smoke)" }}>{s.label}</span>
                 </div>
-                {i < steps.length - 1 && <div className="w-8 h-px flex-shrink-0" style={{ background: step > s.n ? "rgba(74,222,128,0.45)" : "rgba(203,177,131,0.15)" }} />}
+                {i < steps.length - 1 && <div className="w-8 h-px flex-shrink-0" style={{ background: step > s.n ? "rgba(58,138,86,0.4)" : "rgba(196,154,40,0.12)" }} />}
               </div>
             );
           })}
         </div>
 
-        <div className="rounded-2xl p-6 md:p-8" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.15)" }}>
+        <div className="p-6 md:p-8" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>
 
           {step === 1 && (
             <div className="space-y-5">
-              <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Select Files</h2>
+              <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Select Files</h2>
 
               {/* Medium Selector — Cosmic Edition */}
               <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] mb-2 font-heading" style={{ color: "#AA8E64" }}>Choose Your Medium</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] mb-2 font-heading" style={{ color: "var(--ln-smoke)" }}>Choose Your Medium</p>
                 <div className="grid grid-cols-2 gap-2">
                   <CosmicMediumIcon
                     medium="audio"
@@ -799,7 +799,7 @@ export default function UploadPage() {
                 const checklists: Record<string, { icon: string; color: string; title: string; items: { label: string; note?: string; required: boolean }[] }> = {
                   audio: {
                     icon: "🎵",
-                    color: "#CBB183",
+                    color: "var(--ln-gold)",
                     title: "Before You Upload Music",
                     items: [
                       { label: "Audio file (MP3, WAV, FLAC, M4A, OGG)", note: "Up to 375 MB", required: true },
@@ -824,7 +824,7 @@ export default function UploadPage() {
                   },
                   manuscript: {
                     icon: "📖",
-                    color: "#4ADE80",
+                    color: "var(--ln-seal-bright)",
                     title: "Before You Upload a Manuscript",
                     items: [
                       { label: "Document file (PDF, DOCX, TXT, EPUB)", note: "PDF strongly recommended for best display", required: true },
@@ -838,7 +838,7 @@ export default function UploadPage() {
                   },
                   comic: {
                     icon: "🎨",
-                    color: "#EF4444",
+                    color: "var(--ln-ember)",
                     title: "Before You Upload a Comic / Novel",
                     items: [
                       { label: "Document file (PDF preferred)", note: "All pages in a single PDF for best inline preview", required: true },
@@ -866,12 +866,12 @@ export default function UploadPage() {
                             {item.required ? "!" : "○"}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-xs font-medium" style={{ color: item.required ? "#E6CDAE" : "#8B9BA3" }}>{item.label}</span>
+                            <span className="text-xs font-medium" style={{ color: item.required ? "var(--ln-parchment)" : "#8B9BA3" }}>{item.label}</span>
                             {item.note && <span className="text-[10px] ml-1.5" style={{ color: "#5A6A72" }}>{item.note}</span>}
                           </div>
                         </div>
                       ))}
-                      <p className="text-[9px] pt-1" style={{ color: "#3F4A50" }}>
+                      <p className="text-[9px] pt-1" style={{ color: "var(--ln-iron)" }}>
                         <span style={{ color: cl.color + "99" }}>!</span> = required &nbsp;·&nbsp; ○ = optional but recommended
                       </p>
                     </div>
@@ -886,34 +886,34 @@ export default function UploadPage() {
                   onDragLeave={() => setAudioDragging(false)}
                   onDrop={handleAudioDrop}
                   className="rounded-xl p-8 text-center cursor-pointer transition-all"
-                  style={{ border: `2px dashed ${audioFile ? "#4ADE80" : audioDragging ? "#CBB183" : "rgba(203,177,131,0.22)"}`, background: audioFile ? "rgba(74,222,128,0.05)" : audioDragging ? "rgba(203,177,131,0.05)" : "#2C3438" }}>
+                  style={{ border: `2px dashed ${audioFile ? "var(--ln-seal-bright)" : audioDragging ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}`, background: audioFile ? "rgba(74,222,128,0.05)" : audioDragging ? "rgba(196,154,40,0.04)" : "var(--ln-coal)" }}>
                   <input ref={audioInputRef} type="file" accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/flac,audio/x-flac,audio/aac,audio/ogg,audio/x-m4a,audio/mp4,.mp3,.wav,.flac,.aac,.ogg,.m4a,.aiff,.aif" className="hidden"
                     onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 375 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 375 MB. Consider converting WAV to MP3 first.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); } }} />
                   {audioFile ? (
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(74,222,128,0.18)" }}>
-                        <Check className="w-5 h-5" style={{ color: "#4ADE80" }} />
+                        <Check className="w-5 h-5" style={{ color: "var(--ln-seal-bright)" }} />
                       </div>
-                      <p className="font-medium text-sm" style={{ color: "#4ADE80" }}>{audioFile.name}</p>
+                      <p className="font-medium text-sm" style={{ color: "var(--ln-seal-bright)" }}>{audioFile.name}</p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
                       <button type="button" onClick={e => { e.stopPropagation(); setAudioFile(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
                     </div>
                   ) : (
                     <>
-                      <Music className="w-10 h-10 mx-auto mb-3" style={{ color: "#CBB183", opacity: 0.4 }} />
-                      <p className="font-medium text-sm mb-1" style={{ color: "#DACAAA" }}>{audioDragging ? "Drop it!" : "Drop audio file here or click to browse"}</p>
+                      <Music className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--ln-gold)", opacity: 0.4 }} />
+                      <p className="font-medium text-sm mb-1" style={{ color: "var(--ln-parchment)" }}>{audioDragging ? "Drop it!" : "Drop audio file here or click to browse"}</p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>MP3, WAV, FLAC, M4A, OGG supported</p>
-                      <p className="text-xs mt-1" style={{ color: "#3F4A50" }}>On iPhone, use Safari for best file access</p>
+                      <p className="text-xs mt-1" style={{ color: "var(--ln-iron)" }}>On iPhone, use Safari for best file access</p>
                     </>
                   )}
                 </div>
               )}
 
               {uploadMode === "lyrics" && (
-                <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.28)" }}>
+                <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.25)" }}>
                   <div className="flex items-center gap-2 mb-3">
-                    <Shield className="w-4 h-4" style={{ color: "#CBB183" }} />
-                    <span className="text-xs font-semibold" style={{ color: "#CBB183", letterSpacing: "0.1em" }}>LYRICS-ONLY PROTECTION</span>
+                    <Shield className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+                    <span className="text-xs font-semibold" style={{ color: "var(--ln-gold)", letterSpacing: "0.1em" }}>LYRICS-ONLY PROTECTION</span>
                   </div>
                   <p className="text-xs mb-3" style={{ color: "#E2E8F0" }}>Your lyrics will be hashed with SHA-256 and registered with a Witness ID. No audio file required — protect your words before the music is made.</p>
                   <Textarea
@@ -922,7 +922,7 @@ export default function UploadPage() {
                     placeholder="Paste or type your lyrics here to protect them with a Witness ID..."
                     rows={10}
                     className="font-mono text-sm resize-none"
-                    style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.22)", color: "#DACAAA" }}
+                    style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-parchment)" }}
                   />
                   {lyrics.trim() && (
                     <p className="text-xs mt-2" style={{ color: "#E2E8F0" }}>{lyrics.trim().split(/\s+/).length} words · {lyrics.length} characters</p>
@@ -932,7 +932,7 @@ export default function UploadPage() {
 
               {/* ── Storyboard Builder (comic/novel only) ── */}
               {uploadMode === "comic" && (
-                <div className="rounded-xl p-4" style={{ background: "#1A2530", border: "1px solid rgba(203,177,131,0.18)" }}>
+                <div className="p-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>
                   <StoryboardBuilder
                     onChange={json => setStoryboardPagesJson(json)}
                     disabled={uploadMutation.isPending}
@@ -944,7 +944,7 @@ export default function UploadPage() {
                 <div
                   onClick={() => documentInputRef.current?.click()}
                   className="rounded-xl p-8 text-center cursor-pointer transition-all"
-                  style={{ border: `2px dashed ${documentFile ? (uploadMode === "manuscript" ? "#4ADE80" : "#EF4444") : "rgba(203,177,131,0.22)"}`, background: documentFile ? "rgba(74,222,128,0.05)" : "#2C3438" }}>
+                  style={{ border: `2px dashed ${documentFile ? (uploadMode === "manuscript" ? "var(--ln-seal-bright)" : "var(--ln-ember)") : "rgba(196,154,40,0.2)"}`, background: documentFile ? "rgba(74,222,128,0.05)" : "var(--ln-coal)" }}>
                   <input
                     ref={documentInputRef}
                     type="file"
@@ -955,22 +955,22 @@ export default function UploadPage() {
                   {documentFile ? (
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: uploadMode === "manuscript" ? "rgba(74,222,128,0.18)" : "rgba(239,68,68,0.2)" }}>
-                        <Check className="w-5 h-5" style={{ color: uploadMode === "manuscript" ? "#4ADE80" : "#EF4444" }} />
+                        <Check className="w-5 h-5" style={{ color: uploadMode === "manuscript" ? "var(--ln-seal-bright)" : "var(--ln-ember)" }} />
                       </div>
-                      <p className="font-medium text-sm" style={{ color: uploadMode === "manuscript" ? "#4ADE80" : "#EF4444" }}>{documentFile.name}</p>
+                      <p className="font-medium text-sm" style={{ color: uploadMode === "manuscript" ? "var(--ln-seal-bright)" : "var(--ln-ember)" }}>{documentFile.name}</p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>{(documentFile.size / 1024 / 1024).toFixed(2)} MB</p>
                       <button type="button" onClick={e => { e.stopPropagation(); setDocumentFile(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
                     </div>
                   ) : (
                     <>
                       <span className="text-4xl block mb-3">{uploadMode === "manuscript" ? "📖" : "🎨"}</span>
-                      <p className="font-medium text-sm mb-1" style={{ color: "#DACAAA" }}>
+                      <p className="font-medium text-sm mb-1" style={{ color: "var(--ln-parchment)" }}>
                         {uploadMode === "manuscript" ? "Drop your manuscript here or click to browse" : "Drop your comic/novel file here or click to browse"}
                       </p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>
                         {uploadMode === "manuscript" ? "PDF, DOCX, TXT, EPUB — max 200 MB" : "PDF, CBZ, CBR, ZIP, or image files — max 200 MB"}
                       </p>
-                      <p className="text-xs mt-2 px-4" style={{ color: "#AA8E64" }}>
+                      <p className="text-xs mt-2 px-4" style={{ color: "var(--ln-smoke)" }}>
                         Your file will be SHA-256 hashed and registered with a Witness ID. The original file is stored privately.
                       </p>
                     </>
@@ -979,27 +979,27 @@ export default function UploadPage() {
               )}
 
               <div onClick={() => coverInputRef.current?.click()} className="rounded-xl p-5 text-center cursor-pointer transition-all hover:bg-white/5"
-                style={{ border: `2px dashed ${coverFile ? "#CBB183" : "rgba(203,177,131,0.18)"}`, background: coverFile ? "rgba(203,177,131,0.05)" : "#2C3438" }}>
+                style={{ border: `2px dashed ${coverFile ? "var(--ln-gold)" : "rgba(196,154,40,0.15)"}`, background: coverFile ? "rgba(196,154,40,0.04)" : "var(--ln-coal)" }}>
                 <input ref={coverInputRef} type="file" accept="image/*" className="hidden"
                   onChange={e => { const f = e.target.files?.[0]; if (f) setCoverFile(f); }} />
                 {coverFile ? (
                   <div className="flex items-center justify-center gap-2">
-                    <Check className="w-4 h-4" style={{ color: "#CBB183" }} />
-                    <span className="text-sm" style={{ color: "#CBB183" }}>{coverFile.name}</span>
+                    <Check className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+                    <span className="text-sm" style={{ color: "var(--ln-gold)" }}>{coverFile.name}</span>
                     <button type="button" onClick={e => { e.stopPropagation(); setCoverFile(null); }} className="text-xs hover:underline ml-2" style={{ color: "#E2E8F0" }}>Remove</button>
                   </div>
                 ) : (
                   <>
-                    <ImageIcon className="w-6 h-6 mx-auto mb-1" style={{ color: "#CBB183", opacity: 0.4 }} />
-                    <p className="text-sm" style={{ color: "#E2E8F0" }}>Cover art {uploadMode === "audio" ? <span style={{ color: "#EF4444" }}>*required</span> : <span style={{ color: "#AA8E64" }}>(optional)</span>} — JPG, PNG, WebP</p>
-                    {uploadMode === "audio" && <p className="text-xs mt-1" style={{ color: "#AA8E64" }}>Required to generate your work's visual — every audio work must be visually alive</p>}
+                    <ImageIcon className="w-6 h-6 mx-auto mb-1" style={{ color: "var(--ln-gold)", opacity: 0.4 }} />
+                    <p className="text-sm" style={{ color: "#E2E8F0" }}>Cover art {uploadMode === "audio" ? <span style={{ color: "var(--ln-ember)" }}>*required</span> : <span style={{ color: "var(--ln-smoke)" }}>(optional)</span>} — JPG, PNG, WebP</p>
+                    {uploadMode === "audio" && <p className="text-xs mt-1" style={{ color: "var(--ln-smoke)" }}>Required to generate your work's visual — every audio work must be visually alive</p>}
                   </>
                 )}
               </div>
               {/* Video Upload (audio mode only) */}
               {uploadMode === "audio" && (
                 <div onClick={() => videoInputRef.current?.click()} className="rounded-xl p-5 text-center cursor-pointer transition-all hover:bg-white/5"
-                  style={{ border: `2px dashed ${videoFile ? "#4ADE80" : "rgba(203,177,131,0.18)"}`, background: videoFile ? "rgba(74,222,128,0.05)" : "#2C3438" }}>
+                  style={{ border: `2px dashed ${videoFile ? "var(--ln-seal-bright)" : "rgba(196,154,40,0.15)"}`, background: videoFile ? "rgba(74,222,128,0.05)" : "var(--ln-coal)" }}>
                   <input ref={videoInputRef} type="file" accept="video/*,video/mp4,video/quicktime,video/mov,video/x-m4v,.mp4,.mov,.m4v" className="hidden"
                     onChange={e => {
                       const f = e.target.files?.[0];
@@ -1010,16 +1010,16 @@ export default function UploadPage() {
                     }} />
                   {videoFile ? (
                     <div className="flex items-center justify-center gap-2">
-                      <Check className="w-4 h-4" style={{ color: "#4ADE80" }} />
-                      <span className="text-sm" style={{ color: "#4ADE80" }}>{videoFile.name}</span>
+                      <Check className="w-4 h-4" style={{ color: "var(--ln-seal-bright)" }} />
+                      <span className="text-sm" style={{ color: "var(--ln-seal-bright)" }}>{videoFile.name}</span>
                       <span className="text-xs" style={{ color: "#E2E8F0" }}>({(videoFile.size/1024/1024).toFixed(1)} MB)</span>
                       <button type="button" onClick={e => { e.stopPropagation(); setVideoFile(null); }} className="text-xs hover:underline ml-2" style={{ color: "#E2E8F0" }}>Remove</button>
                     </div>
                   ) : (
                     <>
-                      <Video className="w-6 h-6 mx-auto mb-1" style={{ color: "#4ADE80", opacity: 0.4 }} />
-                      <p className="text-sm" style={{ color: "#E2E8F0" }}>Music Video <span style={{ color: "#AA8E64" }}>(optional)</span> — MP4, MOV, max 500 MB</p>
-                      <p className="text-xs mt-0.5" style={{ color: "#3F4A50" }}>Video gets its own Witness ID alongside your audio</p>
+                      <Video className="w-6 h-6 mx-auto mb-1" style={{ color: "var(--ln-seal-bright)", opacity: 0.4 }} />
+                      <p className="text-sm" style={{ color: "#E2E8F0" }}>Music Video <span style={{ color: "var(--ln-smoke)" }}>(optional)</span> — MP4, MOV, max 500 MB</p>
+                      <p className="text-xs mt-0.5" style={{ color: "var(--ln-iron)" }}>Video gets its own Witness ID alongside your audio</p>
                     </>
                   )}
                 </div>
@@ -1033,7 +1033,7 @@ export default function UploadPage() {
                   !documentFile
                 }
                 onClick={() => setStep(2)}
-                style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
+                style={{ background: "linear-gradient(135deg, #B8860B, #C49A28)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(196,154,40,0.25)" }}>
                 Next: Metadata <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
@@ -1041,41 +1041,41 @@ export default function UploadPage() {
 
           {step === 2 && (
             <div className="space-y-5">
-              <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 {uploadMode === "manuscript" ? "Manuscript Metadata" : uploadMode === "comic" ? "Comic / Novel Metadata" : "Track Metadata"}
               </h2>
 
               {/* ── Title ── */}
               <div>
-                <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>
                   {uploadMode === "manuscript" || uploadMode === "comic" ? "Work Title *" : "Title *"}
                 </label>
                 <Input value={title} onChange={e => setTitle(e.target.value)}
                   placeholder={uploadMode === "manuscript" ? "Enter manuscript title" : uploadMode === "comic" ? "Enter comic / novel title" : "Enter track title"}
-                  style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE" }} />
+                  style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }} />
               </div>
 
               {/* ── Genre (music) OR Category (manuscript/comic) ── */}
               {(uploadMode === "audio" || uploadMode === "lyrics") ? (
                 <div>
-                  <label className="text-xs mb-1.5 flex items-center gap-2 font-medium" style={{ color: "#AA8E64" }}>
+                  <label className="text-xs mb-1.5 flex items-center gap-2 font-medium" style={{ color: "var(--ln-smoke)" }}>
                     Genre
                     {creatorProfile?.primaryGenre && (
                       <span className="text-[10px] font-normal" style={{ color: "#E2E8F0" }}>
-                        — default from profile: <span style={{ color: "#CBB183" }}>{creatorProfile.primaryGenre}</span>
+                        — default from profile: <span style={{ color: "var(--ln-gold)" }}>{creatorProfile.primaryGenre}</span>
                       </span>
                     )}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {creatorProfile?.primaryGenre && !GENRES.includes(creatorProfile.primaryGenre) && (
                       <button type="button" key="profile-genre" onClick={() => setGenre(genre === creatorProfile.primaryGenre ? "" : (creatorProfile.primaryGenre ?? ""))} className="px-3 py-1 rounded-full text-xs transition-all"
-                        style={{ background: genre === creatorProfile.primaryGenre ? "rgba(203,177,131,0.25)" : "#2C3438", color: genre === creatorProfile.primaryGenre ? "#CBB183" : "#3F4A50", border: `1px solid ${genre === creatorProfile.primaryGenre ? "rgba(203,177,131,0.45)" : "rgba(203,177,131,0.18)"}` }}>
+                        style={{ background: genre === creatorProfile.primaryGenre ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === creatorProfile.primaryGenre ? "var(--ln-gold)" : "var(--ln-iron)", border: `1px solid ${genre === creatorProfile.primaryGenre ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
                         {creatorProfile.primaryGenre}
                       </button>
                     )}
                     {GENRES.map(g => (
                       <button type="button" key={g} onClick={() => setGenre(g === genre ? "" : g)} className="px-3 py-1 rounded-full text-xs transition-all"
-                        style={{ background: genre === g ? "rgba(203,177,131,0.25)" : "#2C3438", color: genre === g ? "#CBB183" : "#3F4A50", border: `1px solid ${genre === g ? "rgba(203,177,131,0.45)" : "rgba(203,177,131,0.18)"}` }}>
+                        style={{ background: genre === g ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === g ? "var(--ln-gold)" : "var(--ln-iron)", border: `1px solid ${genre === g ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
                         {g}
                       </button>
                     ))}
@@ -1083,11 +1083,11 @@ export default function UploadPage() {
                 </div>
               ) : (
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>Category</label>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>Category</label>
                   <div className="flex flex-wrap gap-2">
                     {(uploadMode === "manuscript" ? MANUSCRIPT_CATEGORIES : COMIC_CATEGORIES).map(cat => (
                       <button type="button" key={cat} onClick={() => setGenre(cat === genre ? "" : cat)} className="px-3 py-1 rounded-full text-xs transition-all"
-                        style={{ background: genre === cat ? "rgba(203,177,131,0.25)" : "#2C3438", color: genre === cat ? "#CBB183" : "#3F4A50", border: `1px solid ${genre === cat ? "rgba(203,177,131,0.45)" : "rgba(203,177,131,0.18)"}` }}>
+                        style={{ background: genre === cat ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === cat ? "var(--ln-gold)" : "var(--ln-iron)", border: `1px solid ${genre === cat ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
                         {cat}
                       </button>
                     ))}
@@ -1099,14 +1099,14 @@ export default function UploadPage() {
               {(uploadMode === "audio" || uploadMode === "lyrics") && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>BPM</label>
+                    <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>BPM</label>
                     <Input type="number" value={bpm} onChange={e => setBpm(e.target.value)} placeholder="120"
-                      style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE" }} />
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }} />
                   </div>
                   <div>
-                    <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>Key</label>
+                    <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>Key</label>
                     <Input value={keySignature} onChange={e => setKeySignature(e.target.value)} placeholder="C major"
-                      style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE" }} />
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }} />
                   </div>
                 </div>
               )}
@@ -1114,52 +1114,52 @@ export default function UploadPage() {
               {/* ── Album / Series + Date ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>
                     {uploadMode === "manuscript" || uploadMode === "comic" ? "Series / Collection" : "Album"}
                   </label>
                   <Input value={albumName} onChange={e => setAlbumName(e.target.value)}
                     placeholder={uploadMode === "manuscript" || uploadMode === "comic" ? "Series or collection name" : "Album name"}
-                    style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE" }} />
+                    style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }} />
                 </div>
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>
                     {uploadMode === "manuscript" || uploadMode === "comic" ? "Written / Completed" : "Release Date"}
                   </label>
                   <Input type="date" value={releaseDate} onChange={e => setReleaseDate(e.target.value)}
-                    style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE" }} />
+                    style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }} />
                 </div>
               </div>
 
               {/* ── ISRC + BMI (music) OR ISBN + Publisher (manuscript/comic) ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>
                     {uploadMode === "manuscript" || uploadMode === "comic" ? "ISBN" : "ISRC"}
                   </label>
                   <Input value={isrc} onChange={e => setIsrc(e.target.value)}
                     placeholder={uploadMode === "manuscript" || uploadMode === "comic" ? "978-0-000-00000-0 (optional)" : "US-XXX-YY-NNNNN"}
-                    style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE" }} />
+                    style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }} />
                 </div>
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>
                     {uploadMode === "manuscript" || uploadMode === "comic" ? "Publisher / Imprint" : "BMI Member #"}
                   </label>
                   <Input value={bmiNumber} onChange={e => setBmiNumber(e.target.value)}
                     placeholder={uploadMode === "manuscript" || uploadMode === "comic" ? "Publisher or self-published" : "BMI number"}
-                    style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE" }} />
+                    style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }} />
                 </div>
               </div>
 
               {/* ── Mood Tags (music) OR Themes (manuscript/comic) ── */}
               <div>
-                <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>
                   {uploadMode === "manuscript" || uploadMode === "comic" ? "Themes" : "Mood Tags"}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {(uploadMode === "manuscript" || uploadMode === "comic" ? MANUSCRIPT_THEMES : MOODS).map(m => (
                     <button type="button" key={m} onClick={() => setSelectedMoods(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])}
                       className="px-3 py-1 rounded-full text-xs transition-all"
-                      style={{ background: selectedMoods.includes(m) ? "rgba(203,177,131,0.18)" : "#2C3438", color: selectedMoods.includes(m) ? "#CBB183" : "#AA8E64", border: `1px solid ${selectedMoods.includes(m) ? "rgba(203,177,131,0.35)" : "rgba(203,177,131,0.18)"}` }}>
+                      style={{ background: selectedMoods.includes(m) ? "rgba(196,154,40,0.15)" : "var(--ln-coal)", color: selectedMoods.includes(m) ? "var(--ln-gold)" : "var(--ln-smoke)", border: `1px solid ${selectedMoods.includes(m) ? "rgba(196,154,40,0.3)" : "rgba(196,154,40,0.15)"}` }}>
                       {m}
                     </button>
                   ))}
@@ -1168,18 +1168,18 @@ export default function UploadPage() {
               {/* Credits editor */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium" style={{ color: "#AA8E64" }}>Credits</label>
+                  <label className="text-xs font-medium" style={{ color: "var(--ln-smoke)" }}>Credits</label>
                   <button
                     type="button"
                     onClick={() => setCredits(prev => [...prev, { role: "", name: "" }])}
                     className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg transition-all"
-                    style={{ color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)", background: "rgba(74,222,128,0.06)" }}
+                    style={{ color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)", background: "rgba(74,222,128,0.06)" }}
                   >
                     <Plus size={10} /> Add credit
                   </button>
                 </div>
                 {credits.length === 0 && (
-                  <p className="text-[11px]" style={{ color: "#3F4A50" }}>No credits added. Click "Add credit" to list co-writers, producers, engineers, etc.</p>
+                  <p className="text-[11px]" style={{ color: "var(--ln-iron)" }}>No credits added. Click "Add credit" to list co-writers, producers, engineers, etc.</p>
                 )}
                 <div className="space-y-2">
                   {credits.map((c, i) => (
@@ -1189,20 +1189,20 @@ export default function UploadPage() {
                         value={c.role}
                         onChange={e => setCredits(prev => prev.map((x, j) => j === i ? { ...x, role: e.target.value } : x))}
                         className="flex-1"
-                        style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE", fontSize: "12px" }}
+                        style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)", fontSize: "12px" }}
                       />
                       <Input
                         placeholder="Name"
                         value={c.name}
                         onChange={e => setCredits(prev => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
                         className="flex-1"
-                        style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE", fontSize: "12px" }}
+                        style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)", fontSize: "12px" }}
                       />
                       <button
                         type="button"
                         onClick={() => setCredits(prev => prev.filter((_, j) => j !== i))}
                         className="flex-shrink-0 p-1.5 rounded-lg transition-all hover:bg-red-900/20"
-                        style={{ color: "#EF4444" }}
+                        style={{ color: "var(--ln-ember)" }}
                       >
                         <Trash2 size={12} />
                       </button>
@@ -1211,16 +1211,16 @@ export default function UploadPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs mb-2 block font-medium" style={{ color: "#AA8E64" }}>AI Training Consent</label>
+                <label className="text-xs mb-2 block font-medium" style={{ color: "var(--ln-smoke)" }}>AI Training Consent</label>
                 <div className="space-y-2">
                   {AI_CONSENT_OPTIONS.map(opt => (
                     <button type="button" key={opt.value} onClick={() => setAiConsent(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
-                      style={{ background: aiConsent === opt.value ? opt.activeColor : "#2C3438", border: `1px solid ${aiConsent === opt.value ? opt.activeBorder : "rgba(203,177,131,0.15)"}` }}>
+                      style={{ background: aiConsent === opt.value ? opt.activeColor : "var(--ln-coal)", border: `1px solid ${aiConsent === opt.value ? opt.activeBorder : "rgba(196,154,40,0.12)"}` }}>
                       <div className="w-4 h-4 rounded-full mt-0.5 flex-shrink-0 transition-all"
-                        style={{ background: aiConsent === opt.value ? opt.color : "transparent", border: `2px solid ${aiConsent === opt.value ? opt.color : "rgba(203,177,131,0.35)"}` }} />
+                        style={{ background: aiConsent === opt.value ? opt.color : "transparent", border: `2px solid ${aiConsent === opt.value ? opt.color : "rgba(196,154,40,0.3)"}` }} />
                       <div>
-                        <p className="text-sm font-medium" style={{ color: aiConsent === opt.value ? opt.color : "#E6CDAE" }}>{opt.label}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>{opt.desc}</p>
+                        <p className="text-sm font-medium" style={{ color: aiConsent === opt.value ? opt.color : "var(--ln-parchment)" }}>{opt.label}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>{opt.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -1228,21 +1228,21 @@ export default function UploadPage() {
               </div>
               {/* AI Authorship Disclosure */}
               <div>
-                <label className="text-xs mb-2 block font-medium" style={{ color: "#AA8E64" }}>AI AUTHORSHIP DISCLOSURE</label>
+                <label className="text-xs mb-2 block font-medium" style={{ color: "var(--ln-smoke)" }}>AI AUTHORSHIP DISCLOSURE</label>
                 <div className="space-y-2">
                   {([
-                    { value: "original" as const, label: "Human Original", color: "#CBB183", activeColor: "rgba(203,177,131,0.12)", activeBorder: "rgba(203,177,131,0.45)", desc: "Entirely human-made. No AI tools used in creation." },
-                    { value: "ai_assisted" as const, label: "AI-Assisted", color: "#CBB183", activeColor: "rgba(203,177,131,0.1)", activeBorder: "rgba(203,177,131,0.4)", desc: "AI used as a production aid. Human vision, human direction." },
-                    { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "#CBB183", activeColor: "rgba(203,177,131,0.1)", activeBorder: "rgba(203,177,131,0.4)", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
-                    { value: "ai_generated" as const, label: "AI-Generated", color: "#EF4444", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "AI generated the primary content." },
+                    { value: "original" as const, label: "Human Original", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.08)", activeBorder: "rgba(196,154,40,0.4)", desc: "Entirely human-made. No AI tools used in creation." },
+                    { value: "ai_assisted" as const, label: "AI-Assisted", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "AI used as a production aid. Human vision, human direction." },
+                    { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
+                    { value: "ai_generated" as const, label: "AI-Generated", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "AI generated the primary content." },
                   ] as const).map(opt => (
                     <button type="button" key={opt.value} onClick={() => setAiDisclosure(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
-                      style={{ background: aiDisclosure === opt.value ? opt.activeColor : "#2C3438", border: `1px solid ${aiDisclosure === opt.value ? opt.activeBorder : "rgba(203,177,131,0.15)"}` }}>
+                      style={{ background: aiDisclosure === opt.value ? opt.activeColor : "var(--ln-coal)", border: `1px solid ${aiDisclosure === opt.value ? opt.activeBorder : "rgba(196,154,40,0.12)"}` }}>
                       <div className="w-4 h-4 rounded-full mt-0.5 flex-shrink-0 transition-all"
-                        style={{ background: aiDisclosure === opt.value ? opt.color : "transparent", border: `2px solid ${aiDisclosure === opt.value ? opt.color : "rgba(203,177,131,0.35)"}` }} />
+                        style={{ background: aiDisclosure === opt.value ? opt.color : "transparent", border: `2px solid ${aiDisclosure === opt.value ? opt.color : "rgba(196,154,40,0.3)"}` }} />
                       <div>
-                        <p className="text-sm font-medium" style={{ color: aiDisclosure === opt.value ? opt.color : "#E6CDAE" }}>{opt.label}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>{opt.desc}</p>
+                        <p className="text-sm font-medium" style={{ color: aiDisclosure === opt.value ? opt.color : "var(--ln-parchment)" }}>{opt.label}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>{opt.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -1263,19 +1263,19 @@ export default function UploadPage() {
               {/* Lyrics (music/lyrics mode) OR Synopsis (manuscript/comic) */}
               {(uploadMode === "audio" || uploadMode === "lyrics") ? (
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>LYRICS <span style={{ color: "#E2E8F0" }}>(optional — included in WID registration)</span></label>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>LYRICS <span style={{ color: "#E2E8F0" }}>(optional — included in WID registration)</span></label>
                   <Textarea
                     value={lyrics}
                     onChange={e => setLyrics(e.target.value)}
                     placeholder="Paste or type your lyrics here..."
                     rows={8}
                     className="font-mono text-sm resize-none"
-                    style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.18)", color: "#DACAAA" }}
+                    style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }}
                   />
                 </div>
               ) : (
                 <div>
-                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "#AA8E64" }}>
+                  <label className="text-xs mb-1.5 block font-medium" style={{ color: "var(--ln-smoke)" }}>
                     SYNOPSIS / DESCRIPTION <span style={{ color: "#E2E8F0" }}>(optional — included in WID registration)</span>
                   </label>
                   <Textarea
@@ -1284,17 +1284,17 @@ export default function UploadPage() {
                     placeholder={uploadMode === "manuscript" ? "Describe your manuscript — plot, themes, intended audience..." : "Describe your comic or novel — story, characters, visual style..."}
                     rows={6}
                     className="text-sm resize-none"
-                    style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.18)", color: "#DACAAA" }}
+                    style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }}
                   />
                 </div>
               )}
 
               {/* Caption section moved to Step 3 (after WID is confirmed) */}
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
+                <Button variant="outline" onClick={() => setStep(1)} style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
+                <Button className="flex-1" disabled={!title || (uploadMode === "audio" && !coverFile)} onClick={() => setStep(3)} style={{ background: "linear-gradient(135deg, #B8860B, #C49A28)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(196,154,40,0.25)" }}>
                   Next: Witness ID <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1304,7 +1304,7 @@ export default function UploadPage() {
           {step === 3 && (
             <div className="space-y-5">
               <div>
-                <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Witness ID — Cryptographic Provenance</h2>
+                <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Witness ID — Cryptographic Provenance</h2>
                 <p className="text-xs mt-1" style={{ color: "#E2E8F0" }}>
                   {uploadMode === "lyrics"
                     ? "All processing is local — your lyrics are hashed in-browser. ECDSA P-256 signature establishes tamper-evident ownership of your words."
@@ -1312,98 +1312,98 @@ export default function UploadPage() {
                 </p>
               </div>
               {!witnessData ? (
-                <div className="text-center py-10 rounded-xl" style={{ background: "#2C3438", border: "2px dashed rgba(203,177,131,0.22)" }}>
-                  <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(203,177,131,0.1)", border: "1px solid rgba(203,177,131,0.28)" }}>
-                    <Shield className="w-8 h-8" style={{ color: "#CBB183", opacity: 0.6 }} />
+                <div className="text-center py-10 rounded-xl" style={{ background: "var(--ln-coal)", border: "2px dashed rgba(196,154,40,0.2)" }}>
+                  <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(196,154,40,0.09)", border: "1px solid rgba(196,154,40,0.25)" }}>
+                    <Shield className="w-8 h-8" style={{ color: "var(--ln-gold)", opacity: 0.6 }} />
                   </div>
-                  <p className="text-sm mb-1 font-medium" style={{ color: "#DACAAA" }}>Generate your Witness ID</p>
+                  <p className="text-sm mb-1 font-medium" style={{ color: "var(--ln-parchment)" }}>Generate your Witness ID</p>
                   <p className="text-xs mb-5" style={{ color: "#E2E8F0" }}>SHA-256 hash + ECDSA P-256 signature + harmonic frequency derivation</p>
-                  <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
+                  <Button onClick={handleGenerateWid} disabled={generatingWid} style={{ background: "linear-gradient(135deg, #B8860B, #C49A28)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(196,154,40,0.25)" }}>
                     {generatingWid ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : <><Zap className="w-4 h-4 mr-2" /> Generate Witness ID</>}
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl text-center" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.28)" }}>
+                  <div className="p-4 rounded-xl text-center" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.25)" }}>
                     {uploadMode === "lyrics" && (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-semibold" style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)", letterSpacing: "0.08em" }}>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-semibold" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)", letterSpacing: "0.08em" }}>
                         <Shield className="w-3 h-3" /> LYRICS PROTECTED
                       </div>
                     )}
                     {uploadMode === "manuscript" && (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-semibold" style={{ background: "rgba(74,222,128,0.15)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.4)", letterSpacing: "0.08em" }}>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-semibold" style={{ background: "rgba(58,138,86,0.15)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.4)", letterSpacing: "0.08em" }}>
                         📖 MANUSCRIPT WITNESSED
                       </div>
                     )}
                     {uploadMode === "comic" && (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-semibold" style={{ background: "rgba(239,68,68,0.15)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.08em" }}>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-semibold" style={{ background: "rgba(196,68,10,0.15)", color: "var(--ln-ember)", border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.08em" }}>
                         🎨 COMIC / NOVEL WITNESSED
                       </div>
                     )}
                     <p className="text-xs mb-2 font-medium" style={{ color: "#E2E8F0", letterSpacing: "0.12em" }}>WITNESS ID</p>
-                    <p className="text-xl font-bold font-mono" style={{ color: "#CBB183" }}>{witnessData.wid}</p>
+                    <p className="text-xl font-bold font-mono" style={{ color: "var(--ln-gold)" }}>{witnessData.wid}</p>
                     <div className="flex items-center justify-center gap-2 mt-2">
                       <button type="button" onClick={() => { navigator.clipboard.writeText(witnessData.wid); toast.success("WID copied!"); }} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <Copy className="w-3 h-3" /> Copy
                       </button>
-                      <span style={{ color: "#3F4A50" }}>·</span>
+                      <span style={{ color: "var(--ln-iron)" }}>·</span>
                       <button type="button" onClick={() => playIdentityChord(witnessData.frequencies)} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <Play className="w-3 h-3" /> Play Identity Chord
                       </button>
-                      <span style={{ color: "#3F4A50" }}>·</span>
+                      <span style={{ color: "var(--ln-iron)" }}>·</span>
                       <button type="button" onClick={handleGenerateWid} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <RefreshCw className="w-3 h-3" /> Regenerate
                       </button>
                     </div>
                   </div>
                   <HarmonicWaveform frequencies={witnessData.frequencies} active={waveformActive} />
-                  <div className="p-3 rounded-lg" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
                     <p className="text-xs mb-1" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>{uploadMode === "lyrics" ? "SHA-256 LYRICS HASH" : "SHA-256 FILE HASH"}</p>
-                    <p className="text-xs font-mono truncate" style={{ color: "#AA8E64" }}>{witnessData.fileHash}</p>
+                    <p className="text-xs font-mono truncate" style={{ color: "var(--ln-smoke)" }}>{witnessData.fileHash}</p>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
                     <p className="text-xs mb-2" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>HARMONIC SIGNATURE</p>
                     <div className="flex flex-wrap gap-1.5">
                       {witnessData.frequencies.map((f, i) => (
-                        <Badge key={i} style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", fontSize: "10px" }}>{f} Hz</Badge>
+                        <Badge key={i} style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", fontSize: "10px" }}>{f} Hz</Badge>
                       ))}
                     </div>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+                  <div className="p-3 rounded-lg" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
                     <p className="text-xs mb-2" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>AI CONSENT DECLARATION</p>
-                    <Badge style={{ background: aiConsent === "prohibited" ? "rgba(239,68,68,0.2)" : aiConsent === "permitted_attribution" ? "rgba(203,177,131,0.18)" : "rgba(74,222,128,0.18)", color: aiConsent === "prohibited" ? "#EF4444" : aiConsent === "permitted_attribution" ? "#CBB183" : "#4ADE80" }}>
+                    <Badge style={{ background: aiConsent === "prohibited" ? "rgba(239,68,68,0.2)" : aiConsent === "permitted_attribution" ? "rgba(196,154,40,0.15)" : "rgba(74,222,128,0.18)", color: aiConsent === "prohibited" ? "var(--ln-ember)" : aiConsent === "permitted_attribution" ? "var(--ln-gold)" : "var(--ln-seal-bright)" }}>
                       {aiConsent === "prohibited" ? "AI TRAINING PROHIBITED" : aiConsent === "permitted_attribution" ? "PERMITTED WITH ATTRIBUTION" : "FREELY PERMITTED"}
                     </Badge>
                   </div>
-                  <Button variant="outline" className="w-full" onClick={downloadCertificate} style={{ borderColor: "rgba(203,177,131,0.35)", color: "#CBB183" }}>
+                  <Button variant="outline" className="w-full" onClick={downloadCertificate} style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
                     <Download className="w-4 h-4 mr-2" /> Download Witness Certificate (HTML)
                   </Button>
 
                   {/* ── WID Legal Disclaimer ── */}
                   <div
-                    className="rounded-lg px-3 py-2.5 flex items-start gap-2"
-                    style={{ background: "rgba(44,52,56,0.7)", border: "1px solid rgba(203,177,131,0.12)" }}
+                    className="px-3 py-2.5 flex items-start gap-2"
+                    style={{ background: "rgba(44,52,56,0.7)", border: "1px solid rgba(196,154,40,0.08)" }}
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "rgba(230,205,174,0.7)" }} />
-                    <p className="text-[11px] leading-relaxed" style={{ color: "#3F4A50" }}>
+                    <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "rgba(232,223,200,0.6)" }} />
+                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--ln-iron)" }}>
                       Your Witness ID preserves verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration. For legal protection, visit{" "}
-                      <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "#CBB183" }}>copyright.gov/registration</a>.
+                      <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--ln-gold)" }}>copyright.gov/registration</a>.
                     </p>
                   </div>
 
                   {/* ── Post-WID Caption Consent Prompt ── */}
-                  <div className="rounded-xl p-4 mt-2" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.22)" }}>
+                  <div className="p-4 mt-2" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.2)" }}>
                     <div className="flex items-center gap-2 mb-2">
-                      <Shield className="w-4 h-4" style={{ color: "#CBB183" }} />
-                      <span className="text-sm font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>
+                      <Shield className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+                      <span className="text-sm font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
                       {uploadMode === "audio" ? "Your track is now WID Protected" : uploadMode === "lyrics" ? "Your lyrics are now WID Protected" : uploadMode === "manuscript" ? "Your manuscript is now WID Protected" : "Your comic is now WID Protected"} 🔐
                     </span>
                     </div>
                     {captionState === "idle" && !caption && (
                       <>
-                        <p className="text-xs mb-1" style={{ color: "#DACAAA" }}>Would you like AI to suggest a caption?</p>
-                        <p className="text-[11px] mb-3 leading-relaxed" style={{ color: "#AA8E64" }}>
-                          Note: This sends your <strong style={{ color: "#AA8E64" }}>{uploadMode === "audio" ? "track title and genre" : uploadMode === "lyrics" ? "lyrics title and genre" : uploadMode === "manuscript" ? "manuscript title and category" : "comic title and category"} only</strong> — NOT your {uploadMode === "audio" || uploadMode === "lyrics" ? "lyrics or audio" : "manuscript content"} — to an AI system to generate a description.<br />
+                        <p className="text-xs mb-1" style={{ color: "var(--ln-parchment)" }}>Would you like AI to suggest a caption?</p>
+                        <p className="text-[11px] mb-3 leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
+                          Note: This sends your <strong style={{ color: "var(--ln-smoke)" }}>{uploadMode === "audio" ? "track title and genre" : uploadMode === "lyrics" ? "lyrics title and genre" : uploadMode === "manuscript" ? "manuscript title and category" : "comic title and category"} only</strong> — NOT your {uploadMode === "audio" || uploadMode === "lyrics" ? "lyrics or audio" : "manuscript content"} — to an AI system to generate a description.<br />
                           Your {uploadMode === "audio" || uploadMode === "lyrics" ? "lyrics and audio are" : "content is"} never sent. This is optional and can be skipped.
                         </p>
                         <div className="flex gap-2">
@@ -1411,14 +1411,14 @@ export default function UploadPage() {
                             onClick={handleGenerateCaption}
                             disabled={!title}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
-                            style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.35)", color: "#CBB183" }}
+                            style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}
                           >
                             <Sparkles size={11} /> Generate Caption
                           </button>
                           <button
                             onClick={() => setCaptionState("accepted")}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
-                            style={{ background: "rgba(203,177,131,0.06)", border: "1px solid rgba(230,205,174,0.1)", color: "#AA8E64" }}
+                            style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.06)", color: "var(--ln-smoke)" }}
                           >
                             <XIcon size={11} /> Skip — I'll write my own
                           </button>
@@ -1427,21 +1427,21 @@ export default function UploadPage() {
                     )}
                     {captionState === "loading" && (
                       <div className="flex items-center gap-2 py-2">
-                        <Loader2 size={13} className="animate-spin" style={{ color: "#CBB183" }} />
-                        <span className="text-xs" style={{ color: "#AA8E64" }}>Generating caption — only {uploadMode === "audio" ? "title and genre" : uploadMode === "lyrics" ? "title and genre" : "title and category"} sent to AI...</span>
+                        <Loader2 size={13} className="animate-spin" style={{ color: "var(--ln-gold)" }} />
+                        <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>Generating caption — only {uploadMode === "audio" ? "title and genre" : uploadMode === "lyrics" ? "title and genre" : "title and category"} sent to AI...</span>
                       </div>
                     )}
                     {captionState === "suggested" && captionSuggestion && (
-                      <div className="rounded-lg p-3 mb-3" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.2)" }}>
-                        <p className="text-xs leading-relaxed mb-3" style={{ color: "#DACAAA" }}>{captionSuggestion}</p>
+                      <div className="p-3 mb-3" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.17)" }}>
+                        <p className="text-xs leading-relaxed mb-3" style={{ color: "var(--ln-parchment)" }}>{captionSuggestion}</p>
                         <div className="flex gap-2">
-                          <button type="button" onClick={handleAcceptCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.4)", color: "#4ADE80" }}>
+                          <button type="button" onClick={handleAcceptCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "rgba(58,138,86,0.15)", border: "1px solid rgba(74,222,128,0.4)", color: "var(--ln-seal-bright)" }}>
                             <CheckCircle2 size={11} /> Accept
                           </button>
-                          <button type="button" onClick={() => { const edited = window.prompt("Edit the caption:", captionSuggestion); if (edited !== null) { setCaption(edited); setCaptionState("accepted"); setCaptionSuggestion(null); toast.success("Caption saved"); } }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "rgba(203,177,131,0.1)", border: "1px solid rgba(203,177,131,0.28)", color: "#CBB183" }}>
+                          <button type="button" onClick={() => { const edited = window.prompt("Edit the caption:", captionSuggestion); if (edited !== null) { setCaption(edited); setCaptionState("accepted"); setCaptionSuggestion(null); toast.success("Caption saved"); } }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "rgba(196,154,40,0.09)", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>
                             <RefreshCw size={11} /> Edit
                           </button>
-                          <button type="button" onClick={handleIgnoreCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "rgba(203,177,131,0.06)", border: "1px solid rgba(230,205,174,0.1)", color: "#AA8E64" }}>
+                          <button type="button" onClick={handleIgnoreCaption} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.06)", color: "var(--ln-smoke)" }}>
                             <XIcon size={11} /> Ignore
                           </button>
                         </div>
@@ -1450,10 +1450,10 @@ export default function UploadPage() {
                     {(captionState === "accepted" || caption) && (
                       <div className="space-y-2">
                         {captionState === "accepted" && caption && (
-                          <div className="rounded-lg p-3" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.25)" }}>
+                          <div className="p-3" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.25)" }}>
                             <div className="flex items-start gap-2">
-                              <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#4ADE80" }} />
-                              <p className="text-xs leading-relaxed" style={{ color: "#DACAAA" }}>{caption}</p>
+                              <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: "var(--ln-seal-bright)" }} />
+                              <p className="text-xs leading-relaxed" style={{ color: "var(--ln-parchment)" }}>{caption}</p>
                             </div>
                           </div>
                         )}
@@ -1463,22 +1463,22 @@ export default function UploadPage() {
                           placeholder="Write your own caption here..."
                           rows={3}
                           className="text-sm resize-none"
-                          style={{ background: "#2C3438", borderColor: "rgba(203,177,131,0.18)", color: "#DACAAA" }}
+                          style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }}
                         />
-                        <p className="text-[10px]" style={{ color: "#3F4A50", letterSpacing: "0.04em" }}>
+                        <p className="text-[10px]" style={{ color: "var(--ln-iron)", letterSpacing: "0.04em" }}>
                           🔐 Your lyrics are WID protected and never used for AI training.
                         </p>
-                        <button type="button" onClick={() => { setCaptionState("idle"); setCaption(""); }} className="text-[10px] hover:underline" style={{ color: "#AA8E64" }}>Reset caption</button>
+                        <button type="button" onClick={() => { setCaptionState("idle"); setCaption(""); }} className="text-[10px] hover:underline" style={{ color: "var(--ln-smoke)" }}>Reset caption</button>
                       </div>
                     )}
                   </div>
                 </div>
               )}
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" onClick={() => setStep(2)} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
+                <Button variant="outline" onClick={() => setStep(2)} style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={() => setStep(4)} style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
+                <Button className="flex-1" onClick={() => setStep(4)} style={{ background: "linear-gradient(135deg, #B8860B, #C49A28)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(196,154,40,0.25)" }}>
                   {witnessData ? "Next: Publish" : "Skip & Publish"} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1487,8 +1487,8 @@ export default function UploadPage() {
 
           {step === 4 && (
             <div className="space-y-5">
-              <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Review & Publish</h2>
-              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(203,177,131,0.15)" }}>
+              <h2 className="font-semibold text-lg" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Review & Publish</h2>
+              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(196,154,40,0.12)" }}>
                 {[
                   uploadMode === "lyrics"
                     ? { label: "Mode", value: "LYRICS ONLY — Audio Not Attached" }
@@ -1511,38 +1511,38 @@ export default function UploadPage() {
                   { label: "Download", value: "Off — Change in Archive after publish" },
                 ].map(({ label, value, highlight, wid }, i) => (
                   <div key={label} className="flex justify-between items-center px-4 py-2.5 text-sm"
-                    style={{ background: i % 2 === 0 ? "#2C3438" : "#2C3438" }}>
+                    style={{ background: i % 2 === 0 ? "var(--ln-coal)" : "var(--ln-coal)" }}>
                     <span style={{ color: "#E2E8F0" }}>{label}</span>
-                    <span className={wid ? "font-mono text-xs" : ""} style={{ color: highlight ? "#E6CDAE" : wid ? "#CBB183" : "#DACAAA" }}>{value}</span>
+                    <span className={wid ? "font-mono text-xs" : ""} style={{ color: highlight ? "var(--ln-parchment)" : wid ? "var(--ln-gold)" : "var(--ln-parchment)" }}>{value}</span>
                   </div>
                 ))}
               </div>
               {!witnessData && (
-                <div className="flex items-start gap-2 p-3 rounded-lg" style={{ background: "rgba(203,177,131,0.08)", border: "1px solid rgba(203,177,131,0.2)" }}>
-                  <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#CBB183" }} />
-                  <p className="text-xs" style={{ color: "#AA8E64" }}>No Witness ID generated. Your track will be published without cryptographic provenance.</p>
+                <div className="flex items-start gap-2 p-3 rounded-lg" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.17)" }}>
+                  <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+                  <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>No Witness ID generated. Your track will be published without cryptographic provenance.</p>
                 </div>
               )}
               {/* Upload progress bar — shown during audio upload */}
               {(uploadPhase === "uploading" || uploadPhase === "processing") && (
-                <div className="rounded-xl p-4 space-y-2" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.22)" }}>
-                  <div className="flex justify-between text-xs mb-1" style={{ color: "#AA8E64" }}>
+                <div className="p-4 space-y-2" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.2)" }}>
+                  <div className="flex justify-between text-xs mb-1" style={{ color: "var(--ln-smoke)" }}>
                     <span>{uploadPhase === "processing" ? "Processing Witness ID…" : "Uploading audio file…"}</span>
-                    <span style={{ color: "#CBB183" }}>
+                    <span style={{ color: "var(--ln-gold)" }}>
                       {uploadPhase === "processing" ? "100%" : `${uploadProgress}%`}
                     </span>
                   </div>
-                  <div className="w-full rounded-full h-2" style={{ background: "rgba(203,177,131,0.15)" }}>
+                  <div className="w-full rounded-full h-2" style={{ background: "rgba(196,154,40,0.12)" }}>
                     <div
                       className="h-2 rounded-full transition-all duration-300"
                       style={{
                         width: uploadPhase === "processing" ? "100%" : `${uploadProgress}%`,
-                        background: "linear-gradient(90deg, #CBB183, #CBB183)",
+                        background: "linear-gradient(90deg, #C49A28, #C49A28)",
                       }}
                     />
                   </div>
                   {uploadPhase === "processing" && (
-                    <p className="text-xs text-center" style={{ color: "#4ADE80" }}>
+                    <p className="text-xs text-center" style={{ color: "var(--ln-seal-bright)" }}>
                       ✦ Embedding Witness ID into file metadata…
                     </p>
                   )}
@@ -1550,10 +1550,10 @@ export default function UploadPage() {
               )}
 
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" onClick={() => setStep(3)} disabled={uploadPhase === "uploading" || uploadPhase === "processing"} style={{ borderColor: "rgba(203,177,131,0.22)", color: "#AA8E64" }}>
+                <Button variant="outline" onClick={() => setStep(3)} disabled={uploadPhase === "uploading" || uploadPhase === "processing"} style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
-                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "linear-gradient(135deg, #D0A15F, #CBB183)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(203,177,131,0.30)" }}>
+                <Button className="flex-1" onClick={handlePublish} disabled={uploadMutation.isPending || uploadPhase === "uploading" || uploadPhase === "processing"} style={{ background: "linear-gradient(135deg, #B8860B, #C49A28)", color: "#1E1020", fontFamily: "'Cinzel', serif", fontWeight: "700", letterSpacing: "0.06em", boxShadow: "0 4px 16px rgba(196,154,40,0.25)" }}>
                   {(uploadMutation.isPending || uploadPhase === "processing") ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Upload className="w-4 h-4 mr-2" /> {uploadMode === "manuscript" || uploadMode === "comic" ? "Publish Work" : "Publish Track"}</>}
                 </Button>
               </div>
@@ -1561,7 +1561,7 @@ export default function UploadPage() {
           )}
         </div>
 
-        <p className="text-center text-xs mt-6" style={{ color: "#3F4A50" }}>
+        <p className="text-center text-xs mt-6" style={{ color: "var(--ln-iron)" }}>
           BDDT Publishing · Command Domains LLC · Sovereign Shutter™ Framework
         </p>
       </div>

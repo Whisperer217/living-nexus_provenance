@@ -77,7 +77,7 @@ export default function BookDetailPage() {
 
   const artistName = (creator as any)?.artistHandle || (creator as any)?.name || "Unknown";
   const isComic = song?.contentType === "comic";
-  const accentColor = isComic ? "#EF4444" : "#4ADE80";
+  const accentColor = isComic ? "var(--ln-ember)" : "var(--ln-seal-bright)";
   const typeLabel = isComic ? "Comic / Novel" : "Manuscript";
   const widPrefix = isComic ? "WID-CMX" : "WID-MAN";
 
@@ -111,8 +111,8 @@ export default function BookDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#1E2D3A" }}>
         <div className="text-center space-y-3">
-          <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mx-auto" style={{ borderColor: "#CBB183", borderTopColor: "transparent" }} />
-          <p className="text-sm font-heading" style={{ color: "#AA8E64" }}>Loading work…</p>
+          <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mx-auto" style={{ borderColor: "var(--ln-gold)", borderTopColor: "transparent" }} />
+          <p className="text-sm font-heading" style={{ color: "var(--ln-smoke)" }}>Loading work…</p>
         </div>
       </div>
     );
@@ -122,9 +122,9 @@ export default function BookDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#1E2D3A" }}>
         <div className="text-center space-y-4">
-          <BookOpen className="w-12 h-12 mx-auto opacity-30" style={{ color: "#CBB183" }} />
-          <p className="font-heading text-lg" style={{ color: "#E6CDAE" }}>Work not found</p>
-          <Button onClick={() => navigate("/explore")} variant="outline" style={{ borderColor: "#CBB183", color: "#CBB183" }}>
+          <BookOpen className="w-12 h-12 mx-auto opacity-30" style={{ color: "var(--ln-gold)" }} />
+          <p className="font-heading text-lg" style={{ color: "var(--ln-parchment)" }}>Work not found</p>
+          <Button onClick={() => navigate("/explore")} variant="outline" style={{ borderColor: "var(--ln-gold)", color: "var(--ln-gold)" }}>
             Back to Explore
           </Button>
         </div>
@@ -148,8 +148,8 @@ export default function BookDetailPage() {
 
       {/* ── Top nav bar ── */}
       <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3"
-        style={{ background: "linear-gradient(180deg, #1A2530 0%, rgba(26,37,48,0.92) 100%)", borderBottom: "1px solid rgba(203,177,131,0.12)", backdropFilter: "blur(12px)" }}>
-        <button onClick={() => navigate(-1 as any)} className="flex items-center gap-2 text-sm transition-colors hover:text-[#CBB183]" style={{ color: "#AA8E64" }}>
+        style={{ background: "linear-gradient(180deg, #1A2530 0%, rgba(26,37,48,0.92) 100%)", borderBottom: "1px solid rgba(196,154,40,0.08)", backdropFilter: "blur(12px)" }}>
+        <button onClick={() => navigate(-1 as any)} className="flex items-center gap-2 text-sm transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
           <ChevronLeft size={18} />
           <span className="font-heading tracking-wide text-xs">BACK</span>
         </button>
@@ -172,15 +172,15 @@ export default function BookDetailPage() {
             <button
               onClick={() => setShowFullText(v => !v)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-bold tracking-wide transition-all hover:opacity-90"
-              style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}>
+              style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}>
               <BookOpen size={13} />
               Read
             </button>
           )}
-          <button onClick={handleCopyLink} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#AA8E64" }} title="Copy link">
-            {copied ? <Check size={16} style={{ color: "#4ADE80" }} /> : <Copy size={16} />}
+          <button onClick={handleCopyLink} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "var(--ln-smoke)" }} title="Copy link">
+            {copied ? <Check size={16} style={{ color: "var(--ln-seal-bright)" }} /> : <Copy size={16} />}
           </button>
-          <button className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#AA8E64" }} title="Share">
+          <button className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "var(--ln-smoke)" }} title="Share">
             <Share2 size={16} />
           </button>
         </div>
@@ -193,16 +193,16 @@ export default function BookDetailPage() {
 
           {/* Cover art — portrait 3:4 */}
           <div className="flex-shrink-0 w-full md:w-56">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ aspectRatio: "3/4", background: "#2C3438" }}>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ aspectRatio: "3/4", background: "var(--ln-coal)" }}>
               {song.coverArtUrl ? (
                 <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <BookOpen className="w-16 h-16 opacity-20" style={{ color: "#CBB183" }} />
+                  <BookOpen className="w-16 h-16 opacity-20" style={{ color: "var(--ln-gold)" }} />
                 </div>
               )}
               {/* Gold rim overlay */}
-              <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ border: "1px solid rgba(203,177,131,0.35)", boxShadow: "inset 0 0 24px rgba(203,177,131,0.06)" }} />
+              <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ border: "1px solid rgba(196,154,40,0.3)", boxShadow: "inset 0 0 24px rgba(196,154,40,0.04)" }} />
             </div>
 
             {/* Like + WID row under cover */}
@@ -210,7 +210,7 @@ export default function BookDetailPage() {
               <button
                 onClick={(e) => toggleLike(e)}
                 className={`flex items-center gap-1.5 text-sm transition-colors ${liked ? "text-pink-400" : "hover:text-pink-400"}`}
-                style={{ color: liked ? undefined : "#AA8E64" }}
+                style={{ color: liked ? undefined : "var(--ln-smoke)" }}
               >
                 <Heart size={16} fill={liked ? "currentColor" : "none"} />
                 <span className="text-xs font-heading">Like</span>
@@ -218,7 +218,7 @@ export default function BookDetailPage() {
               {song.witnessId && (
                 <Link href={`/verify/${song.witnessId}`}
                   className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full font-heading tracking-wider"
-                  style={{ background: "rgba(0,0,0,0.55)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.45)" }}>
+                  style={{ background: "rgba(0,0,0,0.55)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.4)" }}>
                   <Shield size={9} />{widPrefix}
                 </Link>
               )}
@@ -230,13 +230,13 @@ export default function BookDetailPage() {
             {/* Title */}
             <div>
               <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-1"
-                style={{ fontFamily: "'Cinzel', serif", background: "linear-gradient(135deg, #F5E6C8 0%, #CBB183 50%, #D0A15F 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                style={{ fontFamily: "'Cinzel', serif", background: "linear-gradient(135deg, #F5E6C8 0%, #C49A28 50%, #B8860B 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 {song.title}
               </h1>
-              <div className="flex items-center gap-2 text-sm" style={{ color: "#AA8E64" }}>
+              <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ln-smoke)" }}>
                 <span>by</span>
                 {(creator as any)?.id ? (
-                  <Link href={`/creator/${(creator as any).id}`} className="hover:text-[#CBB183] transition-colors font-heading">
+                  <Link href={`/creator/${(creator as any).id}`} className="hover:text-[#C49A28] transition-colors font-heading">
                     {artistName}
                   </Link>
                 ) : (
@@ -250,7 +250,7 @@ export default function BookDetailPage() {
               <div className="flex flex-wrap gap-2">
                 {(song.genre as string).split(/[,/|]+/).map((t: string) => t.trim()).filter(Boolean).map((tag: string) => (
                   <span key={tag} className="text-[10px] px-2.5 py-1 rounded-full font-heading tracking-wide"
-                    style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid rgba(203,177,131,0.22)" }}>
+                    style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.2)" }}>
                     {tag}
                   </span>
                 ))}
@@ -259,7 +259,7 @@ export default function BookDetailPage() {
 
             {/* Caption / description */}
             {(song as any).caption && (
-              <p className="text-sm leading-relaxed" style={{ color: "#DACAAA", fontFamily: "'Cormorant Garamond', serif", fontSize: "15px" }}>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--ln-parchment)", fontFamily: "'Cormorant Garamond', serif", fontSize: "15px" }}>
                 {(song as any).caption}
               </p>
             )}
@@ -267,27 +267,27 @@ export default function BookDetailPage() {
             {/* Metadata grid */}
             <div className="grid grid-cols-2 gap-3">
               {(song as any).albumName && (
-                <div className="rounded-xl p-3" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.12)" }}>
-                  <p className="text-[9px] uppercase tracking-widest font-heading mb-1" style={{ color: "rgba(203,177,131,0.55)" }}>Series / Collection</p>
-                  <p className="text-xs font-medium" style={{ color: "#DACAAA" }}>{(song as any).albumName}</p>
+                <div className="rounded-xl p-3" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.08)" }}>
+                  <p className="text-[9px] uppercase tracking-widest font-heading mb-1" style={{ color: "rgba(196,154,40,0.5)" }}>Series / Collection</p>
+                  <p className="text-xs font-medium" style={{ color: "var(--ln-parchment)" }}>{(song as any).albumName}</p>
                 </div>
               )}
               {(song as any).releaseDate && (
-                <div className="rounded-xl p-3" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.12)" }}>
-                  <p className="text-[9px] uppercase tracking-widest font-heading mb-1" style={{ color: "rgba(203,177,131,0.55)" }}>Written / Completed</p>
-                  <p className="text-xs font-medium" style={{ color: "#DACAAA" }}>{(song as any).releaseDate}</p>
+                <div className="rounded-xl p-3" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.08)" }}>
+                  <p className="text-[9px] uppercase tracking-widest font-heading mb-1" style={{ color: "rgba(196,154,40,0.5)" }}>Written / Completed</p>
+                  <p className="text-xs font-medium" style={{ color: "var(--ln-parchment)" }}>{(song as any).releaseDate}</p>
                 </div>
               )}
               {(song as any).isrc && (
-                <div className="rounded-xl p-3" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.12)" }}>
-                  <p className="text-[9px] uppercase tracking-widest font-heading mb-1" style={{ color: "rgba(203,177,131,0.55)" }}>ISBN</p>
-                  <p className="text-xs font-mono" style={{ color: "#DACAAA" }}>{(song as any).isrc}</p>
+                <div className="rounded-xl p-3" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.08)" }}>
+                  <p className="text-[9px] uppercase tracking-widest font-heading mb-1" style={{ color: "rgba(196,154,40,0.5)" }}>ISBN</p>
+                  <p className="text-xs font-mono" style={{ color: "var(--ln-parchment)" }}>{(song as any).isrc}</p>
                 </div>
               )}
               {(song as any).createdAt && (
-                <div className="rounded-xl p-3" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.12)" }}>
-                  <p className="text-[9px] uppercase tracking-widest font-heading mb-1" style={{ color: "rgba(203,177,131,0.55)" }}>Witnessed On</p>
-                  <p className="text-xs font-medium" style={{ color: "#DACAAA" }}>
+                <div className="rounded-xl p-3" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.08)" }}>
+                  <p className="text-[9px] uppercase tracking-widest font-heading mb-1" style={{ color: "rgba(196,154,40,0.5)" }}>Witnessed On</p>
+                  <p className="text-xs font-medium" style={{ color: "var(--ln-parchment)" }}>
                     {new Date((song as any).createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                   </p>
                 </div>
@@ -302,13 +302,13 @@ export default function BookDetailPage() {
               try { credits = JSON.parse(rawCredits); } catch { return null; }
               if (credits.length === 0) return null;
               return (
-                <div className="rounded-xl p-4" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.12)" }}>
-                  <p className="text-[9px] uppercase tracking-widest font-heading mb-3" style={{ color: "rgba(203,177,131,0.55)" }}>Credits</p>
+                <div className="rounded-xl p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.08)" }}>
+                  <p className="text-[9px] uppercase tracking-widest font-heading mb-3" style={{ color: "rgba(196,154,40,0.5)" }}>Credits</p>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                     {credits.map((c: { role: string; name: string }, i: number) => (
                       <div key={i} className="flex items-baseline gap-2">
-                        <span className="text-[10px] uppercase tracking-widest flex-shrink-0" style={{ color: "#3F4A50", minWidth: "72px" }}>{c.role}</span>
-                        <span className="text-sm" style={{ color: "#DACAAA" }}>{c.name}</span>
+                        <span className="text-[10px] uppercase tracking-widest flex-shrink-0" style={{ color: "var(--ln-iron)", minWidth: "72px" }}>{c.role}</span>
+                        <span className="text-sm" style={{ color: "var(--ln-parchment)" }}>{c.name}</span>
                       </div>
                     ))}
                   </div>
@@ -342,7 +342,7 @@ export default function BookDetailPage() {
                   </button>
                   <Link href={`/dashboard`}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
-                    style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.30)" }}>
+                    style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }}>
                     <FileText size={14} />
                     Manage
                   </Link>
@@ -357,7 +357,7 @@ export default function BookDetailPage() {
         {hasStoryboard && (
           <div
             className="rounded-2xl overflow-hidden relative group cursor-pointer"
-            style={{ background: "#0D1419", border: "1px solid rgba(203,177,131,0.22)" }}
+            style={{ background: "#0D1419", border: "1px solid rgba(196,154,40,0.2)" }}
             onClick={() => setReaderOpen(true)}
           >
             {/* Preview: first page as hero */}
@@ -388,15 +388,15 @@ export default function BookDetailPage() {
               {/* Page count badge */}
               <div
                 className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-heading font-bold tracking-wider"
-                style={{ background: "rgba(0,0,0,0.65)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}
+                style={{ background: "rgba(0,0,0,0.65)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
               >
                 <BookOpen size={10} />
                 {storyboardPages.length} PAGES
               </div>
             </div>
             {/* Footer strip */}
-            <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid rgba(203,177,131,0.12)" }}>
-              <span className="text-xs font-heading tracking-widest" style={{ color: "#AA8E64" }}>
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
+              <span className="text-xs font-heading tracking-widest" style={{ color: "var(--ln-smoke)" }}>
                 HORIZONTAL READER · SWIPE OR CLICK TO NAVIGATE
               </span>
               {fileUrl && (
@@ -406,7 +406,7 @@ export default function BookDetailPage() {
                   rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
                   className="flex items-center gap-1.5 text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
-                  style={{ color: "#AA8E64" }}
+                  style={{ color: "var(--ln-smoke)" }}
                 >
                   PDF ↗
                 </a>
@@ -417,22 +417,22 @@ export default function BookDetailPage() {
 
         {/* ── Fallback Document Viewer (legacy PDF, no storyboard) ── */}
         {!hasStoryboard && fileUrl && (
-          <div className="rounded-2xl overflow-hidden" style={{ background: "#1A2530", border: "1px solid rgba(203,177,131,0.18)" }}>
-            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(203,177,131,0.12)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}>
               <div className="flex items-center gap-2">
                 <FileText size={15} style={{ color: accentColor }} />
-                <span className="text-sm font-heading font-bold tracking-wide" style={{ color: "#E6CDAE" }}>Document</span>
+                <span className="text-sm font-heading font-bold tracking-wide" style={{ color: "var(--ln-parchment)" }}>Document</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewerMode(v => v === "preview" ? "fullscreen" : "preview")}
                   className="hidden md:block text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
-                  style={{ color: "#AA8E64" }}>
+                  style={{ color: "var(--ln-smoke)" }}>
                   {viewerMode === "preview" ? "EXPAND" : "COLLAPSE"}
                 </button>
                 <a href={fileUrl} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-[10px] font-heading tracking-wider px-2.5 py-1 rounded-lg transition-colors hover:bg-white/5"
-                  style={{ color: "#AA8E64" }}>
+                  style={{ color: "var(--ln-smoke)" }}>
                   OPEN ↗
                 </a>
               </div>
@@ -450,7 +450,7 @@ export default function BookDetailPage() {
             <div className={isPdf ? "md:hidden" : ""}>
               <div className="flex flex-col items-center justify-center py-10 gap-4 px-4">
                 <FileText className="w-12 h-12 opacity-20" style={{ color: accentColor }} />
-                <p className="text-sm text-center font-heading" style={{ color: "#AA8E64" }}>
+                <p className="text-sm text-center font-heading" style={{ color: "var(--ln-smoke)" }}>
                   {isPdf ? "Tap below to open the PDF in your browser or download it." : "This document format requires a dedicated viewer."}
                 </p>
                 <div className="flex gap-3 flex-wrap justify-center">
@@ -462,7 +462,7 @@ export default function BookDetailPage() {
                   </a>
                   <a href={fileUrl} download target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
-                    style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.30)" }}>
+                    style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }}>
                     <Download size={14} />
                     Download
                   </a>
@@ -483,19 +483,19 @@ export default function BookDetailPage() {
 
         {/* ── Full Text Reader (lyricsText) ── */}
         {(song as any)?.lyricsText && (
-          <div className="rounded-2xl overflow-hidden" style={{ background: "#1A2530", border: "1px solid rgba(203,177,131,0.18)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>
             <button
               onClick={() => setShowFullText(v => !v)}
               className="w-full flex items-center justify-between px-4 py-3 transition-colors hover:bg-white/5"
-              style={{ borderBottom: showFullText ? "1px solid rgba(203,177,131,0.12)" : "none" }}>
+              style={{ borderBottom: showFullText ? "1px solid rgba(196,154,40,0.08)" : "none" }}>
               <div className="flex items-center gap-2">
-                <BookOpen size={15} style={{ color: "#CBB183" }} />
-                <span className="text-sm font-heading font-bold tracking-wide" style={{ color: "#E6CDAE" }}>Read Full Text</span>
+                <BookOpen size={15} style={{ color: "var(--ln-gold)" }} />
+                <span className="text-sm font-heading font-bold tracking-wide" style={{ color: "var(--ln-parchment)" }}>Read Full Text</span>
               </div>
-              <span className="text-xs font-heading" style={{ color: "#AA8E64" }}>{showFullText ? "COLLAPSE ▲" : "EXPAND ▼"}</span>
+              <span className="text-xs font-heading" style={{ color: "var(--ln-smoke)" }}>{showFullText ? "COLLAPSE ▲" : "EXPAND ▼"}</span>
             </button>
             {showFullText && (
-              <div className="px-5 py-6 prose prose-invert max-w-none" style={{ color: "#DACAAA", fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", lineHeight: "1.85" }}>
+              <div className="px-5 py-6 prose prose-invert max-w-none" style={{ color: "var(--ln-parchment)", fontFamily: "'Cormorant Garamond', serif", fontSize: "16px", lineHeight: "1.85" }}>
                 {((song as any).lyricsText as string).split("\n").map((para: string, i: number) =>
                   para.trim() ? <p key={i} className="mb-4">{para}</p> : <br key={i} />
                 )}
@@ -507,13 +507,13 @@ export default function BookDetailPage() {
         {/* ── Reactions + Comments ── */}
         <div className="grid md:grid-cols-2 gap-4">
           {/* Reactions */}
-          <div className="rounded-2xl p-4" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.18)" }}>
-            <h3 className="text-sm font-semibold mb-3 font-heading" style={{ color: "#DACAAA" }}>Reactions</h3>
+          <div className="rounded-2xl p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}>
+            <h3 className="text-sm font-semibold mb-3 font-heading" style={{ color: "var(--ln-parchment)" }}>Reactions</h3>
             <div className="flex flex-wrap gap-2">
               {REACTIONS.map(emoji => (
                 <button key={emoji}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-all hover:scale-110 active:scale-95"
-                  style={{ background: "#1E2D3A", border: "1px solid rgba(203,177,131,0.18)" }}>
+                  style={{ background: "#1E2D3A", border: "1px solid rgba(196,154,40,0.15)" }}>
                   {emoji}
                 </button>
               ))}
@@ -521,17 +521,17 @@ export default function BookDetailPage() {
           </div>
 
           {/* Comments */}
-          <div className="rounded-2xl p-4" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.18)" }}>
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 font-heading" style={{ color: "#DACAAA" }}>
+          <div className="rounded-2xl p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}>
+            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 font-heading" style={{ color: "var(--ln-parchment)" }}>
               <MessageSquare size={14} />
               Comments
               {comments && comments.length > 0 && (
-                <span className="text-xs font-normal" style={{ color: "#AA8E64" }}>{comments.length}</span>
+                <span className="text-xs font-normal" style={{ color: "var(--ln-smoke)" }}>{comments.length}</span>
               )}
             </h3>
             <div className="flex gap-2 mb-3">
               <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                style={{ background: "#1E2D3A", color: "#CBB183" }}>
+                style={{ background: "#1E2D3A", color: "var(--ln-gold)" }}>
                 {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
               </div>
               <div className="flex-1 space-y-2">
@@ -545,13 +545,13 @@ export default function BookDetailPage() {
                       commentMutation.mutate({ songId: bookId, content: commentText.trim(), authorName: user?.name || undefined });
                     }
                   }}
-                  style={{ background: "#1E2D3A", border: "1px solid rgba(203,177,131,0.20)", color: "#E6CDAE", fontSize: "13px" }}
+                  style={{ background: "#1E2D3A", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)", fontSize: "13px" }}
                 />
                 {commentText.trim() && (
                   <Button size="sm"
                     onClick={() => commentMutation.mutate({ songId: bookId, content: commentText.trim(), authorName: user?.name || undefined })}
                     disabled={commentMutation.isPending}
-                    style={{ background: "#CBB183", color: "#1E2D3A" }}>
+                    style={{ background: "var(--ln-gold)", color: "#1E2D3A" }}>
                     Post
                   </Button>
                 )}
@@ -561,17 +561,17 @@ export default function BookDetailPage() {
               {comments?.map((c: any) => (
                 <div key={c.id} className="flex gap-2">
                   <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
-                    style={{ background: "#1E2D3A", color: "#CBB183" }}>
+                    style={{ background: "#1E2D3A", color: "var(--ln-gold)" }}>
                     {(c.authorName || "?").charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1">
-                    <p className="text-[11px] font-medium mb-0.5" style={{ color: "#CBB183" }}>{c.authorName || "Anonymous"}</p>
-                    <p className="text-xs leading-relaxed" style={{ color: "#DACAAA" }}>{c.content}</p>
+                    <p className="text-[11px] font-medium mb-0.5" style={{ color: "var(--ln-gold)" }}>{c.authorName || "Anonymous"}</p>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--ln-parchment)" }}>{c.content}</p>
                   </div>
                 </div>
               ))}
               {(!comments || comments.length === 0) && (
-                <p className="text-xs text-center py-4" style={{ color: "#3F4A50" }}>No comments yet. Be the first to respond.</p>
+                <p className="text-xs text-center py-4" style={{ color: "var(--ln-iron)" }}>No comments yet. Be the first to respond.</p>
               )}
             </div>
           </div>
@@ -587,12 +587,12 @@ export default function BookDetailPage() {
           {/* Header bar */}
           <div
             className="flex items-center justify-between px-5 py-4 flex-shrink-0"
-            style={{ borderBottom: "1px solid rgba(203,177,131,0.18)" }}
+            style={{ borderBottom: "1px solid rgba(196,154,40,0.15)" }}
           >
             <div className="flex items-center gap-3">
               <BookOpen size={18} style={{ color: accentColor }} />
               <div>
-                <p className="text-sm font-heading font-bold tracking-wide" style={{ color: "#E6CDAE" }}>Edit Pages</p>
+                <p className="text-sm font-heading font-bold tracking-wide" style={{ color: "var(--ln-parchment)" }}>Edit Pages</p>
                 <p className="text-[10px]" style={{ color: "#5A6A72" }}>{song?.title}</p>
               </div>
             </div>
@@ -600,7 +600,7 @@ export default function BookDetailPage() {
               <button
                 onClick={() => { setEditPagesOpen(false); setEditedPagesJson(null); }}
                 className="px-4 py-2 rounded-xl text-xs font-heading font-bold tracking-wide transition-all hover:bg-white/5"
-                style={{ color: "#AA8E64", border: "1px solid rgba(255,255,255,0.10)" }}
+                style={{ color: "var(--ln-smoke)", border: "1px solid rgba(255,255,255,0.10)" }}
               >
                 Cancel
               </button>

@@ -12,10 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Zap, Package, Star, ChevronRight, Info, CheckCircle2 } from "lucide-react";
 
-const GOLD = "#E6CDAE";
-const SURFACE = "#2C3438";
-const BORDER = "#2C3438";
-const SUBTEXT = "#AA8E64";
+const GOLD = "var(--ln-parchment)";
+const SURFACE = "var(--ln-coal)";
+const BORDER = "var(--ln-coal)";
+const SUBTEXT = "var(--ln-smoke)";
 
 const MICRO_PACKAGES = [
   { id: "micro_10",  slots: 10,  priceCents: 880,   label: "Micro 10" },
@@ -74,7 +74,7 @@ export default function LivingArchiveBillingPage() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen py-12 px-4" style={{ background: "#2C3438" }}>
+      <div className="min-h-screen py-12 px-4" style={{ background: "var(--ln-coal)" }}>
         <div className="max-w-3xl mx-auto space-y-10">
 
           {/* Header */}
@@ -110,7 +110,7 @@ export default function LivingArchiveBillingPage() {
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${pct}%`,
-                      background: pct >= 90 ? "#EF4444" : GOLD,
+                      background: pct >= 90 ? "var(--ln-ember)" : GOLD,
                     }}
                   />
                 </div>
@@ -217,7 +217,7 @@ export default function LivingArchiveBillingPage() {
               "Slots never expire — buy once, use whenever",
             ].map((item) => (
               <div key={item} className="flex items-start gap-2">
-                <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" style={{ color: "#4ADE80" }} />
+                <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" style={{ color: "var(--ln-seal-bright)" }} />
                 <span className="text-sm" style={{ color: SUBTEXT }}>{item}</span>
               </div>
             ))}

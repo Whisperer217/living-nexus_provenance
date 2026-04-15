@@ -83,11 +83,11 @@ const LEXICON: LexiconEntry[] = [
 ];
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  identity: { bg: "rgba(203,177,131,0.15)", text: "#CBB183", border: "rgba(203,177,131,0.3)" },
-  action:   { bg: "rgba(74,222,128,0.15)", text: "#4ADE80", border: "rgba(74,222,128,0.3)" },
-  record:   { bg: "rgba(203,177,131,0.12)",  text: "#CBB183",  border: "rgba(203,177,131,0.28)"  },
-  space:    { bg: "rgba(74,222,128,0.15)", text: "#4ADE80", border: "rgba(74,222,128,0.3)" },
-  economy:  { bg: "rgba(239,68,68,0.15)",  text: "#EF4444",  border: "rgba(239,68,68,0.3)"  },
+  identity: { bg: "rgba(196,154,40,0.12)", text: "var(--ln-gold)", border: "rgba(196,154,40,0.26)" },
+  action:   { bg: "rgba(58,138,86,0.15)", text: "var(--ln-seal-bright)", border: "rgba(58,138,86,0.3)" },
+  record:   { bg: "rgba(196,154,40,0.08)",  text: "var(--ln-gold)",  border: "rgba(196,154,40,0.25)"  },
+  space:    { bg: "rgba(58,138,86,0.15)", text: "var(--ln-seal-bright)", border: "rgba(58,138,86,0.3)" },
+  economy:  { bg: "rgba(196,68,10,0.15)",  text: "var(--ln-ember)",  border: "rgba(196,68,10,0.3)"  },
 };
 
 // ── WID Spec section ───────────────────────────────────────────────────────────
@@ -95,12 +95,12 @@ function WIDSpecSection() {
   return (
     <div className="space-y-8">
       {/* Hero */}
-      <div className="rounded-2xl p-6 border border-white/8"
-        style={{ background: "#2C3438" }}>
+      <div className="p-6 border border-white/8"
+        style={{ background: "var(--ln-coal)" }}>
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(203,177,131,0.15)", border: "1px solid rgba(203,177,131,0.28)" }}>
-            <Fingerprint className="w-6 h-6" style={{ color: "#CBB183" }} />
+            style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.25)" }}>
+            <Fingerprint className="w-6 h-6" style={{ color: "var(--ln-gold)" }} />
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-bold text-white/90 mb-1"
@@ -133,10 +133,10 @@ function WIDSpecSection() {
           {WID_LAYERS.map((layer) => {
             const Icon = layer.icon;
             return (
-              <div key={layer.title} className="rounded-xl p-4 border border-white/8"
-                style={{ background: "#2C3438" }}>
+              <div key={layer.title} className="p-4 border border-white/8"
+                style={{ background: "var(--ln-coal)" }}>
                 <div className="flex items-start gap-3">
-                  <Icon className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#CBB183" }} />
+                  <Icon className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
                   <div>
                     <p className="text-sm font-semibold text-white/85 mb-1">{layer.title}</p>
                     <p className="text-xs text-white/45 leading-relaxed">{layer.description}</p>
@@ -152,7 +152,7 @@ function WIDSpecSection() {
       <div>
         <h3 className="text-sm font-semibold text-white/50 uppercase tracking-widest mb-3">Interoperability</h3>
         <div className="rounded-xl border border-white/8 overflow-hidden"
-          style={{ background: "#2C3438" }}>
+          style={{ background: "var(--ln-coal)" }}>
           <div className="grid grid-cols-[1fr_2fr] text-xs font-semibold text-white/30 px-4 py-2 border-b border-white/8 uppercase tracking-wider">
             <span>System</span>
             <span>Relationship to WID</span>
@@ -169,12 +169,12 @@ function WIDSpecSection() {
       {/* Legal Disclaimer */}
       <div
         className="rounded-xl px-4 py-3 flex items-start gap-2.5"
-        style={{ background: "rgba(44,52,56,0.8)", border: "1px solid rgba(203,177,131,0.18)" }}
+        style={{ background: "rgba(44,52,56,0.8)", border: "1px solid rgba(196,154,40,0.15)" }}
       >
-        <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "rgba(230,205,174,0.7)" }} />
-        <p className="text-xs leading-relaxed" style={{ color: "#3F4A50" }}>
-          <strong style={{ color: "#CBB183" }}>Legal Notice:</strong> Witness IDs are cryptographic provenance records issued by Living Nexus (operated by BDDT Publishing, a DBA of Command Domains LLC). They preserve verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration. For legal copyright protection in the United States, visit{" "}
-          <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "#CBB183" }}>copyright.gov/registration</a>.
+        <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "rgba(232,223,200,0.6)" }} />
+        <p className="text-xs leading-relaxed" style={{ color: "var(--ln-iron)" }}>
+          <strong style={{ color: "var(--ln-gold)" }}>Legal Notice:</strong> Witness IDs are cryptographic provenance records issued by Living Nexus (operated by BDDT Publishing, a DBA of Command Domains LLC). They preserve verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration. For legal copyright protection in the United States, visit{" "}
+          <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--ln-gold)" }}>copyright.gov/registration</a>.
         </p>
       </div>
     </div>
@@ -200,8 +200,8 @@ function LexiconSection() {
   return (
     <div className="space-y-6">
       {/* Intro */}
-      <div className="rounded-xl p-4 border border-white/8"
-        style={{ background: "#2C3438" }}>
+      <div className="p-4 border border-white/8"
+        style={{ background: "var(--ln-coal)" }}>
         <p className="text-sm text-white/55 leading-relaxed">
           Living Nexus uses a distinct vocabulary rooted in provenance, sovereignty, and creative record. These are not rebranded social media terms — each word carries a specific meaning within the system.
         </p>
@@ -236,8 +236,8 @@ function LexiconSection() {
                 style={isActive && colors
                   ? { background: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }
                   : isActive
-                  ? { background: "rgba(203,177,131,0.15)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.28)" }
-                  : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
+                  ? { background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }
+                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
                 }
               >
                 {cat}
@@ -257,14 +257,14 @@ function LexiconSection() {
           {filtered.map((entry, i) => {
             const colors = CATEGORY_COLORS[entry.category];
             return (
-              <div key={i} className="rounded-xl p-4 border border-white/8 transition-colors hover:border-white/15"
-                style={{ background: "#2C3438" }}>
+              <div key={i} className="p-4 border border-white/8 transition-colors hover:border-white/15"
+                style={{ background: "var(--ln-coal)" }}>
                 <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1.5">
                       <span className="text-xs text-white/35 line-through">{entry.standard}</span>
                       <ChevronRight className="w-3 h-3 text-white/20 flex-shrink-0" />
-                      <span className="text-sm font-semibold" style={{ color: "#CBB183" }}>
+                      <span className="text-sm font-semibold" style={{ color: "var(--ln-gold)" }}>
                         {entry.nexus}
                       </span>
                       <span
@@ -291,14 +291,14 @@ export default function LearnPage() {
   const [activeSection, setActiveSection] = useState<"wid-spec" | "lexicon">("wid-spec");
 
   return (
-    <div className="min-h-screen" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen" style={{ background: "var(--ln-coal)" }}>
       <div className="container py-10 max-w-3xl mx-auto px-4"
         style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold mb-2"
-            style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
             Learn
           </h1>
           <p className="text-sm text-white/40">
@@ -307,13 +307,13 @@ export default function LearnPage() {
         </div>
 
         {/* Tab switcher */}
-        <div className="flex gap-1 mb-8 p-1 rounded-xl" style={{ background: "#2C3438" }}>
+        <div className="flex gap-1 mb-8 p-1 rounded-xl" style={{ background: "var(--ln-coal)" }}>
           <button
             onClick={() => setActiveSection("wid-spec")}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
             style={activeSection === "wid-spec"
-              ? { background: "#CBB183", color: "#E6CDAE" }
-              : { color: "#AA8E64" }}
+              ? { background: "var(--ln-gold)", color: "var(--ln-parchment)" }
+              : { color: "var(--ln-smoke)" }}
           >
             <Fingerprint size={13} /> WID Specification
           </button>
@@ -321,8 +321,8 @@ export default function LearnPage() {
             onClick={() => setActiveSection("lexicon")}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
             style={activeSection === "lexicon"
-              ? { background: "#CBB183", color: "#E6CDAE" }
-              : { color: "#AA8E64" }}
+              ? { background: "var(--ln-gold)", color: "var(--ln-parchment)" }
+              : { color: "var(--ln-smoke)" }}
           >
             <BookOpen size={13} /> Lexicon
           </button>

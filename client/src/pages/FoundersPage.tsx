@@ -38,7 +38,7 @@ export default function FoundersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#2C3438] text-white">
+    <div className="min-h-screen bg-[#111009] text-white">
       {/* Back nav */}
       <div className="max-w-2xl mx-auto px-4 pt-6">
         <Link href="/">
@@ -216,7 +216,7 @@ export default function FoundersPage() {
             onClick={handleFounderPurchase}
             disabled={founderMutation.isPending}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:brightness-110 disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #a07830)", color: "#2C3438" }}
+            style={{ background: "linear-gradient(135deg, #c9a84c, #a07830)", color: "var(--ln-coal)" }}
           >
             <Zap size={14} />
             {founderMutation.isPending ? "Opening checkout..." : `Claim Founder Access — ${currentPrice}`}

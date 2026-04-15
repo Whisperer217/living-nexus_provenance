@@ -74,20 +74,20 @@ function MiniTrackRow({
       onClick={onPlay}
       className="w-full flex items-center gap-3 px-4 py-2.5 transition-all active:scale-[0.98] text-left group"
       style={{
-        background: isActive ? "rgba(230,205,174,0.08)" : "transparent",
-        borderLeft: isActive ? "2px solid #CBB183" : "2px solid transparent",
+        background: isActive ? "rgba(196,154,40,0.05)" : "transparent",
+        borderLeft: isActive ? "2px solid #C49A28" : "2px solid transparent",
       }}
     >
       {/* Artwork */}
       <div
         className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden relative"
-        style={{ background: "#2C3438" }}
+        style={{ background: "var(--ln-coal)" }}
       >
         {track.artUrl ? (
           <img src={track.artUrl} alt="" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Music size={14} style={{ color: "#AA8E64" }} />
+            <Music size={14} style={{ color: "var(--ln-smoke)" }} />
           </div>
         )}
         {isActive && (
@@ -101,7 +101,7 @@ function MiniTrackRow({
                 className="w-[2px] rounded-full"
                 style={{
                   height: "6px",
-                  background: "#CBB183",
+                  background: "var(--ln-gold)",
                   animation: `drawerWave ${0.4 + i * 0.12}s ease-in-out infinite alternate`,
                   animationDelay: `${i * 0.08}s`,
                 }}
@@ -114,18 +114,18 @@ function MiniTrackRow({
       <div className="flex-1 min-w-0">
         <div
           className="text-[12px] font-heading truncate leading-tight"
-          style={{ color: isActive ? "#CBB183" : "#E6CDAE" }}
+          style={{ color: isActive ? "var(--ln-gold)" : "var(--ln-parchment)" }}
         >
           {track.title}
         </div>
-        <div className="text-[10px] truncate mt-0.5" style={{ color: "#AA8E64" }}>
+        <div className="text-[10px] truncate mt-0.5" style={{ color: "var(--ln-smoke)" }}>
           {track.artist}
         </div>
       </div>
       {/* Play icon on hover */}
       <div
         className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ color: "#CBB183" }}
+        style={{ color: "var(--ln-gold)" }}
       >
         <Play size={12} fill="currentColor" />
       </div>
@@ -140,15 +140,15 @@ function BuildYourOwn({ onClose }: { onClose: () => void }) {
     <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-4">
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center"
-        style={{ background: "rgba(203,177,131,0.10)", border: "1px solid rgba(203,177,131,0.28)" }}
+        style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}
       >
-        <Plus size={24} style={{ color: "#CBB183" }} />
+        <Plus size={24} style={{ color: "var(--ln-gold)" }} />
       </div>
       <div>
-        <div className="text-[14px] font-heading mb-1" style={{ color: "#E6CDAE" }}>
+        <div className="text-[14px] font-heading mb-1" style={{ color: "var(--ln-parchment)" }}>
           Custom Playlists
         </div>
-        <div className="text-[11px] leading-relaxed" style={{ color: "#AA8E64" }}>
+        <div className="text-[11px] leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
           Build and save your own playlists. Curate tracks from any creator on the platform.
         </div>
       </div>
@@ -156,16 +156,16 @@ function BuildYourOwn({ onClose }: { onClose: () => void }) {
         onClick={() => { onClose(); navigate("/explore"); }}
         className="px-4 py-2 rounded-xl text-[11px] font-heading tracking-wide transition-all active:scale-95"
         style={{
-          background: "rgba(203,177,131,0.12)",
-          border: "1px solid rgba(203,177,131,0.35)",
-          color: "#CBB183",
+          background: "rgba(196,154,40,0.08)",
+          border: "1px solid rgba(196,154,40,0.3)",
+          color: "var(--ln-gold)",
         }}
       >
         Browse Tracks
       </button>
       <div
         className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-full"
-        style={{ background: "#2C3438", color: "#AA8E64" }}
+        style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)" }}
       >
         <Sparkles size={10} />
         Full playlist builder coming soon
@@ -348,14 +348,14 @@ export default function PlaylistDrawer() {
           height: "64px",
           borderRadius: "8px 0 0 8px",
           background: isOpen
-            ? "rgba(203,177,131,0.22)"
+            ? "rgba(196,154,40,0.2)"
             : "rgba(44,52,56,0.92)",
-          border: "1px solid rgba(203,177,131,0.22)",
+          border: "1px solid rgba(196,154,40,0.2)",
           borderRight: "none",
           backdropFilter: "blur(12px)",
           boxShadow: "-2px 0 16px rgba(0,0,0,0.40)",
           transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s",
-          color: "#CBB183",
+          color: "var(--ln-gold)",
           // When any dialog/modal is open: always disable pointer events on the handle
           // This prevents the handle from intercepting taps on dialogs (e.g. Prompt Studio)
           pointerEvents: dialogOpen ? "none" : "auto",
@@ -372,7 +372,7 @@ export default function PlaylistDrawer() {
         style={{
           width: "280px",
           background: "rgba(44,52,56,0.97)",
-          borderLeft: "1px solid rgba(203,177,131,0.10)",
+          borderLeft: "1px solid rgba(196,154,40,0.08)",
           backdropFilter: "blur(20px)",
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
@@ -387,18 +387,18 @@ export default function PlaylistDrawer() {
         {/* Header */}
         <div
           className="flex-shrink-0 flex items-center justify-between px-4 py-4"
-          style={{ borderBottom: "1px solid rgba(203,177,131,0.08)" }}
+          style={{ borderBottom: "1px solid rgba(196,154,40,0.06)" }}
         >
           <div className="flex items-center gap-2">
-            <ListMusic size={14} style={{ color: "#CBB183" }} />
-            <span className="text-[12px] font-heading tracking-widest uppercase" style={{ color: "#CBB183" }}>
+            <ListMusic size={14} style={{ color: "var(--ln-gold)" }} />
+            <span className="text-[12px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-gold)" }}>
               Quick Play
             </span>
           </div>
           <button
             onClick={() => setIsOpen(false)}
             className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:bg-white/5 active:scale-90"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "var(--ln-smoke)" }}
           >
             <X size={14} />
           </button>
@@ -407,7 +407,7 @@ export default function PlaylistDrawer() {
         {/* Tab bar */}
         <div
           className="flex-shrink-0 flex items-center gap-1 px-3 py-2"
-          style={{ borderBottom: "1px solid rgba(203,177,131,0.06)" }}
+          style={{ borderBottom: "1px solid rgba(196,154,40,0.04)" }}
         >
           {TABS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
@@ -417,9 +417,9 @@ export default function PlaylistDrawer() {
                 onClick={() => setActiveTab(id)}
                 className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-all text-[10px] font-heading tracking-wide"
                 style={{
-                  background: isActive ? "rgba(203,177,131,0.14)" : "rgba(44,52,56,0.60)",
-                  color: isActive ? "#E6CDAE" : "#AA8E64",
-                  border: isActive ? "1px solid rgba(203,177,131,0.40)" : "1px solid rgba(203,177,131,0.10)",
+                  background: isActive ? "rgba(196,154,40,0.10)" : "rgba(44,52,56,0.60)",
+                  color: isActive ? "var(--ln-parchment)" : "var(--ln-smoke)",
+                  border: isActive ? "1px solid rgba(196,154,40,0.35)" : "1px solid rgba(196,154,40,0.08)",
                   fontFamily: "'Cinzel', serif",
                   letterSpacing: "0.06em",
                   fontSize: "9px",
@@ -438,19 +438,19 @@ export default function PlaylistDrawer() {
             <BuildYourOwn onClose={() => setIsOpen(false)} />
           ) : activeTab === "liked" && !user ? (
             <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-3">
-              <Lock size={20} style={{ color: "#3F4A50" }} />
-              <div className="text-[12px]" style={{ color: "#AA8E64" }}>
+              <Lock size={20} style={{ color: "var(--ln-iron)" }} />
+              <div className="text-[12px]" style={{ color: "var(--ln-smoke)" }}>
                 Sign in to see your liked tracks
               </div>
             </div>
           ) : isLoading ? (
             <div className="flex items-center justify-center h-32">
-              <Loader2 size={18} className="animate-spin" style={{ color: "rgba(203,177,131,0.45)" }} />
+              <Loader2 size={18} className="animate-spin" style={{ color: "rgba(196,154,40,0.4)" }} />
             </div>
           ) : tracks.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 gap-2">
-              <Music size={18} style={{ color: "#2C3438" }} />
-              <div className="text-[11px]" style={{ color: "#2C3438" }}>
+              <Music size={18} style={{ color: "var(--ln-coal)" }} />
+              <div className="text-[11px]" style={{ color: "var(--ln-coal)" }}>
                 {activeTab === "liked" ? "No liked tracks yet" : "No tracks found"}
               </div>
             </div>
@@ -460,17 +460,17 @@ export default function PlaylistDrawer() {
               <button
                 onClick={() => tracks.length > 0 && handlePlay(tracks[0], tracks)}
                 className="w-full flex items-center gap-2 px-4 py-2 mb-1 transition-all hover:bg-white/5 active:scale-[0.98]"
-                style={{ color: "#CBB183" }}
+                style={{ color: "var(--ln-gold)" }}
               >
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)" }}
+                  style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}
                 >
                   <Play size={11} fill="currentColor" />
                 </div>
                 <span className="text-[11px] font-heading tracking-wide">Play All ({tracks.length})</span>
               </button>
-              <div className="h-px mx-4 mb-1" style={{ background: "rgba(203,177,131,0.06)" }} />
+              <div className="h-px mx-4 mb-1" style={{ background: "rgba(196,154,40,0.04)" }} />
               {tracks.map((track) => (
                 <MiniTrackRow
                   key={track.id}

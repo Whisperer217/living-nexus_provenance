@@ -40,7 +40,7 @@ const interopRows = [
 
 export default function WIDSpecPage() {
   return (
-    <div className="min-h-screen" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen" style={{ background: "var(--ln-coal)" }}>
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div
@@ -56,8 +56,8 @@ export default function WIDSpecPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-widest mb-6"
             style={{
               background: "rgba(44,52,56,0.6)",
-              border: "1px solid rgba(203,177,131,0.35)",
-              color: "#CBB183",
+              border: "1px solid rgba(196,154,40,0.3)",
+              color: "var(--ln-gold)",
             }}
           >
             <FileText className="w-3 h-3" />
@@ -66,18 +66,18 @@ export default function WIDSpecPage() {
 
           <h1
             className="text-4xl sm:text-5xl font-bold tracking-tight mb-4"
-            style={{ fontFamily: "'Orbitron', sans-serif", color: "#E6CDAE" }}
+            style={{ fontFamily: "'Orbitron', sans-serif", color: "var(--ln-parchment)" }}
           >
             Witness ID
           </h1>
           <h2
             className="text-xl sm:text-2xl mb-6"
-            style={{ color: "#CBB183", fontFamily: "'Orbitron', sans-serif" }}
+            style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif" }}
           >
             Public Specification
           </h2>
 
-          <p className="text-base max-w-2xl mx-auto mb-3" style={{ color: "#DACAAA" }}>
+          <p className="text-base max-w-2xl mx-auto mb-3" style={{ color: "var(--ln-parchment)" }}>
             A sovereign creative provenance protocol. A behavioral contract that establishes what the
             WID system requires, what it produces, and what it guarantees — without exposing the
             internal mechanism.
@@ -85,7 +85,7 @@ export default function WIDSpecPage() {
 
           <blockquote
             className="text-sm italic mb-8"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "var(--ln-smoke)" }}
           >
             "It's cool getting a DOI, but getting a WID." — Doc Seraph Mercer, Founder
           </blockquote>
@@ -96,8 +96,8 @@ export default function WIDSpecPage() {
               size="lg"
               className="gap-2 text-sm font-semibold px-8 py-3"
               style={{
-                background: "linear-gradient(135deg, #AA8E64, #7A5A1E)",
-                color: "#2C3438",
+                background: "linear-gradient(135deg, #6B6555, #7A5A1E)",
+                color: "var(--ln-coal)",
                 border: "none",
               }}
             >
@@ -106,7 +106,7 @@ export default function WIDSpecPage() {
             </Button>
           </a>
 
-          <p className="text-xs mt-3" style={{ color: "#3F4A50" }}>
+          <p className="text-xs mt-3" style={{ color: "var(--ln-iron)" }}>
             Command Domains LLC / BDDT Publishing · livingnexus.org
           </p>
         </div>
@@ -116,7 +116,7 @@ export default function WIDSpecPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <h3
           className="text-xs font-mono tracking-widest mb-6 text-center"
-          style={{ color: "#CBB183" }}
+          style={{ color: "var(--ln-gold)" }}
         >
           LAYERED DISCLOSURE MODEL
         </h3>
@@ -133,18 +133,18 @@ export default function WIDSpecPage() {
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(203,177,131,0.12)" }}
+                  style={{ background: "rgba(196,154,40,0.08)" }}
                 >
-                  <Icon className="w-4 h-4" style={{ color: "#CBB183" }} />
+                  <Icon className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
                 </div>
                 <span
                   className="text-sm font-semibold"
-                  style={{ color: "#E6CDAE" }}
+                  style={{ color: "var(--ln-parchment)" }}
                 >
                   {title}
                 </span>
               </div>
-              <p className="text-xs leading-relaxed" style={{ color: "#AA8E64" }}>
+              <p className="text-xs leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
                 {description}
               </p>
             </div>
@@ -156,7 +156,7 @@ export default function WIDSpecPage() {
       <div className="max-w-4xl mx-auto px-6 pb-12">
         <h3
           className="text-xs font-mono tracking-widest mb-6 text-center"
-          style={{ color: "#CBB183" }}
+          style={{ color: "var(--ln-gold)" }}
         >
           RELATIONSHIP TO EXISTING SYSTEMS
         </h3>
@@ -169,13 +169,13 @@ export default function WIDSpecPage() {
               <tr style={{ background: "rgba(44,52,56,0.8)" }}>
                 <th
                   className="text-left px-5 py-3 text-xs font-mono tracking-wider"
-                  style={{ color: "#CBB183" }}
+                  style={{ color: "var(--ln-gold)" }}
                 >
                   SYSTEM
                 </th>
                 <th
                   className="text-left px-5 py-3 text-xs font-mono tracking-wider"
-                  style={{ color: "#CBB183" }}
+                  style={{ color: "var(--ln-gold)" }}
                 >
                   RELATIONSHIP TO WID
                 </th>
@@ -195,11 +195,11 @@ export default function WIDSpecPage() {
                 >
                   <td
                     className="px-5 py-3 font-medium text-xs"
-                    style={{ color: "#DACAAA" }}
+                    style={{ color: "var(--ln-parchment)" }}
                   >
                     {row.system}
                   </td>
-                  <td className="px-5 py-3 text-xs" style={{ color: "#AA8E64" }}>
+                  <td className="px-5 py-3 text-xs" style={{ color: "var(--ln-smoke)" }}>
                     {row.relationship}
                   </td>
                 </tr>
@@ -212,13 +212,13 @@ export default function WIDSpecPage() {
       {/* Mission Statement */}
       <div className="max-w-4xl mx-auto px-6 pb-16">
         <div
-          className="rounded-2xl p-8 text-center"
+          className="p-8 text-center"
           style={{
             background: "rgba(44,52,56,0.8)",
-            border: "1px solid rgba(203,177,131,0.2)",
+            border: "1px solid rgba(196,154,40,0.17)",
           }}
         >
-          <p className="text-base leading-relaxed mb-6" style={{ color: "#DACAAA" }}>
+          <p className="text-base leading-relaxed mb-6" style={{ color: "var(--ln-parchment)" }}>
             Every day, young creators produce original work and submit it to platforms before that
             work has any formal record of origin. A 15-year-old who has spent years writing music
             and uploads it to a streaming platform has no mechanism to establish that the work was
@@ -226,7 +226,7 @@ export default function WIDSpecPage() {
           </p>
           <p
             className="text-base font-semibold leading-relaxed"
-            style={{ color: "#E6CDAE" }}
+            style={{ color: "var(--ln-parchment)" }}
           >
             The Witness ID system exists to close that gap — protect the origin, protect it early,
             before the platforms, before the businesses, before the algorithms.
@@ -238,8 +238,8 @@ export default function WIDSpecPage() {
                 size="sm"
                 className="gap-2 text-xs"
                 style={{
-                  borderColor: "rgba(203,177,131,0.35)",
-                  color: "#CBB183",
+                  borderColor: "rgba(196,154,40,0.3)",
+                  color: "var(--ln-gold)",
                   background: "transparent",
                 }}
               >
@@ -252,9 +252,9 @@ export default function WIDSpecPage() {
                 size="sm"
                 className="gap-2 text-xs"
                 style={{
-                  background: "rgba(203,177,131,0.12)",
-                  color: "#CBB183",
-                  border: "1px solid rgba(203,177,131,0.28)",
+                  background: "rgba(196,154,40,0.08)",
+                  color: "var(--ln-gold)",
+                  border: "1px solid rgba(196,154,40,0.25)",
                 }}
               >
                 <ExternalLink className="w-3 h-3" />

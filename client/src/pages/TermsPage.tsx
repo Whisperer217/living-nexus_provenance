@@ -8,24 +8,24 @@ export default function TermsPage() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: "#2C3438", color: "#E6CDAE" }}
+      style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)" }}
     >
       {/* Header */}
       <div
         className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 border-b"
-        style={{ background: "rgba(44,52,56,0.95)", borderColor: "#2C3438", backdropFilter: "blur(12px)" }}
+        style={{ background: "rgba(44,52,56,0.95)", borderColor: "var(--ln-coal)", backdropFilter: "blur(12px)" }}
       >
         <Link href="/manifesto">
           <button
             className="flex items-center gap-1.5 text-xs transition-colors"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "var(--ln-smoke)" }}
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             Manifesto
           </button>
         </Link>
-        <span style={{ color: "#3F4A50" }}>·</span>
-        <span className="text-xs font-mono tracking-widest" style={{ color: "#AA8E64" }}>
+        <span style={{ color: "var(--ln-iron)" }}>·</span>
+        <span className="text-xs font-mono tracking-widest" style={{ color: "var(--ln-smoke)" }}>
           TERMS OF SERVICE — v{VERSION}
         </span>
       </div>
@@ -35,18 +35,18 @@ export default function TermsPage() {
         {/* Title block */}
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-4">
-            <Scale className="w-4 h-4" style={{ color: "#CBB183" }} />
-            <span className="text-xs font-mono tracking-widest" style={{ color: "#AA8E64" }}>
+            <Scale className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+            <span className="text-xs font-mono tracking-widest" style={{ color: "var(--ln-smoke)" }}>
               LIVING NEXUS / TERMS OF SERVICE
             </span>
           </div>
           <h1
             className="text-3xl font-bold tracking-tight mb-2"
-            style={{ fontFamily: "'Orbitron', sans-serif", color: "#E6CDAE" }}
+            style={{ fontFamily: "'Orbitron', sans-serif", color: "var(--ln-parchment)" }}
           >
             Terms of Service
           </h1>
-          <p className="text-sm" style={{ color: "#AA8E64" }}>
+          <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>
             Last updated: {LAST_UPDATED} &nbsp;·&nbsp; Version {VERSION}
           </p>
         </div>
@@ -56,23 +56,23 @@ export default function TermsPage() {
           <div
             className="rounded-xl p-6 mb-8"
             style={{
-              background: "#2C3438",
-              border: "1px solid rgba(203,177,131,0.2)",
-              boxShadow: "0 0 40px rgba(203,177,131,0.04)",
+              background: "var(--ln-coal)",
+              border: "1px solid rgba(196,154,40,0.17)",
+              boxShadow: "0 0 40px rgba(196,154,40,0.03)",
             }}
           >
             {/* Eyebrow */}
             <div className="flex items-center gap-2 mb-5">
-              <Shield className="w-4 h-4 flex-shrink-0" style={{ color: "#CBB183" }} />
+              <Shield className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
               <span
                 className="text-[10px] font-mono tracking-widest font-bold"
-                style={{ color: "#CBB183" }}
+                style={{ color: "var(--ln-gold)" }}
               >
                 PREAMBLE — READ THIS FIRST
               </span>
             </div>
 
-            <div className="space-y-5 text-sm leading-relaxed" style={{ color: "#DACAAA" }}>
+            <div className="space-y-5 text-sm leading-relaxed" style={{ color: "var(--ln-parchment)" }}>
               <p>
                 The terms that follow exist to protect creators — not the platform. Most terms of service
                 are written as weapons against the people who sign them, stripping ownership, burying rights
@@ -93,11 +93,11 @@ export default function TermsPage() {
             </div>
 
             {/* Covenant + Compare links */}
-            <div className="mt-6 pt-5 flex flex-wrap gap-4" style={{ borderTop: "1px solid rgba(203,177,131,0.12)" }}>
+            <div className="mt-6 pt-5 flex flex-wrap gap-4" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
               <Link href="/manifesto">
                 <span
                   className="inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer"
-                  style={{ color: "#CBB183" }}
+                  style={{ color: "var(--ln-gold)" }}
                 >
                   <ScrollText className="w-3.5 h-3.5" />
                   Read the Living Nexus Covenant →
@@ -106,7 +106,7 @@ export default function TermsPage() {
               <Link href="/terms/compare">
                 <span
                   className="inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer"
-                  style={{ color: "#CBB183" }}
+                  style={{ color: "var(--ln-gold)" }}
                 >
                   <Scale className="w-3.5 h-3.5" />
                   Compare Platform TOS →
@@ -115,7 +115,7 @@ export default function TermsPage() {
               <Link href="/privacy">
                 <span
                   className="inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer"
-                  style={{ color: "#CBB183" }}
+                  style={{ color: "var(--ln-gold)" }}
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
                   Privacy Policy →
@@ -162,7 +162,7 @@ export default function TermsPage() {
               target="_blank"
               rel="noopener noreferrer"
               className="underline"
-              style={{ color: "#CBB183" }}
+              style={{ color: "var(--ln-gold)" }}
             >
               copyright.gov/registration
             </a>
@@ -304,26 +304,26 @@ export default function TermsPage() {
         {/* Footer */}
         <div
           className="mt-16 pt-8 text-center"
-          style={{ borderTop: "1px solid #2C3438" }}
+          style={{ borderTop: "1px solid #111009" }}
         >
-          <p className="text-xs mb-4" style={{ color: "#3F4A50" }}>
+          <p className="text-xs mb-4" style={{ color: "var(--ln-iron)" }}>
             Living Nexus is operated by Command Domains LLC · BDDT Publishing
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/manifesto">
-              <span className="text-xs transition-colors cursor-pointer" style={{ color: "#AA8E64" }}>
+              <span className="text-xs transition-colors cursor-pointer" style={{ color: "var(--ln-smoke)" }}>
                 Manifesto
               </span>
             </Link>
-            <span style={{ color: "#3F4A50" }}>·</span>
+            <span style={{ color: "var(--ln-iron)" }}>·</span>
             <Link href="/lexicon">
-              <span className="text-xs transition-colors cursor-pointer" style={{ color: "#AA8E64" }}>
+              <span className="text-xs transition-colors cursor-pointer" style={{ color: "var(--ln-smoke)" }}>
                 Lexicon
               </span>
             </Link>
-            <span style={{ color: "#3F4A50" }}>·</span>
+            <span style={{ color: "var(--ln-iron)" }}>·</span>
             <Link href="/">
-              <span className="text-xs transition-colors cursor-pointer" style={{ color: "#AA8E64" }}>
+              <span className="text-xs transition-colors cursor-pointer" style={{ color: "var(--ln-smoke)" }}>
                 Home
               </span>
             </Link>
@@ -347,17 +347,17 @@ function Section({
   return (
     <section className="mb-10">
       <div className="flex items-center gap-2 mb-4">
-        <span style={{ color: "#CBB183" }}>{icon}</span>
+        <span style={{ color: "var(--ln-gold)" }}>{icon}</span>
         <h2
           className="text-base font-semibold"
-          style={{ color: "#E6CDAE" }}
+          style={{ color: "var(--ln-parchment)" }}
         >
           {label}
         </h2>
       </div>
       <div
         className="space-y-4 text-sm leading-relaxed pl-6"
-        style={{ color: "#AA8E64", borderLeft: "1px solid rgba(203,177,131,0.15)" }}
+        style={{ color: "var(--ln-smoke)", borderLeft: "1px solid rgba(196,154,40,0.12)" }}
       >
         {children}
       </div>

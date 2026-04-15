@@ -46,19 +46,19 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
         className="w-12 h-12 rounded-full flex items-center justify-center"
         style={{ background: "rgba(239,68,68,0.12)" }}
       >
-        <AlertTriangle size={22} style={{ color: "#E6CDAE" }} />
+        <AlertTriangle size={22} style={{ color: "var(--ln-parchment)" }} />
       </div>
 
       <div>
         <p
           className="font-heading text-[15px] mb-1"
-          style={{ color: "#E6CDAE" }}
+          style={{ color: "var(--ln-parchment)" }}
         >
           We couldn't load your dashboard right now
         </p>
         <p
           className="text-[12px] font-body"
-          style={{ color: "#AA8E64" }}
+          style={{ color: "var(--ln-smoke)" }}
         >
           There was a problem loading {section}. Your data is safe — this is a temporary issue.
         </p>
@@ -70,8 +70,8 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
           onClick={onRetry}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-heading text-[12px] tracking-wide transition-all hover:brightness-110 active:scale-95"
           style={{
-            background: "#CBB183",
-            color: "#E6CDAE",
+            background: "var(--ln-gold)",
+            color: "var(--ln-parchment)",
           }}
         >
           <RefreshCw size={13} />
@@ -84,8 +84,8 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-heading text-[12px] tracking-wide transition-all hover:brightness-110 active:scale-95"
             style={{
               background: "rgba(44,52,56,0.8)",
-              border: "1px solid rgba(203,177,131,0.28)",
-              color: "#CBB183",
+              border: "1px solid rgba(196,154,40,0.25)",
+              color: "var(--ln-gold)",
             }}
           >
             <Music size={13} />
@@ -104,7 +104,7 @@ export function DashboardErrorCard({ section, error, onRetry, route = "/dashboar
             style={{
               background: "transparent",
               border: "1px solid rgba(239,68,68,0.4)",
-              color: "#EF4444",
+              color: "var(--ln-ember)",
             }}
           >
             <Flag size={13} />

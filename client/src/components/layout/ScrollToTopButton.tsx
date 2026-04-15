@@ -43,15 +43,15 @@ export default function ScrollToTopButton() {
         width: "36px",
         height: "36px",
         borderRadius: "50%",
-        background: "linear-gradient(135deg, rgba(203,177,131,0.92), rgba(203,177,131,0.92))",
-        border: "1px solid rgba(203,177,131,0.35)",
-        boxShadow: "0 2px 12px rgba(203,177,131,0.32), 0 1px 4px rgba(0,0,0,0.4)",
+        background: "linear-gradient(135deg, rgba(196,154,40,0.78), rgba(196,154,40,0.78))",
+        border: "1px solid rgba(196,154,40,0.3)",
+        boxShadow: "0 2px 12px rgba(196,154,40,0.3), 0 1px 4px rgba(0,0,0,0.4)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
-        color: "#2C3438",
+        color: "var(--ln-coal)",
       }}
     >
       <ArrowUp size={15} strokeWidth={2.5} />

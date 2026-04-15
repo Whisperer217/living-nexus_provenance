@@ -113,7 +113,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
         audioUrl: t.fileUrl ?? t.song?.fileUrl ?? undefined,
         witnessId: t.witnessId ?? t.song?.witnessId ?? undefined,
         genre: t.genre ?? "",
-        bg: "#2C3438",
+        bg: "var(--ln-coal)",
         emoji: "🎵",
         coverPositionX: t.coverPositionX ?? t.song?.coverPositionX ?? 50,
         coverPositionY: t.coverPositionY ?? t.song?.coverPositionY ?? 50,
@@ -145,8 +145,8 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
           w-8 h-20 rounded-r-xl transition-all duration-300
           border border-l-0 qr-tab-glow`}
         style={{
-          background: "#2C3438",
-          borderColor: "rgba(203,177,131,0.4)",
+          background: "var(--ln-coal)",
+          borderColor: "rgba(196,154,40,0.34)",
           transform: `translateY(-50%) translateX(${open ? "240px" : "0px"})`,
           touchAction: "manipulation",
           WebkitTapHighlightColor: "transparent",
@@ -156,7 +156,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
           size={14}
           className="transition-transform duration-300"
           style={{
-            color: "#CBB183",
+            color: "var(--ln-gold)",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
           }}
         />
@@ -177,7 +177,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
           border-r border-white/[0.08]
           transition-transform duration-300 ease-in-out"
         style={{
-          background: "#2C3438",
+          background: "var(--ln-coal)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
           boxShadow: open ? "4px 0 32px rgba(0,0,0,0.60)" : "none",
         }}
@@ -186,13 +186,13 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-4 pt-5 pb-3 border-b border-white/[0.06]">
           <span className="text-[11px] font-heading tracking-[0.18em] uppercase"
-            style={{ color: "#CBB183" }}>
+            style={{ color: "var(--ln-gold)" }}>
             Quick Access
           </span>
           <button
             onClick={onToggle}
             className="p-2.5 -mr-1.5 rounded-md transition-colors hover:bg-white/[0.06] active:bg-white/[0.10]"
-            style={{ color: "#AA8E64", touchAction: "manipulation", WebkitTapHighlightColor: "transparent", minWidth: "36px", minHeight: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ color: "var(--ln-smoke)", touchAction: "manipulation", WebkitTapHighlightColor: "transparent", minWidth: "36px", minHeight: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
             aria-label="Close panel"
           >
             <X size={14} />
@@ -206,7 +206,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
               <Search
                 size={13}
                 className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ color: "#AA8E64" }}
+                style={{ color: "var(--ln-smoke)" }}
               />
               <input
                 type="text"
@@ -215,12 +215,12 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                 placeholder="Search tracks, artists…"
                 className="w-full pl-8 pr-3 py-2 rounded-lg text-[12px] font-body outline-none transition-all"
                 style={{
-                  background: "#2C3438",
-                  border: "1px solid #2C3438",
-                  color: "#E6CDAE",
+                  background: "var(--ln-coal)",
+                  border: "1px solid #111009",
+                  color: "var(--ln-parchment)",
                 }}
-                onFocus={e => (e.currentTarget.style.borderColor = "rgba(203,177,131,0.5)")}
-                onBlur={e => (e.currentTarget.style.borderColor = "#2C3438")}
+                onFocus={e => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.42)")}
+                onBlur={e => (e.currentTarget.style.borderColor = "var(--ln-coal)")}
               />
             </div>
           </form>
@@ -229,7 +229,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
         {/* ── Genre filter chips ──────────────────────────────────── */}
         <div className="px-3 pb-3">
           <p className="text-[9px] font-heading tracking-[0.15em] uppercase mb-2"
-            style={{ color: "#3F4A50" }}>
+            style={{ color: "var(--ln-iron)" }}>
             Filter
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -241,8 +241,8 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                   onClick={() => setActiveGenre(g.value)}
                   className="px-2.5 py-1 rounded-full text-[10px] font-body transition-all"
                   style={isActive
-                    ? { background: "rgba(203,177,131,0.18)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }
-                    : { background: "#2C3438", color: "#AA8E64", border: "1px solid #2C3438" }
+                    ? { background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }
+                    : { background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #111009" }
                   }
                 >
                   {g.label}
@@ -255,7 +255,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
         {/* ── Track results / recently played ────────────────────── */}
         <div className="flex-1 min-h-0 flex flex-col px-3 pb-3 border-t border-white/[0.06] pt-3 overflow-hidden">
           <p className="text-[9px] font-heading tracking-[0.15em] uppercase mb-2 flex-shrink-0"
-            style={{ color: "#3F4A50" }}>
+            style={{ color: "var(--ln-iron)" }}>
             {query.trim() ? "Results" : "Recently Added"}
           </p>
 
@@ -263,17 +263,17 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
             <div className="space-y-2 flex-1">
               {[0, 1, 2, 4].map(i => (
                 <div key={i} className="flex items-center gap-2 animate-pulse">
-                  <div className="w-8 h-8 rounded flex-shrink-0" style={{ background: "#2C3438" }} />
+                  <div className="w-8 h-8 rounded flex-shrink-0" style={{ background: "var(--ln-coal)" }} />
                   <div className="flex-1 space-y-1">
-                    <div className="h-2 rounded" style={{ background: "#2C3438", width: "70%" }} />
-                    <div className="h-2 rounded" style={{ background: "#2C3438", width: "45%" }} />
+                    <div className="h-2 rounded" style={{ background: "var(--ln-coal)", width: "70%" }} />
+                    <div className="h-2 rounded" style={{ background: "var(--ln-coal)", width: "45%" }} />
                   </div>
                 </div>
               ))}
             </div>
           ) : tracks.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-[11px] text-center" style={{ color: "#3F4A50" }}>
+              <p className="text-[11px] text-center" style={{ color: "var(--ln-iron)" }}>
                 {query.trim() ? "No results found" : "No tracks yet"}
               </p>
             </div>
@@ -285,7 +285,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                   onClick={() => handleTrackClick(track, idx)}
                   className="w-full flex items-center gap-2 rounded-lg p-1.5 transition-colors group text-left"
                   style={{ background: "transparent" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(203,177,131,0.05)")}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(196,154,40,0.04)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 >
                   {(track.coverArtUrl ?? track.song?.coverArtUrl) ? (
@@ -297,21 +297,21 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded flex-shrink-0 flex items-center justify-center text-sm"
-                      style={{ background: "#2C3438" }}>
+                      style={{ background: "var(--ln-coal)" }}>
                       🎵
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] truncate transition-colors group-hover:text-[#CBB183]"
-                      style={{ color: "#E6CDAE" }}>
+                    <p className="text-[11px] truncate transition-colors group-hover:text-[#C49A28]"
+                      style={{ color: "var(--ln-parchment)" }}>
                       {track.title ?? track.song?.title}
                     </p>
-                    <p className="text-[10px] truncate" style={{ color: "#3F4A50" }}>
+                    <p className="text-[10px] truncate" style={{ color: "var(--ln-iron)" }}>
                       {track.artistName ?? track.creator?.name ?? track.creator?.artistHandle ?? "Unknown"}
                     </p>
                   </div>
                   <Play size={10} className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ color: "#CBB183" }} />
+                    style={{ color: "var(--ln-gold)" }} />
                 </button>
               ))}
             </div>
@@ -323,9 +323,9 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
           <button
             onClick={() => { onToggle(); navigate("/explore"); }}
             className="w-full text-[10px] font-body text-center transition-colors"
-            style={{ color: "#3F4A50" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
-            onMouseLeave={e => (e.currentTarget.style.color = "#3F4A50")}
+            style={{ color: "var(--ln-iron)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-iron)")}
           >
             Open full Explore →
           </button>

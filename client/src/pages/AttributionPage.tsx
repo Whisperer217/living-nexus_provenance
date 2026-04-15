@@ -63,18 +63,18 @@ function ContributorCard({
         {/* Avatar initial */}
         <div
           className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 text-lg font-bold"
-          style={{ background: "rgba(212,175,55,0.12)", color: "#CBB183" }}
+          style={{ background: "rgba(212,175,55,0.12)", color: "var(--ln-gold)" }}
         >
           {initial}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-3 flex-wrap">
-            <span className="text-base font-semibold" style={{ color: "#DACAAA" }}>
+            <span className="text-base font-semibold" style={{ color: "var(--ln-parchment)" }}>
               {handle}
             </span>
             <span
               className="text-[10px] uppercase tracking-widest"
-              style={{ color: "#3F4A50" }}
+              style={{ color: "var(--ln-iron)" }}
             >
               Since {since}
             </span>
@@ -100,7 +100,7 @@ function ContributorCard({
                 <button
                   onClick={() => setExpanded(v => !v)}
                   className="text-xs mt-1.5 hover:underline"
-                  style={{ color: "#CBB183" }}
+                  style={{ color: "var(--ln-gold)" }}
                 >
                   {expanded ? "Show less" : "Read more"}
                 </button>
@@ -128,8 +128,8 @@ function Section({
   return (
     <section className="mb-12">
       <div className="flex items-center gap-3 mb-2">
-        <Icon size={16} style={{ color: "#CBB183" }} />
-        <h2 className="text-sm font-semibold uppercase tracking-widest" style={{ color: "#CBB183" }}>
+        <Icon size={16} style={{ color: "var(--ln-gold)" }} />
+        <h2 className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>
           {title}
         </h2>
       </div>
@@ -155,7 +155,7 @@ export default function AttributionPage() {
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <div
         className="relative w-full overflow-hidden"
-        style={{ height: "180px", background: "linear-gradient(135deg, #1A2226 0%, #2C3438 60%, #1A2226 100%)" }}
+        style={{ height: "180px", background: "linear-gradient(135deg, #1A2226 0%, #111009 60%, #1A2226 100%)" }}
       >
         <div
           className="absolute inset-0 opacity-10"
@@ -166,14 +166,14 @@ export default function AttributionPage() {
         />
         <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
           <div className="flex items-center gap-2 mb-2">
-            <Heart size={18} style={{ color: "#CBB183" }} />
-            <span className="text-[10px] uppercase tracking-widest" style={{ color: "#CBB183" }}>
+            <Heart size={18} style={{ color: "var(--ln-gold)" }} />
+            <span className="text-[10px] uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>
               Living Nexus
             </span>
           </div>
           <h1
             className="text-3xl sm:text-4xl font-heading font-bold"
-            style={{ color: "#DACAAA", letterSpacing: "0.04em" }}
+            style={{ color: "var(--ln-parchment)", letterSpacing: "0.04em" }}
           >
             Attribution
           </h1>
@@ -260,8 +260,8 @@ export default function AttributionPage() {
           className="mt-4 rounded-xl p-5 text-center"
           style={{ background: "rgba(212,175,55,0.04)", border: "1px solid rgba(212,175,55,0.12)" }}
         >
-          <Star size={16} className="mx-auto mb-2" style={{ color: "#CBB183" }} />
-          <p className="text-sm font-semibold mb-1" style={{ color: "#DACAAA" }}>
+          <Star size={16} className="mx-auto mb-2" style={{ color: "var(--ln-gold)" }} />
+          <p className="text-sm font-semibold mb-1" style={{ color: "var(--ln-parchment)" }}>
             Want to be part of this?
           </p>
           <p className="text-xs mb-3" style={{ color: "#64748b" }}>
@@ -272,7 +272,7 @@ export default function AttributionPage() {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-colors"
-            style={{ background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.3)", color: "#CBB183" }}
+            style={{ background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.3)", color: "var(--ln-gold)" }}
           >
             Join the Discord
           </a>

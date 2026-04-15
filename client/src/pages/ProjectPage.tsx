@@ -207,7 +207,7 @@ function BannerDropZone({
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-[#2C3438] flex items-center justify-center"
+      className="relative w-full overflow-hidden bg-[#111009] flex items-center justify-center"
       style={{ minHeight: "clamp(14rem, 42vw, 34rem)" }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -225,7 +225,7 @@ function BannerDropZone({
           onClick={() => !editMode && setLightboxOpen(true)}
         />
       ) : (
-        <div className="w-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#2C3438]" style={{ height: "clamp(14rem, 42vw, 34rem)" }} />
+        <div className="w-full bg-gradient-to-br from-[#1a1025] via-[#0d0d1a] to-[#111009]" style={{ height: "clamp(14rem, 42vw, 34rem)" }} />
       )}
       {/* Lightbox */}
       {lightboxOpen && bannerUrl && (
@@ -245,15 +245,15 @@ function BannerDropZone({
           />
         </div>
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#2C3438]/40 to-[#2C3438]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#111009]/40 to-[#111009]" />
 
       {/* Drag-over overlay */}
       {editMode && isDragOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10"
-          style={{ background: "rgba(203,177,131,0.12)", backdropFilter: "blur(4px)", border: "2px dashed rgba(203,177,131,0.55)" }}
+          style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(4px)", border: "2px dashed rgba(196,154,40,0.5)" }}
         >
-          <Upload className="w-10 h-10" style={{ color: "#CBB183" }} />
-          <p className="text-sm font-heading" style={{ color: "#CBB183" }}>Drop to set as banner</p>
+          <Upload className="w-10 h-10" style={{ color: "var(--ln-gold)" }} />
+          <p className="text-sm font-heading" style={{ color: "var(--ln-gold)" }}>Drop to set as banner</p>
         </div>
       )}
 
@@ -262,8 +262,8 @@ function BannerDropZone({
         className="absolute bottom-0 left-0 right-0 h-1 pointer-events-none"
         style={{
           background: witnessId
-            ? "linear-gradient(to right, rgba(74,222,128,0.8), rgba(203,177,131,0.55), transparent)"
-            : "linear-gradient(to right, rgba(203,177,131,0.35), transparent)",
+            ? "linear-gradient(to right, rgba(74,222,128,0.8), rgba(196,154,40,0.5), transparent)"
+            : "linear-gradient(to right, rgba(196,154,40,0.3), transparent)",
         }}
       />
 
@@ -278,7 +278,7 @@ function BannerDropZone({
             style={{
               background: "rgba(44,52,56,0.92)",
               border: "1px solid rgba(74,222,128,0.6)",
-              color: "#4ADE80",
+              color: "var(--ln-seal-bright)",
               backdropFilter: "blur(6px)",
               textDecoration: "none",
             }}
@@ -297,12 +297,12 @@ function BannerDropZone({
               : status === "completed"
               ? "rgba(44,52,56,0.9)"
               : "rgba(170,142,100,0.9)",
-            color: status === "draft" ? "#AA8E64" : status === "completed" ? "#4ADE80" : "#2C3438",
+            color: status === "draft" ? "var(--ln-smoke)" : status === "completed" ? "var(--ln-seal-bright)" : "var(--ln-coal)",
             border: status === "draft"
               ? "1px solid rgba(44,52,56,0.5)"
               : status === "completed"
               ? "1px solid rgba(74,222,128,0.4)"
-              : "1px solid rgba(203,177,131,0.45)",
+              : "1px solid rgba(196,154,40,0.4)",
             backdropFilter: "blur(6px)",
           }}
         >
@@ -1553,14 +1553,14 @@ export default function ProjectPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#2C3438] flex items-center justify-center">
+      <div className="min-h-screen bg-[#111009] flex items-center justify-center">
         <div className="animate-pulse text-white/40">Loading project…</div>
       </div>
     );
   }
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#2C3438] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen bg-[#111009] flex flex-col items-center justify-center gap-4">
         <p className="text-white/60">Project not found.</p>
         <Link href="/"><Button variant="outline" className="border-white/20 text-white">Go Home</Button></Link>
       </div>
@@ -1575,7 +1575,7 @@ export default function ProjectPage() {
   const displayedUpdates = updatesExpanded ? updates : updates.slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-[#2C3438] text-white">
+    <div className="min-h-screen bg-[#111009] text-white">
       {/* ── Banner (drag-and-drop in edit mode) ── */}
       <BannerDropZone
         bannerUrl={project.bannerUrl ?? null}

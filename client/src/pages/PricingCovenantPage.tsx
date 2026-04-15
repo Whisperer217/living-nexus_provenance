@@ -81,19 +81,19 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors"
         style={{
-          background: open ? "#2C3438" : "#2C3438",
-          color: "#E6CDAE",
+          background: open ? "var(--ln-coal)" : "var(--ln-coal)",
+          color: "var(--ln-parchment)",
         }}
-        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.background = "#2C3438"; }}
-        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.background = "#2C3438"; }}
+        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.background = "var(--ln-coal)"; }}
+        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.background = "var(--ln-coal)"; }}
       >
         <span className="font-semibold text-sm pr-4" style={{ fontFamily: "'Cinzel', serif" }}>{q}</span>
-        {open ? <ChevronUp size={15} style={{ color: "#CBB183", flexShrink: 0 }} /> : <ChevronDown size={15} style={{ color: "#3F4A50", flexShrink: 0 }} />}
+        {open ? <ChevronUp size={15} style={{ color: "var(--ln-gold)", flexShrink: 0 }} /> : <ChevronDown size={15} style={{ color: "var(--ln-iron)", flexShrink: 0 }} />}
       </button>
       {open && (
         <div
           className="px-5 pb-5 pt-3 text-sm leading-relaxed"
-          style={{ background: "#2C3438", color: "#DACAAA" }}
+          style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)" }}
         >
           {a}
         </div>
@@ -130,13 +130,13 @@ export default function PricingCovenantPage() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: "#2C3438", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
+      style={{ background: "var(--ln-coal)", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}
     >
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <div
         className="relative overflow-hidden"
         style={{
-          background: "linear-gradient(180deg, #2C3438 0%, #2C3438 100%)",
+          background: "linear-gradient(180deg, var(--ln-coal) 0%, var(--ln-coal) 100%)",
           borderBottom: "1px solid rgba(44,52,56,0.4)",
         }}
       >
@@ -144,7 +144,7 @@ export default function PricingCovenantPage() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(203,177,131,0.06) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(196,154,40,0.04) 0%, transparent 70%)",
           }}
         />
 
@@ -153,9 +153,9 @@ export default function PricingCovenantPage() {
           <div
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-6"
             style={{
-              background: "rgba(203,177,131,0.12)",
-              border: "1px solid rgba(203,177,131,0.25)",
-              color: "#CBB183",
+              background: "rgba(196,154,40,0.08)",
+              border: "1px solid rgba(196,154,40,0.2)",
+              color: "var(--ln-gold)",
               fontFamily: "'Cinzel', serif",
             }}
           >
@@ -166,7 +166,7 @@ export default function PricingCovenantPage() {
           {/* Title */}
           <h1
             className="text-4xl md:text-5xl font-bold mb-6 leading-tight"
-            style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
+            style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
           >
             The Pricing Covenant
           </h1>
@@ -174,13 +174,13 @@ export default function PricingCovenantPage() {
           {/* Aid Bag Statement */}
           <p
             className="text-lg md:text-xl leading-relaxed mb-4 max-w-2xl mx-auto"
-            style={{ color: "#DACAAA" }}
+            style={{ color: "var(--ln-parchment)" }}
           >
             A medic who gives away all his supplies has nothing left when the next soldier comes in.
           </p>
           <p
             className="text-base leading-relaxed mb-8 max-w-2xl mx-auto"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "var(--ln-smoke)" }}
           >
             This platform was built to protect creators — their music, their testimony, their intellectual property.
             Charging for that protection is not extraction. It is restocking the aid bag so we can keep treating people.
@@ -196,12 +196,12 @@ export default function PricingCovenantPage() {
                 border: "1px solid rgba(74,222,128,0.35)",
               }}
             >
-              <CheckCircle size={22} style={{ color: "#4ADE80" }} />
+              <CheckCircle size={22} style={{ color: "var(--ln-seal-bright)" }} />
               <div className="text-left">
-                <p className="font-bold text-sm" style={{ color: "#4ADE80", fontFamily: "'Cinzel', serif" }}>
+                <p className="font-bold text-sm" style={{ color: "var(--ln-seal-bright)", fontFamily: "'Cinzel', serif" }}>
                   You are licensed.
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: "#3F4A50" }}>
+                <p className="text-xs mt-0.5" style={{ color: "var(--ln-iron)" }}>
                   Commercial rights active. Keep creating.
                 </p>
               </div>
@@ -211,11 +211,11 @@ export default function PricingCovenantPage() {
               <div>
                 <span
                   className="text-5xl font-bold"
-                  style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}
+                  style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}
                 >
                   $88.88
                 </span>
-                <span className="ml-2 text-sm" style={{ color: "#3F4A50" }}>
+                <span className="ml-2 text-sm" style={{ color: "var(--ln-iron)" }}>
                   one-time · no subscription · no renewal
                 </span>
               </div>
@@ -224,15 +224,15 @@ export default function PricingCovenantPage() {
                 disabled={licenseMutation.isPending}
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.99] disabled:opacity-60"
                 style={{
-                  background: "linear-gradient(135deg, #CBB183, #CBB183)",
-                  color: "#2C3438",
-                  boxShadow: "0 4px 24px rgba(203,177,131,0.35)",
+                  background: "linear-gradient(135deg, #C49A28, #C49A28)",
+                  color: "var(--ln-coal)",
+                  boxShadow: "0 4px 24px rgba(196,154,40,0.3)",
                   fontFamily: "'Cinzel', serif",
                 }}
               >
                 {licenseMutation.isPending ? (
                   <>
-                    <div className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "#2C3438", borderTopColor: "transparent" }} />
+                    <div className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "var(--ln-coal)", borderTopColor: "transparent" }} />
                     Processing...
                   </>
                 ) : (
@@ -242,7 +242,7 @@ export default function PricingCovenantPage() {
                   </>
                 )}
               </button>
-              <p className="text-xs" style={{ color: "#3F4A50" }}>
+              <p className="text-xs" style={{ color: "var(--ln-iron)" }}>
                 Secured by Stripe · 7-day return policy if no tracks uploaded
               </p>
             </div>
@@ -254,11 +254,11 @@ export default function PricingCovenantPage() {
       <div className="container max-w-3xl mx-auto px-4 py-14">
         <h2
           className="text-xl font-bold mb-2 text-center"
-          style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
+          style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
         >
           What This License Is
         </h2>
-        <p className="text-sm text-center mb-10" style={{ color: "#3F4A50" }}>
+        <p className="text-sm text-center mb-10" style={{ color: "var(--ln-iron)" }}>
           Not a feature list. A covenant between you and this platform.
         </p>
 
@@ -268,24 +268,24 @@ export default function PricingCovenantPage() {
               key={i}
               className="flex gap-4 rounded-xl p-5"
               style={{
-                background: "#2C3438",
+                background: "var(--ln-coal)",
                 border: "1px solid rgba(44,52,56,0.5)",
               }}
             >
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.25)" }}
+                style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.2)" }}
               >
-                <item.icon size={18} style={{ color: "#CBB183" }} />
+                <item.icon size={18} style={{ color: "var(--ln-gold)" }} />
               </div>
               <div>
                 <h3
                   className="font-semibold text-sm mb-1"
-                  style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
+                  style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
                 >
                   {item.title}
                 </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#AA8E64" }}>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
                   {item.body}
                 </p>
               </div>
@@ -298,29 +298,29 @@ export default function PricingCovenantPage() {
       <div
         className="mx-4 md:mx-auto max-w-3xl rounded-2xl p-8 md:p-10 mb-14"
         style={{
-          background: "linear-gradient(135deg, #2C3438, #2C3438)",
-          border: "1px solid rgba(203,177,131,0.18)",
+          background: "linear-gradient(135deg, var(--ln-coal), #111009)",
+          border: "1px solid rgba(196,154,40,0.15)",
         }}
       >
         <div className="flex items-start gap-4">
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(203,177,131,0.15)", border: "1px solid rgba(203,177,131,0.3)" }}
+            style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.26)" }}
           >
-            <span className="text-xl font-bold" style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}>∞</span>
+            <span className="text-xl font-bold" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>∞</span>
           </div>
           <div>
             <h3
               className="font-bold text-base mb-2"
-              style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}
+              style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}
             >
               Why $88.88 and not $89.99
             </h3>
-            <p className="text-sm leading-relaxed" style={{ color: "#DACAAA" }}>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--ln-parchment)" }}>
               Every SaaS platform charges $X9.99 because the retail psychology says round numbers feel expensive.
               That is a manipulation. This platform does not do that.
             </p>
-            <p className="text-sm leading-relaxed mt-3" style={{ color: "#DACAAA" }}>
+            <p className="text-sm leading-relaxed mt-3" style={{ color: "var(--ln-parchment)" }}>
               $88.88 is intentional. The number 8 represents abundance, alignment, and infinite return in multiple
               traditions. Four 8s is a declaration: this exchange is meant to multiply, not extract. You invest in
               your work. The platform invests in protecting it. That is a covenant, not a transaction.
@@ -333,7 +333,7 @@ export default function PricingCovenantPage() {
       <div className="container max-w-3xl mx-auto px-4 pb-14">
         <h2
           className="text-xl font-bold mb-8 text-center"
-          style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
+          style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
         >
           Questions
         </h2>
@@ -349,7 +349,7 @@ export default function PricingCovenantPage() {
         <div className="container max-w-3xl mx-auto px-4 pb-10 text-center">
           <p
             className="text-base mb-6 leading-relaxed"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "var(--ln-smoke)" }}
           >
             You built something real. You built it with your hands, your voice, your testimony.
             <br />
@@ -360,23 +360,23 @@ export default function PricingCovenantPage() {
             disabled={licenseMutation.isPending}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.99] disabled:opacity-60"
             style={{
-              background: "linear-gradient(135deg, #CBB183, #CBB183)",
-              color: "#2C3438",
-              boxShadow: "0 4px 24px rgba(203,177,131,0.3)",
+              background: "linear-gradient(135deg, #C49A28, #C49A28)",
+              color: "var(--ln-coal)",
+              boxShadow: "0 4px 24px rgba(196,154,40,0.26)",
               fontFamily: "'Cinzel', serif",
             }}
           >
             {licenseMutation.isPending ? "Processing..." : "Become a Founding Creator — $88.88"}
             {!licenseMutation.isPending && <ArrowRight size={16} />}
           </button>
-          <p className="text-xs mt-3" style={{ color: "#3F4A50" }}>
+          <p className="text-xs mt-3" style={{ color: "var(--ln-iron)" }}>
             One-time payment · Secured by Stripe · 7-day return policy
           </p>
           <div className="mt-6">
             <Link href="/manifesto">
               <span
                 className="text-xs underline underline-offset-4 transition-opacity hover:opacity-80 cursor-pointer"
-                style={{ color: "#3F4A50" }}
+                style={{ color: "var(--ln-iron)" }}
               >
                 Read the Manifesto — understand why this platform exists
               </span>

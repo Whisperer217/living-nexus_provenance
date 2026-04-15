@@ -87,21 +87,21 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
     <>
       <div
         className="fixed z-50 min-w-[200px] rounded-xl overflow-hidden shadow-2xl py-1"
-        style={{ top: position.y, left: position.x, background: "#2C3438", border: "1px solid #C3AB7D" }}
+        style={{ top: position.y, left: position.x, background: "var(--ln-coal)", border: "1px solid #C3AB7D" }}
       >
         <Link href={`/song/${song.id}`} onClick={onClose}>
-          <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "#DACAAA" }}>
+          <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>
             <ExternalLink className="w-4 h-4 opacity-60" /> Song Page
           </button>
         </Link>
 
         {/* ── Queue / Collection actions ── */}
-        <div className="my-1 border-t" style={{ borderColor: "rgba(203,177,131,0.15)" }} />
+        <div className="my-1 border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
         {song.audioUrl && (
           <button
             onClick={handlePlayNext}
             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-            style={{ color: "#DACAAA" }}
+            style={{ color: "var(--ln-parchment)" }}
           >
             <Play className="w-4 h-4 opacity-60" /> Play Next
           </button>
@@ -109,36 +109,36 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
         <button
           onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-          style={{ color: "#DACAAA" }}
+          style={{ color: "var(--ln-parchment)" }}
         >
           <Library className="w-4 h-4 opacity-60" /> Add to My List
         </button>
 
-        <div className="my-1 border-t" style={{ borderColor: "rgba(203,177,131,0.15)" }} />
-        <button type="button" onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "#DACAAA" }}>
+        <div className="my-1 border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
+        <button type="button" onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>
           <Copy className="w-4 h-4 opacity-60" /> Copy Link
         </button>
         <button
           onClick={() => { downloadMutation.mutate({ songId: song.id }); }}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
-          style={{ color: "#DACAAA" }}
+          style={{ color: "var(--ln-parchment)" }}
         >
           <Download className="w-4 h-4 opacity-60" /> Download
         </button>
         {song.witnessId && (
           <Link href={`/verify/${song.witnessId}`} onClick={onClose}>
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "#CBB183" }}>
+            <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "var(--ln-gold)" }}>
               <Shield className="w-4 h-4" /> View Witness ID
             </button>
           </Link>
         )}
         {isOwner && (
           <>
-            <div className="my-1 border-t" style={{ borderColor: "rgba(203,177,131,0.15)" }} />
+            <div className="my-1 border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
             <button
               onClick={() => { onDelete?.(song.id); onClose(); }}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-500/10 transition-colors text-left"
-              style={{ color: "#EF4444" }}
+              style={{ color: "var(--ln-ember)" }}
             >
               <Trash2 className="w-4 h-4" /> Delete Song
             </button>
@@ -163,7 +163,7 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
       className={`group museum-card parchment-grain cursor-pointer ${
         isPlaying ? "museum-card--active" : ""
       }`}
-      style={isPlaying ? undefined : { borderColor: "rgba(203,177,131,0.22)", boxShadow: "0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px rgba(203,177,131,0.18)" }}
+      style={isPlaying ? undefined : { borderColor: "rgba(196,154,40,0.2)", boxShadow: "0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px rgba(196,154,40,0.15)" }}
     >
       <Link href={`/song/${song.id}`}>
         <div className="prov-card-img-wrap">
@@ -180,22 +180,22 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
             <button
               onClick={(e) => { e.preventDefault(); onPlay(); }}
               className="w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100"
-              style={{ background: "#CBB183" }}
+              style={{ background: "var(--ln-gold)" }}
             >
               {isPlaying
-                ? <Pause className="w-5 h-5" style={{ color: "#E6CDAE" }} />
-                : <Play className="w-5 h-5 ml-0.5" style={{ color: "#E6CDAE" }} />}
+                ? <Pause className="w-5 h-5" style={{ color: "var(--ln-parchment)" }} />
+                : <Play className="w-5 h-5 ml-0.5" style={{ color: "var(--ln-parchment)" }} />}
             </button>
           </div>
           {song.durationSeconds && (
-            <div className="absolute bottom-2 left-2 text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(0,0,0,0.7)", color: "#DACAAA" }}>
+            <div className="absolute bottom-2 left-2 text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(0,0,0,0.7)", color: "var(--ln-parchment)" }}>
               {Math.floor(song.durationSeconds / 60)}:{String(Math.round(song.durationSeconds % 60)).padStart(2, "0")}
             </div>
           )}
           {song.witnessId && (
             <Link href={`/verify/${song.witnessId}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}
               className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100"
-              style={{ background: "rgba(0,0,0,0.72)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.55)" }}
+              style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
             >
               <Shield size={8} /><span>WID</span>
             </Link>
@@ -207,8 +207,8 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
           )}
         </div>
         <div className="p-3">
-          <p className="text-[13px] font-heading text-white/90 truncate mb-0.5 tracking-wide hover:text-[#CBB183] transition-colors" style={{ fontFamily: "'Cinzel', serif" }}>{song.title}</p>
-          {song.genre && <p className="text-[10px] truncate" style={{ color: "#AA8E64" }}>{song.genre}</p>}
+          <p className="text-[13px] font-heading text-white/90 truncate mb-0.5 tracking-wide hover:text-[#C49A28] transition-colors" style={{ fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+          {song.genre && <p className="text-[10px] truncate" style={{ color: "var(--ln-smoke)" }}>{song.genre}</p>}
         </div>
       </Link>
     </div>
@@ -248,7 +248,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
               {[1, 2, 3].map(i => (
                 <div key={i} className="w-0.5 rounded-full" style={{
                   height: `${8 + i * 3}px`,
-                  background: "#CBB183",
+                  background: "var(--ln-gold)",
                   animationName: "pulse",
                   animationDuration: "2s",
                   animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
@@ -260,7 +260,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           ) : (
             <>
               <span className="text-xs group-hover:hidden" style={{ color: "#E2E8F0" }}>{index + 1}</span>
-              <Play className="w-3.5 h-3.5 hidden group-hover:block" style={{ color: "#CBB183" }} />
+              <Play className="w-3.5 h-3.5 hidden group-hover:block" style={{ color: "var(--ln-gold)" }} />
             </>
           )}
         </div>
@@ -276,15 +276,15 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate" style={{ color: isPlaying ? "#CBB183" : "#E6CDAE", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+          <p className="text-sm font-medium truncate" style={{ color: isPlaying ? "var(--ln-gold)" : "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            {song.genre && <span className="text-xs" style={{ color: "#AA8E64" }}>{song.genre}</span>}
+            {song.genre && <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{song.genre}</span>}
             {song.witnessId && (
               <Link
                 href={`/verify/${song.witnessId}`}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
-                <Badge className="text-[9px] px-1 py-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "rgba(203,177,131,0.18)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.25)" }}>
+                <Badge className="text-[9px] px-1 py-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}>
                   <Shield className="w-2.5 h-2.5 mr-0.5" /> WID
                 </Badge>
               </Link>
@@ -305,7 +305,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
           onClick={openMenu}
           className="w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white/10"
         >
-          <MoreHorizontal className="w-4 h-4" style={{ color: "#AA8E64" }} />
+          <MoreHorizontal className="w-4 h-4" style={{ color: "var(--ln-smoke)" }} />
         </button>
       </div>
       {menuOpen && (
@@ -358,7 +358,7 @@ function BannerUploadCTA({ onFocalDetected }: { onFocalDetected?: (focal: { x: n
   return (
     <label
       className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
-      style={{ background: "linear-gradient(135deg, #2C3438, #2C3438)" }}
+      style={{ background: "linear-gradient(135deg, var(--ln-coal), #111009)" }}
     >
       <div
         className="absolute inset-0 opacity-[0.06] pointer-events-none"
@@ -627,20 +627,20 @@ export default function CreatorProfilePage() {
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
       <div className="space-y-2 text-center">
-        <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "rgba(203,177,131,0.28)" }} />
-        <p className="text-sm" style={{ color: "#AA8E64" }}>Loading profile...</p>
+        <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "rgba(196,154,40,0.25)" }} />
+        <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>Loading profile...</p>
       </div>
     </div>
   );
 
   if (!data) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
       <div className="text-center">
-        <p style={{ color: "#AA8E64" }}>Creator not found.</p>
+        <p style={{ color: "var(--ln-smoke)" }}>Creator not found.</p>
         <Link href="/">
-          <Button className="mt-4" style={{ background: "#CBB183", color: "#E6CDAE" }}>Go Home</Button>
+          <Button className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Go Home</Button>
         </Link>
       </div>
     </div>
@@ -673,7 +673,7 @@ export default function CreatorProfilePage() {
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="min-h-screen" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen" style={{ background: "var(--ln-coal)" }}>
       <Helmet>
         <title>{profileTitle}</title>
         <meta name="description" content={profileDesc} />
@@ -704,12 +704,12 @@ export default function CreatorProfilePage() {
           <div
             className="rounded-2xl p-5 text-center"
             style={{
-              background: "rgba(203,177,131,0.08)",
-              border: "1px solid rgba(203,177,131,0.35)",
+              background: "rgba(196,154,40,0.06)",
+              border: "1px solid rgba(196,154,40,0.3)",
             }}
           >
             <div className="text-2xl mb-2">🙏</div>
-            <p className="font-heading text-base mb-1" style={{ color: "#CBB183" }}>
+            <p className="font-heading text-base mb-1" style={{ color: "var(--ln-gold)" }}>
               Gift received — thank you!
             </p>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
@@ -719,7 +719,7 @@ export default function CreatorProfilePage() {
               type="button"
               onClick={() => setTipSuccess(false)}
               className="mt-3 text-xs opacity-50 hover:opacity-80 transition-opacity"
-              style={{ color: "#CBB183" }}
+              style={{ color: "var(--ln-gold)" }}
             >
               Dismiss ✕
             </button>
@@ -757,12 +757,12 @@ export default function CreatorProfilePage() {
         ) : (
           <div
             className="absolute inset-0 z-0"
-            style={{ background: "linear-gradient(135deg, #2C3438 0%, #2C3438 40%, #2C3438 100%)" }}
+            style={{ background: "linear-gradient(135deg, var(--ln-coal) 0%, #111009 40%, #111009 100%)" }}
           >
             <div
               className="w-full h-full opacity-10"
               style={{
-                backgroundImage: "linear-gradient(rgba(203,177,131,0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(203,177,131,0.28) 1px, transparent 1px)",
+                backgroundImage: "linear-gradient(rgba(196,154,40,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(196,154,40,0.25) 1px, transparent 1px)",
                 backgroundSize: "40px 40px",
               }}
             />
@@ -770,7 +770,7 @@ export default function CreatorProfilePage() {
         )}
 
         {/* ── z-10: Bottom fade gradient ── */}
-        <div className="absolute inset-x-0 bottom-0 h-24 z-10 bg-gradient-to-t from-[#2C3438] to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-24 z-10 bg-gradient-to-t from-[#111009] to-transparent pointer-events-none" />
 
         {/* ── z-10: Gold corner accents ── */}
         <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none z-10" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
@@ -807,16 +807,16 @@ export default function CreatorProfilePage() {
           <div
             className="w-full h-full rounded-2xl overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, #2C3438, #2C3438)",
+              background: "linear-gradient(135deg, var(--ln-coal), #111009)",
               /* Ring: dark bg outline so avatar pops off the banner */
-              outline: "4px solid #2C3438",
+              outline: "4px solid #111009",
               boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.25)",
             }}
           >
             {creator.profilePhotoUrl
               ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
                   style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
-              : <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: "#CBB183" }}>
+              : <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: "var(--ln-gold)" }}>
                   {(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}
                 </div>}
           </div>
@@ -843,8 +843,8 @@ export default function CreatorProfilePage() {
       <div
         className="w-full"
         style={{
-          background: "#2C3438",
-          borderBottom: "1px solid #2C3438",
+          background: "var(--ln-coal)",
+          borderBottom: "1px solid #111009",
         }}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -868,7 +868,7 @@ export default function CreatorProfilePage() {
                 {/* Name — wraps gracefully on narrow screens */}
                 <h1
                   className="text-2xl sm:text-4xl font-bold leading-tight select-text break-words"
-                  style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
+                  style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
                 >
                   {creator.name || creator.artistHandle}
                 </h1>
@@ -879,7 +879,7 @@ export default function CreatorProfilePage() {
                       <span
                         title="Founding Creator"
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
-                        style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}
+                        style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
                       >
                         <Crown className="w-3 h-3" />
                         FOUNDER
@@ -888,7 +888,7 @@ export default function CreatorProfilePage() {
                     {creator.licenseStatus === "licensed" && (
                       <span
                         className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
-                        style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}
+                        style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}
                       >
                         LICENSED
                       </span>
@@ -899,8 +899,8 @@ export default function CreatorProfilePage() {
                 {/* @handle sub-header — clickable hyperlink like Twitter, copies profile URL */}
                 {creator.artistHandle && (
                   <button
-                    className="mt-0.5 text-sm font-mono transition-colors hover:text-[#CBB183] focus:outline-none"
-                    style={{ color: "#3F4A50", letterSpacing: "0.01em" }}
+                    className="mt-0.5 text-sm font-mono transition-colors hover:text-[#C49A28] focus:outline-none"
+                    style={{ color: "var(--ln-iron)", letterSpacing: "0.01em" }}
                     title="Copy profile link"
                     onClick={() => {
                       const url = `${window.location.origin}/creator/${creator.id}`;
@@ -917,7 +917,7 @@ export default function CreatorProfilePage() {
                 {creator.bio && (
                   <p
                     className="text-sm mt-2 line-clamp-3 leading-relaxed"
-                    style={{ color: "#AA8E64", border: "none", outline: "none" }}
+                    style={{ color: "var(--ln-smoke)", border: "none", outline: "none" }}
                   >
                     {creator.bio}
                   </p>
@@ -929,7 +929,7 @@ export default function CreatorProfilePage() {
                     {creator.website && (
                       <a href={creator.website} target="_blank" rel="noreferrer"
                         className="opacity-40 hover:opacity-80 transition-opacity"
-                        style={{ color: "#DACAAA" }}
+                        style={{ color: "var(--ln-parchment)" }}
                         title={creator.website}
                       >
                         <Globe className="w-4 h-4" />
@@ -938,7 +938,7 @@ export default function CreatorProfilePage() {
                     {creator.twitterHandle && (
                       <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer"
                         className="opacity-40 hover:opacity-80 transition-opacity"
-                        style={{ color: "#DACAAA" }}
+                        style={{ color: "var(--ln-parchment)" }}
                       >
                         <Twitter className="w-4 h-4" />
                       </a>
@@ -946,7 +946,7 @@ export default function CreatorProfilePage() {
                     {creator.instagramHandle && (
                       <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer"
                         className="opacity-40 hover:opacity-80 transition-opacity"
-                        style={{ color: "#DACAAA" }}
+                        style={{ color: "var(--ln-parchment)" }}
                       >
                         <Instagram className="w-4 h-4" />
                       </a>
@@ -954,7 +954,7 @@ export default function CreatorProfilePage() {
                     {creator.youtubeHandle && (
                       <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer"
                         className="opacity-40 hover:opacity-80 transition-opacity"
-                        style={{ color: "#DACAAA" }}
+                        style={{ color: "var(--ln-parchment)" }}
                       >
                         <Youtube className="w-4 h-4" />
                       </a>
@@ -1015,18 +1015,18 @@ export default function CreatorProfilePage() {
                       WITNESSED &middot; {witnessedWorksCount}
                     </span>
                   )}
-                  <span className="text-sm" style={{ color: "#AA8E64" }}>
-                    <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>
+                  <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
+                    <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>
                     {" "}tracks
                   </span>
                   {witnessCount > 0 && (
                     <button
-                      className="text-sm transition-colors hover:text-[#CBB183] focus:outline-none"
-                      style={{ color: "#AA8E64" }}
+                      className="text-sm transition-colors hover:text-[#C49A28] focus:outline-none"
+                      style={{ color: "var(--ln-smoke)" }}
                       onClick={() => { setWitnessNetworkTab("witnesses"); setWitnessNetworkOpen(true); }}
                       title="View witnesses"
                     >
-                      <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>
+                      <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>
                       {" "}witnesses
                     </button>
                   )}
@@ -1060,7 +1060,7 @@ export default function CreatorProfilePage() {
                       <Link href="/profile">
                         <button
                           className="px-4 py-2 rounded-lg text-xs transition-colors"
-                          style={{ border: "1px solid rgba(203,177,131,0.20)", color: "#AA8E64", background: "transparent" }}
+                          style={{ border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-smoke)", background: "transparent" }}
                         >
                           Edit Profile
                         </button>
@@ -1070,7 +1070,7 @@ export default function CreatorProfilePage() {
                           onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
                           disabled={connectMutation.isPending}
                           className="px-4 py-2 rounded-lg text-xs transition-colors"
-                          style={{ border: "1px solid rgba(74,222,128,0.28)", color: "#4ADE80", background: "rgba(74,222,128,0.08)" }}
+                          style={{ border: "1px solid rgba(74,222,128,0.28)", color: "var(--ln-seal-bright)", background: "rgba(74,222,128,0.08)" }}
                         >
                           <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
                         </button>
@@ -1080,7 +1080,7 @@ export default function CreatorProfilePage() {
                     <button
                       onClick={() => setTipOpen(true)}
                       className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                      style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "#E6CDAE" }}
+                      style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "var(--ln-parchment)" }}
                     >
                       <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
                     </button>
@@ -1091,8 +1091,8 @@ export default function CreatorProfilePage() {
                       disabled={witnessToggle.isPending}
                       className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
                       style={isWitnessingCreator
-                        ? { background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)", color: "#CBB183" }
-                        : { border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }
+                        ? { background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-gold)" }
+                        : { border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-smoke)", background: "transparent" }
                       }
                       title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
                     >
@@ -1112,7 +1112,7 @@ export default function CreatorProfilePage() {
                     trigger={
                       <button
                         className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                        style={{ border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }}
+                        style={{ border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-smoke)", background: "transparent" }}
                         title="Share identity card"
                       >
                         <Share2 className="w-4 h-4" />
@@ -1130,7 +1130,7 @@ export default function CreatorProfilePage() {
               {/* Name — wraps gracefully on narrow screens */}
               <h1
                 className="text-2xl font-bold leading-tight select-text break-words"
-                style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}
+                style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
               >
                 {creator.name || creator.artistHandle}
               </h1>
@@ -1141,7 +1141,7 @@ export default function CreatorProfilePage() {
                     <span
                       title="Founding Creator"
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
-                      style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}
+                      style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
                     >
                       <Crown className="w-3 h-3" />
                       FOUNDER
@@ -1150,7 +1150,7 @@ export default function CreatorProfilePage() {
                   {creator.licenseStatus === "licensed" && (
                     <span
                       className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
-                      style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.22)" }}
+                      style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}
                     >
                       LICENSED
                     </span>
@@ -1161,8 +1161,8 @@ export default function CreatorProfilePage() {
               {/* @handle sub-header — clickable hyperlink like Twitter, copies profile URL */}
               {creator.artistHandle && (
                 <button
-                  className="-mt-1 text-sm font-mono transition-colors hover:text-[#CBB183] focus:outline-none text-left"
-                  style={{ color: "#3F4A50", letterSpacing: "0.01em" }}
+                  className="-mt-1 text-sm font-mono transition-colors hover:text-[#C49A28] focus:outline-none text-left"
+                  style={{ color: "var(--ln-iron)", letterSpacing: "0.01em" }}
                   title="Copy profile link"
                   onClick={() => {
                     const url = `${window.location.origin}/creator/${creator.id}`;
@@ -1191,22 +1191,22 @@ export default function CreatorProfilePage() {
                     WITNESSED &middot; {witnessedWorksCount}
                   </span>
                 )}
-                <span className="text-sm" style={{ color: "#AA8E64" }}>
-                  <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}tracks
+                <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
+                  <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}tracks
                 </span>
                 {totalPlays > 0 && (
-                  <span className="text-sm" style={{ color: "#AA8E64" }}>
-                    <span style={{ color: "#CBB183", fontVariantNumeric: "tabular-nums" }}>{totalPlays.toLocaleString()}</span>{" "}plays
+                  <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
+                    <span style={{ color: "var(--ln-gold)", fontVariantNumeric: "tabular-nums" }}>{totalPlays.toLocaleString()}</span>{" "}plays
                   </span>
                 )}
                 {witnessCount > 0 && (
                   <button
-                    className="text-sm transition-colors hover:text-[#CBB183] focus:outline-none"
-                    style={{ color: "#AA8E64" }}
+                    className="text-sm transition-colors hover:text-[#C49A28] focus:outline-none"
+                    style={{ color: "var(--ln-smoke)" }}
                     onClick={() => { setWitnessNetworkTab("witnesses"); setWitnessNetworkOpen(true); }}
                     title="View witnesses"
                   >
-                    <span style={{ color: "#DACAAA", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
+                    <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
                   </button>
                 )}
                 {/* Bug-kill tracker — admin + honored contributors */}
@@ -1223,7 +1223,7 @@ export default function CreatorProfilePage() {
               </div>
               {/* Bio */}
               {creator.bio && (
-                <p className="text-sm leading-relaxed" style={{ color: "#AA8E64" }}>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
                   {creator.bio}
                 </p>
               )}
@@ -1232,22 +1232,22 @@ export default function CreatorProfilePage() {
               {(creator.website || creator.twitterHandle || creator.instagramHandle || creator.youtubeHandle) && (
                 <div className="flex items-center gap-3">
                   {creator.website && (
-                    <a href={creator.website} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "#DACAAA" }}>
+                    <a href={creator.website} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "var(--ln-parchment)" }}>
                       <Globe className="w-4 h-4" />
                     </a>
                   )}
                   {creator.twitterHandle && (
-                    <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "#DACAAA" }}>
+                    <a href={`https://twitter.com/${creator.twitterHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "var(--ln-parchment)" }}>
                       <Twitter className="w-4 h-4" />
                     </a>
                   )}
                   {creator.instagramHandle && (
-                    <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "#DACAAA" }}>
+                    <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "var(--ln-parchment)" }}>
                       <Instagram className="w-4 h-4" />
                     </a>
                   )}
                   {creator.youtubeHandle && (
-                    <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "#DACAAA" }}>
+                    <a href={`https://youtube.com/@${creator.youtubeHandle}`} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-80 transition-opacity" style={{ color: "var(--ln-parchment)" }}>
                       <Youtube className="w-4 h-4" />
                     </a>
                   )}
@@ -1271,7 +1271,7 @@ export default function CreatorProfilePage() {
                     <Link href="/profile">
                       <button
                         className="px-4 py-2 rounded-lg text-xs transition-colors"
-                        style={{ border: "1px solid rgba(203,177,131,0.20)", color: "#AA8E64", background: "transparent" }}
+                        style={{ border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-smoke)", background: "transparent" }}
                       >
                         Edit Profile
                       </button>
@@ -1281,7 +1281,7 @@ export default function CreatorProfilePage() {
                         onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
                         disabled={connectMutation.isPending}
                         className="px-4 py-2 rounded-lg text-xs transition-colors"
-                        style={{ border: "1px solid rgba(74,222,128,0.28)", color: "#4ADE80", background: "rgba(74,222,128,0.08)" }}
+                        style={{ border: "1px solid rgba(74,222,128,0.28)", color: "var(--ln-seal-bright)", background: "rgba(74,222,128,0.08)" }}
                       >
                         <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
                       </button>
@@ -1291,7 +1291,7 @@ export default function CreatorProfilePage() {
                   <button
                     onClick={() => setTipOpen(true)}
                     className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                    style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "#E6CDAE" }}
+                    style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "var(--ln-parchment)" }}
                   >
                     <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
                   </button>
@@ -1302,8 +1302,8 @@ export default function CreatorProfilePage() {
                     disabled={witnessToggle.isPending}
                     className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
                     style={isWitnessingCreator
-                      ? { background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.28)", color: "#CBB183" }
-                      : { border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }
+                      ? { background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-gold)" }
+                      : { border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-smoke)", background: "transparent" }
                     }
                     title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
                   >
@@ -1313,7 +1313,7 @@ export default function CreatorProfilePage() {
                 <button
                   onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Profile link copied!"); }}
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                  style={{ border: "1px solid rgba(203,177,131,0.15)", color: "#AA8E64", background: "transparent" }}
+                  style={{ border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-smoke)", background: "transparent" }}
                   title="Copy profile link"
                 >
                   <Share2 className="w-4 h-4" />
@@ -1330,12 +1330,12 @@ export default function CreatorProfilePage() {
         {(creatorProjects as any[]).length > 0 && (
           <section className="py-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Projects
               </h2>
               {isOwner && (
                 <Link href="/my-projects">
-                  <button type="button" className="text-xs px-3 py-1 rounded-lg transition-colors" style={{ color: "#CBB183", border: "1px solid #7A5A1E" }}>
+                  <button type="button" className="text-xs px-3 py-1 rounded-lg transition-colors" style={{ color: "var(--ln-gold)", border: "1px solid #7A5A1E" }}>
                     Manage Projects
                   </button>
                 </Link>
@@ -1353,42 +1353,42 @@ export default function CreatorProfilePage() {
                       {project.bannerUrl ? (
                         <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover object-center" />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1025] to-[#2C3438] flex items-center justify-center">
-                          <span className="text-4xl font-bold" style={{ color: "rgba(203,177,131,0.18)" }}>{project.title[0]}</span>
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1025] to-[#111009] flex items-center justify-center">
+                          <span className="text-4xl font-bold" style={{ color: "rgba(196,154,40,0.15)" }}>{project.title[0]}</span>
                         </div>
                       )}
                       <div className="prov-card-gradient" />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200" />
                       <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
-                        <p className="text-xs font-semibold truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>{project.title}</p>
+                        <p className="text-xs font-semibold truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{project.title}</p>
                         <div className="flex items-center justify-between mt-1">
-                          <span className="text-[10px]" style={{ color: "#AA8E64" }}>
+                          <span className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>
                             ${((project.raisedAmountCents || 0) / 100).toLocaleString()} raised
                           </span>
                           <span
                             className="text-[9px] px-1.5 py-0.5 rounded font-medium"
                             style={{
                               background: project.status === "active" ? "rgba(34,197,94,0.8)" : "rgba(44,52,56,0.8)",
-                              color: project.status === "active" ? "#4ADE80" : "#AA8E64",
+                              color: project.status === "active" ? "var(--ln-seal-bright)" : "var(--ln-smoke)",
                             }}
                           >
                             {project.status === "active" ? "Funding" : project.status === "completed" ? "Done" : "Draft"}
                           </span>
                         </div>
                         {project.goalAmountCents && project.raisedAmountCents > 0 && (
-                          <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: "#2C3438" }}>
+                          <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: "var(--ln-coal)" }}>
                             <div
                               className="h-full rounded-full"
                               style={{
                                 width: `${Math.min(100, Math.round((project.raisedAmountCents / project.goalAmountCents) * 100))}%`,
-                                background: "#CBB183",
+                                background: "var(--ln-gold)",
                               }}
                             />
                           </div>
                         )}
                       </div>
                       {project.linkedWitnessId && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(203,177,131,0.9)" }}>
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(196,154,40,0.8)" }}>
                           <Shield className="w-3 h-3 text-white" />
                         </div>
                       )}
@@ -1401,12 +1401,12 @@ export default function CreatorProfilePage() {
         )}
         {isOwner && (creatorProjects as any[]).length === 0 && (
           <section className="py-6">
-            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Projects</h2>
+            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Projects</h2>
             <div className="text-center py-10 rounded-xl" style={{ border: "1px dashed #C3AB7D" }}>
-              <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "#CBB183" }} />
-              <p className="text-sm mb-3" style={{ color: "#AA8E64" }}>No projects yet.</p>
+              <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
+              <p className="text-sm mb-3" style={{ color: "var(--ln-smoke)" }}>No projects yet.</p>
               <Link href="/my-projects">
-                <Button style={{ background: "#CBB183", color: "#E6CDAE" }}>Start a Project</Button>
+                <Button style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Start a Project</Button>
               </Link>
             </div>
           </section>
@@ -1418,7 +1418,7 @@ export default function CreatorProfilePage() {
           if (!bookWorks.length) return null;
           return (
             <section className="py-6">
-              <h2 className="text-base font-bold mb-5" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              <h2 className="text-base font-bold mb-5" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Works
               </h2>
               <div className="flex flex-wrap gap-6">
@@ -1457,11 +1457,11 @@ export default function CreatorProfilePage() {
         {featuredSongs.length > 0 && (
           <section className="py-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Featured Songs
               </h2>
               {songs.length > 8 && (
-                <button type="button" className="flex items-center gap-1 text-xs hover:opacity-80 transition-opacity" style={{ color: "#CBB183" }}>
+                <button type="button" className="flex items-center gap-1 text-xs hover:opacity-80 transition-opacity" style={{ color: "var(--ln-gold)" }}>
                   See All <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -1499,7 +1499,7 @@ export default function CreatorProfilePage() {
           if (!albumEntries.length) return null;
           return (
             <section className="py-4">
-              <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Albums</h2>
+              <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Albums</h2>
               <div className="space-y-5">
                 {albumEntries.map(([albumName, albumSongs]) => {
                   // Prefer the collection's own cover art; fall back to first track's cover
@@ -1508,18 +1508,18 @@ export default function CreatorProfilePage() {
                   const albumCoverX = collection?.coverPositionX ?? albumSongs[0]?.coverPositionX ?? 50;
                   const albumCoverY = collection?.coverPositionY ?? albumSongs[0]?.coverPositionY ?? 50;
                   return (
-                  <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
-                    <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid #2C3438" }}>
+                  <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
+                    <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid #111009" }}>
                       {albumCoverUrl ? (
                         <img src={albumCoverUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" style={{ objectPosition: `${albumCoverX}% ${albumCoverY}%` }} />
                       ) : (
-                        <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(203,177,131,0.12)" }}>
-                          <Music className="w-6 h-6" style={{ color: "#CBB183" }} />
+                        <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(196,154,40,0.08)" }}>
+                          <Music className="w-6 h-6" style={{ color: "var(--ln-gold)" }} />
                         </div>
                       )}
                       <div>
-                        <p className="font-bold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>{albumName}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "#AA8E64" }}>{albumSongs.length} track{albumSongs.length !== 1 ? "s" : ""}</p>
+                        <p className="font-bold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>{albumName}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>{albumSongs.length} track{albumSongs.length !== 1 ? "s" : ""}</p>
                       </div>
                     </div>
                     <div className="space-y-0.5 p-2">
@@ -1573,7 +1573,7 @@ export default function CreatorProfilePage() {
         {/* ── Registered Collections ── */}
         {creatorCollections && creatorCollections.length > 0 && (
           <section className="py-4">
-            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>
+            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
               <Library className="inline w-4 h-4 mr-2 mb-0.5" />
               Registered Collections
             </h2>
@@ -1583,27 +1583,27 @@ export default function CreatorProfilePage() {
                   key={col.id}
                   href={`/verify/${col.collectionWid}`}
                   className="flex items-center gap-4 p-3 rounded-xl transition-colors hover:bg-white/5"
-                  style={{ border: "1px solid rgba(203,177,131,0.18)", background: "#2C3438" }}
+                  style={{ border: "1px solid rgba(196,154,40,0.15)", background: "var(--ln-coal)" }}
                 >
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: "rgba(203,177,131,0.10)" }}
+                    style={{ background: "rgba(196,154,40,0.08)" }}
                   >
-                    <Library className="w-5 h-5" style={{ color: "#CBB183" }} />
+                    <Library className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                    <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                       {col.name}
                     </p>
-                    <p className="text-xs font-mono truncate mt-0.5" style={{ color: "#CBB183" }}>
+                    <p className="text-xs font-mono truncate mt-0.5" style={{ color: "var(--ln-gold)" }}>
                       {col.collectionWid}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs" style={{ color: "#3F4A50" }}>
+                    <p className="text-xs" style={{ color: "var(--ln-iron)" }}>
                       {col.trackCount ?? "?"} tracks
                     </p>
-                    <ExternalLink className="w-3.5 h-3.5 mt-1 ml-auto" style={{ color: "rgba(203,177,131,0.45)" }} />
+                    <ExternalLink className="w-3.5 h-3.5 mt-1 ml-auto" style={{ color: "rgba(196,154,40,0.4)" }} />
                   </div>
                 </a>
               ))}
@@ -1613,7 +1613,7 @@ export default function CreatorProfilePage() {
         {/* ── Full Song List (all songs in compact row format) ── */}
         {songs.length > 0 && (
           <section className="py-4 pb-32">
-            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               All Songs
             </h2>
             <div className="space-y-0.5">
@@ -1634,11 +1634,11 @@ export default function CreatorProfilePage() {
 
         {songs.length === 0 && (
           <div className="text-center py-24">
-            <Music className="w-16 h-16 mx-auto mb-4 opacity-10" style={{ color: "#CBB183" }} />
-            <p className="text-sm" style={{ color: "#AA8E64" }}>No public songs yet.</p>
+            <Music className="w-16 h-16 mx-auto mb-4 opacity-10" style={{ color: "var(--ln-gold)" }} />
+            <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>No public songs yet.</p>
             {isOwner && (
               <Link href="/upload">
-                <Button className="mt-4" style={{ background: "#CBB183", color: "#E6CDAE" }}>
+                <Button className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
                   Upload Your First Track
                 </Button>
               </Link>
@@ -1649,34 +1649,34 @@ export default function CreatorProfilePage() {
         {/* ── Witness Testimonies ── */}
         {(creatorTestimonies as any[]).length > 0 && (
           <section className="py-6 pb-12">
-            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               Testimonies
             </h2>
             <div className="space-y-3">
               {(creatorTestimonies as any[]).map((t: any) => (
-                <div key={t.id} className="p-4 rounded-xl" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+                <div key={t.id} className="p-4 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
                   <div className="flex items-center justify-between mb-2">
                     <span
                       className="font-mono text-[10px] px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
-                      style={{ background: "#2C3438", color: "#CBB183", border: "1px solid #7A5A1E" }}
+                      style={{ background: "var(--ln-coal)", color: "var(--ln-gold)", border: "1px solid #7A5A1E" }}
                       onClick={() => { navigator.clipboard.writeText(t.wid); toast.success("WID-TST copied!"); }}
                       title="Click to copy WID"
                     >
                       {t.wid}
                     </span>
-                    <span className="text-[10px]" style={{ color: "#AA8E64" }}>{new Date(t.createdAt).toLocaleDateString()}</span>
+                    <span className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>{new Date(t.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#DACAAA" }}>{t.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--ln-parchment)" }}>{t.content}</p>
                   {t.linkedWorks && (t.linkedWorks as string[]).length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {(t.linkedWorks as string[]).map((wid: string) => (
-                        <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }}>{wid}</span>
+                        <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }}>{wid}</span>
                       ))}
                     </div>
                   )}
                   <div className="mt-2 flex items-center gap-1">
-                    <Shield className="w-3 h-3" style={{ color: "#3F4A50" }} />
-                    <span className="text-[9px]" style={{ color: "#3F4A50" }}>Immutable — sealed at creation</span>
+                    <Shield className="w-3 h-3" style={{ color: "var(--ln-iron)" }} />
+                    <span className="text-[9px]" style={{ color: "var(--ln-iron)" }}>Immutable — sealed at creation</span>
                   </div>
                 </div>
               ))}
@@ -1687,14 +1687,14 @@ export default function CreatorProfilePage() {
 
       {/* ── Tip Modal ── */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
-        <DialogContent style={{ background: "#2C3438", border: "1px solid #C3AB7D" }}>
+        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               Gift {creator.artistHandle || creator.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm" style={{ color: "#AA8E64" }}>
+            <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>
               90% goes directly to the artist. 10% supports the Living Nexus platform.
             </p>
             <div className="grid grid-cols-4 gap-2">
@@ -1704,8 +1704,8 @@ export default function CreatorProfilePage() {
                   onClick={() => setTipAmount(amt)}
                   className="py-2 rounded-lg text-sm font-medium transition-all"
                   style={{
-                    background: tipAmount === amt ? "#CBB183" : "#2C3438",
-                    color: tipAmount === amt ? "#E6CDAE" : "#DACAAA",
+                    background: tipAmount === amt ? "var(--ln-gold)" : "var(--ln-coal)",
+                    color: tipAmount === amt ? "var(--ln-parchment)" : "var(--ln-parchment)",
                     border: "1px solid #C3AB7D",
                   }}
                 >
@@ -1720,13 +1720,13 @@ export default function CreatorProfilePage() {
               onChange={e => setTipAmount(e.target.value)}
               min="1"
               step="0.01"
-              style={{ background: "#2C3438", border: "1px solid #C3AB7D", color: "#E6CDAE" }}
+              style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", color: "var(--ln-parchment)" }}
             />
             <Button
               className="w-full"
               onClick={handleTip}
               disabled={tipMutation.isPending}
-              style={{ background: "#CBB183", color: "#E6CDAE" }}
+              style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
             >
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Gift`}
             </Button>
@@ -1738,23 +1738,23 @@ export default function CreatorProfilePage() {
       <Dialog open={witnessNetworkOpen} onOpenChange={setWitnessNetworkOpen}>
         <DialogContent
           className="max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col"
-          style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.25)" }}
+          style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.2)" }}
         >
           <DialogHeader className="flex-shrink-0">
-            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               {creator.artistHandle || creator.name} — Witness Network
             </DialogTitle>
           </DialogHeader>
           {/* Tabs */}
-          <div className="flex flex-shrink-0 border-b" style={{ borderColor: "rgba(203,177,131,0.15)" }}>
+          <div className="flex flex-shrink-0 border-b" style={{ borderColor: "rgba(196,154,40,0.12)" }}>
             {(["witnesses", "witnessing"] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setWitnessNetworkTab(tab)}
                 className="flex-1 py-2.5 text-xs font-semibold tracking-widest uppercase transition-colors"
                 style={witnessNetworkTab === tab
-                  ? { color: "#CBB183", borderBottom: "2px solid #CBB183" }
-                  : { color: "#3F4A50", borderBottom: "2px solid transparent" }
+                  ? { color: "var(--ln-gold)", borderBottom: "2px solid #C49A28" }
+                  : { color: "var(--ln-iron)", borderBottom: "2px solid transparent" }
                 }
               >
                 {tab === "witnesses"
@@ -1768,7 +1768,7 @@ export default function CreatorProfilePage() {
           <div className="flex-1 overflow-y-auto py-2">
             {!witnessNetwork ? (
               <div className="flex items-center justify-center py-8">
-                <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: "#CBB183", borderTopColor: "transparent" }} />
+                <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: "var(--ln-gold)", borderTopColor: "transparent" }} />
               </div>
             ) : (
               (() => {
@@ -1776,8 +1776,8 @@ export default function CreatorProfilePage() {
                 if (!list || list.length === 0) {
                   return (
                     <div className="text-center py-8">
-                      <Eye className="w-8 h-8 mx-auto mb-2" style={{ color: "#2C3438" }} />
-                      <p className="text-sm" style={{ color: "#3F4A50" }}>
+                      <Eye className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--ln-coal)" }} />
+                      <p className="text-sm" style={{ color: "var(--ln-iron)" }}>
                         {witnessNetworkTab === "witnesses" ? "No witnesses yet" : "Not witnessing anyone yet"}
                       </p>
                     </div>
@@ -1788,28 +1788,28 @@ export default function CreatorProfilePage() {
                     key={person.id}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all"
                     style={{ borderBottom: "1px solid rgba(44,52,56,0.4)" }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(203,177,131,0.06)"}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.04)"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
                     onClick={() => { setWitnessNetworkOpen(false); navigate(`/creator/${person.id}`); }}
                   >
                     <div
                       className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
-                      style={{ background: "rgba(203,177,131,0.12)", border: "1px solid rgba(203,177,131,0.2)" }}
+                      style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.17)" }}
                     >
                       {person.profilePhotoUrl
                         ? <img src={person.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
-                        : <span className="text-xs font-bold" style={{ color: "#CBB183" }}>{(person.artistHandle || person.name || "?")[0].toUpperCase()}</span>
+                        : <span className="text-xs font-bold" style={{ color: "var(--ln-gold)" }}>{(person.artistHandle || person.name || "?")[0].toUpperCase()}</span>
                       }
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                      <div className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                         {person.artistHandle || person.name}
                       </div>
                       {person.artistHandle && person.name && person.artistHandle !== person.name && (
-                        <div className="text-xs truncate" style={{ color: "#3F4A50" }}>{person.name}</div>
+                        <div className="text-xs truncate" style={{ color: "var(--ln-iron)" }}>{person.name}</div>
                       )}
                     </div>
-                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "#3F4A50" }} />
+                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ln-iron)" }} />
                   </button>
                 ));
               })()
@@ -1822,7 +1822,7 @@ export default function CreatorProfilePage() {
       <Dialog open={showPromptStudio} onOpenChange={(open) => { setShowPromptStudio(open); if (!open) { setPsTab("identity_regen"); setPsResult(null); } }}>
         <DialogContent
           className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-          style={{ background: "#2C3438", border: "1px solid rgba(139,92,246,0.25)" }}
+          style={{ background: "var(--ln-coal)", border: "1px solid rgba(139,92,246,0.25)" }}
         >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2" style={{ fontFamily: "'Cinzel', serif", color: "#a78bfa" }}>
@@ -1923,7 +1923,7 @@ export default function CreatorProfilePage() {
               if (!display?.expressionPrompt) return null;
               return (
                 <div className="space-y-3 pt-2" style={{ borderTop: "1px solid rgba(139,92,246,0.15)" }}>
-                  <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+                  <div className="p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>EXPRESSION PROMPT</span>
                       <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
@@ -1931,7 +1931,7 @@ export default function CreatorProfilePage() {
                     <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{display.expressionPrompt}</p>
                   </div>
                   {display.expressionStyleTags && (
-                    <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div className="p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
                         <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
@@ -1940,7 +1940,7 @@ export default function CreatorProfilePage() {
                     </div>
                   )}
                   {display.expressionComposerNote && (
-                    <div className="rounded-lg p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
+                    <div className="p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
                       <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(245,196,81,0.45)" }}>COMPOSER'S NOTE</span>
                       <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{display.expressionComposerNote}</p>
                     </div>
@@ -1983,7 +1983,7 @@ export default function CreatorProfilePage() {
                 </button>
               </div>
               {psInputBlocks.map((block, idx) => (
-                <div key={idx} className="rounded-lg p-3 space-y-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div key={idx} className="p-3 space-y-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <div className="flex items-center gap-2">
                     <input value={block.label}
                       onChange={(e) => setPsInputBlocks(prev => prev.map((b, i) => i === idx ? { ...b, label: e.target.value } : b))}
@@ -2035,7 +2035,7 @@ export default function CreatorProfilePage() {
                       <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionId || ""); toast.success("EID copied!"); }} className="ml-auto flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
                     </div>
                   )}
-                  <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+                  <div className="p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>GENERATED PROMPT</span>
                       <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionPrompt || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
@@ -2043,7 +2043,7 @@ export default function CreatorProfilePage() {
                     <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.9)" }}>{display.expressionPrompt}</p>
                   </div>
                   {display.expressionStyleTags && (
-                    <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div className="p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
                         <button type="button" onClick={() => { navigator.clipboard.writeText(display.expressionStyleTags || ""); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
@@ -2052,7 +2052,7 @@ export default function CreatorProfilePage() {
                     </div>
                   )}
                   {display.expressionComposerNote && (
-                    <div className="rounded-lg p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
+                    <div className="p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
                       <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(245,196,81,0.45)" }}>COMPOSER'S NOTE</span>
                       <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{display.expressionComposerNote}</p>
                     </div>
@@ -2130,7 +2130,7 @@ export default function CreatorProfilePage() {
             {isOwner && (
             <div className="space-y-2">
               <label className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.55)" }}>PASTE ORIGINAL PROMPT</label>
-              <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <textarea
                   value={psAnchorRaw}
                   onChange={(e) => setPsAnchorRaw(e.target.value)}
@@ -2202,7 +2202,7 @@ export default function CreatorProfilePage() {
               </div>
 
               {/* Anchored prompt */}
-              <div className="rounded-lg p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+              <div className="p-3" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(167,139,250,0.6)" }}>ANCHORED PROMPT</span>
                   <button type="button" onClick={() => { navigator.clipboard.writeText(psAnchorResult!.anchoredPrompt); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(167,139,250,0.6)", background: "rgba(139,92,246,0.1)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
@@ -2212,7 +2212,7 @@ export default function CreatorProfilePage() {
 
               {/* Style tags */}
               {psAnchorResult.styleTags && (
-              <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] font-mono tracking-widest" style={{ color: "rgba(156,163,175,0.5)" }}>STYLE TAGS</span>
                   <button type="button" onClick={() => { navigator.clipboard.writeText(psAnchorResult!.styleTags); toast.success("Copied!"); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ color: "rgba(156,163,175,0.5)", background: "rgba(255,255,255,0.05)" }}><ClipboardCopy className="w-2.5 h-2.5" /> Copy</button>
@@ -2223,7 +2223,7 @@ export default function CreatorProfilePage() {
 
               {/* Composer note */}
               {psAnchorResult.composerNote && (
-              <div className="rounded-lg p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
+              <div className="p-3" style={{ background: "rgba(245,196,81,0.04)", border: "1px solid rgba(245,196,81,0.1)" }}>
                 <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(245,196,81,0.45)" }}>COMPOSER'S NOTE</span>
                 <p className="text-xs leading-relaxed italic" style={{ color: "rgba(229,231,235,0.65)" }}>{psAnchorResult.composerNote}</p>
               </div>
@@ -2231,7 +2231,7 @@ export default function CreatorProfilePage() {
 
               {/* Fusion note */}
               {psAnchorResult.fusionNote && (
-              <div className="rounded-lg p-3" style={{ background: "rgba(96,165,250,0.04)", border: "1px solid rgba(96,165,250,0.1)" }}>
+              <div className="p-3" style={{ background: "rgba(96,165,250,0.04)", border: "1px solid rgba(96,165,250,0.1)" }}>
                 <span className="text-[10px] font-mono tracking-widest block mb-1" style={{ color: "rgba(96,165,250,0.45)" }}>FUSION NOTE</span>
                 <p className="text-xs leading-relaxed" style={{ color: "rgba(229,231,235,0.55)" }}>{psAnchorResult.fusionNote}</p>
               </div>
@@ -2304,7 +2304,7 @@ export default function CreatorProfilePage() {
                 ) : (
                   <div className="space-y-2">
                     {myDrafts.map((draft: any) => (
-                      <div key={draft.id} className="rounded-lg p-3" style={{ background: "rgba(96,165,250,0.04)", border: "1px solid rgba(96,165,250,0.12)" }}>
+                      <div key={draft.id} className="p-3" style={{ background: "rgba(96,165,250,0.04)", border: "1px solid rgba(96,165,250,0.12)" }}>
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 mb-1 flex-wrap">
@@ -2356,7 +2356,7 @@ export default function CreatorProfilePage() {
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
                 {lineageHistory.map((entry: any, idx: number) => (
-                  <div key={entry.id ?? idx} className="rounded-lg p-3"
+                  <div key={entry.id ?? idx} className="p-3"
                     style={{ background: idx === 0 ? "rgba(139,92,246,0.08)" : "rgba(255,255,255,0.02)", border: idx === 0 ? "1px solid rgba(139,92,246,0.25)" : "1px solid rgba(255,255,255,0.06)" }}>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-1.5 flex-wrap">

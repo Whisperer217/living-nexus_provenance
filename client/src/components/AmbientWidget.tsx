@@ -210,7 +210,7 @@ export default function AmbientWidget() {
               ) : (
                 <div
                   className="w-full rounded-lg flex items-center justify-center"
-                  style={{ height: 80, background: "#2C3438" }}
+                  style={{ height: 80, background: "var(--ln-coal)" }}
                 >
                   <Music2 className="w-8 h-8 text-white/20" />
                 </div>

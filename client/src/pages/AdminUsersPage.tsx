@@ -24,15 +24,15 @@ type SortKey = "name" | "createdAt" | "trackCount" | "widCount" | "licenseStatus
 type SortDir = "asc" | "desc";
 type Tab = "users" | "codes" | "stripe" | "embed" | "works" | "config" | "logs" | "billing" | "founders" | "media" | "moderation" | "data_rights" | "projects";
 
-const GOLD = "#CBB183";
-const BG = "#1C2326";       // dark page background
-const CARD = "#253035";       // slightly lighter card surface
+const GOLD = "var(--ln-gold)";
+const BG = "var(--ln-void)";       // dark page background
+const CARD = "var(--ln-coal)";       // slightly lighter card surface
 const BORDER = "#3A4A52";     // visible border on dark bg
 const MUTED = "#94A3B8";      // muted text — readable on dark
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";
-const GREEN = "#4ADE80";
-const RED = "#EF4444";
+const GREEN = "var(--ln-seal-bright)";
+const RED = "var(--ln-ember)";
 
 function formatDate(d: Date | string | null | undefined) {
   if (!d) return "—";
@@ -179,7 +179,7 @@ function UsersTab() {
                 ) : sorted.map((u: any, i: number) => (
                   <tr key={u.id} style={{
                     background: i % 2 === 0 ? CARD : CARD,
-                    borderBottom: `1px solid #2C3438`,
+                    borderBottom: `1px solid #111009`,
                   }}>
                     <td className={tdStyle}>
                       <div className="font-medium" style={{ color: TEXT }}>{u.artistHandle ? `@${u.artistHandle}` : u.name ?? "—"}</div>
@@ -192,11 +192,11 @@ function UsersTab() {
                       <span className="font-mono font-semibold" style={{ color: u.trackCount > 0 ? GOLD : MUTED }}>{u.trackCount}</span>
                     </td>
                     <td className={tdStyle}>
-                      <span className="font-mono font-semibold" style={{ color: u.widCount > 0 ? "#4ADE80" : MUTED }}>{u.widCount}</span>
+                      <span className="font-mono font-semibold" style={{ color: u.widCount > 0 ? "var(--ln-seal-bright)" : MUTED }}>{u.widCount}</span>
                     </td>
                     <td className={tdStyle}>
                       <Badge style={u.licenseStatus === "licensed"
-                        ? { background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
+                        ? { background: "rgba(74,222,128,0.2)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)" }
                         : { background: MUTED, color: MUTED, border: `1px solid #C3AB7D` }}>
                         {u.licenseStatus === "licensed" ? "Licensed" : "Free"}
                       </Badge>
@@ -246,7 +246,7 @@ function UsersTab() {
                         className="h-7 text-xs mt-1"
                         title={u.isPinned ? "Unpin from Featured Creators" : "Pin to top of Featured Creators"}
                         style={u.isPinned
-                          ? { borderColor: "#4ADE80", color: "#4ADE80" }
+                          ? { borderColor: "var(--ln-seal-bright)", color: "var(--ln-seal-bright)" }
                           : { borderColor: BORDER, color: MUTED }
                         }
                         disabled={togglePin.isPending}
@@ -428,7 +428,7 @@ function PromoCodesTab() {
                 {codes.map((c: any, i: number) => (
                   <tr key={c.id} style={{
                     background: i % 2 === 0 ? CARD : CARD,
-                    borderBottom: `1px solid #2C3438`,
+                    borderBottom: `1px solid #111009`,
                   }}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -450,7 +450,7 @@ function PromoCodesTab() {
                     </td>
                     <td className="px-4 py-3">
                       <Badge style={c.isActive
-                        ? { background: "rgba(74,222,128,0.2)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
+                        ? { background: "rgba(74,222,128,0.2)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)" }
                         : { background: MUTED, color: MUTED, border: `1px solid #C3AB7D` }}>
                         {c.isActive ? "Active" : "Inactive"}
                       </Badge>
@@ -458,14 +458,14 @@ function PromoCodesTab() {
                     <td className="px-4 py-3">
                       {c.isActive ? (
                         <Button size="sm" variant="outline" className="h-7 text-xs"
-                          style={{ borderColor: "#EF4444", color: "#EF4444" }}
+                          style={{ borderColor: "var(--ln-ember)", color: "var(--ln-ember)" }}
                           disabled={deactivateCode.isPending}
                           onClick={() => deactivateCode.mutate({ id: c.id })}>
                           <XCircle className="w-3 h-3 mr-1" /> Deactivate
                         </Button>
                       ) : (
                         <Button size="sm" variant="outline" className="h-7 text-xs"
-                          style={{ borderColor: "#4ADE80", color: "#4ADE80" }}
+                          style={{ borderColor: "var(--ln-seal-bright)", color: "var(--ln-seal-bright)" }}
                           disabled={reactivateCode.isPending}
                           onClick={() => reactivateCode.mutate({ id: c.id })}>
                           <RotateCcw className="w-3 h-3 mr-1" /> Reactivate
@@ -514,8 +514,8 @@ function EmbedVideoTab() {
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Total Published", value: stats?.total ?? "—", color: GOLD },
-          { label: "Embed Ready", value: stats?.withEmbed ?? "—", color: "#4ADE80" },
-          { label: "Pending Generation", value: stats?.pending ?? "—", color: "#EF4444" },
+          { label: "Embed Ready", value: stats?.withEmbed ?? "—", color: "var(--ln-seal-bright)" },
+          { label: "Pending Generation", value: stats?.pending ?? "—", color: "var(--ln-ember)" },
         ].map(s => (
           <div key={s.label} className="rounded-xl p-4 text-center" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
             <p className="text-2xl font-bold" style={{ color: s.color, fontFamily: "'Orbitron', sans-serif" }}>{s.value}</p>
@@ -545,7 +545,7 @@ function EmbedVideoTab() {
         {progress.log.length > 0 && (
           <div className="rounded-lg p-3 font-mono text-xs space-y-1 max-h-40 overflow-y-auto" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
             {progress.log.map((line, i) => (
-              <p key={i} style={{ color: line.startsWith("Error") ? "#EF4444" : "#4ADE80" }}>
+              <p key={i} style={{ color: line.startsWith("Error") ? "var(--ln-ember)" : "var(--ln-seal-bright)" }}>
                 {line.startsWith("Error") ? "✗" : "✓"} {line}
               </p>
             ))}
@@ -561,7 +561,7 @@ function EmbedVideoTab() {
       {/* Info */}
       <div className="rounded-xl p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
         <div className="flex items-start gap-3">
-          <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#4ADE80" }} />
+          <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "var(--ln-seal-bright)" }} />
           <div className="text-xs space-y-1" style={{ color: SUBTEXT }}>
             <p>Generation runs in the background — the page doesn't need to stay open.</p>
             <p>Each video takes ~30–60 seconds to generate. For 38 tracks, expect ~20–30 minutes total.</p>
@@ -631,8 +631,8 @@ function StripeRecoveryTab() {
       {result && (
         <div className="rounded-xl border p-6" style={{ background: "rgba(74,222,128,0.06)", borderColor: "rgba(74,222,128,0.35)" }}>
           <div className="flex items-center gap-2 mb-3">
-            <CheckCircle2 className="w-5 h-5" style={{ color: "#4ADE80" }} />
-            <span className="text-sm font-semibold" style={{ color: "#4ADE80" }}>Link Ready</span>
+            <CheckCircle2 className="w-5 h-5" style={{ color: "var(--ln-seal-bright)" }} />
+            <span className="text-sm font-semibold" style={{ color: "var(--ln-seal-bright)" }}>Link Ready</span>
           </div>
           <p className="text-xs mb-2" style={{ color: SUBTEXT }}>Stripe Account: <span className="font-mono" style={{ color: TEXT }}>{result.stripeAccountId}</span></p>
           <div className="flex items-center gap-2 mt-3">
@@ -658,7 +658,7 @@ function StripeRecoveryTab() {
               <ExternalLink className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-xs mt-3" style={{ color: "#AA8E64" }}>
+          <p className="text-xs mt-3" style={{ color: "var(--ln-smoke)" }}>
             This link expires after one use or after ~24 hours. Regenerate if needed.
           </p>
         </div>
@@ -692,7 +692,7 @@ export default function AdminUsersPage() {
   if (user?.role !== "admin") return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
       <div className="text-center max-w-sm">
-        <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "#EF4444" }} />
+        <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "var(--ln-ember)" }} />
         <p className="text-lg font-semibold mb-2" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>Access Denied</p>
         <p className="text-sm mb-6" style={{ color: SUBTEXT }}>This page is restricted to platform administrators.</p>
         <Button variant="outline" onClick={() => navigate("/")} style={{ borderColor: GOLD, color: GOLD }}>Back to Home</Button>
@@ -711,8 +711,8 @@ export default function AdminUsersPage() {
     { id: "logs", label: "Audit Log", icon: <History className="w-4 h-4" /> },
     { id: "founders", label: "Founder Control", icon: <Crown className="w-4 h-4" /> },
     { id: "media", label: "Media Generation", icon: <Video className="w-4 h-4" /> },
-    { id: "moderation", label: "Covenant Moderation", icon: <Shield className="w-4 h-4" style={{ color: "#EF4444" }} /> },
-    { id: "data_rights", label: "Data Rights", icon: <Database className="w-4 h-4" style={{ color: "#4ADE80" }} /> },
+    { id: "moderation", label: "Covenant Moderation", icon: <Shield className="w-4 h-4" style={{ color: "var(--ln-ember)" }} /> },
+    { id: "data_rights", label: "Data Rights", icon: <Database className="w-4 h-4" style={{ color: "var(--ln-seal-bright)" }} /> },
     { id: "projects", label: "Projects / Donations", icon: <Gift className="w-4 h-4" style={{ color: GOLD }} /> },
   ];
 
@@ -733,11 +733,11 @@ export default function AdminUsersPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate("/admin/self-improve")}
-              style={{ borderColor: "#CBB183", color: "#CBB183" }}>
+              style={{ borderColor: "var(--ln-gold)", color: "var(--ln-gold)" }}>
               🤖 Self-Improve
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/admin/payment-integrity")}
-              style={{ borderColor: "#AA8E64", color: "#CBB183" }}>
+              style={{ borderColor: "var(--ln-smoke)", color: "var(--ln-gold)" }}>
               💳 Payment Integrity
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/")}
@@ -835,14 +835,14 @@ function WorksModerationTab() {
 
       <div className="space-y-2">
         {(works ?? []).map((w: any) => (
-          <div key={w.id} className="rounded-xl p-4 flex gap-4 items-start" style={{ background: CARD, border: `1px solid ${w.isFlagged ? "#AA8E64" : w.moderationStatus === "removed" ? "#EF4444" : BORDER}` }}>
+          <div key={w.id} className="rounded-xl p-4 flex gap-4 items-start" style={{ background: CARD, border: `1px solid ${w.isFlagged ? "var(--ln-smoke)" : w.moderationStatus === "removed" ? "var(--ln-ember)" : BORDER}` }}>
             {w.coverArtUrl && <img src={w.coverArtUrl} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-sm" style={{ color: TEXT }}>{w.title}</span>
                 <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: CARD, color: GOLD }}>{w.witnessId ?? "—"}</span>
                 {w.isFlagged && <span className="text-xs px-2 py-0.5 rounded" style={{ background: CARD, color: GOLD }}>FLAGGED</span>}
-                {w.moderationStatus === "removed" && <span className="text-xs px-2 py-0.5 rounded" style={{ background: CARD, color: "#EF4444" }}>REMOVED</span>}
+                {w.moderationStatus === "removed" && <span className="text-xs px-2 py-0.5 rounded" style={{ background: CARD, color: "var(--ln-ember)" }}>REMOVED</span>}
               </div>
               <div className="text-xs mt-1" style={{ color: SUBTEXT }}>
                 {w.contentType?.toUpperCase()} · {w.status} · {w.playCount ?? 0} plays
@@ -855,7 +855,7 @@ function WorksModerationTab() {
                   <Input value={flagReason[w.id] ?? ""} onChange={e => setFlagReason(r => ({ ...r, [w.id]: e.target.value }))}
                     placeholder="Flag reason…" className="w-32 h-7 text-xs" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
                   <Button size="sm" variant="outline" className="h-7 text-xs"
-                    style={{ borderColor: "#AA8E64", color: GOLD }}
+                    style={{ borderColor: "var(--ln-smoke)", color: GOLD }}
                     disabled={!flagReason[w.id]}
                     onClick={() => flagWork.mutate({ songId: w.id, reason: flagReason[w.id] })}>
                     Flag
@@ -872,14 +872,14 @@ function WorksModerationTab() {
               {w.moderationStatus !== "removed" ? (
                 confirmRemove === w.id ? (
                   <div className="flex gap-1">
-                    <Button size="sm" className="h-7 text-xs" style={{ background: "#EF4444", color: "#fff" }}
+                    <Button size="sm" className="h-7 text-xs" style={{ background: "var(--ln-ember)", color: "#fff" }}
                       onClick={() => removeWork.mutate({ songId: w.id })}>Confirm Remove</Button>
                     <Button size="sm" variant="outline" className="h-7 text-xs" style={{ borderColor: BORDER, color: SUBTEXT }}
                       onClick={() => setConfirmRemove(null)}>Cancel</Button>
                   </div>
                 ) : (
                   <Button size="sm" variant="outline" className="h-7 text-xs"
-                    style={{ borderColor: "#EF4444", color: "#EF4444" }}
+                    style={{ borderColor: "var(--ln-ember)", color: "var(--ln-ember)" }}
                     onClick={() => setConfirmRemove(w.id)}>
                     Remove
                   </Button>
@@ -1077,7 +1077,7 @@ function BillingResetTab() {
       </div>
 
       <div className="rounded-xl p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-        <p className="text-sm font-semibold mb-1" style={{ color: "#EF4444" }}>⚠ Destructive Action</p>
+        <p className="text-sm font-semibold mb-1" style={{ color: "var(--ln-ember)" }}>⚠ Destructive Action</p>
         <p className="text-xs" style={{ color: SUBTEXT }}>Billing reset cancels the user's active Stripe subscription and clears their local Stripe customer/subscription IDs. The WID registry is never modified. Use only for refunds, fraud, or test account cleanup.</p>
       </div>
 
@@ -1103,7 +1103,7 @@ function BillingResetTab() {
               <div className="flex gap-2 flex-wrap">
                 <Input value={resetReason} onChange={e => setResetReason(e.target.value)} placeholder="Reason (optional)"
                   className="w-40 h-7 text-xs" style={{ background: CARD, border: `1px solid ${BORDER}`, color: TEXT }} />
-                <Button size="sm" className="h-7 text-xs" style={{ background: "#EF4444", color: "#fff" }}
+                <Button size="sm" className="h-7 text-xs" style={{ background: "var(--ln-ember)", color: "#fff" }}
                   onClick={() => resetBilling.mutate({ userId: u.id, reason: resetReason || undefined })}>
                   Confirm Reset
                 </Button>
@@ -1112,7 +1112,7 @@ function BillingResetTab() {
               </div>
             ) : (
               <Button size="sm" variant="outline" className="h-7 text-xs"
-                style={{ borderColor: "#EF4444", color: "#EF4444" }}
+                style={{ borderColor: "var(--ln-ember)", color: "var(--ln-ember)" }}
                 onClick={() => setConfirmReset(u.id)}>
                 Reset Billing
               </Button>
@@ -1133,15 +1133,15 @@ function AuditLogTab() {
 
   const ACTION_COLOR: Record<string, string> = {
     flag_work: GOLD,
-    unflag_work: "#4ADE80",
-    remove_work: "#EF4444",
-    restore_work: "#4ADE80",
+    unflag_work: "var(--ln-seal-bright)",
+    remove_work: "var(--ln-ember)",
+    restore_work: "var(--ln-seal-bright)",
     set_system_config: GOLD,
-    reset_billing: "#EF4444",
+    reset_billing: "var(--ln-ember)",
     set_user_role: GOLD,
-    grant_license: "#4ADE80",
+    grant_license: "var(--ln-seal-bright)",
     deactivate_code: GOLD,
-    reactivate_code: "#4ADE80",
+    reactivate_code: "var(--ln-seal-bright)",
   };
 
   return (
@@ -1226,19 +1226,19 @@ function FounderControlTab() {
         {/* Capacity bar */}
         <div className="mb-2 flex items-center justify-between text-xs" style={{ color: SUBTEXT }}>
           <span>Founder Seats Filled</span>
-          <span style={{ color: slotsLeft === 0 ? "#EF4444" : GOLD }}>{count} / {max}</span>
+          <span style={{ color: slotsLeft === 0 ? "var(--ln-ember)" : GOLD }}>{count} / {max}</span>
         </div>
         <div className="h-2 rounded-full overflow-hidden" style={{ background: CARD }}>
           <div
             className="h-full rounded-full transition-all"
             style={{
               width: `${(count / max) * 100}%`,
-              background: slotsLeft === 0 ? "#EF4444" : GOLD,
+              background: slotsLeft === 0 ? "var(--ln-ember)" : GOLD,
             }}
           />
         </div>
         {slotsLeft === 0 && (
-          <p className="text-xs mt-2" style={{ color: "#EF4444" }}>
+          <p className="text-xs mt-2" style={{ color: "var(--ln-ember)" }}>
             All founder seats are filled. Revoke a founder before granting a new one.
           </p>
         )}
@@ -1284,7 +1284,7 @@ function FounderControlTab() {
                   size="sm"
                   variant="outline"
                   className="shrink-0 flex items-center gap-1.5 text-xs"
-                  style={{ borderColor: "rgba(239,68,68,0.5)", color: "#EF4444" }}
+                  style={{ borderColor: "rgba(239,68,68,0.5)", color: "var(--ln-ember)" }}
                   disabled={revokeFounder.isPending}
                   onClick={() => revokeFounder.mutate({ userId: f.id })}
                 >
@@ -1345,7 +1345,7 @@ function FounderControlTab() {
                         )}
                         {u.role === "admin" && (
                           <span className="text-xs px-1.5 py-0.5 rounded font-semibold"
-                            style={{ background: "rgba(239,68,68,0.3)", color: "#EF4444" }}>
+                            style={{ background: "rgba(196,68,10,0.3)", color: "var(--ln-ember)" }}>
                             Admin
                           </span>
                         )}
@@ -1361,7 +1361,7 @@ function FounderControlTab() {
                       size="sm"
                       variant="outline"
                       className="shrink-0 flex items-center gap-1.5 text-xs"
-                      style={{ borderColor: "rgba(239,68,68,0.5)", color: "#EF4444" }}
+                      style={{ borderColor: "rgba(239,68,68,0.5)", color: "var(--ln-ember)" }}
                       disabled={revokeFounder.isPending}
                       onClick={() => revokeFounder.mutate({ userId: u.id })}
                     >
@@ -1399,10 +1399,10 @@ function FounderControlTab() {
 // ── Media Generation Tab ──────────────────────────────────────────────────────
 function MediaGenerationTab() {
   const [enqueueId, setEnqueueId] = useState("");
-  const FOUNDER_GOLD = "#CBB183";
-  const GREEN = "#4ADE80";
-  const RED = "#EF4444";
-  const YELLOW = "#CBB183";
+  const FOUNDER_GOLD = "var(--ln-gold)";
+  const GREEN = "var(--ln-seal-bright)";
+  const RED = "var(--ln-ember)";
+  const YELLOW = "var(--ln-gold)";
   const BLUE = "#38BDF8";
 
   // Live pipeline stats — auto-refresh every 10s
@@ -1754,7 +1754,7 @@ function ModerationQueueEmbed() {
             const severity = REASON_SEVERITY[flag.reason] ?? "medium";
             const isExpanded = expandedId === flag.id;
             return (
-              <div key={flag.id} className="rounded-xl overflow-hidden" style={{ background: CARD, border: `1px solid ${severity === "critical" ? "#EF4444" : BORDER}` }}>
+              <div key={flag.id} className="rounded-xl overflow-hidden" style={{ background: CARD, border: `1px solid ${severity === "critical" ? "var(--ln-ember)" : BORDER}` }}>
                 <button type="button" className="w-full text-left p-4 flex items-center gap-4" onClick={() => setExpandedId(isExpanded ? null : flag.id)}>
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: severity === "critical" ? RED : GOLD }} />
                   <div className="flex-1 min-w-0">
@@ -1857,9 +1857,9 @@ function DataRightsTab() {
   });
 
   const stageColors: Record<string, string> = {
-    hosted: "#AA8E64",
-    migrating: "#4ADE80",
-    sovereign: "#4ADE80",
+    hosted: "var(--ln-smoke)",
+    migrating: "var(--ln-seal-bright)",
+    sovereign: "var(--ln-seal-bright)",
   };
 
   const stageLabels: Record<string, string> = {
@@ -1913,7 +1913,7 @@ function DataRightsTab() {
                   return (
                     <tr key={req.id} style={{
                       background: i % 2 === 0 ? CARD : CARD,
-                      borderBottom: `1px solid #2C3438`,
+                      borderBottom: `1px solid #111009`,
                     }}>
                       <td className="px-4 py-3 text-sm">
                         <div className="font-medium" style={{ color: TEXT }}>
@@ -1954,7 +1954,7 @@ function DataRightsTab() {
       {/* Section 2: Sovereign Migration Status */}
       <div className="rounded-xl border p-6" style={{ background: CARD, borderColor: BORDER }}>
         <div className="flex items-center gap-3 mb-4">
-          <Globe className="w-5 h-5" style={{ color: "#4ADE80" }} />
+          <Globe className="w-5 h-5" style={{ color: "var(--ln-seal-bright)" }} />
           <h2 className="text-lg font-bold" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>
             Sovereign Infrastructure Migration
           </h2>
@@ -2172,7 +2172,7 @@ function ProjectDonationsTab() {
       </div>
 
       {/* Webhook setup reminder */}
-      <div className="rounded-xl p-5 border" style={{ background: CARD, borderColor: "#AA8E64" }}>
+      <div className="rounded-xl p-5 border" style={{ background: CARD, borderColor: "var(--ln-smoke)" }}>
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: GOLD }} />
           <div>

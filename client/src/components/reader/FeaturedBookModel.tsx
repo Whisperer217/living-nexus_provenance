@@ -37,7 +37,7 @@ interface Props {
 export function FeaturedBookModel({ song, onRead }: Props) {
   const [, navigate] = useLocation();
   const isComic = song.contentType === "comic";
-  const accentColor = isComic ? "#EF4444" : "#4ADE80";
+  const accentColor = isComic ? "var(--ln-ember)" : "var(--ln-seal-bright)";
   const spineColor = isComic ? "#7F1D1D" : "#14532D";
 
   const pageCount = (() => {
@@ -109,7 +109,7 @@ export function FeaturedBookModel({ song, onRead }: Props) {
             >
               <span
                 className="text-[9px] font-heading font-bold tracking-wider leading-tight"
-                style={{ color: "#E6CDAE" }}
+                style={{ color: "var(--ln-parchment)" }}
               >
                 {song.title}
               </span>
@@ -118,7 +118,7 @@ export function FeaturedBookModel({ song, onRead }: Props) {
           {/* Gold rim overlay */}
           <div
             className="absolute inset-0 pointer-events-none rounded-r-md"
-            style={{ border: "1px solid rgba(203,177,131,0.30)", boxShadow: "inset 0 0 0 1px rgba(203,177,131,0.12)" }}
+            style={{ border: "1px solid rgba(196,154,40,0.25)", boxShadow: "inset 0 0 0 1px rgba(196,154,40,0.08)" }}
           />
           {/* Hover CTA overlay */}
           <div
@@ -164,7 +164,7 @@ export function FeaturedBookModel({ song, onRead }: Props) {
         {pageCount > 0 && (
           <div
             className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-heading font-bold tracking-wider z-10"
-            style={{ background: "rgba(0,0,0,0.72)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}
+            style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
           >
             <BookOpen size={7} />
             {pageCount}
@@ -176,7 +176,7 @@ export function FeaturedBookModel({ song, onRead }: Props) {
       <div className="text-center max-w-[120px]">
         <p
           className="text-[10px] font-heading font-bold tracking-wider leading-tight truncate"
-          style={{ color: "#E6CDAE" }}
+          style={{ color: "var(--ln-parchment)" }}
         >
           {song.title}
         </p>

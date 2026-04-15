@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 const CATEGORIES = [
-  { value: "doctrine", label: "Doctrine", color: "#CBB183", icon: BookOpen },
+  { value: "doctrine", label: "Doctrine", color: "var(--ln-gold)", icon: BookOpen },
   { value: "journal", label: "Journal", color: "#A78BFA", icon: ScrollText },
   { value: "update", label: "Update", color: "#60a5fa", icon: Zap },
   { value: "concept", label: "Concept", color: "#fb923c", icon: Layers },
@@ -63,7 +63,7 @@ function NoteCard({
   return (
     <div
       className="rounded-2xl border transition-all"
-      style={{ background: "#2C3438", borderColor: "#2C3438" }}
+      style={{ background: "var(--ln-coal)", borderColor: "var(--ln-coal)" }}
     >
       {/* Cover image */}
       {note.coverImageUrl && (
@@ -87,8 +87,8 @@ function NoteCard({
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body"
                   style={
                     note.isPublic
-                      ? { background: "rgba(74,222,128,0.12)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
-                      : { background: "rgba(63,74,80,0.15)", color: "#AA8E64", border: "1px solid rgba(63,74,80,0.3)" }
+                      ? { background: "rgba(74,222,128,0.12)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)" }
+                      : { background: "rgba(63,74,80,0.15)", color: "var(--ln-smoke)", border: "1px solid rgba(63,74,80,0.3)" }
                   }
                 >
                   {note.isPublic ? <Globe size={8} /> : <Lock size={8} />}
@@ -102,7 +102,7 @@ function NoteCard({
             <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={() => onEdit(note)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-[#CBB183] hover:bg-white/[0.06] transition-all"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-[#C49A28] hover:bg-white/[0.06] transition-all"
               >
                 <Edit2 size={12} />
               </button>
@@ -142,7 +142,7 @@ function NoteCard({
           {(hasMore || note.videoUrl) && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="flex items-center gap-1 text-[11px] font-body text-white/40 hover:text-[#CBB183] transition-colors"
+              className="flex items-center gap-1 text-[11px] font-body text-white/40 hover:text-[#C49A28] transition-colors"
             >
               {expanded ? <><ChevronUp size={11} /> Collapse</> : <><ChevronDown size={11} /> Read more</>}
             </button>
@@ -184,11 +184,11 @@ function NoteForm({
   return (
     <div
       className="rounded-2xl border p-5 space-y-4"
-      style={{ background: "#2C3438", borderColor: "#2C3438" }}
+      style={{ background: "var(--ln-coal)", borderColor: "var(--ln-coal)" }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText size={15} className="text-[#CBB183]" />
+          <FileText size={15} className="text-[#C49A28]" />
           <span className="font-heading text-[14px] text-white/90 tracking-wide">
             {initial?.id ? "Edit Field Note" : "New Field Note"}
           </span>
@@ -220,7 +220,7 @@ function NoteForm({
               style={
                 active
                   ? { background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}50` }
-                  : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
+                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
               }
             >
               <Icon size={10} />
@@ -246,8 +246,8 @@ function NoteForm({
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-body transition-all"
           style={
             isPublic
-              ? { background: "rgba(74,222,128,0.12)", color: "#4ADE80", border: "1px solid rgba(74,222,128,0.28)" }
-              : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
+              ? { background: "rgba(74,222,128,0.12)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)" }
+              : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
           }
         >
           {isPublic ? <><Eye size={11} /> Public — visible to all</> : <><EyeOff size={11} /> Private — only you</>}
@@ -287,7 +287,7 @@ function NoteForm({
           onClick={() => onSave({ title, body, category, isPublic, videoUrl: videoUrl as string, coverImageUrl: coverImageUrl as string })}
           disabled={!canSave || isSaving}
           className="flex-1 font-heading text-[13px] tracking-wider"
-          style={{ background: "linear-gradient(135deg, #CBB183, #B8960C)", color: "#0a0a0f" }}
+          style={{ background: "linear-gradient(135deg, #C49A28, #B8960C)", color: "#0a0a0f" }}
         >
           {isSaving ? "Saving…" : initial?.id ? "Update Note" : "Publish Note"}
         </Button>
@@ -360,13 +360,13 @@ export default function FieldNotesPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen" style={{ background: "var(--ln-coal)" }}>
       <div className="max-w-2xl mx-auto px-4 py-8 pb-32">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <ScrollText size={18} className="text-[#CBB183]" />
+              <ScrollText size={18} className="text-[#C49A28]" />
               <h1 className="font-heading text-[22px] text-white/95 tracking-wide">Field Notes</h1>
             </div>
             <p className="font-body text-[12px] text-white/40">
@@ -378,7 +378,7 @@ export default function FieldNotesPage() {
               onClick={() => setShowForm(true)}
               size="sm"
               className="flex items-center gap-1.5 font-heading text-[12px] tracking-wider"
-              style={{ background: "linear-gradient(135deg, #CBB183, #B8960C)", color: "#0a0a0f" }}
+              style={{ background: "linear-gradient(135deg, #C49A28, #B8960C)", color: "#0a0a0f" }}
             >
               <Plus size={13} />
               New Note
@@ -417,8 +417,8 @@ export default function FieldNotesPage() {
               className="px-3 py-1 rounded-xl text-[11px] font-body font-semibold tracking-wider uppercase transition-all"
               style={
                 activeFilter === "all"
-                  ? { background: "#CBB18322", color: "#CBB183", border: "1px solid #CBB18350" }
-                  : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
+                  ? { background: "#C49A2822", color: "var(--ln-gold)", border: "1px solid #C49A2850" }
+                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
               }
             >
               All
@@ -435,7 +435,7 @@ export default function FieldNotesPage() {
                   style={
                     activeFilter === cat.value
                       ? { background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}50` }
-                      : { background: "#2C3438", color: "#3F4A50", border: "1px solid #2C3438" }
+                      : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
                   }
                 >
                   <Icon size={9} />
@@ -450,7 +450,7 @@ export default function FieldNotesPage() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 rounded-2xl animate-pulse" style={{ background: "#2C3438" }} />
+              <div key={i} className="h-32 rounded-2xl animate-pulse" style={{ background: "var(--ln-coal)" }} />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -469,7 +469,7 @@ export default function FieldNotesPage() {
                 onClick={() => setShowForm(true)}
                 size="sm"
                 className="font-heading text-[12px] tracking-wider"
-                style={{ background: "linear-gradient(135deg, #CBB183, #B8960C)", color: "#0a0a0f" }}
+                style={{ background: "linear-gradient(135deg, #C49A28, #B8960C)", color: "#0a0a0f" }}
               >
                 <Plus size={13} className="mr-1.5" />
                 Write Your First Note

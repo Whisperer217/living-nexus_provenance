@@ -68,17 +68,17 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                   height: 200,
                   scrollSnapAlign: "start",
                   background: "transparent",
-                  border: "1.5px dashed rgba(203,177,131,0.3)",
+                  border: "1.5px dashed rgba(196,154,40,0.26)",
                 }}
               >
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center"
                   style={{
-                    background: "rgba(203,177,131,0.10)",
-                    border: "1px solid rgba(203,177,131,0.28)",
+                    background: "rgba(196,154,40,0.08)",
+                    border: "1px solid rgba(196,154,40,0.25)",
                   }}
                 >
-                  <span style={{ color: "#CBB183", fontSize: "20px", lineHeight: 1 }}>+</span>
+                  <span style={{ color: "var(--ln-gold)", fontSize: "20px", lineHeight: 1 }}>+</span>
                 </div>
                 <p
                   className="text-[11px] font-semibold text-center px-2"
@@ -86,7 +86,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                 >
                   Start a Project
                 </p>
-                <p className="text-[9px] text-center px-3" style={{ color: "#AA8E64" }}>
+                <p className="text-[9px] text-center px-3" style={{ color: "var(--ln-smoke)" }}>
                   Launch with a Witness ID
                 </p>
               </div>
@@ -126,12 +126,12 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     <div
                       className="w-full h-full flex items-center justify-center"
                       style={{
-                        background: "linear-gradient(135deg, #2C3438, #2C3438)",
+                        background: "linear-gradient(135deg, var(--ln-coal), #111009)",
                       }}
                     >
                       <span
                         className="text-3xl font-bold"
-                        style={{ color: "rgba(203,177,131,0.16)", fontFamily: "'Cinzel', serif" }}
+                        style={{ color: "rgba(196,154,40,0.12)", fontFamily: "'Cinzel', serif" }}
                       >
                         {project.title?.[0] ?? "P"}
                       </span>
@@ -143,7 +143,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                     className="absolute inset-0"
                     style={{
                       background:
-                        "linear-gradient(to top, #2C3438 / 0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)",
+                        "linear-gradient(to top, var(--ln-coal) / 0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)",
                     }}
                   />
 
@@ -184,7 +184,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                   <div className="absolute bottom-0 left-0 right-0 px-2 pb-2 pt-4">
                     <p
                       className="text-[11px] font-semibold leading-tight line-clamp-2"
-                      style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                      style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
                     >
                       {project.title}
                     </p>
@@ -199,19 +199,19 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                       <div
                         className="w-4 h-4 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-[8px] font-bold"
                         style={{
-                          background: "#2C3438",
-                          border: "1px solid rgba(203,177,131,0.32)",
+                          background: "var(--ln-coal)",
+                          border: "1px solid rgba(196,154,40,0.3)",
                         }}
                       >
                         {project.creatorAvatarUrl ? (
                           <img src={project.creatorAvatarUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
-                          <span style={{ color: "#CBB183" }}>
+                          <span style={{ color: "var(--ln-gold)" }}>
                             {(project.creatorName || project.creatorHandle || "?")[0].toUpperCase()}
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] truncate" style={{ color: "#AA8E64" }}>
+                      <p className="text-[10px] truncate" style={{ color: "var(--ln-smoke)" }}>
                         {project.creatorName || project.creatorHandle || "Creator"}
                       </p>
                     </div>
@@ -222,11 +222,11 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                         <div
                           className="flex items-center gap-0.5 px-1 py-0.5 rounded-md"
                           style={{
-                            background: "rgba(203,177,131,0.3)",
-                            border: "1px solid rgba(203,177,131,0.5)",
+                            background: "rgba(196,154,40,0.26)",
+                            border: "1px solid rgba(196,154,40,0.42)",
                           }}
                         >
-                          <Cpu size={7} style={{ color: "#CBB183" }} />
+                          <Cpu size={7} style={{ color: "var(--ln-gold)" }} />
                         </div>
                       )}
                       <button
@@ -247,14 +247,14 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
                         <span className="text-[8px] font-mono" style={{ color: "rgba(230,205,174,0.75)" }}>
                           {pct}% funded
                         </span>
-                        <DollarSign size={7} style={{ color: "rgba(203,177,131,0.55)" }} />
+                        <DollarSign size={7} style={{ color: "rgba(196,154,40,0.5)" }} />
                       </div>
                       <div className="h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(44,52,56,0.6)" }}>
                         <div
                           className="h-full rounded-full"
                           style={{
                             width: `${pct}%`,
-                            background: "linear-gradient(90deg, #AA8E64, #CBB183)",
+                            background: "linear-gradient(90deg, #6B6555, #C49A28)",
                           }}
                         />
                       </div>

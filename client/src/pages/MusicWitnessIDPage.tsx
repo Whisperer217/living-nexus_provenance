@@ -154,7 +154,7 @@ function HarmonicWaveform({ harmonics, playing }: { harmonics: number[]; playing
       ctx.strokeStyle = gradient;
       ctx.lineWidth = 2;
       ctx.shadowBlur = 12;
-      ctx.shadowColor = "#CBB183";
+      ctx.shadowColor = "var(--ln-gold)";
 
       const normalizedFreqs = harmonics.map(f => (f - 100) / 600); // normalize 100-700Hz → 0-1
       const speed = playing ? 0.04 : 0.008;
@@ -185,9 +185,9 @@ function HarmonicWaveform({ harmonics, playing }: { harmonics: number[]; playing
         const screenY = H / 2 + y * H * 0.8;
         ctx.beginPath();
         ctx.arc(x, screenY, 4, 0, Math.PI * 2);
-        ctx.fillStyle = "#CBB183";
+        ctx.fillStyle = "var(--ln-gold)";
         ctx.shadowBlur = 16;
-        ctx.shadowColor = "#CBB183";
+        ctx.shadowColor = "var(--ln-gold)";
         ctx.fill();
         ctx.shadowBlur = 0;
       });
@@ -205,7 +205,7 @@ function HarmonicWaveform({ harmonics, playing }: { harmonics: number[]; playing
       ref={canvasRef}
       width={600}
       height={120}
-      className="w-full rounded border border-[#CBB183]/20"
+      className="w-full rounded border border-[#C49A28]/20"
       style={{ background: "#0a0a0a" }}
     />
   );
@@ -388,7 +388,7 @@ export default function MusicWitnessIDPage() {
       const centsStr = cents >= 0 ? `+${cents}¢` : `${cents}¢`;
       return `<tr>
         <td style="color:#6ee7f7;padding:4px 12px;">H${i + 1}</td>
-        <td style="color:#CBB183;padding:4px 12px;font-family:monospace;">${freq} Hz</td>
+        <td style="color:#C49A28;padding:4px 12px;font-family:monospace;">${freq} Hz</td>
         <td style="color:#e2e8f0;padding:4px 12px;">${note}${octave} ${centsStr}</td>
       </tr>`;
     }).join("");
@@ -401,18 +401,18 @@ export default function MusicWitnessIDPage() {
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
   body { background: #0a0a0a; color: #e2e8f0; font-family: 'Share Tech Mono', monospace; margin: 0; padding: 40px; }
-  .cert { max-width: 800px; margin: 0 auto; border: 1px solid #CBB183; padding: 40px; position: relative; }
+  .cert { max-width: 800px; margin: 0 auto; border: 1px solid #C49A28; padding: 40px; position: relative; }
   .cert::before { content: ''; position: absolute; inset: 6px; border: 1px solid rgba(201,168,76,0.2); pointer-events: none; }
-  h1 { font-family: 'Orbitron', monospace; color: #CBB183; font-size: 22px; letter-spacing: 4px; margin: 0 0 4px; }
+  h1 { font-family: 'Orbitron', monospace; color: #C49A28; font-size: 22px; letter-spacing: 4px; margin: 0 0 4px; }
   h2 { font-family: 'Orbitron', monospace; color: #6ee7f7; font-size: 13px; letter-spacing: 3px; margin: 0 0 32px; }
-  .divider { border: none; border-top: 1px solid #CBB183; margin: 24px 0; opacity: 0.4; }
+  .divider { border: none; border-top: 1px solid #C49A28; margin: 24px 0; opacity: 0.4; }
   .label { color: #6ee7f7; font-size: 11px; letter-spacing: 2px; margin-bottom: 2px; }
   .value { color: #e2e8f0; font-size: 14px; margin-bottom: 16px; word-break: break-all; }
-  .wid { font-family: 'Orbitron', monospace; color: #CBB183; font-size: 20px; letter-spacing: 3px; }
+  .wid { font-family: 'Orbitron', monospace; color: #C49A28; font-size: 20px; letter-spacing: 3px; }
   .consent { display: inline-block; padding: 6px 16px; border: 1px solid ${consentColor}; color: ${consentColor}; font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 2px; margin-bottom: 16px; }
   table { border-collapse: collapse; width: 100%; }
   .footer { margin-top: 32px; font-size: 11px; color: rgba(226,232,240,0.4); line-height: 1.8; }
-  .hs { color: #CBB183; font-size: 13px; letter-spacing: 1px; word-break: break-all; }
+  .hs { color: #C49A28; font-size: 13px; letter-spacing: 1px; word-break: break-all; }
   .sig { font-size: 10px; color: rgba(226,232,240,0.5); word-break: break-all; line-height: 1.6; }
 </style>
 </head>
@@ -423,7 +423,7 @@ export default function MusicWitnessIDPage() {
   <hr class="divider">
   
   <div class="label">WORK TITLE</div>
-  <div class="value" style="font-size:18px;color:#CBB183;">${meta.songTitle}</div>
+  <div class="value" style="font-size:18px;color:#C49A28;">${meta.songTitle}</div>
   
   <div class="label">CREATOR</div>
   <div class="value">${meta.creatorName}${meta.bmiMemberNumber ? ` | BMI: ${meta.bmiMemberNumber}` : ""}${meta.orcidId ? ` | ORCID: ${meta.orcidId}` : ""}${meta.isni ? ` | ISNI: ${meta.isni}` : ""}</div>
@@ -502,11 +502,11 @@ export default function MusicWitnessIDPage() {
   return (
     <div className="min-h-screen pb-32" style={{ background: "#0a0a0a", color: "#e2e8f0" }}>
       {/* Header */}
-      <div className="border-b border-[#CBB183]/20 px-6 py-8">
+      <div className="border-b border-[#C49A28]/20 px-6 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <Shield size={28} className="text-[#CBB183]" />
-            <h1 style={{ fontFamily: "'Orbitron', monospace", color: "#CBB183", fontSize: "22px", letterSpacing: "4px", fontWeight: 700 }}>
+            <Shield size={28} className="text-[#C49A28]" />
+            <h1 style={{ fontFamily: "'Orbitron', monospace", color: "var(--ln-gold)", fontSize: "22px", letterSpacing: "4px", fontWeight: 700 }}>
               MUSIC WITNESS ID GENERATOR
             </h1>
           </div>
@@ -580,8 +580,8 @@ export default function MusicWitnessIDPage() {
                   onClick={() => toggleMood(mood)}
                   className={`px-3 py-1 text-xs border transition-all duration-150 ${
                     meta.moodTags.includes(mood)
-                      ? "border-[#CBB183] text-[#CBB183] bg-[#3F4A50]/10"
-                      : "border-white/10 text-white/40 hover:border-[#CBB183]/40"
+                      ? "border-[#C49A28] text-[#C49A28] bg-[#1C1A14]/10"
+                      : "border-white/10 text-white/40 hover:border-[#C49A28]/40"
                   }`}
                   style={{ fontFamily: "'Share Tech Mono', monospace", letterSpacing: "1px" }}
                 >
@@ -595,7 +595,7 @@ export default function MusicWitnessIDPage() {
           <Field label="Co-Writers" className="mt-4">
             <div className="flex gap-2 mb-2">
               <Input value={coWriterInput} onChange={setCoWriterInput} placeholder="Add co-writer name" onKeyDown={e => e.key === "Enter" && addCoWriter()} />
-              <button type="button" onClick={addCoWriter} className="px-3 border border-[#CBB183]/30 text-[#CBB183] hover:bg-[#3F4A50]/10 transition-colors">
+              <button type="button" onClick={addCoWriter} className="px-3 border border-[#C49A28]/30 text-[#C49A28] hover:bg-[#1C1A14]/10 transition-colors">
                 <Plus size={14} />
               </button>
             </div>
@@ -616,7 +616,7 @@ export default function MusicWitnessIDPage() {
               onChange={e => setField("lyrics", e.target.value)}
               placeholder="Enter lyrics here. They will be SHA-256 hashed in your browser and never sent to any server."
               rows={4}
-              className="w-full px-3 py-2 text-sm border border-white/10 bg-white/[0.03] text-white/80 focus:outline-none focus:border-[#CBB183]/40 resize-none"
+              className="w-full px-3 py-2 text-sm border border-white/10 bg-white/[0.03] text-white/80 focus:outline-none focus:border-[#C49A28]/40 resize-none"
               style={{ fontFamily: "'Share Tech Mono', monospace" }}
             />
           </Field>
@@ -648,7 +648,7 @@ export default function MusicWitnessIDPage() {
         {/* ── Section 4: File Upload ── */}
         <Section title="AUDIO FILE (OPTIONAL)" icon={<Upload size={16} />}>
           <div
-            className="border border-dashed border-[#CBB183]/20 p-8 text-center cursor-pointer hover:border-[#CBB183]/40 transition-colors"
+            className="border border-dashed border-[#C49A28]/20 p-8 text-center cursor-pointer hover:border-[#C49A28]/40 transition-colors"
             onClick={() => document.getElementById("audio-upload")?.click()}
           >
             <input
@@ -660,8 +660,8 @@ export default function MusicWitnessIDPage() {
             />
             {audioFile ? (
               <div>
-                <Music size={24} className="text-[#CBB183] mx-auto mb-2" />
-                <p style={{ fontFamily: "'Share Tech Mono', monospace", color: "#CBB183", fontSize: "13px" }}>{audioFile.name}</p>
+                <Music size={24} className="text-[#C49A28] mx-auto mb-2" />
+                <p style={{ fontFamily: "'Share Tech Mono', monospace", color: "var(--ln-gold)", fontSize: "13px" }}>{audioFile.name}</p>
                 <p className="text-xs text-white/70 mt-1">{(audioFile.size / 1024 / 1024).toFixed(2)} MB — will be hashed locally</p>
               </div>
             ) : (
@@ -678,7 +678,7 @@ export default function MusicWitnessIDPage() {
         <button
           onClick={generate}
           disabled={!meta.creatorName || !meta.songTitle || generating}
-          className="w-full py-4 border border-[#CBB183] text-[#CBB183] hover:bg-[#3F4A50]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+          className="w-full py-4 border border-[#C49A28] text-[#C49A28] hover:bg-[#1C1A14]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
           style={{ fontFamily: "'Orbitron', monospace", letterSpacing: "3px", fontSize: "13px" }}
         >
           {generating ? "GENERATING WITNESS ID..." : "GENERATE WITNESS ID"}
@@ -686,12 +686,12 @@ export default function MusicWitnessIDPage() {
 
         {/* ── Result Panel ── */}
         {result && (
-          <div className="border border-[#CBB183]/40 p-6 space-y-6" style={{ background: "rgba(201,168,76,0.03)" }}>
+          <div className="border border-[#C49A28]/40 p-6 space-y-6" style={{ background: "rgba(201,168,76,0.03)" }}>
             {/* Witness ID */}
             <div>
               <Label>WITNESS ID</Label>
               <div className="flex items-center gap-3 mt-2">
-                <span style={{ fontFamily: "'Orbitron', monospace", color: "#CBB183", fontSize: "20px", letterSpacing: "3px" }}>
+                <span style={{ fontFamily: "'Orbitron', monospace", color: "var(--ln-gold)", fontSize: "20px", letterSpacing: "3px" }}>
                   {result.witnessId}
                 </span>
                 <CopyBtn text={result.witnessId} id="wid" copied={copied} onCopy={copyToClipboard} />
@@ -738,7 +738,7 @@ export default function MusicWitnessIDPage() {
                   return (
                     <div key={i} className="border border-white/[0.06] p-3" style={{ background: "rgba(201,168,76,0.04)" }}>
                       <div style={{ fontFamily: "'Share Tech Mono', monospace", color: "#6ee7f7", fontSize: "10px", letterSpacing: "2px" }}>H{i + 1}</div>
-                      <div style={{ fontFamily: "'Orbitron', monospace", color: "#CBB183", fontSize: "14px" }}>{freq} Hz</div>
+                      <div style={{ fontFamily: "'Orbitron', monospace", color: "var(--ln-gold)", fontSize: "14px" }}>{freq} Hz</div>
                       <div className="text-xs text-white/40 mt-1">{note}{octave} {centsStr}</div>
                     </div>
                   );
@@ -747,7 +747,7 @@ export default function MusicWitnessIDPage() {
 
               {/* HS string */}
               <div className="mt-3 flex items-center gap-2">
-                <span style={{ fontFamily: "'Share Tech Mono', monospace", color: "#CBB183", fontSize: "12px", wordBreak: "break-all" }}>
+                <span style={{ fontFamily: "'Share Tech Mono', monospace", color: "var(--ln-gold)", fontSize: "12px", wordBreak: "break-all" }}>
                   {result.harmonicString}
                 </span>
                 <CopyBtn text={result.harmonicString} id="hs" copied={copied} onCopy={copyToClipboard} />
@@ -757,7 +757,7 @@ export default function MusicWitnessIDPage() {
               <button
                 onClick={playHarmonics}
                 disabled={playing}
-                className="mt-4 flex items-center gap-2 px-4 py-2 border border-[#CBB183]/30 text-[#CBB183] hover:bg-[#3F4A50]/10 disabled:opacity-50 transition-colors"
+                className="mt-4 flex items-center gap-2 px-4 py-2 border border-[#C49A28]/30 text-[#C49A28] hover:bg-[#1C1A14]/10 disabled:opacity-50 transition-colors"
                 style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: "12px", letterSpacing: "2px" }}
               >
                 <Play size={14} fill={playing ? "currentColor" : "none"} />
@@ -788,7 +788,7 @@ export default function MusicWitnessIDPage() {
             <div className="flex flex-wrap gap-3 pt-2 border-t border-white/[0.06]">
               <button
                 onClick={downloadCertificate}
-                className="flex items-center gap-2 px-5 py-3 border border-[#CBB183] text-[#CBB183] hover:bg-[#3F4A50]/10 transition-colors"
+                className="flex items-center gap-2 px-5 py-3 border border-[#C49A28] text-[#C49A28] hover:bg-[#1C1A14]/10 transition-colors"
                 style={{ fontFamily: "'Orbitron', monospace", fontSize: "11px", letterSpacing: "2px" }}
               >
                 <Download size={14} />
@@ -830,7 +830,7 @@ function Field({ label, required, className, children }: { label: string; requir
   return (
     <div className={className}>
       <label className="block text-xs text-white/40 mb-1" style={{ fontFamily: "'Share Tech Mono', monospace", letterSpacing: "1px" }}>
-        {label}{required && <span className="text-[#CBB183] ml-1">*</span>}
+        {label}{required && <span className="text-[#C49A28] ml-1">*</span>}
       </label>
       {children}
     </div>
@@ -847,7 +847,7 @@ function Input({ value, onChange, placeholder, type = "text", onKeyDown }: {
       onChange={e => onChange(e.target.value)}
       onKeyDown={onKeyDown}
       placeholder={placeholder}
-      className="w-full px-3 py-2 text-sm border border-white/10 bg-white/[0.03] text-white/80 focus:outline-none focus:border-[#CBB183]/40 placeholder:text-white/60"
+      className="w-full px-3 py-2 text-sm border border-white/10 bg-white/[0.03] text-white/80 focus:outline-none focus:border-[#C49A28]/40 placeholder:text-white/60"
       style={{ fontFamily: "'Share Tech Mono', monospace" }}
     />
   );
@@ -860,7 +860,7 @@ function Select({ value, onChange, options, placeholder }: {
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="w-full px-3 py-2 text-sm border border-white/10 bg-[#0a0a0a] text-white/80 focus:outline-none focus:border-[#CBB183]/40"
+      className="w-full px-3 py-2 text-sm border border-white/10 bg-[#0a0a0a] text-white/80 focus:outline-none focus:border-[#C49A28]/40"
       style={{ fontFamily: "'Share Tech Mono', monospace" }}
     >
       {placeholder && <option value="">{placeholder}</option>}
@@ -888,9 +888,9 @@ function CopyBtn({ text, id, copied, onCopy }: { text: string; id: string; copie
   return (
     <button
       onClick={() => onCopy(text, id)}
-      className="p-1 text-white/70 hover:text-[#CBB183] transition-colors"
+      className="p-1 text-white/70 hover:text-[#C49A28] transition-colors"
     >
-      {copied === id ? <Check size={14} className="text-[#CBB183]" /> : <Copy size={14} />}
+      {copied === id ? <Check size={14} className="text-[#C49A28]" /> : <Copy size={14} />}
     </button>
   );
 }

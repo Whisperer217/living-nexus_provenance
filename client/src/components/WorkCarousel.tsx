@@ -132,7 +132,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
       {isLoading ? (
         <div className="flex gap-3 overflow-hidden">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: CARD_PAN_W, height: 200, background: "#2C3438" }} />
+            <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: CARD_PAN_W, height: 200, background: "var(--ln-coal)" }} />
           ))}
         </div>
       ) : (

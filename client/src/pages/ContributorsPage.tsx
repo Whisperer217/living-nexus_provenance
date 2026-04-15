@@ -112,8 +112,8 @@ function FounderCard({
       className="relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300"
       style={{
         background:
-          "linear-gradient(160deg, #2C3438 0%, #2C3438 100%)",
-        border: "1px solid rgba(203,177,131,0.10)",
+          "linear-gradient(160deg, #111009 0%, #111009 100%)",
+        border: "1px solid rgba(196,154,40,0.08)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.40)",
       }}
     >
@@ -121,7 +121,7 @@ function FounderCard({
       <div
         className="absolute top-0 left-0 right-0 h-[2px]"
         style={{
-          background: "linear-gradient(90deg, transparent, #CBB183, transparent)",
+          background: "linear-gradient(90deg, transparent, #C49A28, transparent)",
         }}
       />
 
@@ -133,10 +133,10 @@ function FounderCard({
           <span
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
             style={{
-              background: "rgba(203,177,131,0.12)",
-              border: "1px solid #CBB183",
-              color: "#CBB183",
-              boxShadow: "0 0 10px #CBB18355, 0 0 20px #CBB18322",
+              background: "rgba(196,154,40,0.08)",
+              border: "1px solid #C49A28",
+              color: "var(--ln-gold)",
+              boxShadow: "0 0 10px #C49A2855, 0 0 20px #C49A2822",
             }}
           >
             <Award size={10} />
@@ -169,14 +169,14 @@ function FounderCard({
             </p>
             {/* Discord name on its own line */}
             {founder.discordName && (
-              <p className="text-xs leading-snug" style={{ color: "#AA8E64" }}>
+              <p className="text-xs leading-snug" style={{ color: "var(--ln-smoke)" }}>
                 ({founder.discordName})
               </p>
             )}
             {/* Date on its own line */}
             <p
               className="text-[10px] tracking-widest uppercase leading-snug"
-              style={{ color: "#3F4A50" }}
+              style={{ color: "var(--ln-iron)" }}
             >
               March 20, 2026
             </p>
@@ -190,9 +190,9 @@ function FounderCard({
               key={tag}
               className="px-3 py-1 rounded-full text-[11px] font-medium leading-none"
               style={{
-                background: "rgba(203,177,131,0.08)",
-                border: "1px solid rgba(203,177,131,0.14)",
-                color: "#DACAAA",
+                background: "rgba(196,154,40,0.06)",
+                border: "1px solid rgba(196,154,40,0.10)",
+                color: "var(--ln-parchment)",
               }}
             >
               {tag}
@@ -208,10 +208,10 @@ function FounderCard({
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
               background: matchedCreator?.id
-                ? "rgba(203,177,131,0.12)"
-                : "rgba(203,177,131,0.05)",
-              border: `1px solid ${matchedCreator?.id ? "#CBB18366" : "rgba(203,177,131,0.10)"}`,
-              color: matchedCreator?.id ? "#CBB183" : "#AA8E64",
+                ? "rgba(196,154,40,0.08)"
+                : "rgba(196,154,40,0.04)",
+              border: `1px solid ${matchedCreator?.id ? "#C49A2866" : "rgba(196,154,40,0.08)"}`,
+              color: matchedCreator?.id ? "var(--ln-gold)" : "var(--ln-smoke)",
             }}
           >
             <ExternalLink size={13} />
@@ -240,7 +240,7 @@ export default function ContributorsPage() {
         className="relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(160deg, #2C3438 0%, #2C3438 100%)",
+            "linear-gradient(160deg, #111009 0%, #111009 100%)",
           borderBottom: "1px solid rgba(230,205,174,0.07)",
         }}
       >
@@ -249,7 +249,7 @@ export default function ContributorsPage() {
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse at center, #CBB18315 0%, transparent 70%)",
+              "radial-gradient(ellipse at center, #C49A2815 0%, transparent 70%)",
           }}
         />
 
@@ -259,10 +259,10 @@ export default function ContributorsPage() {
             <span
               className="px-4 py-1.5 rounded-full text-xs font-bold tracking-[0.15em] uppercase"
               style={{
-                background: "rgba(203,177,131,0.12)",
-                border: "1px solid #CBB183",
-                color: "#CBB183",
-                boxShadow: "0 0 16px #CBB18333",
+                background: "rgba(196,154,40,0.08)",
+                border: "1px solid #C49A28",
+                color: "var(--ln-gold)",
+                boxShadow: "0 0 16px #C49A2833",
               }}
             >
               <Award size={11} className="inline mr-1.5 -mt-0.5" />
@@ -273,7 +273,7 @@ export default function ContributorsPage() {
           <h1
             className="font-display text-4xl sm:text-5xl md:text-6xl mb-6 leading-tight"
             style={{
-              background: "linear-gradient(135deg, #FFFFFF 30%, #CBB183 100%)",
+              background: "linear-gradient(135deg, #FFFFFF 30%, #C49A28 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -284,7 +284,7 @@ export default function ContributorsPage() {
 
           <blockquote
             className="max-w-2xl mx-auto text-lg sm:text-xl leading-relaxed font-body italic"
-            style={{ color: "#DACAAA" }}
+            style={{ color: "var(--ln-parchment)" }}
           >
             "These are the ones who showed up first. Before the platform was finished.
             Before the world knew. They came anyway."
@@ -293,12 +293,12 @@ export default function ContributorsPage() {
           <div className="mt-8 flex items-center justify-center gap-3">
             <div
               className="h-px w-16"
-              style={{ background: "linear-gradient(90deg, transparent, #CBB183)" }}
+              style={{ background: "linear-gradient(90deg, transparent, #C49A28)" }}
             />
-            <span className="text-[#CBB183] text-lg">✦</span>
+            <span className="text-[#C49A28] text-lg">✦</span>
             <div
               className="h-px w-16"
-              style={{ background: "linear-gradient(90deg, #CBB183, transparent)" }}
+              style={{ background: "linear-gradient(90deg, #C49A28, transparent)" }}
             />
           </div>
         </div>
@@ -319,24 +319,24 @@ export default function ContributorsPage() {
               <div
                 className="h-px w-24"
                 style={{
-                  background: "linear-gradient(90deg, transparent, #CBB18355)",
+                  background: "linear-gradient(90deg, transparent, #C49A2855)",
                 }}
               />
-              <span style={{ color: "#CBB183", opacity: 0.6 }}>✦</span>
+              <span style={{ color: "var(--ln-gold)", opacity: 0.6 }}>✦</span>
               <div
                 className="h-px w-24"
                 style={{
-                  background: "linear-gradient(90deg, #CBB18355, transparent)",
+                  background: "linear-gradient(90deg, #C49A2855, transparent)",
                 }}
               />
             </div>
             <p
               className="text-sm font-body italic"
-              style={{ color: "#3F4A50" }}
+              style={{ color: "var(--ln-iron)" }}
             >
               Living Nexus — Sovereign music. Cryptographic provenance. Creator-owned.
             </p>
-            <p className="text-xs mt-1" style={{ color: "#3F4A50" }}>
+            <p className="text-xs mt-1" style={{ color: "var(--ln-iron)" }}>
               Genesis Day · March 20, 2026
             </p>
           </div>

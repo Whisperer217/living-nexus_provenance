@@ -13,10 +13,10 @@ import { Loader2, Tag, CheckCircle2, ArrowRight, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
-const GOLD = "#CBB183";
-const BG = "#E6CDAE";
-const CARD = "#2C3438";
-const BORDER = "#2C3438";
+const GOLD = "var(--ln-gold)";
+const BG = "var(--ln-parchment)";
+const CARD = "var(--ln-coal)";
+const BORDER = "var(--ln-coal)";
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";
 
@@ -68,10 +68,10 @@ export default function RedeemPage() {
             /* ── Success State ── */
             <div className="text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-                style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.28)" }}>
-                <CheckCircle2 className="w-8 h-8" style={{ color: "#4ADE80" }} />
+                style={{ background: "rgba(58,138,86,0.15)", border: "1px solid rgba(74,222,128,0.28)" }}>
+                <CheckCircle2 className="w-8 h-8" style={{ color: "var(--ln-seal-bright)" }} />
               </div>
-              <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 {wasAlreadyLicensed ? "Slots Added" : "License Activated"}
               </h1>
               <p className="text-sm mb-2" style={{ color: SUBTEXT }}>
@@ -107,7 +107,7 @@ export default function RedeemPage() {
                 style={{ background: `${GOLD}20`, border: `1px solid ${GOLD}40` }}>
                 <Shield className="w-8 h-8" style={{ color: GOLD }} />
               </div>
-              <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+              <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Sign In Required
               </h1>
               <p className="text-sm mb-6" style={{ color: SUBTEXT }}>
@@ -127,9 +127,9 @@ export default function RedeemPage() {
               {user?.licenseStatus === "licensed" && (
                 <div className="rounded-xl p-3 mb-6 flex items-center gap-3"
                   style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.25)" }}>
-                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: "#4ADE80" }} />
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ln-seal-bright)" }} />
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: "#4ADE80" }}>Creator License Active</p>
+                    <p className="text-xs font-semibold" style={{ color: "var(--ln-seal-bright)" }}>Creator License Active</p>
                     <p className="text-xs" style={{ color: SUBTEXT }}>
                       {user.songSlotsTotal ?? 0} slots in your archive. Redeem a slot pack code to add more.
                     </p>
@@ -141,7 +141,7 @@ export default function RedeemPage() {
                   style={{ background: `${GOLD}20`, border: `1px solid ${GOLD}40` }}>
                   <Tag className="w-8 h-8" style={{ color: GOLD }} />
                 </div>
-                <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                   {user?.licenseStatus === "licensed" ? "Redeem Slot Pack" : "Redeem Access Code"}
                 </h1>
                 <p className="text-sm" style={{ color: SUBTEXT }}>
@@ -161,7 +161,7 @@ export default function RedeemPage() {
                     value={code}
                     onChange={e => setCode(e.target.value.toUpperCase())}
                     className="text-center text-lg font-mono tracking-widest uppercase"
-                    style={{ background: "#2C3438", borderColor: BORDER, color: TEXT, letterSpacing: "0.15em" }}
+                    style={{ background: "var(--ln-coal)", borderColor: BORDER, color: TEXT, letterSpacing: "0.15em" }}
                     autoFocus
                     autoComplete="off"
                     spellCheck={false}
@@ -181,7 +181,7 @@ export default function RedeemPage() {
                 </Button>
               </form>
 
-              <p className="text-center text-xs mt-6" style={{ color: "#3F4A50" }}>
+              <p className="text-center text-xs mt-6" style={{ color: "var(--ln-iron)" }}>
                 Don't have a code?{" "}
                 <button
                   className="underline hover:opacity-80 transition-opacity"
@@ -200,7 +200,7 @@ export default function RedeemPage() {
           <div className="text-center mt-4">
             <button
               className="text-xs hover:opacity-80 transition-opacity"
-              style={{ color: "#3F4A50" }}
+              style={{ color: "var(--ln-iron)" }}
               onClick={() => navigate("/")}
             >
               ← Back to Living Nexus

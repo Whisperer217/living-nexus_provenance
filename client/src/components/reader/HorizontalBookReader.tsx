@@ -230,10 +230,10 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
       >
         {/* Title */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <BookOpen size={15} style={{ color: "#CBB183", flexShrink: 0 }} />
+          <BookOpen size={15} style={{ color: "var(--ln-gold)", flexShrink: 0 }} />
           <span
             className="text-sm font-heading font-bold tracking-widest truncate"
-            style={{ color: "#E6CDAE", maxWidth: "60vw" }}
+            style={{ color: "var(--ln-parchment)", maxWidth: "60vw" }}
           >
             {title.toUpperCase()}
           </span>
@@ -243,7 +243,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
           {/* Page counter pill */}
           <span
             className="text-[11px] font-heading font-bold tracking-wider px-3 py-1 rounded-full"
-            style={{ background: "rgba(0,0,0,0.55)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)" }}
+            style={{ background: "rgba(0,0,0,0.55)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
           >
             {pageLabel}
           </span>
@@ -251,7 +251,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
           <button
             onClick={toggleFullscreen}
             className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-white/10"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "var(--ln-smoke)" }}
           >
             {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
@@ -259,7 +259,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
           <button
             onClick={onClose}
             className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-white/10"
-            style={{ color: "#AA8E64" }}
+            style={{ color: "var(--ln-smoke)" }}
           >
             <X size={18} />
           </button>
@@ -281,7 +281,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
             background: "linear-gradient(to right, rgba(0,0,0,0.35) 0%, transparent 100%)",
           }}
         >
-          <ChevronLeft size={28} style={{ color: "#CBB183" }} />
+          <ChevronLeft size={28} style={{ color: "var(--ln-gold)" }} />
         </button>
 
         {/* Right nav zone */}
@@ -296,7 +296,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
             background: "linear-gradient(to left, rgba(0,0,0,0.35) 0%, transparent 100%)",
           }}
         >
-          <ChevronRight size={28} style={{ color: "#CBB183" }} />
+          <ChevronRight size={28} style={{ color: "var(--ln-gold)" }} />
         </button>
 
         {/* ── Mobile: single page ── */}
@@ -338,7 +338,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
                   className="max-w-full max-h-full object-contain"
                   style={{
                     display: "block",
-                    borderRight: rightPage ? "1px solid rgba(203,177,131,0.15)" : "none",
+                    borderRight: rightPage ? "1px solid rgba(196,154,40,0.12)" : "none",
                     boxShadow: rightPage ? "2px 0 12px rgba(0,0,0,0.5)" : "0 0 40px rgba(0,0,0,0.6)",
                   }}
                   draggable={false}
@@ -378,7 +378,7 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
         >
           <p
             className="text-center text-sm font-heading tracking-wide"
-            style={{ color: "#DACAAA" }}
+            style={{ color: "var(--ln-parchment)" }}
           >
             {currentCaption}
           </p>
@@ -390,14 +390,14 @@ export function HorizontalBookReader({ pages, title, onClose, startPage = 0 }: P
         className="absolute bottom-0 left-0 right-0 h-0.5 transition-opacity duration-500"
         style={{
           opacity: showControls ? 0.7 : 0,
-          background: "rgba(203,177,131,0.15)",
+          background: "rgba(196,154,40,0.12)",
         }}
       >
         <div
           className="h-full transition-all duration-300"
           style={{
             width: `${((isMobile ? page : spread) / Math.max(1, (isMobile ? totalPages : totalSpreads) - 1)) * 100}%`,
-            background: "linear-gradient(90deg, #CBB183, #D0A15F)",
+            background: "linear-gradient(90deg, #C49A28, #B8860B)",
           }}
         />
       </div>

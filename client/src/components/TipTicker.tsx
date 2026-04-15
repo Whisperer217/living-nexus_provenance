@@ -27,7 +27,7 @@ export default function TipTicker() {
       style={{
         background: "rgba(44,52,56,0.92)",
         backdropFilter: "blur(8px)",
-        borderBottom: "1px solid rgba(203,177,131,0.12)",
+        borderBottom: "1px solid rgba(196,154,40,0.08)",
         height: "28px",
       }}
       aria-label="Live tip activity"
@@ -41,16 +41,16 @@ export default function TipTicker() {
             key={i}
             className="whitespace-nowrap text-xs md:text-sm font-medium px-8"
             style={{
-              color: "#CBB183",
+              color: "var(--ln-gold)",
               fontFamily: "'Cinzel', serif",
               letterSpacing: "0.02em",
-              textShadow: "0 0 12px rgba(203,177,131,0.35)",
+              textShadow: "0 0 12px rgba(196,154,40,0.3)",
             }}
           >
             {item}
             <span
               className="mx-6 opacity-40"
-              style={{ color: "#CBB183" }}
+              style={{ color: "var(--ln-gold)" }}
             >
               ✦
             </span>

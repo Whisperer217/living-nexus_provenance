@@ -148,7 +148,7 @@ export default function TrackPage() {
       <div className="rounded-2xl overflow-hidden border border-white/[0.08] mb-5">
         {/* Art */}
         <div className="relative h-[220px] flex items-center justify-center"
-          style={{ background: track.bg || "linear-gradient(135deg, #2C3438, #2C3438)" }}>
+          style={{ background: track.bg || "linear-gradient(135deg, var(--ln-coal), #111009)" }}>
           {track.artUrl ? (
             <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover absolute inset-0" />
           ) : (
@@ -160,7 +160,7 @@ export default function TrackPage() {
           <button
             onClick={handlePlay}
             className="absolute bottom-4 left-4 w-12 h-12 rounded-full flex items-center justify-center
-              bg-[#3F4A50] hover:bg-[#3F4A50]/90 active:scale-95 transition-all shadow-lg shadow-[#CBB183]/20"
+              bg-[#1C1A14] hover:bg-[#1C1A14]/90 active:scale-95 transition-all shadow-lg shadow-[#C49A28]/20"
           >
             {isPlaying
               ? <Pause size={20} className="text-black" />
@@ -176,7 +176,7 @@ export default function TrackPage() {
         </div>
 
         {/* Track info */}
-        <div className="p-4 bg-[#2C3438]">
+        <div className="p-4 bg-[#111009]">
           <h1 className="font-heading text-[20px] text-white/95 mb-1">{track.title}</h1>
           <p className="text-[13px] font-body text-white/45 mb-3">{track.artist}</p>
 
@@ -229,7 +229,7 @@ export default function TrackPage() {
               </button>
               {shareOpen && (
                 <div className="absolute bottom-full left-0 mb-2 w-48 rounded-xl border border-white/[0.1]
-                  bg-[#2C3438] shadow-xl z-20 overflow-hidden">
+                  bg-[#111009] shadow-xl z-20 overflow-hidden">
                   <button
                     onClick={copyLink}
                     className="flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] font-body text-white/60
@@ -259,7 +259,7 @@ export default function TrackPage() {
             <button
               onClick={copyLink}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-body transition-all border
-                bg-white/[0.04] border-white/[0.08] text-white/40 hover:border-[#CBB183]/30 hover:text-[#CBB183]"
+                bg-white/[0.04] border-white/[0.08] text-white/40 hover:border-[#C49A28]/30 hover:text-[#C49A28]"
             >
               <Link2 size={13} /> Copy Link
             </button>
@@ -268,7 +268,7 @@ export default function TrackPage() {
       </div>
 
       {/* ── Unique Track URL ── */}
-      <div className="rounded-xl border border-white/[0.07] bg-[#2C3438] p-3 mb-5 flex items-center gap-3">
+      <div className="rounded-xl border border-white/[0.07] bg-[#111009] p-3 mb-5 flex items-center gap-3">
         <Link2 size={14} className="text-[#A78BFA]/60 flex-shrink-0" />
         <span className="flex-1 text-[11px] font-body text-white/70 truncate">{trackUrl}</span>
         <button
@@ -281,10 +281,10 @@ export default function TrackPage() {
       </div>
 
       {/* ── Gift Jar ── */}
-      <div className={`rounded-2xl border p-5 mb-5 ${tipsEnabled ? "border-[#CBB183]/20 bg-[#2C3438]" : "border-white/[0.06] bg-[#2C3438]"}`}>
+      <div className={`rounded-2xl border p-5 mb-5 ${tipsEnabled ? "border-[#C49A28]/20 bg-[#111009]" : "border-white/[0.06] bg-[#111009]"}`}>
         <div className="flex items-center gap-2 mb-2">
-          <DollarSign size={15} className={tipsEnabled ? "text-[#CBB183]" : "text-white/20"} />
-          <span className={`font-heading text-[13px] tracking-wider ${tipsEnabled ? "text-[#CBB183]" : "text-white/25"}`}>
+          <DollarSign size={15} className={tipsEnabled ? "text-[#C49A28]" : "text-white/20"} />
+          <span className={`font-heading text-[13px] tracking-wider ${tipsEnabled ? "text-[#C49A28]" : "text-white/25"}`}>
             Tip the Artist
           </span>
           {tipTotal > 0 && (
@@ -303,8 +303,8 @@ export default function TrackPage() {
                   onClick={() => { setTipSelected(amt); setCustomTip(""); }}
                   className={`py-2 rounded-xl text-[12px] font-heading transition-all border
                     ${tipSelected === amt
-                      ? "bg-[#3F4A50]/15 border-[#CBB183] text-[#CBB183]"
-                      : "bg-[#2C3438] border-white/[0.08] text-white/45 hover:border-[#CBB183]/40 hover:text-[#CBB183]"
+                      ? "bg-[#1C1A14]/15 border-[#C49A28] text-[#C49A28]"
+                      : "bg-[#111009] border-white/[0.08] text-white/45 hover:border-[#C49A28]/40 hover:text-[#C49A28]"
                     }`}
                 >
                   ${amt}
@@ -318,14 +318,14 @@ export default function TrackPage() {
                 value={customTip}
                 onChange={e => { setCustomTip(e.target.value); setTipSelected(null); }}
                 className="flex-1 px-3 py-2 rounded-xl text-[12px] font-body text-white/70
-                  bg-[#2C3438] border border-white/[0.08] outline-none
-                  focus:border-[#CBB183]/50 placeholder:text-white/60"
+                  bg-[#111009] border border-white/[0.08] outline-none
+                  focus:border-[#C49A28]/50 placeholder:text-white/60"
               />
               <button
                 onClick={sendTip}
                 className="px-4 py-2 rounded-xl font-heading text-[12px] tracking-wider transition-all
-                  bg-[#3F4A50]/10 border border-[#CBB183]/30 text-[#CBB183]
-                  hover:bg-[#3F4A50]/20 hover:border-[#CBB183]/60 active:scale-[0.98]"
+                  bg-[#1C1A14]/10 border border-[#C49A28]/30 text-[#C49A28]
+                  hover:bg-[#1C1A14]/20 hover:border-[#C49A28]/60 active:scale-[0.98]"
               >
                 Send ✦
               </button>
@@ -339,7 +339,7 @@ export default function TrackPage() {
       </div>
 
       {/* ── Comments ── */}
-      <div className="rounded-2xl border border-white/[0.08] bg-[#2C3438] p-5">
+      <div className="rounded-2xl border border-white/[0.08] bg-[#111009] p-5">
         <div className="flex items-center gap-2 mb-4">
           <MessageCircle size={15} className="text-[#A78BFA]" />
           <span className="font-heading text-[13px] tracking-wider text-white/70">
@@ -354,7 +354,7 @@ export default function TrackPage() {
             onChange={e => setAuthorName(e.target.value)}
             placeholder="Your name"
             className="w-full px-3 py-2 rounded-xl text-[12px] font-body text-white/70
-              bg-[#2C3438] border border-white/[0.08] outline-none
+              bg-[#111009] border border-white/[0.08] outline-none
               focus:border-[#A78BFA]/50 placeholder:text-white/60"
           />
           <div className="flex gap-2">
@@ -365,7 +365,7 @@ export default function TrackPage() {
               rows={2}
               onKeyDown={e => { if (e.key === "Enter" && e.metaKey) submitComment(); }}
               className="flex-1 px-3 py-2 rounded-xl text-[12px] font-body text-white/70
-                bg-[#2C3438] border border-white/[0.08] outline-none resize-none
+                bg-[#111009] border border-white/[0.08] outline-none resize-none
                 focus:border-[#A78BFA]/50 placeholder:text-white/60"
             />
             <button
@@ -390,7 +390,7 @@ export default function TrackPage() {
             {[...comments].reverse().map(c => (
               <div key={c.id} className="flex gap-3 group">
                 <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center
-                  bg-[#2C3438] border border-white/[0.08] text-[13px]">
+                  bg-[#111009] border border-white/[0.08] text-[13px]">
                   {c.author.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">

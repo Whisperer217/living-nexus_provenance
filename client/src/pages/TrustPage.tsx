@@ -7,15 +7,15 @@ import { trpc } from "@/lib/trpc";
 import { Shield, CheckCircle2, AlertTriangle, XCircle, Minus, Copy, ExternalLink, Lock, Eye } from "lucide-react";
 import { toast } from "sonner";
 
-const GOLD = "#CBB183";
-const BG = "#2C3438";
-const CARD = "#2C3438";
-const BORDER = "#2C3438";
+const GOLD = "var(--ln-gold)";
+const BG = "var(--ln-coal)";
+const CARD = "var(--ln-coal)";
+const BORDER = "var(--ln-coal)";
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";
-const GREEN = "#4ADE80";
-const YELLOW = "#CBB183";
-const RED = "#EF4444";
+const GREEN = "var(--ln-seal-bright)";
+const YELLOW = "var(--ln-gold)";
+const RED = "var(--ln-ember)";
 
 const LAYER_INFO: { key: string; label: string; description: string }[] = [
   { key: "layer2Status",  label: "Infrastructure & Hosting",    description: "Server uptime, CDN, redundancy, and deployment integrity" },
@@ -46,7 +46,7 @@ function OverallBadge({ status }: { status: string | null | undefined }) {
   if (!status) return null;
   const config = {
     pass: { label: "AUDIT PASSED", color: GREEN, bg: "rgba(74,222,128,0.12)" },
-    conditional_pass: { label: "CONDITIONAL PASS", color: YELLOW, bg: "rgba(203,177,131,0.12)" },
+    conditional_pass: { label: "CONDITIONAL PASS", color: YELLOW, bg: "rgba(196,154,40,0.08)" },
     fail: { label: "AUDIT FAILED", color: RED, bg: "rgba(239,68,68,0.12)" },
   }[status] ?? { label: status.toUpperCase(), color: SUBTEXT, bg: "transparent" };
 
@@ -98,7 +98,7 @@ export default function TrustPage() {
     <div style={{ background: BG, minHeight: "100vh", color: TEXT }}>
       {/* Hero */}
       <div style={{
-        background: `linear-gradient(180deg, #2C3438 0%, ${BG} 100%)`,
+        background: `linear-gradient(180deg, #111009 0%, ${BG} 100%)`,
         borderBottom: `1px solid ${BORDER}`,
         padding: "60px 24px 48px",
         textAlign: "center",
@@ -106,7 +106,7 @@ export default function TrustPage() {
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
           <div style={{
             width: 64, height: 64, borderRadius: "50%",
-            background: `rgba(203,177,131,0.10)`,
+            background: `rgba(196,154,40,0.08)`,
             border: `2px solid ${GOLD}`,
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>

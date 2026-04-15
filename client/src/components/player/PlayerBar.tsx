@@ -227,9 +227,9 @@ export default function PlayerBar() {
         right: 0,
         height: isCinematic ? "100dvh" : isExpanded ? "256px" : "68px",
         overflow: "visible",
-        background: isCinematic ? "#000" : "#2C3438",
-          borderTop: isCinematic ? "none" : "1px solid rgba(203,177,131,0.28)",
-        boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px rgba(203,177,131,0.16), 0 -1px 8px rgba(203,177,131,0.20)",
+        background: isCinematic ? "#000" : "var(--ln-coal)",
+          borderTop: isCinematic ? "none" : "1px solid rgba(196,154,40,0.25)",
+        boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px rgba(196,154,40,0.12), 0 -1px 8px rgba(196,154,40,0.15)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
         zIndex: isCinematic ? 9020 : isExpanded ? 9010 : 9001,
@@ -242,13 +242,13 @@ export default function PlayerBar() {
           className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-1 text-[11px] font-semibold transition-all duration-200 rounded-t-lg z-10"
           style={{
             top: "-26px",
-            background: "#2C3438",
+            background: "var(--ln-coal)",
             border: "1px solid rgba(44,52,56,0.5)",
             borderBottom: "none",
-            color: isExpanded ? "#CBB183" : "#AA8E64",
+            color: isExpanded ? "var(--ln-gold)" : "var(--ln-smoke)",
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
-          onMouseLeave={e => (e.currentTarget.style.color = isExpanded ? "#CBB183" : "#AA8E64")}
+          onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+          onMouseLeave={e => (e.currentTarget.style.color = isExpanded ? "var(--ln-gold)" : "var(--ln-smoke)")}
           title={isExpanded ? "Collapse player" : "Expand player"}
         >
           {isExpanded ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
@@ -256,7 +256,7 @@ export default function PlayerBar() {
           {!isExpanded && commentsData && commentsData.length > 0 && (
             <span
               className="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold leading-none"
-              style={{ background: "#CBB183", color: "#2C3438" }}
+              style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
             >
               {commentsData.length} {commentsData.length === 1 ? "witness" : "witnesses"}
             </span>
@@ -292,9 +292,9 @@ export default function PlayerBar() {
             onClick={() => setIsCinematic(false)}
             className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
             style={{
-              background: "#3F4A50",
+              background: "var(--ln-iron)",
               border: "1px solid rgba(63,74,80,0.6)",
-              color: "#CBB183",
+              color: "var(--ln-gold)",
               backdropFilter: "blur(8px)",
             }}
           >
@@ -302,17 +302,17 @@ export default function PlayerBar() {
           </button>
           {/* Track info — top left */}
           <div className="absolute top-4 left-4 z-20">
-            <div className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            <div className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               {currentTrack.title}
             </div>
-            <div className="text-sm mt-1" style={{ color: "#4ADE80" }}>
+            <div className="text-sm mt-1" style={{ color: "var(--ln-seal-bright)" }}>
               {currentTrack.artist}
             </div>
             {currentTrack.witnessId && (
               <button
                 onClick={goToVerify}
                 className="text-[9px] font-mono mt-1 block transition-opacity hover:opacity-80"
-                style={{ color: "rgba(203,177,131,0.7)" }}
+                style={{ color: "rgba(196,154,40,0.6)" }}
               >
                 WID: {currentTrack.witnessId.slice(0, 24)}…
               </button>
@@ -322,7 +322,7 @@ export default function PlayerBar() {
           <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center gap-4 px-8">
             {/* Progress bar */}
             <div className="w-full flex items-center gap-3">
-              <span className="text-[11px] tabular-nums w-8" style={{ color: "#AA8E64" }}>{fmtTime(state.currentTime)}</span>
+              <span className="text-[11px] tabular-nums w-8" style={{ color: "var(--ln-smoke)" }}>{fmtTime(state.currentTime)}</span>
               <div
                 className="flex-1 h-1 rounded-full cursor-pointer group relative"
                 style={{ background: "rgba(44,52,56,0.5)" }}
@@ -332,16 +332,16 @@ export default function PlayerBar() {
                   className="h-full rounded-full"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, #EF4444 0%, #AA8E64 50%, #E6CDAE 100%)",
-                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(203,177,131,0.40)" : "none",
+                    background: "linear-gradient(90deg, #EF4444 0%, #6B6555 50%, #E8DFC8 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(196,154,40,0.35)" : "none",
                   }}
                 />
               </div>
-              <span className="text-[11px] tabular-nums w-8" style={{ color: "#AA8E64" }}>{fmtTime(state.duration)}</span>
+              <span className="text-[11px] tabular-nums w-8" style={{ color: "var(--ln-smoke)" }}>{fmtTime(state.duration)}</span>
             </div>
             {/* Playback controls */}
             <div className="flex items-center gap-6">
-              <button type="button" onClick={toggleShuffle} className={`p-2 transition-colors ${state.isShuffle ? "text-[#CBB183]" : "text-white/40 hover:text-white/80"}`}>
+              <button type="button" onClick={toggleShuffle} className={`p-2 transition-colors ${state.isShuffle ? "text-[#C49A28]" : "text-white/40 hover:text-white/80"}`}>
                 <Shuffle size={18} />
               </button>
               <button type="button" onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
@@ -350,14 +350,14 @@ export default function PlayerBar() {
               <button
                 onClick={togglePlay}
                 className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-105"
-                style={{ background: "#CBB183", color: "#2C3438" }}
+                style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
               >
                 {state.isPlaying ? <Pause size={24} /> : <Play size={24} fill="currentColor" />}
               </button>
               <button type="button" onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
                 <SkipForward size={22} />
               </button>
-              <button type="button" onClick={toggleRepeat} className={`p-2 transition-colors ${state.isRepeat ? "text-[#CBB183]" : "text-white/40 hover:text-white/80"}`}>
+              <button type="button" onClick={toggleRepeat} className={`p-2 transition-colors ${state.isRepeat ? "text-[#C49A28]" : "text-white/40 hover:text-white/80"}`}>
                 <Repeat size={18} />
               </button>
             </div>
@@ -393,7 +393,7 @@ export default function PlayerBar() {
                 style={{
                   background: "rgba(44,52,56,0.88)",
                   border: "1px solid rgba(74,222,128,0.5)",
-                  color: "#4ADE80",
+                  color: "var(--ln-seal-bright)",
                   backdropFilter: "blur(4px)",
                 }}
                 title="Video cryptographically witnessed — click to verify"
@@ -404,7 +404,7 @@ export default function PlayerBar() {
             {/* Gold gradient fade to center */}
             <div
               className="absolute inset-0 pointer-events-none z-10"
-              style={{ background: "linear-gradient(to right, transparent 60%, #2C3438)" }}
+              style={{ background: "linear-gradient(to right, transparent 60%, #111009)" }}
             />
           </div>
 
@@ -415,8 +415,8 @@ export default function PlayerBar() {
               <button
                 onClick={goToSong}
                 disabled={!currentSongId}
-                className="text-lg font-bold truncate block w-full text-left transition-colors hover:text-[#CBB183] disabled:cursor-default mb-0.5"
-                style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}
+                className="text-lg font-bold truncate block w-full text-left transition-colors hover:text-[#C49A28] disabled:cursor-default mb-0.5"
+                style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
               >
                 {currentTrack.title}
               </button>
@@ -424,7 +424,7 @@ export default function PlayerBar() {
                 onClick={goToCreator}
                 disabled={!currentTrack}
                 className="text-sm truncate block w-full text-left transition-opacity hover:opacity-80 disabled:cursor-default mb-1"
-                style={{ color: "#4ADE80" }}
+                style={{ color: "var(--ln-seal-bright)" }}
               >
                 {currentTrack.artist || "—"}
               </button>
@@ -432,7 +432,7 @@ export default function PlayerBar() {
                 <button
                   onClick={goToVerify}
                   className="text-[9px] font-mono truncate block text-left transition-opacity hover:opacity-80 mb-2"
-                  style={{ color: "rgba(203,177,131,0.6)" }}
+                  style={{ color: "rgba(196,154,40,0.5)" }}
                   title="View Witness Certificate"
                 >
                   WID: {currentTrack.witnessId.slice(0, 22)}…
@@ -451,7 +451,7 @@ export default function PlayerBar() {
                 {tipsEnabled && (
                   <button
                     onClick={() => setTipOpen(true)}
-                    className="p-1.5 transition-colors text-[#CBB183] hover:text-[#E6CDAE]"
+                    className="p-1.5 transition-colors text-[#C49A28] hover:text-[#E8DFC8]"
                     title={`Tip ${currentTrack.artist}`}
                   >
                     <DollarSign size={15} />
@@ -460,7 +460,7 @@ export default function PlayerBar() {
                 {currentSongId && (
                   <button
                     onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setAddToListOpen(true); }}
-                    className="p-1.5 transition-colors text-white/50 hover:text-[#CBB183]"
+                    className="p-1.5 transition-colors text-white/50 hover:text-[#C49A28]"
                     title="Add to My List"
                   >
                     <ListPlus size={15} />
@@ -471,7 +471,7 @@ export default function PlayerBar() {
 
             {/* Progress bar */}
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "#AA8E64" }}>
+              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "var(--ln-smoke)" }}>
                 {fmtTime(state.currentTime)}
               </span>
               <div
@@ -483,19 +483,19 @@ export default function PlayerBar() {
                   className="h-full rounded-full relative transition-all"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, #EF4444 0%, #AA8E64 50%, #E6CDAE 100%)",
-                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(203,177,131,0.40)" : "none",
+                    background: "linear-gradient(90deg, #EF4444 0%, #6B6555 50%, #E8DFC8 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(196,154,40,0.35)" : "none",
                   }}
                 >
                   {state.isPlaying && (
                     <div
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full progress-playhead"
-                      style={{ background: "#E6CDAE", boxShadow: "0 0 8px 3px rgba(203,177,131,0.8)" }}
+                      style={{ background: "var(--ln-parchment)", boxShadow: "0 0 8px 3px rgba(196,154,40,0.7)" }}
                     />
                   )}
                 </div>
               </div>
-              <span className="text-[11px] w-8 tabular-nums" style={{ color: "#AA8E64" }}>
+              <span className="text-[11px] w-8 tabular-nums" style={{ color: "var(--ln-smoke)" }}>
                 {fmtTime(state.duration)}
               </span>
             </div>
@@ -503,30 +503,30 @@ export default function PlayerBar() {
             {/* Playback controls */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <button type="button" onClick={toggleShuffle} className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}>
+                <button type="button" onClick={toggleShuffle} className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#C49A28]" : "text-white/30 hover:text-white/70"}`}>
                   <Shuffle size={14} />
                 </button>
-                <button type="button" onClick={prevTrack} className="p-1.5 transition-colors" style={{ color: "#AA8E64" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}>
+                <button type="button" onClick={prevTrack} className="p-1.5 transition-colors" style={{ color: "var(--ln-smoke)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-smoke)")}>
                   <SkipBack size={18} />
                 </button>
                 <button
                   onClick={togglePlay}
                   className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                  style={{ background: "#E6CDAE", color: "#2C3438" }}
+                  style={{ background: "var(--ln-parchment)", color: "var(--ln-coal)" }}
                 >
                   {state.isPlaying
                     ? <Pause size={17} fill="currentColor" />
                     : <Play size={17} fill="currentColor" className="ml-0.5" />
                   }
                 </button>
-                <button type="button" onClick={nextTrack} className="p-1.5 transition-colors" style={{ color: "#AA8E64" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}>
+                <button type="button" onClick={nextTrack} className="p-1.5 transition-colors" style={{ color: "var(--ln-smoke)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-smoke)")}>
                   <SkipForward size={18} />
                 </button>
-                <button type="button" onClick={toggleRepeat} className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#CBB183]" : "text-white/30 hover:text-white/70"}`}>
+                <button type="button" onClick={toggleRepeat} className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#C49A28]" : "text-white/30 hover:text-white/70"}`}>
                   <Repeat size={14} />
                 </button>
               </div>
@@ -537,9 +537,9 @@ export default function PlayerBar() {
                   <button
                     onClick={() => setShowVolume(v => !v)}
                     className="p-1 transition-colors"
-                    style={{ color: state.isMuted ? "#3F4A50" : "#AA8E64" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
-                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "#3F4A50" : "#AA8E64")}
+                    style={{ color: state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)")}
                     title="Volume"
                   >
                     {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -548,16 +548,16 @@ export default function PlayerBar() {
                     <div
                       className="absolute bottom-12 left-1/2 -translate-x-1/2 rounded-2xl shadow-2xl z-50"
                       style={{
-                        background: "#2C3438",
+                        background: "var(--ln-coal)",
                         border: "1px solid rgba(122,90,30,0.6)",
-                        boxShadow: "0 0 24px 4px rgba(203,177,131,0.16), 0 8px 32px rgba(44,52,56,0.8)",
+                        boxShadow: "0 0 24px 4px rgba(196,154,40,0.12), 0 8px 32px rgba(44,52,56,0.8)",
                         padding: "12px 14px 10px",
                         minWidth: "140px",
                       }}
                     >
                       {/* Volume % label */}
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "#CBB183" }}>
+                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>
                           {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
                         </span>
                         {/* Mute toggle */}
@@ -565,8 +565,8 @@ export default function PlayerBar() {
                           onClick={toggleMute}
                           className="p-1 rounded-full transition-all"
                           style={{
-                            color: state.isMuted ? "#CBB183" : "#3F4A50",
-                            background: state.isMuted ? "rgba(230,205,174,0.12)" : "transparent",
+                            color: state.isMuted ? "var(--ln-gold)" : "var(--ln-iron)",
+                            background: state.isMuted ? "rgba(196,154,40,0.08)" : "transparent",
                           }}
                           title={state.isMuted ? "Unmute" : "Mute"}
                         >
@@ -582,7 +582,7 @@ export default function PlayerBar() {
                           onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
                           className="volume-slider-vertical"
                           style={{
-                            background: `linear-gradient(to top, #E6CDAE ${
+                            background: `linear-gradient(to top, #E8DFC8 ${
                               state.isMuted ? 0 : state.volume * 100
                             }%, rgba(44,52,56,0.8) ${
                               state.isMuted ? 0 : state.volume * 100
@@ -596,9 +596,9 @@ export default function PlayerBar() {
                 <button
                   onClick={openTheater}
                   className="p-1.5 transition-colors ml-1"
-                  style={{ color: "#AA8E64" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}
+                  style={{ color: "var(--ln-smoke)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-smoke)")}
                   title="Open Theater Player"
                 >
                   <Maximize2 size={14} />
@@ -617,10 +617,10 @@ export default function PlayerBar() {
               className="px-3 py-2 flex items-center gap-2 flex-shrink-0"
               style={{ borderBottom: "1px solid rgba(44,52,56,0.55)" }}
             >
-              <MessageCircle size={11} style={{ color: "#CBB183" }} />
+              <MessageCircle size={11} style={{ color: "var(--ln-gold)" }} />
               <span
                 className="text-[10px] font-bold tracking-widest uppercase"
-                style={{ color: "#CBB183", fontFamily: "'Cinzel', serif" }}
+                style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
               >
                 Live Feed
               </span>
@@ -630,22 +630,22 @@ export default function PlayerBar() {
             <div
               ref={commentListRef}
               className="flex-1 overflow-y-auto px-3 py-2 space-y-2"
-              style={{ scrollbarWidth: "thin", scrollbarColor: "#2C3438 transparent" }}
+              style={{ scrollbarWidth: "thin", scrollbarColor: "#111009 transparent" }}
             >
               {commentsData && commentsData.length > 0 ? (
                 commentsData.map((c: any) => (
                   <div key={c.id} className="flex gap-2">
                     <div
                       className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold mt-0.5"
-                      style={{ background: "#2C3438", color: "#CBB183" }}
+                      style={{ background: "var(--ln-coal)", color: "var(--ln-gold)" }}
                     >
                       {(c.authorName ?? "?")[0].toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="text-[10px] font-semibold mr-1.5" style={{ color: "#4ADE80" }}>
+                      <span className="text-[10px] font-semibold mr-1.5" style={{ color: "var(--ln-seal-bright)" }}>
                         {c.authorName ?? "Anonymous"}
                       </span>
-                      <span className="text-[11px] leading-relaxed" style={{ color: "#DACAAA" }}>
+                      <span className="text-[11px] leading-relaxed" style={{ color: "var(--ln-parchment)" }}>
                         {c.content}
                       </span>
                     </div>
@@ -653,8 +653,8 @@ export default function PlayerBar() {
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center h-full py-4 opacity-40">
-                  <MessageCircle size={20} style={{ color: "#CBB183" }} className="mb-1.5" />
-                  <p className="text-[11px] italic" style={{ color: "#AA8E64" }}>
+                  <MessageCircle size={20} style={{ color: "var(--ln-gold)" }} className="mb-1.5" />
+                  <p className="text-[11px] italic" style={{ color: "var(--ln-smoke)" }}>
                     No witnesses yet.
                   </p>
                 </div>
@@ -675,18 +675,18 @@ export default function PlayerBar() {
                 maxLength={500}
                 className="flex-1 rounded-md px-2.5 py-1.5 text-[11px] outline-none transition-colors disabled:opacity-50"
                 style={{
-                  background: "#2C3438",
-                  border: "1px solid #2C3438",
-                  color: "#E6CDAE",
+                  background: "var(--ln-coal)",
+                  border: "1px solid #111009",
+                  color: "var(--ln-parchment)",
                 }}
-                onFocus={e => (e.currentTarget.style.borderColor = "rgba(203,177,131,0.5)")}
-                onBlur={e => (e.currentTarget.style.borderColor = "#2C3438")}
+                onFocus={e => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.42)")}
+                onBlur={e => (e.currentTarget.style.borderColor = "var(--ln-coal)")}
               />
               <button
                 onClick={submitComment}
                 disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                 className="px-2.5 py-1.5 rounded-md text-[10px] font-bold transition-colors disabled:opacity-40"
-                style={{ background: "#CBB183", color: "#2C3438" }}
+                style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
               >
                 Post
               </button>
@@ -699,7 +699,7 @@ export default function PlayerBar() {
       {!isExpanded && (
         <div
           className="flex items-center gap-4"
-          style={{ height: "68px", backgroundColor: "#2C3438", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible" }}
+          style={{ height: "68px", backgroundColor: "var(--ln-coal)", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible" }}
         >
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
@@ -709,7 +709,7 @@ export default function PlayerBar() {
               disabled={!currentSongId}
               className="w-14 h-14 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl
                 transition-opacity hover:opacity-80 disabled:cursor-default"
-              style={{ background: currentTrack?.bg || "#2C3438" }}
+              style={{ background: currentTrack?.bg || "var(--ln-coal)" }}
               title={currentTrack?.title || ""}
             >
               {currentTrack?.artUrl && currentTrack.artType !== "video"
@@ -726,8 +726,8 @@ export default function PlayerBar() {
                 onClick={goToSong}
                 disabled={!currentSongId}
                 className="text-[13.5px] font-semibold truncate block w-full text-left
-                  transition-colors hover:text-[#CBB183] disabled:cursor-default"
-                style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif", letterSpacing: "0.03em" }}
+                  transition-colors hover:text-[#C49A28] disabled:cursor-default"
+                style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif", letterSpacing: "0.03em" }}
               >
                 {currentTrack?.title || "No track selected"}
               </button>
@@ -737,7 +737,7 @@ export default function PlayerBar() {
                 disabled={!currentTrack}
                 className="text-[11px] truncate block w-full text-left
                   transition-colors hover:opacity-80 disabled:cursor-default"
-                style={{ color: "#AA8E64" }}
+                style={{ color: "var(--ln-smoke)" }}
               >
                 {currentTrack?.artist || "—"}
               </button>
@@ -746,7 +746,7 @@ export default function PlayerBar() {
                 <button
                   onClick={goToVerify}
                   className="text-[9px] font-mono truncate block text-left transition-opacity hover:opacity-80 mt-0.5"
-                  style={{ color: "rgba(203,177,131,0.6)" }}
+                  style={{ color: "rgba(196,154,40,0.5)" }}
                   title="View Witness Certificate"
                 >
                   {currentTrack.witnessId.slice(0, 18)}…
@@ -770,8 +770,8 @@ export default function PlayerBar() {
             <div className="flex items-center gap-4" style={{ marginTop: "6px" }}>
               <button
                 onClick={toggleShuffle}
-                className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#D0A15F]" : "hover:text-[#CBB183]"}`}
-                style={{ color: state.isShuffle ? "#D0A15F" : "#AA8E64" }}
+                className={`p-1.5 transition-colors ${state.isShuffle ? "text-[#B8860B]" : "hover:text-[#C49A28]"}`}
+                style={{ color: state.isShuffle ? "var(--ln-gold-dim)" : "var(--ln-smoke)" }}
               >
                 <Shuffle size={14} />
               </button>
@@ -781,22 +781,22 @@ export default function PlayerBar() {
               <button
                 onClick={togglePlay}
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-                style={{ background: "#E6CDAE", color: "#2C3438" }}
+                style={{ background: "var(--ln-parchment)", color: "var(--ln-coal)" }}
               >
                 {state.isPlaying
                   ? <Pause size={17} fill="currentColor" />
                   : <Play size={17} fill="currentColor" className="ml-0.5" />
                 }
               </button>
-              <button type="button" onClick={nextTrack} className="p-1.5 transition-colors" style={{ color: "#AA8E64" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}>
+              <button type="button" onClick={nextTrack} className="p-1.5 transition-colors" style={{ color: "var(--ln-smoke)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-smoke)")}>
                 <SkipForward size={18} />
               </button>
               <button
                 onClick={toggleRepeat}
-                className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#D0A15F]" : "hover:text-[#CBB183]"}`}
-                style={{ color: state.isRepeat ? "#D0A15F" : "#AA8E64" }}
+                className={`p-1.5 transition-colors ${state.isRepeat ? "text-[#B8860B]" : "hover:text-[#C49A28]"}`}
+                style={{ color: state.isRepeat ? "var(--ln-gold-dim)" : "var(--ln-smoke)" }}
               >
                 <Repeat size={14} />
               </button>
@@ -804,7 +804,7 @@ export default function PlayerBar() {
 
             {/* Progress bar with animated gold playhead */}
             <div className="flex items-center gap-2 w-full max-w-[520px]">
-              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "#AA8E64" }}>
+              <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: "var(--ln-smoke)" }}>
                 {fmtTime(state.currentTime)}
               </span>
               <div
@@ -816,26 +816,26 @@ export default function PlayerBar() {
                   className="h-full rounded-full relative transition-all"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, #EF4444 0%, #AA8E64 50%, #E6CDAE 100%)",
-                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(203,177,131,0.40)" : "none",
+                    background: "linear-gradient(90deg, #EF4444 0%, #6B6555 50%, #E8DFC8 100%)",
+                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(196,154,40,0.35)" : "none",
                   }}
                 >
                   {state.isPlaying && (
                     <div
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full progress-playhead"
-                      style={{ background: "#E6CDAE", boxShadow: "0 0 8px 3px rgba(203,177,131,0.8)" }}
+                      style={{ background: "var(--ln-parchment)", boxShadow: "0 0 8px 3px rgba(196,154,40,0.7)" }}
                     />
                   )}
                   {!state.isPlaying && (
                     <div
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full
                         opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: "#E6CDAE" }}
+                      style={{ background: "var(--ln-parchment)" }}
                     />
                   )}
                 </div>
               </div>
-              <span className="text-[11px] w-8 tabular-nums" style={{ color: "#AA8E64" }}>
+              <span className="text-[11px] w-8 tabular-nums" style={{ color: "var(--ln-smoke)" }}>
                 {fmtTime(state.duration)}
               </span>
             </div>
@@ -857,7 +857,7 @@ export default function PlayerBar() {
                 disabled={!tipsEnabled}
                 className={`p-1.5 transition-colors ${
                   tipsEnabled
-                    ? "text-[#CBB183] hover:text-[#E6CDAE]"
+                    ? "text-[#C49A28] hover:text-[#E8DFC8]"
                     : "text-white/15 cursor-not-allowed"
                 }`}
                 title={tipsEnabled ? `Tip ${currentTrack.artist}` : "Tips not enabled yet"}
@@ -886,9 +886,9 @@ export default function PlayerBar() {
                   } catch {}
                 }}
                 className="p-1.5 transition-colors"
-                style={{ color: "#AA8E64" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}
+                style={{ color: "var(--ln-smoke)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-smoke)")}
                 title={`Share: ${currentTrack.title}`}
               >
                 <Share2 size={14} />
@@ -911,9 +911,9 @@ export default function PlayerBar() {
                 <button
                   onClick={triggerDownload}
                   className="p-1.5 transition-colors"
-                  style={{ color: "#AA8E64" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "#AA8E64")}
+                  style={{ color: "var(--ln-smoke)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-smoke)")}
                   title={dlPerm === "tipped" ? "Download (tip required)" : "Download track — WID travels with the file 🔐"}
                 >
                   <Download size={14} />
@@ -926,9 +926,9 @@ export default function PlayerBar() {
               <button
                 onClick={e => { setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setAddToListOpen(true); }}
                 className="p-1.5 transition-colors flex-shrink-0"
-                style={{ color: "#CBB183" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#CBB183")}
+                style={{ color: "var(--ln-gold)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-gold)")}
                 title="Add to My List"
               >
                 <ListPlus size={15} />
@@ -941,9 +941,9 @@ export default function PlayerBar() {
               <button
                 onClick={() => setShowVolume(v => !v)}
                 className="p-1 transition-colors"
-                style={{ color: state.isMuted ? "#3F4A50" : "#AA8E64" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#E6CDAE")}
-                onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "#3F4A50" : "#AA8E64")}
+                style={{ color: state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
+                onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)")}
                 title="Volume"
               >
                 {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -953,24 +953,24 @@ export default function PlayerBar() {
                   className="absolute bottom-12 right-0 rounded-2xl shadow-2xl"
                   style={{
                     zIndex: 9990,
-                    background: "#2C3438",
+                    background: "var(--ln-coal)",
                     border: "1px solid rgba(122,90,30,0.6)",
-                    boxShadow: "0 0 24px 4px rgba(203,177,131,0.16), 0 8px 32px rgba(44,52,56,0.8)",
+                    boxShadow: "0 0 24px 4px rgba(196,154,40,0.12), 0 8px 32px rgba(44,52,56,0.8)",
                     padding: "12px 14px 10px",
                     minWidth: "140px",
                   }}
                 >
                   {/* Header row: label + mute */}
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "#CBB183" }}>
+                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>
                       {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
                     </span>
                     <button
                       onClick={toggleMute}
                       className="p-1 rounded-full transition-all"
                       style={{
-                        color: state.isMuted ? "#CBB183" : "#3F4A50",
-                        background: state.isMuted ? "rgba(230,205,174,0.12)" : "transparent",
+                        color: state.isMuted ? "var(--ln-gold)" : "var(--ln-iron)",
+                        background: state.isMuted ? "rgba(196,154,40,0.08)" : "transparent",
                       }}
                       title={state.isMuted ? "Unmute" : "Mute"}
                     >
@@ -986,7 +986,7 @@ export default function PlayerBar() {
                       onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
                       className="volume-slider-vertical"
                       style={{
-                        background: `linear-gradient(to top, #E6CDAE ${
+                        background: `linear-gradient(to top, #E8DFC8 ${
                           state.isMuted ? 0 : state.volume * 100
                         }%, rgba(44,52,56,0.8) ${
                           state.isMuted ? 0 : state.volume * 100
@@ -1002,9 +1002,9 @@ export default function PlayerBar() {
             <button
               onClick={() => { setIsCinematic(c => !c); setIsExpanded(false); }}
               className="p-1.5 transition-colors ml-1"
-              style={{ color: isCinematic ? "#CBB183" : "#AA8E64" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
-              onMouseLeave={e => (e.currentTarget.style.color = isCinematic ? "#CBB183" : "#AA8E64")}
+              style={{ color: isCinematic ? "var(--ln-gold)" : "var(--ln-smoke)" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+              onMouseLeave={e => (e.currentTarget.style.color = isCinematic ? "var(--ln-gold)" : "var(--ln-smoke)")}
               title={isCinematic ? "Exit Cinematic View" : "Cinematic View"}
             >
               {isCinematic ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -1016,9 +1016,9 @@ export default function PlayerBar() {
                 onClick={cycleSpeed}
                 className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all ml-1"
                 style={{
-                  color: playbackRate !== 1 ? "#CBB183" : "#3F4A50",
-                  background: playbackRate !== 1 ? "rgba(203,177,131,0.10)" : "transparent",
-                  border: `1px solid ${playbackRate !== 1 ? "rgba(230,205,174,0.4)" : "rgba(44,52,56,0.5)"}`,
+                  color: playbackRate !== 1 ? "var(--ln-gold)" : "var(--ln-iron)",
+                  background: playbackRate !== 1 ? "rgba(196,154,40,0.08)" : "transparent",
+                  border: `1px solid ${playbackRate !== 1 ? "rgba(196,154,40,0.3)" : "rgba(44,52,56,0.5)"}`,
                   minWidth: "30px",
                 }}
                 title="Cycle playback speed"
@@ -1033,9 +1033,9 @@ export default function PlayerBar() {
                 <button
                   onClick={() => setShowContextMenu(v => !v)}
                   className="p-1.5 rounded transition-all"
-                  style={{ color: showContextMenu ? "#CBB183" : "#3F4A50" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#CBB183")}
-                  onMouseLeave={e => (e.currentTarget.style.color = showContextMenu ? "#CBB183" : "#3F4A50")}
+                  style={{ color: showContextMenu ? "var(--ln-gold)" : "var(--ln-iron)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = showContextMenu ? "var(--ln-gold)" : "var(--ln-iron)")}
                   title="More options"
                 >
                   <MoreHorizontal size={16} />
@@ -1045,9 +1045,9 @@ export default function PlayerBar() {
                     className="absolute bottom-12 right-0 rounded-2xl shadow-2xl overflow-hidden"
                     style={{
                       zIndex: 9990,
-                      background: "#2C3438",
+                      background: "var(--ln-coal)",
                       border: "1px solid rgba(122,90,30,0.55)",
-                      boxShadow: "0 0 28px 4px rgba(203,177,131,0.15), 0 8px 32px rgba(44,52,56,0.85)",
+                      boxShadow: "0 0 28px 4px rgba(196,154,40,0.12), 0 8px 32px rgba(44,52,56,0.85)",
                       minWidth: "160px",
                     }}
                   >
@@ -1055,9 +1055,9 @@ export default function PlayerBar() {
                     <button
                       onClick={() => { setShowContextMenu(false); goToSong(); }}
                       className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                      style={{ color: "#DACAAA" }}
+                      style={{ color: "var(--ln-parchment)" }}
                     >
-                      <ExternalLink size={13} style={{ color: "#AA8E64" }} />
+                      <ExternalLink size={13} style={{ color: "var(--ln-smoke)" }} />
                       Go to Song
                     </button>
                     {/* Share */}
@@ -1069,9 +1069,9 @@ export default function PlayerBar() {
                         try { await navigator.clipboard.writeText(url); } catch {}
                       }}
                       className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                      style={{ color: "#DACAAA" }}
+                      style={{ color: "var(--ln-parchment)" }}
                     >
-                      <Share2 size={13} style={{ color: "#AA8E64" }} />
+                      <Share2 size={13} style={{ color: "var(--ln-smoke)" }} />
                       Share
                     </button>
                     {/* Download */}
@@ -1090,9 +1090,9 @@ export default function PlayerBar() {
                             document.body.removeChild(a);
                           }}
                           className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                          style={{ color: "#DACAAA" }}
+                          style={{ color: "var(--ln-parchment)" }}
                         >
-                          <Download size={13} style={{ color: "#AA8E64" }} />
+                          <Download size={13} style={{ color: "var(--ln-smoke)" }} />
                           Download
                         </button>
                       );
@@ -1106,9 +1106,9 @@ export default function PlayerBar() {
                           setAddToListOpen(true);
                         }}
                         className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                        style={{ color: "#DACAAA" }}
+                        style={{ color: "var(--ln-parchment)" }}
                       >
-                        <ListPlus size={13} style={{ color: "#AA8E64" }} />
+                        <ListPlus size={13} style={{ color: "var(--ln-smoke)" }} />
                         Add to List
                       </button>
                     )}
@@ -1116,9 +1116,9 @@ export default function PlayerBar() {
                     <button
                       onClick={() => { setShowContextMenu(false); navigate("/archive"); }}
                       className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left border-t"
-                      style={{ color: "#DACAAA", borderColor: "rgba(44,52,56,0.5)" }}
+                      style={{ color: "var(--ln-parchment)", borderColor: "rgba(44,52,56,0.5)" }}
                     >
-                      <List size={13} style={{ color: "#AA8E64" }} />
+                      <List size={13} style={{ color: "var(--ln-smoke)" }} />
                       View Queue
                     </button>
                   </div>

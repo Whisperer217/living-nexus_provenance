@@ -37,7 +37,7 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
   const likeCount = prefetchedLikeCount ?? 0;
   const artistName = creator?.artistHandle || creator?.name || "Unknown";
   const isComic = song.contentType === "comic";
-  const accentColor = isComic ? "#EF4444" : "#4ADE80";
+  const accentColor = isComic ? "var(--ln-ember)" : "var(--ln-seal-bright)";
   const accentBg   = isComic ? "rgba(239,68,68,0.12)" : "rgba(74,222,128,0.10)";
   const typeLabel  = isComic ? "Comic / Novel" : "Manuscript";
 
@@ -45,8 +45,8 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
     <div
       className="group relative flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200"
       style={{
-        background: "linear-gradient(160deg, #1E2D3A 0%, #232E35 60%, #2C3438 100%)",
-        border: "1px solid rgba(203,177,131,0.18)",
+        background: "linear-gradient(160deg, #1E2D3A 0%, #232E35 60%, #111009 100%)",
+        border: "1px solid rgba(196,154,40,0.15)",
         boxShadow: "0 2px 12px rgba(0,0,0,0.35)",
       }}
       onClick={() => navigate(`/book/${song.id}`)}
@@ -61,8 +61,8 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #1E2D3A, #2C3438)" }}>
-            <ImageIcon className="w-10 h-10 opacity-20" style={{ color: "#CBB183" }} />
+            style={{ background: "linear-gradient(135deg, #1E2D3A, #111009)" }}>
+            <ImageIcon className="w-10 h-10 opacity-20" style={{ color: "var(--ln-gold)" }} />
           </div>
         )}
 
@@ -83,7 +83,7 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
             href={`/verify/${song.witnessId}`}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
             className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider transition-opacity opacity-90 hover:opacity-100"
-            style={{ background: "rgba(0,0,0,0.72)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.55)" }}
+            style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
             title={`Verified Witness ID: ${song.witnessId}`}
           >
             <Shield size={8} /><span>WID</span>
@@ -103,7 +103,7 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
       {/* ── Info panel ── */}
       <div className="p-3 flex flex-col gap-1.5 flex-1">
         {/* Title */}
-        <p className="text-[13px] font-heading text-white/90 leading-tight line-clamp-2 tracking-wide group-hover:text-[#CBB183] transition-colors"
+        <p className="text-[13px] font-heading text-white/90 leading-tight line-clamp-2 tracking-wide group-hover:text-[#C49A28] transition-colors"
           title={song.title}>
           {song.title}
         </p>
@@ -118,7 +118,7 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
             <Link
               href={`/creator/${creator.id}`}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="truncate hover:text-[#CBB183] transition-colors"
+              className="truncate hover:text-[#C49A28] transition-colors"
             >
               {artistName}
             </Link>
@@ -131,7 +131,7 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
         <div className="flex items-center justify-between mt-auto pt-1">
           {song.genre ? (
             <span className="text-[9px] px-2 py-0.5 rounded-full font-body truncate max-w-[70%]"
-              style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid rgba(203,177,131,0.18)" }}>
+              style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.15)" }}>
               {(song.genre as string).split(/[,/|]+/)[0].trim()}
             </span>
           ) : <span />}

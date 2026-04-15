@@ -208,7 +208,7 @@ function PlaylistCard({
 
   return (
     <div className="rounded-xl border border-white/8 overflow-hidden"
-      style={{ background: "#2C3438" }}>
+      style={{ background: "var(--ln-coal)" }}>
       {/* Header */}
       <div className="flex items-center gap-3 p-4">
         <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
@@ -290,7 +290,7 @@ function PlaylistCard({
               <div
                 key={i}
                 className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-white/3"
-                style={isCurrentAmbient ? { background: "rgba(230,205,174,0.08)" } : {}}
+                style={isCurrentAmbient ? { background: "rgba(196,154,40,0.05)" } : {}}
               >
                 {track.thumbnailUrl ? (
                   <img
@@ -305,7 +305,7 @@ function PlaylistCard({
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate"
-                    style={{ color: isCurrentAmbient ? "#CBB183" : "#DACAAA" }}>
+                    style={{ color: isCurrentAmbient ? "var(--ln-gold)" : "var(--ln-parchment)" }}>
                     {track.title}
                   </p>
                   {track.artist && track.artist !== "External" && track.artist !== "YouTube" && track.artist !== "Suno" && (

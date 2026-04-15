@@ -15,15 +15,15 @@ import {
   Minus, ChevronDown, ChevronUp, ExternalLink, Copy, RefreshCw,
 } from "lucide-react";
 
-const GOLD = "#CBB183";
-const BG = "#E6CDAE";
-const CARD = "#2C3438";
-const BORDER = "#2C3438";
+const GOLD = "var(--ln-gold)";
+const BG = "var(--ln-parchment)";
+const CARD = "var(--ln-coal)";
+const BORDER = "var(--ln-coal)";
 const TEXT = "#E2E8F0";
 const SUBTEXT = "#94A3B8";
-const GREEN = "#4ADE80";
-const YELLOW = "#CBB183";
-const RED = "#EF4444";
+const GREEN = "var(--ln-seal-bright)";
+const YELLOW = "var(--ln-gold)";
+const RED = "var(--ln-ember)";
 
 const LAYER_LABELS: Record<string, string> = {
   layer2Status: "L2 — Infrastructure & Hosting",

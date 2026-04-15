@@ -42,18 +42,18 @@ function RelatedCard({ item }: { item: any }) {
   return (
     <Link href={`/song/${song.id}`}>
       <div className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-white/[0.04] transition-all group">
-        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "#2C3438" }}>
+        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
           {song.coverArtUrl
             ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-            : <Music className="w-5 h-5 opacity-30" style={{ color: "#CBB183" }} />}
+            : <Music className="w-5 h-5 opacity-30" style={{ color: "var(--ln-gold)" }} />}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
-          <p className="text-xs truncate" style={{ color: "#AA8E64" }}>
+          <p className="text-sm font-medium truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+          <p className="text-xs truncate" style={{ color: "var(--ln-smoke)" }}>
             {creator?.artistHandle || creator?.name || "Unknown"}
           </p>
         </div>
-        <Play className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0" style={{ color: "#CBB183" }} />
+        <Play className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
       </div>
     </Link>
   );
@@ -362,19 +362,19 @@ export default function SongDetailPage() {
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
       <div className="text-center space-y-3">
-        <div className="w-16 h-16 rounded-2xl mx-auto animate-pulse" style={{ background: "rgba(203,177,131,0.18)" }} />
-        <p className="text-sm" style={{ color: "#AA8E64" }}>Loading track...</p>
+        <div className="w-16 h-16 rounded-2xl mx-auto animate-pulse" style={{ background: "rgba(196,154,40,0.15)" }} />
+        <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>Loading track...</p>
       </div>
     </div>
   );
 
   if (!song || !songData) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
       <div className="text-center">
-        <p style={{ color: "#AA8E64" }}>Song not found.</p>
-        <Link href="/"><Button className="mt-4" style={{ background: "#CBB183", color: "#E6CDAE" }}>Go Home</Button></Link>
+        <p style={{ color: "var(--ln-smoke)" }}>Song not found.</p>
+        <Link href="/"><Button className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Go Home</Button></Link>
       </div>
     </div>
   );
@@ -391,7 +391,7 @@ export default function SongDetailPage() {
   const embedVideoUrl = (song as any).embedVideoUrl as string | undefined;
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: "#2C3438" }}>
+    <div className="min-h-screen pb-8" style={{ background: "var(--ln-coal)" }}>
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
@@ -435,12 +435,12 @@ export default function SongDetailPage() {
           <div
             className="mb-6 rounded-2xl p-5 text-center animate-fade-up"
             style={{
-              background: "rgba(203,177,131,0.08)",
-              border: "1px solid rgba(203,177,131,0.35)",
+              background: "rgba(196,154,40,0.06)",
+              border: "1px solid rgba(196,154,40,0.3)",
             }}
           >
             <div className="text-2xl mb-2">🙏</div>
-            <p className="font-heading text-base mb-1" style={{ color: "#CBB183" }}>
+            <p className="font-heading text-base mb-1" style={{ color: "var(--ln-gold)" }}>
               Gift received — thank you!
             </p>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
@@ -450,7 +450,7 @@ export default function SongDetailPage() {
               type="button"
               onClick={() => setTipSuccess(false)}
               className="mt-3 text-xs opacity-50 hover:opacity-80 transition-opacity"
-              style={{ color: "#CBB183" }}
+              style={{ color: "var(--ln-gold)" }}
             >
               Dismiss ✕
             </button>
@@ -467,7 +467,7 @@ export default function SongDetailPage() {
                 {(song as any).videoUrl && (
                   <div
                     className="w-full rounded-2xl overflow-hidden mb-3"
-                    style={{ aspectRatio: "16/9", background: "#2C3438" }}
+                    style={{ aspectRatio: "16/9", background: "var(--ln-coal)" }}
                   >
                     {showVideo ? (
                       <video
@@ -483,14 +483,14 @@ export default function SongDetailPage() {
                       <div
                         className="w-full h-full flex items-center justify-center cursor-pointer group"
                         onClick={() => setShowVideo(true)}
-                        style={{ background: "#2C3438" }}
+                        style={{ background: "var(--ln-coal)" }}
                       >
                         {song.coverArtUrl
                           ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-                          : <Music className="w-16 h-16 opacity-10" style={{ color: "#CBB183" }} />}
+                          : <Music className="w-16 h-16 opacity-10" style={{ color: "var(--ln-gold)" }} />}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold"
-                            style={{ background: "#CBB183", color: "#2C3438" }}>
+                            style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>
                             <Video size={14} /> Watch Video
                           </div>
                         </div>
@@ -504,9 +504,9 @@ export default function SongDetailPage() {
                     onClick={() => setShowVideo(v => !v)}
                     className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg mb-3 transition-all"
                     style={{
-                      background: showVideo ? "rgba(203,177,131,0.12)" : "#2C3438",
-                      color: showVideo ? "#CBB183" : "#3F4A50",
-                      border: `1px solid ${showVideo ? "rgba(203,177,131,0.35)" : "#CBB183"}`,
+                      background: showVideo ? "rgba(196,154,40,0.08)" : "var(--ln-coal)",
+                      color: showVideo ? "var(--ln-gold)" : "var(--ln-iron)",
+                      border: `1px solid ${showVideo ? "rgba(196,154,40,0.3)" : "var(--ln-gold)"}`,
                     }}
                   >
                     {showVideo ? <><ImageIcon size={12} /> Cover Art</> : <><Video size={12} /> Music Video</>}
@@ -516,12 +516,12 @@ export default function SongDetailPage() {
                 {!(song as any).videoUrl && (
                   <div
                     className="relative w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex items-center justify-center group cursor-pointer"
-                    style={{ background: "linear-gradient(135deg, #2C3438, #2C3438)" }}
+                    style={{ background: "linear-gradient(135deg, var(--ln-coal), #111009)" }}
                     onClick={song.fileUrl ? handlePlay : undefined}
                   >
                     {song.coverArtUrl
                       ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-                      : <Music className="w-20 h-20 opacity-10" style={{ color: "#CBB183" }} />}
+                      : <Music className="w-20 h-20 opacity-10" style={{ color: "var(--ln-gold)" }} />}
                     {/* Play/pause overlay — always visible when active, hover-visible otherwise */}
                     {song.fileUrl && (
                       <div className={`absolute inset-0 flex items-center justify-center transition-all ${
@@ -531,7 +531,7 @@ export default function SongDetailPage() {
                           className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all ${
                             isThisTrackActive ? "opacity-100 scale-100" : "opacity-0 group-hover:opacity-100 group-hover:scale-100 scale-90"
                           }`}
-                          style={{ background: "#CBB183", color: "#E6CDAE" }}
+                          style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
                         >
                           {isPlaying
                             ? <Pause className="w-6 h-6" />
@@ -545,19 +545,19 @@ export default function SongDetailPage() {
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold leading-tight mb-2"
-                    style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+                    style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                     {song.title}
                   </h1>
                   {creator && (
                     <Link href={`/creator/${creator.id}`}>
                       <div className="flex items-center gap-2 mb-3 hover:opacity-80 cursor-pointer">
                         <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold"
-                          style={{ background: "#2C3438" }}>
+                          style={{ background: "var(--ln-coal)" }}>
                           {creator.profilePhotoUrl
                             ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover" />
-                            : <span style={{ color: "#CBB183" }}>{(creator.artistHandle || creator.name || "?").charAt(0)}</span>}
+                            : <span style={{ color: "var(--ln-gold)" }}>{(creator.artistHandle || creator.name || "?").charAt(0)}</span>}
                         </div>
-                        <span className="text-sm font-medium" style={{ color: "#DACAAA" }}>
+                        <span className="text-sm font-medium" style={{ color: "var(--ln-parchment)" }}>
                           {creator.artistHandle || creator.name}
                         </span>
                       </div>
@@ -567,8 +567,8 @@ export default function SongDetailPage() {
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     <Badge style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{_ctc.icon} {_ctc.label}</Badge>
                     {song.genre && <Badge style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{song.genre}</Badge>}
-                    {song.bpm && <Badge style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid #CBB183", fontSize: "11px" }}>{song.bpm} BPM</Badge>}
-                    {song.keySignature && <Badge style={{ background: "#2C3438", color: "#AA8E64", border: "1px solid #CBB183", fontSize: "11px" }}>{song.keySignature}</Badge>}
+                    {song.bpm && <Badge style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #C49A28", fontSize: "11px" }}>{song.bpm} BPM</Badge>}
+                    {song.keySignature && <Badge style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #C49A28", fontSize: "11px" }}>{song.keySignature}</Badge>}
                     {song.witnessId && (
                       <WIDPanel
                         witnessId={song.witnessId}
@@ -590,9 +590,9 @@ export default function SongDetailPage() {
                       const disc = (song as any).aiDisclosure || creator?.aiDisclosure;
                       if (!disc || disc === "original") return null;
                       const map: Record<string, { label: string; bg: string; fg: string; border: string }> = {
-                        ai_generated: { label: "AI-Generated", bg: "rgba(239,68,68,0.15)", fg: "#EF4444", border: "rgba(239,68,68,0.4)" },
-                        ai_assisted: { label: "AI-Assisted", bg: "rgba(170,142,100,0.15)", fg: "#E6CDAE", border: "rgba(170,142,100,0.4)" },
-                        human_authored_ai_instrument: { label: "HAAI — Human-Authored", bg: "rgba(203,177,131,0.12)", fg: "#CBB183", border: "rgba(203,177,131,0.35)" },
+                        ai_generated: { label: "AI-Generated", bg: "rgba(196,68,10,0.15)", fg: "var(--ln-ember)", border: "rgba(239,68,68,0.4)" },
+                        ai_assisted: { label: "AI-Assisted", bg: "rgba(170,142,100,0.15)", fg: "var(--ln-parchment)", border: "rgba(170,142,100,0.4)" },
+                        human_authored_ai_instrument: { label: "HAAI — Human-Authored", bg: "rgba(196,154,40,0.08)", fg: "var(--ln-gold)", border: "rgba(196,154,40,0.3)" },
                       };
                       const style = map[disc];
                       if (!style) return null;
@@ -613,8 +613,8 @@ export default function SongDetailPage() {
                   {!isOwner && (
                     <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
                        style={isLiked
-                         ? { borderColor: "rgba(239,68,68,0.6)", color: "#EF4444" }
-                         : { borderColor: "#C3AB7D", color: "#AA8E64" }}>
+                         ? { borderColor: "rgba(239,68,68,0.6)", color: "var(--ln-ember)" }
+                         : { borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
                        <Heart className="w-3.5 h-3.5 mr-1" fill={isLiked ? "currentColor" : "none"} />
                        {isLiked ? "Liked" : "Like"}
                        {likeCount > 0 && (
@@ -633,7 +633,7 @@ export default function SongDetailPage() {
                     if (dlPerm === "free") return (
                       <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })}
                         disabled={downloadMutation.isPending}
-                        style={{ borderColor: "#C3AB7D", color: "#AA8E64" }}>
+                        style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
                         <Download className="w-3.5 h-3.5 mr-1" />{downloadMutation.isPending ? "…" : "Download"}
                       </Button>
                     );
@@ -642,18 +642,18 @@ export default function SongDetailPage() {
                         onClick={() => tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin })}
                         disabled={tipDownloadMutation.isPending}
                         title={`Tip $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`}
-                        style={{ borderColor: "rgba(203,177,131,0.35)", color: "#CBB183" }}>
+                        style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
                         <Download className="w-3.5 h-3.5 mr-1" />{tipDownloadMutation.isPending ? "Processing…" : `Download ($${((tipCents ?? 179) / 100).toFixed(2)} tip)`}
                       </Button>
                     );
                     return null;
                   })()}
                   <Button size="sm" variant="outline" onClick={() => setVersionHistoryOpen(true)}
-                    style={{ borderColor: "rgba(203,177,131,0.28)", color: "#CBB183" }}>
+                    style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>
                     <History className="w-3.5 h-3.5 mr-1" />Versions
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setShareOpen(true)}
-                    style={{ borderColor: "#C3AB7D", color: "#AA8E64" }}>
+                    style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
                     <Share2 className="w-3.5 h-3.5 mr-1" />Share
                   </Button>
                   {song && (
@@ -669,7 +669,7 @@ export default function SongDetailPage() {
                       }}
                       trigger={
                         <Button size="sm" variant="outline"
-                          style={{ borderColor: "rgba(203,177,131,0.28)", color: "rgba(230,205,174,0.7)" }}
+                          style={{ borderColor: "rgba(196,154,40,0.25)", color: "rgba(232,223,200,0.6)" }}
                           className="gap-1.5"
                         >
                           <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -684,7 +684,7 @@ export default function SongDetailPage() {
                     />
                   )}
                   <Button size="sm" variant="outline" onClick={() => setAiTransformOpen(true)}
-                    style={{ borderColor: "rgba(203,177,131,0.4)", color: "#CBB183" }}>
+                    style={{ borderColor: "rgba(196,154,40,0.34)", color: "var(--ln-gold)" }}>
                     <Wand2 className="w-3.5 h-3.5 mr-1" />AI Transform
                   </Button>
                   {!isOwner && (
@@ -704,13 +704,13 @@ export default function SongDetailPage() {
 
             {/* ── PROMINENT TIP PANEL ── */}
             {tipsEnabled && !isOwner && (
-              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #2C3438)", border: "1px solid rgba(203,177,131,0.32)" }}>
+              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #111009)", border: "1px solid rgba(196,154,40,0.3)" }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <DollarSign className="w-4 h-4" style={{ color: "#CBB183" }} />
-                  <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>
+                  <DollarSign className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+                  <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
                     Gift {creator?.artistHandle || creator?.name}
                   </p>
-                  <span className="text-xs ml-auto" style={{ color: "#3F4A50" }}>90% goes directly to the artist</span>
+                  <span className="text-xs ml-auto" style={{ color: "var(--ln-iron)" }}>90% goes directly to the artist</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {["1", "2", "5", "10", "25"].map(amt => (
@@ -719,7 +719,7 @@ export default function SongDetailPage() {
                       onClick={() => { setTipAmount(amt); tipMutation.mutate({ songId: song.id, amountCents: Math.round(parseFloat(amt) * 100), origin: window.location.origin }); }}
                       disabled={tipMutation.isPending}
                       className="px-4 py-2 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
-                      style={{ background: "#CBB183", color: "#E6CDAE" }}
+                      style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
                     >
                       ${amt}
                     </button>
@@ -727,7 +727,7 @@ export default function SongDetailPage() {
                   <button
                     onClick={() => setTipOpen(true)}
                     className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95"
-                    style={{ background: "#2C3438", color: "#DACAAA", border: "1px solid #C3AB7D" }}
+                    style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)", border: "1px solid #C3AB7D" }}
                   >
                     Custom
                   </button>
@@ -737,11 +737,11 @@ export default function SongDetailPage() {
 
             {/* Witness ID */}
             {song.witnessId && (
-              <div id="witness-records" className="rounded-2xl p-5" style={{ background: "rgba(203,177,131,0.06)", border: "1px solid rgba(203,177,131,0.25)" }}>
+              <div id="witness-records" className="rounded-2xl p-5" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.2)" }}>
                 <div className="flex items-start gap-3">
-                  <Shield className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "#CBB183" }} />
+                  <Shield className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>Witness ID Certified</p>
+                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Witness ID Certified</p>
                     <p className="text-xs font-mono break-all" style={{ color: "#E2E8F0" }}>{song.witnessId}</p>
                     {song.createdAt && (
                       <p className="text-xs mt-1" style={{ color: "#E2E8F0" }}>
@@ -750,7 +750,7 @@ export default function SongDetailPage() {
                     )}
                     {song.certificateUrl && (
                       <a href={song.certificateUrl} target="_blank" rel="noreferrer"
-                        className="flex items-center gap-1 text-xs mt-2 hover:underline" style={{ color: "#CBB183" }}>
+                        className="flex items-center gap-1 text-xs mt-2 hover:underline" style={{ color: "var(--ln-gold)" }}>
                         <ExternalLink className="w-3 h-3" />View Certificate
                       </a>
                     )}
@@ -761,20 +761,20 @@ export default function SongDetailPage() {
 
             {/* Sovereign Stamp Badge — shown when stamp has been applied */}
             {(song as any).sovereignStampId && (
-              <div className="rounded-2xl p-5" style={{ background: "rgba(230,205,174,0.05)", border: "1px solid rgba(203,177,131,0.32)" }}>
+              <div className="rounded-2xl p-5" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.3)" }}>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 mt-0.5 flex-shrink-0 flex items-center justify-center">
                     <span style={{ fontSize: "18px", lineHeight: 1 }}>🔏</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>Sovereign Stamp Applied</p>
+                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Sovereign Stamp Applied</p>
                     <p className="text-xs font-mono break-all" style={{ color: "#E2E8F0" }}>{(song as any).sovereignStampId}</p>
                     {(song as any).sovereignStampedAt && (
-                      <p className="text-xs mt-1" style={{ color: "#AA8E64" }}>
+                      <p className="text-xs mt-1" style={{ color: "var(--ln-smoke)" }}>
                         Stamped {new Date((song as any).sovereignStampedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                       </p>
                     )}
-                    <p className="text-[11px] mt-1" style={{ color: "#AA8E64" }}>
+                    <p className="text-[11px] mt-1" style={{ color: "var(--ln-smoke)" }}>
                       Near-ultrasonic tone embedded in audio — 17 U.S.C. § 102(a)
                     </p>
                     {(song as any).certificateUrl && (
@@ -783,7 +783,7 @@ export default function SongDetailPage() {
                         target="_blank"
                         rel="noreferrer"
                         className="flex items-center gap-1 text-xs mt-2 hover:underline"
-                        style={{ color: "#CBB183" }}
+                        style={{ color: "var(--ln-gold)" }}
                       >
                         <ExternalLink className="w-3 h-3" />View Provenance Certificate
                       </a>
@@ -795,14 +795,14 @@ export default function SongDetailPage() {
 
             {/* HAAI Authorship Declaration — shown when song has HAAI disclosure */}
             {(song as any).aiDisclosure === "human_authored_ai_instrument" && (
-              <div className="rounded-2xl p-5" style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.18)" }}>
+              <div className="rounded-2xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}>
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(203,177,131,0.12)" }}>
-                    <span style={{ color: "#CBB183", fontSize: "14px" }}>✍</span>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(196,154,40,0.08)" }}>
+                    <span style={{ color: "var(--ln-gold)", fontSize: "14px" }}>✍</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#CBB183" }}>HAAI Authorship Declaration</p>
-                    <p className="text-[11px]" style={{ color: "#AA8E64" }}>Human-Authored via AI Instrument — directorial intent on record</p>
+                    <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>HAAI Authorship Declaration</p>
+                    <p className="text-[11px]" style={{ color: "var(--ln-smoke)" }}>Human-Authored via AI Instrument — directorial intent on record</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -845,14 +845,14 @@ export default function SongDetailPage() {
                     if (!val) return null;
                     return (
                       <div key={key}>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(203,177,131,0.55)" }}>{label}</p>
-                        <p className="text-xs leading-relaxed" style={{ color: "#DACAAA" }}>{val}</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(196,154,40,0.5)" }}>{label}</p>
+                        <p className="text-xs leading-relaxed" style={{ color: "var(--ln-parchment)" }}>{val}</p>
                       </div>
                     );
                   })}
                 </div>
                 {(song as any).haaiDeclaredAt && (
-                  <p className="text-[10px] mt-4 pt-3" style={{ color: "#3F4A50", borderTop: "1px solid #CBB183" }}>
+                  <p className="text-[10px] mt-4 pt-3" style={{ color: "var(--ln-iron)", borderTop: "1px solid #C49A28" }}>
                     Declaration sealed {new Date((song as any).haaiDeclaredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                   </p>
                 )}
@@ -863,32 +863,32 @@ export default function SongDetailPage() {
           {/* ── RIGHT COLUMN ── */}
           <div className="space-y-5">
             {/* Emoji Reactions */}
-            <div className="rounded-2xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+            <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
               <div className="flex flex-wrap gap-2 justify-center">
                 {REACTIONS.map(emoji => (
                   <button type="button" key={emoji} onClick={() => handleReaction(emoji)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all hover:scale-110 active:scale-95"
                     style={{
-                      background: myReactionsSet.has(emoji) ? "rgba(203,177,131,0.18)" : "#2C3438",
-                      border: `1px solid ${myReactionsSet.has(emoji) ? "rgba(203,177,131,0.35)" : "#CBB183"}`,
+                      background: myReactionsSet.has(emoji) ? "rgba(196,154,40,0.15)" : "var(--ln-coal)",
+                      border: `1px solid ${myReactionsSet.has(emoji) ? "rgba(196,154,40,0.3)" : "var(--ln-gold)"}`,
                     }}>
                     <span>{emoji}</span>
-                    {reactionCounts[emoji] ? <span className="text-xs" style={{ color: "#AA8E64" }}>{reactionCounts[emoji]}</span> : null}
+                    {reactionCounts[emoji] ? <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{reactionCounts[emoji]}</span> : null}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Unified Interaction Thread */}
-            <div className="rounded-2xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 flex-wrap" style={{ fontFamily: "'Cinzel', serif", color: "#DACAAA" }}>
+            <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 flex-wrap" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 <MessageSquare className="w-4 h-4" />
                 Activity
                 {eventThread && eventThread.length > 0 && (
-                  <span className="text-xs font-normal" style={{ color: "#AA8E64" }}>{eventThread.length}</span>
+                  <span className="text-xs font-normal" style={{ color: "var(--ln-smoke)" }}>{eventThread.length}</span>
                 )}
                 {song.witnessId && (
-                  <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(203,177,131,0.10)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.25)" }}>
+                  <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}>
                     WID-linked
                   </span>
                 )}
@@ -897,7 +897,7 @@ export default function SongDetailPage() {
               {/* Comment input */}
               <div className="flex gap-2 mb-4">
                 <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                  style={{ background: "#2C3438" }}>
+                  style={{ background: "var(--ln-coal)" }}>
                   {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
                 </div>
                 <div className="flex-1 space-y-2">
@@ -918,12 +918,12 @@ export default function SongDetailPage() {
                         commentMutation.mutate({ songId: song.id, content: commentText.trim(), authorName: user?.artistHandle || user?.name || undefined });
                       }
                     }}
-                    style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#DACAAA", fontSize: "13px" }} />
+                    style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-parchment)", fontSize: "13px" }} />
                   {commentText.trim() && (
                     <Button size="sm"
                       onClick={() => commentMutation.mutate({ songId: song.id, content: commentText.trim(), authorName: user?.artistHandle || user?.name || undefined })}
                       disabled={commentMutation.isPending}
-                      style={{ background: "#CBB183", color: "#E6CDAE" }}>
+                      style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
                       Post
                     </Button>
                   )}
@@ -942,19 +942,19 @@ export default function SongDetailPage() {
                         {/* Top-level comment */}
                         <div className="flex gap-2">
                           <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                            style={{ background: "#2C3438" }}>
-                            <span style={{ color: "#AA8E64" }}>{initial}</span>
+                            style={{ background: "var(--ln-coal)" }}>
+                            <span style={{ color: "var(--ln-smoke)" }}>{initial}</span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-xs font-medium" style={{ color: "#DACAAA" }}>{c.authorName || "Anonymous"}</span>
-                              <span className="text-[10px] ml-auto" style={{ color: "#2C3438" }}>{timeStr}</span>
+                              <span className="text-xs font-medium" style={{ color: "var(--ln-parchment)" }}>{c.authorName || "Anonymous"}</span>
+                              <span className="text-[10px] ml-auto" style={{ color: "var(--ln-coal)" }}>{timeStr}</span>
                             </div>
-                            <p className="text-sm" style={{ color: "#AA8E64" }}>{c.content}</p>
+                            <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>{c.content}</p>
                             <button
                               onClick={() => { setReplyingTo(isReplying ? null : { id: c.id, authorName: c.authorName || "Anonymous" }); setReplyText(""); }}
                               className="text-[10px] mt-1 transition-colors"
-                              style={{ color: isReplying ? "#CBB183" : "#3F4A50" }}
+                              style={{ color: isReplying ? "var(--ln-gold)" : "var(--ln-iron)" }}
                             >
                               {isReplying ? "Cancel" : `Reply`}
                               {c.replies?.length > 0 && !isReplying && ` · ${c.replies.length} ${c.replies.length === 1 ? "reply" : "replies"}`}
@@ -966,7 +966,7 @@ export default function SongDetailPage() {
                         {isReplying && (
                           <div className="ml-9 mt-2 flex gap-2">
                             <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
-                              style={{ background: "#2C3438" }}>
+                              style={{ background: "var(--ln-coal)" }}>
                               {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
                             </div>
                             <div className="flex-1 space-y-1.5">
@@ -981,7 +981,7 @@ export default function SongDetailPage() {
                                   }
                                   if (e.key === "Escape") { setReplyingTo(null); setReplyText(""); }
                                 }}
-                                style={{ background: "#2C3438", border: "1px solid #CBB183", color: "#DACAAA", fontSize: "12px", height: "32px" }}
+                                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-parchment)", fontSize: "12px", height: "32px" }}
                                 autoFocus
                               />
                               {replyText.trim() && (
@@ -989,7 +989,7 @@ export default function SongDetailPage() {
                                   onClick={() => replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim(), authorName: user?.artistHandle || user?.name || undefined })}
                                   disabled={replyMutation.isPending}
                                   className="h-6 text-[11px] px-2"
-                                  style={{ background: "#CBB183", color: "#E6CDAE" }}>
+                                  style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
                                   Post reply
                                 </Button>
                               )}
@@ -999,19 +999,19 @@ export default function SongDetailPage() {
 
                         {/* Nested replies */}
                         {c.replies?.length > 0 && (
-                          <div className="ml-9 mt-2 space-y-2 pl-3" style={{ borderLeft: "1px solid #CBB183" }}>
+                          <div className="ml-9 mt-2 space-y-2 pl-3" style={{ borderLeft: "1px solid #C49A28" }}>
                             {(c.replies as any[]).map((r: any) => (
                               <div key={r.id} className="flex gap-2">
                                 <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
-                                  style={{ background: "#2C3438" }}>
-                                  <span style={{ color: "#3F4A50" }}>{(r.authorName || "A").charAt(0).toUpperCase()}</span>
+                                  style={{ background: "var(--ln-coal)" }}>
+                                  <span style={{ color: "var(--ln-iron)" }}>{(r.authorName || "A").charAt(0).toUpperCase()}</span>
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="text-[11px] font-medium" style={{ color: "#AA8E64" }}>{r.authorName || "Anonymous"}</span>
-                                    <span className="text-[9px] ml-auto" style={{ color: "#2C3438" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
+                                    <span className="text-[11px] font-medium" style={{ color: "var(--ln-smoke)" }}>{r.authorName || "Anonymous"}</span>
+                                    <span className="text-[9px] ml-auto" style={{ color: "var(--ln-coal)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
                                   </div>
-                                  <p className="text-xs" style={{ color: "#AA8E64" }}>{r.content}</p>
+                                  <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>{r.content}</p>
                                 </div>
                               </div>
                             ))}
@@ -1021,15 +1021,15 @@ export default function SongDetailPage() {
                     );
                   })
                 ) : (
-                  <p className="text-xs text-center py-4" style={{ color: "#3F4A50" }}>Be the first to comment</p>
+                  <p className="text-xs text-center py-4" style={{ color: "var(--ln-iron)" }}>Be the first to comment</p>
                 )}
               </div>
             </div>
 
             {/* Related */}
             {relatedData && relatedData.length > 0 && (
-              <div className="rounded-2xl p-4" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
-                <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "#DACAAA" }}>Related</h3>
+              <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
+                <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Related</h3>
                 <div className="space-y-1">
                   {relatedData.map((item: any) => <RelatedCard key={item.song.id} item={item} />)}
                 </div>
@@ -1040,16 +1040,16 @@ export default function SongDetailPage() {
 
         {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}
         {song.lyricsText && (
-          <div className="mt-6 rounded-2xl overflow-hidden" style={{ background: "#2C3438", border: `1px solid ${song.isLyricsOnly ? "rgba(203,177,131,0.35)" : "#CBB183"}` }}>
+          <div className="mt-6 rounded-2xl overflow-hidden" style={{ background: "var(--ln-coal)", border: `1px solid ${song.isLyricsOnly ? "rgba(196,154,40,0.3)" : "var(--ln-gold)"}` }}>
             <button type="button" className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#DACAAA" }}>Lyrics</span>
+                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Lyrics</span>
                 {song.isLyricsOnly && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(203,177,131,0.12)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.35)", letterSpacing: "0.06em" }}>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)", letterSpacing: "0.06em" }}>
                     <Shield className="w-2.5 h-2.5" /> LYRICS PROTECTED — Audio Not Yet Attached
                   </span>
                 )}
-                <span className="text-xs ml-2" style={{ color: "#AA8E64" }}>{showLyrics ? "Tap to collapse" : "Tap to expand"}</span>
+                <span className="text-xs ml-2" style={{ color: "var(--ln-smoke)" }}>{showLyrics ? "Tap to collapse" : "Tap to expand"}</span>
               </div>
               {showLyrics
                 ? <ChevronUp className="w-4 h-4" style={{ color: "#E2E8F0" }} />
@@ -1078,11 +1078,11 @@ export default function SongDetailPage() {
                   e.clipboardData.setData("text/plain", selected + cert);
                   e.preventDefault();
                 }}>
-                <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "#DACAAA" }}>
+                <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "var(--ln-parchment)" }}>
                   {song.lyricsText}
                 </pre>
                 {song.witnessId && (
-                  <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(203,177,131,0.15)" }}>
+                  <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(196,154,40,0.12)" }}>
                     <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "#E2E8F0" }}>{[
                       "═══════════════════════════════",
                       "WITNESS ID CERTIFICATE",
@@ -1112,14 +1112,14 @@ export default function SongDetailPage() {
         const allCredits = [...credits, ...coWriterCredits];
         if (allCredits.length === 0) return null;
         return (
-          <div className="mt-4 rounded-2xl overflow-hidden" style={{ background: "#2C3438", border: "1px solid #CBB183" }}>
+          <div className="mt-4 rounded-2xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
             <div className="px-5 py-4">
-              <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "#DACAAA" }}>Credits</h3>
+              <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Credits</h3>
               <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                 {allCredits.map((c: { role: string; name: string }, i: number) => (
                   <div key={i} className="flex items-baseline gap-2">
-                    <span className="text-[10px] uppercase tracking-widest flex-shrink-0" style={{ color: "#3F4A50", minWidth: "80px" }}>{c.role}</span>
-                    <span className="text-sm" style={{ color: "#DACAAA" }}>{c.name}</span>
+                    <span className="text-[10px] uppercase tracking-widest flex-shrink-0" style={{ color: "var(--ln-iron)", minWidth: "80px" }}>{c.role}</span>
+                    <span className="text-sm" style={{ color: "var(--ln-parchment)" }}>{c.name}</span>
                   </div>
                 ))}
               </div>
@@ -1130,26 +1130,26 @@ export default function SongDetailPage() {
 
       {/* Gift Modal */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
-        <DialogContent style={{ background: "#2C3438", border: "1px solid #C3AB7D" }}>
+        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               Gift {creator?.artistHandle || creator?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm" style={{ color: "#AA8E64" }}>90% goes directly to the artist. 10% supports Living Nexus.</p>
+            <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>90% goes directly to the artist. 10% supports Living Nexus.</p>
             <div className="grid grid-cols-4 gap-2">
               {["1", "5", "10", "25"].map(amt => (
                 <button type="button" key={amt} onClick={() => setTipAmount(amt)} className="py-2 rounded-lg text-sm font-medium transition-all"
-                  style={{ background: tipAmount === amt ? "#CBB183" : "#2C3438", color: tipAmount === amt ? "#E6CDAE" : "#DACAAA", border: "1px solid #C3AB7D" }}>
+                  style={{ background: tipAmount === amt ? "var(--ln-gold)" : "var(--ln-coal)", color: tipAmount === amt ? "var(--ln-parchment)" : "var(--ln-parchment)", border: "1px solid #C3AB7D" }}>
                   ${amt}
                 </button>
               ))}
             </div>
             <Input type="number" placeholder="Custom amount ($)" value={tipAmount} onChange={e => setTipAmount(e.target.value)} min="1" step="0.01"
-              style={{ background: "#2C3438", border: "1px solid #C3AB7D", color: "#E6CDAE" }} />
+              style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", color: "var(--ln-parchment)" }} />
             <Button className="w-full" onClick={handleTip} disabled={tipMutation.isPending}
-              style={{ background: "#CBB183", color: "#E6CDAE" }}>
+              style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
               {tipMutation.isPending ? "Processing..." : `Send $${tipAmount || "0"} Gift`}
             </Button>
           </div>
@@ -1169,16 +1169,16 @@ export default function SongDetailPage() {
 
       {/* Share Modal */}
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>
-        <DialogContent style={{ background: "#2C3438", border: "1px solid #C3AB7D", maxWidth: "480px" }}>
+        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", maxWidth: "480px" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#E6CDAE" }}>Share Track</DialogTitle>
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Share Track</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
 
             {/* Embed preview — shows how the link looks in Discord/iMessage */}
             <div>
-              <p className="text-[10px] font-semibold mb-2 tracking-widest" style={{ color: "#3F4A50", fontFamily: "'Orbitron', sans-serif" }}>EMBED PREVIEW</p>
-              <div className="rounded-xl overflow-hidden" style={{ background: "#2C3438", border: "3px solid #CBB183", borderLeft: "4px solid #CBB183" }}>
+              <p className="text-[10px] font-semibold mb-2 tracking-widest" style={{ color: "var(--ln-iron)", fontFamily: "'Orbitron', sans-serif" }}>EMBED PREVIEW</p>
+              <div className="rounded-xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "3px solid #C49A28", borderLeft: "4px solid #C49A28" }}>
                 <div className="flex gap-3 p-3">
                   {song.coverArtUrl && (
                     <img
@@ -1189,36 +1189,36 @@ export default function SongDetailPage() {
                     />
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold mb-0.5" style={{ color: "#CBB183", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.06em" }}>LIVING NEXUS</p>
-                    <p className="text-sm font-bold truncate" style={{ color: "#E6CDAE", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
-                    <p className="text-xs truncate" style={{ color: "#AA8E64" }}>{creator?.artistHandle || creator?.name || "Unknown Artist"}</p>
-                    {song.genre && <p className="text-[10px] mt-0.5" style={{ color: "#3F4A50" }}>{song.genre}{song.witnessId ? " · WID Protected" : ""}</p>}
+                    <p className="text-[10px] font-bold mb-0.5" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.06em" }}>LIVING NEXUS</p>
+                    <p className="text-sm font-bold truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+                    <p className="text-xs truncate" style={{ color: "var(--ln-smoke)" }}>{creator?.artistHandle || creator?.name || "Unknown Artist"}</p>
+                    {song.genre && <p className="text-[10px] mt-0.5" style={{ color: "var(--ln-iron)" }}>{song.genre}{song.witnessId ? " · WID Protected" : ""}</p>}
                   </div>
                 </div>
                 {(song as any).embedVideoUrl ? (
                   <div className="px-3 pb-2">
-                    <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "#4ADE80" }}>
+                    <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--ln-seal-bright)" }}>
                       <div className="w-1.5 h-1.5 rounded-full bg-current" />
                       Video embed ready — Discord will show inline player
                     </div>
                   </div>
                 ) : (
                   <div className="px-3 pb-2">
-                    <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "#AA8E64" }}>
+                    <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--ln-smoke)" }}>
                       <div className="w-1.5 h-1.5 rounded-full bg-current" />
                       Image embed — video generating in background
                     </div>
                   </div>
                 )}
               </div>
-              <p className="text-[10px] mt-1.5" style={{ color: "#3F4A50" }}>This is how your link will appear in Discord, iMessage, Telegram, and Slack.</p>
+              <p className="text-[10px] mt-1.5" style={{ color: "var(--ln-iron)" }}>This is how your link will appear in Discord, iMessage, Telegram, and Slack.</p>
             </div>
 
             {/* Copy link */}
             <div className="flex gap-2">
               <Input value={window.location.href} readOnly
-                style={{ background: "#2C3438", border: "1px solid #C3AB7D", color: "#AA8E64", fontSize: "12px" }} />
-              <Button onClick={copyLink} style={{ background: "#CBB183", color: "#E6CDAE", flexShrink: 0 }}>
+                style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", color: "var(--ln-smoke)", fontSize: "12px" }} />
+              <Button onClick={copyLink} style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", flexShrink: 0 }}>
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
@@ -1227,12 +1227,12 @@ export default function SongDetailPage() {
             <div className="grid grid-cols-2 gap-2">
               <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Listening to "${song.title}" on Living Nexus`)}&url=${encodeURIComponent(window.location.href)}`}
                 target="_blank" rel="noreferrer" className="block">
-                <Button variant="outline" className="w-full" style={{ borderColor: "#C3AB7D", color: "#AA8E64" }}>
+                <Button variant="outline" className="w-full" style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
                   <Twitter className="w-4 h-4 mr-2" />Share on X
                 </Button>
               </a>
               <Button variant="outline" className="w-full"
-                style={{ borderColor: "#C3AB7D", color: "#AA8E64" }}
+                style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}
                 onClick={() => {
                   const discordMsg = `${song.title} — ${creator?.artistHandle || creator?.name || "Unknown"} | ${window.location.href}`;
                   navigator.clipboard.writeText(discordMsg);
@@ -1258,9 +1258,9 @@ export default function SongDetailPage() {
           setTransformStyle(""); setTransformTags([]);
         }
       }}>
-        <DialogContent style={{ background: "#2C3438", border: "1px solid rgba(203,177,131,0.45)", maxWidth: "520px" }}>
+        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.4)", maxWidth: "520px" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "#CBB183", display: "flex", alignItems: "center", gap: "8px" }}>
+            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)", display: "flex", alignItems: "center", gap: "8px" }}>
               <Wand2 className="w-5 h-5" />AI Transform
             </DialogTitle>
           </DialogHeader>
@@ -1271,28 +1271,28 @@ export default function SongDetailPage() {
                 <p className="text-sm text-center" style={{ color: "#E2E8F0" }}>Sign in to transform tracks.</p>
               )}
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: "#CBB183", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>DESCRIBE THE TRANSFORMATION</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>DESCRIBE THE TRANSFORMATION</label>
                 <Textarea
                   value={transformPrompt}
                   onChange={e => setTransformPrompt(e.target.value)}
                   placeholder="e.g. Transform into a lo-fi hip hop beat with rain sounds and vinyl crackle"
                   rows={3}
                   maxLength={500}
-                  style={{ background: "#2C3438", border: "1px solid #2C3438", color: "#DACAAA", resize: "none" }}
+                  style={{ background: "var(--ln-coal)", border: "1px solid #111009", color: "var(--ln-parchment)", resize: "none" }}
                 />
-                <p className="text-xs mt-1" style={{ color: "#3F4A50" }}>{transformPrompt.length}/500</p>
+                <p className="text-xs mt-1" style={{ color: "var(--ln-iron)" }}>{transformPrompt.length}/500</p>
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: "#CBB183", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>STYLE PRESET (OPTIONAL)</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>STYLE PRESET (OPTIONAL)</label>
                 <Input
                   value={transformStyle}
                   onChange={e => setTransformStyle(e.target.value)}
                   placeholder="e.g. cinematic, dark ambient, jazz"
-                  style={{ background: "#2C3438", border: "1px solid #2C3438", color: "#DACAAA" }}
+                  style={{ background: "var(--ln-coal)", border: "1px solid #111009", color: "var(--ln-parchment)" }}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-2 block" style={{ color: "#CBB183", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>QUICK TAGS</label>
+                <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>QUICK TAGS</label>
                 <div className="flex flex-wrap gap-2">
                   {["lo-fi", "jazz", "cinematic", "dark ambient", "trap", "acoustic", "orchestral", "electronic"].map(tag => (
                     <button
@@ -1300,15 +1300,15 @@ export default function SongDetailPage() {
                       onClick={() => setTransformTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])}
                       className="px-2 py-0.5 rounded text-xs transition-all"
                       style={{
-                        background: transformTags.includes(tag) ? "rgba(203,177,131,0.25)" : "#2C3438",
-                        border: `1px solid ${transformTags.includes(tag) ? "rgba(203,177,131,0.7)" : "#2C3438"}`,
-                        color: transformTags.includes(tag) ? "#CBB183" : "#3F4A50",
+                        background: transformTags.includes(tag) ? "rgba(196,154,40,0.2)" : "var(--ln-coal)",
+                        border: `1px solid ${transformTags.includes(tag) ? "rgba(196,154,40,0.6)" : "var(--ln-coal)"}`,
+                        color: transformTags.includes(tag) ? "var(--ln-gold)" : "var(--ln-iron)",
                       }}
                     >{tag}</button>
                   ))}
                 </div>
               </div>
-              <p className="text-xs" style={{ color: "#3F4A50" }}>
+              <p className="text-xs" style={{ color: "var(--ln-iron)" }}>
                 All AI transforms are linked to the original Witness ID. Generation takes ~60-90 seconds.
               </p>
               <Button
@@ -1320,7 +1320,7 @@ export default function SongDetailPage() {
                   style: transformStyle.trim() || undefined,
                   tags: transformTags.length > 0 ? transformTags : undefined,
                 })}
-                style={{ background: "#CBB183", color: "#2C3438", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}
+                style={{ background: "var(--ln-gold)", color: "var(--ln-coal)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}
               >
                 <Wand2 className="w-4 h-4 mr-2" />
                 {aiTransformMutation.isPending ? "SUBMITTING..." : "GENERATE TRANSFORM"}
@@ -1331,17 +1331,17 @@ export default function SongDetailPage() {
           {transformPhase === "processing" && (
             <div className="py-8 text-center space-y-4">
               <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center animate-pulse"
-                style={{ background: "rgba(203,177,131,0.12)", border: "2px solid rgba(203,177,131,0.4)" }}>
-                <Wand2 className="w-8 h-8" style={{ color: "#CBB183" }} />
+                style={{ background: "rgba(196,154,40,0.08)", border: "2px solid rgba(196,154,40,0.34)" }}>
+                <Wand2 className="w-8 h-8" style={{ color: "var(--ln-gold)" }} />
               </div>
               <div>
-                <p className="font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "#DACAAA" }}>Generating Transform...</p>
-                <p className="text-sm" style={{ color: "#3F4A50" }}>The AI is reimagining your track. This takes 60-90 seconds.</p>
+                <p className="font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Generating Transform...</p>
+                <p className="text-sm" style={{ color: "var(--ln-iron)" }}>The AI is reimagining your track. This takes 60-90 seconds.</p>
               </div>
-              <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: "#2C3438" }}>
-                <div className="h-full rounded-full animate-pulse" style={{ width: "60%", background: "#CBB183" }} />
+              <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: "var(--ln-coal)" }}>
+                <div className="h-full rounded-full animate-pulse" style={{ width: "60%", background: "var(--ln-gold)" }} />
               </div>
-              <p className="text-xs" style={{ color: "#3F4A50" }}>Do not close this dialog</p>
+              <p className="text-xs" style={{ color: "var(--ln-iron)" }}>Do not close this dialog</p>
             </div>
           )}
 
@@ -1349,24 +1349,24 @@ export default function SongDetailPage() {
             <div className="py-4 space-y-4">
               <div className="text-center">
                 <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3"
-                  style={{ background: "rgba(74,222,128,0.15)", border: "2px solid rgba(74,222,128,0.5)" }}>
-                  <Check className="w-6 h-6" style={{ color: "#4ADE80" }} />
+                  style={{ background: "rgba(58,138,86,0.15)", border: "2px solid rgba(74,222,128,0.5)" }}>
+                  <Check className="w-6 h-6" style={{ color: "var(--ln-seal-bright)" }} />
                 </div>
-                <p className="font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "#DACAAA" }}>Transform Complete</p>
-                <p className="text-xs mt-1" style={{ color: "#3F4A50" }}>Prompt: {transformResult.prompt}</p>
+                <p className="font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Transform Complete</p>
+                <p className="text-xs mt-1" style={{ color: "var(--ln-iron)" }}>Prompt: {transformResult.prompt}</p>
               </div>
-              <div className="rounded-lg p-3" style={{ background: "#2C3438", border: "1px solid #2C3438" }}>
-                <p className="text-xs font-semibold mb-2" style={{ color: "#CBB183", fontFamily: "'Orbitron', sans-serif" }}>TRANSFORMED TRACK</p>
+              <div className="p-3" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif" }}>TRANSFORMED TRACK</p>
                 <audio controls src={transformResult.outputUrl} className="w-full" style={{ height: "36px" }} />
               </div>
               <div className="flex gap-2">
                 <a href={transformResult.outputUrl} download className="flex-1">
-                  <Button variant="outline" className="w-full text-xs" style={{ borderColor: "#2C3438", color: "#DACAAA" }}>Download</Button>
+                  <Button variant="outline" className="w-full text-xs" style={{ borderColor: "var(--ln-coal)", color: "var(--ln-parchment)" }}>Download</Button>
                 </a>
                 <Button
                   className="flex-1 text-xs"
                   onClick={() => { setTransformPhase("idle"); setTransformResult(null); setTransformPrompt(""); setTransformStyle(""); setTransformTags([]); }}
-                  style={{ background: "rgba(203,177,131,0.18)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.4)" }}
+                  style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.34)" }}
                 >New Transform</Button>
               </div>
             </div>
@@ -1374,11 +1374,11 @@ export default function SongDetailPage() {
 
           {transformPhase === "error" && (
             <div className="py-6 text-center space-y-3">
-              <p className="font-semibold" style={{ color: "#EF4444" }}>Transform Failed</p>
+              <p className="font-semibold" style={{ color: "var(--ln-ember)" }}>Transform Failed</p>
               <p className="text-sm" style={{ color: "#E2E8F0" }}>{transformError}</p>
               <Button
                 onClick={() => { setTransformPhase("idle"); setTransformError(""); }}
-                style={{ background: "rgba(203,177,131,0.18)", color: "#CBB183", border: "1px solid rgba(203,177,131,0.4)" }}
+                style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.34)" }}
               >Try Again</Button>
             </div>
           )}
