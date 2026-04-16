@@ -235,6 +235,24 @@ export const songs = mysqlTable("songs", {
   // null = no storyboard (legacy PDF-only works fall back to iframe viewer).
   pagesJson: text("pagesJson"),
 
+  // ─── Book Access Control & Commerce ────────────────────────────────────────────
+  // readAccess: controls how the reader is gated for comic/novel content types
+  //   "open"    = anyone can read (default)
+  //   "preview" = first N pages free, rest requires purchase
+  //   "locked"  = no reading without purchase
+  readAccess: mysqlEnum("readAccess", ["open", "preview", "locked"]).default("open").notNull(),
+  // Purchase price in cents. null = not for sale. 0 = free (no payment gate).
+  purchasePriceCents: int("purchasePriceCents"),
+  // Number of free preview pages when readAccess = 'preview'
+  previewPageCount: int("previewPageCount").default(5).notNull(),
+  // Consent modal configuration — JSON object:
+  // { enabled, requireAgeAck, requireAiAck, requireNoRedistrib, customNote }
+  consentSettingsJson: text("consentSettingsJson"),
+  // External hosting/sale links — JSON array:
+  // [{ platform: string; url: string; label?: string }]
+  // Renders as meta badges on the detail page
+  externalLinksJson: text("externalLinksJson"),
+
   // ─── Sovereign Stamp ─────────────────────────────────────────────────────────
   // Authorship tone injection system — BDDT Publishing / Command Domains LLC
   // null = not yet stamped; set = stamped audio file with embedded provenance tone
@@ -1202,3 +1220,17 @@ export const paymentReconciliationLog = mysqlTable("paymentReconciliationLog", {
 });
 export type PaymentReconciliationLog = typeof paymentReconciliationLog.$inferSelect;
 export type InsertPaymentReconciliationLog = typeof paymentReconciliationLog.$inferInsert;
+
+// ─── Book Purchases ────────────────────────────────────────────────────────────
+// One-time purchases of gated books/comics. Unique per (songId, buyerUserId).
+export const bookPurchases = mysqlTable("book_purchases", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("song_id").notNull(),
+  buyerUserId: int("buyer_user_id").notNull(),
+  amountCents: int("amount_cents").notNull().default(0),
+  stripeSessionId: varchar("stripe_session_id", { length: 256 }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 256 }),
+  purchasedAt: timestamp("purchased_at").notNull().defaultNow(),
+});
+export type BookPurchase = typeof bookPurchases.$inferSelect;
+export type InsertBookPurchase = typeof bookPurchases.$inferInsert;

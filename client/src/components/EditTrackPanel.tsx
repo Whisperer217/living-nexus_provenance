@@ -208,6 +208,41 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   );
   const [lineageExpanded, setLineageExpanded] = useState(false);
 
+  // Book Access Control & Commerce state
+  type ExternalLink = { platform: string; url: string; label?: string };
+  const parseExternalLinks = (json: string | null | undefined): ExternalLink[] => {
+    if (!json) return [];
+    try { return JSON.parse(json); } catch { return []; }
+  };
+  type ConsentSettings = {
+    enabled: boolean;
+    requireAgeAck: boolean;
+    requireAiAck: boolean;
+    requireNoRedistrib: boolean;
+    customNote: string;
+  };
+  const parseConsentSettings = (json: string | null | undefined): ConsentSettings => {
+    const defaults: ConsentSettings = { enabled: false, requireAgeAck: false, requireAiAck: false, requireNoRedistrib: true, customNote: "" };
+    if (!json) return defaults;
+    try { return { ...defaults, ...JSON.parse(json) }; } catch { return defaults; }
+  };
+  const [readAccess, setReadAccess] = useState<"open" | "preview" | "locked">(
+    ((song as any).readAccess as any) ?? "open"
+  );
+  const [purchasePriceDollars, setPurchasePriceDollars] = useState<string>(
+    (song as any).purchasePriceCents != null ? ((song as any).purchasePriceCents / 100).toFixed(2) : ""
+  );
+  const [previewPageCount, setPreviewPageCount] = useState<number>(
+    (song as any).previewPageCount ?? 5
+  );
+  const [consentSettings, setConsentSettings] = useState<ConsentSettings>(
+    () => parseConsentSettings((song as any).consentSettingsJson)
+  );
+  const [externalLinks, setExternalLinks] = useState<ExternalLink[]>(
+    () => parseExternalLinks((song as any).externalLinksJson)
+  );
+  const [accessExpanded, setAccessExpanded] = useState(false);
+
   // Credits state
   type CreditEntry = { role: string; name: string };
   const parseCredits = (json: string | null | undefined): CreditEntry[] => {
@@ -370,6 +405,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     const validCredits = credits.filter(c => c.role.trim() || c.name.trim());
     // Only include parentSongId in the payload if the user has touched the field
     const parsedParentId = parentSongId.trim() !== "" ? parseInt(parentSongId, 10) : null;
+    const purchasePriceCents = purchasePriceDollars.trim() !== ""
+      ? Math.round(parseFloat(purchasePriceDollars) * 100)
+      : null;
     await updateMetadata.mutateAsync({
       songId: song.id,
       caption: caption.trim() || null,
@@ -380,6 +418,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       status,
       creditsJson: validCredits.length > 0 ? JSON.stringify(validCredits) : null,
       parentSongId: parsedParentId,
+      // Book access & commerce
+      readAccess,
+      purchasePriceCents: isNaN(purchasePriceCents as number) ? null : purchasePriceCents,
+      previewPageCount,
+      consentSettingsJson: JSON.stringify(consentSettings),
+      externalLinksJson: externalLinks.length > 0 ? JSON.stringify(externalLinks) : null,
     });
     setSaving(false);
   }
@@ -1389,7 +1433,229 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             )}
           </div>
 
-        </div>{/* end Form */}
+        </div>
+
+        {/* ── Book Access & Commerce (comic/manuscript only) ───────────────────────────────────── */}
+        {isWritten && (
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+          >
+            {/* Collapsed header */}
+            <button
+              type="button"
+              className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/5"
+              style={{ background: "rgba(255,255,255,0.02)" }}
+              onClick={() => setAccessExpanded(v => !v)}
+            >
+              <div className="flex items-center gap-2">
+                <Lock size={14} style={{ color: readAccess !== "open" ? "var(--ln-gold)" : "#64748b" }} />
+                <span className="text-sm font-medium" style={{ color: readAccess !== "open" ? "var(--ln-gold)" : "#94a3b8" }}>Access & Commerce</span>
+                {readAccess !== "open" && (
+                  <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.15)", color: "var(--ln-gold)" }}>
+                    {readAccess === "preview" ? "Preview" : "Locked"}
+                  </span>
+                )}
+              </div>
+              <ChevronDown
+                size={14}
+                style={{ color: "#64748b", transform: accessExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+              />
+            </button>
+
+            {accessExpanded && (
+              <div className="px-4 pb-5 pt-3 flex flex-col gap-5" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+
+                {/* ── Read Access Mode ── */}
+                <div>
+                  <Label className="text-xs mb-2 block" style={{ color: "#94a3b8" }}>Read Access</Label>
+                  <div className="flex flex-col gap-2">
+                    {(["open", "preview", "locked"] as const).map(mode => {
+                      const labels: Record<string, { title: string; desc: string }> = {
+                        open: { title: "Open", desc: "Anyone can read for free" },
+                        preview: { title: "Preview", desc: "First N pages free, rest requires purchase" },
+                        locked: { title: "Locked", desc: "No reading without purchase" },
+                      };
+                      const active = readAccess === mode;
+                      return (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => setReadAccess(mode)}
+                          className="flex items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors"
+                          style={{
+                            background: active ? "rgba(212,175,55,0.1)" : "rgba(255,255,255,0.03)",
+                            border: `1px solid ${active ? "rgba(212,175,55,0.4)" : "rgba(255,255,255,0.08)"}`,
+                          }}
+                        >
+                          <div
+                            className="mt-0.5 w-3.5 h-3.5 rounded-full border-2 flex-shrink-0"
+                            style={{
+                              borderColor: active ? "var(--ln-gold)" : "#475569",
+                              background: active ? "var(--ln-gold)" : "transparent",
+                            }}
+                          />
+                          <div>
+                            <p className="text-xs font-semibold" style={{ color: active ? "var(--ln-gold)" : "#e2e8f0" }}>{labels[mode].title}</p>
+                            <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>{labels[mode].desc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ── Price ── */}
+                {(readAccess === "preview" || readAccess === "locked") && (
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <Label className="text-xs mb-1 block" style={{ color: "#94a3b8" }}>Purchase Price (USD)</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "#64748b" }}>$</span>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={purchasePriceDollars}
+                          onChange={e => setPurchasePriceDollars(e.target.value)}
+                          className="h-8 text-xs pl-6"
+                          style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+                        />
+                      </div>
+                      <p className="text-xs mt-1" style={{ color: "#475569" }}>Leave blank = not for sale</p>
+                    </div>
+                    {readAccess === "preview" && (
+                      <div className="w-24">
+                        <Label className="text-xs mb-1 block" style={{ color: "#94a3b8" }}>Free Pages</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          max="50"
+                          value={previewPageCount}
+                          onChange={e => setPreviewPageCount(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="h-8 text-xs"
+                          style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── Consent Layer ── */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-xs" style={{ color: "#94a3b8" }}>Consent Layer</Label>
+                    <button
+                      type="button"
+                      onClick={() => setConsentSettings(s => ({ ...s, enabled: !s.enabled }))}
+                      className="relative w-9 h-5 rounded-full transition-colors"
+                      style={{ background: consentSettings.enabled ? "rgba(212,175,55,0.7)" : "rgba(255,255,255,0.12)" }}
+                    >
+                      <span
+                        className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+                        style={{ left: consentSettings.enabled ? "calc(100% - 18px)" : "2px" }}
+                      />
+                    </button>
+                  </div>
+                  {consentSettings.enabled && (
+                    <div className="flex flex-col gap-2 mt-2">
+                      {([
+                        ["requireAgeAck", "Age-appropriate acknowledgment"],
+                        ["requireAiAck", "AI disclosure acknowledgment"],
+                        ["requireNoRedistrib", "No redistribution terms"],
+                      ] as const).map(([key, label]) => (
+                        <label key={key} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={consentSettings[key]}
+                            onChange={e => setConsentSettings(s => ({ ...s, [key]: e.target.checked }))}
+                            className="w-3.5 h-3.5 accent-yellow-500"
+                          />
+                          <span className="text-xs" style={{ color: "#94a3b8" }}>{label}</span>
+                        </label>
+                      ))}
+                      <div className="mt-1">
+                        <Label className="text-xs mb-1 block" style={{ color: "#94a3b8" }}>Custom consent note (optional)</Label>
+                        <Textarea
+                          placeholder="e.g. This book contains mature themes. Reader discretion advised."
+                          value={consentSettings.customNote}
+                          onChange={e => setConsentSettings(s => ({ ...s, customNote: e.target.value }))}
+                          className="text-xs resize-none"
+                          rows={2}
+                          style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── External Hosting Links ── */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <Label className="text-xs" style={{ color: "#94a3b8" }}>External Hosting Links</Label>
+                      <p className="text-xs mt-0.5" style={{ color: "#475569" }}>Amazon, Gumroad, your site, etc. — shown as badges on the detail page.</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1 flex-shrink-0"
+                      style={{ borderColor: "rgba(212,175,55,0.3)", color: "var(--ln-gold)", background: "transparent" }}
+                      onClick={() => setExternalLinks(prev => [...prev, { platform: "", url: "", label: "" }])}
+                    >
+                      <Plus size={12} /> Add
+                    </Button>
+                  </div>
+                  {externalLinks.length === 0 ? (
+                    <p className="text-xs py-2" style={{ color: "#475569" }}>No external links yet.</p>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {externalLinks.map((link, i) => (
+                        <div key={i} className="flex gap-2 items-center">
+                          <Input
+                            placeholder="Platform (e.g. Amazon)"
+                            value={link.platform}
+                            onChange={e => setExternalLinks(prev => prev.map((x, j) => j === i ? { ...x, platform: e.target.value } : x))}
+                            className="w-28 h-8 text-xs flex-shrink-0"
+                            style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+                          />
+                          <Input
+                            placeholder="https://..."
+                            value={link.url}
+                            onChange={e => setExternalLinks(prev => prev.map((x, j) => j === i ? { ...x, url: e.target.value } : x))}
+                            className="flex-1 h-8 text-xs"
+                            style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+                          />
+                          <button
+                            onClick={() => setExternalLinks(prev => prev.filter((_, j) => j !== i))}
+                            className="p-1 rounded hover:bg-red-900/30 transition-colors"
+                            title="Remove"
+                          >
+                            <Trash2 size={13} style={{ color: "#ef4444" }} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="text-xs h-7 px-3 font-semibold self-end"
+                  style={{
+                    background: saving ? "rgba(196,154,40,0.26)" : "linear-gradient(135deg, #C49A28, #8B6914)",
+                    color: "#000",
+                  }}
+                >
+                  {saving ? "Saving…" : "Save Access Settings"}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div

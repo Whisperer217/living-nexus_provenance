@@ -4,7 +4,7 @@
  * Layout: cover art + metadata left, inline document viewer right.
  * Completely separate from SongDetailPage (music/audio).
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -36,6 +36,9 @@ export default function BookDetailPage() {
   const [readerOpen, setReaderOpen] = useState(false);
   const [editPagesOpen, setEditPagesOpen] = useState(false);
   const [editedPagesJson, setEditedPagesJson] = useState<string | null>(null);
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [consentChecked, setConsentChecked] = useState<Record<string, boolean>>({});
+  const [purchaseOpen, setPurchaseOpen] = useState(false);
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: bookId },
@@ -52,6 +55,16 @@ export default function BookDetailPage() {
   });
 
   const { liked, toggle: toggleLike } = useLike(bookId);
+
+  const { data: purchaseData } = trpc.books.hasPurchased.useQuery(
+    { songId: bookId },
+    { enabled: bookId > 0 }
+  );
+  const hasPurchased = purchaseData?.purchased ?? false;
+  const purchaseCheckoutMutation = trpc.books.createPurchaseCheckout.useMutation({
+    onSuccess: (data) => { if (data.url) window.location.href = data.url; },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
 
   const updatePagesMutation = trpc.songs.updateMetadata.useMutation({
     onSuccess: () => {
@@ -92,6 +105,67 @@ export default function BookDetailPage() {
     try { return JSON.parse(pagesJson) as BookPage[]; } catch { return []; }
   })();
   const hasStoryboard = storyboardPages.length > 0;
+
+  // Access control & commerce
+  type ConsentSettings = { enabled: boolean; requireAgeAck: boolean; requireAiAck: boolean; requireNoRedistrib: boolean; customNote: string };
+  const consentSettingsRaw = (song as any)?.consentSettingsJson as string | undefined;
+  const consentSettings: ConsentSettings = (() => {
+    const defaults: ConsentSettings = { enabled: false, requireAgeAck: false, requireAiAck: false, requireNoRedistrib: true, customNote: "" };
+    if (!consentSettingsRaw) return defaults;
+    try { return { ...defaults, ...JSON.parse(consentSettingsRaw) }; } catch { return defaults; }
+  })();
+  type ExternalLink = { platform: string; url: string; label?: string };
+  const externalLinksRaw = (song as any)?.externalLinksJson as string | undefined;
+  const externalLinks: ExternalLink[] = (() => {
+    if (!externalLinksRaw) return [];
+    try { return JSON.parse(externalLinksRaw) as ExternalLink[]; } catch { return []; }
+  })();
+  const readAccess = ((song as any)?.readAccess as string | undefined) ?? "open";
+  const purchasePriceCents = (song as any)?.purchasePriceCents as number | null | undefined;
+  const previewPageCount = ((song as any)?.previewPageCount as number | undefined) ?? 5;
+  const hasPurchasePrice = purchasePriceCents != null && purchasePriceCents > 0;
+
+  // Determine which pages are visible before purchase
+  const visiblePages = readAccess === "preview"
+    ? storyboardPages.slice(0, previewPageCount)
+    : readAccess === "locked"
+    ? []
+    : storyboardPages;
+  const isGated = (readAccess === "preview" || readAccess === "locked") && !isOwner && !hasPurchased;
+
+  // Consent items to show
+  const consentItems: { key: string; label: string }[] = [];
+  if (consentSettings.enabled) {
+    if (consentSettings.requireAgeAck) consentItems.push({ key: "age", label: "I confirm this content is age-appropriate for the intended reader." });
+    if (consentSettings.requireAiAck) consentItems.push({ key: "ai", label: "I acknowledge this work may contain AI-assisted content." });
+    if (consentSettings.requireNoRedistrib) consentItems.push({ key: "noredist", label: "I agree not to redistribute or reproduce this work without permission." });
+    if (consentSettings.customNote) consentItems.push({ key: "custom", label: consentSettings.customNote });
+  }
+  const allConsentChecked = consentItems.length === 0 || consentItems.every(item => consentChecked[item.key]);
+
+  function handleReadNow() {
+    if (isGated && hasPurchasePrice) { setPurchaseOpen(true); return; }
+    if (consentSettings.enabled && consentItems.length > 0) { setConsentOpen(true); return; }
+    setReaderOpen(true);
+  }
+
+  function handleConsentConfirm() {
+    if (!allConsentChecked) return;
+    setConsentOpen(false);
+    setReaderOpen(true);
+  }
+
+  // Handle Stripe return after purchase
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("purchase") === "success") {
+      toast.success("Purchase complete! Full access unlocked.");
+      // Remove the query param without reloading
+      window.history.replaceState({}, "", window.location.pathname);
+      // Auto-open the reader after a brief delay
+      setTimeout(() => setReaderOpen(true), 800);
+    }
+  }, []);
 
   function handleCopyLink() {
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -307,7 +381,14 @@ export default function BookDetailPage() {
                   <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                     {credits.map((c: { role: string; name: string }, i: number) => (
                       <div key={i} className="flex items-baseline gap-2">
-                        <span className="text-[10px] uppercase tracking-widest flex-shrink-0" style={{ color: "var(--ln-iron)", minWidth: "72px" }}>{c.role}</span>
+                        <span
+                          className="text-[9px] uppercase tracking-widest flex-shrink-0 px-1.5 py-0.5 rounded font-bold"
+                          style={{
+                            minWidth: "72px",
+                            background: c.role.toLowerCase() === "publisher" ? "rgba(59,130,246,0.15)" : "rgba(196,154,40,0.12)",
+                            color: c.role.toLowerCase() === "publisher" ? "#93C5FD" : "rgba(196,154,40,0.85)",
+                          }}
+                        >{c.role}</span>
                         <span className="text-sm" style={{ color: "var(--ln-parchment)" }}>{c.name}</span>
                       </div>
                     ))}
@@ -316,11 +397,37 @@ export default function BookDetailPage() {
               );
             })()}
 
-            {/* WID Panel */}
+             {/* WID Panel */}
             {song.witnessId && (
               <WIDPanel witnessId={song.witnessId} />
             )}
-
+            {/* External Hosting Links */}
+            {externalLinks.length > 0 && (
+              <div className="rounded-xl p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.08)" }}>
+                <p className="text-[9px] uppercase tracking-widest font-heading mb-3" style={{ color: "rgba(196,154,40,0.5)" }}>Also Available On</p>
+                <div className="flex flex-wrap gap-2">
+                  {externalLinks.map((link, i) => (
+                    link.url && link.platform ? (
+                      <a
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-bold tracking-wide transition-all hover:opacity-80"
+                        style={{
+                          background: "rgba(196,154,40,0.08)",
+                          color: "var(--ln-gold)",
+                          border: "1px solid rgba(196,154,40,0.25)",
+                        }}
+                      >
+                        <ExternalLink size={11} />
+                        {link.label || link.platform} ↗
+                      </a>
+                    ) : null
+                  ))}
+                </div>
+              </div>
+            )}
             {/* Action buttons */}
             <div className="flex flex-wrap gap-2 pt-1">
               {fileUrl && (
@@ -358,7 +465,7 @@ export default function BookDetailPage() {
           <div
             className="rounded-2xl overflow-hidden relative group cursor-pointer"
             style={{ background: "#0D1419", border: "1px solid rgba(196,154,40,0.2)" }}
-            onClick={() => setReaderOpen(true)}
+            onClick={handleReadNow}
           >
             {/* Preview: first page as hero */}
             <div className="relative" style={{ aspectRatio: "16/9", overflow: "hidden" }}>
@@ -472,10 +579,102 @@ export default function BookDetailPage() {
           </div>
         )}
 
+        {/* ── Consent Modal ── */}
+        {consentOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
+            <div className="w-full max-w-md rounded-2xl p-6 flex flex-col gap-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.25)" }}>
+              <div className="flex items-center gap-3">
+                <Shield size={20} style={{ color: "var(--ln-gold)" }} />
+                <h2 className="text-base font-heading font-bold" style={{ color: "var(--ln-parchment)" }}>Before You Read</h2>
+              </div>
+              <p className="text-xs" style={{ color: "#94a3b8" }}>Please review and acknowledge the following before accessing this work.</p>
+              <div className="flex flex-col gap-3">
+                {consentItems.map(item => (
+                  <label key={item.key} className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!consentChecked[item.key]}
+                      onChange={e => setConsentChecked(prev => ({ ...prev, [item.key]: e.target.checked }))}
+                      className="mt-0.5 w-4 h-4 accent-yellow-500 flex-shrink-0"
+                    />
+                    <span className="text-sm" style={{ color: "#e2e8f0" }}>{item.label}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-1">
+                <Button
+                  variant="outline"
+                  className="flex-1 text-sm"
+                  onClick={() => setConsentOpen(false)}
+                  style={{ borderColor: "rgba(255,255,255,0.15)", color: "#94a3b8", background: "transparent" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 text-sm font-semibold"
+                  onClick={handleConsentConfirm}
+                  disabled={!allConsentChecked}
+                  style={{
+                    background: allConsentChecked ? "linear-gradient(135deg, #C49A28, #8B6914)" : "rgba(196,154,40,0.2)",
+                    color: allConsentChecked ? "#000" : "#64748b",
+                  }}
+                >
+                  I Agree — Open Book
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* ── Purchase Gate Modal ── */}
+        {purchaseOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
+            <div className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.25)" }}>
+              <div className="flex items-center gap-3">
+                <BookOpen size={20} style={{ color: accentColor }} />
+                <h2 className="text-base font-heading font-bold" style={{ color: "var(--ln-parchment)" }}>{song.title}</h2>
+              </div>
+              {readAccess === "preview" && (
+                <p className="text-sm" style={{ color: "#94a3b8" }}>You've read the first {previewPageCount} pages. Purchase to unlock the full book.</p>
+              )}
+              {readAccess === "locked" && (
+                <p className="text-sm" style={{ color: "#94a3b8" }}>This book requires a one-time purchase to read.</p>
+              )}
+              {hasPurchasePrice && (
+                <div className="rounded-xl p-4 text-center" style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.2)" }}>
+                  <p className="text-2xl font-heading font-bold" style={{ color: "var(--ln-gold)" }}>
+                    ${(purchasePriceCents! / 100).toFixed(2)}
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: "#64748b" }}>One-time purchase · Permanent access</p>
+                </div>
+              )}
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1 text-sm"
+                  onClick={() => setPurchaseOpen(false)}
+                  style={{ borderColor: "rgba(255,255,255,0.15)", color: "#94a3b8", background: "transparent" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 text-sm font-semibold"
+                  onClick={() => {
+                    setPurchaseOpen(false);
+                    purchaseCheckoutMutation.mutate({ songId: bookId, origin: window.location.origin });
+                  }}
+                  disabled={purchaseCheckoutMutation.isPending}
+                  style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}99)`, color: "#000" }}
+                >
+                  Purchase
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* ── Full-screen Reader Portal ── */}
         {readerOpen && hasStoryboard && (
           <HorizontalBookReader
-            pages={storyboardPages}
+            pages={readAccess === "open" || isOwner ? storyboardPages : visiblePages}
             title={song.title}
             onClose={() => setReaderOpen(false)}
           />

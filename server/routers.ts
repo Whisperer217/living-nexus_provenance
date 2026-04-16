@@ -244,6 +244,37 @@ export async function handleStripeWebhook(req: any, res: any) {
           const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
           await recordPlatformGift(parseInt(meta.userId), amountUsd, paymentIntentId);
         }
+        // Book purchase: record access grant
+        if (meta.type === "book_purchase" && meta.songId && meta.userId) {
+          const amountCents = session.amount_total ?? 0;
+          const songId = parseInt(meta.songId);
+          const buyerUserId = parseInt(meta.userId);
+          const db = await getDb();
+          const { bookPurchases } = await import("../drizzle/schema");
+          // Upsert — idempotent on duplicate webhook delivery
+          await db.insert(bookPurchases).values({
+            songId,
+            buyerUserId,
+            amountCents,
+            stripeSessionId: session.id,
+            stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          }).onDuplicateKeyUpdate({ set: { stripeSessionId: session.id } });
+          // Notify the book creator
+          const song = await getSongById(songId);
+          if (song?.userId) {
+            const buyer = await getUserById(buyerUserId);
+            const amountDollars = (amountCents / 100).toFixed(2);
+            await createNotification({
+              userId: song.userId,
+              type: "tip",
+              title: `Book purchased — $${amountDollars}`,
+              body: `${buyer?.name || "A reader"} purchased "${song.title}" for $${amountDollars}`,
+              actorName: buyer?.name || undefined,
+              refType: "song",
+              refId: songId,
+            });
+          }
+        }
         break;
       }
       case "account.updated": {
@@ -1028,6 +1059,12 @@ export const appRouter = router({
       parentSongId: z.number().int().positive().nullable().optional(),
       // Storyboard / Comic Book Reader
       pagesJson: z.string().max(500000).nullable().optional(),
+      // Book Access Control & Commerce
+      readAccess: z.enum(["open", "preview", "locked"]).optional(),
+      purchasePriceCents: z.number().int().min(0).nullable().optional(),
+      previewPageCount: z.number().int().min(1).max(50).optional(),
+      consentSettingsJson: z.string().max(2000).nullable().optional(),
+      externalLinksJson: z.string().max(4096).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
@@ -3081,7 +3118,64 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       }),
   }),
 
-  // ── External Playlists (Phase 7) ─────────────────────────────────────────────
+  // ── Books Commerce ───────────────────────────────────────────────────────────────────
+  books: router({
+    /** Check if the current user has purchased a book */
+    hasPurchased: publicProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        if (!ctx.user) return { purchased: false };
+        const db = await getDb();
+        const { bookPurchases } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+        const row = await db.select({ id: bookPurchases.id })
+          .from(bookPurchases)
+          .where(and(eq(bookPurchases.songId, input.songId), eq(bookPurchases.buyerUserId, ctx.user.id)))
+          .limit(1);
+        return { purchased: row.length > 0 };
+      }),
+    /** Create a Stripe Checkout session for a book purchase */
+    createPurchaseCheckout: protectedProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const song = await getSongById(input.songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
+        const priceCents = (song as any).purchasePriceCents as number | null;
+        if (!priceCents || priceCents <= 0) throw new TRPCError({ code: "BAD_REQUEST", message: "This book has no purchase price set" });
+        const user = await getUserById(ctx.user.id);
+        if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card"],
+          customer_email: user.email ?? undefined,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              unit_amount: priceCents,
+              product_data: {
+                name: song.title,
+                description: `Full access to "${song.title}" on Living Nexus`,
+              },
+            },
+            quantity: 1,
+          }],
+          metadata: {
+            type: "book_purchase",
+            songId: input.songId.toString(),
+            userId: ctx.user.id.toString(),
+            songTitle: song.title,
+          },
+          client_reference_id: ctx.user.id.toString(),
+          success_url: `${input.origin}/book/${input.songId}?purchase=success`,
+          cancel_url: `${input.origin}/book/${input.songId}`,
+        });
+        return { url: session.url };
+      }),
+  }),
+  // ── External Playlists (Phase 7) ─────────────────────────────────────────────────────
   externalPlaylists: router({
     // Import a playlist from a URL (YouTube or Suno)
     import: protectedProcedure

@@ -533,6 +533,20 @@
       "when": 1776286025199,
       "tag": "0076_slippery_thunderball",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1776300532737,
+      "tag": "0077_book_access_consent",
+      "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1776300987137,
+      "tag": "0078_book_purchases",
+      "breakpoints": true
     }
   ]
 }
