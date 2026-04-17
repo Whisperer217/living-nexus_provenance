@@ -5,10 +5,12 @@
  *
  * These are the downloadable "sonic fingerprint" files for each registered artifact.
  * The frequencies are derived from the SHA-256 file hash at upload time — deterministic and unique.
+ *
+ * NOTE: PNG generation uses jimp (pure JS) — no native binaries required for deployment.
  */
 
 import { Router } from "express";
-import { createCanvas } from "canvas";
+import { Jimp } from "jimp";
 import { getDb } from "./db.js";
 import { songs } from "../drizzle/schema.js";
 import { eq } from "drizzle-orm";
@@ -77,105 +79,87 @@ function buildWavBuffer(frequencies: number[]): Buffer {
   return buf;
 }
 
-/** Build a waveform PNG from an array of frequencies.
- *  Renders a multi-frequency waveform visualization — each frequency gets its own
- *  colored sine wave overlaid on a dark background.
+/** Convert RGBA components (0–255 each) to a 32-bit RGBA integer for jimp. */
+function rgba(r: number, g: number, b: number, a: number): number {
+  return ((r & 0xff) << 24) | ((g & 0xff) << 16) | ((b & 0xff) << 8) | (a & 0xff);
+}
+
+/** Frequency palette — gold gradient, 6 entries */
+const FREQ_PALETTE = [
+  rgba(196, 154,  40, 230),
+  rgba(251, 191,  36, 191),
+  rgba(245, 158,  11, 166),
+  rgba(234, 179,   8, 140),
+  rgba(161,  98,   7, 128),
+  rgba(120,  53,  15, 115),
+];
+
+/**
+ * Build a waveform PNG from an array of frequencies using jimp (pure JS).
+ * Renders a multi-frequency waveform visualization on a dark background.
  */
-function buildWaveformPng(frequencies: number[], songTitle: string): Buffer {
-  const WIDTH  = 1200;
-  const HEIGHT = 400;
-  const canvas = createCanvas(WIDTH, HEIGHT);
-  const ctx    = canvas.getContext("2d");
+async function buildWaveformPng(frequencies: number[], _songTitle: string): Promise<Buffer> {
+  const WIDTH  = 800;   // reduced from 1200 — jimp pixel-by-pixel is slower
+  const HEIGHT = 300;
 
-  // Background — deep void
-  ctx.fillStyle = "#0D0B07";
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  // Create dark background (#0D0B07)
+  const img = new Jimp({ width: WIDTH, height: HEIGHT, color: rgba(13, 11, 7, 255) });
 
-  // Subtle grid lines
-  ctx.strokeStyle = "rgba(196,154,40,0.08)";
-  ctx.lineWidth = 1;
-  for (let y = 0; y <= HEIGHT; y += HEIGHT / 4) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WIDTH, y); ctx.stroke();
+  // Draw subtle horizontal grid lines
+  const gridColor = rgba(196, 154, 40, 20);
+  for (let y = 0; y <= HEIGHT; y += Math.floor(HEIGHT / 4)) {
+    for (let x = 0; x < WIDTH; x++) img.setPixelColor(gridColor, x, y);
   }
-  for (let x = 0; x <= WIDTH; x += WIDTH / 8) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, HEIGHT); ctx.stroke();
+  // Draw subtle vertical grid lines
+  for (let x = 0; x <= WIDTH; x += Math.floor(WIDTH / 8)) {
+    for (let y = 0; y < HEIGHT; y++) img.setPixelColor(gridColor, x, y);
   }
 
-  // Center line
-  ctx.strokeStyle = "rgba(196,154,40,0.2)";
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(0, HEIGHT / 2); ctx.lineTo(WIDTH, HEIGHT / 2); ctx.stroke();
-
-  // Frequency colors — gold gradient palette
-  const COLORS = [
-    "rgba(196,154,40,0.9)",
-    "rgba(251,191,36,0.75)",
-    "rgba(245,158,11,0.65)",
-    "rgba(234,179,8,0.55)",
-    "rgba(161,98,7,0.5)",
-    "rgba(120,53,15,0.45)",
-  ];
+  // Draw center line
+  const centerLineColor = rgba(196, 154, 40, 51);
+  const cy = Math.floor(HEIGHT / 2);
+  for (let x = 0; x < WIDTH; x++) img.setPixelColor(centerLineColor, x, cy);
 
   const AMPLITUDE = HEIGHT * 0.35;
   const TWO_PI    = 2 * Math.PI;
-  // Show 3 full cycles of the lowest frequency for visual clarity
   const lowestFreq = Math.min(...frequencies, 110);
   const CYCLES = 3;
   const TIME_WINDOW = CYCLES / lowestFreq;
 
-  // Draw each frequency as a sine wave
+  // Draw each frequency as a sine wave (anti-aliased via vertical line segments)
   frequencies.forEach((freq, idx) => {
-    const color = COLORS[idx % COLORS.length];
-    ctx.strokeStyle = color;
-    ctx.lineWidth = idx === 0 ? 2.5 : 1.5;
-    ctx.beginPath();
+    const color = FREQ_PALETTE[idx % FREQ_PALETTE.length];
+    const lineWidth = idx === 0 ? 2 : 1;
 
     for (let px = 0; px < WIDTH; px++) {
       const t = (px / WIDTH) * TIME_WINDOW;
-      const y = HEIGHT / 2 - Math.sin(TWO_PI * freq * t) * AMPLITUDE * (1 - idx * 0.08);
-      if (px === 0) ctx.moveTo(px, y);
-      else ctx.lineTo(px, y);
+      const yf = HEIGHT / 2 - Math.sin(TWO_PI * freq * t) * AMPLITUDE * (1 - idx * 0.08);
+      const y = Math.round(yf);
+
+      // Draw a vertical segment of `lineWidth` pixels for thickness
+      for (let dy = -Math.floor(lineWidth / 2); dy <= Math.floor(lineWidth / 2); dy++) {
+        const py = y + dy;
+        if (py >= 0 && py < HEIGHT) img.setPixelColor(color, px, py);
+      }
     }
-    ctx.stroke();
   });
 
-  // Composite glow — draw the dominant (first) frequency again with blur effect
+  // Dominant frequency glow (first freq, wider stroke, semi-transparent gold)
   if (frequencies.length > 0) {
-    ctx.shadowColor = "rgba(196,154,40,0.6)";
-    ctx.shadowBlur  = 12;
-    ctx.strokeStyle = "rgba(196,154,40,0.4)";
-    ctx.lineWidth   = 4;
-    ctx.beginPath();
+    const glowColor = rgba(196, 154, 40, 102);
     const freq = frequencies[0];
     for (let px = 0; px < WIDTH; px++) {
       const t = (px / WIDTH) * TIME_WINDOW;
-      const y = HEIGHT / 2 - Math.sin(TWO_PI * freq * t) * AMPLITUDE;
-      if (px === 0) ctx.moveTo(px, y);
-      else ctx.lineTo(px, y);
+      const yf = HEIGHT / 2 - Math.sin(TWO_PI * freq * t) * AMPLITUDE;
+      const y = Math.round(yf);
+      for (let dy = -2; dy <= 2; dy++) {
+        const py = y + dy;
+        if (py >= 0 && py < HEIGHT) img.setPixelColor(glowColor, px, py);
+      }
     }
-    ctx.stroke();
-    ctx.shadowBlur = 0;
   }
 
-  // Frequency labels — bottom left
-  ctx.font = "bold 11px monospace";
-  ctx.fillStyle = "rgba(196,154,40,0.6)";
-  frequencies.forEach((freq, idx) => {
-    ctx.fillText(`${freq.toFixed(1)} Hz`, 12 + idx * 100, HEIGHT - 12);
-  });
-
-  // Song title — top left
-  ctx.font = "bold 14px monospace";
-  ctx.fillStyle = "rgba(196,154,40,0.85)";
-  ctx.fillText(songTitle.substring(0, 60), 12, 24);
-
-  // WID watermark — top right
-  ctx.font = "11px monospace";
-  ctx.fillStyle = "rgba(196,154,40,0.4)";
-  ctx.textAlign = "right";
-  ctx.fillText("LIVING NEXUS · HARMONIC SIGNATURE", WIDTH - 12, 24);
-
-  return canvas.toBuffer("image/png");
+  return img.getBuffer("image/png");
 }
 
 // ---------------------------------------------------------------------------
@@ -242,7 +226,7 @@ harmonicRouter.get("/:songId/image", async (req, res) => {
       return res.status(404).json({ error: "No harmonic signature found for this artifact" });
     }
 
-    const pngBuffer = buildWaveformPng(frequencies, song.title || "Untitled");
+    const pngBuffer = await buildWaveformPng(frequencies, song.title || "Untitled");
     const safeName  = (song.title || "harmonic").replace(/[^a-z0-9]/gi, "_").toLowerCase();
     const widSlug   = song.witnessId ? `_${song.witnessId.replace(/[^a-z0-9]/gi, "_")}` : "";
     const filename  = `${safeName}${widSlug}_waveform.png`;
