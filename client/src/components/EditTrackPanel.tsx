@@ -112,6 +112,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">(
     (song.aiConsent as any) ?? "prohibited"
   );
+  const [ownershipStatus, setOwnershipStatus] = useState<"full" | "partial">(
+    (song as any).ownershipStatus ?? "full"
+  );
   const [status, setStatus] = useState<"Draft" | "Published" | "Unlisted" | "Deleted">(
     (song.status as any) ?? "Published"
   );
@@ -415,6 +418,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       collectionTag: collectionTag.trim() || null,
       coverArtUrl: coverArtUrl || null,
       aiConsent,
+      ownershipStatus,
       status,
       creditsJson: validCredits.length > 0 ? JSON.stringify(validCredits) : null,
       parentSongId: parsedParentId,
@@ -818,6 +822,45 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                 </SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Ownership & Commercial License Disclaimer */}
+          <div
+            className="space-y-3 rounded-xl p-4"
+            style={{
+              background: ownershipStatus === "partial" ? "rgba(239,68,68,0.07)" : "rgba(196,154,40,0.04)",
+              border: `1px solid ${ownershipStatus === "partial" ? "rgba(239,68,68,0.35)" : "rgba(196,154,40,0.18)"}`,
+            }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <Label className="text-white text-sm font-medium flex items-center gap-2">
+                  <Shield size={14} style={{ color: ownershipStatus === "partial" ? "var(--ln-ember)" : "var(--ln-gold)" }} />
+                  Commercial Ownership
+                </Label>
+                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  {ownershipStatus === "full" ? "Full rights — eligible to publish & monetize" : "Partial / unclear — publish & monetize blocked"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOwnershipStatus(s => s === "full" ? "partial" : "full")}
+                className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors"
+                style={{ background: ownershipStatus === "full" ? "var(--ln-gold)" : "rgba(239,68,68,0.5)" }}
+                aria-pressed={ownershipStatus === "full"}
+                aria-label="Toggle commercial ownership"
+              >
+                <span
+                  className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                  style={{ transform: ownershipStatus === "full" ? "translateX(22px)" : "translateX(2px)" }}
+                />
+              </button>
+            </div>
+            {ownershipStatus === "partial" && (
+              <p className="text-xs" style={{ color: "var(--ln-ember)" }}>
+                AI-generated without a commercial license, or remix without full clearance. Upload is allowed, but this work cannot be published or monetized until you resolve the rights situation and toggle this on.
+              </p>
+            )}
           </div>
 
           {/* Visibility */}

@@ -554,6 +554,13 @@
       "when": 1776397087926,
       "tag": "0079_freezing_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1745000000000,
+      "tag": "0080_ownership_disclaimer",
+      "breakpoints": true
     }
   ]
 }

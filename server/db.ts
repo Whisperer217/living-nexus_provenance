@@ -265,6 +265,7 @@ export async function createSong(data: {
   creditsJson?: string;
   releaseDate?: string; isrc?: string;
   aiConsent: "prohibited" | "permitted_attribution" | "permitted";
+  ownershipStatus?: "full" | "partial";
   fileUrl?: string; fileKey?: string; coverArtUrl?: string; fileHash?: string;
   durationSeconds?: number; sampleRate?: number; bitDepth?: number;
   witnessId?: string; harmonicSignature?: number[];
@@ -477,6 +478,14 @@ export async function updateSongStatus(
 ) {
   const db = await getDb();
   if (!db) return;
+  // Enforce publish gate: partial-rights works cannot be Published
+  if (status === "Published") {
+    const [row] = await db.select({ ownershipStatus: songs.ownershipStatus }).from(songs)
+      .where(and(eq(songs.id, songId), eq(songs.userId, userId))).limit(1);
+    if (row?.ownershipStatus === "partial") {
+      throw new Error("This work cannot be published without full commercial ownership or a commercial license.");
+    }
+  }
   // Keep isPublic in sync: only Published songs are publicly visible in any feed
   const isPublic = status === "Published";
   await db.update(songs).set({ status, isPublic, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
@@ -491,6 +500,7 @@ export async function updateSongMetadata(
     collectionTag?: string | null;
     coverArtUrl?: string | null;
     aiConsent?: "prohibited" | "permitted_attribution" | "permitted";
+    ownershipStatus?: "full" | "partial";
     status?: "Draft" | "Published" | "Unlisted" | "Deleted";
     coverPositionX?: number;
     coverPositionY?: number;
@@ -505,6 +515,11 @@ export async function updateSongMetadata(
     haaiDeclaredAt?: Date | null;
     parentSongId?: number | null;
     pagesJson?: string | null;
+    readAccess?: "open" | "preview" | "locked";
+    purchasePriceCents?: number | null;
+    previewPageCount?: number;
+    consentSettingsJson?: string | null;
+    externalLinksJson?: string | null;
   }
 ) {
   const db = await getDb();
@@ -515,6 +530,11 @@ export async function updateSongMetadata(
   if (fields.collectionTag !== undefined) updateSet.collectionTag = fields.collectionTag;
   if (fields.coverArtUrl !== undefined) updateSet.coverArtUrl = fields.coverArtUrl;
   if (fields.aiConsent !== undefined) updateSet.aiConsent = fields.aiConsent;
+  if (fields.ownershipStatus !== undefined) updateSet.ownershipStatus = fields.ownershipStatus;
+  // Enforce publish gate: partial-rights works cannot be Published or monetized
+  if (fields.status === "Published" && fields.ownershipStatus === "partial") {
+    throw new Error("This work cannot be published without full commercial ownership or a commercial license.");
+  }
   if (fields.status !== undefined) updateSet.status = fields.status;
   if (fields.coverPositionX !== undefined) updateSet.coverPositionX = fields.coverPositionX;
   if (fields.coverPositionY !== undefined) updateSet.coverPositionY = fields.coverPositionY;
@@ -528,6 +548,11 @@ export async function updateSongMetadata(
   if (fields.haaiDeclaredAt !== undefined) updateSet.haaiDeclaredAt = fields.haaiDeclaredAt;
   if (fields.parentSongId !== undefined) updateSet.parentSongId = fields.parentSongId;
   if (fields.pagesJson !== undefined) updateSet.pagesJson = fields.pagesJson;
+  if (fields.readAccess !== undefined) updateSet.readAccess = fields.readAccess;
+  if (fields.purchasePriceCents !== undefined) updateSet.purchasePriceCents = fields.purchasePriceCents;
+  if (fields.previewPageCount !== undefined) updateSet.previewPageCount = fields.previewPageCount;
+  if (fields.consentSettingsJson !== undefined) updateSet.consentSettingsJson = fields.consentSettingsJson;
+  if (fields.externalLinksJson !== undefined) updateSet.externalLinksJson = fields.externalLinksJson;
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 

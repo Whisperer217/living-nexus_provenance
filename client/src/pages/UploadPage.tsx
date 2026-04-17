@@ -181,6 +181,7 @@ export default function UploadPage() {
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
   const [aiDisclosure, setAiDisclosure] = useState<"original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument">("original");
+  const [ownershipStatus, setOwnershipStatus] = useState<"full" | "partial">("full");
   const [haaiDeclaration, setHaaiDeclaration] = useState({
     haaiVisualConcept: "",
     haaiStyleLanguage: "",
@@ -575,7 +576,7 @@ export default function UploadPage() {
         uploadMutation.mutate({
           fileUrl, fileKey, coverArtUrl, title, genre: genre || undefined,
           albumName: albumName || undefined, releaseDate: releaseDate || undefined,
-          isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+          isrc: isrc || undefined, aiConsent, ownershipStatus, moodTags: selectedMoods, coWriters: [],
           creditsJson: mergedCredits.length > 0 ? JSON.stringify(mergedCredits) : undefined,
           caption: caption || undefined,
           contentType: uploadMode,
@@ -603,7 +604,7 @@ export default function UploadPage() {
           coverArtUrl, title, genre: genre || undefined,
           bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
           albumName: albumName || undefined, releaseDate: releaseDate || undefined,
-          isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+          isrc: isrc || undefined, aiConsent, ownershipStatus, moodTags: selectedMoods, coWriters: [],
           creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
           lyricsText: lyrics,
           lyricsHash: witnessData?.fileHash,
@@ -639,7 +640,7 @@ export default function UploadPage() {
         title, genre: genre || undefined,
         bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
         albumName: albumName || undefined, releaseDate: releaseDate || undefined,
-        isrc: isrc || undefined, aiConsent, moodTags: selectedMoods, coWriters: [],
+        isrc: isrc || undefined, aiConsent, ownershipStatus, moodTags: selectedMoods, coWriters: [],
         creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
         lyricsText: lyrics || undefined,
         fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
@@ -1272,6 +1273,69 @@ export default function UploadPage() {
                       workType={uploadMode === "comic" ? "comic" : uploadMode === "manuscript" ? "manuscript" : uploadMode === "lyrics" ? "lyrics" : "audio"}
                       compact={false}
                     />
+                  </div>
+                )}
+              </div>
+
+              {/* ── Ownership & Commercial License Disclaimer ─────────── */}
+              <div
+                className="rounded-2xl p-4 space-y-3"
+                style={{
+                  background: ownershipStatus === "partial" ? "rgba(239,68,68,0.07)" : "rgba(196,154,40,0.05)",
+                  border: `1.5px solid ${ownershipStatus === "partial" ? "rgba(239,68,68,0.35)" : "rgba(196,154,40,0.25)"}`,
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: ownershipStatus === "partial" ? "var(--ln-ember)" : "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
+                      Commercial Ownership Declaration
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: "var(--ln-smoke)" }}>
+                      Do you hold full commercial rights to this work?
+                    </p>
+                  </div>
+                  {/* Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setOwnershipStatus(s => s === "full" ? "partial" : "full")}
+                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors"
+                    style={{ background: ownershipStatus === "full" ? "var(--ln-gold)" : "rgba(239,68,68,0.5)" }}
+                    aria-pressed={ownershipStatus === "full"}
+                    aria-label="Toggle commercial ownership"
+                  >
+                    <span
+                      className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                      style={{ transform: ownershipStatus === "full" ? "translateX(22px)" : "translateX(2px)" }}
+                    />
+                  </button>
+                </div>
+
+                {/* Explanatory text — always visible */}
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: "var(--ln-gold)" }} />
+                    <p className="text-xs" style={{ color: "var(--ln-parchment)" }}>
+                      <strong style={{ color: "var(--ln-gold)" }}>Full ownership</strong> — you composed the work entirely, or you remixed commercially-licensed music with significant human alteration. You may publish and monetize.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: "var(--ln-ember)" }} />
+                    <p className="text-xs" style={{ color: "var(--ln-parchment)" }}>
+                      <strong style={{ color: "var(--ln-ember)" }}>Partial / unclear</strong> — AI-generated without a commercial license, or remixed content without full clearance. You can still upload and save as a Draft, but <strong>publishing and monetization will be blocked</strong> until you resolve the rights situation.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Inline warning when partial is selected */}
+                {ownershipStatus === "partial" && (
+                  <div
+                    className="flex items-start gap-2 rounded-xl p-3"
+                    style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)" }}
+                  >
+                    <span className="text-sm" style={{ color: "var(--ln-ember)" }}>⚠</span>
+                    <p className="text-xs" style={{ color: "var(--ln-ember)" }}>
+                      This work will be saved as a <strong>Draft</strong> and cannot be published or monetized. To publish, obtain a commercial license or ensure significant human authorship, then update this declaration.
+                    </p>
                   </div>
                 )}
               </div>

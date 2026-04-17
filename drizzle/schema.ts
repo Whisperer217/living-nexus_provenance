@@ -253,6 +253,15 @@ export const songs = mysqlTable("songs", {
   // Renders as meta badges on the detail page
   externalLinksJson: text("externalLinksJson"),
 
+  // ─── Ownership & Commercial License Disclaimer ─────────────────────────────
+  // Declared by the creator at upload time via a toggle.
+  // "full"    = creator holds full commercial rights (original composition, or remix
+  //             with a commercial license + significant human alteration)
+  // "partial" = AI-generated without a commercial license, or remix without full
+  //             clearance — upload is allowed, but publish + monetization are blocked
+  //             until the creator resolves the rights situation.
+  ownershipStatus: mysqlEnum("ownershipStatus", ["full", "partial"]).default("full").notNull(),
+
   // ─── Sovereign Stamp ─────────────────────────────────────────────────────────
   // Authorship tone injection system — BDDT Publishing / Command Domains LLC
   // null = not yet stamped; set = stamped audio file with embedded provenance tone
