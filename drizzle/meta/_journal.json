@@ -547,6 +547,13 @@
       "when": 1776300987137,
       "tag": "0078_book_purchases",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "5",
+      "when": 1776397087926,
+      "tag": "0079_freezing_bloodstrike",
+      "breakpoints": true
     }
   ]
 }
