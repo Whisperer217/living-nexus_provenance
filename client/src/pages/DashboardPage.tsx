@@ -440,7 +440,7 @@ export default function DashboardPage() {
           {[
             { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "var(--ln-gold)", delta: null },
             { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "var(--ln-gold)", delta: (dashboardDeltas as any)?.newPlays ?? 0 },
-            { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: "var(--lnx-green)", delta: null },
+            { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: slotsUsed > slotsTotal ? "var(--lnx-red)" : "var(--lnx-green)", delta: null },
             { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "var(--ln-seal-bright)", delta: (dashboardDeltas as any)?.newTips ?? 0 },
           ].map(({ label, value, icon: Icon, color, delta }) => (
             <div key={label} className="p-4 relative" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>

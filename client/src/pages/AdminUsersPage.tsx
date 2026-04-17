@@ -16,7 +16,7 @@ import {
   Loader2, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Users, Shield, Tag, Plus, CheckCircle2, XCircle,
   Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle, Crown, UserX, AlertTriangle,
-  Trash2, Database, Globe, Lock, ArrowRight, Pin, PinOff,
+  Trash2, Database, Globe, Lock, ArrowRight, Pin, PinOff, RefreshCw,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
@@ -66,6 +66,14 @@ function UsersTab() {
     onSuccess: (_, vars) => {
       toast.success(`License granted — User ID ${vars.userId} now has ${vars.slotsGranted} upload slots.`);
       setGrantingId(null);
+      utils.admin.getUsers.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const reconcileSlots = trpc.admin.reconcileSlotsUsed.useMutation({
+    onSuccess: (data, vars) => {
+      toast.success(`Slots reconciled — User ID ${vars.userId} corrected to ${data.reconciledTo} used.`);
       utils.admin.getUsers.invalidate();
     },
     onError: (e) => toast.error(e.message),
@@ -240,6 +248,17 @@ function UsersTab() {
                           <Gift className="w-3 h-3 mr-1" /> Grant
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs mt-1"
+                        title="Reconcile songSlotsUsed to actual non-deleted song count"
+                        style={{ borderColor: "rgba(239,68,68,0.5)", color: "var(--lnx-red)" }}
+                        disabled={reconcileSlots.isPending}
+                        onClick={() => reconcileSlots.mutate({ userId: u.id })}
+                      >
+                        <RefreshCw className="w-3 h-3 mr-1" /> Reconcile
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"

@@ -959,6 +959,15 @@ export default function UploadPage() {
               {(uploadMode === "manuscript" || uploadMode === "comic") && (
                 <div
                   onClick={() => documentInputRef.current?.click()}
+                  onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
+                  onDrop={e => {
+                    e.preventDefault(); e.stopPropagation();
+                    const f = Array.from(e.dataTransfer.files)[0];
+                    if (!f) return;
+                    if (f.size > 200 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum 200 MB.`); return; }
+                    setDocumentFile(f);
+                    if (!title) setTitle(f.name.replace(/\.[^/.]+$/, ""));
+                  }}
                   className="rounded-xl p-8 text-center cursor-pointer transition-all"
                   style={{ border: `2px dashed ${documentFile ? (uploadMode === "manuscript" ? "var(--ln-seal-bright)" : "var(--ln-ember)") : "rgba(196,154,40,0.2)"}`, background: documentFile ? "rgba(74,222,128,0.05)" : "var(--ln-coal)" }}>
                   <input

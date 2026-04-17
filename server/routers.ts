@@ -2064,6 +2064,22 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         return { success: true };
       }),
 
+    /** Reconcile songSlotsUsed to the actual count of non-deleted songs for a user */
+    reconcileSlotsUsed: adminProcedure
+      .input(z.object({ userId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("DB unavailable");
+        const { songs: songsTable, users: usersTable } = await import("../drizzle/schema.js");
+        const { count, ne, eq: eqOp } = await import("drizzle-orm");
+        const [row] = await db.select({ actual: count() }).from(songsTable)
+          .where(eqOp(songsTable.userId, input.userId));
+        const actualUsed = row?.actual ?? 0;
+        await db.update(usersTable).set({ songSlotsUsed: actualUsed }).where(eqOp(usersTable.id, input.userId));
+        await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "reconcile_slots", targetType: "user", targetId: String(input.userId) });
+        return { success: true, reconciledTo: actualUsed };
+      }),
+
     /** Toggle the isPinned flag for a creator — pinned creators appear first in the Featured Creators carousel */
     togglePinCreator: adminProcedure
       .input(z.object({ userId: z.number().int(), pin: z.boolean() }))
