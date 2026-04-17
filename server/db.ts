@@ -2862,8 +2862,12 @@ export async function grantFounder(userId: number): Promise<void> {
   if (current >= MAX_FOUNDERS) {
     throw new Error(`Max founders reached (${MAX_FOUNDERS}). Revoke a founder first.`);
   }
+  // Generate a Founder WID if the user doesn't already have one
+  const [existing] = await db.select({ founderWid: users.founderWid })
+    .from(users).where(eq(users.id, userId)).limit(1);
+  const founderWid = (existing as any)?.founderWid ?? `WID-FDR-${String(userId).padStart(4, '0')}-${Date.now()}`;
   await db.update(users)
-    .set({ role: "founder" as any, slotLimit: null })
+    .set({ role: "founder" as any, slotLimit: null, founderWid, founderGrantedAt: new Date() } as any)
     .where(eq(users.id, userId));
 }
 

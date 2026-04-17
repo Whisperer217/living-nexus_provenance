@@ -83,6 +83,10 @@ export const users = mysqlTable("users", {
   lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),
   lastVisitedDashboardAt: timestamp("lastVisitedDashboardAt"),
 
+  // Founder WID — generated at grant time, e.g. WID-FDR-0001-1713340800000
+  founderWid: varchar("founderWid", { length: 64 }),
+  founderGrantedAt: timestamp("founderGrantedAt"),
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),

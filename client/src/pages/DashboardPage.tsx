@@ -243,47 +243,97 @@ export default function DashboardPage() {
       </div>
       <div className="container py-10" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
-        {/* ── No-Works Onboarding Banner ─────────────────────────────────────── */}
-        {hasNoWorks && (
-          <div
-            className="mb-8 p-8 flex flex-col md:flex-row items-center gap-6"
-            style={{
-              background: "linear-gradient(135deg, var(--ln-coal), #111009)",
-              border: "1px solid rgba(196,154,40,0.2)",
-            }}
-          >
-            {/* Icon */}
+        {/* ── 3-Step Onboarding Checklist (shown when user has no works) ── */}
+        {hasNoWorks && (() => {
+          const hasHandle = !!(user as any)?.artistHandle;
+          const steps = [
+            {
+              num: 1,
+              label: "Sign in to Living Nexus",
+              done: true,
+              cta: null as React.ReactNode,
+            },
+            {
+              num: 2,
+              label: "Set your artist handle",
+              done: hasHandle,
+              cta: !hasHandle ? (
+                <Link href="/profile">
+                  <button
+                    type="button"
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:brightness-110 flex-shrink-0"
+                    style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
+                  >
+                    Set Handle
+                  </button>
+                </Link>
+              ) : null,
+            },
+            {
+              num: 3,
+              label: "Upload your first work and receive your WID",
+              done: false,
+              cta: (
+                <Link href="/upload">
+                  <button
+                    type="button"
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:brightness-110 flex-shrink-0"
+                    style={{ background: "var(--ln-gold)", color: "var(--ln-coal)", border: "none" }}
+                  >
+                    Upload &amp; Witness
+                  </button>
+                </Link>
+              ),
+            },
+          ];
+          return (
             <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}
+              className="mb-8 rounded-2xl p-6"
+              style={{
+                background: "linear-gradient(135deg, rgba(196,154,40,0.06), rgba(17,16,9,0.9))",
+                border: "1px solid rgba(196,154,40,0.22)",
+              }}
             >
-              <Shield size={28} style={{ color: "var(--ln-gold)" }} />
-            </div>
-            {/* Copy */}
-            <div className="flex-1 text-center md:text-left">
-              <p
-                className="text-lg font-bold mb-1"
-                style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
-              >
-                Upload your first piece and get your WID
-              </p>
-              <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>
+              <div className="flex items-center gap-2 mb-5">
+                <Shield size={14} style={{ color: "var(--ln-gold)" }} />
+                <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: "var(--ln-gold)" }}>Getting Started</p>
+              </div>
+              <div className="space-y-3">
+                {steps.map((step) => (
+                  <div
+                    key={step.num}
+                    className="flex items-center gap-4 rounded-xl px-4 py-3"
+                    style={{
+                      background: step.done ? "rgba(196,154,40,0.06)" : "rgba(255,255,255,0.03)",
+                      border: `1px solid ${step.done ? "rgba(196,154,40,0.2)" : "rgba(255,255,255,0.07)"}`,
+                    }}
+                  >
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                      style={{
+                        background: step.done ? "rgba(196,154,40,0.18)" : "rgba(255,255,255,0.06)",
+                        color: step.done ? "var(--ln-gold)" : "#6b7280",
+                        border: `1px solid ${step.done ? "rgba(196,154,40,0.35)" : "rgba(255,255,255,0.1)"}`,
+                      }}
+                    >
+                      {step.done ? <CheckCircle size={13} /> : step.num}
+                    </div>
+                    <p
+                      className="flex-1 text-sm"
+                      style={{ color: step.done ? "var(--ln-smoke)" : "var(--ln-parchment)", textDecoration: step.done ? "line-through" : "none" }}
+                    >
+                      {step.label}
+                    </p>
+                    {!step.done && step.cta}
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs mt-4" style={{ color: "#4b5563" }}>
                 Every work you upload receives a cryptographic Witness ID — your permanent, immutable proof of origin.
-                No algorithms. No ownership loss. Just creation, proven.
               </p>
             </div>
-            {/* CTA */}
-            <Link href="/upload">
-              <Button
-                className="flex-shrink-0"
-                style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Upload &amp; Witness Your Work
-              </Button>
-            </Link>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Action buttons */}
         <div className="flex items-center justify-end mb-8 gap-2">

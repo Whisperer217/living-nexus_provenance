@@ -557,9 +557,15 @@
     },
     {
       "idx": 80,
+<<<<<<< Updated upstream
       "version": "7",
       "when": 1745000000000,
       "tag": "0080_ownership_disclaimer",
+=======
+      "version": "5",
+      "when": 1776447772286,
+      "tag": "0080_easy_pride",
+>>>>>>> Stashed changes
       "breakpoints": true
     }
   ]

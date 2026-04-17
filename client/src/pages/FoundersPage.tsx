@@ -1,10 +1,10 @@
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
-import { ChevronLeft, Crown, Shield, Star, Heart, ExternalLink, Zap } from "lucide-react";
+import { ChevronLeft, Crown, Shield, Star, Heart, ExternalLink, Zap, Copy, Check } from "lucide-react";
 import { foundersEraDaysRemaining } from "./FounderEraPage";
 
 const GOLD = "#c9a84c";
@@ -18,6 +18,20 @@ export default function FoundersPage() {
   const { data: archivePackages } = trpc.livingArchive.listPackages.useQuery();
   const founderPackage = archivePackages?.find((p: any) => p.id === "founder_unlimited");
   const currentPrice = founderPackage?.priceCents ? `$${(founderPackage.priceCents / 100).toFixed(2)}` : "$88.88";
+
+  // Detect ?founder=success in URL (Stripe redirect)
+  const isFounderSuccess = useMemo(() => new URLSearchParams(window.location.search).get("founder") === "success", []);
+  const { data: profile } = trpc.profile.me.useQuery(undefined, { enabled: isFounderSuccess && !!user });
+  const founderWid = (profile as any)?.founderWid as string | null | undefined;
+  const [widCopied, setWidCopied] = useState(false);
+  const copyWid = () => {
+    if (founderWid) {
+      navigator.clipboard.writeText(founderWid).then(() => {
+        setWidCopied(true);
+        setTimeout(() => setWidCopied(false), 2000);
+      });
+    }
+  };
 
   const founderMutation = trpc.livingArchive.purchaseFounder.useMutation({
     onSuccess: (data: { url: string | null }) => {
@@ -48,6 +62,59 @@ export default function FoundersPage() {
           </button>
         </Link>
       </div>
+
+      {/* ── Founder Success Banner (shown after Stripe redirect) ── */}
+      {isFounderSuccess && (
+        <div className="max-w-2xl mx-auto px-4 mb-6">
+          <div
+            className="rounded-2xl p-6"
+            style={{
+              background: "linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05))",
+              border: "1px solid rgba(201,168,76,0.5)",
+            }}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(201,168,76,0.2)", border: "1px solid rgba(201,168,76,0.4)" }}
+              >
+                <Crown size={18} style={{ color: GOLD }} />
+              </div>
+              <div>
+                <p className="text-white font-bold text-base">You are a Founder of Living Nexus</p>
+                <p className="text-gray-400 text-xs">Your permanent Founder status has been recorded in the registry.</p>
+              </div>
+            </div>
+            {founderWid ? (
+              <div
+                className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 mt-2"
+                style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,168,76,0.25)" }}
+              >
+                <div>
+                  <p className="text-gray-500 text-[10px] uppercase tracking-widest mb-0.5">Your Founder WID</p>
+                  <p className="text-white font-mono font-bold text-sm">{founderWid}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyWid}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+                  style={{ background: "rgba(201,168,76,0.15)", color: GOLD, border: "1px solid rgba(201,168,76,0.3)" }}
+                >
+                  {widCopied ? <Check size={12} /> : <Copy size={12} />}
+                  {widCopied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-xs mt-2">
+                Your Founder WID is being generated — check your notifications in a moment.
+              </p>
+            )}
+            <p className="text-gray-600 text-xs mt-3">
+              Your Founder WID is permanent and cannot be revoked or transferred. Welcome to the First Witnesses.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-2xl mx-auto px-4 pb-16">
         {/* Header */}

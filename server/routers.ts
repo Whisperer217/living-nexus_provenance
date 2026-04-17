@@ -244,6 +244,32 @@ export async function handleStripeWebhook(req: any, res: any) {
           const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.id;
           await recordPlatformGift(parseInt(meta.userId), amountUsd, paymentIntentId);
         }
+        // Founder purchase: auto-grant founder role + generate WID-FDR-*
+        if (meta.type === "founder_purchase" && meta.userId) {
+          const buyerUserId = parseInt(meta.userId);
+          try {
+            await grantFounder(buyerUserId);
+            const updatedUser = await getUserById(buyerUserId);
+            const founderWid = (updatedUser as any)?.founderWid ?? `WID-FDR-${String(buyerUserId).padStart(4, '0')}-${Date.now()}`;
+            await createNotification({
+              userId: buyerUserId,
+              type: "tip",
+              title: "You are a Founder of Living Nexus",
+              body: `Your Founder WID has been issued: ${founderWid}. Thank you for being one of the First Witnesses.`,
+              actorName: "Living Nexus",
+              refType: "user",
+              refId: buyerUserId,
+            });
+            const buyer = await getUserById(buyerUserId);
+            const amountDollars = ((session.amount_total ?? 0) / 100).toFixed(2);
+            await notifyOwner({
+              title: `New Founder \u2014 $${amountDollars}`,
+              content: `${buyer?.name || "A creator"} (${buyer?.email || ""}) became a Founder. WID: ${founderWid}`,
+            });
+          } catch (e) {
+            console.error("[Webhook] founder_purchase grant failed:", e);
+          }
+        }
         // Book purchase: record access grant
         if (meta.type === "book_purchase" && meta.songId && meta.userId) {
           const amountCents = session.amount_total ?? 0;
