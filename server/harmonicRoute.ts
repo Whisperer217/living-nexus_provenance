@@ -9,7 +9,7 @@
 
 import { Router } from "express";
 import { createCanvas } from "canvas";
-import { db } from "./db.js";
+import { getDb } from "./db.js";
 import { songs } from "../drizzle/schema.js";
 import { eq } from "drizzle-orm";
 
@@ -188,6 +188,8 @@ harmonicRouter.get("/:songId/audio", async (req, res) => {
     const songId = parseInt(req.params.songId);
     if (isNaN(songId)) return res.status(400).json({ error: "Invalid song ID" });
 
+    const db = await getDb();
+    if (!db) return res.status(503).json({ error: "Database unavailable" });
     const [song] = await db.select({
       id: songs.id,
       title: songs.title,
@@ -224,6 +226,8 @@ harmonicRouter.get("/:songId/image", async (req, res) => {
     const songId = parseInt(req.params.songId);
     if (isNaN(songId)) return res.status(400).json({ error: "Invalid song ID" });
 
+    const db = await getDb();
+    if (!db) return res.status(503).json({ error: "Database unavailable" });
     const [song] = await db.select({
       id: songs.id,
       title: songs.title,

@@ -166,15 +166,6 @@ export default function ProfilePage() {
   };
 
   // Load full profile from DB — always fetch fresh on mount so bio/photo updates are immediately visible
-  // Sync localGenres from server profile (only on initial load or external change)
-  useEffect(() => {
-    if (profile?.primaryGenre !== undefined && !genresInitialized) {
-      const raw = profile.primaryGenre || "";
-      setLocalGenres(raw ? raw.split(",").map((g: string) => g.trim()).filter(Boolean) : []);
-      setGenresInitialized(true);
-    }
-  }, [profile?.primaryGenre, genresInitialized]);
-
   const { data: profile, isLoading: profileLoading } = trpc.profile.me.useQuery(undefined, {
     enabled: !!user,
     staleTime: 0,           // treat cached data as immediately stale
@@ -232,6 +223,14 @@ export default function ProfilePage() {
   // Local genre state — avoids stale-read bug when clicking chips in rapid succession
   const [localGenres, setLocalGenres] = useState<string[]>([]);
   const [genresInitialized, setGenresInitialized] = useState(false);
+  // Sync localGenres from server profile (only on initial load or external change)
+  useEffect(() => {
+    if (profile?.primaryGenre !== undefined && !genresInitialized) {
+      const raw = profile.primaryGenre || "";
+      setLocalGenres(raw ? raw.split(",").map((g: string) => g.trim()).filter(Boolean) : []);
+      setGenresInitialized(true);
+    }
+  }, [profile?.primaryGenre, genresInitialized]);
   const replyMutation = trpc.notifications.reply.useMutation({
     onSuccess: () => {
       utils.notifications.list.invalidate();
