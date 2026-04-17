@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ChevronLeft, Heart, Shield, Wrench, Star, Users, Bug } from "lucide-react";
+import { ChevronLeft, Heart, Shield, Wrench, Star, Users, Bug, FileText } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 /* ─── Contributor Data ───────────────────────────────────────────────────────
@@ -254,6 +254,85 @@ export default function AttributionPage() {
           subtitle="Early members of the Living Nexus Discord who shaped the direction of the platform."
           contributors={COMMUNITY_VOICES}
         />
+
+        {/* ── CCAI General Assembly Participation Record ─────────────────── */}
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-2">
+            <FileText size={16} style={{ color: "var(--ln-gold)" }} />
+            <h2 className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>
+              CCAI Alignment &amp; Participation
+            </h2>
+          </div>
+          <p className="text-xs mb-5" style={{ color: "#475569" }}>
+            Formal participation records documenting Living Nexus engagement with the Coalition for Constitutional AI and related governance bodies.
+          </p>
+          <div
+            className="rounded-xl p-5"
+            style={{ background: "rgba(212,175,55,0.03)", border: "1px solid rgba(212,175,55,0.12)" }}
+          >
+            {/* Record header */}
+            <div className="flex items-start gap-4">
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 text-lg font-bold"
+                style={{ background: "rgba(212,175,55,0.12)", color: "var(--ln-gold)" }}
+              >
+                J
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-3 flex-wrap">
+                  <span className="text-base font-semibold" style={{ color: "var(--ln-parchment)" }}>
+                    Jacob Ross (Doc Seraph Mercer)
+                  </span>
+                  <span
+                    className="text-[10px] uppercase tracking-widest"
+                    style={{ color: "var(--ln-iron)" }}
+                  >
+                    April 13, 2026
+                  </span>
+                </div>
+                <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+                  Signatory Member — CCAI General Assembly
+                </p>
+              </div>
+            </div>
+
+            {/* Record title */}
+            <div className="mt-4 mb-3 pb-3" style={{ borderBottom: "1px solid rgba(212,175,55,0.08)" }}>
+              <p className="text-sm font-semibold" style={{ color: "var(--ln-parchment)" }}>
+                Participation and Framework Contributions: CCAI General Assembly, April 13, 2026
+              </p>
+            </div>
+
+            {/* Record body */}
+            <div className="space-y-3 text-sm leading-relaxed" style={{ color: "#94a3b8" }}>
+              <p>
+                Attended the CCAI General Assembly as a signatory member alongside approximately 58 participants. Participated in uniform as a National Guard combat medic, representing the intersection of creator sovereignty doctrine and public service.
+              </p>
+              <p>
+                Submitted a formal Q&amp;A question to the assembly proposing a witness-based approach to verifiable provenance — specifically, that the act of witnessing an artifact should itself be recorded as a cryptographic event, creating an unbroken chain of custody from creation to consumption. The terminology <em style={{ color: "var(--ln-gold)", fontStyle: "normal", fontWeight: 600 }}>"witnessed artifacts"</em> was positively received by Ted Tremper of CCAI leadership.
+              </p>
+              <p>
+                Living Nexus was acknowledged by Tim Friedlander as a working implementation of provenance-first creator infrastructure — the first such acknowledgment of the platform by a named CCAI figure in a formal assembly context.
+              </p>
+              <p>
+                The framework origin was publicly attributed to nine months of work aimed at suicide prevention through creator sovereignty doctrine: the proposition that restoring a creator's ownership of their own testimony is a clinical and ethical intervention, not merely a commercial one.
+              </p>
+            </div>
+
+            {/* Witness tags */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              {["CCAI General Assembly", "Witnessed Artifacts", "Provenance-First", "Creator Sovereignty", "Signatory Member"].map(tag => (
+                <span
+                  key={tag}
+                  className="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full"
+                  style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.18)", color: "var(--ln-gold)" }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* ── Call to action ─────────────────────────────────────────── */}
         <div
