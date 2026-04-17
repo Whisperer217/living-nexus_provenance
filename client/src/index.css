@@ -280,16 +280,22 @@
      body.overlay-active is set by overlayController.ts.
      All panels (menu, quickplay, player, modals) use this single class.
      ─────────────────────────────────────────────────────────────────── */
+  /* overlay-active: overflow lock only (both full and light modes)
+     Does NOT set position:fixed here — that is reserved for overlay-active-full.
+     Light mode (mini-bar drag gesture) uses this class alone so the scroll div
+     behind the mini bar remains scrollable during the gesture. */
   body.overlay-active {
     overflow: hidden;
-    /* position:fixed prevents iOS Safari rubber-band scroll from revealing the
-       black browser chrome / void behind the app when any panel is open.
-       We preserve scroll position via JS (overlayController) so the page
-       doesn't jump when the panel closes. */
+    overscroll-behavior: none;
+  }
+  /* overlay-active-full: full-screen takeover (expanded player, modals, menus)
+     Adds position:fixed to prevent iOS Safari rubber-band scroll from revealing
+     the void behind the app. JS (overlayController) saves/restores scrollY
+     to prevent the page from jumping when the panel closes. */
+  body.overlay-active-full {
     position: fixed;
     width: 100%;
     touch-action: none;
-    overscroll-behavior: none;
   }
 
   /* Graceful Lights On transition */

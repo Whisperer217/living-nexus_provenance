@@ -3412,3 +3412,6 @@
 - [x] Fix Stripe webhook: add founder_purchase case → auto grantFounder + generate WID-FDR-*
 - [x] Dashboard Founder success banner: show after /founders?founder=success redirect
 - [x] Simplified onboarding checklist: 3-step card on first dashboard visit (Sign in → Handle → Upload)
+
+## Bug — Scroll Lock While Playing
+- [x] Body scroll locked when expanded player is open — fixed: split overlay-active CSS into light (overflow only) and full (position:fixed) variants; mini-bar drag no longer freezes page scroll

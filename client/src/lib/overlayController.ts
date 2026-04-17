@@ -61,9 +61,12 @@ function _lockScroll(mode: LockMode) {
     document.body.style.overflow = "hidden";
     document.body.style.touchAction = "none";
     document.body.style.top = `-${_savedScrollY}px`;
-    document.body.classList.add("overlay-active");
+    // overlay-active-full adds position:fixed (iOS Safari rubber-band prevention)
+    document.body.classList.add("overlay-active", "overlay-active-full");
   } else {
     // light: overflow only — no touchAction, no position:fixed
+    // Do NOT add overlay-active-full — that would apply position:fixed via CSS
+    // which freezes the scroll position and blocks the scroll div behind the mini bar.
     document.body.style.overflow = "hidden";
     document.body.classList.add("overlay-active");
   }
@@ -73,7 +76,7 @@ function _unlockScroll() {
   document.body.style.overflow = "";
   document.body.style.touchAction = "";
   document.body.style.top = "";
-  document.body.classList.remove("overlay-active");
+  document.body.classList.remove("overlay-active", "overlay-active-full");
   if (_lockMode === "full") {
     // Restore scroll position — position:fixed resets it to 0
     window.scrollTo(0, _savedScrollY);
