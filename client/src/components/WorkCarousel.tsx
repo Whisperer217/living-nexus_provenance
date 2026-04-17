@@ -14,6 +14,7 @@ import { Play, Pause, FileText, BookOpen, Layers, Music, ChevronRight } from "lu
 import { MediaAsset } from "@/components/MediaAsset";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
+import { CreatorHandle } from "@/components/CreatorHandle";
 
 export type WorkType = "audio" | "lyrics" | "manuscript" | "comic";
 
@@ -202,9 +203,14 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
                 {/* Meta */}
                 <div className="p-2.5">
                   <p className="text-[12px] font-semibold truncate" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{item.song.title}</p>
-                  <p className="text-[10px] truncate mt-0.5" style={{ color: "#7a7899" }}>
-                    {item.creator?.artistHandle || item.creator?.name || "Unknown"}
-                  </p>
+                  <div className="mt-0.5">
+                    <CreatorHandle
+                      userId={item.creator?.id}
+                      handle={item.creator?.artistHandle}
+                      displayName={item.creator?.name}
+                      size="sm"
+                    />
+                  </div>
                 </div>
               </div>
             );

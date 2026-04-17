@@ -405,6 +405,21 @@ export const appRouter = router({
   profile: router({
     me: protectedProcedure.query(async ({ ctx }) => getUserById(ctx.user.id)),
     getById: publicProcedure.input(z.object({ userId: z.number() })).query(async ({ input }) => getUserById(input.userId)),
+    /** Lightweight creator card data for handle pop-ups — returns only public fields */
+    getCreatorMini: publicProcedure.input(z.object({ userId: z.number().int().positive() })).query(async ({ input }) => {
+      const user = await getUserById(input.userId);
+      if (!user) return null;
+      return {
+        id: user.id,
+        name: user.name,
+        artistHandle: user.artistHandle,
+        bio: user.bio,
+        profilePhotoUrl: user.profilePhotoUrl,
+        role: user.role,
+        primaryGenre: user.primaryGenre,
+        songSlotsUsed: user.songSlotsUsed,
+      };
+    }),
     update: protectedProcedure.input(z.object({
       name: z.string().max(128).optional(),
       artistHandle: z.string().max(64).optional(),

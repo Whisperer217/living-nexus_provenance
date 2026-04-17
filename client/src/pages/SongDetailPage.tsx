@@ -33,6 +33,7 @@ import { VersionHistoryModal } from "@/components/VersionHistoryModal";
 import { safeAudioUrl } from "@shared/const";
 import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { QRShareModal } from "@/components/QRIdentityCard";
+import { CreatorHandle } from "@/components/CreatorHandle";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
 
@@ -549,19 +550,15 @@ export default function SongDetailPage() {
                     {song.title}
                   </h1>
                   {creator && (
-                    <Link href={`/creator/${creator.id}`}>
-                      <div className="flex items-center gap-2 mb-3 hover:opacity-80 cursor-pointer">
-                        <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold"
-                          style={{ background: "var(--ln-coal)" }}>
-                          {creator.profilePhotoUrl
-                            ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover" />
-                            : <span style={{ color: "var(--ln-gold)" }}>{(creator.artistHandle || creator.name || "?").charAt(0)}</span>}
-                        </div>
-                        <span className="text-sm font-medium" style={{ color: "var(--ln-parchment)" }}>
-                          {creator.artistHandle || creator.name}
-                        </span>
-                      </div>
-                    </Link>
+                    <div className="mb-3">
+                      <CreatorHandle
+                        userId={creator.id}
+                        handle={creator.artistHandle}
+                        displayName={creator.name}
+                        role={(creator as any).role}
+                        size="md"
+                      />
+                    </div>
                   )}
                   {(() => { const _ctc = getContentTypeColors((song as any).contentType ?? "audio"); return (
                   <div className="flex flex-wrap gap-1.5 mb-3">

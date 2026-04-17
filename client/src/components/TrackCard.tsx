@@ -20,6 +20,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { MediaAsset } from "@/components/MediaAsset";
 import { getContentTypeColors } from "@/lib/contentTypeColors";
+import { CreatorHandle } from "@/components/CreatorHandle";
 
 interface Props {
   track: Track;
@@ -298,33 +299,15 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           {track.title}
         </Link>
 
-        {/* Zone 3: Artist name → creator profile page */}
-        <div className="flex items-center gap-2 text-[11px] text-[#6B6555]">
-          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold
-            bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
-            {track.artist.charAt(0)}
-          </div>
-          {track.creatorId ? (
-            <Link
-              href={`/creator/${track.creatorId}`}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="truncate hover:text-[#C49A28] transition-colors cursor-pointer"
-              title={`View ${track.artist}'s profile`}
-            >
-              {track.artist}
-            </Link>
-          ) : (
-            <span className="truncate">{track.artist}</span>
-          )}
-          {track.creatorRole === "founder" && (
-            <span
-              title="Founding Creator"
-              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold tracking-widest flex-shrink-0"
-              style={{ background: "rgba(245,196,81,0.15)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.35)" }}
-            >
-              <Crown className="w-2.5 h-2.5" />
-            </span>
-          )}
+        {/* Zone 3: Artist handle chip with mini pop-up */}
+        <div className="flex items-center gap-1">
+          <CreatorHandle
+            userId={track.creatorId}
+            handle={track.creatorHandle}
+            displayName={track.artist}
+            role={track.creatorRole}
+            size="sm"
+          />
         </div>
 
         {/* Content-type chip + genre pills */}
