@@ -25,6 +25,7 @@ import { serveStatic, setupVite } from "./vite";
 import { startVisualWorker, backfillVisualQueue } from "../visualQueue";
 import { startSelfImprovementWorker } from "../selfImprovementWorker";
 import { startPaymentIntegrityWorker } from "../paymentIntegrityWorker";
+import { globalErrorHandler } from "./errorHandler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -152,6 +153,12 @@ async function startServer() {
   } else {
     serveStatic(app);
   }
+
+  // ── Global error handler ─────────────────────────────────────────────────
+  // MUST be registered LAST — after all routes and middleware.
+  // Catches any unhandled error passed to next(err) or thrown synchronously.
+  // Full error details go to server logs only; client receives a safe payload.
+  app.use(globalErrorHandler);
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
