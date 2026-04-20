@@ -6,8 +6,12 @@
  * Platform: Living Nexus — livingnexus.org
  *
  * POST /api/stamp-song
- * Authenticates the request, runs the full tone injection pipeline,
- * uploads the stamped audio and certificate, and updates the database row.
+ * Authenticates the request, runs the full stamp pipeline, and updates the
+ * database row.
+ *
+ * Audio content (audio): tone injection + hash + certificate
+ * Non-audio content (manuscript, comic, lyrics): hash-only + certificate
+ *   — no file mutation; the stamp IS the cryptographic proof of the original.
  *
  * Auth: requires valid session cookie (same pattern as uploadRoute.ts)
  */
@@ -62,38 +66,41 @@ router.post("/api/stamp-song", async (req: Request, res: Response) => {
     return;
   }
 
-  // ── Guard: missing audio ──────────────────────────────────────────────────
+  // ── Guard: missing file ───────────────────────────────────────────────────
   if (!song.fileUrl) {
-    res.status(400).json({ error: "Song has no audio file — cannot stamp" });
+    res.status(400).json({ error: "This work has no file attached — cannot stamp" });
     return;
   }
 
   // ── Guard: already stamped ────────────────────────────────────────────────
   if (song.sovereignStampId) {
     res.status(409).json({
-      error: "Song is already stamped",
+      error: "This work is already stamped",
       stampId: song.sovereignStampId,
       stampedFileUrl: song.stampedFileUrl,
     });
     return;
   }
 
-  console.log(`[SovereignStamp] Starting stamp pipeline for song ${songId} (user ${user.id})`);
+  // ── Detect content type ───────────────────────────────────────────────────
+  const isAudio = !song.contentType || song.contentType === "audio";
+
+  console.log(`[SovereignStamp] Starting stamp pipeline for song ${songId} (user ${user.id}, type: ${song.contentType ?? "audio"})`);
 
   try {
-    // ── Step 1: Download original audio ──────────────────────────────────────
-    const audioResponse = await fetch(song.fileUrl);
-    if (!audioResponse.ok) {
-      res.status(502).json({ error: `Failed to fetch audio file: ${audioResponse.status}` });
+    // ── Step 1: Download original file ────────────────────────────────────────
+    const fileResponse = await fetch(song.fileUrl);
+    if (!fileResponse.ok) {
+      res.status(502).json({ error: `Failed to fetch file: ${fileResponse.status}` });
       return;
     }
-    const audioArrayBuffer = await audioResponse.arrayBuffer();
-    const audioBuffer = Buffer.from(audioArrayBuffer);
+    const fileArrayBuffer = await fileResponse.arrayBuffer();
+    const fileBuffer = Buffer.from(fileArrayBuffer);
 
     // ── Step 2: Compute original file hash ────────────────────────────────────
     const originalHash = crypto
       .createHash("sha256")
-      .update(audioBuffer)
+      .update(fileBuffer)
       .digest("hex");
 
     // ── Step 3: Generate Stamp ID ─────────────────────────────────────────────
@@ -104,31 +111,40 @@ router.post("/api/stamp-song", async (req: Request, res: Response) => {
 
     console.log(`[SovereignStamp] Stamp ID: ${stampId}`);
 
-    // ── Step 4: Inject tone ───────────────────────────────────────────────────
-    console.log(`[SovereignStamp] Running tone injection...`);
-    const stampedBuffer = await injectTone(audioBuffer, stampId);
+    let stampedFileUrl: string;
+    let stampedFileKey: string;
+    let stampedHash: string;
 
-    // ── Step 5: Compute stamped file hash ─────────────────────────────────────
-    const stampedHash = crypto
-      .createHash("sha256")
-      .update(stampedBuffer)
-      .digest("hex");
+    if (isAudio) {
+      // ── Audio path: inject near-ultrasonic tone ──────────────────────────────
+      console.log(`[SovereignStamp] Running tone injection...`);
+      const stampedBuffer = await injectTone(fileBuffer, stampId);
 
-    // ── Step 6: Upload stamped audio ──────────────────────────────────────────
-    // Derive original filename from fileUrl or fileKey
-    const originalFilename = (song.fileKey ?? song.fileUrl)
-      .split("/")
-      .pop() ?? "audio.wav";
-    const stampedKey = `audio/${user.id}/stamped-${Date.now()}-${originalFilename}`;
+      stampedHash = crypto
+        .createHash("sha256")
+        .update(stampedBuffer)
+        .digest("hex");
 
-    console.log(`[SovereignStamp] Uploading stamped audio to ${stampedKey}...`);
-    const { url: stampedFileUrl, key: stampedFileKey } = await storagePut(
-      stampedKey,
-      stampedBuffer,
-      "audio/wav"
-    );
+      const originalFilename = (song.fileKey ?? song.fileUrl)
+        .split("/")
+        .pop() ?? "audio.wav";
+      const stampedKey = `audio/${user.id}/stamped-${Date.now()}-${originalFilename}`;
 
-    // ── Step 7: Generate and upload certificate ───────────────────────────────
+      console.log(`[SovereignStamp] Uploading stamped audio to ${stampedKey}...`);
+      const uploaded = await storagePut(stampedKey, stampedBuffer, "audio/wav");
+      stampedFileUrl = uploaded.url;
+      stampedFileKey = uploaded.key;
+    } else {
+      // ── Non-audio path: hash-only stamp ──────────────────────────────────────
+      // Manuscripts, comics, and lyrics are stamped by cryptographic hash alone.
+      // The original file is the provenance artifact — no mutation needed.
+      console.log(`[SovereignStamp] Non-audio content — hash-only stamp path.`);
+      stampedHash = originalHash;
+      stampedFileUrl = song.fileUrl;
+      stampedFileKey = song.fileKey ?? "";
+    }
+
+    // ── Step 4: Generate and upload certificate ───────────────────────────────
     console.log(`[SovereignStamp] Generating certificate...`);
     const { certificateUrl, certificateKey } = await generateCertificate({
       stampId,
@@ -137,7 +153,7 @@ router.post("/api/stamp-song", async (req: Request, res: Response) => {
       stampedAt: new Date(),
     });
 
-    // ── Step 8: Update database row ───────────────────────────────────────────
+    // ── Step 5: Update database row ───────────────────────────────────────────
     // Do NOT return success before this completes.
     console.log(`[SovereignStamp] Updating database row for song ${songId}...`);
     await updateSongStamp(songId, {

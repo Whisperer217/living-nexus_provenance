@@ -643,17 +643,22 @@ export default function ArchivePage() {
                         </div>
                       )}
 
-                      {/* View song page */}
-                      {!isDeleted && (
-                        <Link href={`/song/${song.id}`}>
-                          <button
-                            className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
-                            title="View song page"
-                          >
-                            <ExternalLink className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
-                          </button>
-                        </Link>
-                      )}
+                      {/* View page — route books/manuscripts/comics to /book/:id */}
+                      {!isDeleted && (() => {
+                        const isBook = song.contentType === "manuscript" || song.contentType === "comic";
+                        const viewHref = isBook ? `/book/${song.id}` : `/song/${song.id}`;
+                        const viewTitle = isBook ? "View book page" : "View song page";
+                        return (
+                          <Link href={viewHref}>
+                            <button
+                              className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                              title={viewTitle}
+                            >
+                              <ExternalLink className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
+                            </button>
+                          </Link>
+                        );
+                      })()}
 
                       {/* Edit */}
                       {!isDeleted && (
