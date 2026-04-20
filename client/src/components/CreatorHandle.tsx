@@ -53,6 +53,7 @@ function CreatorMiniCard({
   onMouseEnter,
   onMouseLeave,
   navigate,
+  cardRef,
 }: {
   userId: number;
   pos: PopupPos;
@@ -60,6 +61,8 @@ function CreatorMiniCard({
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   navigate: (to: string) => void;
+  /** ref forwarded so the parent's outside-click handler can exclude this node */
+  cardRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const { data, isLoading } = trpc.profile.getCreatorMini.useQuery(
     { userId },
@@ -96,6 +99,7 @@ function CreatorMiniCard({
 
   return createPortal(
     <div
+      ref={cardRef}
       style={style}
       onClick={e => e.stopPropagation()}
       onMouseEnter={onMouseEnter}
@@ -216,11 +220,20 @@ function CreatorMiniCard({
             )}
           </div>
 
-          {/* CTA */}
+          {/* CTA — navigate FIRST, then close so the route change isn't cancelled */}
           <div className="px-3 pb-3">
             <button
-              onClick={() => { onClose(); navigate(profileUrl); }}
-              className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+              onPointerDown={e => {
+                // Prevent the document mousedown/pointerdown outside-click handler
+                // from firing before this button's click handler runs.
+                e.stopPropagation();
+              }}
+              onClick={e => {
+                e.stopPropagation();
+                navigate(profileUrl);
+                onClose();
+              }}
+              className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-semibold transition-all hover:brightness-110 active:scale-95"
               style={{
                 background: "rgba(196,154,40,0.15)",
                 color: "var(--ln-gold)",
@@ -255,6 +268,7 @@ export function CreatorHandle({
   const [open, setOpen] = useState(false);
   const [popupPos, setPopupPos] = useState<PopupPos | null>(null);
   const chipRef = useRef<HTMLSpanElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // navigate is captured here (inside the Router context) and passed to the
   // portal-rendered CreatorMiniCard, which is outside the Router subtree.
@@ -298,17 +312,25 @@ export function CreatorHandle({
     if (closeTimer.current) clearTimeout(closeTimer.current);
   }, []);
 
-  // Close on outside click (mobile)
+  // Close on outside click/tap — but NOT if the tap was inside the portal card
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (chipRef.current && !chipRef.current.contains(e.target as Node)) {
+    const handler = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      const insideChip = chipRef.current?.contains(target);
+      const insideCard = cardRef.current?.contains(target);
+      if (!insideChip && !insideCard) {
         setOpen(false);
         setPopupPos(null);
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    // Use capture so we see the event before stopPropagation on inner elements
+    document.addEventListener("mousedown", handler, true);
+    document.addEventListener("touchstart", handler, { capture: true, passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handler, true);
+      document.removeEventListener("touchstart", handler, true);
+    };
   }, [open]);
 
   // Close on scroll (repositioning would be complex; just close)
@@ -381,6 +403,7 @@ export function CreatorHandle({
           onMouseEnter={cancelClose}
           onMouseLeave={scheduleClose}
           navigate={navigate}
+          cardRef={cardRef}
         />
       )}
     </span>
