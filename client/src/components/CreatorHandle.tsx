@@ -52,12 +52,14 @@ function CreatorMiniCard({
   onClose,
   onMouseEnter,
   onMouseLeave,
+  navigate,
 }: {
   userId: number;
   pos: PopupPos;
   onClose: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  navigate: (to: string) => void;
 }) {
   const { data, isLoading } = trpc.profile.getCreatorMini.useQuery(
     { userId },
@@ -67,8 +69,6 @@ function CreatorMiniCard({
   const profileUrl = data?.artistHandle
     ? `/creator/${data.artistHandle}`
     : `/creator/${userId}`;
-
-  const [, navigate] = useLocation();
 
   const CARD_WIDTH = 256; // w-64
 
@@ -256,6 +256,9 @@ export function CreatorHandle({
   const [popupPos, setPopupPos] = useState<PopupPos | null>(null);
   const chipRef = useRef<HTMLSpanElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // navigate is captured here (inside the Router context) and passed to the
+  // portal-rendered CreatorMiniCard, which is outside the Router subtree.
+  const [, navigate] = useLocation();
 
   const label = handle ? `@${handle}` : (displayName ?? "Unknown");
   const profileUrl = handle
@@ -377,6 +380,7 @@ export function CreatorHandle({
           onClose={() => { setOpen(false); setPopupPos(null); }}
           onMouseEnter={cancelClose}
           onMouseLeave={scheduleClose}
+          navigate={navigate}
         />
       )}
     </span>
