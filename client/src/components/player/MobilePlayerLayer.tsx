@@ -99,10 +99,10 @@ function Scrubber({
       </div>
       {!thin && (
         <div className="flex justify-between mt-1.5">
-          <span className="text-[10px] font-mono" style={{ color: "#6B6555" }}>
+          <span className="text-[10px] font-mono" style={{ color: "rgba(232,223,200,0.65)" }}>
             {fmtTime(currentTime)}
           </span>
-          <span className="text-[10px] font-mono" style={{ color: "#6B6555" }}>
+          <span className="text-[10px] font-mono" style={{ color: "rgba(232,223,200,0.65)" }}>
             {fmtTime(duration)}
           </span>
         </div>
@@ -770,7 +770,7 @@ export default function MobilePlayerLayer() {
       <button
         onClick={toggleShuffle}
         className="transition-all active:scale-90"
-        style={{ color: state.isShuffle ? "var(--ln-gold-dim)" : "rgba(196,154,40,0.30)" }}
+        style={{ color: state.isShuffle ? "var(--ln-gold)" : "rgba(232,223,200,0.50)" }}
       >
         <Shuffle size={large ? 20 : 16} />
       </button>
@@ -806,7 +806,7 @@ export default function MobilePlayerLayer() {
       <button
         onClick={toggleRepeat}
         className="transition-all active:scale-90"
-        style={{ color: state.isRepeat ? "var(--ln-gold-dim)" : "rgba(196,154,40,0.30)" }}
+        style={{ color: state.isRepeat ? "var(--ln-gold)" : "rgba(232,223,200,0.50)" }}
       >
         <Repeat size={large ? 20 : 16} />
       </button>
@@ -955,7 +955,7 @@ export default function MobilePlayerLayer() {
           <div className="text-[13px] font-heading text-white truncate leading-tight">
             {currentTrack.title || "Unknown Track"}
           </div>
-          <div className="text-[11px] truncate mt-0.5" style={{ color: "#6B6555" }}>
+          <div className="text-[11px] truncate mt-0.5" style={{ color: "rgba(232,223,200,0.65)" }}>
             {currentTrack.artist || "Unknown Artist"}
           </div>
         </button>
@@ -963,7 +963,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleToggleLike}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
-          style={{ color: isLiked ? "var(--ln-ember)" : "rgba(196,154,40,0.35)" }}
+          style={{ color: isLiked ? "var(--ln-ember)" : "rgba(232,223,200,0.55)" }}
         >
           <Heart size={22} fill={isLiked ? "currentColor" : "none"} />
         </button>
@@ -984,7 +984,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={nextTrack}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center transition-all active:scale-90"
-          style={{ color: "#6B6555" }}
+          style={{ color: "rgba(232,223,200,0.65)" }}
         >
           <SkipForward size={18} fill="currentColor" />
         </button>
@@ -1326,7 +1326,7 @@ export default function MobilePlayerLayer() {
               style={{
                 fontFamily: "'Cinzel', serif",
                 fontWeight: 400,
-                color: "#6B6555",
+                color: "rgba(232,223,200,0.75)",
                 letterSpacing: "0.04em",
                 textShadow: "0 1px 3px rgba(0,0,0,0.5)",
               }}
@@ -1342,7 +1342,7 @@ export default function MobilePlayerLayer() {
               style={{
                 fontFamily: "'Cinzel', serif",
                 fontWeight: 400,
-                color: "#6B6555",
+                color: "rgba(232,223,200,0.75)",
                 letterSpacing: "0.04em",
                 textShadow: "0 1px 3px rgba(0,0,0,0.5)",
               }}
@@ -1358,7 +1358,7 @@ export default function MobilePlayerLayer() {
           onClick={handleToggleLike}
           className="flex-shrink-0 ml-4 p-2 rounded-full transition-all active:scale-90"
           style={{
-            color: isLiked ? "var(--ln-ember)" : "#1C1A14",
+            color: isLiked ? "var(--ln-ember)" : "rgba(232,223,200,0.55)",
             background: isLiked ? "rgba(239,68,68,0.12)" : "transparent",
           }}
         >
@@ -1389,7 +1389,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={handleShare}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: copied ? "var(--ln-seal-bright)" : "rgba(196,154,40,0.42)" }}
+          style={{ color: copied ? "var(--ln-seal-bright)" : "rgba(232,223,200,0.75)" }}
         >
           {copied ? <Check size={18} /> : <Share2 size={18} />}
           <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{copied ? "Copied" : "Share Artifact"}</span>
@@ -1397,7 +1397,7 @@ export default function MobilePlayerLayer() {
         <button
           onClick={() => setGiftOpen(true)}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "rgba(196,154,40,0.42)" }}
+          style={{ color: "rgba(232,223,200,0.75)" }}
         >
           <DollarSign size={18} />
           <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>Support</span>
@@ -1410,7 +1410,7 @@ export default function MobilePlayerLayer() {
             }
           }}
           className="flex flex-col items-center gap-1 transition-all active:scale-90"
-          style={{ color: "rgba(196,154,40,0.42)" }}
+          style={{ color: "rgba(232,223,200,0.75)" }}
         >
           <ListMusic size={18} />
           <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>View Record</span>
@@ -1451,7 +1451,7 @@ export default function MobilePlayerLayer() {
           <button
             onClick={() => setShowMobileVolume(v => !v)}
             className="flex flex-col items-center gap-1 transition-all active:scale-90"
-            style={{ color: state.isMuted ? "var(--ln-ember)" : "rgba(196,154,40,0.42)" }}
+            style={{ color: state.isMuted ? "var(--ln-ember)" : "rgba(232,223,200,0.75)" }}
           >
             {state.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
             <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{state.isMuted ? "Muted" : "Vol"}</span>
