@@ -2299,9 +2299,9 @@ function computeTier(totalGifted: number): "supporter" | "patron" | "covenant" {
 /** Get a single supporter record by userId */
 export async function getSupporterByUserId(userId: number) {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) return null;
   const result = await db.select().from(platformSupporters).where(eq(platformSupporters.userId, userId)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  return result.length > 0 ? result[0] : null;
 }
 
 /** Get all supporters ordered by totalGifted desc (for Supporters Wall) */
