@@ -197,7 +197,7 @@ export default function GiftModal({
                   border: tab === "tip" ? "1px solid rgba(196,154,40,0.2)" : "1px solid transparent",
                 }}
               >
-                💸 Tip
+                💸 Support
               </button>
             </div>
           )}

@@ -1392,7 +1392,7 @@ export default function MobilePlayerLayer() {
           style={{ color: copied ? "var(--ln-seal-bright)" : "rgba(196,154,40,0.42)" }}
         >
           {copied ? <Check size={18} /> : <Share2 size={18} />}
-          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{copied ? "Copied" : "Share"}</span>
+          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>{copied ? "Copied" : "Share Artifact"}</span>
         </button>
         <button
           onClick={() => setGiftOpen(true)}
@@ -1400,7 +1400,7 @@ export default function MobilePlayerLayer() {
           style={{ color: "rgba(196,154,40,0.42)" }}
         >
           <DollarSign size={18} />
-          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>Tip</span>
+          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>Support</span>
         </button>
         <button
           onClick={() => {
@@ -1413,7 +1413,7 @@ export default function MobilePlayerLayer() {
           style={{ color: "rgba(196,154,40,0.42)" }}
         >
           <ListMusic size={18} />
-          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>Details</span>
+          <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", fontSize: "8px" }}>View Record</span>
         </button>
         {/* Volume */}
         <div className="relative flex flex-col items-center">
@@ -1899,7 +1899,7 @@ export default function MobilePlayerLayer() {
                   style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
                   <DollarSign size={16} />
                 </div>
-                <span className="text-[9px] font-heading tracking-widest uppercase">Tip</span>
+                <span className="text-[9px] font-heading tracking-widest uppercase">Support</span>
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); handleShare(); }}
@@ -1910,7 +1910,7 @@ export default function MobilePlayerLayer() {
                   style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
                   {copied ? <Check size={16} style={{ color: "#C49A28" }} /> : <Share2 size={16} />}
                 </div>
-                <span className="text-[9px] font-heading tracking-widest uppercase">{copied ? "Copied" : "Share"}</span>
+                <span className="text-[9px] font-heading tracking-widest uppercase">{copied ? "Copied" : "Share Artifact"}</span>
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setPlayerState("mini"); navigate(`/song/${currentSongId}`); }}
@@ -1921,7 +1921,7 @@ export default function MobilePlayerLayer() {
                   style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
                   <ListMusic size={16} />
                 </div>
-                <span className="text-[9px] font-heading tracking-widest uppercase">Details</span>
+                <span className="text-[9px] font-heading tracking-widest uppercase">View Record</span>
               </button>
             </div>
           </div>

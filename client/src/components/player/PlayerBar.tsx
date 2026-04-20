@@ -1072,7 +1072,7 @@ export default function PlayerBar() {
                       style={{ color: "var(--ln-parchment)" }}
                     >
                       <Share2 size={13} style={{ color: "var(--ln-smoke)" }} />
-                      Share
+                      Share Artifact
                     </button>
                     {/* Download */}
                     {(() => {

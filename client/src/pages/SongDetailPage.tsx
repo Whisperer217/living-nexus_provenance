@@ -657,7 +657,7 @@ export default function SongDetailPage() {
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setShareOpen(true)}
                     style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
-                    <Share2 className="w-3.5 h-3.5 mr-1" />Share
+                    <Share2 className="w-3.5 h-3.5 mr-1" />Share Artifact
                   </Button>
                   {song && (
                     <QRShareModal

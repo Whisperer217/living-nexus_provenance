@@ -2,7 +2,7 @@
    LIVING NEXUS — TrackCard
    Three-zone interaction doctrine:
      Zone 1: Cover art  → loads track in global player (does NOT navigate)
-     Zone 2: Song title → navigates to /track/{id}
+     Zone 2: Song title  → navigates to /song/{id}
      Zone 3: Artist     → navigates to /creator/{creatorId}
    Badges: WID (clickable → /verify/:id), AI disclosure, YOURS
    Genre: split on comma → individual pill tags (max 4 + overflow)
@@ -290,7 +290,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
       <div className="p-3 flex flex-col gap-2">
         {/* Zone 2: Song title → song detail page */}
         <Link
-          href={`/track/${track.id}`}
+          href={`/song/${track.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
           className="block text-[13px] font-heading truncate tracking-wide
             text-[#E8DFC8] hover:text-[#B8860B] transition-colors cursor-pointer"
@@ -375,7 +375,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
               </>
             )}
             <button
-              onClick={e => { e.stopPropagation(); navigate(`/track/${track.id}`); }}
+              onClick={e => { e.stopPropagation(); navigate(`/song/${track.id}`); }}
               className="p-1 text-[#6B6555] hover:text-[#B8860B] transition-colors"
               title="Open track page"
             >
