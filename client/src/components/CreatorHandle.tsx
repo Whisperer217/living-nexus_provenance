@@ -23,7 +23,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Crown, Music, ExternalLink } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
@@ -67,6 +67,8 @@ function CreatorMiniCard({
   const profileUrl = data?.artistHandle
     ? `/creator/${data.artistHandle}`
     : `/creator/${userId}`;
+
+  const [, navigate] = useLocation();
 
   const CARD_WIDTH = 256; // w-64
 
@@ -216,9 +218,8 @@ function CreatorMiniCard({
 
           {/* CTA */}
           <div className="px-3 pb-3">
-            <Link
-              href={profileUrl}
-              onClick={onClose}
+            <button
+              onClick={() => { onClose(); navigate(profileUrl); }}
               className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
               style={{
                 background: "rgba(196,154,40,0.15)",
@@ -228,7 +229,7 @@ function CreatorMiniCard({
             >
               <ExternalLink className="w-3 h-3" />
               View Profile
-            </Link>
+            </button>
           </div>
         </>
       ) : (
