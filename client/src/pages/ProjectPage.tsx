@@ -814,9 +814,12 @@ function DonateDialog({ project, open, onClose }: {
   const donate = trpc.projects.donate.useMutation({
     onSuccess: (data) => {
       if (data.url) {
-        toast.info("Redirecting to checkout — opening Stripe in a new tab.");
-        window.open(data.url, "_blank");
+        // Redirect in the SAME tab so Stripe's success_url (?donation=success&session_id=...)
+        // lands back here and confirmDonation fires to record the payment.
+        // Opening in a new tab means the redirect goes to the new tab and this page
+        // never sees the success params.
         onClose();
+        window.location.href = data.url;
       }
     },
     onError: (err) => toast.error(err.message),
