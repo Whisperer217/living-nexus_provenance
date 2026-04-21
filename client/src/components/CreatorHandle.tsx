@@ -69,9 +69,9 @@ function CreatorMiniCard({
     { staleTime: 60_000 }
   );
 
-  const profileUrl = data?.artistHandle
-    ? `/creator/${data.artistHandle}`
-    : `/creator/${userId}`;
+  // Always navigate by numeric ID — CreatorProfilePage uses parseInt(id) to query the DB.
+  // Using artistHandle (a string) causes parseInt to return NaN → "Creator not found".
+  const profileUrl = `/creator/${data?.id ?? userId}`;
 
   const CARD_WIDTH = 256; // w-64
 
@@ -275,11 +275,9 @@ export function CreatorHandle({
   const [, navigate] = useLocation();
 
   const label = handle ? `@${handle}` : (displayName ?? "Unknown");
-  const profileUrl = handle
-    ? `/creator/${handle}`
-    : userId
-    ? `/creator/${userId}`
-    : undefined;
+  // Always use numeric userId for navigation — CreatorProfilePage uses parseInt(id).
+  // Passing the handle string causes parseInt to return NaN → "Creator not found".
+  const profileUrl = userId ? `/creator/${userId}` : undefined;
 
   const isFounder = role === "founder";
   const isAdmin = role === "admin";
