@@ -94,9 +94,11 @@ async function startServer() {
 
   // Stripe webhook MUST be before express.json() for signature verification
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), handleStripeWebhook);
-  // Body parser — 1mb for all routes; large file uploads use the multipart /api/upload-file endpoint
-  app.use(express.json({ limit: "1mb" }));
-  app.use(express.urlencoded({ limit: "1mb", extended: true }));
+  // Body parser — raised to 10 MB to accommodate base64-encoded payloads (video thumbnails,
+  // storyboard pages, etc.). Large binary file uploads still use the multipart /api/upload-file
+  // endpoint which streams directly to S3 without buffering in the JSON body.
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
   // Rate limiting for public write endpoints — prevents spam/play-count inflation
   const publicWriteLimit = rateLimit({

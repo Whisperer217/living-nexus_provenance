@@ -374,22 +374,38 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     setCoverPos(pos);
     setShowCoverPositioner(false);
     setCoverUploading(true);
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const base64 = (ev.target?.result as string).split(",")[1];
-      await uploadCoverArt.mutateAsync({
-        songId: song.id,
-        coverBase64: base64,
-        coverMimeType: file.type,
+    try {
+      // Upload via multipart /api/upload-file to bypass the 1 MB tRPC JSON body limit.
+      // Base64 encoding inflates file size by ~33%, so any image > ~750 KB would fail
+      // if sent through the tRPC uploadCoverArt mutation.
+      const formData = new FormData();
+      formData.append("file", file, file.name);
+      formData.append("type", "cover");
+      formData.append("filename", file.name);
+      const res = await fetch("/api/upload-file", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
       });
-      // Also save the position (use position-only mutation so panel stays open)
-      await saveCoverPositionMutation.mutateAsync({
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.error || `Upload failed (${res.status})`);
+      }
+      const { url } = await res.json() as { url: string; key: string };
+      // Persist the new cover URL and position
+      await updateMetadata.mutateAsync({
         songId: song.id,
+        coverArtUrl: url,
         coverPositionX: pos.x,
         coverPositionY: pos.y,
       });
-    };
-    reader.readAsDataURL(file);
+      setCoverArtUrl(url);
+      toast.success("Cover art updated");
+    } catch (err: any) {
+      toast.error(err?.message || "Cover upload failed");
+    } finally {
+      setCoverUploading(false);
+    }
     if (pendingCoverUrl) URL.revokeObjectURL(pendingCoverUrl);
     setPendingCoverUrl(null);
   }
