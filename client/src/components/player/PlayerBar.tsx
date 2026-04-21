@@ -145,25 +145,45 @@ export default function PlayerBar() {
   // Cinematic inline mode
   const [isCinematic, setIsCinematic] = useState(false);
 
-  // Vertical volume popup
+  // Vertical volume popup — rendered via fixed-position portal to escape any stacking context
   const [showVolume, setShowVolume] = useState(false);
-  const volumePopupRef = useRef<HTMLDivElement>(null);       // expanded bar
-  const volumePopupCompactRef = useRef<HTMLDivElement>(null); // compact bar
+  const [volumePopupPos, setVolumePopupPos] = useState<{ bottom: number; right: number } | null>(null);
+  const volumeBtnRef = useRef<HTMLButtonElement>(null);
+  const volumePopupRef = useRef<HTMLDivElement>(null);  // portal card ref for outside-click
+
+  // Context menu — fixed-position portal
+  const [contextMenuPos, setContextMenuPos] = useState<{ bottom: number; right: number } | null>(null);
+  const contextMenuBtnRef = useRef<HTMLButtonElement>(null);
+  const contextMenuPortalRef = useRef<HTMLDivElement>(null);
+
+  function openVolumePopup() {
+    if (showVolume) { setShowVolume(false); return; }
+    const btn = volumeBtnRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    setVolumePopupPos({ bottom: window.innerHeight - rect.top + 8, right: window.innerWidth - rect.right - 4 });
+    setShowVolume(true);
+  }
+
+  function openContextMenu() {
+    if (showContextMenu) { setShowContextMenu(false); return; }
+    const btn = contextMenuBtnRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    setContextMenuPos({ bottom: window.innerHeight - rect.top + 8, right: window.innerWidth - rect.right - 4 });
+    setShowContextMenu(true);
+  }
 
   useEffect(() => {
     if (!showVolume) return;
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
-      const inExpanded = volumePopupRef.current?.contains(target);
-      const inCompact = volumePopupCompactRef.current?.contains(target);
-      if (!inExpanded && !inCompact) setShowVolume(false);
+      if (volumePopupRef.current?.contains(target)) return;
+      if (volumeBtnRef.current?.contains(target)) return;
+      setShowVolume(false);
     };
-    // Delay so the button click that opened it doesn't immediately close it
     const timer = setTimeout(() => document.addEventListener("click", handleClickOutside), 0);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener("click", handleClickOutside);
-    };
+    return () => { clearTimeout(timer); document.removeEventListener("click", handleClickOutside); };
   }, [showVolume]);
 
   // Navigate to song/creator pages
@@ -217,7 +237,7 @@ export default function PlayerBar() {
     });
   }, []);
 
-  return createPortal(
+  const mainPortal = createPortal(
     <div
       className="transition-all duration-500 ease-in-out hidden md:block"
       style={{
@@ -532,67 +552,18 @@ export default function PlayerBar() {
               </div>
               {/* Volume + Theater */}
               <div className="flex items-center gap-2">
-                {/* Vertical volume popup */}
-                <div ref={volumePopupRef} className="relative">
-                  <button
-                    onClick={() => setShowVolume(v => !v)}
-                    className="p-1 transition-colors"
-                    style={{ color: state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
-                    onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)")}
-                    title="Volume"
-                  >
-                    {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                  </button>
-                  {showVolume && (
-                    <div
-                      className="absolute bottom-12 left-1/2 -translate-x-1/2 rounded-2xl shadow-2xl z-50"
-                      style={{
-                        background: "var(--ln-coal)",
-                        border: "1px solid rgba(122,90,30,0.6)",
-                        boxShadow: "0 0 24px 4px rgba(196,154,40,0.12), 0 8px 32px rgba(44,52,56,0.8)",
-                        padding: "12px 14px 10px",
-                        minWidth: "140px",
-                      }}
-                    >
-                      {/* Volume % label */}
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>
-                          {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
-                        </span>
-                        {/* Mute toggle */}
-                        <button
-                          onClick={toggleMute}
-                          className="p-1 rounded-full transition-all"
-                          style={{
-                            color: state.isMuted ? "var(--ln-gold)" : "var(--ln-iron)",
-                            background: state.isMuted ? "rgba(196,154,40,0.08)" : "transparent",
-                          }}
-                          title={state.isMuted ? "Unmute" : "Mute"}
-                        >
-                          <VolumeX size={11} />
-                        </button>
-                      </div>
-                      {/* Horizontal slider (visually looks vertical via CSS rotate on the element itself) */}
-                      <div className="flex items-center justify-center py-2">
-                        <input
-                          type="range"
-                          min="0" max="1" step="0.01"
-                          value={state.isMuted ? 0 : state.volume}
-                          onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
-                          className="volume-slider-vertical"
-                          style={{
-                            background: `linear-gradient(to top, #E8DFC8 ${
-                              state.isMuted ? 0 : state.volume * 100
-                            }%, rgba(44,52,56,0.8) ${
-                              state.isMuted ? 0 : state.volume * 100
-                            }%)`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* Vertical volume popup — trigger only; popup rendered via portal */}
+                <button
+                  ref={volumeBtnRef}
+                  onClick={openVolumePopup}
+                  className="p-1 transition-colors"
+                  style={{ color: state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)")}
+                  title="Volume"
+                >
+                  {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                </button>
                 <button
                   onClick={openTheater}
                   className="p-1.5 transition-colors ml-1"
@@ -936,67 +907,18 @@ export default function PlayerBar() {
             )}
 
 
-            {/* Volume — vertical popup (compact bar) */}
-            <div ref={volumePopupCompactRef} className="relative">
-              <button
-                onClick={() => setShowVolume(v => !v)}
-                className="p-1 transition-colors"
-                style={{ color: state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
-                onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)")}
-                title="Volume"
-              >
-                {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-              </button>
-              {showVolume && (
-                <div
-                  className="absolute bottom-12 right-0 rounded-2xl shadow-2xl"
-                  style={{
-                    zIndex: 9990,
-                    background: "var(--ln-coal)",
-                    border: "1px solid rgba(122,90,30,0.6)",
-                    boxShadow: "0 0 24px 4px rgba(196,154,40,0.12), 0 8px 32px rgba(44,52,56,0.8)",
-                    padding: "12px 14px 10px",
-                    minWidth: "140px",
-                  }}
-                >
-                  {/* Header row: label + mute */}
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>
-                      {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
-                    </span>
-                    <button
-                      onClick={toggleMute}
-                      className="p-1 rounded-full transition-all"
-                      style={{
-                        color: state.isMuted ? "var(--ln-gold)" : "var(--ln-iron)",
-                        background: state.isMuted ? "rgba(196,154,40,0.08)" : "transparent",
-                      }}
-                      title={state.isMuted ? "Unmute" : "Mute"}
-                    >
-                      <VolumeX size={11} />
-                    </button>
-                  </div>
-                  {/* Slider container — overflow:visible so rotated slider isn't clipped */}
-                  <div className="flex items-center justify-center py-2">
-                    <input
-                      type="range"
-                      min="0" max="1" step="0.01"
-                      value={state.isMuted ? 0 : state.volume}
-                      onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
-                      className="volume-slider-vertical"
-                      style={{
-                        background: `linear-gradient(to top, #E8DFC8 ${
-                          state.isMuted ? 0 : state.volume * 100
-                        }%, rgba(44,52,56,0.8) ${
-                          state.isMuted ? 0 : state.volume * 100
-                        }%)`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Volume — vertical popup (compact bar) — portal-based fixed positioning */}
+            <button
+              ref={volumeBtnRef}
+              onClick={openVolumePopup}
+              className="p-1 transition-colors"
+              style={{ color: state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
+              onMouseLeave={e => (e.currentTarget.style.color = state.isMuted ? "var(--ln-iron)" : "var(--ln-smoke)")}
+              title="Volume"
+            >
+              {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            </button>
 
             {/* Cinematic / Theater toggle */}
             <button
@@ -1029,9 +951,10 @@ export default function PlayerBar() {
 
             {/* Context menu — ⋯ kebab (Go-To / Share / Download / Add / List) */}
             {currentTrack && (
-              <div ref={contextMenuRef} className="relative ml-1">
+              <div className="relative ml-1">
                 <button
-                  onClick={() => setShowContextMenu(v => !v)}
+                  ref={contextMenuBtnRef}
+                  onClick={openContextMenu}
                   className="p-1.5 rounded transition-all"
                   style={{ color: showContextMenu ? "var(--ln-gold)" : "var(--ln-iron)" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
@@ -1040,89 +963,6 @@ export default function PlayerBar() {
                 >
                   <MoreHorizontal size={16} />
                 </button>
-                {showContextMenu && (
-                  <div
-                    className="absolute bottom-12 right-0 rounded-2xl shadow-2xl overflow-hidden"
-                    style={{
-                      zIndex: 9990,
-                      background: "var(--ln-coal)",
-                      border: "1px solid rgba(122,90,30,0.55)",
-                      boxShadow: "0 0 28px 4px rgba(196,154,40,0.12), 0 8px 32px rgba(44,52,56,0.85)",
-                      minWidth: "160px",
-                    }}
-                  >
-                    {/* Go-To Song */}
-                    <button
-                      onClick={() => { setShowContextMenu(false); goToSong(); }}
-                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                      style={{ color: "var(--ln-parchment)" }}
-                    >
-                      <ExternalLink size={13} style={{ color: "var(--ln-smoke)" }} />
-                      Go to Song
-                    </button>
-                    {/* Share */}
-                    <button
-                      onClick={async () => {
-                        setShowContextMenu(false);
-                        const url = `${window.location.origin}/song/${currentSongId}`;
-                        try { if (navigator.share) { await navigator.share({ title: currentTrack.title, url }); return; } } catch {}
-                        try { await navigator.clipboard.writeText(url); } catch {}
-                      }}
-                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                      style={{ color: "var(--ln-parchment)" }}
-                    >
-                      <Share2 size={13} style={{ color: "var(--ln-smoke)" }} />
-                      Share Artifact
-                    </button>
-                    {/* Download */}
-                    {(() => {
-                      const dlPerm = (songDetail?.song as any)?.downloadPermission as string | undefined;
-                      if (!dlPerm || dlPerm === "none") return null;
-                      return (
-                        <button
-                          onClick={() => {
-                            setShowContextMenu(false);
-                            const a = document.createElement("a");
-                            a.href = `/api/download/${currentSongId}`;
-                            a.style.display = "none";
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                          }}
-                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                          style={{ color: "var(--ln-parchment)" }}
-                        >
-                          <Download size={13} style={{ color: "var(--ln-smoke)" }} />
-                          Download
-                        </button>
-                      );
-                    })()}
-                    {/* Add to My List */}
-                    {currentSongId && (
-                      <button
-                        onClick={e => {
-                          setShowContextMenu(false);
-                          setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
-                          setAddToListOpen(true);
-                        }}
-                        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
-                        style={{ color: "var(--ln-parchment)" }}
-                      >
-                        <ListPlus size={13} style={{ color: "var(--ln-smoke)" }} />
-                        Add to List
-                      </button>
-                    )}
-                    {/* View Queue */}
-                    <button
-                      onClick={() => { setShowContextMenu(false); navigate("/archive"); }}
-                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left border-t"
-                      style={{ color: "var(--ln-parchment)", borderColor: "rgba(44,52,56,0.5)" }}
-                    >
-                      <List size={13} style={{ color: "var(--ln-smoke)" }} />
-                      View Queue
-                    </button>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -1155,4 +995,158 @@ export default function PlayerBar() {
     </div>,
     document.body
   );
+
+  // ── Volume popup portal (fixed, escapes all stacking contexts) ──────────
+  const volumePortal = showVolume && volumePopupPos ? createPortal(
+    <div
+      ref={volumePopupRef}
+      style={{
+        position: "fixed",
+        bottom: volumePopupPos.bottom,
+        right: volumePopupPos.right,
+        zIndex: 99999,
+        background: "var(--ln-coal)",
+        border: "1px solid rgba(122,90,30,0.6)",
+        borderRadius: "1rem",
+        boxShadow: "0 0 24px 4px rgba(196,154,40,0.12), 0 8px 32px rgba(44,52,56,0.8)",
+        padding: "12px 14px 10px",
+        minWidth: "140px",
+      }}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>
+          {state.isMuted ? "MUTED" : `${Math.round(state.volume * 100)}%`}
+        </span>
+        <button
+          onClick={toggleMute}
+          className="p-1 rounded-full transition-all"
+          style={{
+            color: state.isMuted ? "var(--ln-gold)" : "var(--ln-iron)",
+            background: state.isMuted ? "rgba(196,154,40,0.08)" : "transparent",
+          }}
+          title={state.isMuted ? "Unmute" : "Mute"}
+        >
+          <VolumeX size={11} />
+        </button>
+      </div>
+      <div className="flex items-center justify-center py-2">
+        <input
+          type="range"
+          min="0" max="1" step="0.01"
+          value={state.isMuted ? 0 : state.volume}
+          onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
+          className="volume-slider-vertical"
+          style={{
+            background: `linear-gradient(to top, #E8DFC8 ${
+              state.isMuted ? 0 : state.volume * 100
+            }%, rgba(44,52,56,0.8) ${
+              state.isMuted ? 0 : state.volume * 100
+            }%)`,
+          }}
+        />
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
+  // ── Context menu portal (fixed, escapes all stacking contexts) ──────────
+  const contextMenuPortal = showContextMenu && contextMenuPos ? createPortal(
+    <div
+      ref={contextMenuPortalRef}
+      style={{
+        position: "fixed",
+        bottom: contextMenuPos.bottom,
+        right: contextMenuPos.right,
+        zIndex: 99999,
+        background: "var(--ln-coal)",
+        border: "1px solid rgba(122,90,30,0.55)",
+        borderRadius: "1rem",
+        boxShadow: "0 0 28px 4px rgba(196,154,40,0.12), 0 8px 32px rgba(44,52,56,0.85)",
+        minWidth: "160px",
+        overflow: "hidden",
+      }}
+    >
+      <button
+        onClick={() => { setShowContextMenu(false); goToSong(); }}
+        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+        style={{ color: "var(--ln-parchment)" }}
+      >
+        <ExternalLink size={13} style={{ color: "var(--ln-smoke)" }} />
+        Go to Song
+      </button>
+      <button
+        onClick={async () => {
+          setShowContextMenu(false);
+          const url = `${window.location.origin}/song/${currentSongId}`;
+          try { if (navigator.share) { await navigator.share({ title: currentTrack!.title, url }); return; } } catch {}
+          try { await navigator.clipboard.writeText(url); } catch {}
+        }}
+        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+        style={{ color: "var(--ln-parchment)" }}
+      >
+        <Share2 size={13} style={{ color: "var(--ln-smoke)" }} />
+        Share Artifact
+      </button>
+      {(() => {
+        const dlPerm = (songDetail?.song as any)?.downloadPermission as string | undefined;
+        if (!dlPerm || dlPerm === "none") return null;
+        return (
+          <button
+            onClick={() => {
+              setShowContextMenu(false);
+              const a = document.createElement("a");
+              a.href = `/api/download/${currentSongId}`;
+              a.style.display = "none";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            }}
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+            style={{ color: "var(--ln-parchment)" }}
+          >
+            <Download size={13} style={{ color: "var(--ln-smoke)" }} />
+            Download
+          </button>
+        );
+      })()}
+      {currentSongId && (
+        <button
+          onClick={e => {
+            setShowContextMenu(false);
+            setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
+            setAddToListOpen(true);
+          }}
+          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+          style={{ color: "var(--ln-parchment)" }}
+        >
+          <ListPlus size={13} style={{ color: "var(--ln-smoke)" }} />
+          Add to List
+        </button>
+      )}
+      <button
+        onClick={() => { setShowContextMenu(false); navigate("/archive"); }}
+        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left border-t"
+        style={{ color: "var(--ln-parchment)", borderColor: "rgba(44,52,56,0.5)" }}
+      >
+        <List size={13} style={{ color: "var(--ln-smoke)" }} />
+        View Queue
+      </button>
+    </div>,
+    document.body
+  ) : null;
+
+  // ── Outside-click for context menu portal ──────────────────────────────
+  useEffect(() => {
+    if (!showContextMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (contextMenuPortalRef.current?.contains(target)) return;
+      if (contextMenuBtnRef.current?.contains(target)) return;
+      setShowContextMenu(false);
+    };
+    const timer = setTimeout(() => document.addEventListener("click", handleClickOutside), 0);
+    return () => { clearTimeout(timer); document.removeEventListener("click", handleClickOutside); };
+  }, [showContextMenu]);
+
+  return <>{mainPortal}{volumePortal}{contextMenuPortal}</>;
 }
