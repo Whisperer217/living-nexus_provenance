@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History, Plus, Trash2, ChevronDown, Link2 } from "lucide-react";
+import { X, Upload, Shield, Lock, Download, FileText, Video, BookOpen, RotateCcw, History, Plus, Trash2, ChevronDown, Link2, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 /* ── Lyrics editor utilities ──────────────────────────────────────────────── */
@@ -198,6 +198,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  // ── Transform / processing status strip ──────────────────────────────────
+  // null = idle, string = current step label, "done" = success, "error" = failed
+  const [processStep, setProcessStep] = useState<string | null>(null);
+  const [processError, setProcessError] = useState<string | null>(null);
+
   // Replace Audio state
   const [replaceAudioFile, setReplaceAudioFile] = useState<File | null>(null);
   const [replaceAudioNote, setReplaceAudioNote] = useState("");
@@ -421,30 +426,39 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
   async function handleSave() {
     setSaving(true);
+    setProcessError(null);
+    setProcessStep("Saving metadata…");
     const validCredits = credits.filter(c => c.role.trim() || c.name.trim());
     // Only include parentSongId in the payload if the user has touched the field
     const parsedParentId = parentSongId.trim() !== "" ? parseInt(parentSongId, 10) : null;
     const purchasePriceCents = purchasePriceDollars.trim() !== ""
       ? Math.round(parseFloat(purchasePriceDollars) * 100)
       : null;
-    await updateMetadata.mutateAsync({
-      songId: song.id,
-      caption: caption.trim() || null,
-      genre: genre || null,
-      collectionTag: collectionTag.trim() || null,
-      coverArtUrl: coverArtUrl || null,
-      aiConsent,
-      ownershipStatus,
-      status,
-      creditsJson: validCredits.length > 0 ? JSON.stringify(validCredits) : null,
-      parentSongId: parsedParentId,
-      // Book access & commerce
-      readAccess,
-      purchasePriceCents: isNaN(purchasePriceCents as number) ? null : purchasePriceCents,
-      previewPageCount,
-      consentSettingsJson: JSON.stringify(consentSettings),
-      externalLinksJson: externalLinks.length > 0 ? JSON.stringify(externalLinks) : null,
-    });
+    try {
+      await updateMetadata.mutateAsync({
+        songId: song.id,
+        caption: caption.trim() || null,
+        genre: genre || null,
+        collectionTag: collectionTag.trim() || null,
+        coverArtUrl: coverArtUrl || null,
+        aiConsent,
+        ownershipStatus,
+        status,
+        creditsJson: validCredits.length > 0 ? JSON.stringify(validCredits) : null,
+        parentSongId: parsedParentId,
+        // Book access & commerce
+        readAccess,
+        purchasePriceCents: isNaN(purchasePriceCents as number) ? null : purchasePriceCents,
+        previewPageCount,
+        consentSettingsJson: JSON.stringify(consentSettings),
+        externalLinksJson: externalLinks.length > 0 ? JSON.stringify(externalLinks) : null,
+      });
+      setProcessStep("done");
+      setTimeout(() => setProcessStep(null), 2500);
+    } catch (e: any) {
+      setProcessError(e?.message || "Save failed");
+      setProcessStep("error");
+    }
     setSaving(false);
   }
 
@@ -466,23 +480,53 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   async function handleWitnessLyrics() {
     if (!lyricsFile) return;
     setLyricsWidLoading(true);
+    setProcessError(null);
+    setProcessStep("Reading lyrics file…");
     try {
-      // Read file as text
-      const text = await lyricsFile.text();
-      // Compute SHA-256 of the raw file bytes
+      // Extract text from the file.
+      // .txt / .mus (text-based) → read as UTF-8 text directly.
+      // .mus files from MuseScore are XML-based — we extract any <lyric text="..."> or
+      // plain text content so the WID-LYR is based on the actual lyric words.
+      let text: string;
+      const ext = lyricsFile.name.split(".").pop()?.toLowerCase() ?? "";
+      if (ext === "mus" || ext === "musicxml" || ext === "mxl" || ext === "xml") {
+        // Parse XML and extract lyric syllables in order
+        const raw = await lyricsFile.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(raw, "application/xml");
+        // MusicXML: <lyric><text>word</text></lyric>
+        const lyricNodes = Array.from(doc.querySelectorAll("lyric text, lyric syllabic ~ text, words"));
+        if (lyricNodes.length > 0) {
+          text = lyricNodes.map(n => n.textContent ?? "").join(" ").replace(/\s+/g, " ").trim();
+        } else {
+          // Fallback: strip all XML tags and use remaining text
+          text = raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        }
+        if (!text) throw new Error("No lyric text found in this notation file. Please also upload a .txt version of your lyrics.");
+      } else {
+        text = await lyricsFile.text();
+      }
+      setProcessStep("Computing cryptographic hash…");
+      // Compute SHA-256 of the raw file bytes (hash covers the original file, not extracted text)
       const buf = await lyricsFile.arrayBuffer();
       const hashBuf = await crypto.subtle.digest("SHA-256", buf);
       const hashArr = Array.from(new Uint8Array(hashBuf));
       const hashHex = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
       setLyricsFileName(lyricsFile.name);
+      setProcessStep("Generating WID-LYR…");
       await addLyricsWithWid.mutateAsync({
         songId: song.id,
         lyricsText: text,
         lyricsFileName: lyricsFile.name,
         lyricsFileHash: hashHex,
       });
+      setProcessStep("done");
+      setTimeout(() => setProcessStep(null), 2500);
     } catch (e: any) {
-      toast.error(e?.message || "Failed to read lyrics file");
+      const msg = e?.message || "Failed to read lyrics file";
+      toast.error(msg);
+      setProcessError(msg);
+      setProcessStep("error");
       setLyricsWidLoading(false);
     }
   }
@@ -529,26 +573,44 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   async function handleReplaceAudio() {
     if (!replaceAudioFile) return;
     setReplaceAudioLoading(true);
+    setProcessError(null);
+    setProcessStep("Reading audio file…");
     try {
+      setProcessStep("Computing file hash…");
       const buf = await replaceAudioFile.arrayBuffer();
       const hashBuf = await crypto.subtle.digest("SHA-256", buf);
       const hashArr = Array.from(new Uint8Array(hashBuf));
       const hashHex = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
+      setProcessStep("Uploading audio to secure storage…");
       const reader = new FileReader();
       reader.onload = async (ev) => {
-        const base64 = (ev.target?.result as string).split(",")[1];
-        await replaceAudioMutation.mutateAsync({
-          songId: song.id,
-          audioBase64: base64,
-          audioMimeType: replaceAudioFile.type || "audio/mpeg",
-          audioFileName: replaceAudioFile.name,
-          fileHash: hashHex,
-          versionNote: replaceAudioNote.trim() || undefined,
-        });
+        try {
+          const base64 = (ev.target?.result as string).split(",")[1];
+          setProcessStep("Generating new WID-MUS…");
+          await replaceAudioMutation.mutateAsync({
+            songId: song.id,
+            audioBase64: base64,
+            audioMimeType: replaceAudioFile.type || "audio/mpeg",
+            audioFileName: replaceAudioFile.name,
+            fileHash: hashHex,
+            versionNote: replaceAudioNote.trim() || undefined,
+          });
+          setProcessStep("done");
+          setTimeout(() => setProcessStep(null), 2500);
+        } catch (e: any) {
+          const msg = e?.message || "Failed to replace audio";
+          toast.error(msg);
+          setProcessError(msg);
+          setProcessStep("error");
+          setReplaceAudioLoading(false);
+        }
       };
       reader.readAsDataURL(replaceAudioFile);
     } catch (e: any) {
-      toast.error(e?.message || "Failed to read audio file");
+      const msg = e?.message || "Failed to read audio file";
+      toast.error(msg);
+      setProcessError(msg);
+      setProcessStep("error");
       setReplaceAudioLoading(false);
     }
   }
@@ -604,6 +666,52 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
             <X size={20} />
           </button>
         </div>
+
+        {/* ── Transform / processing status strip ────────────────────────────────── */}
+        {processStep && (
+          <div
+            className="mx-4 sm:mx-6 mt-3 px-4 py-2.5 rounded-lg flex items-center gap-3 transition-all"
+            style={{
+              background: processStep === "done"
+                ? "rgba(34,197,94,0.10)"
+                : processStep === "error"
+                ? "rgba(239,68,68,0.10)"
+                : "rgba(212,175,55,0.10)",
+              border: `1px solid ${
+                processStep === "done" ? "rgba(34,197,94,0.35)"
+                : processStep === "error" ? "rgba(239,68,68,0.35)"
+                : "rgba(212,175,55,0.35)"
+              }`,
+            }}
+          >
+            {processStep === "done" ? (
+              <CheckCircle2 size={15} style={{ color: "#22c55e", flexShrink: 0 }} />
+            ) : processStep === "error" ? (
+              <AlertCircle size={15} style={{ color: "#ef4444", flexShrink: 0 }} />
+            ) : (
+              <Loader2 size={15} className="animate-spin" style={{ color: "var(--ln-gold)", flexShrink: 0 }} />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium truncate" style={{
+                color: processStep === "done" ? "#22c55e" : processStep === "error" ? "#ef4444" : "var(--ln-gold)"
+              }}>
+                {processStep === "done" ? "Changes saved successfully" : processStep === "error" ? (processError || "Operation failed") : processStep}
+              </p>
+              {processStep !== "done" && processStep !== "error" && (
+                <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
+                  <div className="h-full rounded-full animate-pulse" style={{ background: "var(--ln-gold)", width: "60%" }} />
+                </div>
+              )}
+            </div>
+            {processStep === "error" && (
+              <button
+                onClick={() => { setProcessStep(null); setProcessError(null); }}
+                className="text-xs hover:underline flex-shrink-0"
+                style={{ color: "#ef4444" }}
+              >Dismiss</button>
+            )}
+          </div>
+        )}
 
         {/* WID immutability notice */}
         <div
@@ -1098,7 +1206,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               Lyrics Witness ID <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.12)", color: "var(--ln-gold)" }}>WID-LYR</span>
             </Label>
             <p className="text-xs" style={{ color: "#64748b" }}>
-              Upload your lyrics as a <strong style={{ color: "#94a3b8" }}>.txt</strong> file to generate a cryptographic Witness ID (WID-LYR) — a separate provenance proof for your words, independent of the audio WID.
+              Upload your lyrics as a <strong style={{ color: "#94a3b8" }}>.txt</strong>, <strong style={{ color: "#94a3b8" }}>.mus</strong>, or <strong style={{ color: "#94a3b8" }}>.musicxml</strong> file to generate a cryptographic Witness ID (WID-LYR) — a separate provenance proof for your words, independent of the audio WID.
             </p>
 
             {/* Existing WID-LYR badge */}
@@ -1127,12 +1235,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               <input
                 ref={lyricsFileInputRef}
                 type="file"
-                accept=".txt,text/plain"
+                accept=".txt,.mus,.musicxml,.mxl,.xml,text/plain,application/xml,text/xml"
                 className="hidden"
                 onChange={e => {
                   const f = e.target.files?.[0];
                   if (!f) return;
-                  if (f.size > 500 * 1024) { toast.error("Lyrics file must be under 500 KB"); e.target.value = ""; return; }
+                  if (f.size > 2 * 1024 * 1024) { toast.error("Lyrics file must be under 2 MB"); e.target.value = ""; return; }
                   setLyricsFile(f);
                 }}
               />
@@ -1146,8 +1254,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               ) : (
                 <>
                   <BookOpen size={20} className="mx-auto mb-1" style={{ color: "var(--ln-gold)", opacity: 0.4 }} />
-                  <p className="text-sm" style={{ color: "#94a3b8" }}>{lyricsWid ? "Replace lyrics file" : "Upload lyrics .txt file"}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "#475569" }}>.txt — max 500 KB</p>
+                  <p className="text-sm" style={{ color: "#94a3b8" }}>{lyricsWid ? "Replace lyrics file" : "Upload lyrics file"}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "#475569" }}>.txt · .mus · .musicxml · .xml — max 2 MB</p>
                 </>
               )}
             </div>
