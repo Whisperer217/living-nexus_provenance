@@ -191,14 +191,6 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const [lyricsAddedAt, setLyricsAddedAt] = useState<Date | string | null>(song.lyricsAddedAt ?? null);
   const [lyricsWidLoading, setLyricsWidLoading] = useState(false);
   const lyricsFileInputRef = useRef<HTMLInputElement>(null);
-
-  // ── Status strip ─────────────────────────────────────────────────────────
-  type StripState = { type: "idle" } | { type: "processing"; step: string } | { type: "done" } | { type: "error"; message: string };
-  const [strip, setStrip] = useState<StripState>({ type: "idle" });
-  function stripDone() { setStrip({ type: "done" }); setTimeout(() => setStrip({ type: "idle" }), 2500); }
-  function stripError(msg: string) { setStrip({ type: "error", message: msg }); }
-  function stripStep(step: string) { setStrip({ type: "processing", step }); }
-
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUploading, setVideoUploading] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(song.videoUrl ?? null);
@@ -288,13 +280,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const updateMetadata = trpc.songs.updateMetadata.useMutation({
     onSuccess: () => {
       utils.songs.mySongs.invalidate();
-      stripDone();
       toast.success("Track updated");
       onSaved();
     },
     onError: (err: { message?: string }) => {
       toast.error(err.message || "Failed to save changes");
-      stripError(err.message || "Failed to save changes");
       setSaving(false);
     },
   });
@@ -436,12 +426,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
   async function handleSave() {
     setSaving(true);
-<<<<<<< Updated upstream
     setProcessError(null);
     setProcessStep("Saving metadata…");
-=======
-    stripStep("Saving metadata…");
->>>>>>> Stashed changes
     const validCredits = credits.filter(c => c.role.trim() || c.name.trim());
     // Only include parentSongId in the payload if the user has touched the field
     const parsedParentId = parentSongId.trim() !== "" ? parseInt(parentSongId, 10) : null;
@@ -482,33 +468,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       setLyricsAddedAt(data.lyricsAddedAt);
       setLyricsFile(null);
       setLyricsWidLoading(false);
-      stripDone();
       toast.success("Lyrics witnessed — WID-LYR generated!");
       utils.songs.mySongs.invalidate();
     },
     onError: (err: { message?: string }) => {
-      const msg = err.message || "Failed to witness lyrics";
-      toast.error(msg);
-      stripError(msg);
+      toast.error(err.message || "Failed to witness lyrics");
       setLyricsWidLoading(false);
     },
   });
-
-  /** Extract human-readable text from a MusicXML / .mus / .xml file */
-  function extractMusicXmlLyrics(xmlText: string): string {
-    try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xmlText, "application/xml");
-      const lyricNodes = doc.querySelectorAll("lyric text");
-      if (lyricNodes.length > 0) {
-        return Array.from(lyricNodes).map(n => n.textContent ?? "").filter(Boolean).join(" ");
-      }
-      // Fallback: strip all XML tags
-      return xmlText.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-    } catch {
-      return xmlText;
-    }
-  }
 
   async function handleWitnessLyrics() {
     if (!lyricsFile) return;
@@ -516,7 +483,6 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     setProcessError(null);
     setProcessStep("Reading lyrics file…");
     try {
-<<<<<<< Updated upstream
       // Extract text from the file.
       // .txt / .mus (text-based) → read as UTF-8 text directly.
       // .mus files from MuseScore are XML-based — we extract any <lyric text="..."> or
@@ -542,23 +508,12 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       }
       setProcessStep("Computing cryptographic hash…");
       // Compute SHA-256 of the raw file bytes (hash covers the original file, not extracted text)
-=======
-      stripStep("Reading lyrics file…");
-      const isXml = /\.(mus|musicxml|mxl|xml)$/i.test(lyricsFile.name);
-      const rawText = await lyricsFile.text();
-      const text = isXml ? extractMusicXmlLyrics(rawText) : rawText;
-      stripStep("Computing cryptographic hash…");
->>>>>>> Stashed changes
       const buf = await lyricsFile.arrayBuffer();
       const hashBuf = await crypto.subtle.digest("SHA-256", buf);
       const hashArr = Array.from(new Uint8Array(hashBuf));
       const hashHex = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
       setLyricsFileName(lyricsFile.name);
-<<<<<<< Updated upstream
       setProcessStep("Generating WID-LYR…");
-=======
-      stripStep("Generating WID-LYR…");
->>>>>>> Stashed changes
       await addLyricsWithWid.mutateAsync({
         songId: song.id,
         lyricsText: text,
@@ -570,12 +525,8 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     } catch (e: any) {
       const msg = e?.message || "Failed to read lyrics file";
       toast.error(msg);
-<<<<<<< Updated upstream
       setProcessError(msg);
       setProcessStep("error");
-=======
-      stripError(msg);
->>>>>>> Stashed changes
       setLyricsWidLoading(false);
     }
   }
@@ -605,14 +556,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       setReplaceAudioFile(null);
       setReplaceAudioNote("");
       setReplaceAudioLoading(false);
-      stripDone();
       toast.success("Audio replaced — new WID-MUS generated!");
       utils.songs.mySongs.invalidate();
     },
     onError: (err: { message?: string }) => {
-      const msg = err.message || "Failed to replace audio";
-      toast.error(msg);
-      stripError(msg);
+      toast.error(err.message || "Failed to replace audio");
       setReplaceAudioLoading(false);
     },
   });
@@ -628,17 +576,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     setProcessError(null);
     setProcessStep("Reading audio file…");
     try {
-<<<<<<< Updated upstream
       setProcessStep("Computing file hash…");
-=======
-      stripStep("Reading audio file…");
->>>>>>> Stashed changes
       const buf = await replaceAudioFile.arrayBuffer();
-      stripStep("Computing file hash…");
       const hashBuf = await crypto.subtle.digest("SHA-256", buf);
       const hashArr = Array.from(new Uint8Array(hashBuf));
       const hashHex = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
-<<<<<<< Updated upstream
       setProcessStep("Uploading audio to secure storage…");
       const reader = new FileReader();
       reader.onload = async (ev) => {
@@ -662,32 +604,13 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           setProcessStep("error");
           setReplaceAudioLoading(false);
         }
-=======
-      stripStep("Uploading audio to secure storage…");
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        const base64 = (ev.target?.result as string).split(",")[1];
-        stripStep("Generating new WID-MUS…");
-        await replaceAudioMutation.mutateAsync({
-          songId: song.id,
-          audioBase64: base64,
-          audioMimeType: replaceAudioFile.type || "audio/mpeg",
-          audioFileName: replaceAudioFile.name,
-          fileHash: hashHex,
-          versionNote: replaceAudioNote.trim() || undefined,
-        });
->>>>>>> Stashed changes
       };
       reader.readAsDataURL(replaceAudioFile);
     } catch (e: any) {
       const msg = e?.message || "Failed to read audio file";
       toast.error(msg);
-<<<<<<< Updated upstream
       setProcessError(msg);
       setProcessStep("error");
-=======
-      stripError(msg);
->>>>>>> Stashed changes
       setReplaceAudioLoading(false);
     }
   }
@@ -804,49 +727,6 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           </div>
         </div>
 
-        {/* Status strip */}
-        {strip.type !== "idle" && (
-          <div
-            className="mx-4 sm:mx-6 mt-3 px-4 py-3 rounded-lg flex items-center gap-3"
-            style={{
-              background: strip.type === "error" ? "rgba(239,68,68,0.08)" : strip.type === "done" ? "rgba(34,197,94,0.08)" : "rgba(212,175,55,0.08)",
-              border: `1px solid ${strip.type === "error" ? "rgba(239,68,68,0.3)" : strip.type === "done" ? "rgba(34,197,94,0.3)" : "rgba(212,175,55,0.3)"}`,
-            }}
-          >
-            {strip.type === "processing" && (
-              <>
-                <svg className="animate-spin h-4 w-4 flex-shrink-0" style={{ color: "var(--ln-gold)" }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold" style={{ color: "var(--ln-gold)" }}>Processing</p>
-                  <div className="mt-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
-                    <div className="h-full rounded-full animate-pulse" style={{ background: "var(--ln-gold)", width: "60%" }} />
-                  </div>
-                  <p className="text-xs mt-1" style={{ color: "#94a3b8" }}>{strip.step}</p>
-                </div>
-              </>
-            )}
-            {strip.type === "done" && (
-              <>
-                <svg className="h-4 w-4 flex-shrink-0" style={{ color: "#22c55e" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <p className="text-xs font-semibold" style={{ color: "#22c55e" }}>Changes saved successfully</p>
-              </>
-            )}
-            {strip.type === "error" && (
-              <>
-                <svg className="h-4 w-4 flex-shrink-0" style={{ color: "#ef4444" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                </svg>
-                <p className="text-xs flex-1" style={{ color: "#ef4444" }}>{strip.message}</p>
-                <button type="button" onClick={() => setStrip({ type: "idle" })} className="text-xs hover:underline flex-shrink-0" style={{ color: "#94a3b8" }}>Dismiss</button>
-              </>
-            )}
-          </div>
-        )}
         {/* Form */}
         <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-6 space-y-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
 
