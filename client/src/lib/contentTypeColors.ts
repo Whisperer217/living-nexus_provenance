@@ -9,10 +9,15 @@
  *   - Detail page header accent bar
  *
  * Palette:
- *   Music / Audio  → Purple  (#A78BFA / #7C3AED)
- *   Lyrics Only    → Gold    (#F5C451 / #B8860B)   — existing WID gold, elevated
- *   Manuscript     → Green   (#4ADE80 / #16A34A)
- *   Comic / Novel  → Red     (#F87171 / #DC2626)
+ *   Music / Audio  → Gold    (#C49A28)  — signature LN color
+ *   Lyrics Only    → Blue    (#4A9DBF)  — intellectual, textual
+ *   Manuscript     → Bone    (#C9C0A8)  — literal paper/document
+ *   Comic / Novel  → Ember   (#C4440A)  — energy, visual pop
+ *
+ * Border brightness now matches the Upload page palette:
+ *   default border → rgba(accent, 0.40)  (was a dark hex, barely visible)
+ *   chip border    → rgba(accent, 0.28)
+ *   glow           → rgba(accent, 0.30)
  */
 
 export type ContentType = "audio" | "lyrics" | "manuscript" | "comic" | string;
@@ -20,7 +25,7 @@ export type ContentType = "audio" | "lyrics" | "manuscript" | "comic" | string;
 export interface ContentTypeColors {
   /** Primary accent — used for active borders, pill backgrounds */
   primary: string;
-  /** Dimmed variant — used for inactive borders, muted text */
+  /** Dimmed variant — used for inactive card borders */
   dim: string;
   /** Glow color for box-shadow */
   glow: string;
@@ -38,42 +43,42 @@ export interface ContentTypeColors {
 
 const COLORS: Record<string, ContentTypeColors> = {
   audio: {
-    primary:    "#C49A28",   // --ln-gold — the signature LN color for music
-    dim:        "#8B6914",   // --ln-gold-dim
-    glow:       "rgba(196,154,40,0.25)",
-    text:       "#E8B840",   // --ln-gold-hot
-    chipBg:     "rgba(196,154,40,0.08)",
-    chipBorder: "rgba(196,154,40,0.20)",
+    primary:    "#C49A28",               // --ln-gold — the signature LN color for music
+    dim:        "rgba(196,154,40,0.40)", // matches Upload page active border
+    glow:       "rgba(196,154,40,0.30)",
+    text:       "#E8B840",               // --ln-gold-hot
+    chipBg:     "rgba(196,154,40,0.10)",
+    chipBorder: "rgba(196,154,40,0.28)",
     label:      "Music",
     icon:       "🎵",
   },
   lyrics: {
-    primary:    "#4A9DBF",   // --ln-witness-bright — intellectual, textual
-    dim:        "#2A6B8A",   // --ln-witness
-    glow:       "rgba(74,157,191,0.25)",
+    primary:    "#4A9DBF",               // --ln-witness-bright — intellectual, textual
+    dim:        "rgba(74,157,191,0.40)",
+    glow:       "rgba(74,157,191,0.28)",
     text:       "#7BBFD8",
-    chipBg:     "rgba(74,157,191,0.08)",
-    chipBorder: "rgba(74,157,191,0.20)",
+    chipBg:     "rgba(74,157,191,0.10)",
+    chipBorder: "rgba(74,157,191,0.28)",
     label:      "Lyrics",
     icon:       "✍️",
   },
   manuscript: {
-    primary:    "#C9C0A8",   // --ln-bone — literal paper/document color
-    dim:        "#6B6555",   // --ln-smoke
-    glow:       "rgba(201,192,168,0.20)",
-    text:       "#E8DFC8",   // --ln-parchment
-    chipBg:     "rgba(201,192,168,0.08)",
-    chipBorder: "rgba(201,192,168,0.20)",
+    primary:    "#C9C0A8",               // --ln-bone — literal paper/document color
+    dim:        "rgba(201,192,168,0.38)",
+    glow:       "rgba(201,192,168,0.25)",
+    text:       "#E8DFC8",               // --ln-parchment
+    chipBg:     "rgba(201,192,168,0.10)",
+    chipBorder: "rgba(201,192,168,0.28)",
     label:      "Manuscript",
     icon:       "📖",
   },
   comic: {
-    primary:    "#C4440A",   // --ln-ember — energy, visual pop
-    dim:        "#8B1A0A",   // --ln-blood
-    glow:       "rgba(196,68,10,0.25)",
+    primary:    "#C4440A",               // --ln-ember — energy, visual pop
+    dim:        "rgba(196,68,10,0.40)",
+    glow:       "rgba(196,68,10,0.28)",
     text:       "#E06030",
-    chipBg:     "rgba(196,68,10,0.08)",
-    chipBorder: "rgba(196,68,10,0.20)",
+    chipBg:     "rgba(196,68,10,0.10)",
+    chipBorder: "rgba(196,68,10,0.28)",
     label:      "Comic / Novel",
     icon:       "🎨",
   },

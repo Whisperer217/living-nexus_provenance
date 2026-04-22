@@ -229,6 +229,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   // Only real DB-sourced tracks — DEMO_TRACKS is empty, guard is here for safety
   const allTracks = useCallback(() => state.tracks.filter(t => !!t.audioUrl), [state.tracks]);
 
+  // ── Restore audio.src on mount after page reload ────────────────────────────
+  // sessionStorage restores the queue + currentIdx but the Audio element is
+  // brand-new with no src. Without this, togglePlay() calls audio.play() on an
+  // empty src and produces silence. We set src here (without auto-playing) so
+  // the element is ready the moment the user taps play.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const tracks = state.tracks.filter(t => !!t.audioUrl);
+    const t = tracks[state.currentIdx];
+    if (t?.audioUrl && !audio.src) {
+      audio.src = safeAudioUrl(t.audioUrl);
+      audio.load(); // preload metadata so duration shows immediately
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once on mount only
+
   // Persist queue + currentIdx to sessionStorage so navigation doesn't lose the player state
   useEffect(() => {
     try {
