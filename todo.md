@@ -3221,7 +3221,7 @@
 - [x] Fix PlaylistDrawer panel: add pointer-events-none when closed to prevent blocking desktop player clicks
 
 ## Phase 92 — Desktop Player Fix + Project Page Improvements
-- [ ] Fix desktop PlayerBar 3-dot menu and volume slider (real click blocker)
+- [x] Fix desktop PlayerBar 3-dot menu and volume slider (real click blocker)
 - [ ] Fix project banner image: proper aspect ratio, object-cover with object-top, no stretching
 - [ ] Add zoom-on-click lightbox for project banner image
 - [ ] Add video upload field to project editor
@@ -3278,7 +3278,7 @@
 - [x] Tests: 11 QR unit tests passing
 
 ## Donation Fix + Project Identity
-- [ ] Fix project donation Stripe checkout flow (payment not captured)
+- [x] Fix project donation Stripe checkout flow (payment not captured)
 - [ ] Fix donation progress bar not updating after payment
 - [ ] Add WID pill to project pages and project cards
 - [ ] Improve project banner visual identity (distinguishing design)
