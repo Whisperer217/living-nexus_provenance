@@ -3425,3 +3425,8 @@
 - [x] Status strip: Witness lyrics → "Reading lyrics file…" → "Computing cryptographic hash…" → "Generating WID-LYR…" → green check
 - [x] Status strip: Replace audio → "Reading audio file…" → "Computing file hash…" → "Uploading audio to secure storage…" → "Generating new WID-MUS…" → green check
 - [x] Status strip: Error state shows red alert + message + Dismiss button
+
+## Railway Commit 9c4efc8 — Silent Playback Fix + Content-Type Border Colors
+- [x] Fix silent playback after page refresh — one-time mount effect sets audio.src + audio.load() from restored session track so togglePlay() has a valid src immediately
+- [x] Fix content-type tile border colors — dim values updated from dark hex (#8B6914 etc.) to rgba with 0.38-0.40 opacity matching Upload page palette; chip borders brightened to 0.35 opacity
+- [x] Assessment: Cloudflare login race condition — confirmed not a code issue (Turnstile not present); edge proxy warming on cold Railway deployment, no action required

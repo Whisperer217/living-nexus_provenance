@@ -257,6 +257,20 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     } catch { /* quota exceeded — ignore */ }
   }, [state.tracks, state.currentIdx, state.queueContext]);
 
+  // One-time mount: restore audio.src from session so the player is ready after page refresh.
+  // The Audio element is brand-new on mount — without this, togglePlay() calls play() on an
+  // empty src and the browser silently ignores it.
+  useEffect(() => {
+    const audio = audioRef.current;
+    const tracks = state.tracks.filter(t => !!t.audioUrl);
+    const track = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
+    if (track?.audioUrl && !audio.src) {
+      audio.src = track.audioUrl;
+      audio.load(); // prime the element — no auto-play
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // empty deps — run once on mount only
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
