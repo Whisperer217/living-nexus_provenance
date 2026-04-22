@@ -3415,3 +3415,13 @@
 
 ## Bug — Scroll Lock While Playing
 - [x] Body scroll locked when expanded player is open — fixed: split overlay-active CSS into light (overflow only) and full (position:fixed) variants; mini-bar drag no longer freezes page scroll
+
+## Railway Commit b6daeba — .mus Upload + Processing Status Strip
+- [x] Fix lyrics file input accept attribute — now accepts .txt, .mus, .musicxml, .mxl, .xml (was .txt only)
+- [x] Raise lyrics file size limit from 500 KB to 2 MB (notation files are larger)
+- [x] Add MusicXML smart extraction — extracts <lyric><text> nodes in order; falls back to stripping XML tags
+- [x] Add processing status strip to Edit Track panel (Processing/Done/Error states with step labels)
+- [x] Status strip: Save metadata → "Saving metadata…" → green check (auto-dismiss 2.5s)
+- [x] Status strip: Witness lyrics → "Reading lyrics file…" → "Computing cryptographic hash…" → "Generating WID-LYR…" → green check
+- [x] Status strip: Replace audio → "Reading audio file…" → "Computing file hash…" → "Uploading audio to secure storage…" → "Generating new WID-MUS…" → green check
+- [x] Status strip: Error state shows red alert + message + Dismiss button
