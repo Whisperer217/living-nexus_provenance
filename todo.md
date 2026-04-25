@@ -3556,3 +3556,10 @@
 - [x] No DB migrations
 - [x] TypeScript: 0 errors
 - [x] Save checkpoint and deploy
+
+## Commit 3f1d07c — Mobile SHOP Tab + Desktop MARKETPLACE Gold Pill
+- [x] Pull 3f1d07c (MobilePlayerLayer.tsx: 5-tab bottom nav with gold SHOP tab center position; TopBar.tsx: MARKETPLACE gold gradient pill with hover/active glow + hamburger drawer entry)
+- [x] No merge conflicts (fast-forward, 2 files)
+- [x] No DB migrations
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
