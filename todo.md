@@ -3520,3 +3520,10 @@
 - [x] No DB migrations
 - [x] TypeScript: 0 errors
 - [x] Save checkpoint and deploy
+
+## Commit 4e8e061 — MobilePlayerLayer Jet Black + Keeper Drag Z-Index Fix
+- [x] Pull 4e8e061 (MobilePlayerLayer.tsx all gradients → #000000; FloatingAvatar drag handle z-index 3 above orb image z-index 2)
+- [x] No merge conflicts (fast-forward, 2 files)
+- [x] No DB migrations
+- [x] TypeScript: 0 errors on touched files (pre-existing errors in CreatorSurface.tsx + WIDLookup.tsx are standalone, not in main build)
+- [x] Save checkpoint and deploy
