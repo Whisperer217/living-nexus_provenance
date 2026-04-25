@@ -1298,6 +1298,11 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   --ln-bone:          #C9C0A8;   /* primary body text */
   --ln-parchment:     #E8DFC8;   /* headings, high-contrast text */
 
+  /* ── Panel / Overlay Surfaces (used by FloatingAvatar, KeeperPage) ── */
+  --ln-obsidian:      #060504;   /* deepest panel background, header strips */
+  --ln-panel:         rgba(10, 8, 6, 0.97); /* floating panel background — solid near-black */
+  --ln-panel-border:  rgba(196, 154, 40, 0.15); /* subtle gold border for panels */
+
   /* ── Gold Hierarchy (4 tiers — use intentionally) ── */
   --ln-gold-dim:      #8B6914;   /* subdued accents, eyebrows, footnotes */
   --ln-gold:          #C49A28;   /* primary CTA background, badges */
