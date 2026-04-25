@@ -3492,3 +3492,10 @@
 - [ ] Wire Keeper skin selector (unlockSkin/setActiveSkin mutations on KeeperPage skin cards)
 - [ ] Fix donation progress bar (trpc.projects.getBySlug.invalidate() in confirmDonation onSuccess)
 - [ ] Wire bell badge to unreadCount in top nav
+
+## Commit b8b50f1 — Keeper Sandbox: Voice, AI Art, Image Analysis
+- [x] Pull b8b50f1 (Voice Transcription mic button, AI Artwork Generation, Image Analysis)
+- [x] No merge conflicts (fast-forward merge, 2 files changed)
+- [x] No new DB migrations
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
