@@ -8,11 +8,12 @@
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, DollarSign, Maximize2, Minimize2,
   ChevronDown, ChevronUp, MessageCircle, Share2, Download,
-  MoreHorizontal, ExternalLink, ListPlus, List,
+  MoreHorizontal, ExternalLink, ListPlus, List, Waves,
 } from "lucide-react";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLocation } from "wouter";
@@ -47,6 +48,17 @@ export default function PlayerBar() {
   // Playback speed toggle: 1x → 1.5x → 2x → 0.75x → 1x
   const [playbackRate, setPlaybackRate] = useState(1);
   const SPEED_CYCLE = [1, 1.5, 2, 0.75];
+
+  // ── Frequency-reactive purple glow ──
+  const [glowEnabled, setGlowEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem("ln-player-glow") !== "off"; } catch { return true; }
+  });
+  const toggleGlow = () => setGlowEnabled(v => {
+    const next = !v;
+    try { localStorage.setItem("ln-player-glow", next ? "on" : "off"); } catch {}
+    return next;
+  });
+  const { glowShadow } = useFrequencyGlow(audioRef, glowEnabled, state.isPlaying);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
@@ -249,7 +261,12 @@ export default function PlayerBar() {
         overflow: "visible",
         background: "#000000",
           borderTop: isCinematic ? "none" : "1px solid rgba(196,154,40,0.25)",
-        boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.8), 0 -4px 32px rgba(196,154,40,0.15), 0 -1px 8px rgba(196,154,40,0.18)",
+        boxShadow: isCinematic ? "none" : [
+          "0 -4px 40px rgba(0,0,0,0.8)",
+          "0 -4px 32px rgba(196,154,40,0.15)",
+          "0 -1px 8px rgba(196,154,40,0.18)",
+          glowShadow !== "none" ? glowShadow : "",
+        ].filter(Boolean).join(", "),
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
         zIndex: isCinematic ? 9020 : isExpanded ? 9010 : 9001,
@@ -920,6 +937,22 @@ export default function PlayerBar() {
               {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
 
+            {/* Frequency glow toggle */}
+            <button
+              onClick={toggleGlow}
+              className="p-1.5 transition-all ml-1 rounded"
+              style={{
+                color: glowEnabled ? "#C084FC" : "var(--ln-iron)",
+                background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent",
+                border: `1px solid ${glowEnabled ? "rgba(192,132,252,0.35)" : "rgba(44,52,56,0.4)"}`,
+                boxShadow: glowEnabled && state.isPlaying ? "0 0 8px rgba(138,43,226,0.5)" : "none",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#C084FC")}
+              onMouseLeave={e => (e.currentTarget.style.color = glowEnabled ? "#C084FC" : "var(--ln-iron)")}
+              title={glowEnabled ? "Frequency glow: ON" : "Frequency glow: OFF"}
+            >
+              <Waves size={14} />
+            </button>
             {/* Cinematic / Theater toggle */}
             <button
               onClick={() => { setIsCinematic(c => !c); setIsExpanded(false); }}

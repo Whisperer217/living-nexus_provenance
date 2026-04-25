@@ -17,12 +17,13 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
+import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX,
   Heart, X, Music, DollarSign, Users,
   Share2, ChevronDown, MessageCircle, Info,
-  Check, Shield, Tag, FileText, User, BookOpen,
+  Check, Shield, Tag, FileText, User, BookOpen, Waves,
 } from "lucide-react";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import PlayerTipModal from "./PlayerTipModal";
@@ -179,6 +180,18 @@ export default function MobilePlayerPanel() {
     onSuccess: () => { refetchComments(); setNewComment(""); },
   });
   const [newComment, setNewComment] = useState("");
+
+  // ── Frequency-reactive purple glow (shared with PlayerBar via localStorage) ──
+  const [glowEnabled, setGlowEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem("ln-player-glow") !== "off"; } catch { return true; }
+  });
+  const toggleGlow = () => setGlowEnabled(v => {
+    const next = !v;
+    try { localStorage.setItem("ln-player-glow", next ? "on" : "off"); } catch {}
+    return next;
+  });
+  const { glowShadow } = useFrequencyGlow(audioRef, glowEnabled, state.isPlaying);
+
   const submitComment = useCallback(() => {
     if (!newComment.trim() || !currentSongId) return;
     addCommentMutation.mutate({
@@ -413,7 +426,10 @@ export default function MobilePlayerPanel() {
           right: 0,
           bottom: "68px",
           background: "#000000",
-          boxShadow: "0 -8px 48px rgba(0,0,0,0.80)",
+          boxShadow: [
+            "0 -8px 48px rgba(0,0,0,0.80)",
+            glowShadow !== "none" ? glowShadow : "",
+          ].filter(Boolean).join(", "),
           transform: open ? "translateY(0)" : "translateY(100%)",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: 0,
@@ -762,6 +778,23 @@ export default function MobilePlayerPanel() {
             >
               {state.isMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
               Sound
+            </button>
+
+            {/* Frequency Glow toggle */}
+            <button
+              onClick={toggleGlow}
+              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
+                transition-all active:scale-95"
+              style={{
+                background: glowEnabled ? "rgba(138,43,226,0.12)" : "var(--ln-coal)",
+                color: glowEnabled ? "#C084FC" : "var(--ln-iron)",
+                border: glowEnabled ? "1px solid rgba(192,132,252,0.35)" : "1px solid #111009",
+                fontFamily: "'Cinzel', serif",
+                boxShadow: glowEnabled && state.isPlaying ? "0 0 10px rgba(138,43,226,0.4)" : "none",
+              }}
+            >
+              <Waves size={12} />
+              Glow
             </button>
           </div>
         </div>
