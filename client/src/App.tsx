@@ -74,6 +74,7 @@ const ProjectsDiscoveryPage = lazy(() => import("./pages/ProjectsDiscoveryPage")
 const BookDetailPage = lazy(() => import("./pages/BookDetailPage"));
 const KeeperPage = lazy(() => import("./pages/KeeperPage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const CreatorSurface = lazy(() => import("./pages/CreatorSurface"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -203,6 +204,7 @@ function Router() {
                 <Route path="/my-projects" component={MyProjectsPage} />
                 <Route path="/keeper" component={KeeperPage} />
                 <Route path="/marketplace" component={MarketplacePage} />
+                <Route path="/creator-surface" component={CreatorSurface} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>
