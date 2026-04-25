@@ -5080,5 +5080,156 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         return stats;
       }),
   }),
+
+  // ─── Keeper Avatar System ─────────────────────────────────────────────────
+  keeper: router({
+    /**
+     * Returns the user's full Keeper profile:
+     * owned skins, active skin, custom portrait URL, and live stats.
+     */
+    getProfile: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      const emptyProfile = {
+        ownedSkins: ["hooded-scholar"] as string[],
+        activeSkinId: "hooded-scholar",
+        customImageUrl: null as string | null,
+        stats: { provenanceDepth: 0, corpusSize: 0, voiceDepth: 0, lyricDensity: 0, structuralLogic: 0, emotionalRange: 0 },
+      };
+      if (!db) return emptyProfile;
+      const { keeperSkins, songs, witnesses } = await import('../drizzle/schema');
+      const { eq, count } = await import('drizzle-orm');
+      const skins = await db.select().from(keeperSkins).where(eq(keeperSkins.userId, ctx.user.id));
+      const ownedSkins = ["hooded-scholar", ...skins.map(s => s.skinId)];
+      const activeSkin = skins.find(s => s.isActive);
+      const activeSkinId = activeSkin?.skinId ?? "hooded-scholar";
+      const customSkin = skins.find(s => s.skinId === "custom");
+      const customImageUrl = customSkin?.portraitUrl ?? null;
+      // Stats from existing tables
+      const [songCount] = await db.select({ count: count() }).from(songs).where(eq(songs.userId, ctx.user.id)).catch(() => [{ count: 0 }]);
+      const [witnessCount] = await db.select({ count: count() }).from(witnesses).where(eq(witnesses.userId, ctx.user.id)).catch(() => [{ count: 0 }]);
+      const pd = Number(witnessCount?.count ?? 0);
+      const cs = Number(songCount?.count ?? 0);
+      return {
+        ownedSkins,
+        activeSkinId,
+        customImageUrl,
+        stats: {
+          provenanceDepth: Math.min(100, pd * 5),
+          corpusSize: Math.min(100, cs * 10),
+          voiceDepth: Math.min(100, pd * 3),
+          lyricDensity: Math.min(100, cs * 8),
+          structuralLogic: Math.min(100, pd * 4),
+          emotionalRange: Math.min(100, cs * 6),
+        },
+      };
+    }),
+
+    /** Unlock a skin for the current user (future: Stripe gate) */
+    unlockSkin: protectedProcedure
+      .input(z.object({
+        skinId: z.enum(["hooded-scholar", "conductor", "witness", "archivist", "cipher", "custom"]),
+        creditsPaid: z.number().default(0),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        const { keeperSkins } = await import('../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        const existing = await db.select().from(keeperSkins)
+          .where(and(eq(keeperSkins.userId, ctx.user.id), eq(keeperSkins.skinId, input.skinId)))
+          .limit(1);
+        if (existing.length > 0) return { success: true };
+        await db.insert(keeperSkins).values({
+          userId: ctx.user.id,
+          skinId: input.skinId,
+          skinName: input.skinId,
+          portraitUrl: "",
+          capabilities: [],
+          isActive: false,
+          isCustom: input.skinId === "custom",
+          unlockedAt: Date.now(),
+        });
+        return { success: true };
+      }),
+
+    /** Set a skin as active — deactivates all others first */
+    setActiveSkin: protectedProcedure
+      .input(z.object({ skinId: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        const { keeperSkins } = await import('../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        await db.update(keeperSkins).set({ isActive: false }).where(eq(keeperSkins.userId, ctx.user.id));
+        // If it's the default free skin, no row needed — just clear active
+        if (input.skinId !== "hooded-scholar") {
+          await db.update(keeperSkins)
+            .set({ isActive: true })
+            .where(and(eq(keeperSkins.userId, ctx.user.id), eq(keeperSkins.skinId, input.skinId)));
+        }
+        return { success: true };
+      }),
+
+    /** Chat with the Keeper agent */
+    chat: protectedProcedure
+      .input(z.object({
+        mode: z.enum(["Guide", "Conductor", "Critic", "Custodian"]),
+        message: z.string().max(2000),
+        context: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const systemPrompts: Record<string, string> = {
+          Guide: `You are the user's Personal Nexus Avatar in Guide mode. You are a wise, encouraging creative mentor who knows the user's creative voice deeply. You help with direction, inspiration, and creative encouragement. Be warm, specific, and poetic. Keep responses under 150 words.`,
+          Conductor: `You are the user's Personal Nexus Avatar in Conductor mode. You analyze structure, arrangement, and composition with precision. You think in terms of musical architecture, lyrical flow, and narrative structure. Be analytical but creative. Keep responses under 150 words.`,
+          Critic: `You are the user's Personal Nexus Avatar in Critic mode. You give honest, constructive feedback. You identify what's working and what needs refinement. Be direct but respectful. Keep responses under 150 words.`,
+          Custodian: `You are the user's Personal Nexus Avatar in Custodian mode. You help manage the user's creative archive, provenance records, and WID system. You speak about preservation, legacy, and the permanence of creative work. Keep responses under 150 words.`,
+        };
+        const messages = [
+          { role: "system" as const, content: systemPrompts[input.mode] },
+          ...(input.context ? [{ role: "user" as const, content: `Context: ${input.context}` }] : []),
+          { role: "user" as const, content: input.message },
+        ];
+        const response = await invokeLLM({ messages });
+        const reply = response?.choices?.[0]?.message?.content ?? "The Keeper is momentarily silent. Try again.";
+        return { reply };
+      }),
+
+    /** Upload a custom portrait image to S3 and store the URL */
+    uploadCustomPortrait: protectedProcedure
+      .input(z.object({
+        imageBase64: z.string(),
+        mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const buf = Buffer.from(input.imageBase64, 'base64');
+        const ext = input.mimeType === "image/png" ? "png" : input.mimeType === "image/webp" ? "webp" : "jpg";
+        const key = `keeper-portraits/${ctx.user.id}/${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buf, input.mimeType);
+        const db = await getDb();
+        if (db) {
+          const { keeperSkins } = await import('../drizzle/schema');
+          const { eq, and } = await import('drizzle-orm');
+          const existing = await db.select().from(keeperSkins)
+            .where(and(eq(keeperSkins.userId, ctx.user.id), eq(keeperSkins.skinId, "custom")))
+            .limit(1);
+          if (existing.length > 0) {
+            await db.update(keeperSkins).set({ portraitUrl: url })
+              .where(and(eq(keeperSkins.userId, ctx.user.id), eq(keeperSkins.skinId, "custom")));
+          } else {
+            await db.insert(keeperSkins).values({
+              userId: ctx.user.id,
+              skinId: "custom",
+              skinName: "Custom Portrait",
+              portraitUrl: url,
+              capabilities: ["Custom presence", "Your face, your rules"],
+              isActive: false,
+              isCustom: true,
+              unlockedAt: Date.now(),
+            });
+          }
+        }
+        return { url };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

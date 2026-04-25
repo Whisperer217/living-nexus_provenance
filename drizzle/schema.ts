@@ -1247,3 +1247,18 @@ export const bookPurchases = mysqlTable("book_purchases", {
 });
 export type BookPurchase = typeof bookPurchases.$inferSelect;
 export type InsertBookPurchase = typeof bookPurchases.$inferInsert;
+
+// ─── Keeper Skin System ───────────────────────────────────────────────────────
+export const keeperSkins = mysqlTable("keeper_skins", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  skinId: varchar("skinId", { length: 64 }).notNull(),
+  skinName: varchar("skinName", { length: 128 }).notNull(),
+  portraitUrl: text("portraitUrl").notNull(),
+  capabilities: json("capabilities").notNull().$type<string[]>(),
+  isActive: boolean("isActive").notNull().default(false),
+  isCustom: boolean("isCustom").notNull().default(false),
+  unlockedAt: bigint("unlockedAt", { mode: "number" }).notNull(),
+});
+export type KeeperSkin = typeof keeperSkins.$inferSelect;
+export type InsertKeeperSkin = typeof keeperSkins.$inferInsert;

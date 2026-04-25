@@ -13,6 +13,7 @@ import { TosAcceptanceModal } from "./components/TosAcceptanceModal";
 import { CommunityToastProvider } from "./components/CommunityToast";
 import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
 import AmbientWidget from "./components/AmbientWidget";
+import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
 import { overlayCloseAll } from "@/lib/overlayController";
 
@@ -71,6 +72,7 @@ const ProjectPage = lazy(() => import("./pages/ProjectPage"));
 const MyProjectsPage = lazy(() => import("./pages/MyProjectsPage"));
 const ProjectsDiscoveryPage = lazy(() => import("./pages/ProjectsDiscoveryPage"));
 const BookDetailPage = lazy(() => import("./pages/BookDetailPage"));
+const KeeperPage = lazy(() => import("./pages/KeeperPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -198,6 +200,7 @@ function Router() {
                 <Route path="/project/:slug" component={ProjectPage} />
                 <Route path="/projects/:slug">{({ slug }: { slug: string }) => <Redirect to={`/project/${slug}`} />}</Route>
                 <Route path="/my-projects" component={MyProjectsPage} />
+                <Route path="/keeper" component={KeeperPage} />
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>
@@ -238,6 +241,7 @@ export default function App() {
             <OverlayRouteGuard />
             <QrScanLogger />
             <AmbientWidget />
+            <KeeperAvatarWidget />
             <Router />
             </AmbientPlayerProvider>
           </PlayerProvider>
