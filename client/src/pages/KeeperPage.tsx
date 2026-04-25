@@ -175,7 +175,7 @@ export default function Keeper() {
         style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
       >
         <button
-          onClick={() => navigate("/create")}
+          onClick={() => navigate("/")}
           className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity"
           style={{ color: "var(--ln-smoke)" }}
         >
@@ -186,12 +186,12 @@ export default function Keeper() {
         <div className="ln-wid-badge">KEEPER SCREEN</div>
       </header>
 
-      {/* Main layout */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* Main layout — single column on mobile, 3-col on desktop */}
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
 
         {/* ── Left: Active Keeper portrait + stats ─────────────────────────── */}
         <div
-          className="w-80 flex-shrink-0 flex flex-col border-r overflow-y-auto"
+          className="w-full md:w-80 flex-shrink-0 flex flex-col md:border-r border-b md:border-b-0 overflow-y-auto"
           style={{ borderColor: "var(--ln-panel-border)" }}
         >
           {/* Portrait */}
@@ -328,7 +328,7 @@ export default function Keeper() {
         </div>
 
         {/* ── Center: Skin selection grid ───────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
           <div
             className="text-sm uppercase tracking-widest mb-6"
             style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}
@@ -336,7 +336,7 @@ export default function Keeper() {
             Choose Your Keeper — Skin Armory
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
             {SKINS.map(skin => {
               const owned = skin.id === "hooded-scholar" || ownedSkins.has(skin.id);
               const isActive = activeSkinId === skin.id;

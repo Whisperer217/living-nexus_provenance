@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { X, Minimize2, ChevronUp, Music2, Sword } from "lucide-react";
+import { X, Minimize2, ChevronUp, Music2, Sword, PenLine, Bold, Italic, Highlighter, ImagePlus, Trash2, Wand2, ClipboardCopy, Loader2 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 // ─── Skin image URLs ──────────────────────────────────────────────────────────
 
@@ -86,6 +87,21 @@ export default function FloatingAvatar({
 }: FloatingAvatarProps) {
   const [, navigate] = useLocation();
   const [expanded, setExpanded] = useState(false);
+  const [sandboxOpen, setSandboxOpen] = useState(false);
+  const [sandboxTab, setSandboxTab] = useState<"write" | "ppg">("write");
+  const [sandboxText, setSandboxText] = useState("");
+  const [sandboxImages, setSandboxImages] = useState<string[]>([]);
+  const [sandboxUploading, setSandboxUploading] = useState(false);
+  const sandboxFileRef = useRef<HTMLInputElement>(null);
+  const sandboxTextRef = useRef<HTMLTextAreaElement>(null);
+  // PPG state
+  const [ppgType, setPpgType] = useState<"style_prompt" | "lyric_brief" | "composer_blueprint" | "visual_direction" | "press_bio">("style_prompt");
+  const [ppgPlatform, setPpgPlatform] = useState<"suno" | "udio" | "general">("suno");
+  const [ppgBlocks, setPpgBlocks] = useState([{ label: "", content: "" }]);
+  const [ppgResult, setPpgResult] = useState<{ expressionPrompt?: string; expressionStyleTags?: string; expressionComposerNote?: string; expressionId?: string } | null>(null);
+  const generatePpgMutation = trpc.promptStudio.generateStylePrompt.useMutation({
+    onSuccess: (data) => setPpgResult(data as typeof ppgResult),
+  });
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
     try {
       const saved = localStorage.getItem("ln_avatar_pos");
@@ -134,6 +150,47 @@ export default function FloatingAvatar({
     window.addEventListener("mouseup", onUp);
     return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
   }, [dragging]);
+
+  // ─── Sandbox helpers ────────────────────────────────────────────────────────
+
+  const applyFormat = (tag: string) => {
+    const ta = sandboxTextRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart ?? 0;
+    const end = ta.selectionEnd ?? 0;
+    const sel = sandboxText.slice(start, end);
+    if (!sel) return;
+    const wrapped = tag === "highlight"
+      ? `==${sel}==`
+      : tag === "bold"
+        ? `**${sel}**`
+        : `_${sel}_`;
+    setSandboxText(sandboxText.slice(0, start) + wrapped + sandboxText.slice(end));
+  };
+
+  const handleSandboxImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return;
+    setSandboxUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("type", "image");
+      const res = await fetch("/api/upload-file", { method: "POST", body: form });
+      const json = await res.json();
+      if (json.url) setSandboxImages(prev => [...prev, json.url]);
+    } catch {}
+    setSandboxUploading(false);
+    if (sandboxFileRef.current) sandboxFileRef.current.value = "";
+  };
+
+  const sendSandboxToKeeper = () => {
+    if (!sandboxText.trim() && sandboxImages.length === 0) return;
+    const imageNote = sandboxImages.length > 0 ? `\n[${sandboxImages.length} image(s) attached]` : "";
+    onAskAgent?.(`[SANDBOX] ${sandboxText.trim()}${imageNote}`);
+    setSandboxOpen(false);
+  };
 
   // ─── Now Playing → agent thread notification ─────────────────────────────────
   useEffect(() => {
@@ -292,15 +349,30 @@ export default function FloatingAvatar({
 
   // ─── Expanded panel ──────────────────────────────────────────────────────────
 
+  // On mobile (<640px) use near-full-screen overlay; on desktop use 320x480 anchored panel
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
   return (
     <div
-      className="fixed flex flex-col rounded-lg overflow-hidden"
+      className="fixed flex flex-col overflow-hidden"
       style={{
-        bottom: orbBottom,
-        right: orbRight,
-        zIndex: ORB_Z,
-        width: 320,
-        height: 480,
+        // Mobile: full-screen overlay from bottom, ignoring drag position
+        ...(isMobile ? {
+          bottom: 0,
+          left: 0,
+          right: 0,
+          top: "auto",
+          height: "80vh",
+          borderRadius: "16px 16px 0 0",
+          zIndex: ORB_Z,
+        } : {
+          bottom: orbBottom,
+          right: orbRight,
+          width: 320,
+          height: 480,
+          borderRadius: 8,
+          zIndex: ORB_Z,
+        }),
         background: "var(--ln-panel)",
         border: `1px solid ${modeColor}66`,
         boxShadow: `0 0 0 1px ${modeColor}22, 0 8px 40px rgba(0,0,0,0.7)`,
@@ -340,6 +412,15 @@ export default function FloatingAvatar({
 
         {/* Controls */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {/* Sandbox toggle */}
+          <button
+            className="w-5 h-5 flex items-center justify-center rounded hover:opacity-70 transition-opacity"
+            style={{ color: sandboxOpen ? modeColor : "var(--ln-smoke)", background: sandboxOpen ? `${modeColor}22` : "transparent" }}
+            onClick={() => setSandboxOpen(v => !v)}
+            title={sandboxOpen ? "Close Sandbox" : "Open Creative Sandbox"}
+          >
+            <PenLine style={{ width: 12, height: 12 }} />
+          </button>
           {onCinematicToggle && (
             <button
               className="w-5 h-5 flex items-center justify-center rounded hover:opacity-70 transition-opacity"
@@ -395,112 +476,293 @@ export default function FloatingAvatar({
         </div>
       )}
 
-      {/* Mode tabs */}
-      <div
-        className="flex flex-shrink-0"
-        style={{ borderBottom: `1px solid var(--ln-panel-border)` }}
-      >
-        {(["Guide", "Conductor", "Critic", "Custodian"] as const).map(m => (
-          <button
-            key={m}
-            onClick={() => onModeChange?.(m)}
-            className="flex-1 py-1.5 text-center transition-colors"
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.55rem",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: agentMode === m ? MODE_COLORS[m] : "var(--ln-smoke)",
-              borderBottom: agentMode === m ? `2px solid ${MODE_COLORS[m]}` : "2px solid transparent",
-              background: "transparent",
-            }}
-          >
-            {m}
-          </button>
-        ))}
-      </div>
-
-      {/* Message thread */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {agentMessages.length === 0 && (
-          <div
-            className="text-xs text-center mt-4"
-            style={{ color: "var(--ln-smoke)", fontFamily: "'EB Garamond', serif", fontStyle: "italic" }}
-          >
-            Your Keeper watches. Speak when ready.
+      {/* ── SANDBOX VIEW ─────────────────────────────────────────────────────── */}
+      {sandboxOpen ? (
+        <>
+          {/* Sandbox tab bar */}
+          <div className="flex flex-shrink-0" style={{ borderBottom: `1px solid var(--ln-panel-border)` }}>
+            {(["write", "ppg"] as const).map(t => (
+              <button key={t} onClick={() => setSandboxTab(t)}
+                className="flex-1 py-1.5 text-center transition-colors"
+                style={{
+                  fontFamily: "'Space Mono', monospace", fontSize: "0.55rem",
+                  letterSpacing: "0.08em", textTransform: "uppercase",
+                  color: sandboxTab === t ? modeColor : "var(--ln-smoke)",
+                  borderBottom: sandboxTab === t ? `2px solid ${modeColor}` : "2px solid transparent",
+                  background: "transparent",
+                }}>
+                {t === "write" ? "✍ Write" : "⬡ PPG"}
+              </button>
+            ))}
           </div>
-        )}
-        {agentMessages.map(msg => (
-          <div key={msg.id} className="text-sm leading-relaxed">
-            <span
-              className="text-xs mr-2"
-              style={{
-                color: MODE_COLORS[msg.mode] ?? modeColor,
-                fontFamily: "'Space Mono', monospace",
-                fontSize: "0.55rem",
-              }}
-            >
-              [{msg.mode}]
-            </span>
-            <span style={{ color: "var(--ln-parchment)", fontSize: "0.8rem" }}>{msg.content}</span>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
 
-      {/* Ask button */}
-      <div
-        className="flex-shrink-0 p-2"
-        style={{ borderTop: `1px solid var(--ln-panel-border)` }}
-      >
-        <div style={{ display: "flex", gap: 6 }}>
-          <input
-            id="keeper-input"
-            type="text"
-            placeholder="speak to your keeper…"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                const val = (e.target as HTMLInputElement).value.trim();
-                if (val) { onAskAgent?.(val); (e.target as HTMLInputElement).value = ""; }
-              }
-            }}
-            style={{
-              flex: 1,
-              background: "rgba(255,255,255,0.04)",
-              border: `1px solid ${modeColor}33`,
-              borderRadius: 6,
-              padding: "6px 10px",
-              fontSize: "0.7rem",
-              color: "var(--ln-parchment)",
-              fontFamily: "'Space Mono', monospace",
-              outline: "none",
-            }}
-          />
-          <button
-            className="rounded transition-colors hover:opacity-80"
-            style={{
-              background: `${modeColor}22`,
-              border: `1px solid ${modeColor}44`,
-              color: modeColor,
-              padding: "6px 10px",
-              fontSize: "0.65rem",
-              fontFamily: "'Space Mono', monospace",
-              cursor: "pointer",
-              flexShrink: 0,
-              opacity: isThinking ? 0.5 : 1,
-            }}
-            disabled={isThinking}
-            onClick={() => {
-              const el = document.getElementById("keeper-input") as HTMLInputElement | null;
-              const val = el?.value.trim();
-              if (val) { onAskAgent?.(val); if (el) el.value = ""; }
-            }}
-          >
-            {isThinking ? "···" : "→"}
-          </button>
-        </div>
-      </div>
+          {/* Sandbox body */}
+          <div className="flex-1 overflow-y-auto flex flex-col" style={{ minHeight: 0 }}>
+
+            {/* ── WRITE TAB ── */}
+            {sandboxTab === "write" && (
+              <div className="flex flex-col flex-1 p-3 gap-2">
+                {/* Formatting toolbar */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {[{ icon: Bold, tag: "bold", title: "Bold" }, { icon: Italic, tag: "italic", title: "Italic" }, { icon: Highlighter, tag: "highlight", title: "Highlight" }].map(({ icon: Icon, tag, title }) => (
+                    <button key={tag} onClick={() => applyFormat(tag)} title={title}
+                      className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-opacity"
+                      style={{ background: "rgba(255,255,255,0.05)", border: `1px solid var(--ln-panel-border)`, color: "var(--ln-smoke)" }}>
+                      <Icon style={{ width: 10, height: 10 }} />
+                    </button>
+                  ))}
+                  <div className="flex-1" />
+                  {/* Image attach */}
+                  <input ref={sandboxFileRef} type="file" accept="image/*" className="hidden" onChange={handleSandboxImageUpload} />
+                  <button onClick={() => sandboxFileRef.current?.click()} disabled={sandboxUploading} title="Attach Image"
+                    className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-opacity"
+                    style={{ background: "rgba(255,255,255,0.05)", border: `1px solid var(--ln-panel-border)`, color: "var(--ln-smoke)" }}>
+                    {sandboxUploading ? <Loader2 style={{ width: 10, height: 10 }} className="animate-spin" /> : <ImagePlus style={{ width: 10, height: 10 }} />}
+                  </button>
+                  {sandboxText || sandboxImages.length > 0 ? (
+                    <button onClick={() => { setSandboxText(""); setSandboxImages([]); }} title="Clear"
+                      className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-opacity"
+                      style={{ background: "rgba(255,255,255,0.05)", border: `1px solid var(--ln-panel-border)`, color: "rgba(251,113,133,0.7)" }}>
+                      <Trash2 style={{ width: 10, height: 10 }} />
+                    </button>
+                  ) : null}
+                </div>
+
+                {/* Text area */}
+                <textarea
+                  ref={sandboxTextRef}
+                  value={sandboxText}
+                  onChange={e => setSandboxText(e.target.value)}
+                  placeholder="Write lyrics, notes, ideas, or anything your Keeper can help with…"
+                  className="flex-1 resize-none outline-none w-full"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: `1px solid var(--ln-panel-border)`,
+                    borderRadius: 6,
+                    padding: "8px 10px",
+                    fontSize: "0.75rem",
+                    lineHeight: 1.6,
+                    color: "var(--ln-parchment)",
+                    fontFamily: "'EB Garamond', serif",
+                    minHeight: 120,
+                  }}
+                />
+
+                {/* Attached images */}
+                {sandboxImages.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {sandboxImages.map((url, i) => (
+                      <div key={i} className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0"
+                        style={{ border: `1px solid var(--ln-panel-border)` }}>
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <button onClick={() => setSandboxImages(prev => prev.filter((_, j) => j !== i))}
+                          className="absolute top-0 right-0 w-4 h-4 flex items-center justify-center"
+                          style={{ background: "rgba(0,0,0,0.7)", color: "rgba(251,113,133,0.9)", fontSize: 9 }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Send to Keeper */}
+                <button onClick={sendSandboxToKeeper}
+                  disabled={!sandboxText.trim() && sandboxImages.length === 0}
+                  className="w-full py-2 rounded text-xs font-semibold transition-all disabled:opacity-40"
+                  style={{
+                    background: `${modeColor}22`, border: `1px solid ${modeColor}44`,
+                    color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em",
+                  }}>
+                  SEND TO KEEPER →
+                </button>
+              </div>
+            )}
+
+            {/* ── PPG TAB ── */}
+            {sandboxTab === "ppg" && (
+              <div className="flex flex-col p-3 gap-3 overflow-y-auto">
+                {/* Prompt type */}
+                <div>
+                  <div className="text-[10px] font-mono tracking-widest mb-1" style={{ color: "var(--ln-gold)" }}>PROMPT TYPE</div>
+                  <select value={ppgType} onChange={e => { setPpgType(e.target.value as typeof ppgType); setPpgResult(null); }}
+                    className="w-full rounded px-2 py-1.5 text-xs appearance-none cursor-pointer outline-none"
+                    style={{ background: `${modeColor}11`, border: `1px solid ${modeColor}33`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>
+                    <option value="style_prompt">🎵 Style Prompt</option>
+                    <option value="lyric_brief">✍️ Lyric Brief</option>
+                    <option value="composer_blueprint">🎛️ Composer Blueprint</option>
+                    <option value="visual_direction">🎨 Visual Direction</option>
+                    <option value="press_bio">📰 Press Bio</option>
+                  </select>
+                </div>
+
+                {/* Platform */}
+                <div className="flex gap-1.5">
+                  {(["suno", "udio", "general"] as const).map(p => (
+                    <button key={p} onClick={() => setPpgPlatform(p)}
+                      className="flex-1 py-1 rounded text-center text-xs font-mono transition-all"
+                      style={ppgPlatform === p
+                        ? { background: `${modeColor}22`, border: `1px solid ${modeColor}55`, color: modeColor, fontSize: "0.55rem" }
+                        : { background: "transparent", border: `1px solid var(--ln-panel-border)`, color: "var(--ln-smoke)", fontSize: "0.55rem" }}>
+                      {p.charAt(0).toUpperCase() + p.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Inspiration blocks */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>INSPIRATION</div>
+                    <button onClick={() => setPpgBlocks(prev => [...prev, { label: "", content: "" }])}
+                      className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ color: modeColor, background: `${modeColor}11`, border: `1px solid ${modeColor}22` }}>+ Add</button>
+                  </div>
+                  {ppgBlocks.map((block, idx) => (
+                    <div key={idx} className="mb-2 p-2 rounded" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid var(--ln-panel-border)` }}>
+                      <div className="flex items-center gap-1 mb-1">
+                        <input value={block.label}
+                          onChange={e => setPpgBlocks(prev => prev.map((b, i) => i === idx ? { ...b, label: e.target.value } : b))}
+                          placeholder="Label (e.g. Lyrics, Mood)"
+                          className="flex-1 bg-transparent outline-none text-[10px] font-mono"
+                          style={{ color: modeColor, borderBottom: `1px solid ${modeColor}22`, paddingBottom: 1 }} />
+                        {ppgBlocks.length > 1 && (
+                          <button onClick={() => setPpgBlocks(prev => prev.filter((_, i) => i !== idx))}
+                            style={{ color: "rgba(251,113,133,0.7)", fontSize: 10, lineHeight: 1 }}>×</button>
+                        )}
+                      </div>
+                      <textarea value={block.content}
+                        onChange={e => setPpgBlocks(prev => prev.map((b, i) => i === idx ? { ...b, content: e.target.value } : b))}
+                        placeholder="Paste lyrics, describe a style, mood, reference…"
+                        rows={3}
+                        className="w-full bg-transparent outline-none resize-none text-xs leading-relaxed"
+                        style={{ color: "var(--ln-parchment)", fontSize: "0.7rem" }} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Generate button */}
+                <button
+                  onClick={() => generatePpgMutation.mutate({ targetPlatform: ppgPlatform, promptType: ppgType, userInputBlocks: ppgBlocks.filter(b => b.content.trim()) })}
+                  disabled={generatePpgMutation.isPending || ppgBlocks.every(b => !b.content.trim())}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded text-xs font-semibold transition-all disabled:opacity-40"
+                  style={{ background: `${modeColor}22`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>
+                  {generatePpgMutation.isPending
+                    ? <><Loader2 className="w-3 h-3 animate-spin" /> Generating…</>
+                    : <><Wand2 className="w-3 h-3" /> Generate Provenance Prompt</>}
+                </button>
+
+                {/* Result */}
+                {ppgResult?.expressionPrompt && (
+                  <div className="space-y-2 pt-2" style={{ borderTop: `1px solid var(--ln-panel-border)` }}>
+                    {ppgResult.expressionId && (
+                      <div className="flex items-center gap-2 px-2 py-1.5 rounded"
+                        style={{ background: `${modeColor}11`, border: `1px solid ${modeColor}33` }}>
+                        <span className="font-mono text-[10px] font-bold flex-1 truncate" style={{ color: modeColor }}>{ppgResult.expressionId}</span>
+                        <button onClick={() => navigator.clipboard.writeText(ppgResult.expressionId ?? "")}
+                          className="flex-shrink-0" style={{ color: modeColor, fontSize: 9 }}>
+                          <ClipboardCopy style={{ width: 10, height: 10 }} />
+                        </button>
+                      </div>
+                    )}
+                    <div className="p-2 rounded" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid var(--ln-panel-border)` }}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>PROMPT</span>
+                        <button onClick={() => navigator.clipboard.writeText(ppgResult.expressionPrompt ?? "")} style={{ color: "var(--ln-gold)", fontSize: 9 }}>
+                          <ClipboardCopy style={{ width: 10, height: 10 }} />
+                        </button>
+                      </div>
+                      <p className="text-xs leading-relaxed" style={{ color: "var(--ln-parchment)", fontSize: "0.7rem" }}>{ppgResult.expressionPrompt}</p>
+                    </div>
+                    {ppgResult.expressionStyleTags && (
+                      <div className="p-2 rounded" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid var(--ln-panel-border)` }}>
+                        <div className="text-[10px] font-mono tracking-widest mb-1" style={{ color: "var(--ln-smoke)" }}>STYLE TAGS</div>
+                        <p className="text-xs" style={{ color: "rgba(209,213,219,0.7)", fontSize: "0.65rem" }}>{ppgResult.expressionStyleTags}</p>
+                      </div>
+                    )}
+                    {/* Send to Keeper */}
+                    <button onClick={() => { onAskAgent?.(`[PPG RESULT] ${ppgResult.expressionPrompt}`); setSandboxOpen(false); }}
+                      className="w-full py-1.5 rounded text-xs font-semibold transition-all"
+                      style={{ background: `${modeColor}22`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>
+                      SEND TO KEEPER →
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Mode tabs */}
+          <div className="flex flex-shrink-0" style={{ borderBottom: `1px solid var(--ln-panel-border)` }}>
+            {(["Guide", "Conductor", "Critic", "Custodian"] as const).map(m => (
+              <button key={m} onClick={() => onModeChange?.(m)}
+                className="flex-1 py-1.5 text-center transition-colors"
+                style={{
+                  fontFamily: "'Space Mono', monospace", fontSize: "0.55rem",
+                  letterSpacing: "0.08em", textTransform: "uppercase",
+                  color: agentMode === m ? MODE_COLORS[m] : "var(--ln-smoke)",
+                  borderBottom: agentMode === m ? `2px solid ${MODE_COLORS[m]}` : "2px solid transparent",
+                  background: "transparent",
+                }}>
+                {m}
+              </button>
+            ))}
+          </div>
+
+          {/* Message thread */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {agentMessages.length === 0 && (
+              <div className="text-xs text-center mt-4"
+                style={{ color: "var(--ln-smoke)", fontFamily: "'EB Garamond', serif", fontStyle: "italic" }}>
+                Your Keeper watches. Speak when ready.
+              </div>
+            )}
+            {agentMessages.map(msg => (
+              <div key={msg.id} className="text-sm leading-relaxed">
+                <span className="text-xs mr-2"
+                  style={{ color: MODE_COLORS[msg.mode] ?? modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}>
+                  [{msg.mode}]
+                </span>
+                <span style={{ color: "var(--ln-parchment)", fontSize: "0.8rem" }}>{msg.content}</span>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Ask input */}
+          <div className="flex-shrink-0 p-2" style={{ borderTop: `1px solid var(--ln-panel-border)` }}>
+            <div style={{ display: "flex", gap: 6 }}>
+              <input id="keeper-input" type="text" placeholder="speak to your keeper…"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val) { onAskAgent?.(val); (e.target as HTMLInputElement).value = ""; }
+                  }
+                }}
+                style={{
+                  flex: 1, background: "rgba(255,255,255,0.04)",
+                  border: `1px solid ${modeColor}33`, borderRadius: 6,
+                  padding: "6px 10px", fontSize: "0.7rem",
+                  color: "var(--ln-parchment)", fontFamily: "'Space Mono', monospace", outline: "none",
+                }} />
+              <button className="rounded transition-colors hover:opacity-80"
+                style={{
+                  background: `${modeColor}22`, border: `1px solid ${modeColor}44`,
+                  color: modeColor, padding: "6px 10px", fontSize: "0.65rem",
+                  fontFamily: "'Space Mono', monospace", cursor: "pointer",
+                  flexShrink: 0, opacity: isThinking ? 0.5 : 1,
+                }}
+                disabled={isThinking}
+                onClick={() => {
+                  const el = document.getElementById("keeper-input") as HTMLInputElement | null;
+                  const val = el?.value.trim();
+                  if (val) { onAskAgent?.(val); if (el) el.value = ""; }
+                }}>
+                {isThinking ? "···" : "→"}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
