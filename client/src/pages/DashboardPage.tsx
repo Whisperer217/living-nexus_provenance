@@ -204,13 +204,6 @@ export default function DashboardPage() {
   const isLicensed = licenseData?.licenseStatus === "licensed";
   const tipsEnabled = connectData?.status === "enabled";
 
-
-      case "failed": return { label: "Failed", color: "var(--lnx-red)" };
-      case "processing": return { label: "Processing", color: "var(--lnx-orange)" };
-      default: return { label: "Pending", color: "#E2E8F0" };
-    }
-  };
-
   return (
     <div className="min-h-screen" style={{ background: "#111009" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
