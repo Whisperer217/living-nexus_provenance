@@ -349,35 +349,6 @@ export const slotPurchases = mysqlTable("slotPurchases", {
 export type SlotPurchase = typeof slotPurchases.$inferSelect;
 export type InsertSlotPurchase = typeof slotPurchases.$inferInsert;
 
-// ─── AI Transforms ────────────────────────────────────────────────────────────
-export const aiTransforms = mysqlTable("aiTransforms", {
-  id: int("id").autoincrement().primaryKey(),
-  originalSongId: int("originalSongId").notNull(),
-  userId: int("userId").notNull(),
-
-  // Request params
-  prompt: text("prompt").notNull(),
-  style: varchar("style", { length: 128 }),
-  tags: json("tags").$type<string[]>(),
-
-  // Sonauto task tracking
-  sonautoTaskId: varchar("sonautoTaskId", { length: 128 }),
-  status: mysqlEnum("status", ["pending", "processing", "success", "failed"]).default("pending").notNull(),
-  errorMessage: text("errorMessage"),
-
-  // Result
-  outputUrl: text("outputUrl"),
-  outputKey: text("outputKey"),
-
-  // Provenance link back to original
-  originalWitnessId: varchar("originalWitnessId", { length: 64 }),
-
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type AiTransform = typeof aiTransforms.$inferSelect;
-export type InsertAiTransform = typeof aiTransforms.$inferInsert;
 // ─── Likes ────────────────────────────────────────────────────────────────────
 export const likes = mysqlTable("likes", {
   id: int("id").autoincrement().primaryKey(),

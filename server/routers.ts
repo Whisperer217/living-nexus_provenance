@@ -18,8 +18,6 @@ import {
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
-  createAiTransform, updateAiTransform, getAiTransformById,
-  getAiTransformsBySong, getAiTransformsByUser,
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount, getBulkLikeStatuses,
   getSongByWitnessId, updateSongMetadata, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
@@ -1355,94 +1353,6 @@ export const appRouter = router({
       return getRelatedSongs(input.songId, input.genre, 6);
     }),
 
-    // ── AI Transform ──────────────────────────────────────────────────────────
-    aiTransform: protectedProcedure.input(z.object({
-      songId: z.number(),
-      prompt: z.string().min(1).max(500),
-      style: z.string().max(128).optional(),
-      tags: z.array(z.string()).max(10).optional(),
-    })).mutation(async ({ ctx, input }) => {
-      const song = await getSongById(input.songId);
-      if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
-      if (!song.fileUrl) throw new TRPCError({ code: "BAD_REQUEST", message: "Song has no audio file" });
-
-      // Create DB record first
-      const insertResult = await createAiTransform({
-        originalSongId: input.songId,
-        userId: ctx.user.id,
-        prompt: input.prompt,
-        style: input.style,
-        tags: input.tags,
-        originalWitnessId: song.witnessId ?? undefined,
-      });
-      const transformId = (insertResult as any).insertId as number;
-
-      // Kick off Sonauto generation asynchronously
-      const sonautoApiKey = process.env.SONAUTO_API_KEY || "";
-      const requestBody: Record<string, unknown> = {
-        prompt: input.prompt,
-        num_songs: 1,
-      };
-      if (input.style) requestBody.style = input.style;
-      if (input.tags && input.tags.length > 0) requestBody.tags = input.tags;
-
-      // Fire-and-forget: start Sonauto task, poll in background
-      (async () => {
-        try {
-          // Submit generation request
-          const genRes = await fetch("https://api.sonauto.ai/v1/generations", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${sonautoApiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody),
-          });
-          if (!genRes.ok) {
-            const errText = await genRes.text();
-            await updateAiTransform(transformId, { status: "failed", errorMessage: `Sonauto API error: ${errText}` });
-            return;
-          }
-          const genData = await genRes.json() as { task_id: string };
-          const taskId = genData.task_id;
-          await updateAiTransform(transformId, { sonautoTaskId: taskId, status: "processing" });
-
-          // Poll until complete (max 3 minutes)
-          const maxAttempts = 36; // 36 * 5s = 180s
-          for (let i = 0; i < maxAttempts; i++) {
-            await new Promise(r => setTimeout(r, 5000));
-            const pollRes = await fetch(`https://api.sonauto.ai/v1/generations/${taskId}`, {
-              headers: { "Authorization": `Bearer ${sonautoApiKey}` },
-            });
-            if (!pollRes.ok) continue;
-            const pollData = await pollRes.json() as { status: string; song_paths?: string[] };
-            if (pollData.status === "SUCCESS" && pollData.song_paths && pollData.song_paths.length > 0) {
-              const outputUrl = pollData.song_paths[0];
-              await updateAiTransform(transformId, { status: "success", outputUrl });
-              return;
-            } else if (pollData.status === "FAILURE") {
-              await updateAiTransform(transformId, { status: "failed", errorMessage: "Sonauto generation failed" });
-              return;
-            }
-          }
-          await updateAiTransform(transformId, { status: "failed", errorMessage: "Generation timed out" });
-        } catch (err: any) {
-          await updateAiTransform(transformId, { status: "failed", errorMessage: err.message });
-        }
-      })();
-
-      return { transformId, status: "processing" as const };
-    }),
-
-    getTransformStatus: protectedProcedure.input(z.object({ transformId: z.number() })).query(async ({ ctx, input }) => {
-      const transform = await getAiTransformById(input.transformId);
-      if (!transform || transform.userId !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND" });
-      return transform;
-    }),
-
-    getTransforms: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => {
-      return getAiTransformsBySong(input.songId);
-    }),
-    getMyTransforms: protectedProcedure.query(async ({ ctx }) => {
-      return getAiTransformsByUser(ctx.user.id);
-    }),
     getLiked: protectedProcedure.query(async ({ ctx }) => {
       return getLikedSongs(ctx.user.id);
     }),

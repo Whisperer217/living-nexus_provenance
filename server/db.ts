@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, gte, inArray, isNotNull, like, ne, or, sql }
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {
-  InsertUser, aiTransforms, comments, downloads, licenses, likes,
+  InsertUser, comments, downloads, licenses, likes,
   slotPurchases, songs, tips, users, events,
   promoCodes, promoRedemptions,
   nameHistory,
@@ -760,122 +760,6 @@ export async function getRelatedSongs(songId: number, genre?: string | null, lim
     .limit(limit);
 }
 
-// ─── AI Transforms ────────────────────────────────────────────────────────────
-
-export async function createAiTransform(data: {
-  originalSongId: number;
-  userId: number;
-  prompt: string;
-  style?: string;
-  tags?: string[];
-  originalWitnessId?: string;
-}) {
-  const db = await getDb();
-  if (!db) throw new Error("Database unavailable");
-  const result = await db.insert(aiTransforms).values({
-    ...data,
-    tags: data.tags as unknown as string[],
-    status: "pending",
-  });
-  return result;
-}
-
-export async function updateAiTransform(id: number, data: {
-  sonautoTaskId?: string;
-  status?: "pending" | "processing" | "success" | "failed";
-  errorMessage?: string;
-  outputUrl?: string;
-  outputKey?: string;
-}) {
-  const db = await getDb();
-  if (!db) return;
-  await db.update(aiTransforms).set(data).where(eq(aiTransforms.id, id));
-}
-
-export async function getAiTransformsByInsertId(insertId: number) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db.select().from(aiTransforms).where(eq(aiTransforms.id, insertId)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
-}
-
-export async function getAiTransformsBySong(songId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(aiTransforms)
-    .where(and(eq(aiTransforms.originalSongId, songId), eq(aiTransforms.status, "success")))
-    .orderBy(desc(aiTransforms.createdAt))
-    .limit(20);
-}
-
-export async function getAiTransformById(id: number) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db.select().from(aiTransforms).where(eq(aiTransforms.id, id)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
-}
-
-export async function getAiTransformsByUser(userId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db
-    .select({
-      id: aiTransforms.id,
-      originalSongId: aiTransforms.originalSongId,
-      originalSongTitle: songs.title,
-      originalWitnessId: aiTransforms.originalWitnessId,
-      prompt: aiTransforms.prompt,
-      style: aiTransforms.style,
-      tags: aiTransforms.tags,
-      status: aiTransforms.status,
-      outputUrl: aiTransforms.outputUrl,
-      errorMessage: aiTransforms.errorMessage,
-      createdAt: aiTransforms.createdAt,
-    })
-    .from(aiTransforms)
-    .leftJoin(songs, eq(aiTransforms.originalSongId, songs.id))
-    .where(eq(aiTransforms.userId, userId))
-    .orderBy(desc(aiTransforms.createdAt))
-    .limit(50);
-}
-
-export async function getSongByWitnessId(witnessId: string) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db
-    .select({
-      song: songs,
-      creator: {
-        id: users.id,
-        name: users.name,
-        artistHandle: users.artistHandle,
-        profilePhotoUrl: users.profilePhotoUrl,
-      },
-    })
-    .from(songs)
-    .leftJoin(users, eq(songs.userId, users.id))
-    .where(eq(songs.witnessId, witnessId))
-    .limit(1);
-  return result.length > 0 ? result[0] : undefined;
-}
-
-export async function getTransformsByWitnessId(witnessId: string) {
-  const db = await getDb();
-  if (!db) return [];
-  return db
-    .select({
-      id: aiTransforms.id,
-      prompt: aiTransforms.prompt,
-      style: aiTransforms.style,
-      status: aiTransforms.status,
-      outputUrl: aiTransforms.outputUrl,
-      createdAt: aiTransforms.createdAt,
-    })
-    .from(aiTransforms)
-    .where(and(eq(aiTransforms.originalWitnessId, witnessId), eq(aiTransforms.status, "success")))
-    .orderBy(desc(aiTransforms.createdAt))
-    .limit(20);
-}
 
 // ─── Likes ────────────────────────────────────────────────────────────────────
 
