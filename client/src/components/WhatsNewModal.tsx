@@ -10,14 +10,91 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.31.0";
+const CURRENT_VERSION = "v2.40.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.31.0",
+    version: "v2.40.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Shield, text: "Provenance Events — A new provenanceEvents ledger is live. Every creative action — draft, checkpoint, anchor, fork — is recorded as a signed event tied to your creator ID and agent fingerprint. The foundation for immutable creative provenance." },
+      { icon: Network, text: "Satchel — Your creative event ledger is now accessible via the Satchel interface. Checkpoint your work, anchor it to the chain, fork from any prior state. Full event history with session labels." },
+      { icon: Sparkles, text: "Provenance Prompt Generator (PPG) — Generate, save, and manage provenance prompts directly from the platform. LLM-backed generation with full history. Each prompt is tied to your creator identity." },
+      { icon: Users, text: "Personal Nexus Agent — Your AI creative agent now has a persistent identity with fingerprint tracking. The agents router (getOrCreate, updateFingerprint) keeps your agent consistent across sessions." },
+      { icon: Shield, text: "Work Identity Documents (WIDs) Router — wids.create, wids.getByCreator, wids.getById procedures now available. Register and retrieve WIDs programmatically." },
+      { icon: FileText, text: "Ed25519 Keypair — auth.hasKeypair and auth.generateKeypair procedures added. Generate your cryptographic identity — public key stored server-side, private key returned once to your client. Your signature is yours alone." },
+    ],
+  },
+  {
+    version: "v2.39.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Zap, text: "AI Transform Removed — The Sonauto AI Transform feature has been fully removed from the platform. 552 lines of integration code retired. Living Nexus is a provenance platform — transformation tools belong in your own studio, not embedded here." },
+    ],
+  },
+  {
+    version: "v2.38.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: CreditCard, text: "Marketplace Navigation — The Marketplace now has its own permanent home in the navigation. Mobile: a gold-ringed Shop tab in the center of the bottom bar. Desktop: a gold-bordered MARKETPLACE pill in the top nav. Always one tap away." },
+    ],
+  },
+  {
+    version: "v2.37.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Eye, text: "Keeper Vision Fixed — Attaching an image to the Keeper sandbox and clicking Analyze now sends the actual image to the vision model. Previously only a text label was passed and the Keeper hallucinated a response. The image is now fully seen." },
+    ],
+  },
+  {
+    version: "v2.36.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Radio, text: "Voice Recorder Overhaul — The mic button in the Write tab now uses a deterministic 3-state flow: Idle → Recording → Ready. Click to start, click Stop to end, then choose Transcribe or Discard before committing to a Whisper API call. No more accidental recordings from premature releases." },
+    ],
+  },
+  {
+    version: "v2.35.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Music, text: "Audio Silence Fix — A Web Audio API bug was silencing playback on fresh page loads. The frequency glow was defaulting to ON, transferring the audio element to a suspended AudioContext before any user gesture. Glow now defaults to OFF — audio plays correctly from first load, always." },
+    ],
+  },
+  {
+    version: "v2.34.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Maximize2, text: "Keeper Avatar Desktop Drag — The Keeper orb can now be repositioned on desktop. Hold the orb for 200 ms then drag to move it anywhere on screen. Position persists across sessions. Quick click still opens the panel normally." },
+    ],
+  },
+  {
+    version: "v2.33.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: CreditCard, text: "Marketplace Default Listings — Navigate to /marketplace while logged in and click ⊕ Seed Default Listings to populate the shop with 6 curated items: a provenance album, three Keeper skin packs, a WID Edition thumb drive, and a Creator Starter Pack. One click, instant catalogue." },
+    ],
+  },
+  {
+    version: "v2.32.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Sparkles, text: "Frequency-Reactive Glow — The audio player now pulses with the music. Bass frequencies drive a wide purple bloom, mids create a shimmer layer, and high frequencies flicker at the edge. Toggle via the Waves button (desktop) or Glow button (mobile expanded panel). Preference saved across sessions." },
+    ],
+  },
+  {
+    version: "v2.31.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Music, text: "Genre Multi-Select — The genre selector on track edit and creator profile is now a chip grid instead of a dropdown. Select as many genres as your work spans — Gospel, Trap, Power Metal, Neo-Soul, and 60+ other styles are available. Selections are stored as a comma-separated list and the 64-character cap has been removed entirely." },
       { icon: BookOpen, text: "Comic Upload — Storyboard-Only Mode — Comics and novels can now be published using storyboard pages alone, without uploading a separate file. The Next: Metadata button unlocks as soon as pages are added, the Witness ID is generated from the page layout, and the file drop zone relabels itself as optional once pages are present." },

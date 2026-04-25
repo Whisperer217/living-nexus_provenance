@@ -3583,3 +3583,8 @@
 ## OAuth Callback Error Logging Patch
 - [x] Patched server/_core/oauth.ts catch block to log and return errMsg, errStatus, errCode, and stack trace top 4 lines
 - [x] TypeScript: 0 errors
+
+## What's New Modal — v2.40.0 Update
+- [x] Updated CURRENT_VERSION from v2.31.0 to v2.40.0
+- [x] Added v2.32.0 through v2.40.0 entries
+- [x] TypeScript: 0 errors
