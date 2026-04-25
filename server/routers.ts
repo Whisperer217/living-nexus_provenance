@@ -270,6 +270,33 @@ export async function handleStripeWebhook(req: any, res: any) {
             console.error("[Webhook] founder_purchase grant failed:", e);
           }
         }
+        // Album download gift: record as project donation so unlock check passes
+        if (meta.type === "album_download" && meta.projectId) {
+          const amountCents = session.amount_total ?? 0;
+          const donorUserId = meta.userId ? parseInt(meta.userId) : undefined;
+          await recordProjectDonation({
+            projectId: parseInt(meta.projectId),
+            donorUserId,
+            donorName: meta.donorName || undefined,
+            amountCents,
+            stripeSessionId: session.id,
+            stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          });
+          // Notify the creator
+          const project = await getProjectById(parseInt(meta.projectId));
+          if (project?.userId) {
+            const amountDollars = (amountCents / 100).toFixed(2);
+            await createNotification({
+              userId: project.userId,
+              type: "tip",
+              title: `Album download unlocked — $${amountDollars}`,
+              body: `${meta.donorName || "A fan"} gifted $${amountDollars} to download "${project.title}"`,
+              actorName: meta.donorName || undefined,
+              refType: "project",
+              refId: parseInt(meta.projectId),
+            });
+          }
+        }
         // Book purchase: record access grant
         if (meta.type === "book_purchase" && meta.songId && meta.userId) {
           const amountCents = session.amount_total ?? 0;
@@ -4887,6 +4914,91 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
         await reorderProjectSongs(input.projectId, input.orderedIds);
         return { ok: true };
+      }),
+    /** Get album download permission info (public) */
+    getAlbumDownload: publicProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .query(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        const perm = (project as any).albumDownloadPermission as string ?? 'none';
+        const priceCents = (project as any).albumDownloadPriceCents as number ?? 499;
+        let unlocked = perm === 'free';
+        if (!unlocked && perm === 'tipped' && ctx.user) {
+          const donations = await getProjectDonations(input.projectId);
+          const userTotal = donations
+            .filter((d) => d.donorUserId === ctx.user!.id)
+            .reduce((sum, d) => sum + d.amountCents, 0);
+          unlocked = userTotal >= priceCents;
+        }
+        return { permission: perm, priceCents, unlocked };
+      }),
+    /** Set album download permission (creator only) */
+    setAlbumDownload: protectedProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        permission: z.enum(['none', 'free', 'tipped']),
+        priceCents: z.number().int().min(50).max(100000).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
+        await updateProject(input.projectId, {
+          albumDownloadPermission: input.permission as any,
+          ...(input.priceCents !== undefined ? { albumDownloadPriceCents: input.priceCents } : {}),
+        });
+        return { ok: true };
+      }),
+    /** Download all tracks in an album — returns array of {id, title, fileUrl} */
+    downloadAlbum: protectedProcedure
+      .input(z.object({ projectId: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        const perm = (project as any).albumDownloadPermission as string ?? 'none';
+        const priceCents = (project as any).albumDownloadPriceCents as number ?? 499;
+        if (perm === 'none') throw new TRPCError({ code: 'FORBIDDEN', message: 'Album downloads are not enabled for this project.' });
+        if (perm === 'tipped') {
+          const donations = await getProjectDonations(input.projectId);
+          const userTotal = donations
+            .filter((d) => d.donorUserId === ctx.user.id)
+            .reduce((sum, d) => sum + d.amountCents, 0);
+          if (userTotal < priceCents) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: `Gift \$${(priceCents / 100).toFixed(2)} to unlock the full album download.` });
+          }
+        }
+        const tracks = await getProjectSongs(input.projectId);
+        const downloadable = tracks
+          .filter((t) => t.song?.fileUrl && t.song?.status === 'Published')
+          .map((t) => ({ id: t.songId, title: t.song!.title, fileUrl: t.song!.fileUrl! }));
+        return { tracks: downloadable };
+      }),
+    /** Create Stripe checkout to gift-unlock an album download */
+    createAlbumDownloadCheckout: publicProcedure
+      .input(z.object({ projectId: z.number().int(), origin: z.string().url() }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+        const perm = (project as any).albumDownloadPermission as string ?? 'none';
+        if (perm !== 'tipped') throw new TRPCError({ code: 'BAD_REQUEST', message: 'This album does not require a gift to download.' });
+        const priceCents = (project as any).albumDownloadPriceCents as number ?? 499;
+        const creator = await getUserById(project.userId);
+        if (!creator?.stripeAccountId) throw new TRPCError({ code: 'BAD_REQUEST', message: 'This creator has not enabled payments yet.' });
+        const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+        if (!acct.charges_enabled) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Creator payment account is still being verified.' });
+        const feeAmount = Math.round(priceCents * PLATFORM_FEE_PERCENT / 100);
+        const session = await stripe.checkout.sessions.create({
+          mode: 'payment',
+          payment_method_types: ['card'],
+          line_items: [{ price_data: { currency: 'usd', product_data: { name: `Album Download: "${project.title}"`, description: `Gift-to-download — supporting ${(creator as any).artistHandle || creator.name || 'this creator'} on Living Nexus` }, unit_amount: priceCents }, quantity: 1 }],
+          metadata: { type: 'album_download', projectId: input.projectId.toString(), userId: ctx.user?.id?.toString() || '', donorName: ctx.user?.name || '' },
+          payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
+          success_url: `${input.origin}/project/${project.slug}?album_download=unlocked`,
+          cancel_url: `${input.origin}/project/${project.slug}`,
+          allow_promotion_codes: false,
+        });
+        return { url: session.url };
       }),
   }),
 

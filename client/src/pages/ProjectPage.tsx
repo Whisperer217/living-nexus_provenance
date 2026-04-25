@@ -32,7 +32,7 @@ import {
   Heart, Users, Calendar, ShieldCheck, ChevronDown, ChevronUp,
   Pencil, Plus, Trash2, Image as ImageIcon, Video, Type, Quote,
   Minus, Check, X, Eye, Upload, ExternalLink, Rocket, Share2, Copy, Bell, BellOff, GripVertical,
-  Mic, Music, Volume2, Play, Pause, Search, FileVideo,
+  Mic, Music, Volume2, Play, Pause, Search, FileVideo, Download, Archive, Lock,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { QRShareModal } from "@/components/QRIdentityCard";
@@ -1158,6 +1158,38 @@ function ProjectSongsPanel({ projectId, editMode, userId }: {
   const [showPicker, setShowPicker] = useState(false);
 
   const { data: linkedSongs = [] } = trpc.projects.getSongs.useQuery({ projectId });
+  const { user } = useAuth();
+  const isOwner = !!user && user.id === userId;
+
+  // Album download
+  const { data: albumDl, refetch: refetchAlbumDl } = trpc.projects.getAlbumDownload.useQuery({ projectId });
+  const [albumDlPerm, setAlbumDlPerm] = useState<'none' | 'free' | 'tipped'>('none');
+  const [albumDlPrice, setAlbumDlPrice] = useState('4.99');
+  const [showAlbumDlSettings, setShowAlbumDlSettings] = useState(false);
+
+  const setAlbumDownload = trpc.projects.setAlbumDownload.useMutation({
+    onSuccess: () => { toast.success('Album download settings saved'); refetchAlbumDl(); setShowAlbumDlSettings(false); },
+    onError: (e) => toast.error(e.message),
+  });
+  const downloadAlbum = trpc.projects.downloadAlbum.useMutation({
+    onSuccess: (data) => {
+      data.tracks.forEach((t) => {
+        const a = document.createElement('a');
+        a.href = t.fileUrl;
+        a.download = t.title;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+      toast.success(`Downloading ${data.tracks.length} tracks`);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const createAlbumCheckout = trpc.projects.createAlbumDownloadCheckout.useMutation({
+    onSuccess: (data) => { if (data.url) window.location.href = data.url; },
+    onError: (e) => toast.error(e.message),
+  });
 
   // Load the creator's own songs for the picker
   const { data: mySongsRaw } = trpc.songs.mySongs.useQuery(
@@ -1212,17 +1244,95 @@ function ProjectSongsPanel({ projectId, editMode, userId }: {
           <Music className="w-5 h-5 text-[#d4a017]" /> Tracks
           <Badge variant="outline" className="border-white/20 text-white/50 text-xs">{linkedSongs.length}</Badge>
         </h2>
-        {editMode && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setShowPicker(!showPicker)}
-            className="border-white/20 bg-transparent text-white/70 hover:text-white hover:border-white/40 text-xs h-8"
-          >
-            <Plus className="w-3 h-3 mr-1" /> Add track
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Album download button — visible to fans when enabled */}
+          {!editMode && albumDl?.permission === 'free' && linkedSongs.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => downloadAlbum.mutate({ projectId })}
+              disabled={downloadAlbum.isPending}
+              className="border-[#d4a017]/40 bg-transparent text-[#d4a017] hover:bg-[#d4a017]/10 text-xs h-8"
+            >
+              <Download className="w-3 h-3 mr-1" /> Download Album
+            </Button>
+          )}
+          {!editMode && albumDl?.permission === 'tipped' && linkedSongs.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => createAlbumCheckout.mutate({ projectId, origin: window.location.origin })}
+              disabled={createAlbumCheckout.isPending}
+              className="border-[#d4a017]/40 bg-transparent text-[#d4a017] hover:bg-[#d4a017]/10 text-xs h-8"
+            >
+              <Download className="w-3 h-3 mr-1" /> Download Album · ${((albumDl.priceCents ?? 0) / 100).toFixed(2)}
+            </Button>
+          )}
+          {editMode && (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => { setAlbumDlPerm((albumDl?.permission as any) ?? 'none'); setAlbumDlPrice(((albumDl?.priceCents ?? 499) / 100).toFixed(2)); setShowAlbumDlSettings(!showAlbumDlSettings); }}
+                className="border-white/20 bg-transparent text-white/70 hover:text-white hover:border-white/40 text-xs h-8"
+              >
+                <Archive className="w-3 h-3 mr-1" /> Album DL
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowPicker(!showPicker)}
+                className="border-white/20 bg-transparent text-white/70 hover:text-white hover:border-white/40 text-xs h-8"
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add track
+              </Button>
+            </>
+          )}
+        </div>
       </div>
+
+      {/* Album download settings (edit mode) */}
+      {editMode && showAlbumDlSettings && (
+        <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 space-y-3">
+          <p className="text-white/70 text-sm font-medium">Album Download Permission</p>
+          <div className="space-y-2">
+            {(['none', 'free', 'tipped'] as const).map((perm) => (
+              <label key={perm} className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="albumDlPerm" value={perm} checked={albumDlPerm === perm} onChange={() => setAlbumDlPerm(perm)} className="accent-[#d4a017]" />
+                <span className="text-white/80 text-sm">
+                  {perm === 'none' && 'No Download'}
+                  {perm === 'free' && 'Free Download — anyone can download at no cost'}
+                  {perm === 'tipped' && 'Gift-Gated — unlock after gifting a minimum amount'}
+                </span>
+              </label>
+            ))}
+          </div>
+          {albumDlPerm === 'tipped' && (
+            <div className="flex items-center gap-2">
+              <span className="text-white/50 text-sm">Minimum gift ($)</span>
+              <Input
+                type="number"
+                min="0.50"
+                step="0.01"
+                value={albumDlPrice}
+                onChange={(e) => setAlbumDlPrice(e.target.value)}
+                className="w-24 bg-white/5 border-white/10 text-white text-sm h-8"
+              />
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={() => setAlbumDownload.mutate({ projectId, permission: albumDlPerm, priceCents: Math.round(parseFloat(albumDlPrice) * 100) })}
+              disabled={setAlbumDownload.isPending}
+              className="bg-[#d4a017] hover:bg-[#d4a017]/90 text-black text-xs h-8"
+            >
+              Save
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setShowAlbumDlSettings(false)} className="border-white/20 bg-transparent text-white/60 text-xs h-8">Cancel</Button>
+          </div>
+        </div>
+      )}
 
       {/* Song picker (edit mode) */}
       {editMode && showPicker && (

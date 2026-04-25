@@ -1012,6 +1012,9 @@ export const projects = mysqlTable("projects", {
   status: mysqlEnum("status", ["draft", "active", "completed", "archived"]).default("draft").notNull(),
   linkedWitnessId: varchar("linkedWitnessId", { length: 64 }),
   linkedSongId: int("linkedSongId"),
+  // Album-level download permissions
+  albumDownloadPermission: mysqlEnum("albumDownloadPermission", ["none", "free", "tipped"]).default("none").notNull(),
+  albumDownloadPriceCents: int("albumDownloadPriceCents").default(499).notNull(), // $4.99 default
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
