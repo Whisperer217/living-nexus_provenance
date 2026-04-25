@@ -3549,3 +3549,10 @@
 - [x] No DB migrations
 - [x] TypeScript: 0 errors
 - [x] Save checkpoint and deploy
+
+## Commit 85ebeda — Voice Recorder State Machine + Keeper Vision Pipeline Fix
+- [x] Pull 85ebeda (FloatingAvatar.tsx: voice recorder 3-state machine idle/recording/ready with STOP+TRANSCRIBE+discard; Keeper sendSandboxToKeeper now calls analyzeImage on each attachment before sending to keeper.chat — LLM receives actual vision analysis instead of placeholder string)
+- [x] No merge conflicts (fast-forward, 1 file)
+- [x] No DB migrations
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
