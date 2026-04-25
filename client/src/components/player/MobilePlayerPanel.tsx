@@ -339,7 +339,7 @@ export default function MobilePlayerPanel() {
           paddingTop: "10px",
           paddingBottom: "10px",
           borderRadius: "10px 0 0 10px",
-          background: "var(--ln-coal)",
+          background: "#000000",
           border: "1px solid #111009",
           borderRight: "none",
           boxShadow: "-4px 0 24px rgba(0,0,0,0.50), -2px 0 8px rgba(196,154,40,0.12)",
@@ -412,7 +412,7 @@ export default function MobilePlayerPanel() {
           left: 0,
           right: 0,
           bottom: "68px",
-          background: "var(--ln-coal)",
+          background: "#000000",
           boxShadow: "0 -8px 48px rgba(0,0,0,0.80)",
           transform: open ? "translateY(0)" : "translateY(100%)",
           paddingTop: "env(safe-area-inset-top, 0px)",
@@ -458,7 +458,7 @@ export default function MobilePlayerPanel() {
 
           {/* Gradient fade — bottom of artwork into controls */}
           <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, transparent, #111009)" }} />
+            style={{ background: "linear-gradient(to bottom, transparent, #000000)" }} />
 
           {/* Tap zone — toggle controls overlay (identity always stays) */}
           <div className="absolute inset-0 z-10 cursor-pointer" onClick={handleArtTap} />
@@ -794,7 +794,7 @@ export default function MobilePlayerPanel() {
             width: "100vw",
             height: "72vh",
             maxHeight: "600px",
-            background: "var(--ln-coal)",
+            background: "#000000",
             borderTop: "1px solid #111009",
             borderRadius: "20px 20px 0 0",
             boxShadow: "0 -8px 32px rgba(0,0,0,0.60)",
@@ -806,7 +806,7 @@ export default function MobilePlayerPanel() {
         >
           {/* Sheet drag handle */}
           <div className="flex-shrink-0 flex flex-col items-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
-            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "var(--ln-coal)" }} />
+            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "#000000" }} />
           </div>
 
           {/* Tab bar */}
@@ -1027,7 +1027,7 @@ export default function MobilePlayerPanel() {
                     maxLength={1000}
                     className="flex-1 rounded-xl px-3 py-2 text-[12px] outline-none transition-colors disabled:opacity-50"
                     style={{
-                      background: "var(--ln-coal)",
+                      background: "#000000",
                       border: "1px solid #111009",
                       color: "var(--ln-parchment)",
                     }}
