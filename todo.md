@@ -3467,3 +3467,11 @@
 - [x] Apply drizzle/0082_album_download.sql migration (albumDownloadPermission + albumDownloadPriceCents on projects table)
 - [x] Fix TS errors: bigint import in schema.ts, implicit any in routers.ts and ProjectPage.tsx
 - [x] CSS variable fix c8fb9b4 (--ln-panel, --ln-obsidian, --ln-panel-border) merged
+
+## Commits c8fb9b4 / 76a0ab3 / e1b7e5a Sync
+- [x] Pull c8fb9b4 (CSS vars fix), 76a0ab3 (TS fixes + 0083 migration), e1b7e5a (Stripe init guard)
+- [x] Apply drizzle/0081_keeper_skins.sql (keeper_skins table confirmed in DB)
+- [x] Apply drizzle/0082_album_download.sql (albumDownloadPermission + albumDownloadPriceCents confirmed)
+- [x] Apply drizzle/0083_icy_baron_zemo.sql (duplicate of 0082 — columns already present)
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
