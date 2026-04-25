@@ -3535,3 +3535,10 @@
 - [x] TypeScript: 0 errors
 - [x] visualQueue table confirmed present in DB (0032 migration already applied)
 - [x] Save checkpoint and deploy
+
+## Commit e06421e — Keeper Skin Audit + Marketplace Seed + Desktop Drag
+- [x] Pull e06421e (Keeper skin selector confirmed fully wired; marketplace.seedDefaults idempotent procedure with 6 default items; seed button in empty state; desktop 200ms hold-to-drag for Keeper orb)
+- [x] No merge conflicts (fast-forward, 3 files)
+- [x] No DB migrations
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
