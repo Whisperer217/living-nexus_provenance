@@ -18,7 +18,7 @@ import {
   LayoutDashboard, Archive, Sparkles, Terminal,
   BookOpen, Star, Heart, Eye, Fingerprint, Scale,
   LogIn, LogOut, Bell, Menu, X, ChevronRight,
-  CheckCircle2, Zap, Rocket,
+  CheckCircle2, Zap, Rocket, ShoppingBag,
 } from "lucide-react";
 
 const LOGO_URL =
@@ -29,6 +29,7 @@ const CORE_NAV = [
   { label: "Home",            icon: Home,          path: "/"          },
   { label: "Explore",         icon: Compass,       path: "/explore"   },
   { label: "Projects",        icon: Rocket,        path: "/projects"  },
+  { label: "Marketplace",     icon: ShoppingBag,   path: "/marketplace", gold: true },
   { label: "Upload",          icon: Upload,        path: "/upload"    },
   { label: "Dashboard",       icon: LayoutDashboard, path: "/dashboard", authOnly: true },
   { label: "Archive",         icon: Archive,       path: "/archive",  authOnly: true, archiveBadge: true },
@@ -36,9 +37,10 @@ const CORE_NAV = [
 
 // ── Drawer sections ────────────────────────────────────────────────
 const DRAWER_NAVIGATE = [
-  { label: "Home",            icon: Home,    path: "/"          },
-  { label: "Explore",         icon: Compass, path: "/explore"   },
-  { label: "Projects",        icon: Rocket,  path: "/projects"  },
+  { label: "Home",        icon: Home,        path: "/"           },
+  { label: "Explore",     icon: Compass,     path: "/explore"    },
+  { label: "Projects",    icon: Rocket,      path: "/projects"   },
+  { label: "Marketplace", icon: ShoppingBag, path: "/marketplace", gold: true },
 ];
 
 const DRAWER_CREATE = [
@@ -223,9 +225,62 @@ export default function TopBar({ archiveSongCount, unreadCount }: TopBarProps) {
           {CORE_NAV.map(item => {
             if (item.authOnly && !user && !authLoading) return null;
             const active = isActive(item.path);
+            const isGold = !!(item as any).gold;
             const archiveBadge = item.archiveBadge && archiveSongCount > 0
               ? (archiveSongCount > 99 ? "99+" : String(archiveSongCount))
               : null;
+
+            // Gold Marketplace pill — always has gold border, glows on active/hover
+            if (isGold) {
+              return (
+                <button
+                  key={item.label}
+                  onClick={() => goTo(item.path)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all whitespace-nowrap flex-shrink-0 relative"
+                  style={{
+                    fontSize: "11px",
+                    fontFamily: "'Cinzel', serif",
+                    fontWeight: active ? 700 : 600,
+                    letterSpacing: "0.08em",
+                    background: active
+                      ? "linear-gradient(135deg, rgba(196,154,40,0.22), rgba(232,184,64,0.12))"
+                      : "linear-gradient(135deg, rgba(196,154,40,0.10), rgba(140,100,20,0.06))",
+                    border: active
+                      ? "1px solid rgba(232,184,64,0.65)"
+                      : "1px solid rgba(196,154,40,0.40)",
+                    color: active ? "#FFD060" : "#E8B840",
+                    boxShadow: active
+                      ? "0 0 14px rgba(196,154,40,0.30), inset 0 0 8px rgba(196,154,40,0.08)"
+                      : "0 0 6px rgba(196,154,40,0.12)",
+                    textShadow: active ? "0 0 10px rgba(255,208,96,0.5)" : "none",
+                    marginLeft: 4,
+                    marginRight: 4,
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.color = "#FFD060";
+                    el.style.borderColor = "rgba(232,184,64,0.65)";
+                    el.style.boxShadow = "0 0 14px rgba(196,154,40,0.30), inset 0 0 8px rgba(196,154,40,0.08)";
+                    el.style.textShadow = "0 0 10px rgba(255,208,96,0.4)";
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) {
+                      const el = e.currentTarget as HTMLElement;
+                      el.style.color = "#E8B840";
+                      el.style.borderColor = "rgba(196,154,40,0.40)";
+                      el.style.boxShadow = "0 0 6px rgba(196,154,40,0.12)";
+                      el.style.textShadow = "none";
+                    }
+                  }}
+                >
+                  <item.icon size={13} style={{ color: "inherit" }} />
+                  <span>{item.label}</span>
+                  {/* shimmer underline always visible for gold pill */}
+                  <span className="absolute bottom-0 left-3 right-3 h-[1px]"
+                    style={{ background: "linear-gradient(90deg, transparent, rgba(196,154,40,0.6), transparent)" }} />
+                </button>
+              );
+            }
 
             return (
               <button

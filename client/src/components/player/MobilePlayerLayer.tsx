@@ -33,7 +33,7 @@ import {
   Volume2, VolumeX, Shield, MessageCircle,
   ChevronRight, Send, Users, Fingerprint,
   ExternalLink, Crown, ArrowUp,
-  Home, Compass, Bell, User, Rocket, Sparkles, Loader2,
+  Home, Compass, Bell, User, Rocket, Sparkles, Loader2, ShoppingBag,
   MoreVertical, ListPlus, UserCircle2, Copy, Flag,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
@@ -825,11 +825,11 @@ export default function MobilePlayerLayer() {
       refetchInterval: 30_000,
     });
     const NAV_ITEMS = [
-      { icon: Home,    label: "Home",     path: "/" },
-      { icon: Compass, label: "Explore",  path: "/explore" },
-      { icon: Rocket,  label: "Projects", path: "/projects" },
-      { icon: Bell,    label: "Signals",  path: "/notifications", badge: (unreadCount as number) > 0 ? String(Math.min(unreadCount as number, 99)) : undefined },
-      { icon: User,    label: "Profile",  path: "/profile" },
+      { icon: Home,         label: "Home",     path: "/" },
+      { icon: Compass,      label: "Explore",  path: "/explore" },
+      { icon: ShoppingBag,  label: "Shop",     path: "/marketplace", gold: true },
+      { icon: Bell,         label: "Signals",  path: "/notifications", badge: (unreadCount as number) > 0 ? String(Math.min(unreadCount as number, 99)) : undefined },
+      { icon: User,         label: "Profile",  path: "/profile" },
     ];
     return (
       <div
@@ -844,28 +844,51 @@ export default function MobilePlayerLayer() {
         }}
       >
         <div className="flex items-center justify-around h-14 px-2">
-          {NAV_ITEMS.map(({ icon: Icon, label, path, badge }) => {
+          {NAV_ITEMS.map(({ icon: Icon, label, path, badge, gold }: { icon: React.ElementType; label: string; path: string; badge?: string; gold?: boolean }) => {
             const isActive = path === "/" ? location === "/" : location.startsWith(path);
+            const isGold = !!gold;
+            // Gold tab: always shows gold color; active state gets brighter gold + glow
+            const tabColor = isActive
+              ? (isGold ? "#FFD060" : "#C49A28")
+              : (isGold ? "#C49A28" : "#6B6555");
             return (
               <button
                 key={path}
                 onClick={() => { try { navigator.vibrate?.(5); } catch {} navigate(path); }}
                 className="relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all active:scale-90"
-                style={{ color: isActive ? "#C49A28" : "#6B6555" }}
+                style={{ color: tabColor }}
                 aria-label={label}
               >
-                <div className="relative">
-                  <Icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />
-                  {badge && (
-                    <span
-                      className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-1"
-                      style={{ background: "var(--ln-ember)", color: "white" }}
-                    >{badge}</span>
-                  )}
-                </div>
-                <span className="text-[9px] font-heading tracking-wide uppercase" style={{ lineHeight: 1 }}>{label}</span>
+                {/* Gold ring around Shop icon */}
+                {isGold ? (
+                  <div className="relative flex items-center justify-center"
+                    style={{
+                      width: 32, height: 32, borderRadius: "50%",
+                      background: isActive ? "rgba(196,154,40,0.18)" : "rgba(196,154,40,0.08)",
+                      border: `1px solid ${isActive ? "rgba(196,154,40,0.55)" : "rgba(196,154,40,0.30)"}`,
+                      boxShadow: isActive ? "0 0 10px rgba(196,154,40,0.35)" : "0 0 4px rgba(196,154,40,0.12)",
+                      marginBottom: 1,
+                    }}>
+                    <Icon size={16} strokeWidth={isActive ? 2.2 : 1.8} />
+                    {badge && (
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full text-[8px] font-bold px-0.5"
+                        style={{ background: "var(--ln-ember)", color: "white" }}>{badge}</span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />
+                    {badge && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-1"
+                        style={{ background: "var(--ln-ember)", color: "white" }}>{badge}</span>
+                    )}
+                  </div>
+                )}
+                <span className="text-[9px] font-heading tracking-wide uppercase"
+                  style={{ lineHeight: 1, color: isGold ? tabColor : undefined }}>{label}</span>
                 {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full" style={{ background: "#C49A28" }} />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full"
+                    style={{ background: isGold ? "#FFD060" : "#C49A28" }} />
                 )}
               </button>
             );
