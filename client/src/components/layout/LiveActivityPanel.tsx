@@ -70,14 +70,15 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           top: "50%",
           left: open ? `${PANEL_WIDTH}px` : "0px",
           transform: "translateY(-50%)",
-          background: "rgba(44,52,56,0.95)",
-          border: "1px solid rgba(44,52,56,0.5)",
-          borderLeft: "none",
+          background: "rgba(20,18,12,0.97)",
+          border: "1px solid rgba(196,154,40,0.4)",
+          borderLeft: "2px solid rgba(196,154,40,0.8)",
           borderRadius: "0 8px 8px 0",
-          padding: "12px 6px",
+          padding: "14px 8px",
           writingMode: "vertical-rl",
           textOrientation: "mixed",
           transition: "left 0.3s cubic-bezier(0.4,0,0.2,1)",
+          boxShadow: "3px 0 16px rgba(196,154,40,0.15)",
         }}
         onClick={onToggle}
         title={open ? "Close Live Panel" : "Open Live Panel"}

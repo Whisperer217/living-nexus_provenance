@@ -348,12 +348,14 @@ export default function PlaylistDrawer() {
           height: "64px",
           borderRadius: "8px 0 0 8px",
           background: isOpen
-            ? "rgba(196,154,40,0.2)"
-            : "rgba(44,52,56,0.92)",
-          border: "1px solid rgba(196,154,40,0.2)",
+            ? "rgba(196,154,40,0.25)"
+            : "rgba(20,18,12,0.97)",
+          border: isOpen
+            ? "1px solid rgba(196,154,40,0.5)"
+            : "1px solid rgba(196,154,40,0.4)",
           borderRight: "none",
           backdropFilter: "blur(12px)",
-          boxShadow: "-2px 0 16px rgba(0,0,0,0.40)",
+          boxShadow: "-3px 0 16px rgba(196,154,40,0.15)",
           transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s",
           color: "var(--ln-gold)",
           // When any dialog/modal is open: always disable pointer events on the handle

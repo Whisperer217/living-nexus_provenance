@@ -3455,3 +3455,9 @@
 - [x] Fix TS errors: KeeperAvatarWidget implicit any, witnesses.userId → witnesserId, bigint import
 - [x] Resolve _journal.json merge conflict (kept ownership_disclaimer as 0080, keeper_skins as 0081)
 - [x] Apply all pending migrations via apply-migrations.mjs (16 applied, 68 skipped)
+
+## Keeper Widget + Sidebar Layout Fixes
+- [x] Lift Keeper orb above global PlayerBar (zIndex 9050, bottom 92px desktop)
+- [x] Make Keeper orb visible on mobile (orbBottom uses max() to clear mobile nav+mini stack)
+- [x] Make Live panel pull tab visible (gold accent border, dark bg, gold glow shadow)
+- [x] Make PlaylistDrawer pull tab visible (gold accent border, dark bg, gold glow shadow)

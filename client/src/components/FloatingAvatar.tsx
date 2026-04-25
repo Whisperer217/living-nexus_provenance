@@ -146,15 +146,24 @@ export default function FloatingAvatar({
     }
   }, [nowPlaying]);
 
+  // Desktop PlayerBar: 68px at zIndex 9001. Orb bottom = 68+24 = 92px.
+  // Mobile: nav (56px) + mini player (64px) = 120px stack at zIndex 9001. Orb bottom = 120+24 = 144px.
+  // Use CSS clamp via a responsive style: on md+ use 92px, on <md use 144px.
+  // We achieve this with a CSS custom property set via a style tag.
+  const orbBottom = `max(92px, calc(${24 + position.y}px + env(safe-area-inset-bottom, 0px)))`;
+  const orbRight = `${24 + position.x}px`;
+  const ORB_Z = 9050;
+
   // ─── Cinematic orb (collapsed, small) ───────────────────────────────────────
 
   if (cinematicMode && !expanded) {
     return (
       <div
-        className="fixed z-50"
+        className="fixed"
         style={{
-          bottom: `${24 + position.y}px`,
-          right: `${24 + position.x}px`,
+          bottom: orbBottom,
+          right: orbRight,
+          zIndex: ORB_Z,
           transition: "opacity 0.6s ease",
         }}
       >
@@ -208,10 +217,11 @@ export default function FloatingAvatar({
   if (!expanded) {
     return (
       <div
-        className="fixed z-50"
+        className="fixed"
         style={{
-          bottom: `${24 + position.y}px`,
-          right: `${24 + position.x}px`,
+          bottom: orbBottom,
+          right: orbRight,
+          zIndex: ORB_Z,
           userSelect: "none",
         }}
       >
@@ -284,10 +294,11 @@ export default function FloatingAvatar({
 
   return (
     <div
-      className="fixed z-50 flex flex-col rounded-lg overflow-hidden"
+      className="fixed flex flex-col rounded-lg overflow-hidden"
       style={{
-        bottom: `${24 + position.y}px`,
-        right: `${24 + position.x}px`,
+        bottom: orbBottom,
+        right: orbRight,
+        zIndex: ORB_Z,
         width: 320,
         height: 480,
         background: "var(--ln-panel)",
