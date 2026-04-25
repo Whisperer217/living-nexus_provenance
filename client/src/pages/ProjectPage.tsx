@@ -1462,16 +1462,16 @@ export default function ProjectPage() {
   const confirmDonationMutation = trpc.projects.confirmDonation.useMutation({
     onSuccess: (result) => {
       if (result.credited) {
-        // Donation recorded — refetch quickly to show updated total
-        setTimeout(() => refetchProject(), 800);
+        // Donation recorded — invalidate immediately to refresh raised total
+        utils.projects.getBySlug.invalidate({ slug: slug ?? "" });
       } else {
-        // Webhook may still be in flight — refetch after 3s
-        setTimeout(() => refetchProject(), 3000);
+        // Webhook may still be in flight — invalidate after 3s
+        setTimeout(() => utils.projects.getBySlug.invalidate({ slug: slug ?? "" }), 3000);
       }
     },
     onError: () => {
-      // Fallback: just refetch after 3s
-      setTimeout(() => refetchProject(), 3000);
+      // Fallback: invalidate after 3s
+      setTimeout(() => utils.projects.getBySlug.invalidate({ slug: slug ?? "" }), 3000);
     },
   });
   useEffect(() => {

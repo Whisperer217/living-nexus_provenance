@@ -3572,24 +3572,38 @@
 - [ ] Drop aiTransforms table SQL on production DB (optional cleanup, table is now unused)
 
 ## Phase 56: Router Split
-- [ ] Split routers.ts into server/routers/songs.ts, keeper.ts, marketplace.ts, profile.ts, system.ts, events.ts
-- [ ] Keep server/routers.ts as a thin barrel that imports and re-exports all sub-routers
-- [ ] Verify tRPC client types still resolve correctly after split
-- [ ] TypeScript: 0 errors after split
+- [ ] Deferred — to be done as a dedicated session once codebase stabilizes
 
 ## Phase 57: VisualQueue Migration
-- [ ] Apply drizzle/0032_purple_zombie.sql migration on builder DB
-- [ ] Verify VisualQueue worker tick error disappears from logs
+- [x] Applied drizzle/0032_purple_zombie.sql on builder DB — visualQueue table now exists
+- [x] Production already had the table; builder now in sync
 
 ## Phase 58: Follow System
-- [ ] Add follows table to drizzle/schema.ts (followerId, followingId, createdAt, unique constraint)
-- [ ] Apply migration SQL
-- [ ] Add toggleFollow, getFollowStatus, getFollowerCount, getFollowingCount DB helpers
-- [ ] Add profile.toggleFollow, profile.getFollowStatus, profile.getFollowerCount tRPC procedures
-- [ ] Wire Follow/Unfollow button on CreatorProfilePage (optimistic update)
-- [ ] Show follower count on creator profile header
+- [x] Confirmed already implemented as Witness system (witnessCreator, unwatchCreator, isWitnessing, getWitnessCount, getWitnessNetwork)
+- [x] Witness button fully wired on CreatorProfilePage with count display and Witness Network modal
 
 ## Phase 59: TypeScript Cleanup
-- [ ] Fix all TS errors in CreatorSurface.tsx
-- [ ] Fix all TS errors in WIDLookup.tsx
-- [ ] TypeScript: 0 errors across full codebase
+- [x] Add provenanceEvents table to schema.ts + migration 0085_romantic_fenris.sql
+- [x] Add provenance event DB helpers: insertProvenanceEvent, getProvenanceEventsByCreator, getWidWithEvent, insertWid, getOrCreateAgent, updateAgentFingerprint, setUserPublicKey
+- [x] Add satchel router (checkpoint/anchor/fork/list)
+- [x] Add ppg router (generate with LLM)
+- [x] Add agents router (me/getOrCreate/message/updateFingerprint)
+- [x] Add wids router (lookup with flattened shape/register)
+- [x] Add auth.hasKeypair + auth.generateKeypair
+- [x] Fix CreatorSurface.tsx: trpc.satchel.* calls, agentMessage shape, result.text coercion
+- [x] Restore getSongByWitnessId to db.ts
+- [x] ZERO TypeScript errors — confirmed by tsc watcher: Found 0 errors
+- [x] Commit 8fb3180 pushed to main — clean rebase, zero conflicts
+
+## Phase 60: OAuth Callback Fix (BLOCKING)
+- [ ] Diagnose "OAuth callback failed" error at /api/oauth/callback on production
+- [ ] Check if the error is caused by a state/origin parsing regression from recent commits
+- [ ] Check if JWT_SECRET or OAUTH_SERVER_URL env vars are missing/changed on production
+- [ ] Check if the oauth.ts core handler was accidentally modified
+- [ ] Fix root cause and push to production
+
+## Phase 61: Route + Donation Fix + Marketplace Art
+- [x] Register /creator-surface route in App.tsx
+- [x] Fix donation progress bar — invalidate projects.getBySlug in confirmDonation onSuccess
+- [x] Marketplace tables applied to production DB (0084_boring_stryfe.sql)
+- [ ] Marketplace item artwork — generate + upload images for 6 seeded items (items already have CDN artwork URLs from Keeper skin assets)
