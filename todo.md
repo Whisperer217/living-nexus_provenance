@@ -3563,3 +3563,11 @@
 - [x] No DB migrations
 - [x] TypeScript: 0 errors
 - [x] Save checkpoint and deploy
+
+## Commit 589574e — AI Transform Full Removal + getSongByWitnessId Restore
+- [x] Pull 589574e (357a969 + 589574e: AI Transform removed — procedures, modal, UI, schema, workRoute lineage; 552 lines net removed across 6 files)
+- [x] Restored getSongByWitnessId to server/db.ts (was accidentally removed during AI Transform cleanup; still needed by oembedRoute, og.ts, routers.ts, shareRoute, workRoute)
+- [x] No merge conflicts (fast-forward, 6 files)
+- [x] No DB migrations (aiTransforms table still exists in DB — unused, can DROP later)
+- [x] TypeScript: 0 errors after fix
+- [x] Save checkpoint and deploy
