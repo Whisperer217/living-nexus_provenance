@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import FloatingAvatar from "@/components/FloatingAvatar";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -73,6 +74,12 @@ export default function CreatorSurface() {
   const [selectedVariant, setSelectedVariant] = useState<PPGVariant | null>(null);
   const [showPPG, setShowPPG] = useState(false);
 
+  // Cinematic mode
+  const [cinematicMode, setCinematicMode] = useState(false);
+
+  // Keeper skin (read from keeper profile)
+  const keeperQuery = trpc.keeper.getProfile.useQuery(undefined, { enabled: !!user });
+
   // Provenance state
   const [pendingHash, setPendingHash] = useState<string | null>(null);
   const [lastEventId, setLastEventId] = useState<string | null>(null);
@@ -118,13 +125,29 @@ export default function CreatorSurface() {
     }
   }, [hasKeypairQuery.data]);
 
-  // ─── Welcome agent message ───────────────────────────────────────────────────
+  // ─── Welcome agent message ────────────────────────────────────────────────
 
   useEffect(() => {
     if (user && agentMessages.length === 0) {
       addAgentMessage("Welcome to the surface. Your work is witnessed here.", "Guide");
     }
   }, [user]);
+
+  // ─── Now Playing → agent thread notification ────────────────────────────────
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const track = (e as CustomEvent<{ title: string; artist: string }>).detail;
+      if (track?.title) {
+        addAgentMessage(
+          `Now playing: “${track.title}” by ${track.artist}. Want me to pull the lyrical structure for reference?`,
+          "Guide"
+        );
+      }
+    };
+    window.addEventListener("ln:nowplaying", handler);
+    return () => window.removeEventListener("ln:nowplaying", handler);
+  }, []);
 
   // ─── Ephemeral draft to sessionStorage ──────────────────────────────────────
 
@@ -362,12 +385,26 @@ export default function CreatorSurface() {
   return (
     <div
       className="h-screen flex flex-col overflow-hidden"
-      style={{ background: "var(--ln-obsidian)" }}
+      style={{
+        background: "var(--ln-obsidian)",
+        transition: "all 0.6s ease",
+      }}
+      onKeyDown={e => { if (e.key === "F11") { e.preventDefault(); setCinematicMode(c => !c); } }}
+      tabIndex={-1}
     >
       {/* Top bar */}
       <header
         className="flex items-center justify-between px-4 py-2 border-b flex-shrink-0"
-        style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
+        style={{
+          borderColor: "var(--ln-panel-border)",
+          background: "var(--ln-panel)",
+          opacity: cinematicMode ? 0 : 1,
+          pointerEvents: cinematicMode ? "none" : "auto",
+          transition: "opacity 0.6s ease",
+          height: cinematicMode ? 0 : undefined,
+          overflow: "hidden",
+          padding: cinematicMode ? 0 : undefined,
+        }}
       >
         <div className="flex items-center gap-3">
           <div className="ln-wid-badge">LIVING NEXUS</div>
@@ -406,11 +443,16 @@ export default function CreatorSurface() {
       </header>
 
       {/* Main 3-panel layout */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* ── Left: Satchel ─────────────────────────────────────────────────── */}
+      <div className="flex flex-1 overflow-hidden">        {/* ── Left: Satchel ──────────────────────────────────────────────────── */}
         <aside
-          className="w-64 flex-shrink-0 flex flex-col border-r overflow-hidden"
-          style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
+          className="flex-shrink-0 flex flex-col border-r overflow-hidden"
+          style={{
+            borderColor: "var(--ln-panel-border)",
+            background: "var(--ln-panel)",
+            width: cinematicMode ? 0 : 256,
+            opacity: cinematicMode ? 0 : 1,
+            transition: "width 0.5s ease, opacity 0.5s ease",
+          }}
         >
           <div className="ln-panel-header">Satchel</div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -501,10 +543,16 @@ export default function CreatorSurface() {
           </div>
         </main>
 
-        {/* ── Right: Agent panel ────────────────────────────────────────────── */}
+        {/* ── Right: Agent panel ──────────────────────────────────────────────────── */}
         <aside
-          className="w-72 flex-shrink-0 flex flex-col border-l overflow-hidden"
-          style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
+          className="flex-shrink-0 flex flex-col border-l overflow-hidden"
+          style={{
+            borderColor: "var(--ln-panel-border)",
+            background: "var(--ln-panel)",
+            width: cinematicMode ? 0 : 288,
+            opacity: cinematicMode ? 0 : 1,
+            transition: "width 0.5s ease, opacity 0.5s ease",
+          }}
         >
           {/* Mode selector */}
           <div className="ln-panel-header flex items-center gap-2">
@@ -581,10 +629,39 @@ export default function CreatorSurface() {
         </aside>
       </div>
 
+      {/* ── Cinematic mode overlay ──────────────────────────────────────────── */}
+      {cinematicMode && (
+        <div
+          className="fixed inset-0 pointer-events-none z-40"
+          style={{
+            background: "rgba(6,6,6,0.85)",
+            transition: "opacity 0.6s ease",
+          }}
+        />
+      )}
+
+      {/* ── Floating Avatar Widget ───────────────────────────────────────────── */}
+      <FloatingAvatar
+        activeSkinId={keeperQuery.data?.activeSkinId ?? "hooded-scholar"}
+        customImageUrl={keeperQuery.data?.customImageUrl}
+        agentMode={agentMode}
+        agentMessages={agentMessages.map(m => ({ id: m.id, role: m.role, content: m.content, mode: m.mode }))}
+        onAskAgent={handleAgentMessage}
+        onModeChange={(m) => setAgentMode(m as AgentMode)}
+        cinematicMode={cinematicMode}
+        onCinematicToggle={() => setCinematicMode(c => !c)}
+        userName={user?.name ?? undefined}
+      />
+
       {/* ── Bottom: Provenance preview bar ──────────────────────────────────── */}
       <footer
         className="flex items-center gap-4 px-4 py-2 border-t flex-shrink-0 text-xs"
-        style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
+        style={{
+          borderColor: "var(--ln-panel-border)",
+          background: "var(--ln-panel)",
+          opacity: cinematicMode ? 0.15 : 1,
+          transition: "opacity 0.6s ease",
+        }}
       >
         <div className="flex items-center gap-1.5" style={{ color: "var(--ln-smoke)" }}>
           <Shield className="w-3 h-3" />

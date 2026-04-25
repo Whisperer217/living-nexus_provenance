@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertEvent, InsertUser, agents, events, users, wids } from "../drizzle/schema";
+import { InsertEvent, InsertUser, agents, events, keeperSkins, users, wids } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -172,4 +172,74 @@ export async function getWidWithEvent(widId: string) {
     event: eventResult.length > 0 ? eventResult[0] : null,
     creator: userResult.length > 0 ? userResult[0] : null,
   };
+}
+
+// ─── Keeper Skin helpers ───────────────────────────────────────────────────────
+
+export async function getKeeperSkins(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select().from(keeperSkins).where(eq(keeperSkins.userId, userId)).orderBy(desc(keeperSkins.createdAt));
+}
+
+export async function getActiveSkin(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.select().from(keeperSkins)
+    .where(and(eq(keeperSkins.userId, userId), eq(keeperSkins.isActive, 1)))
+    .limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function unlockSkin(userId: number, skinId: string, creditsPaid: number, customImageUrl?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Check if already owned
+  const existing = await db.select().from(keeperSkins)
+    .where(and(eq(keeperSkins.userId, userId), eq(keeperSkins.skinId, skinId)))
+    .limit(1);
+  if (existing.length > 0) return existing[0];
+  await db.insert(keeperSkins).values({
+    userId,
+    skinId,
+    creditsPaid,
+    customImageUrl: customImageUrl ?? null,
+    isActive: 0,
+  });
+  const created = await db.select().from(keeperSkins)
+    .where(and(eq(keeperSkins.userId, userId), eq(keeperSkins.skinId, skinId)))
+    .limit(1);
+  return created[0];
+}
+
+export async function setActiveSkin(userId: number, skinId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Deactivate all
+  await db.update(keeperSkins).set({ isActive: 0 }).where(eq(keeperSkins.userId, userId));
+  // Activate target
+  await db.update(keeperSkins).set({ isActive: 1 })
+    .where(and(eq(keeperSkins.userId, userId), eq(keeperSkins.skinId, skinId)));
+}
+
+export async function updateCustomSkinImage(userId: number, imageUrl: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(keeperSkins).set({ customImageUrl: imageUrl })
+    .where(and(eq(keeperSkins.userId, userId), eq(keeperSkins.skinId, "custom")));
+}
+
+export async function getCreatorEventCount(creatorId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.select().from(events).where(eq(events.creatorId, creatorId));
+  return result.length;
+}
+
+export async function getCreatorAnchorCount(creatorId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.select().from(events)
+    .where(and(eq(events.creatorId, creatorId), eq(events.actionType, "anchor")));
+  return result.length;
 }

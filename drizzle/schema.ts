@@ -92,3 +92,21 @@ export const wids = mysqlTable("wids", {
 
 export type Wid = typeof wids.$inferSelect;
 export type InsertWid = typeof wids.$inferInsert;
+
+// ─── Keeper Skins ─────────────────────────────────────────────────────────────
+export const keeperSkins = mysqlTable("keeper_skins", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** Skin identifier: 'hooded-scholar' | 'conductor' | 'witness' | 'archivist' | 'cipher' | 'custom' */
+  skinId: varchar("skinId", { length: 64 }).notNull(),
+  /** For custom upload: S3 URL of the uploaded portrait */
+  customImageUrl: text("customImageUrl"),
+  /** Whether this skin is currently active */
+  isActive: int("isActive").default(0).notNull(),
+  /** Credits paid (0 for default) */
+  creditsPaid: int("creditsPaid").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type KeeperSkin = typeof keeperSkins.$inferSelect;
+export type InsertKeeperSkin = typeof keeperSkins.$inferInsert;

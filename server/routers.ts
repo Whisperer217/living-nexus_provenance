@@ -14,7 +14,15 @@ import {
   setUserPublicKey,
   updateAgentFingerprint,
   getUserById,
+  getKeeperSkins,
+  getActiveSkin,
+  unlockSkin,
+  setActiveSkin,
+  updateCustomSkinImage,
+  getCreatorEventCount,
+  getCreatorAnchorCount,
 } from "./db";
+import { storagePut } from "./storage";
 import {
   buildAnchorPayload,
   canonicalize,
@@ -354,6 +362,76 @@ Respond with valid JSON only, no markdown fences:
         } catch {
           throw new Error("PPG: failed to parse LLM response");
         }
+       }),
+  }),
+
+  // ─── Keeper (PNA character screen) ─────────────────────────────────────────────────────────
+  keeper: router({
+    /** Get owned skins + active skin + keeper stats. */
+    getProfile: protectedProcedure.query(async ({ ctx }) => {
+      const [skins, activeSkin, eventCount, anchorCount, agent] = await Promise.all([
+        getKeeperSkins(ctx.user.id),
+        getActiveSkin(ctx.user.id),
+        getCreatorEventCount(ctx.user.id),
+        getCreatorAnchorCount(ctx.user.id),
+        getOrCreateAgent(ctx.user.id),
+      ]);
+      // Ensure default skin is always in the list
+      const ownedIds = new Set(skins.map(s => s.skinId));
+      const defaultOwned = ownedIds.has("hooded-scholar");
+      return {
+        ownedSkins: skins.map(s => s.skinId),
+        activeSkinId: activeSkin?.skinId ?? "hooded-scholar",
+        customImageUrl: skins.find(s => s.skinId === "custom")?.customImageUrl ?? null,
+        defaultOwned,
+        stats: {
+          eventCount,
+          anchorCount,
+          corpusSize: eventCount * 120, // approx words
+          provenanceDepth: anchorCount,
+          voiceDepth: Math.min(100, anchorCount * 5),
+          lyricalDensity: Math.min(100, eventCount * 2),
+          structuralLogic: Math.min(100, (agent.styleFingerprint?.structure_patterns?.length ?? 0) * 10),
+          emotionalRange: Math.min(100, (agent.styleFingerprint?.tone?.length ?? 0) * 12),
+        },
+        agentMode: "Guide" as const,
+      };
+    }),
+
+    /** Unlock a skin (mock purchase — credits system future). */
+    unlockSkin: protectedProcedure
+      .input(z.object({
+        skinId: z.enum(["hooded-scholar", "conductor", "witness", "archivist", "cipher", "custom"]),
+        creditsPaid: z.number().min(0),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const skin = await unlockSkin(ctx.user.id, input.skinId, input.creditsPaid);
+        return { skin };
+      }),
+
+    /** Set active skin. */
+    setActiveSkin: protectedProcedure
+      .input(z.object({ skinId: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        await setActiveSkin(ctx.user.id, input.skinId);
+        return { success: true };
+      }),
+
+    /** Upload custom portrait to S3 and save URL. */
+    uploadCustomPortrait: protectedProcedure
+      .input(z.object({
+        imageBase64: z.string().min(1),
+        mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const buffer = Buffer.from(input.imageBase64, "base64");
+        const ext = input.mimeType === "image/png" ? "png" : input.mimeType === "image/webp" ? "webp" : "jpg";
+        const key = `keeper-portraits/${ctx.user.id}-custom.${ext}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        // Ensure custom skin row exists
+        await unlockSkin(ctx.user.id, "custom", 200, url);
+        await updateCustomSkinImage(ctx.user.id, url);
+        return { url };
       }),
   }),
 });
