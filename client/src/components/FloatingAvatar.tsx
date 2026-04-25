@@ -270,32 +270,61 @@ export default function FloatingAvatar({
     if (sandboxFileRef.current) sandboxFileRef.current.value = "";
   };
 
-  const sendSandboxToKeeper = () => {
+  const sendSandboxToKeeper = async () => {
     if (!sandboxText.trim() && sandboxImages.length === 0) return;
-    const imageNote = sandboxImages.length > 0 ? `\n[${sandboxImages.length} image(s) attached]` : "";
-    onAskAgent?.(`[SANDBOX] ${sandboxText.trim()}${imageNote}`);
+    // If images are attached, run vision analysis on the first image first,
+    // then include the analysis + text in the chat message so the LLM actually
+    // sees the image content instead of receiving a bare text label.
+    if (sandboxImages.length > 0) {
+      setIsAnalyzingImage(true);
+      try {
+        const results = await Promise.all(
+          sandboxImages.map(url =>
+            analyzeImageMutation.mutateAsync({ imageUrl: url, context: sandboxText || undefined })
+          )
+        );
+        const visionSummary = results.map((r, i) => `[Image ${i + 1} analysis]: ${r.analysis}`).join('\n');
+        const fullMessage = sandboxText.trim()
+          ? `${sandboxText.trim()}\n\n${visionSummary}`
+          : visionSummary;
+        onAskAgent?.(fullMessage);
+      } catch {
+        // Fall back to text-only if vision fails
+        onAskAgent?.(sandboxText.trim() || '[Image attached — analysis unavailable]');
+      } finally {
+        setIsAnalyzingImage(false);
+      }
+    } else {
+      onAskAgent?.(sandboxText.trim());
+    }
+    setSandboxText("");
+    setSandboxImages([]);
     setSandboxOpen(false);
   };
 
   // ─── Mic recording helpers ───────────────────────────────────────────────────
+  // recordedBlobRef holds the last recorded blob so the user can choose to
+  // transcribe it or discard it after stopping.
+  const recordedBlobRef = useRef<{ blob: Blob; mimeType: string } | null>(null);
+  const [hasRecording, setHasRecording] = useState(false);
+
   const startRecording = async () => {
+    if (isRecording) return;
+    recordedBlobRef.current = null;
+    setHasRecording(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
       const recorder = new MediaRecorder(stream, { mimeType });
       audioChunksRef.current = [];
       recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-      recorder.onstop = async () => {
+      recorder.onstop = () => {
         stream.getTracks().forEach(t => t.stop());
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        if (blob.size > 16 * 1024 * 1024) return; // 16MB limit
-        setIsTranscribing(true);
-        const reader = new FileReader();
-        reader.onload = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          transcribeVoiceMutation.mutate({ audioBase64: base64, mimeType: mimeType as 'audio/webm' | 'audio/mp4' });
-        };
-        reader.readAsDataURL(blob);
+        if (blob.size > 0 && blob.size <= 16 * 1024 * 1024) {
+          recordedBlobRef.current = { blob, mimeType };
+          setHasRecording(true);
+        }
       };
       recorder.start();
       mediaRecorderRef.current = recorder;
@@ -306,9 +335,30 @@ export default function FloatingAvatar({
   };
 
   const stopRecording = () => {
+    if (!isRecording) return;
     mediaRecorderRef.current?.stop();
     mediaRecorderRef.current = null;
     setIsRecording(false);
+    // hasRecording will be set true by recorder.onstop
+  };
+
+  const transcribeRecording = () => {
+    const rec = recordedBlobRef.current;
+    if (!rec) return;
+    setIsTranscribing(true);
+    setHasRecording(false);
+    recordedBlobRef.current = null;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(',')[1];
+      transcribeVoiceMutation.mutate({ audioBase64: base64, mimeType: rec.mimeType as 'audio/webm' | 'audio/mp4' });
+    };
+    reader.readAsDataURL(rec.blob);
+  };
+
+  const discardRecording = () => {
+    recordedBlobRef.current = null;
+    setHasRecording(false);
   };
 
   // ─── Now Playing → agent thread notification ─────────────────────────────────
@@ -660,14 +710,11 @@ export default function FloatingAvatar({
                       <Icon style={{ width: 10, height: 10 }} />
                     </button>
                   ))}
-                  {/* Mic button */}
+                  {/* Mic button — click to START recording */}
                   <button
-                    onMouseDown={startRecording}
-                    onMouseUp={stopRecording}
-                    onTouchStart={(e) => { e.preventDefault(); startRecording(); }}
-                    onTouchEnd={(e) => { e.preventDefault(); stopRecording(); }}
-                    disabled={isTranscribing}
-                    title={isRecording ? "Release to transcribe" : isTranscribing ? "Transcribing…" : "Hold to record voice"}
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isTranscribing || hasRecording}
+                    title={isRecording ? "Stop recording" : isTranscribing ? "Transcribing…" : "Record voice"}
                     className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-all"
                     style={{
                       background: isRecording ? "rgba(251,113,133,0.25)" : isTranscribing ? "rgba(196,154,40,0.2)" : "rgba(255,255,255,0.05)",
@@ -697,13 +744,39 @@ export default function FloatingAvatar({
                     </button>
                   ) : null}
                 </div>
-                {/* Recording status bar */}
-                {(isRecording || isTranscribing) && (
+                {/* Recording action bar */}
+                {isRecording && (
+                  <div className="flex items-center gap-2 px-2 py-1.5 rounded"
+                    style={{ background: "rgba(251,113,133,0.1)", border: "1px solid rgba(251,113,133,0.3)" }}>
+                    <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0" />
+                    <span className="text-[10px] font-mono flex-1" style={{ color: "rgba(251,113,133,0.9)" }}>Recording…</span>
+                    <button onClick={stopRecording}
+                      className="px-2 py-0.5 rounded text-[9px] font-mono font-semibold transition-all hover:opacity-80"
+                      style={{ background: "rgba(251,113,133,0.25)", border: "1px solid rgba(251,113,133,0.5)", color: "rgba(251,113,133,0.95)" }}>
+                      ■ STOP
+                    </button>
+                  </div>
+                )}
+                {hasRecording && !isRecording && (
+                  <div className="flex items-center gap-2 px-2 py-1.5 rounded"
+                    style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.3)" }}>
+                    <span className="text-[10px] font-mono flex-1" style={{ color: "var(--ln-gold)" }}>✓ Recording ready</span>
+                    <button onClick={transcribeRecording}
+                      className="px-2 py-0.5 rounded text-[9px] font-mono font-semibold transition-all hover:opacity-80"
+                      style={{ background: "rgba(196,154,40,0.2)", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-gold)" }}>
+                      TRANSCRIBE
+                    </button>
+                    <button onClick={discardRecording}
+                      className="px-1.5 py-0.5 rounded text-[9px] font-mono transition-all hover:opacity-80"
+                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--ln-panel-border)", color: "rgba(251,113,133,0.7)" }}>
+                      ×
+                    </button>
+                  </div>
+                )}
+                {isTranscribing && (
                   <div className="flex items-center gap-2 px-2 py-1 rounded text-[10px] font-mono"
-                    style={{ background: isRecording ? "rgba(251,113,133,0.1)" : "rgba(196,154,40,0.1)", border: `1px solid ${isRecording ? "rgba(251,113,133,0.3)" : "rgba(196,154,40,0.3)"}`, color: isRecording ? "rgba(251,113,133,0.9)" : "var(--ln-gold)" }}>
-                    {isRecording
-                      ? <><span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block" /> Recording… release to transcribe</>
-                      : <><Loader2 className="w-3 h-3 animate-spin" /> Transcribing your voice…</>}
+                    style={{ background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                    <Loader2 className="w-3 h-3 animate-spin" /> Transcribing your voice…
                   </div>
                 )}
 
