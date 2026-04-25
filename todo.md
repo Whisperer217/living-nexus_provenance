@@ -3527,3 +3527,11 @@
 - [x] No DB migrations
 - [x] TypeScript: 0 errors on touched files (pre-existing errors in CreatorSurface.tsx + WIDLookup.tsx are standalone, not in main build)
 - [x] Save checkpoint and deploy
+
+## Commit 13f3787 — Web Audio Autoplay Fix
+- [x] Pull 13f3787 (useFrequencyGlow.ts: two-condition gate — enabled=true + AudioContext.resume()="running" before connecting source node; prevents AudioContext from silencing playback on page load)
+- [x] No merge conflicts (fast-forward, 1 file)
+- [x] No DB migrations
+- [x] TypeScript: 0 errors
+- [x] visualQueue table confirmed present in DB (0032 migration already applied)
+- [x] Save checkpoint and deploy
