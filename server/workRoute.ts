@@ -15,7 +15,7 @@
  */
 
 import { Router } from "express";
-import { getSongByWitnessId, getTransformsByWitnessId } from "./db";
+import { getSongByWitnessId } from "./db";
 
 export const workRouter = Router();
 
@@ -52,9 +52,6 @@ workRouter.get("/:wid", async (req, res) => {
         protocol: "WID/1.0",
       });
     }
-
-    // Fetch AI transform lineage (derivative works)
-    const transforms = await getTransformsByWitnessId(wid.trim());
 
     const artistName = creator?.artistHandle || creator?.name || "Unknown Artist";
     const creatorProfileUrl = creator?.id
@@ -130,14 +127,8 @@ workRouter.get("/:wid", async (req, res) => {
         tipCount: song.tipCount,
       },
 
-      // Lineage — derivative works created from this origin
-      lineage: transforms.map((t: typeof transforms[number]) => ({
-        type: "ai_transform",
-        style: t.style || null,
-        prompt: t.prompt || null,
-        outputUrl: t.outputUrl || null,
-        createdAt: t.createdAt,
-      })),
+      // Lineage — reserved for future derivative work tracking
+      lineage: [],
     };
 
     // ── Response headers ──────────────────────────────────────────────────────

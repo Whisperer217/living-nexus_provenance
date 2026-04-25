@@ -582,6 +582,20 @@
       "when": 1777111889229,
       "tag": "0083_icy_baron_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "5",
+      "when": 1777115270005,
+      "tag": "0084_boring_stryfe",
+      "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "5",
+      "when": 1777146185294,
+      "tag": "0085_romantic_fenris",
+      "breakpoints": true
     }
   ]
 }

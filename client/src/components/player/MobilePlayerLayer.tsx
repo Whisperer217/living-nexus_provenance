@@ -33,7 +33,7 @@ import {
   Volume2, VolumeX, Shield, MessageCircle,
   ChevronRight, Send, Users, Fingerprint,
   ExternalLink, Crown, ArrowUp,
-  Home, Compass, Bell, User, Rocket, Sparkles, Loader2,
+  Home, Compass, Bell, User, Rocket, Sparkles, Loader2, ShoppingBag,
   MoreVertical, ListPlus, UserCircle2, Copy, Flag,
 } from "lucide-react";
 import GiftModal from "./GiftModal";
@@ -206,14 +206,14 @@ function DiscoverPanel({
             onClick={() => onPlay(track)}
             className="flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-[0.98] text-left"
             style={{
-              background: "rgba(44,52,56,0.6)",
-              border: "1px solid rgba(44,52,56,0.5)",
+              background: "#000000",
+              border: "1px solid rgba(0,0,0,0.85)",
             }}
           >
             {/* Art */}
             <div
               className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden"
-              style={{ background: "#111009" }}
+              style={{ background: "#000000" }}
             >
               {track.artUrl ? (
                 <img src={track.artUrl} alt="" className="w-full h-full object-cover" />
@@ -732,7 +732,7 @@ export default function MobilePlayerLayer() {
       {isVisualPending && (
         <div
           className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-1.5 py-1.5 px-3"
-          style={{ background: "linear-gradient(to top, rgba(44,52,56,0.82), transparent)" }}
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82), transparent)" }}
         >
           <div className="flex gap-0.5 items-center">
             {[0, 1, 2].map(i => (
@@ -825,11 +825,11 @@ export default function MobilePlayerLayer() {
       refetchInterval: 30_000,
     });
     const NAV_ITEMS = [
-      { icon: Home,    label: "Home",     path: "/" },
-      { icon: Compass, label: "Explore",  path: "/explore" },
-      { icon: Rocket,  label: "Projects", path: "/projects" },
-      { icon: Bell,    label: "Signals",  path: "/notifications", badge: (unreadCount as number) > 0 ? String(Math.min(unreadCount as number, 99)) : undefined },
-      { icon: User,    label: "Profile",  path: "/profile" },
+      { icon: Home,         label: "Home",     path: "/" },
+      { icon: Compass,      label: "Explore",  path: "/explore" },
+      { icon: ShoppingBag,  label: "Shop",     path: "/marketplace", gold: true },
+      { icon: Bell,         label: "Signals",  path: "/notifications", badge: (unreadCount as number) > 0 ? String(Math.min(unreadCount as number, 99)) : undefined },
+      { icon: User,         label: "Profile",  path: "/profile" },
     ];
     return (
       <div
@@ -837,37 +837,58 @@ export default function MobilePlayerLayer() {
         style={{
           height: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
-          /* Solid background — no bleed-through from content below */
-          background: isLightsOn
-            ? "linear-gradient(180deg, #1a2a3a 0%, #1e2d3a 100%)"
-            : "linear-gradient(180deg, #1E2D3A 0%, #111009 100%)",
+          /* Solid background — jet black always */
+          background: "#000000",
           backdropFilter: "blur(12px) saturate(1.2)",
-          borderTop: isLightsOn ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(196,154,40,0.08)",
+          borderTop: "1px solid rgba(196,154,40,0.08)",
         }}
       >
         <div className="flex items-center justify-around h-14 px-2">
-          {NAV_ITEMS.map(({ icon: Icon, label, path, badge }) => {
+          {NAV_ITEMS.map(({ icon: Icon, label, path, badge, gold }: { icon: React.ElementType; label: string; path: string; badge?: string; gold?: boolean }) => {
             const isActive = path === "/" ? location === "/" : location.startsWith(path);
+            const isGold = !!gold;
+            // Gold tab: always shows gold color; active state gets brighter gold + glow
+            const tabColor = isActive
+              ? (isGold ? "#FFD060" : "#C49A28")
+              : (isGold ? "#C49A28" : "#6B6555");
             return (
               <button
                 key={path}
                 onClick={() => { try { navigator.vibrate?.(5); } catch {} navigate(path); }}
                 className="relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all active:scale-90"
-                style={{ color: isActive ? "#C49A28" : "#6B6555" }}
+                style={{ color: tabColor }}
                 aria-label={label}
               >
-                <div className="relative">
-                  <Icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />
-                  {badge && (
-                    <span
-                      className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-1"
-                      style={{ background: "var(--ln-ember)", color: "white" }}
-                    >{badge}</span>
-                  )}
-                </div>
-                <span className="text-[9px] font-heading tracking-wide uppercase" style={{ lineHeight: 1 }}>{label}</span>
+                {/* Gold ring around Shop icon */}
+                {isGold ? (
+                  <div className="relative flex items-center justify-center"
+                    style={{
+                      width: 32, height: 32, borderRadius: "50%",
+                      background: isActive ? "rgba(196,154,40,0.18)" : "rgba(196,154,40,0.08)",
+                      border: `1px solid ${isActive ? "rgba(196,154,40,0.55)" : "rgba(196,154,40,0.30)"}`,
+                      boxShadow: isActive ? "0 0 10px rgba(196,154,40,0.35)" : "0 0 4px rgba(196,154,40,0.12)",
+                      marginBottom: 1,
+                    }}>
+                    <Icon size={16} strokeWidth={isActive ? 2.2 : 1.8} />
+                    {badge && (
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full text-[8px] font-bold px-0.5"
+                        style={{ background: "var(--ln-ember)", color: "white" }}>{badge}</span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />
+                    {badge && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold px-1"
+                        style={{ background: "var(--ln-ember)", color: "white" }}>{badge}</span>
+                    )}
+                  </div>
+                )}
+                <span className="text-[9px] font-heading tracking-wide uppercase"
+                  style={{ lineHeight: 1, color: isGold ? tabColor : undefined }}>{label}</span>
                 {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full" style={{ background: "#C49A28" }} />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full"
+                    style={{ background: isGold ? "#FFD060" : "#C49A28" }} />
                 )}
               </button>
             );
@@ -885,14 +906,10 @@ export default function MobilePlayerLayer() {
         bottom: `calc(var(--nav-height, 56px) + max(env(safe-area-inset-bottom, 0px), 8px))`,
         minHeight: "64px",
         paddingBottom: 0,
-        /* Solid background — no bleed-through */
-        background: isLightsOn
-          ? "linear-gradient(180deg, #1a2a3a 0%, #1e2d3a 100%)"
-          : "linear-gradient(180deg, #1E2D3A 0%, #111009 100%)",
+        /* Solid background — jet black always */
+        background: "#000000",
         backdropFilter: "blur(16px) saturate(1.3)",
-        borderTop: isLightsOn
-          ? "1px solid rgba(255,255,255,0.15)"
-          : "1px solid rgba(196,154,40,0.16)",
+        borderTop: "1px solid rgba(196,154,40,0.16)",
         boxShadow: "0 -8px 40px rgba(0,0,0,0.75), 0 -1px 0 rgba(196,154,40,0.08)",
       }}
       onTouchStart={onMiniTouchStart}
@@ -923,7 +940,7 @@ export default function MobilePlayerLayer() {
             <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
-              style={{ background: "#111009" }}>
+              style={{ background: "#000000" }}>
               <Music size={16} style={{ color: "#6B6555" }} />
             </div>
           )}
@@ -1034,7 +1051,7 @@ export default function MobilePlayerLayer() {
               <div
                 className="absolute bottom-full right-0 mb-2 w-52 rounded-2xl overflow-hidden z-[23]"
                 style={{
-                  background: "rgba(44,52,56,0.97)",
+                  background: "rgba(0,0,0,0.85)",
                   backdropFilter: "blur(20px)",
                   border: "1px solid rgba(196,154,40,0.16)",
                   boxShadow: "0 8px 40px rgba(0,0,0,0.70)",
@@ -1114,7 +1131,7 @@ export default function MobilePlayerLayer() {
     <div
       className="md:hidden fixed inset-0 z-[9010] flex flex-col"
       style={{
-        background: "linear-gradient(180deg, #1E2D3A 0%, #232E35 35%, #111009 100%)",
+        background: "#000000",
         transform: `translateY(${expandedDragOffset}px)`,
         transition: expandedDragOffset === 0 ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "none",
         paddingTop: "env(safe-area-inset-top, 0px)",
@@ -1172,7 +1189,7 @@ export default function MobilePlayerLayer() {
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
           height: 0,
           minHeight: 0,
-          background: "linear-gradient(180deg, #1E2D3A 0%, #232E35 35%, #111009 100%)",
+          background: "#000000",
         }}
       >
 
@@ -1277,7 +1294,7 @@ export default function MobilePlayerLayer() {
               onClick={() => setWidPanelOpen(true)}
               className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
               style={{
-                background: "rgba(44,52,56,0.88)",
+                background: "rgba(0,0,0,0.85)",
                 border: "1px solid rgba(74,222,128,0.5)",
                 color: "var(--ln-seal-bright)",
                 backdropFilter: "blur(4px)",
@@ -1420,7 +1437,7 @@ export default function MobilePlayerLayer() {
           {showMobileVolume && (
             <div
               className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-2xl p-3 shadow-2xl z-50 flex flex-col items-center gap-2"
-              style={{ background: "#111009", border: "1px solid rgba(44,52,56,0.6)" }}
+              style={{ background: "#000000", border: "1px solid #000000" }}
             >
               <span className="text-[10px] font-mono" style={{ color: "#C49A28" }}>
                 {state.isMuted ? "0" : Math.round(state.volume * 100)}%
@@ -1434,7 +1451,7 @@ export default function MobilePlayerLayer() {
                 style={{
                   background: `linear-gradient(to top, #C49A28 ${
                     state.isMuted ? 0 : state.volume * 100
-                  }%, rgba(44,52,56,0.7) ${
+                  }%, rgba(0,0,0,0.85) ${
                     state.isMuted ? 0 : state.volume * 100
                   }%)`,
                 }}
@@ -1465,7 +1482,7 @@ export default function MobilePlayerLayer() {
       {widBadge && (
         <div className="flex-shrink-0 mx-8 mb-4 rounded-2xl overflow-hidden"
           style={{
-            background: "rgba(44,52,56,0.6)",
+            background: "#000000",
             border: "1px solid rgba(74,222,128,0.35)",
           }}
         >
@@ -1482,7 +1499,7 @@ export default function MobilePlayerLayer() {
               </span>
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
-                  background: "rgba(44,52,56,0.5)",
+                  background: "rgba(0,0,0,0.85)",
                   color: "var(--ln-seal-bright)",
                   border: "1px solid rgba(58,138,86,0.3)",
                 }}>
@@ -1554,7 +1571,7 @@ export default function MobilePlayerLayer() {
             style={{ color: "#6B6555" }}>
             Signals
           </div>
-          <div className="flex-1 h-px" style={{ background: "rgba(44,52,56,0.5)" }} />
+          <div className="flex-1 h-px" style={{ background: "rgba(0,0,0,0.85)" }} />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {EMOJI_REACTIONS.map(({ type, emoji, label }) => {
@@ -1569,8 +1586,8 @@ export default function MobilePlayerLayer() {
                 style={{
                   background: isActive
                     ? "rgba(122,90,30,0.6)"
-                    : "rgba(44,52,56,0.8)",
-                  border: `1px solid ${isActive ? "rgba(196,154,40,0.35)" : "rgba(44,52,56,0.6)"}`,
+                    : "rgba(0,0,0,0.85)",
+                  border: `1px solid ${isActive ? "rgba(196,154,40,0.35)" : "#000000"}`,
                 }}
               >
                 <span className="text-[14px] leading-none">{emoji}</span>
@@ -1591,8 +1608,8 @@ export default function MobilePlayerLayer() {
         <div
           className="flex-shrink-0 mx-8 mb-3 flex items-center justify-center gap-2 py-2 px-4 rounded-full animate-fade-in"
           style={{
-            background: "rgba(44,52,56,0.5)",
-            border: "1px solid rgba(44,52,56,0.4)",
+            background: "rgba(0,0,0,0.85)",
+            border: "1px solid rgba(0,0,0,0.85)",
           }}
         >
           <span className="text-[13px]">🎧</span>
@@ -1610,8 +1627,8 @@ export default function MobilePlayerLayer() {
       {/* Comments Panel */}
       <div className="flex-shrink-0 mx-8 mb-4 rounded-2xl overflow-hidden"
         style={{
-          background: "rgba(44,52,56,0.6)",
-          border: "1px solid rgba(44,52,56,0.5)",
+          background: "#000000",
+          border: "1px solid rgba(0,0,0,0.85)",
         }}
       >
         {/* Header */}
@@ -1628,7 +1645,7 @@ export default function MobilePlayerLayer() {
             {comments.length > 0 && (
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
-                  background: "rgba(44,52,56,0.8)",
+                  background: "rgba(0,0,0,0.85)",
                   color: "#1C1A14",
                 }}>
                 {comments.length}
@@ -1646,7 +1663,7 @@ export default function MobilePlayerLayer() {
         </button>
         {/* Expanded content */}
         {commentsPanelOpen && (
-          <div className="border-t" style={{ borderColor: "rgba(44,52,56,0.4)" }}>
+          <div className="border-t" style={{ borderColor: "rgba(0,0,0,0.85)" }}>
             {/* Comment list */}
             <div className="max-h-48 overflow-y-auto px-4 py-3 space-y-3">
               {comments.length === 0 ? (
@@ -1657,7 +1674,7 @@ export default function MobilePlayerLayer() {
                 comments.slice(0, 20).map((c: any, i: number) => (
                   <div key={c.id ?? i} className="flex gap-2">
                     <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px]"
-                      style={{ background: "#111009", color: "#1C1A14" }}>
+                      style={{ background: "#000000", color: "#1C1A14" }}>
                       {(c.authorName || c.userName || "?")[0]?.toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -1680,7 +1697,7 @@ export default function MobilePlayerLayer() {
               )}
             </div>
             {/* Comment input */}
-            <div className="px-4 pb-3 border-t" style={{ borderColor: "rgba(44,52,56,0.5)" }}>
+            <div className="px-4 pb-3 border-t" style={{ borderColor: "rgba(0,0,0,0.85)" }}>
               <div className="flex gap-2 pt-3">
                 <input
                   type="text"
@@ -1691,8 +1708,8 @@ export default function MobilePlayerLayer() {
                   disabled={!user || commentSubmitting}
                   className="flex-1 text-[11px] px-3 py-2 rounded-xl outline-none transition-all"
                   style={{
-                    background: "rgba(44,52,56,0.8)",
-                    border: "1px solid rgba(44,52,56,0.6)",
+                    background: "rgba(0,0,0,0.85)",
+                    border: "1px solid #000000",
                     color: "var(--ln-parchment)",
                   }}
                 />
@@ -1820,7 +1837,7 @@ export default function MobilePlayerLayer() {
               onClick={(e) => { e.stopPropagation(); setPlayerState("expanded"); setWidPanelOpen(true); }}
               className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
               style={{
-                background: "rgba(44,52,56,0.88)",
+                background: "rgba(0,0,0,0.85)",
                 border: "1px solid rgba(74,222,128,0.5)",
                 color: "var(--ln-seal-bright)",
                 backdropFilter: "blur(4px)",

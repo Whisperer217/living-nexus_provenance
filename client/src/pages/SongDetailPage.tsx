@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import {
   Play, Pause, Share2, Copy, DollarSign, MessageSquare,
   Shield, Music, ChevronLeft, Download, Headphones,
-  Wand2, ExternalLink, Check, ChevronDown, ChevronUp, Twitter, Heart,
+  ExternalLink, Check, ChevronDown, ChevronUp, Twitter, Heart,
   Video, ImageIcon, History,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
@@ -121,47 +121,8 @@ export default function SongDetailPage() {
   const [showVideo, setShowVideo] = useState(false);
   const videoDetailRef = useRef<HTMLVideoElement>(null);
 
-  const [aiTransformOpen, setAiTransformOpen] = useState(false);
-  const [transformPrompt, setTransformPrompt] = useState("");
-  const [transformStyle, setTransformStyle] = useState("");
-  const [transformTags, setTransformTags] = useState<string[]>([]);
-  const [activeTransformId, setActiveTransformId] = useState<number | null>(null);
-  const [transformResult, setTransformResult] = useState<{ outputUrl: string; prompt: string } | null>(null);
-  const [transformPhase, setTransformPhase] = useState<"idle" | "processing" | "done" | "error">("idle");
-  const [transformError, setTransformError] = useState("");
 
-  const aiTransformMutation = trpc.songs.aiTransform.useMutation({
-    onSuccess: (data) => {
-      setActiveTransformId(data.transformId);
-      setTransformPhase("processing");
-    },
-    onError: (err) => {
-      setTransformPhase("error");
-      setTransformError(err.message);
-    },
-  });
 
-  const { data: transformStatus } = trpc.songs.getTransformStatus.useQuery(
-    { transformId: activeTransformId! },
-    {
-      enabled: !!activeTransformId && transformPhase === "processing",
-      refetchInterval: 4000,
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  useEffect(() => {
-    if (!transformStatus) return;
-    if (transformStatus.status === "success" && transformStatus.outputUrl) {
-      setTransformResult({ outputUrl: transformStatus.outputUrl, prompt: transformStatus.prompt });
-      setTransformPhase("done");
-      setActiveTransformId(null);
-    } else if (transformStatus.status === "failed") {
-      setTransformPhase("error");
-      setTransformError(transformStatus.errorMessage || "Generation failed");
-      setActiveTransformId(null);
-    }
-  }, [transformStatus]);
 
   const { data: songData, isLoading } = trpc.songs.getById.useQuery(
     { id: songId },
@@ -686,10 +647,7 @@ export default function SongDetailPage() {
                       }
                     />
                   )}
-                  <Button size="sm" variant="outline" onClick={() => setAiTransformOpen(true)}
-                    style={{ borderColor: "rgba(196,154,40,0.34)", color: "var(--ln-gold)" }}>
-                    <Wand2 className="w-3.5 h-3.5 mr-1" />AI Transform
-                  </Button>
+
                   {!isOwner && (
                     <FlagContentButton
                       workId={song.id}
@@ -1283,142 +1241,6 @@ export default function SongDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* AI Transform Modal */}
-      <Dialog open={aiTransformOpen} onOpenChange={(open) => {
-        if (!open && transformPhase === "processing") return;
-        setAiTransformOpen(open);
-        if (!open) {
-          setTransformPhase("idle"); setTransformResult(null);
-          setTransformError(""); setTransformPrompt("");
-          setTransformStyle(""); setTransformTags([]);
-        }
-      }}>
-        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.4)", maxWidth: "520px" }}>
-          <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Wand2 className="w-5 h-5" />AI Transform
-            </DialogTitle>
-          </DialogHeader>
-
-          {transformPhase === "idle" && (
-            <div className="space-y-4 py-2">
-              {!user && (
-                <p className="text-sm text-center" style={{ color: "#E2E8F0" }}>Sign in to transform tracks.</p>
-              )}
-              <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>DESCRIBE THE TRANSFORMATION</label>
-                <Textarea
-                  value={transformPrompt}
-                  onChange={e => setTransformPrompt(e.target.value)}
-                  placeholder="e.g. Transform into a lo-fi hip hop beat with rain sounds and vinyl crackle"
-                  rows={3}
-                  maxLength={500}
-                  style={{ background: "var(--ln-coal)", border: "1px solid #111009", color: "var(--ln-parchment)", resize: "none" }}
-                />
-                <p className="text-xs mt-1" style={{ color: "var(--ln-iron)" }}>{transformPrompt.length}/500</p>
-              </div>
-              <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>STYLE PRESET (OPTIONAL)</label>
-                <Input
-                  value={transformStyle}
-                  onChange={e => setTransformStyle(e.target.value)}
-                  placeholder="e.g. cinematic, dark ambient, jazz"
-                  style={{ background: "var(--ln-coal)", border: "1px solid #111009", color: "var(--ln-parchment)" }}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}>QUICK TAGS</label>
-                <div className="flex flex-wrap gap-2">
-                  {["lo-fi", "jazz", "cinematic", "dark ambient", "trap", "acoustic", "orchestral", "electronic"].map(tag => (
-                    <button
-                      key={tag}
-                      onClick={() => setTransformTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])}
-                      className="px-2 py-0.5 rounded text-xs transition-all"
-                      style={{
-                        background: transformTags.includes(tag) ? "rgba(196,154,40,0.2)" : "var(--ln-coal)",
-                        border: `1px solid ${transformTags.includes(tag) ? "rgba(196,154,40,0.6)" : "var(--ln-coal)"}`,
-                        color: transformTags.includes(tag) ? "var(--ln-gold)" : "var(--ln-iron)",
-                      }}
-                    >{tag}</button>
-                  ))}
-                </div>
-              </div>
-              <p className="text-xs" style={{ color: "var(--ln-iron)" }}>
-                All AI transforms are linked to the original Witness ID. Generation takes ~60-90 seconds.
-              </p>
-              <Button
-                className="w-full font-semibold"
-                disabled={!user || !transformPrompt.trim() || aiTransformMutation.isPending}
-                onClick={() => aiTransformMutation.mutate({
-                  songId,
-                  prompt: transformPrompt.trim(),
-                  style: transformStyle.trim() || undefined,
-                  tags: transformTags.length > 0 ? transformTags : undefined,
-                })}
-                style={{ background: "var(--ln-gold)", color: "var(--ln-coal)", fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.08em" }}
-              >
-                <Wand2 className="w-4 h-4 mr-2" />
-                {aiTransformMutation.isPending ? "SUBMITTING..." : "GENERATE TRANSFORM"}
-              </Button>
-            </div>
-          )}
-
-          {transformPhase === "processing" && (
-            <div className="py-8 text-center space-y-4">
-              <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center animate-pulse"
-                style={{ background: "rgba(196,154,40,0.08)", border: "2px solid rgba(196,154,40,0.34)" }}>
-                <Wand2 className="w-8 h-8" style={{ color: "var(--ln-gold)" }} />
-              </div>
-              <div>
-                <p className="font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Generating Transform...</p>
-                <p className="text-sm" style={{ color: "var(--ln-iron)" }}>The AI is reimagining your track. This takes 60-90 seconds.</p>
-              </div>
-              <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: "var(--ln-coal)" }}>
-                <div className="h-full rounded-full animate-pulse" style={{ width: "60%", background: "var(--ln-gold)" }} />
-              </div>
-              <p className="text-xs" style={{ color: "var(--ln-iron)" }}>Do not close this dialog</p>
-            </div>
-          )}
-
-          {transformPhase === "done" && transformResult && (
-            <div className="py-4 space-y-4">
-              <div className="text-center">
-                <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3"
-                  style={{ background: "rgba(58,138,86,0.15)", border: "2px solid rgba(74,222,128,0.5)" }}>
-                  <Check className="w-6 h-6" style={{ color: "var(--ln-seal-bright)" }} />
-                </div>
-                <p className="font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Transform Complete</p>
-                <p className="text-xs mt-1" style={{ color: "var(--ln-iron)" }}>Prompt: {transformResult.prompt}</p>
-              </div>
-              <div className="p-3" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
-                <p className="text-xs font-semibold mb-2" style={{ color: "var(--ln-gold)", fontFamily: "'Orbitron', sans-serif" }}>TRANSFORMED TRACK</p>
-                <audio controls src={transformResult.outputUrl} className="w-full" style={{ height: "36px" }} />
-              </div>
-              <div className="flex gap-2">
-                <a href={transformResult.outputUrl} download className="flex-1">
-                  <Button variant="outline" className="w-full text-xs" style={{ borderColor: "var(--ln-coal)", color: "var(--ln-parchment)" }}>Download</Button>
-                </a>
-                <Button
-                  className="flex-1 text-xs"
-                  onClick={() => { setTransformPhase("idle"); setTransformResult(null); setTransformPrompt(""); setTransformStyle(""); setTransformTags([]); }}
-                  style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.34)" }}
-                >New Transform</Button>
-              </div>
-            </div>
-          )}
-
-          {transformPhase === "error" && (
-            <div className="py-6 text-center space-y-3">
-              <p className="font-semibold" style={{ color: "var(--ln-ember)" }}>Transform Failed</p>
-              <p className="text-sm" style={{ color: "#E2E8F0" }}>{transformError}</p>
-              <Button
-                onClick={() => { setTransformPhase("idle"); setTransformError(""); }}
-                style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.34)" }}
-              >Try Again</Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

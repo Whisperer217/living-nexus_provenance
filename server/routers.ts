@@ -18,8 +18,6 @@ import {
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
-  createAiTransform, updateAiTransform, getAiTransformById,
-  getAiTransformsBySong, getAiTransformsByUser,
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount, getBulkLikeStatuses,
   getSongByWitnessId, updateSongMetadata, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
@@ -85,6 +83,14 @@ import {
   getProjectSongs, addSongToProject, removeSongFromProject, reorderProjectSongs,
   getLatestAuditLog, getAllAuditLogs, createAuditLog, updateAuditLog,
   setPinCreator,
+  insertProvenanceEvent,
+  getProvenanceEventsByCreator,
+  getLatestProvenanceCheckpoint,
+  getOrCreateAgent,
+  updateAgentFingerprint,
+  insertWid,
+  getWidWithEvent,
+  setUserPublicKey,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -428,6 +434,21 @@ export const appRouter = router({
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
+    }),
+    /** Check if user has a provenance keypair registered. */
+    hasKeypair: protectedProcedure.query(async ({ ctx }) => {
+      const user = await getUserById(ctx.user.id);
+      return { hasKey: !!(user?.publicKey) };
+    }),
+    /** Generate Ed25519 keypair on first use. Returns public key + private key ONCE. */
+    generateKeypair: protectedProcedure.mutation(async ({ ctx }) => {
+      const { generateKeypair: genKp } = await import("./provenance");
+      const user = await getUserById(ctx.user.id);
+      if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      if (user.publicKey) return { publicKeyHex: user.publicKey, alreadyExists: true };
+      const { privateKeyHex, publicKeyHex } = await genKp();
+      await setUserPublicKey(ctx.user.id, publicKeyHex);
+      return { publicKeyHex, privateKeyHex, alreadyExists: false };
     }),
   }),
 
@@ -1355,94 +1376,6 @@ export const appRouter = router({
       return getRelatedSongs(input.songId, input.genre, 6);
     }),
 
-    // ── AI Transform ──────────────────────────────────────────────────────────
-    aiTransform: protectedProcedure.input(z.object({
-      songId: z.number(),
-      prompt: z.string().min(1).max(500),
-      style: z.string().max(128).optional(),
-      tags: z.array(z.string()).max(10).optional(),
-    })).mutation(async ({ ctx, input }) => {
-      const song = await getSongById(input.songId);
-      if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
-      if (!song.fileUrl) throw new TRPCError({ code: "BAD_REQUEST", message: "Song has no audio file" });
-
-      // Create DB record first
-      const insertResult = await createAiTransform({
-        originalSongId: input.songId,
-        userId: ctx.user.id,
-        prompt: input.prompt,
-        style: input.style,
-        tags: input.tags,
-        originalWitnessId: song.witnessId ?? undefined,
-      });
-      const transformId = (insertResult as any).insertId as number;
-
-      // Kick off Sonauto generation asynchronously
-      const sonautoApiKey = process.env.SONAUTO_API_KEY || "";
-      const requestBody: Record<string, unknown> = {
-        prompt: input.prompt,
-        num_songs: 1,
-      };
-      if (input.style) requestBody.style = input.style;
-      if (input.tags && input.tags.length > 0) requestBody.tags = input.tags;
-
-      // Fire-and-forget: start Sonauto task, poll in background
-      (async () => {
-        try {
-          // Submit generation request
-          const genRes = await fetch("https://api.sonauto.ai/v1/generations", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${sonautoApiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody),
-          });
-          if (!genRes.ok) {
-            const errText = await genRes.text();
-            await updateAiTransform(transformId, { status: "failed", errorMessage: `Sonauto API error: ${errText}` });
-            return;
-          }
-          const genData = await genRes.json() as { task_id: string };
-          const taskId = genData.task_id;
-          await updateAiTransform(transformId, { sonautoTaskId: taskId, status: "processing" });
-
-          // Poll until complete (max 3 minutes)
-          const maxAttempts = 36; // 36 * 5s = 180s
-          for (let i = 0; i < maxAttempts; i++) {
-            await new Promise(r => setTimeout(r, 5000));
-            const pollRes = await fetch(`https://api.sonauto.ai/v1/generations/${taskId}`, {
-              headers: { "Authorization": `Bearer ${sonautoApiKey}` },
-            });
-            if (!pollRes.ok) continue;
-            const pollData = await pollRes.json() as { status: string; song_paths?: string[] };
-            if (pollData.status === "SUCCESS" && pollData.song_paths && pollData.song_paths.length > 0) {
-              const outputUrl = pollData.song_paths[0];
-              await updateAiTransform(transformId, { status: "success", outputUrl });
-              return;
-            } else if (pollData.status === "FAILURE") {
-              await updateAiTransform(transformId, { status: "failed", errorMessage: "Sonauto generation failed" });
-              return;
-            }
-          }
-          await updateAiTransform(transformId, { status: "failed", errorMessage: "Generation timed out" });
-        } catch (err: any) {
-          await updateAiTransform(transformId, { status: "failed", errorMessage: err.message });
-        }
-      })();
-
-      return { transformId, status: "processing" as const };
-    }),
-
-    getTransformStatus: protectedProcedure.input(z.object({ transformId: z.number() })).query(async ({ ctx, input }) => {
-      const transform = await getAiTransformById(input.transformId);
-      if (!transform || transform.userId !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND" });
-      return transform;
-    }),
-
-    getTransforms: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => {
-      return getAiTransformsBySong(input.songId);
-    }),
-    getMyTransforms: protectedProcedure.query(async ({ ctx }) => {
-      return getAiTransformsByUser(ctx.user.id);
-    }),
     getLiked: protectedProcedure.query(async ({ ctx }) => {
       return getLikedSongs(ctx.user.id);
     }),
@@ -5344,6 +5277,598 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           }
         }
         return { url };
+      }),
+
+    /** Transcribe voice audio to text via Whisper */
+    transcribeVoice: protectedProcedure
+      .input(z.object({
+        audioBase64: z.string(),
+        mimeType: z.enum(["audio/webm", "audio/mp4", "audio/mpeg", "audio/wav", "audio/ogg"]),
+        language: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { transcribeAudio } = await import('./_core/voiceTranscription');
+        const ext = input.mimeType.split('/')[1].replace('mpeg', 'mp3');
+        const key = `keeper-voice/${ctx.user.id}/${Date.now()}.${ext}`;
+        const buf = Buffer.from(input.audioBase64, 'base64');
+        const { url: audioUrl } = await storagePut(key, buf, input.mimeType);
+        const result = await transcribeAudio({
+          audioUrl,
+          language: input.language,
+          prompt: 'Transcribe creative lyrics or spoken word content',
+        });
+        if ('error' in result) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: (result as any).error });
+        return { text: (result as any).text, language: (result as any).language };
+      }),
+
+    /** Generate artwork from a text prompt */
+    generateArtwork: protectedProcedure
+      .input(z.object({
+        prompt: z.string().max(1000),
+        styleTags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { generateImage } = await import('./_core/imageGeneration');
+        const fullPrompt = input.styleTags?.length
+          ? `${input.prompt}. Style: ${input.styleTags.join(', ')}`
+          : input.prompt;
+        const genResult = await generateImage({ prompt: fullPrompt });
+        if (!genResult?.url) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Image generation failed' });
+        // Re-upload to our S3 so it persists permanently
+        const imgRes = await fetch(genResult.url);
+        const imgBuf = new Uint8Array(await imgRes.arrayBuffer());
+        const key = `keeper-artwork/${ctx.user.id}/${Date.now()}.png`;
+        const { url } = await storagePut(key, imgBuf, 'image/png');
+        return { url };
+      }),
+
+    /** Analyze an image with the Keeper's vision */
+    analyzeImage: protectedProcedure
+      .input(z.object({
+        imageUrl: z.string().url(),
+        context: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const systemPrompt = `You are the user's Keeper — a provenance-aware creative companion. Analyze the image provided and describe it in the context of the creator's artistic identity. Comment on visual style, mood, color palette, and how it relates to their creative corpus. Be specific and poetic. Keep response under 200 words.`;
+        const userContent: any[] = [
+          { type: 'text', text: input.context ? `Context: ${input.context}\n\nAnalyze this image:` : 'Analyze this image:' },
+          { type: 'image_url', image_url: { url: input.imageUrl } },
+        ];
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userContent },
+          ],
+        });
+        const analysis = response?.choices?.[0]?.message?.content ?? 'The Keeper sees something profound but cannot yet find the words.';
+        return { analysis };
+      }),
+  }),
+  // ─── Marketplace ──────────────────────────────────────────────────────────────
+  marketplace: router({
+    // Public: list all active marketplace items, optionally filtered by type
+    listItems: publicProcedure
+      .input(z.object({
+        type: z.enum(["album", "skin", "physical", "creator_good"]).optional(),
+        featuredOnly: z.boolean().optional(),
+        limit: z.number().min(1).max(100).default(50),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { eq, and, desc, isNull, gt } = await import('drizzle-orm');
+        const conditions: any[] = [eq(marketplaceItems.active, true)];
+        if (input.type) conditions.push(eq(marketplaceItems.type, input.type));
+        if (input.featuredOnly) conditions.push(eq(marketplaceItems.featured, true));
+        const rows = await db
+          .select({
+            id: marketplaceItems.id,
+            type: marketplaceItems.type,
+            title: marketplaceItems.title,
+            description: marketplaceItems.description,
+            artworkUrl: marketplaceItems.artworkUrl,
+            priceCents: marketplaceItems.priceCents,
+            royaltyPct: marketplaceItems.royaltyPct,
+            wid: marketplaceItems.wid,
+            projectId: marketplaceItems.projectId,
+            songId: marketplaceItems.songId,
+            stock: marketplaceItems.stock,
+            featured: marketplaceItems.featured,
+            createdAt: marketplaceItems.createdAt,
+            creatorId: marketplaceItems.creatorId,
+            creatorName: users.name,
+            creatorHandle: users.artistHandle,
+            creatorAvatarUrl: users.profilePhotoUrl,
+          })
+          .from(marketplaceItems)
+          .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
+          .where(and(...conditions))
+          .orderBy(desc(marketplaceItems.featured), desc(marketplaceItems.createdAt))
+          .limit(input.limit);
+        return rows;
+      }),
+
+    // Public: get a single marketplace item with full creator provenance
+    getItem: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const rows = await db
+          .select({
+            id: marketplaceItems.id,
+            type: marketplaceItems.type,
+            title: marketplaceItems.title,
+            description: marketplaceItems.description,
+            artworkUrl: marketplaceItems.artworkUrl,
+            priceCents: marketplaceItems.priceCents,
+            royaltyPct: marketplaceItems.royaltyPct,
+            wid: marketplaceItems.wid,
+            projectId: marketplaceItems.projectId,
+            songId: marketplaceItems.songId,
+            stock: marketplaceItems.stock,
+            featured: marketplaceItems.featured,
+            active: marketplaceItems.active,
+            createdAt: marketplaceItems.createdAt,
+            creatorId: marketplaceItems.creatorId,
+            creatorName: users.name,
+            creatorHandle: users.artistHandle,
+            creatorAvatarUrl: users.profilePhotoUrl,
+          })
+          .from(marketplaceItems)
+          .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
+          .where(eq(marketplaceItems.id, input.id))
+          .limit(1);
+        return rows[0] ?? null;
+      }),
+
+    // Protected: create a Stripe checkout session for a marketplace item
+    createCheckout: protectedProcedure
+      .input(z.object({
+        itemId: z.number(),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!stripe) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Payments not configured' });
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const rows = await db.select().from(marketplaceItems)
+          .where(eq(marketplaceItems.id, input.itemId)).limit(1);
+        const item = rows[0];
+        if (!item) throw new TRPCError({ code: 'NOT_FOUND', message: 'Item not found' });
+        if (!item.active) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Item is no longer available' });
+        if (item.stock !== null && item.stock !== undefined && item.stock <= 0)
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Item is sold out' });
+        const creatorPayoutCents = Math.floor(item.priceCents * item.royaltyPct / 100);
+        const platformFeeCents = item.priceCents - creatorPayoutCents;
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: [{
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: item.title,
+                ...(item.artworkUrl ? { images: [item.artworkUrl] } : {}),
+                metadata: { wid: item.wid ?? '', type: item.type },
+              },
+              unit_amount: item.priceCents,
+            },
+            quantity: 1,
+          }],
+          mode: 'payment',
+          success_url: `${input.origin}/marketplace?purchase=success&item=${item.id}`,
+          cancel_url: `${input.origin}/marketplace?purchase=cancelled`,
+          metadata: {
+            type: 'marketplace_purchase',
+            itemId: item.id.toString(),
+            buyerUserId: ctx.user.id.toString(),
+            creatorPayoutCents: creatorPayoutCents.toString(),
+            platformFeeCents: platformFeeCents.toString(),
+          },
+        });
+        // Record pending purchase
+        const { marketplacePurchases } = await import('../drizzle/schema');
+        await db.insert(marketplacePurchases).values({
+          itemId: item.id,
+          buyerUserId: ctx.user.id,
+          amountCents: item.priceCents,
+          creatorPayoutCents,
+          platformFeeCents,
+          stripeSessionId: session.id,
+          status: 'pending',
+        });
+        return { url: session.url };
+      }),
+
+    // Protected: buyer's purchase history
+    myPurchases: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return [];
+      const { marketplacePurchases, marketplaceItems, users } = await import('../drizzle/schema');
+      const { eq, desc } = await import('drizzle-orm');
+      const rows = await db
+        .select({
+          id: marketplacePurchases.id,
+          status: marketplacePurchases.status,
+          amountCents: marketplacePurchases.amountCents,
+          provenanceWid: marketplacePurchases.provenanceWid,
+          fulfilledAt: marketplacePurchases.fulfilledAt,
+          createdAt: marketplacePurchases.createdAt,
+          itemId: marketplaceItems.id,
+          itemTitle: marketplaceItems.title,
+          itemType: marketplaceItems.type,
+          itemArtworkUrl: marketplaceItems.artworkUrl,
+          itemWid: marketplaceItems.wid,
+          creatorName: users.name,
+          creatorHandle: users.artistHandle,
+        })
+        .from(marketplacePurchases)
+        .leftJoin(marketplaceItems, eq(marketplacePurchases.itemId, marketplaceItems.id))
+        .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
+        .where(eq(marketplacePurchases.buyerUserId, ctx.user.id))
+        .orderBy(desc(marketplacePurchases.createdAt))
+        .limit(50);
+      return rows;
+    }),
+
+    // Protected: creator's sales dashboard
+    creatorSales: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return { items: [], totalEarningsCents: 0 };
+      const { marketplacePurchases, marketplaceItems } = await import('../drizzle/schema');
+      const { eq, and, desc, sum } = await import('drizzle-orm');
+      const items = await db
+        .select({
+          id: marketplaceItems.id,
+          title: marketplaceItems.title,
+          type: marketplaceItems.type,
+          artworkUrl: marketplaceItems.artworkUrl,
+          priceCents: marketplaceItems.priceCents,
+          royaltyPct: marketplaceItems.royaltyPct,
+          stock: marketplaceItems.stock,
+          active: marketplaceItems.active,
+          featured: marketplaceItems.featured,
+          createdAt: marketplaceItems.createdAt,
+        })
+        .from(marketplaceItems)
+        .where(eq(marketplaceItems.creatorId, ctx.user.id))
+        .orderBy(desc(marketplaceItems.createdAt));
+      // Total earnings from fulfilled purchases
+      const earningsRows = await db
+        .select({ total: sum(marketplacePurchases.creatorPayoutCents) })
+        .from(marketplacePurchases)
+        .leftJoin(marketplaceItems, eq(marketplacePurchases.itemId, marketplaceItems.id))
+        .where(and(
+          eq(marketplaceItems.creatorId, ctx.user.id),
+          eq(marketplacePurchases.status, 'fulfilled')
+        ));
+      const totalEarningsCents = Number(earningsRows[0]?.total ?? 0);
+      return { items, totalEarningsCents };
+    }),
+
+    // Admin: create a new marketplace item
+    createItem: protectedProcedure
+      .input(z.object({
+        type: z.enum(["album", "skin", "physical", "creator_good"]),
+        title: z.string().min(1).max(256),
+        description: z.string().optional(),
+        artworkUrl: z.string().url().optional(),
+        priceCents: z.number().min(0),
+        royaltyPct: z.number().min(0).max(100).default(70),
+        wid: z.string().optional(),
+        projectId: z.number().optional(),
+        songId: z.number().optional(),
+        stock: z.number().optional(),
+        featured: z.boolean().default(false),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../drizzle/schema');
+        const result = await db.insert(marketplaceItems).values({
+          type: input.type,
+          title: input.title,
+          description: input.description,
+          artworkUrl: input.artworkUrl,
+          priceCents: input.priceCents,
+          royaltyPct: input.royaltyPct,
+          creatorId: ctx.user.id,
+          wid: input.wid,
+          projectId: input.projectId,
+          songId: input.songId,
+          stock: input.stock,
+          featured: input.featured,
+          active: true,
+        });
+        return { id: (result as any).insertId };
+      }),
+
+    // Protected: toggle item active status (owner only)
+    toggleItemActive: protectedProcedure
+      .input(z.object({ itemId: z.number(), active: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        await db.update(marketplaceItems)
+          .set({ active: input.active })
+          .where(and(eq(marketplaceItems.id, input.itemId), eq(marketplaceItems.creatorId, ctx.user.id)));
+        return { ok: true };
+      }),
+
+    // Owner-only: seed the first default marketplace listings
+    // Safe to call multiple times — skips if items already exist for this creator
+    seedDefaults: protectedProcedure.mutation(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+      const { marketplaceItems } = await import('../drizzle/schema');
+      const { eq, count } = await import('drizzle-orm');
+      // Idempotency guard — only seed if creator has no items yet
+      const existing = await db
+        .select({ cnt: count() })
+        .from(marketplaceItems)
+        .where(eq(marketplaceItems.creatorId, ctx.user.id));
+      if (Number(existing[0]?.cnt ?? 0) > 0) return { seeded: 0, message: 'Items already exist — skipped.' };
+      const seeds = [
+        {
+          type: 'album' as const,
+          title: 'Living Nexus — Provenance Vol. 1',
+          description: 'The debut gated album. 12 tracks, each anchored to a Witness ID. Includes lossless WAV download + PDF provenance certificate.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-hooded-scholar_67e69960.png',
+          priceCents: 1299,
+          royaltyPct: 90,
+          featured: true,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'skin' as const,
+          title: 'Keeper Skin Pack — The Conductor',
+          description: 'Unlock the Conductor skin for your Keeper avatar. Grants arrangement analysis, structural critique, and beat mapping modes.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-conductor_4e479e6b.png',
+          priceCents: 499,
+          royaltyPct: 80,
+          featured: true,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'skin' as const,
+          title: 'Keeper Skin Pack — The Witness',
+          description: 'Unlock the Witness skin. Grants testimonial mode, emotional range analysis, and corpus deep-read capabilities.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-witness_f31f36b2.png',
+          priceCents: 699,
+          royaltyPct: 80,
+          featured: false,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'skin' as const,
+          title: 'Keeper Skin Pack — The Archivist',
+          description: 'Unlock the Archivist skin. Grants provenance graph, fork lineage mapping, and WID cross-reference tools.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-archivist_07d235d9.png',
+          priceCents: 899,
+          royaltyPct: 80,
+          featured: false,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'physical' as const,
+          title: 'Living Nexus Thumb Drive — WID Edition',
+          description: 'Physical USB thumb drive pre-loaded with your purchased tracks + provenance certificates. Ships in a 3D-printed case engraved with your WID. Limited run.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-cipher_c8ee6e38.png',
+          priceCents: 2999,
+          royaltyPct: 70,
+          featured: true,
+          active: true,
+          stock: 50,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'creator_good' as const,
+          title: 'Creator Starter Pack — 100 Provenance Slots',
+          description: 'Bootstrap your provenance ledger. 100 Witness ID anchor slots for new songs, lyrics, and manuscripts. Never lose attribution.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-upload-slot_ab8bd82e.png',
+          priceCents: 999,
+          royaltyPct: 85,
+          featured: false,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+      ];
+      await db.insert(marketplaceItems).values(seeds);
+      return { seeded: seeds.length, message: `${seeds.length} default marketplace items created.` };
+    }),
+  }),
+
+  // ─── Satchel (Provenance Event Ledger for CreatorSurface/Writer) ─────────────
+  satchel: router({
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(500).optional() }).optional())
+      .query(async ({ ctx, input }) => {
+        return getProvenanceEventsByCreator(ctx.user.id, input?.limit ?? 200);
+      }),
+
+    checkpoint: protectedProcedure
+      .input(z.object({
+        payloadText: z.string(),
+        parentEventId: z.string().max(64).nullable().optional(),
+        sessionLabel: z.string().max(128).nullable().optional(),
+        privateKeyHex: z.string().optional(), // client-side signing (optional)
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const crypto = await import("crypto");
+        const eventId = crypto.createHash("sha256").update(input.payloadText).digest("hex");
+        return insertProvenanceEvent({
+          eventId,
+          creatorId: ctx.user.id,
+          actionType: "checkpoint",
+          parentEventId: input.parentEventId ?? null,
+          payloadCanonical: input.payloadText,
+          sessionLabel: input.sessionLabel ?? null,
+        });
+      }),
+
+    anchor: protectedProcedure
+      .input(z.object({
+        payloadText: z.string(),
+        parentEventId: z.string().max(64).nullable().optional(),
+        sessionLabel: z.string().max(128).nullable().optional(),
+        privateKeyHex: z.string().optional(),
+        originType: z.enum(["original", "derived", "assisted"]).optional(),
+        sourceRefs: z.array(z.string()).optional(),
+        transformationType: z.enum(["rewrite", "remix", "extension"]).nullable().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const crypto = await import("crypto");
+        const eventId = crypto.createHash("sha256").update(input.payloadText).digest("hex");
+        const result = await insertProvenanceEvent({
+          eventId,
+          creatorId: ctx.user.id,
+          actionType: "anchor",
+          parentEventId: input.parentEventId ?? null,
+          payloadCanonical: input.payloadText,
+          sessionLabel: input.sessionLabel ?? null,
+          origin: {
+            origin_type: input.originType ?? "original",
+            source_refs: input.sourceRefs ?? [],
+            transformation_type: input.transformationType ?? null,
+          },
+        });
+        // Return wid (same as eventId for anchor events)
+        return { ...result, wid: eventId };
+      }),
+
+    fork: protectedProcedure
+      .input(z.object({
+        originEventId: z.string().max(64),
+        payloadText: z.string(),
+        sessionLabel: z.string().max(128).nullable().optional(),
+        privateKeyHex: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const crypto = await import("crypto");
+        const eventId = crypto.createHash("sha256").update(input.payloadText + input.originEventId).digest("hex");
+        return insertProvenanceEvent({
+          eventId,
+          creatorId: ctx.user.id,
+          actionType: "fork",
+          parentEventId: input.originEventId,
+          payloadCanonical: input.payloadText,
+          sessionLabel: input.sessionLabel ?? null,
+          origin: { origin_type: "derived", source_refs: [input.originEventId], transformation_type: null },
+        });
+      }),
+
+    latestCheckpoint: protectedProcedure
+      .query(async ({ ctx }) => {
+        return getLatestProvenanceCheckpoint(ctx.user.id);
+      }),
+  }),
+
+  // ─── PPG (Personal Provenance Guide — AI writing assistant for CreatorSurface) ─
+  ppg: router({
+    generate: protectedProcedure
+      .input(z.object({
+        prompt: z.string().max(4000),
+        context: z.string().max(8000).optional(),
+        sessionLabel: z.string().max(128).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const systemPrompt = `You are the Personal Provenance Guide (PPG) for ${ctx.user.name ?? "a creator"} on Living Nexus. 
+You help creators develop their writing, lyrics, manuscripts, and creative works. 
+You understand provenance — every word belongs to its creator. 
+Be concise, generative, and creatively useful. Respond in plain text suitable for a writing editor.`;
+        const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+          { role: "system", content: systemPrompt },
+        ];
+        if (input.context) {
+          messages.push({ role: "user", content: `Current draft:\n\n${input.context}` });
+          messages.push({ role: "assistant", content: "I have your draft in context. How can I help?" });
+        }
+        messages.push({ role: "user", content: input.prompt });
+        const response = await invokeLLM({ messages });
+        const text = response.choices?.[0]?.message?.content ?? "";
+        return { text, sessionLabel: input.sessionLabel ?? null };
+      }),
+  }),
+
+  agents: router({
+    /** Get or create the Personal Nexus Agent for the current user. */
+    me: protectedProcedure.query(async ({ ctx }) => getOrCreateAgent(ctx.user.id)),
+    /** Alias used by CreatorSurface — same as me. */
+    getOrCreate: protectedProcedure.query(async ({ ctx }) => getOrCreateAgent(ctx.user.id)),
+    /** Send a message to the agent for style analysis or creative assistance. */
+    message: protectedProcedure
+      .input(z.object({ content: z.string().min(1), context: z.string().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const agent = await getOrCreateAgent(ctx.user.id);
+        const sysPrompt = `You are a Personal Nexus Agent — a creative intelligence bonded to this creator. You help them develop their voice, analyze their work, and evolve their style. Be concise and generative.`;
+        const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+          { role: "system", content: sysPrompt },
+        ];
+        if (input.context) messages.push({ role: "user", content: `Context:\n${input.context}` });
+        messages.push({ role: "user", content: input.content });
+        const response = await invokeLLM({ messages });
+        const text = response.choices?.[0]?.message?.content ?? "";
+        return { text, agentId: agent.id };
+      }),
+    /** Update the agent's style fingerprint after a session. */
+    updateFingerprint: protectedProcedure
+      .input(z.object({
+        agentId: z.number().int().positive(),
+        styleFingerprint: z.object({
+          tone: z.array(z.string()),
+          structure_patterns: z.array(z.string()),
+          common_transforms: z.array(z.string()),
+        }),
+        frozenTraits: z.object({ voice_constraints: z.array(z.string()) }).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await updateAgentFingerprint(input.agentId, input.styleFingerprint, input.frozenTraits);
+        return { ok: true };
+      }),
+  }),
+
+  wids: router({
+    /** Look up a WID and its associated provenance event. Returns flattened shape for WIDLookup page. */
+    lookup: publicProcedure
+      .input(z.object({ wid: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const result = await getWidWithEvent(input.wid);
+        if (!result) return null;
+        // Flatten wid row fields to top level for WIDLookup.tsx
+        return {
+          ...result.wid,
+          creator: result.creator,
+          event: result.event,
+        };
+      }),
+    /** Register a new WID for a provenance anchor event. */
+    register: protectedProcedure
+      .input(z.object({
+        wid: z.string().min(1),
+        eventId: z.string().min(1),
+        contentHash: z.string().min(1),
+        signature: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return insertWid({ ...input, creatorId: ctx.user.id });
       }),
   }),
 });

@@ -97,9 +97,9 @@ export default function CreatorSurface() {
   const generateKeypairMutation = trpc.auth.generateKeypair.useMutation();
   const agentQuery = trpc.agents.getOrCreate.useQuery(undefined, { enabled: !!user });
   const agentMessageMutation = trpc.agents.message.useMutation();
-  const checkpointMutation = trpc.events.checkpoint.useMutation();
-  const anchorMutation = trpc.events.anchor.useMutation();
-  const forkMutation = trpc.events.fork.useMutation();
+  const checkpointMutation = trpc.satchel.checkpoint.useMutation();
+  const anchorMutation = trpc.satchel.anchor.useMutation();
+  const forkMutation = trpc.satchel.fork.useMutation();
   const ppgMutation = trpc.ppg.generate.useMutation();
   const satchelQuery = trpc.satchel.list.useQuery(undefined, { enabled: !!user });
   const utils = trpc.useUtils();
@@ -282,12 +282,23 @@ export default function CreatorSurface() {
     try {
       const agent = agentQuery.data;
       const result = await ppgMutation.mutateAsync({
-        rawText: editorText,
-        agentProfile: agent?.styleFingerprint as { tone: string[]; structure_patterns: string[]; common_transforms: string[] } | undefined,
-        lineageParent: lastEventId,
+        prompt: editorText,
+        context: agent?.styleFingerprint ? JSON.stringify(agent.styleFingerprint) : undefined,
+        sessionLabel: lastEventId ?? undefined,
       });
-      setPpgResult(result);
-      addAgentMessage(`PPG ready. Intent: "${result.intent}"`, "Conductor");
+      // Adapt simple text response to PPGResult shape for the panel
+      const ppgAdapted: PPGResult = {
+        intent: "PPG suggestion ready",
+        prompt_structured: editorText,
+        variants: {
+          conservative: result.text as string,
+          exploratory: result.text as string,
+          divergent: result.text as string,
+        },
+        lineage_parent: lastEventId,
+      };
+      setPpgResult(ppgAdapted);
+      addAgentMessage(`PPG ready — suggestion generated.`, "Conductor");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "PPG failed";
       toast.error(msg);
@@ -307,11 +318,10 @@ export default function CreatorSurface() {
   const handleAgentMessage = async () => {
     try {
       const result = await agentMessageMutation.mutateAsync({
-        mode: agentMode,
+        content: agentMode ? `[${agentMode}] Analyze or assist with the current draft.` : "Analyze or assist with the current draft.",
         context: editorText.slice(0, 500) || "Creator just opened the surface.",
-        sessionLabel,
       });
-      addAgentMessage(result.message, agentMode);
+      addAgentMessage(typeof result.text === "string" ? result.text : JSON.stringify(result.text), agentMode);
     } catch (err) {
       console.error("Agent message failed:", err);
     }
@@ -480,7 +490,7 @@ export default function CreatorSurface() {
                 >
                   {label}
                 </div>
-                {evts.map(event => (
+                {evts.map((event: (typeof satchelQuery.data)[number]) => (
                   <SatchelEntry
                     key={event.eventId}
                     event={event}

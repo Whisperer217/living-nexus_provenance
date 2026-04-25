@@ -90,10 +90,43 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+
+  // Provenance keypair — Ed25519 public key (hex). Private key stored client-side only.
+  publicKey: text("publicKey"),
 });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+// ─── Agents (Personal Nexus Agent) ───────────────────────────────────────────
+export const agents = mysqlTable("agents", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  styleFingerprint: json("styleFingerprint").$type<{
+    tone: string[];
+    structure_patterns: string[];
+    common_transforms: string[];
+  }>().default({ tone: [], structure_patterns: [], common_transforms: [] }),
+  frozenTraits: json("frozenTraits").$type<{ voice_constraints: string[] }>().default({ voice_constraints: [] }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Agent = typeof agents.$inferSelect;
+export type InsertAgent = typeof agents.$inferInsert;
+
+// ─── WIDs (Witness IDs — provenance anchors) ──────────────────────────────────
+export const wids = mysqlTable("wids", {
+  wid: varchar("wid", { length: 64 }).primaryKey(),
+  eventId: varchar("eventId", { length: 64 }).notNull(),
+  contentHash: varchar("contentHash", { length: 64 }).notNull(),
+  creatorId: int("creatorId").notNull(),
+  signature: text("signature"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Wid = typeof wids.$inferSelect;
+export type InsertWid = typeof wids.$inferInsert;
 
 // ─── Songs ────────────────────────────────────────────────────────────────────
 export const songs = mysqlTable("songs", {
@@ -349,35 +382,6 @@ export const slotPurchases = mysqlTable("slotPurchases", {
 export type SlotPurchase = typeof slotPurchases.$inferSelect;
 export type InsertSlotPurchase = typeof slotPurchases.$inferInsert;
 
-// ─── AI Transforms ────────────────────────────────────────────────────────────
-export const aiTransforms = mysqlTable("aiTransforms", {
-  id: int("id").autoincrement().primaryKey(),
-  originalSongId: int("originalSongId").notNull(),
-  userId: int("userId").notNull(),
-
-  // Request params
-  prompt: text("prompt").notNull(),
-  style: varchar("style", { length: 128 }),
-  tags: json("tags").$type<string[]>(),
-
-  // Sonauto task tracking
-  sonautoTaskId: varchar("sonautoTaskId", { length: 128 }),
-  status: mysqlEnum("status", ["pending", "processing", "success", "failed"]).default("pending").notNull(),
-  errorMessage: text("errorMessage"),
-
-  // Result
-  outputUrl: text("outputUrl"),
-  outputKey: text("outputKey"),
-
-  // Provenance link back to original
-  originalWitnessId: varchar("originalWitnessId", { length: 64 }),
-
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type AiTransform = typeof aiTransforms.$inferSelect;
-export type InsertAiTransform = typeof aiTransforms.$inferInsert;
 // ─── Likes ────────────────────────────────────────────────────────────────────
 export const likes = mysqlTable("likes", {
   id: int("id").autoincrement().primaryKey(),
@@ -1265,3 +1269,81 @@ export const keeperSkins = mysqlTable("keeper_skins", {
 });
 export type KeeperSkin = typeof keeperSkins.$inferSelect;
 export type InsertKeeperSkin = typeof keeperSkins.$inferInsert;
+
+// ─── Marketplace ──────────────────────────────────────────────────────────────
+// Items listed in the Living Nexus Marketplace.
+// type: "album" | "skin" | "physical" | "creator_good"
+// Every item is anchored to a creator (creatorId) and optionally a WID.
+export const marketplaceItems = mysqlTable("marketplace_items", {
+  id: int("id").autoincrement().primaryKey(),
+  type: mysqlEnum("type", ["album", "skin", "physical", "creator_good"]).notNull(),
+  title: varchar("title", { length: 256 }).notNull(),
+  description: text("description"),
+  artworkUrl: text("artwork_url"),
+  priceCents: int("price_cents").notNull().default(0),
+  // Creator who earns royalties (can differ from uploader)
+  creatorId: int("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // Royalty percentage paid to creator (0-100, stored as integer e.g. 70 = 70%)
+  royaltyPct: int("royalty_pct").notNull().default(70),
+  // Optional WID anchor — the provenance record this item is tied to
+  wid: varchar("wid", { length: 128 }),
+  // Optional reference to a project/album (for type="album")
+  projectId: int("project_id"),
+  // Optional reference to a song (for type="album" single-track)
+  songId: int("song_id"),
+  // Stock: null = unlimited, 0 = sold out, >0 = limited edition
+  stock: int("stock"),
+  active: boolean("active").notNull().default(true),
+  featured: boolean("featured").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+});
+export type MarketplaceItem = typeof marketplaceItems.$inferSelect;
+export type InsertMarketplaceItem = typeof marketplaceItems.$inferInsert;
+
+// Purchases of marketplace items.
+// On fulfillment: stock is decremented, provenance receipt WID is generated.
+export const marketplacePurchases = mysqlTable("marketplace_purchases", {
+  id: int("id").autoincrement().primaryKey(),
+  itemId: int("item_id").notNull().references(() => marketplaceItems.id, { onDelete: "restrict" }),
+  buyerUserId: int("buyer_user_id"),  // null = guest checkout
+  amountCents: int("amount_cents").notNull(),
+  creatorPayoutCents: int("creator_payout_cents").notNull(),
+  platformFeeCents: int("platform_fee_cents").notNull(),
+  stripeSessionId: varchar("stripe_session_id", { length: 256 }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 256 }),
+  status: mysqlEnum("status", ["pending", "paid", "fulfilled", "refunded", "failed"]).notNull().default("pending"),
+  // Provenance receipt — WID generated on fulfillment
+  provenanceWid: varchar("provenance_wid", { length: 128 }),
+  fulfilledAt: timestamp("fulfilled_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+export type MarketplacePurchase = typeof marketplacePurchases.$inferSelect;
+export type InsertMarketplacePurchase = typeof marketplacePurchases.$inferInsert;
+
+// ─── Provenance Events (append-only creator ledger for CreatorSurface/Writer) ──
+export const provenanceEvents = mysqlTable("provenanceEvents", {
+  /** SHA-256 of the canonical payload — serves as the event ID */
+  eventId: varchar("eventId", { length: 64 }).primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  agentId: int("agentId"),
+  actionType: mysqlEnum("actionType", ["draft", "checkpoint", "anchor", "fork"]).notNull(),
+  /** SHA-256 of the parent event, or null (first event in chain) */
+  parentEventId: varchar("parentEventId", { length: 64 }),
+  /** JSON: { origin_type, source_refs, transformation_type } */
+  origin: json("origin").$type<{
+    origin_type: "original" | "derived" | "assisted";
+    source_refs: string[];
+    transformation_type: "rewrite" | "remix" | "extension" | null;
+  }>(),
+  /** Canonicalized payload string (UTF-8, normalized) */
+  payloadCanonical: text("payloadCanonical").notNull(),
+  /** Ed25519 signature over eventId, base64-encoded */
+  signature: text("signature"),
+  /** Session/thread label for Satchel grouping */
+  sessionLabel: varchar("sessionLabel", { length: 128 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProvenanceEvent = typeof provenanceEvents.$inferSelect;
+export type InsertProvenanceEvent = typeof provenanceEvents.$inferInsert;

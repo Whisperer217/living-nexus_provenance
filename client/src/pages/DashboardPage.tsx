@@ -14,14 +14,13 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
-  BarChart2, CheckCircle, AlertCircle, Wand2, Clock, CheckCircle2,
-  XCircle, Download, Play, Activity, MessageCircle, Zap, Gift,
+  BarChart2, CheckCircle, AlertCircle, CheckCircle2, Download, Play, Activity, MessageCircle, Zap, Gift,
   Library, RefreshCw, FileArchive, PackageOpen, Camera, X,
   TrendingUp, Heart, LineChart, Pencil, Fingerprint, BookOpen, FileText, Image, Bell
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
-type Tab = "songs" | "transforms" | "activity" | "collections" | "archive" | "analytics" | "widcache" | "discord";
+type Tab = "songs" | "activity" | "collections" | "archive" | "analytics" | "widcache" | "discord";
 
 interface BatchTrack {
   id: number;
@@ -63,7 +62,6 @@ export default function DashboardPage() {
   const [showChecklist, setShowChecklist] = useState(false);
 
   const { data: songs, refetch: refetchSongs, error: songsError } = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
-  const { data: transforms, error: transformsError, refetch: refetchTransforms } = trpc.songs.getMyTransforms.useQuery(undefined, { enabled: isAuthenticated && activeTab === "transforms", retry: 1 });
   const { data: activityEvents, isLoading: activityLoading, error: activityError, refetch: refetchActivity } = trpc.events.getForCreator.useQuery(
     { limit: 200 },
     { enabled: isAuthenticated && activeTab === "activity", refetchInterval: 30_000, retry: 1 }
@@ -205,24 +203,6 @@ export default function DashboardPage() {
   const slotsPercent = Math.min(100, Math.round((slotsUsed / slotsTotal) * 100));
   const isLicensed = licenseData?.licenseStatus === "licensed";
   const tipsEnabled = connectData?.status === "enabled";
-
-  const transformStatusIcon = (status: string) => {
-    switch (status) {
-      case "success": return <CheckCircle2 className="w-4 h-4" style={{ color: "var(--lnx-green)" }} />;
-      case "failed": return <XCircle className="w-4 h-4" style={{ color: "var(--lnx-red)" }} />;
-      case "processing": return <Clock className="w-4 h-4" style={{ color: "var(--lnx-orange)" }} />;
-      default: return <Clock className="w-4 h-4" style={{ color: "#E2E8F0" }} />;
-    }
-  };
-
-  const transformStatusLabel = (status: string) => {
-    switch (status) {
-      case "success": return { label: "Complete", color: "var(--lnx-green)" };
-      case "failed": return { label: "Failed", color: "var(--lnx-red)" };
-      case "processing": return { label: "Processing", color: "var(--lnx-orange)" };
-      default: return { label: "Pending", color: "#E2E8F0" };
-    }
-  };
 
   return (
     <div className="min-h-screen" style={{ background: "#111009" }}>
@@ -581,19 +561,6 @@ export default function DashboardPage() {
             {songs?.length ? <span className="text-xs opacity-70">({songs.length})</span> : null}
           </button>
           <button
-            onClick={() => setActiveTab("transforms")}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-            style={{
-              background: activeTab === "transforms" ? "var(--ln-gold)" : "transparent",
-              color: activeTab === "transforms" ? "white" : "var(--ln-smoke)",
-              fontFamily: "'Cinzel', serif",
-            }}
-          >
-            <Wand2 className="w-4 h-4" />
-            My Transforms
-            {transforms?.length ? <span className="text-xs opacity-70">({transforms.length})</span> : null}
-          </button>
-          <button
             onClick={() => { setActiveTab("activity"); touchActivityMutation.mutate(); }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative"
             style={{
@@ -893,112 +860,8 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* My Transforms Tab */}
-        {activeTab === "transforms" && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>My AI Transforms</h2>
-                <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>AI-generated derivatives of your songs, linked to their original Witness IDs.</p>
-              </div>
-            </div>
-            {transformsError ? (
-              <DashboardErrorCard
-                section="your AI transforms"
-                error={transformsError}
-                onRetry={() => refetchTransforms()}
-                route="/dashboard#transforms"
-              />
-            ) : !transforms?.length ? (
-              <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
-                <Wand2 className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
-                <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No AI transforms yet.</p>
-                <p className="text-xs" style={{ color: "var(--ln-iron)" }}>Open any song page and use the AI Transform button to create a derivative.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {transforms.map((t: any) => {
-                  const { label, color } = transformStatusLabel(t.status);
-                  return (
-                    <div key={t.id} className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-                      <div className="flex items-start gap-4">
-                        {/* Status icon */}
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "var(--ln-coal)" }}>
-                          {transformStatusIcon(t.status)}
-                        </div>
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-sm truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
-                              Transform of "{t.originalSongTitle || `Song #${t.originalSongId}`}"
-                            </p>
-                            <Badge className="text-xs px-1.5 py-0 flex-shrink-0" style={{ background: `${color}20`, color, fontSize: "9px" }}>
-                              {label}
-                            </Badge>
-                          </div>
-                          <p className="text-xs mb-1 line-clamp-2" style={{ color: "var(--ln-smoke)" }}>
-                            <span style={{ color: "#E2E8F0" }}>Prompt: </span>{t.prompt}
-                          </p>
-                          <div className="flex items-center gap-3 flex-wrap">
-                            {t.style && (
-                              <span className="text-xs" style={{ color: "#E2E8F0" }}>Style: {t.style}</span>
-                            )}
-                            {t.originalWitnessId && (
-                              <Link href={`/verify/${t.originalWitnessId}`}>
-                                <span className="text-xs cursor-pointer hover:underline" style={{ color: "var(--ln-gold)" }}>
-                                  WID: {t.originalWitnessId.slice(0, 12)}…
-                                </span>
-                              </Link>
-                            )}
-                            <span className="text-xs" style={{ color: "var(--ln-iron)" }}>
-                              {new Date(t.createdAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                          {t.status === "failed" && t.errorMessage && (
-                            <p className="text-xs mt-1" style={{ color: "var(--lnx-red)" }}>Error: {t.errorMessage}</p>
-                          )}
-                        </div>
-                        {/* Actions */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {t.outputUrl && (
-                            <>
-                              <a href={t.outputUrl} target="_blank" rel="noopener noreferrer">
-                                <button
-                                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
-                                  title="Play transform"
-                                >
-                                  <Play className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
-                                </button>
-                              </a>
-                              <a href={t.outputUrl} download>
-                                <button
-                                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
-                                  title="Download transform"
-                                >
-                                  <Download className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
-                                </button>
-                              </a>
-                            </>
-                          )}
-                          <Link href={`/song/${t.originalSongId}`}>
-                            <button
-                              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
-                              title="View original song"
-                            >
-                              <ExternalLink className="w-3 h-3" style={{ color: "#E2E8F0" }} />
-                            </button>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
 
-                {/* Collections Tab */}
+        {/* Collections Tab */}
         {activeTab === "collections" && (
           <div>
             <div className="flex items-center justify-between mb-4">

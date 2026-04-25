@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, gte, inArray, isNotNull, like, ne, or, sql }
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {
-  InsertUser, aiTransforms, comments, downloads, licenses, likes,
+  InsertUser, comments, downloads, licenses, likes,
   slotPurchases, songs, tips, users, events,
   promoCodes, promoRedemptions,
   nameHistory,
@@ -28,6 +28,7 @@ import {
   type ProjectBlock,
   type InsertPlatformAuditLog,
   type QrShare, type InsertQrShare,
+  agents, wids, provenanceEvents,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -491,6 +492,26 @@ export async function updateSongStatus(
   await db.update(songs).set({ status, isPublic, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
+export async function getSongByWitnessId(witnessId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select({
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(eq(songs.witnessId, witnessId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 export async function updateSongMetadata(
   songId: number,
   userId: number,
@@ -760,122 +781,6 @@ export async function getRelatedSongs(songId: number, genre?: string | null, lim
     .limit(limit);
 }
 
-// ─── AI Transforms ────────────────────────────────────────────────────────────
-
-export async function createAiTransform(data: {
-  originalSongId: number;
-  userId: number;
-  prompt: string;
-  style?: string;
-  tags?: string[];
-  originalWitnessId?: string;
-}) {
-  const db = await getDb();
-  if (!db) throw new Error("Database unavailable");
-  const result = await db.insert(aiTransforms).values({
-    ...data,
-    tags: data.tags as unknown as string[],
-    status: "pending",
-  });
-  return result;
-}
-
-export async function updateAiTransform(id: number, data: {
-  sonautoTaskId?: string;
-  status?: "pending" | "processing" | "success" | "failed";
-  errorMessage?: string;
-  outputUrl?: string;
-  outputKey?: string;
-}) {
-  const db = await getDb();
-  if (!db) return;
-  await db.update(aiTransforms).set(data).where(eq(aiTransforms.id, id));
-}
-
-export async function getAiTransformsByInsertId(insertId: number) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db.select().from(aiTransforms).where(eq(aiTransforms.id, insertId)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
-}
-
-export async function getAiTransformsBySong(songId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(aiTransforms)
-    .where(and(eq(aiTransforms.originalSongId, songId), eq(aiTransforms.status, "success")))
-    .orderBy(desc(aiTransforms.createdAt))
-    .limit(20);
-}
-
-export async function getAiTransformById(id: number) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db.select().from(aiTransforms).where(eq(aiTransforms.id, id)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
-}
-
-export async function getAiTransformsByUser(userId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db
-    .select({
-      id: aiTransforms.id,
-      originalSongId: aiTransforms.originalSongId,
-      originalSongTitle: songs.title,
-      originalWitnessId: aiTransforms.originalWitnessId,
-      prompt: aiTransforms.prompt,
-      style: aiTransforms.style,
-      tags: aiTransforms.tags,
-      status: aiTransforms.status,
-      outputUrl: aiTransforms.outputUrl,
-      errorMessage: aiTransforms.errorMessage,
-      createdAt: aiTransforms.createdAt,
-    })
-    .from(aiTransforms)
-    .leftJoin(songs, eq(aiTransforms.originalSongId, songs.id))
-    .where(eq(aiTransforms.userId, userId))
-    .orderBy(desc(aiTransforms.createdAt))
-    .limit(50);
-}
-
-export async function getSongByWitnessId(witnessId: string) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db
-    .select({
-      song: songs,
-      creator: {
-        id: users.id,
-        name: users.name,
-        artistHandle: users.artistHandle,
-        profilePhotoUrl: users.profilePhotoUrl,
-      },
-    })
-    .from(songs)
-    .leftJoin(users, eq(songs.userId, users.id))
-    .where(eq(songs.witnessId, witnessId))
-    .limit(1);
-  return result.length > 0 ? result[0] : undefined;
-}
-
-export async function getTransformsByWitnessId(witnessId: string) {
-  const db = await getDb();
-  if (!db) return [];
-  return db
-    .select({
-      id: aiTransforms.id,
-      prompt: aiTransforms.prompt,
-      style: aiTransforms.style,
-      status: aiTransforms.status,
-      outputUrl: aiTransforms.outputUrl,
-      createdAt: aiTransforms.createdAt,
-    })
-    .from(aiTransforms)
-    .where(and(eq(aiTransforms.originalWitnessId, witnessId), eq(aiTransforms.status, "success")))
-    .orderBy(desc(aiTransforms.createdAt))
-    .limit(20);
-}
 
 // ─── Likes ────────────────────────────────────────────────────────────────────
 
@@ -3888,4 +3793,119 @@ export async function getQrScanStats(shareId: number): Promise<{
     .orderBy(desc(qrScans.scannedAt))
     .limit(20);
   return { total, recent };
+}
+
+// ─── Provenance Events (CreatorSurface / Writer satchel) ─────────────────────
+
+export async function insertProvenanceEvent(data: {
+  eventId: string;
+  creatorId: number;
+  agentId?: number | null;
+  actionType: "draft" | "checkpoint" | "anchor" | "fork";
+  parentEventId?: string | null;
+  origin?: {
+    origin_type: "original" | "derived" | "assisted";
+    source_refs: string[];
+    transformation_type: "rewrite" | "remix" | "extension" | null;
+  } | null;
+  payloadCanonical: string;
+  signature?: string | null;
+  sessionLabel?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const { provenanceEvents } = await import("../drizzle/schema");
+  await db.insert(provenanceEvents).values({
+    eventId: data.eventId,
+    creatorId: data.creatorId,
+    agentId: data.agentId ?? null,
+    actionType: data.actionType,
+    parentEventId: data.parentEventId ?? null,
+    origin: data.origin ?? null,
+    payloadCanonical: data.payloadCanonical,
+    signature: data.signature ?? null,
+    sessionLabel: data.sessionLabel ?? null,
+  });
+  return { eventId: data.eventId };
+}
+
+export async function getProvenanceEventsByCreator(creatorId: number, limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  const { provenanceEvents } = await import("../drizzle/schema");
+  return db
+    .select()
+    .from(provenanceEvents)
+    .where(eq(provenanceEvents.creatorId, creatorId))
+    .orderBy(desc(provenanceEvents.createdAt))
+    .limit(limit);
+}
+
+export async function getLatestProvenanceCheckpoint(creatorId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const { provenanceEvents } = await import("../drizzle/schema");
+  const rows = await db
+    .select()
+    .from(provenanceEvents)
+    .where(and(
+      eq(provenanceEvents.creatorId, creatorId),
+      eq(provenanceEvents.actionType, "checkpoint")
+    ))
+    .orderBy(desc(provenanceEvents.createdAt))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+// ─── Agents (Personal Nexus Agent) ───────────────────────────────────────────
+
+export async function getOrCreateAgent(userId: number) {
+  const db = await getDb();
+  const existing = await db.select().from(agents).where(eq(agents.userId, userId)).limit(1);
+  if (existing[0]) return existing[0];
+  await db.insert(agents).values({ userId });
+  const created = await db.select().from(agents).where(eq(agents.userId, userId)).limit(1);
+  return created[0]!;
+}
+
+export async function updateAgentFingerprint(
+  agentId: number,
+  styleFingerprint: { tone: string[]; structure_patterns: string[]; common_transforms: string[] },
+  frozenTraits?: { voice_constraints: string[] }
+) {
+  const db = await getDb();
+  const update: Record<string, unknown> = { styleFingerprint };
+  if (frozenTraits) update.frozenTraits = frozenTraits;
+  await db.update(agents).set(update).where(eq(agents.id, agentId));
+}
+
+// ─── WIDs ─────────────────────────────────────────────────────────────────────
+
+export async function insertWid(data: {
+  wid: string;
+  eventId: string;
+  contentHash: string;
+  creatorId: number;
+  signature?: string | null;
+}) {
+  const db = await getDb();
+  await db.insert(wids).values(data).onDuplicateKeyUpdate({ set: { eventId: data.eventId } });
+  return data;
+}
+
+export async function getWidWithEvent(widValue: string) {
+  const db = await getDb();
+  const widRow = await db.select().from(wids).where(eq(wids.wid, widValue)).limit(1);
+  if (!widRow[0]) return null;
+  const w = widRow[0];
+  const creator = await db.select({ id: users.id, name: users.name }).from(users).where(eq(users.id, w.creatorId)).limit(1);
+  const event = await db.select().from(provenanceEvents).where(eq(provenanceEvents.eventId, w.eventId)).limit(1);
+  return { wid: w, creator: creator[0] ?? null, event: event[0] ?? null };
+}
+
+// ─── Keypair ──────────────────────────────────────────────────────────────────
+
+export async function setUserPublicKey(userId: number, publicKeyHex: string) {
+  const db = await getDb();
+  await db.update(users).set({ publicKey: publicKeyHex }).where(eq(users.id, userId));
 }

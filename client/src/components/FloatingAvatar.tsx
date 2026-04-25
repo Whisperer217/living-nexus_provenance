@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { X, Minimize2, ChevronUp, Music2, Sword } from "lucide-react";
+import { X, Minimize2, ChevronUp, Music2, Sword, PenLine, Bold, Italic, Highlighter, ImagePlus, Trash2, Wand2, ClipboardCopy, Loader2, Mic, MicOff, Palette, Eye } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 // ─── Skin image URLs ──────────────────────────────────────────────────────────
 
@@ -86,6 +87,50 @@ export default function FloatingAvatar({
 }: FloatingAvatarProps) {
   const [, navigate] = useLocation();
   const [expanded, setExpanded] = useState(false);
+  const [sandboxOpen, setSandboxOpen] = useState(false);
+  const [sandboxTab, setSandboxTab] = useState<"write" | "ppg">("write");
+  const [sandboxText, setSandboxText] = useState("");
+  const [sandboxImages, setSandboxImages] = useState<string[]>([]);
+  const [sandboxUploading, setSandboxUploading] = useState(false);
+  const sandboxFileRef = useRef<HTMLInputElement>(null);
+  const sandboxTextRef = useRef<HTMLTextAreaElement>(null);
+  // PPG state
+  const [ppgType, setPpgType] = useState<"style_prompt" | "lyric_brief" | "composer_blueprint" | "visual_direction" | "press_bio">("style_prompt");
+  const [ppgPlatform, setPpgPlatform] = useState<"suno" | "udio" | "general">("suno");
+  const [ppgBlocks, setPpgBlocks] = useState([{ label: "", content: "" }]);
+  const [ppgResult, setPpgResult] = useState<{ expressionPrompt?: string; expressionStyleTags?: string; expressionComposerNote?: string; expressionId?: string } | null>(null);
+  const generatePpgMutation = trpc.promptStudio.generateStylePrompt.useMutation({
+    onSuccess: (data) => setPpgResult(data as typeof ppgResult),
+  });
+  // ─── Mic / transcription state ───────────────────────────────────────────────
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const transcribeVoiceMutation = trpc.keeper.transcribeVoice.useMutation({
+    onSuccess: (data) => {
+      if (data.text) setSandboxText(prev => prev ? prev + '\n' + data.text : data.text);
+      setIsTranscribing(false);
+    },
+    onError: () => setIsTranscribing(false),
+  });
+  // ─── Artwork generation state ─────────────────────────────────────────────────
+  const [generatedArtUrl, setGeneratedArtUrl] = useState<string | null>(null);
+  const [isGeneratingArt, setIsGeneratingArt] = useState(false);
+  const generateArtworkMutation = trpc.keeper.generateArtwork.useMutation({
+    onSuccess: (data) => { setGeneratedArtUrl(data.url); setIsGeneratingArt(false); },
+    onError: () => setIsGeneratingArt(false),
+  });
+  // ─── Image analysis state ─────────────────────────────────────────────────────
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const analyzeImageMutation = trpc.keeper.analyzeImage.useMutation({
+    onSuccess: (data) => {
+      onAskAgent?.(`[KEEPER VISION] ${data.analysis}`);
+      setSandboxOpen(false);
+      setIsAnalyzingImage(false);
+    },
+    onError: () => setIsAnalyzingImage(false),
+  });
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
     try {
       const saved = localStorage.getItem("ln_avatar_pos");
@@ -111,29 +156,210 @@ export default function FloatingAvatar({
     }
   }, [agentMessages, expanded]);
 
-  // ─── Drag handlers ──────────────────────────────────────────────────────────
+  // ─── Drag handlers (mouse + touch) ──────────────────────────────────────────
 
+  // Desktop drag — 200ms hold initiates drag, short click still opens panel
+  const mouseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mouseDragStarted = useRef(false);
   const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return; // left button only
     e.preventDefault();
-    setDragging(true);
-    dragStart.current = { mx: e.clientX, my: e.clientY, ox: position.x, oy: position.y };
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const ox = position.x;
+    const oy = position.y;
+    mouseDragStarted.current = false;
+    mouseTimer.current = setTimeout(() => {
+      mouseDragStarted.current = true;
+      setDragging(true);
+      dragStart.current = { mx: startX, my: startY, ox, oy };
+    }, 200);
   }, [position]);
+  const onMouseUp = useCallback(() => {
+    if (mouseTimer.current) { clearTimeout(mouseTimer.current); mouseTimer.current = null; }
+    if (!mouseDragStarted.current && !expanded) {
+      // Short click — open panel
+      setExpanded(true);
+    }
+    mouseDragStarted.current = false;
+    setDragging(false);
+  }, [expanded]);
+
+  // Touch drag — long-press (280ms) initiates drag so quick taps still open the panel
+  const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    const ox = position.x;
+    const oy = position.y;
+    touchTimer.current = setTimeout(() => {
+      setDragging(true);
+      dragStart.current = { mx: t.clientX, my: t.clientY, ox, oy };
+    }, 280);
+  }, [position]);
+  const onTouchEndOrCancel = useCallback(() => {
+    if (touchTimer.current) { clearTimeout(touchTimer.current); touchTimer.current = null; }
+    setDragging(false);
+  }, []);
 
   useEffect(() => {
     if (!dragging) return;
+    const savePos = (newPos: { x: number; y: number }) => {
+      setPosition(newPos);
+      try { localStorage.setItem("ln_avatar_pos", JSON.stringify(newPos)); } catch {}
+    };
     const onMove = (e: MouseEvent) => {
       if (!dragStart.current) return;
       const dx = e.clientX - dragStart.current.mx;
       const dy = e.clientY - dragStart.current.my;
-      const newPos = { x: dragStart.current.ox - dx, y: dragStart.current.oy - dy };
-      setPosition(newPos);
-      try { localStorage.setItem("ln_avatar_pos", JSON.stringify(newPos)); } catch {}
+      savePos({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragStart.current) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      const dx = t.clientX - dragStart.current.mx;
+      const dy = t.clientY - dragStart.current.my;
+      savePos({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
     };
     const onUp = () => setDragging(false);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    window.addEventListener("touchcancel", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onUp);
+      window.removeEventListener("touchcancel", onUp);
+    };
   }, [dragging]);
+
+  // ─── Sandbox helpers ────────────────────────────────────────────────────────
+
+  const applyFormat = (tag: string) => {
+    const ta = sandboxTextRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart ?? 0;
+    const end = ta.selectionEnd ?? 0;
+    const sel = sandboxText.slice(start, end);
+    if (!sel) return;
+    const wrapped = tag === "highlight"
+      ? `==${sel}==`
+      : tag === "bold"
+        ? `**${sel}**`
+        : `_${sel}_`;
+    setSandboxText(sandboxText.slice(0, start) + wrapped + sandboxText.slice(end));
+  };
+
+  const handleSandboxImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return;
+    setSandboxUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("type", "image");
+      const res = await fetch("/api/upload-file", { method: "POST", body: form });
+      const json = await res.json();
+      if (json.url) setSandboxImages(prev => [...prev, json.url]);
+    } catch {}
+    setSandboxUploading(false);
+    if (sandboxFileRef.current) sandboxFileRef.current.value = "";
+  };
+
+  const sendSandboxToKeeper = async () => {
+    if (!sandboxText.trim() && sandboxImages.length === 0) return;
+    // If images are attached, run vision analysis on the first image first,
+    // then include the analysis + text in the chat message so the LLM actually
+    // sees the image content instead of receiving a bare text label.
+    if (sandboxImages.length > 0) {
+      setIsAnalyzingImage(true);
+      try {
+        const results = await Promise.all(
+          sandboxImages.map(url =>
+            analyzeImageMutation.mutateAsync({ imageUrl: url, context: sandboxText || undefined })
+          )
+        );
+        const visionSummary = results.map((r, i) => `[Image ${i + 1} analysis]: ${r.analysis}`).join('\n');
+        const fullMessage = sandboxText.trim()
+          ? `${sandboxText.trim()}\n\n${visionSummary}`
+          : visionSummary;
+        onAskAgent?.(fullMessage);
+      } catch {
+        // Fall back to text-only if vision fails
+        onAskAgent?.(sandboxText.trim() || '[Image attached — analysis unavailable]');
+      } finally {
+        setIsAnalyzingImage(false);
+      }
+    } else {
+      onAskAgent?.(sandboxText.trim());
+    }
+    setSandboxText("");
+    setSandboxImages([]);
+    setSandboxOpen(false);
+  };
+
+  // ─── Mic recording helpers ───────────────────────────────────────────────────
+  // recordedBlobRef holds the last recorded blob so the user can choose to
+  // transcribe it or discard it after stopping.
+  const recordedBlobRef = useRef<{ blob: Blob; mimeType: string } | null>(null);
+  const [hasRecording, setHasRecording] = useState(false);
+
+  const startRecording = async () => {
+    if (isRecording) return;
+    recordedBlobRef.current = null;
+    setHasRecording(false);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      recorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (blob.size > 0 && blob.size <= 16 * 1024 * 1024) {
+          recordedBlobRef.current = { blob, mimeType };
+          setHasRecording(true);
+        }
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Mic access denied', err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (!isRecording) return;
+    mediaRecorderRef.current?.stop();
+    mediaRecorderRef.current = null;
+    setIsRecording(false);
+    // hasRecording will be set true by recorder.onstop
+  };
+
+  const transcribeRecording = () => {
+    const rec = recordedBlobRef.current;
+    if (!rec) return;
+    setIsTranscribing(true);
+    setHasRecording(false);
+    recordedBlobRef.current = null;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(',')[1];
+      transcribeVoiceMutation.mutate({ audioBase64: base64, mimeType: rec.mimeType as 'audio/webm' | 'audio/mp4' });
+    };
+    reader.readAsDataURL(rec.blob);
+  };
+
+  const discardRecording = () => {
+    recordedBlobRef.current = null;
+    setHasRecording(false);
+  };
 
   // ─── Now Playing → agent thread notification ─────────────────────────────────
   useEffect(() => {
@@ -225,11 +451,37 @@ export default function FloatingAvatar({
           userSelect: "none",
         }}
       >
-        {/* Drag handle ring */}
+        {/* Drag handle ring — hold-to-drag on both mouse and touch (200ms threshold) */}
         <div
           className="absolute inset-0 rounded-full cursor-grab"
-          style={{ zIndex: 1 }}
+          style={{ zIndex: 3 }}
           onMouseDown={onMouseDown}
+          onMouseUp={onMouseUp}
+          onTouchStart={(e) => {
+            // Record touch start position to distinguish tap vs drag
+            const t = e.touches[0];
+            const startX = t.clientX;
+            const startY = t.clientY;
+            const ox = position.x;
+            const oy = position.y;
+
+            touchTimer.current = setTimeout(() => {
+              setDragging(true);
+              dragStart.current = { mx: startX, my: startY, ox, oy };
+            }, 200);
+            // Store start position for tap detection
+            (e.currentTarget as HTMLDivElement).dataset.touchStartX = String(startX);
+            (e.currentTarget as HTMLDivElement).dataset.touchStartY = String(startY);
+          }}
+          onTouchEnd={(e) => {
+            if (touchTimer.current) { clearTimeout(touchTimer.current); touchTimer.current = null; }
+            if (!dragging) {
+              // It was a tap — open the panel
+              setExpanded(true);
+            }
+            setDragging(false);
+          }}
+          onTouchCancel={onTouchEndOrCancel}
         />
 
         {/* Orb */}
@@ -292,22 +544,37 @@ export default function FloatingAvatar({
 
   // ─── Expanded panel ──────────────────────────────────────────────────────────
 
+  // On mobile (<640px) use near-full-screen overlay; on desktop use 320x480 anchored panel
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
   return (
     <div
-      className="fixed flex flex-col rounded-lg overflow-hidden"
+      className="fixed flex flex-col overflow-hidden"
       style={{
-        bottom: orbBottom,
-        right: orbRight,
-        zIndex: ORB_Z,
-        width: 320,
-        height: 480,
+        // Mobile: full-screen overlay from bottom, ignoring drag position
+        ...(isMobile ? {
+          bottom: 0,
+          left: 0,
+          right: 0,
+          top: "auto",
+          height: "80vh",
+          borderRadius: "16px 16px 0 0",
+          zIndex: ORB_Z,
+        } : {
+          bottom: orbBottom,
+          right: orbRight,
+          width: 320,
+          height: 480,
+          borderRadius: 8,
+          zIndex: ORB_Z,
+        }),
         background: "var(--ln-panel)",
         border: `1px solid ${modeColor}66`,
         boxShadow: `0 0 0 1px ${modeColor}22, 0 8px 40px rgba(0,0,0,0.7)`,
         userSelect: "none",
       }}
     >
-      {/* Header — drag zone */}
+      {/* Header — drag zone (mouse + touch) */}
       <div
         className="flex items-center gap-2 px-3 py-2 flex-shrink-0 cursor-grab"
         style={{
@@ -315,6 +582,10 @@ export default function FloatingAvatar({
           borderBottom: `1px solid ${modeColor}33`,
         }}
         onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEndOrCancel}
+        onTouchCancel={onTouchEndOrCancel}
       >
         {/* Portrait thumbnail */}
         <div
@@ -340,6 +611,15 @@ export default function FloatingAvatar({
 
         {/* Controls */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {/* Sandbox toggle */}
+          <button
+            className="w-5 h-5 flex items-center justify-center rounded hover:opacity-70 transition-opacity"
+            style={{ color: sandboxOpen ? modeColor : "var(--ln-smoke)", background: sandboxOpen ? `${modeColor}22` : "transparent" }}
+            onClick={() => setSandboxOpen(v => !v)}
+            title={sandboxOpen ? "Close Sandbox" : "Open Creative Sandbox"}
+          >
+            <PenLine style={{ width: 12, height: 12 }} />
+          </button>
           {onCinematicToggle && (
             <button
               className="w-5 h-5 flex items-center justify-center rounded hover:opacity-70 transition-opacity"
@@ -395,112 +675,398 @@ export default function FloatingAvatar({
         </div>
       )}
 
-      {/* Mode tabs */}
-      <div
-        className="flex flex-shrink-0"
-        style={{ borderBottom: `1px solid var(--ln-panel-border)` }}
-      >
-        {(["Guide", "Conductor", "Critic", "Custodian"] as const).map(m => (
-          <button
-            key={m}
-            onClick={() => onModeChange?.(m)}
-            className="flex-1 py-1.5 text-center transition-colors"
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.55rem",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: agentMode === m ? MODE_COLORS[m] : "var(--ln-smoke)",
-              borderBottom: agentMode === m ? `2px solid ${MODE_COLORS[m]}` : "2px solid transparent",
-              background: "transparent",
-            }}
-          >
-            {m}
-          </button>
-        ))}
-      </div>
-
-      {/* Message thread */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {agentMessages.length === 0 && (
-          <div
-            className="text-xs text-center mt-4"
-            style={{ color: "var(--ln-smoke)", fontFamily: "'EB Garamond', serif", fontStyle: "italic" }}
-          >
-            Your Keeper watches. Speak when ready.
+      {/* ── SANDBOX VIEW ─────────────────────────────────────────────────────── */}
+      {sandboxOpen ? (
+        <>
+          {/* Sandbox tab bar */}
+          <div className="flex flex-shrink-0" style={{ borderBottom: `1px solid var(--ln-panel-border)` }}>
+            {(["write", "ppg"] as const).map(t => (
+              <button key={t} onClick={() => setSandboxTab(t)}
+                className="flex-1 py-1.5 text-center transition-colors"
+                style={{
+                  fontFamily: "'Space Mono', monospace", fontSize: "0.55rem",
+                  letterSpacing: "0.08em", textTransform: "uppercase",
+                  color: sandboxTab === t ? modeColor : "var(--ln-smoke)",
+                  borderBottom: sandboxTab === t ? `2px solid ${modeColor}` : "2px solid transparent",
+                  background: "transparent",
+                }}>
+                {t === "write" ? "✍ Write" : "⬡ PPG"}
+              </button>
+            ))}
           </div>
-        )}
-        {agentMessages.map(msg => (
-          <div key={msg.id} className="text-sm leading-relaxed">
-            <span
-              className="text-xs mr-2"
-              style={{
-                color: MODE_COLORS[msg.mode] ?? modeColor,
-                fontFamily: "'Space Mono', monospace",
-                fontSize: "0.55rem",
-              }}
-            >
-              [{msg.mode}]
-            </span>
-            <span style={{ color: "var(--ln-parchment)", fontSize: "0.8rem" }}>{msg.content}</span>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
 
-      {/* Ask button */}
-      <div
-        className="flex-shrink-0 p-2"
-        style={{ borderTop: `1px solid var(--ln-panel-border)` }}
-      >
-        <div style={{ display: "flex", gap: 6 }}>
-          <input
-            id="keeper-input"
-            type="text"
-            placeholder="speak to your keeper…"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                const val = (e.target as HTMLInputElement).value.trim();
-                if (val) { onAskAgent?.(val); (e.target as HTMLInputElement).value = ""; }
-              }
-            }}
-            style={{
-              flex: 1,
-              background: "rgba(255,255,255,0.04)",
-              border: `1px solid ${modeColor}33`,
-              borderRadius: 6,
-              padding: "6px 10px",
-              fontSize: "0.7rem",
-              color: "var(--ln-parchment)",
-              fontFamily: "'Space Mono', monospace",
-              outline: "none",
-            }}
-          />
-          <button
-            className="rounded transition-colors hover:opacity-80"
-            style={{
-              background: `${modeColor}22`,
-              border: `1px solid ${modeColor}44`,
-              color: modeColor,
-              padding: "6px 10px",
-              fontSize: "0.65rem",
-              fontFamily: "'Space Mono', monospace",
-              cursor: "pointer",
-              flexShrink: 0,
-              opacity: isThinking ? 0.5 : 1,
-            }}
-            disabled={isThinking}
-            onClick={() => {
-              const el = document.getElementById("keeper-input") as HTMLInputElement | null;
-              const val = el?.value.trim();
-              if (val) { onAskAgent?.(val); if (el) el.value = ""; }
-            }}
-          >
-            {isThinking ? "···" : "→"}
-          </button>
-        </div>
-      </div>
+          {/* Sandbox body */}
+          <div className="flex-1 overflow-y-auto flex flex-col" style={{ minHeight: 0 }}>
+
+            {/* ── WRITE TAB ── */}
+            {sandboxTab === "write" && (
+              <div className="flex flex-col flex-1 p-3 gap-2">
+                {/* Formatting toolbar */}
+                <div className="flex items-center gap-1 flex-shrink-0 flex-wrap">
+                  {[{ icon: Bold, tag: "bold", title: "Bold" }, { icon: Italic, tag: "italic", title: "Italic" }, { icon: Highlighter, tag: "highlight", title: "Highlight" }].map(({ icon: Icon, tag, title }) => (
+                    <button key={tag} onClick={() => applyFormat(tag)} title={title}
+                      className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-opacity"
+                      style={{ background: "rgba(255,255,255,0.05)", border: `1px solid var(--ln-panel-border)`, color: "var(--ln-smoke)" }}>
+                      <Icon style={{ width: 10, height: 10 }} />
+                    </button>
+                  ))}
+                  {/* Mic button — click to START recording */}
+                  <button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isTranscribing || hasRecording}
+                    title={isRecording ? "Stop recording" : isTranscribing ? "Transcribing…" : "Record voice"}
+                    className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-all"
+                    style={{
+                      background: isRecording ? "rgba(251,113,133,0.25)" : isTranscribing ? "rgba(196,154,40,0.2)" : "rgba(255,255,255,0.05)",
+                      border: `1px solid ${isRecording ? "rgba(251,113,133,0.6)" : isTranscribing ? "rgba(196,154,40,0.4)" : "var(--ln-panel-border)"}`,
+                      color: isRecording ? "rgba(251,113,133,0.9)" : isTranscribing ? "var(--ln-gold)" : "var(--ln-smoke)",
+                      boxShadow: isRecording ? "0 0 8px rgba(251,113,133,0.4)" : "none",
+                    }}>
+                    {isTranscribing
+                      ? <Loader2 style={{ width: 10, height: 10 }} className="animate-spin" />
+                      : isRecording
+                        ? <MicOff style={{ width: 10, height: 10 }} />
+                        : <Mic style={{ width: 10, height: 10 }} />}
+                  </button>
+                  <div className="flex-1" />
+                  {/* Image attach */}
+                  <input ref={sandboxFileRef} type="file" accept="image/*" className="hidden" onChange={handleSandboxImageUpload} />
+                  <button onClick={() => sandboxFileRef.current?.click()} disabled={sandboxUploading} title="Attach Image"
+                    className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-opacity"
+                    style={{ background: "rgba(255,255,255,0.05)", border: `1px solid var(--ln-panel-border)`, color: "var(--ln-smoke)" }}>
+                    {sandboxUploading ? <Loader2 style={{ width: 10, height: 10 }} className="animate-spin" /> : <ImagePlus style={{ width: 10, height: 10 }} />}
+                  </button>
+                  {sandboxText || sandboxImages.length > 0 ? (
+                    <button onClick={() => { setSandboxText(""); setSandboxImages([]); }} title="Clear"
+                      className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-opacity"
+                      style={{ background: "rgba(255,255,255,0.05)", border: `1px solid var(--ln-panel-border)`, color: "rgba(251,113,133,0.7)" }}>
+                      <Trash2 style={{ width: 10, height: 10 }} />
+                    </button>
+                  ) : null}
+                </div>
+                {/* Recording action bar */}
+                {isRecording && (
+                  <div className="flex items-center gap-2 px-2 py-1.5 rounded"
+                    style={{ background: "rgba(251,113,133,0.1)", border: "1px solid rgba(251,113,133,0.3)" }}>
+                    <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0" />
+                    <span className="text-[10px] font-mono flex-1" style={{ color: "rgba(251,113,133,0.9)" }}>Recording…</span>
+                    <button onClick={stopRecording}
+                      className="px-2 py-0.5 rounded text-[9px] font-mono font-semibold transition-all hover:opacity-80"
+                      style={{ background: "rgba(251,113,133,0.25)", border: "1px solid rgba(251,113,133,0.5)", color: "rgba(251,113,133,0.95)" }}>
+                      ■ STOP
+                    </button>
+                  </div>
+                )}
+                {hasRecording && !isRecording && (
+                  <div className="flex items-center gap-2 px-2 py-1.5 rounded"
+                    style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.3)" }}>
+                    <span className="text-[10px] font-mono flex-1" style={{ color: "var(--ln-gold)" }}>✓ Recording ready</span>
+                    <button onClick={transcribeRecording}
+                      className="px-2 py-0.5 rounded text-[9px] font-mono font-semibold transition-all hover:opacity-80"
+                      style={{ background: "rgba(196,154,40,0.2)", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-gold)" }}>
+                      TRANSCRIBE
+                    </button>
+                    <button onClick={discardRecording}
+                      className="px-1.5 py-0.5 rounded text-[9px] font-mono transition-all hover:opacity-80"
+                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--ln-panel-border)", color: "rgba(251,113,133,0.7)" }}>
+                      ×
+                    </button>
+                  </div>
+                )}
+                {isTranscribing && (
+                  <div className="flex items-center gap-2 px-2 py-1 rounded text-[10px] font-mono"
+                    style={{ background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                    <Loader2 className="w-3 h-3 animate-spin" /> Transcribing your voice…
+                  </div>
+                )}
+
+                {/* Text area */}
+                <textarea
+                  ref={sandboxTextRef}
+                  value={sandboxText}
+                  onChange={e => setSandboxText(e.target.value)}
+                  placeholder="Write lyrics, notes, ideas, or anything your Keeper can help with…"
+                  className="flex-1 resize-none outline-none w-full"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: `1px solid var(--ln-panel-border)`,
+                    borderRadius: 6,
+                    padding: "8px 10px",
+                    fontSize: "0.75rem",
+                    lineHeight: 1.6,
+                    color: "var(--ln-parchment)",
+                    fontFamily: "'EB Garamond', serif",
+                    minHeight: 120,
+                  }}
+                />
+
+                {/* Attached images */}
+                {sandboxImages.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {sandboxImages.map((url, i) => (
+                      <div key={i} className="relative flex-shrink-0 group"
+                        style={{ width: 48, height: 48 }}>
+                        <div className="w-full h-full rounded overflow-hidden"
+                          style={{ border: `1px solid var(--ln-panel-border)` }}>
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        {/* Analyze with Keeper button */}
+                        <button
+                          onClick={() => {
+                            setIsAnalyzingImage(true);
+                            analyzeImageMutation.mutate({ imageUrl: url, context: sandboxText || undefined });
+                          }}
+                          disabled={isAnalyzingImage}
+                          title="Keeper: Analyze this image"
+                          className="absolute bottom-0 left-0 right-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ background: "rgba(0,0,0,0.75)", height: 18, borderRadius: "0 0 4px 4px", color: "var(--ln-gold)", fontSize: 8 }}>
+                          {isAnalyzingImage ? <Loader2 style={{ width: 8, height: 8 }} className="animate-spin" /> : <><Eye style={{ width: 8, height: 8 }} /> <span className="ml-0.5">Analyze</span></>}
+                        </button>
+                        <button onClick={() => setSandboxImages(prev => prev.filter((_, j) => j !== i))}
+                          className="absolute top-0 right-0 w-4 h-4 flex items-center justify-center"
+                          style={{ background: "rgba(0,0,0,0.7)", color: "rgba(251,113,133,0.9)", fontSize: 9, borderRadius: "0 4px 0 4px" }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Send to Keeper */}
+                <button onClick={sendSandboxToKeeper}
+                  disabled={!sandboxText.trim() && sandboxImages.length === 0}
+                  className="w-full py-2 rounded text-xs font-semibold transition-all disabled:opacity-40"
+                  style={{
+                    background: `${modeColor}22`, border: `1px solid ${modeColor}44`,
+                    color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em",
+                  }}>
+                  SEND TO KEEPER →
+                </button>
+              </div>
+            )}
+
+            {/* ── PPG TAB ── */}
+            {sandboxTab === "ppg" && (
+              <div className="flex flex-col p-3 gap-3 overflow-y-auto">
+                {/* Prompt type */}
+                <div>
+                  <div className="text-[10px] font-mono tracking-widest mb-1" style={{ color: "var(--ln-gold)" }}>PROMPT TYPE</div>
+                  <select value={ppgType} onChange={e => { setPpgType(e.target.value as typeof ppgType); setPpgResult(null); }}
+                    className="w-full rounded px-2 py-1.5 text-xs appearance-none cursor-pointer outline-none"
+                    style={{ background: `${modeColor}11`, border: `1px solid ${modeColor}33`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>
+                    <option value="style_prompt">🎵 Style Prompt</option>
+                    <option value="lyric_brief">✍️ Lyric Brief</option>
+                    <option value="composer_blueprint">🎛️ Composer Blueprint</option>
+                    <option value="visual_direction">🎨 Visual Direction</option>
+                    <option value="press_bio">📰 Press Bio</option>
+                  </select>
+                </div>
+
+                {/* Platform */}
+                <div className="flex gap-1.5">
+                  {(["suno", "udio", "general"] as const).map(p => (
+                    <button key={p} onClick={() => setPpgPlatform(p)}
+                      className="flex-1 py-1 rounded text-center text-xs font-mono transition-all"
+                      style={ppgPlatform === p
+                        ? { background: `${modeColor}22`, border: `1px solid ${modeColor}55`, color: modeColor, fontSize: "0.55rem" }
+                        : { background: "transparent", border: `1px solid var(--ln-panel-border)`, color: "var(--ln-smoke)", fontSize: "0.55rem" }}>
+                      {p.charAt(0).toUpperCase() + p.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Inspiration blocks */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>INSPIRATION</div>
+                    <button onClick={() => setPpgBlocks(prev => [...prev, { label: "", content: "" }])}
+                      className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ color: modeColor, background: `${modeColor}11`, border: `1px solid ${modeColor}22` }}>+ Add</button>
+                  </div>
+                  {ppgBlocks.map((block, idx) => (
+                    <div key={idx} className="mb-2 p-2 rounded" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid var(--ln-panel-border)` }}>
+                      <div className="flex items-center gap-1 mb-1">
+                        <input value={block.label}
+                          onChange={e => setPpgBlocks(prev => prev.map((b, i) => i === idx ? { ...b, label: e.target.value } : b))}
+                          placeholder="Label (e.g. Lyrics, Mood)"
+                          className="flex-1 bg-transparent outline-none text-[10px] font-mono"
+                          style={{ color: modeColor, borderBottom: `1px solid ${modeColor}22`, paddingBottom: 1 }} />
+                        {ppgBlocks.length > 1 && (
+                          <button onClick={() => setPpgBlocks(prev => prev.filter((_, i) => i !== idx))}
+                            style={{ color: "rgba(251,113,133,0.7)", fontSize: 10, lineHeight: 1 }}>×</button>
+                        )}
+                      </div>
+                      <textarea value={block.content}
+                        onChange={e => setPpgBlocks(prev => prev.map((b, i) => i === idx ? { ...b, content: e.target.value } : b))}
+                        placeholder="Paste lyrics, describe a style, mood, reference…"
+                        rows={3}
+                        className="w-full bg-transparent outline-none resize-none text-xs leading-relaxed"
+                        style={{ color: "var(--ln-parchment)", fontSize: "0.7rem" }} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Generate button */}
+                <button
+                  onClick={() => generatePpgMutation.mutate({ targetPlatform: ppgPlatform, promptType: ppgType, userInputBlocks: ppgBlocks.filter(b => b.content.trim()) })}
+                  disabled={generatePpgMutation.isPending || ppgBlocks.every(b => !b.content.trim())}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded text-xs font-semibold transition-all disabled:opacity-40"
+                  style={{ background: `${modeColor}22`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>
+                  {generatePpgMutation.isPending
+                    ? <><Loader2 className="w-3 h-3 animate-spin" /> Generating…</>
+                    : <><Wand2 className="w-3 h-3" /> Generate Provenance Prompt</>}
+                </button>
+
+                {/* Result */}
+                {ppgResult?.expressionPrompt && (
+                  <div className="space-y-2 pt-2" style={{ borderTop: `1px solid var(--ln-panel-border)` }}>
+                    {ppgResult.expressionId && (
+                      <div className="flex items-center gap-2 px-2 py-1.5 rounded"
+                        style={{ background: `${modeColor}11`, border: `1px solid ${modeColor}33` }}>
+                        <span className="font-mono text-[10px] font-bold flex-1 truncate" style={{ color: modeColor }}>{ppgResult.expressionId}</span>
+                        <button onClick={() => navigator.clipboard.writeText(ppgResult.expressionId ?? "")}
+                          className="flex-shrink-0" style={{ color: modeColor, fontSize: 9 }}>
+                          <ClipboardCopy style={{ width: 10, height: 10 }} />
+                        </button>
+                      </div>
+                    )}
+                    <div className="p-2 rounded" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid var(--ln-panel-border)` }}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-mono tracking-widest" style={{ color: "var(--ln-gold)" }}>PROMPT</span>
+                        <button onClick={() => navigator.clipboard.writeText(ppgResult.expressionPrompt ?? "")} style={{ color: "var(--ln-gold)", fontSize: 9 }}>
+                          <ClipboardCopy style={{ width: 10, height: 10 }} />
+                        </button>
+                      </div>
+                      <p className="text-xs leading-relaxed" style={{ color: "var(--ln-parchment)", fontSize: "0.7rem" }}>{ppgResult.expressionPrompt}</p>
+                    </div>
+                    {ppgResult.expressionStyleTags && (
+                      <div className="p-2 rounded" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid var(--ln-panel-border)` }}>
+                        <div className="text-[10px] font-mono tracking-widest mb-1" style={{ color: "var(--ln-smoke)" }}>STYLE TAGS</div>
+                        <p className="text-xs" style={{ color: "rgba(209,213,219,0.7)", fontSize: "0.65rem" }}>{ppgResult.expressionStyleTags}</p>
+                      </div>
+                    )}
+                    {/* Generate Art from prompt */}
+                    <button
+                      onClick={() => {
+                        if (!ppgResult.expressionPrompt) return;
+                        setIsGeneratingArt(true);
+                        setGeneratedArtUrl(null);
+                        generateArtworkMutation.mutate({
+                          prompt: ppgResult.expressionPrompt,
+                          styleTags: ppgResult.expressionStyleTags ? ppgResult.expressionStyleTags.split(',').map(s => s.trim()) : [],
+                        });
+                      }}
+                      disabled={isGeneratingArt}
+                      className="w-full flex items-center justify-center gap-2 py-1.5 rounded text-xs font-semibold transition-all disabled:opacity-40"
+                      style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.35)", color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>
+                      {isGeneratingArt
+                        ? <><Loader2 className="w-3 h-3 animate-spin" /> Generating Artwork…</>
+                        : <><Palette className="w-3 h-3" /> Generate Art from Prompt</>}
+                    </button>
+                    {/* Generated artwork preview */}
+                    {generatedArtUrl && (
+                      <div className="rounded overflow-hidden" style={{ border: "1px solid rgba(196,154,40,0.3)" }}>
+                        <img src={generatedArtUrl} alt="Generated artwork" className="w-full object-cover" style={{ maxHeight: 160 }} />
+                        <div className="flex gap-1 p-1.5" style={{ background: "rgba(0,0,0,0.5)" }}>
+                          <a href={generatedArtUrl} download="keeper-artwork.png" target="_blank" rel="noreferrer"
+                            className="flex-1 text-center py-1 rounded text-[10px] font-mono transition-all"
+                            style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                            Download
+                          </a>
+                          <button
+                            onClick={() => { onAskAgent?.(`[KEEPER ARTWORK] ${generatedArtUrl}`); setSandboxOpen(false); }}
+                            className="flex-1 py-1 rounded text-[10px] font-mono transition-all"
+                            style={{ background: `${modeColor}15`, border: `1px solid ${modeColor}33`, color: modeColor }}>
+                            Send to Keeper
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {/* Send to Keeper */}
+                    <button onClick={() => { onAskAgent?.(`[PPG RESULT] ${ppgResult.expressionPrompt}`); setSandboxOpen(false); }}
+                      className="w-full py-1.5 rounded text-xs font-semibold transition-all"
+                      style={{ background: `${modeColor}22`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>
+                      SEND TO KEEPER →
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Mode tabs */}
+          <div className="flex flex-shrink-0" style={{ borderBottom: `1px solid var(--ln-panel-border)` }}>
+            {(["Guide", "Conductor", "Critic", "Custodian"] as const).map(m => (
+              <button key={m} onClick={() => onModeChange?.(m)}
+                className="flex-1 py-1.5 text-center transition-colors"
+                style={{
+                  fontFamily: "'Space Mono', monospace", fontSize: "0.55rem",
+                  letterSpacing: "0.08em", textTransform: "uppercase",
+                  color: agentMode === m ? MODE_COLORS[m] : "var(--ln-smoke)",
+                  borderBottom: agentMode === m ? `2px solid ${MODE_COLORS[m]}` : "2px solid transparent",
+                  background: "transparent",
+                }}>
+                {m}
+              </button>
+            ))}
+          </div>
+
+          {/* Message thread */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {agentMessages.length === 0 && (
+              <div className="text-xs text-center mt-4"
+                style={{ color: "var(--ln-smoke)", fontFamily: "'EB Garamond', serif", fontStyle: "italic" }}>
+                Your Keeper watches. Speak when ready.
+              </div>
+            )}
+            {agentMessages.map(msg => (
+              <div key={msg.id} className="text-sm leading-relaxed">
+                <span className="text-xs mr-2"
+                  style={{ color: MODE_COLORS[msg.mode] ?? modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}>
+                  [{msg.mode}]
+                </span>
+                <span style={{ color: "var(--ln-parchment)", fontSize: "0.8rem" }}>{msg.content}</span>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Ask input */}
+          <div className="flex-shrink-0 p-2" style={{ borderTop: `1px solid var(--ln-panel-border)` }}>
+            <div style={{ display: "flex", gap: 6 }}>
+              <input id="keeper-input" type="text" placeholder="speak to your keeper…"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val) { onAskAgent?.(val); (e.target as HTMLInputElement).value = ""; }
+                  }
+                }}
+                style={{
+                  flex: 1, background: "rgba(255,255,255,0.04)",
+                  border: `1px solid ${modeColor}33`, borderRadius: 6,
+                  padding: "6px 10px", fontSize: "0.7rem",
+                  color: "var(--ln-parchment)", fontFamily: "'Space Mono', monospace", outline: "none",
+                }} />
+              <button className="rounded transition-colors hover:opacity-80"
+                style={{
+                  background: `${modeColor}22`, border: `1px solid ${modeColor}44`,
+                  color: modeColor, padding: "6px 10px", fontSize: "0.65rem",
+                  fontFamily: "'Space Mono', monospace", cursor: "pointer",
+                  flexShrink: 0, opacity: isThinking ? 0.5 : 1,
+                }}
+                disabled={isThinking}
+                onClick={() => {
+                  const el = document.getElementById("keeper-input") as HTMLInputElement | null;
+                  const val = el?.value.trim();
+                  if (val) { onAskAgent?.(val); if (el) el.value = ""; }
+                }}>
+                {isThinking ? "···" : "→"}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

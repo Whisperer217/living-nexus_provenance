@@ -8,11 +8,12 @@
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, DollarSign, Maximize2, Minimize2,
   ChevronDown, ChevronUp, MessageCircle, Share2, Download,
-  MoreHorizontal, ExternalLink, ListPlus, List,
+  MoreHorizontal, ExternalLink, ListPlus, List, Waves,
 } from "lucide-react";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLocation } from "wouter";
@@ -47,6 +48,20 @@ export default function PlayerBar() {
   // Playback speed toggle: 1x → 1.5x → 2x → 0.75x → 1x
   const [playbackRate, setPlaybackRate] = useState(1);
   const SPEED_CYCLE = [1, 1.5, 2, 0.75];
+
+  // ── Frequency-reactive purple glow ──
+  // OPT-IN: default false so AudioContext is never created before a user gesture.
+  // A fresh session (no localStorage key) starts with glow OFF, preventing the
+  // suspended-AudioContext silence bug on first page load.
+  const [glowEnabled, setGlowEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem("ln-player-glow") === "on"; } catch { return false; }
+  });
+  const toggleGlow = () => setGlowEnabled(v => {
+    const next = !v;
+    try { localStorage.setItem("ln-player-glow", next ? "on" : "off"); } catch {}
+    return next;
+  });
+  const { glowShadow } = useFrequencyGlow(audioRef, glowEnabled, state.isPlaying);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
@@ -247,9 +262,14 @@ export default function PlayerBar() {
         right: 0,
         height: isCinematic ? "100dvh" : isExpanded ? "256px" : "68px",
         overflow: "visible",
-        background: isCinematic ? "#000" : "var(--ln-coal)",
+        background: "#000000",
           borderTop: isCinematic ? "none" : "1px solid rgba(196,154,40,0.25)",
-        boxShadow: isCinematic ? "none" : "0 -4px 40px rgba(0,0,0,0.6), 0 -4px 32px rgba(196,154,40,0.12), 0 -1px 8px rgba(196,154,40,0.15)",
+        boxShadow: isCinematic ? "none" : [
+          "0 -4px 40px rgba(0,0,0,0.8)",
+          "0 -4px 32px rgba(196,154,40,0.15)",
+          "0 -1px 8px rgba(196,154,40,0.18)",
+          glowShadow !== "none" ? glowShadow : "",
+        ].filter(Boolean).join(", "),
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         paddingLeft: "16px",
         zIndex: isCinematic ? 9020 : isExpanded ? 9010 : 9001,
@@ -262,8 +282,8 @@ export default function PlayerBar() {
           className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-1 text-[11px] font-semibold transition-all duration-200 rounded-t-lg z-10"
           style={{
             top: "-26px",
-            background: "var(--ln-coal)",
-            border: "1px solid rgba(44,52,56,0.5)",
+            background: "#000000",
+            border: "1px solid rgba(196,154,40,0.25)",
             borderBottom: "none",
             color: isExpanded ? "var(--ln-gold)" : "var(--ln-smoke)",
           }}
@@ -424,7 +444,7 @@ export default function PlayerBar() {
             {/* Gold gradient fade to center */}
             <div
               className="absolute inset-0 pointer-events-none z-10"
-              style={{ background: "linear-gradient(to right, transparent 60%, #111009)" }}
+              style={{ background: "linear-gradient(to right, transparent 60%, #000000)" }}
             />
           </div>
 
@@ -436,7 +456,7 @@ export default function PlayerBar() {
                 onClick={goToSong}
                 disabled={!currentSongId}
                 className="text-lg font-bold truncate block w-full text-left transition-colors hover:text-[#C49A28] disabled:cursor-default mb-0.5"
-                style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
+                style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}
               >
                 {currentTrack.title}
               </button>
@@ -581,12 +601,12 @@ export default function PlayerBar() {
           {/* RIGHT — Live comment feed (272px) */}
           <div
             className="w-72 flex flex-col flex-shrink-0 overflow-hidden"
-            style={{ borderLeft: "1px solid rgba(44,52,56,0.55)" }}
+            style={{ borderLeft: "1px solid rgba(196,154,40,0.15)" }}
           >
             {/* Header */}
             <div
               className="px-3 py-2 flex items-center gap-2 flex-shrink-0"
-              style={{ borderBottom: "1px solid rgba(44,52,56,0.55)" }}
+              style={{ borderBottom: "1px solid rgba(196,154,40,0.15)" }}
             >
               <MessageCircle size={11} style={{ color: "var(--ln-gold)" }} />
               <span
@@ -601,14 +621,14 @@ export default function PlayerBar() {
             <div
               ref={commentListRef}
               className="flex-1 overflow-y-auto px-3 py-2 space-y-2"
-              style={{ scrollbarWidth: "thin", scrollbarColor: "#111009 transparent" }}
+              style={{ scrollbarWidth: "thin", scrollbarColor: "#000000 transparent" }}
             >
               {commentsData && commentsData.length > 0 ? (
                 commentsData.map((c: any) => (
                   <div key={c.id} className="flex gap-2">
                     <div
                       className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold mt-0.5"
-                      style={{ background: "var(--ln-coal)", color: "var(--ln-gold)" }}
+                      style={{ background: "#1a1500", color: "var(--ln-gold)" }}
                     >
                       {(c.authorName ?? "?")[0].toUpperCase()}
                     </div>
@@ -616,7 +636,7 @@ export default function PlayerBar() {
                       <span className="text-[10px] font-semibold mr-1.5" style={{ color: "var(--ln-seal-bright)" }}>
                         {c.authorName ?? "Anonymous"}
                       </span>
-                      <span className="text-[11px] leading-relaxed" style={{ color: "var(--ln-parchment)" }}>
+                      <span className="text-[11px] leading-relaxed" style={{ color: "#EDE0C4" }}>
                         {c.content}
                       </span>
                     </div>
@@ -635,7 +655,7 @@ export default function PlayerBar() {
             {/* Comment input */}
             <div
               className="p-2 flex gap-1.5 flex-shrink-0"
-              style={{ borderTop: "1px solid rgba(44,52,56,0.55)" }}
+              style={{ borderTop: "1px solid rgba(196,154,40,0.15)" }}
             >
               <input
                 value={newComment}
@@ -646,12 +666,12 @@ export default function PlayerBar() {
                 maxLength={500}
                 className="flex-1 rounded-md px-2.5 py-1.5 text-[11px] outline-none transition-colors disabled:opacity-50"
                 style={{
-                  background: "var(--ln-coal)",
-                  border: "1px solid #111009",
-                  color: "var(--ln-parchment)",
+                  background: "#0a0a0a",
+                  border: "1px solid rgba(196,154,40,0.2)",
+                  color: "#EDE0C4",
                 }}
-                onFocus={e => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.42)")}
-                onBlur={e => (e.currentTarget.style.borderColor = "var(--ln-coal)")}
+                onFocus={e => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.55)")}
+                onBlur={e => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.2)")}
               />
               <button
                 onClick={submitComment}
@@ -670,7 +690,7 @@ export default function PlayerBar() {
       {!isExpanded && (
         <div
           className="flex items-center gap-4"
-          style={{ height: "68px", backgroundColor: "var(--ln-coal)", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible" }}
+          style={{ height: "68px", backgroundColor: "#000000", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible" }}
         >
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
@@ -680,7 +700,7 @@ export default function PlayerBar() {
               disabled={!currentSongId}
               className="w-14 h-14 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl
                 transition-opacity hover:opacity-80 disabled:cursor-default"
-              style={{ background: currentTrack?.bg || "var(--ln-coal)" }}
+              style={{ background: currentTrack?.bg || "#111009" }}
               title={currentTrack?.title || ""}
             >
               {currentTrack?.artUrl && currentTrack.artType !== "video"
@@ -698,7 +718,7 @@ export default function PlayerBar() {
                 disabled={!currentSongId}
                 className="text-[13.5px] font-semibold truncate block w-full text-left
                   transition-colors hover:text-[#C49A28] disabled:cursor-default"
-                style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif", letterSpacing: "0.03em" }}
+                style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif", letterSpacing: "0.03em" }}
               >
                 {currentTrack?.title || "No track selected"}
               </button>
@@ -708,7 +728,7 @@ export default function PlayerBar() {
                 disabled={!currentTrack}
                 className="text-[11px] truncate block w-full text-left
                   transition-colors hover:opacity-80 disabled:cursor-default"
-                style={{ color: "var(--ln-smoke)" }}
+                style={{ color: "rgba(230,220,200,0.75)" }}
               >
                 {currentTrack?.artist || "—"}
               </button>
@@ -920,6 +940,22 @@ export default function PlayerBar() {
               {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
 
+            {/* Frequency glow toggle */}
+            <button
+              onClick={toggleGlow}
+              className="p-1.5 transition-all ml-1 rounded"
+              style={{
+                color: glowEnabled ? "#C084FC" : "var(--ln-iron)",
+                background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent",
+                border: `1px solid ${glowEnabled ? "rgba(192,132,252,0.35)" : "rgba(44,52,56,0.4)"}`,
+                boxShadow: glowEnabled && state.isPlaying ? "0 0 8px rgba(138,43,226,0.5)" : "none",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#C084FC")}
+              onMouseLeave={e => (e.currentTarget.style.color = glowEnabled ? "#C084FC" : "var(--ln-iron)")}
+              title={glowEnabled ? "Frequency glow: ON" : "Frequency glow: OFF"}
+            >
+              <Waves size={14} />
+            </button>
             {/* Cinematic / Theater toggle */}
             <button
               onClick={() => { setIsCinematic(c => !c); setIsExpanded(false); }}
