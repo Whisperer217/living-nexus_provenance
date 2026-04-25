@@ -3461,3 +3461,9 @@
 - [x] Make Keeper orb visible on mobile (orbBottom uses max() to clear mobile nav+mini stack)
 - [x] Make Live panel pull tab visible (gold accent border, dark bg, gold glow shadow)
 - [x] Make PlaylistDrawer pull tab visible (gold accent border, dark bg, gold glow shadow)
+
+## Commit e7ce7fc — Album Download Feature
+- [x] Pull commit e7ce7fc from living-nexus_provenance
+- [x] Apply drizzle/0082_album_download.sql migration (albumDownloadPermission + albumDownloadPriceCents on projects table)
+- [x] Fix TS errors: bigint import in schema.ts, implicit any in routers.ts and ProjectPage.tsx
+- [x] CSS variable fix c8fb9b4 (--ln-panel, --ln-obsidian, --ln-panel-border) merged

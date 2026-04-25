@@ -4970,8 +4970,8 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         }
         const tracks = await getProjectSongs(input.projectId);
         const downloadable = tracks
-          .filter((t) => t.song?.fileUrl && t.song?.status === 'Published')
-          .map((t) => ({ id: t.songId, title: t.song!.title, fileUrl: t.song!.fileUrl! }));
+          .filter((t: typeof tracks[number]) => t.song?.fileUrl && t.song?.status === 'Published')
+          .map((t: typeof tracks[number]) => ({ id: t.songId, title: t.song!.title, fileUrl: t.song!.fileUrl! }));
         return { tracks: downloadable };
       }),
     /** Create Stripe checkout to gift-unlock an album download */

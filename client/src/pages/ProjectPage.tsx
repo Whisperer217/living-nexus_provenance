@@ -1173,7 +1173,7 @@ function ProjectSongsPanel({ projectId, editMode, userId }: {
   });
   const downloadAlbum = trpc.projects.downloadAlbum.useMutation({
     onSuccess: (data) => {
-      data.tracks.forEach((t) => {
+      data.tracks.forEach((t: { id: number; title: string; fileUrl: string }) => {
         const a = document.createElement('a');
         a.href = t.fileUrl;
         a.download = t.title;
