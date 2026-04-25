@@ -380,13 +380,35 @@ export default function FloatingAvatar({
           userSelect: "none",
         }}
       >
-        {/* Drag handle ring — mouse + touch drag */}
+        {/* Drag handle ring — mouse + touch drag (z:3 so it intercepts touches before the orb image) */}
         <div
           className="absolute inset-0 rounded-full cursor-grab"
-          style={{ zIndex: 1 }}
+          style={{ zIndex: 3 }}
           onMouseDown={onMouseDown}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEndOrCancel}
+          onTouchStart={(e) => {
+            // Record touch start position to distinguish tap vs drag
+            const t = e.touches[0];
+            const startX = t.clientX;
+            const startY = t.clientY;
+            const ox = position.x;
+            const oy = position.y;
+
+            touchTimer.current = setTimeout(() => {
+              setDragging(true);
+              dragStart.current = { mx: startX, my: startY, ox, oy };
+            }, 200);
+            // Store start position for tap detection
+            (e.currentTarget as HTMLDivElement).dataset.touchStartX = String(startX);
+            (e.currentTarget as HTMLDivElement).dataset.touchStartY = String(startY);
+          }}
+          onTouchEnd={(e) => {
+            if (touchTimer.current) { clearTimeout(touchTimer.current); touchTimer.current = null; }
+            if (!dragging) {
+              // It was a tap — open the panel
+              setExpanded(true);
+            }
+            setDragging(false);
+          }}
           onTouchCancel={onTouchEndOrCancel}
         />
 
