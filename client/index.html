@@ -1,51 +1,17 @@
 <!doctype html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Living Nexus</title>
-
-    <!-- Primary favicon -->
-    <link rel="icon" type="image/png" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png" />
-
-    <!-- PWA manifest -->
-    <link rel="manifest" href="/manifest.json" />
-
-    <!-- iOS home screen support -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Living Nexus" />
-    <link rel="apple-touch-icon" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-192x192_ec4bd177.png" />
-
-    <!-- Android / browser theme -->
-    <meta name="theme-color" content="#080d14" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="application-name" content="Living Nexus" />
-
-    <!-- SEO / social -->
-    <meta name="description" content="Sovereign music. Cryptographic provenance. Creator-owned." />
-    <!-- Default canonical — overridden per-page by the Express OG layer for crawlers.
-         For regular browser visits this ensures Google always sees a canonical tag. -->
-    <link rel="canonical" href="https://www.livingnexus.org/" />
-
-    <!--
-      oEmbed discovery — Discord, Slack, and other platforms read this link tag
-      and call /api/oembed?url={page_url} to get song/creator-specific metadata.
-      This bypasses the Manus CDN's generic OG tag override because /api/* routes
-      are forwarded directly to the Express server.
-    -->
-    <link
-      rel="alternate"
-      type="application/json+oembed"
-      href="https://www.livingnexus.org/api/oembed?url=https://www.livingnexus.org/"
-      title="Living Nexus oEmbed"
-    />
-
-    <!-- Fonts -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Living Nexus — Provenance-First Creator Surface</title>    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
@@ -53,117 +19,6 @@
       defer
       src="%VITE_ANALYTICS_ENDPOINT%/umami"
       data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
-
-    <!-- Service Worker registration — production grade -->
-    <script>
-    (function () {
-      if (!('serviceWorker' in navigator)) return;
-
-      // ── Compact update toast (bottom-right, non-intrusive) ─────────────────
-      function showUpdateBanner() {
-        if (document.getElementById('ln-update-banner')) return;
-        var toast = document.createElement('div');
-        toast.id = 'ln-update-banner';
-        toast.style.cssText = [
-          'position:fixed', 'bottom:88px', 'right:16px', 'z-index:99999',
-          'background:rgba(8,13,20,0.96)', 'color:#e8e0d4',
-          'font-family:DM Sans,sans-serif', 'font-size:13px', 'font-weight:500',
-          'border:1px solid rgba(212,175,55,0.45)',
-          'border-radius:12px',
-          'padding:10px 14px',
-          'display:flex', 'align-items:center', 'gap:10px',
-          'box-shadow:0 4px 24px rgba(0,0,0,0.6)',
-          'backdrop-filter:blur(12px)',
-          'max-width:300px',
-          'transform:translateY(120%)', 'opacity:0',
-          'transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s ease',
-        ].join(';');
-        var text = document.createElement('span');
-        text.textContent = '\u2728 Update available';
-        text.style.cssText = 'flex:1;color:#D4AF37;font-weight:600;font-size:12px;letter-spacing:0.04em;';
-        var btn = document.createElement('button');
-        btn.textContent = 'Refresh';
-        btn.style.cssText = [
-          'background:#D4AF37', 'color:#080d14',
-          'border:none', 'border-radius:6px',
-          'font-family:DM Sans,sans-serif', 'font-size:11px', 'font-weight:700',
-          'padding:4px 10px', 'cursor:pointer', 'white-space:nowrap',
-        ].join(';');
-        btn.addEventListener('click', function (e) { e.stopPropagation(); window.location.reload(); });
-        var dismiss = document.createElement('button');
-        dismiss.textContent = '\u00d7';
-        dismiss.style.cssText = [
-          'background:none', 'border:none', 'color:rgba(232,224,212,0.5)',
-          'font-size:16px', 'line-height:1', 'cursor:pointer', 'padding:0 2px',
-        ].join(';');
-        dismiss.addEventListener('click', function (e) {
-          e.stopPropagation();
-          toast.style.transform = 'translateY(120%)';
-          toast.style.opacity = '0';
-          setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 400);
-        });
-        toast.appendChild(text);
-        toast.appendChild(btn);
-        toast.appendChild(dismiss);
-        document.body.appendChild(toast);
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            toast.style.transform = 'translateY(0)';
-            toast.style.opacity = '1';
-          });
-        });
-      }
-
-      // ── Listen for SW_UPDATED message ──────────────────────────────────────
-      navigator.serviceWorker.addEventListener('message', function (event) {
-        if (event.data && event.data.type === 'SW_UPDATED') {
-          showUpdateBanner();
-        }
-      });
-
-      window.addEventListener('load', function () {
-        // Step 1: Unregister ALL existing service workers (clean slate)
-        navigator.serviceWorker.getRegistrations().then(function (registrations) {
-          var unregisterAll = registrations
-            .filter(function (r) { return r.scope !== window.location.origin + '/'; })
-            .map(function (r) {
-              console.log('[SW] Unregistering old worker:', r.scope);
-              return r.unregister();
-            });
-          return Promise.all(unregisterAll);
-        }).then(function () {
-          // Step 2: Register the new production service worker
-          return navigator.serviceWorker.register('/sw.js', { scope: '/' });
-        }).then(function (reg) {
-          console.log('[SW] Registered:', reg.scope);
-
-          // Step 3: Detect new waiting worker → prompt update
-          if (reg.waiting) {
-            showUpdateBanner();
-          }
-          reg.addEventListener('updatefound', function () {
-            var newWorker = reg.installing;
-            if (!newWorker) return;
-            newWorker.addEventListener('statechange', function () {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New version waiting — tell it to skip waiting
-                newWorker.postMessage({ type: 'SKIP_WAITING' });
-              }
-            });
-          });
-
-          // Step 4: When controller changes (new SW took over) show banner
-          var refreshing = false;
-          navigator.serviceWorker.addEventListener('controllerchange', function () {
-            if (refreshing) return;
-            refreshing = true;
-            showUpdateBanner();
-          });
-        }).catch(function (err) {
-          console.warn('[SW] Registration failed:', err);
-        });
-      });
-    })();
-    </script>
   </body>
+
 </html>

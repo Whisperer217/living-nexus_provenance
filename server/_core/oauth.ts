@@ -59,25 +59,8 @@ export function registerOAuthRoutes(app: Express) {
 
       res.redirect(302, "/");
     } catch (error) {
-      const err = error as Record<string, unknown>;
-      const errMsg = typeof err?.message === "string" ? err.message : String(error);
-      const errStatus = typeof err?.status === "number" ? err.status : typeof err?.statusCode === "number" ? err.statusCode : undefined;
-      const errCode = typeof err?.code === "string" ? err.code : undefined;
-      console.error(
-        "[OAuth] Callback failed",
-        JSON.stringify({
-          message: errMsg,
-          status: errStatus,
-          code: errCode,
-          stack: typeof err?.stack === "string" ? err.stack.split("\n").slice(0, 4).join(" | ") : undefined,
-        }),
-      );
-      res.status(500).json({
-        error: "OAuth callback failed",
-        detail: errMsg,
-        status: errStatus,
-        code: errCode,
-      });
+      console.error("[OAuth] Callback failed", error);
+      res.status(500).json({ error: "OAuth callback failed" });
     }
   });
 }

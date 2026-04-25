@@ -3468,123 +3468,142 @@
 - [x] Fix TS errors: bigint import in schema.ts, implicit any in routers.ts and ProjectPage.tsx
 - [x] CSS variable fix c8fb9b4 (--ln-panel, --ln-obsidian, --ln-panel-border) merged
 
-## Commits c8fb9b4 / 76a0ab3 / e1b7e5a Sync
-- [x] Pull c8fb9b4 (CSS vars fix), 76a0ab3 (TS fixes + 0083 migration), e1b7e5a (Stripe init guard)
-- [x] Apply drizzle/0081_keeper_skins.sql (keeper_skins table confirmed in DB)
-- [x] Apply drizzle/0082_album_download.sql (albumDownloadPermission + albumDownloadPriceCents confirmed)
-- [x] Apply drizzle/0083_icy_baron_zemo.sql (duplicate of 0082 — columns already present)
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 2b — Mobile Fixes + Keeper Creative Sandbox
 
-## Commit bea1538 — Keeper Creative Sandbox + Bug Fixes
-- [x] Pull bea1538 (KeeperPage 404 fix, mobile layout, Creative Sandbox with Write + PPG tabs)
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+- [ ] Fix 404 on /creator route — check App.tsx routing for creator-surface/creator page
+- [ ] Fix KeeperPage mobile layout — right column (Keeper Loadout) clips off-screen on mobile, needs single-column stack
+- [ ] Fix FloatingAvatar expanded panel mobile visibility — hard to see on mobile
+- [ ] Build Keeper Creative Sandbox — micro text/image editor in expanded Keeper panel with rich text (bold/italic/highlight), image upload, Keeper minimized to corner, Keeper can assist with selected text
+- [x] PPG (Provenance Prompt Generator) wired into Keeper Creative Sandbox (PPG tab)
+- [x] KeeperPage back button fixed (was navigating to /create, now navigates to /)
+- [x] KeeperPage mobile layout — single column stack on mobile, 3-col on md+
 
-## Commit ba58399 — Marketplace Feature
-- [x] Pull ba58399 (Marketplace full page + mini drawer + schema + tRPC router)
-- [x] No merge conflicts (fast-forward merge)
-- [x] bigint import intact in drizzle/schema.ts
-- [x] Apply migration 0084_boring_stryfe.sql (marketplace_items + marketplace_purchases tables)
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
-- [ ] Seed first marketplace listings (mascot skin, gated albums) via admin panel or DB
-- [ ] Wire Keeper skin selector (unlockSkin/setActiveSkin mutations on KeeperPage skin cards)
-- [ ] Fix donation progress bar (trpc.projects.getBySlug.invalidate() in confirmDonation onSuccess)
-- [ ] Wire bell badge to unreadCount in top nav
+## Phase 3 — Marketplace
 
-## Commit b8b50f1 — Keeper Sandbox: Voice, AI Art, Image Analysis
-- [x] Pull b8b50f1 (Voice Transcription mic button, AI Artwork Generation, Image Analysis)
-- [x] No merge conflicts (fast-forward merge, 2 files changed)
-- [x] No new DB migrations
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+- [ ] Stripe integration (split payments: creator cut + platform cut at transaction level)
+- [ ] DB schema: marketplace_items table (type, title, price_cents, creator_id, wid, artwork_url, stock, active, royalty_pct)
+- [ ] DB schema: marketplace_purchases table (item_id, buyer_id, stripe_payment_intent, amount_cents, creator_payout_cents, status, fulfilled_at)
+- [ ] tRPC: marketplace.listItems (public, filterable by type: album | skin | physical | creator_good)
+- [ ] tRPC: marketplace.getItem (public, single item with full creator provenance)
+- [ ] tRPC: marketplace.createCheckout (protected, Stripe checkout session with split payment)
+- [ ] tRPC: marketplace.webhook (Stripe webhook handler, fulfillment + WID anchor on purchase)
+- [ ] tRPC: marketplace.myPurchases (protected, buyer history with provenance receipts)
+- [ ] tRPC: marketplace.creatorSales (protected, creator earnings dashboard)
+- [ ] /marketplace full page — featured drops, gated albums, Keeper skins, creator goods
+- [ ] Right-side mini marketplace drawer (global, persistent, quick-buy surface)
+- [ ] Creator earnings widget on dashboard
+- [ ] WID anchor on every marketplace item purchase (provenance receipt generated on fulfillment)
+- [ ] Playlist feature (create, name, add tracks, public/private) — feeds into marketplace drawer
 
-## Commit 7a9516b — PlayerBar Black Theme Polish
-- [x] Pull 7a9516b (jet black background, improved text contrast across PlayerBar + MobilePlayerPanel)
-- [x] No merge conflicts
-- [x] No DB migrations
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 4 — Keeper Sandbox AI Features
+- [ ] tRPC procedure: keeper.transcribeVoice — upload audio to S3, call Whisper, return text
+- [ ] tRPC procedure: keeper.generateArtwork — take prompt + style tags, call imageGeneration, return S3 URL
+- [ ] tRPC procedure: keeper.analyzeImage — accept image URL, call LLM with image_url content, return analysis
+- [ ] Write tab: mic button with hold-to-record, auto-transcribe into editor on release
+- [ ] PPG tab: "Generate Art" button after prompt is generated, shows result image with save/download option
+- [ ] Sandbox: image drop zone + upload, sends to Keeper for visual analysis in chat thread
 
-## Commit b174997 — Frequency-Reactive Purple Glow
-- [x] Pull b174997 (useFrequencyGlow hook, Web Audio API bass/mid/high bands, toggle button desktop+mobile, localStorage persist, CORS fallback)
-- [x] No merge conflicts (fast-forward, 3 files)
-- [x] No DB migrations
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 47: Fix Audio Playback (Silent Audio Bug)
+- [x] Fix useFrequencyGlow: AudioContext suspended state silences audio when glow is enabled on page load
+- [x] Fix: only call createMediaElementSource after explicit user gesture (glow toggle), not on mount
+- [x] Ensure AudioContext.resume() is awaited before connecting source node
+- [x] Guard: if AudioContext is suspended and cannot resume, fall back to static glow without connecting
+- [ ] Remove orphaned MobilePlayerPanel.tsx (no longer mounted anywhere — replaced by MobilePlayerLayer)
 
-## Commit dfe735f — Mobile Player Jet Black + Draggable Keeper Avatar
-- [x] Pull dfe735f (mobile player all surfaces #000000, gold borders, draggable Keeper orb with 280ms long-press, localStorage position persist)
-- [x] No merge conflicts (fast-forward, 2 files)
-- [x] No DB migrations
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 48: Keeper Skin Selector Wiring
+- [x] Audit KeeperPage skin cards — confirm unlockSkin/setActiveSkin tRPC procedures exist in routers.ts
+- [x] Wire "Equip" button on each skin card to setActiveSkin mutation (optimistic update)
+- [x] Wire "Unlock" / "Purchase" button to unlockSkin mutation or Stripe checkout for paid skins
+- [x] Active skin card shows gold ring + "EQUIPPED" badge
+- [x] Locked skin card shows lock icon + price; unlocked-but-not-active shows "Equip" CTA
 
-## Commit 4e8e061 — MobilePlayerLayer Jet Black + Keeper Drag Z-Index Fix
-- [x] Pull 4e8e061 (MobilePlayerLayer.tsx all gradients → #000000; FloatingAvatar drag handle z-index 3 above orb image z-index 2)
-- [x] No merge conflicts (fast-forward, 2 files)
-- [x] No DB migrations
-- [x] TypeScript: 0 errors on touched files (pre-existing errors in CreatorSurface.tsx + WIDLookup.tsx are standalone, not in main build)
-- [x] Save checkpoint and deploy
+## Phase 49: Seed Marketplace Listings
+- [x] Add marketplace.seedDefaults protected mutation to routers.ts (idempotent, 6 items)
+- [x] Add "⊕ Seed Default Listings" button to MarketplacePage empty state (logged-in users only)
+- [x] Invalidates listItems cache on success so items appear immediately
+- [ ] Verify /marketplace page and MarketplaceDrawer SHOP tab render real items (requires production deploy)
 
-## Commit 13f3787 — Web Audio Autoplay Fix
-- [x] Pull 13f3787 (useFrequencyGlow.ts: two-condition gate — enabled=true + AudioContext.resume()="running" before connecting source node; prevents AudioContext from silencing playback on page load)
-- [x] No merge conflicts (fast-forward, 1 file)
-- [x] No DB migrations
-- [x] TypeScript: 0 errors
-- [x] visualQueue table confirmed present in DB (0032 migration already applied)
-- [x] Save checkpoint and deploy
+## Phase 50: Desktop Drag for FloatingAvatar
+- [x] Add mousedown hold handler (200ms threshold) to FloatingAvatar orb for desktop drag
+- [x] mousemove updates position, mouseup ends drag — same clamp logic as touch
+- [x] Position persists to localStorage (same key as touch drag)
+- [x] No conflict with click-to-open-panel (short click still opens panel)
 
-## Commit e06421e — Keeper Skin Audit + Marketplace Seed + Desktop Drag
-- [x] Pull e06421e (Keeper skin selector confirmed fully wired; marketplace.seedDefaults idempotent procedure with 6 default items; seed button in empty state; desktop 200ms hold-to-drag for Keeper orb)
-- [x] No merge conflicts (fast-forward, 3 files)
-- [x] No DB migrations
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 51: Deep Audio Playback Fix (Persistent Silence)
+- [x] Audit PlayerContext: audio element creation, src assignment, play/pause lifecycle
+- [x] Audit safeAudioUrl: check if URL transformation is stripping or corrupting audio src
+- [x] Audit useFrequencyGlow: verify the fix from Phase 47 is not breaking audio on non-glow path
+- [x] Check for double-instantiation of AudioContext or createMediaElementSource across components
+- [x] ROOT CAUSE: glowEnabled defaulted to TRUE (opt-out) in PlayerBar + MobilePlayerPanel
+- [x] Fix: change glowEnabled init from !== 'off' to === 'on' in both components
+- [x] Commit 979b5f2 pushed to main — clean fast-forward, zero conflicts
 
-## Commit 979b5f2 — Glow Opt-In Default (AudioContext Silence Root Cause Fix)
-- [x] Pull 979b5f2 (PlayerBar.tsx + MobilePlayerPanel.tsx: glowEnabled init changed from opt-out to opt-in — localStorage "on" required; prevents AudioContext creation before user gesture on fresh sessions)
-- [x] No merge conflicts (fast-forward, 2 files)
-- [x] No DB migrations
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 52: Writer Voice Recorder UX Fix
+- [x] Add visible Stop button during recording (separate from mic toggle)
+- [x] Add "Transcribe" action button after recording stops
+- [x] Clear recording blob state after transcription is inserted into editor
+- [x] Ensure recording can be cancelled without transcribing
 
-## Commit 85ebeda — Voice Recorder State Machine + Keeper Vision Pipeline Fix
-- [x] Pull 85ebeda (FloatingAvatar.tsx: voice recorder 3-state machine idle/recording/ready with STOP+TRANSCRIBE+discard; Keeper sendSandboxToKeeper now calls analyzeImage on each attachment before sending to keeper.chat — LLM receives actual vision analysis instead of placeholder string)
-- [x] No merge conflicts (fast-forward, 1 file)
-- [x] No DB migrations
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 53: Keeper Image Upload Vision Fix
+- [x] Audit how uploaded image URL is passed to the LLM in the Keeper chat pipeline
+- [x] Ensure image_url content block is sent in the LLM messages array (not just text)
+- [x] Fix: LLM must receive the actual image as a vision input, not just a text label
+- [x] sendSandboxToKeeper now calls analyzeImage mutation for each image, passes full analysis to chat
+- [x] Fallback to text-only if vision fails; sandboxImages cleared after send
 
-## Commit 3f1d07c — Mobile SHOP Tab + Desktop MARKETPLACE Gold Pill
-- [x] Pull 3f1d07c (MobilePlayerLayer.tsx: 5-tab bottom nav with gold SHOP tab center position; TopBar.tsx: MARKETPLACE gold gradient pill with hover/active glow + hamburger drawer entry)
-- [x] No merge conflicts (fast-forward, 2 files)
-- [x] No DB migrations
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 54: Marketplace Navigation
+- [x] Add Marketplace tab to mobile bottom nav (between existing tabs, below global player)
+- [x] Marketplace tab uses ShoppingBag icon with gold ring surround
+- [x] Desktop top nav: add gold-bordered "MARKETPLACE" pill with gradient bg + glow + shimmer underline
+- [x] Desktop nav entry uses distinct gold border to stand out from all other nav items
+- [x] Both link to /marketplace route
+- [x] Commit 3f1d07c pushed to main — clean fast-forward, zero conflicts
 
-## Commit 589574e — AI Transform Full Removal + getSongByWitnessId Restore
-- [x] Pull 589574e (357a969 + 589574e: AI Transform removed — procedures, modal, UI, schema, workRoute lineage; 552 lines net removed across 6 files)
-- [x] Restored getSongByWitnessId to server/db.ts (was accidentally removed during AI Transform cleanup; still needed by oembedRoute, og.ts, routers.ts, shareRoute, workRoute)
-- [x] No merge conflicts (fast-forward, 6 files)
-- [x] No DB migrations (aiTransforms table still exists in DB — unused, can DROP later)
-- [x] TypeScript: 0 errors after fix
-- [x] Save checkpoint and deploy
+## Phase 55: Remove AI Transform (Sonauto)
+- [x] Remove songs.aiTransform and songs.getTransformStatus tRPC procedures from routers.ts
+- [x] Remove songs.getMyTransforms tRPC procedure from routers.ts
+- [x] Remove aiTransforms table from drizzle/schema.ts
+- [x] Remove createAiTransform, updateAiTransform, getAiTransformById, getAiTransformsBySong, getAiTransformsByUser, getTransformsByWitnessId helpers from server/db.ts
+- [x] Remove AI Transform modal, state, mutations, and button from SongDetailPage
+- [x] Remove My Transforms tab, query, helpers, and tab content from DashboardPage
+- [x] Remove getTransformsByWitnessId import and lineage section from workRoute.ts
+- [x] Final grep sweep: zero AI Transform references remain in codebase
+- [x] Commit 357a969 pushed to main — -552 lines net, clean fast-forward, zero conflicts
+- [ ] Drop aiTransforms table SQL on production DB (optional cleanup, table is now unused)
 
-## Commit 8fb3180 — Full TS Clean + satchel/ppg/agents/wids Routers + provenanceEvents Schema
-- [x] Pull 8fb3180 (CreatorSurface.tsx, drizzle/schema.ts, server/db.ts, server/routers.ts, drizzle/0085_romantic_fenris.sql)
-- [x] Removed duplicate getSongByWitnessId from db.ts (our previous restore at line 313 conflicted with the one in the commit at line 515)
-- [x] Created server/provenance.ts with generateKeypair/signPayload/verifySignature (Ed25519 via Web Crypto API)
-- [x] Applied migration 0085: provenanceEvents table created, aiTransforms table dropped
-- [x] TypeScript: 0 errors
-- [x] Save checkpoint and deploy
+## Phase 56: Router Split
+- [ ] Deferred — to be done as a dedicated session once codebase stabilizes
 
-## OAuth Callback Error Logging Patch
-- [x] Patched server/_core/oauth.ts catch block to log and return errMsg, errStatus, errCode, and stack trace top 4 lines
-- [x] TypeScript: 0 errors
+## Phase 57: VisualQueue Migration
+- [x] Applied drizzle/0032_purple_zombie.sql on builder DB — visualQueue table now exists
+- [x] Production already had the table; builder now in sync
 
-## What's New Modal — v2.40.0 Update
-- [x] Updated CURRENT_VERSION from v2.31.0 to v2.40.0
-- [x] Added v2.32.0 through v2.40.0 entries
-- [x] TypeScript: 0 errors
+## Phase 58: Follow System
+- [x] Confirmed already implemented as Witness system (witnessCreator, unwatchCreator, isWitnessing, getWitnessCount, getWitnessNetwork)
+- [x] Witness button fully wired on CreatorProfilePage with count display and Witness Network modal
+
+## Phase 59: TypeScript Cleanup
+- [x] Add provenanceEvents table to schema.ts + migration 0085_romantic_fenris.sql
+- [x] Add provenance event DB helpers: insertProvenanceEvent, getProvenanceEventsByCreator, getWidWithEvent, insertWid, getOrCreateAgent, updateAgentFingerprint, setUserPublicKey
+- [x] Add satchel router (checkpoint/anchor/fork/list)
+- [x] Add ppg router (generate with LLM)
+- [x] Add agents router (me/getOrCreate/message/updateFingerprint)
+- [x] Add wids router (lookup with flattened shape/register)
+- [x] Add auth.hasKeypair + auth.generateKeypair
+- [x] Fix CreatorSurface.tsx: trpc.satchel.* calls, agentMessage shape, result.text coercion
+- [x] Restore getSongByWitnessId to db.ts
+- [x] ZERO TypeScript errors — confirmed by tsc watcher: Found 0 errors
+- [x] Commit 8fb3180 pushed to main — clean rebase, zero conflicts
+
+## Phase 60: OAuth Callback Fix (BLOCKING)
+- [ ] Diagnose "OAuth callback failed" error at /api/oauth/callback on production
+- [ ] Check if the error is caused by a state/origin parsing regression from recent commits
+- [ ] Check if JWT_SECRET or OAUTH_SERVER_URL env vars are missing/changed on production
+- [ ] Check if the oauth.ts core handler was accidentally modified
+- [ ] Fix root cause and push to production
+
+## Phase 61: Route + Donation Fix + Marketplace Art
+- [x] Register /creator-surface route in App.tsx
+- [x] Fix donation progress bar — invalidate projects.getBySlug in confirmDonation onSuccess
+- [x] Marketplace tables applied to production DB (0084_boring_stryfe.sql)
+- [ ] Marketplace item artwork — generate + upload images for 6 seeded items (items already have CDN artwork URLs from Keeper skin assets)
