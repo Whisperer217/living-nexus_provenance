@@ -50,8 +50,11 @@ export default function PlayerBar() {
   const SPEED_CYCLE = [1, 1.5, 2, 0.75];
 
   // ── Frequency-reactive purple glow ──
+  // OPT-IN: default false so AudioContext is never created before a user gesture.
+  // A fresh session (no localStorage key) starts with glow OFF, preventing the
+  // suspended-AudioContext silence bug on first page load.
   const [glowEnabled, setGlowEnabled] = useState<boolean>(() => {
-    try { return localStorage.getItem("ln-player-glow") !== "off"; } catch { return true; }
+    try { return localStorage.getItem("ln-player-glow") === "on"; } catch { return false; }
   });
   const toggleGlow = () => setGlowEnabled(v => {
     const next = !v;

@@ -182,8 +182,9 @@ export default function MobilePlayerPanel() {
   const [newComment, setNewComment] = useState("");
 
   // ── Frequency-reactive purple glow (shared with PlayerBar via localStorage) ──
+  // OPT-IN: default false so AudioContext is never created before a user gesture.
   const [glowEnabled, setGlowEnabled] = useState<boolean>(() => {
-    try { return localStorage.getItem("ln-player-glow") !== "off"; } catch { return true; }
+    try { return localStorage.getItem("ln-player-glow") === "on"; } catch { return false; }
   });
   const toggleGlow = () => setGlowEnabled(v => {
     const next = !v;
