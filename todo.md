@@ -3480,3 +3480,15 @@
 - [x] Pull bea1538 (KeeperPage 404 fix, mobile layout, Creative Sandbox with Write + PPG tabs)
 - [x] TypeScript: 0 errors
 - [x] Save checkpoint and deploy
+
+## Commit ba58399 — Marketplace Feature
+- [x] Pull ba58399 (Marketplace full page + mini drawer + schema + tRPC router)
+- [x] No merge conflicts (fast-forward merge)
+- [x] bigint import intact in drizzle/schema.ts
+- [x] Apply migration 0084_boring_stryfe.sql (marketplace_items + marketplace_purchases tables)
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
+- [ ] Seed first marketplace listings (mascot skin, gated albums) via admin panel or DB
+- [ ] Wire Keeper skin selector (unlockSkin/setActiveSkin mutations on KeeperPage skin cards)
+- [ ] Fix donation progress bar (trpc.projects.getBySlug.invalidate() in confirmDonation onSuccess)
+- [ ] Wire bell badge to unreadCount in top nav
