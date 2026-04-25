@@ -90,10 +90,43 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+
+  // Provenance keypair — Ed25519 public key (hex). Private key stored client-side only.
+  publicKey: text("publicKey"),
 });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+// ─── Agents (Personal Nexus Agent) ───────────────────────────────────────────
+export const agents = mysqlTable("agents", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  styleFingerprint: json("styleFingerprint").$type<{
+    tone: string[];
+    structure_patterns: string[];
+    common_transforms: string[];
+  }>().default({ tone: [], structure_patterns: [], common_transforms: [] }),
+  frozenTraits: json("frozenTraits").$type<{ voice_constraints: string[] }>().default({ voice_constraints: [] }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Agent = typeof agents.$inferSelect;
+export type InsertAgent = typeof agents.$inferInsert;
+
+// ─── WIDs (Witness IDs — provenance anchors) ──────────────────────────────────
+export const wids = mysqlTable("wids", {
+  wid: varchar("wid", { length: 64 }).primaryKey(),
+  eventId: varchar("eventId", { length: 64 }).notNull(),
+  contentHash: varchar("contentHash", { length: 64 }).notNull(),
+  creatorId: int("creatorId").notNull(),
+  signature: text("signature"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Wid = typeof wids.$inferSelect;
+export type InsertWid = typeof wids.$inferInsert;
 
 // ─── Songs ────────────────────────────────────────────────────────────────────
 export const songs = mysqlTable("songs", {
@@ -1287,3 +1320,30 @@ export const marketplacePurchases = mysqlTable("marketplace_purchases", {
 });
 export type MarketplacePurchase = typeof marketplacePurchases.$inferSelect;
 export type InsertMarketplacePurchase = typeof marketplacePurchases.$inferInsert;
+
+// ─── Provenance Events (append-only creator ledger for CreatorSurface/Writer) ──
+export const provenanceEvents = mysqlTable("provenanceEvents", {
+  /** SHA-256 of the canonical payload — serves as the event ID */
+  eventId: varchar("eventId", { length: 64 }).primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  agentId: int("agentId"),
+  actionType: mysqlEnum("actionType", ["draft", "checkpoint", "anchor", "fork"]).notNull(),
+  /** SHA-256 of the parent event, or null (first event in chain) */
+  parentEventId: varchar("parentEventId", { length: 64 }),
+  /** JSON: { origin_type, source_refs, transformation_type } */
+  origin: json("origin").$type<{
+    origin_type: "original" | "derived" | "assisted";
+    source_refs: string[];
+    transformation_type: "rewrite" | "remix" | "extension" | null;
+  }>(),
+  /** Canonicalized payload string (UTF-8, normalized) */
+  payloadCanonical: text("payloadCanonical").notNull(),
+  /** Ed25519 signature over eventId, base64-encoded */
+  signature: text("signature"),
+  /** Session/thread label for Satchel grouping */
+  sessionLabel: varchar("sessionLabel", { length: 128 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProvenanceEvent = typeof provenanceEvents.$inferSelect;
+export type InsertProvenanceEvent = typeof provenanceEvents.$inferInsert;

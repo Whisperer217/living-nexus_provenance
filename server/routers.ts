@@ -83,6 +83,14 @@ import {
   getProjectSongs, addSongToProject, removeSongFromProject, reorderProjectSongs,
   getLatestAuditLog, getAllAuditLogs, createAuditLog, updateAuditLog,
   setPinCreator,
+  insertProvenanceEvent,
+  getProvenanceEventsByCreator,
+  getLatestProvenanceCheckpoint,
+  getOrCreateAgent,
+  updateAgentFingerprint,
+  insertWid,
+  getWidWithEvent,
+  setUserPublicKey,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -426,6 +434,21 @@ export const appRouter = router({
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
+    }),
+    /** Check if user has a provenance keypair registered. */
+    hasKeypair: protectedProcedure.query(async ({ ctx }) => {
+      const user = await getUserById(ctx.user.id);
+      return { hasKey: !!(user?.publicKey) };
+    }),
+    /** Generate Ed25519 keypair on first use. Returns public key + private key ONCE. */
+    generateKeypair: protectedProcedure.mutation(async ({ ctx }) => {
+      const { generateKeypair: genKp } = await import("./provenance");
+      const user = await getUserById(ctx.user.id);
+      if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      if (user.publicKey) return { publicKeyHex: user.publicKey, alreadyExists: true };
+      const { privateKeyHex, publicKeyHex } = await genKp();
+      await setUserPublicKey(ctx.user.id, publicKeyHex);
+      return { publicKeyHex, privateKeyHex, alreadyExists: false };
     }),
   }),
 
@@ -5669,6 +5692,184 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       await db.insert(marketplaceItems).values(seeds);
       return { seeded: seeds.length, message: `${seeds.length} default marketplace items created.` };
     }),
+  }),
+
+  // ─── Satchel (Provenance Event Ledger for CreatorSurface/Writer) ─────────────
+  satchel: router({
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(500).optional() }).optional())
+      .query(async ({ ctx, input }) => {
+        return getProvenanceEventsByCreator(ctx.user.id, input?.limit ?? 200);
+      }),
+
+    checkpoint: protectedProcedure
+      .input(z.object({
+        payloadText: z.string(),
+        parentEventId: z.string().max(64).nullable().optional(),
+        sessionLabel: z.string().max(128).nullable().optional(),
+        privateKeyHex: z.string().optional(), // client-side signing (optional)
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const crypto = await import("crypto");
+        const eventId = crypto.createHash("sha256").update(input.payloadText).digest("hex");
+        return insertProvenanceEvent({
+          eventId,
+          creatorId: ctx.user.id,
+          actionType: "checkpoint",
+          parentEventId: input.parentEventId ?? null,
+          payloadCanonical: input.payloadText,
+          sessionLabel: input.sessionLabel ?? null,
+        });
+      }),
+
+    anchor: protectedProcedure
+      .input(z.object({
+        payloadText: z.string(),
+        parentEventId: z.string().max(64).nullable().optional(),
+        sessionLabel: z.string().max(128).nullable().optional(),
+        privateKeyHex: z.string().optional(),
+        originType: z.enum(["original", "derived", "assisted"]).optional(),
+        sourceRefs: z.array(z.string()).optional(),
+        transformationType: z.enum(["rewrite", "remix", "extension"]).nullable().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const crypto = await import("crypto");
+        const eventId = crypto.createHash("sha256").update(input.payloadText).digest("hex");
+        const result = await insertProvenanceEvent({
+          eventId,
+          creatorId: ctx.user.id,
+          actionType: "anchor",
+          parentEventId: input.parentEventId ?? null,
+          payloadCanonical: input.payloadText,
+          sessionLabel: input.sessionLabel ?? null,
+          origin: {
+            origin_type: input.originType ?? "original",
+            source_refs: input.sourceRefs ?? [],
+            transformation_type: input.transformationType ?? null,
+          },
+        });
+        // Return wid (same as eventId for anchor events)
+        return { ...result, wid: eventId };
+      }),
+
+    fork: protectedProcedure
+      .input(z.object({
+        originEventId: z.string().max(64),
+        payloadText: z.string(),
+        sessionLabel: z.string().max(128).nullable().optional(),
+        privateKeyHex: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const crypto = await import("crypto");
+        const eventId = crypto.createHash("sha256").update(input.payloadText + input.originEventId).digest("hex");
+        return insertProvenanceEvent({
+          eventId,
+          creatorId: ctx.user.id,
+          actionType: "fork",
+          parentEventId: input.originEventId,
+          payloadCanonical: input.payloadText,
+          sessionLabel: input.sessionLabel ?? null,
+          origin: { origin_type: "derived", source_refs: [input.originEventId], transformation_type: null },
+        });
+      }),
+
+    latestCheckpoint: protectedProcedure
+      .query(async ({ ctx }) => {
+        return getLatestProvenanceCheckpoint(ctx.user.id);
+      }),
+  }),
+
+  // ─── PPG (Personal Provenance Guide — AI writing assistant for CreatorSurface) ─
+  ppg: router({
+    generate: protectedProcedure
+      .input(z.object({
+        prompt: z.string().max(4000),
+        context: z.string().max(8000).optional(),
+        sessionLabel: z.string().max(128).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const systemPrompt = `You are the Personal Provenance Guide (PPG) for ${ctx.user.name ?? "a creator"} on Living Nexus. 
+You help creators develop their writing, lyrics, manuscripts, and creative works. 
+You understand provenance — every word belongs to its creator. 
+Be concise, generative, and creatively useful. Respond in plain text suitable for a writing editor.`;
+        const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+          { role: "system", content: systemPrompt },
+        ];
+        if (input.context) {
+          messages.push({ role: "user", content: `Current draft:\n\n${input.context}` });
+          messages.push({ role: "assistant", content: "I have your draft in context. How can I help?" });
+        }
+        messages.push({ role: "user", content: input.prompt });
+        const response = await invokeLLM({ messages });
+        const text = response.choices?.[0]?.message?.content ?? "";
+        return { text, sessionLabel: input.sessionLabel ?? null };
+      }),
+  }),
+
+  agents: router({
+    /** Get or create the Personal Nexus Agent for the current user. */
+    me: protectedProcedure.query(async ({ ctx }) => getOrCreateAgent(ctx.user.id)),
+    /** Alias used by CreatorSurface — same as me. */
+    getOrCreate: protectedProcedure.query(async ({ ctx }) => getOrCreateAgent(ctx.user.id)),
+    /** Send a message to the agent for style analysis or creative assistance. */
+    message: protectedProcedure
+      .input(z.object({ content: z.string().min(1), context: z.string().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const agent = await getOrCreateAgent(ctx.user.id);
+        const sysPrompt = `You are a Personal Nexus Agent — a creative intelligence bonded to this creator. You help them develop their voice, analyze their work, and evolve their style. Be concise and generative.`;
+        const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+          { role: "system", content: sysPrompt },
+        ];
+        if (input.context) messages.push({ role: "user", content: `Context:\n${input.context}` });
+        messages.push({ role: "user", content: input.content });
+        const response = await invokeLLM({ messages });
+        const text = response.choices?.[0]?.message?.content ?? "";
+        return { text, agentId: agent.id };
+      }),
+    /** Update the agent's style fingerprint after a session. */
+    updateFingerprint: protectedProcedure
+      .input(z.object({
+        agentId: z.number().int().positive(),
+        styleFingerprint: z.object({
+          tone: z.array(z.string()),
+          structure_patterns: z.array(z.string()),
+          common_transforms: z.array(z.string()),
+        }),
+        frozenTraits: z.object({ voice_constraints: z.array(z.string()) }).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await updateAgentFingerprint(input.agentId, input.styleFingerprint, input.frozenTraits);
+        return { ok: true };
+      }),
+  }),
+
+  wids: router({
+    /** Look up a WID and its associated provenance event. Returns flattened shape for WIDLookup page. */
+    lookup: publicProcedure
+      .input(z.object({ wid: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const result = await getWidWithEvent(input.wid);
+        if (!result) return null;
+        // Flatten wid row fields to top level for WIDLookup.tsx
+        return {
+          ...result.wid,
+          creator: result.creator,
+          event: result.event,
+        };
+      }),
+    /** Register a new WID for a provenance anchor event. */
+    register: protectedProcedure
+      .input(z.object({
+        wid: z.string().min(1),
+        eventId: z.string().min(1),
+        contentHash: z.string().min(1),
+        signature: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return insertWid({ ...input, creatorId: ctx.user.id });
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

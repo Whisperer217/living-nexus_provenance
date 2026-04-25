@@ -28,6 +28,7 @@ import {
   type ProjectBlock,
   type InsertPlatformAuditLog,
   type QrShare, type InsertQrShare,
+  agents, wids, provenanceEvents,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -509,6 +510,26 @@ export async function updateSongStatus(
   // Keep isPublic in sync: only Published songs are publicly visible in any feed
   const isPublic = status === "Published";
   await db.update(songs).set({ status, isPublic, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+}
+
+export async function getSongByWitnessId(witnessId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select({
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(eq(songs.witnessId, witnessId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
 }
 
 export async function updateSongMetadata(
@@ -3792,4 +3813,119 @@ export async function getQrScanStats(shareId: number): Promise<{
     .orderBy(desc(qrScans.scannedAt))
     .limit(20);
   return { total, recent };
+}
+
+// ─── Provenance Events (CreatorSurface / Writer satchel) ─────────────────────
+
+export async function insertProvenanceEvent(data: {
+  eventId: string;
+  creatorId: number;
+  agentId?: number | null;
+  actionType: "draft" | "checkpoint" | "anchor" | "fork";
+  parentEventId?: string | null;
+  origin?: {
+    origin_type: "original" | "derived" | "assisted";
+    source_refs: string[];
+    transformation_type: "rewrite" | "remix" | "extension" | null;
+  } | null;
+  payloadCanonical: string;
+  signature?: string | null;
+  sessionLabel?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const { provenanceEvents } = await import("../drizzle/schema");
+  await db.insert(provenanceEvents).values({
+    eventId: data.eventId,
+    creatorId: data.creatorId,
+    agentId: data.agentId ?? null,
+    actionType: data.actionType,
+    parentEventId: data.parentEventId ?? null,
+    origin: data.origin ?? null,
+    payloadCanonical: data.payloadCanonical,
+    signature: data.signature ?? null,
+    sessionLabel: data.sessionLabel ?? null,
+  });
+  return { eventId: data.eventId };
+}
+
+export async function getProvenanceEventsByCreator(creatorId: number, limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  const { provenanceEvents } = await import("../drizzle/schema");
+  return db
+    .select()
+    .from(provenanceEvents)
+    .where(eq(provenanceEvents.creatorId, creatorId))
+    .orderBy(desc(provenanceEvents.createdAt))
+    .limit(limit);
+}
+
+export async function getLatestProvenanceCheckpoint(creatorId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const { provenanceEvents } = await import("../drizzle/schema");
+  const rows = await db
+    .select()
+    .from(provenanceEvents)
+    .where(and(
+      eq(provenanceEvents.creatorId, creatorId),
+      eq(provenanceEvents.actionType, "checkpoint")
+    ))
+    .orderBy(desc(provenanceEvents.createdAt))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+// ─── Agents (Personal Nexus Agent) ───────────────────────────────────────────
+
+export async function getOrCreateAgent(userId: number) {
+  const db = await getDb();
+  const existing = await db.select().from(agents).where(eq(agents.userId, userId)).limit(1);
+  if (existing[0]) return existing[0];
+  await db.insert(agents).values({ userId });
+  const created = await db.select().from(agents).where(eq(agents.userId, userId)).limit(1);
+  return created[0]!;
+}
+
+export async function updateAgentFingerprint(
+  agentId: number,
+  styleFingerprint: { tone: string[]; structure_patterns: string[]; common_transforms: string[] },
+  frozenTraits?: { voice_constraints: string[] }
+) {
+  const db = await getDb();
+  const update: Record<string, unknown> = { styleFingerprint };
+  if (frozenTraits) update.frozenTraits = frozenTraits;
+  await db.update(agents).set(update).where(eq(agents.id, agentId));
+}
+
+// ─── WIDs ─────────────────────────────────────────────────────────────────────
+
+export async function insertWid(data: {
+  wid: string;
+  eventId: string;
+  contentHash: string;
+  creatorId: number;
+  signature?: string | null;
+}) {
+  const db = await getDb();
+  await db.insert(wids).values(data).onDuplicateKeyUpdate({ set: { eventId: data.eventId } });
+  return data;
+}
+
+export async function getWidWithEvent(widValue: string) {
+  const db = await getDb();
+  const widRow = await db.select().from(wids).where(eq(wids.wid, widValue)).limit(1);
+  if (!widRow[0]) return null;
+  const w = widRow[0];
+  const creator = await db.select({ id: users.id, name: users.name }).from(users).where(eq(users.id, w.creatorId)).limit(1);
+  const event = await db.select().from(provenanceEvents).where(eq(provenanceEvents.eventId, w.eventId)).limit(1);
+  return { wid: w, creator: creator[0] ?? null, event: event[0] ?? null };
+}
+
+// ─── Keypair ──────────────────────────────────────────────────────────────────
+
+export async function setUserPublicKey(userId: number, publicKeyHex: string) {
+  const db = await getDb();
+  await db.update(users).set({ publicKey: publicKeyHex }).where(eq(users.id, userId));
 }
