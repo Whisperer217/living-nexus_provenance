@@ -3542,3 +3542,10 @@
 - [x] No DB migrations
 - [x] TypeScript: 0 errors
 - [x] Save checkpoint and deploy
+
+## Commit 979b5f2 — Glow Opt-In Default (AudioContext Silence Root Cause Fix)
+- [x] Pull 979b5f2 (PlayerBar.tsx + MobilePlayerPanel.tsx: glowEnabled init changed from opt-out to opt-in — localStorage "on" required; prevents AudioContext creation before user gesture on fresh sessions)
+- [x] No merge conflicts (fast-forward, 2 files)
+- [x] No DB migrations
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
