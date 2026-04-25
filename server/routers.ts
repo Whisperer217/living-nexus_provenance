@@ -92,7 +92,9 @@ import { getOrGenerateEmbedVideo } from "./embedVideo";
 import { enqueueVisualJob } from "./visualQueue";
 import { notifyOwner } from "./_core/notification";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2024-06-20" as any });
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
+  : null as unknown as Stripe;
 const PLATFORM_FEE_PERCENT = 10;
 
 // ── Build stats — updated via env vars on each deploy ──
