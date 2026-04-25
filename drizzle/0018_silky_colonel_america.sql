@@ -1,0 +1,1 @@
+ALTER TABLE `songs` ADD `artAspectRatio` enum('1:1','4:5','16:9');

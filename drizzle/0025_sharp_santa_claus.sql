@@ -1,0 +1,1 @@
+ALTER TABLE `songs` ADD `contentType` enum('audio','lyrics','manuscript','comic') DEFAULT 'audio' NOT NULL;

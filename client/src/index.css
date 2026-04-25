@@ -1,23 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIVING NEXUS — Digital Sacred Museum Design System
+   Philosophy: Sacred Technology × Sovereign Witness
+   Colors: Quartzite Stone + Aged Gold Veining + Aubergine Depth
+   Typography: Cinzel (wordmark) + Cormorant Garamond (headings) + DM Sans (body)
+   Doctrine: Laminin/Logos v0.1 — He holds all things together
+   Aesthetic: Museum exhibit hall · quartzite walls · gold-veined stone
+═══════════════════════════════════════════════════════════════════ */
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
-/* ─── Living Nexus Design Tokens ─────────────────────────────────────────── */
-:root {
-  --ln-gold: #C49A28;
-  --ln-gold-dim: rgba(196, 154, 40, 0.35);
-  --ln-gold-glow: rgba(196, 154, 40, 0.15);
-  --ln-coal: #111009;
-  --ln-obsidian: #0D0C08;
-  --ln-parchment: #E8DFC8;
-  --ln-parchment-dim: rgba(232, 223, 200, 0.65);
-  --ln-smoke: #6B6555;
-  --ln-smoke-dim: rgba(107, 101, 85, 0.45);
-  --ln-ember: #8B3A1A;
-  --ln-panel: #16140F;
-  --ln-panel-border: rgba(196, 154, 40, 0.18);
-}
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -56,103 +51,349 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Living Nexus custom tokens */
+  --color-gold: var(--gold);
+  --color-gold-dim: var(--gold-dim);
+  --color-teal: var(--teal);
+  --color-teal-dim: var(--teal-dim);
+  --color-violet: var(--violet);
+  --color-violet-dim: var(--violet-dim);
+  --color-void: var(--void);
+  --color-void-2: var(--void-2);
+  --color-void-3: var(--void-3);
+  --color-void-4: var(--void-4);
 }
 
-/* ─── Dark theme (default) ────────────────────────────────────────────────── */
 :root {
-  --radius: 0.5rem;
-  /* Gold primary */
-  --primary: oklch(0.72 0.12 75);
-  --primary-foreground: oklch(0.10 0.01 75);
-  /* Backgrounds — deep obsidian */
-  --background: oklch(0.09 0.008 75);
-  --foreground: oklch(0.88 0.018 75);
-  --card: oklch(0.12 0.01 75);
-  --card-foreground: oklch(0.88 0.018 75);
-  --popover: oklch(0.12 0.01 75);
-  --popover-foreground: oklch(0.88 0.018 75);
-  /* Muted / secondary */
-  --secondary: oklch(0.18 0.01 75);
-  --secondary-foreground: oklch(0.72 0.018 75);
-  --muted: oklch(0.16 0.008 75);
-  --muted-foreground: oklch(0.52 0.014 75);
-  /* Accent — gold tint */
-  --accent: oklch(0.20 0.025 75);
-  --accent-foreground: oklch(0.72 0.12 75);
-  /* Destructive */
-  --destructive: oklch(0.60 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  /* Borders / inputs */
-  --border: oklch(0.72 0.12 75 / 18%);
-  --input: oklch(0.72 0.12 75 / 12%);
-  --ring: oklch(0.72 0.12 75 / 60%);
-  /* Charts */
-  --chart-1: oklch(0.72 0.12 75);
-  --chart-2: oklch(0.60 0.10 75);
-  --chart-3: oklch(0.48 0.08 75);
-  --chart-4: oklch(0.36 0.06 75);
-  --chart-5: oklch(0.24 0.04 75);
-  /* Sidebar */
-  --sidebar: oklch(0.11 0.01 75);
-  --sidebar-foreground: oklch(0.88 0.018 75);
-  --sidebar-primary: oklch(0.72 0.12 75);
-  --sidebar-primary-foreground: oklch(0.10 0.01 75);
-  --sidebar-accent: oklch(0.18 0.02 75);
-  --sidebar-accent-foreground: oklch(0.72 0.12 75);
-  --sidebar-border: oklch(0.72 0.12 75 / 15%);
-  --sidebar-ring: oklch(0.72 0.12 75 / 50%);
+  /* ══════════════════════════════════════════════════════════════════
+     LIVING NEXUS — Gunmetal Museum Palette  (ANCHORED)
+     "A museum of multimedia assets in a digital system" — Doc Seraph Mercer
+     Gunmetal Gray walls · Pearl Quartzite text · Quartzite Gold veining
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* ── Surface Steps (gunmetal museum walls) ── */
+  --void:   #111009;   /* Near-black — page background */
+  --void-2: #111009;   /* Darker Gunmetal — sidebar / nav */
+  --void-3: #1C1A14;   /* Lifted Steel — cards / raised surfaces */
+  --void-4: #4A5560;   /* Elevated Steel — modals / popovers */
+
+  /* ── Quartzite Stone Tones (pearl text + accents on dark metal) ── */
+  --stone-light:  #E8DFC8;   /* Pale Quartzite — primary text */
+  --stone-mid:    #DACAAA;   /* Warm Quartzite — secondary text */
+  --stone-warm:   #C49A28;   /* Honey Quartzite — gold accent */
+  --stone-deep:   #BD9B63;   /* Amber Quartzite — deeper accent */
+  --stone-shadow: #6B6555;   /* Shadow Quartzite — muted */
+
+  /* ── Gold Accent (quartzite veining on gunmetal) ── */
+  --gold:       #C49A28;   /* Quartzite Gold — primary accent */
+  --gold-dim:   #6B6555;   /* Shadow Stone — muted gold */
+  --gold-glow:  #D0A15F;   /* Bright Vein — hover / active */
+  --gold-bright:#E8DFC8;   /* Pearl Stone — highlight */
+  --rose:       #C49A28;   /* Quartzite Gold (secondary) */
+  --terra:      #E2725B;   /* Terra Cotta — warm destructive */
+  --teal:       #6B6555;   /* Shadow Stone (warm accent) */
+  --teal-dim:   #8A7250;   /* Deeper shadow stone */
+  --violet:     #C49A28;   /* Quartzite Gold (highlight) */
+  --violet-dim: #6B6555;   /* Shadow Stone */
+
+  /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
+  --lnx-gold:       #C49A28;   /* Quartzite Gold */
+  --lnx-gold-glow:  #D0A15F;   /* Bright Vein — glow states */
+  --lnx-gold-muted: #6B6555;   /* Shadow Stone — muted */
+  /* Green = Verified / Published / Alive */
+  --lnx-green:      #4ADE80;
+  --lnx-green-soft: #86EFAC;
+  /* Orange = Draft / In Progress / Transition */
+  --lnx-orange:     #D0A15F;   /* Bright Vein */
+  --lnx-orange-soft:#E8DFC8;   /* Pearl Stone */
+  /* Red = Destructive / Warning / Irreversible */
+  --lnx-red:        #F87171;
+  --lnx-red-soft:   #FCA5A5;
+  /* Foundation — gunmetal backgrounds */
+  --lnx-bg:         #111009;   /* Near-black — page bg */
+  --lnx-bg-2:       #111009;   /* Darker Gunmetal — nav/sidebar */
+  --lnx-bg-3:       #1C1A14;   /* Lifted Steel — cards */
+  --lnx-text:       #E8DFC8;   /* Pale Quartzite — primary text */
+  --lnx-text-muted: #6B6555;   /* Shadow Stone — muted text */
+
+  /* ── Semantic Tokens ── */
+  --radius: 0.6rem;
+  --background: var(--void);          /* #111009 — Near-black */
+  --foreground: #E8DFC8;              /* Pale Quartzite text */
+  --card: var(--void-3);              /* Lifted Steel */
+  --card-foreground: #E8DFC8;
+  --popover: var(--void-4);           /* Elevated Steel */
+  --popover-foreground: #E8DFC8;
+  --primary: var(--gold);             /* Quartzite Gold */
+  --primary-foreground: #111009;      /* Dark gunmetal on gold button */
+  --secondary: var(--void-2);         /* Darker Gunmetal */
+  --secondary-foreground: #E8DFC8;
+  --muted: var(--void-3);             /* Lifted Steel — muted surface */
+  --muted-foreground: #6B6555;        /* Shadow Stone */
+  --accent: var(--gold-glow);         /* Bright Vein */
+  --accent-foreground: #111009;
+  --destructive: #E2725B;             /* Terra Cotta */
+  --destructive-foreground: #E8DFC8;
+  --border: rgba(203, 177, 131, 0.28); /* Quartzite Gold border */
+  --input:  rgba(203, 177, 131, 0.16);
+  --ring: var(--gold);
+
+  --chart-1: #C49A28;   /* Quartzite Gold */
+  --chart-2: #D0A15F;   /* Bright Vein */
+  --chart-3: #E8DFC8;   /* Pale Quartzite */
+  --chart-4: #6B6555;   /* Shadow Stone */
+  --chart-5: #1C1A14;   /* Lifted Steel */
+
+  --sidebar: var(--void-2);           /* Darker Gunmetal */
+  --sidebar-foreground: #E8DFC8;
+  --sidebar-primary: var(--gold);
+  --sidebar-primary-foreground: #111009;
+  --sidebar-accent: var(--void-3);
+  --sidebar-accent-foreground: #E8DFC8;
+  --sidebar-border: rgba(203, 177, 131, 0.22);
+  --sidebar-ring: var(--gold);
 }
 
-/* ─── Light theme override (rarely used) ─────────────────────────────────── */
-.light {
-  --primary: oklch(0.55 0.12 75);
-  --primary-foreground: oklch(0.98 0 0);
-  --background: oklch(0.97 0.005 75);
-  --foreground: oklch(0.18 0.01 75);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.01 75);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.01 75);
-  --secondary: oklch(0.94 0.005 75);
-  --secondary-foreground: oklch(0.35 0.01 75);
-  --muted: oklch(0.94 0.005 75);
-  --muted-foreground: oklch(0.52 0.01 75);
-  --accent: oklch(0.94 0.005 75);
-  --accent-foreground: oklch(0.18 0.01 75);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.88 0.008 75);
-  --input: oklch(0.88 0.008 75);
-  --ring: oklch(0.55 0.12 75 / 60%);
-  --sidebar: oklch(0.97 0.005 75);
-  --sidebar-foreground: oklch(0.18 0.01 75);
-  --sidebar-primary: oklch(0.55 0.12 75);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.94 0.005 75);
-  --sidebar-accent-foreground: oklch(0.18 0.01 75);
-  --sidebar-border: oklch(0.88 0.008 75);
-  --sidebar-ring: oklch(0.55 0.12 75 / 50%);
+/* =================================================================
+   LIVING NEXUS — Theme System
+   Two themes: dark (default Lantern) and warm (Onyx Coffee / Cream-Clay)
+   Toggle via: document.documentElement.setAttribute('data-theme', 'warm')
+   Saved to user profile and localStorage for flash-free load.
+================================================================= */
+
+/* ── DARK THEME (mirrors :root — gunmetal is already dark) ── */
+[data-theme="dark"] {
+  --void:   #111009;
+  --void-2: #111009;
+  --void-3: #1C1A14;
+  --void-4: #4A5560;
+
+  --gold:       #C49A28;
+  --gold-dim:   #6B6555;
+  --gold-glow:  #D0A15F;
+  --rose:       #C49A28;
+  --terra:      #E2725B;
+  --teal:       #6B6555;
+  --teal-dim:   #8A7250;
+
+  --background:          var(--void);
+  --foreground:          #E8DFC8;
+  --card:                var(--void-3);
+  --card-foreground:     #E8DFC8;
+  --popover:             var(--void-4);
+  --popover-foreground:  #E8DFC8;
+  --primary:             var(--gold);
+  --primary-foreground:  #111009;
+  --secondary:           var(--void-2);
+  --secondary-foreground:#E8DFC8;
+  --muted:               var(--void-3);
+  --muted-foreground:    #6B6555;
+  --accent:              var(--gold-glow);
+  --accent-foreground:   #111009;
+  --border:              rgba(203, 177, 131, 0.28);
+  --input:               rgba(203, 177, 131, 0.16);
+  --ring:                var(--gold);
+
+  --lnx-bg:         #111009;
+  --lnx-bg-2:       #111009;
+  --lnx-bg-3:       #1C1A14;
+  --lnx-text:       #E8DFC8;
+  --lnx-text-muted: #6B6555;
+  --lnx-gold:       #C49A28;
+  --lnx-gold-glow:  #D0A15F;
+  --lnx-gold-muted: #6B6555;
+
+  --sidebar:                    var(--void-2);
+  --sidebar-foreground:         #E8DFC8;
+  --sidebar-primary:            var(--gold);
+  --sidebar-primary-foreground: #111009;
+  --sidebar-accent:             var(--void-3);
+  --sidebar-accent-foreground:  #E8DFC8;
+  --sidebar-border:             rgba(203, 177, 131, 0.22);
+  --sidebar-ring:               var(--gold);
+}
+
+/* ── WARM THEME (Steel Overlay — Lights On) ──
+   The steel tint is applied via React inline styles on TopBar + MainLayout
+   (rgba rgba(55,68,85,0.72) nav, rgba(42,55,70,0.80) drawer).
+   The dark base palette is intentionally preserved here — no CSS variable
+   overrides needed. Only the body filter and scrollbar tint are applied.
+   This prevents the page background / card surfaces / text from flipping
+   to cream-clay, which would make white text invisible.
+*/
+[data-theme="warm"] {
+  /* Intentionally empty — dark base tokens remain active.
+     Visual tint is handled by backdrop-filter overlays in React components. */
+}
+
+/* Warm theme body nudge — slight dim + contrast reduction, full saturation preserved so gold stays vivid */
+[data-theme="warm"] body {
+  filter: sepia(0.03) brightness(0.94) contrast(0.90) saturate(1.0) hue-rotate(1deg);
+  transition: filter 0.45s ease;
+}
+
+/* Warm theme headings — inherit from dark base (no color override; steel overlay handles the tint) */
+
+/* Warm theme scrollbar — olive tint */
+[data-theme="warm"] ::-webkit-scrollbar-thumb {
+  background: rgba(74,92,58,0.55);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    height: 100%;
+    overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
+    background-color: #111009; /* Near-black — match app bg */
+    /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
+  }
+  /* NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals by clipping
+     fixed-position overlays against the html root instead of the viewport.
+     iOS Safari scroll void is sealed by body.overlay-active { position:fixed } instead.
+     The html height:100% is preserved for layout integrity. */
+  html {
+    height: 100%;
+  }
+  /* ── Bottom Stack Layout Tokens ─────────────────────────────────────
+     Single source of truth for all bottom-anchored heights.
+     Player sits ABOVE nav. Content padding accounts for both.
+     ─────────────────────────────────────────────────────────────────── */
+  :root {
+    --nav-height: 56px;                    /* BottomNavBar visual height */
+    --nav-safe: max(env(safe-area-inset-bottom, 0px), 8px);
+    --nav-total: calc(var(--nav-height) + var(--nav-safe)); /* full nav footprint */
+    --player-height: 64px;                 /* MiniBar height */
+    --bottom-stack: calc(var(--nav-total) + var(--player-height)); /* total reserved bottom */
+  }
+
+  #root {
+    min-height: 100dvh; /* dvh = true mobile viewport height, not browser-lied vh */
+    display: flex;
+    flex-direction: column;
+  }
+  /* scroll-lock override moved outside @layer base — see below */
+
+  /* ── Global Overlay System ─────────────────────────────────────────
+     body.overlay-active is set by overlayController.ts.
+     All panels (menu, quickplay, player, modals) use this single class.
+     ─────────────────────────────────────────────────────────────────── */
+  /* overlay-active: overflow lock only (both full and light modes)
+     Does NOT set position:fixed here — that is reserved for overlay-active-full.
+     Light mode (mini-bar drag gesture) uses this class alone so the scroll div
+     behind the mini bar remains scrollable during the gesture. */
+  body.overlay-active {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  /* overlay-active-full: full-screen takeover (expanded player, modals, menus)
+     Adds position:fixed to prevent iOS Safari rubber-band scroll from revealing
+     the void behind the app. JS (overlayController) saves/restores scrollY
+     to prevent the page from jumping when the panel closes. */
+  body.overlay-active-full {
+    position: fixed;
+    width: 100%;
+    touch-action: none;
+  }
+
+  /* Graceful Lights On transition */
+  html {
+    transition:
+      background-color 0.45s ease,
+      color 0.35s ease;
+  }
   body {
     @apply bg-background text-foreground;
-    font-family: 'EB Garamond', 'Palatino Linotype', Georgia, serif;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    transition:
+      background-color 0.45s ease,
+      color 0.35s ease;
+  }
+  /* Typography weight upgrade */
+  p, span, li, td, th, label, input, textarea, select {
+    font-weight: 450;
+  }
+  /* h1/h2 — Cinzel for section titles (etched stone caps)
+     h3/h4 — Cormorant Garamond for editorial subheadings
+     h5/h6 — DM Sans for utility labels */
+  h1, h2 {
+    font-family: 'Cinzel', serif;
+    color: #E8DFC8;           /* Pale Quartzite */
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  h3, h4 {
+    font-family: 'Cormorant Garamond', serif;
+    color: #DACAAA;           /* Warm Quartzite */
+    letter-spacing: 0.02em;
+    font-weight: 500;
+    font-size: 1.1em;
+  }
+  h5, h6 {
+    font-family: 'DM Sans', sans-serif;
+    color: #6B6555;           /* Shadow Stone */
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8em;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),
   [type="submit"]:not(:disabled),
-  [type="reset"]:not(:disabled),
   a[href],
-  select:not(:disabled),
-  input[type="checkbox"]:not(:disabled),
-  input[type="radio"]:not(:disabled) {
+  select:not(:disabled) {
     @apply cursor-pointer;
   }
+
+  /* Scrollbar styling — warm amber tint */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(196,154,40,0.40); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+   * { scrollbar-width: thin; scrollbar-color: rgba(196,154,40,0.40) transparent; }
+}
+
+/* ── Radix Dialog scroll-lock compatibility ──────────────────────────────
+   MUST live OUTSIDE any @layer block.
+
+   react-remove-scroll-bar dynamically appends a plain (unlayered) <style>
+   tag to <head> that injects:
+     body[data-scroll-locked] { position: relative !important; }
+
+   In the CSS cascade, unlayered styles ALWAYS beat @layer styles —
+   even with higher specificity and !important inside the layer.
+   The only way to beat an unlayered rule is with another unlayered rule
+   that has equal-or-higher specificity and appears later in source order.
+
+   This block is unlayered and uses html body[...] (higher specificity)
+   so it definitively wins regardless of when the library injects its tag.
+
+   Effect: body stays position:static when a Radix dialog is open, so
+   fixed-position portals (modals) resolve against the viewport and center
+   correctly. The margin-right scrollbar-gap compensation is also zeroed
+   to prevent layout-shift ghost-clicks on the PlaylistDrawer tab.
+   ─────────────────────────────────────────────────────────────────── */
+html body[data-scroll-locked] {
+  position: static !important;
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* ── Dialog centering ───────────────────────────────────────────────────────────────
+   Tailwind v4 translate-x-[-50%] / translate-y-[-50%] utilities may not
+   generate CSS in all build configurations. This unlayered rule guarantees
+   the dialog is always viewport-centered using raw CSS, regardless of
+   Tailwind utility output or CSS variable resolution.
+   ─────────────────────────────────────────────────────────────── */
+[data-slot="dialog-content"] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  translate: none !important;  /* prevent Tailwind v4 CSS translate property from composing */
+  transform: translate(-50%, -50%) !important;
 }
 
 @layer components {
@@ -163,74 +404,1687 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
-
   .flex {
     min-height: 0;
     min-width: 0;
   }
-
   @media (min-width: 640px) {
-    .container {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
+    .container { padding-left: 1.5rem; padding-right: 1.5rem; }
   }
-
   @media (min-width: 1024px) {
-    .container {
-      padding-left: 2rem;
-      padding-right: 2rem;
-      max-width: 1440px;
-    }
+    .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; }
   }
 
-  /* ─── LN Panel system ─────────────────────────────────────────────────── */
-  .ln-panel {
-    background: var(--ln-panel);
-    border: 1px solid var(--ln-panel-border);
-    border-radius: var(--radius);
-  }
-
-  .ln-panel-header {
-    border-bottom: 1px solid var(--ln-panel-border);
-    padding: 0.5rem 0.75rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ln-gold);
-    font-family: 'Space Mono', monospace;
-  }
-
-  /* ─── Gold glow button ────────────────────────────────────────────────── */
-  .ln-btn-gold {
-    background: var(--ln-gold);
-    color: var(--ln-coal);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    transition: box-shadow 0.15s ease, opacity 0.15s ease;
-  }
-  .ln-btn-gold:hover:not(:disabled) {
-    box-shadow: 0 0 12px var(--ln-gold-dim);
-    opacity: 0.92;
-  }
-
-  /* ─── Provenance hash display ─────────────────────────────────────────── */
-  .ln-hash {
-    font-family: 'Space Mono', 'Courier New', monospace;
-    font-size: 0.72rem;
-    color: var(--ln-smoke);
+  /* ── Divine Typography ──
+     Cinzel Decorative  — wordmark / hero display
+     Cinzel             — section headings, labels, badges
+     Cormorant Garamond — editorial subheadings, descriptions, pull quotes
+     DM Sans            — body copy, UI text
+  ────────────────────────────────────────────────────────────────── */
+  .font-display {
+    font-family: 'Cinzel Decorative', serif;
     letter-spacing: 0.04em;
   }
-
-  /* ─── WID badge ───────────────────────────────────────────────────────── */
-  .ln-wid-badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    background: var(--ln-gold-glow);
-    border: 1px solid var(--ln-gold-dim);
-    color: var(--ln-gold);
-    padding: 0.1rem 0.45rem;
-    border-radius: 2px;
+  .font-heading {
+    font-family: 'Cinzel', serif;
     letter-spacing: 0.06em;
   }
+  .font-subheading {
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+  .font-editorial {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  .font-body {
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── MUSEUM SECTION TITLE — Cinzel caps with quartzite gold underline ── */
+  .museum-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;         /* 12px — compact, authoritative */
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #C49A28;             /* Quartzite Gold */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .museum-section-title::before {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #C49A28);
+    flex-shrink: 0;
+  }
+  .museum-section-title::after {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    background: linear-gradient(to left, transparent, #C49A28);
+    flex-shrink: 0;
+  }
+
+  /* ── MUSEUM SECTION HEADER — larger display heading ── */
+  .museum-section-header {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;            /* 16px */
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #E8DFC8;             /* Pale Quartzite */
+  }
+
+  /* ── MUSEUM CAPTION — Cormorant Garamond for descriptions / pull quotes ── */
+  .museum-caption {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9375rem;       /* 15px */
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: #DACAAA;             /* Warm Quartzite */
+    line-height: 1.6;
+  }
+
+  /* ── Gold gradient text — candlelight amber ── */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #B8820A, #E8A830, #F5C451, #E8A830, #B8820A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-teal-gradient {
+    background: linear-gradient(135deg, #4A9A7A, #6BBFA0, #4A9A7A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-violet-gradient {
+    background: linear-gradient(135deg, #C87840, #E8A060);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Ambient glow — candlelight halo behind key UI elements ── */
+  .glow-gold {
+    position: relative;
+  }
+  .glow-gold::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 22px 4px rgba(196,154,40,0.20), 0 0 8px 1px rgba(196,154,40,0.28);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-violet {
+    position: relative;
+  }
+  .glow-violet::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 22px 3px rgba(196,154,40,0.18), 0 0 8px 1px rgba(196,154,40,0.25);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Hero radial gradient — warm lantern center bleeding to charred oak edge ── */
+  .hero-radial {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%,
+        rgba(53,62,67,0.0) 0%,
+        rgba(53,62,67,0.6) 45%,
+        rgba(44,52,56,0.85) 70%,
+        rgba(44,52,56,1.0) 100%
+      );
+    pointer-events: none;
+  }
+
+  /* ── Player bar ambient glow — warm amber lantern uplight ── */
+  .player-glow {
+    box-shadow:
+      0 -4px 32px rgba(196,154,40,0.16),
+      0 -1px 8px rgba(196,154,40,0.22),
+      0 -8px 48px rgba(196,154,40,0.08);
+  }
+
+  /* ── Sage glow for teal-accented elements ── */
+  .glow-teal {
+    position: relative;
+  }
+  .glow-teal::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 18px 2px rgba(74,222,128,0.18), 0 0 6px 0px rgba(74,222,128,0.25);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── WID badge ambient glow — candlelight amber halo ── */
+  .wid-glow {
+    box-shadow:
+      0 0 16px 4px rgba(196,154,40,0.50),
+      0 0 6px 1px rgba(196,154,40,0.35),
+      0 0 32px 8px rgba(196,154,40,0.20);
+    border-color: rgba(196,154,40,0.60) !important;
+  }
+
+  /* ── Track card ambient glow on hover — warm lantern lift ── */
+  .track-card-glow {
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
+  }
+  .track-card-glow:hover {
+    box-shadow: 0 4px 28px rgba(196,154,40,0.18), 0 2px 10px rgba(196,154,40,0.16);
+    transform: translateY(-1px);
+  }
+
+  /* ── MUSEUM CARD SYSTEM — Phase 2 exhibit frames ──
+     Gunmetal wall · Gilded border · Pearl info panel · 3D shadow lift
+     The card sits on the gunmetal wall like a framed exhibit.
+     Cover art fills the top. Info panel below has a pearl-stone face.
+  ────────────────────────────────────────────────────────────────── */
+  .museum-card {
+    background: #1C1A14;                         /* Lifted Steel — card body */
+    border: 1px solid rgba(203, 177, 131, 0.32); /* Quartzite Gold border */
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.35),
+      0 1px 3px rgba(0, 0, 0, 0.25);
+  }
+  .museum-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(203, 177, 131, 0.65);     /* Gold vein brightens on hover */
+    box-shadow:
+      0 12px 32px rgba(0, 0, 0, 0.50),           /* deep shadow for 3D lift */
+      0 4px 12px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(203, 177, 131, 0.20),        /* outer gold ring */
+      inset 0 1px 0 rgba(230, 205, 174, 0.08);   /* pearl top-edge sheen */
+  }
+  /* Active track — gold frame glows */
+  .museum-card--active {
+    border-color: rgba(203, 177, 131, 0.70) !important;
+    box-shadow:
+      0 0 0 1px rgba(203, 177, 131, 0.35),
+      0 8px 28px rgba(0, 0, 0, 0.45),
+      0 0 20px rgba(208, 161, 95, 0.18);
+  }
+  /* Hot track — gold banner treatment preserved */
+  .museum-card--hot {
+    border-color: rgba(208, 161, 95, 0.65) !important;
+  }
+  /* Info panel — pearl stone face below the cover art */
+  .museum-card-info {
+    background: linear-gradient(
+      to bottom,
+      #1C1A14 0%,          /* matches card body at top */
+      #384249 60%,         /* slight deepening */
+      #323C42 100%         /* darkest at bottom — grounds the card */
+    );
+    padding: 0.75rem;
+  }
+
+  /* ── MUSEUM PAN ROW — standardized horizontal scroll row ──
+     All asset carousels use this class for consistent behavior.
+     - Smooth momentum scroll on mobile
+     - Hidden scrollbar (aesthetic)
+     - Fade-out edges (gunmetal gradient mask)
+     - Snap to card boundaries
+  ────────────────────────────────────────────────────────────────── */
+  .museum-pan-row {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 0.5rem;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    /* Hide scrollbar — all browsers */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .museum-pan-row::-webkit-scrollbar {
+    display: none;
+  }
+  .museum-pan-row > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  /* Wrapper with fade-out edges */
+  .museum-pan-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+  .museum-pan-wrapper::before,
+  .museum-pan-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2.5rem;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .museum-pan-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, #111009, transparent);
+  }
+  .museum-pan-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, #111009, transparent);
+  }
+
+  /* ── MUSEUM GRID — 3-column max, consistent gutter ── */
+  .museum-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  @media (min-width: 640px) {
+    .museum-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 1280px) {
+    .museum-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
+  /* ── SACRED GEOMETRY DIVIDERS — section separators with gold vein lines ──
+     Three variants:
+     .sg-divider        — simple centered gold line with diamond pip
+     .sg-divider-wide   — full-width with flanking ornamental lines
+     .sg-hero-frame     — corner-bracket overlay for hero/featured sections
+  ────────────────────────────────────────────────────────────────── */
+
+  /* Simple divider: ─────── ◆ ─────── */
+  .sg-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+    opacity: 0.6;
+  }
+  .sg-divider::before,
+  .sg-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to var(--sg-dir, right), transparent, rgba(196,154,40,0.55), transparent);
+  }
+  .sg-divider::before { --sg-dir: right; }
+  .sg-divider::after  { --sg-dir: left; }
+  .sg-divider-pip {
+    width: 6px;
+    height: 6px;
+    background: #C49A28;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(196,154,40,0.5);
+  }
+
+  /* Wide divider with ornamental flanking lines */
+  .sg-divider-wide {
+    position: relative;
+    height: 1.5rem;
+    margin: 2rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sg-divider-wide::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(to right,
+      transparent 0%,
+      rgba(196,154,40,0.15) 10%,
+      rgba(196,154,40,0.45) 35%,
+      rgba(196,154,40,0.55) 50%,
+      rgba(196,154,40,0.45) 65%,
+      rgba(196,154,40,0.15) 90%,
+      transparent 100%
+    );
+  }
+  .sg-divider-wide-center {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
+    background: #111009;
+  }
+  .sg-divider-wide-center::before,
+  .sg-divider-wide-center::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: rgba(196,154,40,0.65);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+  .sg-divider-wide-center-dot {
+    width: 5px;
+    height: 5px;
+    background: #C49A28;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(196,154,40,0.6);
+  }
+
+  /* Hero frame: corner brackets on featured section containers */
+  .sg-hero-frame {
+    position: relative;
+  }
+  .sg-hero-frame::before,
+  .sg-hero-frame::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0.55;
+  }
+  .sg-hero-frame::before {
+    top: 8px;
+    left: 8px;
+    border-top: 1.5px solid #C49A28;
+    border-left: 1.5px solid #C49A28;
+  }
+  .sg-hero-frame::after {
+    bottom: 8px;
+    right: 8px;
+    border-bottom: 1.5px solid #C49A28;
+    border-right: 1.5px solid #C49A28;
+  }
+
+  /* ── Gold banner — tracks with 50+ plays earn a luminous gold border treatment ── */
+  .gold-banner {
+    border-color: rgba(196,154,40,0.60) !important;
+    box-shadow:
+      0 0 0 1px rgba(196,154,40,0.28),
+      0 0 18px 2px rgba(196,154,40,0.18),
+      inset 0 0 12px 0 rgba(196,154,40,0.04);
+  }
+  .gold-banner:hover {
+    border-color: rgba(196,154,40,0.75) !important;
+    box-shadow:
+      0 0 0 1px rgba(196,154,40,0.40),
+      0 0 28px 4px rgba(196,154,40,0.28),
+      inset 0 0 16px 0 rgba(196,154,40,0.06);
+    transform: translateY(-2px);
+  }
+  @keyframes goldShimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+  }
+  .gold-banner-ribbon {
+    background: linear-gradient(90deg,
+      #6B6555 0%,
+      #E8DFC8 40%,
+      #E8DFC8 55%,
+      #E8DFC8 70%,
+      #6B6555 100%
+    );
+    background-size: 200% auto;
+    animation: goldShimmer 2.8s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Noise texture overlay ── */
+  .noise-overlay::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.35;
+  }
+
+  /* ── Parchment grain texture — aged paper feel on cards and modals ── */
+  .parchment-grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .parchment-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.06'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    opacity: 0.55;
+    mix-blend-mode: overlay;
+  }
+
+  /* ── Gold divider line — candlelight amber ── */
+  .gold-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,154,40,0.45), transparent);
+  }
+
+  /* ── Live wave animation ── */
+  .live-wave {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 14px;
+  }
+  .live-wave span {
+    width: 2px;
+    border-radius: 2px;
+    background: var(--gold);
+    animation: waveBar 0.7s ease-in-out infinite alternate;
+  }
+  .live-wave span:nth-child(1) { height: 4px; animation-delay: 0s; }
+  .live-wave span:nth-child(2) { height: 10px; animation-delay: 0.07s; }
+  .live-wave span:nth-child(3) { height: 14px; animation-delay: 0.14s; }
+  .live-wave span:nth-child(4) { height: 7px; animation-delay: 0.10s; }
+  .live-wave span:nth-child(5) { height: 11px; animation-delay: 0.03s; }
+  @keyframes waveBar {
+    from { transform: scaleY(1); }
+    to { transform: scaleY(0.25); }
+  }
+  .live-wave.paused span { animation-play-state: paused; }
+
+  /* ── Pulse dot — warm amber live indicator ── */
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #C49A28;
+    box-shadow: 0 0 10px rgba(196,154,40,0.7);
+    animation: pulseDot 1.5s ease-in-out infinite;
+  }
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── Page fade-up entrance ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+  }
+  .animate-fade-up {
+    animation: fadeUp 0.35s ease both;
+  }
+
+  /* ── Gold shimmer — candlelight flicker ── */
+  @keyframes goldShimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .gold-shimmer {
+    background: linear-gradient(90deg, #B8820A, #E8A830, #F5C451, #FADA7A, #F5C451, #E8A830, #B8820A);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: goldShimmer 4s linear infinite;
+  }
+
+  /* ── Animated gold progress glow — candlelight pulse ── */
+  @keyframes progressGlow {
+    0%, 100% { box-shadow: 0 0 5px 2px rgba(196,154,40,0.50); }
+    50% { box-shadow: 0 0 10px 4px rgba(196,154,40,0.85); }
+  }
+  .progress-playhead {
+    animation: progressGlow 1.8s ease-in-out infinite;
+  }
+
+  /* ── Lantern cathedral background — warm charred oak with amber radial glow ── */
+  .cosmic-bg {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%,
+        rgba(203, 177, 131, 0.08) 0%,
+        rgba(208, 161, 95, 0.05) 40%,
+        transparent 70%
+      ),
+      radial-gradient(ellipse 60% 40% at 50% 100%,
+        rgba(203, 177, 131, 0.06) 0%,
+        rgba(53, 62, 67, 0.04) 50%,
+        transparent 80%
+      ),
+      #111009;
+  }
+
+  /* ── CTA button glow — lantern warmth ── */
+  .btn-gold-glow {
+    box-shadow: 0 0 0 0 rgba(196,154,40,0.0);
+    transition: box-shadow 0.25s ease, transform 0.15s ease;
+  }
+  .btn-gold-glow:hover {
+    box-shadow:
+      0 0 20px 5px rgba(196,154,40,0.35),
+      0 4px 18px rgba(196,154,40,0.22);
+    transform: translateY(-1px);
+  }
+  .btn-violet-glow {
+    box-shadow: 0 0 0 0 rgba(170,142,100,0.0);
+    transition: box-shadow 0.25s ease, transform 0.15s ease;
+  }
+  .btn-violet-glow:hover {
+    box-shadow:
+      0 0 18px 4px rgba(170,142,100,0.35),
+      0 4px 16px rgba(196,154,40,0.22);
+    transform: translateY(-1px);
+  }
+
+  /* ── ORIGIN GLOW BEHAVIOR — WID badge pulse + active state glow — */
+  /* WID badge: soft gold pulse animation */
+  @keyframes widPulse {
+    0%, 100% { box-shadow: 0 0 10px 2px color-mix(in srgb, var(--lnx-gold) 35%, transparent), 0 0 4px 0px color-mix(in srgb, var(--lnx-gold-glow) 25%, transparent); }
+    50% { box-shadow: 0 0 18px 5px color-mix(in srgb, var(--lnx-gold) 50%, transparent), 0 0 8px 2px color-mix(in srgb, var(--lnx-gold-glow) 35%, transparent); }
+  }
+  .wid-origin-glow {
+    border-color: color-mix(in srgb, var(--lnx-gold) 55%, transparent) !important;
+    animation: widPulse 3s ease-in-out infinite;
+  }
+  /* Mobile: reduced glow intensity */
+  @media (max-width: 768px) {
+    .wid-origin-glow {
+      animation: none;
+      box-shadow: 0 0 8px 2px color-mix(in srgb, var(--lnx-gold) 30%, transparent);
+    }
+  }
+
+  /* Active track: faint gold edge glow */
+  .track-active-glow {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--lnx-gold) 30%, transparent), 0 4px 20px color-mix(in srgb, var(--lnx-gold) 12%, transparent);
+    transition: box-shadow 0.3s ease;
+  }
+
+  /* Hover: subtle elevation + light */
+  .hover-elevate {
+    transition: box-shadow 0.2s ease, transform 0.15s ease, background 0.2s ease;
+  }
+  .hover-elevate:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.40), 0 0 12px color-mix(in srgb, var(--lnx-gold) 10%, transparent);
+    transform: translateY(-1px);
+  }
+
+  /* ── SEMANTIC STATUS BADGES — enforcing color meaning ── */
+  .badge-published, .badge-verified {
+    background: color-mix(in srgb, var(--lnx-green) 15%, transparent);
+    color: var(--lnx-green-soft);
+    border: 1px solid color-mix(in srgb, var(--lnx-green) 35%, transparent);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .badge-draft, .badge-processing {
+    background: color-mix(in srgb, var(--lnx-orange) 15%, transparent);
+    color: var(--lnx-orange-soft);
+    border: 1px solid color-mix(in srgb, var(--lnx-orange) 35%, transparent);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .badge-error, .badge-destructive {
+    background: color-mix(in srgb, var(--lnx-red) 15%, transparent);
+    color: var(--lnx-red-soft);
+    border: 1px solid color-mix(in srgb, var(--lnx-red) 35%, transparent);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .badge-wid {
+    background: color-mix(in srgb, var(--lnx-gold) 12%, transparent);
+    color: var(--lnx-gold);
+    border: 1px solid color-mix(in srgb, var(--lnx-gold) 40%, transparent);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── ELEVATION LAYERS — consistent surface depth ── */
+  .surface-base     { background: var(--lnx-bg); }
+  .surface-raised   { background: var(--lnx-bg-2); }
+  .surface-elevated { background: var(--lnx-bg-3); }
+  .surface-modal    { background: #4A5560; backdrop-filter: blur(12px); }
+
+  /* ── SEMANTIC TEXT COLORS — use these instead of hardcoded values ── */
+  .text-lnx-gold   { color: var(--lnx-gold); }
+  .text-lnx-green  { color: var(--lnx-green); }
+  .text-lnx-orange { color: var(--lnx-orange); }
+  .text-lnx-red    { color: var(--lnx-red); }
+  .text-lnx-muted  { color: var(--lnx-text-muted); }
+
+  /* ── Genre pill — warm amber ── */
+  .genre-pill {
+    border: 1px solid rgba(196,154,40,0.28);
+    color: #DACAAA;
+    background: rgba(196,154,40,0.08);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .genre-pill:hover, .genre-pill.active {
+    border-color: rgba(196,154,40,0.60);
+    color: #C49A28;
+    background: rgba(196,154,40,0.14);
+  }
+}
+
+/* ── Vertical range slider (volume) ─────────────────────────────────────── */
+/* Used by PlayerBar and MobilePlayerLayer vertical volume controls          */
+
+@keyframes flamePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(196, 154, 40, 0);
+    border-color: var(--ln-gold-dim);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px rgba(196, 154, 40, 0.2);
+    border-color: var(--ln-gold-hot);
+  }
+}
+
+/* ── Standard vertical slider (bottom bar + expanded bar) ── */
+/* Uses transform rotation — slider-vertical is deprecated in Chrome 121+ */
+input[type="range"].volume-slider-vertical {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 8px;
+  height: 108px;
+  cursor: pointer;
+  border-radius: 9999px;
+  outline: none;
+  padding: 0;
+  flex-shrink: 0;
+  background: transparent;
+}
+input[type="range"].volume-slider-vertical::-webkit-slider-runnable-track {
+  width: 8px;
+  border-radius: 9999px;
+  background: rgba(44,52,56,0.8);
+}
+input[type="range"].volume-slider-vertical::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #E8DFC8, #C49A28 55%, #6B6555);
+  border: 2px solid rgba(230,205,174,0.95);
+  margin-left: -5px;
+  cursor: pointer;
+  animation: flamePulse 2.4s ease-in-out infinite;
+  transition: transform 0.15s ease;
+}
+input[type="range"].volume-slider-vertical::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+input[type="range"].volume-slider-vertical::-moz-range-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(44,52,56,0.8);
+}
+input[type="range"].volume-slider-vertical::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #E8DFC8, #C49A28 55%, #6B6555);
+  border: 2px solid rgba(230,205,174,0.95);
+  cursor: pointer;
+  box-shadow: 0 0 8px 3px rgba(196,154,40,0.50);
+}
+
+/* ── Theater-mode vertical slider — taller, organ-pipe style ──────────── */
+/* Theater slider: same rotation approach, taller */
+input[type="range"].volume-slider-theater {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 10px;
+  height: 130px;
+  cursor: pointer;
+  border-radius: 9999px;
+  outline: none;
+  padding: 0;
+  flex-shrink: 0;
+  background: transparent;
+}
+input[type="range"].volume-slider-theater::-webkit-slider-runnable-track {
+  width: 10px;
+  border-radius: 9999px;
+  background: rgba(44,52,56,0.8);
+}
+input[type="range"].volume-slider-theater::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #E8DFC8, #C49A28 50%, #1C1A14);
+  border: 2px solid rgba(230,205,174,0.95);
+  margin-left: -6px;
+  cursor: pointer;
+  animation: flamePulse 2.0s ease-in-out infinite;
+  transition: transform 0.15s ease;
+}
+input[type="range"].volume-slider-theater::-webkit-slider-thumb:hover {
+  transform: scale(1.20);
+}
+input[type="range"].volume-slider-theater::-moz-range-track {
+  height: 10px;
+  border-radius: 9999px;
+  background: rgba(44,52,56,0.8);
+}
+input[type="range"].volume-slider-theater::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #E8DFC8, #C49A28 50%, #1C1A14);
+  border: 2px solid rgba(230,205,174,0.95);
+  cursor: pointer;
+  box-shadow: 0 0 10px 4px rgba(196,154,40,0.6);
+}
+
+/* ── TrackCard visual-pending shimmer animations ── */
+@keyframes trackCardShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes trackCardDot {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PROVENANCE CARD STYLE STANDARD — see CARD_STANDARDS.md
+   Canonical CSS for all provenance cards. Do not override without
+   updating CARD_STANDARDS.md.
+═══════════════════════════════════════════════════════════════════ */
+
+/* Image wrapper: locked 4:5 frame via MediaAsset padding-bottom system */
+.prov-card-img-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.75rem; /* rounded-xl — consistent across all cards */
+  max-height: 200px;     /* unified cap — matches pan-row and grid cards site-wide */
+  border: 1px solid rgba(196, 154, 40, 0.15);
+}
+
+/* Bottom gradient overlay: always present, cinematic fade */
+.prov-card-gradient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(17, 16, 9, 0.6) 50%,
+    rgba(10, 8, 6, 0.95) 100%
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIVING NEXUS — Content-Type Color System
+   Accent rings on museum-card for each content type.
+   Applied via JS inline styles (see contentTypeColors.ts).
+   These CSS custom properties are available for use in components.
+═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Music / Audio — Purple */
+  --ct-audio-primary:    #A78BFA;
+  --ct-audio-dim:        #7C3AED;
+  --ct-audio-glow:       rgba(167,139,250,0.35);
+
+  /* Lyrics Only — Gold */
+  --ct-lyrics-primary:   #F5C451;
+  --ct-lyrics-dim:       #D0A15F;
+  --ct-lyrics-glow:      rgba(245,196,81,0.35);
+
+  /* Manuscript — Green */
+  --ct-manuscript-primary: #4ADE80;
+  --ct-manuscript-dim:     #16A34A;
+  --ct-manuscript-glow:    rgba(74,222,128,0.30);
+
+  /* Comic / Novel — Red */
+  --ct-comic-primary:    #F87171;
+  --ct-comic-dim:        #DC2626;
+  --ct-comic-glow:       rgba(248,113,113,0.30);
+
+  /* ── Living Nexus Identity Palette ── */
+  --ln-void:          #0A0806;   /* deepest background */
+  --ln-coal:          #111009;   /* card/surface background */
+  --ln-iron:          #1C1A14;   /* secondary surface, hover bg */
+  --ln-ash:           #2E2B22;   /* borders, dividers */
+  --ln-steel:         #3D3A2E;   /* disabled states, muted borders */
+  --ln-smoke:         #6B6555;   /* secondary text, labels */
+  --ln-bone:          #C9C0A8;   /* primary body text */
+  --ln-parchment:     #E8DFC8;   /* headings, high-contrast text */
+
+  /* ── Panel / Overlay Surfaces (used by FloatingAvatar, KeeperPage) ── */
+  --ln-obsidian:      #060504;   /* deepest panel background, header strips */
+  --ln-panel:         rgba(10, 8, 6, 0.97); /* floating panel background — solid near-black */
+  --ln-panel-border:  rgba(196, 154, 40, 0.15); /* subtle gold border for panels */
+
+  /* ── Gold Hierarchy (4 tiers — use intentionally) ── */
+  --ln-gold-dim:      #8B6914;   /* subdued accents, eyebrows, footnotes */
+  --ln-gold:          #C49A28;   /* primary CTA background, badges */
+  --ln-gold-hot:      #E8B840;   /* hero text accent, active states */
+  --ln-gold-flame:    #F5CC5A;   /* hover on gold elements only */
+
+  /* ── Semantic Accent Colors ── */
+  --ln-ember:         #C4440A;   /* warnings, live indicators, error states */
+  --ln-blood:         #8B1A0A;   /* deep error, destructive actions */
+  --ln-witness:       #2A6B8A;   /* WID supports panel, info states */
+  --ln-witness-bright:#4A9DBF;   /* WID icon, active witness indicators */
+  --ln-seal:          #1A4A2E;   /* WID proves panel, verified states */
+  --ln-seal-bright:   #3A8A56;   /* checkmark icons, confirmed badges */
+
+  /* ── Typography ── */
+  --font-display:     'Cinzel', 'Georgia', serif;
+  --font-body:        'DM Sans', system-ui, sans-serif;
+  --font-mono:        'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ── Base Typography (redesign v2.31) ── */
+body {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-display,
+.heading-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+
+/* Eyebrow / overline labels */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;       /* 11px */
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ln-gold-dim);
+}
+
+/* ── Tailwind v4 theme registration for LN identity tokens ── */
+@theme {
+  --color-void:          #0A0806;
+  --color-coal:          #111009;
+  --color-iron:          #1C1A14;
+  --color-ash:           #2E2B22;
+  --color-steel:         #3D3A2E;
+  --color-smoke:         #6B6555;
+  --color-bone:          #C9C0A8;
+  --color-parchment:     #E8DFC8;
+
+  --color-gold-dim:      #8B6914;
+  --color-gold:          #C49A28;
+  --color-gold-hot:      #E8B840;
+  --color-gold-flame:    #F5CC5A;
+
+  --color-ember:         #C4440A;
+  --color-witness:       #2A6B8A;
+  --color-witness-bright:#4A9DBF;
+  --color-seal:          #1A4A2E;
+  --color-seal-bright:   #3A8A56;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIVING NEXUS — Part 2 Global Patterns
+   Scope: Toasts, modals, sidebar, signals, gift confirmation,
+          What's New panel, shared utility classes
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Shared utility: eyebrow label ── */
+.ln-eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ln-gold-dim);
+  font-family: var(--font-body);
+  display: block;
+}
+
+/* ── Shared utility: flat stamp button (no border-radius) ── */
+.ln-stamp-btn {
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.ln-stamp-btn-primary {
+  background: var(--ln-gold);
+  color: var(--ln-void);
+  border: none;
+  padding: 14px 24px;
+}
+.ln-stamp-btn-primary:hover { background: var(--ln-gold-hot); }
+.ln-stamp-btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(196,154,40,0.25);
+  color: var(--ln-smoke);
+  padding: 12px 20px;
+}
+.ln-stamp-btn-ghost:hover {
+  border-color: var(--ln-gold);
+  color: var(--ln-gold);
+  background: rgba(196,154,40,0.06);
+}
+
+/* ── Shared utility: WID input field ── */
+.wid-input {
+  background: var(--ln-iron);
+  border: 1px solid rgba(196,154,40,0.25);
+  border-radius: 0;
+  color: var(--ln-parchment);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  padding: 14px 16px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.wid-input:focus {
+  border-color: var(--ln-gold);
+  box-shadow: 0 0 0 1px rgba(196,154,40,0.3);
+}
+.wid-input::placeholder {
+  color: var(--ln-steel);
+  font-family: var(--font-mono);
+}
+
+/* ── Shared utility: gold top-bar accent (pseudo-element) ── */
+.ln-gold-topbar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ln-gold),
+    var(--ln-gold-hot),
+    var(--ln-gold),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* ── Toast notifications ── */
+[data-sonner-toast] {
+  background: var(--ln-coal) !important;
+  border: 1px solid rgba(196,154,40,0.2) !important;
+  border-left: 3px solid var(--ln-gold) !important;
+  color: var(--ln-bone) !important;
+  font-size: 13px !important;
+  padding: 12px 16px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  min-width: 280px;
+}
+[data-sonner-toast][data-type="error"]   { border-left-color: var(--ln-ember) !important; }
+[data-sonner-toast][data-type="success"] { border-left-color: var(--ln-seal-bright) !important; }
+[data-sonner-toast][data-type="info"]    { border-left-color: var(--ln-witness-bright) !important; }
+[data-sonner-toast] [data-title]         { color: var(--ln-bone) !important; font-weight: 500; }
+[data-sonner-toast] [data-description]  { color: var(--ln-smoke) !important; font-size: 12px !important; }
+[data-sonner-toast] [data-close-button] { color: var(--ln-smoke) !important; background: none !important; border: none !important; }
+[data-sonner-toast] [data-close-button]:hover { color: var(--ln-gold) !important; }
+
+/* ── Modal overlays ── */
+.ln-modal-backdrop {
+  background: rgba(10,8,6,0.85);
+  backdrop-filter: blur(2px);
+}
+.ln-modal {
+  background: var(--ln-coal);
+  border: 1px solid rgba(196,154,40,0.2);
+  border-radius: 0;
+  max-width: 520px;
+  width: 100%;
+  position: relative;
+}
+.ln-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(196,154,40,0.12);
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--ln-parchment);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ln-modal-body { padding: 24px; }
+.ln-modal-close {
+  color: var(--ln-smoke);
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.ln-modal-close:hover { color: var(--ln-gold); }
+
+/* ── Sidebar ── */
+.ln-sidebar {
+  background: var(--ln-coal);
+  border-right: 1px solid rgba(196,154,40,0.12);
+}
+.ln-sidebar-section-label {
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ln-gold-dim);
+  font-family: var(--font-body);
+  padding: 16px 16px 6px;
+  display: block;
+}
+.ln-sidebar-item {
+  font-size: 13px;
+  color: var(--ln-smoke);
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 2px solid transparent;
+}
+.ln-sidebar-item:hover {
+  color: var(--ln-bone);
+  background: var(--ln-iron);
+}
+.ln-sidebar-item.active {
+  color: var(--ln-gold-hot);
+  background: rgba(196,154,40,0.08);
+  border-left-color: var(--ln-gold);
+}
+
+/* ── Signals / notification feed ── */
+.ln-signals-container {
+  background: var(--ln-coal);
+  border: 1px solid rgba(196,154,40,0.12);
+}
+.ln-signal-row {
+  border-bottom: 1px solid rgba(196,154,40,0.06);
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: background 0.15s;
+}
+.ln-signal-row:hover { background: var(--ln-iron); }
+.ln-signal-unread {
+  background: var(--ln-gold);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.ln-signal-icon-witness  { color: var(--ln-gold-dim); }
+.ln-signal-icon-comment  { color: var(--ln-witness-bright); }
+.ln-signal-icon-tip      { color: var(--ln-seal-bright); }
+
+/* ── Gift confirmation banner ── */
+.gift-confirmation {
+  border: 1px solid rgba(196,154,40,0.4);
+  background: rgba(196,154,40,0.08);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideDown 0.3s ease;
+  border-radius: 0;
+}
+.gift-confirmation-icon {
+  color: var(--ln-gold-hot);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.gift-confirmation-text {
+  font-size: 13px;
+  color: var(--ln-bone);
+  font-weight: 400;
+  flex: 1;
+}
+.gift-confirmation-dismiss {
+  margin-left: auto;
+  color: var(--ln-smoke);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.15s;
+}
+.gift-confirmation-dismiss:hover { color: var(--ln-gold); }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── What's New / changelog panel ── */
+.whats-new-panel {
+  background: var(--ln-coal);
+  border-left: 1px solid rgba(196,154,40,0.15);
+}
+.whats-new-version-tag {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--ln-gold);
+  letter-spacing: 0.12em;
+}
+.whats-new-latest-badge {
+  background: rgba(196,154,40,0.12);
+  color: var(--ln-gold);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 0;
+  font-family: var(--font-body);
+}
+.whats-new-date {
+  font-size: 10px;
+  color: var(--ln-smoke);
+}
+.whats-new-feature-heading {
+  font-size: 13px;
+  color: var(--ln-bone);
+  font-weight: 500;
+}
+.whats-new-feature-desc {
+  font-size: 12px;
+  color: var(--ln-smoke);
+  font-weight: 300;
+  line-height: 1.7;
+}
+.whats-new-version-divider {
+  border-top: 1px solid rgba(196,154,40,0.08);
+}
+
+/* ── Flat stamp filter bar (Explore, Learn, Dashboard tabs) ── */
+.ln-filter-bar {
+  border-bottom: 1px solid rgba(196,154,40,0.12);
+  background: var(--ln-coal);
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ln-filter-bar::-webkit-scrollbar { display: none; }
+.ln-filter-pill {
+  border-radius: 0;
+  background: transparent;
+  color: var(--ln-smoke);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.ln-filter-pill:hover {
+  background: var(--ln-iron);
+  color: var(--ln-bone);
+}
+.ln-filter-pill.active {
+  background: rgba(196,154,40,0.12);
+  color: var(--ln-gold-hot);
+  border-bottom-color: var(--ln-gold);
+}
+.ln-mode-pill {
+  border-radius: 0;
+  background: transparent;
+  color: var(--ln-smoke);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  padding: 8px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s;
+}
+.ln-mode-pill:hover { color: var(--ln-bone); background: var(--ln-iron); }
+.ln-mode-pill.active {
+  background: var(--ln-gold);
+  color: var(--ln-void);
+  border-bottom-color: transparent;
+}
+
+/* ── WID certificate card ── */
+.wid-certificate {
+  border: 1px solid rgba(196,154,40,0.3);
+  background: var(--ln-coal);
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+}
+.wid-certificate::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ln-gold),
+    var(--ln-gold-hot),
+    var(--ln-gold),
+    transparent
+  );
+  pointer-events: none;
+}
+.wid-certificate-watermark {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: 120px;
+  color: rgba(196,154,40,0.03);
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+.wid-cert-id {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ln-gold-hot);
+  letter-spacing: 0.1em;
+}
+.wid-cert-creator {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ln-parchment);
+}
+.wid-cert-timestamp {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ln-smoke);
+}
+.wid-cert-hash {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ln-smoke);
+  word-break: break-all;
+}
+.wid-verified-badge {
+  background: rgba(58,138,86,0.15);
+  border: 1px solid rgba(58,138,86,0.4);
+  color: var(--ln-seal-bright);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+/* ── Upload page ── */
+.upload-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid rgba(196,154,40,0.12);
+  padding-bottom: 20px;
+  margin-bottom: 32px;
+}
+.upload-step {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ln-steel);
+  font-family: var(--font-body);
+  position: relative;
+}
+.upload-step.active {
+  color: var(--ln-gold-hot);
+  font-weight: 500;
+}
+.upload-step.complete { color: var(--ln-seal-bright); }
+.upload-step-num {
+  font-family: var(--font-display);
+  font-size: 18px;
+  display: block;
+  margin-bottom: 4px;
+}
+.drop-zone {
+  border: 1px dashed rgba(196,154,40,0.3);
+  background: rgba(196,154,40,0.03);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  border-radius: 0;
+}
+.drop-zone:hover,
+.drop-zone.dragging {
+  border-color: var(--ln-gold);
+  background: rgba(196,154,40,0.06);
+}
+.drop-zone-icon {
+  font-size: 32px;
+  color: var(--ln-gold-dim);
+  margin-bottom: 12px;
+}
+.drop-zone-text {
+  font-size: 13px;
+  color: var(--ln-smoke);
+  font-weight: 300;
+}
+.haai-form {
+  border: 1px solid rgba(196,154,40,0.2);
+  background: rgba(196,154,40,0.03);
+  padding: 24px;
+  margin-top: 24px;
+  border-radius: 0;
+}
+.haai-label {
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ln-gold-dim);
+  margin-bottom: 4px;
+  display: block;
+  font-family: var(--font-body);
+}
+.haai-field-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--ln-parchment);
+  margin-bottom: 6px;
+}
+.register-btn {
+  width: 100%;
+  background: var(--ln-gold);
+  color: var(--ln-void);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 18px;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.15s;
+}
+.register-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.register-btn:hover { background: var(--ln-gold-hot); }
+
+/* ── Founder Era tier cards ── */
+.founder-tier {
+  border: 1px solid rgba(196,154,40,0.15);
+  background: var(--ln-coal);
+  padding: 24px;
+  position: relative;
+  transition: border-color 0.2s;
+  border-radius: 0;
+}
+.founder-tier:hover { border-color: rgba(196,154,40,0.4); }
+.founder-tier.covenant {
+  border-color: rgba(196,154,40,0.35);
+  background: rgba(196,154,40,0.04);
+}
+.founder-tier.covenant::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ln-gold), var(--ln-gold-hot), var(--ln-gold), transparent);
+  pointer-events: none;
+}
+
+/* ── Project progress bar ── */
+.project-progress-track {
+  background: var(--ln-ash);
+  height: 3px;
+  border-radius: 0;
+  overflow: hidden;
+}
+.project-progress-fill {
+  background: linear-gradient(90deg, var(--ln-gold-dim), var(--ln-gold-hot));
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+/* ── Spec layer (Learn page) ── */
+.spec-layer {
+  border-left: 2px solid var(--ln-gold-dim);
+  padding-left: 20px;
+  margin-bottom: 24px;
+  transition: border-left-color 0.15s;
+}
+.spec-layer:hover { border-left-color: var(--ln-gold); }
+
+/* ── Legal notice block ── */
+.legal-notice {
+  border: 1px solid rgba(196,154,40,0.12);
+  background: rgba(196,154,40,0.04);
+  padding: 20px 24px;
+  border-left: 3px solid var(--ln-gold-dim);
+  border-radius: 0;
+}
+.legal-notice p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ln-smoke);
+  font-weight: 300;
+}
+
+/* ── Terms/doctrine preamble ── */
+.terms-preamble {
+  border: 1px solid rgba(196,154,40,0.2);
+  background: rgba(196,154,40,0.04);
+  padding: 24px 28px;
+  margin-bottom: 40px;
+  position: relative;
+  border-radius: 0;
+}
+.terms-preamble::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ln-gold), transparent);
+  pointer-events: none;
+}
+.terms-preamble p {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ln-bone);
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* ── Doctrine/legal page typography ── */
+.ln-doctrine-page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.ln-doctrine-page h1 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--ln-parchment);
+}
+.ln-doctrine-page h2 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--ln-parchment);
+  border-bottom: 1px solid rgba(196,154,40,0.12);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+.ln-doctrine-page h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ln-bone);
+}
+.ln-doctrine-page p,
+.ln-doctrine-page li {
+  font-size: 14px;
+  line-height: 1.9;
+  font-weight: 300;
+  color: var(--ln-bone);
+}
+.ln-doctrine-page a {
+  color: var(--ln-gold);
+  border-bottom: 1px solid rgba(196,154,40,0.3);
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ln-doctrine-page a:hover {
+  color: var(--ln-gold-hot);
+  border-bottom-color: var(--ln-gold-hot);
+}
+.ln-doctrine-page strong {
+  color: var(--ln-parchment);
+  font-weight: 500;
+}
+
+/* ── Explore hero ── */
+.explore-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  color: var(--ln-parchment);
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 24px rgba(0,0,0,0.7);
+}
+.explore-hero-sub {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ln-bone);
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 12px rgba(0,0,0,0.8);
+}
+
+/* ── Archive / Dashboard rows ── */
+.ln-archive-row {
+  border-bottom: 1px solid rgba(196,154,40,0.06);
+  background: var(--ln-coal);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.15s;
+}
+.ln-archive-row:hover { background: var(--ln-iron); }
+.ln-archive-row-title {
+  font-size: 13px;
+  color: var(--ln-bone);
+  font-weight: 500;
+}
+.ln-archive-row-wid {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ln-smoke);
+}
+.ln-drag-grip {
+  color: var(--ln-steel);
+  cursor: grab;
+  transition: color 0.15s;
+}
+.ln-drag-grip:hover { color: var(--ln-gold-dim); }
+
+/* ── Jukebox / Listen Together ── */
+.jukebox-session-badge {
+  background: rgba(196,154,40,0.12);
+  border: 1px solid rgba(196,154,40,0.3);
+  color: var(--ln-gold);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 0;
+  font-family: var(--font-body);
+}
+.jukebox-leave-btn {
+  color: var(--ln-ember);
+  border: 1px solid rgba(196,68,10,0.3);
+  background: transparent;
+  border-radius: 0;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+.jukebox-leave-btn:hover { background: rgba(196,68,10,0.1); }
+
+/* ── Comic reader chrome ── */
+.comic-reader-nav-btn {
+  color: var(--ln-smoke);
+  background: rgba(10,8,6,0.6);
+  border: none;
+  cursor: pointer;
+  padding: 12px;
+  transition: color 0.15s;
+  border-radius: 0;
+}
+.comic-reader-nav-btn:hover { color: var(--ln-gold-hot); }
+.comic-reader-page-indicator {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--ln-smoke);
 }

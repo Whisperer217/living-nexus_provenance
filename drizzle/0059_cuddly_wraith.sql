@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `isPinned` boolean DEFAULT false NOT NULL;

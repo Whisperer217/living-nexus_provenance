@@ -1,0 +1,2 @@
+ALTER TABLE `projects` ADD `albumDownloadPermission` enum('none','free','tipped') DEFAULT 'none' NOT NULL;--> statement-breakpoint
+ALTER TABLE `projects` ADD `albumDownloadPriceCents` int DEFAULT 499 NOT NULL;

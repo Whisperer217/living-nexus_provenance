@@ -1,0 +1,790 @@
+/* ═══════════════════════════════════════════════════════════════════
+   LIVING NEXUS — Archive Page
+   Authenticated users only. Shows all of the user's own tracks.
+   Phase 66: Batch-select checkboxes, WID monospace under title,
+             improved track numbers, drag handles, auth guard.
+═══════════════════════════════════════════════════════════════════ */
+
+import { useEffect, useState, useRef } from "react";
+import { Link, useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+  Music, Upload, Globe, EyeOff, Pencil, ExternalLink,
+  Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
+  Download, Lock, Coins, Layers, AlertTriangle,
+} from "lucide-react";
+import { EditTrackPanel } from "@/components/EditTrackPanel";
+import { getLoginUrl } from "@/const";
+import { usePlayer } from "@/contexts/PlayerContext";
+import MyListsTab from "@/components/MyListsTab";
+import ExternalPlaylistsTab from "@/components/ExternalPlaylistsTab";
+
+/* ── Status tag ─────────────────────────────────────────────────── */
+const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
+  Published: { bg: "color-mix(in srgb, var(--lnx-green) 15%, transparent)",  text: "var(--lnx-green-soft)"  },
+  Draft:     { bg: "color-mix(in srgb, var(--lnx-orange) 15%, transparent)", text: "var(--lnx-orange-soft)" },
+  Unlisted:  { bg: "rgba(196,154,40,0.15)",                             text: "var(--ln-gold)"   },
+  Deleted:   { bg: "color-mix(in srgb, var(--lnx-red) 15%, transparent)",    text: "var(--lnx-red-soft)"   },
+};
+
+function StatusTag({ status }: { status: string }) {
+  const s = STATUS_STYLES[status] ?? { bg: "rgba(63,74,80,0.18)", text: "var(--ln-smoke)" };
+  return (
+    <span
+      className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold"
+      style={{ background: s.bg, color: s.text }}
+    >
+      {status}
+    </span>
+  );
+}
+
+function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return "—";
+  return new Date(date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+/* ── Confirm Delete Modal ───────────────────────────────────────── */
+function ConfirmDeleteModal({
+  song,
+  onConfirm,
+  onCancel,
+  isPending,
+}: {
+  song: any;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isPending: boolean;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ background: "rgba(0,0,0,0.85)" }}
+      onClick={onCancel}
+    >
+      <div
+        className="rounded-2xl p-6 max-w-sm w-full"
+        style={{
+          background: "var(--ln-coal)",
+          border: "1px solid color-mix(in srgb, var(--lnx-red) 35%, transparent)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="font-bold text-lg mb-1" style={{ color: "var(--ln-ember)", fontFamily: "'Cinzel', serif" }}>
+          Delete Track
+        </p>
+        <p className="text-sm mb-1" style={{ color: "#E2E8F0" }}>
+          Are you sure you want to delete:
+        </p>
+        <p className="font-semibold mb-4 truncate" style={{ color: "var(--ln-parchment)" }}>
+          "{song.title}"
+        </p>
+
+        {/* WID Preservation Notice */}
+        <div
+          className="rounded-xl p-3 mb-5"
+          style={{
+            background: "rgba(196,154,40,0.05)",
+            border: "1px solid rgba(196,154,40,0.2)",
+          }}
+        >
+          <div className="flex items-center gap-1.5 mb-1">
+            <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+            <p className="text-xs font-bold" style={{ color: "var(--ln-gold)" }}>
+              WID Preserved
+            </p>
+          </div>
+          <p className="text-xs leading-relaxed" style={{ color: "#E2E8F0" }}>
+            Your Witness ID{" "}
+            <span className="font-mono text-[10px]" style={{ color: "var(--ln-gold)" }}>
+              {song.witnessId}
+            </span>{" "}
+            remains on record permanently. The cryptographic proof of origin is never deleted — only the track is removed from public view.
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={onConfirm}
+            disabled={isPending}
+            className="flex-1 font-bold py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50"
+            style={{
+              background: "color-mix(in srgb, var(--lnx-red) 20%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--lnx-red) 50%, transparent)",
+              color: "var(--ln-ember)",
+            }}
+          >
+            {isPending ? "Deleting…" : "Delete Track"}
+          </button>
+          <button
+            onClick={onCancel}
+            disabled={isPending}
+            className="flex-1 py-2.5 rounded-xl text-sm"
+            style={{ border: "1px solid #C3AB7D", color: "#E2E8F0" }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Page ───────────────────────────────────────────────────────── */
+export default function ArchivePage() {
+  const { isAuthenticated, loading } = useAuth();
+  const [,] = useLocation();
+  const utils = trpc.useUtils();
+  const [editingSong, setEditingSong] = useState<any | null>(null);
+  const [deletingSong, setDeletingSong] = useState<any | null>(null);
+  const [activeTab, setActiveTab] = useState<"tracks" | "lists" | "external">("tracks");
+  const { playQueueAt } = usePlayer();
+  const { user } = useAuth();
+  const myArtistName = user?.artistHandle || user?.name || "Unknown Creator";
+
+  // Batch selection state
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [batchMode, setBatchMode] = useState(false);
+
+  // Drag-to-reorder state
+  const [localSongs, setLocalSongs] = useState<any[]>([]);
+  const draggedId = useRef<number | null>(null);
+  const dragOverId = useRef<number | null>(null);
+
+  const buildTrack = (song: any) => ({
+    id: String(song.id),
+    title: song.title ?? "Untitled Work",
+    artist: myArtistName,
+    audioUrl: song.fileUrl ?? "",
+    coverArt: song.coverArtUrl ?? "",
+    artUrl: song.coverArtUrl ?? undefined,
+    genre: song.genre ?? "",
+    witnessId: song.witnessId ?? "",
+    aiDisclosure: song.aiConsent ?? "original",
+    coverPositionX: song.coverPositionX ?? 50,
+    coverPositionY: song.coverPositionY ?? 50,
+        visualReady: song.visualReady ?? false,
+        autoVideoUrl: song.autoVideoUrl ?? undefined,
+        creatorRole: song.creator?.role ?? undefined,
+  });
+
+  const handlePlay = (e: React.MouseEvent, songList: any[], idx: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const playable = songList.filter((s: any) => s.fileUrl);
+    const clickedTrack = songList[idx];
+    if (!clickedTrack?.fileUrl) {
+      toast.error("This track has no audio file attached.");
+      return;
+    }
+    const tracks = playable.map(buildTrack);
+    const startIdx = tracks.findIndex((t) => t.id === String(clickedTrack.id));
+    playQueueAt(tracks, startIdx >= 0 ? startIdx : 0, "PLAYLIST");
+    toast.success(`Now playing: ${clickedTrack.title}`);
+  };
+
+  // Auth guard
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      window.location.href = getLoginUrl();
+    }
+  }, [loading, isAuthenticated]);
+
+  const { data: songs, isLoading: songsLoading } = trpc.songs.mySongs.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  // Sync localSongs when server data arrives
+  useEffect(() => {
+    if (songs) setLocalSongs(songs);
+  }, [songs]);
+
+  // Clear selection when exiting batch mode
+  useEffect(() => {
+    if (!batchMode) setSelectedIds(new Set());
+  }, [batchMode]);
+
+  /* Optimistic publish toggle */
+  const updateStatus = trpc.songs.updateStatus.useMutation({
+    onMutate: async ({ songId, status }) => {
+      await utils.songs.mySongs.cancel();
+      const prev = utils.songs.mySongs.getData();
+      utils.songs.mySongs.setData(undefined, (old: any) =>
+        old?.map((s: any) => s.id === songId ? { ...s, status } : s)
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) utils.songs.mySongs.setData(undefined, ctx.prev);
+      toast.error("Failed to update status");
+    },
+    onSuccess: (_data, vars) => {
+      const label = vars.status === "Published" ? "Track published" : "Track set to Draft";
+      toast.success(label);
+    },
+    onSettled: () => utils.songs.mySongs.invalidate(),
+  });
+
+  /* Delete (soft) */
+  const deleteSong = trpc.songs.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Track removed. Your WID record is preserved permanently.");
+      setDeletingSong(null);
+      utils.songs.mySongs.invalidate();
+    },
+    onError: () => toast.error("Failed to delete track"),
+  });
+
+  /* Download permission — optimistic cycle: none → free → tipped → none */
+  const updateDownload = trpc.songDownload.updatePermission.useMutation({
+    onMutate: async ({ songId, permission }) => {
+      await utils.songs.mySongs.cancel();
+      const prev = utils.songs.mySongs.getData();
+      utils.songs.mySongs.setData(undefined, (old: any) =>
+        old?.map((s: any) => s.id === songId ? { ...s, downloadPermission: permission } : s)
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) utils.songs.mySongs.setData(undefined, ctx.prev);
+      toast.error("Failed to update download setting");
+    },
+    onSuccess: (_data, vars) => {
+      const labels: Record<string, string> = { none: "Downloads off", free: "Free downloads on", tipped: "Tip-gated downloads on" };
+      toast.success(labels[vars.permission] ?? "Download setting updated");
+    },
+    onSettled: () => utils.songs.mySongs.invalidate(),
+  });
+
+  const cycleDownload = (e: React.MouseEvent, song: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const cycle: Record<string, "none" | "free" | "tipped"> = { none: "free", free: "tipped", tipped: "none" };
+    const current = (song.downloadPermission ?? "none") as string;
+    const next = cycle[current] ?? "none";
+    updateDownload.mutate({ songId: song.id, permission: next, tipThresholdCents: song.downloadTipThresholdCents ?? 179 });
+  };
+
+  /* Reorder — calls songs.reorder which validates ownership server-side */
+  const reorderMySongs = trpc.songs.reorder.useMutation({
+    onError: () => {
+      toast.error("Failed to save order");
+      if (songs) setLocalSongs(songs); // rollback
+    },
+  });
+
+  const handleToggle = (e: React.MouseEvent, song: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = song.status === "Published" ? "Draft" : "Published";
+    updateStatus.mutate({ songId: song.id, status: next });
+  };
+
+  /* ── Batch selection helpers ───────────────────────────────────── */
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    const nonDeleted = displaySongs.filter((s: any) => s.status !== "Deleted").map((s: any) => s.id);
+    setSelectedIds(new Set(nonDeleted));
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  /* ── Drag handlers ─────────────────────────────────────────────── */
+  const handleDragStart = (e: React.DragEvent, id: number) => {
+    draggedId.current = id;
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    dragOverId.current = id;
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: number) => {
+    e.preventDefault();
+    if (draggedId.current === null || draggedId.current === targetId) return;
+    const from = localSongs.findIndex((s) => s.id === draggedId.current);
+    const to = localSongs.findIndex((s) => s.id === targetId);
+    if (from === -1 || to === -1) return;
+    const reordered = [...localSongs];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(to, 0, moved);
+    setLocalSongs(reordered);
+    reorderMySongs.mutate({ orderedIds: reordered.map((s: any) => s.id) });
+    toast.success("Track order saved");
+    draggedId.current = null;
+    dragOverId.current = null;
+  };
+
+  const handleDragEnd = () => {
+    draggedId.current = null;
+    dragOverId.current = null;
+  };
+
+  if (loading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
+        <div className="w-8 h-8 rounded-full border-2 animate-spin"
+          style={{ borderColor: "var(--ln-gold)", borderTopColor: "transparent" }} />
+      </div>
+    );
+  }
+
+  const displaySongs = localSongs.length > 0 ? localSongs : (songs ?? []);
+  const nonDeletedCount = displaySongs.filter((s: any) => s.status !== "Deleted").length;
+
+  return (
+    <>
+    <div className="min-h-screen" style={{ background: "#111009" }}>
+      {/* ── Hero Banner ─────────────────────────────────────────────────── */}
+      <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
+        <img
+          src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/znZFuENyiCRsHFOi.png"
+          alt="Archive hero"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ filter: "saturate(1.15) contrast(1.1)" }}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(10,15,30,0.85) 0%, rgba(20,25,40,0.45) 45%, transparent 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(53,62,67,0.85) 0%, rgba(53,62,67,0.15) 40%, transparent 100%)" }} />
+        <div className="absolute bottom-0 left-0 p-6">
+          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
+          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>LNX Archive</h1>
+          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-parchment)" }}>The permanent record of witnessed creative works</p>
+        </div>
+      </div>
+      <div className="container py-10 max-w-4xl mx-auto px-4" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
+
+        {/* ── Breadcrumb ──────────────────────────────────────────── */}
+        <nav className="flex items-center gap-1.5 text-xs mb-5" style={{ color: "#E2E8F0" }}>
+          <Link href="/dashboard">
+            <span className="hover:underline cursor-pointer" style={{ color: "var(--ln-gold)" }}>Dashboard</span>
+          </Link>
+          <span>/</span>
+          <span style={{ color: "var(--ln-parchment)" }}>Archive</span>
+        </nav>
+
+        {/* ── Upload action ─────────────────────────────────────────────── */}
+        <div className="flex items-center justify-end mb-6">
+          <Link href="/upload">
+            <Button size="sm" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
+              <Upload className="w-3 h-3 mr-1" /> Upload New
+            </Button>
+          </Link>
+        </div>
+
+        {/* ── Slot Usage Bar ─────────────────────────────────────────── */}
+        {(() => {
+          const slotsUsed = (songs as any)?.[0]?.slotsUsed ?? nonDeletedCount;
+          const slotsTotal = (user as any)?.songSlotsTotal ?? 100;
+          const slotPct = slotsTotal > 0 ? Math.round((nonDeletedCount / slotsTotal) * 100) : 0;
+          const isNear = slotPct >= 90;
+          const isFull = nonDeletedCount >= slotsTotal;
+          return (
+            <Link href="/settings/billing">
+              <div
+                className="flex items-center gap-3 mb-6 px-4 py-3 rounded-xl border cursor-pointer hover:border-amber-500/50 transition-colors"
+                style={{
+                  background: isFull ? "rgba(44,52,56,0.4)" : isNear ? "rgba(44,52,56,0.3)" : "var(--ln-coal)",
+                  borderColor: isFull ? "rgba(239,68,68,0.4)" : isNear ? "rgba(196,154,40,0.34)" : "rgba(44,52,56,0.4)",
+                }}
+              >
+                {isFull ? (
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ln-ember)" }} />
+                ) : (
+                  <Layers className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium" style={{ color: isFull ? "var(--ln-ember)" : isNear ? "var(--ln-parchment)" : "var(--ln-parchment)" }}>
+                      {isFull ? "Archive Full" : isNear ? "Approaching Slot Limit" : "Archive Slots"}
+                    </span>
+                    <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>
+                      {nonDeletedCount} / {slotsTotal}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full" style={{ background: "var(--ln-coal)" }}>
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(slotPct, 100)}%`,
+                        background: isFull ? "var(--ln-ember)" : isNear ? "var(--ln-gold)" : "var(--ln-seal-bright)",
+                      }}
+                    />
+                  </div>
+                </div>
+                <span className="text-xs flex-shrink-0" style={{ color: "var(--ln-smoke)" }}>Manage →</span>
+              </div>
+            </Link>
+          );
+        })()}
+
+        {/* ── Tab switcher ───────────────────────────────────────── */}
+        <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "var(--ln-coal)" }}>
+          {(["tracks", "lists", "external"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+              style={activeTab === tab
+                ? { background: "var(--ln-gold)", color: "var(--ln-parchment)" }
+                : { color: "var(--ln-smoke)" }}
+            >
+              {tab === "tracks" && <><Music size={13} /> My Tracks</>}
+              {tab === "lists"  && <><ListMusic size={13} /> My Lists</>}
+              {tab === "external" && <><Globe size={13} /> External</>}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "lists"    && <MyListsTab />}
+        {activeTab === "external" && <ExternalPlaylistsTab />}
+
+        {/* ── Track toolbar ──────────────────────────────────────── */}
+        {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
+          <div className="flex items-center justify-between mb-3">
+            {/* Left: count + batch toggle */}
+            <div className="flex items-center gap-3">
+              <p className="text-xs" style={{ color: "#E2E8F0" }}>
+                {nonDeletedCount} {nonDeletedCount === 1 ? "track" : "tracks"}
+              </p>
+              <button
+                onClick={() => setBatchMode(b => !b)}
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-all"
+                style={batchMode
+                  ? { background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }
+                  : { color: "var(--ln-smoke)", border: "1px solid #C49A28" }
+                }
+              >
+                <CheckSquare className="w-3 h-3" />
+                {batchMode ? "Exit Select" : "Select"}
+              </button>
+              {batchMode && (
+                <>
+                  <button
+                    onClick={selectAll}
+                    className="text-xs px-2 py-1 rounded-lg transition-all"
+                    style={{ color: "var(--ln-smoke)", border: "1px solid #C49A28" }}
+                  >
+                    All
+                  </button>
+                  {selectedIds.size > 0 && (
+                    <button
+                      onClick={clearSelection}
+                      className="text-xs px-2 py-1 rounded-lg transition-all"
+                      style={{ color: "var(--ln-smoke)", border: "1px solid #C49A28" }}
+                    >
+                      Clear ({selectedIds.size})
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+            {/* Right: drag hint */}
+            {!batchMode && (
+              <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>
+                Drag <GripVertical className="inline w-3 h-3" /> to reorder
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ── Loading skeleton ────────────────────────────────────────── */}
+        {activeTab === "tracks" && songsLoading && (
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-16 rounded-xl animate-pulse"
+                style={{ background: "var(--ln-coal)" }} />
+            ))}
+          </div>
+        )}
+
+        {/* ── Empty state ────────────────────────────────────────── */}
+        {activeTab === "tracks" && !songsLoading && displaySongs.length === 0 && (
+          <div className="text-center py-20 rounded-xl"
+            style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
+            <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
+            <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>
+              You have not uploaded any tracks yet.
+            </p>
+            <Link href="/upload">
+              <Button style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
+                Upload Your First Track
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {/* ── Track list ────────────────────────────────────────── */}
+        {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
+          <div className="space-y-2">
+            {displaySongs.map((song: any, idx: number) => {
+              const isPublished = song.status === "Published";
+              const isPending = updateStatus.isPending && updateStatus.variables?.songId === song.id;
+              const hasAudio = !!song.fileUrl;
+              const isDeleted = song.status === "Deleted";
+              const isSelected = selectedIds.has(song.id);
+
+              return (
+                <div
+                  key={song.id}
+                  draggable={!batchMode && !isDeleted}
+                  onDragStart={(e) => !batchMode && handleDragStart(e, song.id)}
+                  onDragOver={(e) => !batchMode && handleDragOver(e, song.id)}
+                  onDrop={(e) => !batchMode && handleDrop(e, song.id)}
+                  onDragEnd={handleDragEnd}
+                  onClick={(e) => {
+                    if (batchMode && !isDeleted) { toggleSelect(song.id); return; }
+                    if (hasAudio && !isDeleted) handlePlay(e, displaySongs, idx);
+                  }}
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:brightness-110"
+                  style={{
+                    background: isSelected
+                      ? "rgba(196,154,40,0.05)"
+                      : isDeleted ? "var(--ln-coal)" : "var(--ln-coal)",
+                    border: isSelected
+                      ? "1px solid rgba(196,154,40,0.3)"
+                      : `1px solid ${isDeleted ? "color-mix(in srgb, var(--lnx-red) 20%, transparent)" : "var(--ln-gold)"}`,
+                    cursor: batchMode ? (isDeleted ? "default" : "pointer") : (hasAudio && !isDeleted ? "pointer" : "default"),
+                    opacity: isDeleted ? 0.6 : 1,
+                  }}
+                >
+                  {/* Batch checkbox OR drag handle */}
+                  {batchMode ? (
+                    <div
+                      className="flex-shrink-0"
+                      onClick={(e) => { e.stopPropagation(); if (!isDeleted) toggleSelect(song.id); }}
+                    >
+                      {isSelected
+                        ? <CheckSquare className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+                        : <Square className="w-4 h-4" style={{ color: "var(--ln-iron)" }} />
+                      }
+                    </div>
+                  ) : (
+                    <div
+                      className="flex-shrink-0 cursor-grab active:cursor-grabbing"
+                      onClick={(e) => e.stopPropagation()}
+                      title="Drag to reorder"
+                    >
+                      <GripVertical className="w-4 h-4" style={{ color: "var(--ln-iron)" }} />
+                    </div>
+                  )}
+
+                  {/* Track number */}
+                  <span
+                    className="text-xs w-5 text-center flex-shrink-0 font-mono tabular-nums"
+                    style={{ color: "var(--ln-smoke)" }}
+                  >
+                    {idx + 1}
+                  </span>
+
+                  {/* Cover art */}
+                  <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
+                    style={{ background: "var(--ln-coal)" }}>
+                    {song.coverArtUrl
+                      ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover"
+                          style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
+                      : <Music className="w-4 h-4 opacity-40" style={{ color: "var(--ln-gold)" }} />}
+                  </div>
+
+                  {/* Title + WID + genre */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate"
+                      style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
+                      {song.title}
+                    </p>
+                    {/* WID in monospace — always shown if present */}
+                    {song.witnessId && (
+                      <p
+                        className="font-mono text-[10px] truncate mt-0.5 tracking-tight"
+                        style={{ color: "rgba(196,154,40,0.55)" }}
+                        title={`Witness ID: ${song.witnessId}`}
+                      >
+                        {song.witnessId}
+                      </p>
+                    )}
+                    {/* Genre — only if no WID shown */}
+                    {!song.witnessId && song.genre && (
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "#E2E8F0" }}>
+                        {song.genre}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Upload date */}
+                  <span className="text-xs flex-shrink-0 hidden sm:block" style={{ color: "#E2E8F0" }}>
+                    {formatDate(song.createdAt)}
+                  </span>
+
+                  {/* Status tag */}
+                  <div className="flex-shrink-0">
+                    <StatusTag status={song.status ?? "Draft"} />
+                  </div>
+
+                  {/* Action buttons — hidden in batch mode */}
+                  {!batchMode && (
+                    <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      {/* Play indicator */}
+                      {hasAudio && !isDeleted && (
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center"
+                          style={{ color: "var(--ln-gold)" }} title="Click row to play">
+                          <Play className="w-3 h-3" />
+                        </div>
+                      )}
+
+                      {/* View page — route books/manuscripts/comics to /book/:id */}
+                      {!isDeleted && (() => {
+                        const isBook = song.contentType === "manuscript" || song.contentType === "comic";
+                        const viewHref = isBook ? `/book/${song.id}` : `/song/${song.id}`;
+                        const viewTitle = isBook ? "View book page" : "View song page";
+                        return (
+                          <Link href={viewHref}>
+                            <button
+                              className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                              title={viewTitle}
+                            >
+                              <ExternalLink className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
+                            </button>
+                          </Link>
+                        );
+                      })()}
+
+                      {/* Edit */}
+                      {!isDeleted && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setEditingSong(song); }}
+                          title="Edit track metadata"
+                          className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all"
+                          style={{
+                            background: "rgba(212,175,55,0.1)",
+                            color: "var(--ln-gold)",
+                            border: "1px solid rgba(212,175,55,0.3)",
+                          }}
+                        >
+                          <Pencil className="w-3 h-3" /> Edit
+                        </button>
+                      )}
+
+                      {/* Download permission cycle button */}
+                      {!isDeleted && (() => {
+                        const dlPerm = (song.downloadPermission ?? "none") as string;
+                        const dlPending = updateDownload.isPending && updateDownload.variables?.songId === song.id;
+                        const dlConfig: Record<string, { icon: React.ReactNode; label: string; bg: string; color: string; border: string }> = {
+                          none: {
+                            icon: <Lock className="w-3 h-3" />,
+                            label: "No DL",
+                            bg: "rgba(44,52,56,0.6)",
+                            color: "var(--ln-parchment)",
+                            border: "1px solid #111009",
+                          },
+                          free: {
+                            icon: <Download className="w-3 h-3" />,
+                            label: "Free DL",
+                            bg: "rgba(74,222,128,0.12)",
+                            color: "var(--ln-seal-bright)",
+                            border: "1px solid rgba(74,222,128,0.35)",
+                          },
+                          tipped: {
+                            icon: <Coins className="w-3 h-3" />,
+                            label: "Tip DL",
+                            bg: "rgba(196,154,40,0.08)",
+                            color: "var(--ln-gold)",
+                            border: "1px solid rgba(196,154,40,0.3)",
+                          },
+                        };
+                        const cfg = dlConfig[dlPerm] ?? dlConfig.none;
+                        return (
+                          <button
+                            onClick={(e) => cycleDownload(e, song)}
+                            disabled={dlPending}
+                            title={`Download: ${dlPerm} — click to cycle`}
+                            className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all disabled:opacity-50"
+                            style={{ background: cfg.bg, color: cfg.color, border: cfg.border }}
+                          >
+                            {dlPending
+                              ? <span className="w-3 h-3 rounded-full border border-t-transparent animate-spin" style={{ borderColor: "currentColor", borderTopColor: "transparent" }} />
+                              : cfg.icon
+                            }
+                            {cfg.label}
+                          </button>
+                        );
+                      })()}
+
+                      {/* Publish toggle */}
+                      {!isDeleted && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleToggle(e, song); }}
+                          disabled={isPending}
+                          title={isPublished ? "Unpublish (set to Draft)" : "Publish"}
+                          className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all disabled:opacity-50"
+                          style={isPublished
+                            ? { background: "rgba(58,138,86,0.15)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.35)" }
+                            : { background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }
+                          }
+                        >
+                          {isPending ? (
+                            <span className="w-3 h-3 rounded-full border border-t-transparent animate-spin"
+                              style={{ borderColor: "currentColor", borderTopColor: "transparent" }} />
+                          ) : isPublished ? (
+                            <><EyeOff className="w-3 h-3" /> Unpublish</>
+                          ) : (
+                            <><Globe className="w-3 h-3" /> Publish</>
+                          )}
+                        </button>
+                      )}
+
+                      {/* Delete */}
+                      {!isDeleted && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setDeletingSong(song); }}
+                          title="Delete track (WID preserved)"
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:badge-error"
+                          style={{ color: "var(--lnx-red)" }}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Edit Track Panel */}
+    {editingSong && (
+      <EditTrackPanel
+        song={editingSong}
+        onClose={() => setEditingSong(null)}
+        onSaved={() => {
+          setEditingSong(null);
+          utils.songs.mySongs.invalidate();
+        }}
+      />
+    )}
+
+    {/* Confirm Delete Modal */}
+    {deletingSong && (
+      <ConfirmDeleteModal
+        song={deletingSong}
+        onConfirm={() => deleteSong.mutate({ songId: deletingSong.id })}
+        onCancel={() => setDeletingSong(null)}
+        isPending={deleteSong.isPending}
+      />
+    )}
+  </>);
+}

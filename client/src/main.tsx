@@ -1,14 +1,33 @@
 import { trpc } from "@/lib/trpc";
 import { UNAUTHED_ERR_MSG } from '@shared/const';
+import { HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
+import { LightsModeProvider } from "./contexts/LightsModeContext";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Data stays fresh for 30s — prevents redundant refetches on tab focus / component remount
+      staleTime: 30_000,
+      // Keep unused query data in cache for 5 minutes
+      gcTime: 5 * 60_000,
+      // Don't retry on 4xx errors (auth failures, not found) — only retry on network errors
+      retry: (failureCount, error) => {
+        if (error instanceof TRPCClientError) {
+          const status = error.data?.httpStatus;
+          if (status && status >= 400 && status < 500) return false;
+        }
+        return failureCount < 2;
+      },
+    },
+  },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
@@ -53,9 +72,14 @@ const trpcClient = trpc.createClient({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <trpc.Provider client={trpcClient} queryClient={queryClient}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </trpc.Provider>
+  <HelmetProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        {/* LightsModeProvider must be inside QueryClientProvider so it can call trpc hooks */}
+        <LightsModeProvider>
+          <App />
+        </LightsModeProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
+  </HelmetProvider>
 );

@@ -1,0 +1,1 @@
+ALTER TABLE `jukeboxQueue` MODIFY COLUMN `tipAmountCents` int NOT NULL DEFAULT 0;

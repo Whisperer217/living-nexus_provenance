@@ -1,0 +1,2 @@
+ALTER TABLE `songVersions` MODIFY COLUMN `aiDisclosure` enum('original','ai_assisted','ai_generated','human_authored_ai_instrument') DEFAULT 'original';--> statement-breakpoint
+ALTER TABLE `users` MODIFY COLUMN `aiDisclosure` enum('original','ai_assisted','ai_generated','human_authored_ai_instrument') DEFAULT 'original';

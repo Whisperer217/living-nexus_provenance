@@ -1,0 +1,1 @@
+ALTER TABLE `witnessTestimonies` MODIFY COLUMN `linkedWorks` json;

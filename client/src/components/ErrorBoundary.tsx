@@ -21,6 +21,13 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error, info: { componentStack: string }) {
+    // Log full details to the console in dev; suppress in production
+    if (import.meta.env.DEV) {
+      console.error("[ErrorBoundary]", error, info.componentStack);
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       return (
@@ -33,13 +40,23 @@ class ErrorBoundary extends Component<Props, State> {
 
             <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
 
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
-              </pre>
-            </div>
+            {import.meta.env.DEV ? (
+              // Show full stack trace in development only
+              <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
+                <pre className="text-sm text-muted-foreground whitespace-break-spaces">
+                  {this.state.error?.stack}
+                </pre>
+              </div>
+            ) : (
+              // In production, show a safe generic message — no internal details exposed
+              <p className="text-sm text-muted-foreground mb-6 text-center">
+                Something went wrong on this page. Try reloading — if the problem
+                persists, please contact support.
+              </p>
+            )}
 
             <button
+              type="button"
               onClick={() => window.location.reload()}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-lg",

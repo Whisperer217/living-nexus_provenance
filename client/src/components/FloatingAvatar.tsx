@@ -62,11 +62,12 @@ interface FloatingAvatarProps {
   customImageUrl?: string | null;
   agentMode?: string;
   agentMessages?: { id: string; role: string; content: string; mode: string }[];
-  onAskAgent?: () => void;
+  onAskAgent?: (text: string) => void;
   onModeChange?: (mode: string) => void;
   cinematicMode?: boolean;
   onCinematicToggle?: () => void;
   userName?: string;
+  isThinking?: boolean;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -81,6 +82,7 @@ export default function FloatingAvatar({
   cinematicMode = false,
   onCinematicToggle,
   userName,
+  isThinking = false,
 }: FloatingAvatarProps) {
   const [, navigate] = useLocation();
   const [expanded, setExpanded] = useState(false);
@@ -144,15 +146,24 @@ export default function FloatingAvatar({
     }
   }, [nowPlaying]);
 
+  // Desktop PlayerBar: 68px at zIndex 9001. Orb bottom = 68+24 = 92px.
+  // Mobile: nav (56px) + mini player (64px) = 120px stack at zIndex 9001. Orb bottom = 120+24 = 144px.
+  // Use CSS clamp via a responsive style: on md+ use 92px, on <md use 144px.
+  // We achieve this with a CSS custom property set via a style tag.
+  const orbBottom = `max(92px, calc(${24 + position.y}px + env(safe-area-inset-bottom, 0px)))`;
+  const orbRight = `${24 + position.x}px`;
+  const ORB_Z = 9050;
+
   // ─── Cinematic orb (collapsed, small) ───────────────────────────────────────
 
   if (cinematicMode && !expanded) {
     return (
       <div
-        className="fixed z-50"
+        className="fixed"
         style={{
-          bottom: `${24 + position.y}px`,
-          right: `${24 + position.x}px`,
+          bottom: orbBottom,
+          right: orbRight,
+          zIndex: ORB_Z,
           transition: "opacity 0.6s ease",
         }}
       >
@@ -206,10 +217,11 @@ export default function FloatingAvatar({
   if (!expanded) {
     return (
       <div
-        className="fixed z-50"
+        className="fixed"
         style={{
-          bottom: `${24 + position.y}px`,
-          right: `${24 + position.x}px`,
+          bottom: orbBottom,
+          right: orbRight,
+          zIndex: ORB_Z,
           userSelect: "none",
         }}
       >
@@ -282,10 +294,11 @@ export default function FloatingAvatar({
 
   return (
     <div
-      className="fixed z-50 flex flex-col rounded-lg overflow-hidden"
+      className="fixed flex flex-col rounded-lg overflow-hidden"
       style={{
-        bottom: `${24 + position.y}px`,
-        right: `${24 + position.x}px`,
+        bottom: orbBottom,
+        right: orbRight,
+        zIndex: ORB_Z,
         width: 320,
         height: 480,
         background: "var(--ln-panel)",
@@ -440,21 +453,53 @@ export default function FloatingAvatar({
         className="flex-shrink-0 p-2"
         style={{ borderTop: `1px solid var(--ln-panel-border)` }}
       >
-        <button
-          className="w-full py-2 rounded text-xs transition-colors hover:opacity-80"
-          style={{
-            background: `${modeColor}18`,
-            border: `1px solid ${modeColor}44`,
-            color: modeColor,
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "0.6rem",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}
-          onClick={onAskAgent}
-        >
-          speak to your keeper…
-        </button>
+        <div style={{ display: "flex", gap: 6 }}>
+          <input
+            id="keeper-input"
+            type="text"
+            placeholder="speak to your keeper…"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                const val = (e.target as HTMLInputElement).value.trim();
+                if (val) { onAskAgent?.(val); (e.target as HTMLInputElement).value = ""; }
+              }
+            }}
+            style={{
+              flex: 1,
+              background: "rgba(255,255,255,0.04)",
+              border: `1px solid ${modeColor}33`,
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "0.7rem",
+              color: "var(--ln-parchment)",
+              fontFamily: "'Space Mono', monospace",
+              outline: "none",
+            }}
+          />
+          <button
+            className="rounded transition-colors hover:opacity-80"
+            style={{
+              background: `${modeColor}22`,
+              border: `1px solid ${modeColor}44`,
+              color: modeColor,
+              padding: "6px 10px",
+              fontSize: "0.65rem",
+              fontFamily: "'Space Mono', monospace",
+              cursor: "pointer",
+              flexShrink: 0,
+              opacity: isThinking ? 0.5 : 1,
+            }}
+            disabled={isThinking}
+            onClick={() => {
+              const el = document.getElementById("keeper-input") as HTMLInputElement | null;
+              const val = el?.value.trim();
+              if (val) { onAskAgent?.(val); if (el) el.value = ""; }
+            }}
+          >
+            {isThinking ? "···" : "→"}
+          </button>
+        </div>
       </div>
     </div>
   );

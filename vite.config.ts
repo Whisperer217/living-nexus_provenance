@@ -152,8 +152,48 @@ function vitePluginManusDebugCollector(): Plugin {
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
+// ─── SW Cache-Bust Plugin ─────────────────────────────────────────────────────
+// Rewrites the CACHE_VERSION in sw.js at build time to include the build
+// timestamp, so every deploy automatically invalidates old caches.
+function swCacheBustPlugin(): Plugin {
+  const buildId = `ln-${Date.now()}`;
+  return {
+    name: "sw-cache-bust",
+    // In dev mode, transform sw.js requests on-the-fly
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === "/sw.js") {
+          const swPath = path.resolve(import.meta.dirname, "client", "public", "sw.js");
+          const content = fs.readFileSync(swPath, "utf-8").replace(
+            /const CACHE_VERSION\s*=\s*"[^"]+"/,
+            `const CACHE_VERSION = "${buildId}"`
+          );
+          res.setHeader("Content-Type", "application/javascript");
+          res.end(content);
+          return;
+        }
+        next();
+      });
+    },
+    // At build time, write the patched sw.js into the output directory
+    closeBundle() {
+      const swSrc = path.resolve(import.meta.dirname, "client", "public", "sw.js");
+      const swDest = path.resolve(import.meta.dirname, "dist", "public", "sw.js");
+      if (fs.existsSync(swSrc)) {
+        const content = fs.readFileSync(swSrc, "utf-8").replace(
+          /const CACHE_VERSION\s*=\s*"[^"]+"/,
+          `const CACHE_VERSION = "${buildId}"`
+        );
+        fs.mkdirSync(path.dirname(swDest), { recursive: true });
+        fs.writeFileSync(swDest, content, "utf-8");
+        console.log(`[sw-cache-bust] Wrote ${swDest} with CACHE_VERSION=${buildId}`);
+      }
+    },
+  };
+}
+
 export default defineConfig({
-  plugins,
+  plugins: [...plugins, swCacheBustPlugin()],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
