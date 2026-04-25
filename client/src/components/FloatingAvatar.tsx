@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { X, Minimize2, ChevronUp, Music2, Sword, PenLine, Bold, Italic, Highlighter, ImagePlus, Trash2, Wand2, ClipboardCopy, Loader2 } from "lucide-react";
+import { X, Minimize2, ChevronUp, Music2, Sword, PenLine, Bold, Italic, Highlighter, ImagePlus, Trash2, Wand2, ClipboardCopy, Loader2, Mic, MicOff, Palette, Eye } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 // ─── Skin image URLs ──────────────────────────────────────────────────────────
@@ -102,6 +102,35 @@ export default function FloatingAvatar({
   const generatePpgMutation = trpc.promptStudio.generateStylePrompt.useMutation({
     onSuccess: (data) => setPpgResult(data as typeof ppgResult),
   });
+  // ─── Mic / transcription state ───────────────────────────────────────────────
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const transcribeVoiceMutation = trpc.keeper.transcribeVoice.useMutation({
+    onSuccess: (data) => {
+      if (data.text) setSandboxText(prev => prev ? prev + '\n' + data.text : data.text);
+      setIsTranscribing(false);
+    },
+    onError: () => setIsTranscribing(false),
+  });
+  // ─── Artwork generation state ─────────────────────────────────────────────────
+  const [generatedArtUrl, setGeneratedArtUrl] = useState<string | null>(null);
+  const [isGeneratingArt, setIsGeneratingArt] = useState(false);
+  const generateArtworkMutation = trpc.keeper.generateArtwork.useMutation({
+    onSuccess: (data) => { setGeneratedArtUrl(data.url); setIsGeneratingArt(false); },
+    onError: () => setIsGeneratingArt(false),
+  });
+  // ─── Image analysis state ─────────────────────────────────────────────────────
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const analyzeImageMutation = trpc.keeper.analyzeImage.useMutation({
+    onSuccess: (data) => {
+      onAskAgent?.(`[KEEPER VISION] ${data.analysis}`);
+      setSandboxOpen(false);
+      setIsAnalyzingImage(false);
+    },
+    onError: () => setIsAnalyzingImage(false),
+  });
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
     try {
       const saved = localStorage.getItem("ln_avatar_pos");
@@ -190,6 +219,40 @@ export default function FloatingAvatar({
     const imageNote = sandboxImages.length > 0 ? `\n[${sandboxImages.length} image(s) attached]` : "";
     onAskAgent?.(`[SANDBOX] ${sandboxText.trim()}${imageNote}`);
     setSandboxOpen(false);
+  };
+
+  // ─── Mic recording helpers ───────────────────────────────────────────────────
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (blob.size > 16 * 1024 * 1024) return; // 16MB limit
+        setIsTranscribing(true);
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          transcribeVoiceMutation.mutate({ audioBase64: base64, mimeType: mimeType as 'audio/webm' | 'audio/mp4' });
+        };
+        reader.readAsDataURL(blob);
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Mic access denied', err);
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    mediaRecorderRef.current = null;
+    setIsRecording(false);
   };
 
   // ─── Now Playing → agent thread notification ─────────────────────────────────
@@ -503,7 +566,7 @@ export default function FloatingAvatar({
             {sandboxTab === "write" && (
               <div className="flex flex-col flex-1 p-3 gap-2">
                 {/* Formatting toolbar */}
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-1 flex-shrink-0 flex-wrap">
                   {[{ icon: Bold, tag: "bold", title: "Bold" }, { icon: Italic, tag: "italic", title: "Italic" }, { icon: Highlighter, tag: "highlight", title: "Highlight" }].map(({ icon: Icon, tag, title }) => (
                     <button key={tag} onClick={() => applyFormat(tag)} title={title}
                       className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-opacity"
@@ -511,6 +574,27 @@ export default function FloatingAvatar({
                       <Icon style={{ width: 10, height: 10 }} />
                     </button>
                   ))}
+                  {/* Mic button */}
+                  <button
+                    onMouseDown={startRecording}
+                    onMouseUp={stopRecording}
+                    onTouchStart={(e) => { e.preventDefault(); startRecording(); }}
+                    onTouchEnd={(e) => { e.preventDefault(); stopRecording(); }}
+                    disabled={isTranscribing}
+                    title={isRecording ? "Release to transcribe" : isTranscribing ? "Transcribing…" : "Hold to record voice"}
+                    className="w-6 h-6 flex items-center justify-center rounded hover:opacity-80 transition-all"
+                    style={{
+                      background: isRecording ? "rgba(251,113,133,0.25)" : isTranscribing ? "rgba(196,154,40,0.2)" : "rgba(255,255,255,0.05)",
+                      border: `1px solid ${isRecording ? "rgba(251,113,133,0.6)" : isTranscribing ? "rgba(196,154,40,0.4)" : "var(--ln-panel-border)"}`,
+                      color: isRecording ? "rgba(251,113,133,0.9)" : isTranscribing ? "var(--ln-gold)" : "var(--ln-smoke)",
+                      boxShadow: isRecording ? "0 0 8px rgba(251,113,133,0.4)" : "none",
+                    }}>
+                    {isTranscribing
+                      ? <Loader2 style={{ width: 10, height: 10 }} className="animate-spin" />
+                      : isRecording
+                        ? <MicOff style={{ width: 10, height: 10 }} />
+                        : <Mic style={{ width: 10, height: 10 }} />}
+                  </button>
                   <div className="flex-1" />
                   {/* Image attach */}
                   <input ref={sandboxFileRef} type="file" accept="image/*" className="hidden" onChange={handleSandboxImageUpload} />
@@ -527,6 +611,15 @@ export default function FloatingAvatar({
                     </button>
                   ) : null}
                 </div>
+                {/* Recording status bar */}
+                {(isRecording || isTranscribing) && (
+                  <div className="flex items-center gap-2 px-2 py-1 rounded text-[10px] font-mono"
+                    style={{ background: isRecording ? "rgba(251,113,133,0.1)" : "rgba(196,154,40,0.1)", border: `1px solid ${isRecording ? "rgba(251,113,133,0.3)" : "rgba(196,154,40,0.3)"}`, color: isRecording ? "rgba(251,113,133,0.9)" : "var(--ln-gold)" }}>
+                    {isRecording
+                      ? <><span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block" /> Recording… release to transcribe</>
+                      : <><Loader2 className="w-3 h-3 animate-spin" /> Transcribing your voice…</>}
+                  </div>
+                )}
 
                 {/* Text area */}
                 <textarea
@@ -552,12 +645,27 @@ export default function FloatingAvatar({
                 {sandboxImages.length > 0 && (
                   <div className="flex gap-2 flex-wrap">
                     {sandboxImages.map((url, i) => (
-                      <div key={i} className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0"
-                        style={{ border: `1px solid var(--ln-panel-border)` }}>
-                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      <div key={i} className="relative flex-shrink-0 group"
+                        style={{ width: 48, height: 48 }}>
+                        <div className="w-full h-full rounded overflow-hidden"
+                          style={{ border: `1px solid var(--ln-panel-border)` }}>
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        {/* Analyze with Keeper button */}
+                        <button
+                          onClick={() => {
+                            setIsAnalyzingImage(true);
+                            analyzeImageMutation.mutate({ imageUrl: url, context: sandboxText || undefined });
+                          }}
+                          disabled={isAnalyzingImage}
+                          title="Keeper: Analyze this image"
+                          className="absolute bottom-0 left-0 right-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ background: "rgba(0,0,0,0.75)", height: 18, borderRadius: "0 0 4px 4px", color: "var(--ln-gold)", fontSize: 8 }}>
+                          {isAnalyzingImage ? <Loader2 style={{ width: 8, height: 8 }} className="animate-spin" /> : <><Eye style={{ width: 8, height: 8 }} /> <span className="ml-0.5">Analyze</span></>}
+                        </button>
                         <button onClick={() => setSandboxImages(prev => prev.filter((_, j) => j !== i))}
                           className="absolute top-0 right-0 w-4 h-4 flex items-center justify-center"
-                          style={{ background: "rgba(0,0,0,0.7)", color: "rgba(251,113,133,0.9)", fontSize: 9 }}>×</button>
+                          style={{ background: "rgba(0,0,0,0.7)", color: "rgba(251,113,133,0.9)", fontSize: 9, borderRadius: "0 4px 0 4px" }}>×</button>
                       </div>
                     ))}
                   </div>
@@ -674,6 +782,43 @@ export default function FloatingAvatar({
                       <div className="p-2 rounded" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid var(--ln-panel-border)` }}>
                         <div className="text-[10px] font-mono tracking-widest mb-1" style={{ color: "var(--ln-smoke)" }}>STYLE TAGS</div>
                         <p className="text-xs" style={{ color: "rgba(209,213,219,0.7)", fontSize: "0.65rem" }}>{ppgResult.expressionStyleTags}</p>
+                      </div>
+                    )}
+                    {/* Generate Art from prompt */}
+                    <button
+                      onClick={() => {
+                        if (!ppgResult.expressionPrompt) return;
+                        setIsGeneratingArt(true);
+                        setGeneratedArtUrl(null);
+                        generateArtworkMutation.mutate({
+                          prompt: ppgResult.expressionPrompt,
+                          styleTags: ppgResult.expressionStyleTags ? ppgResult.expressionStyleTags.split(',').map(s => s.trim()) : [],
+                        });
+                      }}
+                      disabled={isGeneratingArt}
+                      className="w-full flex items-center justify-center gap-2 py-1.5 rounded text-xs font-semibold transition-all disabled:opacity-40"
+                      style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.35)", color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>
+                      {isGeneratingArt
+                        ? <><Loader2 className="w-3 h-3 animate-spin" /> Generating Artwork…</>
+                        : <><Palette className="w-3 h-3" /> Generate Art from Prompt</>}
+                    </button>
+                    {/* Generated artwork preview */}
+                    {generatedArtUrl && (
+                      <div className="rounded overflow-hidden" style={{ border: "1px solid rgba(196,154,40,0.3)" }}>
+                        <img src={generatedArtUrl} alt="Generated artwork" className="w-full object-cover" style={{ maxHeight: 160 }} />
+                        <div className="flex gap-1 p-1.5" style={{ background: "rgba(0,0,0,0.5)" }}>
+                          <a href={generatedArtUrl} download="keeper-artwork.png" target="_blank" rel="noreferrer"
+                            className="flex-1 text-center py-1 rounded text-[10px] font-mono transition-all"
+                            style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                            Download
+                          </a>
+                          <button
+                            onClick={() => { onAskAgent?.(`[KEEPER ARTWORK] ${generatedArtUrl}`); setSandboxOpen(false); }}
+                            className="flex-1 py-1 rounded text-[10px] font-mono transition-all"
+                            style={{ background: `${modeColor}15`, border: `1px solid ${modeColor}33`, color: modeColor }}>
+                            Send to Keeper
+                          </button>
+                        </div>
                       </div>
                     )}
                     {/* Send to Keeper */}

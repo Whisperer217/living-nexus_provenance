@@ -5345,8 +5345,72 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         }
         return { url };
       }),
-  }),
 
+    /** Transcribe voice audio to text via Whisper */
+    transcribeVoice: protectedProcedure
+      .input(z.object({
+        audioBase64: z.string(),
+        mimeType: z.enum(["audio/webm", "audio/mp4", "audio/mpeg", "audio/wav", "audio/ogg"]),
+        language: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { transcribeAudio } = await import('./_core/voiceTranscription');
+        const ext = input.mimeType.split('/')[1].replace('mpeg', 'mp3');
+        const key = `keeper-voice/${ctx.user.id}/${Date.now()}.${ext}`;
+        const buf = Buffer.from(input.audioBase64, 'base64');
+        const { url: audioUrl } = await storagePut(key, buf, input.mimeType);
+        const result = await transcribeAudio({
+          audioUrl,
+          language: input.language,
+          prompt: 'Transcribe creative lyrics or spoken word content',
+        });
+        if ('error' in result) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: (result as any).error });
+        return { text: (result as any).text, language: (result as any).language };
+      }),
+
+    /** Generate artwork from a text prompt */
+    generateArtwork: protectedProcedure
+      .input(z.object({
+        prompt: z.string().max(1000),
+        styleTags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { generateImage } = await import('./_core/imageGeneration');
+        const fullPrompt = input.styleTags?.length
+          ? `${input.prompt}. Style: ${input.styleTags.join(', ')}`
+          : input.prompt;
+        const genResult = await generateImage({ prompt: fullPrompt });
+        if (!genResult?.url) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Image generation failed' });
+        // Re-upload to our S3 so it persists permanently
+        const imgRes = await fetch(genResult.url);
+        const imgBuf = new Uint8Array(await imgRes.arrayBuffer());
+        const key = `keeper-artwork/${ctx.user.id}/${Date.now()}.png`;
+        const { url } = await storagePut(key, imgBuf, 'image/png');
+        return { url };
+      }),
+
+    /** Analyze an image with the Keeper's vision */
+    analyzeImage: protectedProcedure
+      .input(z.object({
+        imageUrl: z.string().url(),
+        context: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const systemPrompt = `You are the user's Keeper — a provenance-aware creative companion. Analyze the image provided and describe it in the context of the creator's artistic identity. Comment on visual style, mood, color palette, and how it relates to their creative corpus. Be specific and poetic. Keep response under 200 words.`;
+        const userContent: any[] = [
+          { type: 'text', text: input.context ? `Context: ${input.context}\n\nAnalyze this image:` : 'Analyze this image:' },
+          { type: 'image_url', image_url: { url: input.imageUrl } },
+        ];
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userContent },
+          ],
+        });
+        const analysis = response?.choices?.[0]?.message?.content ?? 'The Keeper sees something profound but cannot yet find the words.';
+        return { analysis };
+      }),
+  }),
   // ─── Marketplace ──────────────────────────────────────────────────────────────
   marketplace: router({
     // Public: list all active marketplace items, optionally filtered by type
