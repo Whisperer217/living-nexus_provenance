@@ -310,26 +310,6 @@ export async function getSongWithCreator(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function getSongByWitnessId(witnessId: string) {
-  const db = await getDb();
-  if (!db) return undefined;
-  const result = await db
-    .select({
-      song: songs,
-      creator: {
-        id: users.id,
-        name: users.name,
-        artistHandle: users.artistHandle,
-        profilePhotoUrl: users.profilePhotoUrl,
-      },
-    })
-    .from(songs)
-    .leftJoin(users, eq(songs.userId, users.id))
-    .where(eq(songs.witnessId, witnessId))
-    .limit(1);
-  return result.length > 0 ? result[0] : undefined;
-}
-
 export async function getSongsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];

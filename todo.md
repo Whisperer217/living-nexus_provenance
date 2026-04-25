@@ -3571,3 +3571,11 @@
 - [x] No DB migrations (aiTransforms table still exists in DB — unused, can DROP later)
 - [x] TypeScript: 0 errors after fix
 - [x] Save checkpoint and deploy
+
+## Commit 8fb3180 — Full TS Clean + satchel/ppg/agents/wids Routers + provenanceEvents Schema
+- [x] Pull 8fb3180 (CreatorSurface.tsx, drizzle/schema.ts, server/db.ts, server/routers.ts, drizzle/0085_romantic_fenris.sql)
+- [x] Removed duplicate getSongByWitnessId from db.ts (our previous restore at line 313 conflicted with the one in the commit at line 515)
+- [x] Created server/provenance.ts with generateKeypair/signPayload/verifySignature (Ed25519 via Web Crypto API)
+- [x] Applied migration 0085: provenanceEvents table created, aiTransforms table dropped
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
