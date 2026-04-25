@@ -156,7 +156,7 @@ export default function FloatingAvatar({
     }
   }, [agentMessages, expanded]);
 
-  // ─── Drag handlers ──────────────────────────────────────────────────────────
+  // ─── Drag handlers (mouse + touch) ──────────────────────────────────────────
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -164,20 +164,55 @@ export default function FloatingAvatar({
     dragStart.current = { mx: e.clientX, my: e.clientY, ox: position.x, oy: position.y };
   }, [position]);
 
+  // Touch drag — long-press (280ms) initiates drag so quick taps still open the panel
+  const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    const ox = position.x;
+    const oy = position.y;
+    touchTimer.current = setTimeout(() => {
+      setDragging(true);
+      dragStart.current = { mx: t.clientX, my: t.clientY, ox, oy };
+    }, 280);
+  }, [position]);
+  const onTouchEndOrCancel = useCallback(() => {
+    if (touchTimer.current) { clearTimeout(touchTimer.current); touchTimer.current = null; }
+    setDragging(false);
+  }, []);
+
   useEffect(() => {
     if (!dragging) return;
+    const savePos = (newPos: { x: number; y: number }) => {
+      setPosition(newPos);
+      try { localStorage.setItem("ln_avatar_pos", JSON.stringify(newPos)); } catch {}
+    };
     const onMove = (e: MouseEvent) => {
       if (!dragStart.current) return;
       const dx = e.clientX - dragStart.current.mx;
       const dy = e.clientY - dragStart.current.my;
-      const newPos = { x: dragStart.current.ox - dx, y: dragStart.current.oy - dy };
-      setPosition(newPos);
-      try { localStorage.setItem("ln_avatar_pos", JSON.stringify(newPos)); } catch {}
+      savePos({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragStart.current) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      const dx = t.clientX - dragStart.current.mx;
+      const dy = t.clientY - dragStart.current.my;
+      savePos({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
     };
     const onUp = () => setDragging(false);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    window.addEventListener("touchcancel", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onUp);
+      window.removeEventListener("touchcancel", onUp);
+    };
   }, [dragging]);
 
   // ─── Sandbox helpers ────────────────────────────────────────────────────────
@@ -345,11 +380,14 @@ export default function FloatingAvatar({
           userSelect: "none",
         }}
       >
-        {/* Drag handle ring */}
+        {/* Drag handle ring — mouse + touch drag */}
         <div
           className="absolute inset-0 rounded-full cursor-grab"
           style={{ zIndex: 1 }}
           onMouseDown={onMouseDown}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEndOrCancel}
+          onTouchCancel={onTouchEndOrCancel}
         />
 
         {/* Orb */}
@@ -442,7 +480,7 @@ export default function FloatingAvatar({
         userSelect: "none",
       }}
     >
-      {/* Header — drag zone */}
+      {/* Header — drag zone (mouse + touch) */}
       <div
         className="flex items-center gap-2 px-3 py-2 flex-shrink-0 cursor-grab"
         style={{
@@ -450,6 +488,9 @@ export default function FloatingAvatar({
           borderBottom: `1px solid ${modeColor}33`,
         }}
         onMouseDown={onMouseDown}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEndOrCancel}
+        onTouchCancel={onTouchEndOrCancel}
       >
         {/* Portrait thumbnail */}
         <div

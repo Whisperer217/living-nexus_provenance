@@ -353,7 +353,7 @@ export default function MobilePlayerPanel() {
           paddingBottom: "10px",
           borderRadius: "10px 0 0 10px",
           background: "#000000",
-          border: "1px solid #111009",
+          border: "1px solid rgba(196,154,40,0.12)",
           borderRight: "none",
           boxShadow: "-4px 0 24px rgba(0,0,0,0.50), -2px 0 8px rgba(196,154,40,0.12)",
           touchAction: "none",
@@ -363,7 +363,7 @@ export default function MobilePlayerPanel() {
         {/* Art thumbnail — visual only, no click */}
         <div
           className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center pointer-events-none"
-          style={{ background: currentTrack?.bg || "var(--ln-coal)" }}
+          style={{ background: currentTrack?.bg || "#0a0a0a" }}
         >
           {currentTrack?.artUrl && currentTrack.artType !== "video" ? (
             <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover"
@@ -462,7 +462,7 @@ export default function MobilePlayerPanel() {
           ) : (
             /* Placeholder — always show something, never blank */
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-              style={{ background: currentTrack?.bg || "var(--ln-coal)" }}>
+              style={{ background: currentTrack?.bg || "#0a0a0a" }}>
               <Music className="w-16 h-16 opacity-20 text-white" />
               {currentTrack && (
                 <span className="text-[11px] opacity-30 text-white font-body px-4 text-center line-clamp-2">
@@ -591,7 +591,7 @@ export default function MobilePlayerPanel() {
               onClick={(e) => { e.stopPropagation(); navigate(`/verify/${videoWitnessId}`); }}
               className="absolute top-12 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold tracking-wide z-20"
               style={{
-                background: "rgba(44,52,56,0.88)",
+                background: "rgba(0,0,0,0.92)",
                 border: "1px solid rgba(74,222,128,0.5)",
                 color: "var(--ln-seal-bright)",
                 backdropFilter: "blur(4px)",
@@ -721,7 +721,7 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed"
               style={{
-                background: tipsEnabled ? "rgba(196,154,40,0.08)" : "var(--ln-coal)",
+                background: tipsEnabled ? "rgba(196,154,40,0.08)" : "#000000",
                 color: tipsEnabled ? "var(--ln-gold)" : "var(--ln-iron)",
                 border: tipsEnabled ? "1px solid rgba(196,154,40,0.2)" : "1px solid #111009",
                 fontFamily: "'Cinzel', serif",
@@ -738,7 +738,7 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: (sheetOpen && sheetTab === "details") ? "rgba(56,189,248,0.15)" : "var(--ln-coal)",
+                background: (sheetOpen && sheetTab === "details") ? "rgba(56,189,248,0.15)" : "#000000",
                 color: (sheetOpen && sheetTab === "details") ? "#38BDF8" : "var(--ln-smoke)",
                 border: (sheetOpen && sheetTab === "details") ? "1px solid rgba(56,189,248,0.35)" : "1px solid #111009",
                 fontFamily: "'Cinzel', serif",
@@ -754,7 +754,7 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: (sheetOpen && sheetTab === "lyrics") ? "rgba(170,142,100,0.15)" : "var(--ln-coal)",
+                background: (sheetOpen && sheetTab === "lyrics") ? "rgba(170,142,100,0.15)" : "#000000",
                 color: (sheetOpen && sheetTab === "lyrics") ? "var(--ln-parchment)" : "var(--ln-smoke)",
                 border: (sheetOpen && sheetTab === "lyrics") ? "1px solid rgba(170,142,100,0.35)" : "1px solid #111009",
                 fontFamily: "'Cinzel', serif",
@@ -770,7 +770,7 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: state.isMuted ? "rgba(239,68,68,0.12)" : "var(--ln-coal)",
+                background: state.isMuted ? "rgba(239,68,68,0.12)" : "#000000",
                 color: state.isMuted ? "var(--ln-ember)" : "var(--ln-smoke)",
                 border: state.isMuted ? "1px solid rgba(196,68,10,0.3)" : "1px solid #111009",
                 fontFamily: "'Cinzel', serif",
@@ -786,7 +786,7 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: glowEnabled ? "rgba(138,43,226,0.12)" : "var(--ln-coal)",
+                background: glowEnabled ? "rgba(138,43,226,0.12)" : "#000000",
                 color: glowEnabled ? "#C084FC" : "var(--ln-iron)",
                 border: glowEnabled ? "1px solid rgba(192,132,252,0.35)" : "1px solid #111009",
                 fontFamily: "'Cinzel', serif",
@@ -828,7 +828,7 @@ export default function MobilePlayerPanel() {
             height: "72vh",
             maxHeight: "600px",
             background: "#000000",
-            borderTop: "1px solid #111009",
+            borderTop: "1px solid rgba(196,154,40,0.12)",
             borderRadius: "20px 20px 0 0",
             boxShadow: "0 -8px 32px rgba(0,0,0,0.60)",
             transform: sheetOpen ? "translateY(0)" : "translateY(100%)",
@@ -869,7 +869,7 @@ export default function MobilePlayerPanel() {
           </div>
 
           {/* Sheet content — scrollable */}
-          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "#111009 transparent", overscrollBehavior: "contain" }}>
+          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "#0a0a0a transparent", overscrollBehavior: "contain" }}>
 
             {/* ── DETAILS TAB ── */}
             {sheetTab === "details" && (
@@ -938,9 +938,9 @@ export default function MobilePlayerPanel() {
                               key={tag}
                               className="text-[10px] px-2 py-0.5 rounded-full font-body leading-none"
                               style={{
-                                background: "rgba(44,52,56,0.8)",
+                                background: "rgba(0,0,0,0.85)",
                                 color: "var(--ln-parchment)",
-                                border: "1px solid rgba(44,52,56,0.6)",
+                                border: "1px solid rgba(196,154,40,0.08)",
                               }}
                             >
                               {tag}
@@ -950,9 +950,9 @@ export default function MobilePlayerPanel() {
                             <span
                               className="text-[10px] px-2 py-0.5 rounded-full font-body leading-none"
                               style={{
-                                background: "rgba(44,52,56,0.6)",
+                                background: "rgba(0,0,0,0.7)",
                                 color: "var(--ln-iron)",
-                                border: "1px solid rgba(44,52,56,0.4)",
+                                border: "1px solid rgba(196,154,40,0.06)",
                               }}
                             >
                               +{overflow}
@@ -1050,7 +1050,7 @@ export default function MobilePlayerPanel() {
                 </div>
                 {/* Comment input — pinned to bottom of sheet */}
                 <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2"
-                  style={{ borderTop: "1px solid #111009" }}>
+                  style={{ borderTop: "1px solid rgba(196,154,40,0.12)" }}>
                   <input
                     value={newComment}
                     onChange={e => setNewComment(e.target.value)}
@@ -1061,7 +1061,7 @@ export default function MobilePlayerPanel() {
                     className="flex-1 rounded-xl px-3 py-2 text-[12px] outline-none transition-colors disabled:opacity-50"
                     style={{
                       background: "#000000",
-                      border: "1px solid #111009",
+                      border: "1px solid rgba(196,154,40,0.12)",
                       color: "var(--ln-parchment)",
                     }}
                   />
