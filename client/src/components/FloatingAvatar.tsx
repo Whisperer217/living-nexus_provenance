@@ -158,11 +158,32 @@ export default function FloatingAvatar({
 
   // ─── Drag handlers (mouse + touch) ──────────────────────────────────────────
 
+  // Desktop drag — 200ms hold initiates drag, short click still opens panel
+  const mouseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mouseDragStarted = useRef(false);
   const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return; // left button only
     e.preventDefault();
-    setDragging(true);
-    dragStart.current = { mx: e.clientX, my: e.clientY, ox: position.x, oy: position.y };
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const ox = position.x;
+    const oy = position.y;
+    mouseDragStarted.current = false;
+    mouseTimer.current = setTimeout(() => {
+      mouseDragStarted.current = true;
+      setDragging(true);
+      dragStart.current = { mx: startX, my: startY, ox, oy };
+    }, 200);
   }, [position]);
+  const onMouseUp = useCallback(() => {
+    if (mouseTimer.current) { clearTimeout(mouseTimer.current); mouseTimer.current = null; }
+    if (!mouseDragStarted.current && !expanded) {
+      // Short click — open panel
+      setExpanded(true);
+    }
+    mouseDragStarted.current = false;
+    setDragging(false);
+  }, [expanded]);
 
   // Touch drag — long-press (280ms) initiates drag so quick taps still open the panel
   const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -380,11 +401,12 @@ export default function FloatingAvatar({
           userSelect: "none",
         }}
       >
-        {/* Drag handle ring — mouse + touch drag (z:3 so it intercepts touches before the orb image) */}
+        {/* Drag handle ring — hold-to-drag on both mouse and touch (200ms threshold) */}
         <div
           className="absolute inset-0 rounded-full cursor-grab"
           style={{ zIndex: 3 }}
           onMouseDown={onMouseDown}
+          onMouseUp={onMouseUp}
           onTouchStart={(e) => {
             // Record touch start position to distinguish tap vs drag
             const t = e.touches[0];
@@ -510,6 +532,7 @@ export default function FloatingAvatar({
           borderBottom: `1px solid ${modeColor}33`,
         }}
         onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEndOrCancel}
         onTouchCancel={onTouchEndOrCancel}

@@ -5668,6 +5668,97 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           .where(and(eq(marketplaceItems.id, input.itemId), eq(marketplaceItems.creatorId, ctx.user.id)));
         return { ok: true };
       }),
+
+    // Owner-only: seed the first default marketplace listings
+    // Safe to call multiple times — skips if items already exist for this creator
+    seedDefaults: protectedProcedure.mutation(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+      const { marketplaceItems } = await import('../drizzle/schema');
+      const { eq, count } = await import('drizzle-orm');
+      // Idempotency guard — only seed if creator has no items yet
+      const existing = await db
+        .select({ cnt: count() })
+        .from(marketplaceItems)
+        .where(eq(marketplaceItems.creatorId, ctx.user.id));
+      if (Number(existing[0]?.cnt ?? 0) > 0) return { seeded: 0, message: 'Items already exist — skipped.' };
+      const seeds = [
+        {
+          type: 'album' as const,
+          title: 'Living Nexus — Provenance Vol. 1',
+          description: 'The debut gated album. 12 tracks, each anchored to a Witness ID. Includes lossless WAV download + PDF provenance certificate.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-hooded-scholar_67e69960.png',
+          priceCents: 1299,
+          royaltyPct: 90,
+          featured: true,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'skin' as const,
+          title: 'Keeper Skin Pack — The Conductor',
+          description: 'Unlock the Conductor skin for your Keeper avatar. Grants arrangement analysis, structural critique, and beat mapping modes.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-conductor_4e479e6b.png',
+          priceCents: 499,
+          royaltyPct: 80,
+          featured: true,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'skin' as const,
+          title: 'Keeper Skin Pack — The Witness',
+          description: 'Unlock the Witness skin. Grants testimonial mode, emotional range analysis, and corpus deep-read capabilities.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-witness_f31f36b2.png',
+          priceCents: 699,
+          royaltyPct: 80,
+          featured: false,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'skin' as const,
+          title: 'Keeper Skin Pack — The Archivist',
+          description: 'Unlock the Archivist skin. Grants provenance graph, fork lineage mapping, and WID cross-reference tools.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-archivist_07d235d9.png',
+          priceCents: 899,
+          royaltyPct: 80,
+          featured: false,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'physical' as const,
+          title: 'Living Nexus Thumb Drive — WID Edition',
+          description: 'Physical USB thumb drive pre-loaded with your purchased tracks + provenance certificates. Ships in a 3D-printed case engraved with your WID. Limited run.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-cipher_c8ee6e38.png',
+          priceCents: 2999,
+          royaltyPct: 70,
+          featured: true,
+          active: true,
+          stock: 50,
+          creatorId: ctx.user.id,
+        },
+        {
+          type: 'creator_good' as const,
+          title: 'Creator Starter Pack — 100 Provenance Slots',
+          description: 'Bootstrap your provenance ledger. 100 Witness ID anchor slots for new songs, lyrics, and manuscripts. Never lose attribution.',
+          artworkUrl: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-upload-slot_ab8bd82e.png',
+          priceCents: 999,
+          royaltyPct: 85,
+          featured: false,
+          active: true,
+          stock: null,
+          creatorId: ctx.user.id,
+        },
+      ];
+      await db.insert(marketplaceItems).values(seeds);
+      return { seeded: seeds.length, message: `${seeds.length} default marketplace items created.` };
+    }),
   }),
 });
 export type AppRouter = typeof appRouter;

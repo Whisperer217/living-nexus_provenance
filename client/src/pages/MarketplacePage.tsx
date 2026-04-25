@@ -218,6 +218,18 @@ export default function MarketplacePage() {
     limit: 50,
   });
 
+  const utils = trpc.useUtils();
+  const seedDefaults = trpc.marketplace.seedDefaults.useMutation({
+    onSuccess: (data) => {
+      if (data.seeded > 0) {
+        toast.success(`${data.seeded} marketplace items seeded!`);
+        utils.marketplace.listItems.invalidate();
+      } else {
+        toast.info(data.message);
+      }
+    },
+    onError: (err) => toast.error(err.message ?? 'Seed failed.'),
+  });
   const createCheckout = trpc.marketplace.createCheckout.useMutation({
     onSuccess: (data) => {
       if (data.url) {
@@ -350,9 +362,29 @@ export default function MarketplacePage() {
             <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", marginBottom: "8px" }}>
               No items yet
             </div>
-            <div style={{ fontSize: "13px" }}>
+            <div style={{ fontSize: "13px", marginBottom: user ? "24px" : "0" }}>
               The first drops are coming. Check back soon.
             </div>
+            {user && (
+              <button
+                onClick={() => seedDefaults.mutate()}
+                disabled={seedDefaults.isPending}
+                style={{
+                  background: "rgba(196,154,40,0.12)",
+                  border: "1px solid rgba(196,154,40,0.4)",
+                  color: "var(--ln-gold)",
+                  fontFamily: "var(--font-display)",
+                  fontSize: "11px",
+                  letterSpacing: "0.1em",
+                  padding: "8px 20px",
+                  borderRadius: "4px",
+                  cursor: seedDefaults.isPending ? "wait" : "pointer",
+                  opacity: seedDefaults.isPending ? 0.6 : 1,
+                }}
+              >
+                {seedDefaults.isPending ? "Seeding…" : "⊕ Seed Default Listings"}
+              </button>
+            )}
           </div>
         )}
 
