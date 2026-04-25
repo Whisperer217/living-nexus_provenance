@@ -90,7 +90,7 @@ export default function KeeperAvatarWidget() {
       const assistantMsg: AgentMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
-        content: res.reply,
+        content: typeof res.reply === 'string' ? res.reply : String(res.reply),
         mode,
       };
       setMessages(prev => [...prev, assistantMsg]);
@@ -114,7 +114,7 @@ export default function KeeperAvatarWidget() {
       onModeChange={(m) => setMode(m as AgentMode)}
       cinematicMode={cinematic}
       onCinematicToggle={() => setCinematic(c => !c)}
-      userName={user.displayName || user.username}
+      userName={user.name || user.artistHandle || 'Creator'}
       isThinking={chatMutation.isPending}
     />
   );

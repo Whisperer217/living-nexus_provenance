@@ -5099,14 +5099,15 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       const { keeperSkins, songs, witnesses } = await import('../drizzle/schema');
       const { eq, count } = await import('drizzle-orm');
       const skins = await db.select().from(keeperSkins).where(eq(keeperSkins.userId, ctx.user.id));
-      const ownedSkins = ["hooded-scholar", ...skins.map(s => s.skinId)];
-      const activeSkin = skins.find(s => s.isActive);
+      type Skin = typeof skins[number];
+      const ownedSkins = ["hooded-scholar", ...skins.map((s: Skin) => s.skinId)];
+      const activeSkin = skins.find((s: Skin) => s.isActive);
       const activeSkinId = activeSkin?.skinId ?? "hooded-scholar";
-      const customSkin = skins.find(s => s.skinId === "custom");
+      const customSkin = skins.find((s: Skin) => s.skinId === "custom");
       const customImageUrl = customSkin?.portraitUrl ?? null;
       // Stats from existing tables
       const [songCount] = await db.select({ count: count() }).from(songs).where(eq(songs.userId, ctx.user.id)).catch(() => [{ count: 0 }]);
-      const [witnessCount] = await db.select({ count: count() }).from(witnesses).where(eq(witnesses.userId, ctx.user.id)).catch(() => [{ count: 0 }]);
+      const [witnessCount] = await db.select({ count: count() }).from(witnesses).where(eq(witnesses.witnesserId, ctx.user.id)).catch(() => [{ count: 0 }]);
       const pd = Number(witnessCount?.count ?? 0);
       const cs = Number(songCount?.count ?? 0);
       return {

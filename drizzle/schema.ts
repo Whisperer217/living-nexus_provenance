@@ -1,6 +1,6 @@
 import {
   int, mysqlEnum, mysqlTable, text, timestamp,
-  varchar, float, boolean, json, uniqueIndex, index
+  varchar, float, boolean, json, uniqueIndex, index, bigint
 } from "drizzle-orm/mysql-core";
 
 // ─── Users ────────────────────────────────────────────────────────────────────

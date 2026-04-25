@@ -3430,3 +3430,28 @@
 - [x] Fix silent playback after page refresh — one-time mount effect sets audio.src + audio.load() from restored session track so togglePlay() has a valid src immediately
 - [x] Fix content-type tile border colors — dim values updated from dark hex (#8B6914 etc.) to rgba with 0.38-0.40 opacity matching Upload page palette; chip borders brightened to 0.35 opacity
 - [x] Assessment: Cloudflare login race condition — confirmed not a code issue (Turnstile not present); edge proxy warming on cold Railway deployment, no action required
+
+## Phase 2a Provenance Engine Integration (from ln-provenance-engine)
+
+- [ ] Clone ln-provenance-engine and copy client pages (CreatorSurface, Keeper, WIDLookup, FloatingAvatar)
+- [ ] Copy server/provenance.ts utility file
+- [ ] Merge server/db.ts provenance + keeper DB helpers
+- [ ] Merge server/routers.ts tRPC procedures (anchor, events, keeper, skins, PPG)
+- [ ] Merge drizzle/schema.ts — add agents, events, wids, keeper_skins tables
+- [ ] Copy LN-PHASE2-SPEC.md for reference
+- [ ] Register /create, /keeper, /wid/:wid routes in App.tsx
+- [ ] Apply DB migrations 0001, 0002, 0003
+- [ ] TypeScript check — 0 errors
+- [ ] Tests passing
+
+## Commit 4186fba — Keeper System Integration (from living-nexus_provenance)
+- [x] FloatingAvatar.tsx — StarCraft orb widget with mode ring, cinematic mode, now playing, real chat input
+- [x] KeeperAvatarWidget.tsx — self-contained wrapper managing state and trpc.keeper.chat calls
+- [x] KeeperPage.tsx — /keeper character screen with 6 skins, live stats, mode selector
+- [x] App.tsx — /keeper route registered, KeeperAvatarWidget mounted at app level (floats over every page)
+- [x] server/routers.ts — keeper router: getProfile, unlockSkin, setActiveSkin, uploadCustomPortrait, chat
+- [x] drizzle/schema.ts — keeperSkins table definition (bigint import added)
+- [x] drizzle/0081_keeper_skins.sql — keeper_skins table created in DB
+- [x] Fix TS errors: KeeperAvatarWidget implicit any, witnesses.userId → witnesserId, bigint import
+- [x] Resolve _journal.json merge conflict (kept ownership_disclaimer as 0080, keeper_skins as 0081)
+- [x] Apply all pending migrations via apply-migrations.mjs (16 applied, 68 skipped)

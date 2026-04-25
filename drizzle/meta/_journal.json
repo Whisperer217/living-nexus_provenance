@@ -557,15 +557,23 @@
     },
     {
       "idx": 80,
-<<<<<<< Updated upstream
       "version": "7",
       "when": 1745000000000,
       "tag": "0080_ownership_disclaimer",
-=======
-      "version": "5",
+      "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
       "when": 1776447772286,
-      "tag": "0080_easy_pride",
->>>>>>> Stashed changes
+      "tag": "0081_keeper_skins",
+      "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "5",
+      "when": 1777109891039,
+      "tag": "0082_exotic_arachne",
       "breakpoints": true
     }
   ]
