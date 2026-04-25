@@ -26,6 +26,7 @@ import MobilePlayerLayer from "@/components/player/MobilePlayerLayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 // QuickRefSlider and QuickRefBottomSheet removed (Phase 88) — replaced by right-side playlist drawer
 import PlaylistDrawer from "@/components/player/PlaylistDrawer";
+import MarketplaceDrawer from "@/components/MarketplaceDrawer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import TopBar from "@/components/layout/TopBar";
 import LiveActivityPanel from "@/components/layout/LiveActivityPanel";
@@ -413,6 +414,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <TheaterPlayer />
       {/* Right-side Playlist Drawer — z-9000, below expanded player (z-9995) */}
       <PlaylistDrawer />
+
+      {/* Marketplace Drawer — right-side mini storefront, z-55 */}
+      <MarketplaceDrawer />
 
       {/* Scroll to top */}
       <ScrollToTopButton />

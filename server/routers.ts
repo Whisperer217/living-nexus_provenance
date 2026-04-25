@@ -5346,5 +5346,264 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         return { url };
       }),
   }),
+
+  // ─── Marketplace ──────────────────────────────────────────────────────────────
+  marketplace: router({
+    // Public: list all active marketplace items, optionally filtered by type
+    listItems: publicProcedure
+      .input(z.object({
+        type: z.enum(["album", "skin", "physical", "creator_good"]).optional(),
+        featuredOnly: z.boolean().optional(),
+        limit: z.number().min(1).max(100).default(50),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { eq, and, desc, isNull, gt } = await import('drizzle-orm');
+        const conditions: any[] = [eq(marketplaceItems.active, true)];
+        if (input.type) conditions.push(eq(marketplaceItems.type, input.type));
+        if (input.featuredOnly) conditions.push(eq(marketplaceItems.featured, true));
+        const rows = await db
+          .select({
+            id: marketplaceItems.id,
+            type: marketplaceItems.type,
+            title: marketplaceItems.title,
+            description: marketplaceItems.description,
+            artworkUrl: marketplaceItems.artworkUrl,
+            priceCents: marketplaceItems.priceCents,
+            royaltyPct: marketplaceItems.royaltyPct,
+            wid: marketplaceItems.wid,
+            projectId: marketplaceItems.projectId,
+            songId: marketplaceItems.songId,
+            stock: marketplaceItems.stock,
+            featured: marketplaceItems.featured,
+            createdAt: marketplaceItems.createdAt,
+            creatorId: marketplaceItems.creatorId,
+            creatorName: users.name,
+            creatorHandle: users.artistHandle,
+            creatorAvatarUrl: users.profilePhotoUrl,
+          })
+          .from(marketplaceItems)
+          .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
+          .where(and(...conditions))
+          .orderBy(desc(marketplaceItems.featured), desc(marketplaceItems.createdAt))
+          .limit(input.limit);
+        return rows;
+      }),
+
+    // Public: get a single marketplace item with full creator provenance
+    getItem: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const rows = await db
+          .select({
+            id: marketplaceItems.id,
+            type: marketplaceItems.type,
+            title: marketplaceItems.title,
+            description: marketplaceItems.description,
+            artworkUrl: marketplaceItems.artworkUrl,
+            priceCents: marketplaceItems.priceCents,
+            royaltyPct: marketplaceItems.royaltyPct,
+            wid: marketplaceItems.wid,
+            projectId: marketplaceItems.projectId,
+            songId: marketplaceItems.songId,
+            stock: marketplaceItems.stock,
+            featured: marketplaceItems.featured,
+            active: marketplaceItems.active,
+            createdAt: marketplaceItems.createdAt,
+            creatorId: marketplaceItems.creatorId,
+            creatorName: users.name,
+            creatorHandle: users.artistHandle,
+            creatorAvatarUrl: users.profilePhotoUrl,
+          })
+          .from(marketplaceItems)
+          .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
+          .where(eq(marketplaceItems.id, input.id))
+          .limit(1);
+        return rows[0] ?? null;
+      }),
+
+    // Protected: create a Stripe checkout session for a marketplace item
+    createCheckout: protectedProcedure
+      .input(z.object({
+        itemId: z.number(),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!stripe) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Payments not configured' });
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const rows = await db.select().from(marketplaceItems)
+          .where(eq(marketplaceItems.id, input.itemId)).limit(1);
+        const item = rows[0];
+        if (!item) throw new TRPCError({ code: 'NOT_FOUND', message: 'Item not found' });
+        if (!item.active) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Item is no longer available' });
+        if (item.stock !== null && item.stock !== undefined && item.stock <= 0)
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Item is sold out' });
+        const creatorPayoutCents = Math.floor(item.priceCents * item.royaltyPct / 100);
+        const platformFeeCents = item.priceCents - creatorPayoutCents;
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: [{
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: item.title,
+                ...(item.artworkUrl ? { images: [item.artworkUrl] } : {}),
+                metadata: { wid: item.wid ?? '', type: item.type },
+              },
+              unit_amount: item.priceCents,
+            },
+            quantity: 1,
+          }],
+          mode: 'payment',
+          success_url: `${input.origin}/marketplace?purchase=success&item=${item.id}`,
+          cancel_url: `${input.origin}/marketplace?purchase=cancelled`,
+          metadata: {
+            type: 'marketplace_purchase',
+            itemId: item.id.toString(),
+            buyerUserId: ctx.user.id.toString(),
+            creatorPayoutCents: creatorPayoutCents.toString(),
+            platformFeeCents: platformFeeCents.toString(),
+          },
+        });
+        // Record pending purchase
+        const { marketplacePurchases } = await import('../drizzle/schema');
+        await db.insert(marketplacePurchases).values({
+          itemId: item.id,
+          buyerUserId: ctx.user.id,
+          amountCents: item.priceCents,
+          creatorPayoutCents,
+          platformFeeCents,
+          stripeSessionId: session.id,
+          status: 'pending',
+        });
+        return { url: session.url };
+      }),
+
+    // Protected: buyer's purchase history
+    myPurchases: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return [];
+      const { marketplacePurchases, marketplaceItems, users } = await import('../drizzle/schema');
+      const { eq, desc } = await import('drizzle-orm');
+      const rows = await db
+        .select({
+          id: marketplacePurchases.id,
+          status: marketplacePurchases.status,
+          amountCents: marketplacePurchases.amountCents,
+          provenanceWid: marketplacePurchases.provenanceWid,
+          fulfilledAt: marketplacePurchases.fulfilledAt,
+          createdAt: marketplacePurchases.createdAt,
+          itemId: marketplaceItems.id,
+          itemTitle: marketplaceItems.title,
+          itemType: marketplaceItems.type,
+          itemArtworkUrl: marketplaceItems.artworkUrl,
+          itemWid: marketplaceItems.wid,
+          creatorName: users.name,
+          creatorHandle: users.artistHandle,
+        })
+        .from(marketplacePurchases)
+        .leftJoin(marketplaceItems, eq(marketplacePurchases.itemId, marketplaceItems.id))
+        .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
+        .where(eq(marketplacePurchases.buyerUserId, ctx.user.id))
+        .orderBy(desc(marketplacePurchases.createdAt))
+        .limit(50);
+      return rows;
+    }),
+
+    // Protected: creator's sales dashboard
+    creatorSales: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return { items: [], totalEarningsCents: 0 };
+      const { marketplacePurchases, marketplaceItems } = await import('../drizzle/schema');
+      const { eq, and, desc, sum } = await import('drizzle-orm');
+      const items = await db
+        .select({
+          id: marketplaceItems.id,
+          title: marketplaceItems.title,
+          type: marketplaceItems.type,
+          artworkUrl: marketplaceItems.artworkUrl,
+          priceCents: marketplaceItems.priceCents,
+          royaltyPct: marketplaceItems.royaltyPct,
+          stock: marketplaceItems.stock,
+          active: marketplaceItems.active,
+          featured: marketplaceItems.featured,
+          createdAt: marketplaceItems.createdAt,
+        })
+        .from(marketplaceItems)
+        .where(eq(marketplaceItems.creatorId, ctx.user.id))
+        .orderBy(desc(marketplaceItems.createdAt));
+      // Total earnings from fulfilled purchases
+      const earningsRows = await db
+        .select({ total: sum(marketplacePurchases.creatorPayoutCents) })
+        .from(marketplacePurchases)
+        .leftJoin(marketplaceItems, eq(marketplacePurchases.itemId, marketplaceItems.id))
+        .where(and(
+          eq(marketplaceItems.creatorId, ctx.user.id),
+          eq(marketplacePurchases.status, 'fulfilled')
+        ));
+      const totalEarningsCents = Number(earningsRows[0]?.total ?? 0);
+      return { items, totalEarningsCents };
+    }),
+
+    // Admin: create a new marketplace item
+    createItem: protectedProcedure
+      .input(z.object({
+        type: z.enum(["album", "skin", "physical", "creator_good"]),
+        title: z.string().min(1).max(256),
+        description: z.string().optional(),
+        artworkUrl: z.string().url().optional(),
+        priceCents: z.number().min(0),
+        royaltyPct: z.number().min(0).max(100).default(70),
+        wid: z.string().optional(),
+        projectId: z.number().optional(),
+        songId: z.number().optional(),
+        stock: z.number().optional(),
+        featured: z.boolean().default(false),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../drizzle/schema');
+        const result = await db.insert(marketplaceItems).values({
+          type: input.type,
+          title: input.title,
+          description: input.description,
+          artworkUrl: input.artworkUrl,
+          priceCents: input.priceCents,
+          royaltyPct: input.royaltyPct,
+          creatorId: ctx.user.id,
+          wid: input.wid,
+          projectId: input.projectId,
+          songId: input.songId,
+          stock: input.stock,
+          featured: input.featured,
+          active: true,
+        });
+        return { id: (result as any).insertId };
+      }),
+
+    // Protected: toggle item active status (owner only)
+    toggleItemActive: protectedProcedure
+      .input(z.object({ itemId: z.number(), active: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        await db.update(marketplaceItems)
+          .set({ active: input.active })
+          .where(and(eq(marketplaceItems.id, input.itemId), eq(marketplaceItems.creatorId, ctx.user.id)));
+        return { ok: true };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

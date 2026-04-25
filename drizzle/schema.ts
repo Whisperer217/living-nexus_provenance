@@ -1265,3 +1265,54 @@ export const keeperSkins = mysqlTable("keeper_skins", {
 });
 export type KeeperSkin = typeof keeperSkins.$inferSelect;
 export type InsertKeeperSkin = typeof keeperSkins.$inferInsert;
+
+// ─── Marketplace ──────────────────────────────────────────────────────────────
+// Items listed in the Living Nexus Marketplace.
+// type: "album" | "skin" | "physical" | "creator_good"
+// Every item is anchored to a creator (creatorId) and optionally a WID.
+export const marketplaceItems = mysqlTable("marketplace_items", {
+  id: int("id").autoincrement().primaryKey(),
+  type: mysqlEnum("type", ["album", "skin", "physical", "creator_good"]).notNull(),
+  title: varchar("title", { length: 256 }).notNull(),
+  description: text("description"),
+  artworkUrl: text("artwork_url"),
+  priceCents: int("price_cents").notNull().default(0),
+  // Creator who earns royalties (can differ from uploader)
+  creatorId: int("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // Royalty percentage paid to creator (0-100, stored as integer e.g. 70 = 70%)
+  royaltyPct: int("royalty_pct").notNull().default(70),
+  // Optional WID anchor — the provenance record this item is tied to
+  wid: varchar("wid", { length: 128 }),
+  // Optional reference to a project/album (for type="album")
+  projectId: int("project_id"),
+  // Optional reference to a song (for type="album" single-track)
+  songId: int("song_id"),
+  // Stock: null = unlimited, 0 = sold out, >0 = limited edition
+  stock: int("stock"),
+  active: boolean("active").notNull().default(true),
+  featured: boolean("featured").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+});
+export type MarketplaceItem = typeof marketplaceItems.$inferSelect;
+export type InsertMarketplaceItem = typeof marketplaceItems.$inferInsert;
+
+// Purchases of marketplace items.
+// On fulfillment: stock is decremented, provenance receipt WID is generated.
+export const marketplacePurchases = mysqlTable("marketplace_purchases", {
+  id: int("id").autoincrement().primaryKey(),
+  itemId: int("item_id").notNull().references(() => marketplaceItems.id, { onDelete: "restrict" }),
+  buyerUserId: int("buyer_user_id"),  // null = guest checkout
+  amountCents: int("amount_cents").notNull(),
+  creatorPayoutCents: int("creator_payout_cents").notNull(),
+  platformFeeCents: int("platform_fee_cents").notNull(),
+  stripeSessionId: varchar("stripe_session_id", { length: 256 }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 256 }),
+  status: mysqlEnum("status", ["pending", "paid", "fulfilled", "refunded", "failed"]).notNull().default("pending"),
+  // Provenance receipt — WID generated on fulfillment
+  provenanceWid: varchar("provenance_wid", { length: 128 }),
+  fulfilledAt: timestamp("fulfilled_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+export type MarketplacePurchase = typeof marketplacePurchases.$inferSelect;
+export type InsertMarketplacePurchase = typeof marketplacePurchases.$inferInsert;
