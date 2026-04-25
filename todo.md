@@ -3579,3 +3579,7 @@
 - [x] Applied migration 0085: provenanceEvents table created, aiTransforms table dropped
 - [x] TypeScript: 0 errors
 - [x] Save checkpoint and deploy
+
+## OAuth Callback Error Logging Patch
+- [x] Patched server/_core/oauth.ts catch block to log and return errMsg, errStatus, errCode, and stack trace top 4 lines
+- [x] TypeScript: 0 errors
