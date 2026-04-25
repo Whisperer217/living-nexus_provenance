@@ -3506,3 +3506,10 @@
 - [x] No DB migrations
 - [x] TypeScript: 0 errors
 - [x] Save checkpoint and deploy
+
+## Commit b174997 — Frequency-Reactive Purple Glow
+- [x] Pull b174997 (useFrequencyGlow hook, Web Audio API bass/mid/high bands, toggle button desktop+mobile, localStorage persist, CORS fallback)
+- [x] No merge conflicts (fast-forward, 3 files)
+- [x] No DB migrations
+- [x] TypeScript: 0 errors
+- [x] Save checkpoint and deploy
