@@ -3632,3 +3632,10 @@
 - [ ] Detect lyrics/instrumentation requests and format output as structured song layout (verse/chorus/bridge sections with instrumentation notes inline)
 - [ ] Corpus Size slider maps to LLM max_tokens (100 words = ~150 tokens baseline, scales to ~2000 tokens at max)
 - [ ] Commit, checkpoint, push to GitHub
+
+## Phase 64: Sovereign Stamp Audit Remediation
+- [x] DB: all 62 tables confirmed in production, pnpm db:push clean
+- [x] Drizzle journal conflict resolved (0086_giant_loa vs 0086_white_unus)
+- [x] keeper_notes table applied to production manually
+- [x] SongDetailPage.tsx: "Apply Sovereign Stamp" button (owner-only, hidden once stamped)
+- [x] DashboardPage.tsx: Sovereign Stamp status badge in track list row (🔏 Stamped / Unstamped)

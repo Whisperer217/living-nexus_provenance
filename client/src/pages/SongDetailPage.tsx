@@ -23,7 +23,7 @@ import {
   Play, Pause, Share2, Copy, DollarSign, MessageSquare,
   Shield, Music, ChevronLeft, Download, Headphones,
   ExternalLink, Check, ChevronDown, ChevronUp, Twitter, Heart,
-  Video, ImageIcon, History,
+  Video, ImageIcon, History, Stamp,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
@@ -73,6 +73,7 @@ export default function SongDetailPage() {
   const [replyingTo, setReplyingTo] = useState<{ id: number; authorName: string } | null>(null);
   const [replyText, setReplyText] = useState("");
   const [showLyrics, setShowLyrics] = useState(false);
+  const [stampLoading, setStampLoading] = useState(false);
   const [editingLyrics, setEditingLyrics] = useState(false);
   const [lyricsEdit, setLyricsEdit] = useState("");
   // Persistent reactions — backed by DB via tRPC
@@ -773,6 +774,47 @@ export default function SongDetailPage() {
                       </a>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Apply Sovereign Stamp — owner-only, shown when NOT yet stamped ── */}
+            {isOwner && !(song as any).sovereignStampId && (
+              <div className="rounded-2xl p-5" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.25)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(196,154,40,0.1)" }}>
+                    <Stamp className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Sovereign Stamp</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: "var(--ln-smoke)" }}>Embed a near-ultrasonic provenance tone + generate a cryptographic certificate</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    disabled={stampLoading}
+                    onClick={async () => {
+                      setStampLoading(true);
+                      try {
+                        const res = await fetch("/api/stamp-song", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          credentials: "include",
+                          body: JSON.stringify({ songId: song.id }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Stamp failed");
+                        toast.success("🔏 Sovereign Stamp applied! Provenance certificate generated.", { duration: 6000 });
+                        utils.songs.getById.invalidate({ id: songId });
+                      } catch (err: any) {
+                        toast.error(err.message || "Stamp failed");
+                      } finally {
+                        setStampLoading(false);
+                      }
+                    }}
+                    style={{ background: "var(--ln-gold)", color: "#0a0a0a", fontFamily: "'Cinzel', serif", fontSize: "12px", whiteSpace: "nowrap", flexShrink: 0 }}
+                  >
+                    {stampLoading ? "Stamping…" : "Apply Stamp"}
+                  </Button>
                 </div>
               </div>
             )}
