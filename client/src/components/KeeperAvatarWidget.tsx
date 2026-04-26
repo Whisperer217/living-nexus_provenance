@@ -3,31 +3,40 @@
  *
  * Self-contained wrapper around FloatingAvatar that:
  *  - Reads the user's active skin from trpc.keeper.getProfile
- *  - Manages agent mode, message history, and cinematic mode state
- *  - Calls trpc.keeper.chat for LLM responses
+ *  - Manages persona, message history, and cinematic mode state
+ *  - Calls trpc.keeper.chat with full conversation history + optional imageUrls
+ *  - Saves notes to DB via trpc.keeper.saveNote
  *  - Hides on /keeper and auth pages
  */
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import FloatingAvatar, { SKIN_IMAGES } from "./FloatingAvatar";
+import FloatingAvatar from "./FloatingAvatar";
 
-type AgentMode = "Guide" | "Conductor" | "Critic" | "Custodian";
+type PersonaMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist";
 
 interface AgentMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-  mode: AgentMode;
+  mode: PersonaMode;
 }
 
 const HIDDEN_PATHS = ["/keeper", "/verify", "/download", "/login"];
 
+const PERSONA_ID: Record<PersonaMode, string> = {
+  Guide: "guide",
+  Conductor: "conductor",
+  Witness: "witness",
+  Custodian: "custodian",
+  Archivist: "archivist",
+};
+
 export default function KeeperAvatarWidget() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const [mode, setMode] = useState<AgentMode>("Guide");
+  const [mode, setMode] = useState<PersonaMode>("Guide");
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [cinematic, setCinematic] = useState(false);
   const nowPlayingRef = useRef<{ title: string; artist: string } | null>(null);
@@ -37,6 +46,7 @@ export default function KeeperAvatarWidget() {
     staleTime: 30_000,
   });
   const chatMutation = trpc.keeper.chat.useMutation();
+  const saveNoteMutation = trpc.keeper.saveNote.useMutation();
 
   // Keyboard shortcut for cinematic mode
   useEffect(() => {
@@ -76,8 +86,9 @@ export default function KeeperAvatarWidget() {
   const activeSkinId = profile?.activeSkinId ?? "hooded-scholar";
   const customImageUrl = profile?.customImageUrl ?? null;
 
-  const handleAskAgent = async (text: string) => {
-    if (!text.trim()) return;
+  const handleAskAgent = async (text: string, imageUrls?: string[]) => {
+    if (!text.trim() && (!imageUrls || imageUrls.length === 0)) return;
+
     const userMsg: AgentMessage = {
       id: `u-${Date.now()}`,
       role: "user",
@@ -85,12 +96,24 @@ export default function KeeperAvatarWidget() {
       mode,
     };
     setMessages(prev => [...prev, userMsg]);
+
+    // Build conversation history (last 20 turns to keep context window manageable)
+    const historySlice = messages.slice(-20).map(m => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    }));
+
     try {
-      const res = await chatMutation.mutateAsync({ mode, message: text });
+      const res = await chatMutation.mutateAsync({
+        persona: PERSONA_ID[mode] as "guide" | "conductor" | "witness" | "custodian" | "archivist",
+        message: text,
+        imageUrls: imageUrls && imageUrls.length > 0 ? imageUrls : undefined,
+        history: historySlice,
+      });
       const assistantMsg: AgentMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
-        content: typeof res.reply === 'string' ? res.reply : String(res.reply),
+        content: typeof res.reply === "string" ? res.reply : String(res.reply),
         mode,
       };
       setMessages(prev => [...prev, assistantMsg]);
@@ -104,6 +127,15 @@ export default function KeeperAvatarWidget() {
     }
   };
 
+  const handleSaveNote = async (content: string, imageUrl?: string) => {
+    if (!content.trim()) return;
+    await saveNoteMutation.mutateAsync({
+      personaId: PERSONA_ID[mode],
+      content,
+      imageUrl,
+    });
+  };
+
   return (
     <FloatingAvatar
       activeSkinId={activeSkinId}
@@ -111,11 +143,13 @@ export default function KeeperAvatarWidget() {
       agentMode={mode}
       agentMessages={messages}
       onAskAgent={handleAskAgent}
-      onModeChange={(m) => setMode(m as AgentMode)}
+      onModeChange={(m) => setMode(m as PersonaMode)}
+      onSaveNote={handleSaveNote}
       cinematicMode={cinematic}
       onCinematicToggle={() => setCinematic(c => !c)}
-      userName={user.name || user.artistHandle || 'Creator'}
+      userName={user.name || user.artistHandle || "Creator"}
       isThinking={chatMutation.isPending}
+      isSavingNote={saveNoteMutation.isPending}
     />
   );
 }

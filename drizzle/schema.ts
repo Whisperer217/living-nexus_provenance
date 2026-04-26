@@ -1347,3 +1347,25 @@ export const provenanceEvents = mysqlTable("provenanceEvents", {
 
 export type ProvenanceEvent = typeof provenanceEvents.$inferSelect;
 export type InsertProvenanceEvent = typeof provenanceEvents.$inferInsert;
+
+// ─── Keeper Notes (persistent creative notes saved from the Keeper sandbox) ───
+// Each note is tied to a user + persona. Notes can contain lyrics, prose,
+// ideas, or any creative text. An optional imageUrl stores an attached image.
+export const keeperNotes = mysqlTable("keeper_notes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  /** Which persona the note was created under */
+  personaId: varchar("persona_id", { length: 64 }).notNull().default("guide"),
+  /** Short user-supplied or auto-generated title */
+  title: varchar("title", { length: 256 }).notNull().default("Untitled Note"),
+  /** Full note content — lyrics, prose, ideas */
+  content: text("content").notNull(),
+  /** Optional S3 URL of an attached image */
+  imageUrl: text("image_url"),
+  /** Optional tag for quick filtering (e.g. "lyrics", "structure", "testimony") */
+  tag: varchar("tag", { length: 64 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+});
+export type KeeperNote = typeof keeperNotes.$inferSelect;
+export type InsertKeeperNote = typeof keeperNotes.$inferInsert;

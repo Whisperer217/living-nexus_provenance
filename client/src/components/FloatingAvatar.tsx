@@ -14,13 +14,29 @@ export const SKIN_IMAGES: Record<string, string> = {
   "upload-slot":    "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/skin-upload-slot_ab8bd82e.png",
 };
 
-// ─── Mode colours ─────────────────────────────────────────────────────────────
+// ─── Persona colours & capability labels ─────────────────────────────────────
 
 const MODE_COLORS: Record<string, string> = {
   Guide:     "#C9A84C",
   Conductor: "#7B9EA6",
-  Critic:    "#A67B7B",
+  Witness:   "#B8956A",
   Custodian: "#7BA67B",
+  Archivist: "#8B7355",
+  Critic:    "#A67B7B",
+};
+
+const PERSONA_CAPABILITY: Record<string, string> = {
+  Guide:     "Direction · Inspiration · Voice",
+  Conductor: "Structure · Arrangement · Flow",
+  Witness:   "Testimony · Emotional Truth · Depth",
+  Custodian: "Archive · Provenance · Legacy",
+  Archivist: "Semantics · Pattern · Corpus",
+  Critic:    "Feedback · Refinement · Clarity",
+};
+
+const PERSONA_ID: Record<string, string> = {
+  Guide: "guide", Conductor: "conductor", Witness: "witness",
+  Custodian: "custodian", Archivist: "archivist", Critic: "guide",
 };
 
 // ─── Now Playing hook (Media Session API) ────────────────────────────────────
@@ -63,12 +79,14 @@ interface FloatingAvatarProps {
   customImageUrl?: string | null;
   agentMode?: string;
   agentMessages?: { id: string; role: string; content: string; mode: string }[];
-  onAskAgent?: (text: string) => void;
+  onAskAgent?: (text: string, imageUrls?: string[]) => void;
   onModeChange?: (mode: string) => void;
+  onSaveNote?: (content: string, imageUrl?: string) => void;
   cinematicMode?: boolean;
   onCinematicToggle?: () => void;
   userName?: string;
   isThinking?: boolean;
+  isSavingNote?: boolean;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -80,11 +98,14 @@ export default function FloatingAvatar({
   agentMessages = [],
   onAskAgent,
   onModeChange,
+  onSaveNote,
   cinematicMode = false,
   onCinematicToggle,
   userName,
   isThinking = false,
+  isSavingNote = false,
 }: FloatingAvatarProps) {
+  const [noteSaved, setNoteSaved] = useState(false);
   const [, navigate] = useLocation();
   const [expanded, setExpanded] = useState(false);
   const [sandboxOpen, setSandboxOpen] = useState(false);
@@ -272,34 +293,19 @@ export default function FloatingAvatar({
 
   const sendSandboxToKeeper = async () => {
     if (!sandboxText.trim() && sandboxImages.length === 0) return;
-    // If images are attached, run vision analysis on the first image first,
-    // then include the analysis + text in the chat message so the LLM actually
-    // sees the image content instead of receiving a bare text label.
-    if (sandboxImages.length > 0) {
-      setIsAnalyzingImage(true);
-      try {
-        const results = await Promise.all(
-          sandboxImages.map(url =>
-            analyzeImageMutation.mutateAsync({ imageUrl: url, context: sandboxText || undefined })
-          )
-        );
-        const visionSummary = results.map((r, i) => `[Image ${i + 1} analysis]: ${r.analysis}`).join('\n');
-        const fullMessage = sandboxText.trim()
-          ? `${sandboxText.trim()}\n\n${visionSummary}`
-          : visionSummary;
-        onAskAgent?.(fullMessage);
-      } catch {
-        // Fall back to text-only if vision fails
-        onAskAgent?.(sandboxText.trim() || '[Image attached — analysis unavailable]');
-      } finally {
-        setIsAnalyzingImage(false);
-      }
-    } else {
-      onAskAgent?.(sandboxText.trim());
-    }
+    // Pass images directly to the chat procedure — the router now handles multimodal natively
+    onAskAgent?.(sandboxText.trim(), sandboxImages.length > 0 ? sandboxImages : undefined);
     setSandboxText("");
     setSandboxImages([]);
     setSandboxOpen(false);
+  };
+
+  const handleSaveNote = async () => {
+    if (!sandboxText.trim()) return;
+    const firstImage = sandboxImages[0];
+    await onSaveNote?.(sandboxText.trim(), firstImage);
+    setNoteSaved(true);
+    setTimeout(() => setNoteSaved(false), 2000);
   };
 
   // ─── Mic recording helpers ───────────────────────────────────────────────────
@@ -830,16 +836,34 @@ export default function FloatingAvatar({
                   </div>
                 )}
 
-                {/* Send to Keeper */}
-                <button onClick={sendSandboxToKeeper}
-                  disabled={!sandboxText.trim() && sandboxImages.length === 0}
-                  className="w-full py-2 rounded text-xs font-semibold transition-all disabled:opacity-40"
-                  style={{
-                    background: `${modeColor}22`, border: `1px solid ${modeColor}44`,
-                    color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em",
-                  }}>
-                  SEND TO KEEPER →
-                </button>
+                {/* Action buttons row */}
+                <div className="flex gap-2">
+                  {/* Save Note */}
+                  {onSaveNote && (
+                    <button onClick={handleSaveNote}
+                      disabled={!sandboxText.trim() || isSavingNote}
+                      className="flex-shrink-0 py-2 px-3 rounded text-xs font-semibold transition-all disabled:opacity-40"
+                      style={{
+                        background: noteSaved ? "rgba(123,166,123,0.25)" : "rgba(255,255,255,0.05)",
+                        border: `1px solid ${noteSaved ? "rgba(123,166,123,0.6)" : "var(--ln-panel-border)"}`,
+                        color: noteSaved ? "#7BA67B" : "var(--ln-smoke)",
+                        fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.06em",
+                        whiteSpace: "nowrap",
+                      }}>
+                      {noteSaved ? "✓ SAVED" : isSavingNote ? "⋯" : "⇩ SAVE NOTE"}
+                    </button>
+                  )}
+                  {/* Send to Keeper */}
+                  <button onClick={sendSandboxToKeeper}
+                    disabled={!sandboxText.trim() && sandboxImages.length === 0}
+                    className="flex-1 py-2 rounded text-xs font-semibold transition-all disabled:opacity-40"
+                    style={{
+                      background: `${modeColor}22`, border: `1px solid ${modeColor}44`,
+                      color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em",
+                    }}>
+                    SEND TO KEEPER →
+                  </button>
+                </div>
               </div>
             )}
 
@@ -994,21 +1018,31 @@ export default function FloatingAvatar({
         </>
       ) : (
         <>
-          {/* Mode tabs */}
-          <div className="flex flex-shrink-0" style={{ borderBottom: `1px solid var(--ln-panel-border)` }}>
-            {(["Guide", "Conductor", "Critic", "Custodian"] as const).map(m => (
-              <button key={m} onClick={() => onModeChange?.(m)}
-                className="flex-1 py-1.5 text-center transition-colors"
-                style={{
-                  fontFamily: "'Space Mono', monospace", fontSize: "0.55rem",
-                  letterSpacing: "0.08em", textTransform: "uppercase",
-                  color: agentMode === m ? MODE_COLORS[m] : "var(--ln-smoke)",
-                  borderBottom: agentMode === m ? `2px solid ${MODE_COLORS[m]}` : "2px solid transparent",
-                  background: "transparent",
-                }}>
-                {m}
-              </button>
-            ))}
+          {/* Persona tabs */}
+          <div className="flex-shrink-0">
+            <div className="flex" style={{ borderBottom: `1px solid var(--ln-panel-border)` }}>
+              {(["Guide", "Conductor", "Witness", "Custodian", "Archivist"] as const).map(m => (
+                <button key={m} onClick={() => onModeChange?.(m)}
+                  className="flex-1 py-1.5 text-center transition-colors"
+                  style={{
+                    fontFamily: "'Space Mono', monospace", fontSize: "0.48rem",
+                    letterSpacing: "0.06em", textTransform: "uppercase",
+                    color: agentMode === m ? MODE_COLORS[m] : "var(--ln-smoke)",
+                    borderBottom: agentMode === m ? `2px solid ${MODE_COLORS[m]}` : "2px solid transparent",
+                    background: "transparent",
+                  }}>
+                  {m}
+                </button>
+              ))}
+            </div>
+            {/* Capability label for active persona */}
+            {PERSONA_CAPABILITY[agentMode] && (
+              <div className="px-3 py-1 text-center" style={{ borderBottom: `1px solid var(--ln-panel-border)`, background: `${modeColor}08` }}>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: `${modeColor}99`, letterSpacing: "0.05em" }}>
+                  {PERSONA_CAPABILITY[agentMode]}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Message thread */}

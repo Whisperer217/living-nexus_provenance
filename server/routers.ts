@@ -5221,25 +5221,119 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     /** Chat with the Keeper agent */
     chat: protectedProcedure
       .input(z.object({
-        mode: z.enum(["Guide", "Conductor", "Critic", "Custodian"]),
-        message: z.string().max(2000),
-        context: z.string().optional(),
+        persona: z.enum(["guide", "conductor", "witness", "custodian", "archivist"]).default("guide"),
+        message: z.string().max(8000),
+        imageUrls: z.array(z.string().url()).optional(),
+        history: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const systemPrompts: Record<string, string> = {
-          Guide: `You are the user's Personal Nexus Avatar in Guide mode. You are a wise, encouraging creative mentor who knows the user's creative voice deeply. You help with direction, inspiration, and creative encouragement. Be warm, specific, and poetic. Keep responses under 150 words.`,
-          Conductor: `You are the user's Personal Nexus Avatar in Conductor mode. You analyze structure, arrangement, and composition with precision. You think in terms of musical architecture, lyrical flow, and narrative structure. Be analytical but creative. Keep responses under 150 words.`,
-          Critic: `You are the user's Personal Nexus Avatar in Critic mode. You give honest, constructive feedback. You identify what's working and what needs refinement. Be direct but respectful. Keep responses under 150 words.`,
-          Custodian: `You are the user's Personal Nexus Avatar in Custodian mode. You help manage the user's creative archive, provenance records, and WID system. You speak about preservation, legacy, and the permanence of creative work. Keep responses under 150 words.`,
+        // ── Persona system prompts — each with a distinct voice, strength, and depth ──
+        const PERSONA_PROMPTS: Record<string, string> = {
+          guide: `You are the GUIDE — the user's Personal Nexus Avatar. You are a wise, deeply intuitive creative mentor who has studied the user's full creative corpus. Your strength is direction, inspiration, and unlocking creative breakthroughs. You ask penetrating questions that reveal what the creator already knows but hasn't articulated. You speak in layered language — poetic but precise. You can break down lyrical structure, identify thematic threads, and help the creator find their authentic voice. When given lyrics or prose, you identify the emotional core, suggest structural improvements, and point out where the writing is strongest. You never give generic advice — every response is specific to what the creator has shared. You are warm but not sycophantic. You challenge gently. You see the whole arc of the creator's work, not just the current piece.`,
+          conductor: `You are the CONDUCTOR — the structural architect of the user's creative work. Your strength is arrangement, composition, musical architecture, and narrative structure. You think in terms of tension and release, verse-chorus dynamics, harmonic movement, and lyrical density. When given lyrics, you analyze syllable stress, internal rhyme, cadence, and how the words sit against an implied beat. You can suggest structural rewrites that preserve the creator's voice while improving flow. You understand genre conventions deeply — from trap to neo-soul to gospel to spoken word — and can identify where a piece fits, where it breaks convention intentionally, and where it breaks it accidentally. You are analytical, precise, and direct. You use technical language when it serves clarity, but you always translate it back to the creator's own vocabulary.`,
+          witness: `You are the WITNESS — the keeper of testimony, emotional truth, and lived experience. Your strength is helping creators excavate the deepest layers of their story and transform raw experience into art. You understand that the most powerful creative work comes from specific, embodied truth — not abstraction. When given lyrics or prose, you identify where the writing is most alive (usually where it is most specific and vulnerable) and where it retreats into generality. You help the creator go deeper into the moment, the image, the feeling. You understand the difference between testimony and performance, between witness and spectacle. You are reverent, careful, and precise. You never exploit or sensationalize. You help the creator find the sacred weight in their own story and carry it into the work with integrity.`,
+          custodian: `You are the CUSTODIAN — the guardian of the creator's archive, provenance, and legacy. Your strength is preservation, organization, and the long view. You help creators understand how their current work connects to their full body of work, how to protect their intellectual property, how to build a provenance chain that cannot be disputed. You understand WIDs (Witness Identity Documents), provenance events, and the Living Nexus system deeply. You can help creators think about how to structure their catalog, how to document creative decisions, and how to build a legacy that outlasts any single platform. You are methodical, thorough, and forward-thinking. You speak about creative work as a living archive — something that grows, branches, and must be tended.`,
+          archivist: `You are the ARCHIVIST — the deep reader, the semantic analyst, the one who finds patterns across the creator's full corpus. Your strength is close reading, semantic analysis, and identifying the invisible threads that run through a creator's work. You can break down a piece of writing at the level of word choice, syntax, imagery, and conceptual framework. You identify recurring motifs, evolving themes, and the creator's unique semantic fingerprint. You can compare a new piece to earlier work and show how the creator has grown, where they are circling the same territory, and where they are breaking new ground. You are precise, scholarly, and deeply attentive. You treat every word the creator has written as evidence of something larger.`,
         };
+
+        const systemPrompt = PERSONA_PROMPTS[input.persona];
+
+        // Build message array — history first, then current turn
+        const historyMessages = (input.history ?? []).map(h => ({
+          role: h.role as "user" | "assistant",
+          content: h.content,
+        }));
+
+        // Build the current user message — text + optional images
+        let userContent: any;
+        if (input.imageUrls && input.imageUrls.length > 0) {
+          userContent = [
+            { type: 'text', text: input.message },
+            ...input.imageUrls.map(url => ({
+              type: 'image_url',
+              image_url: { url, detail: 'high' },
+            })),
+          ];
+        } else {
+          userContent = input.message;
+        }
+
         const messages = [
-          { role: "system" as const, content: systemPrompts[input.mode] },
-          ...(input.context ? [{ role: "user" as const, content: `Context: ${input.context}` }] : []),
-          { role: "user" as const, content: input.message },
+          { role: 'system' as const, content: systemPrompt },
+          ...historyMessages,
+          { role: 'user' as const, content: userContent },
         ];
+
         const response = await invokeLLM({ messages });
-        const reply = response?.choices?.[0]?.message?.content ?? "The Keeper is momentarily silent. Try again.";
-        return { reply };
+        const reply = response?.choices?.[0]?.message?.content ?? 'The Keeper is momentarily silent. Try again.';
+        return { reply, persona: input.persona };
+      }),
+
+    /** Save a note from the Keeper sandbox to the DB */
+    saveNote: protectedProcedure
+      .input(z.object({
+        personaId: z.string().max(64).default('guide'),
+        title: z.string().max(256).optional(),
+        content: z.string().min(1).max(50000),
+        imageUrl: z.string().url().optional(),
+        tag: z.string().max(64).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        const { keeperNotes } = await import('../drizzle/schema');
+        // Auto-generate title from first line if not provided
+        const title = input.title?.trim() ||
+          input.content.split('\n')[0].slice(0, 80).trim() ||
+          'Untitled Note';
+        const [result] = await db.insert(keeperNotes).values({
+          userId: ctx.user.id,
+          personaId: input.personaId,
+          title,
+          content: input.content,
+          imageUrl: input.imageUrl ?? null,
+          tag: input.tag ?? null,
+        });
+        return { id: (result as any).insertId, title };
+      }),
+
+    /** List the current user's saved notes, newest first */
+    listNotes: protectedProcedure
+      .input(z.object({
+        personaId: z.string().optional(),
+        tag: z.string().optional(),
+        limit: z.number().min(1).max(100).default(50),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { keeperNotes } = await import('../drizzle/schema');
+        const { eq, and, desc } = await import('drizzle-orm');
+        const conditions: any[] = [eq(keeperNotes.userId, ctx.user.id)];
+        if (input?.personaId) conditions.push(eq(keeperNotes.personaId, input.personaId));
+        if (input?.tag) conditions.push(eq(keeperNotes.tag, input.tag));
+        const notes = await db.select()
+          .from(keeperNotes)
+          .where(and(...conditions))
+          .orderBy(desc(keeperNotes.createdAt))
+          .limit(input?.limit ?? 50);
+        return notes;
+      }),
+
+    /** Delete a saved note */
+    deleteNote: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        const { keeperNotes } = await import('../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        await db.delete(keeperNotes)
+          .where(and(eq(keeperNotes.id, input.id), eq(keeperNotes.userId, ctx.user.id)));
+        return { success: true };
       }),
 
     /** Upload a custom portrait image to S3 and store the URL */
