@@ -3607,3 +3607,18 @@
 - [x] Fix donation progress bar — invalidate projects.getBySlug in confirmDonation onSuccess
 - [x] Marketplace tables applied to production DB (0084_boring_stryfe.sql)
 - [ ] Marketplace item artwork — generate + upload images for 6 seeded items (items already have CDN artwork URLs from Keeper skin assets)
+
+## Phase 62: Keeper AI Overhaul
+- [x] Audit KeeperPage.tsx, KeeperAvatarWidget.tsx, keeper tRPC router — understand current state
+- [x] Define 5 distinct persona profiles (Guide, Conductor, Witness, Custodian, Archivist) with unique system prompts and capability flags
+- [x] Add keeperNotes DB table (userId, personaId, title, content, imageUrl, createdAt, updatedAt)
+- [x] Apply keeperNotes migration to production DB
+- [x] Rich input panel already existed: lyrics/notes textarea, image upload with preview, voice recorder
+- [x] Wire images directly as multimodal content blocks to LLM (no pre-analysis stripping)
+- [x] Voice recorder already wired to transcription API
+- [x] Upgrade LLM call: pass full conversation history (last 20 turns), persona system prompt, image blocks
+- [x] Add "Save Note" button — persists current textarea + image to keeperNotes table
+- [ ] Add Notes panel/drawer in Keeper UI — lists saved notes, click to reload into chat (deferred)
+- [x] Persona switcher shows 5 personas with distinct accent colors
+- [x] Each persona has a distinct capability badge (Direction, Structure, Testimony, Archive, Semantics)
+- [x] Commit, checkpoint, push to GitHub
