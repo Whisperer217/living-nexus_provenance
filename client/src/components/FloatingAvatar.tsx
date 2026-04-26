@@ -74,19 +74,50 @@ function useNowPlaying(): NowPlaying | null {
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
+interface ArchiveEntry {
+  id: number;
+  title: string;
+  messages: { id: string; role: string; content: string; timestamp: number }[];
+  createdAt: number;
+}
 interface FloatingAvatarProps {
   activeSkinId?: string;
   customImageUrl?: string | null;
   agentMode?: string;
+<<<<<<< Updated upstream
   agentMessages?: { id: string; role: string; content: string; mode: string }[];
   onAskAgent?: (text: string, imageUrls?: string[]) => void;
+=======
+  agentMessages?: { id: string; role: string; content: string; mode: string; timestamp?: number }[];
+  onAskAgent?: (text: string) => void;
+>>>>>>> Stashed changes
   onModeChange?: (mode: string) => void;
   onSaveNote?: (content: string, imageUrl?: string) => void;
   cinematicMode?: boolean;
   onCinematicToggle?: () => void;
   userName?: string;
   isThinking?: boolean;
+<<<<<<< Updated upstream
   isSavingNote?: boolean;
+=======
+  // Per-message controls
+  onEditMessage?: (id: string, newContent: string) => void;
+  onDeleteMessage?: (id: string) => void;
+  onCopyMessage?: (content: string) => void;
+  // Thread controls
+  onClearAll?: () => void;
+  onCopyAll?: () => void;
+  onSaveArchive?: () => void;
+  onChatRefresh?: () => void;
+  isSavingArchive?: boolean;
+  // Archive
+  archives?: ArchiveEntry[];
+  onLoadArchive?: (messages: { id: string; role: string; content: string; timestamp: number }[]) => void;
+  onDeleteArchive?: (id: number) => void;
+  // Profile gate
+  profileGatePassed?: boolean;
+  profileGateMissing?: string[];
+>>>>>>> Stashed changes
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -103,9 +134,29 @@ export default function FloatingAvatar({
   onCinematicToggle,
   userName,
   isThinking = false,
+<<<<<<< Updated upstream
   isSavingNote = false,
 }: FloatingAvatarProps) {
   const [noteSaved, setNoteSaved] = useState(false);
+=======
+  onEditMessage,
+  onDeleteMessage,
+  onCopyMessage,
+  onClearAll,
+  onCopyAll,
+  onSaveArchive,
+  onChatRefresh,
+  isSavingArchive = false,
+  archives = [],
+  onLoadArchive,
+  onDeleteArchive,
+  profileGatePassed = true,
+  profileGateMissing = [],
+}: FloatingAvatarProps) {
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState("");
+>>>>>>> Stashed changes
   const [, navigate] = useLocation();
   const [expanded, setExpanded] = useState(false);
   const [sandboxOpen, setSandboxOpen] = useState(false);
@@ -1045,6 +1096,53 @@ export default function FloatingAvatar({
             )}
           </div>
 
+          {/* Chat thread controls */}
+          {agentMessages.length > 0 && (
+            <div className="flex-shrink-0 flex items-center gap-1 px-2 py-1" style={{ borderBottom: `1px solid var(--ln-panel-border)`, background: "rgba(0,0,0,0.3)" }}>
+              <button onClick={onCopyAll} title="Copy all" className="p-1 rounded hover:opacity-80 transition-opacity" style={{ color: "var(--ln-smoke)" }}>
+                <ClipboardCopy className="w-3 h-3" />
+              </button>
+              <button onClick={onSaveArchive} disabled={isSavingArchive} title="Save to archive" className="p-1 rounded hover:opacity-80 transition-opacity" style={{ color: "var(--ln-gold)" }}>
+                {isSavingArchive ? <Loader2 className="w-3 h-3 animate-spin" /> : <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.06em" }}>SAVE</span>}
+              </button>
+              <button onClick={onChatRefresh} title="New thread" className="p-1 rounded hover:opacity-80 transition-opacity" style={{ color: "var(--ln-smoke)" }}>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.06em" }}>NEW</span>
+              </button>
+              <button onClick={() => setArchiveOpen(a => !a)} title="Archives" className="p-1 rounded hover:opacity-80 transition-opacity" style={{ color: archiveOpen ? "var(--ln-gold)" : "var(--ln-smoke)" }}>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.06em" }}>ARCH</span>
+              </button>
+              <div className="flex-1" />
+              <button onClick={onClearAll} title="Clear all" className="p-1 rounded hover:opacity-80 transition-opacity" style={{ color: "#A67B7B" }}>
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+          {/* Archive panel */}
+          {archiveOpen && (
+            <div className="flex-shrink-0 overflow-y-auto" style={{ maxHeight: 160, borderBottom: `1px solid var(--ln-panel-border)`, background: "rgba(0,0,0,0.5)" }}>
+              {archives.length === 0 ? (
+                <div className="p-3 text-center" style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}>No archives yet</div>
+              ) : archives.map(arch => (
+                <div key={arch.id} className="flex items-center gap-1 px-2 py-1.5" style={{ borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
+                  <button onClick={() => { onLoadArchive?.(arch.messages); setArchiveOpen(false); }} className="flex-1 text-left hover:opacity-80 transition-opacity" style={{ color: "var(--ln-parchment)", fontFamily: "'Space Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.04em" }}>
+                    {arch.title}
+                  </button>
+                  <button onClick={() => onDeleteArchive?.(arch.id)} className="p-0.5 hover:opacity-80" style={{ color: "#A67B7B" }}>
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* Profile gate banner */}
+          {!profileGatePassed && (
+            <div className="flex-shrink-0 px-3 py-2" style={{ background: "rgba(166,123,123,0.12)", borderBottom: `1px solid rgba(166,123,123,0.3)` }}>
+              <p style={{ color: "#C4A0A0", fontFamily: "'Space Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.04em", lineHeight: 1.5 }}>
+                Complete your profile to unlock full Keeper access.<br />
+                Missing: {profileGateMissing.join(" · ")}
+              </p>
+            </div>
+          )}
           {/* Message thread */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {agentMessages.length === 0 && (
@@ -1054,12 +1152,42 @@ export default function FloatingAvatar({
               </div>
             )}
             {agentMessages.map(msg => (
-              <div key={msg.id} className="text-sm leading-relaxed">
-                <span className="text-xs mr-2"
-                  style={{ color: MODE_COLORS[msg.mode] ?? modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}>
-                  [{msg.mode}]
-                </span>
-                <span style={{ color: "var(--ln-parchment)", fontSize: "0.8rem" }}>{msg.content}</span>
+              <div key={msg.id} className="group relative text-sm leading-relaxed" style={{ paddingRight: 52 }}>
+                {editingId === msg.id ? (
+                  <div className="flex flex-col gap-1">
+                    <textarea
+                      value={editDraft}
+                      onChange={e => setEditDraft(e.target.value)}
+                      rows={3}
+                      className="w-full rounded p-1.5 text-xs resize-none focus:outline-none"
+                      style={{ background: "#0a0a0a", border: `1px solid ${modeColor}55`, color: "var(--ln-parchment)", fontFamily: "inherit", fontSize: "0.78rem", lineHeight: 1.5 }}
+                    />
+                    <div className="flex gap-1">
+                      <button onClick={() => { onEditMessage?.(msg.id, editDraft); setEditingId(null); }} className="px-2 py-0.5 rounded text-xs" style={{ background: `${modeColor}22`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}>SAVE</button>
+                      <button onClick={() => setEditingId(null)} className="px-2 py-0.5 rounded text-xs" style={{ background: "transparent", border: "1px solid var(--ln-panel-border)", color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}>CANCEL</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-xs mr-2"
+                      style={{ color: MODE_COLORS[msg.mode] ?? modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}>
+                      [{msg.role === 'user' ? 'YOU' : msg.mode}]
+                    </span>
+                    <span style={{ color: "var(--ln-parchment)", fontSize: "0.8rem" }}>{msg.content}</span>
+                    {/* Per-message controls (visible on hover) */}
+                    <div className="absolute right-0 top-0 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => onCopyMessage?.(msg.content)} title="Copy" className="p-0.5 rounded hover:opacity-80" style={{ color: "var(--ln-smoke)" }}>
+                        <ClipboardCopy className="w-2.5 h-2.5" />
+                      </button>
+                      <button onClick={() => { setEditingId(msg.id); setEditDraft(msg.content); }} title="Edit" className="p-0.5 rounded hover:opacity-80" style={{ color: "var(--ln-gold)" }}>
+                        <PenLine className="w-2.5 h-2.5" />
+                      </button>
+                      <button onClick={() => onDeleteMessage?.(msg.id)} title="Delete" className="p-0.5 rounded hover:opacity-80" style={{ color: "#A67B7B" }}>
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
             <div ref={messagesEndRef} />

@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
-import { ArrowLeft, Lock, Upload, Check, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, Lock, Upload, Check, Loader2, Zap, BookOpen } from "lucide-react";
+import KeeperCharacterSheet from "@/components/KeeperCharacterSheet";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 
 // ─── Skin catalogue ───────────────────────────────────────────────────────────
@@ -328,6 +329,7 @@ export default function Keeper() {
         </div>
 
         {/* ── Center: Skin selection grid ───────────────────────────────────── */}
+        {/* Character Sheet drawer toggle button (fixed right edge) */}
         <div className="flex-1 overflow-y-auto p-6">
           <div
             className="text-sm uppercase tracking-widest mb-6"
@@ -537,6 +539,28 @@ export default function Keeper() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ── Right: Character Sheet panel ─────────────────────────────────── */}
+      <div
+        className="w-96 flex-shrink-0 flex flex-col border-l overflow-y-auto"
+        style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
+      >
+        <div
+          className="flex items-center gap-2 px-4 py-3 border-b flex-shrink-0"
+          style={{ borderColor: "var(--ln-panel-border)" }}
+        >
+          <BookOpen className="w-3.5 h-3.5" style={{ color: "var(--ln-gold)" }} />
+          <span
+            className="text-xs uppercase tracking-widest"
+            style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
+          >
+            Character Sheet
+          </span>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <KeeperCharacterSheet />
         </div>
       </div>
     </div>

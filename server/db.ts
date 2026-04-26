@@ -3814,7 +3814,6 @@ export async function insertProvenanceEvent(data: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
-  const { provenanceEvents } = await import("../drizzle/schema");
   await db.insert(provenanceEvents).values({
     eventId: data.eventId,
     creatorId: data.creatorId,
@@ -3832,7 +3831,6 @@ export async function insertProvenanceEvent(data: {
 export async function getProvenanceEventsByCreator(creatorId: number, limit = 100) {
   const db = await getDb();
   if (!db) return [];
-  const { provenanceEvents } = await import("../drizzle/schema");
   return db
     .select()
     .from(provenanceEvents)
@@ -3844,7 +3842,6 @@ export async function getProvenanceEventsByCreator(creatorId: number, limit = 10
 export async function getLatestProvenanceCheckpoint(creatorId: number) {
   const db = await getDb();
   if (!db) return null;
-  const { provenanceEvents } = await import("../drizzle/schema");
   const rows = await db
     .select()
     .from(provenanceEvents)

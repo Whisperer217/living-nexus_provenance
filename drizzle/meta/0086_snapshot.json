@@ -1,8 +1,13 @@
 {
   "version": "5",
   "dialect": "mysql",
+<<<<<<< Updated upstream
   "id": "8b6bcf5d-52ff-44e7-b271-060c774c97d4",
   "prevId": "d5dbe3d8-9fcf-4c62-8569-fe20d50c0542",
+=======
+  "id": "399284aa-c414-4b07-b9dd-6e68303e9007",
+  "prevId": "556eccc1-7367-43a6-b823-1f1912498263",
+>>>>>>> Stashed changes
   "tables": {
     "adminLogs": {
       "name": "adminLogs",
@@ -1314,8 +1319,13 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+<<<<<<< Updated upstream
     "keeper_notes": {
       "name": "keeper_notes",
+=======
+    "keeperCharacterSheets": {
+      "name": "keeperCharacterSheets",
+>>>>>>> Stashed changes
       "columns": {
         "id": {
           "name": "id",
@@ -1324,19 +1334,30 @@
           "notNull": true,
           "autoincrement": true
         },
+<<<<<<< Updated upstream
         "user_id": {
           "name": "user_id",
+=======
+        "userId": {
+          "name": "userId",
+>>>>>>> Stashed changes
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
+<<<<<<< Updated upstream
         "persona_id": {
           "name": "persona_id",
+=======
+        "presetId": {
+          "name": "presetId",
+>>>>>>> Stashed changes
           "type": "varchar(64)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+<<<<<<< Updated upstream
           "default": "'guide'"
         },
         "title": {
@@ -1349,11 +1370,26 @@
         },
         "content": {
           "name": "content",
+=======
+          "default": "'the-witness'"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'The Witness'"
+        },
+        "persona": {
+          "name": "persona",
+>>>>>>> Stashed changes
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
+<<<<<<< Updated upstream
         "image_url": {
           "name": "image_url",
           "type": "text",
@@ -1370,14 +1406,45 @@
         },
         "created_at": {
           "name": "created_at",
+=======
+        "attributes": {
+          "name": "attributes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mediumContext": {
+          "name": "mediumContext",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "isActive": {
+          "name": "isActive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+>>>>>>> Stashed changes
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": "(now())"
         },
+<<<<<<< Updated upstream
         "updated_at": {
           "name": "updated_at",
+=======
+        "updatedAt": {
+          "name": "updatedAt",
+>>>>>>> Stashed changes
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -1387,6 +1454,7 @@
         }
       },
       "indexes": {},
+<<<<<<< Updated upstream
       "foreignKeys": {
         "keeper_notes_user_id_users_id_fk": {
           "name": "keeper_notes_user_id_users_id_fk",
@@ -1405,6 +1473,74 @@
       "compositePrimaryKeys": {
         "keeper_notes_id": {
           "name": "keeper_notes_id",
+=======
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "keeperCharacterSheets_id": {
+          "name": "keeperCharacterSheets_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "keeperChatArchives": {
+      "name": "keeperChatArchives",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "messages": {
+          "name": "messages",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "keeperChatArchives_id": {
+          "name": "keeperChatArchives_id",
+>>>>>>> Stashed changes
           "columns": [
             "id"
           ]
