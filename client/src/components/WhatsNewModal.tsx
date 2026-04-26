@@ -10,14 +10,91 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.31.0";
+const CURRENT_VERSION = "v2.40.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.31.0",
+    version: "v2.40.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: Shield, text: "Provenance Events — A new provenanceEvents ledger is live. Every creative action — draft, checkpoint, anchor, fork — is recorded as a signed event tied to your creator ID and agent fingerprint. The foundation for immutable creative provenance." },
+      { icon: Network, text: "Satchel — Your creative event ledger is now accessible via the Satchel interface. Checkpoint your work, anchor it to the chain, fork from any prior state. Full event history with session labels." },
+      { icon: Sparkles, text: "Provenance Prompt Generator (PPG) — Generate, save, and manage provenance prompts directly from the platform. LLM-backed generation with full history. Each prompt is tied to your creator identity." },
+      { icon: Users, text: "Personal Nexus Agent — Your AI creative agent now has a persistent identity with fingerprint tracking. The agents router (getOrCreate, updateFingerprint) keeps your agent consistent across sessions." },
+      { icon: Shield, text: "Work Identity Documents (WIDs) Router — wids.create, wids.getByCreator, wids.getById procedures now available. Register and retrieve WIDs programmatically." },
+      { icon: Shield, text: "Ed25519 Keypair Generation — auth.generateKeypair and auth.hasKeypair procedures added. Your public key is stored on your user record for cryptographic signing of provenance events." },
+    ],
+  },
+  {
+    version: "v2.39.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Zap, text: "AI Transform Removed — The AI Transform feature (Sonauto integration) has been fully removed from the platform. 552 lines of code removed across 6 files. The song detail page and dashboard are cleaner and faster." },
+    ],
+  },
+  {
+    version: "v2.38.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Gift, text: "Marketplace Navigation — The MARKETPLACE pill in the desktop top nav now has a permanent gold gradient background, gold border, and shimmer underline. The mobile bottom nav has a new SHOP tab with a gold ring icon in the center position." },
+    ],
+  },
+  {
+    version: "v2.37.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: ImagePlus, text: "Keeper Vision Fix — Attaching images to the Keeper sandbox now correctly sends the image content to the LLM. The previous implementation sent only a placeholder string; the new flow runs vision analysis on each image first and appends the result to the message." },
+    ],
+  },
+  {
+    version: "v2.36.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Radio, text: "Voice Recorder Overhaul — The mic button now uses a proper 3-state flow: Idle → Recording (with STOP button) → Ready (with TRANSCRIBE and discard). Eliminates the unreliable hold-to-record pattern. Works identically on mobile and desktop." },
+    ],
+  },
+  {
+    version: "v2.35.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Music, text: "Audio Silence Fix — The frequency-reactive glow now defaults to OFF on fresh sessions (opt-in). AudioContext is never created before a user gesture, eliminating the browser autoplay policy silence bug that affected first-time visitors." },
+    ],
+  },
+  {
+    version: "v2.34.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Compass, text: "Keeper Avatar Desktop Drag — The Keeper orb now supports 200ms hold-to-drag on desktop (mousedown), matching the existing mobile touch behavior. Position persists to localStorage across sessions." },
+    ],
+  },
+  {
+    version: "v2.33.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Gift, text: "Marketplace Seed Defaults — A new seedDefaults procedure inserts 6 default marketplace items (album, 3 Keeper skins, thumb drive, creator pack) when the marketplace is empty. An admin seed button appears in the empty state for logged-in users." },
+    ],
+  },
+  {
+    version: "v2.32.0",
+    date: "April 2026",
+    label: "",
+    items: [
+      { icon: Sparkles, text: "Frequency-Reactive Purple Glow — The player now responds to audio frequency data in real time. Bass drives a wide outer bloom, mids create a shimmer layer, and highs produce a thin edge flicker. Toggle with the Waves (〜) button. Powered by Web Audio API AnalyserNode at 60fps." },
+    ],
+  },
+  {
+    version: "v2.31.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Music, text: "Genre Multi-Select — The genre selector on track edit and creator profile is now a chip grid instead of a dropdown. Select as many genres as your work spans — Gospel, Trap, Power Metal, Neo-Soul, and 60+ other styles are available. Selections are stored as a comma-separated list and the 64-character cap has been removed entirely." },
       { icon: BookOpen, text: "Comic Upload — Storyboard-Only Mode — Comics and novels can now be published using storyboard pages alone, without uploading a separate file. The Next: Metadata button unlocks as soon as pages are added, the Witness ID is generated from the page layout, and the file drop zone relabels itself as optional once pages are present." },
