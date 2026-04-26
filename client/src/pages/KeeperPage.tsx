@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -68,17 +68,30 @@ const SKINS: Array<{
   },
 ];
 
-const MODES = ["Guide", "Conductor", "Critic", "Custodian"] as const;
+const MODES = ["Guide", "Conductor", "Witness", "Custodian", "Archivist"] as const;
 type AgentMode = typeof MODES[number];
 
 const MODE_COLORS: Record<AgentMode, string> = {
   Guide:     "#C9A84C",
   Conductor: "#7B9EA6",
-  Critic:    "#A67B7B",
+  Witness:   "#D4956A",
   Custodian: "#7BA67B",
+  Archivist: "#9B7B55",
 };
 
-const STAT_LABELS = [
+const MODE_CAPABILITY: Record<AgentMode, string> = {
+  Guide:     "Direction · Inspiration · Voice",
+  Conductor: "Structure · Arrangement · Flow",
+  Witness:   "Testimony · Emotional Truth · Depth",
+  Custodian: "Provenance · Archive · Legacy",
+  Archivist: "Semantics · Pattern · Corpus",
+};
+
+// ─── Archetype base attribute profiles ───────────────────────────────────────
+// (canonical definitions live in KeeperAttrsContext; imported below)
+import { useKeeperAttrs, ARCHETYPE_BASES, type AttrKey, type AttrState } from "@/contexts/KeeperAttrsContext";
+
+const STAT_LABELS: Array<{ key: AttrKey; label: string; isCount: boolean }> = [
   { key: "voiceDepth",       label: "Voice Depth",       isCount: false },
   { key: "lyricalDensity",   label: "Lyrical Density",   isCount: false },
   { key: "structuralLogic",  label: "Structural Logic",  isCount: false },
@@ -96,6 +109,9 @@ export default function Keeper() {
   const [selectedSkin, setSelectedSkin] = useState<string | null>(null);
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Per-archetype attribute state — shared via KeeperAttrsContext
+  const { archetypeAttrs, setArchetypeAttrs, attrs, handleAttrChange, handleModeChange } = useKeeperAttrs();
 
   const profileQuery = trpc.keeper.getProfile.useQuery(undefined, { enabled: !!user });
   const unlockMutation = trpc.keeper.unlockSkin.useMutation();
@@ -268,30 +284,34 @@ export default function Keeper() {
               Keeper Attributes
             </div>
             {STAT_LABELS.map(({ key, label, isCount }) => {
-              const val = stats ? (stats as Record<string, number>)[key] ?? 0 : 0;
-              const pct = isCount ? Math.min(100, val / 10) : val;
+              const val = attrs[key];
+              const max = isCount ? 1000 : 100;
+              const pct = isCount ? Math.min(100, (val / max) * 100) : val;
+              const base = ARCHETYPE_BASES[activeMode][key];
+              const boosted = val > base;
               return (
                 <div key={key}>
                   <div className="flex justify-between mb-0.5">
-                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-smoke)" }}>
-                      {label}
+                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: boosted ? MODE_COLORS[activeMode] : "var(--ln-smoke)" }}>
+                      {label}{boosted ? " ▲" : ""}
                     </span>
                     <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-gold)" }}>
-                      {isCount ? `${val} words` : `${val}`}
+                      {isCount ? `${val}` : `${val}`}
                     </span>
                   </div>
-                  <div
-                    className="h-1.5 rounded-full overflow-hidden"
-                    style={{ background: "var(--ln-panel-border)" }}
-                  >
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${pct}%`,
-                        background: `linear-gradient(90deg, ${activeSkin.color}88, ${activeSkin.color})`,
-                      }}
-                    />
-                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={max}
+                    step={isCount ? 50 : 1}
+                    value={val}
+                    onChange={e => handleAttrChange(key, Number(e.target.value))}
+                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(90deg, ${MODE_COLORS[activeMode]} ${pct}%, var(--ln-panel-border) ${pct}%)`,
+                      accentColor: MODE_COLORS[activeMode],
+                    }}
+                  />
                 </div>
               );
             })}
@@ -299,17 +319,33 @@ export default function Keeper() {
 
           {/* Mode selector */}
           <div className="px-4 pb-4">
-            <div
-              className="text-xs uppercase tracking-widest mb-2"
-              style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
-            >
-              Active Mode
+            <div className="flex items-center justify-between mb-2">
+              <div
+                className="text-xs uppercase tracking-widest"
+                style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
+              >
+                Active Mode
+              </div>
+              <button
+                onClick={() => setArchetypeAttrs(prev => ({ ...prev, [activeMode]: ARCHETYPE_BASES[activeMode] }))}
+                className="text-xs px-2 py-0.5 rounded transition-all hover:opacity-80"
+                style={{
+                  border: `1px solid var(--ln-panel-border)`,
+                  color: "var(--ln-smoke)",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "0.5rem",
+                  letterSpacing: "0.06em",
+                }}
+                title="Reset sliders to archetype base values"
+              >
+                RESET
+              </button>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5 mb-2">
               {MODES.map(m => (
                 <button
                   key={m}
-                  onClick={() => setActiveMode(m)}
+                  onClick={() => handleModeChange(m)}
                   className="py-2 rounded text-xs transition-all"
                   style={{
                     background: activeMode === m ? `${MODE_COLORS[m]}22` : "transparent",
@@ -323,6 +359,20 @@ export default function Keeper() {
                   {m.toUpperCase()}
                 </button>
               ))}
+            </div>
+            {/* Capability label */}
+            <div
+              className="text-center py-1 px-2 rounded"
+              style={{
+                background: `${MODE_COLORS[activeMode]}10`,
+                border: `1px solid ${MODE_COLORS[activeMode]}30`,
+                color: MODE_COLORS[activeMode],
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.5rem",
+                letterSpacing: "0.06em",
+              }}
+            >
+              {MODE_CAPABILITY[activeMode]}
             </div>
           </div>
         </div>

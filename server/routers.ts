@@ -5228,6 +5228,14 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           role: z.enum(["user", "assistant"]),
           content: z.string(),
         })).optional(),
+        attrs: z.object({
+          voiceDepth: z.number().min(0).max(100),
+          lyricalDensity: z.number().min(0).max(100),
+          structuralLogic: z.number().min(0).max(100),
+          emotionalRange: z.number().min(0).max(100),
+          provenanceDepth: z.number().min(0).max(100),
+          corpusSize: z.number().min(0).max(1000),
+        }).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // ── Persona system prompts — each with a distinct voice, strength, and depth ──
@@ -5239,7 +5247,47 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
           archivist: `You are the ARCHIVIST — the deep reader, the semantic analyst, the one who finds patterns across the creator's full corpus. Your strength is close reading, semantic analysis, and identifying the invisible threads that run through a creator's work. You can break down a piece of writing at the level of word choice, syntax, imagery, and conceptual framework. You identify recurring motifs, evolving themes, and the creator's unique semantic fingerprint. You can compare a new piece to earlier work and show how the creator has grown, where they are circling the same territory, and where they are breaking new ground. You are precise, scholarly, and deeply attentive. You treat every word the creator has written as evidence of something larger.`,
         };
 
-        const systemPrompt = PERSONA_PROMPTS[input.persona];
+        // ── Build attribute modifier block ──────────────────────────────────
+        const a = input.attrs;
+        const attrBlock = a ? `
+
+--- ACTIVE ATTRIBUTE PROFILE ---
+Voice Depth: ${a.voiceDepth}/100 — ${a.voiceDepth >= 75 ? 'Speak with gravitas and weight; every word carries consequence.' : a.voiceDepth >= 40 ? 'Balanced tone — direct but not heavy.' : 'Keep it light and accessible; brevity over depth.'}
+Lyrical Density: ${a.lyricalDensity}/100 — ${a.lyricalDensity >= 75 ? 'Prioritize dense, layered lyric writing with internal rhyme, syllabic precision, and compound imagery.' : a.lyricalDensity >= 40 ? 'Moderate lyrical complexity — clear lines with occasional internal texture.' : 'Simple, direct language; clarity over complexity.'}
+Structural Logic: ${a.structuralLogic}/100 — ${a.structuralLogic >= 75 ? 'Apply rigorous structural analysis; label every section, identify tension/release arcs, and suggest formal improvements.' : a.structuralLogic >= 40 ? 'Note structural patterns but prioritize creative flow over strict form.' : 'Minimal structural commentary; follow the creator\'s instinct.'}
+Emotional Range: ${a.emotionalRange}/100 — ${a.emotionalRange >= 75 ? 'Engage the full emotional spectrum; do not shy away from darkness, grief, or ecstasy.' : a.emotionalRange >= 40 ? 'Moderate emotional engagement; acknowledge feeling without over-dramatizing.' : 'Keep emotional commentary restrained and analytical.'}
+Provenance Depth: ${a.provenanceDepth}/100 — ${a.provenanceDepth >= 75 ? 'Actively connect this work to the creator\'s archive, prior pieces, and long-term legacy.' : a.provenanceDepth >= 40 ? 'Occasionally reference context and creative history when relevant.' : 'Focus on the current piece only; no archive references.'}
+Response Length: target approximately ${Math.round(50 + (a.corpusSize / 1000) * 950)} words unless the task requires more or less.
+--- END ATTRIBUTE PROFILE ---` : '';
+
+        // ── Detect lyrics/instrumentation request ────────────────────────────
+        const lyricsKeywords = /\b(lyric|verse|chorus|bridge|hook|pre.?chorus|outro|intro|refrain|bar|rhyme|syllable|cadence|flow|rap|sing|song structure|instrumentation|arrangement|beat|chord|melody|progression|bpm|key signature|time signature|breakdown|drop|build|section|stanza|couplet)\b/i;
+        const isLyricsRequest = lyricsKeywords.test(input.message);
+        const lyricsFormatInstruction = isLyricsRequest ? `
+
+--- LYRICS / INSTRUMENTATION FORMAT RULE ---
+When writing or analyzing lyrics, ALWAYS use this labeled section format:
+
+[INTRO] (optional)
+[VERSE 1]
+[PRE-CHORUS] (if applicable)
+[CHORUS]
+[VERSE 2]
+[PRE-CHORUS] (if applicable)
+[CHORUS]
+[BRIDGE] (if applicable)
+[OUTRO / FINAL CHORUS]
+
+For each section, if instrumentation is relevant, add an indented note immediately after the section label:
+  ↳ Instrumentation: [describe key instruments, texture, BPM feel, key, mood]
+
+If analyzing existing lyrics, annotate each section with:
+  ↳ Analysis: [syllable count per line, rhyme scheme, emotional register, what works, what to improve]
+
+Never collapse multiple sections into a single block. Always label clearly.
+--- END FORMAT RULE ---` : '';
+
+        const systemPrompt = PERSONA_PROMPTS[input.persona] + attrBlock + lyricsFormatInstruction;
 
         // Build message array — history first, then current turn
         const historyMessages = (input.history ?? []).map(h => ({
