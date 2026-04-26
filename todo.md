@@ -3632,3 +3632,7 @@
 - [ ] Detect lyrics/instrumentation requests and format output as structured song layout (verse/chorus/bridge sections with instrumentation notes inline)
 - [ ] Corpus Size slider maps to LLM max_tokens (100 words = ~150 tokens baseline, scales to ~2000 tokens at max)
 - [ ] Commit, checkpoint, push to GitHub
+
+## Phase 64: Upload Form Contrast Fix (Mobile)
+- [x] Brighten UploadPage form inputs — higher contrast backgrounds, visible labels on mobile
+- [x] Ensure all form fields (Title, Genre, BPM, Key, Album, ISRC, BMI, Mood Tags, Credits) are legible on dark mobile screens
