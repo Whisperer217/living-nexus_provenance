@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import FloatingAvatar from "./FloatingAvatar";
+import { useKeeperAttrs } from "@/contexts/KeeperAttrsContext";
 
 type PersonaMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist";
 
@@ -36,6 +37,7 @@ const PERSONA_ID: Record<PersonaMode, string> = {
 export default function KeeperAvatarWidget() {
   const { user } = useAuth();
   const [location] = useLocation();
+  const { attrs: keeperAttrs } = useKeeperAttrs();
   const [mode, setMode] = useState<PersonaMode>("Guide");
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [cinematic, setCinematic] = useState(false);
@@ -109,6 +111,7 @@ export default function KeeperAvatarWidget() {
         message: text,
         imageUrls: imageUrls && imageUrls.length > 0 ? imageUrls : undefined,
         history: historySlice,
+        attrs: keeperAttrs ?? undefined,
       });
       const assistantMsg: AgentMessage = {
         id: `a-${Date.now()}`,

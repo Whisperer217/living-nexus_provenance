@@ -3622,3 +3622,13 @@
 - [x] Persona switcher shows 5 personas with distinct accent colors
 - [x] Each persona has a distinct capability badge (Direction, Structure, Testimony, Archive, Semantics)
 - [x] Commit, checkpoint, push to GitHub
+
+## Phase 63: Keeper Archetype Attribute System + Structured Output
+
+- [ ] Define per-archetype base attribute profiles for all 5 personas (Guide, Conductor, Witness, Custodian, Archivist) — each has distinct base values for Voice Depth, Lyrical Density, Structural Logic, Emotional Range, Provenance Depth, Corpus Size
+- [ ] KeeperPage: clicking an archetype applies that archetype's base values to sliders (boosts/overrides), user can still manually adjust after
+- [ ] Save attribute state per-archetype so switching back restores last manual state
+- [ ] Pass all 6 attribute values into the keeper.chat tRPC call and inject them into the system prompt as behavioral parameters (e.g. "Lyrical Density: 85/100 — prioritize dense, multi-layered lyric writing")
+- [ ] Detect lyrics/instrumentation requests and format output as structured song layout (verse/chorus/bridge sections with instrumentation notes inline)
+- [ ] Corpus Size slider maps to LLM max_tokens (100 words = ~150 tokens baseline, scales to ~2000 tokens at max)
+- [ ] Commit, checkpoint, push to GitHub
