@@ -1348,7 +1348,6 @@ export const provenanceEvents = mysqlTable("provenanceEvents", {
 export type ProvenanceEvent = typeof provenanceEvents.$inferSelect;
 export type InsertProvenanceEvent = typeof provenanceEvents.$inferInsert;
 
-<<<<<<< Updated upstream
 // ─── Keeper Notes (persistent creative notes saved from the Keeper sandbox) ───
 // Each note is tied to a user + persona. Notes can contain lyrics, prose,
 // ideas, or any creative text. An optional imageUrl stores an attached image.
@@ -1370,13 +1369,8 @@ export const keeperNotes = mysqlTable("keeper_notes", {
 });
 export type KeeperNote = typeof keeperNotes.$inferSelect;
 export type InsertKeeperNote = typeof keeperNotes.$inferInsert;
-=======
+
 // ─── Keeper Character Sheets ──────────────────────────────────────────────────
-// Each user can have one active character sheet that defines the Keeper's
-// persona, medium awareness, and adjustable attributes.
-// presetId: references a stock preset slug (e.g. "the-archivist", "the-witness")
-// attributes: freeform JSON for tone, style, frameworks, etc.
-// mediumContext: per-medium JSON (music, lyrics, book, comic, video, general)
 export const keeperCharacterSheets = mysqlTable("keeperCharacterSheets", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -1406,8 +1400,6 @@ export type KeeperCharacterSheet = typeof keeperCharacterSheets.$inferSelect;
 export type InsertKeeperCharacterSheet = typeof keeperCharacterSheets.$inferInsert;
 
 // ─── Keeper Chat Archives ─────────────────────────────────────────────────────
-// Saved conversation threads from the Keeper sandbox.
-// messages: array of { role, content, timestamp, id }
 export const keeperChatArchives = mysqlTable("keeperChatArchives", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -1423,4 +1415,3 @@ export const keeperChatArchives = mysqlTable("keeperChatArchives", {
 });
 export type KeeperChatArchive = typeof keeperChatArchives.$inferSelect;
 export type InsertKeeperChatArchive = typeof keeperChatArchives.$inferInsert;
->>>>>>> Stashed changes

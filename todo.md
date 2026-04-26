@@ -3608,8 +3608,7 @@
 - [x] Marketplace tables applied to production DB (0084_boring_stryfe.sql)
 - [ ] Marketplace item artwork — generate + upload images for 6 seeded items (items already have CDN artwork URLs from Keeper skin assets)
 
-<<<<<<< Updated upstream
-## Phase 62: Keeper AI Overhaul
+## Phase 62: Keeper AI Overhaul (upstream)
 - [x] Audit KeeperPage.tsx, KeeperAvatarWidget.tsx, keeper tRPC router — understand current state
 - [x] Define 5 distinct persona profiles (Guide, Conductor, Witness, Custodian, Archivist) with unique system prompts and capability flags
 - [x] Add keeperNotes DB table (userId, personaId, title, content, imageUrl, createdAt, updatedAt)
@@ -3623,34 +3622,21 @@
 - [x] Persona switcher shows 5 personas with distinct accent colors
 - [x] Each persona has a distinct capability badge (Direction, Structure, Testimony, Archive, Semantics)
 - [x] Commit, checkpoint, push to GitHub
-=======
-## Phase 62: Keeper Character Sheet + Chat Upgrade
 
-- [ ] DB schema: keeper_character_sheets table (userId, presetId, name, persona, mediumContext JSON, attributes JSON, isActive)
-- [ ] DB schema: keeper_chat_archives table (userId, title, messages JSON, createdAt)
-- [ ] Migration: push new tables to DB
-- [ ] tRPC: keeper.getActiveSheet, keeper.saveSheet, keeper.listPresets, keeper.saveArchive, keeper.listArchives, keeper.deleteArchive
-- [ ] Character Sheet UI: preset selector (stock personas), adjustable attribute fields, medium tabs (Music/Lyrics/Book/Comic/Video)
-- [ ] Keeper chat: persist messages to localStorage + DB sync
-- [ ] Keeper chat: per-message edit (inline), copy, delete controls
-- [ ] Keeper chat: Clear All + Copy All toolbar buttons
-- [ ] Keeper chat: mini archive panel — save current thread with title, list saved threads, load/delete
-- [ ] Keeper chat: Chat Refresh (new thread, archive current if non-empty)
-- [ ] Profile gate: users without display_name + testimony + profile_caption + at least one WID/work see Guide only
-- [ ] Inject character sheet + user profile (name, testimony, caption, EID, linked lyrics/works) into Keeper system prompt
-
-## Keeper Character Sheet + Chat Upgrade (Phase 62)
+## Phase 62: Keeper Character Sheet + Chat Upgrade (Manus)
 - [x] DB schema: keeper_character_sheets and keeper_chat_archives tables added
 - [x] Migration applied: both tables created in DB
 - [x] tRPC: keeper.getSheet, keeper.saveSheet, keeper.listPresets procedures
 - [x] tRPC: keeper.saveArchive, keeper.listArchives, keeper.deleteArchive procedures
 - [x] tRPC: keeper.profileGateCheck procedure
-- [x] KEEPER_PRESETS: 4 stock presets (Witness, Conductor, Archivist, Cipher)
+- [x] KEEPER_PRESETS: 5 stock presets (Witness, Conductor, Archivist, Sovereign, Cipher)
 - [x] keeper.chat: character sheet + user profile injected into system prompt
+- [x] keeper.chat: mode enum expanded to include Witness and Archivist
 - [x] KeeperCharacterSheet.tsx: preset selector, adjustable attributes, medium context tabs
 - [x] KeeperAvatarWidget.tsx: persistent chat (localStorage), per-message edit/copy/delete
 - [x] KeeperAvatarWidget.tsx: Clear All, Copy All, archive save/load, chat refresh
 - [x] KeeperAvatarWidget.tsx: profile gate (Guide-only for incomplete profiles)
 - [x] FloatingAvatar.tsx: extended props for message controls, archive, profile gate
 - [x] Keeper.tsx: Character Sheet panel added as right column
->>>>>>> Stashed changes
+- [x] All merge conflicts resolved: KeeperAvatarWidget.tsx, todo.md
+- [x] TypeScript: 0 errors

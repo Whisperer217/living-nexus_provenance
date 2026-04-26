@@ -3,45 +3,31 @@
  *
  * Self-contained wrapper around FloatingAvatar that:
  *  - Reads the user's active skin from trpc.keeper.getProfile
-<<<<<<< Updated upstream
- *  - Manages persona, message history, and cinematic mode state
- *  - Calls trpc.keeper.chat with full conversation history + optional imageUrls
- *  - Saves notes to DB via trpc.keeper.saveNote
-=======
  *  - Manages agent mode, message history (persisted to localStorage), and cinematic mode state
- *  - Calls trpc.keeper.chat for LLM responses
+ *  - Calls trpc.keeper.chat for LLM responses with full conversation history + optional imageUrls
  *  - Per-message: edit (inline), copy, delete
  *  - Chat controls: Clear All, Copy All, Save to Archive, Chat Refresh
  *  - Archive: save/load/delete threads synced to DB
  *  - Profile gate: Guide-only mode for users without a complete profile
->>>>>>> Stashed changes
  *  - Hides on /keeper and auth pages
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-<<<<<<< Updated upstream
-import FloatingAvatar from "./FloatingAvatar";
-=======
 import FloatingAvatar, { SKIN_IMAGES } from "./FloatingAvatar";
 import { toast } from "sonner";
->>>>>>> Stashed changes
 
-type PersonaMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist";
+type AgentMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist";
 
 export interface AgentMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-<<<<<<< Updated upstream
-  mode: PersonaMode;
-=======
   mode: AgentMode;
   timestamp: number;
   /** If true, message is being edited inline */
   editing?: boolean;
->>>>>>> Stashed changes
 }
 
 const HIDDEN_PATHS = ["/keeper", "/verify", "/download", "/login"];
@@ -68,7 +54,7 @@ function saveMessages(msgs: AgentMessage[]) {
   }
 }
 
-const PERSONA_ID: Record<PersonaMode, string> = {
+const PERSONA_ID: Record<AgentMode, string> = {
   Guide: "guide",
   Conductor: "conductor",
   Witness: "witness",
@@ -79,13 +65,8 @@ const PERSONA_ID: Record<PersonaMode, string> = {
 export default function KeeperAvatarWidget() {
   const { user } = useAuth();
   const [location] = useLocation();
-<<<<<<< Updated upstream
-  const [mode, setMode] = useState<PersonaMode>("Guide");
-  const [messages, setMessages] = useState<AgentMessage[]>([]);
-=======
   const [mode, setMode] = useState<AgentMode>("Guide");
   const [messages, setMessages] = useState<AgentMessage[]>(() => loadMessages());
->>>>>>> Stashed changes
   const [cinematic, setCinematic] = useState(false);
   const nowPlayingRef = useRef<{ title: string; artist: string } | null>(null);
 
@@ -99,9 +80,7 @@ export default function KeeperAvatarWidget() {
     staleTime: 60_000,
   });
   const chatMutation = trpc.keeper.chat.useMutation();
-<<<<<<< Updated upstream
   const saveNoteMutation = trpc.keeper.saveNote.useMutation();
-=======
   const saveArchiveMutation = trpc.keeper.saveArchive.useMutation();
   const listArchivesQuery = trpc.keeper.listArchives.useQuery(undefined, {
     enabled: !!user,
@@ -114,7 +93,6 @@ export default function KeeperAvatarWidget() {
   useEffect(() => {
     saveMessages(messages);
   }, [messages]);
->>>>>>> Stashed changes
 
   // ─── Keyboard shortcuts ───────────────────────────────────────────────────
   useEffect(() => {
@@ -151,20 +129,15 @@ export default function KeeperAvatarWidget() {
   const profileGatePassed = profileGateQuery.data?.passed ?? true;
   const effectiveMode = profileGatePassed ? mode : "Guide";
 
-<<<<<<< Updated upstream
-  const handleAskAgent = async (text: string, imageUrls?: string[]) => {
-    if (!text.trim() && (!imageUrls || imageUrls.length === 0)) return;
-=======
   // ─── Chat handlers ────────────────────────────────────────────────────────
-  const handleAskAgent = useCallback(async (text: string) => {
-    if (!text.trim()) return;
+  const handleAskAgent = useCallback(async (text: string, imageUrls?: string[]) => {
+    if (!text.trim() && (!imageUrls || imageUrls.length === 0)) return;
 
     // Profile gate: only allow Guide mode if profile incomplete
     if (!profileGatePassed && effectiveMode !== "Guide") {
       toast.error("Complete your profile to unlock full Keeper features.");
       return;
     }
->>>>>>> Stashed changes
 
     const userMsg: AgentMessage = {
       id: `u-${Date.now()}`,
@@ -182,27 +155,17 @@ export default function KeeperAvatarWidget() {
     }));
 
     try {
-<<<<<<< Updated upstream
       const res = await chatMutation.mutateAsync({
-        persona: PERSONA_ID[mode] as "guide" | "conductor" | "witness" | "custodian" | "archivist",
+        mode: effectiveMode,
         message: text,
         imageUrls: imageUrls && imageUrls.length > 0 ? imageUrls : undefined,
-        history: historySlice,
       });
-      const assistantMsg: AgentMessage = {
-        id: `a-${Date.now()}`,
-        role: "assistant",
-        content: typeof res.reply === "string" ? res.reply : String(res.reply),
-        mode,
-=======
-      const res = await chatMutation.mutateAsync({ mode: effectiveMode, message: text });
       const assistantMsg: AgentMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
         content: typeof res.reply === 'string' ? res.reply : String(res.reply),
         mode: effectiveMode,
         timestamp: Date.now(),
->>>>>>> Stashed changes
       };
       setMessages(prev => [...prev, assistantMsg]);
     } catch {
@@ -214,7 +177,7 @@ export default function KeeperAvatarWidget() {
         timestamp: Date.now(),
       }]);
     }
-  }, [chatMutation, effectiveMode, profileGatePassed]);
+  }, [chatMutation, effectiveMode, profileGatePassed, messages]);
 
   // ─── Per-message operations ───────────────────────────────────────────────
   const handleEditMessage = useCallback((id: string, newContent: string) => {
@@ -308,10 +271,6 @@ export default function KeeperAvatarWidget() {
       agentMode={effectiveMode}
       agentMessages={messages}
       onAskAgent={handleAskAgent}
-<<<<<<< Updated upstream
-      onModeChange={(m) => setMode(m as PersonaMode)}
-      onSaveNote={handleSaveNote}
-=======
       onModeChange={(m) => {
         if (!profileGatePassed) {
           toast.error("Complete your profile to unlock Keeper modes.");
@@ -319,14 +278,12 @@ export default function KeeperAvatarWidget() {
         }
         setMode(m as AgentMode);
       }}
->>>>>>> Stashed changes
+      onSaveNote={handleSaveNote}
       cinematicMode={cinematic}
       onCinematicToggle={() => setCinematic(c => !c)}
       userName={user.name || user.artistHandle || "Creator"}
       isThinking={chatMutation.isPending}
-<<<<<<< Updated upstream
       isSavingNote={saveNoteMutation.isPending}
-=======
       onEditMessage={handleEditMessage}
       onDeleteMessage={handleDeleteMessage}
       onCopyMessage={handleCopyMessage}
@@ -340,7 +297,6 @@ export default function KeeperAvatarWidget() {
       profileGatePassed={profileGatePassed}
       profileGateMissing={profileGateQuery.data?.missing ?? []}
       isSavingArchive={saveArchiveMutation.isPending}
->>>>>>> Stashed changes
     />
   );
 }

@@ -84,22 +84,15 @@ interface FloatingAvatarProps {
   activeSkinId?: string;
   customImageUrl?: string | null;
   agentMode?: string;
-<<<<<<< Updated upstream
-  agentMessages?: { id: string; role: string; content: string; mode: string }[];
-  onAskAgent?: (text: string, imageUrls?: string[]) => void;
-=======
   agentMessages?: { id: string; role: string; content: string; mode: string; timestamp?: number }[];
-  onAskAgent?: (text: string) => void;
->>>>>>> Stashed changes
+  onAskAgent?: (text: string, imageUrls?: string[]) => void;
   onModeChange?: (mode: string) => void;
   onSaveNote?: (content: string, imageUrl?: string) => void;
   cinematicMode?: boolean;
   onCinematicToggle?: () => void;
   userName?: string;
   isThinking?: boolean;
-<<<<<<< Updated upstream
   isSavingNote?: boolean;
-=======
   // Per-message controls
   onEditMessage?: (id: string, newContent: string) => void;
   onDeleteMessage?: (id: string) => void;
@@ -117,7 +110,6 @@ interface FloatingAvatarProps {
   // Profile gate
   profileGatePassed?: boolean;
   profileGateMissing?: string[];
->>>>>>> Stashed changes
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -134,11 +126,7 @@ export default function FloatingAvatar({
   onCinematicToggle,
   userName,
   isThinking = false,
-<<<<<<< Updated upstream
   isSavingNote = false,
-}: FloatingAvatarProps) {
-  const [noteSaved, setNoteSaved] = useState(false);
-=======
   onEditMessage,
   onDeleteMessage,
   onCopyMessage,
@@ -153,10 +141,10 @@ export default function FloatingAvatar({
   profileGatePassed = true,
   profileGateMissing = [],
 }: FloatingAvatarProps) {
+  const [noteSaved, setNoteSaved] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState("");
->>>>>>> Stashed changes
   const [, navigate] = useLocation();
   const [expanded, setExpanded] = useState(false);
   const [sandboxOpen, setSandboxOpen] = useState(false);
