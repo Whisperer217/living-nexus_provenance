@@ -3608,7 +3608,7 @@
 - [x] Marketplace tables applied to production DB (0084_boring_stryfe.sql)
 - [ ] Marketplace item artwork — generate + upload images for 6 seeded items (items already have CDN artwork URLs from Keeper skin assets)
 
-## Phase 62: Keeper AI Overhaul (upstream)
+## Phase 62: Keeper AI Overhaul
 - [x] Audit KeeperPage.tsx, KeeperAvatarWidget.tsx, keeper tRPC router — understand current state
 - [x] Define 5 distinct persona profiles (Guide, Conductor, Witness, Custodian, Archivist) with unique system prompts and capability flags
 - [x] Add keeperNotes DB table (userId, personaId, title, content, imageUrl, createdAt, updatedAt)
@@ -3623,20 +3623,12 @@
 - [x] Each persona has a distinct capability badge (Direction, Structure, Testimony, Archive, Semantics)
 - [x] Commit, checkpoint, push to GitHub
 
-## Phase 62: Keeper Character Sheet + Chat Upgrade (Manus)
-- [x] DB schema: keeper_character_sheets and keeper_chat_archives tables added
-- [x] Migration applied: both tables created in DB
-- [x] tRPC: keeper.getSheet, keeper.saveSheet, keeper.listPresets procedures
-- [x] tRPC: keeper.saveArchive, keeper.listArchives, keeper.deleteArchive procedures
-- [x] tRPC: keeper.profileGateCheck procedure
-- [x] KEEPER_PRESETS: 5 stock presets (Witness, Conductor, Archivist, Sovereign, Cipher)
-- [x] keeper.chat: character sheet + user profile injected into system prompt
-- [x] keeper.chat: mode enum expanded to include Witness and Archivist
-- [x] KeeperCharacterSheet.tsx: preset selector, adjustable attributes, medium context tabs
-- [x] KeeperAvatarWidget.tsx: persistent chat (localStorage), per-message edit/copy/delete
-- [x] KeeperAvatarWidget.tsx: Clear All, Copy All, archive save/load, chat refresh
-- [x] KeeperAvatarWidget.tsx: profile gate (Guide-only for incomplete profiles)
-- [x] FloatingAvatar.tsx: extended props for message controls, archive, profile gate
-- [x] Keeper.tsx: Character Sheet panel added as right column
-- [x] All merge conflicts resolved: KeeperAvatarWidget.tsx, todo.md
-- [x] TypeScript: 0 errors
+## Phase 63: Keeper Archetype Attribute System + Structured Output
+
+- [ ] Define per-archetype base attribute profiles for all 5 personas (Guide, Conductor, Witness, Custodian, Archivist) — each has distinct base values for Voice Depth, Lyrical Density, Structural Logic, Emotional Range, Provenance Depth, Corpus Size
+- [ ] KeeperPage: clicking an archetype applies that archetype's base values to sliders (boosts/overrides), user can still manually adjust after
+- [ ] Save attribute state per-archetype so switching back restores last manual state
+- [ ] Pass all 6 attribute values into the keeper.chat tRPC call and inject them into the system prompt as behavioral parameters (e.g. "Lyrical Density: 85/100 — prioritize dense, multi-layered lyric writing")
+- [ ] Detect lyrics/instrumentation requests and format output as structured song layout (verse/chorus/bridge sections with instrumentation notes inline)
+- [ ] Corpus Size slider maps to LLM max_tokens (100 words = ~150 tokens baseline, scales to ~2000 tokens at max)
+- [ ] Commit, checkpoint, push to GitHub
