@@ -30,6 +30,7 @@ import MarketplaceDrawer from "@/components/MarketplaceDrawer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import TopBar from "@/components/layout/TopBar";
 import LiveActivityPanel from "@/components/layout/LiveActivityPanel";
+import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
@@ -67,6 +68,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [liveOpen, setLiveOpen] = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
   // Notification badges
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, {
@@ -209,12 +211,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
           <span className="font-display text-base gold-shimmer">Living Nexus</span>
         </div>
-        {/* Bell — 44px tap target, navigates to /notifications */}
+        {/* Bell — opens What's New modal on tap */}
         {!!user && (
           <button
-            onClick={() => navigate("/notifications")}
+            onClick={() => setWhatsNewOpen(true)}
             className="relative flex items-center justify-center rounded-lg text-white/40 hover:text-white/70 transition-all"
             style={{ minWidth: 44, minHeight: 44 }}
+            aria-label="What's New"
           >
             <Bell size={18} />
             {(unreadCount as number) > 0 && (
@@ -348,12 +351,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             {/* Mobile account footer */}
             <div className="px-4 pb-4 border-t border-[rgba(44,52,56,0.35)] pt-3">
               <button
-                onClick={closeMobileMenu}
+                onClick={() => { closeMobileMenu(); setWhatsNewOpen(true); }}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-2 transition-all text-white/65 hover:text-[#E8A830] hover:bg-[rgba(196,154,40,0.04)]"
               >
                 <Sparkles size={15} className="flex-shrink-0" />
                 <span className="text-[13px] font-body">What's New</span>
-                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}>v2.24</span>
+                <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}>v2.31.0</span>
               </button>
               {!authLoading && !user ? (
                 <a
@@ -420,6 +423,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* Scroll to top */}
       <ScrollToTopButton />
+
+      {/* What's New Modal — triggered by mobile bell or drawer button */}
+      {whatsNewOpen && (
+        <WhatsNewModal forceOpen={true} onClose={() => setWhatsNewOpen(false)} />
+      )}
     </div>
   );
 }

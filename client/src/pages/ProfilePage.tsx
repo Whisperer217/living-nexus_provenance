@@ -127,12 +127,12 @@ function HandleField({ value, onSave }: { value: string; onSave: (v: string) => 
     );
   }
   return (
-    <div className="group flex items-center gap-1 cursor-pointer" onClick={() => setEditing(true)}>
-      <span className="text-sm text-white/40 font-body">@</span>
-      <span className={`text-[13px] font-body ${value ? "text-white/60" : "text-white/40 italic"}`}>
+    <div className="group flex items-center gap-1 cursor-pointer min-w-0 max-w-full" onClick={() => setEditing(true)}>
+      <span className="text-sm text-white/40 font-body flex-shrink-0">@</span>
+      <span className={`text-[13px] font-body truncate whitespace-nowrap overflow-hidden ${value ? "text-white/60" : "text-white/40 italic"}`}>
         {value || "artist-handle"}
       </span>
-      <Edit2 size={11} className="text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <Edit2 size={11} className="text-white/60 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
     </div>
   );
 }
@@ -651,7 +651,7 @@ export default function ProfilePage() {
                 </span>
               </div>
               {/* Handle — @ prefix integrated into HandleField to avoid duplication when editing */}
-              <div className="flex items-center gap-1 mb-1">
+              <div className="flex items-center gap-1 mb-1 min-w-0 overflow-hidden">
                 <HandleField
                   value={profile?.artistHandle || ""}
                   onSave={v => save({ artistHandle: v })}
