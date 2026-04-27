@@ -663,6 +663,53 @@ export default function SongDetailPage() {
 
 
 
+            {/* ── HEADLINE CAPTION + DESCRIPTION ── */}
+            {((song as any).headlineCaption || (song as any).description) && (
+              <div className="rounded-2xl p-5 space-y-3" style={{ background: "rgba(196,154,40,0.03)", border: "1px solid rgba(196,154,40,0.15)" }}>
+                {(song as any).headlineCaption && (
+                  <p className="text-base font-semibold leading-snug" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
+                    {(song as any).headlineCaption}
+                  </p>
+                )}
+                {(song as any).description && (
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--ln-smoke)", fontFamily: "'Lato', sans-serif" }}>
+                    {(song as any).description}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* ── GALLERY ── */}
+            {(() => {
+              const rawGallery = (song as any).galleryImagesJson;
+              if (!rawGallery) return null;
+              let gallery: { url: string; caption?: string }[] = [];
+              try { gallery = typeof rawGallery === 'string' ? JSON.parse(rawGallery) : rawGallery; } catch { return null; }
+              if (!gallery.length) return null;
+              return (
+                <div className="space-y-3">
+                  <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>Gallery</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {gallery.map((img, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="rounded-xl overflow-hidden aspect-square bg-black/30">
+                          <img
+                            src={img.url}
+                            alt={img.caption || `Gallery image ${i + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                            onClick={() => window.open(img.url, '_blank')}
+                          />
+                        </div>
+                        {img.caption && (
+                          <p className="text-[10px] leading-tight px-1" style={{ color: "var(--ln-iron)" }}>{img.caption}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* ── PROMINENT TIP PANEL ── */}
             {tipsEnabled && !isOwner && (
               <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #111009)", border: "1px solid rgba(196,154,40,0.3)" }}>

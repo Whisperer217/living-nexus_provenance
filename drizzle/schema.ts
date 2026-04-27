@@ -150,6 +150,26 @@ export const songs = mysqlTable("songs", {
 
   // Editorial
   caption: text("caption"),
+  // Headline caption — short punchy subtitle shown prominently on the work detail page
+  // Separate from the long-form description below
+  headlineCaption: varchar("headlineCaption", { length: 280 }),
+  // Long-form description — the story, process, and intent behind the work
+  // Supports markdown; can be AI-drafted from uploaded images at upload time
+  description: text("description"),
+  // Gallery images — JSON array of { url: string; key: string; caption?: string }
+  // Additional images uploaded alongside the work (process photos, artwork, notes, etc.)
+  // These are separate from the player asset (coverArtUrl / videoUrl)
+  galleryImagesJson: text("galleryImagesJson"),
+  // Player asset designation — which asset is shown in the audio player and feed cards
+  // "cover" = static cover art (coverArtUrl); "video" = music video (videoUrl)
+  playerAssetType: mysqlEnum("playerAssetType", ["cover", "video"]).default("cover").notNull(),
+  // AI Tool Disclosure — specific tools used in creation (from the batch upload sketch)
+  // Each is a boolean flag; aiToolOtherName holds the free-text name if aiToolOther = true
+  aiToolSuno: boolean("aiToolSuno").default(false).notNull(),
+  aiToolUdio: boolean("aiToolUdio").default(false).notNull(),
+  aiToolSonato: boolean("aiToolSonato").default(false).notNull(),
+  aiToolOther: boolean("aiToolOther").default(false).notNull(),
+  aiToolOtherName: varchar("aiToolOtherName", { length: 128 }),
   collectionTag: varchar("collectionTag", { length: 128 }),
 
   // Files

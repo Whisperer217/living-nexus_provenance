@@ -853,6 +853,17 @@ export const appRouter = router({
       fileHash: z.string().optional(), witnessId: z.string().optional(),
       harmonicSignature: z.array(z.number()).optional(), ecdsaPublicKey: z.string().optional(), ecdsaSignature: z.string().optional(),
       caption: z.string().max(2000).nullable().optional(),
+      // Enriched editorial fields
+      headlineCaption: z.string().max(280).optional(),
+      description: z.string().max(10000).optional(),
+      galleryImagesJson: z.string().max(200000).optional(), // JSON array of { url, key, caption? }
+      playerAssetType: z.enum(["cover", "video"]).optional(),
+      // AI Tool Disclosure
+      aiToolSuno: z.boolean().optional(),
+      aiToolUdio: z.boolean().optional(),
+      aiToolSonato: z.boolean().optional(),
+      aiToolOther: z.boolean().optional(),
+      aiToolOtherName: z.string().max(128).optional(),
       // Audio metadata from upload pipeline
       durationSeconds: z.number().optional(),
       sampleRate: z.number().optional(),
@@ -893,7 +904,7 @@ export const appRouter = router({
       // Determine HAAI declared timestamp if all 6 fields are provided
       const haaiFields = [input.haaiVisualConcept, input.haaiStyleLanguage, input.haaiInstrumentation, input.haaiVocalConveyance, input.haaiLyricalInspiration, input.haaiEmotionalTone];
       const haaiDeclaredAt = (input.aiDisclosure === "human_authored_ai_instrument" && haaiFields.every(f => f && f.trim().length > 0)) ? new Date() : undefined;
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiDeclaredAt, pagesJson: input.pagesJson } as any);
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiDeclaredAt, pagesJson: input.pagesJson } as any);
        const songId = (insertResult as any).insertId as number;
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
@@ -944,6 +955,9 @@ export const appRouter = router({
       // Legacy base64 cover (still accepted for backward compat)
       coverBase64: z.string().optional(),
       coverMimeType: z.string().optional(),
+      // Album-level options from batch upload sketch
+      albumArtAcrossAll: z.boolean().optional(), // apply album art to every track
+      albumArtIsAi: z.boolean().optional(), // album art is AI-generated
       tracks: z.array(z.object({
         // Preferred: pre-uploaded S3 URL from /api/upload-file
         fileUrl: z.string().url().optional(),
@@ -963,6 +977,14 @@ export const appRouter = router({
         harmonicSignature: z.array(z.number()).optional(),
         ecdsaPublicKey: z.string().optional(),
         ecdsaSignature: z.string().optional(),
+        // New fields from batch upload sketch
+        releaseDate: z.string().optional(), // ISO date string for original creation date
+        aiDisclosure: z.enum(["original", "ai_assisted", "human_authored_ai_instrument", "ai_generated"]).optional(),
+        aiToolSuno: z.boolean().optional(),
+        aiToolUdio: z.boolean().optional(),
+        aiToolSonato: z.boolean().optional(),
+        aiToolOther: z.boolean().optional(),
+        aiToolOtherName: z.string().max(128).optional(),
       })).min(1).max(50),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
@@ -1001,13 +1023,21 @@ export const appRouter = router({
           aiConsent: track.aiConsent ?? input.aiConsent,
           fileUrl,
           fileKey: audioKey,
-          coverArtUrl: track.coverArtUrl ?? coverArtUrl,
+          coverArtUrl: track.coverArtUrl ?? (input.albumArtAcrossAll !== false ? coverArtUrl : undefined),
           fileHash: track.fileHash,
           witnessId: track.witnessId,
           harmonicSignature: track.harmonicSignature,
           ecdsaPublicKey: track.ecdsaPublicKey,
           ecdsaSignature: track.ecdsaSignature,
-        });
+          // New provenance fields from batch upload sketch
+          releaseDate: track.releaseDate,
+          aiDisclosure: track.aiDisclosure,
+          aiToolSuno: track.aiToolSuno ?? false,
+          aiToolUdio: track.aiToolUdio ?? false,
+          aiToolSonato: track.aiToolSonato ?? false,
+          aiToolOther: track.aiToolOther ?? false,
+          aiToolOtherName: track.aiToolOtherName,
+        } as any);
         // Capture the auto-increment ID directly from the insert result to preserve upload order
         const songId = (insertResult as any).insertId as number | undefined;
         results.push({ title: track.title, witnessId: track.witnessId, fileUrl, songId });
@@ -1494,6 +1524,8 @@ export const appRouter = router({
         title: z.string().min(1).max(255),
         genre: z.string().optional(),
         workType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional(),
+        generateDescription: z.boolean().optional(), // if true, generate a longer description instead of a short caption
+        imageUrls: z.array(z.string().url()).max(6).optional(), // gallery images to analyze for richer description
         // NOTE: content is intentionally NOT accepted here.
         // Per platform policy, only title and genre/category are sent to AI.
         // Lyrics, manuscripts, and audio are WID-protected and must never be sent to external AI systems.
@@ -1502,7 +1534,19 @@ export const appRouter = router({
         const workType = input.workType ?? "audio";
         const workLabel = workType === "audio" ? "music track" : workType === "lyrics" ? "lyrics work" : workType === "manuscript" ? "manuscript or book" : "comic or graphic novel";
         const creatorLabel = workType === "audio" || workType === "lyrics" ? "musician/songwriter" : workType === "manuscript" ? "author" : "comic creator";
-        const systemPrompt = `You are a caption writer for Living Nexus, a sovereign creative provenance platform. Your job is to write a short, compelling caption/description for a ${workLabel} that a creator is uploading. The caption should:
+
+        const isDescription = input.generateDescription === true;
+
+        const systemPrompt = isDescription
+          ? `You are a description writer for Living Nexus, a sovereign creative provenance platform. Your job is to write a rich, authentic long-form description for a ${workLabel} that a creator is uploading. The description should:
+- Be 2-4 paragraphs (100-300 words)
+- Tell the story behind the work — the process, the intent, the emotional context
+- Sound like the creator's own voice — personal, specific, not corporate
+- Avoid generic phrases like "a journey" or "sonic landscape"
+- Give the reader a reason to care about this specific work
+- End with something that makes the reader want to experience it
+Return ONLY the description text. No quotes. No labels. No explanation.`
+          : `You are a caption writer for Living Nexus, a sovereign creative provenance platform. Your job is to write a short, compelling caption/description for a ${workLabel} that a creator is uploading. The caption should:
 - Be 1-3 sentences (50-150 words max)
 - Capture the spirit and feel of the work based on its title and category only
 - Sound authentic and creator-voiced — not corporate or generic
@@ -1511,20 +1555,28 @@ export const appRouter = router({
 - End with energy — make someone want to experience it
 Return ONLY the caption text. No quotes. No labels. No explanation.`;
 
-        // IMPORTANT: Only title and genre/category are sent. Content is NEVER sent.
-        const userMessage = `${workType === "manuscript" || workType === "comic" ? "Work" : "Track"} title: "${input.title}"
-${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${input.genre || "Not specified"}`;;
+        // IMPORTANT: Only title, genre/category, and optional gallery images are sent. Audio/lyrics content is NEVER sent.
+        const textContent = `${workType === "manuscript" || workType === "comic" ? "Work" : "Track"} title: "${input.title}"
+${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${input.genre || "Not specified"}${input.imageUrls?.length ? `\n\nI have also attached ${input.imageUrls.length} image(s) that represent the visual context, artwork, or process photos for this work. Use them to enrich the description.` : ""}`;
+
+        // Build multimodal message if images are provided
+        const userContent: any = input.imageUrls?.length
+          ? [
+              { type: "text", text: textContent },
+              ...input.imageUrls.map((url: string) => ({ type: "image_url", image_url: { url, detail: "low" as const } })),
+            ]
+          : textContent;
 
         const response = await invokeLLM({
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: userMessage },
+            { role: "user", content: userContent },
           ],
         });
 
         const caption = (response as any)?.choices?.[0]?.message?.content?.trim() ?? "";
         if (!caption) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Caption generation failed. Please try again." });
-        return { caption };
+        return { caption, description: caption }; // return both keys for compatibility
       }),
     // ── Generate Collection Certificate (HTML → S3) ────────────────────────────
     generateCollectionCertificate: protectedProcedure

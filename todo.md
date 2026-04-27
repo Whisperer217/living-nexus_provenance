@@ -3646,3 +3646,11 @@
 - [x] Push Phase 65 changes to GitHub (commit 26a1031 on main)
 - [x] Fix artist handle wrapping on mobile — add whitespace-nowrap + overflow-hidden + min-w-0 to HandleField display div
 - [x] Fix What's New modal not opening — wire mobile header bell to open WhatsNewModal; fix drawer "What's New" button; bump version label to v2.31.0
+
+## Phase 67: Enriched Upload System (MakerWorld-Inspired)
+- [x] Schema migration: headlineCaption, description, galleryImagesJson, playerAssetType, aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther, aiToolOtherName added to songs table
+- [x] Catch-up migration: all missing songs + users columns applied to production DB
+- [x] Single upload page: headline caption field, description field, AI Draft button (uses gallery images as visual context for LLM), gallery image upload with per-image captions, player asset type designation
+- [x] Batch upload page: album-level toggles (Album Art Across All, Album Art AI/Original), per-track AI disclosure radio (Original/HAAI/AI Assisted/AI Generated), per-track AI tool toggles (Suno 5+, Udio, Sonato, Other), per-track release date field, Repeat Across Tracks button in Batch Fill panel
+- [x] Song detail page: headline caption section, long-form description section, gallery grid (2-3 col, click to expand, per-image captions), clear visual separation from player/actions
+- [x] generateCaption router: upgraded to accept imageUrls array (up to 6), builds multimodal LLM message with image_url content blocks for richer description generation
