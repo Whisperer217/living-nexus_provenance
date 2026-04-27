@@ -283,7 +283,9 @@ export default function PlayerBar() {
           style={{
             top: "-26px",
             background: "#000000",
-            border: "1px solid rgba(196,154,40,0.25)",
+            borderTop: "1px solid rgba(196,154,40,0.25)",
+            borderLeft: "1px solid rgba(196,154,40,0.25)",
+            borderRight: "1px solid rgba(196,154,40,0.25)",
             borderBottom: "none",
             color: isExpanded ? "var(--ln-gold)" : "var(--ln-smoke)",
           }}
