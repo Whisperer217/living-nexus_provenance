@@ -3639,3 +3639,10 @@
 - [x] keeper_notes table applied to production manually
 - [x] SongDetailPage.tsx: "Apply Sovereign Stamp" button (owner-only, hidden once stamped)
 - [x] DashboardPage.tsx: Sovereign Stamp status badge in track list row (🔏 Stamped / Unstamped)
+
+## Phase 65: Custom Upload Slot Fix
+- [x] Root cause: hidden file `<input>` was inside `{isSelected}` conditional block — only mounted after card was clicked, so `fileInputRef.current` was null on first button press
+- [x] Fix: hoisted `<input ref={fileInputRef}>` above the skin grid so it is always mounted
+- [x] Removed duplicate `<input>` from inside the `isUpload` action button block
+- [x] Upload & Unlock button now correctly triggers the file picker on first click
+- [x] TypeScript: 0 errors
