@@ -1,5 +1,5 @@
 import {
-  int, mysqlEnum, mysqlTable, text, timestamp,
+  int, mysqlEnum, mysqlTable, text, timestamp, tinyint,
   varchar, float, boolean, json, uniqueIndex, index, bigint
 } from "drizzle-orm/mysql-core";
 
@@ -1389,3 +1389,30 @@ export const keeperNotes = mysqlTable("keeper_notes", {
 });
 export type KeeperNote = typeof keeperNotes.$inferSelect;
 export type InsertKeeperNote = typeof keeperNotes.$inferInsert;
+
+// ─── Keeper Character Sheets ──────────────────────────────────────────────────
+export const keeperCharacterSheets = mysqlTable("keeper_character_sheets", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  presetId: varchar("preset_id", { length: 64 }).notNull().default("the-witness"),
+  name: varchar("name", { length: 128 }).notNull().default("My Sheet"),
+  persona: text("persona"),
+  attributes: json("attributes"),
+  mediumContext: json("medium_context"),
+  isActive: tinyint("is_active").notNull().default(1),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
+});
+export type KeeperCharacterSheet = typeof keeperCharacterSheets.$inferSelect;
+export type InsertKeeperCharacterSheet = typeof keeperCharacterSheets.$inferInsert;
+
+// ─── Keeper Chat Archives ─────────────────────────────────────────────────────
+export const keeperChatArchives = mysqlTable("keeper_chat_archives", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  title: varchar("title", { length: 256 }).notNull().default("Untitled Session"),
+  messages: json("messages").notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
+});
+export type KeeperChatArchive = typeof keeperChatArchives.$inferSelect;
+export type InsertKeeperChatArchive = typeof keeperChatArchives.$inferInsert;

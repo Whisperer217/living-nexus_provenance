@@ -73,7 +73,7 @@ export default function KeeperCharacterSheet({ onClose }: { onClose?: () => void
   }, [sheetQuery.data]);
 
   const loadPreset = (presetId: string) => {
-    const preset = presets.find(p => p.id === presetId);
+    const preset = presets.find((p: any) => p.id === presetId);
     if (!preset) return;
     setSelectedPresetId(presetId);
     setSheet({
@@ -185,7 +185,7 @@ export default function KeeperCharacterSheet({ onClose }: { onClose?: () => void
             PRESET
           </div>
           <div className="grid grid-cols-2 gap-1.5">
-            {presets.map(p => (
+            {presets.map((p: any) => (
               <button
                 key={p.id}
                 onClick={() => loadPreset(p.id)}
