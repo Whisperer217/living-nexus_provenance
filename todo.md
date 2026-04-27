@@ -3638,6 +3638,11 @@
 - [x] Ensure all form fields (Title, Genre, BPM, Key, Album, ISRC, BMI, Mood Tags, Credits) are legible on dark mobile screens
 
 ## Phase 65: Full Production DB Migration
-- [ ] Apply full schema to production — create songs, tips, projects, playlists, comments, and all other missing tables
-- [ ] Verify all schema tables exist on production
-- [ ] Fix border/borderRight CSS shorthand conflict warning
+- [x] Apply full schema to production — create songs, tips, projects, playlists, comments, and all other missing tables
+- [x] Verify all schema tables exist on production
+- [x] Fix border/borderRight CSS shorthand conflict warning
+
+## Phase 66: GitHub Sync + Mobile Bug Fixes
+- [x] Push Phase 65 changes to GitHub (commit 26a1031 on main)
+- [x] Fix artist handle wrapping on mobile — add whitespace-nowrap + overflow-hidden + min-w-0 to HandleField display div
+- [x] Fix What's New modal not opening — wire mobile header bell to open WhatsNewModal; fix drawer "What's New" button; bump version label to v2.31.0
