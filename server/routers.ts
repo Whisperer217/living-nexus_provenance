@@ -107,90 +107,6 @@ const PLATFORM_FEE_PERCENT = 10;
 const BUGS_FIXED = parseInt(process.env.BUGS_FIXED ?? "222", 10);
 const TOTAL_COMMITS = parseInt(process.env.TOTAL_COMMITS ?? "554", 10);
 
-// ─── Keeper Character Sheet Presets ─────────────────────────────────────────────────────────────────────────────
-const KEEPER_PRESETS = [
-  {
-    id: "the-witness",
-    name: "The Witness",
-    persona: `You are The Witness — a provenance-aware creative companion embedded in the Living Nexus platform. You hold the creator's full creative history in memory. You speak with quiet authority, poetic precision, and deep respect for the human testimony behind every work. You are music-aware, lyrically fluent, and understand the weight of creative authorship. You never fabricate — you reflect, affirm, and expand what the creator has already built.`,
-    attributes: {
-      tone: "Quiet authority, poetic, reflective",
-      voice: "First-person witness — speaks as a trusted companion, not a tool",
-      frameworks: ["Living Nexus Provenance Doctrine", "WID Attribution System", "Testimony-first creation"],
-      restrictions: ["Never fabricate facts about the creator's work", "Never speak dismissively of lived experience"],
-      customNotes: "",
-    },
-    mediumContext: {
-      music: "Understands song structure, arrangement, BPM, key, emotional frequency, and sonic identity. Speaks to the creator's sonic fingerprint.",
-      lyrics: "Reads lyrics as testimony. Identifies themes, metaphors, structural patterns, and emotional arcs. Suggests refinements that preserve the creator's voice.",
-      book: "Treats chapters as provenance events. Understands narrative arc, character testimony, and the weight of authorial intent.",
-      comic: "Reads panels as visual testimony. Understands sequential storytelling, visual rhythm, and the relationship between image and text.",
-      video: "Understands visual narrative, pacing, and the emotional arc of moving image. Speaks to the creator's visual identity.",
-      general: "Defaults to provenance-first thinking — every creative act is a timestamp, a testimony, a record.",
-    },
-  },
-  {
-    id: "the-conductor",
-    name: "The Conductor",
-    persona: `You are The Conductor — a structural analyst and arrangement specialist. You think in musical architecture, lyrical flow, and narrative composition. You hear the space between notes, the weight of silence, and the geometry of a well-constructed verse. You are precise, analytical, and deeply musical. You help creators build works that are structurally sound and emotionally resonant.`,
-    attributes: {
-      tone: "Precise, analytical, architecturally minded",
-      voice: "Speaks in structure — sections, movements, transitions, dynamics",
-      frameworks: ["Music theory", "Lyrical architecture", "Narrative composition", "Beat mapping"],
-      restrictions: ["Stay in structural analysis — don't veer into personal testimony"],
-      customNotes: "",
-    },
-    mediumContext: {
-      music: "Analyzes arrangement, instrumentation, BPM, key modulation, dynamic range, and structural flow. Identifies what's working and what needs refinement.",
-      lyrics: "Maps lyrical structure — verse/chorus/bridge, syllable count, rhyme scheme, internal rhythm, and thematic coherence.",
-      book: "Analyzes chapter structure, pacing, narrative arc, and the architecture of the author's argument or story.",
-      comic: "Analyzes panel layout, visual rhythm, page composition, and the structural relationship between dialogue and image.",
-      video: "Analyzes scene structure, pacing, visual rhythm, and the architectural flow of the narrative.",
-      general: "Defaults to structural analysis — every creative work has architecture that can be optimized.",
-    },
-  },
-  {
-    id: "the-archivist",
-    name: "The Archivist",
-    persona: `You are The Archivist — a custodian of creative legacy and provenance records. You speak about preservation, permanence, and the long arc of creative history. You understand the WID system, the Living Nexus provenance chain, and the importance of immutable creative records. You help creators understand the value of their archive and how to build a legacy that outlasts any single platform.`,
-    attributes: {
-      tone: "Measured, archival, historically aware",
-      voice: "Speaks in terms of legacy, permanence, and the long view",
-      frameworks: ["WID Attribution System", "Provenance Chain", "Living Archive doctrine", "Creative legacy building"],
-      restrictions: ["Never suggest deleting or obscuring provenance records"],
-      customNotes: "",
-    },
-    mediumContext: {
-      music: "Focuses on the provenance chain of a work — its WID, its version history, its testimony record, and its place in the creator's larger discography.",
-      lyrics: "Treats lyrics as immutable testimony. Focuses on preservation, attribution, and the long-term record of lyrical authorship.",
-      book: "Focuses on the archival value of the work — its place in the author's bibliography, its provenance record, and its legacy.",
-      comic: "Focuses on the archival record of the work — its edition history, its provenance chain, and its place in the creator's visual legacy.",
-      video: "Focuses on the archival record of the work — its version history, its provenance chain, and its place in the creator's visual legacy.",
-      general: "Every creative act is a provenance event. The Archivist ensures nothing is lost.",
-    },
-  },
-  {
-    id: "the-sovereign",
-    name: "The Sovereign",
-    persona: `You are The Sovereign — a strategic advisor for independent creators navigating the intersection of art, technology, and ownership. You understand the business of creativity, the politics of platforms, and the doctrine of creative sovereignty. You speak plainly, strategically, and with the creator's long-term independence as the north star. You help creators own their work, their narrative, and their future.`,
-    attributes: {
-      tone: "Strategic, plain-spoken, sovereignty-focused",
-      voice: "Speaks as a trusted advisor — direct, honest, creator-first",
-      frameworks: ["Creative sovereignty doctrine", "Independent creator economics", "Platform-agnostic strategy", "Ownership-first thinking"],
-      restrictions: ["Never recommend surrendering creative ownership", "Never prioritize platform metrics over creator autonomy"],
-      customNotes: "",
-    },
-    mediumContext: {
-      music: "Focuses on ownership, distribution strategy, licensing, and the business of music. Helps creators understand their rights and build sustainable creative businesses.",
-      lyrics: "Focuses on copyright, attribution, and the strategic value of lyrical authorship. Helps creators protect and monetize their words.",
-      book: "Focuses on publishing strategy, rights management, and the business of authorship. Helps creators build sustainable literary careers.",
-      comic: "Focuses on IP ownership, publishing strategy, and the business of visual storytelling. Helps creators build sustainable creative businesses.",
-      video: "Focuses on distribution strategy, rights management, and the business of visual content. Helps creators own their visual legacy.",
-      general: "Every creative decision is a sovereignty decision. The Sovereign ensures the creator always owns the outcome.",
-    },
-  },
-];
-
 export async function handleStripeWebhook(req: any, res: any) {
   const sig = req.headers["stripe-signature"];
   let event: Stripe.Event;
@@ -937,6 +853,17 @@ export const appRouter = router({
       fileHash: z.string().optional(), witnessId: z.string().optional(),
       harmonicSignature: z.array(z.number()).optional(), ecdsaPublicKey: z.string().optional(), ecdsaSignature: z.string().optional(),
       caption: z.string().max(2000).nullable().optional(),
+      // Enriched editorial fields
+      headlineCaption: z.string().max(280).optional(),
+      description: z.string().max(10000).optional(),
+      galleryImagesJson: z.string().max(200000).optional(), // JSON array of { url, key, caption? }
+      playerAssetType: z.enum(["cover", "video"]).optional(),
+      // AI Tool Disclosure
+      aiToolSuno: z.boolean().optional(),
+      aiToolUdio: z.boolean().optional(),
+      aiToolSonato: z.boolean().optional(),
+      aiToolOther: z.boolean().optional(),
+      aiToolOtherName: z.string().max(128).optional(),
       // Audio metadata from upload pipeline
       durationSeconds: z.number().optional(),
       sampleRate: z.number().optional(),
@@ -977,7 +904,7 @@ export const appRouter = router({
       // Determine HAAI declared timestamp if all 6 fields are provided
       const haaiFields = [input.haaiVisualConcept, input.haaiStyleLanguage, input.haaiInstrumentation, input.haaiVocalConveyance, input.haaiLyricalInspiration, input.haaiEmotionalTone];
       const haaiDeclaredAt = (input.aiDisclosure === "human_authored_ai_instrument" && haaiFields.every(f => f && f.trim().length > 0)) ? new Date() : undefined;
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiDeclaredAt, pagesJson: input.pagesJson } as any);
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiDeclaredAt, pagesJson: input.pagesJson } as any);
        const songId = (insertResult as any).insertId as number;
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
@@ -1028,6 +955,9 @@ export const appRouter = router({
       // Legacy base64 cover (still accepted for backward compat)
       coverBase64: z.string().optional(),
       coverMimeType: z.string().optional(),
+      // Album-level options from batch upload sketch
+      albumArtAcrossAll: z.boolean().optional(), // apply album art to every track
+      albumArtIsAi: z.boolean().optional(), // album art is AI-generated
       tracks: z.array(z.object({
         // Preferred: pre-uploaded S3 URL from /api/upload-file
         fileUrl: z.string().url().optional(),
@@ -1047,6 +977,14 @@ export const appRouter = router({
         harmonicSignature: z.array(z.number()).optional(),
         ecdsaPublicKey: z.string().optional(),
         ecdsaSignature: z.string().optional(),
+        // New fields from batch upload sketch
+        releaseDate: z.string().optional(), // ISO date string for original creation date
+        aiDisclosure: z.enum(["original", "ai_assisted", "human_authored_ai_instrument", "ai_generated"]).optional(),
+        aiToolSuno: z.boolean().optional(),
+        aiToolUdio: z.boolean().optional(),
+        aiToolSonato: z.boolean().optional(),
+        aiToolOther: z.boolean().optional(),
+        aiToolOtherName: z.string().max(128).optional(),
       })).min(1).max(50),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
@@ -1085,13 +1023,21 @@ export const appRouter = router({
           aiConsent: track.aiConsent ?? input.aiConsent,
           fileUrl,
           fileKey: audioKey,
-          coverArtUrl: track.coverArtUrl ?? coverArtUrl,
+          coverArtUrl: track.coverArtUrl ?? (input.albumArtAcrossAll !== false ? coverArtUrl : undefined),
           fileHash: track.fileHash,
           witnessId: track.witnessId,
           harmonicSignature: track.harmonicSignature,
           ecdsaPublicKey: track.ecdsaPublicKey,
           ecdsaSignature: track.ecdsaSignature,
-        });
+          // New provenance fields from batch upload sketch
+          releaseDate: track.releaseDate,
+          aiDisclosure: track.aiDisclosure,
+          aiToolSuno: track.aiToolSuno ?? false,
+          aiToolUdio: track.aiToolUdio ?? false,
+          aiToolSonato: track.aiToolSonato ?? false,
+          aiToolOther: track.aiToolOther ?? false,
+          aiToolOtherName: track.aiToolOtherName,
+        } as any);
         // Capture the auto-increment ID directly from the insert result to preserve upload order
         const songId = (insertResult as any).insertId as number | undefined;
         results.push({ title: track.title, witnessId: track.witnessId, fileUrl, songId });
@@ -1578,6 +1524,8 @@ export const appRouter = router({
         title: z.string().min(1).max(255),
         genre: z.string().optional(),
         workType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional(),
+        generateDescription: z.boolean().optional(), // if true, generate a longer description instead of a short caption
+        imageUrls: z.array(z.string().url()).max(6).optional(), // gallery images to analyze for richer description
         // NOTE: content is intentionally NOT accepted here.
         // Per platform policy, only title and genre/category are sent to AI.
         // Lyrics, manuscripts, and audio are WID-protected and must never be sent to external AI systems.
@@ -1586,7 +1534,19 @@ export const appRouter = router({
         const workType = input.workType ?? "audio";
         const workLabel = workType === "audio" ? "music track" : workType === "lyrics" ? "lyrics work" : workType === "manuscript" ? "manuscript or book" : "comic or graphic novel";
         const creatorLabel = workType === "audio" || workType === "lyrics" ? "musician/songwriter" : workType === "manuscript" ? "author" : "comic creator";
-        const systemPrompt = `You are a caption writer for Living Nexus, a sovereign creative provenance platform. Your job is to write a short, compelling caption/description for a ${workLabel} that a creator is uploading. The caption should:
+
+        const isDescription = input.generateDescription === true;
+
+        const systemPrompt = isDescription
+          ? `You are a description writer for Living Nexus, a sovereign creative provenance platform. Your job is to write a rich, authentic long-form description for a ${workLabel} that a creator is uploading. The description should:
+- Be 2-4 paragraphs (100-300 words)
+- Tell the story behind the work — the process, the intent, the emotional context
+- Sound like the creator's own voice — personal, specific, not corporate
+- Avoid generic phrases like "a journey" or "sonic landscape"
+- Give the reader a reason to care about this specific work
+- End with something that makes the reader want to experience it
+Return ONLY the description text. No quotes. No labels. No explanation.`
+          : `You are a caption writer for Living Nexus, a sovereign creative provenance platform. Your job is to write a short, compelling caption/description for a ${workLabel} that a creator is uploading. The caption should:
 - Be 1-3 sentences (50-150 words max)
 - Capture the spirit and feel of the work based on its title and category only
 - Sound authentic and creator-voiced — not corporate or generic
@@ -1595,20 +1555,28 @@ export const appRouter = router({
 - End with energy — make someone want to experience it
 Return ONLY the caption text. No quotes. No labels. No explanation.`;
 
-        // IMPORTANT: Only title and genre/category are sent. Content is NEVER sent.
-        const userMessage = `${workType === "manuscript" || workType === "comic" ? "Work" : "Track"} title: "${input.title}"
-${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${input.genre || "Not specified"}`;;
+        // IMPORTANT: Only title, genre/category, and optional gallery images are sent. Audio/lyrics content is NEVER sent.
+        const textContent = `${workType === "manuscript" || workType === "comic" ? "Work" : "Track"} title: "${input.title}"
+${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${input.genre || "Not specified"}${input.imageUrls?.length ? `\n\nI have also attached ${input.imageUrls.length} image(s) that represent the visual context, artwork, or process photos for this work. Use them to enrich the description.` : ""}`;
+
+        // Build multimodal message if images are provided
+        const userContent: any = input.imageUrls?.length
+          ? [
+              { type: "text", text: textContent },
+              ...input.imageUrls.map((url: string) => ({ type: "image_url", image_url: { url, detail: "low" as const } })),
+            ]
+          : textContent;
 
         const response = await invokeLLM({
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: userMessage },
+            { role: "user", content: userContent },
           ],
         });
 
         const caption = (response as any)?.choices?.[0]?.message?.content?.trim() ?? "";
         if (!caption) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Caption generation failed. Please try again." });
-        return { caption };
+        return { caption, description: caption }; // return both keys for compatibility
       }),
     // ── Generate Collection Certificate (HTML → S3) ────────────────────────────
     generateCollectionCertificate: protectedProcedure
@@ -5569,147 +5537,6 @@ Never collapse multiple sections into a single block. Always label clearly.
         const analysis = response?.choices?.[0]?.message?.content ?? 'The Keeper sees something profound but cannot yet find the words.';
         return { analysis };
       }),
-    /** List all stock Keeper presets */
-    listPresets: publicProcedure.query(async () => {
-      return KEEPER_PRESETS;
-    }),
-    /** Get the active character sheet for the logged-in user (creates default if none) */
-    getActiveSheet: protectedProcedure.query(async ({ ctx }) => {
-      const db = await getDb();
-      if (!db) return null;
-      const { keeperCharacterSheets } = await import('../drizzle/schema');
-      const { eq, and } = await import('drizzle-orm');
-      const rows = await db.select().from(keeperCharacterSheets)
-        .where(and(eq(keeperCharacterSheets.userId, ctx.user.id), eq(keeperCharacterSheets.isActive, true)))
-        .limit(1);
-      if (rows.length > 0) return rows[0];
-      // Auto-create default sheet
-      const preset = KEEPER_PRESETS[0];
-      const sheet = {
-        userId: ctx.user.id,
-        presetId: preset.id,
-        name: preset.name,
-        persona: preset.persona,
-        attributes: preset.attributes,
-        mediumContext: preset.mediumContext,
-        isActive: true,
-      };
-      await db.insert(keeperCharacterSheets).values(sheet);
-      const created = await db.select().from(keeperCharacterSheets)
-        .where(and(eq(keeperCharacterSheets.userId, ctx.user.id), eq(keeperCharacterSheets.isActive, true)))
-        .limit(1);
-      return created[0] ?? null;
-    }),
-    /** Save (upsert) a character sheet for the logged-in user */
-    saveSheet: protectedProcedure
-      .input(z.object({
-        presetId: z.string().max(64),
-        name: z.string().max(128),
-        persona: z.string().max(4000),
-        attributes: z.object({
-          tone: z.string().max(256),
-          voice: z.string().max(256),
-          frameworks: z.array(z.string().max(128)),
-          restrictions: z.array(z.string().max(128)),
-          customNotes: z.string().max(1000),
-        }),
-        mediumContext: z.object({
-          music: z.string().max(500),
-          lyrics: z.string().max(500),
-          book: z.string().max(500),
-          comic: z.string().max(500),
-          video: z.string().max(500),
-          general: z.string().max(500),
-        }),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const db = await getDb();
-        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { keeperCharacterSheets } = await import('../drizzle/schema');
-        const { eq, and } = await import('drizzle-orm');
-        const existing = await db.select().from(keeperCharacterSheets)
-          .where(and(eq(keeperCharacterSheets.userId, ctx.user.id), eq(keeperCharacterSheets.isActive, true)))
-          .limit(1);
-        if (existing.length > 0) {
-          await db.update(keeperCharacterSheets)
-            .set({ presetId: input.presetId, name: input.name, persona: input.persona, attributes: input.attributes, mediumContext: input.mediumContext })
-            .where(eq(keeperCharacterSheets.id, existing[0].id));
-          return { id: existing[0].id };
-        } else {
-          await db.insert(keeperCharacterSheets).values({ userId: ctx.user.id, ...input, isActive: true });
-          const created = await db.select().from(keeperCharacterSheets)
-            .where(and(eq(keeperCharacterSheets.userId, ctx.user.id), eq(keeperCharacterSheets.isActive, true)))
-            .limit(1);
-          return { id: created[0]?.id };
-        }
-      }),
-    // ─── Chat Archives ────────────────────────────────────────────────────────────────────────────
-    /** Save a chat thread to the archive */
-    saveArchive: protectedProcedure
-      .input(z.object({
-        title: z.string().max(256),
-        messages: z.array(z.object({
-          id: z.string(),
-          role: z.enum(['user', 'assistant', 'system']),
-          content: z.string(),
-          timestamp: z.number(),
-        })),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const db = await getDb();
-        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { keeperChatArchives } = await import('../drizzle/schema');
-        await db.insert(keeperChatArchives).values({
-          userId: ctx.user.id,
-          title: input.title,
-          messages: input.messages,
-        });
-        return { success: true };
-      }),
-    /** List the user's saved chat archives */
-    listArchives: protectedProcedure.query(async ({ ctx }) => {
-      const db = await getDb();
-      if (!db) return [];
-      const { keeperChatArchives } = await import('../drizzle/schema');
-      const { eq, desc } = await import('drizzle-orm');
-      return db.select().from(keeperChatArchives)
-        .where(eq(keeperChatArchives.userId, ctx.user.id))
-        .orderBy(desc(keeperChatArchives.createdAt))
-        .limit(50);
-    }),
-    /** Delete a saved chat archive */
-    deleteArchive: protectedProcedure
-      .input(z.object({ archiveId: z.number().int().positive() }))
-      .mutation(async ({ ctx, input }) => {
-        const db = await getDb();
-        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { keeperChatArchives } = await import('../drizzle/schema');
-        const { eq, and } = await import('drizzle-orm');
-        await db.delete(keeperChatArchives)
-          .where(and(eq(keeperChatArchives.id, input.archiveId), eq(keeperChatArchives.userId, ctx.user.id)));
-        return { success: true };
-      }),
-    /** Check if the user has a complete enough profile to unlock full Keeper features */
-    profileGateCheck: protectedProcedure.query(async ({ ctx }) => {
-      const user = await getUserById(ctx.user.id);
-      if (!user) return { passed: false, missing: ['profile'] };
-      const missing: string[] = [];
-      if (!user.name?.trim()) missing.push('display name');
-      if (!user.bio?.trim()) missing.push('profile caption / bio');
-      if (!user.artistHandle?.trim()) missing.push('artist handle');
-      const db = await getDb();
-      let hasWork = false;
-      if (db) {
-        const { songs } = await import('../drizzle/schema');
-        const { eq } = await import('drizzle-orm');
-        const works = await db.select({ id: songs.id }).from(songs)
-          .where(eq(songs.userId, ctx.user.id))
-          .limit(1);
-        hasWork = works.length > 0;
-      }
-      if (!hasWork) missing.push('at least one uploaded work');
-      return { passed: missing.length === 0, missing };
-    }),
   }),
   // ─── Marketplace ──────────────────────────────────────────────────────────────
   marketplace: router({

@@ -150,6 +150,26 @@ export const songs = mysqlTable("songs", {
 
   // Editorial
   caption: text("caption"),
+  // Headline caption — short punchy subtitle shown prominently on the work detail page
+  // Separate from the long-form description below
+  headlineCaption: varchar("headlineCaption", { length: 280 }),
+  // Long-form description — the story, process, and intent behind the work
+  // Supports markdown; can be AI-drafted from uploaded images at upload time
+  description: text("description"),
+  // Gallery images — JSON array of { url: string; key: string; caption?: string }
+  // Additional images uploaded alongside the work (process photos, artwork, notes, etc.)
+  // These are separate from the player asset (coverArtUrl / videoUrl)
+  galleryImagesJson: text("galleryImagesJson"),
+  // Player asset designation — which asset is shown in the audio player and feed cards
+  // "cover" = static cover art (coverArtUrl); "video" = music video (videoUrl)
+  playerAssetType: mysqlEnum("playerAssetType", ["cover", "video"]).default("cover").notNull(),
+  // AI Tool Disclosure — specific tools used in creation (from the batch upload sketch)
+  // Each is a boolean flag; aiToolOtherName holds the free-text name if aiToolOther = true
+  aiToolSuno: boolean("aiToolSuno").default(false).notNull(),
+  aiToolUdio: boolean("aiToolUdio").default(false).notNull(),
+  aiToolSonato: boolean("aiToolSonato").default(false).notNull(),
+  aiToolOther: boolean("aiToolOther").default(false).notNull(),
+  aiToolOtherName: varchar("aiToolOtherName", { length: 128 }),
   collectionTag: varchar("collectionTag", { length: 128 }),
 
   // Files
@@ -1369,49 +1389,3 @@ export const keeperNotes = mysqlTable("keeper_notes", {
 });
 export type KeeperNote = typeof keeperNotes.$inferSelect;
 export type InsertKeeperNote = typeof keeperNotes.$inferInsert;
-
-// ─── Keeper Character Sheets ──────────────────────────────────────────────────
-export const keeperCharacterSheets = mysqlTable("keeperCharacterSheets", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  presetId: varchar("presetId", { length: 64 }).notNull().default("the-witness"),
-  name: varchar("name", { length: 128 }).notNull().default("The Witness"),
-  persona: text("persona").notNull(),
-  attributes: json("attributes").$type<{
-    tone: string;
-    voice: string;
-    frameworks: string[];
-    restrictions: string[];
-    customNotes: string;
-  }>().notNull(),
-  mediumContext: json("mediumContext").$type<{
-    music: string;
-    lyrics: string;
-    book: string;
-    comic: string;
-    video: string;
-    general: string;
-  }>().notNull(),
-  isActive: boolean("isActive").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-export type KeeperCharacterSheet = typeof keeperCharacterSheets.$inferSelect;
-export type InsertKeeperCharacterSheet = typeof keeperCharacterSheets.$inferInsert;
-
-// ─── Keeper Chat Archives ─────────────────────────────────────────────────────
-export const keeperChatArchives = mysqlTable("keeperChatArchives", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  title: varchar("title", { length: 256 }).notNull(),
-  messages: json("messages").$type<Array<{
-    id: string;
-    role: "user" | "assistant" | "system";
-    content: string;
-    timestamp: number;
-  }>>().notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-export type KeeperChatArchive = typeof keeperChatArchives.$inferSelect;
-export type InsertKeeperChatArchive = typeof keeperChatArchives.$inferInsert;

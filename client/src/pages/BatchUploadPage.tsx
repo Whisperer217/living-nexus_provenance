@@ -86,11 +86,26 @@ interface TrackCard {
   expanded: boolean;
   audioDragging: boolean;
   coverDragging: boolean;
+  // New provenance fields from batch upload sketch
+  releaseDate: string;
+  aiDisclosure: "original" | "ai_assisted" | "human_authored_ai_instrument" | "ai_generated";
+  aiToolSuno: boolean;
+  aiToolUdio: boolean;
+  aiToolSonato: boolean;
+  aiToolOther: boolean;
+  aiToolOtherName: string;
 }
 
 function makeEmptyCard(overrides?: Partial<TrackCard>): TrackCard {
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    releaseDate: "",
+    aiDisclosure: "original",
+    aiToolSuno: false,
+    aiToolUdio: false,
+    aiToolSonato: false,
+    aiToolOther: false,
+    aiToolOtherName: "",
     audioFile: null,
     audioStatus: "empty",
     coverFile: null,
@@ -366,8 +381,79 @@ function TrackCardUI({
                     ))}
                   </SelectContent>
                 </Select>
+
+              {/* Release Date */}
+              <div>
+                <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "var(--ln-parchment)" }}>Original Creation Date</label>
+                <Input
+                  type="date"
+                  value={card.releaseDate}
+                  onChange={e => onChange(card.id, { releaseDate: e.target.value })}
+                  className="h-9 text-sm"
+                  style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: card.releaseDate ? "#FFFFFF" : "var(--ln-iron)", colorScheme: "dark" }}
+                />
               </div>
+
+              {/* AI Disclosure */}
+              <div>
+                <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "var(--ln-parchment)" }}>AI Disclosure</label>
+                <div className="flex flex-col gap-1.5">
+                  {([
+                    { value: "original", label: "Original" },
+                    { value: "human_authored_ai_instrument", label: "HAAI" },
+                    { value: "ai_assisted", label: "AI Assisted" },
+                    { value: "ai_generated", label: "AI Generated" },
+                  ] as const).map(opt => (
+                    <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={`aiDisclosure-${card.id}`}
+                        value={opt.value}
+                        checked={card.aiDisclosure === opt.value}
+                        onChange={() => onChange(card.id, { aiDisclosure: opt.value })}
+                        className="accent-yellow-500"
+                      />
+                      <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Tool Toggles */}
+              {(card.aiDisclosure === "ai_assisted" || card.aiDisclosure === "human_authored_ai_instrument" || card.aiDisclosure === "ai_generated") && (
+                <div>
+                  <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "var(--ln-parchment)" }}>AI Tools Used</label>
+                  <div className="flex flex-col gap-1.5">
+                    {([
+                      { key: "aiToolSuno" as const, label: "Suno 5+" },
+                      { key: "aiToolUdio" as const, label: "Udio" },
+                      { key: "aiToolSonato" as const, label: "Sonato" },
+                      { key: "aiToolOther" as const, label: "Other" },
+                    ]).map(tool => (
+                      <label key={tool.key} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={card[tool.key]}
+                          onChange={e => onChange(card.id, { [tool.key]: e.target.checked })}
+                          className="accent-yellow-500"
+                        />
+                        <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>{tool.label}</span>
+                      </label>
+                    ))}
+                    {card.aiToolOther && (
+                      <Input
+                        placeholder="Name the tool"
+                        value={card.aiToolOtherName}
+                        onChange={e => onChange(card.id, { aiToolOtherName: e.target.value })}
+                        className="h-8 text-xs mt-1"
+                        style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#FFFFFF" }}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+          </div>
 
             {/* Right: per-track cover art */}
             <div className="flex flex-col gap-2">
@@ -451,6 +537,16 @@ export default function BatchUploadPage() {
   const [batchFillOpen, setBatchFillOpen] = useState(false);
   const [batchGenre, setBatchGenre] = useState("");
   const [batchAiConsent, setBatchAiConsent] = useState<TrackCard["aiConsent"]>("prohibited");
+
+  // Album-level sketch options
+  const [albumArtAcrossAll, setAlbumArtAcrossAll] = useState(true);
+  const [albumArtIsAi, setAlbumArtIsAi] = useState(false);
+  const [batchAiDisclosure, setBatchAiDisclosure] = useState<TrackCard["aiDisclosure"]>("original");
+  const [batchAiToolSuno, setBatchAiToolSuno] = useState(false);
+  const [batchAiToolUdio, setBatchAiToolUdio] = useState(false);
+  const [batchAiToolSonato, setBatchAiToolSonato] = useState(false);
+  const [batchAiToolOther, setBatchAiToolOther] = useState(false);
+  const [batchAiToolOtherName, setBatchAiToolOtherName] = useState("");
 
   const [cards, setCards] = useState<TrackCard[]>([makeEmptyCard()]);
   const [isUploading, setIsUploading] = useState(false);
@@ -541,6 +637,19 @@ export default function BatchUploadPage() {
     setBatchFillOpen(false);
   };
 
+  const repeatDisclosureAcrossAll = () => {
+    setCards(prev => prev.map(c => ({
+      ...c,
+      aiDisclosure: batchAiDisclosure,
+      aiToolSuno: batchAiToolSuno,
+      aiToolUdio: batchAiToolUdio,
+      aiToolSonato: batchAiToolSonato,
+      aiToolOther: batchAiToolOther,
+      aiToolOtherName: batchAiToolOtherName,
+    })));
+    toast.success("AI disclosure repeated across all tracks");
+  };
+
   const handleSubmit = async () => {
     if (!albumName.trim()) { toast.error("Album / collection name is required"); return; }
     const readyCards = cards.filter(c => c.audioStatus === "ready" && c.audioFile);
@@ -561,6 +670,10 @@ export default function BatchUploadPage() {
         title: string; genre?: string; aiConsent: TrackCard["aiConsent"];
         fileHash?: string; witnessId?: string;
         harmonicSignature?: number[]; ecdsaPublicKey?: string; ecdsaSignature?: string;
+        releaseDate?: string;
+        aiDisclosure?: TrackCard["aiDisclosure"];
+        aiToolSuno?: boolean; aiToolUdio?: boolean; aiToolSonato?: boolean;
+        aiToolOther?: boolean; aiToolOtherName?: string;
       }[] = [];
 
       for (const card of readyCards) {
@@ -583,6 +696,14 @@ export default function BatchUploadPage() {
           harmonicSignature: card.harmonicSignature,
           ecdsaPublicKey: card.ecdsaPublicKey,
           ecdsaSignature: card.ecdsaSignature,
+          // New provenance fields from batch upload sketch
+          releaseDate: card.releaseDate || undefined,
+          aiDisclosure: card.aiDisclosure,
+          aiToolSuno: card.aiToolSuno,
+          aiToolUdio: card.aiToolUdio,
+          aiToolSonato: card.aiToolSonato,
+          aiToolOther: card.aiToolOther,
+          aiToolOtherName: card.aiToolOtherName || undefined,
         });
       }
 
@@ -818,6 +939,46 @@ export default function BatchUploadPage() {
         </div>
       </div>
 
+      {/* Album-level sketch options */}
+      <div
+        className="p-4 space-y-3"
+        style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
+      >
+        <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>Album Options</p>
+        <div className="flex flex-wrap gap-6">
+          {/* Album Art Across All */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <div
+              onClick={() => setAlbumArtAcrossAll(v => !v)}
+              className="relative w-10 h-5 rounded-full transition-colors cursor-pointer"
+              style={{ background: albumArtAcrossAll ? "#C49A28" : "#3a3a3a" }}
+            >
+              <div
+                className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+                style={{ transform: albumArtAcrossAll ? "translateX(22px)" : "translateX(2px)" }}
+              />
+            </div>
+            <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>Album Art Across All</span>
+          </label>
+          {/* Album Art AI/Original */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <div
+              onClick={() => setAlbumArtIsAi(v => !v)}
+              className="relative w-10 h-5 rounded-full transition-colors cursor-pointer"
+              style={{ background: albumArtIsAi ? "#C49A28" : "#3a3a3a" }}
+            >
+              <div
+                className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+                style={{ transform: albumArtIsAi ? "translateX(22px)" : "translateX(2px)" }}
+              />
+            </div>
+            <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>
+              Album Art: <span style={{ color: albumArtIsAi ? "#C49A28" : "#4ade80" }}>{albumArtIsAi ? "AI" : "Original"}</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
       {/* Batch fill panel */}
       <div
         className="rounded-2xl overflow-hidden"
@@ -883,6 +1044,63 @@ export default function BatchUploadPage() {
                 </Select>
               </div>
             </div>
+            {/* AI Disclosure batch */}
+            <div className="border-t pt-3" style={{ borderColor: "rgba(196,154,40,0.2)" }}>
+              <p className="text-[10px] mb-2 font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>AI Disclosure (Repeat Across Tracks)</p>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {([
+                  { value: "original", label: "Original" },
+                  { value: "human_authored_ai_instrument", label: "HAAI" },
+                  { value: "ai_assisted", label: "AI Assisted" },
+                  { value: "ai_generated", label: "AI Generated" },
+                ] as const).map(opt => (
+                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="batchAiDisclosure"
+                      value={opt.value}
+                      checked={batchAiDisclosure === opt.value}
+                      onChange={() => setBatchAiDisclosure(opt.value)}
+                      className="accent-yellow-500"
+                    />
+                    <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+              {(batchAiDisclosure === "ai_assisted" || batchAiDisclosure === "human_authored_ai_instrument" || batchAiDisclosure === "ai_generated") && (
+                <div className="flex flex-wrap gap-3 mb-2">
+                  {([
+                    { key: "batchAiToolSuno" as const, setter: setBatchAiToolSuno, val: batchAiToolSuno, label: "Suno 5+" },
+                    { key: "batchAiToolUdio" as const, setter: setBatchAiToolUdio, val: batchAiToolUdio, label: "Udio" },
+                    { key: "batchAiToolSonato" as const, setter: setBatchAiToolSonato, val: batchAiToolSonato, label: "Sonato" },
+                    { key: "batchAiToolOther" as const, setter: setBatchAiToolOther, val: batchAiToolOther, label: "Other" },
+                  ]).map(tool => (
+                    <label key={tool.key} className="flex items-center gap-1.5 cursor-pointer">
+                      <input type="checkbox" checked={tool.val} onChange={e => tool.setter(e.target.checked)} className="accent-yellow-500" />
+                      <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>{tool.label}</span>
+                    </label>
+                  ))}
+                  {batchAiToolOther && (
+                    <Input
+                      placeholder="Name the tool"
+                      value={batchAiToolOtherName}
+                      onChange={e => setBatchAiToolOtherName(e.target.value)}
+                      className="h-7 text-xs w-full"
+                      style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#FFFFFF" }}
+                    />
+                  )}
+                </div>
+              )}
+              <Button
+                onClick={repeatDisclosureAcrossAll}
+                size="sm"
+                variant="outline"
+                className="gap-2 text-xs"
+                style={{ border: "1px solid rgba(196,154,40,0.4)", color: "var(--ln-gold)" }}
+              >
+                Repeat Across Tracks
+              </Button>
+            </div>
             <Button
               onClick={applyBatchFill}
               size="sm"
@@ -893,7 +1111,7 @@ export default function BatchUploadPage() {
                 border: "1px solid rgba(196,154,40,0.25)",
               }}
             >
-              <Sparkles size={13} /> Apply to All Tracks
+              <Sparkles size={13} /> Apply Genre & Consent to All
             </Button>
           </div>
         )}

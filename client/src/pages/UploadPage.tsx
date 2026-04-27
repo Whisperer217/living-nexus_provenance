@@ -193,6 +193,19 @@ export default function UploadPage() {
   const [caption, setCaption] = useState("");
   const [captionSuggestion, setCaptionSuggestion] = useState<string | null>(null);
   const [captionState, setCaptionState] = useState<"idle" | "loading" | "suggested" | "accepted">("idle");
+  // Enriched editorial fields
+  const [headlineCaption, setHeadlineCaption] = useState("");
+  const [description, setDescription] = useState("");
+  const [galleryImages, setGalleryImages] = useState<{ url: string; key: string; caption: string }[]>([]);
+  const [playerAssetType, setPlayerAssetType] = useState<"cover" | "video">("cover");
+  // AI Tool Disclosure toggles
+  const [aiToolSuno, setAiToolSuno] = useState(false);
+  const [aiToolUdio, setAiToolUdio] = useState(false);
+  const [aiToolSonato, setAiToolSonato] = useState(false);
+  const [aiToolOther, setAiToolOther] = useState(false);
+  const [aiToolOtherName, setAiToolOtherName] = useState("");
+  const [descriptionGenerating, setDescriptionGenerating] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadMode, setUploadMode] = useState<"audio" | "lyrics" | "manuscript" | "comic">("audio");
   const [documentFile, setDocumentFile] = useState<File | null>(null);
@@ -579,6 +592,12 @@ export default function UploadPage() {
           isrc: isrc || undefined, aiConsent, ownershipStatus, moodTags: selectedMoods, coWriters: [],
           creditsJson: mergedCredits.length > 0 ? JSON.stringify(mergedCredits) : undefined,
           caption: caption || undefined,
+          headlineCaption: headlineCaption || undefined,
+          description: description || undefined,
+          galleryImagesJson: galleryImages.length > 0 ? JSON.stringify(galleryImages) : undefined,
+          playerAssetType,
+          aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
+          aiToolOtherName: aiToolOtherName || undefined,
           contentType: uploadMode,
           fileHash: witnessData?.fileHash, witnessId: witnessData?.wid,
           harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
@@ -614,6 +633,12 @@ export default function UploadPage() {
           harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
           ecdsaSignature: witnessData?.signature,
           caption: caption || undefined,
+          headlineCaption: headlineCaption || undefined,
+          description: description || undefined,
+          galleryImagesJson: galleryImages.length > 0 ? JSON.stringify(galleryImages) : undefined,
+          playerAssetType,
+          aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
+          aiToolOtherName: aiToolOtherName || undefined,
           aiDisclosure,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
         } as any);
@@ -647,6 +672,12 @@ export default function UploadPage() {
         harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
         ecdsaSignature: witnessData?.signature,
         caption: caption || undefined,
+        headlineCaption: headlineCaption || undefined,
+        description: description || undefined,
+        galleryImagesJson: galleryImages.length > 0 ? JSON.stringify(galleryImages) : undefined,
+        playerAssetType,
+        aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
+        aiToolOtherName: aiToolOtherName || undefined,
         // Audio metadata from upload pipeline
         durationSeconds: pipelineMeta?.durationSeconds,
         sampleRate: pipelineMeta?.sampleRate,
@@ -1081,6 +1112,127 @@ export default function UploadPage() {
                   style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.40)", color: "var(--ln-parchment)" }} />
               </div>
 
+              {/* ── Headline Caption ── */}
+              <div>
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "#B8A88A" }}>Headline Caption <span style={{ color: "var(--ln-iron)" }}>(optional — short punchy subtitle)</span></label>
+                <Input value={headlineCaption} onChange={e => setHeadlineCaption(e.target.value)}
+                  placeholder="e.g. A midnight confession in three chords"
+                  maxLength={120}
+                  style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.30)", color: "var(--ln-parchment)" }} />
+                {headlineCaption && <p className="text-[10px] mt-1" style={{ color: "var(--ln-iron)" }}>{headlineCaption.length}/120</p>}
+              </div>
+
+              {/* ── Description with AI Generator ── */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium" style={{ color: "#B8A88A" }}>Description <span style={{ color: "var(--ln-iron)" }}>(optional — the story behind the work)</span></label>
+                  <button
+                    type="button"
+                    disabled={descriptionGenerating || !title}
+                    onClick={async () => {
+                      if (!title) { toast.error("Add a title first"); return; }
+                      setDescriptionGenerating(true);
+                      try {
+                        const res = await fetch("/api/trpc/songs.generateCaption", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ json: { title, genre: genre || undefined, workType: uploadMode === "manuscript" ? "manuscript" : uploadMode === "comic" ? "comic" : uploadMode === "lyrics" ? "lyrics" : "audio", generateDescription: true, imageUrls: galleryImages.slice(0, 6).map(img => img.url) } }),
+                        });
+                        const data = await res.json();
+                        const text = data?.result?.data?.json?.caption || data?.result?.data?.json?.description || "";
+                        if (text) { setDescription(text); toast.success("Description drafted — edit as needed"); }
+                        else toast.error("Could not generate description");
+                      } catch { toast.error("Generation failed"); }
+                      finally { setDescriptionGenerating(false); }
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                    style={{ background: descriptionGenerating ? "rgba(196,154,40,0.06)" : "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)", color: descriptionGenerating ? "#B8A88A" : "var(--ln-gold)", opacity: !title ? 0.5 : 1 }}
+                  >
+                    {descriptionGenerating ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+                    {descriptionGenerating ? "Drafting..." : "AI Draft"}
+                  </button>
+                </div>
+                <Textarea
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  placeholder="Tell the story behind this work — the process, the intent, the moment it came from..."
+                  rows={4}
+                  className="text-sm resize-none"
+                  style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }}
+                />
+              </div>
+
+              {/* ── Gallery Images ── */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-medium" style={{ color: "#B8A88A" }}>Gallery Images <span style={{ color: "var(--ln-iron)" }}>(optional — process photos, artwork, liner notes)</span></label>
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all"
+                    style={{ color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)", background: "rgba(74,222,128,0.06)" }}
+                  >
+                    <Plus size={10} /> Add Images
+                  </button>
+                  <input
+                    ref={galleryInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files || []);
+                      if (!files.length) return;
+                      toast.info(`Uploading ${files.length} image${files.length > 1 ? "s" : ""}...`);
+                      try {
+                        const uploaded: { url: string; key: string; caption: string }[] = [];
+                        for (const f of files) {
+                          const fd = new FormData();
+                          fd.append("file", f);
+                          const r = await fetch("/api/upload-gallery-image", { method: "POST", body: fd });
+                          if (!r.ok) throw new Error("Upload failed");
+                          const d = await r.json();
+                          uploaded.push({ url: d.url, key: d.key, caption: "" });
+                        }
+                        setGalleryImages(prev => [...prev, ...uploaded]);
+                        toast.success(`${files.length} image${files.length > 1 ? "s" : ""} added`);
+                      } catch (err: any) { toast.error(err.message || "Image upload failed"); }
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
+                {galleryImages.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {galleryImages.map((img, idx) => (
+                      <div key={idx} className="relative rounded-xl overflow-hidden" style={{ border: "1px solid rgba(196,154,40,0.2)" }}>
+                        <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-28 object-cover" />
+                        <div className="p-2" style={{ background: "var(--ln-coal)" }}>
+                          <input
+                            type="text"
+                            placeholder="Caption for this image..."
+                            value={img.caption}
+                            onChange={e => setGalleryImages(prev => prev.map((x, i) => i === idx ? { ...x, caption: e.target.value } : x))}
+                            className="w-full text-xs px-2 py-1 rounded"
+                            style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.2)", color: "var(--ln-parchment)" }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setGalleryImages(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center"
+                          style={{ background: "rgba(0,0,0,0.7)", color: "var(--ln-ember)" }}
+                        >
+                          <XIcon size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {galleryImages.length === 0 && (
+                  <p className="text-[11px]" style={{ color: "var(--ln-iron)" }}>No gallery images yet. Add process photos, artwork variations, or visual context for your work.</p>
+                )}
+              </div>
+
               {/* ── Genre (music) OR Category (manuscript/comic) ── */}
               {(uploadMode === "audio" || uploadMode === "lyrics") ? (
                 <div>
@@ -1282,6 +1434,43 @@ export default function UploadPage() {
                       workType={uploadMode === "comic" ? "comic" : uploadMode === "manuscript" ? "manuscript" : uploadMode === "lyrics" ? "lyrics" : "audio"}
                       compact={false}
                     />
+                  </div>
+                )}
+                {/* AI Tool Disclosure — shown when not "original" */}
+                {aiDisclosure !== "original" && (
+                  <div className="mt-4 p-4 rounded-xl" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.14)" }}>
+                    <p className="text-xs font-semibold mb-3" style={{ color: "#B8A88A", letterSpacing: "0.08em" }}>WHICH AI TOOLS WERE USED?</p>
+                    <div className="space-y-2">
+                      {([
+                        { key: "suno" as const, label: "Suno 5+", state: aiToolSuno, set: setAiToolSuno },
+                        { key: "udio" as const, label: "Udio", state: aiToolUdio, set: setAiToolUdio },
+                        { key: "sonato" as const, label: "Sonato", state: aiToolSonato, set: setAiToolSonato },
+                        { key: "other" as const, label: "Other", state: aiToolOther, set: setAiToolOther },
+                      ]).map(tool => (
+                        <div key={tool.key} className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => tool.set(!tool.state)}
+                            className="relative flex-shrink-0 w-9 h-5 rounded-full transition-colors"
+                            style={{ background: tool.state ? "var(--ln-gold)" : "rgba(196,154,40,0.15)" }}
+                            aria-pressed={tool.state}
+                          >
+                            <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ transform: tool.state ? "translateX(16px)" : "translateX(2px)" }} />
+                          </button>
+                          <span className="text-sm" style={{ color: tool.state ? "var(--ln-parchment)" : "#B8A88A" }}>{tool.label}</span>
+                        </div>
+                      ))}
+                      {aiToolOther && (
+                        <input
+                          type="text"
+                          placeholder="Name the tool..."
+                          value={aiToolOtherName}
+                          onChange={e => setAiToolOtherName(e.target.value)}
+                          className="w-full mt-1 px-3 py-2 rounded-lg text-sm"
+                          style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
+                        />
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
