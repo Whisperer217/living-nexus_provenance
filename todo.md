@@ -3636,3 +3636,8 @@
 ## Phase 64: Upload Form Contrast Fix (Mobile)
 - [x] Brighten UploadPage form inputs — higher contrast backgrounds, visible labels on mobile
 - [x] Ensure all form fields (Title, Genre, BPM, Key, Album, ISRC, BMI, Mood Tags, Credits) are legible on dark mobile screens
+
+## Phase 65: Full Production DB Migration
+- [ ] Apply full schema to production — create songs, tips, projects, playlists, comments, and all other missing tables
+- [ ] Verify all schema tables exist on production
+- [ ] Fix border/borderRight CSS shorthand conflict warning

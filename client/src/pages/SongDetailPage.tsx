@@ -1171,7 +1171,7 @@ export default function SongDetailPage() {
             {/* Embed preview — shows how the link looks in Discord/iMessage */}
             <div>
               <p className="text-[10px] font-semibold mb-2 tracking-widest" style={{ color: "var(--ln-iron)", fontFamily: "'Orbitron', sans-serif" }}>EMBED PREVIEW</p>
-              <div className="rounded-xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "3px solid #C49A28", borderLeft: "4px solid #C49A28" }}>
+              <div className="rounded-xl overflow-hidden" style={{ background: "var(--ln-coal)", borderTop: "3px solid #C49A28", borderRight: "3px solid #C49A28", borderBottom: "3px solid #C49A28", borderLeft: "4px solid #C49A28" }}>
                 <div className="flex gap-3 p-3">
                   {song.coverArtUrl && (
                     <img

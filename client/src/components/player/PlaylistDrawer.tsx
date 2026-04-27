@@ -350,9 +350,9 @@ export default function PlaylistDrawer() {
           background: isOpen
             ? "rgba(196,154,40,0.25)"
             : "rgba(20,18,12,0.97)",
-          border: isOpen
-            ? "1px solid rgba(196,154,40,0.5)"
-            : "1px solid rgba(196,154,40,0.4)",
+          borderTop: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
+          borderLeft: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
+          borderBottom: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
           borderRight: "none",
           backdropFilter: "blur(12px)",
           boxShadow: "-3px 0 16px rgba(196,154,40,0.15)",
