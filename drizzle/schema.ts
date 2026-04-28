@@ -1389,3 +1389,30 @@ export const keeperNotes = mysqlTable("keeper_notes", {
 });
 export type KeeperNote = typeof keeperNotes.$inferSelect;
 export type InsertKeeperNote = typeof keeperNotes.$inferInsert;
+
+// ─── Keeper Character Sheets ──────────────────────────────────────────────────
+export const keeperCharacterSheets = mysqlTable("keeper_character_sheets", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  presetId: varchar("preset_id", { length: 64 }).notNull(),
+  name: varchar("name", { length: 100 }),
+  persona: varchar("persona", { length: 64 }),
+  mediumContext: text("medium_context"),
+  attributes: text("attributes"),
+  isActive: int("is_active").default(1),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+});
+export type KeeperCharacterSheet = typeof keeperCharacterSheets.$inferSelect;
+export type InsertKeeperCharacterSheet = typeof keeperCharacterSheets.$inferInsert;
+
+// ─── Keeper Chat Archives ─────────────────────────────────────────────────────
+export const keeperChatArchives = mysqlTable("keeper_chat_archives", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  title: varchar("title", { length: 200 }),
+  messages: text("messages"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+export type KeeperChatArchive = typeof keeperChatArchives.$inferSelect;
+export type InsertKeeperChatArchive = typeof keeperChatArchives.$inferInsert;

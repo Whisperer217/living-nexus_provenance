@@ -80,8 +80,8 @@ export default function KeeperCharacterSheet({ onClose }: { onClose?: () => void
       presetId: preset.id,
       name: preset.name,
       persona: preset.persona,
-      attributes: preset.attributes as SheetAttributes,
-      mediumContext: preset.mediumContext as MediumContext,
+      attributes: (preset.sheetAttributes ?? preset.attributes) as SheetAttributes,
+      mediumContext: (preset.mediumContext ?? {}) as MediumContext,
     });
     setDirty(true);
   };
