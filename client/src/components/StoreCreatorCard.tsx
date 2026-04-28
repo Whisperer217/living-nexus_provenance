@@ -18,11 +18,10 @@ interface StoreCreatorCardProps {
 }
 
 export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
-  const handle = creator.artistHandle || `user${creator.id}`;
-  const name = creator.artistName || handle;
+  const name = creator.artistName || creator.artistHandle || `Creator ${creator.id}`;
 
   return (
-    <Link href={`/creator/${handle}`}>
+    <Link href={`/creator/${creator.id}`}>
       <div className="relative w-44 flex-shrink-0 rounded-xl overflow-hidden cursor-pointer group transition-transform duration-200 hover:scale-[1.03] hover:shadow-2xl bg-white/5 border border-white/10">
         {/* Banner */}
         <div className="h-20 w-full overflow-hidden">

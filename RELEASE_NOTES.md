@@ -7,6 +7,38 @@
 
 ---
 
+## v2.32.1 — April 2026 (Bugfix: Creator Links, Playlist-Add, Share URL Audit)
+
+### Bug Fixes
+
+**StoreCreatorCard — broken creator profile links fixed**
+- Was: `/creator/${artistHandle}` (string handle — route expects numeric ID → 404 on all creator cards)
+- Now: `/creator/${creator.id}` (numeric ID — always resolves correctly)
+- Impact: all creator cards on Home page showcase rows and Explore page now navigate correctly
+
+**StoreTrackCard — context menu added (3-dot button on hover)**
+- New `MoreVertical` button appears top-right on card hover
+- Menu options: Play Next, Add to List (sub-panel with user's playlists), Go to Song, View Creator, Copy WID Link / Copy Link
+- Add to List uses `trpc.playlists.addTrack` — shows all user playlists; creates new list if user has none
+- Context menu is a portal (renders in `document.body`) — not clipped by card overflow
+
+**Share URL routing — confirmed working in code**
+- `/share/:wid` is handled by Express `shareRouter` before CDN intercept
+- Serves full OG/Twitter/Discord meta tags for scrapers
+- Browsers are immediately redirected to `/song/:id` via meta refresh + JS redirect
+- Root cause of broken share links on deployed site: needs a Publish to pick up latest server changes
+
+**Profile surface — dual-profile clarified (no code change needed)**
+- `/profile` = logged-in user's private command center
+- `/creator/:id` = canonical public profile for any creator (all tracks, albums, collections, projects)
+- `CreatorProfilePage` already shows full track list, albums grouped by collectionTag, and collections
+- "Add to My List" context menu option is available to all logged-in users on any creator's profile
+
+### Manus Pub Action Required
+- None — all fixes are in shared components. Publish the site to fix the share URL issue on the deployed domain.
+
+---
+
 ## v2.32.0 — Phase 69 — April 2026
 
 ### What Shipped
