@@ -10,14 +10,14 @@
      7. Trending Now — side-pane horizontal scroll (2 rows × 12)
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TrackCard from "@/components/TrackCard";
 import BookCard from "@/components/BookCard";
 import TipModal from "@/components/TipModal";
 import { CARD_PAN_W } from "@/lib/cardTokens";
-import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart, DollarSign, Cpu, CheckCircle2 } from "lucide-react";
+import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -25,6 +25,9 @@ import { WIDPanel } from "@/components/WIDPanel";
 import FeaturedProjectsCarousel from "@/components/FeaturedProjectsCarousel";
 import { WorkCarousel } from "@/components/WorkCarousel";
 import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
+import { ShowcaseRow } from "@/components/ShowcaseRow";
+import { StoreTrackCard } from "@/components/StoreTrackCard";
+import { StoreCreatorCard } from "@/components/StoreCreatorCard";
 
 /** Animated counter that counts up from 0 to `target` over ~1.2 s */
 function AnimatedCounter({ target }: { target: number }) {
@@ -598,6 +601,254 @@ function TrendingHorizontalGrid({
   );
 }
 
+/* ─── Showcase Section (MS Store rows) ─────────────────────────────────────────────────────── */
+function ShowcaseSection() {
+  const newInput = useMemo(() => ({ limit: 16 }), []);
+  const { data: newRaw } = trpc.songs.newThisWeek.useQuery(newInput, { staleTime: 60_000, refetchOnWindowFocus: false });
+  const trendInput = useMemo(() => ({ limit: 16 }), []);
+  const { data: trendRaw } = trpc.songs.trending.useQuery(trendInput, { staleTime: 60_000, refetchOnWindowFocus: false });
+  const { data: creators } = trpc.profile.featuredCreators.useQuery(undefined, { staleTime: 120_000, refetchOnWindowFocus: false });
+  const { data: voicesRaw } = trpc.songs.getWitnessedVoices.useQuery(undefined, { staleTime: 60_000, refetchOnWindowFocus: false });
+
+  const newSongs = useMemo(() => (newRaw ?? []).map(mapToSongData), [newRaw]);
+  const trendSongs = useMemo(() => (trendRaw ?? []).map(mapToSongData), [trendRaw]);
+  // getWitnessedVoices returns a slightly different shape — adapt it
+  const voiceSongs = useMemo(() => (voicesRaw ?? []).map((v: any) => ({
+    id: typeof v.songId === "string" ? parseInt(v.songId, 10) : (v.songId as number),
+    title: v.title ?? "Untitled",
+    coverArtUrl: v.coverArtUrl ?? null,
+    artistName: v.artistHandle || v.userName || "Unknown",
+    genre: v.genre ?? null,
+    wid: v.witnessId ?? null,
+    widShort: null,
+    playCount: null,
+    fileUrl: v.fileUrl ?? null,
+    duration: null,
+    userId: null,
+    artistHandle: v.artistHandle ?? null,
+    profilePhotoUrl: v.profilePhotoUrl ?? null,
+    aiDisclosure: null,
+    contentType: "audio" as const,
+  })), [voicesRaw]);
+
+  const hasNew = newSongs.length > 0;
+  const hasTrend = trendSongs.length > 0;
+  const hasCreators = (creators ?? []).length > 0;
+  const hasVoices = voiceSongs.length > 0;
+
+  if (!hasNew && !hasTrend && !hasCreators && !hasVoices) return null;
+
+  return (
+    <div className="px-4 pt-6 pb-2">
+      {hasNew && (
+        <ShowcaseRow title="New Arrivals" seeAllHref="/explore">
+          {newSongs.map((song: ReturnType<typeof mapToSongData>, idx: number) => (
+            <StoreTrackCard key={song.id} song={song} size="md" allSongs={newSongs} songIndex={idx} />
+          ))}
+        </ShowcaseRow>
+      )}
+      {hasTrend && (
+        <ShowcaseRow title="Trending This Week" seeAllHref="/explore">
+          {trendSongs.map((song: ReturnType<typeof mapToSongData>, idx: number) => (
+            <StoreTrackCard key={song.id} song={song} size="md" allSongs={trendSongs} songIndex={idx} />
+          ))}
+        </ShowcaseRow>
+      )}
+      {hasCreators && (
+        <ShowcaseRow title="Featured Creators" seeAllHref="/explore?view=creators">
+          {(creators as any[]).map((creator: any) => (
+            <StoreCreatorCard key={creator.id} creator={creator} />
+          ))}
+        </ShowcaseRow>
+      )}
+      {hasVoices && (
+        <ShowcaseRow title="Recently Witnessed" seeAllHref="/explore">
+          {voiceSongs.map((song: (typeof voiceSongs)[number], idx: number) => (
+            <StoreTrackCard key={song.id} song={song} size="md" allSongs={voiceSongs} songIndex={idx} />
+          ))}
+        </ShowcaseRow>
+      )}
+    </div>
+  );
+}
+
+/* ─── Hero Carousel ─────────────────────────────────────────────────────── */
+const HERO_SLIDES = [
+  {
+    id: 1,
+    img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png",
+    tag: "Creative Provenance Platform",
+    headline: "Your work deserves to be",
+    accent: "witnessed.",
+    body: "Every work — music, lyrics, manuscripts, comics — carries a Witness ID. Cryptographic proof of origin that belongs to you before it belongs to anyone else.",
+    cta1: { label: "Register Your Work", href: "/upload", icon: "upload" as const },
+    cta2: { label: "Explore Works", href: "/explore", icon: "compass" as const },
+  },
+  {
+    id: 2,
+    img: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp",
+    tag: "Discover New Voices",
+    headline: "Explore a growing archive of",
+    accent: "witnessed music.",
+    body: "Browse tracks, lyrics, manuscripts, and comics — all registered with cryptographic timestamps. Every play supports an independent creator.",
+    cta1: { label: "Explore Now", href: "/explore", icon: "compass" as const },
+    cta2: { label: "Browse Creators", href: "/explore?view=creators", icon: "users" as const },
+  },
+  {
+    id: 3,
+    img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/znZFuENyiCRsHFOi.png",
+    tag: "Founder's Era — Limited",
+    headline: "Be among the first",
+    accent: "Founding Creators.",
+    body: "Founder's Era creators establish the first anchors of a cryptographically-verified creative record. A timestamped declaration that cannot be altered, disputed, or erased.",
+    cta1: { label: "Claim Your WID", href: "/upload", icon: "upload" as const },
+    cta2: { label: "Learn More", href: "/founder-era", icon: "star" as const },
+  },
+];
+
+function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthenticated: boolean; getLoginUrl: (path?: string) => string }) {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const advance = useCallback((dir: 1 | -1) => {
+    setActive(prev => (prev + dir + HERO_SLIDES.length) % HERO_SLIDES.length);
+  }, []);
+
+  useEffect(() => {
+    if (paused) return;
+    timerRef.current = setInterval(() => advance(1), 5000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [paused, advance]);
+
+  const slide = HERO_SLIDES[active];
+
+  return (
+    <div
+      className="relative overflow-hidden"
+      style={{ minHeight: "420px" }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Background images — cross-fade */}
+      {HERO_SLIDES.map((s, i) => (
+        <div
+          key={s.id}
+          className="absolute inset-0 transition-opacity duration-700"
+          style={{ opacity: i === active ? 1 : 0, zIndex: 0 }}
+        >
+          <img
+            src={s.img}
+            alt=""
+            className="w-full h-full object-cover object-center"
+            style={{ filter: "saturate(1.2) contrast(1.08)" }}
+          />
+        </div>
+      ))}
+
+      {/* Scrims */}
+      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.85) 0%, rgba(30,16,40,0.55) 40%, rgba(40,20,50,0.08) 68%, transparent 100%)" }} />
+      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to top, rgba(20,10,30,0.80) 0%, rgba(30,16,40,0.18) 38%, transparent 100%)" }} />
+      <div className="absolute inset-0 z-10" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(10,8,6,0.30) 80%, rgba(10,8,6,0.60) 100%)" }} />
+
+      {/* Content */}
+      <div className="relative z-20 flex flex-col justify-end px-6 pb-12 pt-16 max-w-3xl">
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles size={13} className="text-[#C49A28]" />
+          <span className="text-[10px] font-heading tracking-[0.22em] uppercase text-[#8B6914]">
+            {slide.tag}
+          </span>
+        </div>
+        <h1
+          className="font-display leading-tight mb-3 transition-all duration-500"
+          style={{ fontSize: "clamp(1.9rem, 5vw, 3rem)", color: "#E8DFC8", textShadow: "0 2px 24px rgba(0,0,0,0.60)" }}
+        >
+          {slide.headline}<br />
+          <span style={{ color: "#C49A28" }}>{slide.accent}</span>
+        </h1>
+        <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "#A09880" }}>
+          {slide.body}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link href={isAuthenticated ? slide.cta1.href : getLogin(slide.cta1.href)}>
+            <button
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+              style={{ background: "#C49A28", color: "#0A0806", boxShadow: "0 2px 16px rgba(196,154,40,0.25)" }}
+            >
+              {slide.cta1.icon === "upload" ? <Upload size={13} /> : slide.cta1.icon === "compass" ? <Compass size={13} /> : <Star size={13} />}
+              {slide.cta1.label}
+            </button>
+          </Link>
+          <Link href={slide.cta2.href}>
+            <button
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+              style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.18)", color: "#C9C0A8" }}
+            >
+              {slide.cta2.icon === "compass" ? <Compass size={13} /> : slide.cta2.icon === "users" ? <Users size={13} /> : <Star size={13} />}
+              {slide.cta2.label}
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Prev / Next arrows */}
+      <button
+        onClick={() => advance(-1)}
+        className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/20"
+        style={{ background: "rgba(0,0,0,0.35)" }}
+      >
+        <ChevronLeft className="w-4 h-4 text-white" />
+      </button>
+      <button
+        onClick={() => advance(1)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/20"
+        style={{ background: "rgba(0,0,0,0.35)" }}
+      >
+        <ChevronRight className="w-4 h-4 text-white" />
+      </button>
+
+      {/* Dot pagination */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+        {HERO_SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActive(i)}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: i === active ? "20px" : "6px",
+              height: "6px",
+              background: i === active ? "#C49A28" : "rgba(255,255,255,0.35)",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Map a { song, creator } row from the API into the flat SongData shape StoreTrackCard expects */
+function mapToSongData(row: any) {
+  const song = row.song ?? row;
+  const creator = row.creator ?? null;
+  return {
+    id: typeof song.id === "string" ? parseInt(song.id, 10) : (song.id as number),
+    title: song.title ?? "Untitled Work",
+    coverArtUrl: song.coverArtUrl ?? null,
+    artistName: creator?.artistHandle || creator?.name || "Unknown Creator",
+    genre: song.genre ?? null,
+    wid: song.witnessId ?? null,
+    widShort: null,
+    playCount: song.playCount ?? null,
+    fileUrl: song.fileUrl ?? null,
+    duration: song.durationSeconds ?? null,
+    userId: song.userId ?? null,
+    artistHandle: creator?.artistHandle ?? null,
+    profilePhotoUrl: creator?.profilePhotoUrl ?? null,
+    aiDisclosure: song.aiDisclosure ?? null,
+    contentType: song.contentType ?? "audio",
+  };
+}
+
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
   { label: "Ambient",    icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-book_038e31c9.png",      color: "#7dd3fc" },
@@ -694,78 +945,14 @@ export default function HomePage() {
     <div className="animate-fade-up cosmic-bg min-h-screen">
 
       {/* ══════════════════════════════════════════════════════════════
-          HERO
+          HERO CAROUSEL
       ══════════════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden" style={{ minHeight: "420px" }}>
-        <img
-          src={HERO_IMG}
-          alt="Living Nexus"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          style={{ filter: "saturate(1.2) contrast(1.08) brightness(1.0)" }}
-        />
-        {/* Left text-legibility scrim — only covers the text area, image breathes on the right */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.82) 0%, rgba(30,16,40,0.55) 38%, rgba(40,20,50,0.10) 65%, transparent 100%)" }} />
-        {/* Bottom scrim — anchors content, lighter than before */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(20,10,30,0.75) 0%, rgba(30,16,40,0.20) 35%, transparent 100%)" }} />
-        {/* Warm gold radial — subtle lantern glow, doesn't kill image color */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 55% at 28% 52%, rgba(196,154,40,0.06) 0%, transparent 65%)" }} />
-        {/* Edge vignette — lighter, just frames the corners */}
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(10,8,6,0.35) 80%, rgba(10,8,6,0.65) 100%)" }} />
+      <HeroCarousel isAuthenticated={isAuthenticated} getLoginUrl={getLoginUrl} />
 
-        <div className="relative z-10 flex flex-col justify-end px-6 pb-10 pt-16 max-w-3xl">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles size={13} className="text-[#C49A28]" />
-            <span className="text-[10px] font-heading tracking-[0.22em] uppercase text-[#8B6914]">
-              Living Nexus — Creative Provenance Platform
-            </span>
-          </div>
-
-          <h1
-            className="font-display leading-tight mb-3"
-            style={{
-              fontSize: "clamp(1.9rem, 5vw, 3rem)",
-              color: "#E8DFC8",
-              textShadow: "0 2px 24px rgba(0,0,0,0.60)",
-            }}
-          >
-            Your work deserves to be<br />
-            <span style={{ color: "#C49A28" }}>witnessed.</span>
-          </h1>
-
-          <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "#A09880" }}>
-            Every work — music, lyrics, manuscripts, comics, video — carries a Witness ID. Cryptographic proof of origin that belongs to you before it belongs to anyone else.
-          </p>
-
-          <div className="flex flex-wrap gap-3">
-            <Link href={isAuthenticated ? "/upload" : getLoginUrl("/upload")}>
-              <button
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                style={{
-                  background: "#C49A28",
-                  color: "#0A0806",
-                  boxShadow: "0 2px 16px rgba(196,154,40,0.25)",
-                }}
-              >
-                <Upload size={13} />
-                Register Your Work
-              </button>
-            </Link>
-            <Link href="/explore">
-              <button
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                style={{
-                  background: "rgba(196,154,40,0.06)",
-                  border: "1px solid rgba(196,154,40,0.18)",
-                  color: "#C9C0A8",
-                }}
-              >
-                <Compass size={13} />
-                Explore Works
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div>
+      {/* ══════════════════════════════════════════════════════════════
+          MS STORE SHOWCASE ROWS
+      ══════════════════════════════════════════════════════════════ */}
+      <ShowcaseSection />
 
       {/* ══════════════════════════════════════════════════════════════
           FOUNDER'S ERA BLOCK

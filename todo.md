@@ -3660,3 +3660,13 @@
 - [x] Rewrote ensureAudioGraph() — idempotent, handles InvalidStateError gracefully (element already connected), source node stays permanently connected
 - [x] AudioContext destination always wired through analyser so audio reaches speakers regardless of glow state
 - [x] Glow toggle off → stops RAF animation only; audio routing untouched
+
+## Phase 69: Microsoft Store-Inspired Home & Explore Redesign
+- [x] Build reusable ShowcaseRow component — horizontal scroll, section title with "See All" arrow, ← → nav arrows, snap scrolling
+- [x] Build reusable StoreTrackCard component — tall rectangle, cover art dominant, creator avatar + name + WID badge pinned to bottom, play on hover
+- [x] Build reusable StoreCreatorCard component — banner image, avatar, name, follower count, WID badge
+- [x] Rebuild Home page hero — 3-slide carousel, cross-fade, dot pagination, auto-rotate every 5s, prev/next arrows
+- [x] Home page showcase rows — New Arrivals, Trending This Week, Featured Creators, Recently Witnessed
+- [x] Rebuild Explore page — compact header, horizontal pill chips, Store/Classic view toggle, ShowcaseRow + StoreTrackCard in Store view
+- [x] Ensure mobile responsiveness — hero stacks vertically, cards remain large and tappable (snap-x scroll)
+- [x] TypeScript 0 errors, checkpoint, GitHub push
