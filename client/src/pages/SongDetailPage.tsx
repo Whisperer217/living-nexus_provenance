@@ -35,7 +35,12 @@ import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { QRShareModal } from "@/components/QRIdentityCard";
 import { CreatorHandle } from "@/components/CreatorHandle";
 
-const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
+// Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
+const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
+const REACTION_EMOJI: Record<string, string> = {
+  fire: "🔥", love: "😍", wow: "😱", clap: "🙌",
+  thumbsup: "👍", thumbsdown: "👎", mindblown: "🤯", "+": "+",
+};
 
 function RelatedCard({ item }: { item: any }) {
   const song = item.song;
@@ -100,8 +105,9 @@ export default function SongDetailPage() {
       });
       return { prev };
     },
-    onError: (_err, _vars, ctx: any) => {
+    onError: (err: any, _vars, ctx: any) => {
       if (ctx?.prev) utils.songs.getReactions.setData({ songId }, ctx.prev);
+      toast.error(err?.message || "Reaction failed — please try again");
     },
     onSettled: () => {
       utils.songs.getReactions.invalidate({ songId });
@@ -896,15 +902,15 @@ export default function SongDetailPage() {
             {/* Emoji Reactions */}
             <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
               <div className="flex flex-wrap gap-2 justify-center">
-                {REACTIONS.map(emoji => (
-                  <button type="button" key={emoji} onClick={() => handleReaction(emoji)}
+                {REACTION_SLUGS.map((slug: string) => (
+                  <button type="button" key={slug} onClick={() => handleReaction(slug)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all hover:scale-110 active:scale-95"
                     style={{
-                      background: myReactionsSet.has(emoji) ? "rgba(196,154,40,0.15)" : "var(--ln-coal)",
-                      border: `1px solid ${myReactionsSet.has(emoji) ? "rgba(196,154,40,0.3)" : "var(--ln-gold)"}`,
+                      background: myReactionsSet.has(slug) ? "rgba(196,154,40,0.15)" : "var(--ln-coal)",
+                      border: `1px solid ${myReactionsSet.has(slug) ? "rgba(196,154,40,0.3)" : "var(--ln-gold)"}`,
                     }}>
-                    <span>{emoji}</span>
-                    {reactionCounts[emoji] ? <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{reactionCounts[emoji]}</span> : null}
+                    <span>{REACTION_EMOJI[slug] ?? slug}</span>
+                    {reactionCounts[slug] ? <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{reactionCounts[slug]}</span> : null}
                   </button>
                 ))}
               </div>
