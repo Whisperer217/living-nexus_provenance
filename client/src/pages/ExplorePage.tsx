@@ -4,13 +4,13 @@
    No algorithm. No "you might like." Just — here's what exists.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { getCache, setCache, CACHE_KEYS, TTL, setExploreCache, getExploreCache } from "@/lib/lnxCache";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles, BookOpen } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles, BookOpen, LayoutGrid, List } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -20,6 +20,9 @@ import FeaturedProjectsCarousel from "@/components/FeaturedProjectsCarousel";
 import { getContentTypeColors } from "@/lib/contentTypeColors";
 import TrackCard from "@/components/TrackCard";
 import { CARD_PAN_W } from "@/lib/cardTokens";
+import { ShowcaseRow } from "@/components/ShowcaseRow";
+import { StoreTrackCard } from "@/components/StoreTrackCard";
+import { StoreCreatorCard } from "@/components/StoreCreatorCard";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -34,6 +37,46 @@ const GENRE_CARDS = [
 ];
 
 const DISCOVER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp";
+
+/** Flat genre pill chips for the Explore header */
+const GENRE_CHIPS = [
+  { label: "All",         color: "#A78BFA" },
+  { label: "Ambient",     color: "#7dd3fc" },
+  { label: "Gospel",      color: "#fbbf24" },
+  { label: "Jazz",        color: "#c4b5fd" },
+  { label: "Electronic",  color: "#f97316" },
+  { label: "Hip-Hop",     color: "#fb923c" },
+  { label: "Rock",        color: "#f87171" },
+  { label: "R&B",         color: "#a78bfa" },
+  { label: "Metal",       color: "#f87171" },
+  { label: "Classical",   color: "#86efac" },
+  { label: "Pop",         color: "#f9a8d4" },
+  { label: "Country",     color: "#fde68a" },
+  { label: "Soul",        color: "#fdba74" },
+];
+
+/** Map a { song, creator } API row to the flat SongData shape StoreTrackCard expects */
+function exploreMapToSongData(row: any) {
+  const song = row.song ?? row;
+  const creator = row.creator ?? null;
+  return {
+    id: typeof song.id === "string" ? parseInt(song.id, 10) : (song.id as number),
+    title: song.title ?? "Untitled Work",
+    coverArtUrl: song.coverArtUrl ?? null,
+    artistName: creator?.artistHandle || creator?.name || "Unknown Creator",
+    genre: song.genre ?? null,
+    wid: song.witnessId ?? null,
+    widShort: null,
+    playCount: song.playCount ?? null,
+    fileUrl: song.fileUrl ?? null,
+    duration: song.durationSeconds ?? null,
+    userId: song.userId ?? null,
+    artistHandle: creator?.artistHandle ?? null,
+    profilePhotoUrl: creator?.profilePhotoUrl ?? null,
+    aiDisclosure: song.aiDisclosure ?? null,
+    contentType: (song.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
+  };
+}
 const PAGE_SIZE = 24;
 
 type ExploreMode = "infinite" | "randomize" | "trending" | "new";
@@ -308,6 +351,8 @@ export default function ExplorePage() {
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
   const [mode, setMode] = useState<ExploreMode>("infinite");
+  // "store" = StoreTrackCard shelf rows; "classic" = creator-grouped pan-rows
+  const [viewMode, setViewMode] = useState<"store" | "classic">("store");
   const [contentType, setContentType] = useState<ContentType>(
     () => (getCache<string>(CACHE_KEYS.EXPLORE_TAB) as ContentType) ?? "audio"
   );
@@ -639,20 +684,19 @@ export default function ExplorePage() {
 
   return (
     <div className="animate-fade-up">
-      {/* ── Hero Banner ─────────────────────────────────────────────────── */}
-      <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
+      {/* ── Compact Explore Header ─────────────────────────────────────────────────────────────── */}
+      <div className="relative w-full overflow-hidden" style={{ height: "120px" }}>
         <img
           src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/KJZjjmwzpNKiuBIL.png"
           alt="Explore hero"
           className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ filter: "saturate(1.2) contrast(1.08)" }}
         />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.82) 0%, rgba(30,16,40,0.45) 45%, transparent 100%)" }} />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(53,62,67,0.85) 0%, rgba(53,62,67,0.15) 40%, transparent 100%)" }} />
-        <div className="absolute bottom-0 left-0 p-6">
-          <p className="text-xs mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)", letterSpacing: "0.18em" }}>LIVING NEXUS</p>
-          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Explore the Cosmos</h1>
-          <p className="text-sm mt-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-parchment)" }}>Music, lyrics, manuscripts, comics — every witnessed work, at your fingertips</p>
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.88) 0%, rgba(30,16,40,0.55) 50%, transparent 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,28,0.92) 0%, rgba(14,12,28,0.25) 50%, transparent 100%)" }} />
+        <div className="absolute bottom-0 left-0 px-6 pb-4 pt-3">
+          <p className="text-[9px] mb-0.5 font-mono tracking-[0.22em] uppercase" style={{ color: "var(--ln-gold)" }}>Living Nexus</p>
+          <h1 className="text-xl font-bold font-heading" style={{ color: "var(--ln-parchment)", textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>Explore the Cosmos</h1>
         </div>
       </div>
 
@@ -690,42 +734,31 @@ export default function ExplorePage() {
           ))}
         </div>
 
-        {/* Genre icon cards */}
-        <div className="mb-5">
-          <div className="grid grid-cols-4 sm:grid-cols-9 gap-2">
-            {GENRE_CARDS.map(g => (
-              <button
-                key={g.label}
-                onClick={() => setActiveGenre(g.label)}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
-                  ${activeGenre === g.label
-                    ? "border-[#C49A28]/60 bg-[#1C1A14]/[0.10]"
-                    : "border-white/[0.12] bg-[#111009] hover:border-[#C49A28]/40 hover:bg-white/[0.06]"
-                  }`}
-              >
-                {g.icon ? (
-                  <div className="w-9 h-9 flex items-center justify-center">
-                    <img
-                      src={g.icon}
-                      alt={g.label}
-                      className={`w-full h-full object-contain transition-all duration-200
-                        ${activeGenre === g.label ? "scale-110" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"}`}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-9 h-9 flex items-center justify-center rounded-lg"
-                    style={{ background: "linear-gradient(135deg, #C49A28, #7C3AED)" }}>
-                    <span className="text-[10px] font-heading font-bold text-black">ALL</span>
-                  </div>
-                )}
-                <span
-                  className="text-[10px] font-body truncate w-full text-center transition-colors"
-                  style={{ color: activeGenre === g.label ? g.color : "rgba(255,255,255,0.75)" }}
+        {/* Genre pill chips — horizontal scroll */}
+        <div className="mb-5 -mx-6 px-6">
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+            {GENRE_CHIPS.map(g => {
+              const isActive = activeGenre === g.label;
+              return (
+                <button
+                  key={g.label}
+                  onClick={() => setActiveGenre(g.label)}
+                  className="flex-shrink-0 px-4 py-1.5 rounded-full text-[12px] font-heading font-semibold tracking-wide transition-all"
+                  style={isActive ? {
+                    background: `${g.color}22`,
+                    border: `1px solid ${g.color}88`,
+                    color: g.color,
+                    boxShadow: `0 0 10px ${g.color}33`,
+                  } : {
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    color: "rgba(255,255,255,0.60)",
+                  }}
                 >
                   {g.label}
-                </span>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -793,6 +826,25 @@ export default function ExplorePage() {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            {/* Store / Classic view toggle */}
+            <div className="flex items-center gap-0.5 p-0.5 rounded-lg" style={{ background: "var(--ln-coal)", border: "1px solid rgba(44,52,56,0.4)" }}>
+              <button
+                onClick={() => setViewMode("store")}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-bold transition-all"
+                style={viewMode === "store" ? { background: "rgba(196,154,40,0.15)", color: "#C49A28" } : { color: "rgba(255,255,255,0.40)" }}
+                title="Store view"
+              >
+                <LayoutGrid size={12} />
+              </button>
+              <button
+                onClick={() => setViewMode("classic")}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-bold transition-all"
+                style={viewMode === "classic" ? { background: "rgba(196,154,40,0.15)", color: "#C49A28" } : { color: "rgba(255,255,255,0.40)" }}
+                title="Classic view"
+              >
+                <List size={12} />
+              </button>
+            </div>
             <span className="text-[12px] font-body" style={{ color: "rgba(255,255,255,0.45)" }}>
               {isLoading ? "Loading…" : `${songs.length} track${songs.length === 1 ? "" : "s"}`}
             </span>
@@ -839,8 +891,63 @@ export default function ExplorePage() {
           </div>
         )}
 
+        {/* ── STORE VIEW ───────────────────────────────────────────────────────────────── */}
+        {!isLoading && songs.length > 0 && viewMode === "store" && (
+          <div className="-mx-6">
+            {/* Group by genre for store rows */}
+            {(() => {
+              const storeSongs = songs.map(exploreMapToSongData);
+              // If a genre is selected, show one row; otherwise group by genre
+              if (activeGenre !== "All") {
+                return (
+                  <ShowcaseRow
+                    title={activeGenre}
+                    seeAllHref={`/explore?genre=${encodeURIComponent(activeGenre)}`}
+                    className="px-6"
+                  >
+                    {storeSongs.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
+                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={storeSongs} songIndex={idx} />
+                    ))}
+                  </ShowcaseRow>
+                );
+              }
+              // Group by genre
+              const genreMap = new Map<string, ReturnType<typeof exploreMapToSongData>[]>();
+              for (const s of storeSongs) {
+                const g = s.genre || "Other";
+                if (!genreMap.has(g)) genreMap.set(g, []);
+                genreMap.get(g)!.push(s);
+              }
+              // Also show an "All" row with first 20 tracks
+              const rows: React.ReactElement[] = [];
+              if (storeSongs.length > 0) {
+                const topSlice = storeSongs.slice(0, 20);
+                rows.push(
+                  <ShowcaseRow key="__all" title={mode === "trending" ? "Trending" : mode === "new" ? "New This Week" : "All Tracks"} seeAllHref="/explore" className="px-6">
+                    {topSlice.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
+                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={topSlice} songIndex={idx} />
+                    ))}
+                  </ShowcaseRow>
+                );
+              }
+              genreMap.forEach((genreSongs, genre) => {
+                if (genreSongs.length < 3) return; // skip tiny rows
+                rows.push(
+                  <ShowcaseRow key={genre} title={genre} seeAllHref={`/explore?genre=${encodeURIComponent(genre)}`} className="px-6">
+                    {genreSongs.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
+                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={genreSongs} songIndex={idx} />
+                    ))}
+                  </ShowcaseRow>
+                );
+              });
+              return rows;
+            })()}
+          </div>
+        )}
+
+        {/* ── CLASSIC VIEW ──────────────────────────────────────────────────────────────── */}
         {/* Creator-grouped pan-rows — infinite mode only */}
-        {!isLoading && songs.length > 0 && mode === "infinite" && (
+        {!isLoading && songs.length > 0 && viewMode === "classic" && mode === "infinite" && (
           <div
             className="space-y-8"
             style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
@@ -928,8 +1035,8 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Flat grid — randomize / trending / new modes: all tracks across all creators */}
-        {!isLoading && songs.length > 0 && mode !== "infinite" && (
+        {/* Flat grid — randomize / trending / new modes: all tracks across all creators (classic view only) */}
+        {!isLoading && songs.length > 0 && viewMode === "classic" && mode !== "infinite" && (
           <div
             className="grid gap-4"
             style={{

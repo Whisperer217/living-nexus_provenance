@@ -386,15 +386,6 @@ export default function Keeper() {
             Choose Your Keeper — Skin Armory
           </div>
 
-          {/* Hidden file input — always mounted so fileInputRef is never null */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
             {SKINS.map(skin => {
               const owned = skin.id === "hooded-scholar" || ownedSkins.has(skin.id);
@@ -485,6 +476,13 @@ export default function Keeper() {
                       <div className="mt-2">
                         {skin.isUpload ? (
                           <>
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              className="hidden"
+                              onChange={handleFileChange}
+                            />
                             <button
                               className="w-full py-1.5 rounded text-xs transition-all hover:opacity-80"
                               style={{

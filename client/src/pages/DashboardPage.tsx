@@ -725,22 +725,6 @@ export default function DashboardPage() {
                       <span style={{ color: "#E2E8F0", fontSize: "12px", whiteSpace: "nowrap" }}>
                         {song.tipCount || 0} tips
                       </span>
-                       {/* Sovereign Stamp badge */}
-                       {(song as any).sovereignStampId ? (
-                         <span
-                           title={`Stamped: ${(song as any).sovereignStampId}`}
-                           style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", padding: "2px 7px", borderRadius: "999px", background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.35)", color: "var(--ln-gold)", whiteSpace: "nowrap", cursor: "default" }}
-                         >
-                           🔏 Stamped
-                         </span>
-                       ) : (
-                         <span
-                           title="No Sovereign Stamp yet — open the track to apply"
-                           style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", padding: "2px 7px", borderRadius: "999px", background: "rgba(100,100,100,0.08)", border: "1px solid rgba(100,100,100,0.2)", color: "var(--ln-iron)", whiteSpace: "nowrap", cursor: "default" }}
-                         >
-                           Unstamped
-                         </span>
-                       )}
                        {/* WID badge */}
                        {song.witnessId && (
                          <WIDPanel

@@ -3633,16 +3633,40 @@
 - [ ] Corpus Size slider maps to LLM max_tokens (100 words = ~150 tokens baseline, scales to ~2000 tokens at max)
 - [ ] Commit, checkpoint, push to GitHub
 
-## Phase 64: Sovereign Stamp Audit Remediation
-- [x] DB: all 62 tables confirmed in production, pnpm db:push clean
-- [x] Drizzle journal conflict resolved (0086_giant_loa vs 0086_white_unus)
-- [x] keeper_notes table applied to production manually
-- [x] SongDetailPage.tsx: "Apply Sovereign Stamp" button (owner-only, hidden once stamped)
-- [x] DashboardPage.tsx: Sovereign Stamp status badge in track list row (🔏 Stamped / Unstamped)
+## Phase 64: Upload Form Contrast Fix (Mobile)
+- [x] Brighten UploadPage form inputs — higher contrast backgrounds, visible labels on mobile
+- [x] Ensure all form fields (Title, Genre, BPM, Key, Album, ISRC, BMI, Mood Tags, Credits) are legible on dark mobile screens
 
-## Phase 65: Custom Upload Slot Fix
-- [x] Root cause: hidden file `<input>` was inside `{isSelected}` conditional block — only mounted after card was clicked, so `fileInputRef.current` was null on first button press
-- [x] Fix: hoisted `<input ref={fileInputRef}>` above the skin grid so it is always mounted
-- [x] Removed duplicate `<input>` from inside the `isUpload` action button block
-- [x] Upload & Unlock button now correctly triggers the file picker on first click
-- [x] TypeScript: 0 errors
+## Phase 65: Full Production DB Migration
+- [x] Apply full schema to production — create songs, tips, projects, playlists, comments, and all other missing tables
+- [x] Verify all schema tables exist on production
+- [x] Fix border/borderRight CSS shorthand conflict warning
+
+## Phase 66: GitHub Sync + Mobile Bug Fixes
+- [x] Push Phase 65 changes to GitHub (commit 26a1031 on main)
+- [x] Fix artist handle wrapping on mobile — add whitespace-nowrap + overflow-hidden + min-w-0 to HandleField display div
+- [x] Fix What's New modal not opening — wire mobile header bell to open WhatsNewModal; fix drawer "What's New" button; bump version label to v2.31.0
+
+## Phase 67: Enriched Upload System (MakerWorld-Inspired)
+- [x] Schema migration: headlineCaption, description, galleryImagesJson, playerAssetType, aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther, aiToolOtherName added to songs table
+- [x] Catch-up migration: all missing songs + users columns applied to production DB
+- [x] Single upload page: headline caption field, description field, AI Draft button (uses gallery images as visual context for LLM), gallery image upload with per-image captions, player asset type designation
+- [x] Batch upload page: album-level toggles (Album Art Across All, Album Art AI/Original), per-track AI disclosure radio (Original/HAAI/AI Assisted/AI Generated), per-track AI tool toggles (Suno 5+, Udio, Sonato, Other), per-track release date field, Repeat Across Tracks button in Batch Fill panel
+- [x] Song detail page: headline caption section, long-form description section, gallery grid (2-3 col, click to expand, per-image captions), clear visual separation from player/actions
+- [x] generateCaption router: upgraded to accept imageUrls array (up to 6), builds multimodal LLM message with image_url content blocks for richer description generation
+
+## Phase 68: Frequency Glow Audio Routing Fix
+- [x] Fix Frequency Glow toggle silencing audio — toggle now only controls RAF visualizer loop, never disconnects Web Audio graph
+- [x] Rewrote ensureAudioGraph() — idempotent, handles InvalidStateError gracefully (element already connected), source node stays permanently connected
+- [x] AudioContext destination always wired through analyser so audio reaches speakers regardless of glow state
+- [x] Glow toggle off → stops RAF animation only; audio routing untouched
+
+## Phase 69: Microsoft Store-Inspired Home & Explore Redesign
+- [x] Build reusable ShowcaseRow component — horizontal scroll, section title with "See All" arrow, ← → nav arrows, snap scrolling
+- [x] Build reusable StoreTrackCard component — tall rectangle, cover art dominant, creator avatar + name + WID badge pinned to bottom, play on hover
+- [x] Build reusable StoreCreatorCard component — banner image, avatar, name, follower count, WID badge
+- [x] Rebuild Home page hero — 3-slide carousel, cross-fade, dot pagination, auto-rotate every 5s, prev/next arrows
+- [x] Home page showcase rows — New Arrivals, Trending This Week, Featured Creators, Recently Witnessed
+- [x] Rebuild Explore page — compact header, horizontal pill chips, Store/Classic view toggle, ShowcaseRow + StoreTrackCard in Store view
+- [x] Ensure mobile responsiveness — hero stacks vertically, cards remain large and tappable (snap-x scroll)
+- [x] TypeScript 0 errors, checkpoint, GitHub push
