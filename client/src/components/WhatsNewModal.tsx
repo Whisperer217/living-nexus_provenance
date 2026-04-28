@@ -10,14 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.31.0";
+const CURRENT_VERSION = "v2.32.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.31.0",
+    version: "v2.32.0",
     date: "April 2026",
     label: "Latest",
+    items: [
+      { icon: LayoutGrid, text: "Home — Store Layout — The Home page now opens with a Microsoft Store-style layout. A 3-slide hero carousel auto-rotates every 5 seconds with prev/next arrows and dot pagination. Below it, four horizontal shelf rows surface New Arrivals, Trending This Week, Featured Creators, and Recently Witnessed works — each row scrolls independently with snap points and left/right nav arrows." },
+      { icon: Music, text: "StoreTrackCard — A new tall-rectangle card format replaces the square cards in the Home shelves. Cover art fills the card, creator avatar and name are pinned to the bottom, a WID badge appears when the work is witnessed, and a circular play button fades in on hover. Cards snap cleanly in horizontal scroll rows on both desktop and mobile." },
+      { icon: Users, text: "StoreCreatorCard — Featured Creators now display in a dedicated card format: banner image at the top, circular avatar overlaid at the bottom edge, creator name, optional @handle, Founder badge for Founder's Era members, and published-works count. Cards link directly to the creator's profile." },
+      { icon: Compass, text: "Explore — Store View — The Explore page gains a Store / Classic view toggle. Store View (default) groups all tracks into ShowcaseRow shelves by genre — one top-level row for the active mode (All / Trending / New) plus per-genre rows for any genre with 3 or more tracks. Genre filtering now uses horizontal pill chips instead of the icon grid, and the hero banner is compacted to 120px to put more catalogue on screen immediately." },
+    ],
+  },
+  {
+    version: "v2.31.0",
+    date: "April 2026",
+    label: "",
     items: [
       { icon: Music, text: "Genre Multi-Select — The genre selector on track edit and creator profile is now a chip grid instead of a dropdown. Select as many genres as your work spans — Gospel, Trap, Power Metal, Neo-Soul, and 60+ other styles are available. Selections are stored as a comma-separated list and the 64-character cap has been removed entirely." },
       { icon: BookOpen, text: "Comic Upload — Storyboard-Only Mode — Comics and novels can now be published using storyboard pages alone, without uploading a separate file. The Next: Metadata button unlocks as soon as pages are added, the Witness ID is generated from the page layout, and the file drop zone relabels itself as optional once pages are present." },
