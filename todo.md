@@ -3654,3 +3654,9 @@
 - [x] Batch upload page: album-level toggles (Album Art Across All, Album Art AI/Original), per-track AI disclosure radio (Original/HAAI/AI Assisted/AI Generated), per-track AI tool toggles (Suno 5+, Udio, Sonato, Other), per-track release date field, Repeat Across Tracks button in Batch Fill panel
 - [x] Song detail page: headline caption section, long-form description section, gallery grid (2-3 col, click to expand, per-image captions), clear visual separation from player/actions
 - [x] generateCaption router: upgraded to accept imageUrls array (up to 6), builds multimodal LLM message with image_url content blocks for richer description generation
+
+## Phase 68: Frequency Glow Audio Routing Fix
+- [x] Fix Frequency Glow toggle silencing audio — toggle now only controls RAF visualizer loop, never disconnects Web Audio graph
+- [x] Rewrote ensureAudioGraph() — idempotent, handles InvalidStateError gracefully (element already connected), source node stays permanently connected
+- [x] AudioContext destination always wired through analyser so audio reaches speakers regardless of glow state
+- [x] Glow toggle off → stops RAF animation only; audio routing untouched

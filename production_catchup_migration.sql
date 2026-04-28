@@ -1,0 +1,117 @@
+-- ============================================================
+-- Living Nexus — Production Catch-Up Migration
+-- Run this on the PRODUCTION database (your primary instance)
+-- All statements use IF NOT EXISTS — safe to run multiple times
+-- ============================================================
+
+-- ── USERS TABLE ──────────────────────────────────────────────
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS `profilePhotoUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `bannerUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `bio` TEXT,
+  ADD COLUMN IF NOT EXISTS `artistHandle` VARCHAR(64),
+  ADD COLUMN IF NOT EXISTS `primaryGenre` VARCHAR(128),
+  ADD COLUMN IF NOT EXISTS `aiDisclosure` VARCHAR(32),
+  ADD COLUMN IF NOT EXISTS `stripeAccountId` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `stripeAccountStatus` VARCHAR(32) DEFAULT 'not_connected',
+  ADD COLUMN IF NOT EXISTS `stripeOnboardingUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `founderEra` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `founderEraAt` BIGINT,
+  ADD COLUMN IF NOT EXISTS `witnessCount` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `tipCount` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `totalTipsReceivedCents` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `isVerified` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `verifiedAt` BIGINT,
+  ADD COLUMN IF NOT EXISTS `socialLinks` TEXT,
+  ADD COLUMN IF NOT EXISTS `genreTags` TEXT,
+  ADD COLUMN IF NOT EXISTS `location` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `website` VARCHAR(512),
+  ADD COLUMN IF NOT EXISTS `pronouns` VARCHAR(64),
+  ADD COLUMN IF NOT EXISTS `displayName` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `coverArtUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `profileBannerKey` VARCHAR(512),
+  ADD COLUMN IF NOT EXISTS `profilePhotoKey` VARCHAR(512),
+  ADD COLUMN IF NOT EXISTS `coverArtKey` VARCHAR(512),
+  ADD COLUMN IF NOT EXISTS `keeperName` VARCHAR(128),
+  ADD COLUMN IF NOT EXISTS `keeperPortraitUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `keeperPersonality` VARCHAR(64),
+  ADD COLUMN IF NOT EXISTS `keeperUnlockedAt` BIGINT,
+  ADD COLUMN IF NOT EXISTS `keeperCustomized` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `lastSeenWhatsNew` VARCHAR(32),
+  ADD COLUMN IF NOT EXISTS `onboardingComplete` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `onboardingStep` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `updatedAt` BIGINT;
+
+-- ── SONGS TABLE ───────────────────────────────────────────────
+ALTER TABLE songs
+  ADD COLUMN IF NOT EXISTS `headlineCaption` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `description` TEXT,
+  ADD COLUMN IF NOT EXISTS `galleryImagesJson` TEXT,
+  ADD COLUMN IF NOT EXISTS `playerAssetType` VARCHAR(16) DEFAULT 'cover',
+  ADD COLUMN IF NOT EXISTS `aiToolSuno` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `aiToolUdio` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `aiToolSonato` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `aiToolOther` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `aiToolOtherName` VARCHAR(128),
+  ADD COLUMN IF NOT EXISTS `trackOrder` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `coverPositionX` FLOAT DEFAULT 50,
+  ADD COLUMN IF NOT EXISTS `coverPositionY` FLOAT DEFAULT 50,
+  ADD COLUMN IF NOT EXISTS `artAspectRatio` VARCHAR(16) DEFAULT 'square',
+  ADD COLUMN IF NOT EXISTS `contentType` VARCHAR(32) DEFAULT 'audio',
+  ADD COLUMN IF NOT EXISTS `visualReady` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `haaiVisualConcept` TEXT,
+  ADD COLUMN IF NOT EXISTS `haaiStyleLanguage` TEXT,
+  ADD COLUMN IF NOT EXISTS `haaiInstrumentation` TEXT,
+  ADD COLUMN IF NOT EXISTS `haaiVocalConveyance` TEXT,
+  ADD COLUMN IF NOT EXISTS `haaiLyricalInspiration` TEXT,
+  ADD COLUMN IF NOT EXISTS `haaiEmotionalTone` TEXT,
+  ADD COLUMN IF NOT EXISTS `haaiDeclaredAt` BIGINT,
+  ADD COLUMN IF NOT EXISTS `creditsJson` TEXT,
+  ADD COLUMN IF NOT EXISTS `parentSongId` INT,
+  ADD COLUMN IF NOT EXISTS `displayOrder` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `isFlagged` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `flagReason` TEXT,
+  ADD COLUMN IF NOT EXISTS `moderationStatus` VARCHAR(32) DEFAULT 'clean',
+  ADD COLUMN IF NOT EXISTS `pagesJson` TEXT,
+  ADD COLUMN IF NOT EXISTS `readAccess` VARCHAR(32) DEFAULT 'public',
+  ADD COLUMN IF NOT EXISTS `purchasePriceCents` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `previewPageCount` INT DEFAULT 3,
+  ADD COLUMN IF NOT EXISTS `consentSettingsJson` TEXT,
+  ADD COLUMN IF NOT EXISTS `externalLinksJson` TEXT,
+  ADD COLUMN IF NOT EXISTS `ownershipStatus` VARCHAR(32) DEFAULT 'original',
+  ADD COLUMN IF NOT EXISTS `sovereignStampId` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `sovereignStampedAt` BIGINT,
+  ADD COLUMN IF NOT EXISTS `stampedFileUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `stampedFileKey` VARCHAR(512),
+  ADD COLUMN IF NOT EXISTS `stampedFileHash` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `lyricsWid` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `lyricsFileName` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `lyricsFileHash` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `lyricsAddedAt` BIGINT,
+  ADD COLUMN IF NOT EXISTS `embedVideoUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `downloadPermission` VARCHAR(32) DEFAULT 'none',
+  ADD COLUMN IF NOT EXISTS `downloadTipThresholdCents` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `videoWitnessId` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `autoVideoUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `autoVideoKey` VARCHAR(512),
+  ADD COLUMN IF NOT EXISTS `updatedAt` BIGINT;
+
+-- ── NOTIFICATIONS TABLE ───────────────────────────────────────
+ALTER TABLE notifications
+  ADD COLUMN IF NOT EXISTS `archivedAt` BIGINT;
+
+-- ── PLATFORM SUPPORTERS TABLE ─────────────────────────────────
+ALTER TABLE platformSupporters
+  ADD COLUMN IF NOT EXISTS `totalGifted` INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS `tier` VARCHAR(32),
+  ADD COLUMN IF NOT EXISTS `firstGiftAt` BIGINT,
+  ADD COLUMN IF NOT EXISTS `lastGiftAt` BIGINT,
+  ADD COLUMN IF NOT EXISTS `stripePaymentIntentId` VARCHAR(255);
+
+-- ── KEEPER SKINS TABLE ────────────────────────────────────────
+ALTER TABLE keeper_skins
+  ADD COLUMN IF NOT EXISTS `skinName` VARCHAR(128),
+  ADD COLUMN IF NOT EXISTS `portraitUrl` TEXT,
+  ADD COLUMN IF NOT EXISTS `capabilities` TEXT,
+  ADD COLUMN IF NOT EXISTS `isCustom` BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS `unlockedAt` BIGINT;
