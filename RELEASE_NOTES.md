@@ -7,6 +7,30 @@
 
 ---
 
+## v2.32.2 — April 28, 2026 (Bugfix: Emoji Reactions Broken — Slimdoggy Report)
+
+### Root Cause
+The live `songReactions` table had a column named `emoji` (varchar 10, utf8mb4) with a composite unique index on `(songId, userId, emoji)`. The Drizzle schema expected a column named `type` (varchar 16). Every reaction toggle silently failed — the optimistic update flashed and rolled back with no error toast shown to the user.
+
+### DB Migration Applied (live, already executed)
+1. Dropped composite unique index `songReactions_unique` (covered `emoji`)
+2. Dropped `emoji` column
+3. Added `type` column: `varchar(32)` utf8mb4 (safe ASCII slugs, no charset issues)
+4. Added unique index `songReactions_user_song_type_idx` on `(userId, songId, type)`
+
+### Frontend Changes
+- `REACTIONS` array replaced with `REACTION_SLUGS`: `["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"]`
+- `REACTION_EMOJI` map converts slugs → emoji for display only (never stored in DB)
+- Added `onError` toast to `toggleReactionMutation`: users now see "Reaction failed — please try again" instead of silent rollback
+
+### Schema Updated
+`drizzle/schema.ts` — `songReactions.type` is now `varchar(32)`, `createdAt` is `bigint` (matches live DB)
+
+### Manus Pub Action Required
+- None — reactions now work. Publish the site to push the fix to `livingnexus.org`.
+
+---
+
 ## v2.32.1 — April 2026 (Bugfix: Creator Links, Playlist-Add, Share URL Audit)
 
 ### Bug Fixes

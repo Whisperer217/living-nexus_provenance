@@ -720,8 +720,8 @@ export const songReactions = mysqlTable(
     id: int("id").autoincrement().primaryKey(),
     userId: int("userId").notNull(),
     songId: int("songId").notNull(),
-    type: varchar("type", { length: 16 }).notNull(), // emoji string e.g. "🔥"
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    type: varchar("type", { length: 32 }).notNull(), // ASCII slug e.g. "fire", "love"
+    createdAt: bigint("createdAt", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
   },
   (t) => ({
     uniq: uniqueIndex("songReactions_user_song_type_idx").on(t.userId, t.songId, t.type),
