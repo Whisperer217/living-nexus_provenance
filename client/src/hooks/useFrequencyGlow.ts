@@ -1,102 +1,127 @@
 /**
  * useFrequencyGlow
  * ─────────────────────────────────────────────────────────────────────────────
- * Connects to the shared audio element via Web Audio API AnalyserNode and
- * returns real-time frequency band values (bass, mid, high) that drive the
- * purple reactive glow border on the global player.
+ * Beat-reactive glow that pulses with the music.
  *
  * Architecture:
- *  - One AudioContext + AnalyserNode is created lazily on first enable
- *  - The audio element is connected as a MediaElementSourceNode (ONCE, FOREVER)
- *  - The toggle only controls the RAF animation loop — NEVER the audio routing
- *  - requestAnimationFrame loop samples frequency data ~60fps
- *  - Returns { bass, mid, high } as 0–1 floats + a CSS box-shadow string
+ *  - One AudioContext + AnalyserNode, created lazily on first enable
+ *  - Audio element connected as MediaElementSourceNode ONCE, FOREVER
+ *  - Toggle controls only the RAF loop — NEVER the audio routing
+ *  - ~60fps RAF loop samples frequency data and drives a peak/decay envelope
  *
- * CRITICAL Web Audio API rules enforced here:
- *  1. createMediaElementSource() is called AT MOST ONCE per audio element.
- *     Once called, the element's output is permanently rerouted through the
- *     Web Audio graph. We NEVER disconnect or recreate the source node.
- *  2. The analyser is ALWAYS connected to audioCtx.destination so audio
- *     always reaches the speakers regardless of glow toggle state.
- *  3. The toggle only starts/stops the requestAnimationFrame visualizer loop.
- *     Audio routing is untouched by the toggle.
- *  4. AudioContext is only created inside a confirmed user-gesture call chain
- *     (the toggle click) to satisfy browser autoplay policy.
- *  5. If the audio element instance changes (new Audio() in PlayerContext),
- *     we detect it and reconnect the new element to the existing graph.
+ * Beat detection & decay:
+ *  - Bass energy is averaged over the 20–250 Hz band each frame
+ *  - A running "peak" value decays exponentially (×DECAY per frame)
+ *  - When current bass exceeds peak × BEAT_THRESHOLD, a beat is detected:
+ *    peak snaps up to current bass, triggering a bright pulse
+ *  - Between beats the peak decays smoothly → glow fades naturally
  *
- * CORS note: S3 audio must have CORS headers allowing the page origin.
- * If connect fails we fall back to a static ambient glow so the UI never breaks.
+ * Color palette (shifts with frequency content):
+ *  - Idle / low energy: deep violet  (138, 43, 226)
+ *  - Bass hit:          gold/amber   (196, 154, 40)  ← Living Nexus brand
+ *  - Mid-heavy:         cyan/teal    (56, 189, 248)
+ *  - High shimmer:      soft white   (255, 255, 255)
+ *
+ * CORS: audio element must have crossOrigin="anonymous" before src is set.
+ * If graph setup fails we fall back to a static ambient glow.
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
 export interface FrequencyBands {
-  bass: number;   // 0–1  (20–250 Hz)
-  mid: number;    // 0–1  (250–4000 Hz)
-  high: number;   // 0–1  (4000–20000 Hz)
-  glowShadow: string; // ready-to-use CSS box-shadow value
+  bass: number;        // 0–1 raw band average
+  mid: number;         // 0–1 raw band average
+  high: number;        // 0–1 raw band average
+  peak: number;        // 0–1 smoothed peak envelope (drives glow intensity)
+  glowShadow: string;  // ready-to-use CSS box-shadow value
 }
 
 const IDLE: FrequencyBands = {
-  bass: 0,
-  mid: 0,
-  high: 0,
+  bass: 0, mid: 0, high: 0, peak: 0,
   glowShadow: "none",
 };
 
-// Purple palette — deep royal to soft violet
-const PURPLE_DEEP   = "138, 43, 226";   // blueviolet
-const PURPLE_MID    = "167, 80, 255";   // medium violet
-const PURPLE_BRIGHT = "192, 132, 252";  // soft lavender
+// ── Tuning constants ──────────────────────────────────────────────────────────
+const DECAY         = 0.88;   // peak decay per frame (~60fps → full decay in ~0.5s)
+const BEAT_THRESHOLD = 1.15;  // current bass must exceed peak×this to trigger beat
+const MIN_PEAK      = 0.03;   // minimum peak before glow shows (silence threshold)
 
-function buildGlowShadow(bass: number, mid: number, high: number): string {
-  if (bass < 0.02 && mid < 0.02 && high < 0.02) return "none";
+// ── Color palette (RGB strings) ───────────────────────────────────────────────
+const C_VIOLET = "138, 43, 226";    // deep violet — base color
+const C_GOLD   = "196, 154, 40";    // gold/amber — bass hit (brand color)
+const C_CYAN   = "56, 189, 248";    // cyan/teal — mid-heavy passages
+const C_WHITE  = "255, 255, 255";   // white shimmer — high freq edge
 
-  const outerSpread = Math.round(bass * 48);
-  const outerOpacity = (0.25 + bass * 0.65).toFixed(2);
-  const midSpread = Math.round(mid * 24);
-  const midOpacity = (0.15 + mid * 0.55).toFixed(2);
-  const highOpacity = (0.1 + high * 0.5).toFixed(2);
-  const sideSpread = Math.round(bass * 32);
-  const sideOpacity = (0.2 + bass * 0.4).toFixed(2);
+/**
+ * Interpolate between two RGB strings by factor t (0→1).
+ * e.g. lerpColor("138,43,226", "196,154,40", 0.5) → "167,98,133"
+ */
+function lerpColor(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = a.split(",").map(Number);
+  const [br, bg, bb] = b.split(",").map(Number);
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return `${r}, ${g}, ${bl}`;
+}
+
+function buildGlowShadow(
+  bass: number,
+  mid: number,
+  high: number,
+  peak: number,
+): string {
+  if (peak < MIN_PEAK) return "none";
+
+  // ── Color: interpolate violet→gold on bass hit, violet→cyan on mid ──────
+  // When bass is high (beat), shift toward gold. When mid is high, shift toward cyan.
+  const bassColor = lerpColor(C_VIOLET, C_GOLD, Math.min(bass * 2.5, 1));
+  const midColor  = lerpColor(C_VIOLET, C_CYAN, Math.min(mid * 2.0, 1));
+  // Blend bass and mid colors by their relative energy
+  const totalEnergy = bass + mid + 0.001;
+  const primaryColor = lerpColor(bassColor, midColor, mid / totalEnergy);
+
+  // ── Spread & opacity driven by peak envelope ─────────────────────────────
+  const outerSpread  = Math.round(peak * 56);           // 0–56px
+  const outerOpacity = (0.15 + peak * 0.75).toFixed(2); // 0.15–0.90
+  const midSpread    = Math.round(peak * 28);            // 0–28px
+  const midOpacity   = (0.1 + mid * 0.6).toFixed(2);
+  const sideSpread   = Math.round(peak * 40);            // 0–40px
+  const sideOpacity  = (0.1 + peak * 0.5).toFixed(2);
+  const insetSize    = Math.round(peak * 20);            // 0–20px
+  const insetOpacity = (0.1 + peak * 0.55).toFixed(2);
+
+  // ── High-freq shimmer: sharp thin edge flash ─────────────────────────────
+  const highOpacity  = (high * 0.6).toFixed(2);
+  const highSpread   = Math.round(high * 4);
 
   return [
-    // Upward glow (above the bar)
-    `0 -${outerSpread}px ${outerSpread * 2}px rgba(${PURPLE_DEEP}, ${outerOpacity})`,
-    `0 -${midSpread}px ${midSpread * 1.5}px rgba(${PURPLE_MID}, ${midOpacity})`,
-    `0 -2px 8px rgba(${PURPLE_BRIGHT}, ${highOpacity})`,
-    // Inset glow on the bar itself (always visible regardless of content above)
-    `inset 0 1px ${Math.round(bass * 16)}px rgba(${PURPLE_MID}, ${midOpacity})`,
-    `inset 0 0 ${Math.round(mid * 24)}px rgba(${PURPLE_BRIGHT}, ${(mid * 0.3).toFixed(2)})`,
-    // Side glow (left and right edges)
-    `-${sideSpread}px 0 ${sideSpread * 1.5}px rgba(${PURPLE_DEEP}, ${sideOpacity})`,
-    `${sideSpread}px 0 ${sideSpread * 1.5}px rgba(${PURPLE_DEEP}, ${sideOpacity})`,
+    // Primary upward pulse — main beat glow above the bar
+    `0 -${outerSpread}px ${outerSpread * 2}px rgba(${primaryColor}, ${outerOpacity})`,
+    // Secondary mid layer
+    `0 -${midSpread}px ${midSpread * 1.5}px rgba(${midColor}, ${midOpacity})`,
+    // High-freq sharp edge shimmer (white flash on transients)
+    `0 -${highSpread}px ${highSpread * 3}px rgba(${C_WHITE}, ${highOpacity})`,
+    // Inset glow on the bar itself — always visible
+    `inset 0 1px ${insetSize}px rgba(${primaryColor}, ${insetOpacity})`,
+    `inset 0 0 ${Math.round(mid * 20)}px rgba(${midColor}, ${(mid * 0.25).toFixed(2)})`,
+    // Side glow — left and right edges pulse with bass
+    `-${sideSpread}px 0 ${sideSpread * 1.5}px rgba(${primaryColor}, ${sideOpacity})`,
+    `${sideSpread}px 0 ${sideSpread * 1.5}px rgba(${primaryColor}, ${sideOpacity})`,
     // Subtle downward pulse
-    `0 2px ${Math.round(bass * 16)}px rgba(${PURPLE_DEEP}, ${(bass * 0.35).toFixed(2)})`,
+    `0 2px ${Math.round(peak * 18)}px rgba(${primaryColor}, ${(peak * 0.3).toFixed(2)})`,
   ].join(", ");
 }
 
 // ── Module-level singleton Web Audio graph ────────────────────────────────────
-// Kept outside the hook so it survives re-renders and hot-reloads.
-// INVARIANT: once _source is created for an audio element, it is NEVER
-// disconnected. The analyser is ALWAYS connected to destination.
 let _audioCtx: AudioContext | null = null;
 let _analyser: AnalyserNode | null = null;
 let _source: MediaElementAudioSourceNode | null = null;
 let _connectedElement: HTMLAudioElement | null = null;
-// Flag: did we successfully build the graph at least once?
 let _graphReady = false;
 
-/**
- * Ensure the Web Audio graph is built and the given audio element is connected.
- * Safe to call multiple times — idempotent once the graph is ready.
- * Must be called from a user-gesture call chain (toggle click).
- * Returns true if the graph is ready and audio will flow through it.
- */
 async function ensureAudioGraph(audio: HTMLAudioElement): Promise<boolean> {
   try {
-    // Create AudioContext once
     if (!_audioCtx || _audioCtx.state === "closed") {
       _audioCtx = new AudioContext();
       _analyser = null;
@@ -105,48 +130,32 @@ async function ensureAudioGraph(audio: HTMLAudioElement): Promise<boolean> {
       _graphReady = false;
     }
 
-    // Resume if suspended — safe here because we're inside a user-gesture chain
     if (_audioCtx.state === "suspended") {
       await _audioCtx.resume();
     }
 
-    // If still not running, bail — don't touch the audio element
-    if (_audioCtx.state !== "running") {
-      return false;
-    }
+    if (_audioCtx.state !== "running") return false;
 
-    // Create analyser once and wire it permanently to destination
     if (!_analyser) {
       _analyser = _audioCtx.createAnalyser();
       _analyser.fftSize = 256;
-      _analyser.smoothingTimeConstant = 0.8;
-      // ALWAYS connect to destination — audio must always reach speakers
+      // Moderate smoothing — fast enough to catch transients, smooth enough to look good
+      _analyser.smoothingTimeConstant = 0.75;
       _analyser.connect(_audioCtx.destination);
     }
 
-    // Connect source node only once per audio element instance.
-    // If the audio element changed (e.g. PlayerContext created a new one),
-    // we need to connect the new element. We NEVER disconnect the old source
-    // from the analyser — we just create a new source for the new element.
     if (_connectedElement !== audio) {
-      // Note: we do NOT disconnect _source from _analyser here.
-      // The old source will simply stop producing audio when its element is
-      // no longer playing. Creating a new source for the new element is safe.
       try {
         _source = _audioCtx.createMediaElementSource(audio);
         _source.connect(_analyser);
         _connectedElement = audio;
         _graphReady = true;
       } catch (err) {
-        // InvalidStateError: element already has a source node (e.g. same element
-        // was connected in a previous render). This is fine — graph is already set.
         const msg = err instanceof Error ? err.message : String(err);
         if (msg.includes("already") || msg.includes("InvalidState")) {
-          // The element is already connected — graph is ready
           _connectedElement = audio;
           _graphReady = true;
         } else {
-          // Real error (CORS, etc.) — fall back to ambient glow
           return false;
         }
       }
@@ -195,8 +204,9 @@ export function useFrequencyGlow(
   isPlaying: boolean,
 ): FrequencyBands {
   const [bands, setBands] = useState<FrequencyBands>(IDLE);
-  const rafRef = useRef<number | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
+  const rafRef  = useRef<number | null>(null);
+  // Peak envelope — persists across renders, updated inside RAF loop
+  const peakRef = useRef<number>(0);
 
   const stopLoop = useCallback(() => {
     if (rafRef.current !== null) {
@@ -207,29 +217,50 @@ export function useFrequencyGlow(
 
   const startLoop = useCallback((analyser: AnalyserNode) => {
     stopLoop();
-    analyserRef.current = analyser;
+    peakRef.current = 0; // reset peak on new loop start
+
     const tick = () => {
       const { bass, mid, high } = getFrequencyBands(analyser);
-      setBands({ bass, mid, high, glowShadow: buildGlowShadow(bass, mid, high) });
+
+      // ── Beat detection + peak/decay envelope ──────────────────────────────
+      let peak = peakRef.current * DECAY; // decay this frame
+
+      // Beat onset: bass energy jumped above decayed peak × threshold
+      if (bass > peak * BEAT_THRESHOLD) {
+        peak = bass; // snap peak up to current energy
+      }
+
+      // Also let mid/high contribute to peak at lower weight
+      const combinedEnergy = bass + mid * 0.4 + high * 0.15;
+      if (combinedEnergy > peak) {
+        peak = Math.max(peak, combinedEnergy * 0.6);
+      }
+
+      peakRef.current = peak;
+
+      setBands({
+        bass, mid, high, peak,
+        glowShadow: buildGlowShadow(bass, mid, high, peak),
+      });
+
       rafRef.current = requestAnimationFrame(tick);
     };
+
     rafRef.current = requestAnimationFrame(tick);
   }, [stopLoop]);
 
   useEffect(() => {
-    // Glow is off — stop the RAF loop and clear bands.
-    // IMPORTANT: do NOT touch the audio graph here. The source node stays
-    // connected to the analyser which stays connected to destination.
-    // Audio continues to play normally.
     if (!enabled) {
       stopLoop();
+      peakRef.current = 0;
       setBands(IDLE);
       return stopLoop;
     }
 
-    // Glow is on but audio is paused — stop visualizer but keep graph intact
     if (!isPlaying) {
       stopLoop();
+      // Decay peak to zero over a few frames rather than instant cut
+      peakRef.current = 0;
       setBands(IDLE);
       return stopLoop;
     }
@@ -241,24 +272,23 @@ export function useFrequencyGlow(
       return stopLoop;
     }
 
-    // If graph is already ready and analyser is available, just run the loop
+    // Graph already ready — start loop immediately
     if (_graphReady && _analyser && _connectedElement === audio) {
       startLoop(_analyser);
       return stopLoop;
     }
 
-    // First time enabling (or audio element changed): build/update the graph.
-    // This is safe because `enabled` becoming true is always a user toggle click.
+    // First enable or audio element changed — build graph (user-gesture chain)
     let cancelled = false;
     ensureAudioGraph(audio).then((ready) => {
       if (cancelled) return;
       if (ready && _analyser) {
         startLoop(_analyser);
       } else {
-        // CORS or API unavailable — show static ambient glow without Web Audio
+        // CORS/API unavailable — static ambient glow as fallback
         setBands({
-          bass: 0.4, mid: 0.2, high: 0.1,
-          glowShadow: buildGlowShadow(0.4, 0.2, 0.1),
+          bass: 0.4, mid: 0.2, high: 0.1, peak: 0.4,
+          glowShadow: buildGlowShadow(0.4, 0.2, 0.1, 0.4),
         });
       }
     });
