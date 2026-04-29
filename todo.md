@@ -3677,3 +3677,11 @@
 - [x] Build Keeper Notes slide-out drawer in KeeperPage.tsx — NOTES button in top bar, list notes, reload (copy+navigate), delete, tag badges, image previews
 - [x] Flush stale LSP watcher conflict markers — touch schema.ts
 - [x] TypeScript 0 errors, checkpoint, GitHub push, release notes
+
+## Phase 71: Global Player — Frequency Glow + Audio Playback Audit
+
+- [x] Audit useFrequencyGlow hook — RAF loop correct, issue was missing crossOrigin on Audio element
+- [x] Fix frequency glow visual — added crossOrigin=anonymous to Audio element in PlayerContext; expanded glow to radiate inset + sides + downward (not just upward)
+- [x] Audit PlayerContext addAndPlay pipeline — pipeline is correct end-to-end; null fileUrl tracks silently skip (by design)
+- [x] Confirm audio element src is set and play() is called correctly — confirmed, safeAudioUrl is correct
+- [x] TypeScript 0 errors, checkpoint, GitHub push, release notes

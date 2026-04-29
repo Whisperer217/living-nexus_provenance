@@ -7,6 +7,26 @@
 
 ---
 
+## v2.32.4 — April 29, 2026 (Frequency Glow Fix + Audio Pipeline Audit)
+
+### What Shipped
+
+**Frequency Glow Visual Fix (PlayerContext + useFrequencyGlow)**
+- Root cause: `Audio` element created without `crossOrigin = "anonymous"` — Web Audio API's `createMediaElementSource()` requires this before any S3 URL is loaded. Without it, the browser CORS-taints the stream and blocks the analyser from reading frequency data.
+- Fix 1: `PlayerContext.tsx` — `new Audio()` now sets `crossOrigin = "anonymous"` before any `src` is assigned
+- Fix 2: `useFrequencyGlow.ts` — `buildGlowShadow` now radiates in all directions: upward (above bar), inset (on the bar itself, always visible), left/right sides, and a subtle downward pulse. Previously only upward, which was hidden behind page content above the bar.
+
+**Audio Playback Pipeline Audit — Confirmed Correct**
+- Pipeline: `song.fileUrl` (DB) → `mapToSongData.fileUrl` → `toTrack(s).audioUrl` → `addAndPlay(track)` → `audio.src = safeAudioUrl(url)` → `audio.play()`
+- `safeAudioUrl` correctly re-encodes path segments for filenames with spaces
+- Tracks with null `fileUrl` silently skip (play button hidden on those cards — by design)
+- Audio playback issues reported by users are likely network/internet related (S3 URLs require stable connection)
+
+### Manus Pub Action Required
+- None — all changes are in `PlayerContext.tsx` and `useFrequencyGlow.ts`. Publish to deploy.
+
+---
+
 ## v2.32.3 — April 29, 2026 (Keeper Notes Drawer + What's New + LSP Flush)
 
 ### What Shipped
