@@ -7,6 +7,29 @@
 
 ---
 
+## v2.33.0 — April 29, 2026 (Live Waveform Visualizer + Reaction Fix)
+
+### What Shipped
+
+**Live Waveform Visualizer (PlayerBar)**
+- New `client/src/hooks/useWaveformVisualizer.ts` hook draws a real-time oscilloscope waveform to a `<canvas>` element in the compact player bar.
+- Uses `getByteTimeDomainData` (time-domain samples) for the wave shape — smooth bezier curve, full bar width, vertically centered.
+- Color shifts with frequency content: violet at rest → gold on bass hits → cyan on mid-heavy passages.
+- Shares the same Web Audio graph (AudioContext + AnalyserNode) as `useFrequencyGlow` via `window.__lnAudioCtx/Analyser/Source` globals — no double-connect, no extra CPU.
+- `useFrequencyGlow` bumped `fftSize` from 256 → 2048 so both hooks get high-resolution data.
+- Canvas is `position: absolute`, `pointer-events: none`, `zIndex: 0` — sits behind all controls, never intercepts clicks.
+- Toggled by the existing `∿` Frequency Glow button (same localStorage key `ln-player-glow`).
+- Fades in/out with `opacity` transition (0.4s ease) when toggled.
+
+**Reaction Error Fix (Production)**
+- `server/db.ts` connection pool: added `connectTimeout: 10000` and `idleTimeout: 60000` to handle ECONNRESET on idle TiDB serverless connections.
+- `client/src/pages/SongDetailPage.tsx` `onError` handler: replaced `toast.error(err?.message || ...)` with `toast.error("Reaction failed — please try again")` — raw SQL no longer leaks to the UI.
+
+### Manus Pub Action Required
+- Publish the new checkpoint to deploy the waveform visualizer and reaction fix to production.
+
+---
+
 ## v2.32.5 — April 29, 2026 (Beat-Reactive Glow Pulse)
 
 ### What Shipped

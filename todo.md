@@ -3685,3 +3685,15 @@
 - [x] Audit PlayerContext addAndPlay pipeline — pipeline is correct end-to-end; null fileUrl tracks silently skip (by design)
 - [x] Confirm audio element src is set and play() is called correctly — confirmed, safeAudioUrl is correct
 - [x] TypeScript 0 errors, checkpoint, GitHub push, release notes
+
+### Phase 73: Bug Fix — songReactions Production Insert Failure
+- [x] Fix songReactions insert failure on production — DB connection pool ECONNRESET (idleTimeout 60s + connectTimeout 10s); sanitize error toast to never leak raw SQL
+## Phase 74: Live Waveform Visualizer
+- [x] Add useWaveformVisualizer.ts hook — oscilloscope canvas, bezier wave, color shifts violet→gold→cyan with frequency bands
+- [x] Canvas behind player controls, pointer-events: none, z-index: 0
+- [x] Smooth bezier wave driven by real time-domain audio data (getByteTimeDomainData)
+- [x] Shares Web Audio graph with useFrequencyGlow via window globals (no double-connect)
+- [x] useFrequencyGlow fftSize bumped 256→2048 for high-res shared data
+- [x] Toggled by existing ∿ Frequency Glow button (same localStorage key)
+- [x] WhatsNewModal bumped to v2.33.0, RELEASE_NOTES.md updated
+- [x] TypeScript 0 errors, checkpoint, GitHub push

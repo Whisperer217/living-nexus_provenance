@@ -105,9 +105,9 @@ export default function SongDetailPage() {
       });
       return { prev };
     },
-    onError: (err: any, _vars, ctx: any) => {
+    onError: (_err: any, _vars, ctx: any) => {
       if (ctx?.prev) utils.songs.getReactions.setData({ songId }, ctx.prev);
-      toast.error(err?.message || "Reaction failed — please try again");
+      toast.error("Reaction failed — please try again");
     },
     onSettled: () => {
       utils.songs.getReactions.invalidate({ songId });
