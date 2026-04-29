@@ -3,7 +3,9 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
-import { ArrowLeft, Lock, Upload, Check, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, Lock, Upload, Check, Loader2, Zap, BookOpen, Trash2, RotateCcw, X, Tag } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 
 // ─── Skin catalogue ───────────────────────────────────────────────────────────
@@ -109,15 +111,36 @@ export default function Keeper() {
   const [selectedSkin, setSelectedSkin] = useState<string | null>(null);
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [reloadingNoteId, setReloadingNoteId] = useState<number | null>(null);
 
   // Per-archetype attribute state — shared via KeeperAttrsContext
   const { archetypeAttrs, setArchetypeAttrs, attrs, handleAttrChange, handleModeChange } = useKeeperAttrs();
 
   const profileQuery = trpc.keeper.getProfile.useQuery(undefined, { enabled: !!user });
+  const notesQuery = trpc.keeper.listNotes.useQuery(undefined, { enabled: !!user && notesOpen });
+  const deleteNoteMutation = trpc.keeper.deleteNote.useMutation({
+    onSuccess: () => utils.keeper.listNotes.invalidate(),
+    onError: () => toast.error("Failed to delete note."),
+  });
   const unlockMutation = trpc.keeper.unlockSkin.useMutation();
   const setActiveMutation = trpc.keeper.setActiveSkin.useMutation();
   const uploadMutation = trpc.keeper.uploadCustomPortrait.useMutation();
   const utils = trpc.useUtils();
+
+  /** Reload a saved note into the Keeper chat by navigating to the Keeper chat page with the note pre-filled */
+  const handleReloadNote = (content: string, noteId: number) => {
+    setReloadingNoteId(noteId);
+    // Copy to clipboard so user can paste into chat, and show a toast
+    navigator.clipboard.writeText(content).then(() => {
+      toast.success("Note copied to clipboard — paste it into the Keeper chat.", { duration: 4000 });
+    }).catch(() => {
+      toast.info("Note ready — paste into the Keeper chat.");
+    });
+    setReloadingNoteId(null);
+    setNotesOpen(false);
+    navigate("/keeper-chat");
+  };
 
   const profile = profileQuery.data;
   const ownedSkins = new Set(profile?.ownedSkins ?? []);
@@ -199,8 +222,152 @@ export default function Keeper() {
           <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.7rem" }}>BACK TO SURFACE</span>
         </button>
         <div className="flex-1" />
+        {/* Notes button */}
+        <button
+          onClick={() => setNotesOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80 relative"
+          style={{
+            background: "var(--ln-gold)18",
+            border: "1px solid var(--ln-gold)44",
+            color: "var(--ln-gold)",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "0.6rem",
+            letterSpacing: "0.08em",
+          }}
+        >
+          <BookOpen className="w-3 h-3" />
+          NOTES
+          {notesQuery.data && notesQuery.data.length > 0 && (
+            <span
+              className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-xs"
+              style={{ background: "var(--ln-gold)", color: "#0a0a0a", fontSize: "0.5rem", fontFamily: "'Space Mono', monospace" }}
+            >
+              {notesQuery.data.length > 99 ? "99+" : notesQuery.data.length}
+            </span>
+          )}
+        </button>
         <div className="ln-wid-badge">KEEPER SCREEN</div>
       </header>
+
+      {/* ── Notes Drawer ─────────────────────────────────────────────────── */}
+      <Sheet open={notesOpen} onOpenChange={setNotesOpen}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-md flex flex-col p-0"
+          style={{ background: "var(--ln-panel)", borderLeft: "1px solid var(--ln-panel-border)" }}
+        >
+          <SheetHeader className="px-5 py-4 border-b flex-shrink-0" style={{ borderColor: "var(--ln-panel-border)" }}>
+            <div className="flex items-center justify-between">
+              <SheetTitle
+                className="flex items-center gap-2"
+                style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.1em" }}
+              >
+                <BookOpen className="w-4 h-4" />
+                KEEPER NOTES
+              </SheetTitle>
+              <button
+                onClick={() => setNotesOpen(false)}
+                className="p-1 rounded hover:opacity-70 transition-opacity"
+                style={{ color: "var(--ln-smoke)" }}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <SheetDescription style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.06em", marginTop: 4 }}>
+              SAVED FROM KEEPER CHAT · CLICK TO RELOAD
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+            {notesQuery.isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--ln-gold)" }} />
+              </div>
+            )}
+            {!notesQuery.isLoading && (!notesQuery.data || notesQuery.data.length === 0) && (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <BookOpen className="w-8 h-8 opacity-30" style={{ color: "var(--ln-gold)" }} />
+                <p style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em", textAlign: "center" }}>
+                  NO NOTES SAVED YET<br />
+                  <span style={{ opacity: 0.6 }}>USE THE KEEPER CHAT TO SAVE IDEAS,<br />LYRICS, AND INSPIRATIONS.</span>
+                </p>
+              </div>
+            )}
+            {notesQuery.data?.map((note: import('@/../../drizzle/schema').KeeperNote) => (
+              <div
+                key={note.id}
+                className="rounded p-3 flex flex-col gap-2 group"
+                style={{ background: "var(--ln-obsidian)", border: "1px solid var(--ln-panel-border)" }}
+              >
+                {/* Header row */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className="font-semibold truncate"
+                      style={{ color: "var(--ln-parchment)", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}
+                    >
+                      {note.title}
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.5rem" }}>
+                        {note.personaId.toUpperCase()} · {new Date(note.createdAt).toLocaleDateString()}
+                      </span>
+                      {note.tag && (
+                        <Badge
+                          variant="outline"
+                          className="h-3.5 px-1 text-xs"
+                          style={{ color: "var(--ln-gold)", borderColor: "var(--ln-gold)44", fontFamily: "'Space Mono', monospace", fontSize: "0.45rem" }}
+                        >
+                          <Tag className="w-2 h-2 mr-0.5" />
+                          {note.tag}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => handleReloadNote(note.content, note.id)}
+                      disabled={reloadingNoteId === note.id}
+                      className="p-1.5 rounded transition-all hover:opacity-80"
+                      style={{ background: "var(--ln-gold)18", border: "1px solid var(--ln-gold)44", color: "var(--ln-gold)" }}
+                      title="Copy to clipboard and open Keeper chat"
+                    >
+                      {reloadingNoteId === note.id
+                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                        : <RotateCcw className="w-3 h-3" />}
+                    </button>
+                    <button
+                      onClick={() => deleteNoteMutation.mutate({ id: note.id })}
+                      disabled={deleteNoteMutation.isPending}
+                      className="p-1.5 rounded transition-all hover:opacity-80"
+                      style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444" }}
+                      title="Delete note"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+                {/* Preview */}
+                <p
+                  className="line-clamp-3 text-xs leading-relaxed"
+                  style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.58rem" }}
+                >
+                  {note.content}
+                </p>
+                {note.imageUrl && (
+                  <img
+                    src={note.imageUrl}
+                    alt="Note attachment"
+                    className="w-full max-h-32 object-cover rounded"
+                    style={{ border: "1px solid var(--ln-panel-border)" }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Main layout — single column on mobile, 3-col on desktop */}
       <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
