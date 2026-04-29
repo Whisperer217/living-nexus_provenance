@@ -46,6 +46,9 @@ export async function getDb() {
         queueLimit: 0,
         enableKeepAlive: true,
         keepAliveInitialDelay: 10000,
+        // Prevent stale connections from causing ECONNRESET on serverless TiDB
+        connectTimeout: 10000,
+        idleTimeout: 60000, // drop idle connections after 60s
       });
       _db = drizzle(_pool as any);
       console.log("[Database] Connection pool initialized (limit: 20)");

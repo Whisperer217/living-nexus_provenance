@@ -10,14 +10,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.32.2";
+const CURRENT_VERSION = "v2.33.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.33.0",
+    date: "April 29, 2026",
+    label: "Latest",
+    items: [
+      { icon: Zap, text: "Live Waveform Visualizer — The player bar now has a real-time oscilloscope waveform drawn directly from the audio signal. When Frequency Glow is enabled (the ∿ button), a smooth bezier wave runs the full width of the bar, color-shifting from violet at rest to gold on bass hits and cyan on mid-heavy passages. The wave is drawn on a canvas layer behind the controls so nothing is obscured. The glow effect and waveform share the same Web Audio graph — no extra CPU overhead." },
+      { icon: Shield, text: "Reaction Error Fixed (Production) — Emoji reactions were silently failing on the live site with a raw database error message appearing in the toast. Two fixes: the DB connection pool now handles ECONNRESET (stale serverless connections) with a 60-second idle timeout, and the error toast now always shows a clean user-facing message instead of leaking internal SQL." },
+    ],
+  },
+  {
     version: "v2.32.2",
     date: "April 28, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Shield, text: "Emoji Reactions Fixed — The 🔥❤️👏 reaction bar on song pages was silently failing for all users. A database column mismatch (emoji chars stored in a varchar(10) utf8 column) caused every reaction toggle to roll back without any error message. The column has been migrated to a safe varchar(32) utf8mb4 type using ASCII slug keys. Reactions now register correctly and a clear error toast appears if anything goes wrong." },
       { icon: Users, text: "Creator Cards Fixed — Clicking a creator card on the Home page showcase rows or Explore page was returning a 404. The card was linking to the creator's @handle instead of their numeric profile ID. All creator cards now navigate correctly to the full public profile with their complete track list, albums, and collections." },

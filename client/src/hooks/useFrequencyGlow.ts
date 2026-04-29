@@ -124,6 +124,7 @@ async function ensureAudioGraph(audio: HTMLAudioElement): Promise<boolean> {
   try {
     if (!_audioCtx || _audioCtx.state === "closed") {
       _audioCtx = new AudioContext();
+      (window as any).__lnAudioCtx = _audioCtx;
       _analyser = null;
       _source = null;
       _connectedElement = null;
@@ -138,10 +139,11 @@ async function ensureAudioGraph(audio: HTMLAudioElement): Promise<boolean> {
 
     if (!_analyser) {
       _analyser = _audioCtx.createAnalyser();
-      _analyser.fftSize = 256;
+      _analyser.fftSize = 2048; // high-res for both glow and waveform
       // Moderate smoothing — fast enough to catch transients, smooth enough to look good
       _analyser.smoothingTimeConstant = 0.75;
       _analyser.connect(_audioCtx.destination);
+      (window as any).__lnAnalyser = _analyser;
     }
 
     if (_connectedElement !== audio) {
@@ -150,6 +152,7 @@ async function ensureAudioGraph(audio: HTMLAudioElement): Promise<boolean> {
         _source.connect(_analyser);
         _connectedElement = audio;
         _graphReady = true;
+        (window as any).__lnSource = _source;
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         if (msg.includes("already") || msg.includes("InvalidState")) {

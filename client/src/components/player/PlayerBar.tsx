@@ -9,6 +9,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
+import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, DollarSign, Maximize2, Minimize2,
@@ -62,6 +63,10 @@ export default function PlayerBar() {
     return next;
   });
   const { glowShadow } = useFrequencyGlow(audioRef, glowEnabled, state.isPlaying);
+
+  // ── Waveform canvas ──
+  const waveCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  useWaveformVisualizer(audioRef, waveCanvasRef, glowEnabled, state.isPlaying);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
@@ -692,8 +697,24 @@ export default function PlayerBar() {
       {!isExpanded && (
         <div
           className="flex items-center gap-4"
-          style={{ height: "68px", backgroundColor: "#000000", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible" }}
+          style={{ height: "68px", backgroundColor: "#000000", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible", position: "relative" }}
         >
+          {/* Waveform canvas — full-width oscilloscope behind controls */}
+          <canvas
+            ref={waveCanvasRef}
+            width={1200}
+            height={68}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              opacity: glowEnabled ? 1 : 0,
+              transition: "opacity 0.4s ease",
+              zIndex: 0,
+            }}
+          />
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
             {/* Art — 56px, clickable → song page */}
