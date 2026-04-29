@@ -3703,3 +3703,7 @@
 - [x] WhatsNewModal — backfilled v2.32.4 (Frequency Glow Visual Fix) and v2.32.5 (Beat-Reactive Glow Pulse) entries between v2.33.0 and v2.32.2
 - [x] Keeper chat profile injection — wire ctx.user profile (name, artistHandle, bio, expressionId, EID fields, primaryGenre, toneFrequencyNote, dominantKey, tempoRange, energyProfile, location) into keeper.chat system prompt as CREATOR IDENTITY PROFILE block
 - [x] TypeScript 0 errors, checkpoint, GitHub push
+
+## Phase 76: Waveform Position + Mobile Glow Indicator
+- [x] Fix desktop waveform canvas position — canvas moved from outer bar wrapper into center controls div (flex-1), constrained to progress bar region only
+- [x] Add beat-reactive frequency glow to mobile player audio indicator bars icon — useMobileAudioGlow hook reads window.__lnAnalyser, drives bar heights + violet/gold/cyan color; CSS fallback when glow is off
