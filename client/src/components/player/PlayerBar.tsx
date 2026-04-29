@@ -699,22 +699,6 @@ export default function PlayerBar() {
           className="flex items-center gap-4"
           style={{ height: "68px", backgroundColor: "#000000", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible", position: "relative" }}
         >
-          {/* Waveform canvas — full-width oscilloscope behind controls */}
-          <canvas
-            ref={waveCanvasRef}
-            width={1200}
-            height={68}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              opacity: glowEnabled ? 1 : 0,
-              transition: "opacity 0.4s ease",
-              zIndex: 0,
-            }}
-          />
           {/* ── Track info (left) ── */}
           <div className="flex items-center gap-3 w-[240px] flex-shrink-0 min-w-0">
             {/* Art — 56px, clickable → song page */}
@@ -780,7 +764,23 @@ export default function PlayerBar() {
           </div>
 
           {/* ── Controls (center) ── */}
-          <div className="flex-1 flex flex-col items-center gap-1.5">
+          <div className="flex-1 flex flex-col items-center gap-1.5" style={{ position: "relative" }}>
+            {/* Waveform canvas — anchored to center column only */}
+            <canvas
+              ref={waveCanvasRef}
+              width={1200}
+              height={68}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                pointerEvents: "none",
+                opacity: glowEnabled ? 1 : 0,
+                transition: "opacity 0.4s ease",
+                zIndex: 0,
+              }}
+            />
             <div className="flex items-center gap-4" style={{ marginTop: "6px" }}>
               <button
                 onClick={toggleShuffle}

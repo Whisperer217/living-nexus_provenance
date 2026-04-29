@@ -25,6 +25,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { useLightsMode } from "@/contexts/LightsModeContext";
+import { useMobileAudioGlow } from "@/hooks/useMobileAudioGlow";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Heart, Music,
@@ -276,6 +277,11 @@ export default function MobilePlayerLayer() {
 
   // Expanded sheet tab: "playing" | "discover"
   const [expandedTab, setExpandedTab] = useState<"playing" | "discover">("playing");
+  // Frequency glow — reads same localStorage key as desktop PlayerBar
+  const [glowEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem("ln-player-glow") === "on"; } catch { return false; }
+  });
+  const { barHeights, glowColor, glowShadow: mobileGlowShadow } = useMobileAudioGlow(state.isPlaying, glowEnabled);
   // Canonical panel states
   const [widPanelOpen, setWidPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
@@ -1006,14 +1012,25 @@ export default function MobilePlayerLayer() {
           <SkipForward size={18} fill="currentColor" />
         </button>
 
-        {/* Vertical audio visualizer — visible when playing */}
+        {/* Vertical audio visualizer — beat-reactive when glow enabled, CSS fallback otherwise */}
         {state.isPlaying && (
-          <div className="flex-shrink-0 flex items-end gap-[2px] h-5 px-0.5" aria-hidden>
-            {[1, 2, 3, 4, 5].map(i => (
+          <div
+            className="flex-shrink-0 flex items-end gap-[2px] h-5 px-0.5"
+            aria-hidden
+            style={glowEnabled ? { filter: `drop-shadow(0 0 4px ${glowColor})` } : undefined}
+          >
+            {[0, 1, 2, 3, 4].map(i => (
               <span
                 key={i}
                 className="w-[2px] rounded-full"
-                style={{
+                style={glowEnabled ? {
+                  // Reactive: height from analyser, color from beat palette
+                  background: glowColor,
+                  height: `${Math.max(3, Math.round(barHeights[i] * 20))}px`,
+                  minHeight: "3px",
+                  transition: "height 0.05s ease-out, background 0.1s ease",
+                } : {
+                  // CSS fallback animation
                   background: "rgba(232,223,200,0.6)",
                   animationName: "mobileWave",
                   animationDuration: `${0.35 + i * 0.09}s`,
