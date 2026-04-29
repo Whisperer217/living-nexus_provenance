@@ -610,6 +610,20 @@
       "when": 1777331154079,
       "tag": "0087_real_imperial_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "5",
+      "when": 1777352409646,
+      "tag": "0088_easy_meteorite",
+      "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "5",
+      "when": 1777436688129,
+      "tag": "0089_normal_warpath",
+      "breakpoints": true
     }
   ]
 }

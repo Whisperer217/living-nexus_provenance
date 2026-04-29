@@ -1,0 +1,21 @@
+{
+  "query": "SHOW COLUMNS FROM songs LIKE 'status';\nSELECT status, COUNT(*) as count FROM songs GROUP BY status;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SHOW COLUMNS FROM songs LIKE 'status';\nSELECT status, COUNT(*) as count FROM songs GROUP BY status;",
+  "rows": [
+    {
+      "Field": "status",
+      "Type": "enum('Draft','Published','Unlisted','Deleted')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "Published",
+      "Extra": ""
+    }
+  ],
+  "messages": [
+    "status\tcount",
+    "Published\t2"
+  ],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nstatus\tenum('Draft','Published','Unlisted','Deleted')\tNO\t\tPublished\t\nstatus\tcount\nPublished\t2\n",
+  "stderr": "",
+  "execution_time_ms": 398
+}

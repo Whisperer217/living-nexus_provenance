@@ -1,0 +1,20 @@
+{
+  "query": "SELECT u.id, u.name, u.artistHandle, u.stripeAccountId, u.stripeAccountStatus FROM users u WHERE u.name LIKE '%Mosh%' OR u.artistHandle LIKE '%Mosh%' OR u.artistHandle LIKE '%Slimdoggy%' OR u.name LIKE '%Slimdoggy%' LIMIT 5; SHOW TABLES LIKE '%tip%'; SHOW TABLES LIKE '%payment%'; SHOW TABLES LIKE '%gift%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT u.id, u.name, u.artistHandle, u.stripeAccountId, u.stripeAccountStatus FROM users u WHERE u.name LIKE '%Mosh%' OR u.artistHandle LIKE '%Mosh%' OR u.artistHandle LIKE '%Slimdoggy%' OR u.name LIKE '%Slimdoggy%' LIMIT 5; SHOW TABLES LIKE '%tip%'; SHOW TABLES LIKE '%payment%'; SHOW TABLES LIKE '%gift%';",
+  "rows": [
+    {
+      "id": "780095",
+      "name": "MoshAI",
+      "artistHandle": "MoshAIMusic",
+      "stripeAccountId": "acct_1TG8jYLLgcfV0oZB",
+      "stripeAccountStatus": "enabled"
+    }
+  ],
+  "messages": [
+    "Tables_in_7kHkqvMBX9Ci3pQfWTqqQr (%tip%)",
+    "tips"
+  ],
+  "stdout": "id\tname\tartistHandle\tstripeAccountId\tstripeAccountStatus\n780095\tMoshAI\tMoshAIMusic\tacct_1TG8jYLLgcfV0oZB\tenabled\nTables_in_7kHkqvMBX9Ci3pQfWTqqQr (%tip%)\ntips\n",
+  "stderr": "",
+  "execution_time_ms": 75
+}

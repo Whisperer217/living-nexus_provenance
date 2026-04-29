@@ -1,0 +1,90 @@
+{
+  "query": "SELECT id, name, artistHandle, email, role, licenseStatus FROM users ORDER BY id ASC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT id, name, artistHandle, email, role, licenseStatus FROM users ORDER BY id ASC LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Doc Seraph Mercer",
+      "artistHandle": "NULL",
+      "email": "goodlifepcdaddy@gmail.com",
+      "role": "admin",
+      "licenseStatus": "licensed"
+    },
+    {
+      "id": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "HlkngMniacNrdWrmngr",
+      "email": "gradebbountyhunting@gmail.com",
+      "role": "user",
+      "licenseStatus": "licensed"
+    },
+    {
+      "id": "300012",
+      "name": "NULL",
+      "artistHandle": "NULL",
+      "email": "NULL",
+      "role": "admin",
+      "licenseStatus": "free"
+    },
+    {
+      "id": "300013",
+      "name": "NULL",
+      "artistHandle": "NULL",
+      "email": "NULL",
+      "role": "admin",
+      "licenseStatus": "free"
+    },
+    {
+      "id": "300014",
+      "name": "NULL",
+      "artistHandle": "NULL",
+      "email": "NULL",
+      "role": "admin",
+      "licenseStatus": "free"
+    },
+    {
+      "id": "300015",
+      "name": "NULL",
+      "artistHandle": "NULL",
+      "email": "NULL",
+      "role": "admin",
+      "licenseStatus": "free"
+    },
+    {
+      "id": "300016",
+      "name": "NULL",
+      "artistHandle": "NULL",
+      "email": "NULL",
+      "role": "admin",
+      "licenseStatus": "free"
+    },
+    {
+      "id": "300017",
+      "name": "NULL",
+      "artistHandle": "NULL",
+      "email": "NULL",
+      "role": "admin",
+      "licenseStatus": "free"
+    },
+    {
+      "id": "300018",
+      "name": "NULL",
+      "artistHandle": "NULL",
+      "email": "NULL",
+      "role": "admin",
+      "licenseStatus": "free"
+    },
+    {
+      "id": "300019",
+      "name": "NULL",
+      "artistHandle": "NULL",
+      "email": "NULL",
+      "role": "admin",
+      "licenseStatus": "free"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tartistHandle\temail\trole\tlicenseStatus\n1\tDoc Seraph Mercer\tNULL\tgoodlifepcdaddy@gmail.com\tadmin\tlicensed\n180001\tMannon The Conquerer\tHlkngMniacNrdWrmngr\tgradebbountyhunting@gmail.com\tuser\tlicensed\n300012\tNULL\tNULL\tNULL\tadmin\tfree\n300013\tNULL\tNULL\tNULL\tadmin\tfree\n300014\tNULL\tNULL\tNULL\tadmin\tfree\n300015\tNULL\tNULL\tNULL\tadmin\tfree\n300016\tNULL\tNULL\tNULL\tadmin\tfree\n300017\tNULL\tNULL\tNULL\tadmin\tfree\n300018\tNULL\tNULL\tNULL\tadmin\tfree\n300019\tNULL\tNULL\tNULL\tadmin\tfree\n",
+  "stderr": "",
+  "execution_time_ms": 101
+}

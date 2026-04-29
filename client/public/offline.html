@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080d14" />
+  <title>Living Nexus — Offline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #D4AF37;
+      --gold-light: #F5D76E;
+      --bg: #080d14;
+      --bg-card: #0e1520;
+      --text: #e8e0d0;
+      --muted: rgba(232,224,208,0.45);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Subtle radial glow */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 50% 30%, rgba(212,175,55,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 420px;
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    /* Logo ring */
+    .logo-ring {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid rgba(212,175,55,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      box-shadow: 0 0 32px rgba(212,175,55,0.12), 0 0 0 8px rgba(212,175,55,0.04);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 32px rgba(212,175,55,0.12), 0 0 0 8px rgba(212,175,55,0.04); }
+      50%       { box-shadow: 0 0 48px rgba(212,175,55,0.22), 0 0 0 12px rgba(212,175,55,0.07); }
+    }
+
+    .logo-ring img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* Wordmark */
+    .wordmark {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(212,175,55,0.08);
+      border: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* Main message */
+    .headline {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .subtext {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    /* WID safety card */
+    .wid-card {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid rgba(212,175,55,0.15);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      text-align: left;
+    }
+
+    .wid-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .wid-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .wid-text {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Retry button */
+    .retry-btn {
+      margin-top: 0.5rem;
+      padding: 0.75rem 2rem;
+      border-radius: 10px;
+      background: var(--gold);
+      color: #080d14;
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .retry-btn:hover { background: var(--gold-light); }
+    .retry-btn:active { transform: scale(0.97); }
+
+    .footer-text {
+      font-size: 0.7rem;
+      color: rgba(232,224,208,0.2);
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Logo -->
+    <div class="logo-ring">
+      <img
+        src="https://cdn-assets.manus.space/webdev-assets/living-nexus/icon-192.png"
+        alt="Living Nexus"
+        onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-family:Cinzel,serif;color:#D4AF37;font-size:1.5rem;font-weight:700\'>LN</span>'"
+      />
+    </div>
+
+    <!-- Wordmark -->
+    <div class="wordmark">Living Nexus</div>
+
+    <!-- Status -->
+    <div class="badge">
+      <span class="badge-dot"></span>
+      You are offline
+    </div>
+
+    <!-- Headline -->
+    <div class="headline">Connection lost.<br/>Your music is still here.</div>
+
+    <p class="subtext">
+      Living Nexus is temporarily unreachable. Any cached tracks will continue
+      to play. Your tips and uploads will sync automatically when you reconnect.
+    </p>
+
+    <!-- WID safety card -->
+    <div class="wid-card">
+      <div class="wid-icon">🔐</div>
+      <div>
+        <div class="wid-label">Witness IDs are safe</div>
+        <div class="wid-text">
+          Every Witness ID is cryptographically recorded on-chain. Your
+          provenance is permanent and cannot be lost, altered, or taken from
+          you — online or offline.
+        </div>
+      </div>
+    </div>
+
+    <!-- Retry -->
+    <button class="retry-btn" onclick="window.location.reload()">
+      Try Again
+    </button>
+
+    <div class="footer-text">Command Domains LLC · BDDT Publishing</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "query": "SELECT COUNT(*) as total FROM nameHistory;\nSELECT nh.id, nh.userId, u.name as currentName, nh.oldName, nh.newName, nh.changedAt \nFROM nameHistory nh \nJOIN users u ON u.id = nh.userId \nORDER BY nh.changedAt ASC \nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT COUNT(*) as total FROM nameHistory;\nSELECT nh.id, nh.userId, u.name as currentName, nh.oldName, nh.newName, nh.changedAt \nFROM nameHistory nh \nJOIN users u ON u.id = nh.userId \nORDER BY nh.changedAt ASC \nLIMIT 10;",
+  "rows": [
+    {
+      "total": "81"
+    },
+    {
+      "total": "id\tuserId\tcurrentName\toldName\tnewName\tchangedAt"
+    },
+    {
+      "total": "1\t1\tDoc Seraph Mercer\tNULL\tDoc Seraph Mercer\t2026-03-17 03:55:09"
+    },
+    {
+      "total": "2\t180001\tMannon The Conquerer\tNULL\tMannon The Conquerer\t2026-03-17 23:24:30"
+    },
+    {
+      "total": "3\t330007\tMaxSpeed\tNULL\tMaxSpeed\t2026-03-18 04:23:01"
+    },
+    {
+      "total": "4\t330010\tJake Seraph Mercer\tNULL\tJake Seraph Mercer\t2026-03-18 04:25:15"
+    },
+    {
+      "total": "5\t690002\tJake Seraph Mercer\tNULL\tJake Seraph Mercer\t2026-03-19 21:19:08"
+    },
+    {
+      "total": "6\t720001\tJake Seraph Mercer\tNULL\tJake Seraph Mercer\t2026-03-20 00:39:55"
+    },
+    {
+      "total": "7\t720051\tGreg Speed\tNULL\tGreg Speed\t2026-03-20 01:12:29"
+    },
+    {
+      "total": "8\t780040\tMannon The Conquerer\tNULL\tMannon The Conquerer\t2026-03-20 03:04:42"
+    },
+    {
+      "total": "9\t780095\tMoshAI\tNULL\tMoshAI\t2026-03-20 03:26:25"
+    },
+    {
+      "total": "10\t900006\tBrandon Reedy\tNULL\tBrandon Reedy\t2026-03-20 13:27:21"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n81\nid\tuserId\tcurrentName\toldName\tnewName\tchangedAt\n1\t1\tDoc Seraph Mercer\tNULL\tDoc Seraph Mercer\t2026-03-17 03:55:09\n2\t180001\tMannon The Conquerer\tNULL\tMannon The Conquerer\t2026-03-17 23:24:30\n3\t330007\tMaxSpeed\tNULL\tMaxSpeed\t2026-03-18 04:23:01\n4\t330010\tJake Seraph Mercer\tNULL\tJake Seraph Mercer\t2026-03-18 04:25:15\n5\t690002\tJake Seraph Mercer\tNULL\tJake Seraph Mercer\t2026-03-19 21:19:08\n6\t720001\tJake Seraph Mercer\tNULL\tJake Seraph Mercer\t2026-03-20 00:39:55\n7\t720051\tGreg Speed\tNULL\tGreg Speed\t2026-03-20 01:12:29\n8\t780040\tMannon The Conquerer\tNULL\tMannon The Conquerer\t2026-03-20 03:04:42\n9\t780095\tMoshAI\tNULL\tMoshAI\t2026-03-20 03:26:25\n10\t900006\tBrandon Reedy\tNULL\tBrandon Reedy\t2026-03-20 13:27:21\n",
+  "stderr": "",
+  "execution_time_ms": 74
+}

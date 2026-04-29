@@ -1,0 +1,43 @@
+{
+  "query": "\nSELECT COUNT(*) as userCount FROM users;\nSELECT COUNT(*) as songCount FROM songs WHERE status != 'Deleted';\nSELECT COUNT(*) as widCount FROM songs WHERE witnessId IS NOT NULL AND status != 'Deleted';\nSELECT u.id, u.name, COUNT(s.id) as trackCount FROM users u LEFT JOIN songs s ON s.userId = u.id AND s.status != 'Deleted' GROUP BY u.id LIMIT 5;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute \nSELECT COUNT(*) as userCount FROM users;\nSELECT COUNT(*) as songCount FROM songs WHERE status != 'Deleted';\nSELECT COUNT(*) as widCount FROM songs WHERE witnessId IS NOT NULL AND status != 'Deleted';\nSELECT u.id, u.name, COUNT(s.id) as trackCount FROM users u LEFT JOIN songs s ON s.userId = u.id AND s.status != 'Deleted' GROUP BY u.id LIMIT 5;\n",
+  "rows": [
+    {
+      "userCount": "13237"
+    },
+    {
+      "userCount": "songCount"
+    },
+    {
+      "userCount": "136"
+    },
+    {
+      "userCount": "widCount"
+    },
+    {
+      "userCount": "135"
+    },
+    {
+      "userCount": "id\tname\ttrackCount"
+    },
+    {
+      "userCount": "3210419\tNULL\t0"
+    },
+    {
+      "userCount": "1800027\tNULL\t0"
+    },
+    {
+      "userCount": "2010002\tNULL\t0"
+    },
+    {
+      "userCount": "2340524\tNULL\t0"
+    },
+    {
+      "userCount": "2310585\tNULL\t0"
+    }
+  ],
+  "messages": [],
+  "stdout": "userCount\n13237\nsongCount\n136\nwidCount\n135\nid\tname\ttrackCount\n3210419\tNULL\t0\n1800027\tNULL\t0\n2010002\tNULL\t0\n2340524\tNULL\t0\n2310585\tNULL\t0\n",
+  "stderr": "",
+  "execution_time_ms": 154
+}

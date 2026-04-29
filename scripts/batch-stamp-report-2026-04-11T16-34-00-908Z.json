@@ -1,0 +1,42 @@
+{
+  "startedAt": "2026-04-11T16:34:00.908Z",
+  "completedAt": "2026-04-11T16:34:09.256Z",
+  "dryRun": false,
+  "totalEligible": 2,
+  "processed": 2,
+  "succeeded": 2,
+  "failed": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "songId": 1470007,
+      "userId": 330007,
+      "title": "Prayer Warrior",
+      "witnessId": "WID-MUS-AD3E9F02-041FFD8D",
+      "stampId": "SS-1470007-330007-7D64A60B-0392F632",
+      "toneFrequencyHz": 19026,
+      "originalHash": "0392f632b378a81373d150a516d2fbd5115ecee3d5733bfaf597e165848c1688",
+      "stampedHash": "f8aef2043a94a0a8fb7c51c6cf30b961694aa0154fb054d4228a6f95b30de172",
+      "stampedFileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/330007/stamped-1775925244038-1775142245486-Prayer_Warrior.mp3",
+      "certificateUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/certificates/330007/SS-1470007-330007-7D64A60B-0392F632.txt",
+      "status": "success",
+      "error": null,
+      "durationMs": 5420
+    },
+    {
+      "songId": 1710016,
+      "userId": 180001,
+      "title": "Virus Prime Phase 2 Theme - Overclocked Beast",
+      "witnessId": "WID-MUS-E1575D8B-9AEB380C",
+      "stampId": "SS-1710016-180001-7D64BC11-9AEA5F81",
+      "toneFrequencyHz": 18449,
+      "originalHash": "9aea5f81977f39b9d21949ef680bd8d0d544906038c4368440f79a74af19f5db",
+      "stampedHash": "8c115fc904aabbf157bbc6e2ed743bdcd778cd80dfa7f6d80dffabf0df777edc",
+      "stampedFileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/stamped-1775925247866-1775540369490-Virus_Prime_Phase_2_Theme_-_Overclocked_Beast.mp3",
+      "certificateUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/certificates/180001/SS-1710016-180001-7D64BC11-9AEA5F81.txt",
+      "status": "success",
+      "error": null,
+      "durationMs": 2411
+    }
+  ]
+}

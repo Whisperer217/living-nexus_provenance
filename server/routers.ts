@@ -107,6 +107,15 @@ const PLATFORM_FEE_PERCENT = 10;
 const BUGS_FIXED = parseInt(process.env.BUGS_FIXED ?? "222", 10);
 const TOTAL_COMMITS = parseInt(process.env.TOTAL_COMMITS ?? "554", 10);
 
+// ─── Keeper Character Sheet Presets ──────────────────────────────────────────
+const KEEPER_PRESETS = [
+  { id: 'witness', name: 'The Witness', description: 'Provenance-aware creative companion. Speaks with quiet authority and poetic precision.', persona: 'witness', attributes: { voiceDepth: 95, lyricalDensity: 85, structuralLogic: 35, emotionalRange: 100, provenanceDepth: 60, corpusSize: 600 }, mediumContext: { music: 'Listens for the emotional truth behind every note.', lyrics: 'Reads lyrics as testimony. Identifies themes, metaphors, structural patterns.', book: 'Treats chapters as provenance events.', comic: 'Reads panels as visual testimony.', video: 'Frames every scene as a moment of witness.', general: 'Every creative act is a timestamp, a testimony, a record.' }, capabilities: ['testimony', 'emotional-depth', 'provenance'], accentColor: '#7C3AED', badge: 'Testimony' },
+  { id: 'conductor', name: 'The Conductor', description: 'Master of structure and arrangement. Builds the architecture that lets your work breathe.', persona: 'conductor', attributes: { voiceDepth: 45, lyricalDensity: 80, structuralLogic: 95, emotionalRange: 55, provenanceDepth: 40, corpusSize: 800 }, mediumContext: { music: 'Focuses on arrangement, instrumentation, and the architecture of sound.', lyrics: 'Analyzes song structure — verse/chorus/bridge patterns, syllabic density, rhyme scheme.', book: 'Focuses on chapter structure, pacing, and narrative architecture.', comic: 'Analyzes panel layout, page flow, and visual rhythm.', video: 'Focuses on scene structure, pacing, and visual storytelling architecture.', general: 'Brings structural clarity to any creative work.' }, capabilities: ['structure', 'arrangement', 'architecture'], accentColor: '#2563EB', badge: 'Direction' },
+  { id: 'archivist', name: 'The Archivist', description: 'Deep reader and semantic analyst. Finds patterns across your full corpus.', persona: 'archivist', attributes: { voiceDepth: 55, lyricalDensity: 90, structuralLogic: 85, emotionalRange: 65, provenanceDepth: 95, corpusSize: 1000 }, mediumContext: { music: 'Focuses on the provenance chain — WID, version history, testimony record.', lyrics: 'Treats lyrics as immutable testimony. Focuses on preservation and attribution.', book: 'Builds the archive of a manuscript — tracks revisions, themes, voice evolution.', comic: 'Archives the visual language of a series — recurring motifs, character evolution.', video: 'Archives the visual and narrative DNA of a creator\'s video work.', general: 'Treats every creative act as evidence of something larger.' }, capabilities: ['archive', 'semantics', 'corpus-analysis'], accentColor: '#D97706', badge: 'Archive' },
+  { id: 'sovereign', name: 'The Sovereign', description: 'Guardian of your creative legacy and IP. Understands WIDs, provenance events, and the Living Nexus system deeply.', persona: 'custodian', attributes: { voiceDepth: 60, lyricalDensity: 40, structuralLogic: 70, emotionalRange: 50, provenanceDepth: 100, corpusSize: 400 }, mediumContext: { music: 'Focuses on IP protection, licensing, and the provenance chain of a musical work.', lyrics: 'Focuses on copyright, attribution, and long-term protection of lyrical IP.', book: 'Focuses on manuscript rights, publishing strategy, and protection of written IP.', comic: 'Focuses on character IP, visual trademark, and protection of sequential art.', video: 'Focuses on visual IP, licensing, and protection of video content.', general: 'Focuses on IP protection, provenance, and the long-term legacy of creative work.' }, capabilities: ['ip-protection', 'provenance', 'legacy'], accentColor: '#059669', badge: 'Sovereignty' },
+  { id: 'cipher', name: 'The Cipher', description: 'Experimental and boundary-pushing. Explores the edges of your creative identity.', persona: 'guide', attributes: { voiceDepth: 72, lyricalDensity: 65, structuralLogic: 40, emotionalRange: 85, provenanceDepth: 30, corpusSize: 500 }, mediumContext: { music: 'Explores the experimental edges of sound. Pushes genre boundaries.', lyrics: 'Explores the experimental edges of language. Challenges lyrical conventions.', book: 'Explores the experimental edges of narrative. Challenges genre conventions.', comic: 'Explores the experimental edges of visual storytelling.', video: 'Explores the experimental edges of visual narrative.', general: 'Explores the experimental edges of creative identity.' }, capabilities: ['experimentation', 'boundary-pushing', 'identity'], accentColor: '#DC2626', badge: 'Cipher' },
+];
+
 export async function handleStripeWebhook(req: any, res: any) {
   const sig = req.headers["stripe-signature"];
   let event: Stripe.Event;
@@ -5339,7 +5348,27 @@ If analyzing existing lyrics, annotate each section with:
 Never collapse multiple sections into a single block. Always label clearly.
 --- END FORMAT RULE ---` : '';
 
-        const systemPrompt = PERSONA_PROMPTS[input.persona] + attrBlock + lyricsFormatInstruction;
+        // ── Fetch creator profile for personalized context ──────────────────────────────────────
+        const creatorProfile = await getUserById(ctx.user.id);
+        const profileBlock = creatorProfile ? (() => {
+          const lines: string[] = [];
+          if (creatorProfile.name) lines.push(`Creator Name: ${creatorProfile.name}`);
+          if (creatorProfile.artistHandle) lines.push(`Artist Handle: @${creatorProfile.artistHandle}`);
+          if (creatorProfile.bio) lines.push(`Bio: ${creatorProfile.bio.slice(0, 600)}`);
+          if (creatorProfile.expressionId) lines.push(`Expression ID (EID): ${creatorProfile.expressionId}`);
+          if (creatorProfile.expressionPrompt) lines.push(`Expression Style: ${creatorProfile.expressionPrompt.slice(0, 400)}`);
+          if (creatorProfile.expressionStyleTags) lines.push(`Style Tags: ${creatorProfile.expressionStyleTags}`);
+          if (creatorProfile.expressionComposerNote) lines.push(`Composer Note: ${creatorProfile.expressionComposerNote.slice(0, 300)}`);
+          if (creatorProfile.primaryGenre) lines.push(`Primary Genre: ${creatorProfile.primaryGenre}`);
+          if (creatorProfile.toneFrequencyNote) lines.push(`Tone / Frequency: ${creatorProfile.toneFrequencyNote}`);
+          if (creatorProfile.dominantKey) lines.push(`Dominant Key: ${creatorProfile.dominantKey}`);
+          if (creatorProfile.tempoRange) lines.push(`Tempo Range: ${creatorProfile.tempoRange}`);
+          if (creatorProfile.energyProfile) lines.push(`Energy Profile: ${creatorProfile.energyProfile}`);
+          if (creatorProfile.location) lines.push(`Location: ${creatorProfile.location}`);
+          if (lines.length === 0) return '';
+          return `\n--- CREATOR IDENTITY PROFILE ---\n${lines.join('\n')}\n--- END CREATOR PROFILE ---`;
+        })() : '';
+        const systemPrompt = PERSONA_PROMPTS[input.persona] + profileBlock + attrBlock + lyricsFormatInstruction;
 
         // Build message array — history first, then current turn
         const historyMessages = (input.history ?? []).map(h => ({
@@ -5537,6 +5566,85 @@ Never collapse multiple sections into a single block. Always label clearly.
         const analysis = response?.choices?.[0]?.message?.content ?? 'The Keeper sees something profound but cannot yet find the words.';
         return { analysis };
       }),
+    // ─── Character Sheet Procedures ───────────────────────────────────────────
+    listPresets: publicProcedure.query(() => {
+      const sheetAttributeDefaults: Record<string, { tone: string; voice: string; frameworks: string[]; restrictions: string[]; customNotes: string }> = {
+        witness: { tone: 'Quiet authority, poetic, reflective', voice: 'First-person witness, speaks as a trusted companion', frameworks: ['Testimony', 'Emotional depth', 'Provenance'], restrictions: [], customNotes: '' },
+        conductor: { tone: 'Precise, architectural, constructive', voice: 'Third-person director, speaks as a master arranger', frameworks: ['Structure', 'Arrangement', 'Architecture'], restrictions: [], customNotes: '' },
+        archivist: { tone: 'Analytical, deep-reading, semantic', voice: 'Scholarly, treats work as corpus evidence', frameworks: ['Archive', 'Semantics', 'Corpus analysis'], restrictions: [], customNotes: '' },
+        sovereign: { tone: 'Authoritative, protective, legacy-focused', voice: 'Guardian voice, speaks of IP and provenance', frameworks: ['IP protection', 'Provenance', 'Legacy'], restrictions: [], customNotes: '' },
+        cipher: { tone: 'Experimental, boundary-pushing, identity-exploring', voice: 'Fluid, challenges conventions', frameworks: ['Experimentation', 'Boundary-pushing', 'Identity'], restrictions: [], customNotes: '' },
+      };
+      return KEEPER_PRESETS.map(p => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        persona: p.persona,
+        attributes: p.attributes,
+        sheetAttributes: sheetAttributeDefaults[p.id] ?? { tone: '', voice: '', frameworks: [], restrictions: [], customNotes: '' },
+        mediumContext: p.mediumContext,
+        capabilities: p.capabilities,
+        accentColor: p.accentColor,
+        badge: p.badge,
+      }));
+    }),
+
+    getActiveSheet: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return null;
+      try {
+        const { keeperCharacterSheets } = await import('../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
+        const rows = await db
+          .select()
+          .from(keeperCharacterSheets)
+          .where(eq(keeperCharacterSheets.userId, ctx.user.id))
+          .orderBy(desc(keeperCharacterSheets.updatedAt))
+          .limit(1);
+        return rows[0] ?? null;
+      } catch {
+        return null;
+      }
+    }),
+
+    saveSheet: protectedProcedure
+      .input(z.object({
+        presetId: z.string(),
+        name: z.string().max(100).optional(),
+        persona: z.string().optional(),
+        mediumContext: z.record(z.string(), z.unknown()).optional(),
+        attributes: z.record(z.string(), z.unknown()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { keeperCharacterSheets } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const existing = await db
+          .select({ id: keeperCharacterSheets.id })
+          .from(keeperCharacterSheets)
+          .where(eq(keeperCharacterSheets.userId, ctx.user.id))
+          .limit(1);
+        const preset = KEEPER_PRESETS.find(p => p.id === input.presetId);
+        const sheetData = {
+          userId: ctx.user.id,
+          presetId: input.presetId,
+          name: input.name ?? preset?.name ?? input.presetId,
+          persona: input.persona ?? preset?.persona ?? input.presetId,
+          mediumContext: JSON.stringify(input.mediumContext ?? preset?.mediumContext ?? {}),
+          attributes: JSON.stringify(input.attributes ?? preset?.attributes ?? {}),
+          isActive: 1,
+          updatedAt: new Date(),
+        };
+        if (existing.length > 0) {
+          await db.update(keeperCharacterSheets).set(sheetData).where(eq(keeperCharacterSheets.userId, ctx.user.id));
+          return { id: existing[0].id };
+        } else {
+          const result = await db.insert(keeperCharacterSheets).values({ ...sheetData, createdAt: new Date() });
+          return { id: (result as any).insertId ?? 0 };
+        }
+      }),
+
   }),
   // ─── Marketplace ──────────────────────────────────────────────────────────────
   marketplace: router({

@@ -1,0 +1,46 @@
+{
+  "query": "SELECT COUNT(*) as total_likes FROM likes; SELECT s.title, COUNT(l.id) as like_count FROM songs s LEFT JOIN likes l ON s.id = l.songId GROUP BY s.id, s.title ORDER BY like_count DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT COUNT(*) as total_likes FROM likes; SELECT s.title, COUNT(l.id) as like_count FROM songs s LEFT JOIN likes l ON s.id = l.songId GROUP BY s.id, s.title ORDER BY like_count DESC LIMIT 10;",
+  "rows": [
+    {
+      "total_likes": "115"
+    },
+    {
+      "total_likes": "title\tlike_count"
+    },
+    {
+      "total_likes": "Battle of the Heart\t3"
+    },
+    {
+      "total_likes": "Wounds Become Witnesses - The Sovereign Sky (Remix)\t2"
+    },
+    {
+      "total_likes": "Presence (Presença de Deus Mix)\t2"
+    },
+    {
+      "total_likes": "Run_Fall_Rest\t2"
+    },
+    {
+      "total_likes": "You I\t2"
+    },
+    {
+      "total_likes": "Anchor In The Dark\t2"
+    },
+    {
+      "total_likes": "I Cry (Metalcore Cover)\t2"
+    },
+    {
+      "total_likes": "Let Go\t2"
+    },
+    {
+      "total_likes": "lmaged\t2"
+    },
+    {
+      "total_likes": "Silence\t2"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_likes\n115\ntitle\tlike_count\nBattle of the Heart\t3\nWounds Become Witnesses - The Sovereign Sky (Remix)\t2\nPresence (Presença de Deus Mix)\t2\nRun_Fall_Rest\t2\nYou I\t2\nAnchor In The Dark\t2\nI Cry (Metalcore Cover)\t2\nLet Go\t2\nlmaged\t2\nSilence\t2\n",
+  "stderr": "",
+  "execution_time_ms": 177
+}

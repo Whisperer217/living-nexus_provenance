@@ -1,0 +1,94 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' ORDER BY ORDINAL_POSITION;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' ORDER BY ORDINAL_POSITION;",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "openId"
+    },
+    {
+      "COLUMN_NAME": "name"
+    },
+    {
+      "COLUMN_NAME": "email"
+    },
+    {
+      "COLUMN_NAME": "loginMethod"
+    },
+    {
+      "COLUMN_NAME": "role"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    },
+    {
+      "COLUMN_NAME": "lastSignedIn"
+    },
+    {
+      "COLUMN_NAME": "artistHandle"
+    },
+    {
+      "COLUMN_NAME": "bio"
+    },
+    {
+      "COLUMN_NAME": "profilePhotoUrl"
+    },
+    {
+      "COLUMN_NAME": "bmiMemberNumber"
+    },
+    {
+      "COLUMN_NAME": "website"
+    },
+    {
+      "COLUMN_NAME": "location"
+    },
+    {
+      "COLUMN_NAME": "twitterHandle"
+    },
+    {
+      "COLUMN_NAME": "instagramHandle"
+    },
+    {
+      "COLUMN_NAME": "youtubeHandle"
+    },
+    {
+      "COLUMN_NAME": "bannerUrl"
+    },
+    {
+      "COLUMN_NAME": "licenseStatus"
+    },
+    {
+      "COLUMN_NAME": "songSlotsUsed"
+    },
+    {
+      "COLUMN_NAME": "songSlotsTotal"
+    },
+    {
+      "COLUMN_NAME": "stripeCustomerId"
+    },
+    {
+      "COLUMN_NAME": "stripeAccountId"
+    },
+    {
+      "COLUMN_NAME": "stripeAccountStatus"
+    },
+    {
+      "COLUMN_NAME": "aiDisclosure"
+    },
+    {
+      "COLUMN_NAME": "primaryGenre"
+    },
+    {
+      "COLUMN_NAME": "hasSeenWelcome"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\nopenId\nname\nemail\nloginMethod\nrole\ncreatedAt\nupdatedAt\nlastSignedIn\nartistHandle\nbio\nprofilePhotoUrl\nbmiMemberNumber\nwebsite\nlocation\ntwitterHandle\ninstagramHandle\nyoutubeHandle\nbannerUrl\nlicenseStatus\nsongSlotsUsed\nsongSlotsTotal\nstripeCustomerId\nstripeAccountId\nstripeAccountStatus\naiDisclosure\nprimaryGenre\nhasSeenWelcome\n",
+  "stderr": "",
+  "execution_time_ms": 376
+}
