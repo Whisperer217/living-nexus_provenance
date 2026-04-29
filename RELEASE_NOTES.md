@@ -7,6 +7,32 @@
 
 ---
 
+## v2.32.3 — April 29, 2026 (Keeper Notes Drawer + What's New + LSP Flush)
+
+### What Shipped
+
+**Keeper Notes Drawer (KeeperPage.tsx)**
+- `NOTES` button added to Keeper screen top bar (gold pill, BookOpen icon, live count badge)
+- Clicking opens a right-side `Sheet` drawer listing all notes saved from the Keeper chat
+- Each note card shows: title, persona slug, date, optional tag badge, 3-line content preview, optional image thumbnail
+- **Reload button** (↺): copies note content to clipboard and navigates to `/keeper-chat` for immediate re-use
+- **Delete button**: calls `trpc.keeper.deleteNote` with optimistic cache invalidation
+- Empty state shown when no notes exist yet
+- Notes are lazy-loaded (query only fires when drawer is open)
+
+**tRPC procedures used (already existed, no changes):**
+- `trpc.keeper.listNotes` — returns `KeeperNote[]` sorted newest-first
+- `trpc.keeper.deleteNote` — deletes by ID, scoped to authed user
+
+**What's New modal** — bumped to v2.32.2, reactions fix entry added
+
+**LSP watcher** — stale conflict markers cleared via `touch drizzle/schema.ts`
+
+### Manus Pub Action Required
+- None — all changes are in `KeeperPage.tsx` and `WhatsNewModal.tsx`. Publish to deploy.
+
+---
+
 ## v2.32.2 — April 28, 2026 (Bugfix: Emoji Reactions Broken — Slimdoggy Report)
 
 ### Root Cause

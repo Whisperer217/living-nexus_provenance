@@ -3670,3 +3670,10 @@
 - [x] Rebuild Explore page — compact header, horizontal pill chips, Store/Classic view toggle, ShowcaseRow + StoreTrackCard in Store view
 - [x] Ensure mobile responsiveness — hero stacks vertically, cards remain large and tappable (snap-x scroll)
 - [x] TypeScript 0 errors, checkpoint, GitHub push
+
+## Phase 70: Keeper Notes Drawer + What's New v2.32.2 + LSP Flush
+
+- [x] Add v2.32.2 entry to WhatsNewModal.tsx — emoji reactions fix, slug keys, onError toast
+- [x] Build Keeper Notes slide-out drawer in KeeperPage.tsx — NOTES button in top bar, list notes, reload (copy+navigate), delete, tag badges, image previews
+- [x] Flush stale LSP watcher conflict markers — touch schema.ts
+- [x] TypeScript 0 errors, checkpoint, GitHub push, release notes
