@@ -58,12 +58,22 @@ function buildGlowShadow(bass: number, mid: number, high: number): string {
   const midSpread = Math.round(mid * 24);
   const midOpacity = (0.15 + mid * 0.55).toFixed(2);
   const highOpacity = (0.1 + high * 0.5).toFixed(2);
+  const sideSpread = Math.round(bass * 32);
+  const sideOpacity = (0.2 + bass * 0.4).toFixed(2);
 
   return [
+    // Upward glow (above the bar)
     `0 -${outerSpread}px ${outerSpread * 2}px rgba(${PURPLE_DEEP}, ${outerOpacity})`,
     `0 -${midSpread}px ${midSpread * 1.5}px rgba(${PURPLE_MID}, ${midOpacity})`,
     `0 -2px 8px rgba(${PURPLE_BRIGHT}, ${highOpacity})`,
-    `0 2px ${Math.round(bass * 12)}px rgba(${PURPLE_DEEP}, ${(bass * 0.3).toFixed(2)})`,
+    // Inset glow on the bar itself (always visible regardless of content above)
+    `inset 0 1px ${Math.round(bass * 16)}px rgba(${PURPLE_MID}, ${midOpacity})`,
+    `inset 0 0 ${Math.round(mid * 24)}px rgba(${PURPLE_BRIGHT}, ${(mid * 0.3).toFixed(2)})`,
+    // Side glow (left and right edges)
+    `-${sideSpread}px 0 ${sideSpread * 1.5}px rgba(${PURPLE_DEEP}, ${sideOpacity})`,
+    `${sideSpread}px 0 ${sideSpread * 1.5}px rgba(${PURPLE_DEEP}, ${sideOpacity})`,
+    // Subtle downward pulse
+    `0 2px ${Math.round(bass * 16)}px rgba(${PURPLE_DEEP}, ${(bass * 0.35).toFixed(2)})`,
   ].join(", ");
 }
 

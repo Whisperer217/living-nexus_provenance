@@ -192,7 +192,15 @@ function loadSessionTracks(): { tracks: Track[]; currentIdx: number; queueContex
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
-  const audioRef = useRef<HTMLAudioElement>(new Audio());
+  const audioRef = useRef<HTMLAudioElement>(null as unknown as HTMLAudioElement);
+  // Initialise the Audio element once — crossOrigin MUST be set before any src is assigned.
+  if (!audioRef.current) {
+    const a = new Audio();
+    // REQUIRED for Web Audio API createMediaElementSource() to work with S3 CORS URLs.
+    // Must be set BEFORE any src is assigned — cannot be changed after first load.
+    a.crossOrigin = "anonymous";
+    (audioRef as React.MutableRefObject<HTMLAudioElement>).current = a;
+  }
   const [isNowPlayingPanelOpen, setIsNowPlayingPanelOpen] = useState(false);
   const openNowPlayingPanel = useCallback(() => setIsNowPlayingPanelOpen(true), []);
   const closeNowPlayingPanel = useCallback(() => setIsNowPlayingPanelOpen(false), []);
