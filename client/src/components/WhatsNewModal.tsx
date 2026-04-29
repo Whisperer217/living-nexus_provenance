@@ -24,6 +24,22 @@ const UPDATES = [
     ],
   },
   {
+    version: "v2.32.5",
+    date: "April 29, 2026",
+    label: "",
+    items: [
+      { icon: Zap, text: "Beat-Reactive Glow Pulse — The Frequency Glow system was rewritten from scratch. Instead of linearly tracking raw frequency values, the glow now pulses with the music using a beat detection + peak/decay envelope. When bass energy exceeds the running peak by 15%, a beat is detected and the peak snaps up instantly. Between beats, it decays exponentially at ×0.88 per frame (~0.5s full decay). The peak envelope drives all glow spread and opacity values — not raw frequency. Color palette: violet at idle, gold/amber on bass hits, cyan on mid-heavy passages, white shimmer on high-freq transients. Six glow layers: upward pulse, mid layer, white edge flash, inset bar glow, side glow, and subtle downward pulse." },
+    ],
+  },
+  {
+    version: "v2.32.4",
+    date: "April 29, 2026",
+    label: "",
+    items: [
+      { icon: Zap, text: "Frequency Glow Visual Fix — The Frequency Glow toggle was enabled but the glow was invisible. Root cause: the Audio element was created without crossOrigin='anonymous' before any S3 URL was loaded. The Web Audio API's createMediaElementSource() requires this attribute — without it, the browser CORS-taints the stream and blocks the analyser from reading any frequency data. Fix: PlayerContext now sets crossOrigin='anonymous' on the Audio element before assigning any src. The glow now radiates in all directions: upward above the bar, inset on the bar itself (always visible), left and right side edges, and a subtle downward pulse." },
+    ],
+  },
+  {
     version: "v2.32.2",
     date: "April 28, 2026",
     label: "",

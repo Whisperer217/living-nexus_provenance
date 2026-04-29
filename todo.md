@@ -3697,3 +3697,9 @@
 - [x] Toggled by existing ∿ Frequency Glow button (same localStorage key)
 - [x] WhatsNewModal bumped to v2.33.0, RELEASE_NOTES.md updated
 - [x] TypeScript 0 errors, checkpoint, GitHub push
+
+## Phase 75: Post-v2.33.0 Checklist
+- [x] LSP conflict markers in drizzle/schema.ts — confirmed clean, no markers present (false alarm from stale LSP diagnostics)
+- [x] WhatsNewModal — backfilled v2.32.4 (Frequency Glow Visual Fix) and v2.32.5 (Beat-Reactive Glow Pulse) entries between v2.33.0 and v2.32.2
+- [x] Keeper chat profile injection — wire ctx.user profile (name, artistHandle, bio, expressionId, EID fields, primaryGenre, toneFrequencyNote, dominantKey, tempoRange, energyProfile, location) into keeper.chat system prompt as CREATOR IDENTITY PROFILE block
+- [x] TypeScript 0 errors, checkpoint, GitHub push

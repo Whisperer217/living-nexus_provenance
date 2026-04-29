@@ -5348,7 +5348,27 @@ If analyzing existing lyrics, annotate each section with:
 Never collapse multiple sections into a single block. Always label clearly.
 --- END FORMAT RULE ---` : '';
 
-        const systemPrompt = PERSONA_PROMPTS[input.persona] + attrBlock + lyricsFormatInstruction;
+        // ── Fetch creator profile for personalized context ──────────────────────────────────────
+        const creatorProfile = await getUserById(ctx.user.id);
+        const profileBlock = creatorProfile ? (() => {
+          const lines: string[] = [];
+          if (creatorProfile.name) lines.push(`Creator Name: ${creatorProfile.name}`);
+          if (creatorProfile.artistHandle) lines.push(`Artist Handle: @${creatorProfile.artistHandle}`);
+          if (creatorProfile.bio) lines.push(`Bio: ${creatorProfile.bio.slice(0, 600)}`);
+          if (creatorProfile.expressionId) lines.push(`Expression ID (EID): ${creatorProfile.expressionId}`);
+          if (creatorProfile.expressionPrompt) lines.push(`Expression Style: ${creatorProfile.expressionPrompt.slice(0, 400)}`);
+          if (creatorProfile.expressionStyleTags) lines.push(`Style Tags: ${creatorProfile.expressionStyleTags}`);
+          if (creatorProfile.expressionComposerNote) lines.push(`Composer Note: ${creatorProfile.expressionComposerNote.slice(0, 300)}`);
+          if (creatorProfile.primaryGenre) lines.push(`Primary Genre: ${creatorProfile.primaryGenre}`);
+          if (creatorProfile.toneFrequencyNote) lines.push(`Tone / Frequency: ${creatorProfile.toneFrequencyNote}`);
+          if (creatorProfile.dominantKey) lines.push(`Dominant Key: ${creatorProfile.dominantKey}`);
+          if (creatorProfile.tempoRange) lines.push(`Tempo Range: ${creatorProfile.tempoRange}`);
+          if (creatorProfile.energyProfile) lines.push(`Energy Profile: ${creatorProfile.energyProfile}`);
+          if (creatorProfile.location) lines.push(`Location: ${creatorProfile.location}`);
+          if (lines.length === 0) return '';
+          return `\n--- CREATOR IDENTITY PROFILE ---\n${lines.join('\n')}\n--- END CREATOR PROFILE ---`;
+        })() : '';
+        const systemPrompt = PERSONA_PROMPTS[input.persona] + profileBlock + attrBlock + lyricsFormatInstruction;
 
         // Build message array — history first, then current turn
         const historyMessages = (input.history ?? []).map(h => ({
