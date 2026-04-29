@@ -7,6 +7,43 @@
 
 ---
 
+## v2.32.5 — April 29, 2026 (Beat-Reactive Glow Pulse)
+
+### What Shipped
+
+**useFrequencyGlow.ts — Full rewrite**
+
+The frequency glow now pulses with the music instead of linearly tracking raw frequency values.
+
+**Beat detection + peak/decay envelope:**
+- Each RAF frame, bass energy is compared against a running `peakRef` value
+- When current bass exceeds `peak × 1.15` (BEAT_THRESHOLD), a beat is detected — `peak` snaps up to current bass energy
+- Between beats, `peak` decays exponentially at `×0.88` per frame (~60fps → full decay in ~0.5s)
+- Mid/high contribute to peak at lower weights (0.4× and 0.15×)
+- The `peak` envelope drives all glow spread/opacity values — not raw frequency
+
+**Color shifting:**
+- Idle/low energy: deep violet `(138, 43, 226)`
+- Bass hit: gold/amber `(196, 154, 40)` — Living Nexus brand color
+- Mid-heavy passages: cyan/teal `(56, 189, 248)`
+- High-freq transients: white shimmer edge `(255, 255, 255)`
+- Colors interpolate smoothly based on relative band energy each frame
+
+**Glow layers:**
+- Primary upward pulse (above bar) — 0–56px spread driven by peak
+- Secondary mid layer
+- High-freq white edge flash on transients
+- Inset glow on bar itself (always visible)
+- Side glow (left + right edges)
+- Subtle downward pulse
+
+**No schema changes. No new procedures.**
+
+### Manus Pub Action Required
+- None — change is in `useFrequencyGlow.ts` only. Publish to deploy.
+
+---
+
 ## v2.32.4 — April 29, 2026 (Frequency Glow Fix + Audio Pipeline Audit)
 
 ### What Shipped
