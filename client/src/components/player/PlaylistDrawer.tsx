@@ -99,7 +99,7 @@ function TabHandle({
   onClick: () => void;
 }) {
   const TAB_HEIGHT = 72;
-  const TAB_GAP = 4;
+  const TAB_GAP = 2;
   const totalHeight = total * TAB_HEIGHT + (total - 1) * TAB_GAP;
   const topOffset = `calc(50% - ${totalHeight / 2}px + ${index * (TAB_HEIGHT + TAB_GAP)}px)`;
 

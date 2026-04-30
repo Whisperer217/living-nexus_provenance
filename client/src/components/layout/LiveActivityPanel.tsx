@@ -1,13 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — LiveActivityPanel
-   Left-edge slide-in panel. Desktop only (hidden md:block).
+   Right-edge slide-in panel. Desktop only (hidden md:block).
 
    ARCHITECTURE:
    - Self-contained isOpen state
    - Each tab (Live / Playing / Tips) is its own individual protruding
-     handle on the right edge of the panel, stacked top-to-bottom
+     handle on the left edge of the panel, stacked top-to-bottom
    - All tab handles slide in sync with the panel
-     (left: isOpen ? PANEL_WIDTH : 0)
+     (right: isOpen ? PANEL_WIDTH : 0)
    - Clicking a tab: opens drawer + switches to that tab
    - Clicking the active tab again: collapses the drawer
    - createPortal to document.body
@@ -43,9 +43,9 @@ const TABS: { id: LiveTab; label: string; icon: string }[] = [
 ];
 
 // ─── Individual Tab Handle ─────────────────────────────────────────
-// Each tab is its own fixed-position button on the left edge.
+// Each tab is its own fixed-position button on the right edge.
 // They stack vertically using `top` offsets calculated from the center.
-// All slide right when the drawer opens.
+// All slide left when the drawer opens.
 function TabHandle({
   tab,
   index,
@@ -64,7 +64,7 @@ function TabHandle({
   // Stack tabs centered in the viewport.
   // Each tab button is ~72px tall. Gap between tabs: 4px.
   const TAB_HEIGHT = 72;
-  const TAB_GAP = 4;
+  const TAB_GAP = 2;
   const totalHeight = total * TAB_HEIGHT + (total - 1) * TAB_GAP;
   // top offset: center the stack, then offset per index
   const topOffset = `calc(50% - ${totalHeight / 2}px + ${index * (TAB_HEIGHT + TAB_GAP)}px)`;
@@ -75,19 +75,19 @@ function TabHandle({
       aria-label={`${isOpen && isActive ? "Close" : "Open"} live activity panel — ${tab.label}`}
       style={{
         position: "fixed",
-        left: isOpen ? `${PANEL_WIDTH}px` : "0px",
+        right: isOpen ? `${PANEL_WIDTH}px` : "0px",
         top: topOffset,
         zIndex: 56,
         background: isActive && isOpen
           ? "rgba(196,154,40,0.18)"
           : "var(--ln-panel)",
         borderTop: "1px solid var(--ln-panel-border)",
-        borderRight: "1px solid var(--ln-panel-border)",
+        borderLeft: "1px solid var(--ln-panel-border)",
         borderBottom: "1px solid var(--ln-panel-border)",
-        borderLeft: isActive && isOpen
+        borderRight: isActive && isOpen
           ? "2px solid var(--ln-gold)"
           : "none",
-        borderRadius: "0 8px 8px 0",
+        borderRadius: "8px 0 0 8px",
         padding: "10px 7px",
         cursor: "pointer",
         display: "flex",
@@ -97,7 +97,7 @@ function TabHandle({
         gap: "5px",
         height: `${TAB_HEIGHT}px`,
         width: "28px",
-        transition: "left 0.3s cubic-bezier(0.4,0,0.2,1), background 0.15s, border-left 0.15s",
+        transition: "right 0.3s cubic-bezier(0.4,0,0.2,1), background 0.15s, border-right 0.15s",
         color: isActive && isOpen ? "var(--ln-gold)" : "rgba(255,255,255,0.45)",
       }}
       onMouseEnter={e => {
@@ -117,7 +117,6 @@ function TabHandle({
       <span style={{
         writingMode: "vertical-rl",
         textOrientation: "mixed",
-        transform: "rotate(180deg)",
         fontSize: "8px",
         fontFamily: "var(--font-display)",
         fontWeight: 700,
@@ -229,14 +228,14 @@ export default function LiveActivityPanel() {
         style={{
           position: "fixed",
           top: 0,
-          left: isOpen ? 0 : `-${PANEL_WIDTH}px`,
+          right: isOpen ? 0 : `-${PANEL_WIDTH}px`,
           width: `${PANEL_WIDTH}px`,
           height: "100vh",
           background: "var(--ln-panel)",
-          borderRight: "1px solid var(--ln-panel-border)",
+          borderLeft: "1px solid var(--ln-panel-border)",
           zIndex: 55,
           flexDirection: "column",
-          transition: "left 0.3s cubic-bezier(0.4,0,0.2,1)",
+          transition: "right 0.3s cubic-bezier(0.4,0,0.2,1)",
           overflowY: "auto",
           overflowX: "hidden",
         }}
