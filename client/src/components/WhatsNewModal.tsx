@@ -10,14 +10,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.36.1";
+const CURRENT_VERSION = "v2.38.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.36.1",
+    version: "v2.38.0",
     date: "April 30, 2026",
     label: "Latest",
+    items: [
+      { icon: Music, text: "Global Player v3.0 — The player is now a draggable floating overlay that lives above all content. Drag it up to expand to full-screen (artwork, provenance strip, Up Next queue, action row). Drag down to the floating bar (controls + progress). Drag to the bottom edge for the compact mini strip. Three snap zones: Mini (72px), Float (140px), Expanded (full height). Glass backdrop with gold glow system. Works on all screen sizes." },
+      { icon: BookOpen, text: "Expanded Player — Full artwork, creator name with verified badge, Witnessed on Living Nexus strip, provenance shield button, Up Next queue (next 3 tracks), Add to Collection, Like, Share, Tip, and Verify actions. Waveform visualizer and frequency glow available in expanded view." },
+    ],
+  },
+  {
+    version: "v2.37.1",
+    date: "April 30, 2026",
+    label: "",
+    items: [
+      { icon: BookOpen, text: "Collections & Likes system — Every track card now has a + button that opens an Add to Collection modal. Create named collections, drag-reorder liked tracks in the LIKED drawer, manage collections in the BUILD drawer. Profile page has Likes and Collections tabs synced with the drawer." },
+    ],
+  },
+  {
+    version: "v2.36.1",
+    date: "April 30, 2026",
+    label: "",
     items: [
       { icon: BookOpen, text: "SHOP Tab Added — A SHOP tab handle now appears in the right-side drawer stack below BUILD. Clicking SHOP closes the Quick Play drawer and opens the Marketplace drawer directly. All five tabs (NEW / TREND / LIKED / BUILD / SHOP) are stacked on the right edge." },
     ],

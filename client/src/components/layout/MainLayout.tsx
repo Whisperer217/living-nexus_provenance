@@ -21,8 +21,8 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { overlayOpen, overlayClose } from "@/lib/overlayController";
-import PlayerBar from "@/components/player/PlayerBar";
-import MobilePlayerLayer from "@/components/player/MobilePlayerLayer";
+import GlobalPlayer from "@/components/player/GlobalPlayer";
+// PlayerBar and MobilePlayerLayer replaced by GlobalPlayer (v3.0)
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 // QuickRefSlider and QuickRefBottomSheet removed (Phase 88) — replaced by right-side playlist drawer
 import PlaylistDrawer from "@/components/player/PlaylistDrawer";
@@ -404,13 +404,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           Mobile: portal-based MobilePlayerLayer
       ══════════════════════════════════════════════ */}
 
-      {/* Desktop Player Bar — full width */}
-      <div className="hidden md:block">
-        <PlayerBar />
-      </div>
-
-      {/* Mobile Player Layer */}
-      <MobilePlayerLayer />
+      {/* Global Player — draggable floating overlay, all screen sizes */}
+      <GlobalPlayer />
 
       {/* Theater Player */}
       <TheaterPlayer />

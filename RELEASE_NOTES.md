@@ -7,6 +7,65 @@
 
 ---
 
+## v2.38.0 — April 30, 2026 (Global Player v3.0)
+
+### What Shipped
+
+**GlobalPlayer component (`client/src/components/player/GlobalPlayer.tsx`)**
+- Replaced `PlayerBar` + `MobilePlayerLayer` with a single unified draggable floating overlay
+- Renders via `createPortal` to `document.body` at `z-index: 9000`
+- **3 snap zones:** Mini (72px compact strip), Float (140px controls + progress), Expanded (full height)
+- **Gesture layer:** pointer drag on Y-axis with snap physics; content beneath remains fully interactive
+- **Glass backdrop:** `rgba(0,0,0,0.82)` + `backdrop-blur(16px)` + gold glow system (`#D4AF37` shadow stack)
+- **Expanded player:** large artwork with WID badge, creator link, Witnessed on Living Nexus strip, provenance shield, action row (Like / Add / Share / Tip / Verify), waveform visualizer, Up Next queue (next 3 tracks)
+- **Volume popup:** vertical slider in a floating portal
+- Works on all screen sizes — no separate mobile/desktop player needed
+
+**MainLayout.tsx**
+- `PlayerBar` and `MobilePlayerLayer` imports removed
+- `<GlobalPlayer />` replaces both
+
+### TypeScript
+- 0 errors (confirmed by fresh `tsc --noEmit` run).
+
+### Manus Pub Action Required
+- Publish checkpoint `c1bcd981` (v2.37.1) first if not already done, then publish the new v2.38.0 checkpoint once created.
+
+---
+
+## v2.37.1 — April 30, 2026 (Collections & Likes Bug Fixes)
+
+### What Shipped
+- Fixed `BuildCollectionsPanel` track rendering — was accessing `t.title` directly instead of `t.song.title`
+- Replaced "Add to List" / "+ Create new list" in `StoreTrackCard` context menu with "Add to Collection" (opens `AddToCollectionModal`)
+- Removed stale `AddToListPanel` function from `StoreTrackCard`
+
+---
+
+## v2.37.0 — April 30, 2026 (Collections & Likes System)
+
+### What Shipped
+
+**Schema** (`drizzle/schema.ts`)
+- New `userCollections` table: `id`, `userId`, `name`, `description`, `createdAt`, `updatedAt`
+- New `userCollectionTracks` table: `id`, `collectionId`, `songId`, `sortOrder`, `addedAt`
+- `sortOrder` column added to `likes` table for drag-reorder
+
+**Backend** (`server/db.ts`, `server/routers.ts`)
+- `getUserCollections`, `createUserCollection`, `deleteUserCollection`, `getCollectionTracks`, `addTrackToCollection`, `removeTrackFromCollection` DB helpers
+- `getLikedOrdered` — returns liked tracks sorted by `sortOrder`
+- `reorderLikes` — updates `sortOrder` for a batch of liked track IDs
+- `userCollections` tRPC router: `list`, `create`, `delete`, `getTracks`, `addTrack`, `removeTrack`
+- `songs.getLikedOrdered` and `songs.reorderLikes` procedures added
+
+**Frontend**
+- `AddToCollectionModal` — + button on every track card opens a modal with collection picker + "New Collection" button
+- `PlaylistDrawer` LIKED tab — drag-reorderable liked tracks via `DraggableLikedList`
+- `PlaylistDrawer` BUILD tab — `BuildCollectionsPanel` with real collections list, expandable tracks, create/delete
+- `ProfilePage` — Likes tab (card grid with + button) and Collections tab (folder view with track cards)
+
+---
+
 ## v2.36.0 — April 30, 2026 (Individual Stacked Tab Handles)
 
 ### What Shipped
