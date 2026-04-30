@@ -28,7 +28,7 @@ import { useLocation } from "wouter";
 const PANEL_WIDTH = 280;
 
 // ── Types ──────────────────────────────────────────────────────────
-type PlaylistTab = "new" | "trending" | "liked" | "build";
+type PlaylistTab = "new" | "trending" | "liked" | "build" | "shop";
 
 interface TrackRow {
   id: number;
@@ -76,6 +76,7 @@ const TABS: { id: PlaylistTab; label: string; icon: string }[] = [
   { id: "trending", label: "TREND",    icon: "↑" },
   { id: "liked",    label: "LIKED",    icon: "♥" },
   { id: "build",    label: "BUILD",    icon: "+" },
+  { id: "shop",     label: "SHOP",     icon: "⊛" },
 ];
 
 // ─── Individual Tab Handle ─────────────────────────────────────────
@@ -347,7 +348,14 @@ export default function PlaylistDrawer() {
   };
 
   // Handle tab click: open + switch tab, or collapse if already active
+  // SHOP tab dispatches a custom event to open MarketplaceDrawer instead
   function handleTabClick(tabId: PlaylistTab) {
+    if (tabId === "shop") {
+      // Close this drawer and open the Marketplace drawer
+      setIsOpen(false);
+      window.dispatchEvent(new CustomEvent("ln:open-shop"));
+      return;
+    }
     if (isOpen && activeTab === tabId) {
       setIsOpen(false);
     } else {
@@ -422,6 +430,7 @@ export default function PlaylistDrawer() {
     trending: "Trending",
     liked: "Liked Tracks",
     build: "Build Playlist",
+    shop: "Shop",
   };
 
   const content = (

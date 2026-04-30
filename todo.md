@@ -3756,3 +3756,10 @@
 - [x] TypeScript: 0 errors
 - [x] WhatsNewModal bumped to v2.36.0
 - [x] RELEASE_NOTES.md updated with v2.36.0 entry
+
+## Phase 92: SHOP Tab in Right Drawer Stack (v2.36.1)
+- [x] Add SHOP tab to PlaylistDrawer TABS array (⊛ icon)
+- [x] SHOP tab click dispatches ln:open-shop custom event and closes PlaylistDrawer
+- [x] MarketplaceDrawer listens for ln:open-shop event and opens itself
+- [x] TypeScript: 0 errors
+- [x] WhatsNewModal bumped to v2.36.1

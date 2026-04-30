@@ -10,14 +10,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.36.0";
+const CURRENT_VERSION = "v2.36.1";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.36.0",
+    version: "v2.36.1",
     date: "April 30, 2026",
     label: "Latest",
+    items: [
+      { icon: BookOpen, text: "SHOP Tab Added — A SHOP tab handle now appears in the right-side drawer stack below BUILD. Clicking SHOP closes the Quick Play drawer and opens the Marketplace drawer directly. All five tabs (NEW / TREND / LIKED / BUILD / SHOP) are stacked on the right edge." },
+    ],
+  },
+  {
+    version: "v2.36.0",
+    date: "April 30, 2026",
+    label: "",
     items: [
       { icon: BookOpen, text: "Individual Stacked Tab Handles — Each tab on both side drawers is now its own individual protruding handle on the screen edge, stacked vertically top-to-bottom. Left drawer: LIVE / PLAYING / TIPS tabs stacked on the left edge. Right drawer: NEW / TREND / LIKED / BUILD tabs stacked on the right edge. Clicking a tab opens the drawer and switches to that section; clicking the active tab again collapses the drawer. The header inside the panel now shows the active section name instead of a pill row." },
     ],

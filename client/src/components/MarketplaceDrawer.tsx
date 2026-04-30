@@ -170,6 +170,13 @@ export default function MarketplaceDrawer() {
   const [location] = useLocation();
   useEffect(() => { setIsOpen(false); }, [location]);
 
+  // Listen for external open trigger (e.g. from PlaylistDrawer SHOP tab)
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener("ln:open-shop", handler);
+    return () => window.removeEventListener("ln:open-shop", handler);
+  }, []);
+
   // Close on outside click
   useEffect(() => {
     if (!isOpen) return;
