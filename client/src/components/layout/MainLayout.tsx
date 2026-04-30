@@ -67,7 +67,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const { user, loading: authLoading, logout } = useAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [liveOpen, setLiveOpen] = useState(false);
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
   // Notification badges
@@ -185,8 +184,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* TopBar — desktop only */}
       <TopBar archiveSongCount={archiveSongCount} unreadCount={unreadCount as number} />
 
-      {/* LiveActivityPanel — desktop only */}
-      <LiveActivityPanel open={liveOpen} onToggle={() => setLiveOpen(o => !o)} />
+      {/* LiveActivityPanel — desktop only, self-contained state */}
+      <LiveActivityPanel />
 
       {/* ══════════════════════════════════════════════
           MOBILE LAYOUT (<md)

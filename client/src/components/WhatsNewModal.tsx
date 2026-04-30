@@ -10,14 +10,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.34.2";
+const CURRENT_VERSION = "v2.35.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.34.2",
+    version: "v2.35.0",
     date: "April 30, 2026",
     label: "Latest",
+    items: [
+      { icon: BookOpen, text: "Unified Drawer Handles — All three side drawers (Live Activity left, Quick Play right, Shop right) now share the same interaction pattern. Each drawer has a single centered handle button that protrudes from the screen edge and slides in sync with the panel. Click the handle to open; click again to close. The multi-tab BookSpine strip has been replaced with a compact pill tab row inside the panel header — cleaner, less visual noise, consistent with the Shop drawer that was already using this pattern." },
+    ],
+  },
+  {
+    version: "v2.34.2",
+    date: "April 30, 2026",
+    label: "",
     items: [
       { icon: BookOpen, text: "Book-Tab Drawer Fix — The spine tab strips on both side drawers (Live Activity left, Quick Play right) now render as fixed-position overlays outside the sliding panel. Previously, clicking the active tab to collapse the drawer would slide the tabs off-screen with the panel, making them impossible to click to reopen. The tabs now always remain visible at the screen edge — left drawer tabs stay at the left edge when closed, right drawer tabs at the right edge — and slide in sync with the panel when it opens or closes." },
       { icon: Music, text: "StoreTrackCard Play Fix — Track cards on the Home and Explore pages now play on click instead of navigating to the song detail page. Navigation to the song page is available through the three-dot context menu (Go to Song)." },

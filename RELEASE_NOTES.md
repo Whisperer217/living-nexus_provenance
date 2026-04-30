@@ -7,6 +7,27 @@
 
 ---
 
+## v2.35.0 — April 30, 2026 (Unified Drawer Handle Pattern)
+
+### What Shipped
+
+**Unified Drawer Handle Pattern — All Three Side Drawers**
+- All three side drawers (Live Activity left, Quick Play right, Shop right) now use the same single centered handle architecture as `MarketplaceDrawer`.
+- Each drawer has one handle button centered vertically on the panel edge that slides in sync with the panel (`left`/`right` CSS property transitions with the panel).
+- The multi-tab `BookSpineTabs` strip has been removed from `LiveActivityPanel` and `PlaylistDrawer` and replaced with a compact pill tab row inside the panel header.
+- `LiveActivityPanel` is now self-contained (owns its own `isOpen` state via `useState`). The parent-controlled `open`/`onToggle` props have been removed from `MainLayout`.
+- `PlaylistDrawer` already owned its own state — updated to use the same handle pattern.
+
+**Files changed:**
+- `client/src/components/layout/LiveActivityPanel.tsx` — full rewrite
+- `client/src/components/player/PlaylistDrawer.tsx` — full rewrite
+- `client/src/components/layout/MainLayout.tsx` — removed `liveOpen`/`setLiveOpen` state and props
+
+### TypeScript
+- 0 errors.
+
+---
+
 ## v2.34.2 — April 30, 2026 (Book-Tab Drawer Collapse Fix)
 
 ### What Shipped

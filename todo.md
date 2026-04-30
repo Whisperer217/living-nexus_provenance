@@ -3739,3 +3739,10 @@
 - [x] Added v2.34.0 entry (Book-Tab Spine Drawers redesign) to WhatsNewModal
 - [x] RELEASE_NOTES.md updated with v2.34.2 and v2.34.0 entries
 - [x] TypeScript 0 errors, checkpoint, GitHub push
+
+## Phase 90: Unified Drawer Handle Pattern (v2.35.0)
+- [x] Rebuild LiveActivityPanel — single centered handle, self-contained isOpen state, createPortal, inline styles matching MarketplaceDrawer
+- [x] Rebuild PlaylistDrawer — single centered handle, createPortal, inline styles matching MarketplaceDrawer
+- [x] Remove parent-controlled liveOpen/setLiveOpen from MainLayout
+- [x] WhatsNewModal bumped to v2.35.0 with unified drawer entry
+- [x] RELEASE_NOTES.md updated with v2.35.0 entry
