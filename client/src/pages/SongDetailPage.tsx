@@ -68,7 +68,7 @@ function RelatedCard({ item }: { item: any }) {
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { addAndPlay, state: playerState, currentTrackId, openNowPlayingPanel } = usePlayer();
+  const { addAndPlay, togglePlay, state: playerState, currentTrackId, openNowPlayingPanel } = usePlayer();
   const songId = parseInt(id || "0");
 
   const [tipOpen, setTipOpen] = useState(false);
@@ -263,25 +263,9 @@ export default function SongDetailPage() {
   const handlePlay = () => {
     if (!song) return;
     if (isThisTrackActive) {
-      // Track is already loaded — just toggle play/pause in global player
-      // PlayerContext togglePlay is available via audioRef; use addAndPlay to re-trigger
-      addAndPlay({
-        id: `song-${song.id}`,
-        title: song.title,
-        artist: creator?.artistHandle || creator?.name || "Unknown",
-        genre: song.genre || "",
-        audioUrl: safeAudioUrl(song.fileUrl),
-        artUrl: song.coverArtUrl || undefined,
-        witnessId: song.witnessId || undefined,
-        aiDisclosure: (creator?.aiDisclosure as any) || undefined,
-        creatorHandle: creator?.artistHandle || creator?.name || undefined,
-        creatorId: creator?.id ?? undefined,
-        coverPositionX: song.coverPositionX ?? 50,
-        coverPositionY: song.coverPositionY ?? 50,
-        visualReady: song.visualReady ?? false,
-        autoVideoUrl: song.autoVideoUrl ?? undefined,
-        creatorRole: song.creator?.role ?? undefined,
-      });
+      // Track is already loaded in the global player — just toggle play/pause, do NOT restart
+      togglePlay();
+      return;
     } else {
       // New track — load into global player and start playing
       addAndPlay({
