@@ -212,6 +212,15 @@ export default function ProfilePage() {
   const reorderLikesMutation = trpc.songs.reorderLikes.useMutation({
     onSuccess: () => utils.songs.getLikedOrdered.invalidate(),
   });
+  // ── Legacy playlists (shown in Collections tab) ─────────────────
+  const { data: myLegacyPlaylists = [] } = trpc.playlists.mine.useQuery(undefined, { enabled: !!user && activeTab === "collections" });
+  const [expandedLegacyPlaylistId, setExpandedLegacyPlaylistId] = useState<number | null>(null);
+  const { data: expandedLegacyPlaylistData } = trpc.playlists.getById.useQuery(
+    { id: expandedLegacyPlaylistId! },
+    { enabled: expandedLegacyPlaylistId !== null }
+  );
+  const expandedLegacyPlaylistTracks = expandedLegacyPlaylistData?.tracks ?? [];
+
   const { data: myFieldNotes = [] } = trpc.fieldNotes.mine.useQuery(undefined, { enabled: !!user && activeTab === "field-notes" });
   const { data: myTestimonies = [] } = trpc.testimony.mine.useQuery(undefined, { enabled: !!user && activeTab === "testimony" });
   const createTestimonyMutation = trpc.testimony.create.useMutation({
@@ -1185,6 +1194,62 @@ export default function ProfilePage() {
                   </div>
                 );
               })
+            )}
+
+            {/* ── Legacy Playlists section ── */}
+            {(myLegacyPlaylists as any[]).length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 mb-3 pt-4 border-t border-white/[0.06]">
+                  <Music size={11} className="text-white/30" />
+                  <span className="text-[11px] font-heading tracking-widest text-white/50">{(myLegacyPlaylists as any[]).length} PLAYLISTS</span>
+                </div>
+                {(myLegacyPlaylists as any[]).map((pl: any) => {
+                  const isExpanded = expandedLegacyPlaylistId === pl.id;
+                  return (
+                    <div key={pl.id} className="rounded-xl border border-white/[0.06] bg-[#111009] overflow-hidden mb-2">
+                      <div
+                        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/[0.02] transition-all"
+                        onClick={() => setExpandedLegacyPlaylistId(isExpanded ? null : pl.id)}
+                      >
+                        <div className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "rgba(167,139,250,0.06)", border: "1px solid rgba(167,139,250,0.15)" }}>
+                          <Music size={14} className="text-[#A78BFA]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-body text-white/80 truncate">{pl.name}</p>
+                          <p className="text-[11px] font-body text-white/40 mt-0.5">Playlist</p>
+                        </div>
+                        {isExpanded ? <ChevronDown size={13} className="text-white/30 flex-shrink-0" /> : <ChevronRight size={13} className="text-white/30 flex-shrink-0" />}
+                      </div>
+                      {isExpanded && (
+                        <div className="border-t border-white/[0.04]">
+                          {expandedLegacyPlaylistTracks.length === 0 ? (
+                            <div className="text-center py-6">
+                              <p className="text-white/30 font-body text-[11px]">No tracks in this playlist</p>
+                            </div>
+                          ) : (
+                            (expandedLegacyPlaylistTracks as any[]).map((item: any) => {
+                              const s = item.song ?? item;
+                              return (
+                                <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.02] transition-all border-b border-white/[0.03] last:border-0">
+                                  <div className="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden bg-[#0a0a08]">
+                                    {s.coverArtUrl
+                                      ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                                      : <div className="w-full h-full flex items-center justify-center"><Music size={11} className="text-white/30" /></div>}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[12px] font-body text-white/75 truncate">{s.title}</p>
+                                    <p className="text-[10px] font-body text-white/40 truncate">{s.artistHandle ?? s.creatorName ?? ""}</p>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         )}

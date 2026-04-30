@@ -7,6 +7,35 @@
 
 ---
 
+## v2.38.1 — April 30, 2026 (Legacy Playlists Visibility + Nav Fix)
+
+### What Shipped
+
+**ProfilePage.tsx**
+- Collections tab now shows legacy playlists (`playlists.mine`) in a "My Playlists" section below the named Collections section
+- Each legacy playlist is expandable (click to reveal tracks via `playlists.getById`)
+- No data loss — all playlists preserved alongside the new Collections system
+
+**PlaylistDrawer.tsx — BuildCollectionsPanel**
+- Fixed legacy playlists query: now uses `playlists.getById` (returns `{ playlist, tracks }`) instead of non-existent `playlists.getTracks`
+- "My Playlists" section added below "My Collections" in the BUILD drawer tab
+- Expandable playlist folders with inline track list
+
+**MainLayout.tsx**
+- "My Profile" hamburger menu item now correctly navigates to `/profile` (settings page)
+- "Creator Page" label added for public creator view at `/creator/{id}`
+
+**WhatsNewModal.tsx**
+- Bumped to `v2.38.1`, added entries for all three fixes above
+
+### TypeScript
+- 0 errors (confirmed by fresh `tsc --noEmit` run).
+
+### Manus Pub Action Required
+- Publish checkpoint `b7416bc6` (v2.38.0) first if not already done, then publish the new v2.38.1 checkpoint once created.
+
+---
+
 ## v2.38.0 — April 30, 2026 (Global Player v3.0)
 
 ### What Shipped

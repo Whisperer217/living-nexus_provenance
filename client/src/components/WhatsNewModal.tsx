@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
-  Shield, Upload, Music, Video, DollarSign, Users, BookOpen,
+  Shield, Upload, Music, Video, DollarSign, Users, BookOpen, FolderOpen,
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
   Eye, Globe, FileText, Network, Scroll, Film, Gift, Link2,
   Radio, ArrowUpFromLine, Library, FileArchive, Rocket, ImagePlus, Compass,
@@ -10,14 +10,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.38.0";
+const CURRENT_VERSION = "v2.38.1";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.38.0",
+    version: "v2.38.1",
     date: "April 30, 2026",
     label: "Latest",
+    items: [
+      { icon: FolderOpen, text: "Profile Collections tab — Legacy playlists now appear below your named Collections in the Collections tab. Expand any playlist to see its tracks. No data loss — all playlists are preserved alongside the new Collections system." },
+      { icon: Music, text: "BUILD drawer tab — Legacy playlists now appear in a \"My Playlists\" section below your Collections in the BUILD tab of the Quick Play drawer. Expand to browse tracks inline." },
+      { icon: Users, text: "Navigation fix — \"My Profile\" in the menu now correctly goes to your profile settings page. \"Creator Page\" goes to your public creator view." },
+    ],
+  },
+  {
+    version: "v2.38.0",
+    date: "April 30, 2026",
+    label: "",
     items: [
       { icon: Music, text: "Global Player v3.0 — The player is now a draggable floating overlay that lives above all content. Drag it up to expand to full-screen (artwork, provenance strip, Up Next queue, action row). Drag down to the floating bar (controls + progress). Drag to the bottom edge for the compact mini strip. Three snap zones: Mini (72px), Float (140px), Expanded (full height). Glass backdrop with gold glow system. Works on all screen sizes." },
       { icon: BookOpen, text: "Expanded Player — Full artwork, creator name with verified badge, Witnessed on Living Nexus strip, provenance shield button, Up Next queue (next 3 tracks), Add to Collection, Like, Share, Tip, and Verify actions. Waveform visualizer and frequency glow available in expanded view." },

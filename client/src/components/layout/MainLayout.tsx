@@ -314,7 +314,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {!authLoading && user && renderMobileNavItem({ label: "Upload", icon: Upload, path: "/upload" })}
               {!authLoading && user && renderMobileNavItem(DASHBOARD_NAV_ITEM)}
               {!authLoading && user && renderMobileNavItem(ARCHIVE_NAV_ITEM)}
-              {!authLoading && user && renderMobileNavItem({ label: "My Profile", icon: Fingerprint, path: `/creator/${(user as any).id}` })}
+              {!authLoading && user && renderMobileNavItem({ label: "My Profile", icon: User, path: "/profile" })}
+              {!authLoading && user && renderMobileNavItem({ label: "Creator Page", icon: Fingerprint, path: `/creator/${(user as any).id}` })}
               {!authLoading && user && renderMobileNavItem({ label: "Prompt Generator", icon: Sparkles, path: `/creator/${(user as any).id}?openPromptStudio=1` })}
               {!authLoading && (user as any)?.role === "admin" && renderMobileNavItem({ label: "LN Command", icon: Terminal, path: "/admin" })}
 

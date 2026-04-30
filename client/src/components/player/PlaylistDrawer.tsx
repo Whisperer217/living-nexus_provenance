@@ -350,6 +350,13 @@ function BuildCollectionsPanel() {
   const { data: collections, isLoading } = trpc.userCollections.list.useQuery(undefined, {
     enabled: !!user,
   });
+  const { data: legacyPlaylists } = trpc.playlists.mine.useQuery(undefined, { enabled: !!user });
+  const [expandedPlaylistId, setExpandedPlaylistId] = useState<number | null>(null);
+  const { data: expandedPlaylistData } = trpc.playlists.getById.useQuery(
+    { id: expandedPlaylistId! },
+    { enabled: expandedPlaylistId !== null }
+  );
+  const expandedPlaylistTracks = expandedPlaylistData?.tracks ?? [];
   const { data: expandedTracks } = trpc.userCollections.getTracks.useQuery(
     { collectionId: expandedId! },
     { enabled: expandedId !== null }
@@ -535,6 +542,60 @@ function BuildCollectionsPanel() {
             )}
           </div>
         ))
+      )}
+      {/* Legacy Playlists Section */}
+      {legacyPlaylists && legacyPlaylists.length > 0 && (
+        <>
+          <div style={{ padding: "12px 12px 6px", borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: "8px" }}>
+            <span style={{ fontSize: "9px", fontFamily: "var(--font-display)", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" }}>My Playlists</span>
+          </div>
+          {legacyPlaylists.map((pl: { id: number; name: string }) => (
+            <div key={pl.id}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                padding: "8px 12px",
+                background: expandedPlaylistId === pl.id ? "rgba(196,154,40,0.05)" : "transparent",
+                borderLeft: expandedPlaylistId === pl.id ? "2px solid var(--ln-gold)" : "2px solid transparent",
+                cursor: "pointer",
+              }}
+                onClick={() => setExpandedPlaylistId(expandedPlaylistId === pl.id ? null : pl.id)}
+              >
+                {expandedPlaylistId === pl.id
+                  ? <ChevronDown size={12} style={{ color: "var(--ln-gold)", flexShrink: 0 }} />
+                  : <ChevronRight size={12} style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }} />}
+                <Music size={13} style={{ color: expandedPlaylistId === pl.id ? "var(--ln-gold)" : "rgba(255,255,255,0.4)", flexShrink: 0 }} />
+                <span style={{
+                  flex: 1, fontSize: "12px", fontWeight: 600,
+                  fontFamily: "var(--font-display)",
+                  color: expandedPlaylistId === pl.id ? "var(--ln-gold)" : "var(--ln-parchment)",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>{pl.name}</span>
+              </div>
+              {expandedPlaylistId === pl.id && (
+                <div style={{ paddingLeft: "24px" }}>
+                  {expandedPlaylistTracks.length === 0 ? (
+                    <div style={{ padding: "8px 12px", color: "rgba(255,255,255,0.2)", fontSize: "10px" }}>No tracks</div>
+                  ) : (
+                    expandedPlaylistTracks.map((t: any) => {
+                      const artUrl = t.song?.coverArtUrl ?? t.song?.artUrl ?? null;
+                      return (
+                        <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px 6px 0" }}>
+                          <div style={{ width: "28px", height: "28px", borderRadius: "4px", overflow: "hidden", flexShrink: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {artUrl ? <img src={artUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <Music size={10} style={{ color: "rgba(255,255,255,0.2)" }} />}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: "10px", fontWeight: 600, color: "var(--ln-parchment)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.song?.title ?? "Unknown"}</div>
+                            <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.song?.artist ?? ""}</div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </>
       )}
     </div>
   );

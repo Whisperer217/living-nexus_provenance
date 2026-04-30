@@ -3777,3 +3777,10 @@
 - [x] BUILD drawer tab — collections list, open collection to see tracks, reorder/remove
 - [x] Profile page Likes tab — full card grid of liked tracks
 - [x] Profile page Collections tab — named collection folders, expandable card view, create new collection
+
+## Phase 101: Bug Fixes — Legacy Playlists Visibility + Nav Fix (v2.38.1)
+- [x] ProfilePage Collections tab — add legacy playlists section below userCollections (playlists.mine + playlists.getById)
+- [x] PlaylistDrawer BuildCollectionsPanel — fix legacy playlists query (getTracks → getById), add "My Playlists" section
+- [x] MainLayout hamburger menu — "My Profile" → /profile, "Creator Page" → /creator/{id}
+- [x] WhatsNewModal bumped to v2.38.1 with all three fix entries
+- [x] RELEASE_NOTES.md updated with v2.38.1 entry
