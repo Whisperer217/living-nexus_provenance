@@ -63,11 +63,16 @@ function TabHandle({
 }) {
   // Stack tabs centered in the viewport.
   // Each tab button is ~72px tall. Gap between tabs: 4px.
-  const TAB_HEIGHT = 72;
+  const TAB_HEIGHT = 68;
   const TAB_GAP = 2;
+  // Anchor from bottom so this group sits in the lower portion of the screen,
+  // separated from the PlaylistDrawer group which anchors from the top.
+  // BOTTOM_ANCHOR: distance from bottom of viewport to the bottom of the last tab.
+  const BOTTOM_ANCHOR = 120; // px from bottom (clears the player bar)
   const totalHeight = total * TAB_HEIGHT + (total - 1) * TAB_GAP;
-  // top offset: center the stack, then offset per index
-  const topOffset = `calc(50% - ${totalHeight / 2}px + ${index * (TAB_HEIGHT + TAB_GAP)}px)`;
+  // index 0 = topmost tab in this group
+  const bottomOffset = BOTTOM_ANCHOR + (total - 1 - index) * (TAB_HEIGHT + TAB_GAP);
+  const topOffset = `calc(100% - ${bottomOffset + TAB_HEIGHT}px)`;
 
   return (
     <button
@@ -75,9 +80,9 @@ function TabHandle({
       aria-label={`${isOpen && isActive ? "Close" : "Open"} live activity panel — ${tab.label}`}
       style={{
         position: "fixed",
-        right: isOpen ? `${PANEL_WIDTH}px` : "0px",
+        right: isOpen ? `${PANEL_WIDTH}px` : "-4px",
         top: topOffset,
-        zIndex: 56,
+        zIndex: 54,
         background: isActive && isOpen
           ? "rgba(196,154,40,0.18)"
           : "var(--ln-panel)",
