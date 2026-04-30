@@ -3919,3 +3919,167 @@ export async function setUserPublicKey(userId: number, publicKeyHex: string) {
   const db = await getDb();
   await db.update(users).set({ publicKey: publicKeyHex }).where(eq(users.id, userId));
 }
+
+
+// ─── User Collections (Curation Folders) ─────────────────────────────────────
+
+export async function getUserCollections(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { userCollections, userCollectionTracks } = await import("../drizzle/schema");
+  const cols = await db
+    .select()
+    .from(userCollections)
+    .where(eq(userCollections.userId, userId))
+    .orderBy(asc(userCollections.sortOrder), asc(userCollections.createdAt));
+
+  // Get track counts for each collection
+  const counts = await db
+    .select({
+      collectionId: userCollectionTracks.collectionId,
+      count: sql<number>`count(*)`,
+    })
+    .from(userCollectionTracks)
+    .where(inArray(userCollectionTracks.collectionId, cols.map((c: { id: number }) => c.id)))
+    .groupBy(userCollectionTracks.collectionId);
+
+  const countMap = Object.fromEntries(counts.map((c: { collectionId: number; count: number }) => [c.collectionId, Number(c.count)]));
+  return cols.map((c: { id: number; userId: number; name: string; description: string | null; sortOrder: number; createdAt: Date }) => ({ ...c, trackCount: countMap[c.id] ?? 0 }));
+}
+
+export async function createUserCollection(userId: number, name: string, description?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { userCollections } = await import("../drizzle/schema");
+  // Get next sortOrder
+  const existing = await db
+    .select({ sortOrder: userCollections.sortOrder })
+    .from(userCollections)
+    .where(eq(userCollections.userId, userId))
+    .orderBy(desc(userCollections.sortOrder))
+    .limit(1);
+  const nextOrder = (existing[0]?.sortOrder ?? -1) + 1;
+  const [result] = await db.insert(userCollections).values({ userId, name, description, sortOrder: nextOrder });
+  return { id: (result as any).insertId as number, name, description, sortOrder: nextOrder };
+}
+
+export async function renameUserCollection(userId: number, collectionId: number, name: string, description?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { userCollections } = await import("../drizzle/schema");
+  await db.update(userCollections)
+    .set({ name, description })
+    .where(and(eq(userCollections.id, collectionId), eq(userCollections.userId, userId)));
+}
+
+export async function deleteUserCollection(userId: number, collectionId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { userCollections, userCollectionTracks } = await import("../drizzle/schema");
+  // Delete tracks first
+  await db.delete(userCollectionTracks).where(eq(userCollectionTracks.collectionId, collectionId));
+  await db.delete(userCollections)
+    .where(and(eq(userCollections.id, collectionId), eq(userCollections.userId, userId)));
+}
+
+export async function getUserCollectionTracks(collectionId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { userCollectionTracks } = await import("../drizzle/schema");
+  return db
+    .select({
+      entry: userCollectionTracks,
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(userCollectionTracks)
+    .innerJoin(songs, eq(userCollectionTracks.songId, songs.id))
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(eq(userCollectionTracks.collectionId, collectionId))
+    .orderBy(asc(userCollectionTracks.sortOrder), asc(userCollectionTracks.addedAt));
+}
+
+export async function addTrackToUserCollection(collectionId: number, songId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { userCollectionTracks } = await import("../drizzle/schema");
+  // Check if already in collection
+  const existing = await db
+    .select({ id: userCollectionTracks.id })
+    .from(userCollectionTracks)
+    .where(and(eq(userCollectionTracks.collectionId, collectionId), eq(userCollectionTracks.songId, songId)))
+    .limit(1);
+  if (existing.length > 0) return { alreadyExists: true };
+  // Get next sortOrder
+  const last = await db
+    .select({ sortOrder: userCollectionTracks.sortOrder })
+    .from(userCollectionTracks)
+    .where(eq(userCollectionTracks.collectionId, collectionId))
+    .orderBy(desc(userCollectionTracks.sortOrder))
+    .limit(1);
+  const nextOrder = (last[0]?.sortOrder ?? -1) + 1;
+  await db.insert(userCollectionTracks).values({ collectionId, songId, sortOrder: nextOrder });
+  return { alreadyExists: false };
+}
+
+export async function removeTrackFromUserCollection(collectionId: number, songId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { userCollectionTracks } = await import("../drizzle/schema");
+  await db.delete(userCollectionTracks)
+    .where(and(eq(userCollectionTracks.collectionId, collectionId), eq(userCollectionTracks.songId, songId)));
+}
+
+export async function reorderUserCollectionTracks(collectionId: number, orderedIds: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { userCollectionTracks } = await import("../drizzle/schema");
+  for (let i = 0; i < orderedIds.length; i++) {
+    await db.update(userCollectionTracks)
+      .set({ sortOrder: i })
+      .where(and(eq(userCollectionTracks.id, orderedIds[i]), eq(userCollectionTracks.collectionId, collectionId)));
+  }
+}
+
+// ─── Likes Reorder ────────────────────────────────────────────────────────────
+
+export async function getLikedSongsOrdered(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { likes } = await import("../drizzle/schema");
+  return db
+    .select({
+      likeId: likes.id,
+      sortOrder: likes.sortOrder,
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+      likedAt: likes.createdAt,
+    })
+    .from(likes)
+    .innerJoin(songs, and(eq(likes.songId, songs.id), eq(songs.status, "Published")))
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(eq(likes.userId, userId))
+    .orderBy(asc(likes.sortOrder), desc(likes.createdAt))
+    .limit(200);
+}
+
+export async function reorderLikes(userId: number, orderedSongIds: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { likes } = await import("../drizzle/schema");
+  for (let i = 0; i < orderedSongIds.length; i++) {
+    await db.update(likes)
+      .set({ sortOrder: i })
+      .where(and(eq(likes.userId, userId), eq(likes.songId, orderedSongIds[i])));
+  }
+}

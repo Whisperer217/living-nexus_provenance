@@ -91,6 +91,10 @@ import {
   insertWid,
   getWidWithEvent,
   setUserPublicKey,
+  getUserCollections, createUserCollection, renameUserCollection, deleteUserCollection,
+  getUserCollectionTracks, addTrackToUserCollection, removeTrackFromUserCollection,
+  reorderUserCollectionTracks,
+  getLikedSongsOrdered, reorderLikes,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -1418,6 +1422,15 @@ export const appRouter = router({
     getLiked: protectedProcedure.query(async ({ ctx }) => {
       return getLikedSongs(ctx.user.id);
     }),
+    getLikedOrdered: protectedProcedure.query(async ({ ctx }) => {
+      return getLikedSongsOrdered(ctx.user.id);
+    }),
+    reorderLikes: protectedProcedure
+      .input(z.object({ orderedSongIds: z.array(z.number()) }))
+      .mutation(async ({ ctx, input }) => {
+        await reorderLikes(ctx.user.id, input.orderedSongIds);
+        return { ok: true };
+      }),
     toggleLike: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => {
       const result = await toggleLike(ctx.user.id, input.songId);
       // Check for like surge: if this was a new like, see if the song got 10+ likes in the last hour
@@ -6143,6 +6156,59 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
       }))
       .mutation(async ({ input }) => {
         await updateAgentFingerprint(input.agentId, input.styleFingerprint, input.frozenTraits);
+        return { ok: true };
+      }),
+  }),
+
+  userCollections: router({
+    /** List all collections for the current user, with track counts */
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return getUserCollections(ctx.user.id);
+    }),
+    /** Create a new collection */
+    create: protectedProcedure
+      .input(z.object({ name: z.string().min(1).max(128), description: z.string().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        return createUserCollection(ctx.user.id, input.name, input.description);
+      }),
+    /** Rename / update description of a collection */
+    rename: protectedProcedure
+      .input(z.object({ collectionId: z.number(), name: z.string().min(1).max(128), description: z.string().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        await renameUserCollection(ctx.user.id, input.collectionId, input.name, input.description);
+        return { ok: true };
+      }),
+    /** Delete a collection and all its tracks */
+    delete: protectedProcedure
+      .input(z.object({ collectionId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await deleteUserCollection(ctx.user.id, input.collectionId);
+        return { ok: true };
+      }),
+    /** Get tracks in a collection */
+    getTracks: protectedProcedure
+      .input(z.object({ collectionId: z.number() }))
+      .query(async ({ input }) => {
+        return getUserCollectionTracks(input.collectionId);
+      }),
+    /** Add a track to a collection */
+    addTrack: protectedProcedure
+      .input(z.object({ collectionId: z.number(), songId: z.number() }))
+      .mutation(async ({ input }) => {
+        return addTrackToUserCollection(input.collectionId, input.songId);
+      }),
+    /** Remove a track from a collection */
+    removeTrack: protectedProcedure
+      .input(z.object({ collectionId: z.number(), songId: z.number() }))
+      .mutation(async ({ input }) => {
+        await removeTrackFromUserCollection(input.collectionId, input.songId);
+        return { ok: true };
+      }),
+    /** Reorder tracks in a collection by providing the ordered array of entry IDs */
+    reorderTracks: protectedProcedure
+      .input(z.object({ collectionId: z.number(), orderedIds: z.array(z.number()) }))
+      .mutation(async ({ input }) => {
+        await reorderUserCollectionTracks(input.collectionId, input.orderedIds);
         return { ok: true };
       }),
   }),

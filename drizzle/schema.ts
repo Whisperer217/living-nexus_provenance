@@ -407,6 +407,7 @@ export const likes = mysqlTable("likes", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),   // the user who liked
   songId: int("songId").notNull(),   // the song that was liked
+  sortOrder: int("sortOrder").default(0).notNull(), // user-defined ordering in their likes list
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (t) => ({
   songIdx: index("likes_songId_idx").on(t.songId),
@@ -1416,3 +1417,39 @@ export const keeperChatArchives = mysqlTable("keeper_chat_archives", {
 });
 export type KeeperChatArchive = typeof keeperChatArchives.$inferSelect;
 export type InsertKeeperChatArchive = typeof keeperChatArchives.$inferInsert;
+
+// ─── User Collections (Curation Folders) ─────────────────────────────────────
+// User-created named curation folders (distinct from Album WID `collections`).
+// These are the personal playlists/folders shown in the LIKED drawer BUILD tab
+// and on the Profile > Collections tab.
+export const userCollections = mysqlTable("userCollections", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 128 }).notNull(),
+  description: text("description"),
+  coverUrl: text("coverUrl"),          // optional cover image (first track's art by default)
+  sortOrder: int("sortOrder").default(0).notNull(), // ordering within user's collection list
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  userIdx: index("userCollections_userId_idx").on(t.userId),
+}));
+
+export type UserCollection = typeof userCollections.$inferSelect;
+export type InsertUserCollection = typeof userCollections.$inferInsert;
+
+// ─── User Collection Tracks ───────────────────────────────────────────────────
+// Many-to-many: a track can be in multiple user collections; each entry has a sort order.
+export const userCollectionTracks = mysqlTable("userCollectionTracks", {
+  id: int("id").autoincrement().primaryKey(),
+  collectionId: int("collectionId").notNull(),  // FK → userCollections.id
+  songId: int("songId").notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  addedAt: timestamp("addedAt").defaultNow().notNull(),
+}, (t) => ({
+  collectionIdx: index("userCollectionTracks_collectionId_idx").on(t.collectionId),
+  songIdx: index("userCollectionTracks_songId_idx").on(t.songId),
+}));
+
+export type UserCollectionTrack = typeof userCollectionTracks.$inferSelect;
+export type InsertUserCollectionTrack = typeof userCollectionTracks.$inferInsert;

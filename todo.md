@@ -3763,3 +3763,17 @@
 - [x] MarketplaceDrawer listens for ln:open-shop event and opens itself
 - [x] TypeScript: 0 errors
 - [x] WhatsNewModal bumped to v2.36.1
+
+## Phase 100: Collections & Likes System
+- [x] Schema: add `collections` table (id, userId, name, description, sortOrder, createdAt)
+- [x] Schema: add `collection_tracks` table (id, collectionId, songId, sortOrder, addedAt)
+- [x] Schema: add `sort_order` column to `song_likes` table
+- [x] Backend: collections.create, list, rename, delete procedures
+- [x] Backend: collections.addTrack, removeTrack, reorderTracks procedures
+- [x] Backend: likes.reorder procedure (update sort_order on song_likes)
+- [x] Backend: likes.getOrdered query (returns liked tracks sorted by sort_order)
+- [x] AddToCollectionModal component — + button on track cards, modal with collection list + New Collection
+- [x] LIKED drawer tab — reorderable liked tracks (drag-to-reorder)
+- [x] BUILD drawer tab — collections list, open collection to see tracks, reorder/remove
+- [x] Profile page Likes tab — full card grid of liked tracks
+- [x] Profile page Collections tab — named collection folders, expandable card view, create new collection

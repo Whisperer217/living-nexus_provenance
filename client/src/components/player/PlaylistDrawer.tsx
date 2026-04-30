@@ -18,12 +18,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  Music, Loader2, Lock, Play, Plus, Sparkles,
+  Music, Loader2, Lock, Play, Plus, Sparkles, GripVertical, Trash2, FolderOpen, ChevronDown, ChevronRight,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
+import { AddToCollectionButton } from "@/components/AddToCollectionModal";
 
 const PANEL_WIDTH = 280;
 
@@ -252,55 +253,278 @@ function MiniTrackRow({
   );
 }
 
-// ── Build Your Own placeholder ─────────────────────────────────────
-function BuildYourOwn({ onClose }: { onClose: () => void }) {
-  const [, navigate] = useLocation();
+// ── DraggableLikedList ─────────────────────────────────────────────
+// Reorderable list of liked tracks with drag handles
+function DraggableLikedList({
+  tracks,
+  onReorder,
+  onPlay,
+  currentId,
+}: {
+  tracks: TrackRow[];
+  onReorder: (orderedIds: number[]) => void;
+  onPlay: (track: TrackRow, all: TrackRow[]) => void;
+  currentId?: string;
+}) {
+  const [items, setItems] = useState<TrackRow[]>(tracks);
+  const dragIdx = useRef<number | null>(null);
+
+  useEffect(() => { setItems(tracks); }, [tracks]);
+
+  function onDragStart(i: number) { dragIdx.current = i; }
+  function onDragOver(e: React.DragEvent, i: number) {
+    e.preventDefault();
+    if (dragIdx.current === null || dragIdx.current === i) return;
+    const next = [...items];
+    const [moved] = next.splice(dragIdx.current, 1);
+    next.splice(i, 0, moved);
+    dragIdx.current = i;
+    setItems(next);
+  }
+  function onDragEnd() {
+    dragIdx.current = null;
+    onReorder(items.map(t => t.id));
+  }
+
   return (
-    <div style={{
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      height: "100%", padding: "24px", textAlign: "center", gap: "16px",
-    }}>
-      <div style={{
-        width: "56px", height: "56px", borderRadius: "16px",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        background: "rgba(196,154,40,0.08)",
-        border: "1px solid rgba(196,154,40,0.25)",
-      }}>
-        <Plus size={24} style={{ color: "var(--ln-gold)" }} />
-      </div>
-      <div>
-        <div style={{
-          fontSize: "14px", fontWeight: 700,
-          fontFamily: "var(--font-display)",
-          color: "var(--ln-parchment)", marginBottom: "4px",
-        }}>Custom Playlists</div>
-        <div style={{ fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.4)" }}>
-          Build and save your own playlists. Curate tracks from any creator on the platform.
+    <div style={{ padding: "8px 0" }}>
+      {items.map((track, i) => (
+        <div
+          key={track.id}
+          draggable
+          onDragStart={() => onDragStart(i)}
+          onDragOver={(e) => onDragOver(e, i)}
+          onDragEnd={onDragEnd}
+          style={{
+            display: "flex", alignItems: "center", gap: "6px",
+            padding: "6px 8px 6px 4px",
+            background: String(track.id) === currentId ? "rgba(196,154,40,0.05)" : "transparent",
+            borderLeft: String(track.id) === currentId ? "2px solid var(--ln-gold)" : "2px solid transparent",
+            cursor: "grab",
+          }}
+        >
+          <GripVertical size={12} style={{ color: "rgba(255,255,255,0.2)", flexShrink: 0 }} />
+          <div
+            style={{ flex: 1, display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}
+            onClick={() => onPlay(track, items)}
+          >
+            <div style={{
+              width: "36px", height: "36px", borderRadius: "6px",
+              overflow: "hidden", flexShrink: 0,
+              background: "rgba(0,0,0,0.4)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {track.artUrl
+                ? <img src={track.artUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <Music size={12} style={{ color: "rgba(255,255,255,0.2)" }} />}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: "11px", fontWeight: 600,
+                color: String(track.id) === currentId ? "var(--ln-gold)" : "var(--ln-parchment)",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{track.title}</div>
+              <div style={{
+                fontSize: "9px", color: "rgba(255,255,255,0.35)",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{track.artist}</div>
+            </div>
+          </div>
+          <AddToCollectionButton songId={track.id} songTitle={track.title} size={12} />
         </div>
+      ))}
+    </div>
+  );
+}
+
+// ── BuildCollectionsPanel ──────────────────────────────────────────
+// Shows user's named collections with expandable track lists
+function BuildCollectionsPanel() {
+  const utils = trpc.useUtils();
+  const { user } = useAuth();
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const { playQueueAt } = usePlayer();
+
+  const { data: collections, isLoading } = trpc.userCollections.list.useQuery(undefined, {
+    enabled: !!user,
+  });
+  const { data: expandedTracks } = trpc.userCollections.getTracks.useQuery(
+    { collectionId: expandedId! },
+    { enabled: expandedId !== null }
+  );
+
+  const createCol = trpc.userCollections.create.useMutation({
+    onSuccess: () => {
+      utils.userCollections.list.invalidate();
+      setCreating(false);
+      setNewName("");
+    },
+  });
+  const deleteCol = trpc.userCollections.delete.useMutation({
+    onSuccess: () => utils.userCollections.list.invalidate(),
+  });
+  const removeTrack = trpc.userCollections.removeTrack.useMutation({
+    onSuccess: () => utils.userCollections.getTracks.invalidate(),
+  });
+
+  if (!user) return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "200px", gap: "12px", padding: "24px", textAlign: "center" }}>
+      <Lock size={20} style={{ color: "rgba(255,255,255,0.2)" }} />
+      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)" }}>Sign in to manage collections</div>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: "12px 0" }}>
+      {/* Create new */}
+      <div style={{ padding: "0 12px 12px" }}>
+        {creating ? (
+          <div style={{ display: "flex", gap: "6px" }}>
+            <input
+              autoFocus
+              placeholder="Collection name…"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && newName.trim() && createCol.mutate({ name: newName.trim() })}
+              style={{
+                flex: 1, background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(196,154,40,0.3)",
+                borderRadius: "6px", color: "#e8e0d0",
+                padding: "6px 10px", fontSize: "12px", outline: "none",
+              }}
+            />
+            <button
+              onClick={() => newName.trim() && createCol.mutate({ name: newName.trim() })}
+              disabled={!newName.trim() || createCol.isPending}
+              style={{
+                padding: "6px 12px", borderRadius: "6px",
+                background: "var(--ln-gold)", color: "#0a0812",
+                border: "none", fontWeight: 700, fontSize: "11px", cursor: "pointer",
+              }}
+            >{createCol.isPending ? "…" : "Add"}</button>
+            <button
+              onClick={() => { setCreating(false); setNewName(""); }}
+              style={{ padding: "6px", background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: "16px" }}
+            >✕</button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setCreating(true)}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", gap: "8px",
+              padding: "8px 10px", borderRadius: "8px",
+              background: "transparent", border: "1px dashed rgba(196,154,40,0.3)",
+              color: "var(--ln-gold)", cursor: "pointer", fontSize: "11px",
+              fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: "0.06em",
+            }}
+          >
+            <Plus size={12} /> New Collection
+          </button>
+        )}
       </div>
-      <button
-        onClick={() => { onClose(); navigate("/explore"); }}
-        style={{
-          padding: "8px 16px", borderRadius: "10px",
-          background: "rgba(196,154,40,0.08)",
-          border: "1px solid rgba(196,154,40,0.3)",
-          color: "var(--ln-gold)",
-          fontFamily: "var(--font-display)",
-          fontWeight: 700, fontSize: "11px",
-          letterSpacing: "0.08em", cursor: "pointer",
-        }}
-      >
-        Browse Tracks
-      </button>
-      <div style={{
-        display: "flex", alignItems: "center", gap: "6px",
-        fontSize: "10px", padding: "6px 12px", borderRadius: "20px",
-        background: "rgba(0,0,0,0.3)", color: "rgba(255,255,255,0.3)",
-      }}>
-        <Sparkles size={10} />
-        Full playlist builder coming soon
-      </div>
+
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "20px" }}>
+          <Loader2 size={16} style={{ color: "rgba(196,154,40,0.4)", animation: "spin 1s linear infinite" }} />
+        </div>
+      ) : !collections || collections.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "24px", color: "rgba(255,255,255,0.3)", fontSize: "11px" }}>
+          <FolderOpen size={24} style={{ margin: "0 auto 8px", opacity: 0.3 }} />
+          No collections yet
+        </div>
+      ) : (
+        collections.map((col: { id: number; name: string; trackCount: number }) => (
+          <div key={col.id}>
+            {/* Collection header */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              padding: "8px 12px",
+              background: expandedId === col.id ? "rgba(196,154,40,0.05)" : "transparent",
+              borderLeft: expandedId === col.id ? "2px solid var(--ln-gold)" : "2px solid transparent",
+              cursor: "pointer",
+            }}
+              onClick={() => setExpandedId(expandedId === col.id ? null : col.id)}
+            >
+              {expandedId === col.id
+                ? <ChevronDown size={12} style={{ color: "var(--ln-gold)", flexShrink: 0 }} />
+                : <ChevronRight size={12} style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }} />}
+              <FolderOpen size={13} style={{ color: expandedId === col.id ? "var(--ln-gold)" : "rgba(255,255,255,0.4)", flexShrink: 0 }} />
+              <span style={{
+                flex: 1, fontSize: "12px", fontWeight: 600,
+                fontFamily: "var(--font-display)",
+                color: expandedId === col.id ? "var(--ln-gold)" : "var(--ln-parchment)",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{col.name}</span>
+              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>{col.trackCount}</span>
+              <button
+                onClick={e => { e.stopPropagation(); deleteCol.mutate({ collectionId: col.id }); }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.2)", padding: "2px", flexShrink: 0 }}
+                title="Delete collection"
+              ><Trash2 size={11} /></button>
+            </div>
+
+            {/* Expanded tracks */}
+            {expandedId === col.id && (
+              <div style={{ paddingLeft: "24px" }}>
+                {!expandedTracks ? (
+                  <div style={{ padding: "8px", color: "rgba(255,255,255,0.2)", fontSize: "10px" }}>Loading…</div>
+                ) : expandedTracks.length === 0 ? (
+                  <div style={{ padding: "8px 12px", color: "rgba(255,255,255,0.2)", fontSize: "10px" }}>No tracks yet — use + on any track card</div>
+                ) : (
+                  expandedTracks.map((t: { id: number; title: string; artist: string; artUrl?: string | null }) => (
+                    <div key={t.id} style={{
+                      display: "flex", alignItems: "center", gap: "8px",
+                      padding: "6px 12px 6px 0",
+                    }}>
+                      <div style={{
+                        width: "28px", height: "28px", borderRadius: "4px",
+                        overflow: "hidden", flexShrink: 0,
+                        background: "rgba(0,0,0,0.4)",
+                      }}>
+                        {t.artUrl
+                          ? <img src={t.artUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          : <Music size={10} style={{ color: "rgba(255,255,255,0.2)", margin: "9px" }} />}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: "10px", fontWeight: 600, color: "var(--ln-parchment)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>
+                        <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.artist}</div>
+                      </div>
+                      <button
+                        onClick={() => removeTrack.mutate({ collectionId: col.id, songId: t.id })}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.2)", padding: "2px", flexShrink: 0 }}
+                      ><Trash2 size={10} /></button>
+                    </div>
+                  ))
+                )}
+                {/* Play collection */}
+                {expandedTracks && expandedTracks.length > 0 && (
+                  <button
+                    onClick={() => {
+                      const playerTracks = expandedTracks.map((t: any) => ({
+                        id: String(t.id), title: t.title, artist: t.artist,
+                        artUrl: t.artUrl ?? undefined, audioUrl: t.audioUrl ?? "",
+                      }));
+                      playQueueAt(playerTracks, 0, "NONE");
+                    }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "6px",
+                      padding: "6px 12px 10px 0",
+                      background: "none", border: "none",
+                      color: "var(--ln-gold)", cursor: "pointer",
+                      fontSize: "10px", fontFamily: "var(--font-display)",
+                      fontWeight: 700, letterSpacing: "0.06em",
+                    }}
+                  >
+                    <Play size={10} fill="currentColor" /> Play All
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }
@@ -375,9 +599,13 @@ export default function PlaylistDrawer() {
     { limit: 20 },
     { enabled: isOpen && activeTab === "trending", staleTime: 60_000 }
   );
-  const { data: likedData, isLoading: likedLoading } = trpc.songs.getLiked.useQuery(undefined, {
+  const utils = trpc.useUtils();
+  const { data: likedData, isLoading: likedLoading } = trpc.songs.getLikedOrdered.useQuery(undefined, {
     enabled: isOpen && activeTab === "liked" && !!user,
-    staleTime: 60_000,
+    staleTime: 30_000,
+  });
+  const reorderLikes = trpc.songs.reorderLikes.useMutation({
+    onSuccess: () => utils.songs.getLikedOrdered.invalidate(),
   });
 
   const newTracks: TrackRow[] = (newData ?? []).map(flattenSong);
@@ -537,7 +765,7 @@ export default function PlaylistDrawer() {
           scrollbarColor: "rgba(196,154,40,0.25) transparent",
         }}>
           {activeTab === "build" ? (
-            <BuildYourOwn onClose={() => setIsOpen(false)} />
+            <BuildCollectionsPanel />
           ) : activeTab === "liked" && !user ? (
             <div style={{
               display: "flex", flexDirection: "column",
@@ -551,63 +779,55 @@ export default function PlaylistDrawer() {
               </div>
             </div>
           ) : isLoading ? (
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              height: "128px",
-            }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "128px" }}>
               <Loader2 size={18} style={{ color: "rgba(196,154,40,0.4)", animation: "spin 1s linear infinite" }} />
             </div>
           ) : tracks.length === 0 ? (
-            <div style={{
-              display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              height: "128px", gap: "8px",
-            }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "128px", gap: "8px" }}>
               <Music size={18} style={{ color: "rgba(255,255,255,0.1)" }} />
               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)" }}>
                 {activeTab === "liked" ? "No liked tracks yet" : "No tracks found"}
               </div>
             </div>
+          ) : activeTab === "liked" ? (
+            <>
+              {/* Play all */}
+              <button
+                onClick={() => likedTracks.length > 0 && handlePlay(likedTracks[0], likedTracks)}
+                style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", marginBottom: "4px", background: "transparent", border: "none", cursor: "pointer", color: "var(--ln-gold)", transition: "background 0.15s" }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+              >
+                <div style={{ width: "28px", height: "28px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}>
+                  <Play size={11} fill="currentColor" />
+                </div>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em" }}>Play All ({likedTracks.length})</span>
+              </button>
+              <div style={{ height: "1px", margin: "0 16px 4px", background: "rgba(196,154,40,0.04)" }} />
+              <DraggableLikedList
+                tracks={likedTracks}
+                onReorder={(ids) => reorderLikes.mutate({ orderedSongIds: ids })}
+                onPlay={handlePlay}
+                currentId={currentId}
+              />
+            </>
           ) : (
             <div style={{ padding: "8px 0" }}>
               {/* Play all */}
               <button
                 onClick={() => tracks.length > 0 && handlePlay(tracks[0], tracks)}
-                style={{
-                  width: "100%",
-                  display: "flex", alignItems: "center", gap: "8px",
-                  padding: "8px 16px", marginBottom: "4px",
-                  background: "transparent", border: "none",
-                  cursor: "pointer", color: "var(--ln-gold)",
-                  transition: "background 0.15s",
-                }}
+                style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", marginBottom: "4px", background: "transparent", border: "none", cursor: "pointer", color: "var(--ln-gold)", transition: "background 0.15s" }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)"}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
               >
-                <div style={{
-                  width: "28px", height: "28px", borderRadius: "8px",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(196,154,40,0.08)",
-                  border: "1px solid rgba(196,154,40,0.25)",
-                }}>
+                <div style={{ width: "28px", height: "28px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}>
                   <Play size={11} fill="currentColor" />
                 </div>
-                <span style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "11px", fontWeight: 700,
-                  letterSpacing: "0.06em",
-                }}>
-                  Play All ({tracks.length})
-                </span>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em" }}>Play All ({tracks.length})</span>
               </button>
               <div style={{ height: "1px", margin: "0 16px 4px", background: "rgba(196,154,40,0.04)" }} />
               {tracks.map((track) => (
-                <MiniTrackRow
-                  key={track.id}
-                  track={track}
-                  isActive={currentId === String(track.id)}
-                  onPlay={() => handlePlay(track, tracks)}
-                />
+                <MiniTrackRow key={track.id} track={track} isActive={currentId === String(track.id)} onPlay={() => handlePlay(track, tracks)} />
               ))}
             </div>
           )}

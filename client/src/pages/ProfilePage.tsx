@@ -16,7 +16,9 @@ import {
   CheckCircle, AlertCircle, Zap, LogOut,
   Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users, Shield,
   Download, Trash2, AlertTriangle, Sun, Moon,
+  FolderOpen, Plus, ChevronDown, ChevronRight, GripVertical,
 } from "lucide-react";
+import { AddToCollectionButton } from "@/components/AddToCollectionModal";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -189,8 +191,27 @@ export default function ProfilePage() {
   const { data: witnessNetwork } = trpc.witness.network.useQuery(undefined, { enabled: !!user && activeTab === "overview" });
   const { data: analytics } = trpc.profile.myAnalytics.useQuery(undefined, { enabled: !!user && activeTab === "overview", staleTime: 60_000 });
   // ── Command center tab data ───────────────────────────────────────
-  const { data: likedSongs = [] } = trpc.songs.getLiked.useQuery(undefined, { enabled: !!user && activeTab === "liked" });
-  const { data: myPlaylists = [] } = trpc.playlists.mine.useQuery(undefined, { enabled: !!user && activeTab === "collections" });
+  const { data: likedSongs = [] } = trpc.songs.getLikedOrdered.useQuery(undefined, { enabled: !!user && activeTab === "liked" });
+  const { data: myCollections = [] } = trpc.userCollections.list.useQuery(undefined, { enabled: !!user && activeTab === "collections" });
+  const [expandedCollectionId, setExpandedCollectionId] = useState<number | null>(null);
+  const [creatingCollection, setCreatingCollection] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const { data: expandedCollectionTracks } = trpc.userCollections.getTracks.useQuery(
+    { collectionId: expandedCollectionId! },
+    { enabled: expandedCollectionId !== null }
+  );
+  const createCollection = trpc.userCollections.create.useMutation({
+    onSuccess: () => { utils.userCollections.list.invalidate(); setCreatingCollection(false); setNewCollectionName(""); },
+  });
+  const deleteCollection = trpc.userCollections.delete.useMutation({
+    onSuccess: () => utils.userCollections.list.invalidate(),
+  });
+  const removeFromCollection = trpc.userCollections.removeTrack.useMutation({
+    onSuccess: () => utils.userCollections.getTracks.invalidate(),
+  });
+  const reorderLikesMutation = trpc.songs.reorderLikes.useMutation({
+    onSuccess: () => utils.songs.getLikedOrdered.invalidate(),
+  });
   const { data: myFieldNotes = [] } = trpc.fieldNotes.mine.useQuery(undefined, { enabled: !!user && activeTab === "field-notes" });
   const { data: myTestimonies = [] } = trpc.testimony.mine.useQuery(undefined, { enabled: !!user && activeTab === "testimony" });
   const createTestimonyMutation = trpc.testimony.create.useMutation({
@@ -1067,41 +1088,103 @@ export default function ProfilePage() {
         )}
 
         {/* ═══════════════════════════════════════════════════════════
-             COLLECTIONS TAB — Playlists
+             COLLECTIONS TAB — User-created named collections
         ═══════════════════════════════════════════════════════════ */}
         {activeTab === "collections" && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-heading tracking-widest text-white/50">{(myPlaylists as any[]).length} PLAYLISTS</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-heading tracking-widest text-white/50">{myCollections.length} COLLECTIONS</span>
               <button
-                onClick={() => navigate("/archive")}
-                className="text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#A78BFA" }}
+                onClick={() => setCreatingCollection(true)}
+                className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
+                style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.3)", color: "#C49A28" }}
               >
-                Manage in Archive
+                <Plus size={11} /> New Collection
               </button>
             </div>
-            {(myPlaylists as any[]).length === 0 ? (
+
+            {/* New collection input */}
+            {creatingCollection && (
+              <div className="flex items-center gap-2 p-3 rounded-xl border border-[rgba(196,154,40,0.3)] bg-[#111009]">
+                <FolderOpen size={14} className="text-[#C49A28] flex-shrink-0" />
+                <input
+                  autoFocus
+                  value={newCollectionName}
+                  onChange={e => setNewCollectionName(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && newCollectionName.trim()) createCollection.mutate({ name: newCollectionName.trim() }); if (e.key === "Escape") { setCreatingCollection(false); setNewCollectionName(""); } }}
+                  placeholder="Collection name..."
+                  className="flex-1 bg-transparent text-[13px] font-body text-white/80 outline-none placeholder:text-white/25"
+                />
+                <button onClick={() => newCollectionName.trim() && createCollection.mutate({ name: newCollectionName.trim() })} className="text-[#C49A28] hover:text-[#e8b83a] transition-colors"><Check size={13} /></button>
+                <button onClick={() => { setCreatingCollection(false); setNewCollectionName(""); }} className="text-white/30 hover:text-white/60 transition-colors"><X size={13} /></button>
+              </div>
+            )}
+
+            {myCollections.length === 0 && !creatingCollection ? (
               <div className="text-center py-12">
-                <Music size={24} className="mx-auto mb-2 text-white/15" />
-                <p className="text-white/50 font-body text-[12px]">No playlists yet</p>
-                <button type="button" onClick={() => navigate("/archive")} className="text-[#A78BFA] hover:underline text-[12px] font-body mt-1">Create one in Archive</button>
+                <FolderOpen size={24} className="mx-auto mb-2 text-white/15" />
+                <p className="text-white/50 font-body text-[12px]">No collections yet</p>
+                <p className="text-white/30 font-body text-[11px] mt-1">Click + on any track to add it to a collection</p>
               </div>
             ) : (
-              (myPlaylists as any[]).map((pl) => (
-                <div key={pl.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all">
-                  <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
-                    <Music size={14} className="text-white/40" />
+              (myCollections as any[]).map((col) => {
+                const isExpanded = expandedCollectionId === col.id;
+                return (
+                  <div key={col.id} className="rounded-xl border border-white/[0.06] bg-[#111009] overflow-hidden">
+                    {/* Collection header */}
+                    <div
+                      className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/[0.02] transition-all"
+                      onClick={() => setExpandedCollectionId(isExpanded ? null : col.id)}
+                    >
+                      <div className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.15)" }}>
+                        <FolderOpen size={14} className="text-[#C49A28]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-body text-white/80 truncate">{col.name}</p>
+                        <p className="text-[11px] font-body text-white/40 mt-0.5">{col.trackCount ?? 0} tracks</p>
+                      </div>
+                      {isExpanded ? <ChevronDown size={13} className="text-white/30 flex-shrink-0" /> : <ChevronRight size={13} className="text-white/30 flex-shrink-0" />}
+                      <button
+                        onClick={e => { e.stopPropagation(); if (confirm(`Delete "${col.name}"?`)) deleteCollection.mutate({ collectionId: col.id }); }}
+                        className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0"
+                      ><Trash2 size={11} /></button>
+                    </div>
+                    {/* Expanded track list */}
+                    {isExpanded && (
+                      <div className="border-t border-white/[0.04]">
+                        {!expandedCollectionTracks ? (
+                          <div className="flex items-center justify-center py-6"><Loader2 size={14} className="text-[#C49A28]/40 animate-spin" /></div>
+                        ) : expandedCollectionTracks.length === 0 ? (
+                          <div className="text-center py-6">
+                            <p className="text-white/30 font-body text-[11px]">No tracks yet — click + on any track</p>
+                          </div>
+                        ) : (
+                          (expandedCollectionTracks as any[]).map((item) => {
+                            const s = item.song ?? item;
+                            return (
+                              <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.02] transition-all border-b border-white/[0.03] last:border-0">
+                                <div className="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden bg-[#0a0a08]">
+                                  {s.coverArtUrl
+                                    ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                                    : <div className="w-full h-full flex items-center justify-center"><Music size={11} className="text-white/30" /></div>}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[12px] font-body text-white/75 truncate">{s.title}</p>
+                                  <p className="text-[10px] font-body text-white/40 truncate">{s.artistHandle ?? s.creatorName ?? ""}</p>
+                                </div>
+                                <button
+                                  onClick={() => removeFromCollection.mutate({ collectionId: col.id, songId: s.id })}
+                                  className="p-1.5 rounded text-white/20 hover:text-red-400 transition-colors flex-shrink-0"
+                                ><X size={10} /></button>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-body text-white/80 truncate">{pl.name}</p>
-                    <p className="text-[11px] font-body text-white/55 mt-0.5">
-                      {pl.isPublic ? "Public" : "Private"}{pl.isCollaborative ? " · Collaborative" : ""}
-                    </p>
-                  </div>
-                  <span className="text-[10px] font-body text-white/50 flex-shrink-0">{pl.trackCount ?? 0} tracks</span>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}
@@ -1133,6 +1216,7 @@ export default function ProfilePage() {
                       <p className="text-[13px] font-body text-white/80 truncate">{s.title}</p>
                       <p className="text-[11px] font-body text-white/55 mt-0.5 truncate">{creatorName}</p>
                     </div>
+                    <AddToCollectionButton songId={s.id} songTitle={s.title} />
                     <button type="button" onClick={() => navigate(`/song/${s.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/40 hover:text-[#A78BFA] transition-all flex-shrink-0"><ExternalLink size={12} /></button>
                   </div>
                 );
