@@ -2,10 +2,14 @@
    LIVING NEXUS — PlaylistDrawer
    Right-side slide-in panel. Desktop + mobile.
 
-   ARCHITECTURE: Matches MarketplaceDrawer exactly.
+   ARCHITECTURE: Matches LiveActivityPanel exactly.
    - Self-contained isOpen state
-   - Single centered handle button on the left edge of the panel
-   - Handle slides with the panel (right: isOpen ? PANEL_WIDTH : 0)
+   - Each tab (New / Trending / Liked / Build) is its own individual
+     protruding handle on the left edge of the panel, stacked top-to-bottom
+   - All tab handles slide in sync with the panel
+     (right: isOpen ? PANEL_WIDTH : 0)
+   - Clicking a tab: opens drawer + switches to that tab
+   - Clicking the active tab again: collapses the drawer
    - createPortal to document.body
    - Inline styles using var(--ln-panel) / var(--ln-gold) tokens
    - Closes on route change and outside click
@@ -14,8 +18,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  ListMusic, TrendingUp, Sparkles,
-  Heart, Plus, Play, Music, Loader2, Lock,
+  Music, Loader2, Lock, Play, Plus, Sparkles,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -67,94 +70,96 @@ function flattenSong(s: any): TrackRow {
   };
 }
 
-// ─── Handle (always visible, slides with panel) ───────────────────
-function DrawerHandle({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) {
+// ── Tab definitions ────────────────────────────────────────────────
+const TABS: { id: PlaylistTab; label: string; icon: string }[] = [
+  { id: "new",      label: "NEW",      icon: "✦" },
+  { id: "trending", label: "TREND",    icon: "↑" },
+  { id: "liked",    label: "LIKED",    icon: "♥" },
+  { id: "build",    label: "BUILD",    icon: "+" },
+];
+
+// ─── Individual Tab Handle ─────────────────────────────────────────
+// Each tab is its own fixed-position button on the right edge.
+// They stack vertically using `top` offsets calculated from the center.
+// All slide left when the drawer opens.
+function TabHandle({
+  tab,
+  index,
+  total,
+  isOpen,
+  isActive,
+  onClick,
+}: {
+  tab: { id: PlaylistTab; label: string; icon: string };
+  index: number;
+  total: number;
+  isOpen: boolean;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  const TAB_HEIGHT = 72;
+  const TAB_GAP = 4;
+  const totalHeight = total * TAB_HEIGHT + (total - 1) * TAB_GAP;
+  const topOffset = `calc(50% - ${totalHeight / 2}px + ${index * (TAB_HEIGHT + TAB_GAP)}px)`;
+
   return (
     <button
       onClick={onClick}
-      aria-label={isOpen ? "Close quick play panel" : "Open quick play panel"}
+      aria-label={`${isOpen && isActive ? "Close" : "Open"} quick play panel — ${tab.label}`}
       style={{
         position: "fixed",
         right: isOpen ? `${PANEL_WIDTH}px` : "0px",
-        top: "50%",
-        transform: "translateY(-50%)",
+        top: topOffset,
         zIndex: 56,
-        background: "var(--ln-panel)",
+        background: isActive && isOpen
+          ? "rgba(196,154,40,0.18)"
+          : "var(--ln-panel)",
         borderTop: "1px solid var(--ln-panel-border)",
         borderLeft: "1px solid var(--ln-panel-border)",
         borderBottom: "1px solid var(--ln-panel-border)",
-        borderRight: "none",
+        borderRight: isActive && isOpen
+          ? "2px solid var(--ln-gold)"
+          : "none",
         borderRadius: "8px 0 0 8px",
-        padding: "12px 6px",
+        padding: "10px 7px",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: "6px",
-        transition: "right 0.3s cubic-bezier(0.4,0,0.2,1)",
-        color: "var(--ln-gold)",
+        justifyContent: "center",
+        gap: "5px",
+        height: `${TAB_HEIGHT}px`,
+        width: "28px",
+        transition: "right 0.3s cubic-bezier(0.4,0,0.2,1), background 0.15s, border-right 0.15s",
+        color: isActive && isOpen ? "var(--ln-gold)" : "rgba(255,255,255,0.45)",
+      }}
+      onMouseEnter={e => {
+        if (!(isActive && isOpen)) {
+          (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.08)";
+          (e.currentTarget as HTMLElement).style.color = "rgba(196,154,40,0.8)";
+        }
+      }}
+      onMouseLeave={e => {
+        if (!(isActive && isOpen)) {
+          (e.currentTarget as HTMLElement).style.background = "var(--ln-panel)";
+          (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
+        }
       }}
     >
-      <span style={{ fontSize: "14px" }}>♪</span>
+      <span style={{ fontSize: "12px", lineHeight: 1 }}>{tab.icon}</span>
       <span style={{
         writingMode: "vertical-rl",
         textOrientation: "mixed",
-        fontSize: "9px",
+        fontSize: "8px",
         fontFamily: "var(--font-display)",
         fontWeight: 700,
-        letterSpacing: "0.15em",
-        color: "rgba(255,255,255,0.5)",
+        letterSpacing: "0.14em",
         textTransform: "uppercase",
+        lineHeight: 1,
       }}>
-        PLAY
+        {tab.label}
       </span>
-      <span style={{ fontSize: "10px", opacity: 0.5 }}>{isOpen ? "›" : "‹"}</span>
     </button>
-  );
-}
-
-// ─── Tab pill row ─────────────────────────────────────────────────
-function TabRow({
-  tabs,
-  active,
-  onChange,
-}: {
-  tabs: { id: PlaylistTab; label: string }[];
-  active: PlaylistTab;
-  onChange: (id: PlaylistTab) => void;
-}) {
-  return (
-    <div style={{
-      display: "flex",
-      gap: "4px",
-      padding: "8px 12px",
-      borderBottom: "1px solid var(--ln-panel-border)",
-      flexShrink: 0,
-    }}>
-      {tabs.map(t => (
-        <button
-          key={t.id}
-          onClick={() => onChange(t.id)}
-          style={{
-            flex: 1,
-            padding: "5px 0",
-            background: active === t.id ? "rgba(196,154,40,0.15)" : "transparent",
-            border: active === t.id ? "1px solid rgba(196,154,40,0.35)" : "1px solid transparent",
-            borderRadius: "6px",
-            color: active === t.id ? "var(--ln-gold)" : "rgba(255,255,255,0.4)",
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: "9px",
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            cursor: "pointer",
-            transition: "all 0.15s",
-          }}
-        >
-          {t.label}
-        </button>
-      ))}
-    </div>
   );
 }
 
@@ -191,7 +196,6 @@ function MiniTrackRow({
         if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent";
       }}
     >
-      {/* Artwork */}
       <div style={{
         width: "40px", height: "40px", borderRadius: "8px",
         overflow: "hidden", flexShrink: 0,
@@ -223,7 +227,6 @@ function MiniTrackRow({
           </div>
         )}
       </div>
-      {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
           fontSize: "12px", fontWeight: 600,
@@ -241,7 +244,6 @@ function MiniTrackRow({
           {track.artist}
         </div>
       </div>
-      {/* Play icon */}
       <Play size={11} fill="currentColor" style={{ color: "var(--ln-gold)", flexShrink: 0, opacity: 0.6 }} />
     </button>
   );
@@ -305,7 +307,7 @@ export default function PlaylistDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<PlaylistTab>("new");
   const drawerRef = useRef<HTMLDivElement>(null);
-  const { addAndPlay, playQueueAt, state } = usePlayer();
+  const { playQueueAt, state } = usePlayer();
   const { user } = useAuth();
 
   // Close on route change
@@ -317,28 +319,16 @@ export default function PlaylistDrawer() {
     if (!isOpen) return;
     const handler = (e: MouseEvent) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
-        const handle = document.querySelector("[data-playlist-handle]");
-        if (handle && handle.contains(e.target as Node)) return;
+        const handles = Array.from(document.querySelectorAll("[data-playlist-tab-handle]"));
+        for (const h of handles) {
+          if (h.contains(e.target as Node)) return;
+        }
         setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [isOpen]);
-
-  // Close when modal/dialog opens
-  useEffect(() => {
-    const checkAndClose = () => {
-      const locked =
-        document.body.hasAttribute("data-scroll-locked") ||
-        document.body.style.overflow === "hidden" ||
-        document.body.style.overflowY === "hidden";
-      if (locked) setIsOpen(false);
-    };
-    const observer = new MutationObserver(checkAndClose);
-    observer.observe(document.body, { attributes: true, attributeFilter: ["data-scroll-locked", "style"] });
-    return () => observer.disconnect();
-  }, []);
 
   // Close on Escape
   useEffect(() => {
@@ -347,7 +337,7 @@ export default function PlaylistDrawer() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Swipe-to-close
+  // Swipe-to-close (swipe right)
   const touchStartX = useRef<number | null>(null);
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const onTouchEnd = (e: React.TouchEvent) => {
@@ -355,6 +345,16 @@ export default function PlaylistDrawer() {
     if (e.changedTouches[0].clientX - touchStartX.current > 60) setIsOpen(false);
     touchStartX.current = null;
   };
+
+  // Handle tab click: open + switch tab, or collapse if already active
+  function handleTabClick(tabId: PlaylistTab) {
+    if (isOpen && activeTab === tabId) {
+      setIsOpen(false);
+    } else {
+      setActiveTab(tabId);
+      setIsOpen(true);
+    }
+  }
 
   // ── Data queries ────────────────────────────────────────────────
   const { data: newData, isLoading: newLoading } = trpc.songs.newThisWeek.useQuery(
@@ -417,12 +417,12 @@ export default function PlaylistDrawer() {
   const stateTracks = state.tracks ?? [];
   const currentId = stateTracks[state.currentIdx]?.id;
 
-  const TABS = [
-    { id: "new" as PlaylistTab,      label: "New"      },
-    { id: "trending" as PlaylistTab, label: "Trending" },
-    { id: "liked" as PlaylistTab,    label: "Liked"    },
-    { id: "build" as PlaylistTab,    label: "Build"    },
-  ];
+  const tabLabel: Record<PlaylistTab, string> = {
+    new: "New This Week",
+    trending: "Trending",
+    liked: "Liked Tracks",
+    build: "Build Playlist",
+  };
 
   const content = (
     <>
@@ -445,9 +445,19 @@ export default function PlaylistDrawer() {
         />
       )}
 
-      {/* Handle */}
-      <div data-playlist-handle>
-        <DrawerHandle isOpen={isOpen} onClick={() => setIsOpen(v => !v)} />
+      {/* Individual stacked tab handles */}
+      <div data-playlist-tab-handle>
+        {TABS.map((t, i) => (
+          <TabHandle
+            key={t.id}
+            tab={t}
+            index={i}
+            total={TABS.length}
+            isOpen={isOpen}
+            isActive={activeTab === t.id}
+            onClick={() => handleTabClick(t.id)}
+          />
+        ))}
       </div>
 
       {/* Drawer panel */}
@@ -489,11 +499,11 @@ export default function PlaylistDrawer() {
               color: "var(--ln-parchment)",
               display: "flex", alignItems: "center", gap: "6px",
             }}>
-              <ListMusic size={13} style={{ color: "var(--ln-gold)" }} />
-              Quick Play
+              <span style={{ color: "var(--ln-gold)" }}>♪</span>
+              {tabLabel[activeTab]}
             </div>
             <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", marginTop: "2px" }}>
-              Curated playlists
+              Quick play
             </div>
           </div>
           <button
@@ -506,9 +516,6 @@ export default function PlaylistDrawer() {
             ×
           </button>
         </div>
-
-        {/* Tab row */}
-        <TabRow tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
         {/* Content */}
         <div style={{

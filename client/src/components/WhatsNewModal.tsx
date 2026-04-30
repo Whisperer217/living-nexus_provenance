@@ -10,14 +10,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.35.0";
+const CURRENT_VERSION = "v2.36.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.35.0",
+    version: "v2.36.0",
     date: "April 30, 2026",
     label: "Latest",
+    items: [
+      { icon: BookOpen, text: "Individual Stacked Tab Handles — Each tab on both side drawers is now its own individual protruding handle on the screen edge, stacked vertically top-to-bottom. Left drawer: LIVE / PLAYING / TIPS tabs stacked on the left edge. Right drawer: NEW / TREND / LIKED / BUILD tabs stacked on the right edge. Clicking a tab opens the drawer and switches to that section; clicking the active tab again collapses the drawer. The header inside the panel now shows the active section name instead of a pill row." },
+    ],
+  },
+  {
+    version: "v2.35.0",
+    date: "April 30, 2026",
+    label: "",
     items: [
       { icon: BookOpen, text: "Unified Drawer Handles — All three side drawers (Live Activity left, Quick Play right, Shop right) now share the same interaction pattern. Each drawer has a single centered handle button that protrudes from the screen edge and slides in sync with the panel. Click the handle to open; click again to close. The multi-tab BookSpine strip has been replaced with a compact pill tab row inside the panel header — cleaner, less visual noise, consistent with the Shop drawer that was already using this pattern." },
     ],

@@ -7,6 +7,28 @@
 
 ---
 
+## v2.36.0 — April 30, 2026 (Individual Stacked Tab Handles)
+
+### What Shipped
+
+**Individual Stacked Tab Handles — Both Side Drawers**
+- Each tab on both side drawers is now its own individual protruding handle on the screen edge, stacked vertically top-to-bottom.
+- Left drawer (LiveActivityPanel): LIVE / PLAYING / TIPS — 3 handles stacked on the left edge.
+- Right drawer (PlaylistDrawer): NEW / TREND / LIKED / BUILD — 4 handles stacked on the right edge.
+- Clicking a tab opens the drawer and switches to that section. Clicking the active tab again collapses the drawer.
+- Active tab handle gets gold left/right border accent + gold background tint.
+- Panel header now shows the active section name (no pill row inside the panel).
+- Both drawers: `createPortal`, inline styles, `var(--ln-panel)` tokens, 0.3s cubic-bezier transition.
+
+**Files changed:**
+- `client/src/components/layout/LiveActivityPanel.tsx` — TabHandle component, stacked via `top` calc offsets
+- `client/src/components/player/PlaylistDrawer.tsx` — TabHandle component, stacked via `top` calc offsets
+
+### TypeScript
+- 0 errors.
+
+---
+
 ## v2.35.0 — April 30, 2026 (Unified Drawer Handle Pattern)
 
 ### What Shipped

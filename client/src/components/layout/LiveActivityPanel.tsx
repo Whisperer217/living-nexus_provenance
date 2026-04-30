@@ -2,10 +2,14 @@
    LIVING NEXUS — LiveActivityPanel
    Left-edge slide-in panel. Desktop only (hidden md:block).
 
-   ARCHITECTURE: Matches MarketplaceDrawer exactly.
-   - Self-contained isOpen state (no props needed)
-   - Single centered handle button on the right edge of the panel
-   - Handle slides with the panel (left: isOpen ? PANEL_WIDTH : 0)
+   ARCHITECTURE:
+   - Self-contained isOpen state
+   - Each tab (Live / Playing / Tips) is its own individual protruding
+     handle on the right edge of the panel, stacked top-to-bottom
+   - All tab handles slide in sync with the panel
+     (left: isOpen ? PANEL_WIDTH : 0)
+   - Clicking a tab: opens drawer + switches to that tab
+   - Clicking the active tab again: collapses the drawer
    - createPortal to document.body
    - Inline styles using var(--ln-panel) / var(--ln-gold) tokens
    - Closes on route change and outside click
@@ -15,7 +19,7 @@ import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
-import { Music, Zap, Radio } from "lucide-react";
+import { Music, Zap } from "lucide-react";
 
 const PANEL_WIDTH = 280;
 
@@ -31,95 +35,99 @@ function timeAgo(ts: number): string {
   return `${Math.floor(diff / 3600)}h ago`;
 }
 
-// ─── Handle (always visible, slides with panel) ───────────────────
-function DrawerHandle({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) {
+// ── Tab definitions ────────────────────────────────────────────────
+const TABS: { id: LiveTab; label: string; icon: string }[] = [
+  { id: "live",    label: "LIVE",    icon: "◈" },
+  { id: "playing", label: "PLAYING", icon: "♪" },
+  { id: "tips",    label: "TIPS",    icon: "⚡" },
+];
+
+// ─── Individual Tab Handle ─────────────────────────────────────────
+// Each tab is its own fixed-position button on the left edge.
+// They stack vertically using `top` offsets calculated from the center.
+// All slide right when the drawer opens.
+function TabHandle({
+  tab,
+  index,
+  total,
+  isOpen,
+  isActive,
+  onClick,
+}: {
+  tab: { id: LiveTab; label: string; icon: string };
+  index: number;
+  total: number;
+  isOpen: boolean;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  // Stack tabs centered in the viewport.
+  // Each tab button is ~72px tall. Gap between tabs: 4px.
+  const TAB_HEIGHT = 72;
+  const TAB_GAP = 4;
+  const totalHeight = total * TAB_HEIGHT + (total - 1) * TAB_GAP;
+  // top offset: center the stack, then offset per index
+  const topOffset = `calc(50% - ${totalHeight / 2}px + ${index * (TAB_HEIGHT + TAB_GAP)}px)`;
+
   return (
     <button
       onClick={onClick}
-      aria-label={isOpen ? "Close live activity panel" : "Open live activity panel"}
+      aria-label={`${isOpen && isActive ? "Close" : "Open"} live activity panel — ${tab.label}`}
       style={{
         position: "fixed",
         left: isOpen ? `${PANEL_WIDTH}px` : "0px",
-        top: "50%",
-        transform: "translateY(-50%)",
+        top: topOffset,
         zIndex: 56,
-        background: "var(--ln-panel)",
+        background: isActive && isOpen
+          ? "rgba(196,154,40,0.18)"
+          : "var(--ln-panel)",
         borderTop: "1px solid var(--ln-panel-border)",
         borderRight: "1px solid var(--ln-panel-border)",
         borderBottom: "1px solid var(--ln-panel-border)",
-        borderLeft: "none",
+        borderLeft: isActive && isOpen
+          ? "2px solid var(--ln-gold)"
+          : "none",
         borderRadius: "0 8px 8px 0",
-        padding: "12px 6px",
+        padding: "10px 7px",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: "6px",
-        transition: "left 0.3s cubic-bezier(0.4,0,0.2,1)",
-        color: "var(--ln-gold)",
+        justifyContent: "center",
+        gap: "5px",
+        height: `${TAB_HEIGHT}px`,
+        width: "28px",
+        transition: "left 0.3s cubic-bezier(0.4,0,0.2,1), background 0.15s, border-left 0.15s",
+        color: isActive && isOpen ? "var(--ln-gold)" : "rgba(255,255,255,0.45)",
+      }}
+      onMouseEnter={e => {
+        if (!(isActive && isOpen)) {
+          (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.08)";
+          (e.currentTarget as HTMLElement).style.color = "rgba(196,154,40,0.8)";
+        }
+      }}
+      onMouseLeave={e => {
+        if (!(isActive && isOpen)) {
+          (e.currentTarget as HTMLElement).style.background = "var(--ln-panel)";
+          (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
+        }
       }}
     >
-      <span style={{ fontSize: "14px" }}>◈</span>
+      <span style={{ fontSize: "12px", lineHeight: 1 }}>{tab.icon}</span>
       <span style={{
         writingMode: "vertical-rl",
         textOrientation: "mixed",
         transform: "rotate(180deg)",
-        fontSize: "9px",
+        fontSize: "8px",
         fontFamily: "var(--font-display)",
         fontWeight: 700,
-        letterSpacing: "0.15em",
-        color: "rgba(255,255,255,0.5)",
+        letterSpacing: "0.14em",
         textTransform: "uppercase",
+        lineHeight: 1,
       }}>
-        LIVE
+        {tab.label}
       </span>
-      <span style={{ fontSize: "10px", opacity: 0.5 }}>{isOpen ? "‹" : "›"}</span>
     </button>
-  );
-}
-
-// ─── Tab pill row ─────────────────────────────────────────────────
-function TabRow({
-  tabs,
-  active,
-  onChange,
-}: {
-  tabs: { id: LiveTab; label: string }[];
-  active: LiveTab;
-  onChange: (id: LiveTab) => void;
-}) {
-  return (
-    <div style={{
-      display: "flex",
-      gap: "4px",
-      padding: "8px 12px",
-      borderBottom: "1px solid var(--ln-panel-border)",
-      flexShrink: 0,
-    }}>
-      {tabs.map(t => (
-        <button
-          key={t.id}
-          onClick={() => onChange(t.id)}
-          style={{
-            flex: 1,
-            padding: "5px 0",
-            background: active === t.id ? "rgba(196,154,40,0.15)" : "transparent",
-            border: active === t.id ? "1px solid rgba(196,154,40,0.35)" : "1px solid transparent",
-            borderRadius: "6px",
-            color: active === t.id ? "var(--ln-gold)" : "rgba(255,255,255,0.4)",
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: "9px",
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            cursor: "pointer",
-            transition: "all 0.15s",
-          }}
-        >
-          {t.label}
-        </button>
-      ))}
-    </div>
   );
 }
 
@@ -140,14 +148,33 @@ export default function LiveActivityPanel() {
     if (!isOpen) return;
     const handler = (e: MouseEvent) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
-        const handle = document.querySelector("[data-live-handle]");
-        if (handle && handle.contains(e.target as Node)) return;
+        const handles = Array.from(document.querySelectorAll("[data-live-tab-handle]"));
+        for (const h of handles) {
+          if (h.contains(e.target as Node)) return;
+        }
         setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [isOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  // Handle tab click: open + switch tab, or collapse if already active
+  function handleTabClick(tabId: LiveTab) {
+    if (isOpen && tab === tabId) {
+      setIsOpen(false);
+    } else {
+      setTab(tabId);
+      setIsOpen(true);
+    }
+  }
 
   // Data
   const { data: tips } = trpc.tips.recentTips.useQuery(undefined, {
@@ -167,12 +194,6 @@ export default function LiveActivityPanel() {
   const rawCurrentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
   const currentTrack = (!rawCurrentTrack?.contentType || rawCurrentTrack.contentType === "audio") ? rawCurrentTrack : null;
 
-  const TABS = [
-    { id: "live" as LiveTab,    label: "Live"    },
-    { id: "playing" as LiveTab, label: "Playing" },
-    { id: "tips" as LiveTab,    label: "Tips"    },
-  ];
-
   const content = (
     <>
       <style>{`
@@ -186,9 +207,19 @@ export default function LiveActivityPanel() {
         }
       `}</style>
 
-      {/* Handle */}
-      <div data-live-handle className="hidden md:block">
-        <DrawerHandle isOpen={isOpen} onClick={() => setIsOpen(v => !v)} />
+      {/* Individual stacked tab handles */}
+      <div className="hidden md:block" data-live-tab-handle>
+        {TABS.map((t, i) => (
+          <TabHandle
+            key={t.id}
+            tab={t}
+            index={i}
+            total={TABS.length}
+            isOpen={isOpen}
+            isActive={tab === t.id}
+            onClick={() => handleTabClick(t.id)}
+          />
+        ))}
       </div>
 
       {/* Drawer panel */}
@@ -204,7 +235,6 @@ export default function LiveActivityPanel() {
           background: "var(--ln-panel)",
           borderRight: "1px solid var(--ln-panel-border)",
           zIndex: 55,
-          display: "flex",
           flexDirection: "column",
           transition: "left 0.3s cubic-bezier(0.4,0,0.2,1)",
           overflowY: "auto",
@@ -226,18 +256,25 @@ export default function LiveActivityPanel() {
               fontSize: "13px", fontWeight: 700,
               letterSpacing: "0.1em", textTransform: "uppercase",
               color: "var(--ln-parchment)",
-              display: "flex", alignItems: "center", gap: "6px",
+              display: "flex", alignItems: "center", gap: "8px",
             }}>
-              <span style={{
-                width: "6px", height: "6px", borderRadius: "50%",
-                background: "#ef4444",
-                display: "inline-block",
-                animation: "lnPulse 1.5s infinite",
-              }} />
-              Live Activity
+              {tab === "live" && (
+                <>
+                  <span style={{
+                    width: "6px", height: "6px", borderRadius: "50%",
+                    background: "#ef4444", display: "inline-block",
+                    animation: "lnPulse 1.5s infinite",
+                  }} />
+                  Live Activity
+                </>
+              )}
+              {tab === "playing" && <>♪ Now Playing</>}
+              {tab === "tips" && <>⚡ Tips</>}
             </div>
             <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", marginTop: "2px" }}>
-              Platform pulse
+              {tab === "live" && "Platform pulse"}
+              {tab === "playing" && "Current queue"}
+              {tab === "tips" && "Recent creator support"}
             </div>
           </div>
           <button
@@ -250,9 +287,6 @@ export default function LiveActivityPanel() {
             ×
           </button>
         </div>
-
-        {/* Tab row */}
-        <TabRow tabs={TABS} active={tab} onChange={setTab} />
 
         {/* Body */}
         <div style={{

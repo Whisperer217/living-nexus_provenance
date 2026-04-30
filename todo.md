@@ -3746,3 +3746,13 @@
 - [x] Remove parent-controlled liveOpen/setLiveOpen from MainLayout
 - [x] WhatsNewModal bumped to v2.35.0 with unified drawer entry
 - [x] RELEASE_NOTES.md updated with v2.35.0 entry
+
+## Phase 91: Individual Stacked Tab Handles (v2.36.0)
+- [x] LiveActivityPanel — each tab (LIVE/PLAYING/TIPS) is its own individual protruding handle, stacked top-to-bottom on left edge
+- [x] PlaylistDrawer — each tab (NEW/TREND/LIKED/BUILD) is its own individual protruding handle, stacked top-to-bottom on right edge
+- [x] Clicking tab opens drawer + switches section; clicking active tab collapses drawer
+- [x] Active tab handle: gold border accent + gold background tint
+- [x] Panel header shows active section name (no pill row)
+- [x] TypeScript: 0 errors
+- [x] WhatsNewModal bumped to v2.36.0
+- [x] RELEASE_NOTES.md updated with v2.36.0 entry
