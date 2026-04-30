@@ -3707,3 +3707,7 @@
 ## Phase 76: Waveform Position + Mobile Glow Indicator
 - [x] Fix desktop waveform canvas position — canvas moved from outer bar wrapper into center controls div (flex-1), constrained to progress bar region only
 - [x] Add beat-reactive frequency glow to mobile player audio indicator bars icon — useMobileAudioGlow hook reads window.__lnAnalyser, drives bar heights + violet/gold/cyan color; CSS fallback when glow is off
+
+## Phase 77: Bug Fixes from Slimdoggy Design Feedback
+- [x] Fix Featured Creators display names — getAllCreators now excludes creators whose name matches ^Creator[[:space:]][0-9]+$ (auto-generated OAuth placeholder); only shows creators with real artistHandle or non-placeholder name
+- [x] Fix pause button on song detail page restarting the song — handlePlay now calls togglePlay() when isThisTrackActive, not addAndPlay()

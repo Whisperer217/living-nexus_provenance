@@ -251,8 +251,15 @@ export async function getAllCreators() {
     .from(users)
     .innerJoin(songs, and(eq(songs.userId, users.id), eq(songs.status, "Published")))
     .where(and(
-      isNotNull(users.name),
-      ne(users.name, ""),
+      // Must have a real name or artistHandle — exclude auto-generated "Creator {digits}" placeholders
+      or(
+        isNotNull(users.artistHandle),
+        and(
+          isNotNull(users.name),
+          ne(users.name, ""),
+          sql`${users.name} NOT REGEXP '^Creator[[:space:]][0-9]+$'`,
+        )
+      ),
     ))
     .groupBy(users.id)
     .having(sql`count(${songs.id}) > 0`)
