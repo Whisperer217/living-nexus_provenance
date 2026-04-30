@@ -225,10 +225,10 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
 
   return (
     <>
-      <Link href={`/song/${song.id}`}>
-        <div
-          className={`relative ${widthClass} ${heightClass} flex-shrink-0 rounded-xl overflow-hidden cursor-pointer group transition-transform duration-200 hover:scale-[1.03] hover:shadow-2xl`}
-        >
+      <div
+        onClick={handlePlay}
+        className={`relative ${widthClass} ${heightClass} flex-shrink-0 rounded-xl overflow-hidden cursor-pointer group transition-transform duration-200 hover:scale-[1.03] hover:shadow-2xl`}
+      >
           {/* Cover Art */}
           <div className="absolute inset-0">
             {song.coverArtUrl ? (
@@ -306,9 +306,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
               </span>
             )}
           </div>
-        </div>
-      </Link>
-
+      </div>
       {/* Context menu portal */}
       {menuPos && (
         <TrackContextMenu

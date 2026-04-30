@@ -3722,3 +3722,10 @@
 - [x] Parchment-toned dark interior (warm rgba(18,15,10) gradient) replaces old blue-grey
 - [x] Page-edge rule at top of each drawer (thin gold border + subtle gold tint)
 - [x] TypeScript 0 errors, checkpoint, GitHub push
+
+## Phase 79: Bug Fixes v2.34.1
+- [x] Fix Recently Witnessed song cards — removed Link wrapper from StoreTrackCard, card click now calls handlePlay(); Go to Song still in 3-dot menu
+- [x] Fix book-tab drawers — solid near-black backgrounds (#0a0806 gradient), removed backdropFilter blur
+- [x] Fix book-tab drawers — clicking active tab now toggles drawer closed (BookSpineTabs onTabClick checks isOpen state)
+- [x] Fix cinematic mode duplication — compact bar guard changed to !isExpanded && !isCinematic; cinematic overlay controls unaffected
+- [x] TypeScript 0 errors, checkpoint, GitHub push

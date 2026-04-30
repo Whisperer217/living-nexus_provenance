@@ -141,10 +141,13 @@ export default function BookSpineTabs({
                 : "translateX(0)",
             }}
             onClick={() => {
-              if (!drawerOpen) {
+              if (isActive && drawerOpen) {
+                // Clicking the active tab again collapses the drawer
                 onDrawerToggle();
+              } else {
+                if (!drawerOpen) onDrawerToggle();
+                onTabChange(tab.id);
               }
-              onTabChange(tab.id);
             }}
             title={tab.label}
             role="tab"

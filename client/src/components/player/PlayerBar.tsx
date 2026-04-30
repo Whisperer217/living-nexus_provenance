@@ -694,7 +694,7 @@ export default function PlayerBar() {
       )}
 
       {/* ══ COMPACT BAR (always visible, overlays bottom of expanded) ══ */}
-      {!isExpanded && (
+      {!isExpanded && !isCinematic && (
         <div
           className="flex items-center gap-4"
           style={{ height: "68px", backgroundColor: "#000000", borderRadius: "0px", paddingRight: "5px", paddingLeft: "5px", marginRight: "5px", marginLeft: "10px", overflow: "visible", position: "relative" }}

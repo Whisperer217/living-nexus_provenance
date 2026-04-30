@@ -363,9 +363,8 @@ export default function PlaylistDrawer() {
         className={`fixed top-0 right-0 h-full z-[31] flex flex-col${isOpen ? "" : " pointer-events-none"}`}
         style={{
           width: "280px",
-          background: "linear-gradient(180deg, rgba(18,15,10,0.98) 0%, rgba(22,18,12,0.97) 100%)",
-          borderLeft: "1px solid rgba(196,154,40,0.12)",
-          backdropFilter: "blur(20px)",
+          background: "linear-gradient(180deg, #0a0806 0%, #0d0a07 100%)",
+          borderLeft: "1px solid rgba(196,154,40,0.2)",
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
           boxShadow: "-8px 0 40px rgba(0,0,0,0.60)",

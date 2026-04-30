@@ -83,10 +83,9 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           left: 0,
           width: `${PANEL_WIDTH}px`,
           bottom: `${BOTTOM_OFFSET}px`,
-          /* Parchment-toned dark background — warmer than the old blue-grey */
-          background: "linear-gradient(180deg, rgba(18,15,10,0.98) 0%, rgba(22,18,12,0.97) 100%)",
-          borderRight: "1px solid rgba(196,154,40,0.12)",
-          backdropFilter: "blur(20px)",
+          /* Near-black solid — no bleed-through */
+          background: "linear-gradient(180deg, #0a0806 0%, #0d0a07 100%)",
+          borderRight: "1px solid rgba(196,154,40,0.2)",
           transform: open ? "translateX(0)" : `translateX(-${PANEL_WIDTH}px)`,
           transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
           boxShadow: "6px 0 32px rgba(0,0,0,0.55)",
