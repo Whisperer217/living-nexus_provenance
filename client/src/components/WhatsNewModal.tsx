@@ -10,14 +10,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.33.0";
+const CURRENT_VERSION = "v2.34.2";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.34.2",
+    date: "April 30, 2026",
+    label: "Latest",
+    items: [
+      { icon: BookOpen, text: "Book-Tab Drawer Fix — The spine tab strips on both side drawers (Live Activity left, Quick Play right) now render as fixed-position overlays outside the sliding panel. Previously, clicking the active tab to collapse the drawer would slide the tabs off-screen with the panel, making them impossible to click to reopen. The tabs now always remain visible at the screen edge — left drawer tabs stay at the left edge when closed, right drawer tabs at the right edge — and slide in sync with the panel when it opens or closes." },
+      { icon: Music, text: "StoreTrackCard Play Fix — Track cards on the Home and Explore pages now play on click instead of navigating to the song detail page. Navigation to the song page is available through the three-dot context menu (Go to Song)." },
+      { icon: Users, text: "Featured Creators Filter — The Featured Creators carousel now excludes accounts with auto-generated placeholder names (e.g. \"Creator 5330001\"). Only creators with a real display name or artist handle appear." },
+    ],
+  },
+  {
+    version: "v2.34.0",
+    date: "April 30, 2026",
+    label: "",
+    items: [
+      { icon: BookOpen, text: "Book-Tab Spine Drawers — Both side panels (Live Activity on the left, Quick Play on the right) have been redesigned as book-divider spine drawers. Vertical protruding tabs on the drawer edge mimic the tabbed dividers of a reference book. Left panel: Live / Playing / Tips tabs on the right spine edge. Right panel: New / Trending / Liked / Build tabs on the left spine edge. Cinzel small-caps labels, gold foil active state, warm near-black parchment interior." },
+    ],
+  },
+  {
     version: "v2.33.0",
     date: "April 29, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Zap, text: "Live Waveform Visualizer — The player bar now has a real-time oscilloscope waveform drawn directly from the audio signal. When Frequency Glow is enabled (the ∿ button), a smooth bezier wave runs the full width of the bar, color-shifting from violet at rest to gold on bass hits and cyan on mid-heavy passages. The wave is drawn on a canvas layer behind the controls so nothing is obscured. The glow effect and waveform share the same Web Audio graph — no extra CPU overhead." },
       { icon: Shield, text: "Reaction Error Fixed (Production) — Emoji reactions were silently failing on the live site with a raw database error message appearing in the toast. Two fixes: the DB connection pool now handles ECONNRESET (stale serverless connections) with a 60-second idle timeout, and the error toast now always shows a clean user-facing message instead of leaking internal SQL." },

@@ -3,6 +3,12 @@
    Left-edge slide-in panel. Desktop only.
    Book-tab spine navigation — tabs protrude from the right edge
    of the drawer like dividers in a living reference book.
+
+   ARCHITECTURE NOTE: The BookSpineTabs strip is rendered as a
+   FIXED-POSITION sibling OUTSIDE the sliding panel div. This ensures
+   the tabs remain visible and clickable even when the drawer is
+   fully closed (translateX(-PANEL_WIDTH)). The tab strip's `left`
+   position transitions in sync with the panel.
 ═══════════════════════════════════════════════════════════════════ */
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -75,6 +81,36 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
         }
       `}</style>
 
+      {/* ── Book spine tabs — FIXED POSITION, outside the sliding panel ─ */}
+      {/* These stay on screen at all times so the user can always click  */}
+      {/* a tab to open the drawer, even when the panel is fully closed.  */}
+      <div
+        className="hidden md:block fixed z-[36]"
+        style={{
+          top: `${TOP_OFFSET}px`,
+          /* When open: tabs sit at the right edge of the panel.
+             When closed: tabs sit at left:0 (screen left edge).
+             Transition mirrors the panel's cubic-bezier. */
+          left: open ? `${PANEL_WIDTH}px` : "0px",
+          transition: "left 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
+          width: 0,
+          height: `calc(100vh - ${TOP_OFFSET}px - ${BOTTOM_OFFSET}px)`,
+          overflow: "visible",
+          pointerEvents: "auto",
+        }}
+      >
+        <BookSpineTabs
+          side="left"
+          tabs={TABS}
+          activeTab={tab}
+          onTabChange={(id) => setTab(id as LiveTab)}
+          drawerOpen={open}
+          onDrawerToggle={onToggle}
+          topOffset={TOP_OFFSET}
+          drawerWidth={PANEL_WIDTH}
+        />
+      </div>
+
       {/* ── Slide-in panel ───────────────────────────────────────── */}
       <div
         className="hidden md:flex fixed flex-col"
@@ -89,27 +125,11 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           transform: open ? "translateX(0)" : `translateX(-${PANEL_WIDTH}px)`,
           transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
           boxShadow: "6px 0 32px rgba(0,0,0,0.55)",
-          /* position:relative so the spine tabs can be absolutely positioned */
           position: "fixed",
           overflow: "visible",
           zIndex: 35,
         }}
       >
-        {/* ── Book spine tabs — protrude from right edge ─────────── */}
-        {/* Rendered as absolute children of the panel so they move with it */}
-        <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: "100%", overflow: "visible", zIndex: 36 }}>
-          <BookSpineTabs
-            side="left"
-            tabs={TABS}
-            activeTab={tab}
-            onTabChange={(id) => setTab(id as LiveTab)}
-            drawerOpen={open}
-            onDrawerToggle={onToggle}
-            topOffset={TOP_OFFSET}
-            drawerWidth={PANEL_WIDTH}
-          />
-        </div>
-
         {/* ── Page edge rule — top of the "book page" ────────────── */}
         <div
           className="flex-shrink-0 flex items-center gap-2 px-4 py-3"
@@ -184,8 +204,8 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
               })}
               {(!recentSongs || recentSongs.length === 0) && (
                 <div className="px-4 py-6 text-center">
-                  <Radio size={20} style={{ color: "rgba(196,154,40,0.15)", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "rgba(196,154,40,0.35)" }}>No recent activity</div>
+                  <Music size={20} style={{ color: "rgba(196,154,40,0.15)", margin: "0 auto 8px" }} />
+                  <div className="text-[11px]" style={{ color: "rgba(196,154,40,0.35)" }}>No tracks yet</div>
                 </div>
               )}
             </div>
@@ -253,41 +273,37 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
               )}
               <div className="px-4 py-1.5">
                 <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.4)", fontFamily: "'Cinzel', serif" }}>
-                  Recently Registered
+                  Queue
                 </span>
               </div>
-              {recentSongs?.map((item: any) => {
-                const s = item.song ?? item;
-                const c = item.creator ?? {};
-                return (
+              {tracks.filter(t => !t.contentType || t.contentType === "audio").slice(0, 8).map((t, i) => (
+                <div
+                  key={t.id}
+                  className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all"
+                  onClick={() => playTrack(i)}
+                  style={{ borderBottom: "1px solid rgba(196,154,40,0.04)" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.04)"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                >
                   <div
-                    key={s.id}
-                    className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all"
-                    onClick={() => navigate(`/song/${s.id}`)}
-                    style={{ borderBottom: "1px solid rgba(196,154,40,0.04)" }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.04)"}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                    className="w-7 h-7 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden"
+                    style={{ background: "linear-gradient(135deg, #1a1208, #2a1f0e)", border: "1px solid rgba(196,154,40,0.10)" }}
                   >
-                    <div
-                      className="w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden"
-                      style={{ background: "linear-gradient(135deg, #1a1208, #2a1f0e)", border: "1px solid rgba(196,154,40,0.12)" }}
-                    >
-                      {s.coverArtUrl
-                        ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover rounded-md" />
-                        : <Music size={12} style={{ color: "rgba(196,154,40,0.35)" }} />
-                      }
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-medium truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{s.title}</div>
-                      <div className="text-[9px] truncate" style={{ color: "rgba(196,154,40,0.45)" }}>{c.artistHandle || c.name || "Unknown"}</div>
-                    </div>
+                    {t.artUrl
+                      ? <img src={t.artUrl} alt="" className="w-full h-full object-cover rounded-md" />
+                      : <Music size={10} style={{ color: "rgba(196,154,40,0.3)" }} />
+                    }
                   </div>
-                );
-              })}
-              {(!recentSongs || recentSongs.length === 0) && (
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] truncate" style={{ color: state.currentIdx === i ? "var(--ln-gold)" : "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{t.title}</div>
+                    <div className="text-[9px] truncate" style={{ color: "rgba(196,154,40,0.4)" }}>{t.artist}</div>
+                  </div>
+                </div>
+              ))}
+              {tracks.filter(t => !t.contentType || t.contentType === "audio").length === 0 && (
                 <div className="px-4 py-6 text-center">
                   <Music size={20} style={{ color: "rgba(196,154,40,0.15)", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "rgba(196,154,40,0.35)" }}>No tracks yet</div>
+                  <div className="text-[11px]" style={{ color: "rgba(196,154,40,0.35)" }}>Nothing queued</div>
                 </div>
               )}
             </div>

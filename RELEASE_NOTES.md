@@ -7,6 +7,49 @@
 
 ---
 
+## v2.34.2 — April 30, 2026 (Book-Tab Drawer Collapse Fix)
+
+### What Shipped
+
+**LiveActivityPanel — Fixed-Position Tab Strip**
+- `BookSpineTabs` was previously rendered as a child of the sliding panel div in `LiveActivityPanel`. When the panel translated off-screen (`translateX(-272px)`), the tabs slid with it — making them invisible and unclickable.
+- Fix: The tab strip is now rendered as a **separate fixed-position sibling** outside the sliding panel. A `<div className="hidden md:block fixed z-[36]">` container holds the `BookSpineTabs` and transitions its `left` property in sync with the panel's `transform` transition (same cubic-bezier).
+- When closed: `left: 0px` — tabs protrude from the left screen edge.
+- When open: `left: 272px` — tabs sit at the right edge of the open panel.
+- `PlaylistDrawer` (right side) already had this architecture correct — no change needed there.
+
+**WhatsNewModal bumped to v2.34.2**
+- Added v2.34.2 entry (drawer fix, StoreTrackCard play fix, Featured Creators filter).
+- Added v2.34.0 entry (Book-Tab Spine Drawers redesign).
+
+### TypeScript
+- 0 errors.
+
+---
+
+## v2.34.0 — April 30, 2026 (Book-Tab Spine Drawer Redesign)
+
+### What Shipped
+
+**BookSpineTabs Component (`client/src/components/BookSpineTabs.tsx`)**
+- New reusable component for vertical protruding spine tabs on side drawers.
+- `side="left"`: tabs protrude from the right edge of the left drawer.
+- `side="right"`: tabs protrude from the left edge of the right drawer.
+- Cinzel small-caps labels, gold foil active state, warm near-black parchment interior.
+- Active tab lifts slightly with gold glow; inactive tabs show on hover.
+- Dot indicator support for live pulse on the Live tab.
+- Toggle-collapse: clicking the active tab calls `onDrawerToggle()` to close the drawer.
+
+**LiveActivityPanel — Book-Tab Redesign**
+- Left panel tabs: Live / Playing / Tips on the right spine edge.
+- Near-black solid background (`#0a0806` gradient), no backdrop blur.
+
+**PlaylistDrawer — Book-Tab Redesign**
+- Right panel tabs: New / Trending / Liked / Build on the left spine edge.
+- Fixed-position tab strip outside the sliding panel (correct architecture from the start).
+
+---
+
 ## v2.33.0 — April 29, 2026 (Live Waveform Visualizer + Reaction Fix)
 
 ### What Shipped

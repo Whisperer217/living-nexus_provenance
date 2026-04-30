@@ -3729,3 +3729,13 @@
 - [x] Fix book-tab drawers — clicking active tab now toggles drawer closed (BookSpineTabs onTabClick checks isOpen state)
 - [x] Fix cinematic mode duplication — compact bar guard changed to !isExpanded && !isCinematic; cinematic overlay controls unaffected
 - [x] TypeScript 0 errors, checkpoint, GitHub push
+## Phase 80: Book-Tab Drawer Collapse Fix (v2.34.2)
+- [x] Root cause identified: BookSpineTabs rendered inside sliding panel div in LiveActivityPanel — tabs slid off-screen with panel when drawer closed
+- [x] Fix LiveActivityPanel: moved BookSpineTabs to a separate fixed-position sibling div outside the sliding panel; `left` property transitions in sync with panel's `transform`
+- [x] Verified PlaylistDrawer (right side) already had correct architecture — no change needed
+- [x] Verified: tabs visible at left edge when drawer closed (left:0px), slide to right edge when open (left:272px)
+- [x] Verified: clicking active tab collapses drawer; clicking any tab when closed opens drawer
+- [x] WhatsNewModal bumped to v2.34.2 with drawer fix, StoreTrackCard play fix, Featured Creators filter entries
+- [x] Added v2.34.0 entry (Book-Tab Spine Drawers redesign) to WhatsNewModal
+- [x] RELEASE_NOTES.md updated with v2.34.2 and v2.34.0 entries
+- [x] TypeScript 0 errors, checkpoint, GitHub push
