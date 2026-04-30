@@ -25,52 +25,6 @@ const TYPE_ICONS: Record<string, string> = {
   creator_good: "✦",
 };
 
-// ─── Handle Tab (always visible) ─────────────────────────────────────────────
-function DrawerHandle({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label={isOpen ? "Close marketplace drawer" : "Open marketplace"}
-      style={{
-        position: "fixed",
-        right: isOpen ? "280px" : "0px",
-        top: "50%",
-        transform: "translateY(-50%)",
-        zIndex: 56,
-        background: "var(--ln-panel)",
-        borderTop: "1px solid var(--ln-panel-border)",
-        borderLeft: "1px solid var(--ln-panel-border)",
-        borderBottom: "1px solid var(--ln-panel-border)",
-        borderRight: "none",
-        borderRadius: "8px 0 0 8px",
-        padding: "12px 6px",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "6px",
-        transition: "right 0.3s cubic-bezier(0.4,0,0.2,1)",
-        color: "var(--ln-gold)",
-      }}
-    >
-      <span style={{ fontSize: "14px" }}>✦</span>
-      <span style={{
-        writingMode: "vertical-rl",
-        textOrientation: "mixed",
-        fontSize: "9px",
-        fontFamily: "var(--font-display)",
-        fontWeight: 700,
-        letterSpacing: "0.15em",
-        color: "rgba(255,255,255,0.5)",
-        textTransform: "uppercase",
-      }}>
-        SHOP
-      </span>
-      <span style={{ fontSize: "10px", opacity: 0.5 }}>{isOpen ? "›" : "‹"}</span>
-    </button>
-  );
-}
-
 // ─── Mini Item Card ───────────────────────────────────────────────────────────
 function MiniItemCard({
   item,
@@ -182,9 +136,6 @@ export default function MarketplaceDrawer() {
     if (!isOpen) return;
     const handler = (e: MouseEvent) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
-        // Don't close if clicking the handle button (it's outside the drawer div)
-        const handle = document.querySelector("[data-marketplace-handle]");
-        if (handle && handle.contains(e.target as Node)) return;
         setIsOpen(false);
       }
     };
@@ -224,12 +175,7 @@ export default function MarketplaceDrawer() {
 
   const content = (
     <>
-      {/* Handle */}
-      <div data-marketplace-handle>
-        <DrawerHandle isOpen={isOpen} onClick={() => setIsOpen((v) => !v)} />
-      </div>
-
-      {/* Drawer panel */}
+      {/* Drawer panel — handle is now the SHOP tab in PlaylistDrawer */}
       <div
         ref={drawerRef}
         style={{
