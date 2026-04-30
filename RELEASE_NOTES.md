@@ -7,6 +7,92 @@
 
 ---
 
+## v2.36.0 — April 30, 2026 (Individual Stacked Tab Handles)
+
+### What Shipped
+
+**Individual Stacked Tab Handles — Both Side Drawers**
+- Each tab on both side drawers is now its own individual protruding handle on the screen edge, stacked vertically top-to-bottom.
+- Left drawer (LiveActivityPanel): LIVE / PLAYING / TIPS — 3 handles stacked on the left edge.
+- Right drawer (PlaylistDrawer): NEW / TREND / LIKED / BUILD — 4 handles stacked on the right edge.
+- Clicking a tab opens the drawer and switches to that section. Clicking the active tab again collapses the drawer.
+- Active tab handle gets gold left/right border accent + gold background tint.
+- Panel header now shows the active section name (no pill row inside the panel).
+- Both drawers: `createPortal`, inline styles, `var(--ln-panel)` tokens, 0.3s cubic-bezier transition.
+
+**Files changed:**
+- `client/src/components/layout/LiveActivityPanel.tsx` — TabHandle component, stacked via `top` calc offsets
+- `client/src/components/player/PlaylistDrawer.tsx` — TabHandle component, stacked via `top` calc offsets
+
+### TypeScript
+- 0 errors.
+
+---
+
+## v2.35.0 — April 30, 2026 (Unified Drawer Handle Pattern)
+
+### What Shipped
+
+**Unified Drawer Handle Pattern — All Three Side Drawers**
+- All three side drawers (Live Activity left, Quick Play right, Shop right) now use the same single centered handle architecture as `MarketplaceDrawer`.
+- Each drawer has one handle button centered vertically on the panel edge that slides in sync with the panel (`left`/`right` CSS property transitions with the panel).
+- The multi-tab `BookSpineTabs` strip has been removed from `LiveActivityPanel` and `PlaylistDrawer` and replaced with a compact pill tab row inside the panel header.
+- `LiveActivityPanel` is now self-contained (owns its own `isOpen` state via `useState`). The parent-controlled `open`/`onToggle` props have been removed from `MainLayout`.
+- `PlaylistDrawer` already owned its own state — updated to use the same handle pattern.
+
+**Files changed:**
+- `client/src/components/layout/LiveActivityPanel.tsx` — full rewrite
+- `client/src/components/player/PlaylistDrawer.tsx` — full rewrite
+- `client/src/components/layout/MainLayout.tsx` — removed `liveOpen`/`setLiveOpen` state and props
+
+### TypeScript
+- 0 errors.
+
+---
+
+## v2.34.2 — April 30, 2026 (Book-Tab Drawer Collapse Fix)
+
+### What Shipped
+
+**LiveActivityPanel — Fixed-Position Tab Strip**
+- `BookSpineTabs` was previously rendered as a child of the sliding panel div in `LiveActivityPanel`. When the panel translated off-screen (`translateX(-272px)`), the tabs slid with it — making them invisible and unclickable.
+- Fix: The tab strip is now rendered as a **separate fixed-position sibling** outside the sliding panel. A `<div className="hidden md:block fixed z-[36]">` container holds the `BookSpineTabs` and transitions its `left` property in sync with the panel's `transform` transition (same cubic-bezier).
+- When closed: `left: 0px` — tabs protrude from the left screen edge.
+- When open: `left: 272px` — tabs sit at the right edge of the open panel.
+- `PlaylistDrawer` (right side) already had this architecture correct — no change needed there.
+
+**WhatsNewModal bumped to v2.34.2**
+- Added v2.34.2 entry (drawer fix, StoreTrackCard play fix, Featured Creators filter).
+- Added v2.34.0 entry (Book-Tab Spine Drawers redesign).
+
+### TypeScript
+- 0 errors.
+
+---
+
+## v2.34.0 — April 30, 2026 (Book-Tab Spine Drawer Redesign)
+
+### What Shipped
+
+**BookSpineTabs Component (`client/src/components/BookSpineTabs.tsx`)**
+- New reusable component for vertical protruding spine tabs on side drawers.
+- `side="left"`: tabs protrude from the right edge of the left drawer.
+- `side="right"`: tabs protrude from the left edge of the right drawer.
+- Cinzel small-caps labels, gold foil active state, warm near-black parchment interior.
+- Active tab lifts slightly with gold glow; inactive tabs show on hover.
+- Dot indicator support for live pulse on the Live tab.
+- Toggle-collapse: clicking the active tab calls `onDrawerToggle()` to close the drawer.
+
+**LiveActivityPanel — Book-Tab Redesign**
+- Left panel tabs: Live / Playing / Tips on the right spine edge.
+- Near-black solid background (`#0a0806` gradient), no backdrop blur.
+
+**PlaylistDrawer — Book-Tab Redesign**
+- Right panel tabs: New / Trending / Liked / Build on the left spine edge.
+- Fixed-position tab strip outside the sliding panel (correct architecture from the start).
+
+---
+
 ## v2.33.0 — April 29, 2026 (Live Waveform Visualizer + Reaction Fix)
 
 ### What Shipped

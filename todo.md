@@ -3711,3 +3711,55 @@
 ## Phase 77: Bug Fixes from Slimdoggy Design Feedback
 - [x] Fix Featured Creators display names — getAllCreators now excludes creators whose name matches ^Creator[[:space:]][0-9]+$ (auto-generated OAuth placeholder); only shows creators with real artistHandle or non-placeholder name
 - [x] Fix pause button on song detail page restarting the song — handlePlay now calls togglePlay() when isThisTrackActive, not addAndPlay()
+
+## Phase 78: Book-Tab Side Drawers Redesign
+- [x] Audit LiveActivityPanel (left) and PlaylistDrawer (right) — full structure understood
+- [x] Build BookSpineTabs component — vertical protruding spine tabs, Cinzel labels, gold foil active state, 3D lift, dot indicator support
+- [x] Wire BookSpineTabs into left LiveActivityPanel — tabs: Live, Playing, Tips on right spine edge; new Live tab added with recently-registered content
+- [x] Wire BookSpineTabs into right PlaylistDrawer — tabs: New, Trending, Liked, Build on left spine edge; old horizontal tab bar removed
+- [x] Tabs start from top of page (topOffset=52), stacked vertically, 72px each with 2px gap
+- [x] Active tab raised with translateX lift + gold border + glow shadow; inactive tabs dark recessed
+- [x] Parchment-toned dark interior (warm rgba(18,15,10) gradient) replaces old blue-grey
+- [x] Page-edge rule at top of each drawer (thin gold border + subtle gold tint)
+- [x] TypeScript 0 errors, checkpoint, GitHub push
+
+## Phase 79: Bug Fixes v2.34.1
+- [x] Fix Recently Witnessed song cards — removed Link wrapper from StoreTrackCard, card click now calls handlePlay(); Go to Song still in 3-dot menu
+- [x] Fix book-tab drawers — solid near-black backgrounds (#0a0806 gradient), removed backdropFilter blur
+- [x] Fix book-tab drawers — clicking active tab now toggles drawer closed (BookSpineTabs onTabClick checks isOpen state)
+- [x] Fix cinematic mode duplication — compact bar guard changed to !isExpanded && !isCinematic; cinematic overlay controls unaffected
+- [x] TypeScript 0 errors, checkpoint, GitHub push
+## Phase 80: Book-Tab Drawer Collapse Fix (v2.34.2)
+- [x] Root cause identified: BookSpineTabs rendered inside sliding panel div in LiveActivityPanel — tabs slid off-screen with panel when drawer closed
+- [x] Fix LiveActivityPanel: moved BookSpineTabs to a separate fixed-position sibling div outside the sliding panel; `left` property transitions in sync with panel's `transform`
+- [x] Verified PlaylistDrawer (right side) already had correct architecture — no change needed
+- [x] Verified: tabs visible at left edge when drawer closed (left:0px), slide to right edge when open (left:272px)
+- [x] Verified: clicking active tab collapses drawer; clicking any tab when closed opens drawer
+- [x] WhatsNewModal bumped to v2.34.2 with drawer fix, StoreTrackCard play fix, Featured Creators filter entries
+- [x] Added v2.34.0 entry (Book-Tab Spine Drawers redesign) to WhatsNewModal
+- [x] RELEASE_NOTES.md updated with v2.34.2 and v2.34.0 entries
+- [x] TypeScript 0 errors, checkpoint, GitHub push
+
+## Phase 90: Unified Drawer Handle Pattern (v2.35.0)
+- [x] Rebuild LiveActivityPanel — single centered handle, self-contained isOpen state, createPortal, inline styles matching MarketplaceDrawer
+- [x] Rebuild PlaylistDrawer — single centered handle, createPortal, inline styles matching MarketplaceDrawer
+- [x] Remove parent-controlled liveOpen/setLiveOpen from MainLayout
+- [x] WhatsNewModal bumped to v2.35.0 with unified drawer entry
+- [x] RELEASE_NOTES.md updated with v2.35.0 entry
+
+## Phase 91: Individual Stacked Tab Handles (v2.36.0)
+- [x] LiveActivityPanel — each tab (LIVE/PLAYING/TIPS) is its own individual protruding handle, stacked top-to-bottom on left edge
+- [x] PlaylistDrawer — each tab (NEW/TREND/LIKED/BUILD) is its own individual protruding handle, stacked top-to-bottom on right edge
+- [x] Clicking tab opens drawer + switches section; clicking active tab collapses drawer
+- [x] Active tab handle: gold border accent + gold background tint
+- [x] Panel header shows active section name (no pill row)
+- [x] TypeScript: 0 errors
+- [x] WhatsNewModal bumped to v2.36.0
+- [x] RELEASE_NOTES.md updated with v2.36.0 entry
+
+## Phase 92: SHOP Tab in Right Drawer Stack (v2.36.1)
+- [x] Add SHOP tab to PlaylistDrawer TABS array (⊛ icon)
+- [x] SHOP tab click dispatches ln:open-shop custom event and closes PlaylistDrawer
+- [x] MarketplaceDrawer listens for ln:open-shop event and opens itself
+- [x] TypeScript: 0 errors
+- [x] WhatsNewModal bumped to v2.36.1

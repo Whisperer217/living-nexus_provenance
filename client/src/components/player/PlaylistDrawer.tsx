@@ -1,23 +1,34 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — PlaylistDrawer
-   Right-side slide-in drawer for quick playlist access.
-   Triggered by a small tab on the right edge of the screen.
-   z-index: 9000 — sits above page content but BELOW the expanded
-   player (z-9995) and cinematic layer (z-9999).
+   Right-side slide-in panel. Desktop + mobile.
+
+   ARCHITECTURE: Matches LiveActivityPanel exactly.
+   - Self-contained isOpen state
+   - Each tab (New / Trending / Liked / Build) is its own individual
+     protruding handle on the left edge of the panel, stacked top-to-bottom
+   - All tab handles slide in sync with the panel
+     (right: isOpen ? PANEL_WIDTH : 0)
+   - Clicking a tab: opens drawer + switches to that tab
+   - Clicking the active tab again: collapses the drawer
+   - createPortal to document.body
+   - Inline styles using var(--ln-panel) / var(--ln-gold) tokens
+   - Closes on route change and outside click
+   - Swipe-to-close on mobile (swipe right)
 ═══════════════════════════════════════════════════════════════════ */
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  ChevronRight, ChevronLeft, ListMusic, TrendingUp, Sparkles,
-  Heart, Plus, Play, Music, Loader2, Lock, X,
+  Music, Loader2, Lock, Play, Plus, Sparkles,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 
+const PANEL_WIDTH = 280;
+
 // ── Types ──────────────────────────────────────────────────────────
-type PlaylistTab = "new" | "trending" | "liked" | "build";
+type PlaylistTab = "new" | "trending" | "liked" | "build" | "shop";
 
 interface TrackRow {
   id: number;
@@ -59,6 +70,102 @@ function flattenSong(s: any): TrackRow {
   };
 }
 
+// ── Tab definitions ────────────────────────────────────────────────
+const TABS: { id: PlaylistTab; label: string; icon: string }[] = [
+  { id: "new",      label: "NEW",      icon: "✦" },
+  { id: "trending", label: "TREND",    icon: "↑" },
+  { id: "liked",    label: "LIKED",    icon: "♥" },
+  { id: "build",    label: "BUILD",    icon: "+" },
+  { id: "shop",     label: "SHOP",     icon: "⊛" },
+];
+
+// ─── Individual Tab Handle ─────────────────────────────────────────
+// Each tab is its own fixed-position button on the right edge.
+// They stack vertically using `top` offsets calculated from the center.
+// All slide left when the drawer opens.
+function TabHandle({
+  tab,
+  index,
+  total,
+  isOpen,
+  isActive,
+  onClick,
+}: {
+  tab: { id: PlaylistTab; label: string; icon: string };
+  index: number;
+  total: number;
+  isOpen: boolean;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  const TAB_HEIGHT = 68;
+  const TAB_GAP = 2;
+  // Anchor from top so this group sits in the upper portion of the screen,
+  // separated from the LiveActivityPanel group which anchors from the bottom.
+  const TOP_ANCHOR = 80; // px from top of viewport
+  const topOffset = `${TOP_ANCHOR + index * (TAB_HEIGHT + TAB_GAP)}px`;
+
+  return (
+    <button
+      onClick={onClick}
+      aria-label={`${isOpen && isActive ? "Close" : "Open"} quick play panel — ${tab.label}`}
+      style={{
+        position: "fixed",
+        right: isOpen ? `${PANEL_WIDTH}px` : "0px",
+        top: topOffset,
+        zIndex: 56,
+        background: isActive && isOpen
+          ? "rgba(196,154,40,0.18)"
+          : "var(--ln-panel)",
+        borderTop: "1px solid var(--ln-panel-border)",
+        borderLeft: "1px solid var(--ln-panel-border)",
+        borderBottom: "1px solid var(--ln-panel-border)",
+        borderRight: isActive && isOpen
+          ? "2px solid var(--ln-gold)"
+          : "none",
+        borderRadius: "8px 0 0 8px",
+        padding: "10px 7px",
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "5px",
+        height: `${TAB_HEIGHT}px`,
+        width: "28px",
+        transition: "right 0.3s cubic-bezier(0.4,0,0.2,1), background 0.15s, border-right 0.15s",
+        color: isActive && isOpen ? "var(--ln-gold)" : "rgba(255,255,255,0.45)",
+      }}
+      onMouseEnter={e => {
+        if (!(isActive && isOpen)) {
+          (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.08)";
+          (e.currentTarget as HTMLElement).style.color = "rgba(196,154,40,0.8)";
+        }
+      }}
+      onMouseLeave={e => {
+        if (!(isActive && isOpen)) {
+          (e.currentTarget as HTMLElement).style.background = "var(--ln-panel)";
+          (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
+        }
+      }}
+    >
+      <span style={{ fontSize: "12px", lineHeight: 1 }}>{tab.icon}</span>
+      <span style={{
+        writingMode: "vertical-rl",
+        textOrientation: "mixed",
+        fontSize: "8px",
+        fontFamily: "var(--font-display)",
+        fontWeight: 700,
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        lineHeight: 1,
+      }}>
+        {tab.label}
+      </span>
+    </button>
+  );
+}
+
 // ── Mini Track Row ─────────────────────────────────────────────────
 function MiniTrackRow({
   track,
@@ -72,63 +179,75 @@ function MiniTrackRow({
   return (
     <button
       onClick={onPlay}
-      className="w-full flex items-center gap-3 px-4 py-2.5 transition-all active:scale-[0.98] text-left group"
       style={{
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "10px 16px",
         background: isActive ? "rgba(196,154,40,0.05)" : "transparent",
-        borderLeft: isActive ? "2px solid #C49A28" : "2px solid transparent",
+        borderLeft: isActive ? "2px solid var(--ln-gold)" : "2px solid transparent",
+        border: "none",
+        cursor: "pointer",
+        textAlign: "left",
+        transition: "background 0.15s",
+      }}
+      onMouseEnter={e => {
+        if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.03)";
+      }}
+      onMouseLeave={e => {
+        if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent";
       }}
     >
-      {/* Artwork */}
-      <div
-        className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden relative"
-        style={{ background: "var(--ln-coal)" }}
-      >
+      <div style={{
+        width: "40px", height: "40px", borderRadius: "8px",
+        overflow: "hidden", flexShrink: 0,
+        background: "rgba(0,0,0,0.4)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        position: "relative",
+      }}>
         {track.artUrl ? (
-          <img src={track.artUrl} alt="" className="w-full h-full object-cover" />
+          <img src={track.artUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Music size={14} style={{ color: "var(--ln-smoke)" }} />
-          </div>
+          <Music size={14} style={{ color: "rgba(255,255,255,0.2)" }} />
         )}
         {isActive && (
-          <div
-            className="absolute inset-0 flex items-end justify-center pb-1 gap-[2px]"
-            style={{ background: "rgba(0,0,0,0.35)" }}
-          >
-            {[1, 2, 3].map((i) => (
-              <span
-                key={i}
-                className="w-[2px] rounded-full"
-                style={{
-                  height: "6px",
-                  background: "var(--ln-gold)",
-                  animation: `drawerWave ${0.4 + i * 0.12}s ease-in-out infinite alternate`,
-                  animationDelay: `${i * 0.08}s`,
-                }}
-              />
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "rgba(0,0,0,0.35)",
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+            paddingBottom: "4px", gap: "2px",
+          }}>
+            {[1, 2, 3].map(i => (
+              <span key={i} style={{
+                width: "2px", borderRadius: "1px",
+                background: "var(--ln-gold)",
+                height: "6px",
+                animation: `drawerWave ${0.4 + i * 0.12}s ease-in-out infinite alternate`,
+                animationDelay: `${i * 0.08}s`,
+              }} />
             ))}
           </div>
         )}
       </div>
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div
-          className="text-[12px] font-heading truncate leading-tight"
-          style={{ color: isActive ? "var(--ln-gold)" : "var(--ln-parchment)" }}
-        >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: "12px", fontWeight: 600,
+          color: isActive ? "var(--ln-gold)" : "var(--ln-parchment)",
+          fontFamily: "var(--font-display)",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
           {track.title}
         </div>
-        <div className="text-[10px] truncate mt-0.5" style={{ color: "var(--ln-smoke)" }}>
+        <div style={{
+          fontSize: "10px", marginTop: "2px",
+          color: "rgba(255,255,255,0.35)",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
           {track.artist}
         </div>
       </div>
-      {/* Play icon on hover */}
-      <div
-        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ color: "var(--ln-gold)" }}
-      >
-        <Play size={12} fill="currentColor" />
-      </div>
+      <Play size={11} fill="currentColor" style={{ color: "var(--ln-gold)", flexShrink: 0, opacity: 0.6 }} />
     </button>
   );
 }
@@ -137,36 +256,48 @@ function MiniTrackRow({
 function BuildYourOwn({ onClose }: { onClose: () => void }) {
   const [, navigate] = useLocation();
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-4">
-      <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center"
-        style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}
-      >
+    <div style={{
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      height: "100%", padding: "24px", textAlign: "center", gap: "16px",
+    }}>
+      <div style={{
+        width: "56px", height: "56px", borderRadius: "16px",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: "rgba(196,154,40,0.08)",
+        border: "1px solid rgba(196,154,40,0.25)",
+      }}>
         <Plus size={24} style={{ color: "var(--ln-gold)" }} />
       </div>
       <div>
-        <div className="text-[14px] font-heading mb-1" style={{ color: "var(--ln-parchment)" }}>
-          Custom Playlists
-        </div>
-        <div className="text-[11px] leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
+        <div style={{
+          fontSize: "14px", fontWeight: 700,
+          fontFamily: "var(--font-display)",
+          color: "var(--ln-parchment)", marginBottom: "4px",
+        }}>Custom Playlists</div>
+        <div style={{ fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.4)" }}>
           Build and save your own playlists. Curate tracks from any creator on the platform.
         </div>
       </div>
       <button
         onClick={() => { onClose(); navigate("/explore"); }}
-        className="px-4 py-2 rounded-xl text-[11px] font-heading tracking-wide transition-all active:scale-95"
         style={{
+          padding: "8px 16px", borderRadius: "10px",
           background: "rgba(196,154,40,0.08)",
           border: "1px solid rgba(196,154,40,0.3)",
           color: "var(--ln-gold)",
+          fontFamily: "var(--font-display)",
+          fontWeight: 700, fontSize: "11px",
+          letterSpacing: "0.08em", cursor: "pointer",
         }}
       >
         Browse Tracks
       </button>
-      <div
-        className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-full"
-        style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)" }}
-      >
+      <div style={{
+        display: "flex", alignItems: "center", gap: "6px",
+        fontSize: "10px", padding: "6px 12px", borderRadius: "20px",
+        background: "rgba(0,0,0,0.3)", color: "rgba(255,255,255,0.3)",
+      }}>
         <Sparkles size={10} />
         Full playlist builder coming soon
       </div>
@@ -176,72 +307,64 @@ function BuildYourOwn({ onClose }: { onClose: () => void }) {
 
 // ── Main Component ─────────────────────────────────────────────────
 export default function PlaylistDrawer() {
-   const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<PlaylistTab>("new");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const { addAndPlay, playQueueAt, state } = usePlayer();
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const { playQueueAt, state } = usePlayer();
   const { user } = useAuth();
-  // LAYER AUTHORITY RULE: Close drawer on route change — prevents stacking with new pages
-  const [location] = useLocation();
+
+  // Close on route change
+  const [location, navigate] = useLocation();
   useEffect(() => { setIsOpen(false); }, [location]);
 
-  // LAYER AUTHORITY RULE: Close drawer when any modal/dialog opens — one primary surface at a time
+  // Close on outside click
   useEffect(() => {
-    const checkAndClose = () => {
-      const locked =
-        document.body.hasAttribute("data-scroll-locked") ||
-        document.body.style.overflow === "hidden" ||
-        document.body.style.overflowY === "hidden";
-      if (locked) setIsOpen(false);
+    if (!isOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
+        const handles = Array.from(document.querySelectorAll("[data-playlist-tab-handle]"));
+        for (const h of handles) {
+          if (h.contains(e.target as Node)) return;
+        }
+        setIsOpen(false);
+      }
     };
-    const observer = new MutationObserver(checkAndClose);
-    observer.observe(document.body, { attributes: true, attributeFilter: ["data-scroll-locked", "style"] });
-    return () => observer.disconnect();
-  }, []);
-
-  // Detect when any Radix dialog/modal is open — hide tab trigger to prevent accidental activation
-  useEffect(() => {
-    const checkDialogOpen = () => {
-      // Radix Dialog sets data-scroll-locked on <body> when open
-      // Custom modals (EditTrackPanel etc.) set body overflow:hidden directly
-      const locked =
-        document.body.hasAttribute("data-scroll-locked") ||
-        document.body.style.overflow === "hidden" ||
-        document.body.style.overflowY === "hidden";
-      setDialogOpen(locked);
-    };
-    // Run immediately on mount to catch already-open dialogs
-    checkDialogOpen();
-    // Watch for attribute/style changes
-    const observer = new MutationObserver(checkDialogOpen);
-    observer.observe(document.body, { attributes: true, attributeFilter: ["data-scroll-locked", "style"] });
-    // Poll as a safety net (100ms interval) — catches edge cases where MutationObserver fires late
-    const interval = setInterval(checkDialogOpen, 100);
-    return () => {
-      observer.disconnect();
-      clearInterval(interval);
-    };
-  }, []);
-  // Swipe-to-close gesture
-  const touchStartX = useRef<number | null>(null);
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - touchStartX.current;
-    if (delta > 60) setIsOpen(false);
-    touchStartX.current = null;
-  };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [isOpen]);
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false);
-    };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  // Swipe-to-close (swipe right)
+  const touchStartX = useRef<number | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    if (e.changedTouches[0].clientX - touchStartX.current > 60) setIsOpen(false);
+    touchStartX.current = null;
+  };
+
+  // Handle tab click: open + switch tab, or collapse if already active
+  // SHOP tab dispatches a custom event to open MarketplaceDrawer instead
+  function handleTabClick(tabId: PlaylistTab) {
+    if (tabId === "shop") {
+      // Close this drawer and open the Marketplace drawer
+      setIsOpen(false);
+      window.dispatchEvent(new CustomEvent("ln:open-shop"));
+      return;
+    }
+    if (isOpen && activeTab === tabId) {
+      setIsOpen(false);
+    } else {
+      setActiveTab(tabId);
+      setIsOpen(true);
+    }
+  }
 
   // ── Data queries ────────────────────────────────────────────────
   const { data: newData, isLoading: newLoading } = trpc.songs.newThisWeek.useQuery(
@@ -304,14 +427,15 @@ export default function PlaylistDrawer() {
   const stateTracks = state.tracks ?? [];
   const currentId = stateTracks[state.currentIdx]?.id;
 
-  const TABS: { id: PlaylistTab; label: string; icon: React.ElementType }[] = [
-    { id: "new", label: "New", icon: Sparkles },
-    { id: "trending", label: "Trending", icon: TrendingUp },
-    { id: "liked", label: "Liked", icon: Heart },
-    { id: "build", label: "Build", icon: Plus },
-  ];
+  const tabLabel: Record<PlaylistTab, string> = {
+    new: "New This Week",
+    trending: "Trending",
+    liked: "Liked Tracks",
+    build: "Build Playlist",
+    shop: "Shop",
+  };
 
-  const drawerContent = (
+  const content = (
     <>
       <style>{`
         @keyframes drawerWave {
@@ -320,159 +444,163 @@ export default function PlaylistDrawer() {
         }
       `}</style>
 
-      {/* Backdrop — only on mobile */}
+      {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="md:hidden fixed inset-0 z-[30]"
-          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}
+          className="md:hidden"
+          style={{
+            position: "fixed", inset: 0, zIndex: 30,
+            background: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)",
+          }}
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* Tab trigger — right edge, desktop only.
-           Hidden on mobile (md:hidden) because the fixed handle overlaps page
-           content at the right edge and intercepts taps on buttons like the
-           Provenance Prompt Generator, triggering the drawer instead of the
-           intended action. On mobile the drawer is opened via the sidebar. */}
-      {/* Slides fully off-screen when any dialog/modal is open to prevent accidental activation */}
-      <button
-        onClick={() => setIsOpen((v) => !v)}
-        className="md:flex hidden fixed z-[32] items-center justify-center active:scale-95"
-        style={{
-          // When drawer open: peeking left of the drawer panel
-          // When drawer closed + no dialog: peek 4px into screen (visible handle)
-          // When drawer closed + dialog open: fully off-screen (right: -28px)
-          right: isOpen ? "280px" : (dialogOpen ? "-28px" : "0px"),
-          bottom: "calc(env(safe-area-inset-bottom, 0px) + 140px)",
-          width: "22px",
-          height: "64px",
-          borderRadius: "8px 0 0 8px",
-          background: isOpen
-            ? "rgba(196,154,40,0.25)"
-            : "rgba(20,18,12,0.97)",
-          borderTop: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
-          borderLeft: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
-          borderBottom: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
-          borderRight: "none",
-          backdropFilter: "blur(12px)",
-          boxShadow: "-3px 0 16px rgba(196,154,40,0.15)",
-          transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s",
-          color: "var(--ln-gold)",
-          // When any dialog/modal is open: always disable pointer events on the handle
-          // This prevents the handle from intercepting taps on dialogs (e.g. Prompt Studio)
-          pointerEvents: dialogOpen ? "none" : "auto",
-        }}
-        title={isOpen ? "Close playlist drawer" : "Open playlist drawer"}
-        aria-label={isOpen ? "Close playlist drawer" : "Open playlist drawer"}
-      >
-        {isOpen ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-      </button>
+      {/* Individual stacked tab handles */}
+      <div data-playlist-tab-handle>
+        {TABS.map((t, i) => (
+          <TabHandle
+            key={t.id}
+            tab={t}
+            index={i}
+            total={TABS.length}
+            isOpen={isOpen}
+            isActive={activeTab === t.id}
+            onClick={() => handleTabClick(t.id)}
+          />
+        ))}
+      </div>
 
       {/* Drawer panel */}
       <div
-        className={`fixed top-0 right-0 h-full z-[31] flex flex-col${isOpen ? "" : " pointer-events-none"}`}
+        ref={drawerRef}
         style={{
-          width: "280px",
-          background: "rgba(44,52,56,0.97)",
-          borderLeft: "1px solid rgba(196,154,40,0.08)",
-          backdropFilter: "blur(20px)",
-          transform: isOpen ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
-          boxShadow: "-8px 0 40px rgba(0,0,0,0.60)",
+          position: "fixed",
+          top: 0,
+          right: isOpen ? 0 : `-${PANEL_WIDTH}px`,
+          width: `${PANEL_WIDTH}px`,
+          height: "100vh",
+          background: "var(--ln-panel)",
+          borderLeft: "1px solid var(--ln-panel-border)",
+          zIndex: 55,
+          display: "flex",
+          flexDirection: "column",
+          transition: "right 0.3s cubic-bezier(0.4,0,0.2,1)",
+          overflowX: "hidden",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          overscrollBehavior: "contain", // prevent panel from escaping its bounds on mobile momentum scroll
         }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
         {/* Header */}
-        <div
-          className="flex-shrink-0 flex items-center justify-between px-4 py-4"
-          style={{ borderBottom: "1px solid rgba(196,154,40,0.06)" }}
-        >
-          <div className="flex items-center gap-2">
-            <ListMusic size={14} style={{ color: "var(--ln-gold)" }} />
-            <span className="text-[12px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-gold)" }}>
-              Quick Play
-            </span>
+        <div style={{
+          padding: "16px 16px 12px",
+          borderBottom: "1px solid var(--ln-panel-border)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexShrink: 0,
+        }}>
+          <div>
+            <div style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "13px", fontWeight: 700,
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              color: "var(--ln-parchment)",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}>
+              <span style={{ color: "var(--ln-gold)" }}>♪</span>
+              {tabLabel[activeTab]}
+            </div>
+            <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", marginTop: "2px" }}>
+              Quick play
+            </div>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:bg-white/5 active:scale-90"
-            style={{ color: "var(--ln-smoke)" }}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              color: "rgba(255,255,255,0.4)", fontSize: "18px", padding: "4px",
+            }}
           >
-            <X size={14} />
+            ×
           </button>
         </div>
 
-        {/* Tab bar */}
-        <div
-          className="flex-shrink-0 flex items-center gap-1 px-3 py-2"
-          style={{ borderBottom: "1px solid rgba(196,154,40,0.04)" }}
-        >
-          {TABS.map(({ id, label, icon: Icon }) => {
-            const isActive = activeTab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-all text-[10px] font-heading tracking-wide"
-                style={{
-                  background: isActive ? "rgba(196,154,40,0.10)" : "rgba(44,52,56,0.60)",
-                  color: isActive ? "var(--ln-parchment)" : "var(--ln-smoke)",
-                  border: isActive ? "1px solid rgba(196,154,40,0.35)" : "1px solid rgba(196,154,40,0.08)",
-                  fontFamily: "'Cinzel', serif",
-                  letterSpacing: "0.06em",
-                  fontSize: "9px",
-                }}
-              >
-                <Icon size={13} />
-                {label}
-              </button>
-            );
-          })}
-        </div>
-
         {/* Content */}
-        <div className="flex-1 overflow-y-auto" style={{ overscrollBehavior: "contain", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)" }}>
+        <div style={{
+          flex: 1, overflowY: "auto",
+          overscrollBehavior: "contain",
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 120px)",
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(196,154,40,0.25) transparent",
+        }}>
           {activeTab === "build" ? (
             <BuildYourOwn onClose={() => setIsOpen(false)} />
           ) : activeTab === "liked" && !user ? (
-            <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-3">
-              <Lock size={20} style={{ color: "var(--ln-iron)" }} />
-              <div className="text-[12px]" style={{ color: "var(--ln-smoke)" }}>
+            <div style={{
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              height: "200px", gap: "12px", padding: "24px",
+              textAlign: "center",
+            }}>
+              <Lock size={20} style={{ color: "rgba(255,255,255,0.2)" }} />
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)" }}>
                 Sign in to see your liked tracks
               </div>
             </div>
           ) : isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 size={18} className="animate-spin" style={{ color: "rgba(196,154,40,0.4)" }} />
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              height: "128px",
+            }}>
+              <Loader2 size={18} style={{ color: "rgba(196,154,40,0.4)", animation: "spin 1s linear infinite" }} />
             </div>
           ) : tracks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 gap-2">
-              <Music size={18} style={{ color: "var(--ln-coal)" }} />
-              <div className="text-[11px]" style={{ color: "var(--ln-coal)" }}>
+            <div style={{
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              height: "128px", gap: "8px",
+            }}>
+              <Music size={18} style={{ color: "rgba(255,255,255,0.1)" }} />
+              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)" }}>
                 {activeTab === "liked" ? "No liked tracks yet" : "No tracks found"}
               </div>
             </div>
           ) : (
-            <div className="py-2">
-              {/* Play all button */}
+            <div style={{ padding: "8px 0" }}>
+              {/* Play all */}
               <button
                 onClick={() => tracks.length > 0 && handlePlay(tracks[0], tracks)}
-                className="w-full flex items-center gap-2 px-4 py-2 mb-1 transition-all hover:bg-white/5 active:scale-[0.98]"
-                style={{ color: "var(--ln-gold)" }}
+                style={{
+                  width: "100%",
+                  display: "flex", alignItems: "center", gap: "8px",
+                  padding: "8px 16px", marginBottom: "4px",
+                  background: "transparent", border: "none",
+                  cursor: "pointer", color: "var(--ln-gold)",
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
               >
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}
-                >
+                <div style={{
+                  width: "28px", height: "28px", borderRadius: "8px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "rgba(196,154,40,0.08)",
+                  border: "1px solid rgba(196,154,40,0.25)",
+                }}>
                   <Play size={11} fill="currentColor" />
                 </div>
-                <span className="text-[11px] font-heading tracking-wide">Play All ({tracks.length})</span>
+                <span style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "11px", fontWeight: 700,
+                  letterSpacing: "0.06em",
+                }}>
+                  Play All ({tracks.length})
+                </span>
               </button>
-              <div className="h-px mx-4 mb-1" style={{ background: "rgba(196,154,40,0.04)" }} />
+              <div style={{ height: "1px", margin: "0 16px 4px", background: "rgba(196,154,40,0.04)" }} />
               {tracks.map((track) => (
                 <MiniTrackRow
                   key={track.id}
@@ -488,5 +616,5 @@ export default function PlaylistDrawer() {
     </>
   );
 
-  return createPortal(drawerContent, document.body);
+  return createPortal(content, document.body);
 }
