@@ -3711,3 +3711,14 @@
 ## Phase 77: Bug Fixes from Slimdoggy Design Feedback
 - [x] Fix Featured Creators display names — getAllCreators now excludes creators whose name matches ^Creator[[:space:]][0-9]+$ (auto-generated OAuth placeholder); only shows creators with real artistHandle or non-placeholder name
 - [x] Fix pause button on song detail page restarting the song — handlePlay now calls togglePlay() when isThisTrackActive, not addAndPlay()
+
+## Phase 78: Book-Tab Side Drawers Redesign
+- [x] Audit LiveActivityPanel (left) and PlaylistDrawer (right) — full structure understood
+- [x] Build BookSpineTabs component — vertical protruding spine tabs, Cinzel labels, gold foil active state, 3D lift, dot indicator support
+- [x] Wire BookSpineTabs into left LiveActivityPanel — tabs: Live, Playing, Tips on right spine edge; new Live tab added with recently-registered content
+- [x] Wire BookSpineTabs into right PlaylistDrawer — tabs: New, Trending, Liked, Build on left spine edge; old horizontal tab bar removed
+- [x] Tabs start from top of page (topOffset=52), stacked vertically, 72px each with 2px gap
+- [x] Active tab raised with translateX lift + gold border + glow shadow; inactive tabs dark recessed
+- [x] Parchment-toned dark interior (warm rgba(18,15,10) gradient) replaces old blue-grey
+- [x] Page-edge rule at top of each drawer (thin gold border + subtle gold tint)
+- [x] TypeScript 0 errors, checkpoint, GitHub push

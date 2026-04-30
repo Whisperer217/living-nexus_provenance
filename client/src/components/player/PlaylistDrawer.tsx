@@ -8,13 +8,14 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  ChevronRight, ChevronLeft, ListMusic, TrendingUp, Sparkles,
+  ListMusic, TrendingUp, Sparkles,
   Heart, Plus, Play, Music, Loader2, Lock, X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
+import BookSpineTabs from "@/components/BookSpineTabs";
 
 // ── Types ──────────────────────────────────────────────────────────
 type PlaylistTab = "new" | "trending" | "liked" | "build";
@@ -304,11 +305,11 @@ export default function PlaylistDrawer() {
   const stateTracks = state.tracks ?? [];
   const currentId = stateTracks[state.currentIdx]?.id;
 
-  const TABS: { id: PlaylistTab; label: string; icon: React.ElementType }[] = [
-    { id: "new", label: "New", icon: Sparkles },
-    { id: "trending", label: "Trending", icon: TrendingUp },
-    { id: "liked", label: "Liked", icon: Heart },
-    { id: "build", label: "Build", icon: Plus },
+  const TABS = [
+    { id: "new" as PlaylistTab,      label: "New",      icon: Sparkles },
+    { id: "trending" as PlaylistTab, label: "Trending", icon: TrendingUp },
+    { id: "liked" as PlaylistTab,    label: "Liked",    icon: Heart },
+    { id: "build" as PlaylistTab,    label: "Build",    icon: Plus },
   ];
 
   const drawerContent = (
@@ -329,109 +330,81 @@ export default function PlaylistDrawer() {
         />
       )}
 
-      {/* Tab trigger — right edge, desktop only.
-           Hidden on mobile (md:hidden) because the fixed handle overlaps page
-           content at the right edge and intercepts taps on buttons like the
-           Provenance Prompt Generator, triggering the drawer instead of the
-           intended action. On mobile the drawer is opened via the sidebar. */}
-      {/* Slides fully off-screen when any dialog/modal is open to prevent accidental activation */}
-      <button
-        onClick={() => setIsOpen((v) => !v)}
-        className="md:flex hidden fixed z-[32] items-center justify-center active:scale-95"
-        style={{
-          // When drawer open: peeking left of the drawer panel
-          // When drawer closed + no dialog: peek 4px into screen (visible handle)
-          // When drawer closed + dialog open: fully off-screen (right: -28px)
-          right: isOpen ? "280px" : (dialogOpen ? "-28px" : "0px"),
-          bottom: "calc(env(safe-area-inset-bottom, 0px) + 140px)",
-          width: "22px",
-          height: "64px",
-          borderRadius: "8px 0 0 8px",
-          background: isOpen
-            ? "rgba(196,154,40,0.25)"
-            : "rgba(20,18,12,0.97)",
-          borderTop: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
-          borderLeft: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
-          borderBottom: isOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.4)",
-          borderRight: "none",
-          backdropFilter: "blur(12px)",
-          boxShadow: "-3px 0 16px rgba(196,154,40,0.15)",
-          transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s",
-          color: "var(--ln-gold)",
-          // When any dialog/modal is open: always disable pointer events on the handle
-          // This prevents the handle from intercepting taps on dialogs (e.g. Prompt Studio)
-          pointerEvents: dialogOpen ? "none" : "auto",
-        }}
-        title={isOpen ? "Close playlist drawer" : "Open playlist drawer"}
-        aria-label={isOpen ? "Close playlist drawer" : "Open playlist drawer"}
-      >
-        {isOpen ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-      </button>
+      {/* Book spine tabs — desktop only, hidden on mobile */}
+      {!dialogOpen && (
+        <div
+          className="md:block hidden fixed z-[32]"
+          style={{
+            top: "52px",
+            right: isOpen ? "280px" : "0px",
+            transition: "right 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
+            /* Spine tab strip container — zero width, tabs protrude left */
+            width: 0,
+            height: "calc(100vh - 52px - 72px)",
+            overflow: "visible",
+            pointerEvents: dialogOpen ? "none" : "auto",
+          }}
+        >
+          <BookSpineTabs
+            side="right"
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={(id) => setActiveTab(id as PlaylistTab)}
+            drawerOpen={isOpen}
+            onDrawerToggle={() => setIsOpen((v) => !v)}
+            topOffset={52}
+            drawerWidth={280}
+          />
+        </div>
+      )}
 
       {/* Drawer panel */}
       <div
         className={`fixed top-0 right-0 h-full z-[31] flex flex-col${isOpen ? "" : " pointer-events-none"}`}
         style={{
           width: "280px",
-          background: "rgba(44,52,56,0.97)",
-          borderLeft: "1px solid rgba(196,154,40,0.08)",
+          background: "linear-gradient(180deg, rgba(18,15,10,0.98) 0%, rgba(22,18,12,0.97) 100%)",
+          borderLeft: "1px solid rgba(196,154,40,0.12)",
           backdropFilter: "blur(20px)",
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
           boxShadow: "-8px 0 40px rgba(0,0,0,0.60)",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          overscrollBehavior: "contain", // prevent panel from escaping its bounds on mobile momentum scroll
+          overscrollBehavior: "contain",
         }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* Header */}
+        {/* Header — page edge rule */}
         <div
-          className="flex-shrink-0 flex items-center justify-between px-4 py-4"
-          style={{ borderBottom: "1px solid rgba(196,154,40,0.06)" }}
+          className="flex-shrink-0 flex items-center gap-2 px-4 py-3"
+          style={{
+            borderBottom: "1px solid rgba(196,154,40,0.10)",
+            background: "rgba(196,154,40,0.025)",
+          }}
         >
-          <div className="flex items-center gap-2">
-            <ListMusic size={14} style={{ color: "var(--ln-gold)" }} />
-            <span className="text-[12px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-gold)" }}>
-              Quick Play
-            </span>
-          </div>
+          <ListMusic size={12} style={{ color: "var(--ln-gold)" }} />
+          <span
+            className="text-[9px] font-heading tracking-[0.16em] uppercase"
+            style={{ color: "rgba(196,154,40,0.6)", fontFamily: "'Cinzel', serif" }}
+          >
+            Quick Play
+          </span>
+          {/* Active tab label */}
+          <span
+            className="ml-auto text-[9px] font-heading tracking-[0.12em] uppercase"
+            style={{ color: "rgba(196,154,40,0.35)", fontFamily: "'Cinzel', serif" }}
+          >
+            {TABS.find(t => t.id === activeTab)?.label}
+          </span>
           <button
             onClick={() => setIsOpen(false)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:bg-white/5 active:scale-90"
-            style={{ color: "var(--ln-smoke)" }}
+            className="w-6 h-6 flex items-center justify-center rounded-lg transition-all hover:bg-white/5 active:scale-90"
+            style={{ color: "rgba(196,154,40,0.4)" }}
           >
-            <X size={14} />
+            <X size={12} />
           </button>
-        </div>
-
-        {/* Tab bar */}
-        <div
-          className="flex-shrink-0 flex items-center gap-1 px-3 py-2"
-          style={{ borderBottom: "1px solid rgba(196,154,40,0.04)" }}
-        >
-          {TABS.map(({ id, label, icon: Icon }) => {
-            const isActive = activeTab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-all text-[10px] font-heading tracking-wide"
-                style={{
-                  background: isActive ? "rgba(196,154,40,0.10)" : "rgba(44,52,56,0.60)",
-                  color: isActive ? "var(--ln-parchment)" : "var(--ln-smoke)",
-                  border: isActive ? "1px solid rgba(196,154,40,0.35)" : "1px solid rgba(196,154,40,0.08)",
-                  fontFamily: "'Cinzel', serif",
-                  letterSpacing: "0.06em",
-                  fontSize: "9px",
-                }}
-              >
-                <Icon size={13} />
-                {label}
-              </button>
-            );
-          })}
         </div>
 
         {/* Content */}

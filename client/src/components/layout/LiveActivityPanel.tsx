@@ -1,24 +1,25 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — LiveActivityPanel
    Left-edge slide-in panel. Desktop only.
-   Shows: Now Playing tracks, recent tips, active listen sessions.
-   Replaces the TipTicker marquee on desktop.
+   Book-tab spine navigation — tabs protrude from the right edge
+   of the drawer like dividers in a living reference book.
 ═══════════════════════════════════════════════════════════════════ */
-
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
-import { X, Music, Zap } from "lucide-react";
+import { Music, Zap, Radio } from "lucide-react";
+import BookSpineTabs from "@/components/BookSpineTabs";
 
 const PANEL_WIDTH = 272;
+const TOP_OFFSET = 52;
+const BOTTOM_OFFSET = 72;
 
-type LiveTab = "playing" | "tips";
+type LiveTab = "live" | "playing" | "tips";
 
 function formatAmount(cents: number): string {
   return `$${(cents / 100).toFixed(2).replace(/\.00$/, "")}`;
 }
-
 function timeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
   if (diff < 60) return `${diff}s ago`;
@@ -36,15 +37,10 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
   const [, navigate] = useLocation();
   const { state, allTracks, playTrack } = usePlayer();
 
-  // Recent tips
   const { data: tips } = trpc.tips.recentTips.useQuery(undefined, {
     refetchInterval: 30_000,
     staleTime: 25_000,
   });
-
-
-
-  // Recent audio tracks from explore (for "Now Playing" context) — filter to audio only
   const { data: recentSongsRaw } = trpc.songs.discover.useQuery(
     { limit: 12, offset: 0, contentType: "audio" },
     { staleTime: 60_000, refetchOnWindowFocus: false }
@@ -56,123 +52,163 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
 
   const tracks = allTracks();
   const rawCurrentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
-  // Only show audio tracks in "Now Playing" — manuscripts, comics, and lyrics are not audio
   const isAudioTrack = (t: typeof rawCurrentTrack) =>
     !t || !t.contentType || t.contentType === "audio";
   const currentTrack = isAudioTrack(rawCurrentTrack) ? rawCurrentTrack : null;
 
+  const TABS = [
+    { id: "live" as LiveTab,    label: "Live",    icon: Radio, dot: true },
+    { id: "playing" as LiveTab, label: "Playing", icon: Music },
+    { id: "tips" as LiveTab,    label: "Tips",    icon: Zap },
+  ];
+
   return (
     <>
-      {/* ── Pull tab (always visible on desktop) ─────────────────── */}
-      <div
-        className="hidden md:flex fixed z-40 flex-col items-center gap-1.5 cursor-pointer select-none transition-all duration-300"
-        style={{
-          top: "50%",
-          left: open ? `${PANEL_WIDTH}px` : "0px",
-          transform: "translateY(-50%)",
-          background: "rgba(20,18,12,0.97)",
-          border: "1px solid rgba(196,154,40,0.4)",
-          borderLeft: "2px solid rgba(196,154,40,0.8)",
-          borderRadius: "0 8px 8px 0",
-          padding: "14px 8px",
-          writingMode: "vertical-rl",
-          textOrientation: "mixed",
-          transition: "left 0.3s cubic-bezier(0.4,0,0.2,1)",
-          boxShadow: "3px 0 16px rgba(196,154,40,0.15)",
-        }}
-        onClick={onToggle}
-        title={open ? "Close Live Panel" : "Open Live Panel"}
-      >
-        <span
-          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-          style={{ background: "#ef4444", animation: "pulse 1.5s infinite" }}
-        />
-        <span
-          className="text-[9px] font-heading tracking-[0.12em] uppercase"
-          style={{ color: open ? "var(--ln-gold)" : "var(--ln-smoke)" }}
-        >
-          Live
-        </span>
-      </div>
+      <style>{`
+        @keyframes bar-bounce {
+          from { transform: scaleY(0.4); }
+          to   { transform: scaleY(1); }
+        }
+        @keyframes lnPulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.35; }
+        }
+      `}</style>
 
       {/* ── Slide-in panel ───────────────────────────────────────── */}
       <div
-        className="hidden md:flex fixed flex-col z-35"
+        className="hidden md:flex fixed flex-col"
         style={{
-          top: "52px",
+          top: `${TOP_OFFSET}px`,
           left: 0,
           width: `${PANEL_WIDTH}px`,
-          bottom: "72px",
-          background: "rgba(44,52,56,0.97)",
-          borderRight: "1px solid rgba(44,52,56,0.5)",
-          backdropFilter: "blur(16px)",
+          bottom: `${BOTTOM_OFFSET}px`,
+          /* Parchment-toned dark background — warmer than the old blue-grey */
+          background: "linear-gradient(180deg, rgba(18,15,10,0.98) 0%, rgba(22,18,12,0.97) 100%)",
+          borderRight: "1px solid rgba(196,154,40,0.12)",
+          backdropFilter: "blur(20px)",
           transform: open ? "translateX(0)" : `translateX(-${PANEL_WIDTH}px)`,
-          transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+          transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
+          boxShadow: "6px 0 32px rgba(0,0,0,0.55)",
+          /* position:relative so the spine tabs can be absolutely positioned */
+          position: "fixed",
+          overflow: "visible",
+          zIndex: 35,
         }}
       >
-        {/* Header */}
+        {/* ── Book spine tabs — protrude from right edge ─────────── */}
+        {/* Rendered as absolute children of the panel so they move with it */}
+        <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: "100%", overflow: "visible", zIndex: 36 }}>
+          <BookSpineTabs
+            side="left"
+            tabs={TABS}
+            activeTab={tab}
+            onTabChange={(id) => setTab(id as LiveTab)}
+            drawerOpen={open}
+            onDrawerToggle={onToggle}
+            topOffset={TOP_OFFSET}
+            drawerWidth={PANEL_WIDTH}
+          />
+        </div>
+
+        {/* ── Page edge rule — top of the "book page" ────────────── */}
         <div
-          className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-          style={{ borderBottom: "1px solid rgba(44,52,56,0.35)" }}
+          className="flex-shrink-0 flex items-center gap-2 px-4 py-3"
+          style={{
+            borderBottom: "1px solid rgba(196,154,40,0.10)",
+            background: "rgba(196,154,40,0.025)",
+          }}
         >
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#ef4444", animation: "pulse 1.5s infinite" }} />
-            <span className="text-[10px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.7)" }}>
-              Live Activity
-            </span>
-          </div>
-          <button
-            onClick={onToggle}
-            className="p-1 rounded transition-all"
-            style={{ color: "var(--ln-iron)" }}
+          <span
+            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+            style={{ background: "#ef4444", animation: "lnPulse 1.5s infinite" }}
+          />
+          <span
+            className="text-[9px] font-heading tracking-[0.16em] uppercase"
+            style={{ color: "rgba(196,154,40,0.6)", fontFamily: "'Cinzel', serif" }}
           >
-            <X size={14} />
-          </button>
+            Live Activity
+          </span>
+          {/* Active tab label shown inline */}
+          <span
+            className="ml-auto text-[9px] font-heading tracking-[0.12em] uppercase"
+            style={{ color: "rgba(196,154,40,0.35)", fontFamily: "'Cinzel', serif" }}
+          >
+            {TABS.find(t => t.id === tab)?.label}
+          </span>
         </div>
 
-        {/* Tabs */}
-        <div className="flex flex-shrink-0" style={{ borderBottom: "1px solid rgba(44,52,56,0.3)" }}>
-          {([
-            { key: "playing", label: "Playing", icon: Music },
-            { key: "tips",    label: "Tips",    icon: Zap    },
-          ] as { key: LiveTab; label: string; icon: React.ElementType }[]).map(t => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 transition-all"
-              style={{
-                fontSize: "10px", fontWeight: 600,
-                color: tab === t.key ? "var(--ln-gold)" : "var(--ln-iron)",
-                borderBottom: tab === t.key ? "2px solid #C49A28" : "2px solid transparent",
-              }}
-            >
-              <t.icon size={11} />
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {/* ── Body ─────────────────────────────────────────────────── */}
+        <div
+          className="flex-1 overflow-y-auto"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(196,154,40,0.25) transparent",
+            overscrollBehavior: "contain",
+          }}
+        >
+          {/* LIVE TAB — recently registered tracks */}
+          {tab === "live" && (
+            <div className="py-2">
+              <div className="px-4 py-1.5">
+                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.4)", fontFamily: "'Cinzel', serif" }}>
+                  Recently Registered
+                </span>
+              </div>
+              {recentSongs?.map((item: any) => {
+                const s = item.song ?? item;
+                const c = item.creator ?? {};
+                return (
+                  <div
+                    key={s.id}
+                    className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all"
+                    onClick={() => navigate(`/song/${s.id}`)}
+                    style={{ borderBottom: "1px solid rgba(196,154,40,0.04)" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.04)"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                  >
+                    <div
+                      className="w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden"
+                      style={{ background: "linear-gradient(135deg, #1a1208, #2a1f0e)", border: "1px solid rgba(196,154,40,0.12)" }}
+                    >
+                      {s.coverArtUrl
+                        ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover rounded-md" />
+                        : <Music size={12} style={{ color: "rgba(196,154,40,0.35)" }} />
+                      }
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[11px] font-medium truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{s.title}</div>
+                      <div className="text-[9px] truncate" style={{ color: "rgba(196,154,40,0.45)" }}>{c.artistHandle || c.name || "Unknown"}</div>
+                    </div>
+                  </div>
+                );
+              })}
+              {(!recentSongs || recentSongs.length === 0) && (
+                <div className="px-4 py-6 text-center">
+                  <Radio size={20} style={{ color: "rgba(196,154,40,0.15)", margin: "0 auto 8px" }} />
+                  <div className="text-[11px]" style={{ color: "rgba(196,154,40,0.35)" }}>No recent activity</div>
+                </div>
+              )}
+            </div>
+          )}
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "#C3AB7D transparent", overscrollBehavior: "contain" }}>
-
-          {/* NOW PLAYING TAB */}
+          {/* PLAYING TAB */}
           {tab === "playing" && (
             <div className="py-2">
-              {/* Currently playing in this session */}
               {currentTrack && (
                 <>
                   <div className="px-4 py-1.5">
-                    <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "var(--ln-iron)" }}>
+                    <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.4)", fontFamily: "'Cinzel', serif" }}>
                       Your Session
                     </span>
                   </div>
                   <div
                     className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-all"
-                    style={{ background: "rgba(196,154,40,0.04)" }}
+                    style={{ background: "rgba(196,154,40,0.04)", borderBottom: "1px solid rgba(196,154,40,0.06)" }}
                   >
                     <div
                       className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"
-                      style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid rgba(44,52,56,0.35)" }}
+                      style={{ background: "linear-gradient(135deg, #1a1208, #2a1f0e)", border: "1px solid rgba(196,154,40,0.15)" }}
                     >
                       {currentTrack.artUrl
                         ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover rounded-lg" />
@@ -180,7 +216,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                           <div className="flex gap-0.5 items-end h-3.5">
                             {[0, 1, 2].map(i => (
                               <div key={i} className="w-0.5 rounded-sm" style={{
-                                background: "var(--ln-iron)",
+                                background: "rgba(196,154,40,0.5)",
                                 height: `${[8, 14, 10][i]}px`,
                                 animationName: "bar-bounce",
                                 animationDuration: "0.8s",
@@ -195,13 +231,13 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                       }
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-semibold truncate" style={{ color: "var(--ln-parchment)" }}>{currentTrack.title}</div>
-                      <div className="text-[10px] truncate" style={{ color: "var(--ln-iron)" }}>{currentTrack.artist}</div>
+                      <div className="text-[11px] font-semibold truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{currentTrack.title}</div>
+                      <div className="text-[10px] truncate" style={{ color: "rgba(196,154,40,0.5)" }}>{currentTrack.artist}</div>
                     </div>
                     <div className="flex gap-0.5 items-end h-3" style={{ flexShrink: 0 }}>
                       {[0, 1, 2].map(i => (
                         <div key={i} className="w-0.5 rounded-sm" style={{
-                          background: "var(--ln-iron)",
+                          background: "rgba(196,154,40,0.5)",
                           height: `${[6, 12, 8][i]}px`,
                           animationName: state.isPlaying ? "bar-bounce" : "none",
                           animationDuration: "0.8s",
@@ -213,13 +249,11 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                       ))}
                     </div>
                   </div>
-                  <div className="mx-4 my-1" style={{ height: "1px", background: "rgba(44,52,56,0.3)" }} />
+                  <div className="mx-4 my-1" style={{ height: "1px", background: "rgba(196,154,40,0.05)" }} />
                 </>
               )}
-
-              {/* Recent public tracks */}
               <div className="px-4 py-1.5">
-                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "var(--ln-iron)" }}>
+                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.4)", fontFamily: "'Cinzel', serif" }}>
                   Recently Registered
                 </span>
               </div>
@@ -227,34 +261,34 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                 const s = item.song ?? item;
                 const c = item.creator ?? {};
                 return (
-                <div
-                  key={s.id}
-                  className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all"
-                  onClick={() => navigate(`/song/${s.id}`)}
-                  style={{ borderBottom: "1px solid rgba(44,52,56,0.15)" }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(44,52,56,0.6)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
-                >
                   <div
-                    className="w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden"
-                    style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", border: "1px solid rgba(44,52,56,0.3)" }}
+                    key={s.id}
+                    className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all"
+                    onClick={() => navigate(`/song/${s.id}`)}
+                    style={{ borderBottom: "1px solid rgba(196,154,40,0.04)" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.04)"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
                   >
-                    {s.coverArtUrl
-                      ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover rounded-md" />
-                      : <Music size={12} style={{ color: "var(--ln-iron)" }} />
-                    }
+                    <div
+                      className="w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden"
+                      style={{ background: "linear-gradient(135deg, #1a1208, #2a1f0e)", border: "1px solid rgba(196,154,40,0.12)" }}
+                    >
+                      {s.coverArtUrl
+                        ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover rounded-md" />
+                        : <Music size={12} style={{ color: "rgba(196,154,40,0.35)" }} />
+                      }
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[11px] font-medium truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{s.title}</div>
+                      <div className="text-[9px] truncate" style={{ color: "rgba(196,154,40,0.45)" }}>{c.artistHandle || c.name || "Unknown"}</div>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-medium truncate" style={{ color: "var(--ln-parchment)" }}>{s.title}</div>
-                    <div className="text-[9px] truncate" style={{ color: "var(--ln-iron)" }}>{c.name || c.artistHandle || "Unknown"}</div>
-                  </div>
-                </div>
                 );
               })}
               {(!recentSongs || recentSongs.length === 0) && (
                 <div className="px-4 py-6 text-center">
-                  <Music size={20} style={{ color: "var(--ln-coal)", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "var(--ln-iron)" }}>No tracks yet</div>
+                  <Music size={20} style={{ color: "rgba(196,154,40,0.15)", margin: "0 auto 8px" }} />
+                  <div className="text-[11px]" style={{ color: "rgba(196,154,40,0.35)" }}>No tracks yet</div>
                 </div>
               )}
             </div>
@@ -264,7 +298,7 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
           {tab === "tips" && (
             <div className="py-2">
               <div className="px-4 py-1.5">
-                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "var(--ln-iron)" }}>
+                <span className="text-[8px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.4)", fontFamily: "'Cinzel', serif" }}>
                   Recent Tips
                 </span>
               </div>
@@ -272,11 +306,11 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                 <div
                   key={t.id}
                   className="flex items-start gap-3 px-4 py-2.5 transition-all"
-                  style={{ borderBottom: "1px solid rgba(44,52,56,0.15)" }}
+                  style={{ borderBottom: "1px solid rgba(196,154,40,0.04)" }}
                 >
                   <div
                     className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                    style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}
+                    style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.15)" }}
                   >
                     {(t.fanName || "?").charAt(0).toUpperCase()}
                   </div>
@@ -286,11 +320,11 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                       {" tipped "}
                       <span style={{ color: "var(--ln-parchment)", fontWeight: 500 }}>{t.creatorName}</span>
                     </div>
-                    <div className="text-[10px] mt-0.5" style={{ color: "var(--ln-iron)" }}>
+                    <div className="text-[10px] mt-0.5" style={{ color: "rgba(196,154,40,0.5)" }}>
                       {formatAmount(t.amountCents)} · "{t.songTitle}"
                     </div>
                     {t.createdAt && (
-                      <div className="text-[9px] mt-0.5" style={{ color: "var(--ln-iron)" }}>
+                      <div className="text-[9px] mt-0.5" style={{ color: "rgba(196,154,40,0.35)" }}>
                         {timeAgo(new Date(t.createdAt).getTime())}
                       </div>
                     )}
@@ -301,26 +335,15 @@ export default function LiveActivityPanel({ open, onToggle }: LiveActivityPanelP
                 </div>
               )) : (
                 <div className="px-4 py-6 text-center">
-                  <Zap size={20} style={{ color: "var(--ln-coal)", margin: "0 auto 8px" }} />
-                  <div className="text-[11px]" style={{ color: "var(--ln-iron)" }}>No tips yet today</div>
-                  <div className="text-[10px] mt-1" style={{ color: "var(--ln-coal)" }}>Be the first to support a creator</div>
+                  <Zap size={20} style={{ color: "rgba(196,154,40,0.15)", margin: "0 auto 8px" }} />
+                  <div className="text-[11px]" style={{ color: "rgba(196,154,40,0.35)" }}>No tips yet today</div>
+                  <div className="text-[10px] mt-1" style={{ color: "rgba(196,154,40,0.2)" }}>Be the first to support a creator</div>
                 </div>
               )}
             </div>
           )}
-
-
-
         </div>
       </div>
-
-      {/* Bar-bounce animation */}
-      <style>{`
-        @keyframes bar-bounce {
-          from { transform: scaleY(0.4); }
-          to   { transform: scaleY(1); }
-        }
-      `}</style>
     </>
   );
 }
