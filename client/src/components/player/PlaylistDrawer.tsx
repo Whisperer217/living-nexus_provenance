@@ -473,8 +473,12 @@ function BuildCollectionsPanel() {
                 ) : expandedTracks.length === 0 ? (
                   <div style={{ padding: "8px 12px", color: "rgba(255,255,255,0.2)", fontSize: "10px" }}>No tracks yet — use + on any track card</div>
                 ) : (
-                  expandedTracks.map((t: { id: number; title: string; artist: string; artUrl?: string | null }) => (
-                    <div key={t.id} style={{
+                  expandedTracks.map((t: any) => {
+                    const s = t.song ?? t;
+                    const artUrl = s.coverArtUrl ?? s.artUrl ?? null;
+                    const artist = t.creator?.artistHandle || t.creator?.name || s.artist || "";
+                    return (
+                    <div key={t.entry?.id ?? s.id} style={{
                       display: "flex", alignItems: "center", gap: "8px",
                       padding: "6px 12px 6px 0",
                     }}>
@@ -482,30 +486,37 @@ function BuildCollectionsPanel() {
                         width: "28px", height: "28px", borderRadius: "4px",
                         overflow: "hidden", flexShrink: 0,
                         background: "rgba(0,0,0,0.4)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
-                        {t.artUrl
-                          ? <img src={t.artUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          : <Music size={10} style={{ color: "rgba(255,255,255,0.2)", margin: "9px" }} />}
+                        {artUrl
+                          ? <img src={artUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          : <Music size={10} style={{ color: "rgba(255,255,255,0.2)" }} />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: "10px", fontWeight: 600, color: "var(--ln-parchment)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>
-                        <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.artist}</div>
+                        <div style={{ fontSize: "10px", fontWeight: 600, color: "var(--ln-parchment)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</div>
+                        <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{artist}</div>
                       </div>
                       <button
-                        onClick={() => removeTrack.mutate({ collectionId: col.id, songId: t.id })}
+                        onClick={() => removeTrack.mutate({ collectionId: col.id, songId: s.id })}
                         style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.2)", padding: "2px", flexShrink: 0 }}
                       ><Trash2 size={10} /></button>
                     </div>
-                  ))
+                    );
+                  })
                 )}
                 {/* Play collection */}
                 {expandedTracks && expandedTracks.length > 0 && (
                   <button
                     onClick={() => {
-                      const playerTracks = expandedTracks.map((t: any) => ({
-                        id: String(t.id), title: t.title, artist: t.artist,
-                        artUrl: t.artUrl ?? undefined, audioUrl: t.audioUrl ?? "",
-                      }));
+                      const playerTracks = expandedTracks.map((t: any) => {
+                        const s = t.song ?? t;
+                        return {
+                          id: String(s.id), title: s.title,
+                          artist: t.creator?.artistHandle || t.creator?.name || s.artist || "",
+                          artUrl: (s.coverArtUrl ?? s.artUrl) ?? undefined,
+                          audioUrl: s.audioUrl ?? "",
+                        };
+                      });
                       playQueueAt(playerTracks, 0, "NONE");
                     }}
                     style={{

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
-import { Play, Shield, MoreVertical, ListPlus, ExternalLink, Copy, SkipForward } from "lucide-react";
+import { Play, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward } from "lucide-react";
+import { AddToCollectionButton } from "@/components/AddToCollectionModal";
 import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
@@ -48,69 +49,9 @@ function toTrack(s: SongData): Track {
   };
 }
 
-// ── Add-to-List sub-panel ─────────────────────────────────────────────────────
-function AddToListPanel({ songId, onClose, anchorRect }: { songId: number; onClose: () => void; anchorRect: DOMRect | null }) {
-  const { data: playlists = [], isLoading } = trpc.playlists.mine.useQuery(undefined, { staleTime: 30_000 });
-  const addMutation = trpc.playlists.addTrack.useMutation({
-    onSuccess: () => { toast.success("Added to list"); onClose(); },
-    onError: (e: { message: string }) => { toast.error(e.message); onClose(); },
-  });
-  const createMutation = trpc.playlists.create.useMutation({
-    onSuccess: (pl) => { if (pl.id) addMutation.mutate({ playlistId: pl.id as number, songId }); },
-    onError: (e: { message: string }) => toast.error(e.message),
-  });
-
-  const style: React.CSSProperties = anchorRect
-    ? { position: "fixed", top: anchorRect.bottom + 4, left: anchorRect.left, zIndex: 100001 }
-    : { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 100001 };
-
-  return createPortal(
-    <div
-      style={{ ...style, background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.3)", borderRadius: "0.75rem", minWidth: "180px", boxShadow: "0 8px 32px rgba(0,0,0,0.6)", overflow: "hidden" }}
-      onClick={e => e.stopPropagation()}
-    >
-      {isLoading ? (
-        <div className="px-4 py-3 text-xs text-white/40">Loading…</div>
-      ) : playlists.length === 0 ? (
-        <button
-          onClick={() => createMutation.mutate({ name: "My List" })}
-          className="w-full px-4 py-2.5 text-xs text-left hover:bg-white/5 transition-colors"
-          style={{ color: "var(--ln-parchment)" }}
-        >
-          + Create new list
-        </button>
-      ) : (
-        <>
-          {playlists.map((pl: any) => (
-            <button
-              key={pl.id}
-              onClick={() => addMutation.mutate({ playlistId: pl.id, songId })}
-              className="w-full px-4 py-2.5 text-xs text-left hover:bg-white/5 transition-colors truncate"
-              style={{ color: "var(--ln-parchment)" }}
-            >
-              {pl.name}
-            </button>
-          ))}
-          <div className="border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
-          <button
-            onClick={() => createMutation.mutate({ name: "New List" })}
-            className="w-full px-4 py-2.5 text-xs text-left hover:bg-white/5 transition-colors"
-            style={{ color: "var(--ln-gold)" }}
-          >
-            + New list
-          </button>
-        </>
-      )}
-    </div>,
-    document.body
-  );
-}
-
 // ── Context menu ──────────────────────────────────────────────────────────────
 function TrackContextMenu({ song, position, onClose }: { song: SongData; position: { x: number; y: number }; onClose: () => void }) {
   const { playNext } = usePlayer();
-  const [showAddToList, setShowAddToList] = useState(false);
-  const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -163,13 +104,10 @@ function TrackContextMenu({ song, position, onClose }: { song: SongData; positio
             <SkipForward className="w-3.5 h-3.5 opacity-60" /> Play Next
           </button>
         )}
-        <button
-          onClick={e => { e.stopPropagation(); setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/5 transition-colors text-left"
-          style={{ color: "var(--ln-parchment)" }}
-        >
-          <ListPlus className="w-3.5 h-3.5 opacity-60" /> Add to List
-        </button>
+        <div className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/5 transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>
+          <FolderPlus className="w-3.5 h-3.5 opacity-60" />
+          <AddToCollectionButton songId={song.id} songTitle={song.title} size={14} className="flex-1 text-left" />
+        </div>
         <div className="border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
         <Link href={`/song/${song.id}`} onClick={onClose}>
           <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/5 transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>
@@ -188,9 +126,7 @@ function TrackContextMenu({ song, position, onClose }: { song: SongData; positio
           {song.wid ? "Copy WID Link" : "Copy Link"}
         </button>
       </div>
-      {showAddToList && (
-        <AddToListPanel songId={song.id} onClose={() => { setShowAddToList(false); onClose(); }} anchorRect={addToListRect} />
-      )}
+
     </>,
     document.body
   );
