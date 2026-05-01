@@ -3875,3 +3875,21 @@
 - [x] Confirmed no remount trigger in PlayerContext dispatch
 - [x] zone, cinematic, commentsOpen, tipOpen, dragHeight all persist across track changes
 - [x] tsc --noEmit: 0 errors (stale watch daemon errors are ProfilePage/CommentModerationPage cache artifacts)
+
+### Phase 108: System Architecture v1.0 Lock
+- [x] AppShell CSS grid: 72px LeftRail + fluid MainColumn + 320px RightRail, height: 100vh
+- [x] LeftRail: icon-only mode switcher (72px), always visible, direct route navigation
+- [x] ContextDrawer: slide-in overlay for mobile/detail views, controlled by open/onClose props
+- [x] ContextDrawer: 220ms cubic-bezier(0.22,1,0.36,1) slide animation
+- [x] TopBar: removed mega dropdown nav, kept search + Prompt Gen + Register Work + notifications + profile
+- [x] GlobalPlayer: repositioned to left:88px, right:336px, bottom:24px (spans MainColumn only)
+- [x] AIGuide: orbBottom raised to 140px (above player), draggable offset preserved
+- [x] No duplicate navigation systems
+- [x] Player persists across routes (already confirmed)
+- [x] No UI tied to track lifecycle (already confirmed)
+- [x] RightRail: 320px contextual signals panel (SIGNALS / PROVENANCE VERIFIED / WITNESS REGISTRY)
+- [x] getNotifications raw SQL fix (refId column name mismatch resolved)
+- [x] WhatsNewModal bumped to v2.43.0 with Phase 108 entries
+- [x] RELEASE_NOTES.md updated with v2.43.0 entry
+- [x] TypeScript: 0 errors
+- [x] GitHub push: fc9dea0..c7c61cb

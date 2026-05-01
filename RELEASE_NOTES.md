@@ -7,6 +7,63 @@
 
 ---
 
+## v2.43.0 — May 1, 2026 (Phase 108: AppShell v1.0 — System Architecture Lock)
+
+### What Shipped
+
+**AppShell Grid (MainLayout.tsx)**
+- Three-column layout: LeftRail (72px) | MainColumn (fluid) | RightRail (320px)
+- TopBar starts at `left: 72px` (after LeftRail), not from the left edge
+- MainColumn has `paddingTop: 52px` (TopBar) and `paddingBottom: 120px` (GlobalPlayer)
+
+**LeftRail (new: client/src/components/layout/LeftRail.tsx)**
+- 72px fixed icon-only mode switcher
+- Modes: HOME / EXPLORE / PROJECTS / MARKETPLACE / UPLOAD / DASHBOARD / ARCHIVE / BUILD
+- Gold active indicator, hover label tooltip
+- Auth-gated: DASHBOARD and ARCHIVE hidden when logged out
+
+**RightRail (new: client/src/components/layout/RightRail.tsx)**
+- 320px contextual signals panel
+- Sections: SIGNALS (live activity), PROVENANCE VERIFIED (recent WIDs), WITNESS REGISTRY (public ledger)
+- Reads from `trpc.notifications.list` (limited to 5), `trpc.songs.trending`, `trpc.witnessRegistry.list`
+
+**ContextDrawer (new: client/src/components/layout/ContextDrawer.tsx)**
+- Slide-in overlay for mobile and detail views
+- Controlled by `open` / `onClose` props
+
+**TopBar.tsx — Stripped**
+- Removed: mega dropdown drawer, core nav pills, hamburger button
+- Kept: search field, Prompt Gen shortcut, Register Work CTA, notifications bell, profile avatar
+- `left: 72px` so it starts after the LeftRail
+
+**GlobalPlayer.tsx — MainColumn Positioning**
+- `right: RAIL_RIGHT + 16 = 336px` (anchor right)
+- `left: RAIL_LEFT + 16 = 88px` (anchor left)
+- Width: `calc(100vw - 72px - 320px - 64px)` fluid, max 820px, min 560px
+- Player no longer overlaps LeftRail or RightRail
+
+**FloatingAvatar.tsx — AIGuide Orb**
+- `orbBottom` raised from `max(92px, ...)` to `max(140px, ...)` to clear the GlobalPlayer
+
+**server/db.ts — getNotifications**
+- Fixed raw SQL query: `refId` column was being referenced as `refid` in Drizzle ORM join
+- Now uses raw SQL via mysql2 connection to avoid ORM column name mismatch
+
+**WhatsNewModal.tsx**
+- Bumped to `v2.43.0`, added 6 entries for Phase 108 changes
+- Added v2.42.1 and v2.42.0 entries for player state persistence and Nebula tip modal
+
+### No Schema Changes
+No new tables or migrations in this release.
+
+### TypeScript
+- 0 errors (confirmed by fresh `tsc --noEmit` run).
+
+### Manus Pub: No Action Required
+All changes are frontend layout and positioning. No new tRPC procedures. No new DB columns.
+
+---
+
 ## v2.40.0 — May 1, 2026 (GlobalPlayer Interaction Upgrade)
 
 ### What Shipped

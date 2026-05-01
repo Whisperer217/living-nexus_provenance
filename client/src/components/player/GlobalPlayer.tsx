@@ -407,14 +407,20 @@ export default function GlobalPlayer() {
     bottom: "auto",
   } : {};
 
-  /* ── Desktop floating card style (decisions #1 #2 #5 #7 #8 #9 #10) ── */
+  /* ── Desktop floating card style (Phase 108: AppShell-aware positioning) ── */
+  // Player spans MainColumn only: left=72px (LeftRail width), right=320px (RightRail width)
+  // Anchor toggle still works but shifts within the MainColumn bounds
+  const RAIL_LEFT = 72;   // LeftRail width
+  const RAIL_RIGHT = 320; // RightRail width
   const desktopFloatStyle: React.CSSProperties = isDesktop && !isExpanded ? {
-    width: "clamp(680px, 50vw, 820px)",
-    right: desktopAnchor === "right" ? "32px" : "auto",
-    left: desktopAnchor === "left" ? "32px" : "auto",
+    width: `calc(100vw - ${RAIL_LEFT}px - ${RAIL_RIGHT}px - 64px)`, // fluid within MainColumn minus margins
+    maxWidth: 820,
+    minWidth: 560,
+    right: desktopAnchor === "right" ? `${RAIL_RIGHT + 16}px` : "auto",
+    left: desktopAnchor === "left" ? `${RAIL_LEFT + 16}px` : "auto",
     bottom: "24px",
     borderRadius: "20px",          /* fully detached floating card — all 4 corners */
-    transform: "translateY(6px)", /* elevation: lifted above page (decision #2 visual spec) */
+    transform: "translateY(6px)", /* elevation: lifted above page */
   } : {};
 
   const glassBg = isDesktop ? GLASS_BG_DESKTOP : GLASS_BG_MOBILE;

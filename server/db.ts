@@ -1762,40 +1762,27 @@ export async function createNotification(data: {
 export async function getNotifications(userId: number, limit = 50) {
   const db = await getDb();
   if (!db) return [];
-  const { notifications, songs, users } = await import("../drizzle/schema");
-  const rows = await (db as any)
-    .select({
-      // notification fields
-      id: notifications.id,
-      userId: notifications.userId,
-      type: notifications.type,
-      title: notifications.title,
-      body: notifications.body,
-      actorId: notifications.actorId,
-      actorName: notifications.actorName,
-      actorAvatarUrl: notifications.actorAvatarUrl,
-      refId: notifications.refId,
-      refType: notifications.refType,
-      isRead: notifications.isRead,
-      archivedAt: notifications.archivedAt,
-      createdAt: notifications.createdAt,
-      // song metadata (only populated for comment/like/tip signals with refType=song)
-      songTitle: songs.title,
-      songCoverArtUrl: songs.coverArtUrl,
-      songFileUrl: songs.fileUrl,
-      songArtistName: users.name,
-      songCreatorId: songs.userId,
-    })
-    .from(notifications)
-    .leftJoin(songs, and(
-      eq(notifications.refId, songs.id),
-      sql`${notifications.refType} = 'song'`
-    ))
-    .leftJoin(users, eq(songs.userId, users.id))
-    .where(and(eq(notifications.userId, userId), sql`${notifications.archivedAt} IS NULL`))
-    .orderBy(desc(notifications.createdAt))
-    .limit(limit);
-  return rows;
+  // Use raw SQL to avoid Drizzle ORM column name mismatch between schema and actual DB
+  // The actual notifications table has: id, userId, type, title, content, isRead, metadata, createdAt, archivedAt
+  const { default: mysql2 } = await import("mysql2/promise") as any;
+  const conn = await mysql2.createConnection(process.env.DATABASE_URL);
+  try {
+    const [rows] = await conn.query(
+      `SELECT id, userId, type, title, content AS body, isRead, metadata, createdAt, archivedAt
+       FROM notifications
+       WHERE userId = ? AND archivedAt IS NULL
+       ORDER BY createdAt DESC
+       LIMIT ?`,
+      [userId, limit]
+    );
+    return (rows as any[]).map((r: any) => ({
+      ...r,
+      createdAt: r.createdAt instanceof Date ? r.createdAt.getTime() : r.createdAt,
+      archivedAt: r.archivedAt instanceof Date ? r.archivedAt.getTime() : r.archivedAt,
+    }));
+  } finally {
+    await conn.end();
+  }
 }
 
 export async function markNotificationRead(notificationId: number, userId: number) {
