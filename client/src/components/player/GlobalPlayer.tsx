@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { useLocation } from "wouter";
-import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo, memo } from "react";
 import { createPortal } from "react-dom";
 import PlayerTipModal from "./PlayerTipModal";
 import { toast } from "sonner";
@@ -94,7 +94,7 @@ function WidBadge({ onClick }: { onClick?: () => void }) {
 /* ══════════════════════════════════════════════════════════════════
    MAIN COMPONENT
 ══════════════════════════════════════════════════════════════════ */
-export default function GlobalPlayer() {
+function GlobalPlayerInner() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek, playTrack,
@@ -424,7 +424,10 @@ export default function GlobalPlayer() {
   } : {};
 
   const glassBg = isDesktop ? GLASS_BG_DESKTOP : GLASS_BG_MOBILE;
-  const glassBlur = isDesktop ? GLASS_BLUR_DESKTOP : GLASS_BLUR_MOBILE;
+  // Adaptive blur: reduce GPU cost during active playback (Decision #3)
+  const glassBlur = state.isPlaying
+    ? (isDesktop ? "blur(4px)" : "blur(4px)")
+    : (isDesktop ? GLASS_BLUR_DESKTOP : GLASS_BLUR_MOBILE);
 
   const content = (
     <div
@@ -436,6 +439,8 @@ export default function GlobalPlayer() {
         right: 0,
         height: isDesktop && isExpanded ? undefined : `${playerHeight}px`,
         zIndex: 9000,
+        willChange: "transform",
+        contain: "layout paint",
         background: glassBg,
         backdropFilter: glassBlur,
         WebkitBackdropFilter: glassBlur,
@@ -1400,3 +1405,7 @@ export default function GlobalPlayer() {
     document.body
   );
 }
+
+// Memoized export — prevents re-renders from parent layout changes (Decision #5)
+const GlobalPlayer = memo(GlobalPlayerInner);
+export default GlobalPlayer;

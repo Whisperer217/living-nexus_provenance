@@ -1,5 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MainLayout v5 (Isomorphic Navigation System)
+   LIVING NEXUS — MainLayout v6 (Render Layer Separation + Isomorphic Nav)
+
+   Render Layer Ownership (no shared layout dependencies):
+   - ContentLayer  : scrollable page content (contain: layout paint)
+   - PlayerLayer   : GlobalPlayer + TheaterPlayer (contain: layout paint)
+   - GuideLayer    : FloatingAvatar / KeeperAvatarWidget (contain: layout paint)
+   - DrawerLayer   : ContextDrawer + MobileNavDrawer (portal, contain: layout paint)
+   Each layer: will-change: transform; position: fixed or isolated stacking context
    Desktop: LeftRail (72px fixed) + ContextDrawer + MainColumn + RightRail
    Mobile:  Hamburger + MobileNavDrawer (full-screen portal)
 
@@ -209,14 +216,33 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* ══════════════════════════════════════════════
-          GLOBAL OVERLAYS
+          PLAYER LAYER — isolated, no layout dependency
+          contain: layout paint prevents reflow during drag
       ══════════════════════════════════════════════ */}
-      {/* Global Player — draggable floating overlay */}
-      <GlobalPlayer />
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          pointerEvents: "none",
+          contain: "layout paint",
+          willChange: "transform",
+          zIndex: 0, // children use their own z-index
+        }}
+      >
+        {/* Global Player — draggable floating overlay */}
+        <div style={{ pointerEvents: "auto" }}>
+          <GlobalPlayer />
+        </div>
 
-      {/* Theater Player */}
-      <TheaterPlayer />
+        {/* Theater Player */}
+        <div style={{ pointerEvents: "auto" }}>
+          <TheaterPlayer />
+        </div>
+      </div>
 
+      {/* ══════════════════════════════════════════════
+          DRAWER LAYER — portal-based, isolated
+      ══════════════════════════════════════════════ */}
       {/* Playlist Drawer */}
       <PlaylistDrawer />
 

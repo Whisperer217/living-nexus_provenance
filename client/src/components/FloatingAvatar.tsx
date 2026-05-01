@@ -160,6 +160,8 @@ export default function FloatingAvatar({
   });
   const [dragging, setDragging] = useState(false);
   const dragStart = useRef<{ mx: number; my: number; ox: number; oy: number } | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const pendingPos = useRef<{ x: number; y: number } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const nowPlaying = useNowPlaying();
   const prevNowPlaying = useRef<NowPlaying | null>(null);
@@ -224,15 +226,27 @@ export default function FloatingAvatar({
 
   useEffect(() => {
     if (!dragging) return;
-    const savePos = (newPos: { x: number; y: number }) => {
-      setPosition(newPos);
-      try { localStorage.setItem("ln_avatar_pos", JSON.stringify(newPos)); } catch {}
+    // RAF-throttled drag: accumulate position in a ref, flush to state once per frame
+    const flushPos = () => {
+      if (pendingPos.current) {
+        const p = pendingPos.current;
+        pendingPos.current = null;
+        setPosition(p);
+        try { localStorage.setItem("ln_avatar_pos", JSON.stringify(p)); } catch {}
+      }
+      rafRef.current = null;
+    };
+    const scheduleFlush = (newPos: { x: number; y: number }) => {
+      pendingPos.current = newPos;
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(flushPos);
+      }
     };
     const onMove = (e: MouseEvent) => {
       if (!dragStart.current) return;
       const dx = e.clientX - dragStart.current.mx;
       const dy = e.clientY - dragStart.current.my;
-      savePos({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
+      scheduleFlush({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
     };
     const onTouchMove = (e: TouchEvent) => {
       if (!dragStart.current) return;
@@ -240,15 +254,19 @@ export default function FloatingAvatar({
       const t = e.touches[0];
       const dx = t.clientX - dragStart.current.mx;
       const dy = t.clientY - dragStart.current.my;
-      savePos({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
+      scheduleFlush({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
     };
-    const onUp = () => setDragging(false);
+    const onUp = () => {
+      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+      setDragging(false);
+    };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onUp);
     window.addEventListener("touchcancel", onUp);
     return () => {
+      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
       window.removeEventListener("touchmove", onTouchMove);
@@ -397,6 +415,8 @@ export default function FloatingAvatar({
           right: orbRight,
           zIndex: ORB_Z,
           transition: "opacity 0.6s ease",
+          willChange: "transform",
+          contain: "layout paint",
         }}
       >
         {/* Exit cinematic button */}
@@ -455,6 +475,8 @@ export default function FloatingAvatar({
           right: orbRight,
           zIndex: ORB_Z,
           userSelect: "none",
+          willChange: "transform",
+          contain: "layout paint",
         }}
       >
         {/* Drag handle ring — hold-to-drag on both mouse and touch (200ms threshold) */}
