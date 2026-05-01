@@ -10,14 +10,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.43.0";
+const CURRENT_VERSION = "v2.43.1";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.43.0",
+    version: "v2.43.1",
     date: "May 1, 2026",
     label: "Latest",
+    items: [
+      { icon: Music, text: "Global player is now fully persistent across track changes — zone, cinematic mode, comments drawer, and drag height all survive track switches. Track is data, not layout." },
+      { icon: Zap, text: "Smooth drag + snap interactions — RAF-throttled drag on the AI Guide orb with will-change isolation. No visual lag during playback or while scrolling content." },
+      { icon: Sparkles, text: "Adaptive glass system — the player backdrop reduces from blur(16px) to blur(4px) while audio is playing, keeping the interface responsive without sacrificing depth." },
+      { icon: LayoutGrid, text: "Layer isolation — GlobalPlayer, drawers, and the AI Guide now each live in isolated CSS containment layers. Responsiveness is consistent across all three surfaces." },
+      { icon: Film, text: "Foundation for cinematic mode and multi-surface interaction — the interaction system is now stable enough to support portrait→landscape cinematic activation and swipe-based gesture navigation." },
+    ],
+  },
+  {
+    version: "v2.43.0",
+    date: "May 1, 2026",
+    label: "",
     items: [
       { icon: LayoutGrid, text: "AppShell v1.0 — The platform now uses a three-column grid: LeftRail (72px icon navigation), MainColumn (fluid content), RightRail (320px contextual signals). The layout is locked and stable across all pages." },
       { icon: Compass, text: "LeftRail Navigation — A 72px icon-only mode switcher replaces the old sidebar. HOME, EXPLORE, PROJECTS, MARKETPLACE, UPLOAD, DASHBOARD, ARCHIVE, BUILD — each mode is a single icon with a gold active indicator. Hover reveals the label." },

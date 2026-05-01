@@ -96,6 +96,7 @@ import {
   reorderUserCollectionTracks,
   getLikedSongsOrdered, reorderLikes,
   createCommentReport, getFlaggedComments, moderateCommentReport,
+  getGlobalActivityFeed,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -3135,6 +3136,15 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       }),
   }),
 
+  // ── Global Activity Feed ──────────────────────────────────────────────────────
+  globalActivity: router({
+    /** Public activity feed — recent tips, comments, and likes across the platform */
+    feed: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(20).default(8) }).optional())
+      .query(async ({ input }) => {
+        return getGlobalActivityFeed(input?.limit ?? 8);
+      }),
+  }),
   // ── Witness Registry ─────────────────────────────────────────────────────────
   witnessRegistry: router({
     /** Public ledger of all issued WIDs — paginated, filterable by asset type */

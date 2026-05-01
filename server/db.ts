@@ -1762,27 +1762,21 @@ export async function createNotification(data: {
 export async function getNotifications(userId: number, limit = 50) {
   const db = await getDb();
   if (!db) return [];
-  // Use raw SQL to avoid Drizzle ORM column name mismatch between schema and actual DB
-  // The actual notifications table has: id, userId, type, title, content, isRead, metadata, createdAt, archivedAt
-  const { default: mysql2 } = await import("mysql2/promise") as any;
-  const conn = await mysql2.createConnection(process.env.DATABASE_URL);
-  try {
-    const [rows] = await conn.query(
-      `SELECT id, userId, type, title, content AS body, isRead, metadata, createdAt, archivedAt
-       FROM notifications
-       WHERE userId = ? AND archivedAt IS NULL
-       ORDER BY createdAt DESC
-       LIMIT ?`,
-      [userId, limit]
-    );
-    return (rows as any[]).map((r: any) => ({
-      ...r,
-      createdAt: r.createdAt instanceof Date ? r.createdAt.getTime() : r.createdAt,
-      archivedAt: r.archivedAt instanceof Date ? r.archivedAt.getTime() : r.archivedAt,
-    }));
-  } finally {
-    await conn.end();
-  }
+  // Use Drizzle ORM now that the DB schema has been migrated to include all columns
+  const { notifications } = await import("../drizzle/schema");
+  const rows = await (db as any)
+    .select()
+    .from(notifications)
+    .where(and(eq(notifications.userId, userId), sql`${notifications.archivedAt} IS NULL`))
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit);
+  return rows.map((r: any) => ({
+    ...r,
+    // Backfill body from legacy content column for old rows
+    body: r.body ?? (r as any).content ?? null,
+    createdAt: r.createdAt instanceof Date ? r.createdAt.getTime() : r.createdAt,
+    archivedAt: r.archivedAt instanceof Date ? r.archivedAt.getTime() : r.archivedAt,
+  }));
 }
 
 export async function markNotificationRead(notificationId: number, userId: number) {
@@ -4122,5 +4116,81 @@ export async function reorderLikes(userId: number, orderedSongIds: number[]) {
     await db.update(likes)
       .set({ sortOrder: i })
       .where(and(eq(likes.userId, userId), eq(likes.songId, orderedSongIds[i])));
+  }
+}
+
+// ─── Global Activity Feed ─────────────────────────────────────────────────────
+/** Public activity feed — recent tips, comments, and likes across the platform.
+ *  Used by RightRail Signals for non-logged-in visitors.
+ */
+export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
+  id: string;
+  type: "tip" | "comment" | "like" | "witness";
+  actorName: string;
+  songTitle: string | null;
+  songId: number | null;
+  coverArtUrl: string | null;
+  body: string | null;
+  amountCents: number | null;
+  createdAt: number;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  const perType = Math.ceil(limit / 3);
+  try {
+    // Tips (join users for tipper name, join songs for title)
+    const [tipRows] = await db.execute<any[]>(sql`
+      SELECT 'tip' AS type, CONCAT('tip-', t.id) AS id,
+             COALESCE(u.name, 'A fan') AS actorName,
+             s.title AS songTitle, s.id AS songId, s.coverArtUrl,
+             NULL AS body, t.amountCents,
+             UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt
+      FROM tips t
+      LEFT JOIN songs s ON t.songId = s.id
+      LEFT JOIN users u ON t.tipperUserId = u.id
+      ORDER BY t.createdAt DESC LIMIT ${sql.raw(String(perType))}
+    `);
+    // Comments (DB column is 'text', no authorName — use userId join)
+    const [commentRows] = await db.execute<any[]>(sql`
+      SELECT 'comment' AS type, CONCAT('comment-', c.id) AS id,
+             COALESCE(u.name, 'A listener') AS actorName,
+             s.title AS songTitle, s.id AS songId, s.coverArtUrl,
+             c.text AS body, NULL AS amountCents,
+             UNIX_TIMESTAMP(c.createdAt) * 1000 AS createdAt
+      FROM comments c
+      LEFT JOIN songs s ON c.songId = s.id
+      LEFT JOIN users u ON c.userId = u.id
+      ORDER BY c.createdAt DESC LIMIT ${sql.raw(String(perType))}
+    `);
+    // Likes
+    const [likeRows] = await db.execute<any[]>(sql`
+      SELECT 'like' AS type, CONCAT('like-', l.id) AS id,
+             'Someone' AS actorName,
+             s.title AS songTitle, s.id AS songId, s.coverArtUrl,
+             NULL AS body, NULL AS amountCents,
+             UNIX_TIMESTAMP(l.createdAt) * 1000 AS createdAt
+      FROM likes l
+      LEFT JOIN songs s ON l.songId = s.id
+      ORDER BY l.createdAt DESC LIMIT ${sql.raw(String(perType))}
+    `);
+    const merged = [
+      ...(Array.isArray(tipRows) ? tipRows : []),
+      ...(Array.isArray(commentRows) ? commentRows : []),
+      ...(Array.isArray(likeRows) ? likeRows : []),
+    ].map((r: any) => ({
+      id: String(r.id),
+      type: r.type as "tip" | "comment" | "like" | "witness",
+      actorName: r.actorName ?? "Someone",
+      songTitle: r.songTitle ?? null,
+      songId: r.songId ? Number(r.songId) : null,
+      coverArtUrl: r.coverArtUrl ?? null,
+      body: r.body ?? null,
+      amountCents: r.amountCents ? Number(r.amountCents) : null,
+      createdAt: Number(r.createdAt),
+    }));
+    merged.sort((a, b) => b.createdAt - a.createdAt);
+    return merged.slice(0, limit);
+  } catch {
+    return [];
   }
 }
