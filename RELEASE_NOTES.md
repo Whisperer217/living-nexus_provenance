@@ -7,6 +7,34 @@
 
 ---
 
+## v2.39.0 — May 1, 2026 (Desktop GlobalPlayer: Contained Floating Card)
+
+### What Shipped
+
+**GlobalPlayer.tsx — Desktop redesign (all 10 decisions from final system spec)**
+- Desktop layout: `clamp(680px, 50vw, 820px)` width, anchored `bottom-right` (`right: 32px, bottom: 24px`), `left: auto`
+- Desktop shape: `border-radius: 20px` all four sides — fully detached floating card, not a docked tray
+- Desktop expanded state: centered modal overlay (`position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(900px, 90vw); height: min(700px, 85vh)`) — desktop mental model, not a bottom sheet
+- Desktop interaction: chevron/expand button is the primary toggle (click-first); drag remains available as secondary
+- Desktop positioning: anchored bottom-right by default; anchor toggle button (⇤/⇥) in drag handle area switches to bottom-left; no free drag
+- Desktop glass: `backdrop-filter: blur(18px)` + `background: rgba(0,0,0,0.75)` — stronger separation against varied desktop backgrounds
+- Desktop glow: directional — `0 -8px 24px rgba(212,175,55,0.45)` upward gold light + `0 12px 32px rgba(0,0,0,0.9)` depth shadow
+- Sidebar respect: `right: 32px / left: auto` — player never spans behind sidebar
+- 3-tier button hierarchy: Play (brightest gold + hot glow) → Transport/Skip (mid gold) → Utility/Like/Add/Volume/Glow (dim gold)
+- Crisp 3px progress bar track; glow applied only to the 12px knob, not the full bar
+- Mobile unchanged: full-width bottom sheet, tight glow radius, `blur(16px)` glass
+
+**WhatsNewModal.tsx**
+- Bumped to `v2.39.0`, added 5 entries describing the desktop player redesign
+
+**drizzle/schema.ts**
+- Confirmed clean: no conflict markers. LSP health check errors were stale `.tsbuildinfo` cache artifacts — cleared.
+
+### No Schema Changes
+No database migrations required for this release.
+
+---
+
 ## v2.38.1 — April 30, 2026 (Legacy Playlists Visibility + Nav Fix)
 
 ### What Shipped

@@ -10,14 +10,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.38.1";
+const CURRENT_VERSION = "v2.39.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.39.0",
+    date: "May 1, 2026",
+    label: "Latest",
+    items: [
+      { icon: Maximize2, text: "Desktop Player — On desktop (≥1024px) the player is now a contained floating card: clamp(680px, 50vw, 820px) wide, anchored bottom-right with 32px margin, fully rounded on all four corners. No longer a full-width tray." },
+      { icon: Maximize2, text: "Desktop Expanded = Centered Modal — Expanding the player on desktop opens a centered modal overlay (900×700 max) instead of a bottom sheet. Desktop mental model, not mobile." },
+      { icon: Zap, text: "Directional Glow — Desktop glow now pushes upward toward content (gold) with a deep drop shadow below, reinforcing elevation. Mobile glow tightened — no fog bleed." },
+      { icon: Music, text: "3-Tier Button Hierarchy — Play button is the brightest gold with hot glow. Skip/transport buttons are mid gold. Utility buttons (Like, Add, Volume, Glow) are dim gold. Visual weight matches action importance." },
+      { icon: Music, text: "Crisp Progress Bar — Track is now a sharp 3px line. Glow is applied only to the 12px knob, not the entire bar." },
+    ],
+  },
+  {
     version: "v2.38.1",
     date: "April 30, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: FolderOpen, text: "Profile Collections tab — Legacy playlists now appear below your named Collections in the Collections tab. Expand any playlist to see its tracks. No data loss — all playlists are preserved alongside the new Collections system." },
       { icon: Music, text: "BUILD drawer tab — Legacy playlists now appear in a \"My Playlists\" section below your Collections in the BUILD tab of the Quick Play drawer. Expand to browse tracks inline." },

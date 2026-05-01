@@ -3796,3 +3796,8 @@
 - [x] Desktop glow: directional — 0 -8px 24px gold upward + 0 12px 32px black depth
 - [x] Sidebar respect: player right: 32px / left: auto — never spans behind sidebar
 - [x] Visual refinements: tighten glow radius, add translateY(6px) elevation, 3-tier button hierarchy, 3px crisp progress bar, knob-only glow
+
+## Phase 103: Schema Cleanup + Changelog (v2.39.1)
+- [x] Fix 4 stale git conflict markers in drizzle/schema.ts (lines 6, 1396, 1424, 1425) — confirmed no markers exist; stale .tsbuildinfo cache cleared
+- [x] Add WhatsNewModal v2.39.0 entry describing desktop player redesign
+- [x] Update RELEASE_NOTES.md with v2.39.0 entry
