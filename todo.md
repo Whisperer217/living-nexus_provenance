@@ -3923,3 +3923,14 @@
 - [ ] ContextDrawer: receives both open + activeMode; uses activeMode for header label and section highlight
 - [ ] MobileNavDrawer: same two-state model (open + activeMode)
 - [ ] MainLayout: manages both drawerOpen and activeMode state
+
+## Phase 109 Mode-Driven Drawer Rebuild
+- [ ] ContextDrawer renders mode-specific panel for each NavMode (not a universal nav list)
+- [ ] HOME mode: quick links (Discover, New Arrivals, Trending, Founder's Era)
+- [ ] EXPLORE mode: filter/browse links (All Works, Music, Lyrics, Manuscripts, Comics, Visual Art, Creators)
+- [ ] PROFILE mode: account links (My Profile, My Works, Collections, Settings, Log Out)
+- [ ] UPLOAD mode: creation tools (Register Work, Prompt Studio, Draft Works, Upload History)
+- [ ] ARCHIVE mode: archive links (LNA Archive, My Archive, Witnessed Works, Provenance Ledger)
+- [ ] Each mode panel has a header with mode name + icon, no universal nav list
+- [ ] Player stays dominant (z-index 9000+, drawer never overlaps player)
+- [ ] MobileNavDrawer updated to same mode-driven structure

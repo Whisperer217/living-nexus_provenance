@@ -113,7 +113,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         open={drawerOpen}
         activeMode={activeMode}
         onClose={() => setDrawerOpen(false)}
-        archiveSongCount={archiveSongCount}
         onOpenWhatsNew={() => setWhatsNewOpen(true)}
       />
 

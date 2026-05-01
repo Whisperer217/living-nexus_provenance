@@ -1,33 +1,90 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MobileNavDrawer (Isomorphic Navigation System v2.0)
+   LIVING NEXUS — MobileNavDrawer v2 (Mode-Driven)
    Full-screen drawer for mobile (≤1024px).
    Opened by Hamburger button in mobile TopBar.
 
    CONTRACT (Mobile):
-   - Hamburger → opens this drawer (covers content).
+   - Hamburger → opens this drawer (covers content, full-screen).
+   - Drawer shows the same unified nav structure as ContextDrawer.
    - Select route → drawer closes → content updates.
-   - Same NAV_ITEMS as desktop ContextDrawer.
    - Rail does NOT exist on mobile.
+   - Player and AI Guide remain persistent (z-9000+).
 ═══════════════════════════════════════════════════════════════════ */
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
-import { X, ChevronRight, LogIn, LogOut } from "lucide-react";
 import {
-  Home, Compass, Rocket, ShoppingBag,
-  Upload, LayoutDashboard, Archive, Wrench,
+  X, LogIn, LogOut, Sparkles,
+  Home, Compass, User, Upload, Archive,
+  Music, FileText, BookOpen, Image, Users,
+  Star, TrendingUp, Clock,
+  FolderOpen, Settings, PenTool, History,
+  Shield, BookMarked, LayoutGrid, LayoutDashboard,
 } from "lucide-react";
-import { NAV_ITEMS } from "@shared/navItems";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { WHATS_NEW_VERSION } from "@/components/layout/ContextDrawer";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
-const ICON_MAP: Record<string, React.ElementType> = {
-  Home, Compass, Rocket, ShoppingBag,
-  Upload, LayoutDashboard, Archive, Wrench,
-};
+// ── Unified nav structure (mirrors ContextDrawer PANELS) ──────────
+
+interface NavLink {
+  icon: React.ReactNode;
+  label: string;
+  path: string;
+  description?: string;
+  gold?: boolean;
+  danger?: boolean;
+  authOnly?: boolean;
+}
+
+interface NavSection {
+  heading?: string;
+  links: NavLink[];
+}
+
+const ALL_SECTIONS: NavSection[] = [
+  {
+    links: [
+      { icon: <Home size={14} />, label: "Home", path: "/" },
+      { icon: <Compass size={14} />, label: "Explore", path: "/explore" },
+      { icon: <User size={14} />, label: "Profile", path: "/profile", authOnly: true },
+    ],
+  },
+  {
+    heading: "Explore",
+    links: [
+      { icon: <Music size={14} />, label: "Music", path: "/explore?medium=music" },
+      { icon: <FileText size={14} />, label: "Lyrics", path: "/explore?medium=lyrics" },
+      { icon: <BookOpen size={14} />, label: "Manuscripts", path: "/explore?medium=manuscripts" },
+      { icon: <Image size={14} />, label: "Comics & Visual Art", path: "/explore?medium=comics" },
+      { icon: <Users size={14} />, label: "All Creators", path: "/creators" },
+    ],
+  },
+  {
+    heading: "Creator Tools",
+    links: [
+      { icon: <Shield size={14} />, label: "Register Work", path: "/upload", gold: true, authOnly: true },
+      { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio" },
+      { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", authOnly: true },
+      { icon: <PenTool size={14} />, label: "Draft Works", path: "/upload/drafts", authOnly: true },
+      { icon: <History size={14} />, label: "Upload History", path: "/upload/history", authOnly: true },
+    ],
+  },
+  {
+    heading: "Archive",
+    links: [
+      { icon: <BookMarked size={14} />, label: "LNA — Archive", path: "/archive", gold: true },
+      { icon: <Archive size={14} />, label: "My Archive", path: "/archive/mine", authOnly: true },
+      { icon: <Shield size={14} />, label: "Witnessed Works", path: "/archive?filter=witnessed" },
+      { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/archive/ledger" },
+    ],
+  },
+];
+
+// ── Component ─────────────────────────────────────────────────────
 
 interface MobileNavDrawerProps {
   open: boolean;
@@ -41,31 +98,31 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
   const drawerRef = useRef<HTMLDivElement>(null);
 
   // Close on route change
-  useEffect(() => { onClose(); }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    onClose();
+  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
   // Prevent body scroll when open
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
+  const isActive = (path: string) => {
+    if (path === "/" && (location === "/" || location === "/home")) return true;
+    return location === path || (path !== "/" && location.startsWith(path + "/"));
+  };
+
   const handleNav = (path: string) => {
-    if (path === "/__whats-new__") {
-      onClose();
-      onOpenWhatsNew?.();
-      return;
-    }
     navigate(path);
     onClose();
   };
@@ -73,6 +130,16 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
   const handleLogout = async () => {
     await logout();
     onClose();
+    navigate("/");
+  };
+
+  const handleWhatsNew = () => {
+    onClose();
+    if (onOpenWhatsNew) {
+      onOpenWhatsNew();
+    } else {
+      window.dispatchEvent(new CustomEvent("ln:open-whats-new"));
+    }
   };
 
   return createPortal(
@@ -80,123 +147,171 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
       {/* Backdrop */}
       <div
         onClick={onClose}
+        aria-hidden="true"
+        className="lg:hidden"
         style={{
           position: "fixed",
           inset: 0,
           zIndex: 449,
-          background: "rgba(0,0,0,0.6)",
+          background: "rgba(0,0,0,0.65)",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 220ms cubic-bezier(0.22,1,0.36,1)",
         }}
-        className="lg:hidden"
       />
 
       {/* Full-screen drawer panel */}
       <div
         ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation"
         className="lg:hidden flex flex-col"
         style={{
           position: "fixed",
           top: 0,
           left: 0,
           bottom: 0,
-          width: "min(320px, 88vw)",
+          width: "min(340px, 92vw)",
           zIndex: 450,
           background: "rgba(10,9,7,0.99)",
           borderRight: "1px solid rgba(212,175,55,0.12)",
           backdropFilter: "blur(24px)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 220ms cubic-bezier(0.22,1,0.36,1)",
-          boxShadow: open ? "8px 0 40px rgba(0,0,0,0.8), 2px 0 0 rgba(212,175,55,0.06)" : "none",
+          boxShadow: open ? "8px 0 40px rgba(0,0,0,0.80)" : "none",
           pointerEvents: open ? "auto" : "none",
         }}
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-          style={{ borderBottom: "1px solid rgba(212,175,55,0.08)" }}
+          className="flex items-center justify-between px-4 py-3.5 flex-shrink-0"
+          style={{ borderBottom: "1px solid rgba(212,175,55,0.10)" }}
         >
-          <div className="flex items-center gap-2">
-            <img src={LOGO_URL} alt="LN" style={{ width: 28, height: 28, borderRadius: 6 }} />
-            <span className="text-[12px] font-bold tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.75)" }}>
+          <div className="flex items-center gap-2.5">
+            <img src={LOGO_URL} alt="LN" style={{ width: 26, height: 26, borderRadius: 6 }} />
+            <span
+              className="text-[11px] font-bold tracking-[0.18em] uppercase"
+              style={{ color: "rgba(212,175,55,0.75)", fontFamily: "'Cinzel', serif" }}
+            >
               Living Nexus
             </span>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg transition-colors"
-            style={{ color: "rgba(255,255,255,0.4)" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}
+            className="flex items-center justify-center w-7 h-7 rounded-full transition-colors"
+            style={{ color: "rgba(255,255,255,0.35)" }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.75)")}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.35)")}
+            aria-label="Close navigation"
           >
-            <X size={16} />
+            <X size={14} />
           </button>
         </div>
 
-        {/* Nav items — scrollable */}
-        <div className="flex-1 overflow-y-auto py-3 px-3">
-          {NAV_ITEMS.map((item) => {
-            if (item.authOnly && !user) return null;
-            const Icon = ICON_MAP[item.iconName] ?? Home;
+        {/* User profile card */}
+        {user ? (
+          <div
+            className="mx-3 mt-3 rounded-xl px-3 py-2.5 flex items-center gap-3 flex-shrink-0"
+            style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.10)" }}
+          >
+            <div
+              className="flex-shrink-0 rounded-full flex items-center justify-center font-bold text-sm"
+              style={{
+                width: 36, height: 36,
+                background: "rgba(212,175,55,0.14)",
+                border: "1.5px solid rgba(212,175,55,0.30)",
+                color: "#D4AF37",
+              }}
+            >
+              {user.name ? user.name.charAt(0).toUpperCase() : "?"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate" style={{ color: "rgba(255,255,255,0.88)" }}>
+                {user.name || "Creator"}
+              </p>
+              <span
+                className="inline-flex items-center gap-1 text-[8px] font-bold tracking-widest uppercase px-1.5 py-0.5 rounded mt-0.5"
+                style={{ background: "rgba(212,175,55,0.10)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.18)" }}
+              >
+                ◎ WITNESSED
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="mx-3 mt-3 flex-shrink-0">
+            <a
+              href={getLoginUrl()}
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all text-sm"
+              style={{ background: "rgba(212,175,55,0.08)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.15)" }}
+            >
+              <LogIn size={14} />
+              Sign In to Living Nexus
+            </a>
+          </div>
+        )}
 
-            // Check if any sub-item matches current route
-            const sectionActive = item.subItems.some(sub => {
-              if (sub.path === "/") return location === "/" || location === "/home";
-              return location === sub.path || location.startsWith(sub.path + "/");
-            });
-
+        {/* Nav sections — scrollable */}
+        <div className="flex-1 overflow-y-auto py-3" style={{ scrollbarWidth: "none" }}>
+          {ALL_SECTIONS.map((section, si) => {
+            const visibleLinks = section.links.filter(l => !(l.authOnly && !user));
+            if (visibleLinks.length === 0) return null;
             return (
-              <div key={item.id} className="mb-4">
-                {/* Section header */}
-                <div
-                  className="flex items-center gap-2 px-3 py-1.5 mb-1"
-                >
-                  <Icon size={13} style={{ color: sectionActive ? "#D4AF37" : "rgba(255,255,255,0.35)" }} />
-                  <span
-                    className="text-[10px] font-bold tracking-widest uppercase"
-                    style={{ color: sectionActive ? "rgba(212,175,55,0.7)" : "rgba(255,255,255,0.3)" }}
+              <div key={si} className={si > 0 ? "mt-4" : ""}>
+                {section.heading && (
+                  <div
+                    className="px-5 pb-1.5 text-[9px] font-bold tracking-[0.22em] uppercase"
+                    style={{ color: "rgba(212,175,55,0.40)" }}
                   >
-                    {item.label}
-                  </span>
-                </div>
-
-                {/* Sub-items */}
-                {item.subItems.map((sub) => {
-                  if (sub.authOnly && !user) return null;
-
-                  const isActive =
-                    sub.path === "/"
-                      ? location === "/" || location === "/home"
-                      : location === sub.path || location.startsWith(sub.path + "/");
-
+                    {section.heading}
+                  </div>
+                )}
+                {visibleLinks.map((link, li) => {
+                  const active = isActive(link.path);
                   return (
                     <button
-                      key={sub.path}
-                      onClick={() => handleNav(sub.path)}
-                      className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl mb-0.5 transition-all group"
+                      key={li}
+                      onClick={() => handleNav(link.path)}
+                      className="w-full flex items-center gap-3 px-5 py-2.5 text-left transition-colors"
                       style={{
-                        background: isActive ? "rgba(212,175,55,0.10)" : "transparent",
-                        border: isActive ? "1px solid rgba(212,175,55,0.18)" : "1px solid transparent",
+                        background: active ? "rgba(212,175,55,0.07)" : "transparent",
+                        borderLeft: active ? "2px solid rgba(212,175,55,0.65)" : "2px solid transparent",
                       }}
                       onMouseEnter={e => {
-                        if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(212,175,55,0.05)";
+                        if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
                       }}
                       onMouseLeave={e => {
-                        if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent";
+                        if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
                       }}
                     >
                       <span
-                        className="text-[13px] font-medium flex-1"
-                        style={{ color: isActive ? "#D4AF37" : "rgba(255,255,255,0.75)" }}
+                        className="flex-shrink-0"
+                        style={{
+                          color: active
+                            ? "rgba(212,175,55,0.85)"
+                            : link.danger
+                            ? "rgba(255,80,80,0.55)"
+                            : link.gold
+                            ? "rgba(212,175,55,0.60)"
+                            : "rgba(255,255,255,0.32)",
+                        }}
                       >
-                        {sub.label}
+                        {link.icon}
                       </span>
-                      <ChevronRight
-                        size={11}
-                        className="flex-shrink-0 opacity-0 group-hover:opacity-50 transition-opacity"
-                        style={{ color: "rgba(212,175,55,0.6)" }}
-                      />
+                      <span
+                        className="text-[13px] font-medium"
+                        style={{
+                          color: active
+                            ? "rgba(212,175,55,0.95)"
+                            : link.danger
+                            ? "rgba(255,100,100,0.75)"
+                            : link.gold
+                            ? "rgba(212,175,55,0.85)"
+                            : "rgba(255,255,255,0.72)",
+                        }}
+                      >
+                        {link.label}
+                      </span>
                     </button>
                   );
                 })}
@@ -205,36 +320,38 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
           })}
         </div>
 
-        {/* Footer — auth actions */}
+        {/* Footer */}
         <div
-          className="px-3 pb-4 pt-3 flex-shrink-0"
+          className="flex-shrink-0 px-3 pb-5 pt-2"
           style={{ borderTop: "1px solid rgba(212,175,55,0.08)" }}
         >
-          {!user ? (
-            <a
-              href={getLoginUrl()}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl w-full transition-all"
-              style={{
-                background: "rgba(212,175,55,0.08)",
-                border: "1px solid rgba(212,175,55,0.20)",
-              }}
+          <button
+            onClick={handleWhatsNew}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all"
+            style={{ color: "rgba(255,255,255,0.45)" }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)")}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}
+          >
+            <Sparkles size={14} style={{ color: "rgba(212,175,55,0.45)", flexShrink: 0 }} />
+            <span className="flex-1 text-left text-[12px]">What's New</span>
+            <span
+              className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+              style={{ background: "rgba(212,175,55,0.10)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.18)" }}
             >
-              <LogIn size={15} style={{ color: "#D4AF37" }} />
-              <div>
-                <div className="text-[13px] font-semibold" style={{ color: "rgba(230,205,174,0.9)" }}>Sign In</div>
-                <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>Upload &amp; earn tips</div>
-              </div>
-            </a>
-          ) : (
+              {WHATS_NEW_VERSION}
+            </span>
+          </button>
+
+          {user && (
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-2.5 rounded-xl w-full transition-all"
-              style={{ color: "rgba(255,255,255,0.5)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all mt-1"
+              style={{ color: "rgba(255,255,255,0.38)" }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)")}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}
             >
-              <LogOut size={14} />
-              <span className="text-[13px]">Sign Out</span>
+              <LogOut size={14} style={{ color: "rgba(255,255,255,0.28)", flexShrink: 0 }} />
+              <span className="text-[12px]">Log Out</span>
             </button>
           )}
         </div>
