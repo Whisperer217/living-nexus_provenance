@@ -10,14 +10,43 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.40.0";
+const CURRENT_VERSION = "v2.43.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.40.0",
+    version: "v2.43.0",
     date: "May 1, 2026",
     label: "Latest",
+    items: [
+      { icon: LayoutGrid, text: "AppShell v1.0 — The platform now uses a three-column grid: LeftRail (72px icon navigation), MainColumn (fluid content), RightRail (320px contextual signals). The layout is locked and stable across all pages." },
+      { icon: Compass, text: "LeftRail Navigation — A 72px icon-only mode switcher replaces the old sidebar. HOME, EXPLORE, PROJECTS, MARKETPLACE, UPLOAD, DASHBOARD, ARCHIVE, BUILD — each mode is a single icon with a gold active indicator. Hover reveals the label." },
+      { icon: Network, text: "RightRail Signals Panel — A 320px contextual panel on the right shows SIGNALS (live activity), PROVENANCE VERIFIED (recent WIDs), and WITNESS REGISTRY (public ledger). Always visible on desktop." },
+      { icon: Zap, text: "TopBar Stripped — The mega dropdown drawer is gone. TopBar is now a slim bar with a search field, Prompt Gen shortcut, Register Work CTA, notifications bell, and profile avatar. Navigation lives in the LeftRail." },
+      { icon: Music, text: "GlobalPlayer MainColumn — The floating player now spans the MainColumn only (left: 88px, right: 336px). It no longer overlaps the LeftRail or RightRail, keeping the three-column grid clean." },
+      { icon: Sparkles, text: "AIGuide Repositioned — The Keeper companion orb is now at bottom: 140px, clearing the GlobalPlayer with comfortable margin. Draggable offset still works on top of the new base position." },
+    ],
+  },
+  {
+    version: "v2.42.1",
+    date: "May 1, 2026",
+    label: "",
+    items: [
+      { icon: Music, text: "Player State Persistence — Zone (mini/float/expanded), cinematic mode, comments drawer, tip modal, and drag height now persist across track changes. Switching tracks no longer collapses the player." },
+    ],
+  },
+  {
+    version: "v2.42.0",
+    date: "May 1, 2026",
+    label: "",
+    items: [
+      { icon: DollarSign, text: "Tip Modal Nebula Mode — The tip modal is fully rebuilt as a Nebula experience. Compact mode scrolls, Nebula entry expands to full-screen with blurred artwork, orbiting amount buttons, swipe-down to exit, and audio-reactive glow." },
+    ],
+  },
+  {
+    version: "v2.40.0",
+    date: "May 1, 2026",
+    label: "",
     items: [
       { icon: Music, text: "Circular Play Button — The play button is now a 56px circle on mobile and 40px on desktop. Gold fill, hot glow, center-dominant. Unmistakable." },
       { icon: Maximize2, text: "Desktop Float Split Layout — On desktop the floating player now shows artwork on the left and title + progress + controls on the right, side by side. Mobile stays centered vertical stack." },

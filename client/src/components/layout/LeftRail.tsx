@@ -61,12 +61,18 @@ export default function LeftRail({ activeDrawer, onDrawerToggle }: LeftRailProps
 
   return (
     <aside
-      className="hidden lg:flex flex-col items-center py-3 gap-1 flex-shrink-0"
+      className="hidden lg:flex flex-col items-center py-3 gap-1"
       style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        bottom: 0,
         width: 72,
-        background: "rgba(10,9,7,0.95)",
-        borderRight: "1px solid rgba(212,175,55,0.08)",
-        zIndex: 100,
+        background: "rgba(10,9,7,0.97)",
+        borderRight: "1px solid rgba(212,175,55,0.10)",
+        zIndex: 200,
+        overflowY: "auto",
+        overflowX: "hidden",
       }}
     >
       {/* Logo */}
