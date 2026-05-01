@@ -3784,3 +3784,15 @@
 - [x] MainLayout hamburger menu — "My Profile" → /profile, "Creator Page" → /creator/{id}
 - [x] WhatsNewModal bumped to v2.38.1 with all three fix entries
 - [x] RELEASE_NOTES.md updated with v2.38.1 entry
+
+## Phase 102: Desktop GlobalPlayer — Contained Floating Card (v2.39.0)
+- [x] Desktop layout: clamp(680px, 50vw, 820px) width, bottom-right anchor (right: 32px, bottom: 24px), left: auto
+- [x] Desktop shape: border-radius 20–24px all sides (fully detached floating card, not docked tray)
+- [x] Desktop expanded state: centered modal overlay (fixed, top/left 50%, translate -50%/-50%, 900px × 700px max)
+- [x] Desktop interaction: chevron/expand button as primary toggle (click-first), drag as secondary
+- [x] Desktop positioning: anchored bottom-right by default, optional bottom-left toggle, no free drag
+- [x] Floating orb: hover → glow hint, click → open panel, hidden in expanded state
+- [x] Desktop glass: backdrop-filter blur(18px), background rgba(0,0,0,0.75)
+- [x] Desktop glow: directional — 0 -8px 24px gold upward + 0 12px 32px black depth
+- [x] Sidebar respect: player right: 32px / left: auto — never spans behind sidebar
+- [x] Visual refinements: tighten glow radius, add translateY(6px) elevation, 3-tier button hierarchy, 3px crisp progress bar, knob-only glow

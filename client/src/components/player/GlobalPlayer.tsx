@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { useLocation } from "wouter";
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import PlayerTipModal from "./PlayerTipModal";
 
@@ -29,18 +29,40 @@ import PlayerTipModal from "./PlayerTipModal";
 const GOLD = "#D4AF37";
 const GOLD_HL = "#F5E6B3";
 const GOLD_GLOW = "rgba(212,175,55,0.6)";
-const GLASS_BG = "rgba(0,0,0,0.82)";
-const GLASS_BLUR = "blur(16px)";
-const GOLD_SHADOW = `0 0 18px ${GOLD_GLOW}, 0 0 32px rgba(212,175,55,0.25), inset 0 0 10px rgba(212,175,55,0.12)`;
+/* Mobile glass */
+const GLASS_BG_MOBILE = "rgba(0,0,0,0.82)";
+const GLASS_BLUR_MOBILE = "blur(16px)";
+/* Desktop glass — slightly stronger separation (decision #8) */
+const GLASS_BG_DESKTOP = "rgba(0,0,0,0.75)";
+const GLASS_BLUR_DESKTOP = "blur(18px)";
+/* Glow: tightened radius, no fog (decision #1 from visual spec) */
+const GOLD_SHADOW_MOBILE = `0 0 10px rgba(212,175,55,0.45), 0 0 18px rgba(212,175,55,0.18)`;
+/* Desktop glow: directional — upward light + depth (decision #9) */
+const GOLD_SHADOW_DESKTOP = `0 -8px 24px rgba(212,175,55,0.45), 0 12px 32px rgba(0,0,0,0.9)`;
 const GOLD_BORDER = `1px solid rgba(212,175,55,0.45)`;
 
 /* ── Snap zone heights ──────────────────────────────────────────── */
 const SNAP = {
   MINI: 72,       // compact strip — always visible
   FLOAT: 140,     // draggable default
-  EXPANDED: 0,    // full height (computed at runtime)
+  EXPANDED: 0,    // full height on mobile / centered modal on desktop
 } as const;
 type SnapZone = "MINI" | "FLOAT" | "EXPANDED";
+
+/* ── Desktop breakpoint ─────────────────────────────────────────── */
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = React.useState(
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : false
+  );
+  React.useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    setIsDesktop(mq.matches);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isDesktop;
+}
 
 function fmtTime(s: number) {
   if (!s || isNaN(s)) return "0:00";
@@ -79,8 +101,13 @@ export default function GlobalPlayer() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
 
+  const isDesktop = useIsDesktop();
+
   /* ── Snap zone state ── */
   const [zone, setZone] = useState<SnapZone>("MINI");
+
+  /* ── Desktop position anchor: bottom-right or bottom-left (decision #5) ── */
+  const [desktopAnchor, setDesktopAnchor] = useState<"right" | "left">("right");
 
   /* ── Drag state ── */
   const containerRef = useRef<HTMLDivElement>(null);
@@ -272,10 +299,11 @@ export default function GlobalPlayer() {
     return result;
   }, [tracks, state.currentIdx]);
 
-  /* ── Gold glow shadow (combines frequency glow + static gold) ── */
+  /* ── Gold glow shadow — desktop directional, mobile tight (decisions #1 + #9) ── */
+  const baseShadow = isDesktop ? GOLD_SHADOW_DESKTOP : GOLD_SHADOW_MOBILE;
   const activeShadow = glowEnabled && state.isPlaying && glowShadow
-    ? `${GOLD_SHADOW}, ${glowShadow}`
-    : GOLD_SHADOW;
+    ? `${baseShadow}, ${glowShadow}`
+    : baseShadow;
 
   /* ── Render nothing if no track ever loaded ── */
   if (!currentTrack && tracks.length === 0) return null;
@@ -287,6 +315,31 @@ export default function GlobalPlayer() {
   const isFloat = zone === "FLOAT" || (dragHeight !== null && dragHeight >= SNAP.FLOAT - 20 && dragHeight <= SNAP.FLOAT + 40);
   const isMini = !isExpanded && !isFloat;
 
+  /* ── Desktop expanded = centered modal (decision #3) ── */
+  const desktopExpandedStyle: React.CSSProperties = isDesktop && isExpanded ? {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "min(900px, 90vw)",
+    height: "min(700px, 85vh)",
+    right: "auto",
+    bottom: "auto",
+  } : {};
+
+  /* ── Desktop floating card style (decisions #1 #2 #5 #7 #8 #9 #10) ── */
+  const desktopFloatStyle: React.CSSProperties = isDesktop && !isExpanded ? {
+    width: "clamp(680px, 50vw, 820px)",
+    right: desktopAnchor === "right" ? "32px" : "auto",
+    left: desktopAnchor === "left" ? "32px" : "auto",
+    bottom: "24px",
+    borderRadius: "20px",          /* fully detached floating card — all 4 corners */
+    transform: "translateY(6px)", /* elevation: lifted above page (decision #2 visual spec) */
+  } : {};
+
+  const glassBg = isDesktop ? GLASS_BG_DESKTOP : GLASS_BG_MOBILE;
+  const glassBlur = isDesktop ? GLASS_BLUR_DESKTOP : GLASS_BLUR_MOBILE;
+
   const content = (
     <div
       ref={containerRef}
@@ -295,41 +348,56 @@ export default function GlobalPlayer() {
         bottom: 0,
         left: 0,
         right: 0,
-        height: `${playerHeight}px`,
+        height: isDesktop && isExpanded ? undefined : `${playerHeight}px`,
         zIndex: 9000,
-        background: GLASS_BG,
-        backdropFilter: GLASS_BLUR,
-        WebkitBackdropFilter: GLASS_BLUR,
-        borderTop: GOLD_BORDER,
-        borderLeft: GOLD_BORDER,
-        borderRight: GOLD_BORDER,
+        background: glassBg,
+        backdropFilter: glassBlur,
+        WebkitBackdropFilter: glassBlur,
+        border: GOLD_BORDER,
         borderRadius: isExpanded ? "20px 20px 0 0" : "12px 12px 0 0",
         boxShadow: activeShadow,
-        transition: dragHeight !== null ? "none" : "height 0.35s cubic-bezier(0.32,0.72,0,1), border-radius 0.35s ease",
+        transition: dragHeight !== null ? "none" : "height 0.35s cubic-bezier(0.32,0.72,0,1), border-radius 0.35s ease, transform 0.35s ease",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         userSelect: "none",
         touchAction: "none",
+        /* Apply desktop overrides */
+        ...desktopFloatStyle,
+        ...desktopExpandedStyle,
       }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
-      {/* ── DRAG HANDLE ── */}
+      {/* ── DRAG HANDLE (mobile) / CLICK TOGGLE HEADER (desktop) ── */}
       <div
         className="flex items-center justify-center flex-shrink-0 cursor-grab active:cursor-grabbing"
-        style={{ height: "20px", paddingTop: "6px" }}
+        style={{ height: "20px", paddingTop: "6px", position: "relative" }}
       >
-        <div
-          style={{
-            width: "40px",
-            height: "4px",
-            borderRadius: "2px",
-            background: `rgba(212,175,55,0.4)`,
-          }}
-        />
+        {/* Mobile: pill handle */}
+        {!isDesktop && (
+          <div
+            style={{
+              width: "40px",
+              height: "4px",
+              borderRadius: "2px",
+              background: `rgba(212,175,55,0.4)`,
+            }}
+          />
+        )}
+        {/* Desktop: anchor toggle (bottom-right ↔ bottom-left) — decision #5 */}
+        {isDesktop && !isExpanded && (
+          <button
+            onClick={e => { e.stopPropagation(); setDesktopAnchor(a => a === "right" ? "left" : "right"); }}
+            className="absolute right-3 top-0 text-[9px] tracking-widest uppercase opacity-30 hover:opacity-70 transition-opacity"
+            style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}
+            title={`Anchor: ${desktopAnchor} — click to switch`}
+          >
+            {desktopAnchor === "right" ? "⇤" : "⇥"}
+          </button>
+        )}
       </div>
 
       {/* ── MINI BAR (always rendered, fades out when expanded) ── */}
@@ -398,18 +466,19 @@ export default function GlobalPlayer() {
           >
             <SkipForward size={15} />
           </button>
-          {/* Expand chevron */}
+          {/* Expand chevron — click-first on desktop (decision #4) */}
           <button
             onClick={e => { e.stopPropagation(); setZone(z => z === "MINI" ? "FLOAT" : "MINI"); setDragHeight(null); }}
             className="p-1.5 transition-colors"
             style={{ color: GOLD }}
+            title={isMini ? "Expand player" : "Collapse player"}
           >
             {isMini ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
           </button>
         </div>
       </div>
 
-      {/* ── PROGRESS BAR (visible in FLOAT + EXPANDED) ── */}
+      {/* ── PROGRESS BAR — crisp 3px track, glow only on knob (decision #4 visual spec) ── */}
       {!isMini && (
         <div
           className="flex items-center gap-2 px-4 flex-shrink-0"
@@ -422,24 +491,29 @@ export default function GlobalPlayer() {
             {fmtTime(state.currentTime)}
           </span>
           <div
-            className="flex-1 h-1.5 rounded-full cursor-pointer relative"
-            style={{ background: "rgba(44,52,56,0.8)" }}
+            className="flex-1 cursor-pointer relative"
+            style={{ background: "#1a1a1a", height: "3px", borderRadius: "2px" }}
             onClick={handleSeek}
           >
             <div
-              className="h-full rounded-full relative transition-all"
+              className="h-full relative"
               style={{
                 width: `${progress}%`,
-                background: `linear-gradient(90deg, #EF4444 0%, #8B7355 50%, ${GOLD_HL} 100%)`,
-                boxShadow: progress > 2 ? `0 0 8px 1px ${GOLD_GLOW}` : "none",
+                background: GOLD,
+                borderRadius: "2px",
               }}
             >
-              {state.isPlaying && (
-                <div
-                  className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
-                  style={{ background: GOLD_HL, boxShadow: `0 0 8px 3px ${GOLD_GLOW}` }}
-                />
-              )}
+              {/* Knob — glow only here (decision #4) */}
+              <div
+                className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full"
+                style={{
+                  width: "12px",
+                  height: "12px",
+                  background: GOLD_HL,
+                  boxShadow: state.isPlaying ? `0 0 14px rgba(245,230,179,0.7)` : "none",
+                  transform: "translateY(-50%) translateX(50%)",
+                }}
+              />
             </div>
           </div>
           <span className="text-[10px] w-7 tabular-nums" style={{ color: "rgba(212,175,55,0.6)" }}>
@@ -451,39 +525,50 @@ export default function GlobalPlayer() {
       {/* ── FLOAT CONTROLS ROW (visible in FLOAT) ── */}
       {(isFloat || isExpanded) && (
         <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
-          {/* Playback controls */}
+          {/* Playback controls — 3-tier hierarchy (decision #3 visual spec) */}
           <div className="flex items-center gap-3">
-            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(255,255,255,0.3)" }}>
+            {/* Utility tier */}
+            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }}>
               <Shuffle size={14} />
             </button>
-            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
+            {/* Transport tier — mid gold */}
+            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}>
               <SkipBack size={18} />
             </button>
+            {/* Primary — brightest gold, largest, hot glow */}
             <button
               onClick={e => { e.stopPropagation(); togglePlay(); }}
               className="w-11 h-11 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-              style={{ background: GOLD, color: "#000", boxShadow: `0 0 16px ${GOLD_GLOW}` }}
+              style={{
+                background: GOLD,
+                color: "#000",
+                boxShadow: `0 0 10px rgba(212,175,55,0.45), 0 0 18px rgba(212,175,55,0.18)`,
+                filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))`,
+              }}
             >
               {state.isPlaying
                 ? <Pause size={18} fill="currentColor" />
                 : <Play size={18} fill="currentColor" className="ml-0.5" />
               }
             </button>
-            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
+            {/* Transport tier */}
+            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}>
               <SkipForward size={18} />
             </button>
-            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(255,255,255,0.3)" }}>
+            {/* Utility tier */}
+            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }}>
               <Repeat size={14} />
             </button>
           </div>
 
-          {/* Right actions */}
+          {/* Right actions — 3-tier hierarchy: utility dim, transport mid, play brightest (decision #3 visual spec) */}
           <div className="flex items-center gap-1">
+            {/* Utility tier — dim gold */}
             {user && currentSongId && (
               <button
                 onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }}
                 className="p-1.5 transition-colors"
-                style={{ color: isLiked ? "#EF4444" : "rgba(255,255,255,0.35)" }}
+                style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.65)" }}
               >
                 <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
               </button>
@@ -492,7 +577,7 @@ export default function GlobalPlayer() {
               <button
                 onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }}
                 className="p-1.5 transition-colors"
-                style={{ color: "rgba(255,255,255,0.35)" }}
+                style={{ color: "rgba(212,175,55,0.65)" }}
                 title="Add to Collection"
               >
                 <FolderPlus size={15} />
@@ -502,7 +587,7 @@ export default function GlobalPlayer() {
               <button
                 onClick={e => { e.stopPropagation(); setTipOpen(true); }}
                 className="p-1.5 transition-colors"
-                style={{ color: "rgba(212,175,55,0.7)" }}
+                style={{ color: "rgba(212,175,55,0.65)" }}
                 title="Tip creator"
               >
                 <DollarSign size={14} />
@@ -512,7 +597,7 @@ export default function GlobalPlayer() {
               ref={volumeBtnRef}
               onClick={e => { e.stopPropagation(); openVolumePopup(); }}
               className="p-1.5 transition-colors"
-              style={{ color: state.isMuted ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.5)" }}
+              style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.65)" }}
             >
               {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
@@ -520,7 +605,7 @@ export default function GlobalPlayer() {
               onClick={e => { e.stopPropagation(); toggleGlow(); }}
               className="p-1.5 transition-all rounded"
               style={{
-                color: glowEnabled ? "#C084FC" : "rgba(255,255,255,0.25)",
+                color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)",
                 background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent",
               }}
               title={glowEnabled ? "Glow: ON" : "Glow: OFF"}
@@ -531,14 +616,16 @@ export default function GlobalPlayer() {
               ref={contextMenuBtnRef}
               onClick={e => { e.stopPropagation(); openContextMenu(); }}
               className="p-1.5 transition-colors"
-              style={{ color: "rgba(255,255,255,0.35)" }}
+              style={{ color: "rgba(212,175,55,0.65)" }}
             >
               <MoreHorizontal size={16} />
             </button>
+            {/* Expand/collapse — click-first primary toggle on desktop (decision #4) */}
             <button
               onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "FLOAT" : "EXPANDED"); setDragHeight(null); }}
               className="p-1.5 transition-colors"
-              style={{ color: GOLD }}
+              style={{ color: GOLD, filter: `drop-shadow(0 0 6px rgba(212,175,55,0.5))` }}
+              title={isExpanded ? "Collapse" : "Expand player"}
             >
               {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
             </button>
@@ -806,7 +893,7 @@ export default function GlobalPlayer() {
         background: "var(--ln-coal)",
         border: GOLD_BORDER,
         borderRadius: "1rem",
-        boxShadow: GOLD_SHADOW,
+        boxShadow: GOLD_SHADOW_MOBILE,
         padding: "12px 14px 10px",
         minWidth: "140px",
       }}
@@ -846,7 +933,7 @@ export default function GlobalPlayer() {
         background: "var(--ln-coal)",
         border: GOLD_BORDER,
         borderRadius: "1rem",
-        boxShadow: GOLD_SHADOW,
+        boxShadow: GOLD_SHADOW_MOBILE,
         minWidth: "160px",
         overflow: "hidden",
       }}
