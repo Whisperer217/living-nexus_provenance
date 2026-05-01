@@ -3893,3 +3893,12 @@
 - [x] RELEASE_NOTES.md updated with v2.43.0 entry
 - [x] TypeScript: 0 errors
 - [x] GitHub push: fc9dea0..c7c61cb
+
+## Phase 108 Stabilization (from QA review)
+- [x] RightRail data binding: verified — API calls fire correctly, empty states are accurate (no data in DB yet)
+- [x] Z-index hierarchy: fixed — TopBar z-[400], ContextDrawer z-[300], LeftRail z-[200], AIGuide z-[9050], GlobalPlayer z-[9000]
+- [x] Layout overflow: confirmed — overflow-x not set on html (intentional: Radix Dialog portals need viewport clipping); MainLayout root div uses overflow-hidden
+- [x] Hero section spacing: confirmed — hero carousel has pb-12 on content, ShowcaseSection adds natural spacing below
+- [x] Drawer edge bleed: confirmed — LeftRail dark bg is intentional; it's the rail itself at x:0 width:72
+- [x] AI Guide position: confirmed — orbBottom = max(140px, ...), orbRight = 24px + drag offset
+- [x] Player state: confirmed — GlobalPlayer uses PlayerContext (global PlayerProvider in App.tsx), not page-level state

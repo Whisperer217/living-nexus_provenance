@@ -62,7 +62,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     <div className="hidden md:block">
       {/* ── Slim top bar ─────────────────────────────────────────── */}
       <header
-        className="fixed top-0 z-50 flex items-center gap-0"
+        className="fixed top-0 z-[400] flex items-center gap-0"
         style={{
           left: 72,   /* LeftRail width */
           right: 0,

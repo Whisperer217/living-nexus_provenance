@@ -65,7 +65,7 @@ export default function ContextDrawer({ mode, onClose }: ContextDrawerProps) {
         left: 72,
         bottom: 0,
         width: 380,
-        zIndex: 200,
+        zIndex: 300,
         background: "rgba(12,11,9,0.97)",
         borderRight: "1px solid rgba(212,175,55,0.12)",
         backdropFilter: "blur(20px)",
