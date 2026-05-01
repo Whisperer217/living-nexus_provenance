@@ -378,11 +378,11 @@ export default function FloatingAvatar({
     }
   }, [nowPlaying]);
 
-  // Desktop PlayerBar: 68px at zIndex 9001. Orb bottom = 68+24 = 92px.
-  // Mobile: nav (56px) + mini player (64px) = 120px stack at zIndex 9001. Orb bottom = 120+24 = 144px.
-  // Use CSS clamp via a responsive style: on md+ use 92px, on <md use 144px.
-  // We achieve this with a CSS custom property set via a style tag.
-  const orbBottom = `max(92px, calc(${24 + position.y}px + env(safe-area-inset-bottom, 0px)))`;
+  // Phase 108 AppShell: GlobalPlayer floats at bottom:24px, mini height ~80px → top at ~104px.
+  // AIGuide orb at bottom:140px clears the player with comfortable margin.
+  // Mobile: nav (56px) + mini player (64px) = 120px stack. Orb at 144px.
+  // Draggable offset (position.y) adds to the base.
+  const orbBottom = `max(140px, calc(${140 + position.y}px + env(safe-area-inset-bottom, 0px)))`;
   const orbRight = `${24 + position.x}px`;
   const ORB_Z = 9050;
 

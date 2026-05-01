@@ -3875,3 +3875,20 @@
 - [x] Confirmed no remount trigger in PlayerContext dispatch
 - [x] zone, cinematic, commentsOpen, tipOpen, dragHeight all persist across track changes
 - [x] tsc --noEmit: 0 errors (stale watch daemon errors are ProfilePage/CommentModerationPage cache artifacts)
+
+## Phase 108: System Architecture v1.0 Lock
+
+- [ ] AppShell CSS grid: 72px LeftRail + fluid MainColumn + 320px RightRail, height: 100vh
+- [ ] LeftRail: icon-only mode switcher (64-80px), always visible, click → opens ContextDrawer
+- [ ] ContextDrawer: fixed left:72px, top:0, bottom:0, width:380px, overlays MainColumn edge
+- [ ] ContextDrawer: only ONE open at a time, opening one closes previous
+- [ ] ContextDrawer: 220ms cubic-bezier(0.22,1,0.36,1) slide animation
+- [ ] TopBar: remove mega dropdown nav, keep only search + Prompt Gen + Register Work + notifications + profile
+- [ ] GlobalPlayer: reposition to left:72px, right:320px, bottom:16px (spans MainColumn only)
+- [ ] GlobalPlayer: min-height:110px, border-radius:20px, padding:16px 24px
+- [ ] AIGuide: fixed right:24px, bottom:140px (above player), expand on click, collapse to orb
+- [ ] AIGuide: must NOT block navigation, auto-open, or replace drawers
+- [ ] Cinematic mode: hides AIGuide + drawers when active
+- [ ] No duplicate navigation systems
+- [ ] Player persists across routes (already confirmed)
+- [ ] No UI tied to track lifecycle (already confirmed)

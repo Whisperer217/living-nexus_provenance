@@ -16,6 +16,10 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useCallback } from "react";
+import LeftRail from "@/components/layout/LeftRail";
+import RightRail from "@/components/layout/RightRail";
+import ContextDrawer from "@/components/layout/ContextDrawer";
+import type { ContextDrawerMode } from "@/components/layout/LeftRail";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -68,6 +72,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const [activeDrawer, setActiveDrawer] = useState<ContextDrawerMode>(null);
+  const handleDrawerToggle = useCallback((mode: ContextDrawerMode) => {
+    setActiveDrawer(prev => prev === mode ? null : mode);
+  }, []);
 
   // Notification badges
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, {
@@ -171,6 +179,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[#111009] relative" style={{ overscrollBehavior: "none" }}>
+
+      {/* ── Desktop AppShell: LeftRail + ContextDrawer (portaled) ── */}
+      <LeftRail activeDrawer={activeDrawer} onDrawerToggle={handleDrawerToggle} />
+      <ContextDrawer mode={activeDrawer} onClose={() => setActiveDrawer(null)} />
 
       {/* ── Quick Reference Slider — temporarily hidden per user request (Phase 77) ── */}
 
@@ -384,19 +396,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* ══════════════════════════════════════════════
           PAGE CONTENT
-          Desktop: top-padding for TopBar (52px)
+          Desktop: AppShell grid — LeftRail(72px) + MainColumn(fluid) + RightRail(300px)
           Mobile: top-padding for mobile header (56px)
       ══════════════════════════════════════════════ */}
-      <main className="flex-1 flex flex-col overflow-hidden md:pt-[52px] pt-14" style={{ overscrollBehavior: "none" }}>
+      <main className="flex-1 flex overflow-hidden pt-14 lg:pt-[52px]" style={{ overscrollBehavior: "none" }}>
         <style>{`
-          /* Desktop: 72px player bar + safe area */
-          @media (min-width: 768px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
+          /* Desktop: player spans MainColumn only, 110px bottom clearance */
+          @media (min-width: 1024px) { .player-scroll-area { padding-bottom: 130px !important; } }
+          /* Tablet md: full-width player, 72px clearance */
+          @media (min-width: 768px) and (max-width: 1023px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
           /* Mobile: nav (56px + safe-area) + mini player (64px) = full bottom stack */
           @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
         `}</style>
+        {/* MainColumn — fluid, scrollable */}
         <div className="flex-1 overflow-y-auto player-scroll-area" style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}>
           {children}
         </div>
+        {/* RightRail — desktop only, 300px */}
+        <RightRail />
       </main>
 
       {/* ══════════════════════════════════════════════
