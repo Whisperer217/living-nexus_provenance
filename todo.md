@@ -3830,3 +3830,38 @@
 - [x] Register /admin/comments route in App.tsx
 - [x] toast import added to GlobalPlayer.tsx
 - [x] tsc --noEmit: 0 errors (ProfilePage stale cache excluded)
+
+## Phase 106: Nebula Mode — Tip Modal Z-Layer Fix + Player Suspension (v2.42.0)
+- [ ] Raise PlayerTipModal z-index to 10000 (above GlobalPlayer z-index 9000)
+- [ ] Set modal container to 100dvh, internal content area scrollable
+- [ ] Sticky CTA button pinned to bottom of modal
+- [ ] Bottom padding on modal content = player height (80px mobile) so CTA never clips
+- [ ] Player suspension (Option A): fade to 0.15 opacity + translateY(12px) when tip modal opens, restore on close
+- [ ] PlayerContext: expose tipModalOpen state or use a context/event signal to GlobalPlayer
+- [ ] Nebula Mode state machine: IDLE → NEBULA → CONFIRM → COMPLETE
+- [ ] Full-screen takeover on "$" tap: background dissolves, nebula expands to 100dvh
+- [ ] Amount buttons: orbiting/pulsing layout in nebula mode
+- [ ] Swipe-down or X to exit nebula → collapse back to player
+- [ ] Audio-reactive nebula: waveform drives background motion (CSS animation tied to isPlaying)
+
+## Phase 106 Status Update (completed)
+- [x] PlayerTipModal z-index raised to z-[10000] (above GlobalPlayer z-[9000])
+- [x] Modal scrollable content area (overflow-y-auto, overscroll-contain)
+- [x] Sticky CTA button at bottom of modal (flex-shrink-0, borderTop)
+- [x] Bottom margin = 88px (player height + breathing room)
+- [x] maxHeight = calc(100dvh - 100px)
+- [x] Player suspension: data-tip-modal-open body attribute set on mount
+- [x] GlobalPlayer reads data-tip-modal-open via MutationObserver
+- [x] GlobalPlayer opacity: 0.15 + pointerEvents: none when tip modal open
+- [x] Smooth opacity transition (0.4s ease) on player container
+- [x] Nebula Mode state machine: compact → nebula → confirm → complete
+- [x] Nebula entry button (Sparkles icon) in compact modal header
+- [x] Full-screen blurred artwork background in nebula state
+- [x] Nebula particle overlay with audio-reactive CSS animation (isPlaying)
+- [x] Orbiting amount buttons (scale up on selected, spring transition)
+- [x] Swipe-down gesture to exit nebula (80px threshold)
+- [x] Swipe indicator pill with parallax follow
+- [x] Cinematic artwork with float animation when isPlaying
+- [x] Sticky CTA in nebula mode with state-aware label
+- [x] createPortal to document.body for proper z-layer ownership
+- [x] tsc --noEmit: 0 errors confirmed

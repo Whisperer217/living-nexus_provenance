@@ -117,6 +117,17 @@ export default function GlobalPlayer() {
   const isDragging = useRef(false);
   const [dragHeight, setDragHeight] = useState<number | null>(null); // null = use snap zone
 
+  /* ── Tip modal suspension (Option A) ── */
+  // Reads data-tip-modal-open set by PlayerTipModal to fade/dock the player
+  const [tipModalOpen, setTipModalOpen] = useState(false);
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setTipModalOpen(document.body.hasAttribute("data-tip-modal-open"));
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ["data-tip-modal-open"] });
+    return () => observer.disconnect();
+  }, []);
+
   /* ── Cinematic mode ── */
   const [cinematic, setCinematic] = useState(false);
   const [cinematicOverlay, setCinematicOverlay] = useState(true);
@@ -431,7 +442,10 @@ export default function GlobalPlayer() {
         border: GOLD_BORDER,
         borderRadius: isExpanded ? "20px 20px 0 0" : "12px 12px 0 0",
         boxShadow: activeShadow,
-        transition: dragHeight !== null ? "none" : "height 0.35s cubic-bezier(0.32,0.72,0,1), border-radius 0.35s ease, transform 0.35s ease",
+        transition: dragHeight !== null ? "none" : "height 0.35s cubic-bezier(0.32,0.72,0,1), border-radius 0.35s ease, transform 0.35s ease, opacity 0.4s ease",
+        /* Suspension: fade + dock when tip modal is open (Option A) */
+        opacity: tipModalOpen ? 0.15 : 1,
+        pointerEvents: tipModalOpen ? "none" : undefined,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
