@@ -180,8 +180,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[#111009] relative" style={{ overscrollBehavior: "none" }}>
 
-      {/* ── Desktop AppShell: LeftRail + ContextDrawer (portaled) ── */}
+      {/* LeftRail — fixed 72px column, spans full viewport height */}
       <LeftRail activeDrawer={activeDrawer} onDrawerToggle={handleDrawerToggle} />
+      {/* ContextDrawer — portaled overlay, always outside the row */}
       <ContextDrawer mode={activeDrawer} onClose={() => setActiveDrawer(null)} />
 
       {/* ── Quick Reference Slider — temporarily hidden per user request (Phase 77) ── */}
@@ -399,7 +400,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           Desktop: AppShell grid — LeftRail(72px) + MainColumn(fluid) + RightRail(300px)
           Mobile: top-padding for mobile header (56px)
       ══════════════════════════════════════════════ */}
-      <main className="flex-1 flex overflow-hidden pt-14 lg:pt-[52px]" style={{ overscrollBehavior: "none" }}>
+      {/* ── Body row: MainColumn + RightRail (LeftRail is fixed, add pl-[72px] on desktop) ── */}
+      <div className="flex-1 flex overflow-hidden pt-14 lg:pt-[52px] lg:pl-[72px]" style={{ overscrollBehavior: "none" }}>
+      <main className="flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
         <style>{`
           /* Desktop: player spans MainColumn only, 110px bottom clearance */
           @media (min-width: 1024px) { .player-scroll-area { padding-bottom: 130px !important; } }
@@ -415,6 +418,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* RightRail — desktop only, 300px */}
         <RightRail />
       </main>
+      </div> {/* end body row */}
 
       {/* ══════════════════════════════════════════════
           PLAYERS
