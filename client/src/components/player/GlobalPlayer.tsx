@@ -280,12 +280,6 @@ export default function GlobalPlayer() {
     if (currentTrack?.witnessId) navigate(`/verify/${currentTrack.witnessId}`);
   }, [currentTrack, navigate]);
 
-  /* ── Collapse on track change ── */
-  useEffect(() => {
-    setZone("MINI");
-    setDragHeight(null);
-  }, [currentTrack?.id]);
-
   /* ── Computed player height ── */
   const viewportH = typeof window !== "undefined" ? window.innerHeight : 800;
   const expandedH = Math.min(viewportH * 0.92, 820);
