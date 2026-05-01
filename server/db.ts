@@ -4139,7 +4139,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
   const perType = Math.ceil(limit / 3);
   try {
     // Tips (join users for tipper name, join songs for title)
-    const [tipRows] = await db.execute<any[]>(sql`
+    const [tipRows] = (await db.execute(sql`
       SELECT 'tip' AS type, CONCAT('tip-', t.id) AS id,
              COALESCE(u.name, 'A fan') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4149,9 +4149,9 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       LEFT JOIN songs s ON t.songId = s.id
       LEFT JOIN users u ON t.tipperUserId = u.id
       ORDER BY t.createdAt DESC LIMIT ${sql.raw(String(perType))}
-    `);
+    `)) as [any[], any];
     // Comments (DB column is 'text', no authorName — use userId join)
-    const [commentRows] = await db.execute<any[]>(sql`
+    const [commentRows] = (await db.execute(sql`
       SELECT 'comment' AS type, CONCAT('comment-', c.id) AS id,
              COALESCE(u.name, 'A listener') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4161,9 +4161,9 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       LEFT JOIN songs s ON c.songId = s.id
       LEFT JOIN users u ON c.userId = u.id
       ORDER BY c.createdAt DESC LIMIT ${sql.raw(String(perType))}
-    `);
+    `)) as [any[], any];
     // Likes
-    const [likeRows] = await db.execute<any[]>(sql`
+    const [likeRows] = (await db.execute(sql`
       SELECT 'like' AS type, CONCAT('like-', l.id) AS id,
              'Someone' AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4172,7 +4172,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       FROM likes l
       LEFT JOIN songs s ON l.songId = s.id
       ORDER BY l.createdAt DESC LIMIT ${sql.raw(String(perType))}
-    `);
+    `)) as [any[], any];
     const merged = [
       ...(Array.isArray(tipRows) ? tipRows : []),
       ...(Array.isArray(commentRows) ? commentRows : []),
