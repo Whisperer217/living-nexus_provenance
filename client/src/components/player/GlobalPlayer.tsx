@@ -17,13 +17,14 @@ import {
   ChevronDown, ChevronUp, Share2, Download,
   MoreHorizontal, ExternalLink, List, Waves,
   FolderPlus, Shield, GripHorizontal, Music2,
-  DollarSign, MessageCircle, Send, Maximize2, X,
+  DollarSign, MessageCircle, Send, Maximize2, X, Flag,
 } from "lucide-react";
 import { AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { useLocation } from "wouter";
 import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import PlayerTipModal from "./PlayerTipModal";
+import { toast } from "sonner";
 
 /* ── Gold design tokens ─────────────────────────────────────────── */
 const GOLD = "#D4AF37";
@@ -212,6 +213,7 @@ export default function GlobalPlayer() {
 
   /* ── Comments (after currentSongId is available) ── */
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [reportingCommentId, setReportingCommentId] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
@@ -221,6 +223,14 @@ export default function GlobalPlayer() {
   const comments = commentsData ?? [];
   const addCommentMutation = trpc.comments.add.useMutation({
     onSuccess: () => { setCommentText(""); refetchComments(); },
+  });
+  const reportCommentMutation = trpc.comments.report.useMutation({
+    onSuccess: (res: { alreadyReported: boolean }) => {
+      if (res.alreadyReported) toast.info("You already reported this comment.");
+      else toast.success("Report submitted. Thank you.");
+      setReportingCommentId(null);
+    },
+    onError: (e: { message: string }) => { toast.error(e.message); setReportingCommentId(null); },
   });
   async function handleSubmitComment() {
     if (!user || !commentText.trim() || !currentSongId) return;
@@ -1176,14 +1186,29 @@ export default function GlobalPlayer() {
             </div>
           ) : (
             comments.map((c: any) => (
-              <div key={c.id} className="flex gap-2.5">
+              <div key={c.id} className="flex gap-2.5 group">
                 <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold" style={{ background: "rgba(212,175,55,0.15)", color: "rgba(212,175,55,0.8)" }}>
                   {(c.user?.name || c.user?.username || "?").charAt(0).toUpperCase()}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
                     <span className="text-[11px] font-semibold" style={{ color: "#F5EDD8" }}>{c.user?.name || c.user?.username || "Anonymous"}</span>
                     {c.createdAt && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{new Date(c.createdAt).toLocaleDateString()}</span>}
+                    {user && c.id && (
+                      <button
+                        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded"
+                        style={{ color: reportingCommentId === c.id ? "rgba(239,68,68,0.8)" : "rgba(255,255,255,0.25)" }}
+                        title="Report comment"
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (reportingCommentId === c.id) return;
+                          setReportingCommentId(c.id);
+                          reportCommentMutation.mutate({ commentId: c.id, reason: "other" });
+                        }}
+                      >
+                        <Flag size={10} />
+                      </button>
+                    )}
                   </div>
                   <p className="text-[12px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{c.content}</p>
                 </div>

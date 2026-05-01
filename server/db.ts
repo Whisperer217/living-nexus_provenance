@@ -29,6 +29,7 @@ import {
   type InsertPlatformAuditLog,
   type QrShare, type InsertQrShare,
   agents, wids, provenanceEvents,
+  commentReports,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -658,6 +659,59 @@ export async function addComment(data: { songId: number; userId?: number; author
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   return db.insert(comments).values(data);
+}
+
+export async function createCommentReport(data: { commentId: number; reporterId: number; reason: "spam" | "harassment" | "hate_speech" | "misinformation" | "other"; notes?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  // Prevent duplicate reports from same user on same comment
+  const existing = await db.select({ id: commentReports.id }).from(commentReports)
+    .where(and(eq(commentReports.commentId, data.commentId), eq(commentReports.reporterId, data.reporterId)))
+    .limit(1);
+  if (existing.length > 0) return { alreadyReported: true };
+  await db.insert(commentReports).values({ ...data, status: "pending" });
+  return { alreadyReported: false };
+}
+
+export async function getFlaggedComments() {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      reportId: commentReports.id,
+      commentId: commentReports.commentId,
+      reason: commentReports.reason,
+      notes: commentReports.notes,
+      status: commentReports.status,
+      reportedAt: commentReports.createdAt,
+      reporterId: commentReports.reporterId,
+      commentContent: comments.content,
+      commentCreatedAt: comments.createdAt,
+      commentUserId: comments.userId,
+      commentAuthorName: comments.authorName,
+      songId: comments.songId,
+    })
+    .from(commentReports)
+    .innerJoin(comments, eq(commentReports.commentId, comments.id))
+    .where(eq(commentReports.status, "pending"))
+    .orderBy(desc(commentReports.createdAt))
+    .limit(100);
+  return rows;
+}
+
+export async function moderateCommentReport(reportId: number, action: "dismiss" | "delete", reviewerId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const report = await db.select().from(commentReports).where(eq(commentReports.id, reportId)).limit(1);
+  if (!report.length) throw new Error("Report not found");
+  if (action === "delete") {
+    // Hard-delete the comment (and mark report actioned)
+    await db.delete(comments).where(eq(comments.id, report[0].commentId));
+    await db.update(commentReports).set({ status: "actioned", reviewedBy: reviewerId, reviewedAt: new Date() }).where(eq(commentReports.id, reportId));
+  } else {
+    await db.update(commentReports).set({ status: "dismissed", reviewedBy: reviewerId, reviewedAt: new Date() }).where(eq(commentReports.id, reportId));
+  }
+  return { success: true };
 }
 
 // ─── Tips ─────────────────────────────────────────────────────────────────────

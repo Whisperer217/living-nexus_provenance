@@ -10,14 +10,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.39.0";
+const CURRENT_VERSION = "v2.40.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
-    version: "v2.39.0",
+    version: "v2.40.0",
     date: "May 1, 2026",
     label: "Latest",
+    items: [
+      { icon: Music, text: "Circular Play Button — The play button is now a 56px circle on mobile and 40px on desktop. Gold fill, hot glow, center-dominant. Unmistakable." },
+      { icon: Maximize2, text: "Desktop Float Split Layout — On desktop the floating player now shows artwork on the left and title + progress + controls on the right, side by side. Mobile stays centered vertical stack." },
+      { icon: ArrowUpFromLine, text: "Artwork Swipe Navigation — Swipe left on the artwork to go to the next track, right to go back. 60px threshold with rubber-band resistance. Directional gold glow follows the swipe. Works in Float, Expanded, and Cinematic mode." },
+      { icon: MessageCircle, text: "Comments Drawer — Tap the comment icon in the player to open a full thread for the current track. Right-side panel on desktop, bottom sheet on mobile. Add comments, see who else is listening." },
+      { icon: Film, text: "Cinematic Mode — Tap the artwork in Expanded view to enter full-screen cinematic mode. Blurred artwork fills the background, large artwork centers the screen, minimal controls auto-hide after 3 seconds. Tap anywhere to show controls. Swipe to navigate. WID badge visible if the track is witnessed." },
+    ],
+  },
+  {
+    version: "v2.39.0",
+    date: "May 1, 2026",
+    label: "",
     items: [
       { icon: Maximize2, text: "Desktop Player — On desktop (≥1024px) the player is now a contained floating card: clamp(680px, 50vw, 820px) wide, anchored bottom-right with 32px margin, fully rounded on all four corners. No longer a full-width tray." },
       { icon: Maximize2, text: "Desktop Expanded = Centered Modal — Expanding the player on desktop opens a centered modal overlay (900×700 max) instead of a bottom sheet. Desktop mental model, not mobile." },

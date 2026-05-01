@@ -638,6 +638,13 @@
       "when": 1777529772692,
       "tag": "0091_complete_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 92,
+      "version": "5",
+      "when": 1777605953371,
+      "tag": "0092_flippant_wonder_man",
+      "breakpoints": true
     }
   ]
 }

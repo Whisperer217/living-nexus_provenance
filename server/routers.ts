@@ -95,6 +95,7 @@ import {
   getUserCollectionTracks, addTrackToUserCollection, removeTrackFromUserCollection,
   reorderUserCollectionTracks,
   getLikedSongsOrdered, reorderLikes,
+  createCommentReport, getFlaggedComments, moderateCommentReport,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -1794,6 +1795,30 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
           }
         }
         return { success: true };
+      }),
+    report: protectedProcedure
+      .input(z.object({
+        commentId: z.number(),
+        reason: z.enum(["spam", "harassment", "hate_speech", "misinformation", "other"]).default("other"),
+        notes: z.string().max(500).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return createCommentReport({
+          commentId: input.commentId,
+          reporterId: ctx.user.id,
+          reason: input.reason,
+          notes: input.notes,
+        });
+      }),
+    getFlagged: adminProcedure
+      .query(async () => getFlaggedComments()),
+    moderate: adminProcedure
+      .input(z.object({
+        reportId: z.number(),
+        action: z.enum(["dismiss", "delete"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return moderateCommentReport(input.reportId, input.action, ctx.user.id);
       }),
   }),
 

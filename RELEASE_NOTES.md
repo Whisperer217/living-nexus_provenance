@@ -7,6 +7,31 @@
 
 ---
 
+## v2.40.0 — May 1, 2026 (GlobalPlayer Interaction Upgrade)
+
+### What Shipped
+
+**GlobalPlayer.tsx — 5-point interaction upgrade**
+- Circular play button: 56px on mobile Float/Expanded, 40px on desktop split layout. `border-radius: 50%`, gold fill, hot glow.
+- Desktop Float split layout: `[72px artwork thumbnail] | [Title + Artist + Progress bar + Controls row]` side by side on desktop (≥1024px). Mobile stays centered vertical stack.
+- Artwork-only swipe gesture: pointer-based swipe on the artwork area only. Left = next track, right = prev track. 60px threshold. Rubber-band resistance (30% of drag distance, max 18–24px). Directional gold glow shifts toward swipe direction. Arrow hint overlay during swipe. Works in Float, Expanded, and Cinematic.
+- Comments drawer: `MessageCircle` icon in Float action row and Expanded action row. Tap opens right-side panel on desktop (400px wide, anchored above the player, `marginRight: 32px, marginBottom: 100px`), bottom sheet on mobile (70vh). Full thread with avatars, timestamps, inline comment input. Fetches via `trpc.comments.list`, posts via `trpc.comments.add`. Backdrop blur + click-outside to dismiss.
+- Cinematic mode: tap artwork in Expanded state → full-screen portal. Blurred + darkened artwork as background fill. Large centered artwork (380px max) with same swipe gesture. Minimal controls (prev/play/next + progress). Title/artist lower third. Auto-hide overlay after 3 seconds (tap anywhere to show). WID badge top-right if witnessed. Exit button top-left.
+
+**WhatsNewModal.tsx**
+- Bumped to `v2.40.0`, added 5 entries for the interaction upgrades.
+
+**RELEASE_NOTES.md**
+- This entry.
+
+### No Schema Changes
+No new tables or migrations in this release.
+
+### Manus Pub: No Action Required
+All changes are in `GlobalPlayer.tsx` and `WhatsNewModal.tsx` only. Pull `59b320e` and deploy.
+
+---
+
 ## v2.39.0 — May 1, 2026 (Desktop GlobalPlayer: Contained Floating Card)
 
 ### What Shipped

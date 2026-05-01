@@ -3816,3 +3816,17 @@
 - [ ] Swipe preview: next/prev track artwork slides in from swipe direction (deferred — needs queue lookahead)
 - [ ] Timestamped comments: @1:32 format support (deferred)
 - [ ] Slow zoom / parallax motion on cinematic artwork (deferred)
+
+## Phase 105: WhatsNew v2.40.0, Tip Wiring, Comments Moderation
+- [x] Add WhatsNewModal v2.40.0 entry (5 interaction upgrades)
+- [x] Update RELEASE_NOTES.md with v2.40.0 entry
+- [x] Verify GlobalPlayer Tip button wires to PlayerTipModal (confirm tipsEnabled + tipOpen state) — confirmed already wired
+- [x] Add commentReports table to drizzle/schema.ts (0092_flippant_wonder_man.sql, applied to DB)
+- [x] Apply commentReports migration — CREATE TABLE IF NOT EXISTS applied via node/mysql2
+- [x] Add createCommentReport / getFlaggedComments / moderateCommentReport DB helpers to server/db.ts
+- [x] Add comments.report / comments.getFlagged / comments.moderate tRPC procedures
+- [x] Add Flag button to comments drawer (hover-reveal, red on active, calls comments.report)
+- [x] Build /admin/comments moderation page (admin-only, dismiss/delete actions, reason badges)
+- [x] Register /admin/comments route in App.tsx
+- [x] toast import added to GlobalPlayer.tsx
+- [x] tsc --noEmit: 0 errors (ProfilePage stale cache excluded)

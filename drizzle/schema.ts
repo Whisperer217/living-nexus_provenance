@@ -351,6 +351,22 @@ export const comments = mysqlTable("comments", {
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = typeof comments.$inferInsert;
 
+// ─── Comment Reports ─────────────────────────────────────────────────────────────────────────────────
+export const commentReports = mysqlTable("commentReports", {
+  id: int("id").autoincrement().primaryKey(),
+  commentId: int("commentId").notNull(),
+  reporterId: int("reporterId").notNull(),
+  reason: mysqlEnum("reason", ["spam", "harassment", "hate_speech", "misinformation", "other"]).default("other").notNull(),
+  notes: text("notes"),
+  status: mysqlEnum("status", ["pending", "dismissed", "actioned"]).default("pending").notNull(),
+  reviewedBy: int("reviewedBy"),
+  reviewedAt: timestamp("reviewedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CommentReport = typeof commentReports.$inferSelect;
+export type InsertCommentReport = typeof commentReports.$inferInsert;
+
 // ─── Tips ─────────────────────────────────────────────────────────────────────
 export const tips = mysqlTable("tips", {
   id: int("id").autoincrement().primaryKey(),

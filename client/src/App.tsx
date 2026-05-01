@@ -45,6 +45,7 @@ const ManifestoPage = lazy(() => import("./pages/ManifestoPage"));
 const AttributionPage = lazy(() => import("./pages/AttributionPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
 const ModerationQueuePage = lazy(() => import("./pages/admin/ModerationQueuePage"));
+const CommentModerationPage = lazy(() => import("./pages/admin/CommentModerationPage"));
 const AuditLogPage = lazy(() => import("./pages/admin/AuditLogPage"));
 const SelfImprovementPage = lazy(() => import("./pages/SelfImprovementPage"));
 const PaymentIntegrityPage = lazy(() => import("./pages/PaymentIntegrityPage"));
@@ -175,6 +176,7 @@ function Router() {
                 <Route path="/admin/users" component={AdminUsersPage} />
                 <Route path="/admin/normalization" component={ArtworkNormalizationPage} />
                 <Route path="/admin/moderation" component={ModerationQueuePage} />
+                <Route path="/admin/comments" component={CommentModerationPage} />
                 <Route path="/admin/audit" component={AuditLogPage} />
                 <Route path="/admin/self-improve" component={SelfImprovementPage} />
                 <Route path="/admin/payment-integrity" component={PaymentIntegrityPage} />
