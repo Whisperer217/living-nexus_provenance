@@ -30,6 +30,7 @@ import {
   type QrShare, type InsertQrShare,
   agents, wids, provenanceEvents,
   commentReports,
+  userCollectionTracks,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -4064,16 +4065,13 @@ export async function addTrackToUserCollection(collectionId: number, songId: num
 
 export async function removeTrackFromUserCollection(collectionId: number, songId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database unavailable");
-  const { userCollectionTracks } = await import("../drizzle/schema");
+   if (!db) throw new Error("Database unavailable");
   await db.delete(userCollectionTracks)
     .where(and(eq(userCollectionTracks.collectionId, collectionId), eq(userCollectionTracks.songId, songId)));
 }
-
 export async function reorderUserCollectionTracks(collectionId: number, orderedIds: number[]) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { userCollectionTracks } = await import("../drizzle/schema");
   for (let i = 0; i < orderedIds.length; i++) {
     await db.update(userCollectionTracks)
       .set({ sortOrder: i })
@@ -4086,7 +4084,6 @@ export async function reorderUserCollectionTracks(collectionId: number, orderedI
 export async function getLikedSongsOrdered(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { likes } = await import("../drizzle/schema");
   return db
     .select({
       likeId: likes.id,
@@ -4111,7 +4108,6 @@ export async function getLikedSongsOrdered(userId: number) {
 export async function reorderLikes(userId: number, orderedSongIds: number[]) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { likes } = await import("../drizzle/schema");
   for (let i = 0; i < orderedSongIds.length; i++) {
     await db.update(likes)
       .set({ sortOrder: i })
