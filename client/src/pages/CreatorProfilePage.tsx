@@ -20,7 +20,7 @@ import {
   Music, Play, Pause, Shield, Globe, DollarSign, ExternalLink,
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
-  Library, Move, Upload, Loader2, Crown, Sparkles, Wand2, ClipboardCopy, ChevronDown, BookOpen,
+  Library, Move, Upload, Loader2, Crown, Sparkles, Wand2, ClipboardCopy, ChevronDown, BookOpen, Camera,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePositioner } from "@/components/ImagePositioner";
@@ -481,10 +481,40 @@ export default function CreatorProfilePage() {
   );
   // Banner reposition (must be before early returns — Rules of Hooks)
   const bannerPosInitRef = useRef(false);
+  const changeBannerInputRef = useRef<HTMLInputElement>(null);
+  const [changeBannerUploading, setChangeBannerUploading] = useState(false);
   const updateBannerPosition = trpc.profile.update.useMutation({
     onSuccess: () => { toast.success("Banner position saved"); refetch(); },
     onError: (e: any) => toast.error(e.message),
   });
+  const changeBannerMutation = trpc.profile.uploadBanner.useMutation({
+    onSuccess: (data) => {
+      utils.profile.getCreator.invalidate();
+      toast.success("Banner updated");
+      if (data?.focalX !== undefined && data?.focalY !== undefined) {
+        setAiFocalPos({ x: data.focalX, y: data.focalY });
+        setShowBannerPositioner(true);
+      }
+    },
+    onError: (e: any) => toast.error(e.message || "Upload failed"),
+  });
+  const handleChangeBannerFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setChangeBannerUploading(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((res, rej) => {
+        reader.onload = () => res((reader.result as string).split(",")[1]);
+        reader.onerror = rej;
+        reader.readAsDataURL(f);
+      });
+      await changeBannerMutation.mutateAsync({ base64, mimeType: f.type });
+    } finally {
+      setChangeBannerUploading(false);
+      if (changeBannerInputRef.current) changeBannerInputRef.current.value = "";
+    }
+  };
   const witnessToggle = trpc.witness.toggle.useMutation({
     onSuccess: (result) => {
       utils.witness.status.invalidate({ creatorId: creatorIdForWitness });
@@ -778,22 +808,38 @@ export default function CreatorProfilePage() {
         <div className="absolute bottom-0 left-0 w-12 h-12 pointer-events-none z-10" style={{ borderBottom: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
         <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none z-10" style={{ borderBottom: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
 
-        {/* ── z-10: Reposition button (owner only, hover) ── */}
+        {/* ── z-10: Banner edit controls (owner only, hover) ── */}
         {isOwner && creator.bannerUrl && (
-          <button
-            onClick={() => setShowBannerPositioner(true)}
-            className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-              text-white text-[11px] font-body
-              opacity-0 group-hover:opacity-100 transition-opacity z-10"
-            style={{
-              background: "rgba(0,0,0,0.65)",
-              border: "1px solid rgba(201,168,76,0.4)",
-              color: "#c9a84c",
-            }}
-          >
-            <Move size={12} />
-            Reposition
-          </button>
+          <div className="absolute bottom-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            {/* Change Banner — triggers hidden file input */}
+            <label
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer text-[11px] font-body"
+              style={{ background: "rgba(0,0,0,0.65)", border: "1px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}
+              title="Upload a new banner image"
+            >
+              {changeBannerUploading
+                ? <Loader2 size={12} className="animate-spin" />
+                : <Camera size={12} />}
+              {changeBannerUploading ? "Uploading…" : "Change Banner"}
+              <input
+                ref={changeBannerInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleChangeBannerFile}
+                disabled={changeBannerUploading}
+              />
+            </label>
+            {/* Reposition */}
+            <button
+              onClick={() => setShowBannerPositioner(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-body"
+              style={{ background: "rgba(0,0,0,0.65)", border: "1px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}
+            >
+              <Move size={12} />
+              Reposition
+            </button>
+          </div>
         )}
 
         {/* ── z-20: Avatar — absolute, overlapping banner bottom by 50% ── */}

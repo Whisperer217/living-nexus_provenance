@@ -3934,3 +3934,25 @@
 - [ ] Each mode panel has a header with mode name + icon, no universal nav list
 - [ ] Player stays dominant (z-index 9000+, drawer never overlaps player)
 - [ ] MobileNavDrawer updated to same mode-driven structure
+
+## Phase 111: Interaction System Upgrade
+- [x] WhatsNewModal bumped to v2.43.1 with Interaction System Upgrade copy
+- [x] DB migration: notifications table now has body, actorId, actorName, actorAvatarUrl, refId, refType columns
+- [x] RightRail Signals: loading skeleton, SignalIcon by type, click navigates to song or /notifications
+- [x] RightRail: public LIVE ACTIVITY feed for non-logged-in users (globalActivity.feed tRPC procedure)
+- [x] globalActivity.feed: raw SQL, polls tips/comments/likes, returns unified activity items
+- [x] useNow hook: refreshes timeAgo labels every 30s without re-fetching
+- [x] CreatorProfilePage: "Change Banner" button (Camera icon) appears on hover next to Reposition
+- [x] CreatorProfilePage: changeBannerMutation + handleChangeBannerFile wired to profile.uploadBanner
+- [x] CreatorProfilePage: AI focal point auto-opens positioner after banner change
+
+## Phase 111: Interaction System Upgrade
+- [x] WhatsNewModal bumped to v2.43.1 with Interaction System Upgrade copy
+- [x] DB migration: notifications table now has body, actorId, actorName, actorAvatarUrl, refId, refType columns
+- [x] RightRail Signals: loading skeleton, SignalIcon by type, click navigates to song or /notifications
+- [x] RightRail: public LIVE ACTIVITY feed for non-logged-in users (globalActivity.feed tRPC procedure)
+- [x] globalActivity.feed: raw SQL, polls tips/comments/likes, returns unified activity items
+- [x] useNow hook: refreshes timeAgo labels every 30s without re-fetching
+- [x] CreatorProfilePage: Change Banner button (Camera icon) appears on hover next to Reposition
+- [x] CreatorProfilePage: changeBannerMutation + handleChangeBannerFile wired to profile.uploadBanner
+- [x] CreatorProfilePage: AI focal point auto-opens positioner after banner change
