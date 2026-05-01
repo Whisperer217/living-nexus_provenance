@@ -9,12 +9,12 @@
    - TopBar:  NO navigation links (search + actions only)
    - Single NAV_ITEMS source of truth (shared/navItems.ts)
 ═══════════════════════════════════════════════════════════════════ */
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import LeftRail from "@/components/layout/LeftRail";
+import type { NavMode } from "@/components/layout/LeftRail";
 import RightRail from "@/components/layout/RightRail";
 import ContextDrawer from "@/components/layout/ContextDrawer";
 import MobileNavDrawer from "@/components/layout/MobileNavDrawer";
-import type { ContextDrawerMode } from "@/components/layout/LeftRail";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -38,10 +38,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const { state } = usePlayer();
   const { user, loading: authLoading, logout } = useAuth();
 
-  // ── Desktop: ContextDrawer state (one open at a time) ──────────────
-  const [activeDrawer, setActiveDrawer] = useState<ContextDrawerMode>(null);
-  const handleDrawerToggle = useCallback((mode: ContextDrawerMode) => {
-    setActiveDrawer(prev => prev === mode ? null : mode);
+  // ── Desktop: ContextDrawer two-state model ──────────────────────────
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeMode, setActiveMode] = useState<NavMode | null>(null);
+  const drawerOpenRef = useRef(drawerOpen);
+  const activeModeRef = useRef(activeMode);
+  drawerOpenRef.current = drawerOpen;
+  activeModeRef.current = activeMode;
+  // Rail click: set activeMode + open drawer; clicking same mode toggles visibility
+  const handleRailClick = useCallback((mode: NavMode) => {
+    const wasOpen = drawerOpenRef.current;
+    const wasMode = activeModeRef.current;
+    setActiveMode(mode);
+    // If already open on the same mode → close; otherwise open
+    if (wasOpen && wasMode === mode) {
+      setDrawerOpen(false);
+    } else {
+      setDrawerOpen(true);
+    }
   }, []);
 
   // ── Mobile: MobileNavDrawer state ─────────────────────────────────
@@ -92,10 +106,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       style={{ overscrollBehavior: "none" }}
     >
       {/* ── LeftRail — fixed 72px column, desktop only ── */}
-      <LeftRail activeDrawer={activeDrawer} onDrawerToggle={handleDrawerToggle} />
+      <LeftRail drawerOpen={drawerOpen} activeMode={activeMode} onRailClick={handleRailClick} />
 
       {/* ── ContextDrawer — portaled overlay, desktop only ── */}
-      <ContextDrawer mode={activeDrawer} onClose={() => setActiveDrawer(null)} />
+      <ContextDrawer
+        open={drawerOpen}
+        activeMode={activeMode}
+        onClose={() => setDrawerOpen(false)}
+        archiveSongCount={archiveSongCount}
+        onOpenWhatsNew={() => setWhatsNewOpen(true)}
+      />
 
       {/* ── TopBar — desktop only (hidden on mobile) ── */}
       <TopBar archiveSongCount={archiveSongCount} unreadCount={unreadCount as number} />

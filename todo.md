@@ -3916,3 +3916,10 @@
 - [x] Z-index stack: LeftRail(200) < ContextDrawer(300) < TopBar/MobileHeader(400) < MobileNavDrawer(450)
 - [x] TypeScript: 0 errors
 - [x] Vite HMR: all updates clean
+
+## Phase 109 Correction: Two-State Drawer Model
+- [ ] Restore drawerOpen (boolean) + activeMode (NavMode) as separate state — open controls visibility, activeMode controls meaning/highlighting
+- [ ] LeftRail: each icon click sets activeMode to its own id AND opens drawer; clicking active icon toggles drawer closed (but keeps activeMode)
+- [ ] ContextDrawer: receives both open + activeMode; uses activeMode for header label and section highlight
+- [ ] MobileNavDrawer: same two-state model (open + activeMode)
+- [ ] MainLayout: manages both drawerOpen and activeMode state
