@@ -3865,3 +3865,13 @@
 - [x] Sticky CTA in nebula mode with state-aware label
 - [x] createPortal to document.body for proper z-layer ownership
 - [x] tsc --noEmit: 0 errors confirmed
+
+## Phase 107: GlobalPlayer UI State Persistence
+- [x] Audit GlobalPlayer for key prop, conditional mount, or state that resets on currentSong change
+- [x] Audit PlayerContext for any dispatch/action that resets UI state on track change
+- [x] Root cause: useEffect([currentTrack?.id]) at line 284 forced setZone('MINI') + setDragHeight(null) on every track change
+- [x] Fix: removed the collapse-on-track-change useEffect entirely
+- [x] Confirmed no key prop on <GlobalPlayer /> in MainLayout.tsx
+- [x] Confirmed no remount trigger in PlayerContext dispatch
+- [x] zone, cinematic, commentsOpen, tipOpen, dragHeight all persist across track changes
+- [x] tsc --noEmit: 0 errors (stale watch daemon errors are ProfilePage/CommentModerationPage cache artifacts)
