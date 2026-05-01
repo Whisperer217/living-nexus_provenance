@@ -3902,3 +3902,17 @@
 - [x] Drawer edge bleed: confirmed — LeftRail dark bg is intentional; it's the rail itself at x:0 width:72
 - [x] AI Guide position: confirmed — orbBottom = max(140px, ...), orbRight = 24px + drag offset
 - [x] Player state: confirmed — GlobalPlayer uses PlayerContext (global PlayerProvider in App.tsx), not page-level state
+
+## Phase 109: Unified Isomorphic Navigation System
+- [x] shared/navItems.ts: single NAV_ITEMS source of truth (HOME/EXPLORE/PROJECTS/MARKETPLACE/UPLOAD/DASHBOARD/ARCHIVE/BUILD)
+- [x] LeftRail v2: removes all path/direct-navigate; every click calls onDrawerToggle(mode)
+- [x] ContextDrawer v2: full NavList from NAV_ITEMS, portaled, 220ms cubic-bezier, one-open-at-a-time
+- [x] ContextDrawer: click outside closes, Escape closes, route change closes
+- [x] ContextDrawer: overlay only (translateX), no layout push, independent scroll
+- [x] MobileNavDrawer: new component, full-screen portal drawer from NAV_ITEMS
+- [x] MobileNavDrawer: Hamburger in mobile header opens drawer, route change closes
+- [x] MainLayout v5: replaces old inline mobile nav with MobileNavDrawer
+- [x] ln:open-whats-new custom event: ContextDrawer/MobileNavDrawer dispatch, MainLayout listens
+- [x] Z-index stack: LeftRail(200) < ContextDrawer(300) < TopBar/MobileHeader(400) < MobileNavDrawer(450)
+- [x] TypeScript: 0 errors
+- [x] Vite HMR: all updates clean
