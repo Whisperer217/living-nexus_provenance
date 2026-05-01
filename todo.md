@@ -3801,3 +3801,18 @@
 - [x] Fix 4 stale git conflict markers in drizzle/schema.ts (lines 6, 1396, 1424, 1425) — confirmed no markers exist; stale .tsbuildinfo cache cleared
 - [x] Add WhatsNewModal v2.39.0 entry describing desktop player redesign
 - [x] Update RELEASE_NOTES.md with v2.39.0 entry
+
+## Phase 104: GlobalPlayer Interaction Upgrade (v2.40.0)
+- [x] Play button: circular 56px on mobile, 40px on desktop split layout
+- [x] Mobile Float layout: centered vertical stack (artwork → title → progress → controls)
+- [x] Desktop Float layout: horizontal split — [72px artwork] [Title + Meta + Progress + Controls]
+- [x] Artwork-only swipe gesture: left=next, right=prev, 60px threshold, rubber-band resistance, direction hint overlay
+- [x] Swipe gold glow shift: glow direction follows swipe direction (directional box-shadow)
+- [x] Comments icon in Float action row and Expanded action row
+- [x] Comments drawer: right-side panel on desktop (400px, bottom-right anchored), bottom sheet on mobile (70vh)
+- [x] Cinematic mode: tap artwork in expanded state → full-screen blurred bg, center artwork, minimal controls, auto-hide overlay
+- [x] Cinematic swipe: artwork swipe navigation works in cinematic mode
+- [x] Cinematic desktop: full-screen centered (not bottom sheet)
+- [ ] Swipe preview: next/prev track artwork slides in from swipe direction (deferred — needs queue lookahead)
+- [ ] Timestamped comments: @1:32 format support (deferred)
+- [ ] Slow zoom / parallax motion on cinematic artwork (deferred)

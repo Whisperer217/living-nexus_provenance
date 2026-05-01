@@ -17,7 +17,7 @@ import {
   ChevronDown, ChevronUp, Share2, Download,
   MoreHorizontal, ExternalLink, List, Waves,
   FolderPlus, Shield, GripHorizontal, Music2,
-  DollarSign,
+  DollarSign, MessageCircle, Send, Maximize2, X,
 } from "lucide-react";
 import { AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { useLocation } from "wouter";
@@ -116,6 +116,52 @@ export default function GlobalPlayer() {
   const isDragging = useRef(false);
   const [dragHeight, setDragHeight] = useState<number | null>(null); // null = use snap zone
 
+  /* ── Cinematic mode ── */
+  const [cinematic, setCinematic] = useState(false);
+  const [cinematicOverlay, setCinematicOverlay] = useState(true);
+  const cinematicHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function showCinematicOverlay() {
+    setCinematicOverlay(true);
+    if (cinematicHideTimer.current) clearTimeout(cinematicHideTimer.current);
+    cinematicHideTimer.current = setTimeout(() => setCinematicOverlay(false), 3000);
+  }
+  useEffect(() => { if (cinematic) showCinematicOverlay(); }, [cinematic]);
+  useEffect(() => () => { if (cinematicHideTimer.current) clearTimeout(cinematicHideTimer.current); }, []);
+
+  /* ── Artwork swipe gesture (artwork area only) ── */
+  const artSwipeStartX = useRef<number | null>(null);
+  const artSwipeStartY = useRef<number | null>(null);
+  const [swipeDelta, setSwipeDelta] = useState(0);
+  const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
+  const SWIPE_THRESHOLD = 60;
+  function onArtPointerDown(e: React.PointerEvent) {
+    artSwipeStartX.current = e.clientX;
+    artSwipeStartY.current = e.clientY;
+    setSwipeDelta(0);
+    setSwipeDir(null);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+  function onArtPointerMove(e: React.PointerEvent) {
+    if (artSwipeStartX.current === null) return;
+    const dx = e.clientX - artSwipeStartX.current;
+    const dy = e.clientY - (artSwipeStartY.current ?? e.clientY);
+    if (Math.abs(dy) > Math.abs(dx) + 10) return; // vertical scroll wins
+    setSwipeDelta(dx);
+    setSwipeDir(dx < 0 ? "left" : "right");
+  }
+  function onArtPointerUp() {
+    if (artSwipeStartX.current === null) return;
+    const dx = swipeDelta;
+    artSwipeStartX.current = null;
+    artSwipeStartY.current = null;
+    setSwipeDelta(0);
+    setSwipeDir(null);
+    if (Math.abs(dx) >= SWIPE_THRESHOLD) {
+      if (dx < 0) nextTrack();
+      else prevTrack();
+    }
+  }
+
   /* ── Modals ── */
   const [tipOpen, setTipOpen] = useState(false);
   const [addToCollectionOpen, setAddToCollectionOpen] = useState(false);
@@ -163,6 +209,25 @@ export default function GlobalPlayer() {
     { id: currentSongId! },
     { enabled: !!currentSongId && !isNaN(currentSongId!), staleTime: 60_000 }
   );
+
+  /* ── Comments (after currentSongId is available) ── */
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
+    { songId: currentSongId ?? 0 },
+    { enabled: !!currentSongId && !isNaN(currentSongId) && commentsOpen, staleTime: 30_000 }
+  );
+  const comments = commentsData ?? [];
+  const addCommentMutation = trpc.comments.add.useMutation({
+    onSuccess: () => { setCommentText(""); refetchComments(); },
+  });
+  async function handleSubmitComment() {
+    if (!user || !commentText.trim() || !currentSongId) return;
+    setCommentSubmitting(true);
+    try { await addCommentMutation.mutateAsync({ songId: currentSongId, content: commentText.trim() }); }
+    finally { setCommentSubmitting(false); }
+  }
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
 
@@ -522,115 +587,162 @@ export default function GlobalPlayer() {
         </div>
       )}
 
-      {/* ── FLOAT CONTROLS ROW (visible in FLOAT) ── */}
+      {/* ── FLOAT ZONE: desktop = split layout, mobile = stacked controls row ── */}
       {(isFloat || isExpanded) && (
-        <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
-          {/* Playback controls — 3-tier hierarchy (decision #3 visual spec) */}
-          <div className="flex items-center gap-3">
-            {/* Utility tier */}
-            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }}>
-              <Shuffle size={14} />
-            </button>
-            {/* Transport tier — mid gold */}
-            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}>
-              <SkipBack size={18} />
-            </button>
-            {/* Primary — brightest gold, largest, hot glow */}
-            <button
-              onClick={e => { e.stopPropagation(); togglePlay(); }}
-              className="w-11 h-11 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+        isDesktop && isFloat ? (
+          /* ── DESKTOP SPLIT LAYOUT: [Artwork 80px] | [Title + Meta + Progress + Controls] ── */
+          <div className="flex items-center gap-4 px-4 py-2 flex-shrink-0" style={{ minHeight: "80px" }}>
+            {/* Artwork with swipe gesture */}
+            <div
+              className="relative flex-shrink-0 rounded-xl overflow-hidden cursor-pointer select-none"
               style={{
-                background: GOLD,
-                color: "#000",
-                boxShadow: `0 0 10px rgba(212,175,55,0.45), 0 0 18px rgba(212,175,55,0.18)`,
-                filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))`,
+                width: "72px", height: "72px",
+                background: currentTrack?.bg || "#111009",
+                transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.3, 18)}px)` : undefined,
+                transition: swipeDelta === 0 ? "transform 0.25s ease" : "none",
+                boxShadow: swipeDir ? `${swipeDir === "left" ? "-4px" : "4px"} 0 16px rgba(212,175,55,0.35)` : undefined,
               }}
+              onPointerDown={onArtPointerDown}
+              onPointerMove={onArtPointerMove}
+              onPointerUp={onArtPointerUp}
+              onPointerCancel={onArtPointerUp}
+              onClick={e => { if (Math.abs(swipeDelta) < 5) { e.stopPropagation(); goToSong(); } }}
             >
-              {state.isPlaying
-                ? <Pause size={18} fill="currentColor" />
-                : <Play size={18} fill="currentColor" className="ml-0.5" />
+              {currentTrack?.artUrl
+                ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
+                : <div className="w-full h-full flex items-center justify-center text-2xl">{currentTrack?.emoji || "🎵"}</div>
               }
-            </button>
-            {/* Transport tier */}
-            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}>
-              <SkipForward size={18} />
-            </button>
-            {/* Utility tier */}
-            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }}>
-              <Repeat size={14} />
-            </button>
-          </div>
+              {/* Swipe direction hint */}
+              {swipeDir && (
+                <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.3)" }}>
+                  <span className="text-lg" style={{ color: GOLD }}>{swipeDir === "left" ? "▶" : "◀"}</span>
+                </div>
+              )}
+            </div>
 
-          {/* Right actions — 3-tier hierarchy: utility dim, transport mid, play brightest (decision #3 visual spec) */}
-          <div className="flex items-center gap-1">
-            {/* Utility tier — dim gold */}
-            {user && currentSongId && (
-              <button
-                onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }}
-                className="p-1.5 transition-colors"
-                style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.65)" }}
-              >
-                <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
-              </button>
-            )}
-            {currentSongId && (
-              <button
-                onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }}
-                className="p-1.5 transition-colors"
-                style={{ color: "rgba(212,175,55,0.65)" }}
-                title="Add to Collection"
-              >
-                <FolderPlus size={15} />
-              </button>
-            )}
-            {tipsEnabled && currentSongId && (
-              <button
-                onClick={e => { e.stopPropagation(); setTipOpen(true); }}
-                className="p-1.5 transition-colors"
-                style={{ color: "rgba(212,175,55,0.65)" }}
-                title="Tip creator"
-              >
-                <DollarSign size={14} />
-              </button>
-            )}
-            <button
-              ref={volumeBtnRef}
-              onClick={e => { e.stopPropagation(); openVolumePopup(); }}
-              className="p-1.5 transition-colors"
-              style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.65)" }}
-            >
-              {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            </button>
-            <button
-              onClick={e => { e.stopPropagation(); toggleGlow(); }}
-              className="p-1.5 transition-all rounded"
-              style={{
-                color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)",
-                background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent",
-              }}
-              title={glowEnabled ? "Glow: ON" : "Glow: OFF"}
-            >
-              <Waves size={14} />
-            </button>
-            <button
-              ref={contextMenuBtnRef}
-              onClick={e => { e.stopPropagation(); openContextMenu(); }}
-              className="p-1.5 transition-colors"
-              style={{ color: "rgba(212,175,55,0.65)" }}
-            >
-              <MoreHorizontal size={16} />
-            </button>
-            {/* Expand/collapse — click-first primary toggle on desktop (decision #4) */}
-            <button
-              onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "FLOAT" : "EXPANDED"); setDragHeight(null); }}
-              className="p-1.5 transition-colors"
-              style={{ color: GOLD, filter: `drop-shadow(0 0 6px rgba(212,175,55,0.5))` }}
-              title={isExpanded ? "Collapse" : "Expand player"}
-            >
-              {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
-            </button>
+            {/* Right: title + meta + progress + controls */}
+            <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+              {/* Title + artist + actions */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[13px] font-semibold truncate" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>
+                    {currentTrack?.title || "Nothing playing"}
+                  </p>
+                  <p className="text-[11px] truncate" style={{ color: "rgba(212,175,55,0.7)" }}>
+                    {currentTrack?.artist || ""}
+                  </p>
+                </div>
+                {/* Right utility actions */}
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  {user && currentSongId && (
+                    <button onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }} className="p-1.5 transition-colors" style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.5)" }}>
+                      <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
+                    </button>
+                  )}
+                  {currentSongId && (
+                    <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.5)" }} title="Comments">
+                      <MessageCircle size={13} />
+                    </button>
+                  )}
+                  {tipsEnabled && currentSongId && (
+                    <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.5)" }} title="Tip creator">
+                      <DollarSign size={13} />
+                    </button>
+                  )}
+                  <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.5)" }}>
+                    {state.isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                  </button>
+                  <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.5)" }}>
+                    <MoreHorizontal size={14} />
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); setZone("EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: GOLD }} title="Expand player">
+                    <ChevronUp size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] w-6 text-right tabular-nums" style={{ color: "rgba(212,175,55,0.5)" }}>{fmtTime(state.currentTime)}</span>
+                <div className="flex-1 cursor-pointer relative" style={{ background: "#1a1a1a", height: "3px", borderRadius: "2px" }} onClick={handleSeek}>
+                  <div className="h-full relative" style={{ width: `${progress}%`, background: GOLD, borderRadius: "2px" }}>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full" style={{ width: "10px", height: "10px", background: GOLD_HL, boxShadow: state.isPlaying ? `0 0 10px rgba(245,230,179,0.7)` : "none", transform: "translateY(-50%) translateX(50%)" }} />
+                  </div>
+                </div>
+                <span className="text-[9px] w-6 tabular-nums" style={{ color: "rgba(212,175,55,0.5)" }}>{fmtTime(state.duration)}</span>
+              </div>
+
+              {/* Controls row */}
+              <div className="flex items-center gap-2">
+                <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(212,175,55,0.5)" }}><Shuffle size={12} /></button>
+                <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipBack size={15} /></button>
+                {/* Circular play button — 56px spec */}
+                <button
+                  onClick={e => { e.stopPropagation(); togglePlay(); }}
+                  className="flex items-center justify-center rounded-full transition-transform hover:scale-105 flex-shrink-0"
+                  style={{ width: "40px", height: "40px", background: GOLD, color: "#000", boxShadow: `0 0 10px rgba(212,175,55,0.5), 0 0 20px rgba(212,175,55,0.2)` }}
+                >
+                  {state.isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" style={{ marginLeft: "1px" }} />}
+                </button>
+                <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipForward size={15} /></button>
+                <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(212,175,55,0.5)" }}><Repeat size={12} /></button>
+                <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)", background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={12} /></button>
+                {/* Cinematic mode button */}
+                <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1 transition-colors" style={{ color: "rgba(212,175,55,0.5)" }} title="Cinematic mode"><Maximize2 size={12} /></button>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* ── MOBILE / EXPANDED: stacked controls row ── */
+          <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
+            {/* Playback controls — 3-tier hierarchy */}
+            <div className="flex items-center gap-3">
+              <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }}><Shuffle size={14} /></button>
+              <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipBack size={18} /></button>
+              {/* Circular play button — 56px spec */}
+              <button
+                onClick={e => { e.stopPropagation(); togglePlay(); }}
+                className="flex items-center justify-center rounded-full transition-transform hover:scale-105"
+                style={{ width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }}
+              >
+                {state.isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+              </button>
+              <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipForward size={18} /></button>
+              <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }}><Repeat size={14} /></button>
+            </div>
+            {/* Right utility actions */}
+            <div className="flex items-center gap-1">
+              {user && currentSongId && (
+                <button onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }} className="p-1.5 transition-colors" style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.65)" }}>
+                  <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
+                </button>
+              )}
+              {currentSongId && (
+                <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Comments">
+                  <MessageCircle size={14} />
+                </button>
+              )}
+              {currentSongId && (
+                <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Add to Collection">
+                  <FolderPlus size={15} />
+                </button>
+              )}
+              {tipsEnabled && currentSongId && (
+                <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Tip creator">
+                  <DollarSign size={14} />
+                </button>
+              )}
+              <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.65)" }}>
+                {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              </button>
+              <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)", background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={14} /></button>
+              <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }}><MoreHorizontal size={16} /></button>
+              <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "FLOAT" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: GOLD, filter: `drop-shadow(0 0 6px rgba(212,175,55,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"}>
+                {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
+              </button>
+            </div>
+          </div>
+        )
       )}
 
       {/* ── EXPANDED CONTENT ── */}
@@ -642,17 +754,26 @@ export default function GlobalPlayer() {
         >
           <div className="px-4 pb-6 space-y-5">
 
-            {/* Large artwork */}
+            {/* Large artwork — with swipe gesture + cinematic tap */}
             <div className="flex justify-center pt-2">
-              <button
-                onClick={goToSong}
-                className="relative rounded-2xl overflow-hidden transition-transform hover:scale-[1.01]"
+              <div
+                className="relative rounded-2xl overflow-hidden select-none"
                 style={{
                   width: "min(280px, 72vw)",
                   height: "min(280px, 72vw)",
                   background: currentTrack?.bg || "#111009",
-                  boxShadow: `0 8px 40px ${GOLD_GLOW}, 0 0 0 1px rgba(212,175,55,0.3)`,
+                  boxShadow: swipeDir
+                    ? `0 8px 40px ${GOLD_GLOW}, ${swipeDir === "left" ? "-6px" : "6px"} 0 24px rgba(212,175,55,0.4), 0 0 0 1px rgba(212,175,55,0.3)`
+                    : `0 8px 40px ${GOLD_GLOW}, 0 0 0 1px rgba(212,175,55,0.3)`,
+                  transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.25, 24)}px) rotate(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.02, 2)}deg)` : undefined,
+                  transition: swipeDelta === 0 ? "transform 0.3s cubic-bezier(0.32,0.72,0,1), box-shadow 0.2s ease" : "none",
+                  cursor: "pointer",
                 }}
+                onPointerDown={onArtPointerDown}
+                onPointerMove={onArtPointerMove}
+                onPointerUp={onArtPointerUp}
+                onPointerCancel={onArtPointerUp}
+                onClick={e => { if (Math.abs(swipeDelta) < 5) { e.stopPropagation(); setCinematic(true); } }}
               >
                 {currentTrack?.artUrl
                   ? <img
@@ -665,13 +786,27 @@ export default function GlobalPlayer() {
                       {currentTrack?.emoji || "🎵"}
                     </div>
                 }
+                {/* Swipe direction hint */}
+                {swipeDir && (
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.25)" }}>
+                    <span className="text-4xl" style={{ color: GOLD, filter: `drop-shadow(0 0 12px ${GOLD})` }}>
+                      {swipeDir === "left" ? "▶" : "◀"}
+                    </span>
+                  </div>
+                )}
+                {/* Tap hint overlay */}
+                {!swipeDir && (
+                  <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px]" style={{ background: "rgba(0,0,0,0.5)", color: "rgba(255,255,255,0.5)" }}>
+                    <Maximize2 size={9} /> Cinematic
+                  </div>
+                )}
                 {/* WID badge overlay */}
                 {currentTrack?.witnessId && (
                   <div className="absolute top-2 right-2">
                     <WidBadge onClick={goToVerify} />
                   </div>
                 )}
-              </button>
+              </div>
             </div>
 
             {/* Title + artist + WID */}
@@ -702,21 +837,19 @@ export default function GlobalPlayer() {
             {/* Action row */}
             <div className="flex items-center justify-center gap-5">
               {user && currentSongId && (
-                <button
-                  onClick={() => toggleLikeMutation.mutate({ songId: currentSongId })}
-                  className="flex flex-col items-center gap-1 transition-colors"
-                  style={{ color: isLiked ? "#EF4444" : "rgba(255,255,255,0.5)" }}
-                >
+                <button onClick={() => toggleLikeMutation.mutate({ songId: currentSongId })} className="flex flex-col items-center gap-1 transition-colors" style={{ color: isLiked ? "#EF4444" : "rgba(255,255,255,0.5)" }}>
                   <Heart size={22} fill={isLiked ? "currentColor" : "none"} />
                   <span className="text-[9px] uppercase tracking-widest">Like</span>
                 </button>
               )}
               {currentSongId && (
-                <button
-                  onClick={() => setAddToCollectionOpen(true)}
-                  className="flex flex-col items-center gap-1 transition-colors"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
-                >
+                <button onClick={() => setCommentsOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <MessageCircle size={22} />
+                  <span className="text-[9px] uppercase tracking-widest">Comments</span>
+                </button>
+              )}
+              {currentSongId && (
+                <button onClick={() => setAddToCollectionOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
                   <FolderPlus size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Add</span>
                 </button>
@@ -734,21 +867,13 @@ export default function GlobalPlayer() {
                 <span className="text-[9px] uppercase tracking-widest">Share</span>
               </button>
               {tipsEnabled && currentSongId && (
-                <button
-                  onClick={() => setTipOpen(true)}
-                  className="flex flex-col items-center gap-1 transition-colors"
-                  style={{ color: GOLD }}
-                >
+                <button onClick={() => setTipOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: GOLD }}>
                   <DollarSign size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Tip</span>
                 </button>
               )}
               {currentTrack?.witnessId && (
-                <button
-                  onClick={goToVerify}
-                  className="flex flex-col items-center gap-1 transition-colors"
-                  style={{ color: GOLD }}
-                >
+                <button onClick={goToVerify} className="flex flex-col items-center gap-1 transition-colors" style={{ color: GOLD }}>
                   <Shield size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Verify</span>
                 </button>
@@ -989,6 +1114,214 @@ export default function GlobalPlayer() {
     document.body
   ) : null;
 
+  /* ── Comments drawer portal ── */
+  const commentsDrawer = commentsOpen && currentSongId ? createPortal(
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 99990,
+        display: "flex",
+        alignItems: isDesktop ? "center" : "flex-end",
+        justifyContent: isDesktop ? "flex-end" : "center",
+        pointerEvents: "auto",
+      }}
+      onClick={e => { if (e.target === e.currentTarget) setCommentsOpen(false); }}
+    >
+      {/* Backdrop */}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }} onClick={() => setCommentsOpen(false)} />
+      {/* Panel */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          background: "var(--ln-coal, #111009)",
+          border: `1px solid rgba(212,175,55,0.25)`,
+          borderRadius: isDesktop ? "20px" : "20px 20px 0 0",
+          boxShadow: `0 -4px 32px rgba(212,175,55,0.12), 0 0 0 1px rgba(212,175,55,0.08)`,
+          width: isDesktop ? "400px" : "100%",
+          maxWidth: isDesktop ? "400px" : "100vw",
+          height: isDesktop ? "min(600px, 80vh)" : "70vh",
+          marginRight: isDesktop ? "32px" : undefined,
+          marginBottom: isDesktop ? "100px" : undefined,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ borderBottom: "1px solid rgba(212,175,55,0.1)" }}>
+          <div>
+            <span className="text-[12px] font-semibold" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>Comments</span>
+            {comments.length > 0 && <span className="ml-2 text-[10px]" style={{ color: "rgba(212,175,55,0.6)" }}>{comments.length}</span>}
+          </div>
+          <button onClick={() => setCommentsOpen(false)} className="p-1.5 rounded-full transition-colors hover:bg-white/5" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <X size={14} />
+          </button>
+        </div>
+        {/* Track info */}
+        <div className="flex items-center gap-3 px-4 py-2 flex-shrink-0" style={{ borderBottom: "1px solid rgba(212,175,55,0.06)" }}>
+          {currentTrack?.artUrl && <img src={currentTrack.artUrl} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />}
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold truncate" style={{ color: "#F5EDD8" }}>{currentTrack?.title}</p>
+            <p className="text-[10px] truncate" style={{ color: "rgba(212,175,55,0.6)" }}>{currentTrack?.artist}</p>
+          </div>
+        </div>
+        {/* Comments list */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+          {comments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full gap-2" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <MessageCircle size={28} />
+              <p className="text-[11px]">No comments yet. Be the first.</p>
+            </div>
+          ) : (
+            comments.map((c: any) => (
+              <div key={c.id} className="flex gap-2.5">
+                <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold" style={{ background: "rgba(212,175,55,0.15)", color: "rgba(212,175,55,0.8)" }}>
+                  {(c.user?.name || c.user?.username || "?").charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[11px] font-semibold" style={{ color: "#F5EDD8" }}>{c.user?.name || c.user?.username || "Anonymous"}</span>
+                    {c.createdAt && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{new Date(c.createdAt).toLocaleDateString()}</span>}
+                  </div>
+                  <p className="text-[12px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{c.content}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        {/* Comment input */}
+        <div className="px-4 pb-4 pt-2 flex-shrink-0" style={{ borderTop: "1px solid rgba(212,175,55,0.1)" }}>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={commentText}
+              onChange={e => setCommentText(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitComment(); } }}
+              placeholder={user ? "Add a comment…" : "Sign in to comment"}
+              disabled={!user || commentSubmitting}
+              className="flex-1 text-[12px] px-3 py-2 rounded-xl outline-none transition-all"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(212,175,55,0.2)", color: "#F5EDD8" }}
+            />
+            <button
+              onClick={handleSubmitComment}
+              disabled={!user || !commentText.trim() || commentSubmitting}
+              className="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 disabled:opacity-40"
+              style={{ background: "#C49A28", color: "#111009" }}
+            >
+              <Send size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
+  /* ── Cinematic overlay portal ── */
+  const cinematicPortal = cinematic && currentTrack ? createPortal(
+    <div
+      className="fixed inset-0"
+      style={{ zIndex: 99995, background: "#000", cursor: "pointer" }}
+      onClick={showCinematicOverlay}
+    >
+      {/* Full-bleed blurred artwork background */}
+      {currentTrack.artUrl && (
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${currentTrack.artUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
+            filter: "blur(40px) brightness(0.35) saturate(1.4)",
+            transform: "scale(1.1)",
+          }}
+        />
+      )}
+      {/* Center artwork */}
+      <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom: "120px" }}>
+        <div
+          className="relative rounded-3xl overflow-hidden select-none"
+          style={{
+            width: "min(380px, 80vw)",
+            height: "min(380px, 80vw)",
+            boxShadow: `0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.3), 0 0 60px rgba(212,175,55,0.15)`,
+            transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.3, 30)}px) rotate(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.02, 3)}deg)` : undefined,
+            transition: swipeDelta === 0 ? "transform 0.35s cubic-bezier(0.32,0.72,0,1)" : "none",
+          }}
+          onPointerDown={onArtPointerDown}
+          onPointerMove={onArtPointerMove}
+          onPointerUp={onArtPointerUp}
+          onPointerCancel={onArtPointerUp}
+        >
+          {currentTrack.artUrl
+            ? <img src={currentTrack.artUrl} alt={currentTrack.title} className="w-full h-full object-cover" style={{ objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%` }} />
+            : <div className="w-full h-full flex items-center justify-center text-8xl" style={{ background: currentTrack.bg || "#111009" }}>{currentTrack.emoji || "🎵"}</div>
+          }
+          {swipeDir && (
+            <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.2)" }}>
+              <span className="text-5xl" style={{ color: "#D4AF37", filter: "drop-shadow(0 0 16px #D4AF37)" }}>{swipeDir === "left" ? "▶" : "◀"}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Overlay controls — auto-hide after 3s */}
+      <div
+        className="absolute inset-0 flex flex-col justify-between"
+        style={{ transition: "opacity 0.4s", opacity: cinematicOverlay ? 1 : 0, pointerEvents: cinematicOverlay ? "auto" : "none" }}
+      >
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 pt-6" style={{ paddingTop: "max(24px, env(safe-area-inset-top, 24px))" }}>
+          <button
+            onClick={e => { e.stopPropagation(); setCinematic(false); }}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-white/10"
+            style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", color: "rgba(255,255,255,0.8)" }}
+          >
+            <ChevronDown size={18} />
+            <span className="text-[11px] font-medium">Exit Cinematic</span>
+          </button>
+          <div className="text-[9px] font-mono tracking-[0.25em] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>Cinematic</div>
+          {currentTrack.witnessId ? (
+            <button onClick={e => { e.stopPropagation(); setCinematic(false); goToVerify(); }} className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold" style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(74,222,128,0.5)", color: "#4ade80", backdropFilter: "blur(4px)" }}>
+              <Shield size={8} /> WID
+            </button>
+          ) : <div className="w-12" />}
+        </div>
+        {/* Bottom controls */}
+        <div className="px-6 pb-8" style={{ paddingBottom: "max(32px, env(safe-area-inset-bottom, 32px))" }}>
+          <div className="text-center mb-4">
+            <p className="text-[18px] font-semibold" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif", textShadow: "0 2px 16px rgba(0,0,0,0.8)" }}>{currentTrack.title}</p>
+            <p className="text-[13px] mt-1" style={{ color: "rgba(212,175,55,0.8)", textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>{currentTrack.artist}</p>
+          </div>
+          {/* Progress */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-[10px] tabular-nums" style={{ color: "rgba(255,255,255,0.5)" }}>{fmtTime(state.currentTime)}</span>
+            <div className="flex-1 cursor-pointer" style={{ background: "rgba(255,255,255,0.15)", height: "3px", borderRadius: "2px" }} onClick={handleSeek}>
+              <div style={{ width: `${progress}%`, background: "#D4AF37", height: "100%", borderRadius: "2px", position: "relative" }}>
+                <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%) translateX(50%)", width: "12px", height: "12px", borderRadius: "50%", background: "#F5E6B3", boxShadow: "0 0 12px rgba(245,230,179,0.8)" }} />
+              </div>
+            </div>
+            <span className="text-[10px] tabular-nums" style={{ color: "rgba(255,255,255,0.5)" }}>{fmtTime(state.duration)}</span>
+          </div>
+          {/* Controls */}
+          <div className="flex items-center justify-center gap-6">
+            <button onClick={e => { e.stopPropagation(); prevTrack(); }} style={{ color: "rgba(255,255,255,0.7)" }}><SkipBack size={24} fill="currentColor" /></button>
+            <button
+              onClick={e => { e.stopPropagation(); togglePlay(); }}
+              className="flex items-center justify-center rounded-full transition-transform hover:scale-105"
+              style={{ width: "64px", height: "64px", background: "#D4AF37", color: "#000", boxShadow: "0 0 20px rgba(212,175,55,0.6), 0 0 40px rgba(212,175,55,0.25)" }}
+            >
+              {state.isPlaying ? <Pause size={26} fill="currentColor" /> : <Play size={26} fill="currentColor" style={{ marginLeft: "3px" }} />}
+            </button>
+            <button onClick={e => { e.stopPropagation(); nextTrack(); }} style={{ color: "rgba(255,255,255,0.7)" }}><SkipForward size={24} fill="currentColor" /></button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
   /* ── Modals ── */
   const modals = (
     <>
@@ -1021,6 +1354,8 @@ export default function GlobalPlayer() {
       {content}
       {volumePortal}
       {contextMenuPortal}
+      {commentsDrawer}
+      {cinematicPortal}
       {modals}
     </>,
     document.body
