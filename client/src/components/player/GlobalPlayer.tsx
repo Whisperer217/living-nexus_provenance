@@ -66,7 +66,9 @@ function useIsDesktop() {
 }
 
 function fmtTime(s: number, ready = true) {
-  if (!ready || !s || !isFinite(s) || isNaN(s)) return "0:00";
+  // When not ready, show loading indicator rather than 0:00 to communicate "loading new track"
+  if (!ready) return "--:--";
+  if (!s || !isFinite(s) || isNaN(s)) return "0:00";
   const m = Math.floor(s / 60);
   return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
 }
@@ -142,6 +144,16 @@ function GlobalPlayerInner() {
   }
   useEffect(() => { if (cinematic) showCinematicOverlay(); }, [cinematic]);
   useEffect(() => () => { if (cinematicHideTimer.current) clearTimeout(cinematicHideTimer.current); }, []);
+
+  /* ── Cinematic exit channels: ESC key ── */
+  useEffect(() => {
+    if (!cinematic) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.preventDefault(); setCinematic(false); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [cinematic]);
 
   /* ── Artwork swipe gesture (artwork area only) ── */
   const artSwipeStartX = useRef<number | null>(null);
@@ -219,6 +231,19 @@ function GlobalPlayerInner() {
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
   const currentSongId = currentTrack?.id ? parseInt(currentTrack.id, 10) : null;
+
+  /* ── Optimistic display track ──
+   * Mirrors currentTrack but updates IMMEDIATELY when the track index changes,
+   * before isReady fires. This gives instant visual feedback on swipe/skip
+   * while the audio engine resets and loads the new src in the background.
+   * The audio invariants (isReady, atomic reset) are NOT affected.
+   */
+  const [displayTrack, setDisplayTrack] = useState<typeof currentTrack>(currentTrack);
+  useEffect(() => {
+    setDisplayTrack(currentTrack);
+  }, [state.currentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Use displayTrack for all visual rendering so swipe feels instant
+  const visTrack = displayTrack ?? currentTrack;
 
   const { data: songDetail } = trpc.songs.getById.useQuery(
     { id: currentSongId! },
@@ -402,7 +427,7 @@ function GlobalPlayerInner() {
     : baseShadow;
 
   /* ── Render nothing if no track ever loaded ── */
-  if (!currentTrack && tracks.length === 0) return null;
+  if (!visTrack && tracks.length === 0) return null;
 
   /* ══════════════════════════════════════════════════════════════
      PORTAL CONTENT
@@ -524,10 +549,10 @@ function GlobalPlayerInner() {
         <button
           onClick={e => { e.stopPropagation(); goToSong(); }}
           className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
-          style={{ background: currentTrack?.bg || "#111009" }}
+          style={{ background: visTrack?.bg || "#111009" }}
         >
-          {currentTrack?.artUrl
-            ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
+          {visTrack?.artUrl
+            ? <img src={visTrack.artUrl} alt="" className="w-full h-full object-cover" />
             : <Music2 size={16} style={{ color: GOLD }} />
           }
         </button>
@@ -538,10 +563,10 @@ function GlobalPlayerInner() {
             className="text-[13px] font-semibold truncate"
             style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}
           >
-            {currentTrack?.title || "Nothing playing"}
+            {visTrack?.title || "Nothing playing"}
           </p>
           <p className="text-[11px] truncate" style={{ color: "rgba(212,175,55,0.7)" }}>
-            {currentTrack?.artist || ""}
+            {visTrack?.artist || ""}
           </p>
         </div>
 
@@ -642,7 +667,7 @@ function GlobalPlayerInner() {
               className="relative flex-shrink-0 rounded-xl overflow-hidden cursor-pointer select-none"
               style={{
                 width: "72px", height: "72px",
-                background: currentTrack?.bg || "#111009",
+                background: visTrack?.bg || "#111009",
                 transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.3, 18)}px)` : undefined,
                 transition: swipeDelta === 0 ? "transform 0.25s ease" : "none",
                 boxShadow: swipeDir ? `${swipeDir === "left" ? "-4px" : "4px"} 0 16px rgba(212,175,55,0.35)` : undefined,
@@ -653,9 +678,9 @@ function GlobalPlayerInner() {
               onPointerCancel={onArtPointerUp}
               onClick={e => { if (Math.abs(swipeDelta) < 5) { e.stopPropagation(); goToSong(); } }}
             >
-              {currentTrack?.artUrl
-                ? <img src={currentTrack.artUrl} alt="" className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-2xl">{currentTrack?.emoji || "🎵"}</div>
+              {visTrack?.artUrl
+                ? <img src={visTrack.artUrl} alt="" className="w-full h-full object-cover" />
+                : <div className="w-full h-full flex items-center justify-center text-2xl">{visTrack?.emoji || "🎵"}</div>
               }
               {/* Swipe direction hint */}
               {swipeDir && (
@@ -671,10 +696,10 @@ function GlobalPlayerInner() {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-[13px] font-semibold truncate" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>
-                    {currentTrack?.title || "Nothing playing"}
+                    {visTrack?.title || "Nothing playing"}
                   </p>
                   <p className="text-[11px] truncate" style={{ color: "rgba(212,175,55,0.7)" }}>
-                    {currentTrack?.artist || ""}
+                    {visTrack?.artist || ""}
                   </p>
                 </div>
                 {/* Right utility actions */}
@@ -806,7 +831,7 @@ function GlobalPlayerInner() {
                 style={{
                   width: "min(280px, 72vw)",
                   height: "min(280px, 72vw)",
-                  background: currentTrack?.bg || "#111009",
+                  background: visTrack?.bg || "#111009",
                   boxShadow: swipeDir
                     ? `0 8px 40px ${GOLD_GLOW}, ${swipeDir === "left" ? "-6px" : "6px"} 0 24px rgba(212,175,55,0.4), 0 0 0 1px rgba(212,175,55,0.3)`
                     : `0 8px 40px ${GOLD_GLOW}, 0 0 0 1px rgba(212,175,55,0.3)`,
@@ -820,15 +845,15 @@ function GlobalPlayerInner() {
                 onPointerCancel={onArtPointerUp}
                 onClick={e => { if (Math.abs(swipeDelta) < 5) { e.stopPropagation(); setCinematic(true); } }}
               >
-                {currentTrack?.artUrl
+                {visTrack?.artUrl
                   ? <img
-                      src={currentTrack.artUrl}
-                      alt={currentTrack.title}
+                      src={visTrack.artUrl}
+                      alt={visTrack.title}
                       className="w-full h-full object-cover"
-                      style={{ objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%` }}
+                      style={{ objectPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%` }}
                     />
                   : <div className="w-full h-full flex items-center justify-center text-6xl">
-                      {currentTrack?.emoji || "🎵"}
+                      {visTrack?.emoji || "🎵"}
                     </div>
                 }
                 {/* Swipe direction hint */}
@@ -846,7 +871,7 @@ function GlobalPlayerInner() {
                   </div>
                 )}
                 {/* WID badge overlay */}
-                {currentTrack?.witnessId && (
+                {visTrack?.witnessId && (
                   <div className="absolute top-2 right-2">
                     <WidBadge onClick={goToVerify} />
                   </div>
@@ -860,14 +885,14 @@ function GlobalPlayerInner() {
                 className="text-[22px] font-bold leading-tight"
                 style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}
               >
-                {currentTrack?.title || "Nothing playing"}
+                {visTrack?.title || "Nothing playing"}
               </h2>
               <button
                 onClick={goToCreator}
                 className="text-[14px] transition-colors hover:opacity-80 flex items-center gap-1.5 mx-auto"
                 style={{ color: GOLD }}
               >
-                {currentTrack?.artist || ""}
+                {visTrack?.artist || ""}
                 {songDetail?.creator && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: "rgba(212,175,55,0.12)", border: `1px solid ${GOLD}` }}>
                     ✓
@@ -902,7 +927,7 @@ function GlobalPlayerInner() {
               <button
                 onClick={async () => {
                   const url = `${window.location.origin}/song/${currentSongId}`;
-                  try { if (navigator.share) { await navigator.share({ title: currentTrack!.title, url }); return; } } catch {}
+                  try { if (navigator.share) { await navigator.share({ title: visTrack?.title ?? '', url }); return; } } catch {}
                   try { await navigator.clipboard.writeText(url); } catch {}
                 }}
                 className="flex flex-col items-center gap-1 transition-colors"
@@ -917,7 +942,7 @@ function GlobalPlayerInner() {
                   <span className="text-[9px] uppercase tracking-widest">Tip</span>
                 </button>
               )}
-              {currentTrack?.witnessId && (
+              {visTrack?.witnessId && (
                 <button onClick={goToVerify} className="flex flex-col items-center gap-1 transition-colors" style={{ color: GOLD }}>
                   <Shield size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Verify</span>
@@ -926,7 +951,7 @@ function GlobalPlayerInner() {
             </div>
 
             {/* Provenance strip */}
-            {currentTrack?.witnessId && (
+            {visTrack?.witnessId && (
               <button
                 onClick={goToVerify}
                 className="w-full flex items-center justify-between rounded-xl px-4 py-3 transition-all hover:opacity-80"
@@ -1118,7 +1143,7 @@ function GlobalPlayerInner() {
         onClick={async () => {
           setShowContextMenu(false);
           const url = `${window.location.origin}/song/${currentSongId}`;
-          try { if (navigator.share) { await navigator.share({ title: currentTrack!.title, url }); return; } } catch {}
+          try { if (navigator.share) { await navigator.share({ title: visTrack?.title ?? '', url }); return; } } catch {}
           try { await navigator.clipboard.writeText(url); } catch {}
         }}
         className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left"
@@ -1206,10 +1231,10 @@ function GlobalPlayerInner() {
         </div>
         {/* Track info */}
         <div className="flex items-center gap-3 px-4 py-2 flex-shrink-0" style={{ borderBottom: "1px solid rgba(212,175,55,0.06)" }}>
-          {currentTrack?.artUrl && <img src={currentTrack.artUrl} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />}
+          {visTrack?.artUrl && <img src={visTrack.artUrl} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />}
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold truncate" style={{ color: "#F5EDD8" }}>{currentTrack?.title}</p>
-            <p className="text-[10px] truncate" style={{ color: "rgba(212,175,55,0.6)" }}>{currentTrack?.artist}</p>
+            <p className="text-[11px] font-semibold truncate" style={{ color: "#F5EDD8" }}>{visTrack?.title}</p>
+            <p className="text-[10px] truncate" style={{ color: "rgba(212,175,55,0.6)" }}>{visTrack?.artist}</p>
           </div>
         </div>
         {/* Comments list */}
@@ -1280,20 +1305,20 @@ function GlobalPlayerInner() {
   ) : null;
 
   /* ── Cinematic overlay portal ── */
-  const cinematicPortal = cinematic && currentTrack ? createPortal(
+  const cinematicPortal = cinematic && visTrack ? createPortal(
     <div
       className="fixed inset-0"
       style={{ zIndex: 99995, background: "#000", cursor: "pointer" }}
       onClick={showCinematicOverlay}
     >
       {/* Full-bleed blurred artwork background */}
-      {currentTrack.artUrl && (
+      {visTrack.artUrl && (
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url(${currentTrack.artUrl})`,
+            backgroundImage: `url(${visTrack.artUrl})`,
             backgroundSize: "cover",
-            backgroundPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
+            backgroundPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`,
             filter: "blur(40px) brightness(0.35) saturate(1.4)",
             transform: "scale(1.1)",
           }}
@@ -1315,9 +1340,9 @@ function GlobalPlayerInner() {
           onPointerUp={onArtPointerUp}
           onPointerCancel={onArtPointerUp}
         >
-          {currentTrack.artUrl
-            ? <img src={currentTrack.artUrl} alt={currentTrack.title} className="w-full h-full object-cover" style={{ objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%` }} />
-            : <div className="w-full h-full flex items-center justify-center text-8xl" style={{ background: currentTrack.bg || "#111009" }}>{currentTrack.emoji || "🎵"}</div>
+          {visTrack.artUrl
+            ? <img src={visTrack.artUrl} alt={visTrack.title} className="w-full h-full object-cover" style={{ objectPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%` }} />
+            : <div className="w-full h-full flex items-center justify-center text-8xl" style={{ background: visTrack.bg || "#111009" }}>{visTrack.emoji || "🎵"}</div>
           }
           {swipeDir && (
             <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.2)" }}>
@@ -1342,7 +1367,7 @@ function GlobalPlayerInner() {
             <span className="text-[11px] font-medium">Exit Cinematic</span>
           </button>
           <div className="text-[9px] font-mono tracking-[0.25em] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>Cinematic</div>
-          {currentTrack.witnessId ? (
+          {visTrack.witnessId ? (
             <button onClick={e => { e.stopPropagation(); setCinematic(false); goToVerify(); }} className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold" style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(74,222,128,0.5)", color: "#4ade80", backdropFilter: "blur(4px)" }}>
               <Shield size={8} /> WID
             </button>
@@ -1351,8 +1376,8 @@ function GlobalPlayerInner() {
         {/* Bottom controls */}
         <div className="px-6 pb-8" style={{ paddingBottom: "max(32px, env(safe-area-inset-bottom, 32px))" }}>
           <div className="text-center mb-4">
-            <p className="text-[18px] font-semibold" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif", textShadow: "0 2px 16px rgba(0,0,0,0.8)" }}>{currentTrack.title}</p>
-            <p className="text-[13px] mt-1" style={{ color: "rgba(212,175,55,0.8)", textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>{currentTrack.artist}</p>
+            <p className="text-[18px] font-semibold" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif", textShadow: "0 2px 16px rgba(0,0,0,0.8)" }}>{visTrack.title}</p>
+            <p className="text-[13px] mt-1" style={{ color: "rgba(212,175,55,0.8)", textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>{visTrack.artist}</p>
           </div>
           {/* Progress */}
           <div className="flex items-center gap-3 mb-4">
@@ -1388,14 +1413,14 @@ function GlobalPlayerInner() {
       {tipOpen && currentSongId && (
         <PlayerTipModal
           songId={currentSongId}
-          songTitle={currentTrack?.title}
-          artistName={currentTrack?.artist || "this creator"}
-          genre={currentTrack?.genre}
-          witnessId={currentTrack?.witnessId}
-          artUrl={currentTrack?.artUrl}
-          artType={currentTrack?.artType}
-          coverPositionX={currentTrack?.coverPositionX}
-          coverPositionY={currentTrack?.coverPositionY}
+          songTitle={visTrack?.title}
+          artistName={visTrack?.artist || "this creator"}
+          genre={visTrack?.genre}
+          witnessId={visTrack?.witnessId}
+          artUrl={visTrack?.artUrl}
+          artType={visTrack?.artType}
+          coverPositionX={visTrack?.coverPositionX}
+          coverPositionY={visTrack?.coverPositionY}
           stripeAccountId={creatorStripeAccountId}
           onClose={() => setTipOpen(false)}
         />
@@ -1403,7 +1428,7 @@ function GlobalPlayerInner() {
       <AddToCollectionModal
         open={!!(addToCollectionOpen && currentSongId)}
         songId={currentSongId ?? 0}
-        songTitle={currentTrack?.title ?? ""}
+        songTitle={visTrack?.title ?? ""}
         onClose={() => setAddToCollectionOpen(false)}
       />
     </>

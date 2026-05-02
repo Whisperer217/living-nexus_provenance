@@ -3966,3 +3966,12 @@
 - [ ] PlaylistDrawer: listen for ln:close-right-drawers and close self
 - [ ] MarketplaceDrawer: listen for ln:close-right-drawers and close self
 - [ ] Singleton audit documented: audioRef confirmed single-instance, PlayerProvider mounted once at app root
+
+## Phase 114: Feel Alive — Transition Quality + Surface Typing
+
+- [x] GlobalPlayer mount audit: confirmed singleton inside persistent MainLayout shell (not remounting per route)
+- [x] Optimistic displayTrack: visTrack state mirrors currentTrack but updates immediately on track index change (before isReady fires) — instant visual swap on swipe/skip
+- [x] Cinematic ESC key exit channel: window keydown listener active only while cinematic=true
+- [x] Loading state: fmtTime returns --:-- when isReady=false (communicates loading, not zero)
+- [x] Drawer surface typing audit: KeeperAvatarWidget/FloatingAvatar confirmed as independent assist layer (GuideLayer z:50, not subject to ln:close-right-drawers exclusivity)
+- [x] Cinematic portal guard updated to use visTrack (fixes TS18047 null errors)
