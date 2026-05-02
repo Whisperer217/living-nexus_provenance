@@ -512,7 +512,7 @@ function GlobalPlayerInner() {
   const RAIL_RIGHT = 320; // RightRail width
   const desktopFloatStyle: React.CSSProperties = isDesktop && !isExpanded ? {
     width: `calc(100vw - ${RAIL_LEFT}px - ${RAIL_RIGHT}px - 64px)`, // fluid within MainColumn minus margins
-    maxWidth: 820,
+    maxWidth: 1100,
     minWidth: 560,
     right: desktopAnchor === "right" ? `${RAIL_RIGHT + 16}px` : "auto",
     left: desktopAnchor === "left" ? `${RAIL_LEFT + 16}px` : "auto",
@@ -543,7 +543,7 @@ function GlobalPlayerInner() {
         backdropFilter: glassBlur,
         WebkitBackdropFilter: glassBlur,
         border: GOLD_BORDER,
-        borderRadius: isExpanded ? "20px 20px 0 0" : "12px 12px 0 0",
+        borderRadius: isExpanded ? "20px 20px 0 0" : isDesktop ? "20px" : "12px 12px 0 0",
         boxShadow: activeShadow,
         // Spring-physics transition: overshoot + settle for zone changes; none during active drag
         transition: dragHeight !== null ? "none" : "height 0.4s cubic-bezier(0.34,1.56,0.64,1), border-radius 0.35s ease, transform 0.35s ease, opacity 0.4s ease",
