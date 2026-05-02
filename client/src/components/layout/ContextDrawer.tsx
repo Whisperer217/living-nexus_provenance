@@ -241,7 +241,10 @@ export default function ContextDrawer({
         aria-hidden="true"
         style={{
           position: "fixed",
-          inset: 0,
+          top: 0,
+          left: 72,   /* rail width — backdrop never covers the rail */
+          right: 0,
+          bottom: 0,
           zIndex: 299,
           background: "rgba(0,0,0,0.40)",
           opacity: open ? 1 : 0,
@@ -266,7 +269,8 @@ export default function ContextDrawer({
           background: "rgba(12,11,9,0.98)",
           borderRight: "1px solid rgba(212,175,55,0.12)",
           backdropFilter: "blur(20px)",
-          transform: open ? "translateX(0)" : "translateX(-100%)",
+          /* Close: push fully off-screen left past the rail so no artifact bleeds into the 72px rail zone */
+          transform: open ? "translateX(0)" : "translateX(calc(-100% - 72px))",
           transition: "transform 220ms cubic-bezier(0.22,1,0.36,1)",
           boxShadow: open ? "8px 0 40px rgba(0,0,0,0.65)" : "none",
           pointerEvents: open ? "auto" : "none",

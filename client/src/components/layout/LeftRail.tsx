@@ -1,16 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — LeftRail v4 (Two-State Drawer Model)
+   LIVING NEXUS — LeftRail v5 (Interaction Boundary Fix)
    Desktop only (hidden on mobile). Fixed 72px column.
 
-   Two-state contract:
-   - drawerOpen: boolean  → controls visibility
-   - activeMode: NavMode  → controls meaning / section highlight
-   
-   Clicking an icon:
-   - If activeMode !== icon.id → set activeMode = icon.id, open drawer
-   - If activeMode === icon.id → toggle drawerOpen (close if open, open if closed)
-   
-   Rail never navigates directly. Drawer handles all routing.
+   Interaction contract:
+   - All clicks call e.stopPropagation() to prevent bubbling to
+     the ContextDrawer's outside-click handler.
+   - Rail is marked data-rail="true" so ContextDrawer can include
+     it in the "inside" check.
+   - Buttons are 56px tall (full-width) for reliable hit area.
+   - Toggle logic lives in MainLayout.handleRailClick:
+       if (drawerOpen && activeMode === clickedMode) → close
+       else → set activeMode = clickedMode, open
 ═══════════════════════════════════════════════════════════════════ */
 import { useLocation } from "wouter";
 import { Home, Compass, User, Upload, Archive } from "lucide-react";
@@ -42,8 +42,19 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
     return location === path || (path !== "/" && location.startsWith(path + "/"));
   };
 
+  /* stopPropagation wrapper — prevents click from bubbling to the
+     ContextDrawer backdrop's outside-click handler, which would
+     immediately close the drawer before the open logic fires. */
+  const handleClick = (e: React.MouseEvent, mode: NavMode) => {
+    e.stopPropagation();
+    onRailClick(mode);
+  };
+
   return (
     <aside
+      /* data-rail="true" lets ContextDrawer include this element in
+         its "inside the system" check so it doesn't close on rail clicks */
+      data-rail="true"
       className="hidden lg:flex flex-col items-center py-3 gap-1"
       style={{
         position: "fixed",
@@ -53,18 +64,18 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
         width: 72,
         background: "rgba(10,9,7,0.97)",
         borderRight: "1px solid rgba(212,175,55,0.08)",
-        zIndex: 200,
+        zIndex: 310,  /* above drawer backdrop (299) and panel (300) — rail is always visible */
         overflowY: "auto",
         overflowX: "hidden",
       }}
     >
       {/* Logo — opens drawer for current activeMode (or "home" if none) */}
       <button
-        onClick={() => onRailClick(activeMode ?? "home")}
+        onClick={(e) => handleClick(e, activeMode ?? "home")}
         className="mb-3 flex items-center justify-center rounded-xl transition-all hover:bg-white/[0.04]"
         title="Navigation"
         aria-label="Open navigation"
-        style={{ width: 40, height: 40 }}
+        style={{ width: 56, height: 48 }}
       >
         <img src={LOGO_URL} alt="LN" style={{ width: 32, height: 32, borderRadius: 8 }} />
       </button>
@@ -72,7 +83,7 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
       {/* Divider */}
       <div className="w-8 h-px mb-2" style={{ background: "rgba(196,154,40,0.12)" }} />
 
-      {/* Nav icons */}
+      {/* Nav icons — full-width 56px buttons for reliable hit area */}
       {RAIL_ITEMS.map(({ id, icon: Icon, label, path }) => {
         const routeActive = isRouteActive(path);
         const modeActive = activeMode === id;
@@ -84,11 +95,11 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
             key={id}
             title={label}
             aria-label={label}
-            onClick={() => onRailClick(id)}
+            onClick={(e) => handleClick(e, id)}
             className="relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
             style={{
-              width: 52,
-              height: 52,
+              width: 60,   /* wider hit area — fills most of the 72px rail */
+              height: 56,  /* taller hit area — easier to tap/click */
               background: active ? "rgba(212,175,55,0.10)" : "transparent",
               color: active ? "#D4AF37" : "rgba(255,255,255,0.40)",
               boxShadow: active
