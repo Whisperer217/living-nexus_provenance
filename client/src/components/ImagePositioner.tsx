@@ -235,18 +235,33 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
 
   const onTouchEnd = useCallback(() => { touchRef.current = null; }, []);
 
-  // ── Scroll to zoom ────────────────────────────────────────────────
-  const onWheel = useCallback((e: React.WheelEvent) => {
-    if (mode === "fit") return;
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -5 : 5;
-    setZoom(prev => {
-      const next = Math.max(100, Math.min(300, prev + delta));
-      if (next > 100 && mode !== "crop") setMode("crop");
-      return next;
-    });
-    flashOverlay();
-  }, [mode, flashOverlay]);
+  // ── Scroll to zoom ─────────────────────────────────────────────────
+  // React's synthetic onWheel is passive by default in modern browsers,
+  // so e.preventDefault() is a no-op and the page scrolls instead.
+  // We attach the native listener with { passive: false } so we can
+  // actually prevent the page scroll while the positioner is open.
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const flashOverlayRef = useRef(flashOverlay);
+  flashOverlayRef.current = flashOverlay;
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const handleWheel = (e: WheelEvent) => {
+      if (modeRef.current === "fit") return;
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -5 : 5;
+      setZoom(prev => {
+        const next = Math.max(100, Math.min(300, prev + delta));
+        if (next > 100 && modeRef.current !== "crop") setMode("crop");
+        return next;
+      });
+      flashOverlayRef.current();
+    };
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []); // empty deps — refs keep values current without re-subscribing
 
   // ── Double-click to reset ─────────────────────────────────────────
   const onDoubleClick = useCallback(() => {
@@ -278,7 +293,6 @@ export function ImagePositioner(props: ImagePositionerProps | LegacyProps) {
           touchAction: "none",
         }}
         onMouseDown={onMouseDown}
-        onWheel={onWheel}
         onDoubleClick={onDoubleClick}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}

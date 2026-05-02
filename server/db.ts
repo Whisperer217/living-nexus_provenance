@@ -3962,7 +3962,7 @@ export async function setUserPublicKey(userId: number, publicKeyHex: string) {
 export async function getUserCollections(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { userCollections, userCollectionTracks } = await import("../drizzle/schema");
+  // userCollections and userCollectionTracks are statically imported at top of file
   const cols = await db
     .select()
     .from(userCollections)
@@ -4011,7 +4011,7 @@ export async function renameUserCollection(userId: number, collectionId: number,
 export async function deleteUserCollection(userId: number, collectionId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { userCollections, userCollectionTracks } = await import("../drizzle/schema");
+  // userCollections and userCollectionTracks are statically imported at top of file
   // Delete tracks first
   await db.delete(userCollectionTracks).where(eq(userCollectionTracks.collectionId, collectionId));
   await db.delete(userCollections)
