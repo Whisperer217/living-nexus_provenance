@@ -3975,3 +3975,12 @@
 - [x] Loading state: fmtTime returns --:-- when isReady=false (communicates loading, not zero)
 - [x] Drawer surface typing audit: KeeperAvatarWidget/FloatingAvatar confirmed as independent assist layer (GuideLayer z:50, not subject to ln:close-right-drawers exclusivity)
 - [x] Cinematic portal guard updated to use visTrack (fixes TS18047 null errors)
+
+## Phase 115: Swipe Physics, Visual Persistence, Cinematic Polish, Queue Visualization
+
+- [x] Swipe physics: velocity tracking, momentum carry, rubber-band resistance at track boundaries, spring-back animation
+- [x] Player visual persistence: spring-physics cubic-bezier height transitions, will-change during drag, auto-elevate to FLOAT when playback starts in MINI zone
+- [x] Cinematic polish: entrance animation (ln-cinematic-enter keyframe), depth layers with parallax background blur, vignette overlay, improved transition timing
+- [x] Queue auto-scroll: MiniTrackRow forwardRef, activeRowRef + hasMounted guard, smooth scroll to active row on track change
+- [x] ESC key exit for cinematic mode
+- [x] --:-- loading indicator (fmtTime returns --:-- when isReady=false)

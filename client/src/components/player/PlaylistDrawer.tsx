@@ -15,7 +15,7 @@
    - Closes on route change and outside click
    - Swipe-to-close on mobile (swipe right)
 ═══════════════════════════════════════════════════════════════════ */
-import { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   Music, Loader2, Lock, Play, Plus, Sparkles, GripVertical, Trash2, FolderOpen, ChevronDown, ChevronRight,
@@ -168,17 +168,14 @@ function TabHandle({
 }
 
 // ── Mini Track Row ─────────────────────────────────────────────────
-function MiniTrackRow({
-  track,
-  isActive,
-  onPlay,
-}: {
+const MiniTrackRow = React.forwardRef<HTMLButtonElement, {
   track: TrackRow;
   isActive: boolean;
   onPlay: () => void;
-}) {
+}>(function MiniTrackRow({ track, isActive, onPlay }, ref) {
   return (
     <button
+      ref={ref}
       onClick={onPlay}
       style={{
         width: "100%",
@@ -251,7 +248,7 @@ function MiniTrackRow({
       <Play size={11} fill="currentColor" style={{ color: "var(--ln-gold)", flexShrink: 0, opacity: 0.6 }} />
     </button>
   );
-}
+});
 
 // ── DraggableLikedList ─────────────────────────────────────────────
 // Reorderable list of liked tracks with drag handles
@@ -643,6 +640,14 @@ export default function PlaylistDrawer() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // Queue auto-scroll: when track changes, scroll the active row into view
+  const activeRowRef = useRef<HTMLButtonElement | null>(null);
+  const hasMounted = useRef(false);
+  useEffect(() => {
+    if (!hasMounted.current) { hasMounted.current = true; return; }
+    activeRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [state.currentIdx]);
+
   // Swipe-to-close (swipe right)
   const touchStartX = useRef<number | null>(null);
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
@@ -906,7 +911,7 @@ export default function PlaylistDrawer() {
               </button>
               <div style={{ height: "1px", margin: "0 16px 4px", background: "rgba(196,154,40,0.04)" }} />
               {tracks.map((track) => (
-                <MiniTrackRow key={track.id} track={track} isActive={currentId === String(track.id)} onPlay={() => handlePlay(track, tracks)} />
+                <MiniTrackRow key={track.id} ref={currentId === String(track.id) ? activeRowRef : null} track={track} isActive={currentId === String(track.id)} onPlay={() => handlePlay(track, tracks)} />
               ))}
             </div>
           )}

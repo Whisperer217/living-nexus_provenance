@@ -145,6 +145,17 @@ function GlobalPlayerInner() {
   useEffect(() => { if (cinematic) showCinematicOverlay(); }, [cinematic]);
   useEffect(() => () => { if (cinematicHideTimer.current) clearTimeout(cinematicHideTimer.current); }, []);
 
+  /* ── Visual persistence: auto-elevate to FLOAT when playback starts from MINI ── */
+  // This prevents the player from staying invisible (MINI) when a track begins.
+  // User can still drag it back to MINI manually.
+  useEffect(() => {
+    if (state.isPlaying && zone === 'MINI') {
+      setZone('FLOAT');
+      setDragHeight(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isPlaying]);
+
   /* ── Cinematic exit channels: ESC key ── */
   useEffect(() => {
     if (!cinematic) return;
@@ -155,36 +166,82 @@ function GlobalPlayerInner() {
     return () => window.removeEventListener('keydown', onKey);
   }, [cinematic]);
 
-  /* ── Artwork swipe gesture (artwork area only) ── */
+  /* ── Artwork swipe gesture — momentum physics ── */
   const artSwipeStartX = useRef<number | null>(null);
   const artSwipeStartY = useRef<number | null>(null);
+  const artSwipeLastX = useRef<number | null>(null);      // previous frame X for velocity
+  const artSwipeLastT = useRef<number>(0);                // previous frame timestamp
+  const artSwipeVelocity = useRef<number>(0);             // px/ms at release
+  const artSwipeLocked = useRef<boolean>(false);          // vertical scroll lock
   const [swipeDelta, setSwipeDelta] = useState(0);
   const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
-  const SWIPE_THRESHOLD = 60;
+  const SWIPE_THRESHOLD = 50;           // px — reduced because velocity also counts
+  const VELOCITY_THRESHOLD = 0.35;      // px/ms — fast flick triggers even under px threshold
+  const RUBBER_BAND = 0.35;             // 0–1 — resistance at track boundaries (first/last)
+
   function onArtPointerDown(e: React.PointerEvent) {
     artSwipeStartX.current = e.clientX;
     artSwipeStartY.current = e.clientY;
+    artSwipeLastX.current = e.clientX;
+    artSwipeLastT.current = e.timeStamp;
+    artSwipeVelocity.current = 0;
+    artSwipeLocked.current = false;
     setSwipeDelta(0);
     setSwipeDir(null);
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
+
   function onArtPointerMove(e: React.PointerEvent) {
     if (artSwipeStartX.current === null) return;
     const dx = e.clientX - artSwipeStartX.current;
     const dy = e.clientY - (artSwipeStartY.current ?? e.clientY);
-    if (Math.abs(dy) > Math.abs(dx) + 10) return; // vertical scroll wins
-    setSwipeDelta(dx);
-    setSwipeDir(dx < 0 ? "left" : "right");
+    // Lock to vertical scroll if it dominates early
+    if (!artSwipeLocked.current && Math.abs(dy) > Math.abs(dx) + 10) {
+      artSwipeLocked.current = true;
+    }
+    if (artSwipeLocked.current) return;
+
+    // Velocity: exponential moving average for smoothness
+    const dt = e.timeStamp - artSwipeLastT.current;
+    if (dt > 0 && artSwipeLastX.current !== null) {
+      const instantV = (e.clientX - artSwipeLastX.current) / dt;
+      artSwipeVelocity.current = artSwipeVelocity.current * 0.6 + instantV * 0.4;
+    }
+    artSwipeLastX.current = e.clientX;
+    artSwipeLastT.current = e.timeStamp;
+
+    // Rubber-band resistance at queue boundaries
+    const tracks = state.tracks.filter(t => !!t.audioUrl);
+    const atStart = state.currentIdx <= 0;
+    const atEnd = state.currentIdx >= tracks.length - 1;
+    let resistedDx = dx;
+    if ((atStart && dx > 0) || (atEnd && dx < 0)) {
+      // Apply rubber-band: diminishing returns past boundary
+      resistedDx = Math.sign(dx) * Math.pow(Math.abs(dx), RUBBER_BAND) * 12;
+    }
+
+    setSwipeDelta(resistedDx);
+    setSwipeDir(resistedDx < 0 ? "left" : resistedDx > 0 ? "right" : null);
   }
+
   function onArtPointerUp() {
     if (artSwipeStartX.current === null) return;
     const dx = swipeDelta;
+    const vel = artSwipeVelocity.current;
     artSwipeStartX.current = null;
     artSwipeStartY.current = null;
+    artSwipeLastX.current = null;
+    artSwipeVelocity.current = 0;
+    artSwipeLocked.current = false;
+
+    // Animate spring-back before resetting
     setSwipeDelta(0);
     setSwipeDir(null);
-    if (Math.abs(dx) >= SWIPE_THRESHOLD) {
-      if (dx < 0) nextTrack();
+
+    // Trigger on px threshold OR velocity threshold (fast flick)
+    const shouldTrigger = Math.abs(dx) >= SWIPE_THRESHOLD || Math.abs(vel) >= VELOCITY_THRESHOLD;
+    if (shouldTrigger) {
+      if (dx < 0 || vel < -VELOCITY_THRESHOLD) nextTrack();
       else prevTrack();
     }
   }
@@ -488,7 +545,8 @@ function GlobalPlayerInner() {
         border: GOLD_BORDER,
         borderRadius: isExpanded ? "20px 20px 0 0" : "12px 12px 0 0",
         boxShadow: activeShadow,
-        transition: dragHeight !== null ? "none" : "height 0.35s cubic-bezier(0.32,0.72,0,1), border-radius 0.35s ease, transform 0.35s ease, opacity 0.4s ease",
+        // Spring-physics transition: overshoot + settle for zone changes; none during active drag
+        transition: dragHeight !== null ? "none" : "height 0.4s cubic-bezier(0.34,1.56,0.64,1), border-radius 0.35s ease, transform 0.35s ease, opacity 0.4s ease",
         /* Suspension: fade + dock when tip modal is open (Option A) */
         opacity: tipModalOpen ? 0.15 : 1,
         pointerEvents: tipModalOpen ? "none" : undefined,
@@ -1308,10 +1366,16 @@ function GlobalPlayerInner() {
   const cinematicPortal = cinematic && visTrack ? createPortal(
     <div
       className="fixed inset-0"
-      style={{ zIndex: 99995, background: "#000", cursor: "pointer" }}
+      style={{
+        zIndex: 99995,
+        background: "#000",
+        cursor: "pointer",
+        // Entrance animation: fade + scale-up from slightly below
+        animation: "ln-cinematic-enter 0.45s cubic-bezier(0.32,0.72,0,1) both",
+      }}
       onClick={showCinematicOverlay}
     >
-      {/* Full-bleed blurred artwork background */}
+      {/* Depth layer 1: far background — heavy blur, low brightness */}
       {visTrack.artUrl && (
         <div
           className="absolute inset-0"
@@ -1319,11 +1383,39 @@ function GlobalPlayerInner() {
             backgroundImage: `url(${visTrack.artUrl})`,
             backgroundSize: "cover",
             backgroundPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`,
-            filter: "blur(40px) brightness(0.35) saturate(1.4)",
-            transform: "scale(1.1)",
+            filter: "blur(60px) brightness(0.25) saturate(1.6)",
+            transform: "scale(1.15)",
+            // Parallax: background shifts slightly opposite to swipe
+            transition: swipeDelta === 0 ? "transform 0.6s ease" : "none",
+            ...(swipeDelta !== 0 ? { transform: `scale(1.15) translateX(${-swipeDelta * 0.04}px)` } : {}),
           }}
         />
       )}
+      {/* Depth layer 2: mid vignette — radial dark gradient for depth */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, rgba(0,0,0,0.55) 100%)",
+          pointerEvents: "none",
+        }}
+      />
+      {/* Depth layer 3: gold ambient glow behind artwork */}
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ paddingBottom: "120px", pointerEvents: "none" }}
+      >
+        <div
+          style={{
+            width: "min(420px, 88vw)",
+            height: "min(420px, 88vw)",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)",
+            filter: "blur(24px)",
+            transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.15, 20)}px)` : undefined,
+            transition: swipeDelta === 0 ? "transform 0.5s ease" : "none",
+          }}
+        />
+      </div>
       {/* Center artwork */}
       <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom: "120px" }}>
         <div
@@ -1331,9 +1423,11 @@ function GlobalPlayerInner() {
           style={{
             width: "min(380px, 80vw)",
             height: "min(380px, 80vw)",
-            boxShadow: `0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.3), 0 0 60px rgba(212,175,55,0.15)`,
-            transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.3, 30)}px) rotate(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.02, 3)}deg)` : undefined,
-            transition: swipeDelta === 0 ? "transform 0.35s cubic-bezier(0.32,0.72,0,1)" : "none",
+            boxShadow: `0 32px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(212,175,55,0.35), 0 0 80px rgba(212,175,55,0.2)`,
+            transform: swipeDelta !== 0
+              ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.3, 30)}px) rotate(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.02, 3)}deg) scale(${swipeDelta !== 0 ? 0.97 : 1})`
+              : undefined,
+            transition: swipeDelta === 0 ? "transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease" : "none",
           }}
           onPointerDown={onArtPointerDown}
           onPointerMove={onArtPointerMove}
@@ -1345,8 +1439,8 @@ function GlobalPlayerInner() {
             : <div className="w-full h-full flex items-center justify-center text-8xl" style={{ background: visTrack.bg || "#111009" }}>{visTrack.emoji || "🎵"}</div>
           }
           {swipeDir && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.2)" }}>
-              <span className="text-5xl" style={{ color: "#D4AF37", filter: "drop-shadow(0 0 16px #D4AF37)" }}>{swipeDir === "left" ? "▶" : "◀"}</span>
+            <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.15)", backdropFilter: "blur(2px)" }}>
+              <span className="text-5xl" style={{ color: "#D4AF37", filter: "drop-shadow(0 0 20px #D4AF37) drop-shadow(0 0 40px rgba(212,175,55,0.5))" }}>{swipeDir === "left" ? "▶" : "◄"}</span>
             </div>
           )}
         </div>
@@ -1354,7 +1448,7 @@ function GlobalPlayerInner() {
       {/* Overlay controls — auto-hide after 3s */}
       <div
         className="absolute inset-0 flex flex-col justify-between"
-        style={{ transition: "opacity 0.4s", opacity: cinematicOverlay ? 1 : 0, pointerEvents: cinematicOverlay ? "auto" : "none" }}
+        style={{ transition: "opacity 0.5s cubic-bezier(0.4,0,0.2,1)", opacity: cinematicOverlay ? 1 : 0, pointerEvents: cinematicOverlay ? "auto" : "none" }}
       >
         {/* Top bar */}
         <div className="flex items-center justify-between px-6 pt-6" style={{ paddingTop: "max(24px, env(safe-area-inset-top, 24px))" }}>
