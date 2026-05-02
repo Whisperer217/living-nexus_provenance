@@ -65,8 +65,8 @@ function useIsDesktop() {
   return isDesktop;
 }
 
-function fmtTime(s: number) {
-  if (!s || !isFinite(s) || isNaN(s)) return "0:00";
+function fmtTime(s: number, ready = true) {
+  if (!ready || !s || !isFinite(s) || isNaN(s)) return "0:00";
   const m = Math.floor(s / 60);
   return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
 }
@@ -98,6 +98,7 @@ function GlobalPlayerInner() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek, playTrack,
+    isReady,
   } = usePlayer();
   const [, navigate] = useLocation();
   const { user } = useAuth();
@@ -296,6 +297,8 @@ function GlobalPlayerInner() {
 
   /* ── Drag handlers ── */
   function onPointerDown(e: React.PointerEvent) {
+    // Zone-state lock: cinematic mode owns the full screen — block drag zone transitions
+    if (cinematic) return;
     // Only drag from the handle bar area (top 40px of player)
     const target = e.target as HTMLElement;
     if (target.closest("button") || target.closest("input") || target.closest("canvas")) return;
@@ -624,7 +627,7 @@ function GlobalPlayerInner() {
             </div>
           </div>
           <span className="text-[10px] w-7 tabular-nums" style={{ color: "rgba(212,175,55,0.6)" }}>
-            {fmtTime(state.duration)}
+            {fmtTime(state.duration, isReady)}
           </span>
         </div>
       )}
@@ -711,7 +714,7 @@ function GlobalPlayerInner() {
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full" style={{ width: "10px", height: "10px", background: GOLD_HL, boxShadow: state.isPlaying ? `0 0 10px rgba(245,230,179,0.7)` : "none", transform: "translateY(-50%) translateX(50%)" }} />
                   </div>
                 </div>
-                <span className="text-[9px] w-6 tabular-nums" style={{ color: "rgba(212,175,55,0.5)" }}>{fmtTime(state.duration)}</span>
+                <span className="text-[9px] w-6 tabular-nums" style={{ color: "rgba(212,175,55,0.5)" }}>{fmtTime(state.duration, isReady)}</span>
               </div>
 
               {/* Controls row */}
@@ -1359,7 +1362,7 @@ function GlobalPlayerInner() {
                 <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%) translateX(50%)", width: "12px", height: "12px", borderRadius: "50%", background: "#F5E6B3", boxShadow: "0 0 12px rgba(245,230,179,0.8)" }} />
               </div>
             </div>
-            <span className="text-[10px] tabular-nums" style={{ color: "rgba(255,255,255,0.5)" }}>{fmtTime(state.duration)}</span>
+            <span className="text-[10px] tabular-nums" style={{ color: "rgba(255,255,255,0.5)" }}>{fmtTime(state.duration, isReady)}</span>
           </div>
           {/* Controls */}
           <div className="flex items-center justify-center gap-6">

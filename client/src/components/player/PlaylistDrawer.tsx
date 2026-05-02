@@ -613,6 +613,13 @@ export default function PlaylistDrawer() {
   const [location, navigate] = useLocation();
   useEffect(() => { setIsOpen(false); }, [location]);
 
+  // Drawer exclusivity: close when the left-rail context drawer opens
+  useEffect(() => {
+    const handler = () => setIsOpen(false);
+    window.addEventListener("ln:close-right-drawers", handler);
+    return () => window.removeEventListener("ln:close-right-drawers", handler);
+  }, []);
+
   // Close on outside click
   useEffect(() => {
     if (!isOpen) return;

@@ -94,6 +94,8 @@ interface PlayerState {
   volume: number;
   currentTime: number;
   duration: number;
+  /** True once the current track has fired canplay — safe to show real duration */
+  isReady: boolean;
   liked: Set<string>;
   tracks: Track[]; // current context queue
   queueContext: QueueContext; // where the queue was built from
@@ -111,6 +113,8 @@ interface PlayerState {
 
 interface PlayerContextValue {
   state: PlayerState;
+  /** Convenience alias for state.isReady — true once canplay fires for the current track */
+  isReady: boolean;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   allTracks: () => Track[];
   currentTrackId: string | null;
@@ -218,6 +222,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       volume: getCache<number>(CACHE_KEYS.VOLUME) ?? 0.75,
       currentTime: 0,
       duration: 0,
+      isReady: false,
       liked: new Set(),
       tracks: session.tracks,
       queueContext: session.queueContext,
@@ -289,6 +294,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       ...s,
       duration: isFinite(audio.duration) && !isNaN(audio.duration) ? audio.duration : 0,
     }));
+    // canplay fires once the browser has buffered enough to begin playback.
+    // We use this as the "track is ready" signal — safe to show real duration.
+    const onCanPlay = () => setState(s => ({ ...s, isReady: true }));
     const onEnded = () => {
       setState(s => {
         const tracks = s.tracks.filter(t => !!t.audioUrl);
@@ -313,7 +321,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         if (next >= tracks.length) {
           audio.pause();
           audio.currentTime = 0;
-          return { ...s, isPlaying: false };
+          return { ...s, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
         }
         const t = tracks[next];
         if (t?.audioUrl) {
@@ -321,7 +329,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           audio.load(); // required on iOS Safari to reset ended state before play()
           audio.play().catch(() => {});
         }
-        return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl };
+        // Atomically reset readiness + timing on auto-advance
+        return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
       });
     };
     const onPlay = () => setState(s => ({ ...s, isPlaying: true }));
@@ -333,7 +342,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const next = s.currentIdx + 1;
         if (next >= tracks.length) {
           audio.pause();
-          return { ...s, isPlaying: false };
+          return { ...s, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
         }
         const t = tracks[next];
         if (t?.audioUrl) {
@@ -341,12 +350,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           audio.load();
           audio.play().catch(() => {});
         }
-        return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl };
+        // Atomically reset readiness + timing on error-skip
+        return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
       });
     };
 
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("durationchange", onDurationChange);
+    audio.addEventListener("canplay", onCanPlay);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
@@ -354,6 +365,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("durationchange", onDurationChange);
+      audio.removeEventListener("canplay", onCanPlay);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
@@ -374,7 +386,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       } else {
         audio.pause();
       }
-      return { ...s, currentIdx: idx, isPlaying: !!t.audioUrl };
+      // Atomically reset readiness + timing so no stale state leaks between tracks
+      return { ...s, currentIdx: idx, isPlaying: !!t.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
   }, []);
 
@@ -395,7 +408,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       if (!s.isShuffle && next >= tracks.length) {
         const audio = audioRef.current;
         if (audio) { audio.pause(); audio.currentTime = 0; }
-        return { ...s, isPlaying: false };
+        return { ...s, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
       }
       const t = tracks[next];
       const audio = audioRef.current;
@@ -403,7 +416,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         audio.src = safeAudioUrl(t.audioUrl);
         audio.play().catch(() => {});
       }
-      return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl };
+      // Atomically reset readiness + timing
+      return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
   }, []);
 
@@ -417,7 +431,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         audio.src = safeAudioUrl(t.audioUrl);
         audio.play().catch(() => {});
       }
-      return { ...s, currentIdx: prev, isPlaying: !!t?.audioUrl };
+      // Atomically reset readiness + timing
+      return { ...s, currentIdx: prev, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
   }, []);
 
@@ -491,7 +506,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         audio.load(); // reset ended state for mobile browsers
         audio.play().catch(() => {});
       }
-      return { ...s, tracks: newTracks, currentIdx: newIdx, isPlaying: !!t.audioUrl, queueContext: "NONE" };
+      // Atomically reset readiness + timing so no stale state leaks from previous track
+      return { ...s, tracks: newTracks, currentIdx: newIdx, isPlaying: !!t.audioUrl, queueContext: "NONE", isReady: false, duration: 0, currentTime: 0 };
     });
   }, []);
 
@@ -552,7 +568,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     audio.src = safeAudioUrl(t.audioUrl);
     audio.load(); // reset ended state for mobile browsers
     audio.play().catch(() => {});
-    setState(s => ({ ...s, tracks: validTracks, currentIdx: clampedIdx, isPlaying: true, queueContext: context }));
+    // Atomically reset readiness + timing so no stale state leaks from previous track
+    setState(s => ({ ...s, tracks: validTracks, currentIdx: clampedIdx, isPlaying: true, queueContext: context, isReady: false, duration: 0, currentTime: 0 }));
   }, []);
 
   const currentTrackId = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.id ?? null) : null;
@@ -671,9 +688,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     });
   }, [state.currentIdx, state.tracks, nextTrack, prevTrack]);
 
+  const isReady = state.isReady;
+
   return (
     <PlayerContext.Provider value={{
-      state, audioRef, allTracks, currentTrackId, queueContextLabel,
+      state, isReady, audioRef, allTracks, currentTrackId, queueContextLabel,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
       toggleLike, addTrack, addAndPlay, playNext, setQueue, playQueueAt, patchTrack,

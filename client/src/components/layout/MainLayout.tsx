@@ -53,15 +53,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   drawerOpenRef.current = drawerOpen;
   activeModeRef.current = activeMode;
   // Rail click: set activeMode + open drawer; clicking same mode toggles visibility
+  // Exclusivity guard: opening the context drawer closes all right-side drawers
+  // (PlaylistDrawer, MarketplaceDrawer) via a custom event so they can self-close.
   const handleRailClick = useCallback((mode: NavMode) => {
     const wasOpen = drawerOpenRef.current;
     const wasMode = activeModeRef.current;
     setActiveMode(mode);
-    // If already open on the same mode → close; otherwise open
+    // If already open on the same mode → close; otherwise open + close right drawers
     if (wasOpen && wasMode === mode) {
       setDrawerOpen(false);
     } else {
       setDrawerOpen(true);
+      // Signal right-side drawers to close so only one drawer surface is active at a time
+      window.dispatchEvent(new CustomEvent("ln:close-right-drawers"));
     }
   }, []);
 

@@ -3956,3 +3956,13 @@
 - [x] CreatorProfilePage: Change Banner button (Camera icon) appears on hover next to Reposition
 - [x] CreatorProfilePage: changeBannerMutation + handleChangeBannerFile wired to profile.uploadBanner
 - [x] CreatorProfilePage: AI focal point auto-opens positioner after banner change
+
+## Phase 113: Audio Invariants and State Machine Hardening
+- [ ] PlayerContext: add isReady to PlayerState, wire canplay/canplaythrough events
+- [ ] PlayerContext: reset duration/currentTime/isReady=false on every track switch (playTrack, nextTrack, prevTrack, addAndPlay, playQueueAt, onEnded)
+- [ ] GlobalPlayer: use isReady from context to gate fmtTime display (show 0:00 while not ready)
+- [ ] GlobalPlayer: add zone-state lock — if cinematic/EXPANDED mode active, block drag zone transitions
+- [ ] MainLayout: add drawer exclusivity guard — handleRailClick dispatches ln:close-right-drawers event
+- [ ] PlaylistDrawer: listen for ln:close-right-drawers and close self
+- [ ] MarketplaceDrawer: listen for ln:close-right-drawers and close self
+- [ ] Singleton audit documented: audioRef confirmed single-instance, PlayerProvider mounted once at app root
