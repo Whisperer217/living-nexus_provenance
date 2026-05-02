@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -107,7 +107,6 @@ const STAT_LABELS: Array<{ key: AttrKey; label: string; isCount: boolean }> = [
 export default function Keeper() {
   const { user, loading: authLoading } = useAuth({ redirectOnUnauthenticated: true });
   const [, navigate] = useLocation();
-  const [activeMode, setActiveMode] = useState<AgentMode>("Guide");
   const [selectedSkin, setSelectedSkin] = useState<string | null>(null);
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -115,7 +114,8 @@ export default function Keeper() {
   const [reloadingNoteId, setReloadingNoteId] = useState<number | null>(null);
 
   // Per-archetype attribute state — shared via KeeperAttrsContext
-  const { archetypeAttrs, setArchetypeAttrs, attrs, handleAttrChange, handleModeChange } = useKeeperAttrs();
+  // activeMode is from context so ACTIVE MODE buttons update the attributes panel correctly
+  const { activeMode, archetypeAttrs, setArchetypeAttrs, attrs, handleAttrChange, handleModeChange } = useKeeperAttrs();
 
   const profileQuery = trpc.keeper.getProfile.useQuery(undefined, { enabled: !!user });
   const notesQuery = trpc.keeper.listNotes.useQuery(undefined, { enabled: !!user && notesOpen });

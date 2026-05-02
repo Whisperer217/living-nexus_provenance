@@ -773,7 +773,9 @@ export default function CreatorProfilePage() {
             className="absolute inset-0 z-0"
             style={{
               backgroundImage: `url(${creator.bannerUrl})`,
-              backgroundSize: (creator as any).bannerZoom && (creator as any).bannerZoom > 100
+              /* Cap zoom at 100% — values ≥ 100 fall back to cover so the image
+                 always fills the banner without zooming past its natural size */
+              backgroundSize: (creator as any).bannerZoom && (creator as any).bannerZoom < 100
                 ? `${(creator as any).bannerZoom}%`
                 : "cover",
               backgroundPosition: `${bannerPos.x}% ${bannerPos.y}%`,

@@ -499,9 +499,9 @@ function GlobalPlayerInner() {
         className="flex items-center gap-3 flex-shrink-0 px-3"
         style={{
           height: "52px",
-          opacity: isExpanded ? 0 : 1,
+          opacity: (isExpanded || isFloat) ? 0 : 1,
           transition: "opacity 0.2s ease",
-          pointerEvents: isExpanded ? "none" : "auto",
+          pointerEvents: (isExpanded || isFloat) ? "none" : "auto",
         }}
       >
         {/* Art thumbnail */}

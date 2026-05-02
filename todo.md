@@ -3956,3 +3956,12 @@
 - [x] CreatorProfilePage: Change Banner button (Camera icon) appears on hover next to Reposition
 - [x] CreatorProfilePage: changeBannerMutation + handleChangeBannerFile wired to profile.uploadBanner
 - [x] CreatorProfilePage: AI focal point auto-opens positioner after banner change
+
+## Phase 111 Post-Deploy Bug Fixes (Slimdoggy feedback)
+
+- [ ] Banner zoom: cap background-size at 100% (user wants <110%), remove scroll-to-zoom hijack that breaks page scroll
+- [ ] Signals disappeared from RightRail (regression from Phase 111 rewrite)
+- [ ] Double player bars showing (two GlobalPlayer/MiniPlayer bars stacked)
+- [ ] No home/explore navigation accessible from creator profile page
+- [ ] Keeper active-mode tab not updating attributes panel when switching persona
+- [ ] No logout option in current nav/profile arrangement
