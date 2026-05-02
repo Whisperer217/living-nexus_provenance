@@ -285,7 +285,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     audio.volume = state.volume;
 
     const onTimeUpdate = () => setState(s => ({ ...s, currentTime: audio.currentTime }));
-    const onDurationChange = () => setState(s => ({ ...s, duration: audio.duration || 0 }));
+    const onDurationChange = () => setState(s => ({
+      ...s,
+      duration: isFinite(audio.duration) && !isNaN(audio.duration) ? audio.duration : 0,
+    }));
     const onEnded = () => {
       setState(s => {
         const tracks = s.tracks.filter(t => !!t.audioUrl);

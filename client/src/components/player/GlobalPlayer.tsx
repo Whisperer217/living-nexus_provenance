@@ -66,7 +66,7 @@ function useIsDesktop() {
 }
 
 function fmtTime(s: number) {
-  if (!s || isNaN(s)) return "0:00";
+  if (!s || !isFinite(s) || isNaN(s)) return "0:00";
   const m = Math.floor(s / 60);
   return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
 }
@@ -115,6 +115,8 @@ function GlobalPlayerInner() {
   const dragStartY = useRef<number | null>(null);
   const dragStartHeight = useRef<number>(SNAP.MINI);
   const isDragging = useRef(false);
+  const hasDragged = useRef(false); // true once pointer has moved ≥ DRAG_THRESHOLD px
+  const DRAG_THRESHOLD = 6; // px — below this, pointer-up is treated as a click, not a drag
   const [dragHeight, setDragHeight] = useState<number | null>(null); // null = use snap zone
 
   /* ── Tip modal suspension (Option A) ── */
@@ -300,12 +302,16 @@ function GlobalPlayerInner() {
     dragStartY.current = e.clientY;
     dragStartHeight.current = playerHeight;
     isDragging.current = true;
+    hasDragged.current = false; // reset for each new gesture
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
 
   function onPointerMove(e: React.PointerEvent) {
     if (!isDragging.current || dragStartY.current === null) return;
     const delta = dragStartY.current - e.clientY; // positive = dragging up = expanding
+    // Only activate drag once the pointer has moved past the threshold
+    if (!hasDragged.current && Math.abs(delta) < DRAG_THRESHOLD) return;
+    hasDragged.current = true;
     const newH = Math.max(SNAP.MINI, Math.min(expandedH, dragStartHeight.current + delta));
     setDragHeight(newH);
   }
@@ -313,6 +319,13 @@ function GlobalPlayerInner() {
   function onPointerUp() {
     if (!isDragging.current) return;
     isDragging.current = false;
+    // If the pointer never moved past the threshold, treat as a click — do not snap zones
+    if (!hasDragged.current) {
+      hasDragged.current = false;
+      setDragHeight(null);
+      return;
+    }
+    hasDragged.current = false;
     const h = dragHeight ?? playerHeight;
     // Snap to nearest zone
     const midToFloat = (SNAP.MINI + SNAP.FLOAT) / 2;

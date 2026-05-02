@@ -426,6 +426,7 @@ export default function ContextDrawer({
               {!user && (
                 <a
                   href={getLoginUrl()}
+                  onClick={onClose}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm mt-1"
                   style={{ color: "rgba(212,175,55,0.80)" }}
                   onMouseEnter={e =>
