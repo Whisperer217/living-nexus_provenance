@@ -30,6 +30,8 @@ import {
   type QrShare, type InsertQrShare,
   agents, wids, provenanceEvents,
   commentReports,
+  userCollections, userCollectionTracks,
+  notifications,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3961,7 +3963,7 @@ export async function setUserPublicKey(userId: number, publicKeyHex: string) {
 export async function getUserCollections(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { userCollections, userCollectionTracks } = await import("../drizzle/schema");
+  // userCollections and userCollectionTracks are statically imported at top of file
   const cols = await db
     .select()
     .from(userCollections)
@@ -4010,7 +4012,7 @@ export async function renameUserCollection(userId: number, collectionId: number,
 export async function deleteUserCollection(userId: number, collectionId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { userCollections, userCollectionTracks } = await import("../drizzle/schema");
+  // userCollections and userCollectionTracks are statically imported at top of file
   // Delete tracks first
   await db.delete(userCollectionTracks).where(eq(userCollectionTracks.collectionId, collectionId));
   await db.delete(userCollections)
@@ -4086,7 +4088,6 @@ export async function reorderUserCollectionTracks(collectionId: number, orderedI
 export async function getLikedSongsOrdered(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { likes } = await import("../drizzle/schema");
   return db
     .select({
       likeId: likes.id,
@@ -4111,7 +4112,6 @@ export async function getLikedSongsOrdered(userId: number) {
 export async function reorderLikes(userId: number, orderedSongIds: number[]) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { likes } = await import("../drizzle/schema");
   for (let i = 0; i < orderedSongIds.length; i++) {
     await db.update(likes)
       .set({ sortOrder: i })
@@ -4139,7 +4139,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
   const perType = Math.ceil(limit / 3);
   try {
     // Tips (join users for tipper name, join songs for title)
-    const [tipRows] = await db.execute<any[]>(sql`
+    const [tipRows] = await db.execute(sql`
       SELECT 'tip' AS type, CONCAT('tip-', t.id) AS id,
              COALESCE(u.name, 'A fan') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4151,7 +4151,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       ORDER BY t.createdAt DESC LIMIT ${sql.raw(String(perType))}
     `);
     // Comments (DB column is 'text', no authorName — use userId join)
-    const [commentRows] = await db.execute<any[]>(sql`
+    const [commentRows] = await db.execute(sql`
       SELECT 'comment' AS type, CONCAT('comment-', c.id) AS id,
              COALESCE(u.name, 'A listener') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4163,7 +4163,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       ORDER BY c.createdAt DESC LIMIT ${sql.raw(String(perType))}
     `);
     // Likes
-    const [likeRows] = await db.execute<any[]>(sql`
+    const [likeRows] = await db.execute(sql`
       SELECT 'like' AS type, CONCAT('like-', l.id) AS id,
              'Someone' AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,

@@ -6,7 +6,7 @@
    Mobile: not rendered (MainLayout handles mobile separately).
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -14,7 +14,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
-  Upload, Bell, LogIn, CheckCircle2, Zap, Search,
+  Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, Search, User, Settings,
 } from "lucide-react";
 
 const LOGO_URL =
@@ -27,7 +27,21 @@ interface TopBarProps {
 
 export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCount }: TopBarProps) {
   const [location, navigate] = useLocation();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const avatarMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close avatar dropdown when clicking outside
+  useEffect(() => {
+    if (!avatarMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (avatarMenuRef.current && !avatarMenuRef.current.contains(e.target as Node)) {
+        setAvatarMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [avatarMenuOpen]);
   const { state } = usePlayer();
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -189,39 +203,78 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
 
           {/* Avatar / Sign In */}
           {!authLoading && user ? (
-            <button
-              onClick={() => goTo("/profile")}
-              className="relative flex-shrink-0"
-              title={displayName}
-            >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden"
-                style={{
-                  background: "linear-gradient(135deg, #1C1A14, #3D3A2E)",
-                  boxShadow: hasWid
-                    ? "0 0 0 2px #C49A28, 0 0 10px rgba(196,154,40,0.25)"
-                    : "none",
-                }}
+            <div ref={avatarMenuRef} className="relative flex-shrink-0">
+              <button
+                onClick={() => setAvatarMenuOpen(prev => !prev)}
+                className="relative flex-shrink-0"
+                title={displayName}
               >
-                {avatar
-                  ? <img
-                      src={avatar}
-                      alt="avatar"
-                      className="w-full h-full object-cover rounded-full"
-                      style={{ objectPosition: user?.avatarObjectPosition ?? "50% 50%" }}
-                    />
-                  : displayName.charAt(0).toUpperCase()
-                }
-              </div>
-              {hasWid && (
                 <div
-                  className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                  style={{ background: "#C49A28" }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden"
+                  style={{
+                    background: "linear-gradient(135deg, #1C1A14, #3D3A2E)",
+                    boxShadow: hasWid
+                      ? "0 0 0 2px #C49A28, 0 0 10px rgba(196,154,40,0.25)"
+                      : avatarMenuOpen
+                      ? "0 0 0 2px rgba(196,154,40,0.5)"
+                      : "none",
+                  }}
                 >
-                  <CheckCircle2 size={8} className="text-black" />
+                  {avatar
+                    ? <img
+                        src={avatar}
+                        alt="avatar"
+                        className="w-full h-full object-cover rounded-full"
+                        style={{ objectPosition: user?.avatarObjectPosition ?? "50% 50%" }}
+                      />
+                    : displayName.charAt(0).toUpperCase()
+                  }
+                </div>
+                {hasWid && (
+                  <div
+                    className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
+                    style={{ background: "#C49A28" }}
+                  >
+                    <CheckCircle2 size={8} className="text-black" />
+                  </div>
+                )}
+              </button>
+
+              {/* Avatar dropdown menu */}
+              {avatarMenuOpen && (
+                <div
+                  className="absolute right-0 top-full mt-2 min-w-[160px] rounded-xl overflow-hidden shadow-2xl py-1 z-[500]"
+                  style={{ background: "#1A1710", border: "1px solid rgba(196,154,40,0.25)" }}
+                >
+                  {/* User label */}
+                  <div className="px-4 py-2 border-b" style={{ borderColor: "rgba(196,154,40,0.12)" }}>
+                    <p className="text-[11px] font-semibold truncate" style={{ color: "var(--ln-parchment)" }}>{displayName}</p>
+                  </div>
+                  <button
+                    onClick={() => { setAvatarMenuOpen(false); goTo("/profile"); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+                    style={{ color: "var(--ln-parchment)" }}
+                  >
+                    <User size={13} style={{ opacity: 0.6 }} /> Profile
+                  </button>
+                  <button
+                    onClick={() => { setAvatarMenuOpen(false); goTo("/settings"); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+                    style={{ color: "var(--ln-parchment)" }}
+                  >
+                    <Settings size={13} style={{ opacity: 0.6 }} /> Settings
+                  </button>
+                  <div className="my-1 border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
+                  <button
+                    onClick={() => { setAvatarMenuOpen(false); logout().finally(() => navigate("/")); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-500/10 transition-colors text-left"
+                    style={{ color: "var(--ln-ember, #e05a2b)" }}
+                  >
+                    <LogOut size={13} /> Log Out
+                  </button>
                 </div>
               )}
-            </button>
+            </div>
           ) : !authLoading ? (
             <a
               href={getLoginUrl()}
