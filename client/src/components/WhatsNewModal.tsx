@@ -10,14 +10,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.43.1";
+const CURRENT_VERSION = "v2.44.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.44.0",
+    date: "May 3, 2026",
+    label: "Latest",
+    items: [
+      { icon: Film, text: "Keeper Compose — A dedicated composition surface at /keeper-compose. Single-column mobile layout, mode selector (Guide / Conductor / Witness / Custodian / Archivist), and structured Suno-ready output with labeled section cards." },
+      { icon: Sparkles, text: "Cinematic writing mode — tap the film icon in the input bar to enter full-screen screenplay-style composition. Blurred artwork fills the background, lyrics scroll in Georgia serif. Swipe down or press Escape to exit." },
+      { icon: Zap, text: "Live emotional arc preview — the arc panel builds in real time as you type, before generation. Your tension curve is visible from the first word." },
+      { icon: Music, text: "Player adapts while you write — the player collapses to mini when the Keeper input is focused, and restores your previous zone when you stop writing." },
+      { icon: LayoutGrid, text: "RightRail stabilized — fixed-position, independent of content flow. Drawer opens no longer shift the Signals panel or Provenance Verified section." },
+      { icon: Shield, text: "Provenance Verified upgraded — full record cards with WID, media type tags, hover translate, and direct quick-play. Every item is a confirmed registered work." },
+      { icon: Zap, text: "Activation MVP — Stage-based funding system live. Works can now have funding stages with progress bars, contributor records, and Stripe checkout. Make one song visibly move from Stage 1 → Stage 2." },
+    ],
+  },
+  {
     version: "v2.43.1",
     date: "May 1, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Music, text: "Global player is now fully persistent across track changes — zone, cinematic mode, comments drawer, and drag height all survive track switches. Track is data, not layout." },
       { icon: Zap, text: "Smooth drag + snap interactions — RAF-throttled drag on the AI Guide orb with will-change isolation. No visual lag during playback or while scrolling content." },

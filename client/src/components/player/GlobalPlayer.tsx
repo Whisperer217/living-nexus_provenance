@@ -157,6 +157,35 @@ function GlobalPlayerInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isPlaying]);
 
+  /* ── ln:player-collapse / ln:player-expand event wiring ── */
+  // KeeperComposePage dispatches these when the textarea is focused/blurred.
+  // Collapse: snap to MINI. Expand: restore previous zone (never hardcode to EXPANDED).
+  const zoneBeforeCollapse = useRef<SnapZone | null>(null);
+  useEffect(() => {
+    const collapse = () => {
+      if (zone !== 'MINI') {
+        zoneBeforeCollapse.current = zone;
+        setZone('MINI');
+        setDragHeight(null);
+      }
+    };
+    const expand = () => {
+      if (zoneBeforeCollapse.current) {
+        setZone(zoneBeforeCollapse.current);
+        setDragHeight(null);
+        zoneBeforeCollapse.current = null;
+      }
+    };
+    window.addEventListener('ln:player-collapse', collapse);
+    window.addEventListener('ln:player-expand', expand);
+    return () => {
+      window.removeEventListener('ln:player-collapse', collapse);
+      window.removeEventListener('ln:player-expand', expand);
+    };
+  // Re-register when zone changes so collapse captures the latest zone value
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zone]);
+
   /* ── Cinematic exit channels: ESC key ── */
   useEffect(() => {
     if (!cinematic) return;

@@ -75,6 +75,7 @@ const ProjectsDiscoveryPage = lazy(() => import("./pages/ProjectsDiscoveryPage")
 const BookDetailPage = lazy(() => import("./pages/BookDetailPage"));
 const KeeperPage = lazy(() => import("./pages/KeeperPage"));
 const KeeperComposePage = lazy(() => import("./pages/KeeperComposePage"));
+const FirstWitnessPage = lazy(() => import("./pages/FirstWitnessPage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
 const CreatorSurface = lazy(() => import("./pages/CreatorSurface"));
 
@@ -207,6 +208,7 @@ function Router() {
                 <Route path="/my-projects" component={MyProjectsPage} />
                 <Route path="/keeper" component={KeeperPage} />
                 <Route path="/keeper-compose" component={KeeperComposePage} />
+                <Route path="/first-witness" component={FirstWitnessPage} />
                 <Route path="/marketplace" component={MarketplacePage} />
                 <Route path="/creator-surface" component={CreatorSurface} />
                 <Route path="/404" component={NotFound} />

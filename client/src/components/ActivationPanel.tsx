@@ -153,7 +153,7 @@ export function ActivationPanel({ songId, songTitle }: ActivationPanelProps) {
       }
     },
     onError: (err) => {
-      toast.error("Contribution failed", { description: err.message });
+      toast.error(`Contribution failed: ${err.message}`);
     },
   });
 
