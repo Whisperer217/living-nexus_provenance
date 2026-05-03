@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { Shield, Eye, Zap, CheckCircle2, MessageSquare, Heart, DollarSign } from "lucide-react";
+import { Shield, Eye, Zap, CheckCircle2, MessageSquare, Heart, DollarSign, Clock, Music2 } from "lucide-react";
 
 function timeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -77,12 +77,19 @@ export default function RightRail() {
 
   return (
     <aside
-      className="hidden lg:flex flex-col flex-shrink-0 overflow-y-auto"
+      className="hidden lg:flex flex-col overflow-y-auto"
       style={{
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
         width: 300,
         background: "rgba(10,9,7,0.92)",
         borderLeft: "1px solid rgba(212,175,55,0.08)",
-        zIndex: 90,
+        /* z-index: 80 — below ContextDrawer (300) and LeftRail (310),
+           but above page content so it never disappears behind it */
+        zIndex: 80,
+        scrollbarWidth: "none",
       }}
     >
       <div className="flex flex-col gap-4 p-4 pb-32">
@@ -253,6 +260,54 @@ export default function RightRail() {
             ))}
           </div>
         </section>
+
+        {/* ── Recently Witnessed ─────────────────────────────────────────── */}
+        {registryItems.length > 0 && (
+          <section>
+            <div className="flex items-center gap-1.5 mb-2">
+              <Clock size={11} style={{ color: "rgba(212,175,55,0.6)" }} />
+              <span className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
+                RECENTLY WITNESSED
+              </span>
+            </div>
+            <div className="flex flex-col gap-1">
+              {[...registryItems]
+                .sort((a: any, b: any) => {
+                  const ta = typeof a.createdAt === "number" ? a.createdAt : new Date(a.createdAt ?? 0).getTime();
+                  const tb = typeof b.createdAt === "number" ? b.createdAt : new Date(b.createdAt ?? 0).getTime();
+                  return tb - ta;
+                })
+                .slice(0, 4)
+                .map((item: any) => (
+                  <div
+                    key={(item.id ?? item.witnessId) + "-rw"}
+                    className="flex items-center gap-2 py-1.5 rounded-lg px-2 cursor-pointer transition-all hover:bg-white/5"
+                    onClick={() => navigate(`/song/${item.songId ?? item.id}`)}
+                  >
+                    {/* Cover art or placeholder */}
+                    {(item.coverArtUrl ?? item.artworkUrl)
+                      ? <img src={item.coverArtUrl ?? item.artworkUrl} alt="" style={{ width: 28, height: 28, borderRadius: 5, objectFit: "cover", flexShrink: 0 }} />
+                      : <div style={{ width: 28, height: 28, borderRadius: 5, background: "rgba(212,175,55,0.08)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Music2 size={10} style={{ color: "rgba(212,175,55,0.4)" }} />
+                        </div>
+                    }
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-medium truncate" style={{ color: "rgba(255,255,255,0.8)" }}>
+                        {item.title ?? item.songTitle ?? "Untitled"}
+                      </p>
+                      <p className="text-[9px] truncate" style={{ color: "rgba(212,175,55,0.5)" }}>
+                        {item.artistName ?? item.creatorName ?? item.userName ?? ""}
+                      </p>
+                    </div>
+                    <p className="text-[9px] flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }}>
+                      {item.createdAt ? timeAgo(typeof item.createdAt === "number" ? item.createdAt : new Date(item.createdAt).getTime()) : ""}
+                    </p>
+                  </div>
+                ))
+              }
+            </div>
+          </section>
+        )}
 
       </div>
     </aside>

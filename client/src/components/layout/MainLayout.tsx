@@ -209,16 +209,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
 
-          {/* MainColumn — fluid, scrollable */}
+          {/* MainColumn — fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail */}
           <div
-            className="flex-1 overflow-y-auto player-scroll-area"
+            className="flex-1 overflow-y-auto player-scroll-area lg:pr-[300px]"
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
             {children}
           </div>
-
-          {/* RightRail — desktop only, 320px */}
-          <RightRail />
         </main>
       </div>
 
@@ -247,9 +244,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════
+       {/* ════════════════════════════════════════════
+          RIGHT RAIL — fixed, right: 0, z-index: 80
+          Anchored independently so ContextDrawer (z:300) always wins.
+          Content area has lg:pr-[300px] to prevent overlap.
+      ════════════════════════════════════════════ */}
+      <RightRail />
+
+      {/* ════════════════════════════════════════════
           DRAWER LAYER — portal-based, isolated
-      ══════════════════════════════════════════════ */}
+      ════════════════════════════════════════════ */}
       {/* Playlist Drawer */}
       <PlaylistDrawer />
 

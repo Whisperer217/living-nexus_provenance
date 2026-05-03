@@ -4005,3 +4005,14 @@
 - [x] Fix WID copy: certificate and modal status pill now say "content hash recorded at time of registration" instead of immutability overstatements
 - [ ] Remove or repurpose tilt interaction — deferred to Phase 119
 - [ ] Slimdoggy "First Witness" recognition page — reverent, provenance-verified, timestamp-anchored — deferred to Phase 119
+
+## Phase 119: Drawer Layer Architecture Fix + Recently Witnessed
+
+- [x] Audit z-index stack: ContextDrawer (z:300) > LeftRail (z:310) > RightRail (was z:90, in-flow flex child)
+- [x] Extract RightRail from flex flow: moved out of <main> flex row, now rendered as fixed-position sibling after player layer
+- [x] RightRail: position: fixed, top: 0, right: 0, bottom: 0, z-index: 80 — independent of content area, never shifts when drawer opens
+- [x] MainLayout content area: added lg:pr-[300px] to prevent content from rendering under the fixed RightRail
+- [x] ContextDrawer (z:300) now definitively wins the z-index war over RightRail (z:80)
+- [x] Add "Recently Witnessed" section to RightRail Signals panel — shows 4 most recent registry items sorted by createdAt desc, with cover art, title, artist, and timeAgo timestamp
+- [ ] Remove or repurpose tilt interaction — deferred
+- [ ] Slimdoggy "First Witness" recognition page — deferred
