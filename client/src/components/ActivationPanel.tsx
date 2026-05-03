@@ -9,7 +9,7 @@ import { useState } from "react";
 import { Zap, CheckCircle2, Lock, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface ActivationStage {
   id: string;
@@ -131,7 +131,6 @@ function StageBar({
 }
 
 export function ActivationPanel({ songId, songTitle }: ActivationPanelProps) {
-  const { toast } = useToast();
   const [showContributors, setShowContributors] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(1000); // cents — $10 default
   const [customAmount, setCustomAmount] = useState("");
@@ -154,11 +153,7 @@ export function ActivationPanel({ songId, songTitle }: ActivationPanelProps) {
       }
     },
     onError: (err) => {
-      toast({
-        title: "Contribution failed",
-        description: err.message,
-        variant: "destructive",
-      });
+      toast.error("Contribution failed", { description: err.message });
     },
   });
 
@@ -192,7 +187,7 @@ export function ActivationPanel({ songId, songTitle }: ActivationPanelProps) {
   const handleContribute = () => {
     if (!activeStage) return;
     if (finalAmount < 100) {
-      toast({ title: "Minimum contribution is $1", variant: "destructive" });
+      toast.error("Minimum contribution is $1");
       return;
     }
     contribute.mutate({
