@@ -65,6 +65,20 @@
   --color-void-4: var(--void-4);
 }
 
+/* ── WSP (Witness Surface Player) layout variables ── */
+:root {
+  --wsp-top: 56px;    /* mobile: h-14 navbar */
+  --wsp-left: 0px;    /* mobile: no left offset */
+  --wsp-height: 60px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --wsp-top: 52px;   /* desktop: TopBar height */
+    --wsp-left: 72px;  /* desktop: LeftRail width */
+  }
+}
+
 :root {
   /* ══════════════════════════════════════════════════════════════════
      LIVING NEXUS — Gunmetal Museum Palette  (ANCHORED)

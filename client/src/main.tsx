@@ -8,6 +8,7 @@ import superjson from "superjson";
 import App from "./App";
 import { LightsModeProvider } from "./contexts/LightsModeContext";
 import { KeeperAttrsProvider } from "./contexts/KeeperAttrsContext";
+import { WSPProvider } from "./contexts/WSPContext";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
@@ -78,9 +79,11 @@ createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         {/* LightsModeProvider must be inside QueryClientProvider so it can call trpc hooks */}
         <KeeperAttrsProvider>
-          <LightsModeProvider>
-            <App />
-          </LightsModeProvider>
+          <WSPProvider>
+            <LightsModeProvider>
+              <App />
+            </LightsModeProvider>
+          </WSPProvider>
         </KeeperAttrsProvider>
       </QueryClientProvider>
     </trpc.Provider>

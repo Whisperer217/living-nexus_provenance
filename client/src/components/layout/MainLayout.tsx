@@ -26,6 +26,7 @@ import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import GlobalPlayer from "@/components/player/GlobalPlayer";
+import WitnessSurfacePlayer from "@/components/player/WitnessSurfacePlayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 import PlaylistDrawer from "@/components/player/PlaylistDrawer";
 import MarketplaceDrawer from "@/components/MarketplaceDrawer";
@@ -187,13 +188,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onOpenWhatsNew={() => setWhatsNewOpen(true)}
       />
 
+      {/* ── WSP (Witness Surface Player) -- top-anchored, under navbar ── */}
+      <WitnessSurfacePlayer />
+
       {/* ==============================================
           PAGE CONTENT
           Desktop: lg:pl-[72px] to clear LeftRail
-          Mobile:  pt-14 to clear mobile header
+          Mobile:  pt-14 + 60px WSP to clear mobile header + surface bar
       ============================================== */}
       <div
-        className={`flex-1 flex overflow-hidden pt-14 lg:pt-[52px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
+        className={`flex-1 flex overflow-hidden pt-[116px] lg:pt-[112px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
         style={{
           overscrollBehavior: "none",
           transition: "padding-left 220ms cubic-bezier(0.22,1,0.36,1)",
@@ -221,7 +225,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* ==============================================
           PLAYER LAYER -- isolated, no layout dependency
-          contain: layout paint prevents reflow during drag
+          GlobalPlayer is kept for audio engine only (hidden UI).
+          WitnessSurfacePlayer (WSP) provides all visible UI.
+          TheaterPlayer remains for desktop theater mode.
       ============================================== */}
       <div
         style={{
@@ -230,14 +236,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           pointerEvents: "none",
           contain: "layout paint",
           willChange: "transform",
-          zIndex: 0, // children use their own z-index
+          zIndex: 0,
         }}
       >
-        {/* Global Player -- draggable floating overlay */}
-        <div style={{ pointerEvents: "auto" }}>
-          <GlobalPlayer />
-        </div>
-
         {/* Theater Player */}
         <div style={{ pointerEvents: "auto" }}>
           <TheaterPlayer />
