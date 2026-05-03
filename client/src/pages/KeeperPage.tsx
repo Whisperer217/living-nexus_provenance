@@ -139,7 +139,7 @@ export default function Keeper() {
     });
     setReloadingNoteId(null);
     setNotesOpen(false);
-    navigate("/keeper-chat");
+    navigate("/keeper-compose");
   };
 
   const profile = profileQuery.data;
@@ -245,6 +245,21 @@ export default function Keeper() {
               {notesQuery.data.length > 99 ? "99+" : notesQuery.data.length}
             </span>
           )}
+        </button>
+        <button
+          onClick={() => navigate("/keeper-compose")}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
+          style={{
+            background: "var(--ln-gold)22",
+            border: "1px solid var(--ln-gold)66",
+            color: "var(--ln-gold)",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "0.6rem",
+            letterSpacing: "0.08em",
+          }}
+        >
+          <Zap className="w-3 h-3" />
+          COMPOSE
         </button>
         <div className="ln-wid-badge">KEEPER SCREEN</div>
       </header>

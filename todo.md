@@ -4016,3 +4016,19 @@
 - [x] Add "Recently Witnessed" section to RightRail Signals panel — shows 4 most recent registry items sorted by createdAt desc, with cover art, title, artist, and timeAgo timestamp
 - [ ] Remove or repurpose tilt interaction — deferred
 - [ ] Slimdoggy "First Witness" recognition page — deferred
+
+## Phase 120: Keeper Composition Surface (Guide → Structured Composition)
+
+- [x] Audit existing Keeper/Guide chat surface — found keeper.chat tRPC procedure already supports Suno-format output via lyricsKeywords detection
+- [x] Create KeeperComposePage.tsx — full multi-panel composition surface at /keeper-compose:
+  - LEFT panel: Mode selector (Guide/Conductor/Witness/Custodian/Archivist) with icons, descriptions, and active mode indicator
+  - CENTER panel: Structured lyrics editor — parses LLM output into [STYLE]/[TEMPO]/[KEY] header + labeled section cards with tone/delivery annotations; edit mode (textarea); loading state; empty state
+  - RIGHT panel: Emotional Arc — ASCII bar chart (▂▃▄▅▆▇█), visual SVG-style bar chart, anchor term ("Arc"), section dot-matrix intensity display
+  - CINEMATIC MODE: full-screen overlay with arc visualization, screenplay-style lyrics scroll, dimmed background, action bar
+  - Action buttons: COPY (Suno-ready clipboard), EDIT (toggle textarea), SEND TO PLAYER (workflow toast), REGISTER (WID) (navigate to /upload?prefill=...), SAVE NOTE (keeper.saveNote mutation)
+  - Input bar: textarea with Ctrl+Enter shortcut, COMPOSE button, per-mode color theming
+- [x] Register /keeper-compose route in App.tsx (lazy import)
+- [x] Fix dead /keeper-chat link in KeeperPage.tsx → /keeper-compose
+- [x] Add COMPOSE button to KeeperPage header → navigates to /keeper-compose
+- [x] Fix MainLayout.tsx Unicode box-drawing chars (═) in JSX comments → plain ASCII (=) to resolve esbuild JSX parse error
+- [x] TypeScript: 0 client errors (18 pre-existing server/db.ts errors unchanged)

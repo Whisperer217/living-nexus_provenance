@@ -1,5 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — MainLayout v6 (Render Layer Separation + Isomorphic Nav)
+/* ===================================================================
+   LIVING NEXUS -- MainLayout v6 (Render Layer Separation + Isomorphic Nav)
 
    Render Layer Ownership (no shared layout dependencies):
    - ContentLayer  : scrollable page content (contain: layout paint)
@@ -15,7 +15,7 @@
    - Mobile:  Hamburger → MobileNavDrawer → navigate
    - TopBar:  NO navigation links (search + actions only)
    - Single NAV_ITEMS source of truth (shared/navItems.ts)
-═══════════════════════════════════════════════════════════════════ */
+=================================================================== */
 import { useState, useCallback, useEffect, useRef } from "react";
 import LeftRail from "@/components/layout/LeftRail";
 import type { NavMode } from "@/components/layout/LeftRail";
@@ -116,10 +116,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[#111009] relative"
       style={{ overscrollBehavior: "none" }}
     >
-      {/* ── LeftRail — fixed 72px column, desktop only ── */}
+      {/* ── LeftRail -- fixed 72px column, desktop only ── */}
       <LeftRail drawerOpen={drawerOpen} activeMode={activeMode} onRailClick={handleRailClick} />
 
-      {/* ── ContextDrawer — portaled overlay, desktop only ── */}
+      {/* ── ContextDrawer -- portaled overlay, desktop only ── */}
       <ContextDrawer
         open={drawerOpen}
         activeMode={activeMode}
@@ -127,16 +127,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onOpenWhatsNew={() => setWhatsNewOpen(true)}
       />
 
-      {/* ── TopBar — desktop only (hidden on mobile) ── */}
+      {/* ── TopBar -- desktop only (hidden on mobile) ── */}
       <TopBar archiveSongCount={archiveSongCount} unreadCount={unreadCount as number} />
 
-      {/* ── LiveActivityPanel — desktop only, self-contained ── */}
+      {/* ── LiveActivityPanel -- desktop only, self-contained ── */}
       <LiveActivityPanel />
 
-      {/* ══════════════════════════════════════════════
+      {/* ==============================================
           MOBILE HEADER (< lg)
           Hamburger + Logo + Bell
-      ══════════════════════════════════════════════ */}
+      ============================================== */}
       <div
         className="lg:hidden fixed top-0 left-0 right-0 z-[400] flex items-center gap-3 px-4 py-3"
         style={{
@@ -145,7 +145,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           transition: "background 0.4s ease",
         }}
       >
-        {/* Hamburger — opens MobileNavDrawer */}
+        {/* Hamburger -- opens MobileNavDrawer */}
         <button
           onClick={mobileMenuOpen ? closeMobileMenu : openMobileMenu}
           className="p-2 rounded-lg transition-all"
@@ -161,7 +161,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <span className="font-display text-base gold-shimmer">Living Nexus</span>
         </div>
 
-        {/* Bell — opens What's New modal */}
+        {/* Bell -- opens What's New modal */}
         {!!user && (
           <button
             onClick={() => setWhatsNewOpen(true)}
@@ -180,18 +180,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         )}
       </div>
 
-      {/* ── MobileNavDrawer — full-screen, portal-based, mobile only ── */}
+      {/* ── MobileNavDrawer -- full-screen, portal-based, mobile only ── */}
       <MobileNavDrawer
         open={mobileMenuOpen}
         onClose={closeMobileMenu}
         onOpenWhatsNew={() => setWhatsNewOpen(true)}
       />
 
-      {/* ══════════════════════════════════════════════
+      {/* ==============================================
           PAGE CONTENT
           Desktop: lg:pl-[72px] to clear LeftRail
           Mobile:  pt-14 to clear mobile header
-      ══════════════════════════════════════════════ */}
+      ============================================== */}
       <div
         className={`flex-1 flex overflow-hidden pt-14 lg:pt-[52px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
         style={{
@@ -209,7 +209,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
 
-          {/* MainColumn — fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail */}
+          {/* MainColumn -- fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail */}
           <div
             className="flex-1 overflow-y-auto player-scroll-area lg:pr-[300px]"
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
@@ -219,10 +219,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </main>
       </div>
 
-      {/* ══════════════════════════════════════════════
-          PLAYER LAYER — isolated, no layout dependency
+      {/* ==============================================
+          PLAYER LAYER -- isolated, no layout dependency
           contain: layout paint prevents reflow during drag
-      ══════════════════════════════════════════════ */}
+      ============================================== */}
       <div
         style={{
           position: "fixed",
@@ -233,7 +233,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           zIndex: 0, // children use their own z-index
         }}
       >
-        {/* Global Player — draggable floating overlay */}
+        {/* Global Player -- draggable floating overlay */}
         <div style={{ pointerEvents: "auto" }}>
           <GlobalPlayer />
         </div>
@@ -244,16 +244,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </div>
       </div>
 
-       {/* ════════════════════════════════════════════
-          RIGHT RAIL — fixed, right: 0, z-index: 80
+       {/* ============================================
+          RIGHT RAIL -- fixed, right: 0, z-index: 80
           Anchored independently so ContextDrawer (z:300) always wins.
           Content area has lg:pr-[300px] to prevent overlap.
-      ════════════════════════════════════════════ */}
+      ============================================ */}
       <RightRail />
 
-      {/* ════════════════════════════════════════════
-          DRAWER LAYER — portal-based, isolated
-      ════════════════════════════════════════════ */}
+      {/* ============================================
+          DRAWER LAYER -- portal-based, isolated
+      ============================================ */}
       {/* Playlist Drawer */}
       <PlaylistDrawer />
 
