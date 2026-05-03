@@ -158,6 +158,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
 
 // ─── Featured Song Card ────────────────────────────────────────────────────────
 function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => void; isPlaying: boolean }) {
+  const [, navigate] = useLocation();
   return (
     <div
       className={`group museum-card parchment-grain cursor-pointer ${
@@ -193,12 +194,16 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
             </div>
           )}
           {song.witnessId && (
-            <Link href={`/verify/${song.witnessId}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100"
+            <span
+              role="link"
+              tabIndex={0}
+              onClick={(e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); navigate(`/verify/${song.witnessId}`); }}
+              onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); navigate(`/verify/${song.witnessId}`); } }}
+              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100 cursor-pointer"
               style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
             >
               <Shield size={8} /><span>WID</span>
-            </Link>
+            </span>
           )}
           {song.aiConsent === "prohibited" && (
             <div className="absolute top-2 left-2 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
