@@ -8,7 +8,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
-import { useLocation, Link } from "wouter";
+import { useLocation, Link, useSearch } from "wouter";
 import {
   Camera, Edit2, Check, X, Music, Heart, DollarSign,
   MapPin, Globe, Twitter, Instagram, Youtube, Share2,
@@ -180,7 +180,14 @@ export default function ProfilePage() {
     enabled: !!user,
   });
 
-  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony">("overview");
+  // Read ?tab= URL param for deep-links from ContextDrawer and other navigation sources
+  const search = useSearch();
+  const tabFromUrl = new URLSearchParams(search).get("tab") as
+    | "overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony"
+    | null;
+  const validTabs = ["overview", "works", "collections", "liked", "signals", "field-notes", "testimony"] as const;
+  const initialTab = tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) ? tabFromUrl : "overview";
+  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony">(initialTab);
   const [showAddTestimony, setShowAddTestimony] = useState(false);
   const [testimonyContent, setTestimonyContent] = useState("");
   const [testimonyLinkedWorks, setTestimonyLinkedWorks] = useState<string[]>([]);

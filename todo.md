@@ -3984,3 +3984,24 @@
 - [x] Queue auto-scroll: MiniTrackRow forwardRef, activeRowRef + hasMounted guard, smooth scroll to active row on track change
 - [x] ESC key exit for cinematic mode
 - [x] --:-- loading indicator (fmtTime returns --:-- when isReady=false)
+
+## Phase 118: Community Bug Fixes (Slimdoggy feedback)
+
+- [ ] Remove FLOAT zone from GlobalPlayer — enforce only mini/expanded/cinematic
+- [ ] Fix snap reversion bug: pointerUp sets zone once, no reset after expand
+- [ ] Kill double progress bars: render MiniProgress only in mini, FullProgress in expanded/cinematic
+- [ ] Fix Profile drawer deep-links: My Works → /profile?tab=works, Collections → /profile?tab=collections
+- [ ] Remove redundant Settings and Log Out from Profile drawer section
+- [ ] Fix Archive/Witnessed Works naming confusion in ContextDrawer
+- [ ] Fix WID copy: change "content has not been altered since registration" to accurate hash-based claim
+- [ ] Remove or repurpose tilt interaction (bind to parallax or remove entirely)
+
+## Phase 118: Community Bug Fixes (FLOAT Zone Removal + Naming/Copy Fixes)
+- [x] Remove FLOAT zone from GlobalPlayer — SNAP.FLOAT constant removed, SnapZone type updated to "MINI" | "EXPANDED" only, getSnapHeight() simplified, single midpoint threshold in onPointerUp, auto-elevate changed FLOAT→EXPANDED, all isFloat JSX references removed, desktop split-layout FLOAT block collapsed into EXPANDED controls row, expand/collapse buttons updated
+- [x] Progress bars audit: two bars confirmed in separate contexts (main player bar, cinematic overlay portal) — no duplication
+- [x] Fix Profile drawer deep-links: ContextDrawer "My Works" → /profile?tab=works, "Collections" → /profile?tab=collections
+- [x] ProfilePage.tsx: added useSearch() + URLSearchParams to read ?tab= on mount for deep-link support
+- [x] Fix Archive/Witnessed Works naming in ContextDrawer and MobileNavDrawer: "LNA — Archive" → "Witness Registry", "My Archive" → "My Works", "Witnessed Works" → "Verified Works"
+- [x] Fix WID copy: certificate and modal status pill now say "content hash recorded at time of registration" instead of immutability overstatements
+- [ ] Remove or repurpose tilt interaction — deferred to Phase 119
+- [ ] Slimdoggy "First Witness" recognition page — reverent, provenance-verified, timestamp-anchored — deferred to Phase 119

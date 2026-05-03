@@ -110,8 +110,8 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         links: [
           { icon: <User size={14} />, label: "My Profile", path: "/profile", description: "Public creator page", authOnly: true },
-          { icon: <Music size={14} />, label: "My Works", path: "/profile#works", description: "All registered works", authOnly: true },
-          { icon: <FolderOpen size={14} />, label: "Collections", path: "/profile#collections", description: "Curated playlists", authOnly: true },
+          { icon: <Music size={14} />, label: "My Works", path: "/profile?tab=works", description: "All registered works", authOnly: true },
+          { icon: <FolderOpen size={14} />, label: "Collections", path: "/profile?tab=collections", description: "Curated playlists", authOnly: true },
         ],
       },
       {
@@ -148,20 +148,20 @@ const PANELS: Record<NavMode, ModePanel> = {
 
   archive: {
     icon: <Archive size={17} />,
-    title: "Archive",
+    title: "Registry",
     subtitle: "The permanent provenance ledger",
     sections: [
       {
         links: [
-          { icon: <BookMarked size={14} />, label: "LNA — Archive", path: "/archive", description: "Full witnessed works ledger", gold: true },
-          { icon: <Archive size={14} />, label: "My Archive", path: "/archive/mine", description: "Your witnessed works", authOnly: true },
+          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/archive", description: "Public ledger of all registered works", gold: true },
+          { icon: <Archive size={14} />, label: "My Works", path: "/archive/mine", description: "Your personally registered works", authOnly: true },
         ],
       },
       {
         heading: "Registry",
         links: [
-          { icon: <Shield size={14} />, label: "Witnessed Works", path: "/archive?filter=witnessed", description: "Cryptographically verified" },
-          { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/archive/ledger", description: "Immutable timestamp record" },
+          { icon: <Shield size={14} />, label: "Verified Works", path: "/archive?filter=witnessed", description: "Content hash recorded at registration" },
+          { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/archive/ledger", description: "Timestamped creation record" },
         ],
       },
     ],

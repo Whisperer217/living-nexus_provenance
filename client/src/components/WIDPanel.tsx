@@ -100,9 +100,10 @@ function buildCertificate(props: WIDPanelProps): string {
     "Verify at  : https://www.livingnexus.org/verify/" + props.witnessId,
     "",
     "──────────────────────────────────────────────────",
-    "This certificate is cryptographically bound to the",
-    "work above. The Witness ID is immutable and cannot",
-    "be transferred, revoked, or reassigned.",
+    "This certificate records the content hash captured",
+    "at the time of registration on Living Nexus. The",
+    "Witness ID anchors the work to its registration",
+    "timestamp in the provenance ledger.",
     "──────────────────────────────────────────────────",
   ];
 
@@ -146,8 +147,9 @@ function buildCertificate(props: WIDPanelProps): string {
     lines.push(
       "",
       "──────────────────────────────────────────────────",
-      "HAAI declaration is part of the immutable authorship",
-      "record. It cannot be altered after registration.",
+      "HAAI declaration fields were recorded at the time",
+      "of registration and reflect the creator's stated",
+      "intent and authorship as of that date.",
       "──────────────────────────────────────────────────"
     );
   }
@@ -410,7 +412,7 @@ export function WIDPanel({
               }}
             >
               <CheckCircle2 className="w-3 h-3" />
-              Immutable · Cannot be revoked or transferred
+              Content hash recorded at time of registration
             </div>
           </div>
 

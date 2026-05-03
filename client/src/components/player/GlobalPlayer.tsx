@@ -45,10 +45,11 @@ const GOLD_BORDER = `1px solid rgba(212,175,55,0.45)`;
 /* ── Snap zone heights ──────────────────────────────────────────── */
 const SNAP = {
   MINI: 72,       // compact strip — always visible
-  FLOAT: 140,     // draggable default
   EXPANDED: 0,    // full height on mobile / centered modal on desktop
 } as const;
-type SnapZone = "MINI" | "FLOAT" | "EXPANDED";
+// FLOAT zone removed — only MINI and EXPANDED are valid states.
+// Drag previews height freely; release snaps to one of two authoritative zones.
+type SnapZone = "MINI" | "EXPANDED";
 
 /* ── Desktop breakpoint ─────────────────────────────────────────── */
 function useIsDesktop() {
@@ -145,12 +146,12 @@ function GlobalPlayerInner() {
   useEffect(() => { if (cinematic) showCinematicOverlay(); }, [cinematic]);
   useEffect(() => () => { if (cinematicHideTimer.current) clearTimeout(cinematicHideTimer.current); }, []);
 
-  /* ── Visual persistence: auto-elevate to FLOAT when playback starts from MINI ── */
-  // This prevents the player from staying invisible (MINI) when a track begins.
-  // User can still drag it back to MINI manually.
+  /* ── Visual persistence: auto-elevate to EXPANDED when playback starts from MINI ── */
+  // FLOAT zone removed — when playback starts, go directly to EXPANDED.
+  // User can drag back to MINI manually.
   useEffect(() => {
     if (state.isPlaying && zone === 'MINI') {
-      setZone('FLOAT');
+      setZone('EXPANDED');
       setDragHeight(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -371,7 +372,6 @@ function GlobalPlayerInner() {
 
   function getSnapHeight(z: SnapZone): number {
     if (z === "MINI") return SNAP.MINI;
-    if (z === "FLOAT") return SNAP.FLOAT;
     return expandedH;
   }
 
@@ -412,13 +412,11 @@ function GlobalPlayerInner() {
     }
     hasDragged.current = false;
     const h = dragHeight ?? playerHeight;
-    // Snap to nearest zone
-    const midToFloat = (SNAP.MINI + SNAP.FLOAT) / 2;
-    const floatToExpanded = (SNAP.FLOAT + expandedH) / 2;
-    if (h < midToFloat) {
+    // Single threshold: below midpoint → MINI, above → EXPANDED
+    // FLOAT zone removed — no half-states, no ambiguity
+    const midpoint = (SNAP.MINI + expandedH) / 2;
+    if (h < midpoint) {
       setZone("MINI");
-    } else if (h < floatToExpanded) {
-      setZone("FLOAT");
     } else {
       setZone("EXPANDED");
     }
@@ -489,9 +487,10 @@ function GlobalPlayerInner() {
   /* ══════════════════════════════════════════════════════════════
      PORTAL CONTENT
   ══════════════════════════════════════════════════════════════ */
-  const isExpanded = zone === "EXPANDED" || (dragHeight !== null && dragHeight > SNAP.FLOAT + 40);
-  const isFloat = zone === "FLOAT" || (dragHeight !== null && dragHeight >= SNAP.FLOAT - 20 && dragHeight <= SNAP.FLOAT + 40);
-  const isMini = !isExpanded && !isFloat;
+  // FLOAT zone removed — only MINI and EXPANDED are valid.
+  // isExpanded is true when zone is EXPANDED or drag preview is above the midpoint.
+  const isExpanded = zone === "EXPANDED" || (dragHeight !== null && dragHeight > (SNAP.MINI + 200));
+  const isMini = !isExpanded;
 
   /* ── Desktop expanded = centered modal (decision #3) ── */
   const desktopExpandedStyle: React.CSSProperties = isDesktop && isExpanded ? {
@@ -598,9 +597,9 @@ function GlobalPlayerInner() {
         className="flex items-center gap-3 flex-shrink-0 px-3"
         style={{
           height: "52px",
-          opacity: (isExpanded || isFloat) ? 0 : 1,
+          opacity: isExpanded ? 0 : 1,
           transition: "opacity 0.2s ease",
-          pointerEvents: (isExpanded || isFloat) ? "none" : "auto",
+          pointerEvents: isExpanded ? "none" : "auto",
         }}
       >
         {/* Art thumbnail */}
@@ -661,7 +660,7 @@ function GlobalPlayerInner() {
           </button>
           {/* Expand chevron — click-first on desktop (decision #4) */}
           <button
-            onClick={e => { e.stopPropagation(); setZone(z => z === "MINI" ? "FLOAT" : "MINI"); setDragHeight(null); }}
+            onClick={e => { e.stopPropagation(); setZone(z => z === "MINI" ? "EXPANDED" : "MINI"); setDragHeight(null); }}
             className="p-1.5 transition-colors"
             style={{ color: GOLD }}
             title={isMini ? "Expand player" : "Collapse player"}
@@ -715,162 +714,58 @@ function GlobalPlayerInner() {
         </div>
       )}
 
-      {/* ── FLOAT ZONE: desktop = split layout, mobile = stacked controls row ── */}
-      {(isFloat || isExpanded) && (
-        isDesktop && isFloat ? (
-          /* ── DESKTOP SPLIT LAYOUT: [Artwork 80px] | [Title + Meta + Progress + Controls] ── */
-          <div className="flex items-center gap-4 px-4 py-2 flex-shrink-0" style={{ minHeight: "80px" }}>
-            {/* Artwork with swipe gesture */}
-            <div
-              className="relative flex-shrink-0 rounded-xl overflow-hidden cursor-pointer select-none"
-              style={{
-                width: "72px", height: "72px",
-                background: visTrack?.bg || "#111009",
-                transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.3, 18)}px)` : undefined,
-                transition: swipeDelta === 0 ? "transform 0.25s ease" : "none",
-                boxShadow: swipeDir ? `${swipeDir === "left" ? "-4px" : "4px"} 0 16px rgba(212,175,55,0.35)` : undefined,
-              }}
-              onPointerDown={onArtPointerDown}
-              onPointerMove={onArtPointerMove}
-              onPointerUp={onArtPointerUp}
-              onPointerCancel={onArtPointerUp}
-              onClick={e => { if (Math.abs(swipeDelta) < 5) { e.stopPropagation(); goToSong(); } }}
+      {/* ── EXPANDED CONTROLS ROW: stacked controls visible when not in MINI zone ── */}
+      {/* FLOAT zone removed — this row is shown whenever isExpanded is true ── */}
+      {isExpanded && (
+        <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
+          {/* Playback controls — 3-tier hierarchy */}
+          <div className="flex items-center gap-3">
+            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }}><Shuffle size={14} /></button>
+            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipBack size={18} /></button>
+            {/* Circular play button — 56px spec */}
+            <button
+              onClick={e => { e.stopPropagation(); togglePlay(); }}
+              className="flex items-center justify-center rounded-full transition-transform hover:scale-105"
+              style={{ width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }}
             >
-              {visTrack?.artUrl
-                ? <img src={visTrack.artUrl} alt="" className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-2xl">{visTrack?.emoji || "🎵"}</div>
-              }
-              {/* Swipe direction hint */}
-              {swipeDir && (
-                <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.3)" }}>
-                  <span className="text-lg" style={{ color: GOLD }}>{swipeDir === "left" ? "▶" : "◀"}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Right: title + meta + progress + controls */}
-            <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-              {/* Title + artist + actions */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-semibold truncate" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>
-                    {visTrack?.title || "Nothing playing"}
-                  </p>
-                  <p className="text-[11px] truncate" style={{ color: "rgba(212,175,55,0.7)" }}>
-                    {visTrack?.artist || ""}
-                  </p>
-                </div>
-                {/* Right utility actions */}
-                <div className="flex items-center gap-0.5 flex-shrink-0">
-                  {user && currentSongId && (
-                    <button onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }} className="p-1.5 transition-colors" style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.5)" }}>
-                      <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
-                    </button>
-                  )}
-                  {currentSongId && (
-                    <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.5)" }} title="Comments">
-                      <MessageCircle size={13} />
-                    </button>
-                  )}
-                  {tipsEnabled && currentSongId && (
-                    <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.5)" }} title="Tip creator">
-                      <DollarSign size={13} />
-                    </button>
-                  )}
-                  <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.5)" }}>
-                    {state.isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-                  </button>
-                  <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.5)" }}>
-                    <MoreHorizontal size={14} />
-                  </button>
-                  <button onClick={e => { e.stopPropagation(); setZone("EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: GOLD }} title="Expand player">
-                    <ChevronUp size={14} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Progress bar */}
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] w-6 text-right tabular-nums" style={{ color: "rgba(212,175,55,0.5)" }}>{fmtTime(state.currentTime)}</span>
-                <div className="flex-1 cursor-pointer relative" style={{ background: "#1a1a1a", height: "3px", borderRadius: "2px" }} onClick={handleSeek}>
-                  <div className="h-full relative" style={{ width: `${progress}%`, background: GOLD, borderRadius: "2px" }}>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full" style={{ width: "10px", height: "10px", background: GOLD_HL, boxShadow: state.isPlaying ? `0 0 10px rgba(245,230,179,0.7)` : "none", transform: "translateY(-50%) translateX(50%)" }} />
-                  </div>
-                </div>
-                <span className="text-[9px] w-6 tabular-nums" style={{ color: "rgba(212,175,55,0.5)" }}>{fmtTime(state.duration, isReady)}</span>
-              </div>
-
-              {/* Controls row */}
-              <div className="flex items-center gap-2">
-                <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(212,175,55,0.5)" }}><Shuffle size={12} /></button>
-                <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipBack size={15} /></button>
-                {/* Circular play button — 56px spec */}
-                <button
-                  onClick={e => { e.stopPropagation(); togglePlay(); }}
-                  className="flex items-center justify-center rounded-full transition-transform hover:scale-105 flex-shrink-0"
-                  style={{ width: "40px", height: "40px", background: GOLD, color: "#000", boxShadow: `0 0 10px rgba(212,175,55,0.5), 0 0 20px rgba(212,175,55,0.2)` }}
-                >
-                  {state.isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" style={{ marginLeft: "1px" }} />}
-                </button>
-                <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipForward size={15} /></button>
-                <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(212,175,55,0.5)" }}><Repeat size={12} /></button>
-                <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)", background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={12} /></button>
-                {/* Cinematic mode button */}
-                <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1 transition-colors" style={{ color: "rgba(212,175,55,0.5)" }} title="Cinematic mode"><Maximize2 size={12} /></button>
-              </div>
-            </div>
+              {state.isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+            </button>
+            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipForward size={18} /></button>
+            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }}><Repeat size={14} /></button>
           </div>
-        ) : (
-          /* ── MOBILE / EXPANDED: stacked controls row ── */
-          <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
-            {/* Playback controls — 3-tier hierarchy */}
-            <div className="flex items-center gap-3">
-              <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }}><Shuffle size={14} /></button>
-              <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipBack size={18} /></button>
-              {/* Circular play button — 56px spec */}
-              <button
-                onClick={e => { e.stopPropagation(); togglePlay(); }}
-                className="flex items-center justify-center rounded-full transition-transform hover:scale-105"
-                style={{ width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }}
-              >
-                {state.isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+          {/* Right utility actions */}
+          <div className="flex items-center gap-1">
+            {user && currentSongId && (
+              <button onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }} className="p-1.5 transition-colors" style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.65)" }}>
+                <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
               </button>
-              <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipForward size={18} /></button>
-              <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }}><Repeat size={14} /></button>
-            </div>
-            {/* Right utility actions */}
-            <div className="flex items-center gap-1">
-              {user && currentSongId && (
-                <button onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }} className="p-1.5 transition-colors" style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.65)" }}>
-                  <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
-                </button>
-              )}
-              {currentSongId && (
-                <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Comments">
-                  <MessageCircle size={14} />
-                </button>
-              )}
-              {currentSongId && (
-                <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Add to Collection">
-                  <FolderPlus size={15} />
-                </button>
-              )}
-              {tipsEnabled && currentSongId && (
-                <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Tip creator">
-                  <DollarSign size={14} />
-                </button>
-              )}
-              <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.65)" }}>
-                {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            )}
+            {currentSongId && (
+              <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Comments">
+                <MessageCircle size={14} />
               </button>
-              <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)", background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={14} /></button>
-              <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }}><MoreHorizontal size={16} /></button>
-              <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "FLOAT" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: GOLD, filter: `drop-shadow(0 0 6px rgba(212,175,55,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"}>
-                {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
+            )}
+            {currentSongId && (
+              <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Add to Collection">
+                <FolderPlus size={15} />
               </button>
-            </div>
+            )}
+            {tipsEnabled && currentSongId && (
+              <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Tip creator">
+                <DollarSign size={14} />
+              </button>
+            )}
+            <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.65)" }}>
+              {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            </button>
+            <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)", background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={14} /></button>
+            <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }}><MoreHorizontal size={16} /></button>
+            {/* Collapse button: EXPANDED → MINI (FLOAT zone removed) */}
+            <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: GOLD, filter: `drop-shadow(0 0 6px rgba(212,175,55,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"}>
+              {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
+            </button>
           </div>
-        )
+        </div>
       )}
 
       {/* ── EXPANDED CONTENT ── */}
