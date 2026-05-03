@@ -31,7 +31,9 @@ import {
   agents, wids, provenanceEvents,
   commentReports,
   userCollectionTracks,
-  userCollections,
+  activationContributions,
+  type ActivationContribution,
+  type InsertActivationContribution,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -4136,7 +4138,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
   const perType = Math.ceil(limit / 3);
   try {
     // Tips (join users for tipper name, join songs for title)
-    const [tipRows] = await (db.execute as any)(sql`
+    const [tipRows] = await db.execute<any[]>(sql`
       SELECT 'tip' AS type, CONCAT('tip-', t.id) AS id,
              COALESCE(u.name, 'A fan') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4148,7 +4150,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       ORDER BY t.createdAt DESC LIMIT ${sql.raw(String(perType))}
     `);
     // Comments (DB column is 'text', no authorName — use userId join)
-    const [commentRows] = await (db.execute as any)(sql`
+    const [commentRows] = await db.execute<any[]>(sql`
       SELECT 'comment' AS type, CONCAT('comment-', c.id) AS id,
              COALESCE(u.name, 'A listener') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4160,7 +4162,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       ORDER BY c.createdAt DESC LIMIT ${sql.raw(String(perType))}
     `);
     // Likes
-    const [likeRows] = await (db.execute as any)(sql`
+    const [likeRows] = await db.execute<any[]>(sql`
       SELECT 'like' AS type, CONCAT('like-', l.id) AS id,
              'Someone' AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4189,5 +4191,150 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
     return merged.slice(0, limit);
   } catch {
     return [];
+  }
+}
+// ─── Activation (Stage-Based Funding) ──────────────────────────────────────
+
+export interface ActivationStage {
+  id: string;
+  label: string;
+  goalCents: number;
+  reachedAt: string | null;
+}
+
+/** Return the activation state for a song (stages + funding total). */
+export async function getActivationForSong(songId: number): Promise<{
+  activationEnabled: boolean;
+  totalFundingCents: number;
+  stages: ActivationStage[];
+} | null> {
+  try {
+    const db = await getDb();
+    const rows = await db
+      .select({
+        activationEnabled: songs.activationEnabled,
+        totalFundingCents: songs.totalFundingCents,
+        activationStagesJson: songs.activationStagesJson,
+      })
+      .from(songs)
+      .where(eq(songs.id, songId))
+      .limit(1);
+    if (!rows.length) return null;
+    const row = rows[0];
+    let stages: ActivationStage[] = [];
+    if (row.activationStagesJson) {
+      try { stages = JSON.parse(row.activationStagesJson); } catch { stages = []; }
+    }
+    return {
+      activationEnabled: Boolean(row.activationEnabled),
+      totalFundingCents: Number(row.totalFundingCents ?? 0),
+      stages,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Record a completed activation contribution and increment the song's totalFundingCents. */
+export async function recordActivationContribution(data: {
+  songId: number;
+  userId?: number | null;
+  stageId: string;
+  amountCents: number;
+  contributorName?: string;
+  message?: string;
+  anonymous?: boolean;
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+}): Promise<void> {
+  const db = await getDb();
+  // Insert contribution row
+  await db.insert(activationContributions).values({
+    songId: data.songId,
+    userId: data.userId ?? null,
+    stageId: data.stageId,
+    amountCents: data.amountCents,
+    contributorName: data.contributorName ?? null,
+    message: data.message ?? null,
+    anonymous: data.anonymous ?? false,
+    stripeSessionId: data.stripeSessionId ?? null,
+    stripePaymentIntentId: data.stripePaymentIntentId ?? null,
+  });
+  // Increment totalFundingCents on the song
+  await db
+    .update(songs)
+    .set({ totalFundingCents: sql`totalFundingCents + ${data.amountCents}` })
+    .where(eq(songs.id, data.songId));
+  // Check if any stage goal has been reached and mark reachedAt
+  const songRow = await db
+    .select({ activationStagesJson: songs.activationStagesJson, totalFundingCents: songs.totalFundingCents })
+    .from(songs)
+    .where(eq(songs.id, data.songId))
+    .limit(1);
+  if (songRow.length && songRow[0].activationStagesJson) {
+    try {
+      const stages: ActivationStage[] = JSON.parse(songRow[0].activationStagesJson);
+      const total = Number(songRow[0].totalFundingCents ?? 0);
+      let cumulative = 0;
+      let changed = false;
+      for (const stage of stages) {
+        cumulative += stage.goalCents;
+        if (!stage.reachedAt && total >= cumulative) {
+          stage.reachedAt = new Date().toISOString();
+          changed = true;
+        }
+      }
+      if (changed) {
+        await db
+          .update(songs)
+          .set({ activationStagesJson: JSON.stringify(stages) })
+          .where(eq(songs.id, data.songId));
+      }
+    } catch { /* ignore parse errors */ }
+  }
+}
+
+/** Get recent contributions for a song (for the supporter list). */
+export async function getActivationContributions(songId: number, limit = 20): Promise<ActivationContribution[]> {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(activationContributions)
+      .where(eq(activationContributions.songId, songId))
+      .orderBy(desc(activationContributions.createdAt))
+      .limit(limit);
+  } catch {
+    return [];
+  }
+}
+
+/** Set activation config on a song (owner-only, verified in router). */
+export async function configureSongActivation(songId: number, data: {
+  activationEnabled: boolean;
+  stages: ActivationStage[];
+}): Promise<void> {
+  const db = await getDb();
+  await db
+    .update(songs)
+    .set({
+      activationEnabled: data.activationEnabled,
+      activationStagesJson: JSON.stringify(data.stages),
+    })
+    .where(eq(songs.id, songId));
+}
+
+/** Verify that a user owns a song (returns true if they do). */
+export async function verifySongOwnership(songId: number, userId: number): Promise<boolean> {
+  try {
+    const db = await getDb();
+    const rows = await db
+      .select({ userId: songs.userId })
+      .from(songs)
+      .where(eq(songs.id, songId))
+      .limit(1);
+    return rows.length > 0 && rows[0].userId === userId;
+  } catch {
+    return false;
   }
 }

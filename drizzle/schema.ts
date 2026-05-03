@@ -319,6 +319,14 @@ export const songs = mysqlTable("songs", {
   //             until the creator resolves the rights situation.
   ownershipStatus: mysqlEnum("ownershipStatus", ["full", "partial"]).default("full").notNull(),
 
+  // ─── Activation (Stage-Based Funding) ──────────────────────────────────────
+  // Creator-enabled funding gate. When activationEnabled = true, the work shows
+  // a stage progress panel. Supporters contribute via Stripe; each contribution
+  // increments totalFundingCents. activationStagesJson is a JSON array:
+  // [{ id: string; label: string; goalCents: number; reachedAt: string | null }]
+  activationEnabled: boolean("activationEnabled").default(false).notNull(),
+  totalFundingCents: int("totalFundingCents").default(0).notNull(),
+  activationStagesJson: text("activationStagesJson"),
   // ─── Sovereign Stamp ─────────────────────────────────────────────────────────
   // Authorship tone injection system — BDDT Publishing / Command Domains LLC
   // null = not yet stamped; set = stamped audio file with embedded provenance tone
@@ -337,7 +345,28 @@ export const songs = mysqlTable("songs", {
 export type Song = typeof songs.$inferSelect;
 export type InsertSong = typeof songs.$inferInsert;
 
-// ─── Comments ─────────────────────────────────────────────────────────────────
+// ─── Activation Contributions ──────────────────────────────────────────────────────────────────
+// One row per supporter contribution toward a song's activation stage.
+// songId FK → songs.id; stageId matches the id field in activationStagesJson.
+export const activationContributions = mysqlTable("activationContributions", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("songId").notNull().references(() => songs.id, { onDelete: "cascade" }),
+  userId: int("userId"),                              // null = anonymous
+  stageId: varchar("stageId", { length: 64 }).notNull(), // matches stage.id in JSON
+  amountCents: int("amountCents").notNull(),
+  contributorName: varchar("contributorName", { length: 128 }),
+  message: text("message"),
+  anonymous: boolean("anonymous").default(false).notNull(),
+  stripeSessionId: varchar("stripeSessionId", { length: 256 }),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 256 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  songIdx: index("activationContributions_songId_idx").on(t.songId),
+}));
+export type ActivationContribution = typeof activationContributions.$inferSelect;
+export type InsertActivationContribution = typeof activationContributions.$inferInsert;
+
+// ─── Commentss ─────────────────────────────────────────────────────────────────
 export const comments = mysqlTable("comments", {
   id: int("id").autoincrement().primaryKey(),
   songId: int("songId").notNull(),

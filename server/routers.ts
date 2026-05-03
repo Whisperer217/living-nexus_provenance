@@ -97,6 +97,12 @@ import {
   getLikedSongsOrdered, reorderLikes,
   createCommentReport, getFlaggedComments, moderateCommentReport,
   getGlobalActivityFeed,
+  getActivationForSong,
+  recordActivationContribution,
+  getActivationContributions,
+  configureSongActivation,
+  verifySongOwnership,
+  type ActivationStage,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -320,6 +326,47 @@ export async function handleStripeWebhook(req: any, res: any) {
             });
           }
         }
+        // Activation contribution: increment funding + record contribution row
+        if (meta.type === "activation" && meta.songId && meta.stageId) {
+          const amountCents = session.amount_total ?? 0;
+          const songId = parseInt(meta.songId);
+          const contributorUserId = meta.userId ? parseInt(meta.userId) : undefined;
+          try {
+            await recordActivationContribution({
+              songId,
+              userId: contributorUserId ?? null,
+              stageId: meta.stageId,
+              amountCents,
+              contributorName: meta.anonymous === '1' ? 'Anonymous' : (meta.contributorName || undefined),
+              message: meta.message || undefined,
+              anonymous: meta.anonymous === '1',
+              stripeSessionId: session.id,
+              stripePaymentIntentId: typeof session.payment_intent === 'string' ? session.payment_intent : undefined,
+            });
+            // Notify the song creator
+            const song = await getSongById(songId);
+            if (song?.userId) {
+              const amountDollars = (amountCents / 100).toFixed(2);
+              const contributorLabel = meta.anonymous === '1' ? 'An anonymous supporter' : (meta.contributorName || 'A supporter');
+              await createNotification({
+                userId: song.userId,
+                type: 'tip',
+                title: `Activation contribution — $${amountDollars}`,
+                body: `${contributorLabel} contributed $${amountDollars} toward "${song.title}"`,
+                actorName: contributorLabel,
+                refType: 'song',
+                refId: songId,
+              });
+              await notifyOwner({
+                title: `Activation contribution — $${amountDollars}`,
+                content: `${contributorLabel} contributed $${amountDollars} toward "${song.title}" (Stage: ${meta.stageId})`,
+              });
+            }
+          } catch (e) {
+            console.error('[Webhook] activation contribution failed:', e);
+          }
+        }
+
         // Book purchase: record access grant
         if (meta.type === "book_purchase" && meta.songId && meta.userId) {
           const amountCents = session.amount_total ?? 0;
@@ -6244,6 +6291,90 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
       .input(z.object({ collectionId: z.number(), orderedIds: z.array(z.number()) }))
       .mutation(async ({ input }) => {
         await reorderUserCollectionTracks(input.collectionId, input.orderedIds);
+        return { ok: true };
+      }),
+  }),
+
+  // ─── Activation (Stage-Based Funding) ────────────────────────────────────
+  activation: router({
+    /** Get activation state for a song (public). */
+    getForSong: publicProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return getActivationForSong(input.songId);
+      }),
+
+    /** Get recent contributions for a song (public). */
+    getContributions: publicProcedure
+      .input(z.object({ songId: z.number().int().positive(), limit: z.number().int().min(1).max(50).default(20) }))
+      .query(async ({ input }) => {
+        return getActivationContributions(input.songId, input.limit);
+      }),
+
+    /** Create a Stripe Checkout session for an activation contribution. */
+    contribute: protectedProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        stageId: z.string().min(1),
+        amountCents: z.number().int().min(100).max(1000000), // $1 – $10,000
+        message: z.string().max(500).optional(),
+        anonymous: z.boolean().default(false),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!stripe) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Stripe not configured' });
+        // Verify activation is enabled on this song
+        const activation = await getActivationForSong(input.songId);
+        if (!activation?.activationEnabled) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Activation is not enabled for this work' });
+        }
+        const session = await stripe.checkout.sessions.create({
+          mode: 'payment',
+          payment_method_types: ['card'],
+          line_items: [{
+            price_data: {
+              currency: 'usd',
+              unit_amount: input.amountCents,
+              product_data: { name: 'Activation Contribution' },
+            },
+            quantity: 1,
+          }],
+          metadata: {
+            type: 'activation',
+            songId: input.songId.toString(),
+            stageId: input.stageId,
+            userId: ctx.user.id.toString(),
+            contributorName: ctx.user.name ?? '',
+            message: input.message ?? '',
+            anonymous: input.anonymous ? '1' : '0',
+          },
+          success_url: `${input.origin}/song/${input.songId}?activation=success`,
+          cancel_url: `${input.origin}/song/${input.songId}?activation=cancelled`,
+        });
+        return { url: session.url };
+      }),
+
+    /** Admin: enable/disable activation and set stages for a song (owner only). */
+    configure: protectedProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        activationEnabled: z.boolean(),
+        stages: z.array(z.object({
+          id: z.string().min(1),
+          label: z.string().min(1),
+          goalCents: z.number().int().min(100),
+          reachedAt: z.string().nullable().default(null),
+        })).max(10),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const isOwner = await verifySongOwnership(input.songId, ctx.user.id);
+        if (!isOwner) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not own this work' });
+        }
+        await configureSongActivation(input.songId, {
+          activationEnabled: input.activationEnabled,
+          stages: input.stages,
+        });
         return { ok: true };
       }),
   }),
