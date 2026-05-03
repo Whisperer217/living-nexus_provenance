@@ -291,17 +291,35 @@ function GlobalPlayerInner() {
   const currentSongId = currentTrack?.id ? parseInt(currentTrack.id, 10) : null;
 
   /* ── Optimistic display track ──
-   * Mirrors currentTrack but updates IMMEDIATELY when the track index changes,
-   * before isReady fires. This gives instant visual feedback on swipe/skip
-   * while the audio engine resets and loads the new src in the background.
-   * The audio invariants (isReady, atomic reset) are NOT affected.
+   * Mirrors currentTrack but updates IMMEDIATELY when the track index OR track
+   * identity changes, before isReady fires. This gives instant visual feedback
+   * on swipe/skip while the audio engine resets and loads the new src.
+   *
+   * FIX (Phase 122): dependency is now currentTrack?.id (track identity), NOT
+   * just currentIdx. This prevents desync when the queue is rebuilt at the same
+   * index, or when an OS media session / external trigger changes the track
+   * without changing the index.
    */
   const [displayTrack, setDisplayTrack] = useState<typeof currentTrack>(currentTrack);
+
+  // Primary sync: fire whenever the actual track identity changes
   useEffect(() => {
     setDisplayTrack(currentTrack);
-  }, [state.currentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Use displayTrack for all visual rendering so swipe feels instant
-  const visTrack = displayTrack ?? currentTrack;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTrack?.id, state.currentIdx]);
+
+  // Hard-sync guard: if displayTrack has drifted from currentTrack, correct it
+  // immediately (handles race conditions and OS media session edge cases)
+  const visTrack = (() => {
+    const base = displayTrack ?? currentTrack;
+    if (currentTrack && base?.id !== currentTrack.id) {
+      // Drift detected — schedule correction and return the source of truth
+      // We use a timeout(0) to avoid setState-in-render
+      setTimeout(() => setDisplayTrack(currentTrack), 0);
+      return currentTrack;
+    }
+    return base;
+  })();
 
   const { data: songDetail } = trpc.songs.getById.useQuery(
     { id: currentSongId! },

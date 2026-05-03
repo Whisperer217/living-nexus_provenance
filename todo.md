@@ -4048,3 +4048,11 @@
   - Shield icon added to section header
   - Empty state: "No verified works yet."
 - [x] Data source: witnessRegistry.list (limit 3 for provenance, limit 8 for registry/recently witnessed)
+
+## Phase 122: visTrack/displayTrack Desync Fix (HIGH PRIORITY)
+
+- [x] Root cause identified: useEffect([state.currentIdx]) missed track identity changes (queue rebuild at same index, OS media session external triggers)
+- [x] Patch 1 — hard-sync guard in visTrack IIFE: if (base?.id !== currentTrack.id) → return currentTrack immediately + schedule setDisplayTrack(currentTrack) via setTimeout(0) to avoid setState-in-render
+- [x] Patch 2 — stronger effect dependency: changed from [state.currentIdx] to [currentTrack?.id, state.currentIdx] so any track identity change fires the sync
+- [x] Patch 3 — play action audit: playTrack/nextTrack/prevTrack/playQueueAt all update currentIdx which drives the effect — no additional setDisplayTrack calls needed at call sites
+- [x] setQueue only seeds empty queues and never changes playing track — no fix needed there
