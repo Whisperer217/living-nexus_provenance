@@ -13,6 +13,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { WIDPanel } from "@/components/WIDPanel";
+import { usePlayer } from "@/contexts/PlayerContext";
 import {
   GripVertical,
   ChevronDown,
@@ -24,6 +25,7 @@ import {
   Trash2,
   Clock,
   Hash,
+  Play,
 } from "lucide-react";
 
 /* ── Drag-to-reorder hook ──────────────────────────────────────────────────── */
@@ -75,6 +77,7 @@ function ManageTrackRow({
   onDragEnd,
   onRemove,
   playlistId,
+  allTracks,
 }: {
   track: any;
   idx: number;
@@ -83,7 +86,43 @@ function ManageTrackRow({
   onDragEnd: () => void;
   onRemove: (trackId: number) => void;
   playlistId: number;
+  allTracks: any[];
 }) {
+  const { addAndPlay, playQueueAt } = usePlayer();
+
+  function handlePlay(e: React.MouseEvent) {
+    e.stopPropagation();
+    // Build a Track array from all playlist tracks and play from this index
+    const playerTracks = allTracks
+      .filter((t: any) => !!t.fileUrl || !!t.audioUrl)
+      .map((t: any) => ({
+        id: String(t.songId ?? t.id),
+        title: t.title ?? "Untitled",
+        artist: t.artistHandle ? `@${t.artistHandle}` : (t.creatorName ?? ""),
+        genre: t.genre ?? "",
+        audioUrl: t.fileUrl ?? t.audioUrl ?? "",
+        artUrl: t.coverArtUrl ?? undefined,
+        witnessId: t.witnessId ?? undefined,
+      }));
+    const playIdx = allTracks
+      .filter((t: any) => !!t.fileUrl || !!t.audioUrl)
+      .findIndex((_: any, i: number) => i === idx);
+    if (playerTracks.length === 0) {
+      // Fallback: addAndPlay just this track
+      addAndPlay({
+        id: String(track.songId ?? track.id),
+        title: track.title ?? "Untitled",
+        artist: track.artistHandle ? `@${track.artistHandle}` : (track.creatorName ?? ""),
+        genre: track.genre ?? "",
+        audioUrl: track.fileUrl ?? track.audioUrl ?? "",
+        artUrl: track.coverArtUrl ?? undefined,
+        witnessId: track.witnessId ?? undefined,
+      });
+      return;
+    }
+    playQueueAt(playerTracks, Math.max(0, playIdx), "PLAYLIST");
+  }
+
   return (
     <div
       draggable
@@ -91,12 +130,14 @@ function ManageTrackRow({
       onDragEnter={() => onDragEnter(idx)}
       onDragEnd={onDragEnd}
       onDragOver={(e) => e.preventDefault()}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors select-none"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors select-none group"
       style={{
         background: "var(--ln-coal)",
         border: "1px solid #C49A28",
         cursor: "grab",
       }}
+      onMouseEnter={e => (e.currentTarget.style.background = "rgba(196,154,40,0.08)")}
+      onMouseLeave={e => (e.currentTarget.style.background = "var(--ln-coal)")}
     >
       {/* Drag handle */}
       <GripVertical
@@ -145,6 +186,18 @@ function ManageTrackRow({
           />
         )}
       </div>
+
+      {/* Play button */}
+      <button
+        onClick={handlePlay}
+        className="w-6 h-6 rounded-full flex items-center justify-center transition-all flex-shrink-0 opacity-0 group-hover:opacity-100"
+        title="Play from here"
+        style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.3)" }}
+        onMouseEnter={e => (e.currentTarget.style.background = "rgba(196,154,40,0.3)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "rgba(196,154,40,0.15)")}
+      >
+        <Play size={9} style={{ color: "#D4AF37", marginLeft: 1 }} />
+      </button>
 
       {/* Remove button */}
       <button
@@ -321,6 +374,7 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
                 removeTrack.mutate({ playlistTrackId: trackId, playlistId: playlist.id })
               }
               playlistId={playlist.id}
+              allTracks={items}
             />
           ))}
         </div>

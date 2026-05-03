@@ -12,7 +12,8 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { Shield, Eye, Zap, CheckCircle2, MessageSquare, Heart, DollarSign, Clock, Music2 } from "lucide-react";
+import { usePlayer } from "@/contexts/PlayerContext";
+import { Shield, Eye, Zap, CheckCircle2, MessageSquare, Heart, DollarSign, Clock, Music2, Play } from "lucide-react";
 
 function timeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -43,6 +44,7 @@ function SignalIcon({ type }: { type: string }) {
 export default function RightRail() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
+  const { addAndPlay } = usePlayer();
   useNow(); // refresh time labels every 30s
 
   // Personal Signals — user's notification inbox (5 most recent, poll every 45s)
@@ -218,7 +220,21 @@ export default function RightRail() {
                     border: "1px solid rgba(255,215,0,0.08)",
                     transition: "background 0.2s ease, transform 0.2s ease",
                   }}
-                  onClick={() => navigate(`/song/${w.id}`)}
+                  onClick={() => {
+                    if (w.fileUrl || w.audioUrl) {
+                      addAndPlay({
+                        id: String(w.id),
+                        title: w.title ?? "Untitled",
+                        artist: w.artistHandle ? `@${w.artistHandle}` : (w.creatorName ?? ""),
+                        genre: w.genre ?? "",
+                        audioUrl: w.fileUrl ?? w.audioUrl ?? "",
+                        artUrl: w.coverArtUrl ?? undefined,
+                        witnessId: w.witnessId ?? undefined,
+                      });
+                    } else {
+                      navigate(`/song/${w.id}`);
+                    }
+                  }}
                   onMouseEnter={e => {
                     (e.currentTarget as HTMLDivElement).style.background = "rgba(255,215,0,0.06)";
                     (e.currentTarget as HTMLDivElement).style.transform = "translateX(2px)";
@@ -355,7 +371,21 @@ export default function RightRail() {
                   <div
                     key={(item.id ?? item.witnessId) + "-rw"}
                     className="flex items-center gap-2 py-1.5 rounded-lg px-2 cursor-pointer transition-all hover:bg-white/5"
-                    onClick={() => navigate(`/song/${item.songId ?? item.id}`)}
+                    onClick={() => {
+                      if (item.fileUrl || item.audioUrl) {
+                        addAndPlay({
+                          id: String(item.songId ?? item.id),
+                          title: item.title ?? item.songTitle ?? "Untitled",
+                          artist: item.artistHandle ? `@${item.artistHandle}` : (item.creatorName ?? ""),
+                          genre: item.genre ?? "",
+                          audioUrl: item.fileUrl ?? item.audioUrl ?? "",
+                          artUrl: item.coverArtUrl ?? item.artworkUrl ?? undefined,
+                          witnessId: item.witnessId ?? undefined,
+                        });
+                      } else {
+                        navigate(`/song/${item.songId ?? item.id}`);
+                      }
+                    }}
                   >
                     {/* Cover art or placeholder */}
                     {(item.coverArtUrl ?? item.artworkUrl)
