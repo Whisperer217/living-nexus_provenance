@@ -37,9 +37,13 @@ import {
   X,
   Volume2,
   VolumeX,
+  Zap,
+  Target,
 } from "lucide-react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useWSP } from "@/contexts/WSPContext";
+import { useKeeperAttrs } from "@/contexts/KeeperAttrsContext";
+import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 
 /* ── Helpers ── */
@@ -209,6 +213,28 @@ function SurfaceBar() {
           </button>
         </div>
 
+        {/* Provenance pulse — 3 animated dots when track is witnessed */}
+        {track.witnessId && (
+          <div
+            className="shrink-0 hidden sm:flex items-center gap-[3px]"
+            title={`Witnessed: ${track.witnessId.slice(0, 16)}…`}
+          >
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                style={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: "50%",
+                  background: "rgba(74,222,128,0.7)",
+                  animation: "wsp-provenance-pulse 2s cubic-bezier(0.4,0,0.6,1) infinite",
+                  animationDelay: `${i * 220}ms`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Pop-out to floating */}
         <button
           onClick={float}
@@ -235,6 +261,7 @@ function ExpandedPanel() {
     incrementShare,
   } = usePlayer();
   const { collapse, float } = useWSP();
+  const { activeMode } = useKeeperAttrs();
   const [, navigate] = useLocation();
   const [tiltStyle, setTiltStyle] = useState({});
   const artRef = useRef<HTMLDivElement>(null);
@@ -242,6 +269,14 @@ function ExpandedPanel() {
   const [overlayVisible, setOverlayVisible] = useState(true);
 
   const track = state.tracks[state.currentIdx];
+
+  /* Activation data — only fetch when track is loaded */
+  const songIdNum = track ? parseInt(track.id, 10) : 0;
+  const { data: activation } = trpc.activation.getForSong.useQuery(
+    { songId: songIdNum },
+    { enabled: !!track && songIdNum > 0 }
+  );
+
   if (!track) return null;
 
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
@@ -523,8 +558,96 @@ function ExpandedPanel() {
       </div>
 
       {/* 5. Waveform + glow */}
-      <div className="mt-6 mb-4 px-6 w-full flex justify-center shrink-0">
+      <div className="mt-6 px-6 w-full flex justify-center shrink-0">
         <WaveformBars isPlaying={state.isPlaying} />
+      </div>
+
+      {/* 6. Activation stages overlay — shown when activation is enabled */}
+      {activation?.activationEnabled && activation.stages.length > 0 && (() => {
+        const totalGoal = activation.stages.reduce((s, st) => s + st.goalCents, 0);
+        const funded = activation.totalFundingCents;
+        const pct = totalGoal > 0 ? Math.min(100, (funded / totalGoal) * 100) : 0;
+        const currentStageIdx = activation.stages.findIndex(st => !st.reachedAt);
+        const currentStage = currentStageIdx >= 0 ? activation.stages[currentStageIdx] : activation.stages[activation.stages.length - 1];
+        return (
+          <div
+            className="w-full px-6 mt-4 shrink-0"
+            onClick={() => navigate(`/song/${track.id}`)}
+            style={{ cursor: "pointer" }}
+          >
+            <div
+              className="rounded-xl p-3"
+              style={{
+                background: "rgba(255,215,0,0.04)",
+                border: "1px solid rgba(255,215,0,0.12)",
+              }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                  <Target size={11} style={{ color: "rgba(255,215,0,0.6)" }} />
+                  <span className="text-xs font-medium" style={{ color: "rgba(255,215,0,0.7)" }}>
+                    {currentStage?.label ?? "Activation"}
+                  </span>
+                </div>
+                <span className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  ${(funded / 100).toFixed(0)} / ${(totalGoal / 100).toFixed(0)}
+                </span>
+              </div>
+              <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full"
+                  style={{
+                    width: `${pct}%`,
+                    background: "linear-gradient(90deg, rgba(255,215,0,0.8), rgba(255,165,0,0.6))",
+                    transition: "width 0.6s ease",
+                  }}
+                />
+              </div>
+              <div className="flex justify-between mt-1">
+                {activation.stages.map((st, i) => (
+                  <div
+                    key={st.id}
+                    className="flex flex-col items-center gap-0.5"
+                    style={{ flex: 1 }}
+                  >
+                    <div
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: st.reachedAt
+                          ? "rgba(74,222,128,0.8)"
+                          : i === currentStageIdx
+                          ? "rgba(255,215,0,0.6)"
+                          : "rgba(255,255,255,0.15)",
+                        border: i === currentStageIdx ? "1px solid rgba(255,215,0,0.5)" : "none",
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* 7. Keeper sync context */}
+      <div className="flex items-center justify-center gap-2 mt-3 mb-4 shrink-0">
+        <div
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full"
+          style={{
+            background: "rgba(255,215,0,0.05)",
+            border: "1px solid rgba(255,215,0,0.1)",
+          }}
+        >
+          <Zap size={10} style={{ color: "rgba(255,215,0,0.5)" }} />
+          <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Keeper
+          </span>
+          <span className="text-xs font-medium" style={{ color: "rgba(255,215,0,0.6)" }}>
+            {activeMode}
+          </span>
+        </div>
       </div>
 
       {/* Ambient glow behind artwork */}
@@ -708,6 +831,10 @@ const WSP_STYLE = `
   @keyframes wsp-bar-2 { 0%,100%{height:16px} 50%{height:8px} }
   @keyframes wsp-bar-3 { 0%,100%{height:12px} 50%{height:28px} }
   @keyframes wsp-bar-4 { 0%,100%{height:20px} 50%{height:10px} }
+  @keyframes wsp-provenance-pulse {
+    0%,100% { opacity: 0.3; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
 `;
 
 /* ── Root WSP component ── */
