@@ -4056,3 +4056,20 @@
 - [x] Patch 2 — stronger effect dependency: changed from [state.currentIdx] to [currentTrack?.id, state.currentIdx] so any track identity change fires the sync
 - [x] Patch 3 — play action audit: playTrack/nextTrack/prevTrack/playQueueAt all update currentIdx which drives the effect — no additional setDisplayTrack calls needed at call sites
 - [x] setQueue only seeds empty queues and never changes playing track — no fix needed there
+
+## Phase 123: UX Interaction Bug Fixes (Slimdoggy feedback)
+- [x] Fix Collection/playlist ManageTrackRow: non-clickable rows — added Play button (hover-reveal gold circle), playQueueAt from index, addAndPlay fallback, hover gold background, allTracks prop passed at call site
+- [x] Fix RightRail Provenance Verified song clicks: changed from navigate(/song/:id) to addAndPlay() quick-play — no navigation, no cinematic escalation; falls back to navigate if no audioUrl
+- [x] Fix RightRail Recently Witnessed song clicks: same addAndPlay quick-play pattern
+- [x] Root cause confirmed: cinematic was triggered by artwork tap in expanded player (correct behavior), not by RightRail click — the fix is to not navigate to SongDetailPage from RightRail at all
+
+## Phase 124: Keeper Compose Mobile UX Affordances
+- [x] Mobile stacked layout: isMobile flag (< 768px), single-column output + input bar replaces three-panel grid
+- [x] Mode selector on mobile: icon-only pill row in top bar header, no sidebar
+- [x] Thinking state: ThinkingDots component (animated 3-dot pulsing) replaces generic Loader2 + text during generation
+- [x] Cinematic icon trigger: Film icon button in input bar (next to Send) opens cinematic mode directly
+- [x] Cinematic mode: swipe-down-to-close (> 80px delta), ESC key close, swipe hint chevron on mobile
+- [x] Live arc preview: ArcPanel shows derivePreviewArc(prompt) while typing (word-count-based 4-point curve, labeled PREVIEW)
+- [x] Arc panel on mobile: collapsible accordion below output area (auto-opens after generation)
+- [x] Player auto-collapse: textarea onFocus dispatches ln:player-collapse, onBlur dispatches ln:player-expand
+- [x] KeeperAvatarWidget already hidden on /keeper-compose (path starts with /keeper) — page owns its own cinematic trigger
