@@ -57,19 +57,19 @@ export default function RightRail() {
     { enabled: !user, staleTime: 45_000, refetchInterval: 60_000 }
   );
 
-  // Provenance Verified — trending works (all have WIDs by definition of trending)
-  const { data: trendingData } = trpc.songs.trending.useQuery(
-    { limit: 3 },
+  // Provenance Verified — most recently registered works (guaranteed WIDs)
+  const { data: provenanceData } = trpc.witnessRegistry.list.useQuery(
+    { type: "all", cursor: 0, limit: 3 },
     { staleTime: 60_000, refetchInterval: 120_000 }
   );
 
-  // Witness Registry — recent witnessed works
+  // Witness Registry — recent witnessed works (larger set for stats + recently witnessed)
   const { data: registryData } = trpc.witnessRegistry.list.useQuery(
-    { type: "all", cursor: 0, limit: 5 },
+    { type: "all", cursor: 0, limit: 8 },
     { staleTime: 120_000 }
   );
 
-  const provenanceTracks = (trendingData as any[] | undefined) ?? [];
+  const provenanceTracks = (provenanceData as any)?.items ?? [];
   const registryItems = (registryData as any)?.items ?? [];
   const totalWitnesses = registryItems.length > 0
     ? (registryData as any)?.total ?? registryItems.length
@@ -174,12 +174,15 @@ export default function RightRail() {
           ))}
         </section>
 
-        {/* ── Provenance Verified ──────────────────────────────────── */}
+        {/* -- Provenance Verified ----------------------------------------- */}
         <section>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
-              PROVENANCE VERIFIED
-            </span>
+            <div className="flex items-center gap-1.5">
+              <Shield size={11} style={{ color: "rgba(212,175,55,0.6)" }} />
+              <span className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
+                PROVENANCE VERIFIED
+              </span>
+            </div>
             <button
               onClick={() => navigate("/witness-registry")}
               className="text-[10px] transition-colors"
@@ -191,33 +194,103 @@ export default function RightRail() {
             </button>
           </div>
 
-          {provenanceTracks.slice(0, 3).map((w: any) => (
-            <div
-              key={w.id}
-              className="flex items-center gap-2 py-2 border-b cursor-pointer transition-opacity hover:opacity-80"
-              style={{ borderColor: "rgba(212,175,55,0.06)" }}
-              onClick={() => navigate(`/song/${w.id}`)}
-            >
-              {w.coverArtUrl || w.artworkUrl
-                ? <img src={w.coverArtUrl ?? w.artworkUrl} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
-                : <div style={{ width: 32, height: 32, borderRadius: 6, background: "rgba(212,175,55,0.12)", flexShrink: 0 }} />
-              }
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-medium truncate" style={{ color: "rgba(255,255,255,0.85)" }}>
-                  {w.title}
-                </p>
-                <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>
-                  {w.artistName ?? w.creatorName ?? w.userName ?? ""}
-                </p>
-              </div>
-              <CheckCircle2 size={12} style={{ color: "#D4AF37", flexShrink: 0 }} />
-            </div>
-          ))}
+          <div className="flex flex-col gap-2">
+            {provenanceTracks.slice(0, 3).map((w: any) => {
+              // Derive media type tags from returned fields
+              const tags: string[] = [];
+              if (w.hasAudio) tags.push("Audio");
+              if (w.hasVideo) tags.push("Video");
+              if (w.hasLyrics || w.isLyricsOnly) tags.push("Lyrics");
+              if (tags.length === 0) tags.push("Work");
+
+              const handle = w.artistHandle
+                ? `@${w.artistHandle}`
+                : (w.creatorName ?? "");
+
+              return (
+                <div
+                  key={w.id}
+                  className="flex gap-2.5 cursor-pointer"
+                  style={{
+                    padding: "10px",
+                    borderRadius: 10,
+                    background: "rgba(255,215,0,0.03)",
+                    border: "1px solid rgba(255,215,0,0.08)",
+                    transition: "background 0.2s ease, transform 0.2s ease",
+                  }}
+                  onClick={() => navigate(`/song/${w.id}`)}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLDivElement).style.background = "rgba(255,215,0,0.06)";
+                    (e.currentTarget as HTMLDivElement).style.transform = "translateX(2px)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLDivElement).style.background = "rgba(255,215,0,0.03)";
+                    (e.currentTarget as HTMLDivElement).style.transform = "translateX(0)";
+                  }}
+                >
+                  {/* Artwork thumbnail */}
+                  {w.coverArtUrl
+                    ? <img src={w.coverArtUrl} alt="" style={{ width: 48, height: 48, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
+                    : <div style={{ width: 48, height: 48, borderRadius: 6, background: "rgba(212,175,55,0.12)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Music2 size={16} style={{ color: "rgba(212,175,55,0.4)" }} />
+                      </div>
+                  }
+
+                  {/* Meta */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    {/* Title + verified badge */}
+                    <div className="flex items-start justify-between gap-1">
+                      <p className="text-[11px] font-medium leading-tight" style={{ color: "rgba(255,255,255,0.88)", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                        {w.title}
+                      </p>
+                      <CheckCircle2 size={11} style={{ color: "#D4AF37", flexShrink: 0, marginTop: 1 }} />
+                    </div>
+
+                    {/* Creator handle */}
+                    {handle && (
+                      <p className="text-[10px] truncate mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+                        {handle}
+                      </p>
+                    )}
+
+                    {/* WID string */}
+                    {w.witnessId && (
+                      <p className="text-[9px] mt-1 truncate" style={{ color: "rgba(212,175,55,0.5)", fontFamily: "'Space Mono', monospace" }}>
+                        {w.witnessId}
+                      </p>
+                    )}
+
+                    {/* Media type tags */}
+                    <div className="flex gap-1 mt-1.5 flex-wrap">
+                      {tags.map(tag => (
+                        <span
+                          key={tag}
+                          style={{
+                            fontSize: "0.55rem",
+                            padding: "1px 5px",
+                            borderRadius: 3,
+                            background: "rgba(212,175,55,0.1)",
+                            border: "1px solid rgba(212,175,55,0.2)",
+                            color: "rgba(212,175,55,0.7)",
+                            fontFamily: "'Space Mono', monospace",
+                            letterSpacing: "0.04em",
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
           {provenanceTracks.length === 0 && (
-            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>No verified works yet.</p>
+            <p className="text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>No verified works yet.</p>
           )}
         </section>
+
 
         {/* ── Witness Registry Stats ───────────────────────────────── */}
         <section>

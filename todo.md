@@ -4032,3 +4032,19 @@
 - [x] Add COMPOSE button to KeeperPage header → navigates to /keeper-compose
 - [x] Fix MainLayout.tsx Unicode box-drawing chars (═) in JSX comments → plain ASCII (=) to resolve esbuild JSX parse error
 - [x] TypeScript: 0 client errors (18 pre-existing server/db.ts errors unchanged)
+
+## Phase 121: Provenance Verified — Full Record Cards
+
+- [x] Audit: Provenance Verified was using songs.trending (no guaranteed WIDs) — switched to witnessRegistry.list (all items guaranteed WID)
+- [x] Upgraded Provenance Verified section to full record card layout per design spec:
+  - 48x48 artwork thumbnail (Music2 icon fallback)
+  - Title (2-line clamp) + CheckCircle2 verified badge
+  - Creator handle (@artistHandle or creatorName)
+  - WID string in Space Mono monospace (gold, 9px)
+  - Media type tags (Audio / Video / Lyrics / Work) derived from hasAudio/hasVideo/hasLyrics/isLyricsOnly
+  - Gold card background (rgba(255,215,0,0.03)) + border (rgba(255,215,0,0.08))
+  - Hover: background brightens to rgba(255,215,0,0.06) + translateX(2px)
+  - Click: navigate to /song/{id}
+  - Shield icon added to section header
+  - Empty state: "No verified works yet."
+- [x] Data source: witnessRegistry.list (limit 3 for provenance, limit 8 for registry/recently witnessed)
