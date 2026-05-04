@@ -103,7 +103,7 @@ function SurfaceBar() {
 
   return (
     <div
-      className="wsp-surface-bar"
+      className="wsp-surface-bar md:hidden"
       style={{
         position: "fixed",
         top: "var(--wsp-top, 56px)",

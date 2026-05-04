@@ -197,7 +197,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           Mobile:  pt-14 + 60px WSP to clear mobile header + surface bar
       ============================================== */}
       <div
-        className={`flex-1 flex overflow-hidden pt-[116px] lg:pt-[112px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
+        className={`flex-1 flex overflow-hidden pt-[116px] lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
         style={{
           overscrollBehavior: "none",
           transition: "padding-left 220ms cubic-bezier(0.22,1,0.36,1)",

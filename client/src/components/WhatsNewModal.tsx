@@ -10,14 +10,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.44.0";
+const CURRENT_VERSION = "v2.45.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.45.0",
+    date: "May 4, 2026",
+    label: "Latest",
+    items: [
+      { icon: Music, text: "Global player now lives in the top navbar — artwork, seek bar, timestamps, shuffle/prev/pause/next/repeat controls, and expand arrow are all inline. The separate player strip below the navbar is gone on desktop." },
+      { icon: Shield, text: "Register WID fixed — after publishing a work, you are now taken directly to the song page where your WID badge is immediately visible. The success toast shows your full WID." },
+      { icon: Sparkles, text: "Keeper Compose auto-saves every generated composition silently. A Recent Drafts strip appears above the input bar — tap any draft to reload it and re-enter cinematic mode." },
+      { icon: Film, text: "Cinematic mode now activates automatically after generation on desktop — no need to tap the film icon separately." },
+      { icon: Zap, text: "Conductor mode is now visually elevated in the mode selector with a persistent border, STRUCTURE badge, and hover tooltip explaining its purpose." },
+    ],
+  },
+  {
     version: "v2.44.0",
     date: "May 3, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Film, text: "Keeper Compose — A dedicated composition surface at /keeper-compose. Single-column mobile layout, mode selector (Guide / Conductor / Witness / Custodian / Archivist), and structured Suno-ready output with labeled section cards." },
       { icon: Sparkles, text: "Cinematic writing mode — tap the film icon in the input bar to enter full-screen screenplay-style composition. Blurred artwork fills the background, lyrics scroll in Georgia serif. Swipe down or press Escape to exit." },

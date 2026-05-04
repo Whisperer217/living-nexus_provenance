@@ -4161,3 +4161,50 @@
 - [x] WSP SurfaceBar: make the strip feel like a WSP entry point — add a thin gold left-border accent, slightly warmer background
 - [x] KeeperAvatarWidget: fade opacity to 0.35 during active playback (isPlaying=true), restore to 1.0 on pause/stop or hover
 - [x] KeeperAvatarWidget: tie fade to PlayerContext isPlaying state via usePlayer() hook
+
+## Phase 132 — Work Evidence Layer (Proof Attachment System)
+
+- [x] Create workEvidence table in drizzle/schema.ts (id, songId FK, type enum file/link/note, title, url, metadataJson, addedByUserId FK, createdAt, hash)
+- [x] Generate and apply DB migration for workEvidence table
+- [x] Add evidence.list tRPC procedure (public, returns evidence for a songId sorted by createdAt desc)
+- [x] Add evidence.add tRPC protected procedure (owner-only: validate user owns the song, accept type/title/url/hash)
+- [x] Add evidence.delete tRPC protected procedure (owner-only: validate ownership before delete)
+- [x] Add S3 upload endpoint for evidence files (server-side storagePut, return url + sha256 hash)
+- [x] Song page: add Evidence section below Provenance panel (visible, not behind modal)
+- [x] Evidence section: chronological list of evidence items with type icon, title, timestamp, and link
+- [x] Evidence section: Add Evidence button (owner-only, opens inline form or sheet)
+- [x] Add Evidence form: type selector (File / Link / Note), title input, file upload or URL input
+- [x] Evidence item: show computed hash badge when hash is present (chain of custody indicator)
+- [x] Evidence section: empty state with call-to-action for owner
+
+## Phase 133 — Contributor Recognition MVP
+
+- [x] Extend activation.getForSong in server/db.ts to return recentContributors (userId, name, image, stageId, amountCents, createdAt) from activationContributions JOIN users, order DESC, limit 15
+- [x] Update activation.getForSong tRPC procedure in routers.ts to pass recentContributors through
+- [x] Build WitnessStrip component inside ActivationPanel.tsx (horizontal scroll, avatar+name, max 5 visible, +X overflow)
+- [x] Build Stage Attribution in ActivationPanel.tsx (show contributor names per stage, max 2 names + +X, only when stage reached)
+- [x] Build Contribution Feed accordion in ActivationPanel.tsx (collapsed by default, max 10 items, formatContribution helper)
+- [x] Invalidate activation.getForSong after contribution mutation in ActivationPanel.tsx
+- [x] Empty state: show Be the first to witness this work when no contributors
+
+## Phase 135 — Critical Bug Fixes + UX Improvements
+
+### 🚨 Critical
+- [ ] Fix Register WID: debug button click → API route → auth check → form validation → success path
+- [ ] Fix lyrics/chat not persisting: implement auto-save to DB on generation success
+- [ ] Add Recent Drafts panel in Keeper Compose showing last 5 generations
+
+### ⚡ High Impact UX
+- [ ] Remove extra step in Compose→Cinematic: inline film icon in input bar, auto-enter cinematic after generation
+- [ ] Cinematic mode: skip intermediate confirmation, go directly Compose→Generate→Cinematic View
+
+### 🟢 Strategic
+- [x] Elevate Conductor visibility: add tooltip on first use, highlight in onboarding modal
+- [ ] Add Conductor entry point on Home page / sidebar
+
+## Phase 136 — Navbar Player Integration + What's New v2.45.0
+
+- [x] Embed WSP Surface Mode inline in TopBar (artwork + seek + controls)
+- [x] Hide SurfaceBar on desktop (md:hidden)
+- [x] Adjust MainLayout desktop content offset to pt-[56px]
+- [x] Update WhatsNewModal to v2.45.0 with Phase 135 + 136 additions
