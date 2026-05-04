@@ -1498,3 +1498,24 @@ export const userCollectionTracks = mysqlTable("userCollectionTracks", {
 
 export type UserCollectionTrack = typeof userCollectionTracks.$inferSelect;
 export type InsertUserCollectionTrack = typeof userCollectionTracks.$inferInsert;
+
+// ─── Work Evidence Layer ──────────────────────────────────────────────────────
+// Each row is a recorded proof event attached to a song's provenance chain.
+// type: 'file' = S3-uploaded artifact, 'link' = external URL, 'note' = text memo
+export const workEvidence = mysqlTable("workEvidence", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("songId").notNull(),              // FK → songs.id
+  addedByUserId: int("addedByUserId").notNull(), // FK → users.id
+  type: mysqlEnum("type", ["file", "link", "note"]).notNull().default("file"),
+  title: varchar("title", { length: 256 }).notNull(),
+  url: text("url"),                             // S3 URL for files, external URL for links, null for notes
+  noteBody: text("noteBody"),                   // plain text body for type='note'
+  hash: varchar("hash", { length: 64 }),        // SHA-256 hex of file bytes (chain of custody)
+  metadataJson: json("metadataJson"),           // optional: mime type, file size, etc.
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  songIdx: index("workEvidence_songId_idx").on(t.songId),
+  userIdx: index("workEvidence_userId_idx").on(t.addedByUserId),
+}));
+export type WorkEvidence = typeof workEvidence.$inferSelect;
+export type InsertWorkEvidence = typeof workEvidence.$inferInsert;

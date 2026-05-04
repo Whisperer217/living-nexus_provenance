@@ -31,10 +31,12 @@ import {
   agents, wids, provenanceEvents,
   commentReports,
   userCollectionTracks,
-  userCollections,
   activationContributions,
   type ActivationContribution,
   type InsertActivationContribution,
+  workEvidence,
+  type WorkEvidence,
+  type InsertWorkEvidence,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -4139,7 +4141,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
   const perType = Math.ceil(limit / 3);
   try {
     // Tips (join users for tipper name, join songs for title)
-    const [tipRows] = await (db.execute as any)(sql`
+    const [tipRows] = await db.execute<any[]>(sql`
       SELECT 'tip' AS type, CONCAT('tip-', t.id) AS id,
              COALESCE(u.name, 'A fan') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4151,7 +4153,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       ORDER BY t.createdAt DESC LIMIT ${sql.raw(String(perType))}
     `);
     // Comments (DB column is 'text', no authorName — use userId join)
-    const [commentRows] = await (db.execute as any)(sql`
+    const [commentRows] = await db.execute<any[]>(sql`
       SELECT 'comment' AS type, CONCAT('comment-', c.id) AS id,
              COALESCE(u.name, 'A listener') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4163,7 +4165,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       ORDER BY c.createdAt DESC LIMIT ${sql.raw(String(perType))}
     `);
     // Likes
-    const [likeRows] = await (db.execute as any)(sql`
+    const [likeRows] = await db.execute<any[]>(sql`
       SELECT 'like' AS type, CONCAT('like-', l.id) AS id,
              'Someone' AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4338,4 +4340,31 @@ export async function verifySongOwnership(songId: number, userId: number): Promi
   } catch {
     return false;
   }
+}
+
+// ─── Work Evidence Helpers ────────────────────────────────────────────────────
+
+export async function getEvidenceForSong(songId: number): Promise<WorkEvidence[]> {
+  const db = await getDb();
+  return db
+    .select()
+    .from(workEvidence)
+    .where(eq(workEvidence.songId, songId))
+    .orderBy(desc(workEvidence.createdAt));
+}
+
+export async function addEvidence(data: InsertWorkEvidence): Promise<WorkEvidence> {
+  const db = await getDb();
+  const [result] = await db.insert(workEvidence).values(data);
+  const id = (result as any).insertId;
+  const [row] = await db.select().from(workEvidence).where(eq(workEvidence.id, id));
+  return row;
+}
+
+export async function deleteEvidence(id: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  const [row] = await db.select().from(workEvidence).where(eq(workEvidence.id, id));
+  if (!row || row.addedByUserId !== userId) return false;
+  await db.delete(workEvidence).where(eq(workEvidence.id, id));
+  return true;
 }

@@ -29,6 +29,7 @@ import { useLike } from "@/hooks/useLike";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { WIDPanel } from "@/components/WIDPanel";
 import { ActivationPanel } from "@/components/ActivationPanel";
+import { EvidencePanel } from "@/components/EvidencePanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
 import { VersionHistoryModal } from "@/components/VersionHistoryModal";
 import { safeAudioUrl } from "@shared/const";
@@ -1062,6 +1063,8 @@ export default function SongDetailPage() {
 
         {/* ── ACTIVATION — stage-based funding progress ── */}
         <ActivationPanel songId={songId} songTitle={song.title} />
+        {/* ── EVIDENCE — proof attachment layer ── */}
+        <EvidencePanel songId={songId} isOwner={isOwner} />
 
         {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}
         {song.lyricsText && (

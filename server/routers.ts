@@ -103,6 +103,9 @@ import {
   configureSongActivation,
   verifySongOwnership,
   type ActivationStage,
+  getEvidenceForSong,
+  addEvidence,
+  deleteEvidence,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -6376,6 +6379,75 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
           stages: input.stages,
         });
         return { ok: true };
+      }),
+  }),
+
+  evidence: router({
+    /** List all evidence for a song, newest first */
+    list: publicProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return getEvidenceForSong(input.songId);
+      }),
+
+    /** Add a new evidence item (owner-only) */
+    add: protectedProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        type: z.enum(["file", "link", "note"]),
+        title: z.string().min(1).max(256),
+        url: z.string().optional(),
+        noteBody: z.string().optional(),
+        hash: z.string().optional(),
+        metadataJson: z.record(z.unknown()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Verify the user owns this song
+        const owned = await verifySongOwnership(input.songId, ctx.user.id);
+        if (!owned) throw new TRPCError({ code: "FORBIDDEN", message: "You do not own this work." });
+        return addEvidence({
+          songId: input.songId,
+          addedByUserId: ctx.user.id,
+          type: input.type,
+          title: input.title,
+          url: input.url ?? null,
+          noteBody: input.noteBody ?? null,
+          hash: input.hash ?? null,
+          metadataJson: input.metadataJson ?? null,
+        });
+      }),
+
+    /** Delete an evidence item (owner-only) */
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const ok = await deleteEvidence(input.id, ctx.user.id);
+        if (!ok) throw new TRPCError({ code: "FORBIDDEN", message: "Not found or not authorized." });
+        return { success: true };
+      }),
+
+    /** Upload a file to S3 and return url + sha256 hash */
+    uploadFile: protectedProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        filename: z.string().min(1),
+        mimeType: z.string().min(1),
+        base64: z.string().min(1),   // base64-encoded file bytes
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const owned = await verifySongOwnership(input.songId, ctx.user.id);
+        if (!owned) throw new TRPCError({ code: "FORBIDDEN", message: "You do not own this work." });
+        const bytes = Buffer.from(input.base64, "base64");
+        if (bytes.byteLength > 16 * 1024 * 1024) {
+          throw new TRPCError({ code: "PAYLOAD_TOO_LARGE", message: "File must be under 16 MB." });
+        }
+        // Compute SHA-256 hash for chain-of-custody
+        const { createHash } = await import("crypto");
+        const hash = createHash("sha256").update(bytes).digest("hex");
+        const suffix = Date.now().toString(36);
+        const key = `evidence/${ctx.user.id}/${input.songId}/${suffix}-${input.filename}`;
+        const { url } = await storagePut(key, bytes, input.mimeType);
+        return { url, hash, key };
       }),
   }),
 
