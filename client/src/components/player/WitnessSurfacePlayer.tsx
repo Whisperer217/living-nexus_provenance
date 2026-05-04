@@ -84,13 +84,29 @@ function WaveformBars({ isPlaying }: { isPlaying: boolean }) {
   );
 }
 
-/* ── Surface Bar (60px strip) ── */
+/* ── Mobile-only hook ── */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 768);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isMobile;
+}
+
+/* ── Surface Bar (60px strip — mobile only) ── */
 function SurfaceBar() {
-  const { state, togglePlay, nextTrack, prevTrack, seek, audioRef } = usePlayer();
+  const isMobile = useIsMobile();
+  const { state, togglePlay, nextTrack, prevTrack, seek } = usePlayer();
   const { expand, float } = useWSP();
   const [, navigate] = useLocation();
 
   const track = state.tracks[state.currentIdx];
+
+  // Must be after all hooks — Rules of Hooks
+  if (!isMobile) return null;
   if (!track) return null;
 
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
