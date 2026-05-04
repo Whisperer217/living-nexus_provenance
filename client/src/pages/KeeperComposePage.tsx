@@ -315,7 +315,7 @@ function ArcPanel({ arc, previewArc, modeColor, hasContent }: {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function KeeperComposePage() {
-  const { loading: authLoading } = useAuth({ redirectOnUnauthenticated: true });
+  const { loading: authLoading, isAuthenticated } = useAuth({ redirectOnUnauthenticated: true });
   const [, navigate] = useLocation();
   const { activeMode, attrs, handleModeChange } = useKeeperAttrs();
 
