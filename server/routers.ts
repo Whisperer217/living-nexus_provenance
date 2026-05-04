@@ -548,7 +548,7 @@ export const appRouter = router({
       instagramHandle: z.string().max(64).optional(),
       youtubeHandle: z.string().max(64).optional(),
       aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).optional(),
-      primaryGenre: z.string().max(64).optional(),
+      primaryGenre: z.string().max(500).optional(),
       avatarObjectPosition: z.string().max(32).optional(),
       bannerPositionX: z.number().min(0).max(100).optional(),
       bannerPositionY: z.number().min(0).max(100).optional(),
@@ -6399,7 +6399,7 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
         url: z.string().optional(),
         noteBody: z.string().optional(),
         hash: z.string().optional(),
-        metadataJson: z.record(z.string(), z.unknown()).optional(),
+        metadataJson: z.record(z.unknown()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verify the user owns this song
