@@ -74,7 +74,10 @@ function WaveformBars({ isPlaying }: { isPlaying: boolean }) {
               background: isPlaying
                 ? `rgba(255,215,0,${0.3 + Math.abs(Math.sin(i * 0.5)) * 0.5})`
                 : "rgba(255,255,255,0.12)",
-              animation: isPlaying ? `wsp-bar-${(i % 4) + 1} 0.8s ease-in-out infinite` : "none",
+              animationName: isPlaying ? `wsp-bar-${(i % 4) + 1}` : "none",
+              animationDuration: "0.8s",
+              animationTimingFunction: "ease-in-out",
+              animationIterationCount: "infinite",
               animationDelay: `${(i % 8) * 0.1}s`,
             }}
           />
@@ -244,7 +247,10 @@ function SurfaceBar() {
                   height: 5,
                   borderRadius: "50%",
                   background: "rgba(74,222,128,0.7)",
-                  animation: "wsp-provenance-pulse 2s cubic-bezier(0.4,0,0.6,1) infinite",
+                  animationName: "wsp-provenance-pulse",
+                  animationDuration: "2s",
+                  animationTimingFunction: "cubic-bezier(0.4,0,0.6,1)",
+                  animationIterationCount: "infinite",
                   animationDelay: `${i * 220}ms`,
                 }}
               />

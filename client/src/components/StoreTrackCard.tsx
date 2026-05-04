@@ -212,8 +212,16 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="w-0.5 bg-[#C9A84C] rounded-full animate-pulse"
-                  style={{ height: `${8 + i * 4}px`, animationDelay: `${i * 0.15}s` }}
+                  className="w-0.5 rounded-full"
+                  style={{
+                    height: `${8 + i * 4}px`,
+                    background: "#C9A84C",
+                    animationName: "pulse",
+                    animationDuration: "2s",
+                    animationTimingFunction: "cubic-bezier(0.4, 0, 0.6, 1)",
+                    animationIterationCount: "infinite",
+                    animationDelay: `${i * 0.15}s`,
+                  }}
                 />
               ))}
             </div>
