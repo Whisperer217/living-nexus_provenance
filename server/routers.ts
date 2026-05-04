@@ -6399,7 +6399,7 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
         url: z.string().optional(),
         noteBody: z.string().optional(),
         hash: z.string().optional(),
-        metadataJson: z.record(z.unknown()).optional(),
+        metadataJson: z.record(z.string(), z.unknown()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verify the user owns this song
