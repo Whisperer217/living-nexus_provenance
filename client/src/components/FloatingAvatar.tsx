@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { X, Minimize2, ChevronUp, Music2, Sword, PenLine, Bold, Italic, Highlighter, ImagePlus, Trash2, Wand2, ClipboardCopy, Loader2, Mic, MicOff, Palette, Eye } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 // ─── Skin image URLs ──────────────────────────────────────────────────────────
 
@@ -353,8 +354,30 @@ export default function FloatingAvatar({
       recorder.start();
       mediaRecorderRef.current = recorder;
       setIsRecording(true);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Mic access denied', err);
+      const name = err instanceof Error ? (err as DOMException).name : '';
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        toast.error('Microphone access denied', {
+          description: 'Allow microphone access in your browser settings, then try again.',
+          duration: 6000,
+        });
+      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+        toast.error('No microphone found', {
+          description: 'Connect a microphone and try again.',
+          duration: 5000,
+        });
+      } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+        toast.error('Microphone in use', {
+          description: 'Another app may be using your microphone. Close it and try again.',
+          duration: 5000,
+        });
+      } else {
+        toast.error('Could not access microphone', {
+          description: 'Check your browser and system permissions.',
+          duration: 5000,
+        });
+      }
     }
   };
 
