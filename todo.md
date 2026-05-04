@@ -4208,3 +4208,29 @@
 - [x] Hide SurfaceBar on desktop (md:hidden)
 - [x] Adjust MainLayout desktop content offset to pt-[56px]
 - [x] Update WhatsNewModal to v2.45.0 with Phase 135 + 136 additions
+
+## Phase 140 — primaryGenre Validation Fix
+- [x] Increase primaryGenre Zod validation from max(64) to max(500) in server/routers.ts (DB column is already text, no migration needed)
+
+## Phase 141 — UI Hierarchy Restructure (No Backend Changes)
+### Home / Explore Cards
+- [ ] Update card layout to lead with testimony snippet (1–2 lines, from song description/lyricsText)
+- [ ] Move artwork/player below testimony snippet
+- [ ] Show creator + resonance (reactions + funding) at bottom of card
+- [ ] Remove title-first hierarchy from cards
+### Song Detail Page
+- [ ] Move Testimony (rename from description) to top of page
+- [ ] Player (Manifestation) second
+- [ ] Resonance Field (aggregate reactions + funding + contributors) third
+- [ ] WID block fourth
+- [ ] Interaction section (comments, share, contribute) fifth
+- [ ] Metadata (tags, AI label) last
+- [ ] Replace or demote AI-Generated badge (show as subtle footnote, not prominent badge)
+
+## Phase 141b — Testimony Card Paradigm
+- [x] Rebuild StoreTrackCard: testimony text as primary surface over blurred/darkened artwork background, play button below, creator + resonance at bottom
+- [x] Rebuild TrackCard: same testimony-first hierarchy, artwork as atmospheric background
+- [x] Hover effect: image subtly sharpens, play button brightens, card lifts slightly
+- [x] Mobile: same structure, no hover dependency — tap = play or expand
+- [x] Restructure SongDetailPage: Testimony (renamed from description) at top, Player second, Resonance Field third, WID fourth, Interaction fifth, Metadata last
+- [x] Demote AI-Generated badge to subtle footnote in Metadata section

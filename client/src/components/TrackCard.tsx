@@ -131,176 +131,180 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
   const isHot = (track.plays ?? 0) >= 50;
   const ctColors = getContentTypeColors((track as any).contentType ?? "audio");
 
+  // Testimony snippet: first non-empty line of description or lyricsText
+  const testimonySnippet = (() => {
+    const raw = (track as any).description || (track as any).lyricsText || null;
+    if (!raw) return null;
+    const line = raw.split(/\n+/).find((l: string) => l.trim().length > 0)?.trim() ?? "";
+    if (!line) return null;
+    return line.length > 110 ? line.slice(0, 107) + "\u2026" : line;
+  })();
+
   return (
     <>
+    {/*
+      ╔══════════════════════════════════════╗
+      ║  TESTIMONY CARD (TrackCard)          ║
+      ║  Background: blurred artwork         ║
+      ║  1. Testimony text (primary)         ║
+      ║  2. Play button (Manifestation)      ║
+      ║  3. Creator + resonance              ║
+      ╚══════════════════════════════════════╝
+    */}
     <div
       className={`group relative rounded-xl overflow-hidden transition-all duration-300
-        museum-card parchment-grain
-        ${isActive
-          ? "museum-card--active"
-          : isHot
-            ? "museum-card--hot gold-banner"
-            : ""
+        ${
+          isActive
+            ? "shadow-[0_0_32px_rgba(196,154,40,0.22),0_4px_24px_rgba(0,0,0,0.7)]"
+            : isHot
+              ? "gold-banner"
+              : ""
         }`}
-      style={isActive ? undefined : { borderColor: ctColors.dim, boxShadow: `0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px ${ctColors.dim}` }}
+      style={{
+        border: isActive
+          ? "1px solid rgba(196,154,40,0.5)"
+          : `1px solid ${ctColors.dim}`,
+        minHeight: "180px",
+      }}
     >
-      {/* ── Zone 1: Cover Art — plays in global player ── */}
-      <div
-        className="relative overflow-hidden cursor-pointer w-full"
-        style={{ maxHeight: "200px" }}
-        onClick={handleCoverClick}
-        title="Play this track"
-      >
-        <MediaAsset
-          src={track.artType !== "video" ? track.artUrl : null}
-          alt={track.title}
-          mode="card"
-          aspectRatio="4:5"
-          focalX={track.coverPositionX ?? 50}
-          focalY={track.coverPositionY ?? 50}
-          emoji={track.emoji}
-          bg={track.bg}
-          className="w-full transition-transform duration-300 group-hover:scale-105"
-        />
-        {/* Video cover art */}
-        {track.artUrl && track.artType === "video" && (
+      {/* ── Background: blurred artwork ── */}
+      <div className="absolute inset-0 overflow-hidden rounded-xl">
+        {track.artUrl && track.artType !== "video" ? (
+          <img
+            src={track.artUrl}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+            style={{
+              filter: "blur(3px) brightness(0.28)",
+              transform: "scale(1.08)",
+              objectPosition: coverPos,
+            }}
+          />
+        ) : track.artUrl && track.artType === "video" ? (
           <video
             src={track.artUrl}
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: coverPos }}
+            style={{ filter: "blur(3px) brightness(0.28)", objectPosition: coverPos }}
             muted
             loop
           />
-        )}
-
-        {/* Overlay gradient — always present, intensifies on hover/active */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.82) 100%)",
-          }}
-        />
-
-        {/* Play button */}
-        <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
-          transition-all duration-200 z-10
-          ${isActive ? "opacity-100 bg-[#1C1A14]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
-        >
-          {isPlaying
-            ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
-            : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
-          }
-        </div>
-
-        {/* 🔥 Hot badge — top-left corner ribbon for 50+ plays */}
-        {isHot && !track.isOwn && (
-          <div className="absolute top-0 left-0 z-20 flex items-center gap-0.5 px-2 py-0.5"
-            style={{
-              background: "linear-gradient(90deg, rgba(100,74,10,0.95), rgba(196,154,40,0.90))",
-              borderBottomRightRadius: "8px",
-              borderTopLeftRadius: "inherit",
-            }}
-          >
-            <Crown size={9} style={{ color: "#0A0806" }} />
-            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#0A0806" }}>
-              {(track.plays ?? 0) >= 1000
-                ? `${Math.floor((track.plays ?? 0) / 1000)}K PLAYS`
-                : `${track.plays} PLAYS`}
-            </span>
-          </div>
-        )}
-
-        {/* YOURS badge — top-left */}
-        {track.isOwn && (
-          <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded
-            bg-black/70 text-[#C49A28] border border-[#C49A28]/30 z-10 font-heading tracking-wider">
-            YOURS
-          </div>
-        )}
-
-        {/* WID badge — bottom-left, clickable → /verify/:witnessId */}
-        {hasWid && (
-          <Link
-            href={`/verify/${track.witnessId}`}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow wid-origin-glow transition-opacity opacity-90 hover:opacity-100"
-            style={{ background: "rgba(0,0,0,0.72)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.55)" }}
-            title={`Verified Witness ID: ${track.witnessId}`}
-          >
-            <Shield size={8} />
-            <span>WID</span>
-          </Link>
-        )}
-
-        {/* AI Disclosure badge — top-right */}
-        {hasAiDisclosure && (
-          <div className="absolute top-2 right-2 z-10">
-            <AiDisclosurePill value={track.aiDisclosure as any} size="compact" />
-          </div>
-        )}
-
-        {/* visualReady shimmer — pulsing overlay while auto-video is being generated */}
-        {track.visualReady === false && (
+        ) : (
           <div
-            className="absolute inset-0 z-20 pointer-events-none overflow-hidden"
-            style={{ borderRadius: "inherit" }}
-          >
-            {/* Sweep shimmer */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background: "linear-gradient(105deg, transparent 35%, rgba(245,196,81,0.09) 50%, transparent 65%)",
-                backgroundSize: "200% 100%",
-                animation: "trackCardShimmer 2.2s ease-in-out infinite",
-              }}
-            />
-            {/* Bottom label */}
-            <div
-              className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-1.5"
-              style={{
-                background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
-              }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 4,
-                  height: 4,
-                  borderRadius: "50%",
-                  background: "rgba(245,196,81,0.7)",
-                  animation: "trackCardDot 1.1s ease-in-out infinite",
-                }}
-              />
-              <span
-                style={{
-                  fontSize: "8px",
-                  color: "rgba(245,196,81,0.75)",
-                  letterSpacing: "0.12em",
-                  fontFamily: "'Cinzel', serif",
-                }}
-              >
-                generating visual
-              </span>
-            </div>
-          </div>
+            className="w-full h-full"
+            style={{ background: "linear-gradient(135deg, #1a1409 0%, #0d0b07 50%, #111009 100%)" }}
+          />
         )}
       </div>
 
-      {/* ── Info panel ── */}
-      <div className="p-3 flex flex-col gap-2">
-        {/* Zone 2: Song title → song detail page */}
-        <Link
-          href={`/song/${track.id}`}
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          className="block text-[13px] font-heading truncate tracking-wide
-            text-[#E8DFC8] hover:text-[#B8860B] transition-colors cursor-pointer"
-          title={`Open ${track.title}`}
-        >
-          {track.title}
-        </Link>
+      {/* ── Dark overlay ── */}
+      <div
+        className="absolute inset-0 rounded-xl transition-opacity duration-300 group-hover:opacity-60"
+        style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.80) 60%, rgba(0,0,0,0.92) 100%)" }}
+      />
 
-        {/* Zone 3: Artist handle chip with mini pop-up */}
-        <div className="flex items-center gap-1">
+      {/* ── Hot ribbon ── */}
+      {isHot && !track.isOwn && (
+        <div className="absolute top-0 left-0 z-20 flex items-center gap-0.5 px-2 py-0.5 rounded-tl-xl"
+          style={{
+            background: "linear-gradient(90deg, rgba(100,74,10,0.95), rgba(196,154,40,0.90))",
+            borderBottomRightRadius: "8px",
+          }}
+        >
+          <Crown size={9} style={{ color: "#0A0806" }} />
+          <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#0A0806" }}>
+            {(track.plays ?? 0) >= 1000 ? `${Math.floor((track.plays ?? 0) / 1000)}K PLAYS` : `${track.plays} PLAYS`}
+          </span>
+        </div>
+      )}
+      {track.isOwn && (
+        <div className="absolute top-2 left-2 z-20 text-[9px] font-bold px-2 py-0.5 rounded bg-black/70 text-[#C49A28] border border-[#C49A28]/30 font-heading tracking-wider">
+          YOURS
+        </div>
+      )}
+
+      {/* ── Content layer ── */}
+      <div className="relative z-10 flex flex-col p-3 gap-3" style={{ minHeight: "180px" }}>
+
+        {/* 1. TESTIMONY — primary surface */}
+        <div className="flex-1 cursor-pointer" onClick={handleCoverClick}>
+          {testimonySnippet ? (
+            <p
+              className="text-[12px] leading-relaxed"
+              style={{
+                color: "rgba(240,228,196,0.90)",
+                fontFamily: "'Georgia', 'Times New Roman', serif",
+                letterSpacing: "0.01em",
+                lineHeight: "1.65",
+                textShadow: "0 1px 8px rgba(0,0,0,0.9)",
+              }}
+            >
+              &ldquo;{testimonySnippet}&rdquo;
+            </p>
+          ) : (
+            <Link
+              href={`/song/${track.id}`}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            >
+              <p
+                className="text-[13px] font-heading tracking-wide leading-snug"
+                style={{
+                  color: "rgba(240,228,196,0.80)",
+                  fontFamily: "'Cinzel', serif",
+                  textShadow: "0 1px 8px rgba(0,0,0,0.9)",
+                }}
+              >
+                {track.title}
+              </p>
+            </Link>
+          )}
+        </div>
+
+        {/* 2. PLAY + WID row */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCoverClick}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200
+              group-hover:shadow-[0_0_12px_rgba(196,154,40,0.35)]`}
+            style={{
+              background: isActive ? "rgba(196,154,40,0.22)" : "rgba(196,154,40,0.12)",
+              border: `1px solid ${isActive ? "rgba(196,154,40,0.55)" : "rgba(196,154,40,0.35)"}`,
+              color: "#C9A84C",
+            }}
+          >
+            {isPlaying
+              ? <><div className="live-wave scale-[0.6]"><span /><span /><span /></div><span>Playing</span></>
+              : <><Play size={10} fill="currentColor" className="ml-0.5" /><span>Play</span></>
+            }
+          </button>
+
+          {hasWid && (
+            <Link
+              href={`/verify/${track.witnessId}`}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              className="flex items-center gap-0.5 px-1.5 py-1 rounded text-[8px] font-bold font-heading tracking-wider wid-glow transition-opacity opacity-80 hover:opacity-100"
+              style={{ background: "rgba(0,0,0,0.55)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.45)" }}
+              title={`Verified Witness ID: ${track.witnessId}`}
+            >
+              <Shield size={7} />
+              <span>WID</span>
+            </Link>
+          )}
+
+          {/* visualReady shimmer dot */}
+          {track.visualReady === false && (
+            <span
+              style={{
+                display: "inline-block", width: 5, height: 5, borderRadius: "50%",
+                background: "rgba(245,196,81,0.7)",
+                animation: "trackCardDot 1.1s ease-in-out infinite",
+              }}
+            />
+          )}
+        </div>
+
+        {/* 3. CREATOR + RESONANCE */}
+        <div className="flex items-center justify-between gap-2 pt-2 border-t" style={{ borderColor: "rgba(196,154,40,0.1)" }}>
           <CreatorHandle
             userId={track.creatorId}
             handle={track.creatorHandle}
@@ -308,81 +312,71 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             role={track.creatorRole}
             size="sm"
           />
-        </div>
 
-        {/* Content-type chip + genre pills */}
-        <div className="flex flex-wrap gap-1 items-center">
-          <span
-            className="text-[8px] px-1.5 py-0.5 rounded-full font-heading tracking-widest leading-none uppercase"
-            style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
-          >
-            {ctColors.icon} {ctColors.label}
-          </span>
-        </div>
-        <GenrePills genre={track.genre} maxVisible={3} chipBg={ctColors.chipBg} chipBorder={ctColors.chipBorder} textColor={ctColors.text} />
+          <div className="flex items-center gap-1.5">
+            {/* Like */}
+            <button
+              onClick={e => toggleLike(e)}
+              className={`flex items-center gap-0.5 p-0.5 transition-colors ${isLiked ? "text-pink-400" : "text-[#6B6555] hover:text-pink-400"}`}
+              title={isLiked ? "Unlike" : "Like"}
+            >
+              <Heart size={11} fill={isLiked ? "currentColor" : "none"} />
+              {likeCount > 0 && (
+                <span className="text-[10px] leading-none tabular-nums">
+                  {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
+                </span>
+              )}
+            </button>
 
-        {/* Actions row — always visible, no opacity-0 hiding */}
-        <div className="flex items-center justify-between pt-0.5">
-          {/* Like button */}
-          <button
-            onClick={e => toggleLike(e)}
-            className={`flex items-center gap-0.5 p-1 transition-colors ${isLiked ? "text-pink-400" : "text-[#6B6555] hover:text-pink-400"}`}
-            title={isLiked ? "Unlike" : "Like"}
-          >
-            <Heart size={12} fill={isLiked ? "currentColor" : "none"} />
-            {likeCount > 0 && (
-              <span className="text-[10px] leading-none font-medium tabular-nums">
-                {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
-              </span>
-            )}
-          </button>
-
-          {/* Right-side action cluster */}
-          <div className="flex items-center gap-1">
+            {/* Tip */}
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(track, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
-                className="p-1 text-[#6B6555] hover:text-[#C49A28] transition-colors"
+                className="p-0.5 text-[#6B6555] hover:text-[#C49A28] transition-colors"
                 title="Send a gift"
               >
-                <DollarSign size={12} />
+                <DollarSign size={11} />
               </button>
             )}
+
+            {/* Queue + list */}
             {!isNaN(numericId) && numericId > 0 && (
               <>
                 <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    playNext(track);
-                    toast.success(`"${track.title}" plays next`);
-                  }}
-                  className="p-1 text-[#6B6555] hover:text-[#C49A28] transition-colors"
+                  onClick={e => { e.stopPropagation(); playNext(track); toast.success(`"${track.title}" plays next`); }}
+                  className="p-0.5 text-[#6B6555] hover:text-[#C49A28] transition-colors"
                   title="Play next"
                 >
-                  <SkipForward size={12} />
+                  <SkipForward size={11} />
                 </button>
                 <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect());
-                    setShowAddToList(true);
-                  }}
-                  className="p-1 text-[#6B6555] hover:text-[#C49A28] transition-colors"
+                  onClick={e => { e.stopPropagation(); setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
+                  className="p-0.5 text-[#6B6555] hover:text-[#C49A28] transition-colors"
                   title="Add to my list"
                 >
-                  <ListPlus size={12} />
+                  <ListPlus size={11} />
                 </button>
               </>
             )}
             <button
               onClick={e => { e.stopPropagation(); navigate(`/song/${track.id}`); }}
-              className="p-1 text-[#6B6555] hover:text-[#B8860B] transition-colors"
+              className="p-0.5 text-[#6B6555] hover:text-[#B8860B] transition-colors"
               title="Open track page"
             >
-              <ExternalLink size={12} />
+              <ExternalLink size={11} />
             </button>
           </div>
         </div>
+
+        {/* AI disclosure — demoted to tiny footnote */}
+        {hasAiDisclosure && (
+          <div className="flex justify-end">
+            <AiDisclosurePill value={track.aiDisclosure as any} size="compact" />
+          </div>
+        )}
+
+        {/* Genre pills */}
+        <GenrePills genre={track.genre} maxVisible={2} chipBg={ctColors.chipBg} chipBorder={ctColors.chipBorder} textColor={ctColors.text} />
       </div>
     </div>
 

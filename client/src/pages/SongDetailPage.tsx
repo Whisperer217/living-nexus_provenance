@@ -413,6 +413,63 @@ export default function SongDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-5">
+
+            {/* ══ 1. TESTIMONY — Primary Surface ══ */}
+            {((song as any).headlineCaption || (song as any).description) && (
+              <div
+                className="relative rounded-2xl overflow-hidden"
+                style={{ minHeight: "120px" }}
+              >
+                {/* Blurred artwork background */}
+                {song.coverArtUrl && (
+                  <div className="absolute inset-0">
+                    <img
+                      src={song.coverArtUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className="w-full h-full object-cover"
+                      style={{
+                        filter: "blur(4px) brightness(0.22)",
+                        transform: "scale(1.06)",
+                        objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%`,
+                      }}
+                    />
+                  </div>
+                )}
+                {/* Dark overlay */}
+                <div
+                  className="absolute inset-0"
+                  style={{ background: song.coverArtUrl ? "rgba(0,0,0,0.62)" : "rgba(196,154,40,0.03)",
+                    border: "1px solid rgba(196,154,40,0.15)", borderRadius: "1rem" }}
+                />
+                {/* Testimony content */}
+                <div className="relative z-10 p-5 space-y-2">
+                  {(song as any).headlineCaption && (
+                    <p
+                      className="text-base font-semibold leading-snug"
+                      style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}
+                    >
+                      {(song as any).headlineCaption}
+                    </p>
+                  )}
+                  {(song as any).description && (
+                    <p
+                      className="text-sm leading-relaxed whitespace-pre-wrap"
+                      style={{
+                        color: "rgba(240,228,196,0.88)",
+                        fontFamily: "'Georgia', 'Times New Roman', serif",
+                        letterSpacing: "0.01em",
+                        textShadow: "0 1px 6px rgba(0,0,0,0.8)",
+                      }}
+                    >
+                      {(song as any).description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ══ 2. PLAYER (Manifestation) — Cover + Controls ══ */}
             {/* Cover + Meta */}
             <div className="flex flex-col sm:flex-row gap-5">
               {/* Art / Video block */}
@@ -536,22 +593,7 @@ export default function SongDetailPage() {
                         haaiDeclaredAt={(song as any).haaiDeclaredAt}
                       />
                     )}
-                    {(() => {
-                      const disc = (song as any).aiDisclosure || creator?.aiDisclosure;
-                      if (!disc || disc === "original") return null;
-                      const map: Record<string, { label: string; bg: string; fg: string; border: string }> = {
-                        ai_generated: { label: "AI-Generated", bg: "rgba(196,68,10,0.15)", fg: "var(--ln-ember)", border: "rgba(239,68,68,0.4)" },
-                        ai_assisted: { label: "AI-Assisted", bg: "rgba(170,142,100,0.15)", fg: "var(--ln-parchment)", border: "rgba(170,142,100,0.4)" },
-                        human_authored_ai_instrument: { label: "HAAI — Human-Authored", bg: "rgba(196,154,40,0.08)", fg: "var(--ln-gold)", border: "rgba(196,154,40,0.3)" },
-                      };
-                      const style = map[disc];
-                      if (!style) return null;
-                      return (
-                        <Badge style={{ background: style.bg, color: style.fg, border: `1px solid ${style.border}`, fontSize: "11px" }}>
-                          {style.label}
-                        </Badge>
-                      );
-                    })()}
+                    {/* AI disclosure — demoted to subtle footnote, moved to Metadata section at bottom */}
                   </div>
                   ); })()}
                   <div className="flex items-center gap-4 text-xs" style={{ color: "#E2E8F0" }}>
@@ -655,21 +697,8 @@ export default function SongDetailPage() {
 
 
 
-            {/* ── HEADLINE CAPTION + DESCRIPTION ── */}
-            {((song as any).headlineCaption || (song as any).description) && (
-              <div className="rounded-2xl p-5 space-y-3" style={{ background: "rgba(196,154,40,0.03)", border: "1px solid rgba(196,154,40,0.15)" }}>
-                {(song as any).headlineCaption && (
-                  <p className="text-base font-semibold leading-snug" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-                    {(song as any).headlineCaption}
-                  </p>
-                )}
-                {(song as any).description && (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--ln-smoke)", fontFamily: "'Lato', sans-serif" }}>
-                    {(song as any).description}
-                  </p>
-                )}
-              </div>
-            )}
+            {/* ══ 3. RESONANCE FIELD — Reactions + Funding (moved from right column) ══ */}
+            {/* Reactions are in the right column on desktop; on mobile they appear inline here */}
 
             {/* ── GALLERY ── */}
             {(() => {
@@ -881,10 +910,53 @@ export default function SongDetailPage() {
                 )}
               </div>
             )}
+            {/* ══ 6. METADATA — Tags, AI label (demoted footnote) ══ */}
+            {(() => {
+              const disc = (song as any).aiDisclosure || creator?.aiDisclosure;
+              const hasDisc = disc && disc !== "original";
+              const discMap: Record<string, string> = {
+                ai_generated: "AI-Generated",
+                ai_assisted: "AI-Assisted",
+                human_authored_ai_instrument: "HAAI — Human-Authored via AI Instrument",
+              };
+              if (!hasDisc && !song.bpm && !song.keySignature) return null;
+              return (
+                <div
+                  className="rounded-xl px-4 py-3 flex flex-wrap gap-3 items-center"
+                  style={{ background: "rgba(196,154,40,0.02)", border: "1px solid rgba(196,154,40,0.08)" }}
+                >
+                  <p className="text-[9px] font-heading tracking-widest uppercase w-full mb-0.5" style={{ color: "rgba(196,154,40,0.35)" }}>Metadata</p>
+                  {song.bpm && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(196,154,40,0.06)", color: "rgba(196,154,40,0.5)", border: "1px solid rgba(196,154,40,0.12)" }}>
+                      {song.bpm} BPM
+                    </span>
+                  )}
+                  {song.keySignature && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(196,154,40,0.06)", color: "rgba(196,154,40,0.5)", border: "1px solid rgba(196,154,40,0.12)" }}>
+                      {song.keySignature}
+                    </span>
+                  )}
+                  {hasDisc && (
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-full"
+                      style={{
+                        background: "rgba(196,154,40,0.04)",
+                        color: "rgba(196,154,40,0.4)",
+                        border: "1px solid rgba(196,154,40,0.1)",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      {discMap[disc] ?? disc}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* ── RIGHT COLUMN ── */}
           <div className="space-y-5">
+            {/* ══ RESONANCE FIELD — Reactions (right column, desktop) ══ */}
             {/* Emoji Reactions */}
             <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
               <div className="flex flex-wrap gap-2 justify-center">
