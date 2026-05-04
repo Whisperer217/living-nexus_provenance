@@ -1,15 +1,16 @@
 /**
- * ActivationPanel — Stage-Based Progression UI (v3 — Contributor Recognition)
+ * ActivationPanel — Stage-Based Progression UI (v4 — Two-Column Layout)
  *
- * Phase 133 additions:
- *   - WitnessStrip: horizontal scroll of contributor avatars above stage bars
- *   - Stage Attribution: contributor names per reached stage
- *   - Contribution Feed: accordion list "Chain of Contribution"
+ * Phase 134 layout:
+ *   LEFT column  → Witnessed By (avatar strip + names + stage labels)
+ *   RIGHT column → Activation Progress (stage dots + progress bar + contribution input)
+ *   FULL WIDTH   → Chain of Contribution feed (accordion, below grid)
  *
  * Design rule: Names > numbers. "Slimdoggy +4" not "5 contributors".
+ * Reference: ChatGPTImageMay3,2026,10_39_28PM.png
  */
 import { useState } from "react";
-import { Zap, CheckCircle2, Lock, ChevronDown, ChevronUp } from "lucide-react";
+import { Zap, CheckCircle2, Lock, ChevronDown, ChevronUp, Crown } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -41,10 +42,6 @@ function formatDollars(cents: number): string {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
 }
 
-function formatContribution(c: RecentContributor): string {
-  return `${c.name} — Activated Stage ${c.stageId} (${formatDollars(c.amountCents)})`;
-}
-
 function timeAgo(ts: string | Date): string {
   const diff = Date.now() - new Date(ts).getTime();
   const mins = Math.floor(diff / 60000);
@@ -54,12 +51,10 @@ function timeAgo(ts: string | Date): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-/** Initials fallback for avatar */
 function initials(name: string): string {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
-/** Compact avatar circle */
 function Avatar({ name, image, size = 32 }: { name: string; image: string | null; size?: number }) {
   return (
     <div
@@ -67,7 +62,7 @@ function Avatar({ name, image, size = 32 }: { name: string; image: string | null
       style={{
         width: size, height: size,
         background: image ? "transparent" : "rgba(196,154,40,0.18)",
-        border: "1.5px solid rgba(196,154,40,0.35)",
+        border: "2px solid rgba(196,154,40,0.4)",
         fontSize: size * 0.35,
         color: "rgba(196,154,40,0.9)",
       }}
@@ -79,88 +74,406 @@ function Avatar({ name, image, size = 32 }: { name: string; image: string | null
   );
 }
 
-/** WitnessStrip — horizontal scroll of contributor avatars */
-function WitnessStrip({ contributors }: { contributors: RecentContributor[] }) {
-  const visible = contributors.slice(0, 5);
-  const overflow = contributors.length - 5;
-
-  if (contributors.length === 0) {
-    return (
-      <div className="px-5 py-3" style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}>
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-          Be the first to witness this work
-        </p>
-      </div>
-    );
-  }
+/** LEFT COLUMN — Witnessed By strip with avatar circles, names, and stage labels */
+function WitnessedByColumn({ contributors }: { contributors: RecentContributor[] }) {
+  const visible = contributors.slice(0, 4);
+  const overflow = contributors.length - 4;
 
   return (
-    <div
-      className="px-5 py-3"
-      style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}
-    >
-      <p
-        className="text-[10px] uppercase tracking-widest mb-2"
-        style={{ color: "rgba(196,154,40,0.6)" }}
-      >
-        Witnessed By
-      </p>
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {visible.map((c, i) => (
-          <div key={i} className="flex flex-col items-center gap-1 flex-shrink-0">
-            <Avatar name={c.name} image={c.image} size={36} />
-            <span
-              className="text-[9px] text-center max-w-[48px] truncate"
-              style={{ color: "rgba(255,255,255,0.45)" }}
-            >
-              {c.name}
-            </span>
-          </div>
-        ))}
-        {overflow > 0 && (
-          <div className="flex flex-col items-center gap-1 flex-shrink-0">
-            <div
-              className="rounded-full flex items-center justify-center text-xs font-semibold"
-              style={{
-                width: 36, height: 36,
-                background: "rgba(196,154,40,0.1)",
-                border: "1.5px solid rgba(196,154,40,0.25)",
-                color: "rgba(196,154,40,0.7)",
-              }}
-            >
-              +{overflow}
-            </div>
-            <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>more</span>
-          </div>
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <Crown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(196,154,40,0.7)" }} />
+        <span
+          className="text-[10px] uppercase tracking-widest font-semibold"
+          style={{ color: "rgba(196,154,40,0.7)" }}
+        >
+          Witnessed By
+        </span>
+        {contributors.length > 0 && (
+          <span
+            className="text-[10px] px-1.5 py-0.5 rounded"
+            style={{ background: "rgba(196,154,40,0.08)", color: "rgba(196,154,40,0.5)", border: "1px solid rgba(196,154,40,0.15)" }}
+          >
+            View all ({contributors.length})
+          </span>
         )}
       </div>
+
+      {contributors.length === 0 ? (
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>
+          Be the first to witness this work
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {visible.map((c, i) => {
+            // Find the highest stage this contributor reached
+            const stageLabel = c.stageId ? `Stage ${c.stageId}` : null;
+            return (
+              <div key={i} className="flex items-center gap-2.5">
+                <div className="relative flex-shrink-0">
+                  <Avatar name={c.name} image={c.image} size={40} />
+                  {/* Online dot */}
+                  <div
+                    className="absolute bottom-0 right-0 rounded-full"
+                    style={{
+                      width: 10, height: 10,
+                      background: "#4ade80",
+                      border: "2px solid rgba(12,10,6,0.9)",
+                    }}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p
+                    className="text-sm font-semibold truncate"
+                    style={{ color: "rgba(255,255,255,0.85)" }}
+                  >
+                    {c.name}
+                  </p>
+                  {stageLabel && (
+                    <p
+                      className="text-[11px] font-medium"
+                      style={{ color: "rgba(196,154,40,0.75)" }}
+                    >
+                      {stageLabel}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {overflow > 0 && (
+            <div className="flex items-center gap-2.5">
+              <div
+                className="rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0"
+                style={{
+                  width: 40, height: 40,
+                  background: "rgba(196,154,40,0.08)",
+                  border: "2px solid rgba(196,154,40,0.2)",
+                  color: "rgba(196,154,40,0.6)",
+                }}
+              >
+                +{overflow}
+              </div>
+              <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
+                More Witnesses
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-/** Stage Attribution — show contributor names per reached stage */
-function StageAttribution({ stageId, contributors }: { stageId: string; contributors: RecentContributor[] }) {
-  const stageContribs = contributors.filter(c => c.stageId === stageId);
-  if (stageContribs.length === 0) return null;
+/** RIGHT COLUMN — Activation Progress: stage dots + progress bar + contribution input */
+function ActivationProgressColumn({
+  stages,
+  totalFundingCents,
+  totalGoalCents,
+  activeStage,
+  recentContributors,
+  onContribute,
+  isPending,
+}: {
+  stages: ActivationStage[];
+  totalFundingCents: number;
+  totalGoalCents: number;
+  activeStage: ActivationStage | undefined;
+  recentContributors: RecentContributor[];
+  onContribute: (amountCents: number) => void;
+  isPending: boolean;
+}) {
+  const [selectedAmount, setSelectedAmount] = useState(10);
+  const [customAmount, setCustomAmount] = useState("");
+  const PRESET_AMOUNTS = [5, 10, 25, 50];
+  const finalAmountCents = customAmount
+    ? Math.round(parseFloat(customAmount) * 100)
+    : selectedAmount * 100;
 
-  const first2 = stageContribs.slice(0, 2);
-  const overflow = stageContribs.length - 2;
+  const overallProgress = totalGoalCents > 0 ? totalFundingCents / totalGoalCents : 0;
+  const currentStageIdx = stages.findIndex(s => !s.reachedAt);
+
+  // Find the stage that was most recently unlocked
+  const latestUnlocked = stages.filter(s => s.reachedAt).slice(-1)[0];
 
   return (
-    <p className="text-[10px] mt-1 pl-5" style={{ color: "rgba(255,255,255,0.35)" }}>
-      Witnessed by{" "}
-      <span style={{ color: "rgba(196,154,40,0.7)" }}>
-        {first2.map(c => c.name).join(" • ")}
-        {overflow > 0 ? ` • +${overflow}` : ""}
-      </span>
-    </p>
+    <div className="flex flex-col gap-4">
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <span
+          className="text-[10px] uppercase tracking-widest font-semibold"
+          style={{ color: "rgba(196,154,40,0.7)" }}
+        >
+          Activation Progress
+        </span>
+        {latestUnlocked && (
+          <span
+            className="text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1"
+            style={{
+              background: "rgba(74,222,128,0.08)",
+              border: "1px solid rgba(74,222,128,0.25)",
+              color: "rgba(74,222,128,0.8)",
+            }}
+          >
+            <CheckCircle2 className="w-2.5 h-2.5" />
+            {latestUnlocked.label} Unlocked!
+          </span>
+        )}
+      </div>
+
+      {/* Stage dots row — matches reference image style */}
+      <div className="flex items-center gap-1">
+        {stages.map((stage, i) => {
+          const reached = stage.reachedAt !== null;
+          const isActive = i === currentStageIdx;
+          const isLocked = !reached && !isActive;
+          return (
+            <div key={stage.id} className="flex items-center flex-1">
+              {/* Stage node */}
+              <div className="flex flex-col items-center gap-1 flex-1">
+                <div
+                  className="flex items-center justify-center rounded-full font-bold transition-all"
+                  style={{
+                    width: isActive ? 36 : 28,
+                    height: isActive ? 36 : 28,
+                    background: reached
+                      ? "rgba(74,222,128,0.15)"
+                      : isActive
+                      ? "rgba(196,154,40,0.2)"
+                      : "rgba(255,255,255,0.04)",
+                    border: reached
+                      ? "2px solid rgba(74,222,128,0.6)"
+                      : isActive
+                      ? "2px solid rgba(196,154,40,0.7)"
+                      : "2px solid rgba(255,255,255,0.12)",
+                    color: reached
+                      ? "rgba(74,222,128,0.9)"
+                      : isActive
+                      ? "rgba(196,154,40,0.95)"
+                      : "rgba(255,255,255,0.2)",
+                    fontSize: isActive ? 14 : 11,
+                  }}
+                >
+                  {reached ? (
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  ) : isActive ? (
+                    <Zap className="w-3.5 h-3.5" />
+                  ) : (
+                    <Lock className="w-2.5 h-2.5" />
+                  )}
+                </div>
+                <span
+                  className="text-[9px] text-center uppercase tracking-wide"
+                  style={{
+                    color: reached
+                      ? "rgba(74,222,128,0.7)"
+                      : isActive
+                      ? "rgba(196,154,40,0.8)"
+                      : "rgba(255,255,255,0.2)",
+                    fontFamily: "'Cinzel', serif",
+                  }}
+                >
+                  {stage.label}
+                </span>
+                <span
+                  className="text-[9px] tabular-nums"
+                  style={{ color: "rgba(255,255,255,0.25)" }}
+                >
+                  {formatDollars(stage.goalCents)}
+                </span>
+              </div>
+              {/* Connector line between stages */}
+              {i < stages.length - 1 && (
+                <div
+                  className="h-px flex-1 mx-1"
+                  style={{
+                    background: reached
+                      ? "rgba(74,222,128,0.4)"
+                      : "rgba(255,255,255,0.08)",
+                  }}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Progress bar */}
+      <div>
+        <div className="flex justify-between text-xs mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+          <span className="tabular-nums">{formatDollars(totalFundingCents)} raised</span>
+          <span className="tabular-nums">Goal: {formatDollars(totalGoalCents)}</span>
+        </div>
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{
+              width: `${Math.min(overallProgress * 100, 100)}%`,
+              background: "linear-gradient(90deg, #C49A28, #F0C040)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Stage attribution — who unlocked the active stage */}
+      {activeStage && recentContributors.length > 0 && (
+        <div className="flex items-center gap-2">
+          <div className="flex -space-x-1.5">
+            {recentContributors.slice(0, 3).map((c, i) => (
+              <Avatar key={i} name={c.name} image={c.image} size={18} />
+            ))}
+          </div>
+          <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+            Witnessed by{" "}
+            <span style={{ color: "rgba(196,154,40,0.75)", fontWeight: 600 }}>
+              {recentContributors.slice(0, 2).map(c => c.name).join(", ")}
+              {recentContributors.length > 2 ? `, +${recentContributors.length - 2} others` : ""}
+            </span>
+          </p>
+        </div>
+      )}
+
+      {/* Contribution input */}
+      {activeStage && (
+        <div className="pt-3" style={{ borderTop: "1px solid rgba(196,154,40,0.1)" }}>
+          <div className="grid grid-cols-4 gap-1.5 mb-2">
+            {PRESET_AMOUNTS.map((amt) => (
+              <button
+                key={amt}
+                type="button"
+                onClick={() => { setSelectedAmount(amt); setCustomAmount(""); }}
+                className="rounded-lg py-1.5 text-xs transition-all"
+                style={{
+                  background: selectedAmount === amt && !customAmount ? "rgba(196,154,40,0.18)" : "rgba(255,255,255,0.05)",
+                  color: selectedAmount === amt && !customAmount ? "var(--ln-gold)" : "rgba(255,255,255,0.5)",
+                  border: selectedAmount === amt && !customAmount ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(255,255,255,0.08)",
+                  fontWeight: 600,
+                }}
+              >
+                ${amt}
+              </button>
+            ))}
+          </div>
+          <div className="relative flex items-center mb-2">
+            <span className="absolute left-3 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>$</span>
+            <input
+              type="number" min="1" step="1" placeholder="Custom amount"
+              value={customAmount}
+              onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(0); }}
+              className="w-full pl-6 pr-3 py-2 rounded-lg text-xs outline-none"
+              style={{
+                background: customAmount ? "rgba(196,154,40,0.08)" : "rgba(255,255,255,0.04)",
+                color: "var(--ln-parchment)",
+                border: customAmount ? "1px solid rgba(196,154,40,0.4)" : "1px solid rgba(255,255,255,0.08)",
+              }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => onContribute(finalAmountCents)}
+            disabled={isPending || finalAmountCents < 100}
+            className="w-full rounded-xl py-2.5 font-semibold text-sm transition-all disabled:opacity-50"
+            style={{
+              background: "linear-gradient(135deg, #C49A28, #F0C040)",
+              color: "#1A1A1A",
+              fontFamily: "'Cinzel', serif",
+              letterSpacing: "0.06em",
+            }}
+          >
+            {isPending
+              ? "Redirecting…"
+              : `Activate${finalAmountCents >= 100 ? ` — ${formatDollars(finalAmountCents)}` : " This Work"}`}
+          </button>
+          <p className="text-[10px] mt-1.5 text-center" style={{ color: "rgba(255,255,255,0.18)" }}>
+            Powered by Stripe · Secure checkout
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** FULL-WIDTH — Chain of Contribution feed (accordion) */
+function ContributionFeed({ contributors }: { contributors: RecentContributor[] }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{ borderTop: "1px solid rgba(196,154,40,0.1)" }}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-3 transition-opacity hover:opacity-80"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Cinzel', serif" }}>
+            Chain of Contribution
+          </span>
+          {contributors.length > 0 && (
+            <span
+              className="text-[10px] px-1.5 py-0.5 rounded"
+              style={{ background: "rgba(196,154,40,0.1)", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.2)" }}
+            >
+              {contributors.length}
+            </span>
+          )}
+        </div>
+        {open
+          ? <ChevronUp className="w-4 h-4" style={{ color: "rgba(255,255,255,0.25)" }} />
+          : <ChevronDown className="w-4 h-4" style={{ color: "rgba(255,255,255,0.25)" }} />}
+      </button>
+
+      {open && (
+        <div className="px-5 pb-4 space-y-3">
+          {contributors.length === 0 ? (
+            <p className="text-xs text-center py-2" style={{ color: "rgba(255,255,255,0.25)" }}>
+              Be the first to witness this work
+            </p>
+          ) : (
+            contributors.slice(0, 10).map((c, i) => {
+              // Build action text matching reference image
+              const actionText = c.anonymous
+                ? "Contributed anonymously"
+                : c.amountCents > 0
+                ? `Activated Stage ${c.stageId} with ${formatDollars(c.amountCents)}`
+                : `Witnessed this work`;
+              return (
+                <div key={i} className="flex items-center gap-3">
+                  <Avatar name={c.name} image={c.image} size={30} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      <span style={{ color: "rgba(196,154,40,0.85)", fontWeight: 600 }}>{c.name}</span>
+                      {"  "}
+                      <span>{actionText}</span>
+                    </p>
+                  </div>
+                  <span className="text-[10px] flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }}>
+                    {timeAgo(c.createdAt)}
+                  </span>
+                </div>
+              );
+            })
+          )}
+          {contributors.length > 0 && (
+            <button
+              type="button"
+              className="w-full text-center text-xs py-2 rounded-lg transition-all hover:opacity-80"
+              style={{
+                background: "rgba(196,154,40,0.04)",
+                border: "1px solid rgba(196,154,40,0.12)",
+                color: "rgba(196,154,40,0.55)",
+              }}
+            >
+              View all activity →
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
 export function ActivationPanel({ songId, songTitle }: ActivationPanelProps) {
-  const [showFeed, setShowFeed] = useState(false);
-  const [selectedAmount, setSelectedAmount] = useState(10);
-  const [customAmount, setCustomAmount] = useState("");
   const utils = trpc.useUtils();
 
   const { data: activation, isLoading } = trpc.activation.getForSong.useQuery(
@@ -191,19 +504,12 @@ export function ActivationPanel({ songId, songTitle }: ActivationPanelProps) {
   const recentContributors: RecentContributor[] = (activation as any).recentContributors ?? [];
   const totalFundingCents = activation.totalFundingCents ?? 0;
   const totalGoalCents = stages.reduce((sum, s) => sum + s.goalCents, 0);
-  const overallProgress = totalGoalCents > 0 ? totalFundingCents / totalGoalCents : 0;
-
   const activeStage = stages.find((s) => !s.reachedAt) ?? stages[stages.length - 1];
 
-  const PRESET_AMOUNTS = [5, 10, 25, 50];
-  const finalAmountCents = customAmount
-    ? Math.round(parseFloat(customAmount) * 100)
-    : selectedAmount * 100;
-
-  const handleContribute = () => {
+  const handleContribute = (amountCents: number) => {
     if (!activeStage) return;
-    if (finalAmountCents < 100) { toast.error("Minimum contribution is $1"); return; }
-    contribute.mutate({ songId, stageId: activeStage.id, amountCents: finalAmountCents, origin: window.location.origin });
+    if (amountCents < 100) { toast.error("Minimum contribution is $1"); return; }
+    contribute.mutate({ songId, stageId: activeStage.id, amountCents, origin: window.location.origin });
   };
 
   return (
@@ -212,210 +518,44 @@ export function ActivationPanel({ songId, songTitle }: ActivationPanelProps) {
       style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.35)" }}
     >
       {/* ── HEADER ── */}
-      <div className="px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}>
-        <div className="flex items-center gap-2 mb-1">
+      <div className="px-5 pt-4 pb-3" style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}>
+        <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
           <h3 className="text-base font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
             Activate This Work
           </h3>
         </div>
-        <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>
+        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
           Contributions move this work from creation → real-world release
         </p>
-        <div className="text-[10px] mt-2 uppercase tracking-widest font-semibold" style={{ color: "var(--ln-gold)", opacity: 0.7 }}>
-          Creator Commitment: Active
-        </div>
       </div>
 
-      {/* ── WITNESS STRIP ── */}
-      <WitnessStrip contributors={recentContributors} />
-
-      {/* ── TOTAL PROGRESS BAR ── */}
-      <div className="px-5 pt-4 pb-3">
-        <div className="flex justify-between text-xs mb-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-          <span className="tabular-nums">{formatDollars(totalFundingCents)} raised</span>
-          <span className="tabular-nums">Goal: {formatDollars(totalGoalCents)}</span>
+      {/* ── TWO-COLUMN GRID ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-0" style={{ borderBottom: "1px solid rgba(196,154,40,0.1)" }}>
+        {/* LEFT — Witnessed By */}
+        <div
+          className="px-5 py-4"
+          style={{ borderRight: "1px solid rgba(196,154,40,0.08)" }}
+        >
+          <WitnessedByColumn contributors={recentContributors} />
         </div>
-        <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
-          <div
-            className="h-full rounded-full transition-all duration-700"
-            style={{ width: `${Math.min(overallProgress * 100, 100)}%`, background: "linear-gradient(90deg, #C49A28, #F0C040)" }}
+
+        {/* RIGHT — Activation Progress */}
+        <div className="px-5 py-4">
+          <ActivationProgressColumn
+            stages={stages}
+            totalFundingCents={totalFundingCents}
+            totalGoalCents={totalGoalCents}
+            activeStage={activeStage}
+            recentContributors={recentContributors}
+            onContribute={handleContribute}
+            isPending={contribute.isPending}
           />
         </div>
-        <div className="text-[10px] mt-1 text-right tabular-nums" style={{ color: "var(--ln-gold)" }}>
-          {Math.round(overallProgress * 100)}% complete
-        </div>
       </div>
 
-      {/* ── STAGE CARDS ── */}
-      <div className="px-5 pb-4 space-y-3">
-        {stages.length === 0 ? (
-          <p className="text-sm text-center py-4" style={{ color: "var(--ln-smoke)" }}>No stages configured yet.</p>
-        ) : (
-          stages.map((stage) => {
-            const reached = stage.reachedAt !== null;
-            const isActive = stage.id === activeStage?.id;
-            return (
-              <div
-                key={stage.id}
-                className="p-3 rounded-xl transition-all"
-                style={{
-                  border: reached ? "1px solid rgba(234,179,8,0.5)" : isActive ? "1px solid rgba(196,154,40,0.3)" : "1px solid rgba(255,255,255,0.07)",
-                  background: reached ? "rgba(234,179,8,0.05)" : isActive ? "rgba(196,154,40,0.03)" : "transparent",
-                }}
-              >
-                <div className="flex justify-between items-start gap-2">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      {reached
-                        ? <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#4ade80" }} />
-                        : isActive
-                        ? <Zap className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
-                        : <Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }} />}
-                      <span
-                        className="text-sm font-semibold"
-                        style={{
-                          fontFamily: "'Cinzel', serif",
-                          color: reached ? "var(--ln-gold)" : isActive ? "var(--ln-parchment)" : "rgba(255,255,255,0.35)",
-                        }}
-                      >
-                        {stage.label}
-                      </span>
-                    </div>
-                    {stage.description && (
-                      <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.4)", paddingLeft: "1.25rem" }}>
-                        {stage.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex-shrink-0 text-xs text-right">
-                    {reached
-                      ? <span style={{ color: "#4ade80" }}>✔ Reached</span>
-                      : <span style={{ color: "rgba(255,255,255,0.3)" }}>{isActive ? formatDollars(stage.goalCents) : "Locked"}</span>}
-                  </div>
-                </div>
-                {/* Stage Attribution — names of who unlocked this stage */}
-                {reached && (
-                  <StageAttribution stageId={stage.id} contributors={recentContributors} />
-                )}
-                {reached && stage.reachedAt && (
-                  <p className="text-[10px] mt-1 pl-5" style={{ color: "rgba(255,255,255,0.25)" }}>
-                    {new Date(stage.reachedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                  </p>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* ── CONTRIBUTION SECTION ── */}
-      {activeStage && (
-        <div className="px-5 pb-5 pt-3" style={{ borderTop: "1px solid rgba(196,154,40,0.1)" }}>
-          <div className="grid grid-cols-4 gap-2 mb-3">
-            {PRESET_AMOUNTS.map((amt) => (
-              <button
-                key={amt}
-                type="button"
-                onClick={() => { setSelectedAmount(amt); setCustomAmount(""); }}
-                className="rounded-lg py-2 text-sm transition-all"
-                style={{
-                  background: selectedAmount === amt && !customAmount ? "rgba(196,154,40,0.18)" : "rgba(255,255,255,0.05)",
-                  color: selectedAmount === amt && !customAmount ? "var(--ln-gold)" : "rgba(255,255,255,0.55)",
-                  border: selectedAmount === amt && !customAmount ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(255,255,255,0.08)",
-                  fontWeight: 600,
-                }}
-              >
-                ${amt}
-              </button>
-            ))}
-          </div>
-          <div className="relative flex items-center mb-3">
-            <span className="absolute left-3 text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>$</span>
-            <input
-              type="number" min="1" step="1" placeholder="Custom amount"
-              value={customAmount}
-              onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(0); }}
-              className="w-full pl-7 pr-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: customAmount ? "rgba(196,154,40,0.08)" : "rgba(255,255,255,0.04)",
-                color: "var(--ln-parchment)",
-                border: customAmount ? "1px solid rgba(196,154,40,0.4)" : "1px solid rgba(255,255,255,0.08)",
-              }}
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleContribute}
-            disabled={contribute.isPending || finalAmountCents < 100}
-            className="w-full rounded-xl py-3 font-semibold text-sm transition-all disabled:opacity-50"
-            style={{
-              background: "linear-gradient(135deg, #C49A28, #F0C040)",
-              color: "#1A1A1A",
-              fontFamily: "'Cinzel', serif",
-              letterSpacing: "0.06em",
-            }}
-          >
-            {contribute.isPending
-              ? "Redirecting to payment…"
-              : `Activate This Work${finalAmountCents >= 100 ? ` — ${formatDollars(finalAmountCents)}` : ""}`}
-          </button>
-          <p className="text-[10px] mt-2 text-center" style={{ color: "rgba(255,255,255,0.2)" }}>
-            Powered by Stripe · Secure checkout
-          </p>
-        </div>
-      )}
-
-      {/* ── CHAIN OF CONTRIBUTION (accordion) ── */}
-      <button
-        type="button"
-        onClick={() => setShowFeed(!showFeed)}
-        className="w-full flex items-center justify-between px-5 py-3 transition-opacity hover:opacity-80"
-        style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Cinzel', serif" }}>
-            Chain of Contribution
-          </span>
-          {recentContributors.length > 0 && (
-            <span
-              className="text-[10px] px-1.5 py-0.5 rounded"
-              style={{ background: "rgba(196,154,40,0.1)", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.2)" }}
-            >
-              {recentContributors.length}
-            </span>
-          )}
-        </div>
-        {showFeed
-          ? <ChevronUp className="w-4 h-4" style={{ color: "rgba(255,255,255,0.25)" }} />
-          : <ChevronDown className="w-4 h-4" style={{ color: "rgba(255,255,255,0.25)" }} />}
-      </button>
-
-      {showFeed && (
-        <div className="px-5 pb-4 space-y-2">
-          {recentContributors.length === 0 ? (
-            <p className="text-xs text-center py-2" style={{ color: "rgba(255,255,255,0.25)" }}>
-              Be the first to witness this work
-            </p>
-          ) : (
-            recentContributors.slice(0, 10).map((c, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <Avatar name={c.name} image={c.image} size={28} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.6)" }}>
-                    <span style={{ color: "rgba(196,154,40,0.8)", fontWeight: 600 }}>{c.name}</span>
-                    {" — "}
-                    {c.anonymous ? "Contributed anonymously" : `Activated Stage ${c.stageId} (${formatDollars(c.amountCents)})`}
-                  </p>
-                </div>
-                <span className="text-[10px] flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }}>
-                  {timeAgo(c.createdAt)}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-      )}
+      {/* ── CHAIN OF CONTRIBUTION (full-width accordion) ── */}
+      <ContributionFeed contributors={recentContributors} />
     </div>
   );
 }

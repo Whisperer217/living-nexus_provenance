@@ -269,6 +269,12 @@ function ExpandedPanel() {
   const overlayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [overlayVisible, setOverlayVisible] = useState(true);
 
+  /* Inline Interaction Bar state */
+  const [showComment, setShowComment] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [showTip, setShowTip] = useState(false);
+  const [selectedTipAmt, setSelectedTipAmt] = useState(10);
+
   const track = state.tracks[state.currentIdx];
 
   /* Activation data — only fetch when track is loaded */
@@ -277,6 +283,15 @@ function ExpandedPanel() {
     { songId: songIdNum },
     { enabled: !!track && songIdNum > 0 }
   );
+
+  /* Inline interaction mutations */
+  const addComment = trpc.comments.add.useMutation({
+    onSuccess: () => { setCommentText(""); setShowComment(false); },
+  });
+  const createTipCheckout = trpc.tips.createTipCheckout.useMutation({
+    onSuccess: (data) => { if (data?.url) window.location.href = data.url; },
+  });
+  const toggleReaction = trpc.songs.toggleReaction.useMutation();
 
   /* Artwork reactive glow — brightens on hover/tilt interaction */
   const [artGlowActive, setArtGlowActive] = useState(false);
@@ -363,6 +378,8 @@ function ExpandedPanel() {
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
+      {/* ── Constrained surface container ── */}
+      <div style={{ width: "100%", maxWidth: 1100, padding: "0 16px", display: "flex", flexDirection: "column", alignItems: "center", boxSizing: "border-box", borderRadius: 16, boxShadow: "0 0 40px rgba(255,215,0,0.08)" }}>
       {/* TOP ROW: Collapse + Back/Play/Next + Float — all controls in one strip */}
       <div
         className="flex items-center justify-between w-full px-4 pt-3 pb-2 shrink-0"
@@ -503,7 +520,131 @@ function ExpandedPanel() {
         </div>
       </div>
 
-      {/* Song identity — below seek bar */}
+      {/* ── INLINE INTERACTION BAR — directly below seek bar ── */}
+      <div className="w-full mt-5 shrink-0" style={{ maxWidth: 480 }}>
+        {/* Main action row */}
+        <div className="flex items-center justify-center gap-6 py-2">
+          {/* Like */}
+          <button
+            onClick={() => toggleLike(track.id)}
+            className="flex flex-col items-center gap-1 transition-all hover:scale-110 active:scale-95"
+            style={{ color: isLiked ? "rgba(255,80,80,0.9)" : "rgba(255,255,255,0.45)", minWidth: 44, minHeight: 44, justifyContent: "center" }}
+            aria-label="Like"
+          >
+            <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
+          </button>
+
+          {/* Comment toggle */}
+          <button
+            onClick={() => setShowComment(v => !v)}
+            className="flex flex-col items-center gap-1 transition-all hover:scale-110 active:scale-95"
+            style={{ color: showComment ? "rgba(255,215,0,0.8)" : "rgba(255,255,255,0.45)", minWidth: 44, minHeight: 44, justifyContent: "center" }}
+            aria-label="Comment"
+          >
+            <MessageCircle size={20} fill={showComment ? "currentColor" : "none"} />
+          </button>
+
+          {/* Emoji quick react — 5 presets */}
+          {["fire", "love", "grateful", "magic", "vibe"].map((type, i) => {
+            const EMOJIS: Record<string, string> = { fire: "🔥", love: "❤️", grateful: "🙏", magic: "✨", vibe: "🎵" };
+            return (
+              <button
+                key={type}
+                onClick={() => songIdNum > 0 && toggleReaction.mutate({ songId: songIdNum, type })}
+                className="transition-all hover:scale-125 active:scale-95"
+                style={{ fontSize: 20, minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.75 }}
+                aria-label={type}
+              >
+                {EMOJIS[type]}
+              </button>
+            );
+          })}
+
+          {/* Tip button */}
+          {track.tipsEnabled && (
+            <button
+              onClick={() => setShowTip(v => !v)}
+              className="flex flex-col items-center gap-1 transition-all hover:scale-110 active:scale-95"
+              style={{ color: showTip ? "rgba(255,215,0,0.9)" : "rgba(255,215,0,0.55)", minWidth: 44, minHeight: 44, justifyContent: "center" }}
+              aria-label="Pay It Forward"
+            >
+              <Coins size={20} />
+            </button>
+          )}
+
+          {/* Share */}
+          <button
+            onClick={() => {
+              navigator.clipboard?.writeText(`${window.location.origin}/song/${track.id}`);
+              incrementShare(track.id);
+            }}
+            className="flex flex-col items-center gap-1 transition-all hover:scale-110 active:scale-95"
+            style={{ color: "rgba(255,255,255,0.45)", minWidth: 44, minHeight: 44, justifyContent: "center" }}
+            aria-label="Share"
+          >
+            <Share2 size={20} />
+          </button>
+        </div>
+
+        {/* Inline comment input */}
+        {showComment && (
+          <div className="mt-2 flex gap-2 px-2">
+            <input
+              autoFocus
+              value={commentText}
+              onChange={e => setCommentText(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter" && commentText.trim() && songIdNum > 0) {
+                  addComment.mutate({ songId: songIdNum, content: commentText.trim() });
+                }
+                if (e.key === "Escape") setShowComment(false);
+              }}
+              placeholder="Add a witness..."
+              className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+              style={{
+                background: "rgba(0,0,0,0.4)",
+                border: "1px solid rgba(255,215,0,0.2)",
+                color: "rgba(255,255,255,0.85)",
+              }}
+            />
+            <button
+              onClick={() => commentText.trim() && songIdNum > 0 && addComment.mutate({ songId: songIdNum, content: commentText.trim() })}
+              disabled={addComment.isPending || !commentText.trim()}
+              className="px-3 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
+              style={{ background: "rgba(255,215,0,0.15)", color: "rgba(255,215,0,0.9)", border: "1px solid rgba(255,215,0,0.3)" }}
+            >
+              {addComment.isPending ? "..." : "Send"}
+            </button>
+          </div>
+        )}
+
+        {/* Inline tip presets */}
+        {showTip && track.tipsEnabled && (
+          <div className="mt-2 flex items-center gap-2 px-2 justify-center">
+            {[5, 10, 25].map(amt => (
+              <button
+                key={amt}
+                onClick={() => {
+                  setSelectedTipAmt(amt);
+                  createTipCheckout.mutate({ songId: songIdNum, amountCents: amt * 100, origin: window.location.origin });
+                }}
+                disabled={createTipCheckout.isPending}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105 disabled:opacity-50"
+                style={{
+                  background: selectedTipAmt === amt ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.06)",
+                  color: selectedTipAmt === amt ? "rgba(255,215,0,0.95)" : "rgba(255,255,255,0.6)",
+                  border: selectedTipAmt === amt ? "1px solid rgba(255,215,0,0.5)" : "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                ${amt}
+              </button>
+            ))}
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>Pay It Forward</span>
+          </div>
+        )}
+      </div>
+
+      {/* Song identity — below interaction bar */}
       <div className="text-center px-6 mt-3 shrink-0">
         <h2
           className="font-display text-xl mb-0.5 truncate max-w-xs"
@@ -526,62 +667,6 @@ function ExpandedPanel() {
             <ShieldCheck size={9} />
             <span className="font-mono">{track.witnessId.slice(0, 20)}…</span>
           </div>
-        )}
-      </div>
-
-      {/* Actions row — secondary, below identity */}
-      <div className="flex items-center justify-center gap-5 mt-4 px-4 shrink-0">
-        <button
-          onClick={() => toggleLike(track.id)}
-          className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-          style={{ color: isLiked ? "rgba(255,80,80,0.9)" : "rgba(255,255,255,0.35)" }}
-          aria-label="Like"
-        >
-          <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
-          <span className="text-[10px]">Like</span>
-        </button>
-        <button
-          onClick={() => navigate(`/song/${track.id}#comments`)}
-          className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-          style={{ color: "rgba(255,255,255,0.35)" }}
-          aria-label="Comment"
-        >
-          <MessageCircle size={18} />
-          <span className="text-[10px]">Comment</span>
-        </button>
-        <button
-          onClick={() => {
-            navigator.clipboard?.writeText(`${window.location.origin}/song/${track.id}`);
-            incrementShare(track.id);
-          }}
-          className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-          style={{ color: "rgba(255,255,255,0.35)" }}
-          aria-label="Share"
-        >
-          <Share2 size={18} />
-          <span className="text-[10px]">Share</span>
-        </button>
-        {track.tipsEnabled && (
-          <button
-            onClick={() => navigate(`/song/${track.id}#tip`)}
-            className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-            style={{ color: "rgba(255,215,0,0.55)" }}
-            aria-label="Tip"
-          >
-            <Coins size={18} />
-            <span className="text-[10px]">Tip</span>
-          </button>
-        )}
-        {track.witnessId && (
-          <button
-            onClick={() => navigate(`/song/${track.id}`)}
-            className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-            style={{ color: "rgba(255,215,0,0.55)" }}
-            aria-label="Verify"
-          >
-            <ShieldCheck size={18} />
-            <span className="text-[10px]">Verify</span>
-          </button>
         )}
       </div>
 
@@ -677,6 +762,8 @@ function ExpandedPanel() {
           </span>
         </div>
       </div>
+
+      </div>{/* end constrained container */}
 
       {/* Ambient glow behind artwork */}
       {track.artUrl && (
