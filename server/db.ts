@@ -4206,10 +4206,21 @@ export interface ActivationStage {
 }
 
 /** Return the activation state for a song (stages + funding total). */
+export interface RecentContributor {
+  userId: number | null;
+  name: string;
+  image: string | null;
+  stageId: string;
+  amountCents: number;
+  createdAt: Date;
+  anonymous: boolean;
+}
+
 export async function getActivationForSong(songId: number): Promise<{
   activationEnabled: boolean;
   totalFundingCents: number;
   stages: ActivationStage[];
+  recentContributors: RecentContributor[];
 } | null> {
   try {
     const db = await getDb();
@@ -4228,10 +4239,37 @@ export async function getActivationForSong(songId: number): Promise<{
     if (row.activationStagesJson) {
       try { stages = JSON.parse(row.activationStagesJson); } catch { stages = []; }
     }
+    // Fetch recent contributors with user info (LEFT JOIN so anonymous contributions are included)
+    const contribRows = await db
+      .select({
+        userId: activationContributions.userId,
+        stageId: activationContributions.stageId,
+        amountCents: activationContributions.amountCents,
+        contributorName: activationContributions.contributorName,
+        anonymous: activationContributions.anonymous,
+        createdAt: activationContributions.createdAt,
+        userName: users.name,
+        userImage: users.profilePhotoUrl,
+      })
+      .from(activationContributions)
+      .leftJoin(users, eq(activationContributions.userId, users.id))
+      .where(eq(activationContributions.songId, songId))
+      .orderBy(desc(activationContributions.createdAt))
+      .limit(15);
+    const recentContributors: RecentContributor[] = contribRows.map(c => ({
+      userId: c.userId ?? null,
+      name: c.anonymous ? 'Anonymous' : (c.userName ?? c.contributorName ?? 'Contributor'),
+      image: c.anonymous ? null : ((c.userImage as string | null) ?? null),
+      stageId: c.stageId,
+      amountCents: c.amountCents,
+      createdAt: c.createdAt,
+      anonymous: Boolean(c.anonymous),
+    }));
     return {
       activationEnabled: Boolean(row.activationEnabled),
       totalFundingCents: Number(row.totalFundingCents ?? 0),
       stages,
+      recentContributors,
     };
   } catch {
     return null;
