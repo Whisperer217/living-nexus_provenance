@@ -111,8 +111,9 @@ function SurfaceBar() {
         right: 0,
         height: 60,
         zIndex: 350,
-        background: "rgba(12,10,6,0.96)",
+        background: "rgba(14,11,7,0.97)",
         borderBottom: "1px solid rgba(255,215,0,0.12)",
+        borderLeft: "3px solid rgba(255,215,0,0.5)",
         backdropFilter: "blur(20px)",
         display: "flex",
         flexDirection: "column",
@@ -277,6 +278,9 @@ function ExpandedPanel() {
     { enabled: !!track && songIdNum > 0 }
   );
 
+  /* Artwork reactive glow — brightens on hover/tilt interaction */
+  const [artGlowActive, setArtGlowActive] = useState(false);
+
   if (!track) return null;
 
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
@@ -303,13 +307,15 @@ function ExpandedPanel() {
     const dx = (e.clientX - cx) / (rect.width / 2);
     const dy = (e.clientY - cy) / (rect.height / 2);
     setTiltStyle({
-      transform: `perspective(600px) rotateY(${dx * 8}deg) rotateX(${-dy * 8}deg) scale(1.02)`,
-      transition: "transform 0.1s ease",
+      transform: `perspective(700px) rotateY(${dx * 10}deg) rotateX(${-dy * 10}deg) scale(1.03)`,
+      transition: "transform 0.08s ease",
     });
+    setArtGlowActive(true);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    setTiltStyle({ transform: "perspective(600px) rotateY(0deg) rotateX(0deg) scale(1)", transition: "transform 0.4s ease" });
+    setTiltStyle({ transform: "perspective(700px) rotateY(0deg) rotateX(0deg) scale(1)", transition: "transform 0.5s ease" });
+    setArtGlowActive(false);
   }, []);
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -357,8 +363,15 @@ function ExpandedPanel() {
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
-      {/* Collapse handle */}
-      <div className="flex items-center justify-between w-full px-4 pt-3 pb-1 shrink-0">
+      {/* TOP ROW: Collapse + Back/Play/Next + Float — all controls in one strip */}
+      <div
+        className="flex items-center justify-between w-full px-4 pt-3 pb-2 shrink-0"
+        style={{
+          opacity: overlayVisible ? 1 : 0.2,
+          transition: "opacity 0.6s ease",
+        }}
+      >
+        {/* Left: collapse */}
         <button
           onClick={collapse}
           className="flex items-center gap-1 text-xs transition-all hover:opacity-80"
@@ -366,97 +379,134 @@ function ExpandedPanel() {
           aria-label="Collapse player"
         >
           <ChevronDown size={16} />
-          <span>Collapse</span>
+          <span className="hidden sm:inline">Collapse</span>
         </button>
-        <div className="flex items-center gap-2">
+
+        {/* Center: transport controls */}
+        <div className="flex items-center gap-3">
           <button
-            onClick={float}
+            onClick={() => prevTrack()}
             className="p-2 rounded-full transition-all hover:bg-white/5"
-            style={{ color: "rgba(255,255,255,0.3)" }}
-            aria-label="Float player"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+            aria-label="Previous"
           >
-            <ExternalLink size={14} />
+            <SkipBack size={18} />
           </button>
+          <button
+            onClick={togglePlay}
+            className="flex items-center justify-center rounded-full transition-all"
+            style={{
+              width: 48,
+              height: 48,
+              background: "rgba(255,215,0,0.15)",
+              border: "1px solid rgba(255,215,0,0.4)",
+              color: "rgba(255,215,0,0.95)",
+            }}
+            aria-label={state.isPlaying ? "Pause" : "Play"}
+          >
+            {state.isPlaying
+              ? <Pause size={20} fill="currentColor" />
+              : <Play size={20} fill="currentColor" />}
+          </button>
+          <button
+            onClick={() => nextTrack()}
+            className="p-2 rounded-full transition-all hover:bg-white/5"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+            aria-label="Next"
+          >
+            <SkipForward size={18} />
+          </button>
+        </div>
+
+        {/* Right: float */}
+        <button
+          onClick={float}
+          className="p-2 rounded-full transition-all hover:bg-white/5"
+          style={{ color: "rgba(255,255,255,0.3)" }}
+          aria-label="Float player"
+        >
+          <ExternalLink size={14} />
+        </button>
+      </div>
+
+      {/* CORE: HERO artwork — primary focal anchor */}
+      <div className="relative shrink-0" style={{ marginTop: 8 }}>
+        {/* Reactive ambient glow — expands on hover/tilt */}
+        <div
+          style={{
+            position: "absolute",
+            inset: "-24px",
+            borderRadius: "50%",
+            background: "radial-gradient(ellipse, rgba(255,215,0,0.18) 0%, transparent 70%)",
+            opacity: artGlowActive ? 1 : state.isPlaying ? 0.45 : 0.15,
+            transition: "opacity 0.4s ease",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+        <div
+          ref={artRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className="rounded-2xl overflow-hidden cursor-pointer"
+          style={{
+            width: "min(80vw, 420px)",
+            aspectRatio: "1 / 1",
+            background: "rgba(255,215,0,0.06)",
+            border: "1px solid rgba(255,215,0,0.2)",
+            position: "relative",
+            zIndex: 1,
+            boxShadow: artGlowActive
+              ? "0 0 48px rgba(255,215,0,0.25), 0 0 96px rgba(255,165,0,0.12)"
+              : "0 0 24px rgba(255,215,0,0.08)",
+            transition: "box-shadow 0.4s ease",
+            ...tiltStyle,
+          }}
+          onClick={() => navigate(`/song/${track.id}`)}
+        >
+          {track.artUrl ? (
+            <img
+              src={track.artUrl}
+              alt={track.title}
+              className="w-full h-full object-cover"
+              style={{
+                objectPosition: `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%`,
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-6xl">
+              {track.emoji || "🎵"}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 1. Controls row */}
-      <div
-        className="flex items-center gap-4 px-4 py-2 shrink-0"
-        style={{
-          opacity: overlayVisible ? 1 : 0.15,
-          transition: "opacity 0.6s ease",
-        }}
-      >
-        <button
-          onClick={() => prevTrack()}
-          className="p-3 rounded-full transition-all hover:bg-white/5"
-          style={{ color: "rgba(255,255,255,0.6)" }}
-          aria-label="Previous"
+      {/* Seek bar — thin, minimal, directly below artwork */}
+      <div className="w-full px-8 mt-4 shrink-0">
+        <div
+          className="relative rounded-full cursor-pointer"
+          style={{ height: 2, background: "rgba(255,255,255,0.08)" }}
+          onClick={handleSeek}
         >
-          <SkipBack size={20} />
-        </button>
-        <button
-          onClick={togglePlay}
-          className="flex items-center justify-center rounded-full transition-all"
-          style={{
-            width: 56,
-            height: 56,
-            background: "rgba(255,215,0,0.15)",
-            border: "1px solid rgba(255,215,0,0.4)",
-            color: "rgba(255,215,0,0.95)",
-          }}
-          aria-label={state.isPlaying ? "Pause" : "Play"}
-        >
-          {state.isPlaying
-            ? <Pause size={24} fill="currentColor" />
-            : <Play size={24} fill="currentColor" />}
-        </button>
-        <button
-          onClick={() => nextTrack()}
-          className="p-3 rounded-full transition-all hover:bg-white/5"
-          style={{ color: "rgba(255,255,255,0.6)" }}
-          aria-label="Next"
-        >
-          <SkipForward size={20} />
-        </button>
-      </div>
-
-      {/* 2. HERO artwork */}
-      <div
-        ref={artRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        className="rounded-xl overflow-hidden cursor-pointer shrink-0"
-        style={{
-          width: "min(65vw, 320px)",
-          aspectRatio: "1 / 1",
-          background: "rgba(255,215,0,0.06)",
-          border: "1px solid rgba(255,215,0,0.15)",
-          ...tiltStyle,
-        }}
-        onClick={() => navigate(`/song/${track.id}`)}
-      >
-        {track.artUrl ? (
-          <img
-            src={track.artUrl}
-            alt={track.title}
-            className="w-full h-full object-cover"
+          <div
+            className="absolute inset-y-0 left-0 rounded-full"
             style={{
-              objectPosition: `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%`,
+              width: `${progress}%`,
+              background: "linear-gradient(90deg, rgba(255,215,0,0.85), rgba(255,165,0,0.6))",
+              transition: "width 0.25s linear",
             }}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-5xl">
-            {track.emoji || "🎵"}
-          </div>
-        )}
+        </div>
+        <div className="flex justify-between mt-1.5 text-xs" style={{ color: "rgba(255,255,255,0.22)" }}>
+          <span>{fmtTime(state.currentTime)}</span>
+          <span>{fmtTime(state.duration)}</span>
+        </div>
       </div>
 
-      {/* 3. Song identity */}
-      <div className="text-center px-6 mt-4 shrink-0">
+      {/* Song identity — below seek bar */}
+      <div className="text-center px-6 mt-3 shrink-0">
         <h2
-          className="font-display text-xl mb-1 truncate max-w-xs"
+          className="font-display text-xl mb-0.5 truncate max-w-xs"
           style={{ color: "rgba(255,255,255,0.95)" }}
         >
           {track.title}
@@ -466,60 +516,38 @@ function ExpandedPanel() {
         </p>
         {track.witnessId && (
           <div
-            className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded text-xs"
+            className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-xs"
             style={{
-              background: "rgba(255,215,0,0.08)",
-              border: "1px solid rgba(255,215,0,0.2)",
-              color: "rgba(255,215,0,0.6)",
+              background: "rgba(255,215,0,0.07)",
+              border: "1px solid rgba(255,215,0,0.18)",
+              color: "rgba(255,215,0,0.55)",
             }}
           >
-            <ShieldCheck size={10} />
+            <ShieldCheck size={9} />
             <span className="font-mono">{track.witnessId.slice(0, 20)}…</span>
           </div>
         )}
       </div>
 
-      {/* Seek bar */}
-      <div className="w-full px-6 mt-4 shrink-0">
-        <div
-          className="relative h-1 rounded-full cursor-pointer"
-          style={{ background: "rgba(255,255,255,0.1)" }}
-          onClick={handleSeek}
-        >
-          <div
-            className="absolute inset-y-0 left-0 rounded-full"
-            style={{
-              width: `${progress}%`,
-              background: "linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,165,0,0.7))",
-              transition: "width 0.25s linear",
-            }}
-          />
-        </div>
-        <div className="flex justify-between mt-1 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-          <span>{fmtTime(state.currentTime)}</span>
-          <span>{fmtTime(state.duration)}</span>
-        </div>
-      </div>
-
-      {/* 4. Actions row */}
-      <div className="flex items-center justify-center gap-6 mt-4 px-4 shrink-0">
+      {/* Actions row — secondary, below identity */}
+      <div className="flex items-center justify-center gap-5 mt-4 px-4 shrink-0">
         <button
           onClick={() => toggleLike(track.id)}
           className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-          style={{ color: isLiked ? "rgba(255,80,80,0.9)" : "rgba(255,255,255,0.4)" }}
+          style={{ color: isLiked ? "rgba(255,80,80,0.9)" : "rgba(255,255,255,0.35)" }}
           aria-label="Like"
         >
-          <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
-          <span className="text-xs">Like</span>
+          <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+          <span className="text-[10px]">Like</span>
         </button>
         <button
           onClick={() => navigate(`/song/${track.id}#comments`)}
           className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-          style={{ color: "rgba(255,255,255,0.4)" }}
+          style={{ color: "rgba(255,255,255,0.35)" }}
           aria-label="Comment"
         >
-          <MessageCircle size={20} />
-          <span className="text-xs">Comment</span>
+          <MessageCircle size={18} />
+          <span className="text-[10px]">Comment</span>
         </button>
         <button
           onClick={() => {
@@ -527,32 +555,32 @@ function ExpandedPanel() {
             incrementShare(track.id);
           }}
           className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-          style={{ color: "rgba(255,255,255,0.4)" }}
+          style={{ color: "rgba(255,255,255,0.35)" }}
           aria-label="Share"
         >
-          <Share2 size={20} />
-          <span className="text-xs">Share</span>
+          <Share2 size={18} />
+          <span className="text-[10px]">Share</span>
         </button>
         {track.tipsEnabled && (
           <button
             onClick={() => navigate(`/song/${track.id}#tip`)}
             className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-            style={{ color: "rgba(255,215,0,0.6)" }}
+            style={{ color: "rgba(255,215,0,0.55)" }}
             aria-label="Tip"
           >
-            <Coins size={20} />
-            <span className="text-xs">Tip</span>
+            <Coins size={18} />
+            <span className="text-[10px]">Tip</span>
           </button>
         )}
         {track.witnessId && (
           <button
             onClick={() => navigate(`/song/${track.id}`)}
             className="flex flex-col items-center gap-1 transition-all hover:scale-110"
-            style={{ color: "rgba(255,215,0,0.6)" }}
+            style={{ color: "rgba(255,215,0,0.55)" }}
             aria-label="Verify"
           >
-            <ShieldCheck size={20} />
-            <span className="text-xs">Verify</span>
+            <ShieldCheck size={18} />
+            <span className="text-[10px]">Verify</span>
           </button>
         )}
       </div>

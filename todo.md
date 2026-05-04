@@ -4073,3 +4073,91 @@
 - [x] Arc panel on mobile: collapsible accordion below output area (auto-opens after generation)
 - [x] Player auto-collapse: textarea onFocus dispatches ln:player-collapse, onBlur dispatches ln:player-expand
 - [x] KeeperAvatarWidget already hidden on /keeper-compose (path starts with /keeper) — page owns its own cinematic trigger
+
+## Phase 125: Activation MVP
+- [ ] Schema: add activationEnabled (boolean, default false) to songs table
+- [ ] Schema: add totalFundingCents (int, default 0) to songs table
+- [ ] Schema: add activationStagesJson (text/JSON, nullable) to songs table
+- [ ] Schema: create activationContributions table (id, songId, userId, stageId, amountCents, stripeSessionId, stripePaymentIntentId, createdAt)
+- [ ] Migration: generate SQL via pnpm drizzle-kit generate and apply via webdev_execute_sql
+- [ ] Server db.ts: add getActivation(songId), recordActivationContribution() helpers
+- [ ] Server routers.ts: add activation.getForSong (public), activation.contribute (protected, creates Stripe checkout)
+- [ ] Server routers.ts: extend Stripe webhook handler to handle type="activation" metadata
+- [ ] Server routers.ts: webhook increments songs.totalFundingCents and records activationContributions row
+- [ ] Frontend: build ActivationPanel.tsx component (stage bars, contribute button, funding total)
+- [ ] Frontend: mount ActivationPanel on SongDetailPage when activationEnabled=true
+- [ ] Frontend: invalidate songs.getById on contribution success so progress updates
+
+## Phase 125: Activation MVP (Stage-Based Funding)
+- [x] Schema: added activationEnabled (boolean, default false), totalFundingCents (int, default 0), activationStagesJson (text JSON) to songs table
+- [x] Schema: created activationContributions table (id, songId, userId, stageId, amountCents, contributorName, message, anonymous, stripeSessionId, stripePaymentIntentId, createdAt, status)
+- [x] Migration: generated SQL (0093_vengeful_...) and applied via Node.js mysql2 script
+- [x] DB helpers: getActivationForSong, recordActivationContribution, getActivationContributions, configureSongActivation, verifySongOwnership added to server/db.ts
+- [x] tRPC router: activation.getForSong, activation.contribute (Stripe checkout), activation.getContributions, activation.configure added to server/routers.ts
+- [x] Stripe webhook: extended checkout.session.completed handler to process type="activation" payments — records contribution, increments totalFundingCents, marks stage.reachedAt when goal is met
+- [x] Frontend: ActivationPanel.tsx built — stage progress bars (StageBar), contribute button with preset amounts ($5/$10/$25/$50) and custom input, recent supporters accordion, Stripe redirect
+- [x] Frontend: ActivationPanel mounted in SongDetailPage.tsx before lyrics section — only renders when activationEnabled=true
+- [x] No real-time: refresh-based (invalidate on Stripe success redirect)
+
+## Phase 126: Build Failure Fix + First Witness Page
+- [x] Fix ActivationPanel.tsx build failure: replaced @/hooks/use-toast with sonner toast import
+- [x] Wire ln:player-collapse and ln:player-expand events in GlobalPlayer.tsx with mode restore (collapses to MINI, restores previous zone on expand)
+- [x] Update WhatsNew to v2.44.0: Keeper Compose — Now Live (Mobile + Cinematic) with 7 items
+- [x] Build /first-witness page for Slimdoggy with all 5 sections: Header, Provenance Block, Impact Timeline, Doctrine Quote, Certificate (downloadable PNG via Canvas API)
+- [x] Register /first-witness route in App.tsx
+
+## Phase 126: Build Failure Fix + First Witness Page
+- [x] Fix ActivationPanel.tsx build failure: replaced @/hooks/use-toast with sonner toast import
+- [x] Wire ln:player-collapse and ln:player-expand events in GlobalPlayer.tsx with mode restore
+- [x] Update WhatsNew to v2.44.0: Keeper Compose Now Live (Mobile + Cinematic) with 7 items
+- [x] Build /first-witness page for Slimdoggy with all 5 sections: Header, Provenance Block, Impact Timeline, Doctrine Quote, Certificate (downloadable PNG via Canvas API)
+- [x] Register /first-witness route in App.tsx
+
+## Phase 127: Activation Panel UI Upgrade (Production Spec)
+- [x] Rewrite ActivationPanel.tsx with production layout: narrative header (Activate This Work / Creator Commitment: Active), total progress bar anchoring the panel, stage cards with description field (not just bars), 4-button preset grid (5/10/25/50), post-Stripe invalidate + toast, refined CTA button text
+- [x] Stage type updated to include description field (mapped from JSON with fallback empty string)
+- [x] Standard 4-stage system locked: Witnessed / Build / Produce / Release with goalCents 5000/15000/30000/50000
+- [x] Progression system framing enforced: no donation language, all copy reinforces idea to reality arc
+
+## Phase 128: WSP (Witness Surface Player) — Architectural Replacement
+- [x] WSPContext.tsx created: WSPMode type (surface/expanded/floating), floatingPosition state, wsp:* custom events (wsp:expand, wsp:collapse, wsp:float, wsp:dock, wsp:track-change)
+- [x] WitnessSurfacePlayer.tsx built: Surface mode (56-64px bar under navbar, artwork/title/creator/play), Expanded mode (downward expansion with controls/artwork/identity/actions/waveform), Floating mode (draggable, pointer events, edge-snap, localStorage position)
+- [x] MainLayout.tsx updated: WSP injected under Navbar, GlobalPlayer removed from bottom player layer, content area padding adjusted (top instead of bottom)
+- [x] WSPProvider added to main.tsx provider tree (inside KeeperAttrsProvider)
+- [x] CSS variables set in index.css: --wsp-top (56px mobile / 52px desktop), --wsp-left (0px mobile / 72px desktop), --wsp-height (60px)
+- [x] Audio engine confirmed in PlayerContext (new Audio() imperative) — GlobalPlayer removal does not break audio playback
+- [x] PlayerContext bridge: usePlayer() inside WSP gives direct access to currentTrack, isPlaying, togglePlay, seek, toggleLike, incrementShare, nextTrack, prevTrack, audioRef
+- [x] Deferred: Activation stages visual overlay on WSP artwork
+- [x] Deferred: Provenance pulse state on WSP surface bar
+- [x] Deferred: Keeper sync context display in WSP
+- [ ] Deferred: Scroll-aware cinematic transitions
+
+## Phase 131 — WSP Paradigm Shift: Artwork as Primary Surface
+
+- [x] WSP ExpandedPanel: promote artwork to core surface (increase size ~35%, min 75vw or 380px, centered vertically as primary focal anchor)
+- [x] WSP ExpandedPanel: move back/play/next controls INTO the top row (collapse handle row), freeing the center for artwork
+- [x] WSP ExpandedPanel: remove the standalone controls row below the collapse handle (controls now live in top row)
+- [x] WSP ExpandedPanel: tighten seek bar — keep it but make it thinner and less prominent (2px, low opacity)
+- [x] WSP ExpandedPanel: actions row (Like/Comment/Share/Tip/Verify) stays below artwork as secondary row
+- [x] WSP ExpandedPanel: provenance + activation section stays below actions row
+- [x] WSP ExpandedPanel: artwork reactive glow — on hover/tilt interaction, emit a warm gold radial glow behind artwork
+- [ ] WSP ExpandedPanel: activation stage node pulse — when stage threshold is crossed, pulse the stage dot with a green ring animation
+- [ ] WSP ExpandedPanel: activation progress reactive glow — subtle gold shimmer on the progress bar when funding changes
+- [x] WSP SurfaceBar: make the strip feel like a WSP entry point — add a thin gold left-border accent, slightly warmer background
+- [x] KeeperAvatarWidget: fade opacity to 0.35 during active playback (isPlaying=true), restore to 1.0 on pause/stop or hover
+- [x] KeeperAvatarWidget: tie fade to PlayerContext isPlaying state via usePlayer() hook
+
+## Phase 131 — WSP Paradigm Shift: Artwork as Primary Surface
+
+- [x] WSP ExpandedPanel: promote artwork to core surface (increase size ~35%, min 75vw or 380px, centered vertically as primary focal anchor)
+- [x] WSP ExpandedPanel: move back/play/next controls INTO the top row (collapse handle row), freeing the center for artwork
+- [x] WSP ExpandedPanel: remove the standalone controls row below the collapse handle (controls now live in top row)
+- [x] WSP ExpandedPanel: tighten seek bar — keep it but make it thinner and less prominent (2px, low opacity)
+- [x] WSP ExpandedPanel: actions row (Like/Comment/Share/Tip/Verify) stays below artwork as secondary row
+- [x] WSP ExpandedPanel: provenance + activation section stays below actions row
+- [x] WSP ExpandedPanel: artwork reactive glow — on hover/tilt interaction, emit a warm gold radial glow behind artwork
+- [ ] WSP ExpandedPanel: activation stage node pulse — when stage threshold is crossed, pulse the stage dot with a green ring animation
+- [ ] WSP ExpandedPanel: activation progress reactive glow — subtle gold shimmer on the progress bar when funding changes
+- [x] WSP SurfaceBar: make the strip feel like a WSP entry point — add a thin gold left-border accent, slightly warmer background
+- [x] KeeperAvatarWidget: fade opacity to 0.35 during active playback (isPlaying=true), restore to 1.0 on pause/stop or hover
+- [x] KeeperAvatarWidget: tie fade to PlayerContext isPlaying state via usePlayer() hook
