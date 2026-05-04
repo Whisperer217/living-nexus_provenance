@@ -332,11 +332,18 @@ export default function KeeperComposePage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const outputRef   = useRef<HTMLDivElement>(null);
 
+  const utils = trpc.useUtils();
   const chatMutation = trpc.keeper.chat.useMutation();
   const saveNoteMutation = trpc.keeper.saveNote.useMutation({
     onSuccess: () => toast.success("Composition saved to Keeper Notes."),
     onError: () => toast.error("Failed to save note."),
   });
+  const autoSaveMutation = trpc.keeper.saveNote.useMutation(); // silent auto-save
+  const recentDraftsQuery = trpc.keeper.listNotes.useQuery(
+    { tag: "composition", limit: 5 },
+    { enabled: isAuthenticated }
+  );
+  const [draftsOpen, setDraftsOpen] = useState(false);
 
   const arc = composedWork ? deriveArc(composedWork.sections) : [];
   const previewArc = derivePreviewArc(prompt);
@@ -395,8 +402,23 @@ Please respond in Suno-ready format:
       ]);
 
       setPrompt("");
-      // Auto-open arc on mobile after generation
-      if (isMobile) setArcOpen(true);
+      // Auto-save to Keeper Notes silently
+      const autoTitle = parsed.sections[0]?.lyrics?.split("\n")[0]?.slice(0, 60) ?? "Untitled Composition";
+      const autoContent = buildSunoCopy(parsed);
+      autoSaveMutation.mutate({
+        personaId: activeMode.toLowerCase(),
+        title: autoTitle,
+        content: autoContent,
+        tag: "composition",
+      });
+      // Invalidate recent drafts so panel updates
+      utils.keeper.listNotes.invalidate({ tag: "composition", limit: 5 });
+      // Auto-enter cinematic on desktop; open arc on mobile
+      if (isMobile) {
+        setArcOpen(true);
+      } else {
+        setCinematic(true);
+      }
     } catch {
       toast.error("The Keeper is momentarily silent. Try again.");
     } finally {
@@ -602,6 +624,44 @@ Please respond in Suno-ready format:
   }
 
   // ── Shared input bar ───────────────────────────────────────────────────────
+
+  const RecentDraftsStrip = isAuthenticated && (recentDraftsQuery.data?.length ?? 0) > 0 ? (
+    <div className="flex-shrink-0" style={{ borderTop: "1px solid var(--ln-panel-border)", background: "var(--ln-panel)" }}>
+      <button
+        onClick={() => setDraftsOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-1.5 hover:opacity-80 transition-opacity"
+        style={{ color: modeColor }}
+      >
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.1em" }}>RECENT DRAFTS ({recentDraftsQuery.data?.length ?? 0})</span>
+        <ChevronDown className="w-3 h-3" style={{ transform: draftsOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+      </button>
+      {draftsOpen && (
+        <div className="px-4 pb-2 space-y-1">
+          {recentDraftsQuery.data?.map((draft: any) => (
+            <button
+              key={draft.id}
+              onClick={() => {
+                const parsed = parseComposedWork(draft.content);
+                setComposedWork(parsed);
+                setEditableOutput(buildSunoCopy(parsed));
+                setDraftsOpen(false);
+                if (!isMobile) setCinematic(true);
+              }}
+              className="w-full text-left px-3 py-2 rounded transition-all hover:opacity-80"
+              style={{ background: `${modeColor}0A`, border: `1px solid ${modeColor}22` }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate" style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-parchment)" }}>{draft.title}</span>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, opacity: 0.6, flexShrink: 0 }}>
+                  {new Date(draft.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  ) : null;
 
   const InputBar = (
     <div
@@ -857,12 +917,13 @@ Please respond in Suno-ready format:
         </div>
 
         {/* Mobile input bar */}
+        {RecentDraftsStrip}
         {InputBar}
       </div>
     );
   }
 
-  // ── DESKTOP: Three-panel layout ────────────────────────────────────────────
+  // ── DESKTOP: Three-panel layout───────────────────────────────────────────
 
   return (
     <div
@@ -926,27 +987,59 @@ Please respond in Suno-ready format:
             {MODES.map(m => {
               const Icon = MODE_ICONS[m];
               const active = activeMode === m;
+              const isConductor = m === "Conductor";
               return (
-                <button
-                  key={m}
-                  onClick={() => handleModeChange(m)}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded text-left transition-all"
-                  style={{
-                    background: active ? `${MODE_COLORS[m]}18` : "transparent",
-                    border: `1px solid ${active ? MODE_COLORS[m] : "transparent"}`,
-                    color: active ? MODE_COLORS[m] : "var(--ln-smoke)",
-                  }}
-                >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                  <div>
-                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em" }}>
-                      {m.toUpperCase()}
+                <div key={m} className="relative group">
+                  <button
+                    onClick={() => handleModeChange(m)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded text-left transition-all"
+                    style={{
+                      background: active ? `${MODE_COLORS[m]}18` : "transparent",
+                      border: `1px solid ${active ? MODE_COLORS[m] : isConductor ? `${MODE_COLORS[m]}44` : "transparent"}`,
+                      color: active ? MODE_COLORS[m] : "var(--ln-smoke)",
+                    }}
+                  >
+                    <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em" }}>
+                          {m.toUpperCase()}
+                        </span>
+                        {isConductor && (
+                          <span
+                            className="px-1 rounded"
+                            style={{
+                              background: `${MODE_COLORS[m]}33`,
+                              color: MODE_COLORS[m],
+                              fontFamily: "'Space Mono', monospace",
+                              fontSize: "0.4rem",
+                              letterSpacing: "0.06em",
+                            }}
+                          >STRUCTURE</span>
+                        )}
+                      </div>
+                      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", opacity: 0.6, marginTop: 1 }}>
+                        {MODE_DESC[m].split(" · ")[0]}
+                      </div>
                     </div>
-                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", opacity: 0.6, marginTop: 1 }}>
-                      {MODE_DESC[m].split(" · ")[0]}
+                  </button>
+                  {/* Conductor tooltip on hover */}
+                  {isConductor && (
+                    <div
+                      className="absolute left-full top-0 ml-2 z-50 w-48 rounded p-2.5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      style={{
+                        background: "#0e0b07",
+                        border: `1px solid ${MODE_COLORS[m]}44`,
+                        boxShadow: `0 4px 16px rgba(0,0,0,0.6)`,
+                      }}
+                    >
+                      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: MODE_COLORS[m], letterSpacing: "0.08em", marginBottom: 4 }}>CONDUCTOR MODE</div>
+                      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "var(--ln-smoke)", lineHeight: 1.6 }}>
+                        Arranges your song into labeled sections with structure, arc, and delivery notes. Best for full compositions.
+                      </div>
                     </div>
-                  </div>
-                </button>
+                  )}
+                </div>
               );
             })}
           </div>
@@ -1095,6 +1188,7 @@ Please respond in Suno-ready format:
           )}
 
           {/* Desktop input bar */}
+          {RecentDraftsStrip}
           {InputBar}
         </div>
 

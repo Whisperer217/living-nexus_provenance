@@ -325,8 +325,14 @@ export default function UploadPage() {
           timestamp: Date.now(),
           verified: true,
         });
+        toast.success(`WID Registered: ${data.witnessId}`, { duration: 6000 });
       }
-      navigate("/dashboard");
+      // Navigate to the song page so user sees their WID immediately
+      if (data?.songId) {
+        navigate(`/song/${data.songId}`);
+      } else {
+        navigate("/dashboard");
+      }
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });
