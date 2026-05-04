@@ -26,7 +26,7 @@ import { getLoginUrl } from "@/const";
 import { WHATS_NEW_VERSION } from "@/components/layout/ContextDrawer";
 
 const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
 // ── Unified nav structure (mirrors ContextDrawer PANELS) ──────────
 

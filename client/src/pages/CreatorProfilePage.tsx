@@ -158,7 +158,6 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
 
 // ─── Featured Song Card ────────────────────────────────────────────────────────
 function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => void; isPlaying: boolean }) {
-  const [, navigate] = useLocation();
   return (
     <div
       className={`group museum-card parchment-grain cursor-pointer ${
@@ -194,16 +193,12 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
             </div>
           )}
           {song.witnessId && (
-            <span
-              role="link"
-              tabIndex={0}
-              onClick={(e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); navigate(`/verify/${song.witnessId}`); }}
-              onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); navigate(`/verify/${song.witnessId}`); } }}
-              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100 cursor-pointer"
+            <Link href={`/verify/${song.witnessId}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100"
               style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
             >
               <Shield size={8} /><span>WID</span>
-            </span>
+            </Link>
           )}
           {song.aiConsent === "prohibited" && (
             <div className="absolute top-2 left-2 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
@@ -704,7 +699,7 @@ export default function CreatorProfilePage() {
   const profileDesc = creator.bio
     ? creator.bio.slice(0, 160)
     : `${songs.length} track${songs.length !== 1 ? "s" : ""} on Living Nexus`;
-  const profileImage = creator.profilePhotoUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+  const profileImage = creator.profilePhotoUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (

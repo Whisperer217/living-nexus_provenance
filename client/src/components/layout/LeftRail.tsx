@@ -18,7 +18,7 @@ import { Home, Compass, User, Upload, Archive } from "lucide-react";
 export type NavMode = "home" | "explore" | "profile" | "upload" | "archive";
 
 const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
 const RAIL_ITEMS: Array<{ id: NavMode; icon: React.ElementType; label: string; path: string }> = [
   { id: "home",    icon: Home,    label: "Home",    path: "/"        },

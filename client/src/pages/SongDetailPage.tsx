@@ -339,7 +339,7 @@ export default function SongDetailPage() {
   const pageDesc = song.genre
     ? `${song.genre} · ${artistName}${song.witnessId ? " · WID Verified" : ""}${(song as any).bpm ? ` · ${(song as any).bpm} BPM` : ""} — Listen on Living Nexus`
     : `Listen to ${song.title} by ${artistName} on Living Nexus`;
-  const pageImage = song.coverArtUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
+  const pageImage = song.coverArtUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
   const pageUrl = `https://www.livingnexus.org/song/${songId}`;
   const audioFileUrl = song.fileUrl ? safeAudioUrl(song.fileUrl) : undefined;
   const embedVideoUrl = (song as any).embedVideoUrl as string | undefined;
