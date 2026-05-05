@@ -205,15 +205,15 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
             hover:scale-[1.025] hover:shadow-[0_0_40px_rgba(196,154,40,0.18),0_12px_40px_rgba(0,0,0,0.7)]`}
           style={{ minHeight: "200px" }}
         >
-          {/* ── Background: blurred artwork ── */}
+          {/* ── Background: full artwork — clear, vibrant, no blur ── */}
           <div className="absolute inset-0">
             {song.coverArtUrl ? (
               <img
                 src={song.coverArtUrl}
                 alt=""
                 aria-hidden="true"
-                className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:blur-0"
-                style={{ filter: "blur(2px) brightness(0.35)", transform: "scale(1.06)" }}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                style={{ filter: "brightness(0.85)" }}
               />
             ) : (
               <div
@@ -225,57 +225,30 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
             )}
           </div>
 
-          {/* ── Dark overlay — sharpens on hover ── */}
+          {/* ── Bottom gradient only — for text readability, artwork breathes at top ── */}
           <div
-            className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-70"
-            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.82) 60%, rgba(0,0,0,0.92) 100%)", opacity: 1 }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.15) 70%, rgba(0,0,0,0.0) 100%)" }}
           />
 
-          {/* ── Subtle gold vignette at top ── */}
-          <div
-            className="absolute inset-x-0 top-0 h-16 pointer-events-none"
-            style={{ background: "linear-gradient(180deg, rgba(196,154,40,0.04) 0%, transparent 100%)" }}
-          />
+          {/* ── Content layer — artwork visible at top, content anchored at bottom ── */}
+          <div className="relative z-10 flex flex-col justify-end h-full p-4 gap-2" style={{ minHeight: "200px" }}>
 
-          {/* ── Content layer ── */}
-          <div className="relative z-10 flex flex-col h-full p-4 gap-3">
-
-            {/* 1. TESTIMONY — primary surface */}
-            <div className="flex-1">
-              {testimony ? (
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{
-                    color: "rgba(240,228,196,0.92)",
-                    fontFamily: "'Georgia', 'Times New Roman', serif",
-                    letterSpacing: "0.01em",
-                    lineHeight: "1.6",
-                    textShadow: "0 1px 8px rgba(0,0,0,0.8)",
-                  }}
-                >
-                  {testimony.split("\n").map((line, i) => (
-                    <span key={i}>
-                      {i === 0 ? <>&ldquo;{line}</> : line}
-                      {i === testimony.split("\n").length - 1 ? <>&rdquo;</> : null}
-                      {i < testimony.split("\n").length - 1 && <br />}
-                    </span>
-                  ))}
-                </p>
-              ) : (
-                /* No testimony — show title as the witness statement */
-                <p
-                  className="text-sm font-semibold leading-snug"
-                  style={{
-                    color: "rgba(240,228,196,0.75)",
-                    fontFamily: "'Cinzel', serif",
-                    letterSpacing: "0.04em",
-                    textShadow: "0 1px 8px rgba(0,0,0,0.8)",
-                  }}
-                >
-                  {song.title}
-                </p>
-              )}
-            </div>
+            {/* 1. TESTIMONY — overlay companion, bottom of card */}
+            {testimony && (
+              <p
+                className="text-xs leading-relaxed line-clamp-3"
+                style={{
+                  color: "rgba(240,228,196,0.90)",
+                  fontFamily: "'Georgia', 'Times New Roman', serif",
+                  letterSpacing: "0.01em",
+                  lineHeight: "1.55",
+                  textShadow: "0 1px 6px rgba(0,0,0,0.9)",
+                }}
+              >
+                &ldquo;{testimony.replace(/\n/g, " ")}&rdquo;
+              </p>
+            )}
 
             {/* 2. PLAY BUTTON — Manifestation */}
             <div className="flex items-center gap-3">

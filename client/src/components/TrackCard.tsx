@@ -167,17 +167,16 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         minHeight: "180px",
       }}
     >
-      {/* ── Background: blurred artwork ── */}
+      {/* ── Background: full artwork — clear, vibrant, no blur ── */}
       <div className="absolute inset-0 overflow-hidden rounded-xl">
         {track.artUrl && track.artType !== "video" ? (
           <img
             src={track.artUrl}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             style={{
-              filter: "blur(3px) brightness(0.28)",
-              transform: "scale(1.08)",
+              filter: "brightness(0.88)",
               objectPosition: coverPos,
             }}
           />
@@ -185,7 +184,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           <video
             src={track.artUrl}
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ filter: "blur(3px) brightness(0.28)", objectPosition: coverPos }}
+            style={{ filter: "brightness(0.88)", objectPosition: coverPos }}
             muted
             loop
           />
@@ -197,10 +196,10 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         )}
       </div>
 
-      {/* ── Dark overlay ── */}
+      {/* ── Bottom gradient only — artwork breathes at top, text readable at bottom ── */}
       <div
-        className="absolute inset-0 rounded-xl transition-opacity duration-300 group-hover:opacity-60"
-        style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.80) 60%, rgba(0,0,0,0.92) 100%)" }}
+        className="absolute inset-0 rounded-xl pointer-events-none"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.12) 65%, rgba(0,0,0,0.0) 100%)" }}
       />
 
       {/* ── Hot ribbon ── */}
@@ -223,42 +222,25 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         </div>
       )}
 
-      {/* ── Content layer ── */}
-      <div className="relative z-10 flex flex-col p-3 gap-3" style={{ minHeight: "180px" }}>
+      {/* ── Content layer — artwork visible at top, content anchored at bottom ── */}
+      <div className="relative z-10 flex flex-col justify-end p-3 gap-2" style={{ minHeight: "180px" }}>
 
-        {/* 1. TESTIMONY — primary surface */}
-        <div className="flex-1 cursor-pointer" onClick={handleCoverClick}>
-          {testimonySnippet ? (
-            <p
-              className="text-[12px] leading-relaxed"
-              style={{
-                color: "rgba(240,228,196,0.90)",
-                fontFamily: "'Georgia', 'Times New Roman', serif",
-                letterSpacing: "0.01em",
-                lineHeight: "1.65",
-                textShadow: "0 1px 8px rgba(0,0,0,0.9)",
-              }}
-            >
-              &ldquo;{testimonySnippet}&rdquo;
-            </p>
-          ) : (
-            <Link
-              href={`/song/${track.id}`}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            >
-              <p
-                className="text-[13px] font-heading tracking-wide leading-snug"
-                style={{
-                  color: "rgba(240,228,196,0.80)",
-                  fontFamily: "'Cinzel', serif",
-                  textShadow: "0 1px 8px rgba(0,0,0,0.9)",
-                }}
-              >
-                {track.title}
-              </p>
-            </Link>
-          )}
-        </div>
+        {/* 1. TESTIMONY — overlay companion, bottom of card */}
+        {testimonySnippet && (
+          <p
+            className="text-[11px] leading-relaxed line-clamp-3 cursor-pointer"
+            onClick={handleCoverClick}
+            style={{
+              color: "rgba(240,228,196,0.90)",
+              fontFamily: "'Georgia', 'Times New Roman', serif",
+              letterSpacing: "0.01em",
+              lineHeight: "1.55",
+              textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+            }}
+          >
+            &ldquo;{testimonySnippet}&rdquo;
+          </p>
+        )}
 
         {/* 2. PLAY + WID row */}
         <div className="flex items-center gap-2">

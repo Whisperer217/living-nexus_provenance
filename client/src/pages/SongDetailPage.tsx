@@ -414,13 +414,13 @@ export default function SongDetailPage() {
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-5">
 
-            {/* ══ 1. TESTIMONY — Primary Surface ══ */}
+            {/* ══ 1. TESTIMONY — Dual Surface: artwork invites, testimony explains ══ */}
             {((song as any).headlineCaption || (song as any).description) && (
               <div
                 className="relative rounded-2xl overflow-hidden"
-                style={{ minHeight: "120px" }}
+                style={{ minHeight: "160px" }}
               >
-                {/* Blurred artwork background */}
+                {/* Artwork — clear, vibrant, full brightness */}
                 {song.coverArtUrl && (
                   <div className="absolute inset-0">
                     <img
@@ -429,25 +429,29 @@ export default function SongDetailPage() {
                       aria-hidden="true"
                       className="w-full h-full object-cover"
                       style={{
-                        filter: "blur(4px) brightness(0.22)",
-                        transform: "scale(1.06)",
-                        objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%`,
+                        filter: "brightness(0.82)",
+                        objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%`,
                       }}
                     />
                   </div>
                 )}
-                {/* Dark overlay */}
+                {/* Bottom gradient only — text readable, artwork breathes at top */}
                 <div
                   className="absolute inset-0"
-                  style={{ background: song.coverArtUrl ? "rgba(0,0,0,0.62)" : "rgba(196,154,40,0.03)",
-                    border: "1px solid rgba(196,154,40,0.15)", borderRadius: "1rem" }}
+                  style={{
+                    background: song.coverArtUrl
+                      ? "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.50) 45%, rgba(0,0,0,0.10) 75%, rgba(0,0,0,0.0) 100%)"
+                      : "rgba(196,154,40,0.03)",
+                    border: "1px solid rgba(196,154,40,0.15)",
+                    borderRadius: "1rem",
+                  }}
                 />
-                {/* Testimony content */}
-                <div className="relative z-10 p-5 space-y-2">
+                {/* Testimony — anchored at bottom, overlay companion */}
+                <div className="relative z-10 flex flex-col justify-end h-full p-5 space-y-1.5" style={{ minHeight: "160px" }}>
                   {(song as any).headlineCaption && (
                     <p
                       className="text-base font-semibold leading-snug"
-                      style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}
+                      style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}
                     >
                       {(song as any).headlineCaption}
                     </p>
@@ -456,10 +460,10 @@ export default function SongDetailPage() {
                     <p
                       className="text-sm leading-relaxed whitespace-pre-wrap"
                       style={{
-                        color: "rgba(240,228,196,0.88)",
+                        color: "rgba(240,228,196,0.90)",
                         fontFamily: "'Georgia', 'Times New Roman', serif",
                         letterSpacing: "0.01em",
-                        textShadow: "0 1px 6px rgba(0,0,0,0.8)",
+                        textShadow: "0 1px 6px rgba(0,0,0,0.9)",
                       }}
                     >
                       {(song as any).description}

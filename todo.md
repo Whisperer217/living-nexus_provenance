@@ -4234,3 +4234,8 @@
 - [x] Mobile: same structure, no hover dependency — tap = play or expand
 - [x] Restructure SongDetailPage: Testimony (renamed from description) at top, Player second, Resonance Field third, WID fourth, Interaction fifth, Metadata last
 - [x] Demote AI-Generated badge to subtle footnote in Metadata section
+
+## Phase 141c — Dual Surface Card Visual Balance
+- [x] StoreTrackCard: artwork as full visual base (no heavy dim), bottom gradient only for text readability, testimony as overlay companion
+- [x] TrackCard: same — reduce overlay from ~80% to ~40%, artwork vibrant and visible
+- [x] SongDetailPage Testimony block: same bottom-gradient-only treatment
