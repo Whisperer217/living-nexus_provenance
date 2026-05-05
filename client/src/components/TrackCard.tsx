@@ -196,10 +196,10 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         )}
       </div>
 
-      {/* ── Bottom gradient only — artwork breathes at top, text readable at bottom ── */}
+      {/* ── LAYER 2: Gradient — exact canonical spec ── */}
       <div
         className="absolute inset-0 rounded-xl pointer-events-none"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.12) 65%, rgba(0,0,0,0.0) 100%)" }}
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.0) 80%)" }}
       />
 
       {/* ── Hot ribbon ── */}
@@ -222,19 +222,44 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         </div>
       )}
 
-      {/* ── Content layer — artwork visible at top, content anchored at bottom ── */}
-      <div className="relative z-10 flex flex-col justify-end p-3 gap-2" style={{ minHeight: "180px" }}>
+      {/* ── LAYER 4: Play button — centered 56px gold ring ── */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+        <button
+          onClick={handleCoverClick}
+          className="pointer-events-auto flex items-center justify-center rounded-full transition-all duration-200"
+          style={{
+            width: "56px",
+            height: "56px",
+            background: isPlaying ? "rgba(196,154,40,0.22)" : "rgba(0,0,0,0.35)",
+            border: isPlaying ? "2px solid rgba(196,154,40,0.9)" : "2px solid rgba(196,154,40,0.65)",
+            boxShadow: isPlaying
+              ? "0 0 0 6px rgba(196,154,40,0.15), 0 0 24px rgba(196,154,40,0.4)"
+              : "0 0 16px rgba(196,154,40,0.2)",
+            animation: isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
+          }}
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? (
+            <div className="live-wave scale-[0.65]"><span /><span /><span /></div>
+          ) : (
+            <Play size={20} fill="currentColor" className="ml-0.5" style={{ color: "#C9A84C" }} />
+          )}
+        </button>
+      </div>
 
-        {/* 1. TESTIMONY — overlay companion, bottom of card */}
+      {/* ── LAYERS 3 + 5 + 6: Bottom content stack ── */}
+      <div className="absolute inset-x-0 bottom-0 z-20 p-3 flex flex-col gap-1.5">
+
+        {/* LAYER 3: Testimony — 2-line max, #F5F5F5 @ 0.92 */}
         {testimonySnippet && (
           <p
-            className="text-[11px] leading-relaxed line-clamp-3 cursor-pointer"
+            className="text-[11px] leading-snug line-clamp-2 cursor-pointer"
             onClick={handleCoverClick}
             style={{
-              color: "rgba(240,228,196,0.90)",
+              color: "rgba(245,245,245,0.92)",
               fontFamily: "'Georgia', 'Times New Roman', serif",
               letterSpacing: "0.01em",
-              lineHeight: "1.55",
+              lineHeight: "1.5",
               textShadow: "0 1px 6px rgba(0,0,0,0.95)",
             }}
           >
@@ -242,61 +267,33 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           </p>
         )}
 
-        {/* 2. PLAY + WID row */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleCoverClick}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200
-              group-hover:shadow-[0_0_12px_rgba(196,154,40,0.35)]`}
-            style={{
-              background: isActive ? "rgba(196,154,40,0.22)" : "rgba(196,154,40,0.12)",
-              border: `1px solid ${isActive ? "rgba(196,154,40,0.55)" : "rgba(196,154,40,0.35)"}`,
-              color: "#C9A84C",
-            }}
-          >
-            {isPlaying
-              ? <><div className="live-wave scale-[0.6]"><span /><span /><span /></div><span>Playing</span></>
-              : <><Play size={10} fill="currentColor" className="ml-0.5" /><span>Play</span></>
-            }
-          </button>
+        {/* LAYERS 5 + 6: Attribution (left) + Resonance (right) */}
+        <div className="flex items-center justify-between gap-2">
 
-          {hasWid && (
-            <Link
-              href={`/verify/${track.witnessId}`}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="flex items-center gap-0.5 px-1.5 py-1 rounded text-[8px] font-bold font-heading tracking-wider wid-glow transition-opacity opacity-80 hover:opacity-100"
-              style={{ background: "rgba(0,0,0,0.55)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.45)" }}
-              title={`Verified Witness ID: ${track.witnessId}`}
-            >
-              <Shield size={7} />
-              <span>WID</span>
-            </Link>
-          )}
-
-          {/* visualReady shimmer dot */}
-          {track.visualReady === false && (
-            <span
-              style={{
-                display: "inline-block", width: 5, height: 5, borderRadius: "50%",
-                background: "rgba(245,196,81,0.7)",
-                animation: "trackCardDot 1.1s ease-in-out infinite",
-              }}
+          {/* Layer 5: Attribution — creator + WID */}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <CreatorHandle
+              userId={track.creatorId}
+              handle={track.creatorHandle}
+              displayName={track.artist}
+              role={track.creatorRole}
+              size="sm"
             />
-          )}
-        </div>
+            {hasWid && (
+              <Link
+                href={`/verify/${track.witnessId}`}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                className="flex items-center gap-0.5 flex-shrink-0"
+                title={`Verified Witness ID: ${track.witnessId}`}
+              >
+                <Shield size={8} style={{ color: "rgba(196,154,40,0.6)" }} />
+                <span className="text-[8px] font-mono tracking-wider uppercase" style={{ color: "rgba(196,154,40,0.5)" }}>WID</span>
+              </Link>
+            )}
+          </div>
 
-        {/* 3. CREATOR + RESONANCE */}
-        <div className="flex items-center justify-between gap-2 pt-2 border-t" style={{ borderColor: "rgba(196,154,40,0.1)" }}>
-          <CreatorHandle
-            userId={track.creatorId}
-            handle={track.creatorHandle}
-            displayName={track.artist}
-            role={track.creatorRole}
-            size="sm"
-          />
-
-          <div className="flex items-center gap-1.5">
-            {/* Like */}
+          {/* Layer 6: Resonance — likes / tip / actions */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={e => toggleLike(e)}
               className={`flex items-center gap-0.5 p-0.5 transition-colors ${isLiked ? "text-pink-400" : "text-[#6B6555] hover:text-pink-400"}`}
@@ -309,8 +306,6 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                 </span>
               )}
             </button>
-
-            {/* Tip */}
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(track, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
@@ -320,8 +315,6 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                 <DollarSign size={11} />
               </button>
             )}
-
-            {/* Queue + list */}
             {!isNaN(numericId) && numericId > 0 && (
               <>
                 <button
@@ -350,15 +343,16 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           </div>
         </div>
 
-        {/* AI disclosure — demoted to tiny footnote */}
-        {hasAiDisclosure && (
-          <div className="flex justify-end">
-            <AiDisclosurePill value={track.aiDisclosure as any} size="compact" />
-          </div>
+        {/* visualReady shimmer dot */}
+        {track.visualReady === false && (
+          <span
+            style={{
+              display: "inline-block", width: 5, height: 5, borderRadius: "50%",
+              background: "rgba(245,196,81,0.7)",
+              animation: "trackCardDot 1.1s ease-in-out infinite",
+            }}
+          />
         )}
-
-        {/* Genre pills */}
-        <GenrePills genre={track.genre} maxVisible={2} chipBg={ctColors.chipBg} chipBorder={ctColors.chipBorder} textColor={ctColors.text} />
       </div>
     </div>
 

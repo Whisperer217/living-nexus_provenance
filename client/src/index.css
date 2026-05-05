@@ -1240,6 +1240,11 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(196,154,40,0.12), 0 0 20px rgba(196,154,40,0.35); }
+  50% { box-shadow: 0 0 0 8px rgba(196,154,40,0.20), 0 0 32px rgba(196,154,40,0.55); }
+}
+
 @keyframes trackCardDot {
   0%, 100% { opacity: 0.4; transform: scale(0.8); }
   50%       { opacity: 1;   transform: scale(1.2); }

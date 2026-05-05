@@ -4239,3 +4239,13 @@
 - [x] StoreTrackCard: artwork as full visual base (no heavy dim), bottom gradient only for text readability, testimony as overlay companion
 - [x] TrackCard: same — reduce overlay from ~80% to ~40%, artwork vibrant and visible
 - [x] SongDetailPage Testimony block: same bottom-gradient-only treatment
+
+## Phase 141d — Final Canonical Dual Surface Card
+- [x] StoreTrackCard: exact gradient rgba(0,0,0,0.65)→rgba(0,0,0,0.35)→rgba(0,0,0,0.0) at 0%/40%/80%
+- [x] StoreTrackCard: centered 56px gold ring play button with soft glow, hover brighter, playing pulse ring
+- [x] StoreTrackCard: testimony max 2 lines, #F5F5F5 at opacity 0.92, bottom overlay
+- [x] StoreTrackCard: attribution row bottom-left (creator + WID badge), resonance bottom-right (plays/hearts/funding)
+- [x] StoreTrackCard: "NOW PLAYING" badge near resonance when track is active
+- [x] TrackCard: same canonical spec applied
+- [x] Both cards: hover scale(1.02) on artwork, no blur ever
+- [x] pulse-gold keyframe added to index.css for playing state animation
