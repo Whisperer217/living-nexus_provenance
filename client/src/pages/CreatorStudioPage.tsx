@@ -15,7 +15,7 @@ import {
   Loader2, Upload, X, Layers, Settings
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -531,7 +531,7 @@ function MetadataTab({ moodTags, setMoodTags, aiDisclosure, setAiDisclosure, nar
           <SelectContent>
             <SelectItem value="none">Human-created — No AI involvement</SelectItem>
             <SelectItem value="ai_assisted">AI-Assisted — Human-led, AI-enhanced</SelectItem>
-            <SelectItem value="ai_generated">AI-Generated — Primarily AI-produced</SelectItem>
+            <SelectItem value="ai_generated">AI-Assisted Manifestation — Primarily AI-produced</SelectItem>
             <SelectItem value="haai">HAAI — Human-Authored, AI-Implemented</SelectItem>
           </SelectContent>
         </Select>
