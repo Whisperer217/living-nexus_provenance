@@ -26,6 +26,9 @@ export const users = mysqlTable("users", {
   twitterHandle: varchar("twitterHandle", { length: 64 }),
   instagramHandle: varchar("instagramHandle", { length: 64 }),
   youtubeHandle: varchar("youtubeHandle", { length: 64 }),
+  cashAppHandle: varchar("cashAppHandle", { length: 64 }),
+  paypalUsername: varchar("paypalUsername", { length: 128 }),
+  venmoHandle: varchar("venmoHandle", { length: 64 }),
   bannerUrl: text("bannerUrl"),
   avatarObjectPosition: varchar("avatarObjectPosition", { length: 32 }).default("50% 50%"),
   bannerPositionX: float("bannerPositionX").default(50).notNull(),
@@ -83,13 +86,10 @@ export const users = mysqlTable("users", {
   lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),
   lastVisitedDashboardAt: timestamp("lastVisitedDashboardAt"),
 
-   // Founder WID — generated at grant time, e.g. WID-FDR-0001-1713340800000
+  // Founder WID — generated at grant time, e.g. WID-FDR-0001-1713340800000
   founderWid: varchar("founderWid", { length: 64 }),
   founderGrantedAt: timestamp("founderGrantedAt"),
-  // Creator economy — direct payment links (no Stripe required)
-  cashAppHandle: varchar("cashAppHandle", { length: 64 }),   // e.g. "$DocSeraphMercer"
-  paypalUsername: varchar("paypalUsername", { length: 128 }), // e.g. "docseraphmercer" or full URL
-  venmoHandle: varchar("venmoHandle", { length: 64 }),        // e.g. "DocSeraphMercer"
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),

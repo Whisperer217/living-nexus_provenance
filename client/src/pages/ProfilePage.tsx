@@ -142,6 +142,7 @@ function HandleField({ value, onSave }: { value: string; onSave: (v: string) => 
 /* ── Main ProfilePage ──────────────────────────────────────────── */
 export default function ProfilePage() {
   const { user, loading: authLoading, logout } = useAuth();
+  const isOwn = !!user; // ProfilePage is always the logged-in user's own profile
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const { addAndPlay, currentTrackId, state: playerState } = usePlayer();

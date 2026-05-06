@@ -4353,3 +4353,19 @@
 - [ ] Resonance Field: unified reactions + witness count + contributions + comments in one layer
 - [ ] Provenance Block: moved lower (emotion before registry)
 - [ ] Related Universe: large cinematic cards (related creators, connected comics, soundtrack artifacts)
+
+## Phase 146 — Provenance-First Manifestation (commit 74bef2f)
+- [x] Merge commit 74bef2f from GitHub
+- [x] Relocate root-level files to correct src paths
+- [x] Add cashAppHandle, paypalUsername, venmoHandle columns to schema.ts
+- [x] Apply missing columns directly to live DB via SQL
+- [x] Fix CreatorStudioPage.tsx import paths (useAuth, StoryboardBuilder, reader components)
+- [x] Add title/description/headlineCaption/moodTags to updateMetadata procedure input schema
+- [x] Fix z.record(z.unknown()) → z.record(z.string(), z.unknown()) in routers.ts
+- [x] Fix ProfilePage.tsx: define isOwn = !!user
+- [x] Add cashAppHandle/paypalUsername/venmoHandle to profile.update procedure input schema
+- [x] Fix moodTags type: string → string[] conversion at call site
+- [x] Fix reader component props in CreatorStudioPage preview (onClose, content shape)
+- [x] Sync migration journal: insert 0095 record into __drizzle_migrations with correct hash/timestamp
+- [x] pnpm db:push succeeds — migrations applied successfully
+- [x] tsc --noEmit exits 0

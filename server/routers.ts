@@ -552,9 +552,8 @@ export const appRouter = router({
       avatarObjectPosition: z.string().max(32).optional(),
       bannerPositionX: z.number().min(0).max(100).optional(),
       bannerPositionY: z.number().min(0).max(100).optional(),
-      // Creator economy — direct payment links
       cashAppHandle: z.string().max(64).optional(),
-      paypalUsername: z.string().max(128).optional(),
+      paypalUsername: z.string().max(64).optional(),
       venmoHandle: z.string().max(64).optional(),
     })).mutation(async ({ ctx, input }) => {
       if (input.name !== undefined) {
@@ -1230,6 +1229,10 @@ export const appRouter = router({
     }),
     updateMetadata: protectedProcedure.input(z.object({
       songId: z.number(),
+      title: z.string().min(1).max(255).optional(),
+      description: z.string().max(10000).nullable().optional(),
+      headlineCaption: z.string().max(280).nullable().optional(),
+      moodTags: z.array(z.string()).nullable().optional(),
       caption: z.string().max(2000).nullable().optional(),
       genre: z.string().nullable().optional(),
       collectionTag: z.string().max(128).nullable().optional(),
@@ -6405,7 +6408,7 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
         url: z.string().optional(),
         noteBody: z.string().optional(),
         hash: z.string().optional(),
-        metadataJson: z.record(z.unknown()).optional(),
+        metadataJson: z.record(z.string(), z.unknown()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verify the user owns this song
