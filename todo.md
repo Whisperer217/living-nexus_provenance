@@ -4249,3 +4249,20 @@
 - [x] TrackCard: same canonical spec applied
 - [x] Both cards: hover scale(1.02) on artwork, no blur ever
 - [x] pulse-gold keyframe added to index.css for playing state animation
+
+## Phase 142 — Comic System Refactor (Cinematic Guided Reader)
+- [x] Build CinematicComicReader component: Single Page mode (default, max-width 1100px, aspect-ratio preserved, smooth transitions)
+- [x] CinematicComicReader: Spread Mode toggle (max 2 pages, cinematic double-page)
+- [x] CinematicComicReader: Overview Mode (thumbnail grid explorer, not reading default)
+- [x] CinematicComicReader: keyboard arrow navigation (← →, Escape to close)
+- [x] CinematicComicReader: wheel zoom support with GPU-accelerated transform: translate3d()
+- [x] CinematicComicReader: Guided Mode — panel-by-panel progression with zoom/pan animation
+- [x] CinematicComicReader: Guided Mode — panel region metadata (JSON bounding boxes per page)
+- [x] CinematicComicReader: mobile vertical reader — swipe-down panel/scene progression
+- [x] CinematicComicReader: mobile sticky top controls (← Exit, Page #, mode switcher)
+- [x] CinematicComicReader: mobile sticky bottom control (Next Panel / Next Page + panel dots)
+- [x] CinematicComicReader: double-tap to fullscreen panel
+- [x] Restructure BookDetailPage: Origin Testimony as Section 1 (artwork background + testimony text)
+- [x] BookDetailPage: Section 2 Reader Access (cinematic hero entry, mode hints, page count badge)
+- [x] BookDetailPage: Section 3 Resonance Field (reactions + comments)
+- [x] Replace HorizontalBookReader usage with CinematicComicReader in BookDetailPage
