@@ -863,7 +863,7 @@ function DonateDialog({ project, open, onClose }: {
           </div>
           <div className="flex items-center gap-2">
             <Checkbox id="anon" checked={anonymous} onCheckedChange={(v) => setAnonymous(!!v)} className="border-white/20" />
-            <Label htmlFor="anon" className="text-white/60 text-sm cursor-pointer">Pay It Forward anonymously</Label>
+            <Label htmlFor="anon" className="text-white/60 text-sm cursor-pointer">Donate anonymously</Label>
           </div>
           <p className="text-white/50 text-xs">10% platform fee applies. Stripe processes payment securely.</p>
           <Button onClick={handleSubmit} disabled={donate.isPending} className="w-full bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold">
@@ -1816,7 +1816,7 @@ export default function ProjectPage() {
             {project.status === "active" && !editMode && (
               <div className="flex gap-2">
                 <Button onClick={() => setDonateOpen(true)} className="flex-1 bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold py-3 text-base">
-                  <Heart className="w-4 h-4 mr-2" /> Pay It Forward
+                  <Heart className="w-4 h-4 mr-2" /> Donate
                 </Button>
                 {!isOwner && (
                   <Button
@@ -2084,7 +2084,7 @@ export default function ProjectPage() {
                 </div>
               )}
               <Button onClick={() => setDonateOpen(true)} className="bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold px-6">
-                Pay It Forward
+                Donate
               </Button>
               {!isOwner && (
                 <Button

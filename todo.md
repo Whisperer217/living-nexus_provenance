@@ -4323,22 +4323,33 @@
 - [ ] Data model defined: WitnessAnchor type { anchorType: panel|page|paragraph, anchorId: string, authorId, content, createdAt }
 - [ ] Scaffold in shared/types.ts — no UI yet, future phase
 
-## Phase 145 — Resonance Field Unification
+## Phase 145 — Creator Studio Workspace + Comic Platform Shift
 
-- [x] Build ResonanceField component (emoji glyphs, witness name chips, signal intensity bar, Pay It Forward CTA, testimony reach statement, Creator Acknowledgement slot)
-- [x] Replace scattered reaction rows in SongDetailPage with ResonanceField
-- [ ] Replace scattered reaction rows in StoreTrackCard with ResonanceField (compact mode available)
-- [ ] Replace scattered reaction rows in TrackCard with ResonanceField (compact mode available)
-- [x] Language replacements: Likes→Resonance, Followers→Witnesses, Trending→Active Signal, Popular→High Resonance, Donate→Pay It Forward
-- [x] Add Creator Acknowledgement backend procedure (notifyOwner on resonance event)
-- [x] Wire Creator Acknowledgement notification into ResonanceField
+### Creator Studio Workspace (replaces cramped edit modal)
+- [x] Build CreatorStudioPage: full-page tabbed editor at /book/:id/studio
+- [x] Tab 1 — Overview: title, testimony, headline caption, genre, cover art, credits JSON
+- [x] Tab 2 — Pages: StoryboardBuilder with drag-reorder and panel region tagging
+- [x] Tab 3 — Access: readAccess selector, preview page count slider, coming-soon gating features
+- [x] Tab 4 — Metadata: mood tags, narrativeFormat selector, AI disclosure
+- [x] Tab 5 — Resonance: play/tip/witness stats, coming-soon heatmaps
+- [x] Tab 6 — Provenance: WID, timestamps, certificate link, coming-soon lineage
+- [x] Live Preview panel: right-side toggleable split-screen, routes to correct reader engine
+- [x] Replace Edit Pages + Manage buttons in BookDetailPage with single Creator Studio button
+- [x] Commit Revision save button with saving/saved/error states
+- [x] Add /book/:id/studio route to App.tsx
 
-## Phase 145 — Resonance Field Unification
+### Bug Fixes
+- [ ] Fix sidebar z-index overlay conflict: activity rail overlaps modals — add z-index isolation + overflow containment
+- [ ] Fix edit modal max-width: increase to 1100px
+- [ ] Reader lazy loading: progressive image loading, page virtualization
+- [ ] Reader GPU acceleration: ensure all transforms use translate3d()
+- [ ] Fullscreen reader: ESC exit, keyboard navigation, immersive background fade
 
-- [x] Build ResonanceField component (emoji glyphs, witness name chips, signal intensity bar, Pay It Forward CTA, testimony reach statement, Creator Acknowledgement slot)
-- [x] Replace scattered reaction rows in SongDetailPage with ResonanceField
-- [ ] Replace scattered reaction rows in StoreTrackCard with ResonanceField (compact mode available)
-- [ ] Replace scattered reaction rows in TrackCard with ResonanceField (compact mode available)
-- [x] Language replacements: Likes->Resonance, Followers->Witnesses, Trending->Active Signal, Popular->High Resonance, Donate->Pay It Forward
-- [x] Add Creator Acknowledgement backend procedure
-- [x] Wire Creator Acknowledgement notification into ResonanceField
+### BookDetailPage Cinematic Refactor
+- [ ] Hero section: full cinematic banner with ambient artwork, blurred parallax background, soundtrack integration
+- [ ] Hero contains: title, creator, Origin Testimony excerpt, Read Now, Guided Mode, Witness Access CTA
+- [ ] Origin Testimony section: creator intent, emotional meaning, inspiration, witness context
+- [ ] Manifestation Layer: live comic preview (not static image dump), fullscreen launch, guided mode entry
+- [ ] Resonance Field: unified reactions + witness count + contributions + comments in one layer
+- [ ] Provenance Block: moved lower (emotion before registry)
+- [ ] Related Universe: large cinematic cards (related creators, connected comics, soundtrack artifacts)

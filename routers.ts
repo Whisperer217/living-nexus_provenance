@@ -1253,6 +1253,8 @@ export const appRouter = router({
       previewPageCount: z.number().int().min(1).max(50).optional(),
       consentSettingsJson: z.string().max(2000).nullable().optional(),
       externalLinksJson: z.string().max(4096).nullable().optional(),
+      // Narrative Format — reader engine selector
+      narrativeFormat: z.enum(["comic", "childrens", "manuscript"]).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
@@ -6399,7 +6401,7 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
         url: z.string().optional(),
         noteBody: z.string().optional(),
         hash: z.string().optional(),
-        metadataJson: z.record(z.string(), z.unknown()).optional(),
+        metadataJson: z.record(z.unknown()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verify the user owns this song

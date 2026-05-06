@@ -211,6 +211,7 @@ export default function UploadPage() {
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
   const [storyboardPagesJson, setStoryboardPagesJson] = useState<string | null>(null);
+  const [narrativeFormat, setNarrativeFormat] = useState<"comic" | "childrens" | "manuscript" | null>(null);
   const [witnessData, setWitnessData] = useState<WitnessData | null>(null);
   const [generatingWid, setGeneratingWid] = useState(false);
   const [waveformActive, setWaveformActive] = useState(false);
@@ -611,6 +612,7 @@ export default function UploadPage() {
           aiDisclosure,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
           pagesJson: storyboardPagesJson || undefined,
+          narrativeFormat: narrativeFormat ?? (uploadMode === "manuscript" ? "manuscript" : "comic"),
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
@@ -983,6 +985,33 @@ export default function UploadPage() {
                 </div>
               )}
 
+              {/* ── Narrative Format Selector (comic/novel only) ── */}
+              {uploadMode === "comic" && (
+                <div className="rounded-xl p-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>
+                  <p className="text-xs font-heading font-bold tracking-widest mb-3" style={{ color: "var(--ln-gold)" }}>NARRATIVE FORMAT</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { value: "comic", label: "🎭 Comic / Graphic Novel", desc: "Panel-sequenced art, guided reading" },
+                      { value: "childrens", label: "📖 Children's Book", desc: "Full spreads, warm atmosphere, narration" },
+                      { value: "manuscript", label: "📄 Illustrated Novel", desc: "Text-first with visual chapters" },
+                    ] as const).map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setNarrativeFormat(opt.value)}
+                        className="rounded-xl p-3 text-left transition-all"
+                        style={{
+                          background: (narrativeFormat ?? "comic") === opt.value ? "rgba(196,154,40,0.12)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${(narrativeFormat ?? "comic") === opt.value ? "rgba(196,154,40,0.5)" : "rgba(255,255,255,0.08)"}`,
+                        }}
+                      >
+                        <p className="text-xs font-semibold mb-1" style={{ color: "var(--ln-parchment)" }}>{opt.label}</p>
+                        <p className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>{opt.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {/* ── Storyboard Builder (comic/novel only) ── */}
               {uploadMode === "comic" && (
                 <div className="p-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>

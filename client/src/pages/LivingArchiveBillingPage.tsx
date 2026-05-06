@@ -25,7 +25,7 @@ const MICRO_PACKAGES = [
 
 const BULK_PACKAGES = [
   { id: "bulk_100", slots: 100, priceCents: 8800,  label: "Standard",  badge: null },
-  { id: "bulk_300", slots: 300, priceCents: 26400, label: "Value",     badge: "High Resonance" },
+  { id: "bulk_300", slots: 300, priceCents: 26400, label: "Value",     badge: "Popular" },
   { id: "bulk_500", slots: 500, priceCents: 44000, label: "Pro",       badge: "Best Value" },
 ] as const;
 
@@ -176,7 +176,7 @@ export default function LivingArchiveBillingPage() {
                   key={pkg.id}
                   className="border relative"
                   style={{
-                    background: pkg.badge === "High Resonance" ? "rgba(44,52,56,0.6)" : SURFACE,
+                    background: pkg.badge === "Popular" ? "rgba(44,52,56,0.6)" : SURFACE,
                     borderColor: pkg.badge ? GOLD : BORDER,
                   }}
                 >

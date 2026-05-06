@@ -298,6 +298,13 @@ export const songs = mysqlTable("songs", {
   //   "preview" = first N pages free, rest requires purchase
   //   "locked"  = no reading without purchase
   readAccess: mysqlEnum("readAccess", ["open", "preview", "locked"]).default("open").notNull(),
+  // ─── Narrative Format (Reader Engine Selector) ────────────────────────────────
+  // Determines which reading engine is auto-loaded for comic/manuscript/childrens works.
+  // "comic"     = CinematicComicReader (panel-sequenced, guided zoom, dark cinematic chrome)
+  // "childrens" = ChildrensBookReader (page atmosphere, ambient reading, narration anchors, warm UI)
+  // "manuscript" = ManuscriptReader (language-first, vertical flowing text, Kindle-style)
+  // null = not set (falls back to contentType-based default)
+  narrativeFormat: mysqlEnum("narrativeFormat", ["comic", "childrens", "manuscript"]),
   // Purchase price in cents. null = not for sale. 0 = free (no payment gate).
   purchasePriceCents: int("purchasePriceCents"),
   // Number of free preview pages when readAccess = 'preview'

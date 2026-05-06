@@ -446,12 +446,21 @@ export default function BookDetailPage() {
                 </a>
               )}
               {isOwner && (
-                <Link href={`/book/${bookId}/studio`}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
-                  style={{ background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.30)" }}>
-                  <FileText size={14} />
-                  Creator Studio
-                </Link>
+                <>
+                  <button
+                    onClick={() => setEditPagesOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
+                    style={{ background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}44` }}>
+                    <BookOpen size={14} />
+                    Edit Pages
+                  </button>
+                  <Link href={`/dashboard`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-heading font-bold tracking-wide transition-all hover:opacity-90"
+                    style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }}>
+                    <FileText size={14} />
+                    Manage
+                  </Link>
+                </>
               )}
               <FlagContentButton workId={bookId} workType={isComic ? "comic" : "manuscript"} />
             </div>

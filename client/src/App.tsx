@@ -73,6 +73,7 @@ const ProjectPage = lazy(() => import("./pages/ProjectPage"));
 const MyProjectsPage = lazy(() => import("./pages/MyProjectsPage"));
 const ProjectsDiscoveryPage = lazy(() => import("./pages/ProjectsDiscoveryPage"));
 const BookDetailPage = lazy(() => import("./pages/BookDetailPage"));
+const CreatorStudioPage = lazy(() => import("./pages/CreatorStudioPage"));
 const KeeperPage = lazy(() => import("./pages/KeeperPage"));
 const KeeperComposePage = lazy(() => import("./pages/KeeperComposePage"));
 const FirstWitnessPage = lazy(() => import("./pages/FirstWitnessPage"));
@@ -166,6 +167,7 @@ function Router() {
                 <Route path="/archive" component={ArchivePage} />
                 <Route path="/song/:id" component={SongDetailPage} />
                 <Route path="/book/:id" component={BookDetailPage} />
+                <Route path="/book/:id/studio" component={CreatorStudioPage} />
                 <Route path="/songs/:id" component={SongDetailPage} />
                 <Route path="/track/:id" component={TrackPage} />
                 <Route path="/creator/:id" component={CreatorProfilePage} />

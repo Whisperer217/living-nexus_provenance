@@ -737,26 +737,8 @@ export async function getTipsBySong(songId: number) {
   return db.select().from(tips).where(eq(tips.songId, songId)).orderBy(desc(tips.createdAt)).limit(50);
 }
 
-/** Tips for a song with tipper display names — used by ResonanceField */
-export async function getTipsBySongWithNames(songId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  const tipper = alias(users, "tipper");
-  return db
-    .select({
-      id: tips.id,
-      amountCents: tips.amountCents,
-      createdAt: tips.createdAt,
-      tipperHandle: tipper.artistHandle,
-      tipperName: tipper.name,
-    })
-    .from(tips)
-    .leftJoin(tipper, eq(tips.tipperUserId, tipper.id))
-    .where(eq(tips.songId, songId))
-    .orderBy(desc(tips.createdAt))
-    .limit(20);
-}
 // ─── Downloads ────────────────────────────────────────────────────────────────
+
 export async function recordDownload(data: { songId: number; userId?: number; ipAddress?: string }) {
   const db = await getDb();
   if (!db) return;
