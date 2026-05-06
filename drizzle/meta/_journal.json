@@ -666,6 +666,13 @@
       "when": 1778085383278,
       "tag": "0095_familiar_black_panther",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "5",
+      "when": 1778098492763,
+      "tag": "0096_thankful_vampiro",
+      "breakpoints": true
     }
   ]
 }

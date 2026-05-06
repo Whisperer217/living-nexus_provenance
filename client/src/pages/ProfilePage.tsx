@@ -909,7 +909,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-2 gap-3">
               {[
                 { label: "Total Plays", value: (analytics?.totalPlays ?? totalPlays).toLocaleString(), sub: analytics?.playsThisWeek ? `+${analytics.playsThisWeek} this week` : "across all tracks", color: "var(--ln-gold)" },
-                { label: "Total Likes", value: (analytics?.totalLikes ?? 0).toLocaleString(), sub: analytics?.likesThisWeek ? `+${analytics.likesThisWeek} this week` : "across all tracks", color: "#f472b6" },
+                { label: "Total Resonance", value: (analytics?.totalLikes ?? 0).toLocaleString(), sub: analytics?.likesThisWeek ? `+${analytics.likesThisWeek} this week` : "across all tracks", color: "#f472b6" },
                 { label: "Tracks Published", value: dbSongs.filter((s: any) => s.status === "Published").length, sub: "live on Explore", color: "#A78BFA" },
                 { label: "Gifts Received", value: analytics?.totalGiftsReceived ?? 0, sub: analytics?.totalAmountReceived ? `$${((analytics.totalAmountReceived) / 100).toFixed(2)} total` : "tip income", color: "#4ade80" },
                 { label: "Witnessing", value: witnessNetwork?.witnessing?.length ?? 0, sub: "creators you witness", color: "#60a5fa" },

@@ -1068,7 +1068,7 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
                     { label: "Total Plays", value: analyticsData.totalPlays, icon: Play, color: "var(--ln-gold)" },
-                    { label: "Total Likes", value: analyticsData.totalLikes, icon: Heart, color: "var(--ln-ember)" },
+                    { label: "Total Resonance", value: analyticsData.totalLikes, icon: Heart, color: "var(--ln-ember)" },
                     { label: "Gifts Received", value: analyticsData.totalGiftsReceived, icon: Gift, color: "var(--ln-seal-bright)" },
                     { label: "Downloads", value: analyticsData.totalDownloads, icon: Download, color: "#38BDF8" },
                   ].map(({ label, value, icon: Icon, color }) => (
@@ -1086,7 +1086,7 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-4 h-4" style={{ color: "#38BDF8" }} />
                     <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>30-Day Activity Trend</h3>
-                    <span className="text-xs ml-auto" style={{ color: "var(--ln-smoke)" }}>Likes · Gifts · Comments · Witnesses</span>
+                    <span className="text-xs ml-auto" style={{ color: "var(--ln-smoke)" }}>Resonance · Gifts · Comments · Witnesses</span>
                   </div>
                   <ResponsiveContainer width="100%" height={180}>
                     <AreaChart data={analyticsData.playTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
@@ -1124,12 +1124,12 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 )}
-                {/* Likes by track */}
+                {/* Resonance by track */}
                 {analyticsData.likesByTrack.filter((t: { likes: number }) => t.likes > 0).length > 0 && (
                   <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
                     <div className="flex items-center gap-2 mb-4">
                       <Heart className="w-4 h-4" style={{ color: "var(--ln-ember)" }} />
-                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Likes by Track</h3>
+                      <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Resonance by Track</h3>
                     </div>
                     <div className="space-y-2">
                       {[...analyticsData.likesByTrack].sort((a, b) => b.likes - a.likes).slice(0, 10).map((track) => (

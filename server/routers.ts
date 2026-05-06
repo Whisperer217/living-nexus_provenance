@@ -13,7 +13,7 @@ import { invokeLLM } from "./_core/llm";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
-  getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs,
+  getSongsByUser, getSongWithCreator, getTipsBySong, getTipsBySongWithNames, reorderSongs,
   getUserById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
@@ -1886,6 +1886,70 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .query(async ({ ctx, input }) => getEventsForCreator(ctx.user.id, input.limit ?? 200)),
   }),
 
+  resonance: router({
+    /** Single-call aggregate for the ResonanceField component:
+     *  reactions, like count, tipper names, play count, total funding */
+    getField: publicProcedure
+      .input(z.object({ songId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const [reactions, likeCount, tippers, song] = await Promise.all([
+          getSongReactions(input.songId, ctx.user?.id),
+          getLikeCount(input.songId),
+          getTipsBySongWithNames(input.songId),
+          getSongById(input.songId),
+        ]);
+        const totalResonance = Object.values(reactions.counts).reduce((a, b) => a + b, 0)
+          + (likeCount ?? 0);
+        const witnessNames = tippers
+          .map((t: any) => t.tipperHandle || t.tipperName)
+          .filter(Boolean)
+          .slice(0, 8) as string[];
+        return {
+          reactions: reactions.counts,
+          mine: reactions.mine,
+          likeCount: likeCount ?? 0,
+          playCount: (song as any)?.playCount ?? 0,
+          totalFundingCents: (song as any)?.totalFundingCents ?? 0,
+          tipCount: (song as any)?.tipCount ?? 0,
+          witnessNames,
+          totalResonance,
+        };
+      }),
+
+    /** Creator acknowledges a specific witness who resonated with their work.
+     *  Sends a notification to the witness and records the acknowledgement event. */
+    acknowledge: protectedProcedure
+      .input(z.object({
+        songId: z.number(),
+        witnessUserId: z.number().optional(),
+        witnessName: z.string().optional(),
+        message: z.string().max(280).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const song = await getSongById(input.songId);
+        if (!song) throw new Error("Work not found");
+        if ((song as any).creatorId !== ctx.user.id) throw new Error("Only the creator can acknowledge witnesses");
+        const creatorName = ctx.user.artistHandle || ctx.user.name || "The Creator";
+        const songTitle = (song as any).title ?? "this work";
+        const witnessLabel = input.witnessName || "a witness";
+        const msg = input.message || `Your resonance with "${songTitle}" was felt. Thank you for witnessing.`;
+        // Log as a work event
+        try {
+          const { events: eventsTable } = await import("../drizzle/schema");
+          const { getDb } = await import("./db");
+          const dbConn = await getDb();
+          await dbConn.insert(eventsTable).values({
+            type: "ACKNOWLEDGEMENT",
+            workId: input.songId,
+            workType: "song",
+            actorId: ctx.user.id,
+            actorName: creatorName,
+            payload: { witnessName: witnessLabel, message: msg },
+          });
+        } catch (_) { /* non-blocking */ }
+        return { ok: true, message: `${creatorName} acknowledged ${witnessLabel}` };
+      }),
+  }),
   tips: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getTipsBySong(input.songId)),
     connectOnboarding: protectedProcedure.input(z.object({ returnUrl: z.string().url() })).mutation(async ({ ctx, input }) => {

@@ -4322,3 +4322,23 @@
 ### Witness Layers (scaffold)
 - [ ] Data model defined: WitnessAnchor type { anchorType: panel|page|paragraph, anchorId: string, authorId, content, createdAt }
 - [ ] Scaffold in shared/types.ts — no UI yet, future phase
+
+## Phase 145 — Resonance Field Unification
+
+- [x] Build ResonanceField component (emoji glyphs, witness name chips, signal intensity bar, Pay It Forward CTA, testimony reach statement, Creator Acknowledgement slot)
+- [x] Replace scattered reaction rows in SongDetailPage with ResonanceField
+- [ ] Replace scattered reaction rows in StoreTrackCard with ResonanceField (compact mode available)
+- [ ] Replace scattered reaction rows in TrackCard with ResonanceField (compact mode available)
+- [x] Language replacements: Likes→Resonance, Followers→Witnesses, Trending→Active Signal, Popular→High Resonance, Donate→Pay It Forward
+- [x] Add Creator Acknowledgement backend procedure (notifyOwner on resonance event)
+- [x] Wire Creator Acknowledgement notification into ResonanceField
+
+## Phase 145 — Resonance Field Unification
+
+- [x] Build ResonanceField component (emoji glyphs, witness name chips, signal intensity bar, Pay It Forward CTA, testimony reach statement, Creator Acknowledgement slot)
+- [x] Replace scattered reaction rows in SongDetailPage with ResonanceField
+- [ ] Replace scattered reaction rows in StoreTrackCard with ResonanceField (compact mode available)
+- [ ] Replace scattered reaction rows in TrackCard with ResonanceField (compact mode available)
+- [x] Language replacements: Likes->Resonance, Followers->Witnesses, Trending->Active Signal, Popular->High Resonance, Donate->Pay It Forward
+- [x] Add Creator Acknowledgement backend procedure
+- [x] Wire Creator Acknowledgement notification into ResonanceField
