@@ -19,7 +19,7 @@ import {
 import { useLike } from "@/hooks/useLike";
 import { WIDPanel } from "@/components/WIDPanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
-import { HorizontalBookReader, type BookPage } from "@/components/reader/HorizontalBookReader";
+import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 import { StoryboardBuilder, type StoryboardPage } from "@/components/reader/StoryboardBuilder";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
@@ -460,51 +460,98 @@ export default function BookDetailPage() {
           </div>
         </div>
 
-        {/* ── Storyboard Reader (primary) ── */}
+        {/* ── SECTION 1: Origin Testimony ── */}
+        {(song as any).caption && (
+          <div
+            className="relative rounded-2xl overflow-hidden"
+            style={{ minHeight: "220px" }}
+          >
+            {/* Artwork as atmospheric background */}
+            {song.coverArtUrl && (
+              <img
+                src={song.coverArtUrl}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ filter: "brightness(0.55) saturate(0.8)", transform: "scale(1.04)" }}
+              />
+            )}
+            {/* Bottom gradient */}
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.10) 100%)" }} />
+            {/* Testimony content */}
+            <div className="relative z-10 flex flex-col justify-end h-full px-6 py-6">
+              <p className="text-[10px] uppercase tracking-widest font-heading mb-2" style={{ color: "rgba(196,154,40,0.7)" }}>Origin Testimony</p>
+              <p
+                className="text-lg md:text-xl leading-relaxed"
+                style={{ color: "#F5F5F5", fontFamily: "'Cormorant Garamond', serif", opacity: 0.95, maxWidth: "720px" }}
+              >
+                {(song as any).caption}
+              </p>
+              {(song as any).description && (song as any).description !== (song as any).caption && (
+                <p className="mt-3 text-sm leading-relaxed" style={{ color: "rgba(232,223,200,0.7)", fontFamily: "'Cormorant Garamond', serif", maxWidth: "680px" }}>
+                  {(song as any).description}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── SECTION 2: Reader Access (Cinematic Entry) ── */}
         {hasStoryboard && (
           <div
             className="rounded-2xl overflow-hidden relative group cursor-pointer"
             style={{ background: "#0D1419", border: "1px solid rgba(196,154,40,0.2)" }}
             onClick={handleReadNow}
           >
-            {/* Preview: first page as hero */}
+            {/* Hero: first page, clear and vibrant */}
             <div className="relative" style={{ aspectRatio: "16/9", overflow: "hidden" }}>
               <img
                 src={storyboardPages[0].imageUrl}
                 alt={`${song.title} — page 1`}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                style={{ filter: "brightness(0.88)" }}
               />
-              {/* Dark overlay */}
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 60%, transparent 100%)" }} />
-              {/* Play button */}
+              {/* Bottom gradient only */}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.0) 80%)" }} />
+              {/* Read Now button — centered */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div
-                  className="flex items-center gap-3 px-6 py-3 rounded-full transition-all duration-300 group-hover:scale-105"
+                  className="flex items-center gap-3 px-7 py-3.5 rounded-full transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg"
                   style={{
-                    background: "rgba(0,0,0,0.65)",
-                    border: `1px solid ${accentColor}55`,
-                    backdropFilter: "blur(8px)",
+                    background: "rgba(0,0,0,0.6)",
+                    border: `1px solid rgba(196,154,40,0.55)`,
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 0 24px rgba(196,154,40,0.12)",
                   }}
                 >
-                  <Play size={18} fill={accentColor} style={{ color: accentColor }} />
+                  <BookOpen size={17} fill={accentColor} style={{ color: accentColor }} />
                   <span className="text-sm font-heading font-bold tracking-widest" style={{ color: accentColor }}>
                     READ NOW
                   </span>
                 </div>
               </div>
-              {/* Page count badge */}
-              <div
-                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-heading font-bold tracking-wider"
-                style={{ background: "rgba(0,0,0,0.65)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
-              >
-                <BookOpen size={10} />
-                {storyboardPages.length} PAGES
+              {/* Badges */}
+              <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-heading font-bold tracking-wider"
+                  style={{ background: "rgba(0,0,0,0.65)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}>
+                  <BookOpen size={10} />
+                  {storyboardPages.length} PAGES
+                </span>
+                {isGated && (
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-heading font-bold tracking-wider"
+                    style={{ background: "rgba(0,0,0,0.65)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.35)" }}>
+                    🔒 {readAccess === "preview" ? `Preview: ${previewPageCount} pages` : "Locked"}
+                  </span>
+                )}
+              </div>
+              {/* Mode hint */}
+              <div className="absolute bottom-3 right-3 text-[9px] font-heading tracking-widest" style={{ color: "rgba(196,154,40,0.5)" }}>
+                SINGLE · SPREAD · GUIDED · OVERVIEW
               </div>
             </div>
             {/* Footer strip */}
             <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
               <span className="text-xs font-heading tracking-widest" style={{ color: "var(--ln-smoke)" }}>
-                HORIZONTAL READER · SWIPE OR CLICK TO NAVIGATE
+                CINEMATIC READER · ← → KEYS · PINCH TO ZOOM
               </span>
               {fileUrl && (
                 <a
@@ -673,7 +720,7 @@ export default function BookDetailPage() {
         )}
         {/* ── Full-screen Reader Portal ── */}
         {readerOpen && hasStoryboard && (
-          <HorizontalBookReader
+          <CinematicComicReader
             pages={readAccess === "open" || isOwner ? storyboardPages : visiblePages}
             title={song.title}
             onClose={() => setReaderOpen(false)}
@@ -703,7 +750,7 @@ export default function BookDetailPage() {
           </div>
         )}
 
-        {/* ── Reactions + Comments ── */}
+        {/* ── SECTION 3: Resonance Field ── */}
         <div className="grid md:grid-cols-2 gap-4">
           {/* Reactions */}
           <div className="rounded-2xl p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}>
