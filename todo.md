@@ -4266,3 +4266,59 @@
 - [x] BookDetailPage: Section 2 Reader Access (cinematic hero entry, mode hints, page count badge)
 - [x] BookDetailPage: Section 3 Resonance Field (reactions + comments)
 - [x] Replace HorizontalBookReader usage with CinematicComicReader in BookDetailPage
+
+## Phase 143 — Adaptive Narrative Reader (Panel-First Mobile + Canvas Zoom)
+- [ ] Mobile: default to Guided Panel Mode (one panel per swipe, full readable screen) — remove full-page default on mobile
+- [ ] Mobile: swipe right = next panel, swipe left = previous panel, swipe up = next page
+- [ ] Mobile: panel dot indicators at bottom showing position within current page
+- [ ] Desktop: Single Page default, Spread and Guided as toggles
+- [ ] Free canvas zoom/pan: replace linear wheel zoom with pinch-to-zoom + free pan (no axis lock)
+- [ ] Momentum physics: natural easing/deceleration after pan gesture ends
+- [ ] Smart double-tap: zoom to nearest speech bubble or panel bounding box
+- [ ] Two-finger tap: reset to fit-page view
+- [ ] Auto-hide UI chrome: controls visible on tap, auto-fade after 3 seconds (Netflix/Kindle pattern)
+- [ ] Minimal top bar: Back arrow + Title + Page X of Y + ⋯ menu only — remove dense controls from top
+- [ ] Guided Mode: manual-advance by default (tap right = next panel, tap left = previous)
+- [ ] Guided Mode: optional autoplay toggle with timing slider (8s default, 5s–15s range)
+- [ ] Guided Mode: panel display time shows 6–8s for standard panels, 10–14s for dialogue-heavy
+- [ ] Panel data model: panelOrder array with focusArea bounding boxes per page
+- [ ] Bottom control bar: PREV · GUIDED MODE · TOGGLE UI · NEXT (minimal, auto-hides)
+
+## Phase 144 — Three Narrative Rendering Engines (Medium-Specific)
+
+### Comic Book Engine (CinematicComicReader upgrade)
+- [x] Focus Hold metadata: panel JSON supports `hold: true, recommendedDuration: 14` — autoplay respects this duration instead of global setting
+- [x] Reading Style menu in ⋯: Standard / Guided / Spread / Accessibility (replaces mode switcher labels)
+- [x] Auto-load correct engine based on Narrative Format field on the work record
+
+### Children's Book Engine (ChildrensBookReader — new component)
+- [x] Spread mode as desktop default (open-book framing, visual breathing room)
+- [x] Single full page as mobile default (no panel splitting)
+- [x] Page-flip animation (warm, soft — not slide)
+- [x] Ambient Reading Mode: optional subtle particles, soft page glow, warm UI chrome
+- [x] Narration Anchor slots per page: voice clip URL, SFX URL, music cue URL (stored in pagesJson)
+- [x] Narration Anchor: auto-play audio on page turn when anchor is present
+- [x] Always-visible warm UI chrome (larger tap targets, friendly typography)
+- [x] Tap anywhere to advance (no guided panel mode)
+- [x] Read Aloud button placeholder (future TTS)
+
+### Manuscript Engine (ManuscriptReader — new component)
+- [x] Vertical flowing text layout (not paginated images)
+- [x] Reader-selectable typography: Serif / Sans / Mono
+- [x] Reader-selectable theme: Sepia / Dark / Paper (white)
+- [x] 700–850px readable column, centered
+- [x] Focus Mode: hides all chrome, only text visible, ESC to exit
+- [x] Ambient audio: optional background (rain / fireplace / silence)
+- [x] Resume position: saves scroll position to localStorage per work ID
+- [x] Inline Witness Layer anchors (scaffold only — future annotation UI)
+
+### Narrative Format field + routing
+- [x] Add `narrativeFormat` enum column to `songs` table: comic | childrens | manuscript (migration applied)
+- [x] Migration SQL applied via direct DB connection
+- [x] Book upload/edit form: Narrative Format selector (🎭 Comic / 📖 Children's Book / 📄 Illustrated Novel)
+- [x] BookDetailPage: auto-routes to correct reader component based on narrativeFormat
+- [x] narrativeFormat auto-detected from contentType as fallback — no badge needed
+
+### Witness Layers (scaffold)
+- [ ] Data model defined: WitnessAnchor type { anchorType: panel|page|paragraph, anchorId: string, authorId, content, createdAt }
+- [ ] Scaffold in shared/types.ts — no UI yet, future phase
