@@ -20,6 +20,8 @@ import { useLike } from "@/hooks/useLike";
 import { WIDPanel } from "@/components/WIDPanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
 import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
+import { ChildrensBookReader } from "@/components/reader/ChildrensBookReader";
+import { ManuscriptReader } from "@/components/reader/ManuscriptReader";
 import { StoryboardBuilder, type StoryboardPage } from "@/components/reader/StoryboardBuilder";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
@@ -93,6 +95,11 @@ export default function BookDetailPage() {
   const accentColor = isComic ? "var(--ln-ember)" : "var(--ln-seal-bright)";
   const typeLabel = isComic ? "Comic / Novel" : "Manuscript";
   const widPrefix = isComic ? "WID-CMX" : "WID-MAN";
+  // Narrative Format — determines which reader engine to auto-load
+  const narrativeFormat = ((song as any)?.narrativeFormat as string | undefined)
+    ?? (song?.contentType === "comic" ? "comic"
+      : song?.contentType === "manuscript" ? "manuscript"
+      : "comic");
 
   // Determine if the fileUrl is a PDF we can embed
   const fileUrl = (song as any)?.fileUrl as string | undefined;
@@ -718,11 +725,35 @@ export default function BookDetailPage() {
             </div>
           </div>
         )}
-        {/* ── Full-screen Reader Portal ── */}
-        {readerOpen && hasStoryboard && (
+        {/* ── Full-screen Reader Portal — auto-routed by Narrative Format ── */}
+        {readerOpen && hasStoryboard && narrativeFormat === "comic" && (
           <CinematicComicReader
             pages={readAccess === "open" || isOwner ? storyboardPages : visiblePages}
             title={song.title}
+            onClose={() => setReaderOpen(false)}
+          />
+        )}
+        {readerOpen && hasStoryboard && narrativeFormat === "childrens" && (
+          <ChildrensBookReader
+            pages={(readAccess === "open" || isOwner ? storyboardPages : visiblePages).map((p: any) => ({
+              pageNumber: p.pageNumber,
+              imageUrl: p.imageUrl,
+              caption: p.caption,
+              narration: p.narration,
+            }))}
+            title={song.title}
+            onClose={() => setReaderOpen(false)}
+          />
+        )}
+        {readerOpen && (narrativeFormat === "manuscript" || (!hasStoryboard && (song as any)?.lyricsText)) && (
+          <ManuscriptReader
+            workId={String(song.id)}
+            title={song.title}
+            author={artistName}
+            content={{
+              text: (song as any)?.lyricsText ?? storyboardPages.map((p: any, i: number) => p.caption ?? `Page ${i + 1}`).join("\n\n"),
+              coverImageUrl: song.coverArtUrl ?? undefined,
+            }}
             onClose={() => setReaderOpen(false)}
           />
         )}

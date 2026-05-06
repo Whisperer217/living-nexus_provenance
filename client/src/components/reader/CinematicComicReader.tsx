@@ -35,6 +35,9 @@ export interface PanelRegion {
   width: number;
   height: number;
   caption?: string;
+  // Focus Hold — creator-set pacing for emotional reveals, suspense, scripture moments
+  hold?: boolean;
+  recommendedDuration?: number; // seconds — overrides global autoplay timing
 }
 
 export interface PagePanelData {
@@ -415,7 +418,7 @@ export function CinematicComicReader({ pages, title, onClose, startPage = 0, pan
               overview: <Grid3x3 size={12} />,
             };
             const labels: Record<ReaderMode, string> = {
-              single: "Page",
+              single: "Standard",
               spread: "Spread",
               guided: "Guided",
               overview: "Overview",
