@@ -128,6 +128,17 @@ export default function SongDetailPage() {
   const likeCount = likeCountData?.count ?? 0;
   const [showVideo, setShowVideo] = useState(false);
   const videoDetailRef = useRef<HTMLVideoElement>(null);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  useEffect(() => {
+    const onScroll = () => {
+      if (!heroRef.current) return;
+      setHeaderCollapsed(heroRef.current.getBoundingClientRect().bottom < 80);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
 
 
@@ -346,6 +357,90 @@ export default function SongDetailPage() {
 
   return (
     <div className="min-h-screen pb-8" style={{ background: "var(--ln-coal)" }}>
+      {/* ══ STICKY MOBILE MANIFESTATION HEADER (slides in after hero scrolls past) ══ */}
+      <div
+        className="md:hidden"
+        style={{
+          position: "fixed",
+          top: "var(--wsp-top, 56px)",
+          left: 0,
+          right: 0,
+          zIndex: 200,
+          background: "rgba(8,7,4,0.97)",
+          borderBottom: "1px solid rgba(196,154,40,0.15)",
+          backdropFilter: "blur(20px)",
+          transform: headerCollapsed ? "translateY(0)" : "translateY(-100%)",
+          transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "10px 16px",
+        }}
+      >
+        <div className="shrink-0 rounded-lg overflow-hidden" style={{ width: 40, height: 40, background: "rgba(196,154,40,0.08)" }}>
+          {song?.coverArtUrl
+            ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+            : <div className="w-full h-full flex items-center justify-center" style={{ color: "rgba(196,154,40,0.4)" }}><Music className="w-5 h-5" /></div>}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold truncate" style={{ color: "rgba(255,255,255,0.92)", fontFamily: "'Cinzel', serif" }}>{song?.title}</p>
+          <p className="text-xs truncate" style={{ color: "rgba(196,154,40,0.7)" }}>{creator?.artistHandle || creator?.name}</p>
+        </div>
+        <button
+          type="button"
+          onClick={handlePlay}
+          className="shrink-0 flex items-center justify-center rounded-full transition-all"
+          style={{ width: 36, height: 36, background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.35)", color: "rgba(196,154,40,0.9)" }}
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+        </button>
+      </div>
+
+      {/* ══ FLOATING RESONANCE BAR — mobile only, fixed bottom ══ */}
+      {song && (
+        <div
+          className="md:hidden"
+          style={{
+            position: "fixed",
+            bottom: "calc(env(safe-area-inset-bottom, 0px) + 60px)",
+            left: 16,
+            right: 16,
+            zIndex: 190,
+            background: "rgba(8,7,4,0.96)",
+            border: "1px solid rgba(196,154,40,0.2)",
+            borderRadius: 40,
+            backdropFilter: "blur(24px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-around",
+            padding: "10px 8px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+          }}
+        >
+          <button type="button" onClick={() => toggleLike()} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: isLiked ? "rgba(239,68,68,0.9)" : "rgba(255,255,255,0.5)" }} aria-label="Resonate">
+            <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+            <span className="text-[10px]">{likeCount > 0 ? likeCount : ""}</span>
+          </button>
+          <button type="button" onClick={() => document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Witness">
+            <MessageSquare size={18} />
+            <span className="text-[10px]">Witness</span>
+          </button>
+          <button type="button" onClick={() => setTipOpen(true)} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(196,154,40,0.8)" }} aria-label="Support">
+            <DollarSign size={18} />
+            <span className="text-[10px]">Support</span>
+          </button>
+          <button type="button" onClick={copyLink} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Share">
+            <Share2 size={18} />
+            <span className="text-[10px]">Share</span>
+          </button>
+          <button type="button" onClick={() => document.getElementById('wid-section')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(74,222,128,0.7)" }} aria-label="WID">
+            <Shield size={18} />
+            <span className="text-[10px]">WID</span>
+          </button>
+        </div>
+      )}
+
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
@@ -919,7 +1014,7 @@ export default function SongDetailPage() {
               const disc = (song as any).aiDisclosure || creator?.aiDisclosure;
               const hasDisc = disc && disc !== "original";
               const discMap: Record<string, string> = {
-                ai_generated: "AI-Generated",
+                ai_generated: "AI-Assisted Manifestation",
                 ai_assisted: "AI-Assisted",
                 human_authored_ai_instrument: "HAAI — Human-Authored via AI Instrument",
               };

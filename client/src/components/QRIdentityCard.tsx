@@ -1,14 +1,25 @@
 /**
- * QRIdentityCard
- * Renders a visually rich identity card with a QR code, creator/entity info,
- * and a provenance marker. Supports PNG export via canvas.
+ * QRIdentityCard — Ceremonial Collectible Card
  *
- * Design language: dark gold — matching the Living Nexus aesthetic.
+ * A provenance-first identity artifact for Living Nexus creators, tracks, and projects.
+ * Designed as a collectible card — not a utility widget.
+ *
+ * Layers:
+ *   1. Background — deep charcoal with radial ambient glow
+ *   2. Rarity border — color-coded by rarity class (Genesis / Witnessed / Resonant / Standard)
+ *   3. Artwork — full-bleed thumbnail, bottom gradient fade
+ *   4. Rarity badge — top-right corner, color-coded
+ *   5. Entity name + subtitle — centered, gold serif
+ *   6. Resonance signature row — plays · witnesses · contributions
+ *   7. Creator seal — WID fragment + "WITNESSED ON LIVING NEXUS"
+ *   8. QR code — centered, white background, gold border
+ *   9. SCAN TO WITNESS instruction
+ *  10. Bottom provenance strip — date + Living Nexus mark
  */
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import QRCode from "qrcode";
-import { Download, Share2, Copy, Check, Loader2, ExternalLink } from "lucide-react";
+import { Download, Share2, Copy, Check, Loader2, ExternalLink, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -21,10 +32,16 @@ export interface QRCardEntity {
   id: number;
   slug: string;
   name: string;
-  subtitle?: string;       // artist handle / project tagline / song artist
-  description?: string;    // short bio / project description
-  thumbnailUrl?: string;   // cover art / profile photo / banner
+  subtitle?: string;
+  description?: string;
+  thumbnailUrl?: string;
   verifiedBadge?: boolean;
+  // Resonance data (optional — shown in signature row if provided)
+  playCount?: number;
+  witnessCount?: number;
+  totalFundingCents?: number;
+  // Rarity — auto-computed if not provided
+  rarityClass?: "genesis" | "witnessed" | "resonant" | "standard";
 }
 
 interface QRIdentityCardProps {
@@ -36,14 +53,56 @@ interface QRIdentityCardProps {
 
 // ─── Card dimensions ─────────────────────────────────────────────────────────
 const CARD_W = 480;
-const CARD_H = 720;
+const CARD_H = 760;
+
+// ─── Rarity system ────────────────────────────────────────────────────────────
+function computeRarity(entity: QRCardEntity): "genesis" | "witnessed" | "resonant" | "standard" {
+  if (entity.rarityClass) return entity.rarityClass;
+  const funding = (entity.totalFundingCents ?? 0) / 100;
+  const witnesses = entity.witnessCount ?? 0;
+  const plays = entity.playCount ?? 0;
+  if (funding >= 500 || witnesses >= 100) return "genesis";
+  if (funding >= 100 || witnesses >= 25 || plays >= 1000) return "witnessed";
+  if (funding >= 10 || witnesses >= 5 || plays >= 100) return "resonant";
+  return "standard";
+}
+
+const RARITY_CONFIG = {
+  genesis: {
+    label: "GENESIS",
+    primary: "#FFD700",
+    secondary: "#FFA500",
+    glow: "rgba(255,215,0,0.35)",
+    borderStops: ["#FFD700", "#FFA500", "#FFD700", "#FFF8DC", "#FFD700"],
+  },
+  witnessed: {
+    label: "WITNESSED",
+    primary: "#C49A28",
+    secondary: "#E8C84A",
+    glow: "rgba(196,154,40,0.25)",
+    borderStops: ["#C49A28", "#E8C84A", "#C49A28"],
+  },
+  resonant: {
+    label: "RESONANT",
+    primary: "#9B7FD4",
+    secondary: "#C4A8FF",
+    glow: "rgba(155,127,212,0.2)",
+    borderStops: ["#9B7FD4", "#C4A8FF", "#9B7FD4"],
+  },
+  standard: {
+    label: "STANDARD",
+    primary: "#6B7280",
+    secondary: "#9CA3AF",
+    glow: "rgba(107,114,128,0.15)",
+    borderStops: ["#6B7280", "#9CA3AF", "#6B7280"],
+  },
+};
 
 // ─── Canvas renderer ─────────────────────────────────────────────────────────
 
 async function renderCardToCanvas(
   canvas: HTMLCanvasElement,
   entity: QRCardEntity,
-  qrUrl: string,
   shareUrl: string
 ): Promise<void> {
   const ctx = canvas.getContext("2d");
@@ -52,98 +111,119 @@ async function renderCardToCanvas(
   canvas.width = CARD_W;
   canvas.height = CARD_H;
 
-  // ── Background gradient (dark charcoal → near-black) ──────────────────────
+  const rarity = computeRarity(entity);
+  const rc = RARITY_CONFIG[rarity];
+
+  // ── 1. Background ─────────────────────────────────────────────────────────
   const bg = ctx.createLinearGradient(0, 0, 0, CARD_H);
   bg.addColorStop(0, "#1a1508");
-  bg.addColorStop(0.5, "#0d0d0d");
-  bg.addColorStop(1, "#0a0a0a");
+  bg.addColorStop(0.4, "#0e0e0e");
+  bg.addColorStop(1, "#080808");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
-  // ── Gold border ────────────────────────────────────────────────────────────
+  // Ambient radial glow (rarity-colored)
+  const radial = ctx.createRadialGradient(CARD_W / 2, CARD_H * 0.35, 0, CARD_W / 2, CARD_H * 0.35, CARD_W * 0.7);
+  radial.addColorStop(0, rc.glow);
+  radial.addColorStop(1, "transparent");
+  ctx.fillStyle = radial;
+  ctx.fillRect(0, 0, CARD_W, CARD_H);
+
+  // ── 2. Rarity border ──────────────────────────────────────────────────────
   const borderGrad = ctx.createLinearGradient(0, 0, CARD_W, CARD_H);
-  borderGrad.addColorStop(0, "#c9a84c");
-  borderGrad.addColorStop(0.5, "#f0d080");
-  borderGrad.addColorStop(1, "#c9a84c");
+  rc.borderStops.forEach((stop, i) => {
+    borderGrad.addColorStop(i / (rc.borderStops.length - 1), stop);
+  });
   ctx.strokeStyle = borderGrad;
-  ctx.lineWidth = 3;
-  ctx.strokeRect(6, 6, CARD_W - 12, CARD_H - 12);
+  ctx.lineWidth = rarity === "genesis" ? 3.5 : 2.5;
+  const r = 16;
+  ctx.beginPath();
+  ctx.roundRect(5, 5, CARD_W - 10, CARD_H - 10, r);
+  ctx.stroke();
 
-  // ── Inner border (subtle) ─────────────────────────────────────────────────
-  ctx.strokeStyle = "rgba(201,168,76,0.2)";
+  // Inner border (subtle)
+  ctx.strokeStyle = `${rc.primary}22`;
   ctx.lineWidth = 1;
-  ctx.strokeRect(14, 14, CARD_W - 28, CARD_H - 28);
+  ctx.beginPath();
+  ctx.roundRect(12, 12, CARD_W - 24, CARD_H - 24, r - 4);
+  ctx.stroke();
 
-  // ── Thumbnail area — always draw placeholder first, then overlay image ────
-  const thumbH = 220;
-  // Placeholder gradient (always drawn so card is never blank)
-  const ph = ctx.createLinearGradient(20, 20, CARD_W - 20, 20 + thumbH);
+  // ── 3. Artwork ────────────────────────────────────────────────────────────
+  const thumbH = 230;
+  const thumbX = 18;
+  const thumbY = 18;
+  const thumbW = CARD_W - 36;
+
+  // Placeholder gradient
+  const ph = ctx.createLinearGradient(thumbX, thumbY, thumbX + thumbW, thumbY + thumbH);
   ph.addColorStop(0, "#1e1a0e");
   ph.addColorStop(1, "#2a2010");
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(thumbX, thumbY, thumbW, thumbH, [r - 2, r - 2, 0, 0]);
+  ctx.clip();
   ctx.fillStyle = ph;
-  ctx.fillRect(20, 20, CARD_W - 40, thumbH);
+  ctx.fillRect(thumbX, thumbY, thumbW, thumbH);
 
   if (entity.thumbnailUrl) {
     try {
       const img = new Image();
-      // Try without crossOrigin first — if the CDN doesn't send CORS headers,
-      // crossOrigin='anonymous' causes a tainted-canvas error. Without it the
-      // image still renders visually (we just can't export a clean PNG, which
-      // is acceptable as a graceful degradation).
       await new Promise<void>((resolve) => {
         img.onload = () => resolve();
-        img.onerror = () => resolve(); // graceful fallback to placeholder
+        img.onerror = () => resolve();
         img.src = entity.thumbnailUrl!;
       });
       if (img.complete && img.naturalWidth > 0) {
-        // Clip to rectangle
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(20, 20, CARD_W - 40, thumbH);
-        ctx.clip();
-        // Cover-fit the image
-        const scale = Math.max((CARD_W - 40) / img.naturalWidth, thumbH / img.naturalHeight);
+        const scale = Math.max(thumbW / img.naturalWidth, thumbH / img.naturalHeight);
         const sw = img.naturalWidth * scale;
         const sh = img.naturalHeight * scale;
-        const sx = 20 + ((CARD_W - 40) - sw) / 2;
-        const sy = 20 + (thumbH - sh) / 2;
+        const sx = thumbX + (thumbW - sw) / 2;
+        const sy = thumbY + (thumbH - sh) / 2;
         ctx.drawImage(img, sx, sy, sw, sh);
-        ctx.restore();
-        // Gradient overlay on thumbnail bottom
-        const thumbOverlay = ctx.createLinearGradient(0, 20 + thumbH - 80, 0, 20 + thumbH);
-        thumbOverlay.addColorStop(0, "rgba(10,10,10,0)");
-        thumbOverlay.addColorStop(1, "rgba(10,10,10,0.95)");
-        ctx.fillStyle = thumbOverlay;
-        ctx.fillRect(20, 20, CARD_W - 40, thumbH);
       }
-    } catch (_) { /* ignore — placeholder already drawn above */ }
+    } catch (_) { /* placeholder already drawn */ }
   }
 
-  // ── Entity type badge ─────────────────────────────────────────────────────
-  const badgeLabel = entity.type === "creator" ? "CREATOR" : entity.type === "project" ? "PROJECT" : "TRACK";
-  ctx.fillStyle = "rgba(201,168,76,0.85)";
-  const badgeW = 90;
-  const badgeH = 22;
+  // Bottom gradient fade on artwork
+  const thumbFade = ctx.createLinearGradient(0, thumbY + thumbH - 100, 0, thumbY + thumbH);
+  thumbFade.addColorStop(0, "rgba(8,8,8,0)");
+  thumbFade.addColorStop(1, "rgba(8,8,8,0.98)");
+  ctx.fillStyle = thumbFade;
+  ctx.fillRect(thumbX, thumbY, thumbW, thumbH);
+  ctx.restore();
+
+  // ── 4. Rarity badge (top-right) ───────────────────────────────────────────
+  const badgeW = rarity === "genesis" ? 100 : 90;
+  const badgeH = 24;
+  const badgeX = CARD_W - 20 - badgeW;
+  const badgeY = 28;
+  ctx.fillStyle = rc.primary;
   ctx.beginPath();
-  ctx.roundRect(CARD_W - 20 - badgeW, 30, badgeW, badgeH, 4);
+  ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
   ctx.fill();
   ctx.fillStyle = "#0a0a0a";
-  ctx.font = "bold 10px 'Arial', sans-serif";
+  ctx.font = `bold 10px 'Arial', sans-serif`;
   ctx.textAlign = "center";
-  ctx.fillText(badgeLabel, CARD_W - 20 - badgeW / 2, 30 + 15);
+  ctx.fillText(rc.label, badgeX + badgeW / 2, badgeY + 16);
+
+  // Genesis star
+  if (rarity === "genesis") {
+    ctx.fillStyle = "#0a0a0a";
+    ctx.font = "10px 'Arial', sans-serif";
+    ctx.fillText("★", badgeX + 10, badgeY + 16);
+  }
 
   // ── Living Nexus watermark (top-left) ─────────────────────────────────────
-  ctx.fillStyle = "rgba(201,168,76,0.7)";
+  ctx.fillStyle = `${rc.primary}BB`;
   ctx.font = "bold 9px 'Arial', sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText("LIVING NEXUS", 30, 44);
+  ctx.fillText("LIVING NEXUS", 28, 44);
 
-  // ── Entity name ───────────────────────────────────────────────────────────
-  const nameY = 20 + thumbH + 28;
-  ctx.fillStyle = "#f0d080";
+  // ── 5. Entity name + subtitle ─────────────────────────────────────────────
+  const nameY = thumbY + thumbH + 30;
+  ctx.fillStyle = "#F0D080";
   ctx.font = "bold 26px 'Georgia', serif";
   ctx.textAlign = "center";
-  // Truncate long names
   let displayName = entity.name;
   if (ctx.measureText(displayName).width > CARD_W - 60) {
     while (ctx.measureText(displayName + "…").width > CARD_W - 60 && displayName.length > 0) {
@@ -153,19 +233,18 @@ async function renderCardToCanvas(
   }
   ctx.fillText(displayName, CARD_W / 2, nameY);
 
-  // ── Subtitle / handle ─────────────────────────────────────────────────────
   if (entity.subtitle) {
-    ctx.fillStyle = "rgba(201,168,76,0.7)";
-    ctx.font = "14px 'Arial', sans-serif";
-    ctx.fillText(entity.subtitle, CARD_W / 2, nameY + 26);
+    ctx.fillStyle = `${rc.primary}BB`;
+    ctx.font = "13px 'Arial', sans-serif";
+    ctx.fillText(entity.subtitle, CARD_W / 2, nameY + 24);
   }
 
-  // ── Gold divider ──────────────────────────────────────────────────────────
-  const divY = nameY + (entity.subtitle ? 46 : 22);
+  // Gold divider
+  const divY = nameY + (entity.subtitle ? 44 : 20);
   const divGrad = ctx.createLinearGradient(40, 0, CARD_W - 40, 0);
   divGrad.addColorStop(0, "transparent");
-  divGrad.addColorStop(0.3, "#c9a84c");
-  divGrad.addColorStop(0.7, "#c9a84c");
+  divGrad.addColorStop(0.3, rc.primary);
+  divGrad.addColorStop(0.7, rc.primary);
   divGrad.addColorStop(1, "transparent");
   ctx.strokeStyle = divGrad;
   ctx.lineWidth = 1;
@@ -174,50 +253,60 @@ async function renderCardToCanvas(
   ctx.lineTo(CARD_W - 40, divY);
   ctx.stroke();
 
-  // ── Description ───────────────────────────────────────────────────────────
-  if (entity.description) {
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    ctx.font = "12px 'Arial', sans-serif";
-    ctx.textAlign = "center";
-    const words = entity.description.split(" ");
-    const lines: string[] = [];
-    let currentLine = "";
-    const maxW = CARD_W - 80;
-    for (const word of words) {
-      const test = currentLine ? `${currentLine} ${word}` : word;
-      if (ctx.measureText(test).width > maxW) {
-        if (currentLine) lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = test;
-      }
-      if (lines.length >= 3) break;
-    }
-    if (currentLine && lines.length < 3) lines.push(currentLine);
-    lines.forEach((line, i) => {
-      ctx.fillText(line, CARD_W / 2, divY + 18 + i * 18);
+  // ── 6. Resonance signature row ────────────────────────────────────────────
+  const sigY = divY + 22;
+  const hasResonance = (entity.playCount ?? 0) > 0 || (entity.witnessCount ?? 0) > 0 || (entity.totalFundingCents ?? 0) > 0;
+
+  if (hasResonance) {
+    const items: { icon: string; value: string }[] = [];
+    if ((entity.playCount ?? 0) > 0) items.push({ icon: "▶", value: `${entity.playCount!.toLocaleString()} plays` });
+    if ((entity.witnessCount ?? 0) > 0) items.push({ icon: "◈", value: `${entity.witnessCount} witnesses` });
+    if ((entity.totalFundingCents ?? 0) > 0) items.push({ icon: "$", value: `$${((entity.totalFundingCents!) / 100).toFixed(0)} contributed` });
+
+    const colW = Math.floor((CARD_W - 80) / items.length);
+    items.forEach((item, i) => {
+      const cx = 40 + colW * i + colW / 2;
+      ctx.fillStyle = rc.primary;
+      ctx.font = "bold 12px 'Arial', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(item.icon, cx, sigY);
+      ctx.fillStyle = "rgba(255,255,255,0.55)";
+      ctx.font = "10px 'Arial', sans-serif";
+      ctx.fillText(item.value, cx, sigY + 16);
     });
   }
 
-  // ── QR Code ───────────────────────────────────────────────────────────────
-  const qrSize = 160;
-  const qrX = (CARD_W - qrSize) / 2;
-  const qrY = CARD_H - qrSize - 80;
+  // ── 7. Creator seal ───────────────────────────────────────────────────────
+  const sealY = hasResonance ? sigY + 42 : sigY + 4;
+  ctx.fillStyle = `${rc.primary}44`;
+  ctx.beginPath();
+  ctx.roundRect(40, sealY, CARD_W - 80, 28, 6);
+  ctx.fill();
+  ctx.fillStyle = `${rc.primary}99`;
+  ctx.font = "bold 9px 'Arial', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("WITNESSED ON LIVING NEXUS · PROVENANCE PRESERVED", CARD_W / 2, sealY + 18);
 
-  // White background for QR
+  // ── 8. QR Code ────────────────────────────────────────────────────────────
+  const qrSize = 148;
+  const qrX = (CARD_W - qrSize) / 2;
+  const qrY = CARD_H - qrSize - 90;
+
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 8);
+  ctx.roundRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 10);
   ctx.fill();
 
-  // Gold border around QR
-  ctx.strokeStyle = "#c9a84c";
-  ctx.lineWidth = 2;
+  const qrBorderGrad = ctx.createLinearGradient(qrX - 12, qrY - 12, qrX + qrSize + 12, qrY + qrSize + 12);
+  qrBorderGrad.addColorStop(0, rc.primary);
+  qrBorderGrad.addColorStop(0.5, rc.secondary);
+  qrBorderGrad.addColorStop(1, rc.primary);
+  ctx.strokeStyle = qrBorderGrad;
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.roundRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 10);
+  ctx.roundRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 12);
   ctx.stroke();
 
-  // Render QR code into a temp canvas
   const qrCanvas = document.createElement("canvas");
   await QRCode.toCanvas(qrCanvas, shareUrl, {
     width: qrSize,
@@ -226,28 +315,27 @@ async function renderCardToCanvas(
   });
   ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
 
-  // ── Scan instruction ──────────────────────────────────────────────────────
-  ctx.fillStyle = "rgba(201,168,76,0.8)";
-  ctx.font = "11px 'Arial', sans-serif";
+  // ── 9. Scan instruction ───────────────────────────────────────────────────
+  ctx.fillStyle = `${rc.primary}CC`;
+  ctx.font = "bold 11px 'Arial', sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("SCAN TO WITNESS", CARD_W / 2, qrY + qrSize + 22);
+  ctx.fillText("SCAN TO WITNESS", CARD_W / 2, qrY + qrSize + 24);
 
-  // ── URL (truncated) ───────────────────────────────────────────────────────
-  ctx.fillStyle = "rgba(255,255,255,0.35)";
+  ctx.fillStyle = "rgba(255,255,255,0.3)";
   ctx.font = "9px 'Arial', sans-serif";
-  const shortUrl = shareUrl.length > 60 ? shareUrl.slice(0, 57) + "…" : shareUrl;
-  ctx.fillText(shortUrl, CARD_W / 2, qrY + qrSize + 38);
+  const shortUrl = shareUrl.length > 55 ? shareUrl.slice(0, 52) + "…" : shareUrl;
+  ctx.fillText(shortUrl, CARD_W / 2, qrY + qrSize + 40);
 
-  // ── Bottom provenance strip ───────────────────────────────────────────────
-  const stripY = CARD_H - 28;
-  ctx.fillStyle = "rgba(201,168,76,0.08)";
-  ctx.fillRect(20, stripY - 6, CARD_W - 40, 22);
-  ctx.fillStyle = "rgba(201,168,76,0.5)";
+  // ── 10. Bottom provenance strip ───────────────────────────────────────────
+  const stripY = CARD_H - 26;
+  ctx.fillStyle = `${rc.primary}11`;
+  ctx.fillRect(18, stripY - 8, CARD_W - 36, 22);
+  ctx.fillStyle = `${rc.primary}55`;
   ctx.font = "8px 'Arial', sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText("LIVING NEXUS · CREATIVE PROVENANCE PLATFORM", 30, stripY + 8);
+  ctx.fillText("LIVING NEXUS · CREATIVE PROVENANCE PLATFORM", 28, stripY + 7);
   ctx.textAlign = "right";
-  ctx.fillText(new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }), CARD_W - 30, stripY + 8);
+  ctx.fillText(new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }), CARD_W - 28, stripY + 7);
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -260,32 +348,25 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
   const [shareId, setShareId] = useState<number | null>(null);
 
   const generateMutation = trpc.qr.generate.useMutation();
+  const rarity = computeRarity(entity);
+  const rc = RARITY_CONFIG[rarity];
 
-  // Generate the QR share on mount
   useEffect(() => {
     const origin = window.location.origin;
     generateMutation.mutate(
-      {
-        entityType: entity.type,
-        entityId: entity.id,
-        entitySlug: entity.slug,
-        campaign,
-        tag,
-        origin,
-      },
+      { entityType: entity.type, entityId: entity.id, entitySlug: entity.slug, campaign, tag, origin },
       {
         onSuccess: async (data) => {
           setShareUrl(data.url);
           setShareId(data.share.id);
           setIsGenerating(false);
-          // Render the card
           if (canvasRef.current) {
-            await renderCardToCanvas(canvasRef.current, entity, data.url, data.url);
+            await renderCardToCanvas(canvasRef.current, entity, data.url);
           }
         },
         onError: (err) => {
-          setIsGenerating(false);
           toast.error("Failed to generate QR: " + err.message);
+          setIsGenerating(false);
         },
       }
     );
@@ -295,10 +376,8 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
   const handleDownloadPng = useCallback(() => {
     if (!canvasRef.current) return;
     const filename = `living-nexus-${entity.type}-${entity.slug}.png`;
-    // iOS Safari does not support <a download> for data URIs — use toBlob + object URL instead
     canvasRef.current.toBlob((blob) => {
       if (!blob) {
-        // Fallback for browsers that don't support toBlob
         const link = document.createElement("a");
         link.download = filename;
         link.href = canvasRef.current!.toDataURL("image/png");
@@ -313,7 +392,6 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        // Revoke after a short delay to allow the download to start
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
       toast.success("Card downloaded — PNG saved to your device.");
@@ -345,21 +423,39 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      {/* Canvas preview — scales down on narrow screens */}
-      <div className="relative rounded-xl overflow-hidden shadow-2xl border border-amber-700/40"
-        style={{ width: "min(320px, calc(100vw - 4rem))", aspectRatio: `${CARD_W} / ${CARD_H}` }}>
-        {isGenerating && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
-            <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-          </div>
-        )}
-        <canvas
-          ref={canvasRef}
-          style={{ width: "100%", height: "100%", display: "block" }}
-        />
+      {/* Rarity class indicator */}
+      <div className="flex items-center gap-2">
+        <span
+          className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
+          style={{ background: `${rc.primary}18`, border: `1px solid ${rc.primary}44`, color: rc.primary }}
+        >
+          {rarity === "genesis" && "★ "}
+          {rc.label} CARD
+        </span>
       </div>
 
-      {/* Share URL display */}
+      {/* Canvas preview */}
+      <div
+        className="relative rounded-2xl overflow-hidden shadow-2xl"
+        style={{
+          width: "min(320px, calc(100vw - 4rem))",
+          aspectRatio: `${CARD_W} / ${CARD_H}`,
+          boxShadow: `0 0 40px ${rc.glow}, 0 0 80px ${rc.glow}`,
+          border: `2px solid ${rc.primary}44`,
+        }}
+      >
+        {isGenerating && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10 gap-3">
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: rc.primary }} />
+            <span className="text-xs tracking-widest uppercase" style={{ color: `${rc.primary}88` }}>
+              Minting Card…
+            </span>
+          </div>
+        )}
+        <canvas ref={canvasRef} style={{ width: "100%", height: "100%", display: "block" }} />
+      </div>
+
+      {/* Share URL */}
       {shareUrl && (
         <div className="w-full max-w-sm bg-black/40 border border-amber-700/30 rounded-lg px-3 py-2 flex items-center gap-2">
           <ExternalLink className="w-3 h-3 text-amber-500 shrink-0" />
@@ -367,7 +463,6 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
         </div>
       )}
 
-      {/* Campaign tag */}
       {campaign && (
         <Badge variant="outline" className="border-amber-600/50 text-amber-400 text-xs">
           {campaign}
@@ -379,18 +474,20 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
         <Button
           onClick={handleDownloadPng}
           disabled={isGenerating}
-          className="bg-amber-600 hover:bg-amber-500 text-black font-semibold gap-2"
+          className="font-semibold gap-2 text-black"
           size="sm"
+          style={{ background: rc.primary }}
         >
           <Download className="w-4 h-4" />
-          Download PNG
+          Download Card
         </Button>
         <Button
           onClick={handleCopyLink}
           disabled={isGenerating}
           variant="outline"
-          className="border-amber-700/50 text-amber-300 hover:bg-amber-900/30 gap-2"
+          className="gap-2"
           size="sm"
+          style={{ borderColor: `${rc.primary}50`, color: rc.primary }}
         >
           {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           {isCopied ? "Copied!" : "Copy Link"}
@@ -399,8 +496,9 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
           onClick={handleNativeShare}
           disabled={isGenerating}
           variant="outline"
-          className="border-amber-700/50 text-amber-300 hover:bg-amber-900/30 gap-2"
+          className="gap-2"
           size="sm"
+          style={{ borderColor: `${rc.primary}50`, color: rc.primary }}
         >
           <Share2 className="w-4 h-4" />
           Share
@@ -409,7 +507,7 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
 
       {shareId && (
         <p className="text-xs text-white/30 text-center">
-          Share ID #{shareId} · Scans are tracked for provenance attribution
+          Share #{shareId} · Every scan is provenance-attributed
         </p>
       )}
     </div>
@@ -427,41 +525,43 @@ interface QRShareModalProps {
 
 export function QRShareModal({ entity, campaign, tag, trigger }: QRShareModalProps) {
   const [open, setOpen] = useState(false);
+  const rarity = computeRarity(entity);
+  const rc = RARITY_CONFIG[rarity];
 
   const modalContent = open ? (
-    // Rendered via portal so it escapes any parent stacking context (sticky bars, etc.)
     <div
-      className="fixed inset-0 overflow-y-auto bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 overflow-y-auto bg-black/75 backdrop-blur-sm"
       style={{ zIndex: 99999 }}
       onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
     >
       <div className="flex min-h-full items-center justify-center p-4 py-8">
         <div
-          className="bg-[#0d0d0d] border border-amber-700/40 rounded-2xl shadow-2xl w-full"
-          style={{ maxWidth: "min(520px, calc(100vw - 2rem))" }}
+          className="bg-[#0a0a0a] rounded-2xl shadow-2xl w-full"
+          style={{
+            maxWidth: "min(520px, calc(100vw - 2rem))",
+            border: `1.5px solid ${rc.primary}44`,
+            boxShadow: `0 0 60px ${rc.glow}`,
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-amber-700/20">
+          <div className="flex items-center justify-between px-5 pt-5 pb-3" style={{ borderBottom: `1px solid ${rc.primary}22` }}>
             <div>
-              <h2 className="text-amber-300 font-bold text-lg">Share Identity Card</h2>
+              <h2 className="font-bold text-lg" style={{ color: rc.primary }}>Identity Card</h2>
               <p className="text-white/40 text-xs mt-0.5">
-                Provenance-preserving QR — every scan is attributed
+                Ceremonial provenance artifact · {rc.label} class
               </p>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="text-white/40 hover:text-white/80 text-2xl leading-none ml-4 shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-white/70 transition-colors"
+              style={{ background: "rgba(255,255,255,0.05)" }}
             >
-              ×
+              ✕
             </button>
           </div>
-          <QRIdentityCard
-            entity={entity}
-            campaign={campaign}
-            tag={tag}
-            onClose={() => setOpen(false)}
-          />
+
+          <QRIdentityCard entity={entity} campaign={campaign} tag={tag} onClose={() => setOpen(false)} />
         </div>
       </div>
     </div>
@@ -469,10 +569,10 @@ export function QRShareModal({ entity, campaign, tag, trigger }: QRShareModalPro
 
   return (
     <>
-      <span onClick={() => setOpen(true)} className="cursor-pointer">
+      <span onClick={() => setOpen(true)} style={{ cursor: "pointer", display: "inline-flex" }}>
         {trigger}
       </span>
-      {typeof document !== "undefined" && createPortal(modalContent, document.body)}
+      {typeof document !== "undefined" && modalContent && createPortal(modalContent, document.body)}
     </>
   );
 }

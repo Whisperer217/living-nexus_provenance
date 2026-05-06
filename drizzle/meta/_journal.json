@@ -10,13 +10,6 @@
       "breakpoints": true
     },
     {
-      "idx": 0,
-      "version": "5",
-      "when": 1773718797500,
-      "tag": "0000_next_dark_phoenix",
-      "breakpoints": true
-    },
-    {
       "idx": 1,
       "version": "5",
       "when": 1773722388145,
@@ -523,22 +516,8 @@
     {
       "idx": 73,
       "version": "5",
-      "when": 1777109918968,
-      "tag": "0073_comic_book_reader",
-      "breakpoints": true
-    },
-    {
-      "idx": 73,
-      "version": "5",
       "when": 1776169189577,
       "tag": "0073_past_hannibal_king",
-      "breakpoints": true
-    },
-    {
-      "idx": 74,
-      "version": "5",
-      "when": 1777109918976,
-      "tag": "0074_backfill_is_public",
       "breakpoints": true
     },
     {
@@ -578,13 +557,6 @@
     },
     {
       "idx": 80,
-      "version": "5",
-      "when": 1777109919062,
-      "tag": "0080_easy_pride",
-      "breakpoints": true
-    },
-    {
-      "idx": 80,
       "version": "7",
       "when": 1745000000000,
       "tag": "0080_ownership_disclaimer",
@@ -595,13 +567,6 @@
       "version": "7",
       "when": 1776447772286,
       "tag": "0081_keeper_skins",
-      "breakpoints": true
-    },
-    {
-      "idx": 82,
-      "version": "5",
-      "when": 1777111662991,
-      "tag": "0082_album_download",
       "breakpoints": true
     },
     {
@@ -626,24 +591,10 @@
       "breakpoints": true
     },
     {
-      "idx": 84,
-      "version": "5",
-      "when": 1777115822929,
-      "tag": "0084_outstanding_tomorrow_man",
-      "breakpoints": true
-    },
-    {
       "idx": 85,
       "version": "5",
       "when": 1777146185294,
       "tag": "0085_romantic_fenris",
-      "breakpoints": true
-    },
-    {
-      "idx": 86,
-      "version": "5",
-      "when": 1777212399187,
-      "tag": "0086_giant_loa",
       "breakpoints": true
     },
     {
@@ -706,28 +657,7 @@
       "idx": 94,
       "version": "5",
       "when": 1777860964181,
-      "tag": "0094_first_cobalt_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 94,
-      "version": "5",
-      "when": 1777860964181,
       "tag": "0094_special_zodiak",
-      "breakpoints": true
-    },
-    {
-      "idx": 95,
-      "version": "5",
-      "when": 1778085383278,
-      "tag": "0095_quick_warpath",
-      "breakpoints": true
-    },
-    {
-      "idx": 96,
-      "version": "5",
-      "when": 1778098492763,
-      "tag": "0096_futuristic_lockjaw",
       "breakpoints": true
     }
   ]

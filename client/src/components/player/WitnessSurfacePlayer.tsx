@@ -74,10 +74,7 @@ function WaveformBars({ isPlaying }: { isPlaying: boolean }) {
               background: isPlaying
                 ? `rgba(255,215,0,${0.3 + Math.abs(Math.sin(i * 0.5)) * 0.5})`
                 : "rgba(255,255,255,0.12)",
-              animationName: isPlaying ? `wsp-bar-${(i % 4) + 1}` : "none",
-              animationDuration: "0.8s",
-              animationTimingFunction: "ease-in-out",
-              animationIterationCount: "infinite",
+              animation: isPlaying ? `wsp-bar-${(i % 4) + 1} 0.8s ease-in-out infinite` : "none",
               animationDelay: `${(i % 8) * 0.1}s`,
             }}
           />
@@ -247,10 +244,7 @@ function SurfaceBar() {
                   height: 5,
                   borderRadius: "50%",
                   background: "rgba(74,222,128,0.7)",
-                  animationName: "wsp-provenance-pulse",
-                  animationDuration: "2s",
-                  animationTimingFunction: "cubic-bezier(0.4,0,0.6,1)",
-                  animationIterationCount: "infinite",
+                  animation: "wsp-provenance-pulse 2s cubic-bezier(0.4,0,0.6,1) infinite",
                   animationDelay: `${i * 220}ms`,
                 }}
               />
@@ -318,7 +312,11 @@ function ExpandedPanel() {
   /* Artwork reactive glow — brightens on hover/tilt interaction */
   const [artGlowActive, setArtGlowActive] = useState(false);
 
+  /* Mobile-only guard — GlobalPlayer handles desktop expanded view */
+  const isMobileExpanded = useIsMobile();
+
   if (!track) return null;
+  if (!isMobileExpanded) return null;
 
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
   const isLiked = state.liked.has(track.id);

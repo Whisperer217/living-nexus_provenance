@@ -83,13 +83,10 @@ export const users = mysqlTable("users", {
   lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),
   lastVisitedDashboardAt: timestamp("lastVisitedDashboardAt"),
 
-   // Founder WID — generated at grant time, e.g. WID-FDR-0001-1713340800000
+  // Founder WID — generated at grant time, e.g. WID-FDR-0001-1713340800000
   founderWid: varchar("founderWid", { length: 64 }),
   founderGrantedAt: timestamp("founderGrantedAt"),
-  // Creator economy — direct payment links (no Stripe required)
-  cashAppHandle: varchar("cashAppHandle", { length: 64 }),   // e.g. "$DocSeraphMercer"
-  paypalUsername: varchar("paypalUsername", { length: 128 }), // e.g. "docseraphmercer" or full URL
-  venmoHandle: varchar("venmoHandle", { length: 64 }),        // e.g. "DocSeraphMercer"
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),

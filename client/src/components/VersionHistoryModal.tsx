@@ -55,7 +55,7 @@ function fmtSize(bytes: number | null | undefined) {
 const AI_LABELS: Record<string, string> = {
   original: "Human-Made",
   ai_assisted: "AI-Assisted",
-  ai_generated: "AI-Generated",
+  ai_generated: "AI-Assisted Manifestation",
 };
 
 export function VersionHistoryModal({
@@ -236,7 +236,7 @@ export function VersionHistoryModal({
                     <SelectContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}>
                       <SelectItem value="original" className="text-white">Human-Made — No AI Used</SelectItem>
                       <SelectItem value="ai_assisted" className="text-white">AI-Assisted — Human + AI Tools</SelectItem>
-                      <SelectItem value="ai_generated" className="text-white">AI-Generated — AI-Created</SelectItem>
+                      <SelectItem value="ai_generated" className="text-white">AI-Assisted Manifestation — Manifested with AI</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

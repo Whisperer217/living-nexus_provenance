@@ -769,7 +769,7 @@ export default function ProfilePage() {
                 <option value="original">Human-Made — No AI Used</option>
                 <option value="ai_assisted">AI-Assisted — Human + AI Tools</option>
                 <option value="human_authored_ai_instrument">HAAI — Human-Authored via AI Instrument</option>
-                <option value="ai_generated">AI-Generated — AI-Created</option>
+                <option value="ai_generated">AI-Assisted Manifestation — AI-Created</option>
               </select>
             </div>
             {/* Primary Genre — multi-select chips */}
@@ -863,6 +863,41 @@ export default function ProfilePage() {
             onSave={(t, i, y) => save({ twitterHandle: t, instagramHandle: i, youtubeHandle: y })}
           />
         </div>
+
+        {/* ── Direct Support Links (Cash App / PayPal / Venmo) ── */}
+        {isOwn && (
+          <DirectSupportEditor
+            cashApp={(profile as any)?.cashAppHandle || ""}
+            paypal={(profile as any)?.paypalUsername || ""}
+            venmo={(profile as any)?.venmoHandle || ""}
+            onSave={(c, p, v) => save({ cashAppHandle: c || undefined, paypalUsername: p || undefined, venmoHandle: v || undefined })}
+          />
+        )}
+        {!isOwn && ((profile as any)?.cashAppHandle || (profile as any)?.paypalUsername || (profile as any)?.venmoHandle) && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {(profile as any)?.cashAppHandle && (
+              <a href={`https://cash.app/${(profile as any).cashAppHandle.startsWith('$') ? (profile as any).cashAppHandle : '$' + (profile as any).cashAppHandle}`} target="_blank" rel="noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                style={{ background: "rgba(0,214,84,0.12)", border: "1px solid rgba(0,214,84,0.3)", color: "#00D654" }}>
+                <span>$</span> Cash App
+              </a>
+            )}
+            {(profile as any)?.paypalUsername && (
+              <a href={`https://paypal.me/${(profile as any).paypalUsername}`} target="_blank" rel="noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                style={{ background: "rgba(0,112,243,0.12)", border: "1px solid rgba(0,112,243,0.3)", color: "#0070F3" }}>
+                <span>P</span> PayPal
+              </a>
+            )}
+            {(profile as any)?.venmoHandle && (
+              <a href={`https://venmo.com/${(profile as any).venmoHandle}`} target="_blank" rel="noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                style={{ background: "rgba(0,136,255,0.12)", border: "1px solid rgba(0,136,255,0.3)", color: "#0088FF" }}>
+                <span>V</span> Venmo
+              </a>
+            )}
+          </div>
+        )}
 
         {/* ── Command Center Tabs ── */}
         {(() => {
@@ -1891,5 +1926,90 @@ function RequestDeletionButton() {
     >
       <Trash2 size={11} /> Request Account Deletion
     </button>
+  );
+}
+
+/* ── Direct Support Editor (Cash App / PayPal / Venmo) ─────────── */
+function DirectSupportEditor({
+  cashApp, paypal, venmo, onSave,
+}: {
+  cashApp: string; paypal: string; venmo: string;
+  onSave: (cashApp: string, paypal: string, venmo: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [ca, setCa] = useState(cashApp);
+  const [pp, setPp] = useState(paypal);
+  const [vm, setVm] = useState(venmo);
+
+  useEffect(() => { setCa(cashApp); setPp(paypal); setVm(venmo); }, [cashApp, paypal, venmo]);
+
+  const save = () => { onSave(ca.trim(), pp.trim(), vm.trim()); setEditing(false); };
+  const cancel = () => { setCa(cashApp); setPp(paypal); setVm(venmo); setEditing(false); };
+
+  if (!editing) {
+    const hasAny = cashApp || paypal || venmo;
+    return (
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        {cashApp && (
+          <a href={`https://cash.app/${cashApp.startsWith('$') ? cashApp : '$' + cashApp}`} target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+            style={{ background: "rgba(0,214,84,0.12)", border: "1px solid rgba(0,214,84,0.3)", color: "#00D654" }}>
+            $ Cash App
+          </a>
+        )}
+        {paypal && (
+          <a href={`https://paypal.me/${paypal}`} target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+            style={{ background: "rgba(0,112,243,0.12)", border: "1px solid rgba(0,112,243,0.3)", color: "#0070F3" }}>
+            P PayPal
+          </a>
+        )}
+        {venmo && (
+          <a href={`https://venmo.com/${venmo}`} target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+            style={{ background: "rgba(0,136,255,0.12)", border: "1px solid rgba(0,136,255,0.3)", color: "#0088FF" }}>
+            V Venmo
+          </a>
+        )}
+        <button type="button" onClick={() => setEditing(true)}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] transition-all"
+          style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.2)", color: "rgba(196,154,40,0.7)" }}>
+          <Edit2 size={10} /> {hasAny ? "Edit" : "Add Support Links"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4 p-3 rounded-xl space-y-2" style={{ background: "rgba(196,154,40,0.05)", border: "1px solid rgba(196,154,40,0.15)" }}>
+      <p className="text-[11px] font-semibold tracking-wider uppercase" style={{ color: "rgba(196,154,40,0.6)" }}>Direct Support Links</p>
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] w-20 shrink-0" style={{ color: "rgba(255,255,255,0.4)" }}>Cash App</span>
+        <input value={ca} onChange={e => setCa(e.target.value)} placeholder="$YourHandle"
+          className="flex-1 px-2 py-1 rounded-lg text-[12px] bg-black/30 border border-white/10 text-white/80 outline-none placeholder:text-white/30" />
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] w-20 shrink-0" style={{ color: "rgba(255,255,255,0.4)" }}>PayPal</span>
+        <input value={pp} onChange={e => setPp(e.target.value)} placeholder="username or paypal.me/..."
+          className="flex-1 px-2 py-1 rounded-lg text-[12px] bg-black/30 border border-white/10 text-white/80 outline-none placeholder:text-white/30" />
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] w-20 shrink-0" style={{ color: "rgba(255,255,255,0.4)" }}>Venmo</span>
+        <input value={vm} onChange={e => setVm(e.target.value)} placeholder="YourHandle"
+          className="flex-1 px-2 py-1 rounded-lg text-[12px] bg-black/30 border border-white/10 text-white/80 outline-none placeholder:text-white/30" />
+      </div>
+      <div className="flex gap-2 pt-1">
+        <button type="button" onClick={save}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium"
+          style={{ background: "rgba(196,154,40,0.2)", color: "rgba(196,154,40,0.9)" }}>
+          <Check size={11} /> Save
+        </button>
+        <button type="button" onClick={cancel}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px]"
+          style={{ color: "rgba(255,255,255,0.4)" }}>
+          <X size={11} /> Cancel
+        </button>
+      </div>
+    </div>
   );
 }

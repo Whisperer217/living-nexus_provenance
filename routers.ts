@@ -552,10 +552,6 @@ export const appRouter = router({
       avatarObjectPosition: z.string().max(32).optional(),
       bannerPositionX: z.number().min(0).max(100).optional(),
       bannerPositionY: z.number().min(0).max(100).optional(),
-      // Creator economy — direct payment links
-      cashAppHandle: z.string().max(64).optional(),
-      paypalUsername: z.string().max(128).optional(),
-      venmoHandle: z.string().max(64).optional(),
     })).mutation(async ({ ctx, input }) => {
       if (input.name !== undefined) {
         const current = await getUserById(ctx.user.id);
