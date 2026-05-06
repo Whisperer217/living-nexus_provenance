@@ -15,16 +15,16 @@ import {
   Loader2, Upload, X, Layers, Settings
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import StoryboardBuilder, { StoryboardPage } from "@/components/StoryboardBuilder";
-import CinematicComicReader from "@/components/reader/CinematicComicReader";
-import ChildrensBookReader from "@/components/reader/ChildrensBookReader";
-import ManuscriptReader from "@/components/reader/ManuscriptReader";
+import { StoryboardBuilder, StoryboardPage } from "@/components/reader/StoryboardBuilder";
+import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
+import { ChildrensBookReader } from "@/components/reader/ChildrensBookReader";
+import { ManuscriptReader } from "@/components/reader/ManuscriptReader";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -106,10 +106,8 @@ export default function CreatorStudioPage() {
     updateMutation.mutate({
       songId: bookId,
       title,
-      description,
-      headlineCaption,
+      caption: headlineCaption,
       genre,
-      moodTags,
       aiDisclosure: aiDisclosure as any,
       narrativeFormat,
       readAccess,
@@ -117,7 +115,7 @@ export default function CreatorStudioPage() {
       pagesJson: pagesJson ?? undefined,
       creditsJson,
     });
-  }, [bookId, title, description, headlineCaption, genre, moodTags, aiDisclosure, narrativeFormat, readAccess, previewPageCount, pagesJson, creditsJson]);
+  }, [bookId, title, headlineCaption, genre, aiDisclosure, narrativeFormat, readAccess, previewPageCount, pagesJson, creditsJson]);
 
   // ── Guard ───────────────────────────────────────────────────────────────────
   if (isLoading) {
@@ -148,7 +146,8 @@ export default function CreatorStudioPage() {
   } catch { /* ignore */ }
 
   const previewPages = storyboardPages.map((p: StoryboardPage) => ({
-    url: p.url,
+    url: p.imageUrl,
+    imageUrl: p.imageUrl,
     pageNumber: p.pageNumber,
     panelData: (p as any).panelData,
   }));
@@ -313,15 +312,20 @@ export default function CreatorStudioPage() {
             <div className="flex-1 overflow-hidden">
               {previewPages.length > 0 ? (
                 format === "childrens" ? (
-                  <ChildrensBookReader pages={previewPages} title={title} />
+                  <ChildrensBookReader
+                    pages={previewPages.map(p => ({ pageNumber: p.pageNumber, imageUrl: p.imageUrl }))}
+                    title={title}
+                    onClose={() => setPreviewOpen(false)}
+                  />
                 ) : format === "manuscript" ? (
                   <ManuscriptReader
-                    pages={previewPages}
+                    workId={String(bookId)}
                     title={title}
-                    manuscriptText={(song as any).lyricsText ?? ""}
+                    content={{ text: (song as any).lyricsText ?? "" }}
+                    onClose={() => setPreviewOpen(false)}
                   />
                 ) : (
-                  <CinematicComicReader pages={previewPages} title={title} />
+                  <CinematicComicReader pages={previewPages} title={title} onClose={() => setPreviewOpen(false)} />
                 )
               ) : (
                 <div className="flex flex-col items-center justify-center h-full gap-3 opacity-40">

@@ -1226,6 +1226,7 @@ export const appRouter = router({
     }),
     updateMetadata: protectedProcedure.input(z.object({
       songId: z.number(),
+      title: z.string().min(1).max(255).optional(),
       caption: z.string().max(2000).nullable().optional(),
       genre: z.string().nullable().optional(),
       collectionTag: z.string().max(128).nullable().optional(),
@@ -1253,6 +1254,8 @@ export const appRouter = router({
       previewPageCount: z.number().int().min(1).max(50).optional(),
       consentSettingsJson: z.string().max(2000).nullable().optional(),
       externalLinksJson: z.string().max(4096).nullable().optional(),
+      // Narrative Format — reader engine selector
+      narrativeFormat: z.enum(["comic", "childrens", "manuscript"]).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
