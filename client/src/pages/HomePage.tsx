@@ -726,7 +726,7 @@ function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentica
   return (
     <div
       className="relative overflow-hidden"
-      style={{ minHeight: "420px" }}
+      style={{ height: "clamp(360px, 52vw, 520px)", flexShrink: 0 }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
