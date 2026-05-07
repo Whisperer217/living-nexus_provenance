@@ -38,6 +38,9 @@ import {
   workEvidence,
   type WorkEvidence,
   type InsertWorkEvidence,
+  derivatives,
+  type Derivative,
+  type InsertDerivative,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -322,6 +325,7 @@ export async function getSongWithCreator(id: number) {
       id: users.id, name: users.name, artistHandle: users.artistHandle,
       profilePhotoUrl: users.profilePhotoUrl, stripeAccountStatus: users.stripeAccountStatus,
       stripeAccountId: users.stripeAccountId, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre,
+      cashAppHandle: users.cashAppHandle, paypalUsername: users.paypalUsername, venmoHandle: users.venmoHandle,
     },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     // Allow published OR public songs — OG tags should work for any accessible song
@@ -4420,5 +4424,42 @@ export async function deleteEvidence(id: number, userId: number): Promise<boolea
   const [row] = await db.select().from(workEvidence).where(eq(workEvidence.id, id));
   if (!row || row.addedByUserId !== userId) return false;
   await db.delete(workEvidence).where(eq(workEvidence.id, id));
+  return true;
+}
+
+// ─── Derivatives ──────────────────────────────────────────────────────────────
+
+export async function getDerivativesByParent(parentSongId: number): Promise<Derivative[]> {
+  const db = await getDb();
+  return db.select().from(derivatives).where(eq(derivatives.parentSongId, parentSongId)).orderBy(desc(derivatives.createdAt));
+}
+
+export async function getDerivativesByCreator(creatorUserId: number): Promise<Derivative[]> {
+  const db = await getDb();
+  return db.select().from(derivatives).where(eq(derivatives.creatorUserId, creatorUserId)).orderBy(desc(derivatives.createdAt));
+}
+
+export async function createDerivative(data: InsertDerivative): Promise<Derivative> {
+  const db = await getDb();
+  const [result] = await db.insert(derivatives).values(data);
+  const id = (result as any).insertId;
+  const [row] = await db.select().from(derivatives).where(eq(derivatives.id, id));
+  return row;
+}
+
+export async function updateDerivative(id: number, userId: number, data: Partial<InsertDerivative>): Promise<Derivative | null> {
+  const db = await getDb();
+  const [existing] = await db.select().from(derivatives).where(eq(derivatives.id, id));
+  if (!existing || existing.creatorUserId !== userId) return null;
+  await db.update(derivatives).set(data).where(eq(derivatives.id, id));
+  const [updated] = await db.select().from(derivatives).where(eq(derivatives.id, id));
+  return updated ?? null;
+}
+
+export async function deleteDerivative(id: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  const [existing] = await db.select().from(derivatives).where(eq(derivatives.id, id));
+  if (!existing || existing.creatorUserId !== userId) return false;
+  await db.delete(derivatives).where(eq(derivatives.id, id));
   return true;
 }

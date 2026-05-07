@@ -4381,3 +4381,14 @@
 - [x] Sync migration journal: insert 0095 record into __drizzle_migrations with correct hash/timestamp
 - [x] pnpm db:push succeeds — migrations applied successfully
 - [x] tsc --noEmit exits 0
+
+## Phase 149
+- [ ] Hero slide body text: cap at 2 lines on mobile with line-clamp-2
+- [ ] Derivatives tab in Creator Studio (DB schema + procedure + UI)
+- [ ] Creator Support Surface visitor view on public song/profile pages
+
+## Phase 149 — Completed
+
+- [x] Hero slide body text capped at 2 lines on mobile (line-clamp-2 sm:line-clamp-none)
+- [x] Derivatives tab in Creator Studio — DB table (derivatives), migration 0097, tRPC procedures (getByParent/getMine/create/update/delete), DerivativesTab UI with form + list + delete
+- [x] Creator Support Surface visitor view — getSongWithCreator now returns cashAppHandle/paypalUsername/venmoHandle; Direct Support pills rendered on SongDetailPage for visitors

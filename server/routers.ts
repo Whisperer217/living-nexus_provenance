@@ -106,6 +106,11 @@ import {
   getEvidenceForSong,
   addEvidence,
   deleteEvidence,
+  getDerivativesByParent,
+  getDerivativesByCreator,
+  createDerivative,
+  updateDerivative,
+  deleteDerivative,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -6488,6 +6493,59 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
       }))
       .mutation(async ({ ctx, input }) => {
         return insertWid({ ...input, creatorId: ctx.user.id });
+      }),
+  }),
+  derivatives: router({
+    /** Get all derivatives declared for a given parent song (public). */
+    getByParent: publicProcedure
+      .input(z.object({ parentSongId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return getDerivativesByParent(input.parentSongId);
+      }),
+    /** Get all derivatives declared by the logged-in creator. */
+    getMine: protectedProcedure
+      .query(async ({ ctx }) => {
+        return getDerivativesByCreator(ctx.user.id);
+      }),
+    /** Declare a new derivative relationship. */
+    create: protectedProcedure
+      .input(z.object({
+        parentSongId: z.number().int().positive(),
+        childSongId: z.number().int().positive().optional(),
+        derivativeType: z.enum(["remix","reinterpretation","alternate_edition","cover","interpolation","sample","adaptation","translation","other"]).default("remix"),
+        permissionStatus: z.enum(["self","licensed","fair_use","pending","unknown"]).default("unknown"),
+        licenseNotes: z.string().max(2000).optional(),
+        externalTitle: z.string().max(512).optional(),
+        externalUrl: z.string().url().optional(),
+        testimony: z.string().max(5000).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return createDerivative({ ...input, creatorUserId: ctx.user.id });
+      }),
+    /** Update an existing derivative declaration (creator only). */
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        derivativeType: z.enum(["remix","reinterpretation","alternate_edition","cover","interpolation","sample","adaptation","translation","other"]).optional(),
+        permissionStatus: z.enum(["self","licensed","fair_use","pending","unknown"]).optional(),
+        licenseNotes: z.string().max(2000).optional(),
+        externalTitle: z.string().max(512).optional(),
+        externalUrl: z.string().url().optional(),
+        testimony: z.string().max(5000).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...data } = input;
+        const updated = await updateDerivative(id, ctx.user.id, data);
+        if (!updated) throw new TRPCError({ code: "NOT_FOUND", message: "Derivative not found or not yours" });
+        return updated;
+      }),
+    /** Delete a derivative declaration (creator only). */
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const ok = await deleteDerivative(input.id, ctx.user.id);
+        if (!ok) throw new TRPCError({ code: "NOT_FOUND", message: "Derivative not found or not yours" });
+        return { success: true };
       }),
   }),
 });

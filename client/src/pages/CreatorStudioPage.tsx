@@ -12,7 +12,7 @@ import { useParams, useLocation } from "wouter";
 import {
   BookOpen, FileText, Lock, Tag, BarChart2, Shield,
   ChevronLeft, Save, Eye, EyeOff, AlertCircle, CheckCircle,
-  Loader2, Upload, X, Layers, Settings
+  Loader2, Upload, X, Layers, Settings, GitFork, Plus, Trash2, ExternalLink
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from '@/_core/hooks/useAuth';
@@ -28,7 +28,7 @@ import { ManuscriptReader } from '@/components/reader/ManuscriptReader';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Tab = "overview" | "pages" | "access" | "metadata" | "resonance" | "provenance";
+type Tab = "overview" | "pages" | "access" | "metadata" | "resonance" | "provenance" | "derivatives";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "overview",   label: "Overview",   icon: <BookOpen size={14} /> },
@@ -37,6 +37,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "metadata",   label: "Metadata",   icon: <Tag size={14} /> },
   { id: "resonance",  label: "Resonance",  icon: <BarChart2 size={14} /> },
   { id: "provenance", label: "Provenance", icon: <Shield size={14} /> },
+  { id: "derivatives", label: "Derivatives", icon: <GitFork size={14} /> },
 ];
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -289,6 +290,9 @@ export default function CreatorStudioPage() {
             )}
             {activeTab === "provenance" && (
               <ProvenanceTab song={song} />
+            )}
+            {activeTab === "derivatives" && (
+              <DerivativesTab songId={bookId} />
             )}
           </div>
         </div>
@@ -653,6 +657,196 @@ function ProvenanceTab({ song }: any) {
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+// ─── Tab: Derivatives ────────────────────────────────────────────────────────
+
+const DERIVATIVE_TYPE_LABELS: Record<string, string> = {
+  remix: "Remix",
+  reinterpretation: "Reinterpretation",
+  alternate_edition: "Alternate Edition",
+  cover: "Cover",
+  interpolation: "Interpolation",
+  sample: "Sample",
+  adaptation: "Adaptation",
+  translation: "Translation",
+  other: "Other",
+};
+
+const PERMISSION_LABELS: Record<string, string> = {
+  self: "Self (I own both works)",
+  licensed: "Licensed",
+  fair_use: "Fair Use",
+  pending: "Pending Permission",
+  unknown: "Not Specified",
+};
+
+function DerivativesTab({ songId }: { songId: number }) {
+  const utils = trpc.useUtils();
+  const { data: list, isLoading } = trpc.derivatives.getByParent.useQuery({ parentSongId: songId });
+  const createMut = trpc.derivatives.create.useMutation({
+    onSuccess: () => utils.derivatives.getByParent.invalidate({ parentSongId: songId }),
+  });
+  const deleteMut = trpc.derivatives.delete.useMutation({
+    onSuccess: () => utils.derivatives.getByParent.invalidate({ parentSongId: songId }),
+  });
+
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    derivativeType: "remix" as string,
+    permissionStatus: "unknown" as string,
+    externalTitle: "",
+    externalUrl: "",
+    licenseNotes: "",
+    testimony: "",
+  });
+
+  const handleCreate = () => {
+    createMut.mutate({
+      parentSongId: songId,
+      derivativeType: form.derivativeType as any,
+      permissionStatus: form.permissionStatus as any,
+      externalTitle: form.externalTitle || undefined,
+      externalUrl: form.externalUrl || undefined,
+      licenseNotes: form.licenseNotes || undefined,
+      testimony: form.testimony || undefined,
+    }, {
+      onSuccess: () => {
+        setShowForm(false);
+        setForm({ derivativeType: "remix", permissionStatus: "unknown", externalTitle: "", externalUrl: "", licenseNotes: "", testimony: "" });
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-heading font-bold tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.7)" }}>Derivative Declarations</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>Record remixes, covers, and other works derived from this artifact.</p>
+        </div>
+        <button
+          onClick={() => setShowForm(v => !v)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-bold tracking-wide transition-all hover:opacity-80"
+          style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}
+        >
+          <Plus size={12} /> Declare Derivative
+        </button>
+      </div>
+
+      {/* Add form */}
+      {showForm && (
+        <div className="rounded-xl p-5 space-y-4" style={{ background: "rgba(196,154,40,0.05)", border: "1px solid rgba(196,154,40,0.15)" }}>
+          <p className="text-xs font-heading font-bold tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.6)" }}>New Derivative Declaration</p>
+          <div className="grid grid-cols-2 gap-4">
+            <StudioSection label="Type">
+              <Select value={form.derivativeType} onValueChange={v => setForm(f => ({ ...f, derivativeType: v }))}>
+                <SelectTrigger className="studio-input"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(DERIVATIVE_TYPE_LABELS).map(([v, l]) => (
+                    <SelectItem key={v} value={v}>{l}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </StudioSection>
+            <StudioSection label="Permission Status">
+              <Select value={form.permissionStatus} onValueChange={v => setForm(f => ({ ...f, permissionStatus: v }))}>
+                <SelectTrigger className="studio-input"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(PERMISSION_LABELS).map(([v, l]) => (
+                    <SelectItem key={v} value={v}>{l}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </StudioSection>
+          </div>
+          <StudioSection label="External Title" hint="If the derivative is not on Living Nexus, enter its title here.">
+            <Input value={form.externalTitle} onChange={e => setForm(f => ({ ...f, externalTitle: e.target.value }))} placeholder="e.g. My Remix — SoundCloud" className="studio-input" />
+          </StudioSection>
+          <StudioSection label="External URL" hint="Link to the derivative work (optional).">
+            <Input value={form.externalUrl} onChange={e => setForm(f => ({ ...f, externalUrl: e.target.value }))} placeholder="https://…" className="studio-input" />
+          </StudioSection>
+          <StudioSection label="License Notes" hint="Describe the agreement or license terms (optional).">
+            <Textarea value={form.licenseNotes} onChange={e => setForm(f => ({ ...f, licenseNotes: e.target.value }))} placeholder="e.g. Verbal permission granted on 2024-01-15" className="studio-input" rows={2} />
+          </StudioSection>
+          <StudioSection label="Testimony" hint="Your statement about this derivative relationship (optional).">
+            <Textarea value={form.testimony} onChange={e => setForm(f => ({ ...f, testimony: e.target.value }))} placeholder="Describe the creative lineage, inspiration, or transformation…" className="studio-input" rows={3} />
+          </StudioSection>
+          <div className="flex gap-2 justify-end">
+            <button onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs font-heading" style={{ color: "var(--ln-smoke)" }}>Cancel</button>
+            <button
+              onClick={handleCreate}
+              disabled={createMut.isPending}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-heading font-bold tracking-wide transition-all hover:opacity-90 disabled:opacity-50"
+              style={{ background: "var(--ln-gold)", color: "#0D1419" }}
+            >
+              {createMut.isPending ? <Loader2 size={12} className="animate-spin" /> : <GitFork size={12} />}
+              Declare
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* List */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8"><Loader2 className="animate-spin" size={20} style={{ color: "var(--ln-gold)" }} /></div>
+      ) : !list || list.length === 0 ? (
+        <div
+          className="rounded-xl p-8 text-center"
+          style={{ background: "rgba(196,154,40,0.03)", border: "1px dashed rgba(196,154,40,0.15)" }}
+        >
+          <GitFork size={28} className="mx-auto mb-3" style={{ color: "rgba(196,154,40,0.3)" }} />
+          <p className="text-sm font-heading" style={{ color: "var(--ln-smoke)" }}>No derivatives declared yet.</p>
+          <p className="text-xs mt-1" style={{ color: "rgba(196,154,40,0.4)" }}>Declare remixes, covers, or other works that derive from this artifact.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {list.map((d: any) => (
+            <div
+              key={d.id}
+              className="rounded-xl p-4 flex items-start gap-4"
+              style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.12)" }}
+            >
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-heading font-bold px-2 py-0.5 rounded-md" style={{ background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)" }}>
+                    {DERIVATIVE_TYPE_LABELS[d.derivativeType] ?? d.derivativeType}
+                  </span>
+                  <span className="text-xs px-2 py-0.5 rounded-md" style={{ background: "rgba(255,255,255,0.05)", color: "var(--ln-smoke)" }}>
+                    {PERMISSION_LABELS[d.permissionStatus] ?? d.permissionStatus}
+                  </span>
+                </div>
+                {d.externalTitle && (
+                  <p className="text-sm font-medium" style={{ color: "var(--ln-parchment)" }}>{d.externalTitle}</p>
+                )}
+                {d.externalUrl && (
+                  <a href={d.externalUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs underline hover:opacity-80" style={{ color: "var(--ln-gold)" }}>
+                    <ExternalLink size={10} /> {d.externalUrl}
+                  </a>
+                )}
+                {d.testimony && (
+                  <p className="text-xs italic mt-1" style={{ color: "var(--ln-smoke)" }}>"{d.testimony}"</p>
+                )}
+                <p className="text-[10px]" style={{ color: "rgba(196,154,40,0.35)" }}>
+                  Declared {new Date(d.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              <button
+                onClick={() => deleteMut.mutate({ id: d.id })}
+                disabled={deleteMut.isPending}
+                className="flex-shrink-0 p-1.5 rounded-lg transition-all hover:opacity-80 disabled:opacity-40"
+                style={{ color: "rgba(255,80,80,0.6)" }}
+                title="Remove declaration"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

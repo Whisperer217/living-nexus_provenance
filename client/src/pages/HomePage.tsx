@@ -766,7 +766,7 @@ function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentica
           {slide.headline}<br />
           <span style={{ color: "#C49A28" }}>{slide.accent}</span>
         </h1>
-        <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "#A09880" }}>
+        <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md line-clamp-2 sm:line-clamp-none" style={{ color: "#A09880" }}>
           {slide.body}
         </p>
         <div className="flex flex-wrap gap-3">

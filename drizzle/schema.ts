@@ -1537,3 +1537,44 @@ export const workEvidence = mysqlTable("workEvidence", {
 }));
 export type WorkEvidence = typeof workEvidence.$inferSelect;
 export type InsertWorkEvidence = typeof workEvidence.$inferInsert;
+
+// ─── Derivatives ──────────────────────────────────────────────────────────────
+// Tracks explicit creative lineage between works: remixes, reinterpretations,
+// alternate editions, covers, and other derivative relationships.
+// parentSongId = the original work; childSongId = the derivative work.
+export const derivatives = mysqlTable("derivatives", {
+  id: int("id").autoincrement().primaryKey(),
+  parentSongId: int("parentSongId").notNull(),   // FK → songs.id (original)
+  childSongId: int("childSongId"),               // FK → songs.id (derivative) — null if external
+  creatorUserId: int("creatorUserId").notNull(),  // FK → users.id (who declared this lineage)
+  derivativeType: mysqlEnum("derivativeType", [
+    "remix",
+    "reinterpretation",
+    "alternate_edition",
+    "cover",
+    "interpolation",
+    "sample",
+    "adaptation",
+    "translation",
+    "other",
+  ]).notNull().default("remix"),
+  permissionStatus: mysqlEnum("permissionStatus", [
+    "self",
+    "licensed",
+    "fair_use",
+    "pending",
+    "unknown",
+  ]).notNull().default("unknown"),
+  licenseNotes: text("licenseNotes"),
+  externalTitle: varchar("externalTitle", { length: 512 }),
+  externalUrl: text("externalUrl"),
+  testimony: text("testimony"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  parentIdx: index("derivatives_parentSongId_idx").on(t.parentSongId),
+  childIdx: index("derivatives_childSongId_idx").on(t.childSongId),
+  creatorIdx: index("derivatives_creatorUserId_idx").on(t.creatorUserId),
+}));
+export type Derivative = typeof derivatives.$inferSelect;
+export type InsertDerivative = typeof derivatives.$inferInsert;
