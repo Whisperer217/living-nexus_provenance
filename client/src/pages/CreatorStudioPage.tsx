@@ -12,7 +12,7 @@ import { useParams, useLocation } from "wouter";
 import {
   BookOpen, FileText, Lock, Tag, BarChart2, Shield,
   ChevronLeft, Save, Eye, EyeOff, AlertCircle, CheckCircle,
-  Loader2, Upload, X, Layers, Settings
+  Loader2, Upload, X, Layers, Settings, Compass, Music
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -21,18 +21,23 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import StoryboardBuilder, { StoryboardPage } from "@/components/StoryboardBuilder";
-import CinematicComicReader from "@/components/reader/CinematicComicReader";
-import ChildrensBookReader from "@/components/reader/ChildrensBookReader";
-import ManuscriptReader from "@/components/reader/ManuscriptReader";
+import { StoryboardBuilder, type StoryboardPage } from "@/components/reader/StoryboardBuilder";
+import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
+import type { PagePanelData, SoundtrackCue } from "@/components/reader/CinematicComicReader";
+import { ChildrensBookReader } from "@/components/reader/ChildrensBookReader";
+import { ManuscriptReader } from "@/components/reader/ManuscriptReader";
+import PanelRegionEditor from "@/components/studio/PanelRegionEditor";
+import SoundtrackCueMapper from "@/components/studio/SoundtrackCueMapper";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Tab = "overview" | "pages" | "access" | "metadata" | "resonance" | "provenance";
+type Tab = "overview" | "pages" | "guided" | "soundtrack" | "access" | "metadata" | "resonance" | "provenance";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "overview",   label: "Overview",   icon: <BookOpen size={14} /> },
   { id: "pages",      label: "Pages",      icon: <Layers size={14} /> },
+  { id: "guided",     label: "Guided Mode", icon: <Compass size={14} /> },
+  { id: "soundtrack", label: "Soundtrack",  icon: <Music size={14} /> },
   { id: "access",     label: "Access",     icon: <Lock size={14} /> },
   { id: "metadata",   label: "Metadata",   icon: <Tag size={14} /> },
   { id: "resonance",  label: "Resonance",  icon: <BarChart2 size={14} /> },
@@ -71,6 +76,8 @@ export default function CreatorStudioPage() {
   const [previewPageCount, setPreviewPageCount] = useState(3);
   const [pagesJson, setPagesJson]       = useState<string | null>(null);
   const [creditsJson, setCreditsJson]   = useState<string>("");
+  const [panelData, setPanelData]       = useState<PagePanelData[]>([]);
+  const [soundtrackCues, setSoundtrackCues] = useState<SoundtrackCue[]>([]);
 
   // ── Sync from server ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -86,6 +93,15 @@ export default function CreatorStudioPage() {
     setPreviewPageCount((song as any).previewPageCount ?? 3);
     setPagesJson((song as any).pagesJson ?? null);
     setCreditsJson((song as any).creditsJson ?? "");
+    // Guided Mode data
+    try {
+      const pd = JSON.parse((song as any).panelRegionsJson ?? "[]");
+      setPanelData(Array.isArray(pd) ? pd : []);
+    } catch { setPanelData([]); }
+    try {
+      const sc = JSON.parse((song as any).soundtrackCuesJson ?? "[]");
+      setSoundtrackCues(Array.isArray(sc) ? sc : []);
+    } catch { setSoundtrackCues([]); }
   }, [song]);
 
   // ── Mutation ────────────────────────────────────────────────────────────────
@@ -116,8 +132,10 @@ export default function CreatorStudioPage() {
       previewPageCount,
       pagesJson: pagesJson ?? undefined,
       creditsJson,
+      panelRegionsJson: JSON.stringify(panelData),
+      soundtrackCuesJson: JSON.stringify(soundtrackCues),
     });
-  }, [bookId, title, description, headlineCaption, genre, moodTags, aiDisclosure, narrativeFormat, readAccess, previewPageCount, pagesJson, creditsJson]);
+  }, [bookId, title, description, headlineCaption, genre, moodTags, aiDisclosure, narrativeFormat, readAccess, previewPageCount, pagesJson, creditsJson, panelData, soundtrackCues]);
 
   // ── Guard ───────────────────────────────────────────────────────────────────
   if (isLoading) {
@@ -148,9 +166,8 @@ export default function CreatorStudioPage() {
   } catch { /* ignore */ }
 
   const previewPages = storyboardPages.map((p: StoryboardPage) => ({
-    url: p.url,
+    imageUrl: p.url,
     pageNumber: p.pageNumber,
-    panelData: (p as any).panelData,
   }));
 
   const accentColor = "var(--ln-gold)";
@@ -271,6 +288,20 @@ export default function CreatorStudioPage() {
                 setPagesJson={setPagesJson}
               />
             )}
+            {activeTab === "guided" && (
+              <GuidedModeTab
+                pages={storyboardPages.map(p => ({ pageNumber: p.pageNumber, url: p.imageUrl ?? p._previewUrl ?? "" }))}
+                panelData={panelData}
+                onChange={setPanelData}
+              />
+            )}
+            {activeTab === "soundtrack" && (
+              <SoundtrackTab
+                pages={storyboardPages.map(p => ({ pageNumber: p.pageNumber }))}
+                cues={soundtrackCues}
+                onChange={setSoundtrackCues}
+              />
+            )}
             {activeTab === "access" && (
               <AccessTab
                 readAccess={readAccess} setReadAccess={setReadAccess}
@@ -313,15 +344,26 @@ export default function CreatorStudioPage() {
             <div className="flex-1 overflow-hidden">
               {previewPages.length > 0 ? (
                 format === "childrens" ? (
-                  <ChildrensBookReader pages={previewPages} title={title} />
+                  <ChildrensBookReader
+                    pages={previewPages.map(p => ({ pageNumber: p.pageNumber, imageUrl: p.imageUrl }))}
+                    title={title}
+                    onClose={() => {}}
+                  />
                 ) : format === "manuscript" ? (
                   <ManuscriptReader
-                    pages={previewPages}
+                    workId={String(bookId)}
                     title={title}
-                    manuscriptText={(song as any).lyricsText ?? ""}
+                    content={{ text: (song as any)?.lyricsText ?? "" }}
+                    onClose={() => {}}
                   />
                 ) : (
-                  <CinematicComicReader pages={previewPages} title={title} />
+                  <CinematicComicReader
+                    pages={previewPages}
+                    title={title}
+                    panelData={panelData}
+                    soundtrackCues={soundtrackCues}
+                    hasWitnessAccess={true}
+                  />
                 )
               ) : (
                 <div className="flex flex-col items-center justify-center h-full gap-3 opacity-40">
@@ -644,6 +686,50 @@ function ProvenanceTab({ song }: any) {
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+// ─── Tab: Guided Mode ────────────────────────────────────────────────────────
+
+function GuidedModeTab({ pages, panelData, onChange }: any) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="font-heading font-bold text-sm tracking-wide" style={{ color: "var(--ln-parchment)" }}>
+          Panel Region Editor
+        </h3>
+        <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>
+          Draw bounding boxes on each page to define panel regions for Guided Mode. Assign read order, transition type, emotional beats, and creator commentary.
+        </p>
+      </div>
+      <PanelRegionEditor
+        pages={pages}
+        panelData={panelData}
+        onChange={onChange}
+      />
+    </div>
+  );
+}
+
+// ─── Tab: Soundtrack ─────────────────────────────────────────────────────────
+
+function SoundtrackTab({ pages, cues, onChange }: any) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="font-heading font-bold text-sm tracking-wide" style={{ color: "var(--ln-parchment)" }}>
+          Soundtrack Orchestration
+        </h3>
+        <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>
+          Map music tracks to pages or panel regions. The Guided Mode reader will trigger these cues during cinematic playback.
+        </p>
+      </div>
+      <SoundtrackCueMapper
+        pages={pages}
+        cues={cues}
+        onChange={onChange}
+      />
     </div>
   );
 }

@@ -1169,7 +1169,8 @@ export const appRouter = router({
     }),
     // ── Verify Collection WID (WID-ALB) ──────────────────────────────────────────
     verifyCollection: publicProcedure.input(z.object({ collectionWid: z.string().min(1) })).query(async ({ input }) => {
-      const collection = await getCollectionByWid(input.collectionWid);
+      let collection;
+      try { collection = await getCollectionByWid(input.collectionWid); } catch { collection = undefined; }
       if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "No collection found for this WID-ALB" });
       const tracks = await getSongsByCollectionId(collection.id);
       const creator = await getUserById(collection.creatorId);
@@ -1259,6 +1260,13 @@ export const appRouter = router({
       externalLinksJson: z.string().max(4096).nullable().optional(),
       // Narrative Format — reader engine selector
       narrativeFormat: z.enum(["comic", "childrens", "manuscript"]).nullable().optional(),
+      // Guided Reader: Panel Regions & Soundtrack Cues
+      panelRegionsJson: z.string().max(500000).nullable().optional(),
+      soundtrackCuesJson: z.string().max(100000).nullable().optional(),
+      // Title / description / headline
+      title: z.string().max(255).optional(),
+      description: z.string().max(10000).nullable().optional(),
+      headlineCaption: z.string().max(280).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
