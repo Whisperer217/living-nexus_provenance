@@ -666,6 +666,13 @@
       "when": 1778105737979,
       "tag": "0095_amusing_master_mold",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "5",
+      "when": 1778116569514,
+      "tag": "0096_careful_blindfold",
+      "breakpoints": true
     }
   ]
 }

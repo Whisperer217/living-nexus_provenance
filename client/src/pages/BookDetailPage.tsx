@@ -731,6 +731,10 @@ export default function BookDetailPage() {
             pages={readAccess === "open" || isOwner ? storyboardPages : visiblePages}
             title={song.title}
             onClose={() => setReaderOpen(false)}
+            panelData={(() => { try { return JSON.parse((song as any)?.panelRegionsJson ?? "[]"); } catch { return []; } })()}
+            soundtrackCues={(() => { try { return JSON.parse((song as any)?.soundtrackCuesJson ?? "[]"); } catch { return []; } })()}
+            hasWitnessAccess={true}
+            previewPageCount={previewPageCount}
           />
         )}
         {readerOpen && hasStoryboard && narrativeFormat === "childrens" && (

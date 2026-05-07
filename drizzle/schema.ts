@@ -337,6 +337,14 @@ export const songs = mysqlTable("songs", {
   activationEnabled: boolean("activationEnabled").default(false).notNull(),
   totalFundingCents: int("totalFundingCents").default(0).notNull(),
   activationStagesJson: text("activationStagesJson"),
+  // ─── Guided Reader: Panel Regions & Soundtrack Cues ────────────────────────
+  // panelRegionsJson: JSON array of per-page panel region definitions for Guided Mode.
+  // Structure: [{ page: number; regions: [{ id: string; x: number; y: number; width: number; height: number; type: "panel"|"dialogue"|"narration"|"splash"|"reveal"|"cinematic"; readOrder?: number; transitionType?: "fade"|"zoom"|"pan"|"cut"; isEmotionalBeat?: boolean; commentary?: string }] }]
+  panelRegionsJson: text("panelRegionsJson"),
+  // soundtrackCuesJson: JSON array mapping pages/regions to soundtrack tracks.
+  // Structure: [{ page: number; region?: string; trackId: string; startTime: number; label?: string }]
+  soundtrackCuesJson: text("soundtrackCuesJson"),
+
   // ─── Sovereign Stamp ─────────────────────────────────────────────────────────
   // Authorship tone injection system — BDDT Publishing / Command Domains LLC
   // null = not yet stamped; set = stamped audio file with embedded provenance tone

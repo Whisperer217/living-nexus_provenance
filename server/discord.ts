@@ -15,13 +15,15 @@ export type DiscordEventType =
   | "wid_minted"
   | "track_upload"
   | "tip_received"
-  | "like_surge";
+  | "like_surge"
+  | "jukebox_room";
 
 export const DISCORD_EVENT_LABELS: Record<DiscordEventType, string> = {
   wid_minted:    "WID Minted",
   track_upload:  "New Track Upload",
   tip_received:  "Tip Received",
   like_surge:    "Like Surge",
+  jukebox_room:  "Jukebox Room Created",
 };
 
 export const DISCORD_EVENT_DESCRIPTIONS: Record<DiscordEventType, string> = {
@@ -29,6 +31,7 @@ export const DISCORD_EVENT_DESCRIPTIONS: Record<DiscordEventType, string> = {
   track_upload:  "Fires when a creator completes a track upload",
   tip_received:  "Fires when a fan sends a tip to a creator",
   like_surge:    "Fires when a track gains 10+ likes in under an hour",
+  jukebox_room:  "Fires when a creator opens a new Jukebox listening room",
 };
 
 // ─── In-memory rate limiter (30 req/min per URL) ──────────────────────────────
@@ -137,6 +140,22 @@ function formatMessage(event: DiscordEventType, payload: Record<string, unknown>
             { name: "Track", value: String(payload.title ?? "Unknown"), inline: true },
             { name: "Creator", value: String(payload.creatorName ?? "Unknown"), inline: true },
             { name: "New Likes", value: `+${String(payload.newLikes ?? "10")} in the last hour`, inline: false },
+          ],
+          timestamp: new Date().toISOString(),
+          footer: { text: "Living Nexus · Audio Provenance Platform" },
+        }],
+      };
+
+    case "jukebox_room":
+      return {
+        ...base,
+        embeds: [{
+          title: "🎵 Jukebox Room Opened",
+          color: 0xA855F7,
+          description: `A creator just opened a live listening room.`,
+          fields: [
+            { name: "Room Code", value: String(payload.roomCode ?? "—"), inline: true },
+            { name: "Host", value: String(payload.hostName ?? "Unknown"), inline: true },
           ],
           timestamp: new Date().toISOString(),
           footer: { text: "Living Nexus · Audio Provenance Platform" },

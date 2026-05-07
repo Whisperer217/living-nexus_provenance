@@ -4369,3 +4369,15 @@
 - [x] Sync migration journal: insert 0095 record into __drizzle_migrations with correct hash/timestamp
 - [x] pnpm db:push succeeds — migrations applied successfully
 - [x] tsc --noEmit exits 0
+
+## Phase 146 Integration (checkpoint 464186e)
+- [x] Fix CreatorStudioPage.tsx import paths (useAuth, StoryboardBuilder, reader components)
+- [x] Add title/description/headlineCaption/moodTags to updateMetadata procedure input schema
+- [x] Fix z.record(z.unknown()) → z.record(z.string(), z.unknown()) in routers.ts
+- [x] Fix ProfilePage.tsx: define isOwn = !!user
+- [x] Add cashAppHandle/paypalUsername/venmoHandle to profile.update procedure input schema
+- [x] Fix moodTags type: string → string[] conversion at call site
+- [x] Fix reader component props in CreatorStudioPage preview (onClose, content shape)
+- [x] Sync migration journal: insert 0095 record into __drizzle_migrations with correct hash/timestamp
+- [x] pnpm db:push succeeds — migrations applied successfully
+- [x] tsc --noEmit exits 0
