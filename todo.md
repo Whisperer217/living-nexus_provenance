@@ -4480,3 +4480,23 @@
 - [x] Fix 4 pre-existing db.ts errors (execute<any[]> + implicit any)
 - [x] tsc --noEmit exits 0 (fully clean build)
 - [x] 201/201 tests passing
+
+## Phase Layer3-P3 — HMAC Worker Authentication
+- [x] Add LN_WORKER_SECRET to backend env via webdev_request_secrets
+- [x] server/_core/env.ts: workerSecret + cloudWorkerUrl fields
+- [x] server/workerAuth.ts: signPayload(), requireWorkerAuth() middleware, dispatchWorkerJob() helper
+- [x] server/workerCallbackRoute.ts: /api/worker/health, /api/worker/comic-processed, /api/worker/guide-extracted routes
+- [x] server/_core/index.ts: workerCallbackRouter registered before tRPC
+- [x] Cloud worker worker.js: HMAC signPayload() + callbackToBackend() with X-LN-Timestamp / X-LN-Signature headers
+- [x] Systemd ln-worker.service: LN_WORKER_SECRET + LN_API_URL env vars injected
+- [x] Worker health confirmed: http://127.0.0.1:3001/health returns ok
+- [x] tsc --noEmit exits 0
+- [x] 201/201 tests passing
+
+## Phase Layer3-P1 — Comic Processing Pipeline (Pending)
+- [ ] Add ioredis dependency to backend for direct Redis dispatch
+- [ ] server/workerQueue.ts: dispatchComicJob() helper (pushes Bull job to Redis)
+- [ ] songs.dispatchComicProcessing tRPC procedure: protectedProcedure, dispatches job per page
+- [ ] CreatorStudioPage: call dispatchComicProcessing after page upload success
+- [ ] Mission Control page (/mission-control): worker health, queue depths, recent jobs
+
