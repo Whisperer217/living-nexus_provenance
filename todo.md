@@ -4450,3 +4450,13 @@
 - [x] Fix pageNumber missing from pages type in DiscoverPage/ExplorePage/HomePage
 - [x] Fix isAuthenticated → !authLoading in KeeperComposePage
 - [x] 187/187 tests passing
+
+## Phase 149b — Manifestation-First Refactor Sync
+
+- [x] Merge commit 11ecb54 (Phase 149b) from GitHub
+- [x] EvidencePanel: embedded snapshot when no artifacts, collapsed default, provenance depth layer
+- [x] SongDetailPage: confirmed section order (hero → testimony → controls → resonance → gallery → HAAI → activation → witnessed work → lyrics)
+- [x] Comic reader-first flow: BookDetailPage, WorkCarousel, ExploreCard all launch CinematicComicReader inline
+- [x] Fixed 4 pre-existing db.ts errors (execute<any[]> → (db as any).execute(), contribRows.map(c: any))
+- [x] tsc --noEmit exits 0 (fully clean build)
+- [x] 187/187 tests passing

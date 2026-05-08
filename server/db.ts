@@ -4161,7 +4161,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
   const perType = Math.ceil(limit / 3);
   try {
     // Tips (join users for tipper name, join songs for title)
-    const [tipRows] = await db.execute<any[]>(sql`
+    const [tipRows] = await (db as any).execute(sql`
       SELECT 'tip' AS type, CONCAT('tip-', t.id) AS id,
              COALESCE(u.name, 'A fan') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4173,7 +4173,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       ORDER BY t.createdAt DESC LIMIT ${sql.raw(String(perType))}
     `);
     // Comments (DB column is 'text', no authorName — use userId join)
-    const [commentRows] = await db.execute<any[]>(sql`
+    const [commentRows] = await (db as any).execute(sql`
       SELECT 'comment' AS type, CONCAT('comment-', c.id) AS id,
              COALESCE(u.name, 'A listener') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4185,7 +4185,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       ORDER BY c.createdAt DESC LIMIT ${sql.raw(String(perType))}
     `);
     // Likes
-    const [likeRows] = await db.execute<any[]>(sql`
+    const [likeRows] = await (db as any).execute(sql`
       SELECT 'like' AS type, CONCAT('like-', l.id) AS id,
              'Someone' AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4276,7 +4276,7 @@ export async function getActivationForSong(songId: number): Promise<{
       .where(eq(activationContributions.songId, songId))
       .orderBy(desc(activationContributions.createdAt))
       .limit(15);
-    const recentContributors: RecentContributor[] = contribRows.map(c => ({
+    const recentContributors: RecentContributor[] = contribRows.map((c: any) => ({
       userId: c.userId ?? null,
       name: c.anonymous ? 'Anonymous' : (c.userName ?? c.contributorName ?? 'Contributor'),
       image: c.anonymous ? null : ((c.userImage as string | null) ?? null),
