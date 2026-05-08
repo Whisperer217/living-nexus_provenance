@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "3417d3dc-d9c0-4237-8b51-c1477ac8ac10",
-  "prevId": "2b23dad7-808b-4122-a5bc-2286d9673c77",
+  "id": "4b5bbca2-beb0-4b01-ab29-a7c0a6642098",
+  "prevId": "cdbf3c18-37de-4abe-af92-d2aee792104a",
   "tables": {
     "activationContributions": {
       "name": "activationContributions",

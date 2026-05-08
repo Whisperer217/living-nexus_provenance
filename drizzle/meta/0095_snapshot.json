@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "d5ed717d-cd91-4d49-80b6-a72d2444913f",
-  "prevId": "3417d3dc-d9c0-4237-8b51-c1477ac8ac10",
+  "id": "060281d5-a94e-4e79-9b0c-ea5cf85e30c7",
+  "prevId": "4b5bbca2-beb0-4b01-ab29-a7c0a6642098",
   "tables": {
     "activationContributions": {
       "name": "activationContributions",
@@ -6127,27 +6127,6 @@
         },
         "youtubeHandle": {
           "name": "youtubeHandle",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "cashAppHandle": {
-          "name": "cashAppHandle",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "paypalUsername": {
-          "name": "paypalUsername",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "venmoHandle": {
-          "name": "venmoHandle",
           "type": "varchar(64)",
           "primaryKey": false,
           "notNull": false,

@@ -1,16 +1,17 @@
 /**
- * EvidencePanel
+ * EvidencePanel — Witnessed Work Layer
  *
- * Displays the Work Evidence Layer for a song — a chronological list of
- * proof artifacts attached to the work's provenance chain.
+ * Phase 149b: "The manifestation IS the evidence."
  *
- * Evidence types:
- *   file  — S3-uploaded artifact (PDF, audio, image, etc.)
- *   link  — External URL (contract, registration, reference)
+ * When no supplementary proof artifacts have been attached yet,
+ * the panel renders an embedded manifestation snapshot instead of
+ * an empty state. The work itself — cover art, testimony, WID —
+ * is surfaced as the primary evidence.
+ *
+ * Supplementary evidence types (owner-addable):
+ *   file  — S3-uploaded artifact (PDF, audio, stems, contract)
+ *   link  — External URL (registration, reference, contract)
  *   note  — Plain-text memo timestamped to the chain
- *
- * Owner-only: Add Evidence button opens an inline form.
- * Public: Read-only chronological list with hash badges.
  */
 import { useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
@@ -21,12 +22,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   FileText, Link2, StickyNote, Plus, ChevronDown, ChevronUp,
-  Trash2, Hash, ExternalLink, ShieldCheck, Loader2,
+  Trash2, Hash, ExternalLink, ShieldCheck, Loader2, Play, BookOpen, Music2,
 } from "lucide-react";
+
+interface ManifestationSnapshot {
+  coverArtUrl?: string | null;
+  fileUrl?: string | null;
+  headlineCaption?: string | null;
+  description?: string | null;
+  witnessId?: string | null;
+  title?: string | null;
+  contentType?: string | null;
+  /** pages JSON string for comics/books */
+  pagesJson?: string | null;
+}
 
 interface EvidencePanelProps {
   songId: number;
   isOwner: boolean;
+  /** Optional: pass the work's manifestation data to show embedded snapshot when evidence list is empty */
+  manifestation?: ManifestationSnapshot;
+  /** Optional: callback to open the reader for comic/book works */
+  onOpenReader?: () => void;
+  /** Optional: callback to play audio for song works */
+  onPlay?: () => void;
 }
 
 const TYPE_META = {
@@ -41,11 +60,128 @@ function fmtDate(ts: Date | string | number) {
   });
 }
 
-export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
+/** Embedded manifestation snapshot — shown when no supplementary proof artifacts exist */
+function ManifestationSnapshotBlock({
+  m,
+  onPlay,
+  onOpenReader,
+}: {
+  m: ManifestationSnapshot;
+  onPlay?: () => void;
+  onOpenReader?: () => void;
+}) {
+  const isComic = m.contentType === "comic" || m.contentType === "manuscript";
+  const isAudio = !isComic && (m.fileUrl || m.contentType === "audio");
+  const hasPages = (() => {
+    try { return m.pagesJson ? JSON.parse(m.pagesJson).length > 0 : false; } catch { return false; }
+  })();
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden mb-4"
+      style={{ border: "1px solid rgba(196,154,40,0.18)", background: "rgba(255,255,255,0.02)" }}
+    >
+      {/* Cover art strip */}
+      {m.coverArtUrl && (
+        <div className="relative" style={{ aspectRatio: "16/6", overflow: "hidden" }}>
+          <img
+            src={m.coverArtUrl}
+            alt=""
+            aria-hidden
+            className="w-full h-full object-cover"
+            style={{ filter: "brightness(0.55) saturate(0.8)" }}
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 100%)" }} />
+          {/* Primary CTA overlay */}
+          {(isAudio && onPlay) && (
+            <button
+              onClick={onPlay}
+              className="absolute inset-0 flex items-center justify-center gap-2 group"
+              aria-label="Play this work"
+            >
+              <div
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 group-hover:scale-105"
+                style={{
+                  background: "rgba(196,154,40,0.85)",
+                  border: "1px solid rgba(196,154,40,0.5)",
+                  boxShadow: "0 4px 20px rgba(196,154,40,0.2)",
+                }}
+              >
+                <Play size={14} fill="#0A0B08" style={{ color: "#0A0B08" }} className="ml-0.5" />
+                <span className="text-xs font-heading font-bold tracking-widest" style={{ color: "#0A0B08" }}>PLAY NOW</span>
+              </div>
+            </button>
+          )}
+          {(isComic && (onOpenReader || hasPages)) && (
+            <button
+              onClick={onOpenReader}
+              className="absolute inset-0 flex items-center justify-center gap-2 group"
+              aria-label="Read this work"
+            >
+              <div
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 group-hover:scale-105"
+                style={{
+                  background: "rgba(196,154,40,0.85)",
+                  border: "1px solid rgba(196,154,40,0.5)",
+                  boxShadow: "0 4px 20px rgba(196,154,40,0.2)",
+                }}
+              >
+                <BookOpen size={14} style={{ color: "#0A0B08" }} />
+                <span className="text-xs font-heading font-bold tracking-widest" style={{ color: "#0A0B08" }}>READ NOW</span>
+              </div>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Testimony excerpt + WID */}
+      <div className="px-4 py-3 space-y-2">
+        {/* Content type badge */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+            style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.2)" }}>
+            {isComic
+              ? <BookOpen size={10} style={{ color: "rgba(196,154,40,0.7)" }} />
+              : <Music2 size={10} style={{ color: "rgba(196,154,40,0.7)" }} />}
+            <span className="text-[10px] font-heading font-bold tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.7)" }}>
+              {m.contentType ?? "Work"} — Primary Manifestation
+            </span>
+          </div>
+          {m.witnessId && (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full font-mono"
+              style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)" }}>
+              <Hash size={9} style={{ color: "rgba(74,222,128,0.7)" }} />
+              <span className="text-[10px]" style={{ color: "rgba(74,222,128,0.7)" }}>{m.witnessId.slice(0, 20)}…</span>
+            </div>
+          )}
+        </div>
+
+        {/* Testimony excerpt */}
+        {(m.headlineCaption || m.description) && (
+          <p
+            className="text-xs leading-relaxed"
+            style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}
+          >
+            "{(m.headlineCaption || m.description || "").slice(0, 200)}{((m.headlineCaption || m.description || "").length > 200 ? "…" : "")}"
+          </p>
+        )}
+
+        {/* Framing statement */}
+        <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+          The manifestation itself is the primary evidence of this work's existence and authorship.
+          Supplementary proof artifacts (drafts, stems, contracts) can be attached below by the creator.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function EvidencePanel({ songId, isOwner, manifestation, onPlay, onOpenReader }: EvidencePanelProps) {
   const { user } = useAuth();
   const utils = trpc.useUtils();
 
-  const [expanded, setExpanded] = useState(true);
+  // Default collapsed — manifestation hero above already surfaces the work
+  const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState<"file" | "link" | "note">("file");
   const [formTitle, setFormTitle] = useState("");
@@ -105,10 +241,8 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
         base64,
       });
       setFormUrl(result.url);
-      // Pre-fill title from filename if empty
       if (!formTitle) setFormTitle(file.name.replace(/\.[^.]+$/, ""));
       toast.success("File uploaded — hash computed.");
-      // Auto-submit after upload
       await addMutation.mutateAsync({
         songId,
         type: "file",
@@ -138,6 +272,9 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
     });
   };
 
+  // Badge count: show items count if any, otherwise show "Manifestation" if we have a snapshot
+  const badgeCount = items.length > 0 ? items.length : (manifestation ? null : 0);
+
   return (
     <div
       className="mt-6 rounded-2xl overflow-hidden"
@@ -166,11 +303,23 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                 border: "1px solid rgba(196,154,40,0.2)",
               }}
             >
-              {items.length}
+              {items.length} artifact{items.length !== 1 ? "s" : ""}
+            </span>
+          )}
+          {items.length === 0 && manifestation && (
+            <span
+              className="text-xs px-1.5 py-0.5 rounded"
+              style={{
+                background: "rgba(74,222,128,0.06)",
+                color: "rgba(74,222,128,0.6)",
+                border: "1px solid rgba(74,222,128,0.2)",
+              }}
+            >
+              Manifestation on record
             </span>
           )}
           <span className="text-xs ml-1" style={{ color: "var(--ln-smoke)" }}>
-            {expanded ? "Tap to collapse" : "Tap to expand"}
+            {expanded ? "Collapse" : "Expand"}
           </span>
         </div>
         {expanded
@@ -180,28 +329,43 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
 
       {expanded && (
         <div className="px-5 pb-5">
-          {/* Evidence list */}
-          {isLoading ? (
+          {/* Manifestation snapshot — shown when no supplementary artifacts exist */}
+          {!isLoading && items.length === 0 && manifestation && (
+            <ManifestationSnapshotBlock
+              m={manifestation}
+              onPlay={onPlay}
+              onOpenReader={onOpenReader}
+            />
+          )}
+
+          {/* Loading */}
+          {isLoading && (
             <div className="flex items-center gap-2 py-4" style={{ color: "var(--ln-smoke)" }}>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-sm">Loading evidence…</span>
+              <span className="text-sm">Loading…</span>
             </div>
-          ) : items.length === 0 ? (
+          )}
+
+          {/* Empty state — no manifestation data either */}
+          {!isLoading && items.length === 0 && !manifestation && (
             <div
               className="rounded-xl px-4 py-6 text-center mb-4"
               style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(196,154,40,0.15)" }}
             >
               <ShieldCheck className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(196,154,40,0.3)" }} />
               <p className="text-sm font-medium mb-1" style={{ color: "var(--ln-parchment)" }}>
-                No evidence attached yet
+                No supplementary artifacts yet
               </p>
               <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>
                 {isOwner
-                  ? "Attach drafts, stems, contracts, or notes to prove this work is yours."
-                  : "The creator has not attached evidence to this work yet."}
+                  ? "Attach drafts, stems, contracts, or notes to strengthen this work's provenance chain."
+                  : "The creator has not attached supplementary proof artifacts to this work yet."}
               </p>
             </div>
-          ) : (
+          )}
+
+          {/* Supplementary artifact list */}
+          {items.length > 0 && (
             <div className="space-y-2 mb-4">
               {items.map((item) => {
                 const meta = TYPE_META[item.type];
@@ -215,7 +379,6 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                       border: "1px solid rgba(196,154,40,0.1)",
                     }}
                   >
-                    {/* Type icon */}
                     <div
                       className="flex-shrink-0 mt-0.5 p-1.5 rounded-lg"
                       style={{ background: "rgba(196,154,40,0.07)" }}
@@ -223,13 +386,9 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                       <Icon className="w-3.5 h-3.5" style={{ color: meta.color }} />
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className="text-sm font-medium truncate"
-                          style={{ color: "var(--ln-parchment)" }}
-                        >
+                        <span className="text-sm font-medium truncate" style={{ color: "var(--ln-parchment)" }}>
                           {item.title}
                         </span>
                         <span
@@ -244,17 +403,12 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                         </span>
                       </div>
 
-                      {/* Note body */}
                       {item.type === "note" && item.noteBody && (
-                        <p
-                          className="text-xs mt-1 leading-relaxed"
-                          style={{ color: "var(--ln-smoke)" }}
-                        >
+                        <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
                           {item.noteBody}
                         </p>
                       )}
 
-                      {/* Link / file URL */}
                       {item.url && item.type !== "note" && (
                         <a
                           href={item.url}
@@ -268,7 +422,6 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                         </a>
                       )}
 
-                      {/* Hash badge */}
                       {item.hash && (
                         <div
                           className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-[10px] font-mono"
@@ -284,24 +437,22 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                         </div>
                       )}
 
-                      {/* Timestamp */}
                       <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.25)" }}>
                         Added {fmtDate(item.createdAt)}
                       </p>
                     </div>
 
-                    {/* Delete (owner only) */}
                     {isOwner && (
                       <button
                         type="button"
                         onClick={() => {
-                          if (confirm("Remove this evidence from the chain?")) {
+                          if (confirm("Remove this artifact from the chain?")) {
                             deleteMutation.mutate({ id: item.id });
                           }
                         }}
                         className="flex-shrink-0 p-1.5 rounded-lg transition-all hover:bg-red-500/10"
                         style={{ color: "rgba(255,255,255,0.2)" }}
-                        aria-label="Delete evidence"
+                        aria-label="Delete artifact"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -312,7 +463,7 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
             </div>
           )}
 
-          {/* Add Evidence — owner only */}
+          {/* Add artifact — owner only */}
           {isOwner && !showForm && (
             <Button
               size="sm"
@@ -326,7 +477,7 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
               }}
             >
               <Plus className="w-3.5 h-3.5" />
-              Add Witnessed Work
+              Add Proof Artifact
             </Button>
           )}
 
@@ -340,10 +491,9 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                 className="text-xs font-semibold mb-3 uppercase tracking-widest"
                 style={{ color: "rgba(196,154,40,0.7)" }}
               >
-                Add to Witnessed Work
+                Add Proof Artifact
               </p>
 
-              {/* Type selector */}
               <div className="flex gap-2 mb-3">
                 {(["file", "link", "note"] as const).map((t) => {
                   const m = TYPE_META[t];
@@ -367,7 +517,6 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                 })}
               </div>
 
-              {/* Title */}
               <Input
                 placeholder="Title (e.g. Draft v1, Original Lyrics, Contract)"
                 value={formTitle}
@@ -376,7 +525,6 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                 style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-parchment)" }}
               />
 
-              {/* File upload */}
               {formType === "file" && (
                 <div>
                   <input
@@ -399,18 +547,12 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                     {uploading ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>
                     ) : (
-                      <><Plus className="w-4 h-4" /> Choose file (max 16 MB)</>
+                      <><FileText className="w-4 h-4" /> Choose file (max 16 MB)</>
                     )}
                   </label>
-                  {formUrl && (
-                    <p className="text-xs mt-1.5" style={{ color: "rgba(74,222,128,0.7)" }}>
-                      ✓ File uploaded — hash computed
-                    </p>
-                  )}
                 </div>
               )}
 
-              {/* Link URL */}
               {formType === "link" && (
                 <Input
                   placeholder="https://…"
@@ -421,10 +563,9 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                 />
               )}
 
-              {/* Note body */}
               {formType === "note" && (
                 <Textarea
-                  placeholder="Write your note…"
+                  placeholder="Write a note…"
                   value={formNote}
                   onChange={(e) => setFormNote(e.target.value)}
                   rows={3}
@@ -433,25 +574,22 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                 />
               )}
 
-              {/* Actions */}
               <div className="flex gap-2 mt-3">
                 {formType !== "file" && (
                   <Button
                     size="sm"
                     onClick={handleSubmit}
                     disabled={addMutation.isPending}
-                    className="gap-1"
-                    style={{ background: "rgba(196,154,40,0.15)", borderColor: "rgba(196,154,40,0.4)", color: "rgba(196,154,40,0.9)" }}
+                    style={{ background: "rgba(196,154,40,0.85)", color: "#0A0B08" }}
                   >
-                    {addMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                    Add to Chain
+                    {addMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Add"}
                   </Button>
                 )}
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => { setShowForm(false); setFormTitle(""); setFormUrl(""); setFormNote(""); }}
-                  style={{ color: "rgba(255,255,255,0.4)" }}
+                  style={{ borderColor: "rgba(255,255,255,0.1)", color: "var(--ln-smoke)" }}
                 >
                   Cancel
                 </Button>

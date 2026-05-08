@@ -1387,7 +1387,21 @@ export default function SongDetailPage() {
         {/* ── ACTIVATION — stage-based funding progress ── */}
         <ActivationPanel songId={songId} songTitle={song.title} />
         {/* ── WITNESSED WORK — proof attachment layer ── */}
-        <EvidencePanel songId={songId} isOwner={isOwner} />
+        <EvidencePanel
+          songId={songId}
+          isOwner={isOwner}
+          manifestation={{
+            coverArtUrl: song.coverArtUrl,
+            fileUrl: song.fileUrl,
+            headlineCaption: (song as any).headlineCaption,
+            description: (song as any).description,
+            witnessId: song.witnessId,
+            title: song.title,
+            contentType: (song as any).contentType ?? "audio",
+            pagesJson: (song as any).pagesJson,
+          }}
+          onPlay={handlePlay}
+        />
 
         {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}
         {song.lyricsText && (
