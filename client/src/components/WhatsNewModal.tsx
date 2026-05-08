@@ -351,7 +351,7 @@ const UPDATES = [
     date: "April 2026",
     label: "",
     items: [
-      { icon: Shield, text: "AI Disclosure Audit — All AI disclosure labels are now unified across every surface: Human-Made, AI-Assisted, and AI-Generated. One shared component, one vocabulary, no ambiguity anywhere on the platform." },
+      { icon: Shield, text: "AI Disclosure Audit — All AI disclosure labels are now unified across every surface: Human-Made, AI-Assisted, and AI-Assisted Manifestation. One shared component, one vocabulary, no ambiguity anywhere on the platform." },
       { icon: ArrowUpFromLine, text: "Work Versioning — Every work now has a Version History. Upload a new version of a track, add a change note and version label, and the original is automatically archived as v1 with its WID preserved. Creative evolution, fully documented." },
       { icon: FileText, text: "Terms of Service — A full Terms page is now live at /terms. It opens with a creator-protection preamble: these terms exist to protect creators, not the platform. Accessible from the sidebar and mobile drawer." },
       { icon: Music, text: "Ordered Playback — Every section on the platform now plays its own ordered queue. Album tracks stay within the album. Homepage sections (Witnessed Voices, Discover, Trending) each play their own list in sequence. No more jumping across unrelated tracks." },

@@ -11,6 +11,7 @@ import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { toast } from "sonner";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
+import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
 
 // Extended genre categories with WID type indicators
 const MUSIC_GENRES = ["Gospel", "Classical", "Rock", "Hip-Hop", "Electronic", "R&B", "Ambient"];
@@ -58,6 +59,7 @@ export default function DiscoverPage() {
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [showAddToList, setShowAddToList] = useState(false);
   const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
+  const [readerSong, setReaderSong] = useState<any | null>(null);
 
   const openMenu = (e: React.MouseEvent, item: any) => {
     e.preventDefault();
@@ -289,14 +291,12 @@ export default function DiscoverPage() {
         {/* ── Witnessed Voices (Music) ── */}
         <WorkCarousel type="audio" title="Witnessed Voices" viewAllHref="/explore" />
 
-        {/* ── Witnessed Manuscripts ── */}
-        <WorkCarousel type="manuscript" title="Witnessed Manuscripts" viewAllHref="/explore?type=manuscript" />
-
+         {/* ── Witnessed Manuscripts ── */}
+        <WorkCarousel type="manuscript" title="Witnessed Manuscripts" viewAllHref="/explore?type=manuscript" onOpenReader={setReaderSong} />
         {/* ── Witnessed Lyrics ── */}
         <WorkCarousel type="lyrics" title="Witnessed Lyrics" viewAllHref="/explore?type=lyrics" />
-
         {/* ── Witnessed Comics ── */}
-        <WorkCarousel type="comic" title="Witnessed Comics" viewAllHref="/explore?type=comic" />
+         <WorkCarousel type="comic" title="Witnessed Comics" viewAllHref="/explore?type=comic" onOpenReader={setReaderSong} />
 
         {/* Genre Filter — extended with non-music categories */}
         <div id="section-genres">
@@ -537,8 +537,8 @@ export default function DiscoverPage() {
             <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Discover Works</h2>
           </div>
           <div className="space-y-6">
-            <WorkCarousel type="manuscript" title="Manuscripts" viewAllHref="/explore?type=manuscript" />
-            <WorkCarousel type="comic" title="Comics" viewAllHref="/explore?type=comic" />
+            <WorkCarousel type="manuscript" title="Manuscripts" viewAllHref="/explore?type=manuscript" onOpenReader={setReaderSong} />
+            <WorkCarousel type="comic" title="Comics" viewAllHref="/explore?type=comic" onOpenReader={setReaderSong} />
           </div>
         </div>
 
@@ -626,6 +626,23 @@ export default function DiscoverPage() {
           </p>
         </div>
       </div>
+      {/* Inline Comic/Manuscript Reader — launched from carousel cards */}
+      {readerSong && (() => {
+        let pages: { imageUrl: string; caption?: string }[] = [];
+        try {
+          const raw = readerSong.pagesJson;
+          if (raw) pages = typeof raw === "string" ? JSON.parse(raw) : raw;
+        } catch { /* ignore */ }
+        return (
+          <div className="fixed inset-0 z-[9999]">
+            <CinematicComicReader
+              pages={pages}
+              title={readerSong.title}
+              onClose={() => setReaderSong(null)}
+            />
+          </div>
+        );
+      })()}
     </div>
   );
 }

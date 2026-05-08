@@ -4424,3 +4424,18 @@
 - [x] Panel region editor: reading order numbering
 - [x] Panel region editor: transition type per region (fade/zoom/pan/cut)
 - [x] Panel region editor: emotional beat markers per region
+
+## Phase 149 — Manifestation-First Experience Refactor
+
+- [x] Song page: dominant PLAY NOW CTA hero with active player state indicator
+- [x] Song page: live waveform canvas visualization integrated into player section
+- [x] Song page: testimony excerpt surfaced in hero (headlineCaption + description)
+- [x] Song page: resonance activity (recent tips + reactions) surfaced near playback
+- [x] Comic/Book page: reader-first architecture — reader launches immediately on card click
+- [x] Comic/Book page: READ NOW / ENTER STORY CTA as primary hero action
+- [x] Comic/Book page: metadata becomes secondary (below reader entry)
+- [x] Rename Evidence section to Witnessed Work / Provenance Layer
+- [x] Reorder SongDetailPage hierarchy: Manifestation → Resonance → Provenance → Commerce
+- [x] Rename RightRail Provenance Verified to Connected Manifestations
+- [x] BookCard: clicking card launches reader immediately (not detail page first)
+- [x] ExplorePage comic cards: clicking launches reader immediately

@@ -221,11 +221,7 @@ const MiniTrackRow = React.forwardRef<HTMLButtonElement, {
                 width: "2px", borderRadius: "1px",
                 background: "var(--ln-gold)",
                 height: "6px",
-                animationName: "drawerWave",
-                animationDuration: `${0.4 + i * 0.12}s`,
-                animationTimingFunction: "ease-in-out",
-                animationIterationCount: "infinite",
-                animationDirection: "alternate",
+                animation: `drawerWave ${0.4 + i * 0.12}s ease-in-out infinite alternate`,
                 animationDelay: `${i * 0.08}s`,
               }} />
             ))}

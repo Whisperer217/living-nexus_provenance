@@ -182,7 +182,7 @@ export default function RightRail() {
             <div className="flex items-center gap-1.5">
               <Shield size={11} style={{ color: "rgba(212,175,55,0.6)" }} />
               <span className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
-                PROVENANCE VERIFIED
+                CONNECTED MANIFESTATIONS
               </span>
             </div>
             <button

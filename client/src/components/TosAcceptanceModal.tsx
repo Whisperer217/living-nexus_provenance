@@ -153,7 +153,7 @@ export function TosAcceptanceModal() {
               <h3 className="text-[#e8dcc8] font-semibold mb-1">5. AI Disclosure</h3>
               <p>
                 You agree to accurately disclose the role of AI tools in the creation of your works using
-                the platform's disclosure system (Human-Made, AI-Assisted, AI-Generated, or
+                the platform's disclosure system (Human-Made, AI-Assisted, AI-Assisted Manifestation, or
                 Human-Authored via AI Instrument). Misrepresentation of AI involvement may result in
                 account suspension.
               </p>

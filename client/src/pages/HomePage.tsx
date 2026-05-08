@@ -28,6 +28,7 @@ import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
 import { ShowcaseRow } from "@/components/ShowcaseRow";
 import { StoreTrackCard } from "@/components/StoreTrackCard";
 import { StoreCreatorCard } from "@/components/StoreCreatorCard";
+import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
 
 /** Animated counter that counts up from 0 to `target` over ~1.2 s */
 function AnimatedCounter({ target }: { target: number }) {
@@ -846,6 +847,11 @@ function mapToSongData(row: any) {
     profilePhotoUrl: creator?.profilePhotoUrl ?? null,
     aiDisclosure: song.aiDisclosure ?? null,
     contentType: song.contentType ?? "audio",
+    // Testimony fields
+    description: song.description ?? null,
+    lyricsText: song.lyricsText ?? null,
+    totalFundingCents: song.totalFundingCents ?? null,
+    tipCount: song.tipCount ?? null,
   };
 }
 
@@ -868,6 +874,7 @@ export default function HomePage() {
   const [activeGenre, setActiveGenre] = useState("All");
   const [tipTarget, setTipTarget] = useState<any | null>(null);
   const [tipRect, setTipRect] = useState<DOMRect | null>(null);
+  const [readerSong, setReaderSong] = useState<any | null>(null);
 
   const discoverInput = useMemo(() => ({
     genre: activeGenre === "All" ? undefined : activeGenre,
@@ -1370,12 +1377,14 @@ export default function HomePage() {
             title="Witnessed Manuscripts"
             limit={12}
             viewAllHref="/explore?medium=manuscript"
+            onOpenReader={setReaderSong}
           />
           <WorkCarousel
             type="comic"
             title="Witnessed Comics"
             limit={12}
             viewAllHref="/explore?medium=comic"
+            onOpenReader={setReaderSong}
           />
         </div>
 
@@ -1603,6 +1612,24 @@ export default function HomePage() {
       {tipTarget !== null && (
         <TipModal track={tipTrack} onClose={() => { setTipTarget(null); setTipRect(null); }} originRect={tipRect} />
       )}
+
+      {/* Inline Comic/Manuscript Reader — launched from carousel cards */}
+      {readerSong && (() => {
+        let pages: { imageUrl: string; caption?: string }[] = [];
+        try {
+          const raw = readerSong.pagesJson;
+          if (raw) pages = typeof raw === "string" ? JSON.parse(raw) : raw;
+        } catch { /* ignore */ }
+        return (
+          <div className="fixed inset-0 z-[9999]">
+            <CinematicComicReader
+              pages={pages}
+              title={readerSong.title}
+              onClose={() => setReaderSong(null)}
+            />
+          </div>
+        );
+      })()}
     </div>
   );
 }

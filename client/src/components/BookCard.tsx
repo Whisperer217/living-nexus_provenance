@@ -18,6 +18,7 @@ interface BookCardProps {
       contentType?: string | null;
       pageCount?: number | null;
       isrc?: string | null; // ISBN stored here
+      pagesJson?: string | null;
     };
     creator?: {
       id?: number | null;
@@ -27,9 +28,11 @@ interface BookCardProps {
   };
   prefetchedLiked?: boolean;
   prefetchedLikeCount?: number;
+  /** If provided, clicking a comic card calls this instead of navigating to /book/:id */
+  onRead?: (song: BookCardProps["item"]["song"]) => void;
 }
 
-export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }: BookCardProps) {
+export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount, onRead }: BookCardProps) {
   const { song, creator } = item;
   const [, navigate] = useLocation();
   const hasPrefetch = prefetchedLiked !== undefined;
@@ -41,6 +44,11 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
   const accentBg   = isComic ? "rgba(239,68,68,0.12)" : "rgba(74,222,128,0.10)";
   const typeLabel  = isComic ? "Comic / Novel" : "Manuscript";
 
+  const handleCardClick = () => {
+    if (isComic && onRead) { onRead(song); return; }
+    navigate(`/book/${song.id}`);
+  };
+
   return (
     <div
       className="group relative flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200"
@@ -49,7 +57,7 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount }:
         border: "1px solid rgba(196,154,40,0.15)",
         boxShadow: "0 2px 12px rgba(0,0,0,0.35)",
       }}
-      onClick={() => navigate(`/book/${song.id}`)}
+      onClick={handleCardClick}
     >
       {/* ── Cover Art — portrait 3:4 ── */}
       <div className="relative w-full overflow-hidden" style={{ aspectRatio: "3/4" }}>

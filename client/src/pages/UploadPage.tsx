@@ -211,6 +211,7 @@ export default function UploadPage() {
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
   const [storyboardPagesJson, setStoryboardPagesJson] = useState<string | null>(null);
+  const [narrativeFormat, setNarrativeFormat] = useState<"comic" | "childrens" | "manuscript" | null>(null);
   const [witnessData, setWitnessData] = useState<WitnessData | null>(null);
   const [generatingWid, setGeneratingWid] = useState(false);
   const [waveformActive, setWaveformActive] = useState(false);
@@ -611,6 +612,7 @@ export default function UploadPage() {
           aiDisclosure,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
           pagesJson: storyboardPagesJson || undefined,
+          narrativeFormat: narrativeFormat ?? (uploadMode === "manuscript" ? "manuscript" : "comic"),
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
@@ -983,6 +985,33 @@ export default function UploadPage() {
                 </div>
               )}
 
+              {/* ── Narrative Format Selector (comic/novel only) ── */}
+              {uploadMode === "comic" && (
+                <div className="rounded-xl p-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>
+                  <p className="text-xs font-heading font-bold tracking-widest mb-3" style={{ color: "var(--ln-gold)" }}>NARRATIVE FORMAT</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { value: "comic", label: "🎭 Comic / Graphic Novel", desc: "Panel-sequenced art, guided reading" },
+                      { value: "childrens", label: "📖 Children's Book", desc: "Full spreads, warm atmosphere, narration" },
+                      { value: "manuscript", label: "📄 Illustrated Novel", desc: "Text-first with visual chapters" },
+                    ] as const).map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setNarrativeFormat(opt.value)}
+                        className="rounded-xl p-3 text-left transition-all"
+                        style={{
+                          background: (narrativeFormat ?? "comic") === opt.value ? "rgba(196,154,40,0.12)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${(narrativeFormat ?? "comic") === opt.value ? "rgba(196,154,40,0.5)" : "rgba(255,255,255,0.08)"}`,
+                        }}
+                      >
+                        <p className="text-xs font-semibold mb-1" style={{ color: "var(--ln-parchment)" }}>{opt.label}</p>
+                        <p className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>{opt.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {/* ── Storyboard Builder (comic/novel only) ── */}
               {uploadMode === "comic" && (
                 <div className="p-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>
@@ -1418,7 +1447,7 @@ export default function UploadPage() {
                     { value: "original" as const, label: "Human Original", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.08)", activeBorder: "rgba(196,154,40,0.4)", desc: "Entirely human-made. No AI tools used in creation." },
                     { value: "ai_assisted" as const, label: "AI-Assisted", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "AI used as a production aid. Human vision, human direction." },
                     { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
-                    { value: "ai_generated" as const, label: "AI-Generated", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "AI generated the primary content." },
+                    { value: "ai_generated" as const, label: "AI-Assisted Manifestation", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "AI generated the primary content." },
                   ] as const).map(opt => (
                     <button type="button" key={opt.value} onClick={() => setAiDisclosure(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
                       style={{ background: aiDisclosure === opt.value ? opt.activeColor : "var(--ln-coal)", border: `1px solid ${aiDisclosure === opt.value ? opt.activeBorder : "rgba(196,154,40,0.12)"}` }}>
