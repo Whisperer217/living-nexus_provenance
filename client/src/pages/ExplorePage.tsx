@@ -1193,7 +1193,7 @@ export default function ExplorePage() {
       )}
       {/* Inline comic reader — launched when user clicks a comic card */}
       {readerSong && (() => {
-        let pages: { imageUrl: string; caption?: string }[] = [];
+        let pages: { imageUrl: string; pageNumber: number; caption?: string }[] = [];
         try { pages = JSON.parse(readerSong.pagesJson || "[]"); } catch { /* ignore */ }
         return (
           <div className="fixed inset-0 z-[500] bg-black">

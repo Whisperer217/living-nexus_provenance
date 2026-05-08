@@ -1615,7 +1615,7 @@ export default function HomePage() {
 
       {/* Inline Comic/Manuscript Reader — launched from carousel cards */}
       {readerSong && (() => {
-        let pages: { imageUrl: string; caption?: string }[] = [];
+        let pages: { imageUrl: string; pageNumber: number; caption?: string }[] = [];
         try {
           const raw = readerSong.pagesJson;
           if (raw) pages = typeof raw === "string" ? JSON.parse(raw) : raw;

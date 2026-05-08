@@ -12,7 +12,7 @@ import { useParams, useLocation } from "wouter";
 import {
   BookOpen, FileText, Lock, Tag, BarChart2, Shield,
   ChevronLeft, Save, Eye, EyeOff, AlertCircle, CheckCircle,
-  Loader2, Upload, X, Layers, Settings, Compass, Music
+  Loader2, Upload, X, Layers, Settings, Compass, Music, GitFork, Plus, Trash2, ExternalLink
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -31,7 +31,7 @@ import SoundtrackCueMapper from "@/components/studio/SoundtrackCueMapper";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Tab = "overview" | "pages" | "guided" | "soundtrack" | "access" | "metadata" | "resonance" | "provenance";
+type Tab = "overview" | "pages" | "guided" | "soundtrack" | "access" | "metadata" | "resonance" | "provenance" | "derivatives";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "overview",   label: "Overview",   icon: <BookOpen size={14} /> },
@@ -167,7 +167,7 @@ export default function CreatorStudioPage() {
   } catch { /* ignore */ }
 
   const previewPages = storyboardPages.map((p: StoryboardPage) => ({
-    imageUrl: p.url,
+    imageUrl: p.imageUrl,
     pageNumber: p.pageNumber,
   }));
 
@@ -734,6 +734,92 @@ function SoundtrackTab({ pages, cues, onChange }: any) {
         cues={cues}
         onChange={onChange}
       />
+    </div>
+  );
+}
+
+// ─── Tab: Derivatives ───────────────────────────────────────────────────────
+
+function DerivativesTab({ songId }: { songId: number }) {
+  const { data: derivatives, isLoading, refetch } = trpc.derivatives.getByParent.useQuery({ parentSongId: songId });
+  const createMut = trpc.derivatives.create.useMutation({ onSuccess: () => { refetch(); setShowForm(false); setForm({ derivativeType: "remix", permissionStatus: "licensed", licenseNotes: "", testimony: "", externalUrl: "" }); } });
+  const deleteMut = trpc.derivatives.delete.useMutation({ onSuccess: () => refetch() });
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ derivativeType: "remix", permissionStatus: "licensed", licenseNotes: "", testimony: "", externalUrl: "" });
+  return (
+    <div className="space-y-5 max-w-2xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-heading font-bold text-sm tracking-wide" style={{ color: "var(--ln-parchment)" }}>Declared Derivatives</h3>
+          <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>Remixes, covers, samples, and other works derived from this manifestation.</p>
+        </div>
+        <button onClick={() => setShowForm(v => !v)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-bold" style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}>
+          <Plus size={12} /> Declare
+        </button>
+      </div>
+      {showForm && (
+        <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(196,154,40,0.15)" }}>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-heading font-bold tracking-widest uppercase mb-1" style={{ color: "rgba(196,154,40,0.7)" }}>Type</label>
+              <select value={form.derivativeType} onChange={e => setForm(f => ({ ...f, derivativeType: e.target.value }))} className="w-full rounded-lg px-3 py-2 text-sm" style={{ background: "rgba(255,255,255,0.06)", color: "var(--ln-parchment)", border: "1px solid rgba(196,154,40,0.2)" }}>
+                {["remix","cover","sample","adaptation","translation","parody","other"].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-heading font-bold tracking-widest uppercase mb-1" style={{ color: "rgba(196,154,40,0.7)" }}>Permission</label>
+              <select value={form.permissionStatus} onChange={e => setForm(f => ({ ...f, permissionStatus: e.target.value }))} className="w-full rounded-lg px-3 py-2 text-sm" style={{ background: "rgba(255,255,255,0.06)", color: "var(--ln-parchment)", border: "1px solid rgba(196,154,40,0.2)" }}>
+                {["licensed","authorized","unauthorized","unknown"].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-heading font-bold tracking-widest uppercase mb-1" style={{ color: "rgba(196,154,40,0.7)" }}>License Notes</label>
+            <input value={form.licenseNotes} onChange={e => setForm(f => ({ ...f, licenseNotes: e.target.value }))} placeholder="e.g. Creative Commons BY-SA 4.0" className="w-full rounded-lg px-3 py-2 text-sm" style={{ background: "rgba(255,255,255,0.06)", color: "var(--ln-parchment)", border: "1px solid rgba(196,154,40,0.2)" }} />
+          </div>
+          <div>
+            <label className="block text-xs font-heading font-bold tracking-widest uppercase mb-1" style={{ color: "rgba(196,154,40,0.7)" }}>Testimony</label>
+            <textarea value={form.testimony} onChange={e => setForm(f => ({ ...f, testimony: e.target.value }))} placeholder="Describe the creative relationship…" rows={3} className="w-full rounded-lg px-3 py-2 text-sm resize-none" style={{ background: "rgba(255,255,255,0.06)", color: "var(--ln-parchment)", border: "1px solid rgba(196,154,40,0.2)" }} />
+          </div>
+          <div>
+            <label className="block text-xs font-heading font-bold tracking-widest uppercase mb-1" style={{ color: "rgba(196,154,40,0.7)" }}>External URL</label>
+            <input value={form.externalUrl} onChange={e => setForm(f => ({ ...f, externalUrl: e.target.value }))} placeholder="https://…" className="w-full rounded-lg px-3 py-2 text-sm" style={{ background: "rgba(255,255,255,0.06)", color: "var(--ln-parchment)", border: "1px solid rgba(196,154,40,0.2)" }} />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs" style={{ color: "var(--ln-smoke)" }}>Cancel</button>
+            <button onClick={() => createMut.mutate({ parentSongId: songId, ...form, derivativeType: form.derivativeType as any, permissionStatus: form.permissionStatus as any, licenseNotes: form.licenseNotes || undefined, testimony: form.testimony || undefined, externalUrl: form.externalUrl || undefined })} disabled={createMut.isPending} className="px-4 py-1.5 rounded-lg text-xs font-heading font-bold" style={{ background: "var(--ln-gold)", color: "#0D1419" }}>
+              {createMut.isPending ? "Saving…" : "Declare Derivative"}
+            </button>
+          </div>
+        </div>
+      )}
+      {isLoading ? (
+        <div className="flex justify-center py-8"><Loader2 className="animate-spin" size={20} style={{ color: "var(--ln-gold)" }} /></div>
+      ) : !derivatives?.length ? (
+        <div className="flex flex-col items-center justify-center py-12 gap-2 opacity-40">
+          <GitFork size={32} style={{ color: "var(--ln-gold)" }} />
+          <p className="text-sm font-heading" style={{ color: "var(--ln-smoke)" }}>No derivatives declared yet.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {derivatives.map((d: any) => (
+            <div key={d.id} className="rounded-xl p-4 flex items-start justify-between gap-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(196,154,40,0.12)" }}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-heading font-bold uppercase tracking-widest px-2 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)" }}>{d.derivativeType}</span>
+                  <span className="text-xs px-2 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.06)", color: "var(--ln-smoke)" }}>{d.permissionStatus}</span>
+                </div>
+                {d.testimony && <p className="text-sm mt-1" style={{ color: "var(--ln-parchment)" }}>{d.testimony}</p>}
+                {d.licenseNotes && <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>{d.licenseNotes}</p>}
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {d.externalUrl && <a href={d.externalUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded hover:opacity-80" style={{ color: "var(--ln-smoke)" }}><ExternalLink size={14} /></a>}
+                <button onClick={() => deleteMut.mutate({ id: d.id })} className="p-1.5 rounded hover:opacity-80" style={{ color: "rgba(255,80,80,0.7)" }}><Trash2 size={14} /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

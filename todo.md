@@ -4439,3 +4439,14 @@
 - [x] Rename RightRail Provenance Verified to Connected Manifestations
 - [x] BookCard: clicking card launches reader immediately (not detail page first)
 - [x] ExplorePage comic cards: clicking launches reader immediately
+
+## Phase 149 Sync (commit 6bf018e)
+
+- [x] Merge commit 6bf018e from GitHub into sandbox
+- [x] Fix GitFork import + derivatives Tab type in CreatorStudioPage
+- [x] Fix p.url → p.imageUrl in previewPages mapping
+- [x] Add DerivativesTab component inline in CreatorStudioPage
+- [x] Fix onClose?.() in CinematicComicReader keyboard handler
+- [x] Fix pageNumber missing from pages type in DiscoverPage/ExplorePage/HomePage
+- [x] Fix isAuthenticated → !authLoading in KeeperComposePage
+- [x] 187/187 tests passing
