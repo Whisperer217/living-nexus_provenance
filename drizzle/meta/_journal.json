@@ -687,6 +687,13 @@
       "when": 1778262870298,
       "tag": "0098_common_triton",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "5",
+      "when": 1778278213588,
+      "tag": "0099_purple_zaladane",
+      "breakpoints": true
     }
   ]
 }

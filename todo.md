@@ -4500,3 +4500,21 @@
 - [ ] CreatorStudioPage: call dispatchComicProcessing after page upload success
 - [ ] Mission Control page (/mission-control): worker health, queue depths, recent jobs
 
+
+## Phase Layer3-P1 — Comic Processing Pipeline + Mission Control
+
+- [x] Add `workerJobs` table to schema (migration 0099)
+- [x] Create `server/workerQueue.ts` — enqueue, claim, complete, fail helpers
+- [x] Add poll endpoint `GET /api/worker/jobs/poll` (HMAC-signed)
+- [x] Add complete endpoint `POST /api/worker/jobs/:id/complete` (HMAC-signed)
+- [x] Add stats endpoint `GET /api/worker/stats` (public, for ops dashboard)
+- [x] Add `songs.dispatchComicProcessing` tRPC procedure (protected, ownership-gated)
+- [x] Add `songs.dispatchGuideExtraction` tRPC procedure (protected, ownership-gated)
+- [x] Add `songs.getWorkerStats` tRPC procedure (admin-only)
+- [x] Rewrite cloud worker to poll-based architecture (10s interval, HMAC-signed)
+- [x] Worker restarts cleanly and reports `mode: poll` in /health
+- [x] Create `MissionControlPage.tsx` at `/admin/mission-control`
+- [x] Add Mission Control route to App.tsx
+- [x] Add Mission Control button to AdminUsersPage nav
+- [x] TypeScript clean (0 errors)
+- [x] All 201 tests passing

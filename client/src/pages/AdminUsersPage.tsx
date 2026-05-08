@@ -759,6 +759,10 @@ export default function AdminUsersPage() {
               style={{ borderColor: "var(--ln-smoke)", color: "var(--ln-gold)" }}>
               💳 Payment Integrity
             </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/mission-control")}
+              style={{ borderColor: "var(--ln-smoke)", color: "#22C55E" }}>
+              🛰 Mission Control
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/")}
               style={{ borderColor: BORDER, color: SUBTEXT }}>
               ← Back

@@ -1578,3 +1578,25 @@ export const guides = mysqlTable("guides", {
 }));
 export type Guide = typeof guides.$inferSelect;
 export type InsertGuide = typeof guides.$inferInsert;
+
+// ─── Layer 3 Worker Jobs ──────────────────────────────────────────────────────
+// Pending and completed processing jobs dispatched to the cloud worker.
+// The worker polls /api/worker/jobs/poll (HMAC-signed) to pick up pending work.
+export const workerJobs = mysqlTable("workerJobs", {
+  id: int("id").autoincrement().primaryKey(),
+  jobType: mysqlEnum("jobType", ["comic-processing", "guide-extraction", "notification-digest"]).notNull(),
+  status: mysqlEnum("status", ["pending", "claimed", "completed", "failed"]).default("pending").notNull(),
+  payloadJson: json("payloadJson").notNull(),          // job-specific input data
+  resultJson: json("resultJson"),                     // result returned by worker on completion
+  errorMessage: text("errorMessage"),                 // failure reason if status=failed
+  claimedAt: timestamp("claimedAt"),                  // when worker polled and claimed this job
+  completedAt: timestamp("completedAt"),              // when worker reported completion
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  statusIdx: index("workerJobs_status_idx").on(t.status),
+  typeIdx: index("workerJobs_jobType_idx").on(t.jobType),
+  createdIdx: index("workerJobs_createdAt_idx").on(t.createdAt),
+}));
+export type WorkerJob = typeof workerJobs.$inferSelect;
+export type InsertWorkerJob = typeof workerJobs.$inferInsert;

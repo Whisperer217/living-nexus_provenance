@@ -177,3 +177,67 @@ workerCallbackRouter.post(
     }
   }
 );
+
+// ── Job polling endpoint — worker polls this to claim pending jobs ─────────────
+// GET /api/worker/jobs/poll?types=comic-processing,guide-extraction&limit=5
+workerCallbackRouter.get(
+  "/api/worker/jobs/poll",
+  requireWorkerAuth,
+  async (req: Request, res: Response) => {
+    try {
+      const { claimPendingJobs } = await import("./workerQueue");
+      const typesParam = (req.query.types as string) || "comic-processing,guide-extraction,notification-digest";
+      const limit = Math.min(parseInt((req.query.limit as string) || "10", 10), 50);
+      const types = typesParam.split(",").map(t => t.trim()) as import("./workerQueue").JobType[];
+      const jobs = await claimPendingJobs(types, limit);
+      res.json({ jobs });
+    } catch (err) {
+      console.error("[Worker] jobs/poll error:", err);
+      res.status(500).json({ error: "Internal error" });
+    }
+  }
+);
+
+// ── Job completion endpoint — worker reports job done ─────────────────────────
+// POST /api/worker/jobs/:id/complete
+workerCallbackRouter.post(
+  "/api/worker/jobs/:id/complete",
+  requireWorkerAuth,
+  async (req: Request, res: Response) => {
+    try {
+      const jobId = parseInt(req.params.id, 10);
+      if (isNaN(jobId)) {
+        res.status(400).json({ error: "Invalid job ID" });
+        return;
+      }
+      const { completeJob, failJob } = await import("./workerQueue");
+      const { success, result, error } = req.body as {
+        success: boolean;
+        result?: Record<string, unknown>;
+        error?: string;
+      };
+      if (success) {
+        await completeJob(jobId, result ?? {});
+      } else {
+        await failJob(jobId, error ?? "Unknown error");
+      }
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[Worker] jobs/complete error:", err);
+      res.status(500).json({ error: "Internal error" });
+    }
+  }
+);
+
+// ── Worker stats endpoint — for Mission Control dashboard ─────────────────────
+// GET /api/worker/stats  (no auth — public stats for ops dashboard)
+workerCallbackRouter.get("/api/worker/stats", async (_req: Request, res: Response) => {
+  try {
+    const { getJobStats, getRecentJobs } = await import("./workerQueue");
+    const [stats, recent] = await Promise.all([getJobStats(), getRecentJobs(20)]);
+    res.json({ stats, recent });
+  } catch (err) {
+    console.error("[Worker] stats error:", err);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
