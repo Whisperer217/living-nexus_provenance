@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "4b5bbca2-beb0-4b01-ab29-a7c0a6642098",
-  "prevId": "cdbf3c18-37de-4abe-af92-d2aee792104a",
+  "id": "6f2fa14b-277b-44fd-bc8f-880af1ac8e36",
+  "prevId": "55126af5-27fb-4a90-a74f-b0b0b908f96f",
   "tables": {
     "activationContributions": {
       "name": "activationContributions",
@@ -5595,6 +5595,13 @@
           "autoincrement": false,
           "default": "'open'"
         },
+        "narrativeFormat": {
+          "name": "narrativeFormat",
+          "type": "enum('comic','childrens','manuscript')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "purchasePriceCents": {
           "name": "purchasePriceCents",
           "type": "int",
@@ -5650,6 +5657,20 @@
         },
         "activationStagesJson": {
           "name": "activationStagesJson",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "panelRegionsJson": {
+          "name": "panelRegionsJson",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "soundtrackCuesJson": {
+          "name": "soundtrackCuesJson",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -6378,6 +6399,27 @@
         "founderGrantedAt": {
           "name": "founderGrantedAt",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cashAppHandle": {
+          "name": "cashAppHandle",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "paypalUsername": {
+          "name": "paypalUsername",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "venmoHandle": {
+          "name": "venmoHandle",
+          "type": "varchar(64)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

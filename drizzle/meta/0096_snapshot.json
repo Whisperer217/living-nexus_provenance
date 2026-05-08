@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "4b5bbca2-beb0-4b01-ab29-a7c0a6642098",
-  "prevId": "cdbf3c18-37de-4abe-af92-d2aee792104a",
+  "id": "55126af5-27fb-4a90-a74f-b0b0b908f96f",
+  "prevId": "060281d5-a94e-4e79-9b0c-ea5cf85e30c7",
   "tables": {
     "activationContributions": {
       "name": "activationContributions",
@@ -5595,6 +5595,13 @@
           "autoincrement": false,
           "default": "'open'"
         },
+        "narrativeFormat": {
+          "name": "narrativeFormat",
+          "type": "enum('comic','childrens','manuscript')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "purchasePriceCents": {
           "name": "purchasePriceCents",
           "type": "int",
@@ -6378,6 +6385,27 @@
         "founderGrantedAt": {
           "name": "founderGrantedAt",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cashAppHandle": {
+          "name": "cashAppHandle",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "paypalUsername": {
+          "name": "paypalUsername",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "venmoHandle": {
+          "name": "venmoHandle",
+          "type": "varchar(64)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

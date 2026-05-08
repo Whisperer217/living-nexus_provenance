@@ -649,15 +649,36 @@
     {
       "idx": 93,
       "version": "5",
-      "when": 1777846032592,
-      "tag": "0093_stale_mindworm",
+      "when": 1777844384758,
+      "tag": "0093_vengeful_iron_monger",
       "breakpoints": true
     },
     {
       "idx": 94,
       "version": "5",
-      "when": 1777860964181,
-      "tag": "0094_special_zodiak",
+      "when": 1777860598083,
+      "tag": "0094_first_cobalt_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "5",
+      "when": 1778084750901,
+      "tag": "0095_cultured_unicorn",
+      "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "5",
+      "when": 1778104500910,
+      "tag": "0096_rapid_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "5",
+      "when": 1778114318350,
+      "tag": "0097_common_baron_strucker",
       "breakpoints": true
     }
   ]

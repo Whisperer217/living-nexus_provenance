@@ -1,0 +1,1 @@
+ALTER TABLE `songs` ADD `narrativeFormat` enum('comic','childrens','manuscript');
