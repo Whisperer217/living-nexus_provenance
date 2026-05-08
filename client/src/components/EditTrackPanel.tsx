@@ -49,7 +49,7 @@ import {
 const AI_CONSENT_LABELS: Record<string, string> = {
   prohibited: "Human-Made — No AI Training",
   permitted_attribution: "AI-Assisted — Attribution Required",
-  permitted: "AI-Generated — Open Training",
+  permitted: "AI-Assisted Manifestation — Open Training",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -942,7 +942,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
                   AI-Assisted — Attribution Required
                 </SelectItem>
                 <SelectItem value="permitted" style={{ color: "var(--ln-parchment)" }}>
-                  AI-Generated — Open Training
+                  AI-Assisted Manifestation — Open Training
                 </SelectItem>
               </SelectContent>
             </Select>

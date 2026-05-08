@@ -66,7 +66,7 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
       setFormTitle("");
       setFormUrl("");
       setFormNote("");
-      toast.success("Evidence added to the chain.");
+      toast.success("Added to Witnessed Work.");
     },
     onError: (e) => toast.error(e.message),
   });
@@ -78,7 +78,7 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
   const deleteMutation = trpc.evidence.delete.useMutation({
     onSuccess: () => {
       utils.evidence.list.invalidate({ songId });
-      toast.success("Evidence removed.");
+      toast.success("Witnessed Work item removed.");
     },
     onError: (e) => toast.error(e.message),
   });
@@ -155,7 +155,7 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
             className="text-sm font-semibold"
             style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
           >
-            Evidence
+            Witnessed Work
           </span>
           {items.length > 0 && (
             <span
@@ -326,7 +326,7 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
               }}
             >
               <Plus className="w-3.5 h-3.5" />
-              Add Evidence
+              Add Witnessed Work
             </Button>
           )}
 
@@ -340,7 +340,7 @@ export function EvidencePanel({ songId, isOwner }: EvidencePanelProps) {
                 className="text-xs font-semibold mb-3 uppercase tracking-widest"
                 style={{ color: "rgba(196,154,40,0.7)" }}
               >
-                Add Evidence to Chain
+                Add to Witnessed Work
               </p>
 
               {/* Type selector */}

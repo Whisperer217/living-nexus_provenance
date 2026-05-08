@@ -23,6 +23,7 @@ import { CARD_PAN_W } from "@/lib/cardTokens";
 import { ShowcaseRow } from "@/components/ShowcaseRow";
 import { StoreTrackCard } from "@/components/StoreTrackCard";
 import { StoreCreatorCard } from "@/components/StoreCreatorCard";
+import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -92,7 +93,7 @@ const CONTENT_TABS: { id: ContentType; label: string; icon: string; color: strin
 
 /** ExploreCard — mirrors TrackCard architecture exactly */
 function ExploreCard({
-  item, isActive, isPlaying, onPlay, onTip, prefetchedLiked, prefetchedLikeCount,
+  item, isActive, isPlaying, onPlay, onTip, prefetchedLiked, prefetchedLikeCount, onOpenReader,
 }: {
   item: any;
   isActive: boolean;
@@ -101,6 +102,7 @@ function ExploreCard({
   onTip: (item: any, rect: DOMRect) => void;
   prefetchedLiked?: boolean;
   prefetchedLikeCount?: number;
+  onOpenReader?: (song: any) => void;
 }) {
   const { song, creator } = item;
   const { playNext } = usePlayer();
@@ -114,9 +116,11 @@ function ExploreCard({
   const artistName = creator?.artistHandle || creator?.name || "Unknown";
   // Non-audio types navigate to song detail page instead of playing audio
   const isNonAudio = song.contentType === "manuscript" || song.contentType === "comic";
+  const isComic = song.contentType === "comic";
   const isHot = (song.playCount ?? 0) >= 50;
   const ctColors = getContentTypeColors(song.contentType ?? "audio");
   const handleCardClick = () => {
+    if (isComic && onOpenReader) { onOpenReader(song); return; }
     if (isNonAudio) { navigate(`/book/${song.id}`); } else { onPlay(item); }
   };
 
@@ -159,11 +163,13 @@ function ExploreCard({
             ? "opacity-0 group-hover:opacity-100 bg-[#4ADE80]"
             : isActive ? "opacity-100 bg-[#1C1A14]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
         >
-          {isNonAudio
-            ? <ExternalLink size={14} className="text-white" />
-            : isActive && isPlaying
-              ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
-              : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
+          {isComic
+            ? <BookOpen size={14} className="text-white" />
+            : isNonAudio
+              ? <ExternalLink size={14} className="text-white" />
+              : isActive && isPlaying
+                ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
+                : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
           }
         </div>
         {/* 🔥 Hot badge — top-left ribbon for 50+ plays */}
@@ -373,6 +379,9 @@ export default function ExplorePage() {
   // Tip/gift modal state
   const [tipItem, setTipItem] = useState<any | null>(null);
   const [tipRect, setTipRect] = useState<DOMRect | null>(null);
+
+  // Inline comic reader state
+  const [readerSong, setReaderSong] = useState<any | null>(null);
   const tipTrack = tipItem ? {
     id: String(tipItem.song.id),
     title: tipItem.song.title,
@@ -1182,6 +1191,20 @@ export default function ExplorePage() {
       {tipItem && (
         <TipModal track={tipTrack as any} onClose={() => { setTipItem(null); setTipRect(null); }} originRect={tipRect} />
       )}
+      {/* Inline comic reader — launched when user clicks a comic card */}
+      {readerSong && (() => {
+        let pages: { imageUrl: string; caption?: string }[] = [];
+        try { pages = JSON.parse(readerSong.pagesJson || "[]"); } catch { /* ignore */ }
+        return (
+          <div className="fixed inset-0 z-[500] bg-black">
+            <CinematicComicReader
+              pages={pages}
+              title={readerSong.title}
+              onClose={() => setReaderSong(null)}
+            />
+          </div>
+        );
+      })()}
     </div>
   );
 }

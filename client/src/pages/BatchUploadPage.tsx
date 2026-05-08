@@ -402,7 +402,7 @@ function TrackCardUI({
                     { value: "original", label: "Original" },
                     { value: "human_authored_ai_instrument", label: "HAAI" },
                     { value: "ai_assisted", label: "AI Assisted" },
-                    { value: "ai_generated", label: "AI Generated" },
+                    { value: "ai_generated", label: "AI-Assisted Manifestation" },
                   ] as const).map(opt => (
                     <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -1052,7 +1052,7 @@ export default function BatchUploadPage() {
                   { value: "original", label: "Original" },
                   { value: "human_authored_ai_instrument", label: "HAAI" },
                   { value: "ai_assisted", label: "AI Assisted" },
-                  { value: "ai_generated", label: "AI Generated" },
+                  { value: "ai_generated", label: "AI-Assisted Manifestation" },
                 ] as const).map(opt => (
                   <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
                     <input

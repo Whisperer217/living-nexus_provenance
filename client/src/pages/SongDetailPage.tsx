@@ -26,6 +26,8 @@ import {
   Video, ImageIcon, History,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
+import { useRef as _useRef } from "react";
+import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import { WIDPanel } from "@/components/WIDPanel";
 import { ActivationPanel } from "@/components/ActivationPanel";
@@ -70,7 +72,8 @@ function RelatedCard({ item }: { item: any }) {
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { addAndPlay, togglePlay, state: playerState, currentTrackId, openNowPlayingPanel } = usePlayer();
+  const { addAndPlay, togglePlay, state: playerState, currentTrackId, openNowPlayingPanel, audioRef } = usePlayer();
+  const waveCanvasRef = _useRef<HTMLCanvasElement>(null);
   const songId = parseInt(id || "0");
 
   const [tipOpen, setTipOpen] = useState(false);
@@ -120,6 +123,9 @@ export default function SongDetailPage() {
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === `song-${songId}`;
   const isPlaying = isThisTrackActive && playerState.isPlaying;
+
+  // Live waveform visualizer — driven by the global audio element
+  useWaveformVisualizer(audioRef, waveCanvasRef, isThisTrackActive, isPlaying);
   const { liked: isLiked, toggle: toggleLike } = useLike(songId);
   const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
     { songId },
@@ -505,6 +511,77 @@ export default function SongDetailPage() {
             </button>
           </div>
         )}
+        {/* ══ PLAY NOW HERO — Primary Manifestation CTA ══ */}
+        {song.fileUrl && (
+          <div
+            className="relative rounded-2xl overflow-hidden mb-6 cursor-pointer group"
+            style={{ background: "#0A0B08", border: "1px solid rgba(196,154,40,0.2)" }}
+            onClick={handlePlay}
+          >
+            {/* Full-width cover art background */}
+            {song.coverArtUrl && (
+              <img
+                src={song.coverArtUrl}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  filter: "brightness(0.45) saturate(0.9)",
+                  objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%`,
+                }}
+              />
+            )}
+            {/* Gradient overlay */}
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.20) 100%)" }} />
+            {/* Waveform canvas — live when playing */}
+            <canvas
+              ref={waveCanvasRef}
+              width={800}
+              height={60}
+              className="absolute bottom-0 left-0 right-0 w-full"
+              style={{ height: "60px", opacity: isPlaying ? 1 : 0.35, transition: "opacity 0.4s" }}
+            />
+            {/* Content */}
+            <div className="relative z-10 flex flex-col items-center justify-center py-10 px-6 gap-5">
+              {/* Testimony excerpt */}
+              {((song as any).headlineCaption || (song as any).caption) && (
+                <p
+                  className="text-center text-base md:text-lg leading-relaxed max-w-xl"
+                  style={{ color: "rgba(240,228,196,0.85)", fontFamily: "'Cormorant Garamond', serif", textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}
+                >
+                  {(song as any).headlineCaption || (song as any).caption}
+                </p>
+              )}
+              {/* PLAY NOW button */}
+              <div
+                className="flex items-center gap-3 px-8 py-3.5 rounded-full transition-all duration-300 group-hover:scale-105"
+                style={{
+                  background: isPlaying ? "rgba(196,154,40,0.18)" : "rgba(196,154,40,0.92)",
+                  border: "1px solid rgba(196,154,40,0.6)",
+                  boxShadow: isPlaying ? "0 0 32px rgba(196,154,40,0.35)" : "0 4px 24px rgba(196,154,40,0.25)",
+                }}
+              >
+                {isPlaying
+                  ? <Pause size={18} fill="rgba(196,154,40,0.9)" style={{ color: "rgba(196,154,40,0.9)" }} />
+                  : <Play size={18} fill="#0A0B08" style={{ color: "#0A0B08" }} className="ml-0.5" />}
+                <span
+                  className="text-sm font-heading font-bold tracking-widest"
+                  style={{ color: isPlaying ? "rgba(196,154,40,0.9)" : "#0A0B08" }}
+                >
+                  {isPlaying ? "NOW PLAYING" : "PLAY NOW"}
+                </span>
+              </div>
+              {/* Active state indicator */}
+              {isThisTrackActive && (
+                <div className="flex items-center gap-2">
+                  <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
+                  <span className="text-[10px] font-heading tracking-widest" style={{ color: "rgba(196,154,40,0.6)" }}>LIVE IN PLAYER</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-5">
@@ -798,6 +875,38 @@ export default function SongDetailPage() {
 
             {/* ══ 3. RESONANCE FIELD — Reactions + Funding (moved from right column) ══ */}
             {/* Reactions are in the right column on desktop; on mobile they appear inline here */}
+
+            {/* ══ RESONANCE ACTIVITY STRIP — near playback ══ */}
+            {eventThread && eventThread.length > 0 && (
+              <div
+                className="rounded-xl px-4 py-3 flex flex-wrap items-center gap-2"
+                style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.12)" }}
+              >
+                <span className="text-[9px] font-heading tracking-widest uppercase flex-shrink-0" style={{ color: "rgba(196,154,40,0.45)" }}>Resonance</span>
+                <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
+                  {(eventThread as any[]).slice(0, 5).map((ev: any, i: number) => {
+                    const isComment = ev.type === "comment";
+                    const isTip = ev.type === "tip";
+                    const isReaction = ev.type === "reaction";
+                    return (
+                      <span key={i} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full"
+                        style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.12)" }}>
+                        {isTip && <span style={{ color: "var(--ln-gold)" }}>$</span>}
+                        {isReaction && <span>{ev.emoji ?? "✨"}</span>}
+                        {isComment && <span style={{ color: "rgba(196,154,40,0.5)" }}>"</span>}
+                        <span className="truncate max-w-[120px]">{ev.authorName || ev.creatorName || "Witness"}</span>
+                        {isTip && ev.amountCents && (
+                          <span style={{ color: "var(--ln-gold)" }}>${(ev.amountCents / 100).toFixed(0)}</span>
+                        )}
+                      </span>
+                    );
+                  })}
+                  {eventThread.length > 5 && (
+                    <span className="text-[10px]" style={{ color: "rgba(196,154,40,0.4)" }}>+{eventThread.length - 5} more</span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* ── GALLERY ── */}
             {(() => {
@@ -1277,7 +1386,7 @@ export default function SongDetailPage() {
 
         {/* ── ACTIVATION — stage-based funding progress ── */}
         <ActivationPanel songId={songId} songTitle={song.title} />
-        {/* ── EVIDENCE — proof attachment layer ── */}
+        {/* ── WITNESSED WORK — proof attachment layer ── */}
         <EvidencePanel songId={songId} isOwner={isOwner} />
 
         {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}

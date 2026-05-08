@@ -30,7 +30,6 @@ import {
   type QrShare, type InsertQrShare,
   agents, wids, provenanceEvents,
   commentReports,
-  userCollections,
   userCollectionTracks,
   activationContributions,
   type ActivationContribution,

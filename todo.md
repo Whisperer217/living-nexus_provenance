@@ -4354,41 +4354,88 @@
 - [ ] Provenance Block: moved lower (emotion before registry)
 - [ ] Related Universe: large cinematic cards (related creators, connected comics, soundtrack artifacts)
 
-## Phase 146 — Provenance-First Manifestation (commit 74bef2f)
-- [x] Merge commit 74bef2f from GitHub
-- [x] Relocate root-level files to correct src paths
-- [x] Add cashAppHandle, paypalUsername, venmoHandle columns to schema.ts
-- [x] Apply missing columns directly to live DB via SQL
-- [x] Fix CreatorStudioPage.tsx import paths (useAuth, StoryboardBuilder, reader components)
-- [x] Add title/description/headlineCaption/moodTags to updateMetadata procedure input schema
-- [x] Fix z.record(z.unknown()) → z.record(z.string(), z.unknown()) in routers.ts
-- [x] Fix ProfilePage.tsx: define isOwn = !!user
-- [x] Add cashAppHandle/paypalUsername/venmoHandle to profile.update procedure input schema
-- [x] Fix moodTags type: string → string[] conversion at call site
-- [x] Fix reader component props in CreatorStudioPage preview (onClose, content shape)
-- [x] Sync migration journal: insert 0095 record into __drizzle_migrations with correct hash/timestamp
-- [x] pnpm db:push succeeds — migrations applied successfully
-- [x] tsc --noEmit exits 0
+## Phase 146 — Provenance-First Manifestation Ecosystem Reinvention
 
-## Phase 146 Integration (checkpoint 464186e)
-- [x] Fix CreatorStudioPage.tsx import paths (useAuth, StoryboardBuilder, reader components)
-- [x] Add title/description/headlineCaption/moodTags to updateMetadata procedure input schema
-- [x] Fix z.record(z.unknown()) → z.record(z.string(), z.unknown()) in routers.ts
-- [x] Fix ProfilePage.tsx: define isOwn = !!user
-- [x] Add cashAppHandle/paypalUsername/venmoHandle to profile.update procedure input schema
-- [x] Fix moodTags type: string → string[] conversion at call site
-- [x] Fix reader component props in CreatorStudioPage preview (onClose, content shape)
-- [x] Sync migration journal: insert 0095 record into __drizzle_migrations with correct hash/timestamp
-- [x] pnpm db:push succeeds — migrations applied successfully
-- [x] tsc --noEmit exits 0
+### Global Terminology
+- [x] Replace all "AI-Generated" text with "AI-Assisted Manifestation" across AiDisclosurePill, VersionHistoryModal, and all other references
+- [x] AI disclosure badge: never primary, subdued styling, metadata-only positioning
+- [x] Human testimony always prioritized above AI metadata in all layouts
 
-## Phase 149
-- [ ] Hero slide body text: cap at 2 lines on mobile with line-clamp-2
-- [ ] Derivatives tab in Creator Studio (DB schema + procedure + UI)
-- [ ] Creator Support Surface visitor view on public song/profile pages
+### Global Player Fix (Desktop)
+- [x] WitnessSurfacePlayer ExpandedPanel: mobile-only guard added (GlobalPlayer handles desktop)
+- [x] Single canonical player on desktop — no duplicate bottom strip
 
-## Phase 149 — Completed
+### Mobile Song Page Improvements
+- [x] Sticky manifestation header: artwork + title + creator + controls, collapses on scroll (md:hidden)
+- [x] Testimony formatting: larger line spacing, cinematic quote style with left border accent
+- [x] Floating resonance bar at bottom: resonate / support / witness / share / contribute
 
-- [x] Hero slide body text capped at 2 lines on mobile (line-clamp-2 sm:line-clamp-none)
-- [x] Derivatives tab in Creator Studio — DB table (derivatives), migration 0097, tRPC procedures (getByParent/getMine/create/update/delete), DerivativesTab UI with form + list + delete
-- [x] Creator Support Surface visitor view — getSongWithCreator now returns cashAppHandle/paypalUsername/venmoHandle; Direct Support pills rendered on SongDetailPage for visitors
+### Creator Economy Expansion
+- [x] Add cashAppHandle, paypalUsername, venmoHandle columns to users table (migration applied)
+- [x] Add donation link fields to updateProfile procedure in routers.ts
+- [x] DirectSupportEditor component on ProfilePage (edit + display modes)
+- [x] Visitor view: Cash App / PayPal / Venmo link pills on profile
+
+### Identity Card Reinvention
+- [x] QRIdentityCard rewritten as ceremonial collectible card
+- [x] Rarity class system: Genesis / Witnessed / Resonant / Standard (auto-computed from resonance data)
+- [x] Rarity-colored border gradient, ambient glow, rarity badge top-right
+- [x] Resonance signature row: plays · witnesses · contributions
+- [x] Creator seal: "WITNESSED ON LIVING NEXUS · PROVENANCE PRESERVED"
+- [x] QR code with rarity-colored gold border
+- [x] Bottom provenance strip with date
+- [x] "Minting Card…" loading state
+- [x] Rarity indicator above card preview in modal
+
+
+## Phase 147 — Guided Manifestation Reader
+
+- [ ] Panel region data structure: add panelRegions JSON column to songs table
+- [ ] DB migration: panelRegions column on songs table
+- [ ] CinematicComicReader: Guided Mode as true primary mode (panel-by-panel cinematic zoom/pan GPU-accelerated)
+- [ ] CinematicComicReader: smooth easing transitions between panels (no harsh snapping)
+- [x] CinematicComicReader: desktop keyboard navigation (arrow keys, wheel progression)
+- [x] CinematicComicReader: mobile tap-to-advance and vertical swipe momentum
+- [ ] CinematicComicReader: auto-dialogue focus (speech bubble enlargement/sharpening)
+- [x] CinematicComicReader: sticky reader controls top/bottom
+- [x] CinematicComicReader: fullscreen immersive mode (ESC, cinematic fade, hidden chrome, notch safe area)
+- [x] CinematicComicReader: lazy loading nearby pages only
+- [ ] CinematicComicReader: progressive resolution (low-res preview to HD focus region to full-res)
+- [x] CinematicComicReader: Overview mode thumbnail explorer ONLY
+- [x] Soundtrack sync cue mapping: soundtrackCues JSON column (page/region/trackId/startTime)
+- [x] Witness Access gating: free = preview + standard + low-res; Witness = guided + HD + soundtrack + commentary
+- [x] Creator Commentary system: tap-panel overlay with scene meaning/lore/testimony/soundtrack notes
+- [ ] Resonance layer architecture: per-panel reactions and witness notes (data model Phase 147)
+
+## Phase 148 — Manifestation Studio Upgrade
+
+- [ ] CreatorStudioPage: add Derivatives tab (remixes, reinterpretations, alternate editions, creator agreements)
+- [ ] CreatorStudioPage: add Version History tab (snapshots, who/what/when/why, rollback, revision testimony)
+- [x] CreatorStudioPage: Pages tab focus region editor (drag boxes, reading order, pacing, transition type, emotional beats)
+- [x] CreatorStudioPage: Pages tab soundtrack anchor UI (attach tracks to pages/scenes/focus regions)
+- [x] CreatorStudioPage: Live Preview desktop/mobile/fullscreen/guided mode switcher
+- [ ] CreatorStudioPage: Creator Support Surface tab (support links, QR, storefront, resonance funding, contributor payouts)
+- [ ] CreatorStudioPage: Artifact Editions section (standard/witness/founder/signed/timestamped UI scaffold)
+- [ ] CreatorStudioPage: unsaved changes detection + autosave support
+- [ ] CreatorStudioPage: optimistic UI updates on save
+- [ ] CreatorStudioPage: cinematic spacing/immersive layout (not admin dashboard feeling)
+- [ ] Route /song/:id/studio added to App.tsx
+- [x] Panel region editor: drag focus boxes on page image with type (panel/dialogue/narration/splash/reveal/cinematic)
+- [x] Panel region editor: reading order numbering
+- [x] Panel region editor: transition type per region (fade/zoom/pan/cut)
+- [x] Panel region editor: emotional beat markers per region
+
+## Phase 149 — Manifestation-First Experience Refactor
+
+- [x] Song page: dominant PLAY NOW CTA hero with active player state indicator
+- [x] Song page: live waveform canvas visualization integrated into player section
+- [x] Song page: testimony excerpt surfaced in hero (headlineCaption + description)
+- [x] Song page: resonance activity (recent tips + reactions) surfaced near playback
+- [x] Comic/Book page: reader-first architecture — reader launches immediately on card click
+- [x] Comic/Book page: READ NOW / ENTER STORY CTA as primary hero action
+- [x] Comic/Book page: metadata becomes secondary (below reader entry)
+- [x] Rename Evidence section to Witnessed Work / Provenance Layer
+- [x] Reorder SongDetailPage hierarchy: Manifestation → Resonance → Provenance → Commerce
+- [x] Rename RightRail Provenance Verified to Connected Manifestations
+- [x] BookCard: clicking card launches reader immediately (not detail page first)
+- [x] ExplorePage comic cards: clicking launches reader immediately

@@ -506,10 +506,7 @@ export default function PlayerTipModal({
                       boxShadow: isSelected ? "0 0 24px rgba(196,154,40,0.5)" : "none",
                       fontSize: isSelected ? "18px" : "14px",
                       fontFamily: "'Cinzel', serif",
-                      animationName: isPlaying ? "nebulaOrbit" : "none",
-                      animationDuration: `${3 + i * 0.4}s`,
-                      animationTimingFunction: "ease-in-out",
-                      animationIterationCount: isPlaying ? "infinite" : "1",
+                      animation: isPlaying ? `nebulaOrbit ${3 + i * 0.4}s ease-in-out infinite` : "none",
                       animationDelay: `${i * 0.2}s`,
                       transition: "all 0.3s cubic-bezier(0.34,1.56,0.64,1)",
                     }}

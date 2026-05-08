@@ -44,9 +44,11 @@ interface WorkCarouselProps {
   title: string;
   limit?: number;
   viewAllHref?: string;
+  /** If provided, clicking a comic/manuscript card calls this instead of navigating to /book/:id */
+  onOpenReader?: (song: any) => void;
 }
 
-export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarouselProps) {
+export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReader }: WorkCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
 
@@ -153,7 +155,10 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref }: WorkCarou
                   isActive ? "museum-card--active" : ""
                 }`}
                 style={{ width: CARD_PAN_W }}
-                onClick={() => type === "audio" ? handlePlay(item) : undefined}
+                onClick={() => {
+                  if (type === "audio") { handlePlay(item); return; }
+                  if ((type === "comic" || type === "manuscript") && onOpenReader) { onOpenReader(item.song); return; }
+                }}
               >
                 {/* Cover / thumbnail */}
                 <Link href={href}>

@@ -1447,7 +1447,7 @@ export default function UploadPage() {
                     { value: "original" as const, label: "Human Original", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.08)", activeBorder: "rgba(196,154,40,0.4)", desc: "Entirely human-made. No AI tools used in creation." },
                     { value: "ai_assisted" as const, label: "AI-Assisted", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "AI used as a production aid. Human vision, human direction." },
                     { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
-                    { value: "ai_generated" as const, label: "AI-Generated", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "AI generated the primary content." },
+                    { value: "ai_generated" as const, label: "AI-Assisted Manifestation", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "AI generated the primary content." },
                   ] as const).map(opt => (
                     <button type="button" key={opt.value} onClick={() => setAiDisclosure(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
                       style={{ background: aiDisclosure === opt.value ? opt.activeColor : "var(--ln-coal)", border: `1px solid ${aiDisclosure === opt.value ? opt.activeBorder : "rgba(196,154,40,0.12)"}` }}>

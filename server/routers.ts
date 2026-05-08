@@ -1271,6 +1271,10 @@ export const appRouter = router({
       // Guided Reader: Panel Regions & Soundtrack Cues
       panelRegionsJson: z.string().max(500000).nullable().optional(),
       soundtrackCuesJson: z.string().max(100000).nullable().optional(),
+      // Title / description / headline
+      title: z.string().max(255).optional(),
+      description: z.string().max(10000).nullable().optional(),
+      headlineCaption: z.string().max(280).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
