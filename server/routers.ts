@@ -106,11 +106,14 @@ import {
   getEvidenceForSong,
   addEvidence,
   deleteEvidence,
-  getDerivativesByParent,
-  getDerivativesByCreator,
-  createDerivative,
-  updateDerivative,
-  deleteDerivative,
+  createGuide,
+  getGuideById,
+  getGuideByWid,
+  getGuidesByCreator,
+  getPublishedGuides,
+  updateGuide,
+  publishGuide,
+  deleteGuide,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -557,8 +560,9 @@ export const appRouter = router({
       avatarObjectPosition: z.string().max(32).optional(),
       bannerPositionX: z.number().min(0).max(100).optional(),
       bannerPositionY: z.number().min(0).max(100).optional(),
+      // Creator economy — direct payment links
       cashAppHandle: z.string().max(64).optional(),
-      paypalUsername: z.string().max(64).optional(),
+      paypalUsername: z.string().max(128).optional(),
       venmoHandle: z.string().max(64).optional(),
     })).mutation(async ({ ctx, input }) => {
       if (input.name !== undefined) {
@@ -1235,10 +1239,6 @@ export const appRouter = router({
     }),
     updateMetadata: protectedProcedure.input(z.object({
       songId: z.number(),
-      title: z.string().min(1).max(255).optional(),
-      description: z.string().max(10000).nullable().optional(),
-      headlineCaption: z.string().max(280).nullable().optional(),
-      moodTags: z.array(z.string()).nullable().optional(),
       caption: z.string().max(2000).nullable().optional(),
       genre: z.string().nullable().optional(),
       collectionTag: z.string().max(128).nullable().optional(),
@@ -1271,6 +1271,10 @@ export const appRouter = router({
       // Guided Reader: Panel Regions & Soundtrack Cues
       panelRegionsJson: z.string().max(500000).nullable().optional(),
       soundtrackCuesJson: z.string().max(100000).nullable().optional(),
+      // Title / description / headline
+      title: z.string().max(255).optional(),
+      description: z.string().max(10000).nullable().optional(),
+      headlineCaption: z.string().max(280).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
@@ -6417,7 +6421,7 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
         url: z.string().optional(),
         noteBody: z.string().optional(),
         hash: z.string().optional(),
-        metadataJson: z.record(z.string(), z.unknown()).optional(),
+        metadataJson: z.record(z.unknown()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verify the user owns this song
@@ -6495,57 +6499,207 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
         return insertWid({ ...input, creatorId: ctx.user.id });
       }),
   }),
-  derivatives: router({
-    /** Get all derivatives declared for a given parent song (public). */
-    getByParent: publicProcedure
-      .input(z.object({ parentSongId: z.number().int().positive() }))
-      .query(async ({ input }) => {
-        return getDerivativesByParent(input.parentSongId);
-      }),
-    /** Get all derivatives declared by the logged-in creator. */
-    getMine: protectedProcedure
-      .query(async ({ ctx }) => {
-        return getDerivativesByCreator(ctx.user.id);
-      }),
-    /** Declare a new derivative relationship. */
+
+  // ─── Guide Entities ──────────────────────────────────────────────────────────
+  guides: router({
+    /** Create a new guide draft (Step 1 — after files uploaded). */
     create: protectedProcedure
       .input(z.object({
-        parentSongId: z.number().int().positive(),
-        childSongId: z.number().int().positive().optional(),
-        derivativeType: z.enum(["remix","reinterpretation","alternate_edition","cover","interpolation","sample","adaptation","translation","other"]).default("remix"),
-        permissionStatus: z.enum(["self","licensed","fair_use","pending","unknown"]).default("unknown"),
-        licenseNotes: z.string().max(2000).optional(),
-        externalTitle: z.string().max(512).optional(),
-        externalUrl: z.string().url().optional(),
-        testimony: z.string().max(5000).optional(),
+        canonicalName: z.string().min(1).max(256).optional(),
+        provenanceSheetUrl: z.string().url().optional(),
+        artworkUrl: z.string().url().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        return createDerivative({ ...input, creatorUserId: ctx.user.id });
+        return createGuide({
+          creatorId: ctx.user.id,
+          canonicalName: input.canonicalName ?? "Untitled Guide",
+          provenanceSheetUrl: input.provenanceSheetUrl,
+          artworkUrl: input.artworkUrl,
+          canonicalStatus: "draft",
+          revenueCreatorPct: 90,
+        });
       }),
-    /** Update an existing derivative declaration (creator only). */
+
+    /** AI extraction from provenance sheet (Step 2). Uses Gemini to parse the uploaded file. */
+    extractFromSheet: protectedProcedure
+      .input(z.object({
+        guideId: z.number(),
+        fileUrl: z.string().url(),
+        mimeType: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Verify ownership
+        const guide = await getGuideById(input.guideId);
+        if (!guide || guide.creatorId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Guide not found or access denied" });
+        }
+        // Use Gemini to extract structured data from the provenance sheet
+        const extractionPrompt = `You are an AI extraction engine for Living Nexus, a provenance-first creative platform.
+Analyze this provenance sheet / artwork document and extract the following structured information about the guide character.
+Return ONLY valid JSON matching this exact schema:
+{
+  "canonicalName": string,
+  "tagline": string,
+  "archetypeType": string,
+  "role": string,
+  "alignment": string,
+  "domain": string,
+  "testimony": string,
+  "loreDescription": string,
+  "firstManifested": string,
+  "symbols": [{"name": string, "label": string}],
+  "widSuggestion": string
+}
+If a field cannot be determined from the document, use an empty string. For symbols, extract any iconographic symbols, emblems, or sacred objects mentioned or visible. For widSuggestion, suggest a WID code like LN-GUIDE-XXX-0001 based on the character name.`;
+
+        let extracted: Record<string, unknown> = {};
+        try {
+          const response = await invokeLLM({
+            messages: [
+              { role: "user", content: [
+                { type: "text", text: extractionPrompt },
+                { type: "image_url", image_url: { url: input.fileUrl, detail: "high" } },
+              ]},
+            ],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "guide_extraction",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    canonicalName: { type: "string" },
+                    tagline: { type: "string" },
+                    archetypeType: { type: "string" },
+                    role: { type: "string" },
+                    alignment: { type: "string" },
+                    domain: { type: "string" },
+                    testimony: { type: "string" },
+                    loreDescription: { type: "string" },
+                    firstManifested: { type: "string" },
+                    symbols: { type: "array", items: { type: "object", properties: { name: { type: "string" }, label: { type: "string" } }, required: ["name", "label"], additionalProperties: false } },
+                    widSuggestion: { type: "string" },
+                  },
+                  required: ["canonicalName", "tagline", "archetypeType", "role", "alignment", "domain", "testimony", "loreDescription", "firstManifested", "symbols", "widSuggestion"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          });
+          const content = response?.choices?.[0]?.message?.content;
+          if (content) extracted = JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+        } catch (err) {
+          console.error("[guides.extractFromSheet] LLM extraction failed:", err);
+          // Return partial data — don't fail the whole step
+        }
+
+        // Update the guide with extracted data
+        const updated = await updateGuide(input.guideId, ctx.user.id, {
+          canonicalName: (extracted.canonicalName as string) || guide.canonicalName,
+          tagline: (extracted.tagline as string) || undefined,
+          archetypeType: (extracted.archetypeType as string) || undefined,
+          role: (extracted.role as string) || undefined,
+          alignment: (extracted.alignment as string) || undefined,
+          domain: (extracted.domain as string) || undefined,
+          testimony: (extracted.testimony as string) || undefined,
+          loreDescription: (extracted.loreDescription as string) || undefined,
+          firstManifested: (extracted.firstManifested as string) || undefined,
+          symbolsJson: extracted.symbols || [],
+          widCode: (extracted.widSuggestion as string) || undefined,
+          canonicalStatus: "review",
+        });
+        return { guide: updated, extracted };
+      }),
+
+    /** Update guide fields (Step 3 — Review & Confirm). */
     update: protectedProcedure
       .input(z.object({
-        id: z.number().int().positive(),
-        derivativeType: z.enum(["remix","reinterpretation","alternate_edition","cover","interpolation","sample","adaptation","translation","other"]).optional(),
-        permissionStatus: z.enum(["self","licensed","fair_use","pending","unknown"]).optional(),
-        licenseNotes: z.string().max(2000).optional(),
-        externalTitle: z.string().max(512).optional(),
-        externalUrl: z.string().url().optional(),
-        testimony: z.string().max(5000).optional(),
+        guideId: z.number(),
+        canonicalName: z.string().min(1).max(256).optional(),
+        tagline: z.string().max(512).optional(),
+        archetypeType: z.string().max(128).optional(),
+        role: z.string().max(256).optional(),
+        alignment: z.string().max(512).optional(),
+        domain: z.string().max(512).optional(),
+        testimony: z.string().optional(),
+        loreDescription: z.string().optional(),
+        firstManifested: z.string().max(128).optional(),
+        provenanceSheetUrl: z.string().url().optional(),
+        artworkUrl: z.string().url().optional(),
+        extractedImagesJson: z.array(z.object({ url: z.string(), filename: z.string() })).optional(),
+        symbolsJson: z.array(z.object({ name: z.string(), label: z.string(), iconUrl: z.string().optional() })).optional(),
+        widCode: z.string().max(64).optional(),
+        rightsJson: z.record(z.unknown()).optional(),
+        revenueCreatorPct: z.number().min(0).max(100).optional(),
+        derivativePermissionsJson: z.record(z.unknown()).optional(),
+        stripeConnectId: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { id, ...data } = input;
-        const updated = await updateDerivative(id, ctx.user.id, data);
-        if (!updated) throw new TRPCError({ code: "NOT_FOUND", message: "Derivative not found or not yours" });
+        const { guideId, ...data } = input;
+        const updated = await updateGuide(guideId, ctx.user.id, data as Parameters<typeof updateGuide>[2]);
+        if (!updated) throw new TRPCError({ code: "FORBIDDEN", message: "Guide not found or access denied" });
         return updated;
       }),
-    /** Delete a derivative declaration (creator only). */
-    delete: protectedProcedure
-      .input(z.object({ id: z.number().int().positive() }))
+
+    /** Publish the guide (Step 6). Generates canonical WID and sets status to published. */
+    publish: protectedProcedure
+      .input(z.object({ guideId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        const ok = await deleteDerivative(input.id, ctx.user.id);
-        if (!ok) throw new TRPCError({ code: "NOT_FOUND", message: "Derivative not found or not yours" });
-        return { success: true };
+        const guide = await getGuideById(input.guideId);
+        if (!guide || guide.creatorId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Guide not found or access denied" });
+        }
+        if (!guide.canonicalName) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Guide must have a canonical name before publishing" });
+        }
+        const published = await publishGuide(input.guideId, ctx.user.id);
+        if (!published) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to publish guide" });
+        return published;
+      }),
+
+    /** Get a guide by ID (owner only for drafts, public for published). */
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const guide = await getGuideById(input.id);
+        if (!guide) throw new TRPCError({ code: "NOT_FOUND" });
+        if (guide.canonicalStatus !== "published" && guide.creatorId !== ctx.user?.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        return guide;
+      }),
+
+    /** Get a guide by WID code (public, published only). */
+    getByWid: publicProcedure
+      .input(z.object({ widCode: z.string() }))
+      .query(async ({ input }) => {
+        const guide = await getGuideByWid(input.widCode);
+        if (!guide || guide.canonicalStatus !== "published") throw new TRPCError({ code: "NOT_FOUND" });
+        return guide;
+      }),
+
+    /** List guides for the current creator (all statuses). */
+    listMine: protectedProcedure
+      .query(async ({ ctx }) => getGuidesByCreator(ctx.user.id)),
+
+    /** List all published guides (public). */
+    listPublished: publicProcedure
+      .input(z.object({ limit: z.number().max(100).optional() }))
+      .query(async ({ input }) => getPublishedGuides(input.limit ?? 20)),
+
+    /** Delete a guide draft (owner only, not published). */
+    delete: protectedProcedure
+      .input(z.object({ guideId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const guide = await getGuideById(input.guideId);
+        if (!guide || guide.creatorId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        if (guide.canonicalStatus === "published") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot delete a published guide" });
+        }
+        return deleteGuide(input.guideId, ctx.user.id);
       }),
   }),
 });

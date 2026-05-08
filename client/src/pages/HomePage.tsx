@@ -727,7 +727,7 @@ function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentica
   return (
     <div
       className="relative overflow-hidden"
-      style={{ height: "clamp(360px, 52vw, 520px)", flexShrink: 0 }}
+      style={{ minHeight: "420px" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -767,7 +767,7 @@ function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentica
           {slide.headline}<br />
           <span style={{ color: "#C49A28" }}>{slide.accent}</span>
         </h1>
-        <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md line-clamp-2 sm:line-clamp-none" style={{ color: "#A09880" }}>
+        <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "#A09880" }}>
           {slide.body}
         </p>
         <div className="flex flex-wrap gap-3">
@@ -1615,7 +1615,7 @@ export default function HomePage() {
 
       {/* Inline Comic/Manuscript Reader — launched from carousel cards */}
       {readerSong && (() => {
-        let pages: { imageUrl: string; pageNumber: number; caption?: string }[] = [];
+        let pages: { imageUrl: string; caption?: string }[] = [];
         try {
           const raw = readerSong.pagesJson;
           if (raw) pages = typeof raw === "string" ? JSON.parse(raw) : raw;

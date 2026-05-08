@@ -4440,23 +4440,26 @@
 - [x] BookCard: clicking card launches reader immediately (not detail page first)
 - [x] ExplorePage comic cards: clicking launches reader immediately
 
-## Phase 149 Sync (commit 6bf018e)
+## Phase 150 — Guide Entity Upload Pipeline
 
-- [x] Merge commit 6bf018e from GitHub into sandbox
-- [x] Fix GitFork import + derivatives Tab type in CreatorStudioPage
-- [x] Fix p.url → p.imageUrl in previewPages mapping
-- [x] Add DerivativesTab component inline in CreatorStudioPage
-- [x] Fix onClose?.() in CinematicComicReader keyboard handler
-- [x] Fix pageNumber missing from pages type in DiscoverPage/ExplorePage/HomePage
-- [x] Fix isAuthenticated → !authLoading in KeeperComposePage
-- [x] 187/187 tests passing
-
-## Phase 149b — Manifestation-First Refactor Sync
-
-- [x] Merge commit 11ecb54 (Phase 149b) from GitHub
-- [x] EvidencePanel: embedded snapshot when no artifacts, collapsed default, provenance depth layer
-- [x] SongDetailPage: confirmed section order (hero → testimony → controls → resonance → gallery → HAAI → activation → witnessed work → lyrics)
-- [x] Comic reader-first flow: BookDetailPage, WorkCarousel, ExploreCard all launch CinematicComicReader inline
-- [x] Fixed 4 pre-existing db.ts errors (execute<any[]> → (db as any).execute(), contribRows.map(c: any))
-- [x] tsc --noEmit exits 0 (fully clean build)
-- [x] 187/187 tests passing
+- [ ] DB: guides table (id, creatorId, canonicalName, archetypeType, role, alignment, domain, testimony, loreDescription, provenanceSheetUrl, artworkUrl, extractedImagesJson, symbolsJson, widCode, canonicalStatus, rightsJson, revenueCreatorPct, derivativePermissions, stripeConnectId, publishedAt, createdAt)
+- [ ] DB: migration generated and applied
+- [ ] Server: getGuideById, createGuide, updateGuide, publishGuide DB helpers
+- [ ] Server: guides.create tRPC procedure (protectedProcedure)
+- [ ] Server: guides.extractFromSheet tRPC procedure (Gemini AI extraction from uploaded file URL)
+- [ ] Server: guides.update tRPC procedure (update fields, rights, permissions)
+- [ ] Server: guides.publish tRPC procedure (set canonicalStatus=published, generate WID)
+- [ ] Server: guides.getById tRPC procedure (public)
+- [ ] Server: guides.listByCreator tRPC procedure
+- [ ] UI: /upload-guide route — 6-step wizard page
+- [ ] UI: Step 1 — Upload Provenance Sheet (drag-drop, file list, uploaded preview)
+- [ ] UI: Step 2 — Extract & Preview (AI extraction display, extracted images grid, Continue to Review)
+- [ ] UI: Step 3 — Review & Confirm (editable guide details, description, symbols & iconography)
+- [ ] UI: Step 4 — Rights & Permissions (rights settings checkboxes, revenue split, canonical protections toggles)
+- [ ] UI: Step 5 — Connect Creator (Stripe Connect OAuth, payout summary, creator profile display)
+- [ ] UI: Step 6 — Publish Guide (publish preview, public URL, what's next checklist, Publish Guide button)
+- [ ] UI: Step indicator bar (horizontal numbered steps with arrows, gold active state)
+- [ ] UI: Bottom info bar (How the System Works, Derivative Example Flow, Built on Provenance)
+- [ ] UI: Canonical Guide page at /guide/:widCode
+- [ ] Navigation: Add Upload Guide entry to creator nav
+- [ ] Tests: guides.create, guides.extractFromSheet, guides.publish vitest coverage

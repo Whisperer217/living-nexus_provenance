@@ -67,6 +67,8 @@ const ALL_SECTIONS: NavSection[] = [
     heading: "Creator Tools",
     links: [
       { icon: <Shield size={14} />, label: "Register Work", path: "/upload", gold: true, authOnly: true },
+      { icon: <Users size={14} />, label: "Guide Directory", path: "/guides" },
+      { icon: <Shield size={14} />, label: "Upload Guide Character", path: "/guides/upload", gold: true, authOnly: true },
       { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio" },
       { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", authOnly: true },
       { icon: <PenTool size={14} />, label: "Draft Works", path: "/upload/drafts", authOnly: true },

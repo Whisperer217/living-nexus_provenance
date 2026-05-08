@@ -26,9 +26,6 @@ export const users = mysqlTable("users", {
   twitterHandle: varchar("twitterHandle", { length: 64 }),
   instagramHandle: varchar("instagramHandle", { length: 64 }),
   youtubeHandle: varchar("youtubeHandle", { length: 64 }),
-  cashAppHandle: varchar("cashAppHandle", { length: 64 }),
-  paypalUsername: varchar("paypalUsername", { length: 128 }),
-  venmoHandle: varchar("venmoHandle", { length: 64 }),
   bannerUrl: text("bannerUrl"),
   avatarObjectPosition: varchar("avatarObjectPosition", { length: 32 }).default("50% 50%"),
   bannerPositionX: float("bannerPositionX").default(50).notNull(),
@@ -86,10 +83,13 @@ export const users = mysqlTable("users", {
   lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),
   lastVisitedDashboardAt: timestamp("lastVisitedDashboardAt"),
 
-  // Founder WID — generated at grant time, e.g. WID-FDR-0001-1713340800000
+   // Founder WID — generated at grant time, e.g. WID-FDR-0001-1713340800000
   founderWid: varchar("founderWid", { length: 64 }),
   founderGrantedAt: timestamp("founderGrantedAt"),
-
+  // Creator economy — direct payment links (no Stripe required)
+  cashAppHandle: varchar("cashAppHandle", { length: 64 }),   // e.g. "$DocSeraphMercer"
+  paypalUsername: varchar("paypalUsername", { length: 128 }), // e.g. "docseraphmercer" or full URL
+  venmoHandle: varchar("venmoHandle", { length: 64 }),        // e.g. "DocSeraphMercer"
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -1538,43 +1538,43 @@ export const workEvidence = mysqlTable("workEvidence", {
 export type WorkEvidence = typeof workEvidence.$inferSelect;
 export type InsertWorkEvidence = typeof workEvidence.$inferInsert;
 
-// ─── Derivatives ──────────────────────────────────────────────────────────────
-// Tracks explicit creative lineage between works: remixes, reinterpretations,
-// alternate editions, covers, and other derivative relationships.
-// parentSongId = the original work; childSongId = the derivative work.
-export const derivatives = mysqlTable("derivatives", {
+// ─── Guide Entities ───────────────────────────────────────────────────────────
+// Canonical guide characters uploaded via the 6-step provenance pipeline.
+// Each guide has a WID, canonical artwork, testimony, rights config, and Stripe Connect.
+export const guides = mysqlTable("guides", {
   id: int("id").autoincrement().primaryKey(),
-  parentSongId: int("parentSongId").notNull(),   // FK → songs.id (original)
-  childSongId: int("childSongId"),               // FK → songs.id (derivative) — null if external
-  creatorUserId: int("creatorUserId").notNull(),  // FK → users.id (who declared this lineage)
-  derivativeType: mysqlEnum("derivativeType", [
-    "remix",
-    "reinterpretation",
-    "alternate_edition",
-    "cover",
-    "interpolation",
-    "sample",
-    "adaptation",
-    "translation",
-    "other",
-  ]).notNull().default("remix"),
-  permissionStatus: mysqlEnum("permissionStatus", [
-    "self",
-    "licensed",
-    "fair_use",
-    "pending",
-    "unknown",
-  ]).notNull().default("unknown"),
-  licenseNotes: text("licenseNotes"),
-  externalTitle: varchar("externalTitle", { length: 512 }),
-  externalUrl: text("externalUrl"),
-  testimony: text("testimony"),
+  creatorId: int("creatorId").notNull(),              // FK → users.id
+  canonicalName: varchar("canonicalName", { length: 256 }).notNull(),
+  tagline: varchar("tagline", { length: 512 }),
+  archetypeType: varchar("archetypeType", { length: 128 }),  // e.g. "Guide Character / Archetype"
+  role: varchar("role", { length: 256 }),             // e.g. "Creator Guardian / Provenance Protector"
+  alignment: varchar("alignment", { length: 512 }),   // e.g. "Christ-Centered · Truth · Protection"
+  domain: varchar("domain", { length: 512 }),         // e.g. "Imagination · Creativity · Provenance"
+  testimony: text("testimony"),                       // creator's origin testimony
+  loreDescription: text("loreDescription"),           // full lore/description
+  firstManifested: varchar("firstManifested", { length: 128 }),
+  provenanceSheetUrl: text("provenanceSheetUrl"),     // S3 URL of uploaded provenance sheet
+  artworkUrl: text("artworkUrl"),                     // S3 URL of primary canonical artwork
+  extractedImagesJson: json("extractedImagesJson"),   // array of {url, filename} extracted from sheet
+  symbolsJson: json("symbolsJson"),                   // array of {name, iconUrl, label} iconography
+  widCode: varchar("widCode", { length: 64 }).unique(), // e.g. LN-GUIDE-ARB-0001
+  canonicalStatus: mysqlEnum("canonicalStatus", ["draft", "review", "published"]).default("draft").notNull(),
+  // Rights & Permissions
+  rightsJson: json("rightsJson"),                     // {originalCreatorOwnership, platformUsage, derivativeAdaptation, merchandising, commercialization, attributionRequirement}
+  revenueCreatorPct: float("revenueCreatorPct").default(90).notNull(),
+  derivativePermissionsJson: json("derivativePermissionsJson"), // {protectFromUnauthorizedUse, requireAttributionOnDerivatives, lockCanonicalIdentity, allowGuideAppearances}
+  // Stripe Connect
+  stripeConnectId: varchar("stripeConnectId", { length: 128 }),
+  stripePayoutCurrency: varchar("stripePayoutCurrency", { length: 8 }).default("USD"),
+  stripePayoutSchedule: varchar("stripePayoutSchedule", { length: 64 }).default("Automatic (Monthly)"),
+  // Timestamps
+  publishedAt: timestamp("publishedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (t) => ({
-  parentIdx: index("derivatives_parentSongId_idx").on(t.parentSongId),
-  childIdx: index("derivatives_childSongId_idx").on(t.childSongId),
-  creatorIdx: index("derivatives_creatorUserId_idx").on(t.creatorUserId),
+  creatorIdx: index("guides_creatorId_idx").on(t.creatorId),
+  widIdx: index("guides_widCode_idx").on(t.widCode),
+  statusIdx: index("guides_canonicalStatus_idx").on(t.canonicalStatus),
 }));
-export type Derivative = typeof derivatives.$inferSelect;
-export type InsertDerivative = typeof derivatives.$inferInsert;
+export type Guide = typeof guides.$inferSelect;
+export type InsertGuide = typeof guides.$inferInsert;

@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e604e1e5-e539-4b03-ba2a-e9e87a4a657c",
+  "id": "5bbfa530-fc28-4262-8e92-f7c73a7e2cf3",
   "prevId": "6f2fa14b-277b-44fd-bc8f-880af1ac8e36",
   "tables": {
     "activationContributions": {
@@ -895,134 +895,6 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "derivatives": {
-      "name": "derivatives",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "parentSongId": {
-          "name": "parentSongId",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "childSongId": {
-          "name": "childSongId",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "creatorUserId": {
-          "name": "creatorUserId",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "derivativeType": {
-          "name": "derivativeType",
-          "type": "enum('remix','reinterpretation','alternate_edition','cover','interpolation','sample','adaptation','translation','other')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'remix'"
-        },
-        "permissionStatus": {
-          "name": "permissionStatus",
-          "type": "enum('self','licensed','fair_use','pending','unknown')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'unknown'"
-        },
-        "licenseNotes": {
-          "name": "licenseNotes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "externalTitle": {
-          "name": "externalTitle",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "externalUrl": {
-          "name": "externalUrl",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "testimony": {
-          "name": "testimony",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "onUpdate": true,
-          "default": "(now())"
-        }
-      },
-      "indexes": {
-        "derivatives_parentSongId_idx": {
-          "name": "derivatives_parentSongId_idx",
-          "columns": [
-            "parentSongId"
-          ],
-          "isUnique": false
-        },
-        "derivatives_childSongId_idx": {
-          "name": "derivatives_childSongId_idx",
-          "columns": [
-            "childSongId"
-          ],
-          "isUnique": false
-        },
-        "derivatives_creatorUserId_idx": {
-          "name": "derivatives_creatorUserId_idx",
-          "columns": [
-            "creatorUserId"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "derivatives_id": {
-          "name": "derivatives_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
     "discordWebhooks": {
       "name": "discordWebhooks",
       "columns": {
@@ -1641,6 +1513,241 @@
         }
       },
       "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "guides": {
+      "name": "guides",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "creatorId": {
+          "name": "creatorId",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "canonicalName": {
+          "name": "canonicalName",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tagline": {
+          "name": "tagline",
+          "type": "varchar(512)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "archetypeType": {
+          "name": "archetypeType",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "alignment": {
+          "name": "alignment",
+          "type": "varchar(512)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "domain": {
+          "name": "domain",
+          "type": "varchar(512)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "testimony": {
+          "name": "testimony",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "loreDescription": {
+          "name": "loreDescription",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "firstManifested": {
+          "name": "firstManifested",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "provenanceSheetUrl": {
+          "name": "provenanceSheetUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "artworkUrl": {
+          "name": "artworkUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "extractedImagesJson": {
+          "name": "extractedImagesJson",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "symbolsJson": {
+          "name": "symbolsJson",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "widCode": {
+          "name": "widCode",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "canonicalStatus": {
+          "name": "canonicalStatus",
+          "type": "enum('draft','review','published')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'draft'"
+        },
+        "rightsJson": {
+          "name": "rightsJson",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "revenueCreatorPct": {
+          "name": "revenueCreatorPct",
+          "type": "float",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 90
+        },
+        "derivativePermissionsJson": {
+          "name": "derivativePermissionsJson",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "stripeConnectId": {
+          "name": "stripeConnectId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "stripePayoutCurrency": {
+          "name": "stripePayoutCurrency",
+          "type": "varchar(8)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'USD'"
+        },
+        "stripePayoutSchedule": {
+          "name": "stripePayoutSchedule",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'Automatic (Monthly)'"
+        },
+        "publishedAt": {
+          "name": "publishedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "guides_creatorId_idx": {
+          "name": "guides_creatorId_idx",
+          "columns": [
+            "creatorId"
+          ],
+          "isUnique": false
+        },
+        "guides_widCode_idx": {
+          "name": "guides_widCode_idx",
+          "columns": [
+            "widCode"
+          ],
+          "isUnique": false
+        },
+        "guides_canonicalStatus_idx": {
+          "name": "guides_canonicalStatus_idx",
+          "columns": [
+            "canonicalStatus"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "guides_id": {
+          "name": "guides_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "guides_widCode_unique": {
+          "name": "guides_widCode_unique",
+          "columns": [
+            "widCode"
+          ]
+        }
+      },
       "checkConstraint": {}
     },
     "keeper_character_sheets": {
@@ -6274,27 +6381,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "cashAppHandle": {
-          "name": "cashAppHandle",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "paypalUsername": {
-          "name": "paypalUsername",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "venmoHandle": {
-          "name": "venmoHandle",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "bannerUrl": {
           "name": "bannerUrl",
           "type": "text",
@@ -6548,6 +6634,27 @@
         "founderGrantedAt": {
           "name": "founderGrantedAt",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cashAppHandle": {
+          "name": "cashAppHandle",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "paypalUsername": {
+          "name": "paypalUsername",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "venmoHandle": {
+          "name": "venmoHandle",
+          "type": "varchar(64)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

@@ -132,6 +132,8 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         links: [
           { icon: <Shield size={14} />, label: "Register Work", path: "/upload", description: "Issue a Witness ID", authOnly: true, gold: true },
+          { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
+          { icon: <Shield size={14} />, label: "Upload Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
           { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio", description: "Lyrics → AI music prompt" },
         ],
       },

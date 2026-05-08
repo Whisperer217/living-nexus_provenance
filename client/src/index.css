@@ -2125,3 +2125,29 @@ h1, h2, h3, h4, h5, h6,
   from { opacity: 0; transform: scale(1.04) translateY(12px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
+
+/* ─── Guide Upload Wizard ─────────────────────────────────────────────────── */
+.wizard-panel {
+  @apply bg-[#111008] border border-[#2a2010] rounded-xl p-5 h-full flex flex-col;
+}
+.wizard-panel-mini {
+  @apply bg-[#0d0b06] border border-[#1e1a0e] rounded-xl p-4 h-full flex flex-col items-center justify-center text-center min-h-[200px];
+}
+.panel-header {
+  @apply flex items-start gap-3 mb-5;
+}
+.panel-title {
+  @apply text-[#C9A84C] font-bold text-sm tracking-wider;
+}
+.panel-sub {
+  @apply text-[#6b5f3e] text-xs mt-0.5;
+}
+.step-badge {
+  @apply w-7 h-7 rounded-full bg-[#C9A84C] text-black font-bold text-sm flex items-center justify-center shrink-0;
+}
+.step-badge-mini {
+  @apply w-8 h-8 rounded-full border-2 border-[#3a3020] text-[#6b5f3e] font-bold text-sm flex items-center justify-center;
+}
+.btn-gold {
+  @apply bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold;
+}

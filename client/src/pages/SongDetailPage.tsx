@@ -972,49 +972,6 @@ export default function SongDetailPage() {
               </div>
             )}
 
-            {/* ── DIRECT SUPPORT SURFACE ── */}
-            {!isOwner && ((creator as any)?.cashAppHandle || (creator as any)?.paypalUsername || (creator as any)?.venmoHandle) && (
-              <div className="rounded-2xl p-4" style={{ background: "rgba(196,154,40,0.03)", border: "1px solid rgba(196,154,40,0.15)" }}>
-                <p className="text-xs font-semibold mb-3 tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", color: "rgba(196,154,40,0.6)" }}>
-                  Direct Support
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {(creator as any)?.cashAppHandle && (
-                    <a
-                      href={`https://cash.app/${(creator as any).cashAppHandle.startsWith('$') ? (creator as any).cashAppHandle : '$' + (creator as any).cashAppHandle}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:opacity-80 hover:scale-105"
-                      style={{ background: "rgba(0,210,110,0.12)", border: "1px solid rgba(0,210,110,0.25)", color: "#00D26A" }}
-                    >
-                      <span>$</span> Cash App
-                    </a>
-                  )}
-                  {(creator as any)?.paypalUsername && (
-                    <a
-                      href={`https://paypal.me/${(creator as any).paypalUsername}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:opacity-80 hover:scale-105"
-                      style={{ background: "rgba(0,112,243,0.12)", border: "1px solid rgba(0,112,243,0.25)", color: "#0070F3" }}
-                    >
-                      <span>P</span> PayPal
-                    </a>
-                  )}
-                  {(creator as any)?.venmoHandle && (
-                    <a
-                      href={`https://venmo.com/${(creator as any).venmoHandle}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:opacity-80 hover:scale-105"
-                      style={{ background: "rgba(0,160,220,0.12)", border: "1px solid rgba(0,160,220,0.25)", color: "#009DDC" }}
-                    >
-                      <span>V</span> Venmo
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
             {/* Witness ID */}
             {song.witnessId && (
               <div id="witness-records" className="rounded-2xl p-5" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.2)" }}>
