@@ -4463,3 +4463,20 @@
 - [ ] UI: Canonical Guide page at /guide/:widCode
 - [ ] Navigation: Add Upload Guide entry to creator nav
 - [ ] Tests: guides.create, guides.extractFromSheet, guides.publish vitest coverage
+
+## Phase 150 — Guide Entity Upload Pipeline (Integration)
+
+- [x] Merge commit 1a2f6ad (Phase 150) from GitHub
+- [x] Fix z.record() calls in routers.ts (two-argument form)
+- [x] Add userCollections to static import in db.ts
+- [x] Fix guide helper functions to use await getDb() with null guards
+- [x] Rewrite GuideDetailPage.tsx to use correct schema field names (widCode, rightsJson, etc.)
+- [x] Fix CinematicComicReader onClose?.() optional chain
+- [x] Fix CreatorStudioPage: p.url → p.imageUrl, moodTags string → string[]
+- [x] Add moodTags to updateMetadata procedure schema
+- [x] Fix pageNumber missing in DiscoverPage/ExplorePage/HomePage pages arrays
+- [x] Fix isAuthenticated → !authLoading in KeeperComposePage
+- [x] Fix isOwn undefined in ProfilePage (const isOwn = true)
+- [x] Fix 4 pre-existing db.ts errors (execute<any[]> + implicit any)
+- [x] tsc --noEmit exits 0 (fully clean build)
+- [x] 201/201 tests passing

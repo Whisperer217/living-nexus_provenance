@@ -341,7 +341,7 @@ export default function KeeperComposePage() {
   const autoSaveMutation = trpc.keeper.saveNote.useMutation(); // silent auto-save
   const recentDraftsQuery = trpc.keeper.listNotes.useQuery(
     { tag: "composition", limit: 5 },
-    { enabled: isAuthenticated }
+    { enabled: !authLoading }
   );
   const [draftsOpen, setDraftsOpen] = useState(false);
 
@@ -625,7 +625,7 @@ Please respond in Suno-ready format:
 
   // ── Shared input bar ───────────────────────────────────────────────────────
 
-  const RecentDraftsStrip = isAuthenticated && (recentDraftsQuery.data?.length ?? 0) > 0 ? (
+  const RecentDraftsStrip = !authLoading && (recentDraftsQuery.data?.length ?? 0) > 0 ? (
     <div className="flex-shrink-0" style={{ borderTop: "1px solid var(--ln-panel-border)", background: "var(--ln-panel)" }}>
       <button
         onClick={() => setDraftsOpen(o => !o)}

@@ -21,8 +21,8 @@ export default function GuideDetailPage() {
   );
 
   const copyWid = () => {
-    if (guide?.wid) {
-      navigator.clipboard.writeText(guide.wid);
+    if (guide?.widCode) {
+      navigator.clipboard.writeText(guide.widCode);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -55,24 +55,32 @@ export default function GuideDetailPage() {
     );
   }
 
-  const symbols: Array<{ name: string; icon?: string }> = (() => {
+  const symbols: Array<{ name: string; icon?: string; iconUrl?: string; label?: string }> = (() => {
     try {
-      const raw = JSON.parse(guide.symbolsJson ?? "[]");
-      return Array.isArray(raw) ? raw.map((s: any) =>
-        typeof s === "string" ? { name: s } : s
+      const raw = Array.isArray(guide.symbolsJson) ? guide.symbolsJson : JSON.parse((guide.symbolsJson as string) ?? "[]");
+      return Array.isArray(raw) ? raw.map((s: unknown) =>
+        typeof s === "string" ? { name: s } : (s as { name: string; icon?: string; iconUrl?: string; label?: string })
       ) : [];
     } catch { return []; }
   })();
 
   const rights: Record<string, string> = (() => {
-    try { return JSON.parse(guide.rightsJson ?? "{}"); } catch { return {}; }
+    try {
+      const raw = guide.rightsJson;
+      if (!raw) return {};
+      return typeof raw === "string" ? JSON.parse(raw) : (raw as Record<string, string>);
+    } catch { return {}; }
   })();
 
   const protections: Record<string, boolean> = (() => {
-    try { return JSON.parse(guide.protectionsJson ?? "{}"); } catch { return {}; }
+    try {
+      const raw = guide.derivativePermissionsJson;
+      if (!raw) return {};
+      return typeof raw === "string" ? JSON.parse(raw) : (raw as Record<string, boolean>);
+    } catch { return {}; }
   })();
 
-  const isOwner = user && guide.creatorId === (user as any).id;
+  const isOwner = user && guide.creatorId === (user as { id: number }).id;
 
   return (
     <div className="min-h-screen bg-[#080600] text-[#e8d5a3]">
@@ -98,9 +106,9 @@ export default function GuideDetailPage() {
           {/* Left — Cover art */}
           <div className="lg:col-span-1">
             <div className="relative rounded-xl overflow-hidden bg-[#111008] border border-[#2a2010] aspect-[3/4]">
-              {guide.coverArtUrl ? (
+              {guide.artworkUrl ? (
                 <img
-                  src={guide.coverArtUrl}
+                  src={guide.artworkUrl}
                   alt={guide.canonicalName ?? "Guide"}
                   className="w-full h-full object-cover"
                 />
@@ -120,11 +128,11 @@ export default function GuideDetailPage() {
             </div>
 
             {/* WID block */}
-            {guide.wid && (
+            {guide.widCode && (
               <div className="mt-4 bg-[#0d0b06] border border-[#2a2010] rounded-xl p-4">
                 <div className="text-[#6b5f3e] text-xs mb-1 tracking-wider">CANONICAL WID</div>
                 <div className="flex items-center gap-2">
-                  <code className="text-[#C9A84C] font-mono text-sm flex-1 truncate">{guide.wid}</code>
+                  <code className="text-[#C9A84C] font-mono text-sm flex-1 truncate">{guide.widCode}</code>
                   <button onClick={copyWid} className="text-[#6b5f3e] hover:text-[#C9A84C] transition-colors">
                     {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                   </button>
@@ -139,8 +147,8 @@ export default function GuideDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   {symbols.map((s, i) => (
                     <div key={i} className="flex flex-col items-center gap-1 bg-[#111008] border border-[#2a2010] rounded-lg p-3 min-w-[64px]">
-                      {s.icon && <span className="text-xl">{s.icon}</span>}
-                      <span className="text-[#e8d5a3] text-xs text-center">{s.name}</span>
+                      {(s.icon || s.iconUrl) && <span className="text-xl">{s.icon ?? s.iconUrl}</span>}
+                      <span className="text-[#e8d5a3] text-xs text-center">{s.name ?? s.label}</span>
                     </div>
                   ))}
                 </div>
@@ -173,12 +181,12 @@ export default function GuideDetailPage() {
               <table className="w-full">
                 <tbody>
                   {[
-                    ["TYPE", guide.guideType ?? "Guide Character / Archetype"],
+                    ["TYPE", guide.archetypeType ?? "Guide Character / Archetype"],
                     ["ROLE", guide.role],
                     ["ALIGNMENT", guide.alignment],
                     ["DOMAIN", guide.domain],
                     ["FIRST MANIFESTED", guide.firstManifested],
-                    ["WID", guide.wid],
+                    ["WID", guide.widCode],
                     ["STATUS", guide.canonicalStatus?.toUpperCase()],
                   ].filter(([, v]) => v).map(([label, value]) => (
                     <tr key={label as string} className="border-b border-[#1e1a0e] last:border-0">
@@ -199,23 +207,20 @@ export default function GuideDetailPage() {
             </div>
 
             {/* Testimony */}
-            {guide.testimonyOfOrigin && (
+            {guide.testimony && (
               <div className="bg-[#0d0b06] border border-[#2a2010] rounded-xl p-5">
                 <div className="text-[#C9A84C] text-xs font-bold tracking-wider mb-3">TESTIMONY OF ORIGIN</div>
                 <blockquote className="text-[#e8d5a3] text-sm leading-relaxed italic border-l-2 border-[#C9A84C]/40 pl-4">
-                  {guide.testimonyOfOrigin}
+                  {guide.testimony}
                 </blockquote>
-                {guide.creatorName && (
-                  <p className="text-[#C9A84C] text-sm mt-3 font-medium">— {guide.creatorName}</p>
-                )}
               </div>
             )}
 
             {/* Description */}
-            {guide.description && (
+            {guide.loreDescription && (
               <div className="bg-[#0d0b06] border border-[#2a2010] rounded-xl p-5">
                 <div className="text-[#C9A84C] text-xs font-bold tracking-wider mb-3">DESCRIPTION</div>
-                <p className="text-[#e8d5a3] text-sm leading-relaxed">{guide.description}</p>
+                <p className="text-[#e8d5a3] text-sm leading-relaxed">{guide.loreDescription}</p>
               </div>
             )}
 
@@ -238,7 +243,7 @@ export default function GuideDetailPage() {
                             : "bg-[#1e1a0e] text-[#6b5f3e] border border-[#2a2010]"
                         }
                       >
-                        {value}
+                        {value as string}
                       </Badge>
                     </div>
                   ))}
@@ -247,29 +252,29 @@ export default function GuideDetailPage() {
             )}
 
             {/* Revenue split */}
-            {guide.creatorRevenueSplit != null && (
+            {guide.revenueCreatorPct != null && (
               <div className="bg-[#0d0b06] border border-[#2a2010] rounded-xl p-5">
                 <div className="text-[#C9A84C] text-xs font-bold tracking-wider mb-4">REVENUE SPLIT</div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[#e8d5a3] text-sm">Creator (You)</span>
-                    <span className="text-white font-bold">{guide.creatorRevenueSplit}%</span>
+                    <span className="text-white font-bold">{guide.revenueCreatorPct}%</span>
                   </div>
                   <div className="w-full bg-[#1e1a0e] rounded-full h-2">
                     <div
                       className="bg-[#C9A84C] h-2 rounded-full"
-                      style={{ width: `${guide.creatorRevenueSplit}%` }}
+                      style={{ width: `${guide.revenueCreatorPct}%` }}
                     />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-[#6b5f3e] text-sm">Living Nexus Platform</span>
-                    <span className="text-[#6b5f3e] font-bold">{100 - (guide.creatorRevenueSplit ?? 90)}%</span>
+                    <span className="text-[#6b5f3e] font-bold">{100 - (guide.revenueCreatorPct ?? 90)}%</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Protections */}
+            {/* Canonical Protections */}
             {Object.keys(protections).length > 0 && (
               <div className="bg-[#0d0b06] border border-[#2a2010] rounded-xl overflow-hidden">
                 <div className="px-5 py-3 border-b border-[#1e1a0e]">

@@ -240,7 +240,7 @@ export function CinematicComicReader({
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); goNext(); }
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); goPrev(); }
-      if (e.key === "Escape") { if (isFullscreen) document.exitFullscreen?.(); else onClose(); }
+      if (e.key === "Escape") { if (isFullscreen) document.exitFullscreen?.(); else onClose?.(); }
       if (e.key === "+" || e.key === "=") setZoom(z => Math.min(z + 0.2, 3.0));
       if (e.key === "-") setZoom(z => Math.max(z - 0.2, 0.5));
       if (e.key === "c" || e.key === "C") setShowCommentary(s => !s);

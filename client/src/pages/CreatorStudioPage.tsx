@@ -125,7 +125,7 @@ export default function CreatorStudioPage() {
       description,
       headlineCaption,
       genre,
-      moodTags,
+      moodTags: moodTags ? moodTags.split(",").map(t => t.trim()).filter(Boolean) : undefined,
       aiDisclosure: aiDisclosure as any,
       narrativeFormat,
       readAccess,
@@ -166,7 +166,7 @@ export default function CreatorStudioPage() {
   } catch { /* ignore */ }
 
   const previewPages = storyboardPages.map((p: StoryboardPage) => ({
-    imageUrl: p.url,
+    imageUrl: p.imageUrl,
     pageNumber: p.pageNumber,
   }));
 

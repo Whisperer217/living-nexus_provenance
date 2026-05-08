@@ -1275,6 +1275,7 @@ export const appRouter = router({
       title: z.string().max(255).optional(),
       description: z.string().max(10000).nullable().optional(),
       headlineCaption: z.string().max(280).nullable().optional(),
+      moodTags: z.array(z.string()).optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
@@ -6421,7 +6422,7 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
         url: z.string().optional(),
         noteBody: z.string().optional(),
         hash: z.string().optional(),
-        metadataJson: z.record(z.unknown()).optional(),
+        metadataJson: z.record(z.string(), z.unknown()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verify the user owns this song
@@ -6630,9 +6631,9 @@ If a field cannot be determined from the document, use an empty string. For symb
         extractedImagesJson: z.array(z.object({ url: z.string(), filename: z.string() })).optional(),
         symbolsJson: z.array(z.object({ name: z.string(), label: z.string(), iconUrl: z.string().optional() })).optional(),
         widCode: z.string().max(64).optional(),
-        rightsJson: z.record(z.unknown()).optional(),
+        rightsJson: z.record(z.string(), z.unknown()).optional(),
         revenueCreatorPct: z.number().min(0).max(100).optional(),
-        derivativePermissionsJson: z.record(z.unknown()).optional(),
+        derivativePermissionsJson: z.record(z.string(), z.unknown()).optional(),
         stripeConnectId: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
