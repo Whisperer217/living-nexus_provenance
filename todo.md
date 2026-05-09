@@ -4518,3 +4518,20 @@
 - [x] Add Mission Control button to AdminUsersPage nav
 - [x] TypeScript clean (0 errors)
 - [x] All 201 tests passing
+
+## Phase RED — Stability Pass (2026-05-09)
+- [ ] Issue 1: Add /prompt-studio → /keeper-compose redirect in App.tsx
+- [ ] Issue 2: Fix ContextDrawer/MobileNavDrawer left pane profile sub-route links
+- [ ] Issue 3: Restore <GlobalPlayer /> to MainLayout player layer (desktop expansion dead)
+- [ ] Issue 4: Re-add /archive/mine, /archive/favorites, /archive/history, /archive/collections redirects
+- [ ] Issue 5: Wrap EditTrackPanel in createPortal to escape overflow:hidden parent
+- [ ] Phase 148: Implement Global Viewport Manager (z-index registry, layer hierarchy)
+
+## Phase RED — Stability Pass (Platform sync)
+- [x] Fix /prompt-studio → /keeper-compose redirect in App.tsx
+- [x] Fix /archive/mine and /archive/ledger redirects in App.tsx
+- [x] Fix ProfilePage tab sync — useEffect to re-read ?tab= on URL changes
+- [x] Restore GlobalPlayer to MainLayout player layer (desktop expansion was dead)
+- [x] Wrap EditTrackPanel in createPortal to escape overflow:hidden parent
+- [x] Create Global Viewport Layer Registry (client/src/lib/viewportLayers.ts)
+- [x] Apply Z.MOBILE_HEADER to MainLayout mobile header

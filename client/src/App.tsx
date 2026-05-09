@@ -221,6 +221,15 @@ function Router() {
                 <Route path="/guides" component={GuideDirectoryPage} />
                 <Route path="/guides/upload" component={GuideUploadWizard} />
                 <Route path="/guide/:id" component={GuideDetailPage} />
+                {/* ── Stability redirects — dead routes → canonical destinations ── */}
+                <Route path="/prompt-studio"><Redirect to="/keeper-compose" /></Route>
+                <Route path="/archive/mine"><Redirect to="/archive" /></Route>
+                <Route path="/archive/favorites"><Redirect to="/archive" /></Route>
+                <Route path="/archive/history"><Redirect to="/archive" /></Route>
+                <Route path="/archive/collections"><Redirect to="/archive" /></Route>
+                <Route path="/archive/ledger"><Redirect to="/witness-registry" /></Route>
+                <Route path="/upload/drafts"><Redirect to="/archive" /></Route>
+                <Route path="/upload/history"><Redirect to="/archive" /></Route>
                 <Route path="/404" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>

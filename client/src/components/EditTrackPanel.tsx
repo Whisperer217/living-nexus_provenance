@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import { trpc } from "@/lib/trpc";
 import { ImagePositioner } from "@/components/ImagePositioner";
@@ -624,7 +625,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     });
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex">
       {/* Backdrop */}
       <div
@@ -1855,6 +1856,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

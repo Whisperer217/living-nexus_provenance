@@ -189,6 +189,14 @@ export default function ProfilePage() {
   const validTabs = ["overview", "works", "collections", "liked", "signals", "field-notes", "testimony"] as const;
   const initialTab = tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) ? tabFromUrl : "overview";
   const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony">(initialTab);
+  // Sync tab when URL search changes (handles same-page navigation e.g. /profile → /profile?tab=works)
+  useEffect(() => {
+    const t = new URLSearchParams(search).get("tab") as typeof activeTab | null;
+    if (t && (validTabs as readonly string[]).includes(t)) {
+      setActiveTab(t);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
   const [showAddTestimony, setShowAddTestimony] = useState(false);
   const [testimonyContent, setTestimonyContent] = useState("");
   const [testimonyLinkedWorks, setTestimonyLinkedWorks] = useState<string[]>([]);

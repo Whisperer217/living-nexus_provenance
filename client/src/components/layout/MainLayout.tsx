@@ -38,6 +38,7 @@ import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import { Menu, X, Bell } from "lucide-react";
 import { overlayOpen, overlayClose } from "@/lib/overlayController";
+import { Z } from "@/lib/viewportLayers";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
@@ -139,8 +140,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           Hamburger + Logo + Bell
       ============================================== */}
       <div
-        className="lg:hidden fixed top-0 left-0 right-0 z-[400] flex items-center gap-3 px-4 py-3"
+        className="lg:hidden fixed top-0 left-0 right-0 flex items-center gap-3 px-4 py-3"
         style={{
+          zIndex: Z.MOBILE_HEADER,
           background: MOBILE_HEADER_BG,
           borderBottom: `1px solid ${MOBILE_HEADER_BORDER}`,
           transition: "background 0.4s ease",
@@ -225,9 +227,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* ==============================================
           PLAYER LAYER -- isolated, no layout dependency
-          GlobalPlayer is kept for audio engine only (hidden UI).
-          WitnessSurfacePlayer (WSP) provides all visible UI.
-          TheaterPlayer remains for desktop theater mode.
+          GlobalPlayer: desktop floating card + expanded modal (createPortal to body)
+          WitnessSurfacePlayer (WSP): mobile surface bar + expanded panel
+          TheaterPlayer: desktop cinematic theater mode
       ============================================== */}
       <div
         style={{
@@ -239,6 +241,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           zIndex: 0,
         }}
       >
+        {/* GlobalPlayer — desktop floating card + expanded modal (uses createPortal internally, z-9000) */}
+        <div style={{ pointerEvents: "auto" }}>
+          <GlobalPlayer />
+        </div>
         {/* Theater Player */}
         <div style={{ pointerEvents: "auto" }}>
           <TheaterPlayer />
