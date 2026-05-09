@@ -50,18 +50,31 @@ export interface NowPlaying {
 
 function useNowPlaying(): NowPlaying | null {
   const [nowPlaying, setNowPlaying] = useState<NowPlaying | null>(null);
+  // Track previous value in a ref to avoid redundant setState calls on every
+  // 3-second tick — calling setNowPlaying(null) when state is already null
+  // still schedules a re-render in some React versions, which can cascade into
+  // an infinite loop when downstream useEffects depend on the nowPlaying value.
+  const prevRef = useRef<NowPlaying | null>(null);
 
   useEffect(() => {
     const check = () => {
       const meta = navigator.mediaSession?.metadata;
       if (meta?.title) {
-        setNowPlaying({
+        const next: NowPlaying = {
           title: meta.title,
           artist: meta.artist || "Unknown Artist",
           artwork: meta.artwork?.[0]?.src,
-        });
+        };
+        // Only update state when title actually changes
+        if (prevRef.current?.title !== next.title) {
+          prevRef.current = next;
+          setNowPlaying(next);
+        }
       } else {
-        setNowPlaying(null);
+        if (prevRef.current !== null) {
+          prevRef.current = null;
+          setNowPlaying(null);
+        }
       }
     };
 

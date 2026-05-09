@@ -23,7 +23,7 @@
  *  - Auto-hide UI chrome
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   X, ChevronLeft, ChevronRight, Maximize2, Minimize2,
   BookOpen, Grid3x3, Layers, Compass, ZoomIn, ZoomOut,
@@ -184,8 +184,15 @@ export function CinematicComicReader({
     return () => { if (controlsTimer.current) clearTimeout(controlsTimer.current); };
   }, [resetControlsTimer]);
 
-  // ── Panel data for current page ───────────────────────────────────────────
-  const currentPanels = getRegionsForPage(panelData, pageIdx + 1);
+  // ── Panel data for current page ─────────────────────────────────────────
+  // Memoized: getRegionsForPage returns a new array every call — without useMemo
+  // computeGuidedTransform recreates on every render → infinite setState loop.
+  const currentPanels = useMemo(
+    () => getRegionsForPage(panelData, pageIdx + 1),
+    // panelData is a stable prop reference; pageIdx is a primitive — safe deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [panelData, pageIdx]
+  );
   const currentPanel = currentPanels[panelIdx] ?? null;
 
   // ── Navigation ────────────────────────────────────────────────────────────

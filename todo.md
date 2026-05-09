@@ -4535,3 +4535,7 @@
 - [x] Wrap EditTrackPanel in createPortal to escape overflow:hidden parent
 - [x] Create Global Viewport Layer Registry (client/src/lib/viewportLayers.ts)
 - [x] Apply Z.MOBILE_HEADER to MainLayout mobile header
+
+## Infinite Loop Fixes — /book/:id
+- [x] CinematicComicReader: memoize currentPanels with useMemo to stabilize computeGuidedTransform deps
+- [x] FloatingAvatar useNowPlaying: add prev-value ref guard to prevent redundant setNowPlaying calls every 3s
