@@ -175,7 +175,7 @@ export default function Keeper() {
         style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
       >
         <button
-          onClick={() => navigate("/create")}
+          onClick={() => navigate("/keeper-compose")}
           className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity"
           style={{ color: "var(--ln-smoke)" }}
         >

@@ -55,32 +55,25 @@ export default function GuideDetailPage() {
     );
   }
 
-  const symbols: Array<{ name: string; icon?: string; iconUrl?: string; label?: string }> = (() => {
+  const symbols: Array<{ name: string; icon?: string }> = (() => {
     try {
-      const raw = Array.isArray(guide.symbolsJson) ? guide.symbolsJson : JSON.parse((guide.symbolsJson as string) ?? "[]");
-      return Array.isArray(raw) ? raw.map((s: unknown) =>
-        typeof s === "string" ? { name: s } : (s as { name: string; icon?: string; iconUrl?: string; label?: string })
+      const rawJson = typeof guide.symbolsJson === "string" ? guide.symbolsJson : JSON.stringify(guide.symbolsJson ?? []);
+      const raw = JSON.parse(rawJson);
+      return Array.isArray(raw) ? raw.map((s: any) =>
+        typeof s === "string" ? { name: s } : s
       ) : [];
     } catch { return []; }
   })();
 
   const rights: Record<string, string> = (() => {
-    try {
-      const raw = guide.rightsJson;
-      if (!raw) return {};
-      return typeof raw === "string" ? JSON.parse(raw) : (raw as Record<string, string>);
-    } catch { return {}; }
+    try { return JSON.parse(typeof guide.rightsJson === "string" ? guide.rightsJson : JSON.stringify(guide.rightsJson ?? {})); } catch { return {}; }
   })();
 
   const protections: Record<string, boolean> = (() => {
-    try {
-      const raw = guide.derivativePermissionsJson;
-      if (!raw) return {};
-      return typeof raw === "string" ? JSON.parse(raw) : (raw as Record<string, boolean>);
-    } catch { return {}; }
+    try { return JSON.parse(typeof (guide as any).derivativePermissionsJson === "string" ? (guide as any).derivativePermissionsJson : JSON.stringify((guide as any).derivativePermissionsJson ?? {})); } catch { return {}; }
   })();
 
-  const isOwner = user && guide.creatorId === (user as { id: number }).id;
+  const isOwner = user && guide.creatorId === (user as any).id;
 
   return (
     <div className="min-h-screen bg-[#080600] text-[#e8d5a3]">
@@ -147,8 +140,8 @@ export default function GuideDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   {symbols.map((s, i) => (
                     <div key={i} className="flex flex-col items-center gap-1 bg-[#111008] border border-[#2a2010] rounded-lg p-3 min-w-[64px]">
-                      {(s.icon || s.iconUrl) && <span className="text-xl">{s.icon ?? s.iconUrl}</span>}
-                      <span className="text-[#e8d5a3] text-xs text-center">{s.name ?? s.label}</span>
+                      {s.icon && <span className="text-xl">{s.icon}</span>}
+                      <span className="text-[#e8d5a3] text-xs text-center">{s.name}</span>
                     </div>
                   ))}
                 </div>
@@ -243,7 +236,7 @@ export default function GuideDetailPage() {
                             : "bg-[#1e1a0e] text-[#6b5f3e] border border-[#2a2010]"
                         }
                       >
-                        {value as string}
+                        {value}
                       </Badge>
                     </div>
                   ))}
@@ -274,7 +267,7 @@ export default function GuideDetailPage() {
               </div>
             )}
 
-            {/* Canonical Protections */}
+            {/* Protections */}
             {Object.keys(protections).length > 0 && (
               <div className="bg-[#0d0b06] border border-[#2a2010] rounded-xl overflow-hidden">
                 <div className="px-5 py-3 border-b border-[#1e1a0e]">

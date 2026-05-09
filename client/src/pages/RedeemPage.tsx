@@ -186,7 +186,7 @@ export default function RedeemPage() {
                 <button
                   className="underline hover:opacity-80 transition-opacity"
                   style={{ color: GOLD }}
-                  onClick={() => navigate("/license")}
+                  onClick={() => navigate("/pricing")}
                 >
                   View licensing options
                 </button>

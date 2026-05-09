@@ -315,7 +315,8 @@ function ArcPanel({ arc, previewArc, modeColor, hasContent }: {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function KeeperComposePage() {
-  const { loading: authLoading } = useAuth({ redirectOnUnauthenticated: true });
+  const { loading: authLoading, user: authUser } = useAuth({ redirectOnUnauthenticated: true });
+  const isAuthenticated = !!authUser;
   const [, navigate] = useLocation();
   const { activeMode, attrs, handleModeChange } = useKeeperAttrs();
 
@@ -341,7 +342,7 @@ export default function KeeperComposePage() {
   const autoSaveMutation = trpc.keeper.saveNote.useMutation(); // silent auto-save
   const recentDraftsQuery = trpc.keeper.listNotes.useQuery(
     { tag: "composition", limit: 5 },
-    { enabled: !authLoading }
+    { enabled: isAuthenticated }
   );
   const [draftsOpen, setDraftsOpen] = useState(false);
 
@@ -625,7 +626,7 @@ Please respond in Suno-ready format:
 
   // ── Shared input bar ───────────────────────────────────────────────────────
 
-  const RecentDraftsStrip = !authLoading && (recentDraftsQuery.data?.length ?? 0) > 0 ? (
+  const RecentDraftsStrip = isAuthenticated && (recentDraftsQuery.data?.length ?? 0) > 0 ? (
     <div className="flex-shrink-0" style={{ borderTop: "1px solid var(--ln-panel-border)", background: "var(--ln-panel)" }}>
       <button
         onClick={() => setDraftsOpen(o => !o)}

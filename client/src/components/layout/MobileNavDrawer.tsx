@@ -60,7 +60,7 @@ const ALL_SECTIONS: NavSection[] = [
       { icon: <FileText size={14} />, label: "Lyrics", path: "/explore?medium=lyrics" },
       { icon: <BookOpen size={14} />, label: "Manuscripts", path: "/explore?medium=manuscripts" },
       { icon: <Image size={14} />, label: "Comics & Visual Art", path: "/explore?medium=comics" },
-      { icon: <Users size={14} />, label: "All Creators", path: "/creators" },
+      { icon: <Users size={14} />, label: "All Creators", path: "/explore?filter=creators" },
     ],
   },
   {
@@ -69,10 +69,10 @@ const ALL_SECTIONS: NavSection[] = [
       { icon: <Shield size={14} />, label: "Register Work", path: "/upload", gold: true, authOnly: true },
       { icon: <Users size={14} />, label: "Guide Directory", path: "/guides" },
       { icon: <Shield size={14} />, label: "Upload Guide Character", path: "/guides/upload", gold: true, authOnly: true },
-      { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio" },
+      { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose" },
       { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", authOnly: true },
-      { icon: <PenTool size={14} />, label: "Draft Works", path: "/upload/drafts", authOnly: true },
-      { icon: <History size={14} />, label: "Upload History", path: "/upload/history", authOnly: true },
+      { icon: <PenTool size={14} />, label: "Draft Works", path: "/archive", authOnly: true },
+      { icon: <History size={14} />, label: "Upload History", path: "/archive", authOnly: true },
     ],
   },
   {

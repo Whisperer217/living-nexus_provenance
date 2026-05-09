@@ -72,7 +72,7 @@ const PANELS: Record<NavMode, ModePanel> = {
         heading: "Founder's Era",
         links: [
           { icon: <Shield size={14} />, label: "Founder's Era", path: "/#founders-era", description: "Earliest provenance anchors" },
-          { icon: <Users size={14} />, label: "Founding Creators", path: "/creators?filter=founders", description: "View the founding registry" },
+          { icon: <Users size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
         ],
       },
     ],
@@ -95,8 +95,8 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         heading: "By Creator",
         links: [
-          { icon: <Users size={14} />, label: "All Creators", path: "/creators" },
-          { icon: <Star size={14} />, label: "Featured Creators", path: "/creators?filter=featured" },
+          { icon: <Users size={14} />, label: "All Creators", path: "/explore?filter=creators" },
+          { icon: <Star size={14} />, label: "Featured Creators", path: "/founders" },
         ],
       },
     ],
@@ -117,7 +117,7 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         heading: "Account",
         links: [
-          { icon: <Settings size={14} />, label: "Settings", path: "/settings", authOnly: true },
+          { icon: <Settings size={14} />, label: "Settings", path: "/settings/billing", authOnly: true },
           { icon: <LogOut size={14} />, label: "Log Out", path: "__logout__", authOnly: true, danger: true },
         ],
       },
@@ -134,14 +134,14 @@ const PANELS: Record<NavMode, ModePanel> = {
           { icon: <Shield size={14} />, label: "Register Work", path: "/upload", description: "Issue a Witness ID", authOnly: true, gold: true },
           { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
           { icon: <Shield size={14} />, label: "Upload Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
-          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio", description: "Lyrics → AI music prompt" },
+          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
         ],
       },
       {
         heading: "Your Uploads",
         links: [
-          { icon: <PenTool size={14} />, label: "Draft Works", path: "/upload/drafts", description: "Unfinished registrations", authOnly: true },
-          { icon: <History size={14} />, label: "Upload History", path: "/upload/history", description: "All past submissions", authOnly: true },
+          { icon: <PenTool size={14} />, label: "Draft Works", path: "/archive", description: "Unfinished registrations", authOnly: true },
+          { icon: <History size={14} />, label: "Upload History", path: "/archive", description: "All past submissions", authOnly: true },
           { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics", authOnly: true },
         ],
       },

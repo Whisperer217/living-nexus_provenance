@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      navigate("/create");
+      navigate("/upload");
     }
   }, [user, isLoading, navigate]);
 

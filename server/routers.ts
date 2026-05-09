@@ -120,7 +120,6 @@ import { ENV } from "./_core/env";
 import { getOrGenerateEmbedVideo } from "./embedVideo";
 import { enqueueVisualJob } from "./visualQueue";
 import { notifyOwner } from "./_core/notification";
-import { enqueueJob } from "./workerQueue";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
@@ -1276,7 +1275,8 @@ export const appRouter = router({
       title: z.string().max(255).optional(),
       description: z.string().max(10000).nullable().optional(),
       headlineCaption: z.string().max(280).nullable().optional(),
-      moodTags: z.array(z.string()).optional(),
+      // Mood tags
+      moodTags: z.array(z.string()).nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
@@ -1800,54 +1800,6 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       await updateCollectionCover(input.collectionId, ctx.user.id, { coverArtUrl: url });
       return { url };
     }),
-
-    // ── Layer 3: Dispatch comic page processing job ──────────────────────────
-    /** Enqueue a comic page for Layer 3 cloud processing (WebP conversion + SHA-256 fingerprinting). */
-    dispatchComicProcessing: protectedProcedure
-      .input(z.object({
-        songId: z.number().int().positive(),
-        pageIndex: z.number().int().min(0),
-        imageUrl: z.string().url(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        // Verify the caller owns the song
-        const song = await getSongById(input.songId);
-        if (!song || song.userId !== ctx.user.id) {
-          throw new TRPCError({ code: "FORBIDDEN", message: "You do not own this work" });
-        }
-        const job = await enqueueJob("comic-processing", {
-          songId: input.songId,
-          pageIndex: input.pageIndex,
-          imageUrl: input.imageUrl,
-        });
-        return { jobId: job?.id ?? null, status: "queued" };
-      }),
-
-    /** Enqueue a guide entity extraction job for Layer 3 processing. */
-    dispatchGuideExtraction: protectedProcedure
-      .input(z.object({
-        guideId: z.number().int().positive(),
-        provenanceSheetUrl: z.string().url(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const guide = await getGuideById(input.guideId);
-        if (!guide || guide.creatorId !== ctx.user.id) {
-          throw new TRPCError({ code: "FORBIDDEN", message: "You do not own this guide" });
-        }
-        const job = await enqueueJob("guide-extraction", {
-          guideId: input.guideId,
-          provenanceSheetUrl: input.provenanceSheetUrl,
-        });
-        return { jobId: job?.id ?? null, status: "queued" };
-      }),
-
-    /** Get worker job stats for Mission Control (admin only). */
-    getWorkerStats: adminProcedure
-      .query(async () => {
-        const { getJobStats, getRecentJobs } = await import("./workerQueue");
-        const [stats, recent] = await Promise.all([getJobStats(), getRecentJobs(50)]);
-        return { stats, recent };
-      }),
   }),
   comments: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),

@@ -125,7 +125,7 @@ export default function CreatorStudioPage() {
       description,
       headlineCaption,
       genre,
-      moodTags: moodTags ? moodTags.split(",").map(t => t.trim()).filter(Boolean) : undefined,
+      moodTags: moodTags ? moodTags.split(",").map((t: string) => t.trim()).filter(Boolean) : undefined,
       aiDisclosure: aiDisclosure as any,
       narrativeFormat,
       readAccess,

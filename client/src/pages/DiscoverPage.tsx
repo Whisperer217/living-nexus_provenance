@@ -11,7 +11,7 @@ import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { toast } from "sonner";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
-import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
+import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 
 // Extended genre categories with WID type indicators
 const MUSIC_GENRES = ["Gospel", "Classical", "Rock", "Hip-Hop", "Electronic", "R&B", "Ambient"];
@@ -628,7 +628,7 @@ export default function DiscoverPage() {
       </div>
       {/* Inline Comic/Manuscript Reader — launched from carousel cards */}
       {readerSong && (() => {
-        let pages: { imageUrl: string; caption?: string; pageNumber: number }[] = [];
+        let pages: BookPage[] = [];
         try {
           const raw = readerSong.pagesJson;
           if (raw) pages = typeof raw === "string" ? JSON.parse(raw) : raw;
