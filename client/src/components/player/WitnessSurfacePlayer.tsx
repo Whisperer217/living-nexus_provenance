@@ -1,10 +1,10 @@
 /* ================================================================
    LIVING NEXUS — WitnessSurfacePlayer (WSP)
-   The persistent top-layer interface representing the active work.
+   The persistent floating manifestation dock.
 
    Three modes:
-     surface  — 60px strip anchored under navbar, always visible
-     expanded — expands downward: controls → artwork → identity → actions → waveform
+     surface  — compact glass capsule floating above mobile nav bar
+     expanded — full-viewport atmospheric ceremonial takeover
      floating — detached draggable widget, edge-snapping, localStorage position
 
    Design rule:
@@ -39,6 +39,8 @@ import {
   VolumeX,
   Zap,
   Target,
+  BookOpen,
+  Map,
 } from "lucide-react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useWSP } from "@/contexts/WSPContext";
@@ -96,7 +98,71 @@ function useIsMobile() {
   return isMobile;
 }
 
-/* ── Surface Bar (60px strip — mobile only) ── */
+/* ── Manifestation CTA button — content-type aware ── */
+function ManifestationCTA({
+  contentType,
+  trackId,
+  size = "sm",
+}: {
+  contentType?: string;
+  trackId: string;
+  size?: "sm" | "xs";
+}) {
+  const [, navigate] = useLocation();
+
+  if (contentType === "comic" || contentType === "manuscript") {
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/book/${trackId}`);
+        }}
+        className="flex items-center gap-1 rounded-full font-semibold transition-all hover:scale-105 active:scale-95 shrink-0"
+        style={{
+          padding: size === "xs" ? "3px 10px" : "4px 12px",
+          fontSize: size === "xs" ? 10 : 11,
+          background: "rgba(255,215,0,0.18)",
+          border: "1px solid rgba(255,215,0,0.4)",
+          color: "rgba(255,215,0,0.95)",
+          letterSpacing: "0.04em",
+        }}
+        aria-label="Read Now"
+      >
+        <BookOpen size={size === "xs" ? 9 : 10} />
+        READ NOW
+      </button>
+    );
+  }
+
+  if (contentType === "guide") {
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/guide/${trackId}`);
+        }}
+        className="flex items-center gap-1 rounded-full font-semibold transition-all hover:scale-105 active:scale-95 shrink-0"
+        style={{
+          padding: size === "xs" ? "3px 10px" : "4px 12px",
+          fontSize: size === "xs" ? 10 : 11,
+          background: "rgba(255,215,0,0.18)",
+          border: "1px solid rgba(255,215,0,0.4)",
+          color: "rgba(255,215,0,0.95)",
+          letterSpacing: "0.04em",
+        }}
+        aria-label="Enter Guide"
+      >
+        <Map size={size === "xs" ? 9 : 10} />
+        ENTER GUIDE
+      </button>
+    );
+  }
+
+  // Default: audio/lyrics — no extra CTA needed (play/pause is the primary action)
+  return null;
+}
+
+/* ── Surface Bar (compact floating glass capsule — mobile only) ── */
 function SurfaceBar() {
   const isMobile = useIsMobile();
   const { state, togglePlay, nextTrack, prevTrack, seek } = usePlayer();
@@ -122,23 +188,27 @@ function SurfaceBar() {
       className="wsp-surface-bar md:hidden"
       style={{
         position: "fixed",
-        top: "var(--wsp-top, 56px)",
-        left: "var(--wsp-left, 0px)",
-        right: 0,
-        height: 60,
+        bottom: "calc(env(safe-area-inset-bottom, 0px) + 72px)",
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "min(360px, calc(100vw - 24px))",
+        height: 64,
         zIndex: 350,
-        background: "rgba(14,11,7,0.97)",
-        borderBottom: "1px solid rgba(255,215,0,0.12)",
-        borderLeft: "3px solid rgba(255,215,0,0.5)",
-        backdropFilter: "blur(20px)",
+        background: "rgba(10,8,5,0.94)",
+        border: "1px solid rgba(255,215,0,0.22)",
+        borderRadius: 32,
+        backdropFilter: "blur(28px)",
+        WebkitBackdropFilter: "blur(28px)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.08), inset 0 1px 0 rgba(255,215,0,0.06)",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
       }}
     >
-      {/* Progress track */}
+      {/* Progress track — thin gold line at top of capsule */}
       <div
         className="cursor-pointer"
-        style={{ height: 2, background: "rgba(255,255,255,0.08)", flexShrink: 0 }}
+        style={{ height: 2, background: "rgba(255,255,255,0.06)", flexShrink: 0 }}
         onClick={handleSeek}
       >
         <div
@@ -152,12 +222,12 @@ function SurfaceBar() {
       </div>
 
       {/* Main row */}
-      <div className="flex items-center gap-3 px-4 flex-1 min-w-0">
+      <div className="flex items-center gap-2 px-3 flex-1 min-w-0">
         {/* Artwork — tap to expand */}
         <button
           onClick={expand}
-          className="shrink-0 rounded overflow-hidden"
-          style={{ width: 40, height: 40, background: "rgba(255,215,0,0.08)" }}
+          className="shrink-0 rounded-full overflow-hidden"
+          style={{ width: 38, height: 38, background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.15)" }}
           aria-label="Expand player"
         >
           {track.artUrl ? (
@@ -183,65 +253,50 @@ function SurfaceBar() {
           aria-label="Expand player"
         >
           <div
-            className="text-sm font-medium truncate"
+            className="text-xs font-medium truncate"
             style={{ color: "rgba(255,255,255,0.92)" }}
           >
             {track.title}
           </div>
           <div
-            className="text-xs truncate"
-            style={{ color: "rgba(255,215,0,0.6)" }}
+            className="truncate"
+            style={{ color: "rgba(255,215,0,0.6)", fontSize: 10 }}
           >
             {track.artist}
           </div>
         </button>
 
-        {/* Controls */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={() => prevTrack()}
-            className="p-2 rounded-full transition-all hover:bg-white/5"
-            style={{ color: "rgba(255,255,255,0.5)" }}
-            aria-label="Previous"
-          >
-            <SkipBack size={16} />
-          </button>
-          <button
-            onClick={togglePlay}
-            className="flex items-center justify-center rounded-full transition-all"
-            style={{
-              width: 36,
-              height: 36,
-              background: "rgba(255,215,0,0.15)",
-              border: "1px solid rgba(255,215,0,0.3)",
-              color: "rgba(255,215,0,0.9)",
-            }}
-            aria-label={state.isPlaying ? "Pause" : "Play"}
-          >
-            {state.isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
-          </button>
-          <button
-            onClick={() => nextTrack()}
-            className="p-2 rounded-full transition-all hover:bg-white/5"
-            style={{ color: "rgba(255,255,255,0.5)" }}
-            aria-label="Next"
-          >
-            <SkipForward size={16} />
-          </button>
-        </div>
+        {/* Manifestation CTA — content-type specific */}
+        <ManifestationCTA contentType={track.contentType} trackId={track.id} size="xs" />
+
+        {/* Play/Pause */}
+        <button
+          onClick={togglePlay}
+          className="flex items-center justify-center rounded-full transition-all shrink-0"
+          style={{
+            width: 34,
+            height: 34,
+            background: "rgba(255,215,0,0.15)",
+            border: "1px solid rgba(255,215,0,0.3)",
+            color: "rgba(255,215,0,0.9)",
+          }}
+          aria-label={state.isPlaying ? "Pause" : "Play"}
+        >
+          {state.isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+        </button>
 
         {/* Provenance pulse — 3 animated dots when track is witnessed */}
         {track.witnessId && (
           <div
-            className="shrink-0 hidden sm:flex items-center gap-[3px]"
+            className="shrink-0 flex items-center gap-[3px]"
             title={`Witnessed: ${track.witnessId.slice(0, 16)}…`}
           >
             {[0, 1, 2].map(i => (
               <div
                 key={i}
                 style={{
-                  width: 5,
-                  height: 5,
+                  width: 4,
+                  height: 4,
                   borderRadius: "50%",
                   background: "rgba(74,222,128,0.7)",
                   animation: "wsp-provenance-pulse 2s cubic-bezier(0.4,0,0.6,1) infinite",
@@ -251,22 +306,12 @@ function SurfaceBar() {
             ))}
           </div>
         )}
-
-        {/* Pop-out to floating */}
-        <button
-          onClick={float}
-          className="p-2 rounded-full transition-all hover:bg-white/5 shrink-0 hidden sm:flex"
-          style={{ color: "rgba(255,255,255,0.3)" }}
-          aria-label="Float player"
-        >
-          <ExternalLink size={14} />
-        </button>
       </div>
     </div>
   );
 }
 
-/* ── Expanded Panel (expands downward from surface bar) ── */
+/* ── Expanded Panel (full-viewport atmospheric takeover) ── */
 function ExpandedPanel() {
   const {
     state,
@@ -322,19 +367,14 @@ function ExpandedPanel() {
   const isLiked = state.liked.has(track.id);
 
   /* Auto-dim overlay after 3s */
-  const resetOverlayTimer = useCallback(() => {
+  const resetOverlayTimer = () => {
     setOverlayVisible(true);
     if (overlayTimer.current) clearTimeout(overlayTimer.current);
     overlayTimer.current = setTimeout(() => setOverlayVisible(false), 3000);
-  }, []);
-
-  useEffect(() => {
-    resetOverlayTimer();
-    return () => { if (overlayTimer.current) clearTimeout(overlayTimer.current); };
-  }, []);
+  };
 
   /* Tilt on mouse move */
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!artRef.current) return;
     const rect = artRef.current.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
@@ -346,12 +386,12 @@ function ExpandedPanel() {
       transition: "transform 0.08s ease",
     });
     setArtGlowActive(true);
-  }, []);
+  };
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = () => {
     setTiltStyle({ transform: "perspective(700px) rotateY(0deg) rotateX(0deg) scale(1)", transition: "transform 0.5s ease" });
     setArtGlowActive(false);
-  }, []);
+  };
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -368,13 +408,6 @@ function ExpandedPanel() {
     if (delta > 80) collapse();
   };
 
-  /* ESC to collapse */
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") collapse(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [collapse]);
-
   return (
     <div
       className="wsp-expanded"
@@ -384,25 +417,28 @@ function ExpandedPanel() {
       onClick={resetOverlayTimer}
       style={{
         position: "fixed",
-        top: "calc(var(--wsp-top, 56px) + 60px)",
-        left: "var(--wsp-left, 0px)",
+        top: 0,
+        left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 340,
-        background: "rgba(8,7,4,0.98)",
-        backdropFilter: "blur(24px)",
+        zIndex: 400,
+        background: "rgba(6,5,3,0.98)",
+        backdropFilter: "blur(32px)",
+        WebkitBackdropFilter: "blur(32px)",
         overflowY: "auto",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        paddingTop: "env(safe-area-inset-top, 0px)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
       {/* ── Constrained surface container ── */}
-      <div style={{ width: "100%", maxWidth: 1100, padding: "0 16px", display: "flex", flexDirection: "column", alignItems: "center", boxSizing: "border-box", borderRadius: 16, boxShadow: "0 0 40px rgba(255,215,0,0.08)" }}>
-      {/* TOP ROW: Collapse + Back/Play/Next + Float — all controls in one strip */}
+      <div style={{ width: "100%", maxWidth: 1100, padding: "0 16px", display: "flex", flexDirection: "column", alignItems: "center", boxSizing: "border-box" }}>
+
+      {/* TOP ROW: Collapse + Transport + Float */}
       <div
-        className="flex items-center justify-between w-full px-4 pt-3 pb-2 shrink-0"
+        className="flex items-center justify-between w-full px-4 pt-4 pb-2 shrink-0"
         style={{
           opacity: overlayVisible ? 1 : 0.2,
           transition: "opacity 0.6s ease",
@@ -466,9 +502,24 @@ function ExpandedPanel() {
         </button>
       </div>
 
+      {/* Testimony excerpt — shown above artwork for manifestation-first hierarchy */}
+      {track.testimony && (
+        <div
+          className="w-full px-6 mb-3 text-center shrink-0"
+          style={{ maxWidth: 480 }}
+        >
+          <p
+            className="text-sm italic leading-relaxed line-clamp-2"
+            style={{ color: "rgba(255,255,255,0.45)" }}
+          >
+            "{track.testimony}"
+          </p>
+        </div>
+      )}
+
       {/* CORE: HERO artwork — primary focal anchor */}
-      <div className="relative shrink-0" style={{ marginTop: 8 }}>
-        {/* Reactive ambient glow — expands on hover/tilt */}
+      <div className="relative shrink-0" style={{ marginTop: 4 }}>
+        {/* Reactive ambient glow */}
         <div
           style={{
             position: "absolute",
@@ -487,7 +538,7 @@ function ExpandedPanel() {
           onMouseLeave={handleMouseLeave}
           className="rounded-2xl overflow-hidden cursor-pointer"
           style={{
-            width: "min(80vw, 420px)",
+            width: "min(72vw, 380px)",
             aspectRatio: "1 / 1",
             background: "rgba(255,215,0,0.06)",
             border: "1px solid rgba(255,215,0,0.2)",
@@ -518,7 +569,40 @@ function ExpandedPanel() {
         </div>
       </div>
 
-      {/* Seek bar — thin, minimal, directly below artwork */}
+      {/* Song identity — title + artist + WID */}
+      <div className="text-center px-6 mt-4 shrink-0">
+        <h2
+          className="font-display text-xl mb-0.5 truncate max-w-xs"
+          style={{ color: "rgba(255,255,255,0.95)" }}
+        >
+          {track.title}
+        </h2>
+        <p className="text-sm truncate" style={{ color: "rgba(255,215,0,0.7)" }}>
+          {track.artist}
+        </p>
+        {track.witnessId && (
+          <div
+            className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-xs"
+            style={{
+              background: "rgba(255,215,0,0.07)",
+              border: "1px solid rgba(255,215,0,0.18)",
+              color: "rgba(255,215,0,0.55)",
+            }}
+          >
+            <ShieldCheck size={9} />
+            <span className="font-mono">{track.witnessId.slice(0, 20)}…</span>
+          </div>
+        )}
+      </div>
+
+      {/* Manifestation CTA — prominent in expanded view */}
+      {(track.contentType === "comic" || track.contentType === "manuscript" || track.contentType === "guide") && (
+        <div className="mt-3 shrink-0">
+          <ManifestationCTA contentType={track.contentType} trackId={track.id} size="sm" />
+        </div>
+      )}
+
+      {/* Seek bar — thin, minimal, directly below identity */}
       <div className="w-full px-8 mt-4 shrink-0">
         <div
           className="relative rounded-full cursor-pointer"
@@ -540,7 +624,7 @@ function ExpandedPanel() {
         </div>
       </div>
 
-      {/* ── INLINE INTERACTION BAR — directly below seek bar ── */}
+      {/* ── INLINE INTERACTION BAR ── */}
       <div className="w-full mt-5 shrink-0" style={{ maxWidth: 480 }}>
         {/* Main action row */}
         <div className="flex items-center justify-center gap-6 py-2">
@@ -565,7 +649,7 @@ function ExpandedPanel() {
           </button>
 
           {/* Emoji quick react — 5 presets */}
-          {["fire", "love", "grateful", "magic", "vibe"].map((type, i) => {
+          {["fire", "love", "grateful", "magic", "vibe"].map((type) => {
             const EMOJIS: Record<string, string> = { fire: "🔥", love: "❤️", grateful: "🙏", magic: "✨", vibe: "🎵" };
             return (
               <button
@@ -664,38 +748,12 @@ function ExpandedPanel() {
         )}
       </div>
 
-      {/* Song identity — below interaction bar */}
-      <div className="text-center px-6 mt-3 shrink-0">
-        <h2
-          className="font-display text-xl mb-0.5 truncate max-w-xs"
-          style={{ color: "rgba(255,255,255,0.95)" }}
-        >
-          {track.title}
-        </h2>
-        <p className="text-sm truncate" style={{ color: "rgba(255,215,0,0.7)" }}>
-          {track.artist}
-        </p>
-        {track.witnessId && (
-          <div
-            className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-xs"
-            style={{
-              background: "rgba(255,215,0,0.07)",
-              border: "1px solid rgba(255,215,0,0.18)",
-              color: "rgba(255,215,0,0.55)",
-            }}
-          >
-            <ShieldCheck size={9} />
-            <span className="font-mono">{track.witnessId.slice(0, 20)}…</span>
-          </div>
-        )}
-      </div>
-
       {/* 5. Waveform + glow */}
       <div className="mt-6 px-6 w-full flex justify-center shrink-0">
         <WaveformBars isPlaying={state.isPlaying} />
       </div>
 
-      {/* 6. Activation stages overlay — shown when activation is enabled */}
+      {/* 6. Activation stages overlay */}
       {activation?.activationEnabled && activation.stages.length > 0 && (() => {
         const totalGoal = activation.stages.reduce((s, st) => s + st.goalCents, 0);
         const funded = activation.totalFundingCents;
@@ -765,7 +823,7 @@ function ExpandedPanel() {
       })()}
 
       {/* 7. Keeper sync context */}
-      <div className="flex items-center justify-center gap-2 mt-3 mb-4 shrink-0">
+      <div className="flex items-center justify-center gap-2 mt-3 mb-6 shrink-0">
         <div
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full"
           style={{
@@ -989,10 +1047,10 @@ export default function WitnessSurfacePlayer() {
     <>
       <style>{WSP_STYLE}</style>
 
-      {/* Surface bar — always visible when track is loaded and not floating */}
+      {/* Surface bar — compact floating glass capsule when track is loaded and not floating */}
       {mode !== "floating" && <SurfaceBar />}
 
-      {/* Expanded panel — slides down from surface bar */}
+      {/* Expanded panel — full-viewport atmospheric takeover */}
       {mode === "expanded" && <ExpandedPanel />}
 
       {/* Floating widget — detached */}

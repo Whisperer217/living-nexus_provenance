@@ -188,16 +188,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onOpenWhatsNew={() => setWhatsNewOpen(true)}
       />
 
-      {/* ── WSP (Witness Surface Player) -- top-anchored, under navbar ── */}
+      {/* ── WSP (Witness Surface Player) -- bottom-floating glass capsule, mobile only ── */}
       <WitnessSurfacePlayer />
 
       {/* ==============================================
           PAGE CONTENT
           Desktop: lg:pl-[72px] to clear LeftRail
-          Mobile:  pt-14 + 60px WSP to clear mobile header + surface bar
+          Mobile:  pt-[56px] to clear mobile header only (WSP is now bottom-floating)
       ============================================== */}
       <div
-        className={`flex-1 flex overflow-hidden pt-[116px] lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
+        className={`flex-1 flex overflow-hidden pt-[56px] lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
         style={{
           overscrollBehavior: "none",
           transition: "padding-left 220ms cubic-bezier(0.22,1,0.36,1)",
@@ -225,9 +225,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* ==============================================
           PLAYER LAYER -- isolated, no layout dependency
-          GlobalPlayer is kept for audio engine only (hidden UI).
-          WitnessSurfacePlayer (WSP) provides all visible UI.
-          TheaterPlayer remains for desktop theater mode.
+          GlobalPlayer: desktop floating glass card (bottom-right)
+          WitnessSurfacePlayer (WSP): mobile bottom-floating capsule dock
+          TheaterPlayer: desktop theater mode overlay
       ============================================== */}
       <div
         style={{
@@ -239,6 +239,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           zIndex: 0,
         }}
       >
+        {/* Desktop player */}
+        <div style={{ pointerEvents: "auto" }}>
+          <GlobalPlayer />
+        </div>
         {/* Theater Player */}
         <div style={{ pointerEvents: "auto" }}>
           <TheaterPlayer />

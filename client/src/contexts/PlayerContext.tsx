@@ -52,6 +52,7 @@ export interface Track {
   autoVideoUrl?: string; // S3 CDN URL of the looping MP4 visual
   creatorRole?: string; // user role of the creator (e.g. "founder", "admin", "user")
   contentType?: "audio" | "lyrics" | "manuscript" | "comic"; // used to hide player controls for non-audio works
+  testimony?: string; // creator's testimony/description for manifestation-first display
 }
 
 /** Describes WHERE the current queue was built from — controls shuffle/repeat scope */
