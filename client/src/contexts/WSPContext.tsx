@@ -72,11 +72,15 @@ export function WSPProvider({ children }: { children: React.ReactNode }) {
     prevModeRef.current = mode;
     setMode("expanded");
     window.dispatchEvent(new CustomEvent("wsp:expand"));
+    // Bridge to GlobalPlayer (desktop) — GlobalPlayer listens on ln:player-expand
+    window.dispatchEvent(new CustomEvent("ln:player-expand"));
   }, [mode]);
 
   const collapse = useCallback(() => {
     setMode("surface");
     window.dispatchEvent(new CustomEvent("wsp:collapse"));
+    // Bridge to GlobalPlayer (desktop) — GlobalPlayer listens on ln:player-collapse
+    window.dispatchEvent(new CustomEvent("ln:player-collapse"));
   }, []);
 
   const float = useCallback(() => {

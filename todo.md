@@ -4539,3 +4539,11 @@
 ## Infinite Loop Fixes — /book/:id
 - [x] CinematicComicReader: memoize currentPanels with useMemo to stabilize computeGuidedTransform deps
 - [x] FloatingAvatar useNowPlaying: add prev-value ref guard to prevent redundant setNowPlaying calls every 3s
+
+## Player Unification + Edit Panel Fix
+- [x] Bridge WSPContext expand/collapse to GlobalPlayer ln:player-expand/collapse events
+- [x] GlobalPlayer: only renders on desktop when EXPANDED (centered modal) — TopBar is the mini player
+- [x] GlobalPlayer: auto-elevate to EXPANDED only on mobile (not desktop)
+- [x] GlobalPlayer: ln:player-expand always expands to EXPANDED zone (not just restores previous)
+- [x] EditTrackPanel: centered modal on desktop (720px wide), right-side sheet on mobile
+- [x] EditTrackPanel: useIsMobile hook moved to top of function (hooks rules compliance)

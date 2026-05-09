@@ -146,16 +146,16 @@ function GlobalPlayerInner() {
   useEffect(() => { if (cinematic) showCinematicOverlay(); }, [cinematic]);
   useEffect(() => () => { if (cinematicHideTimer.current) clearTimeout(cinematicHideTimer.current); }, []);
 
-  /* ── Visual persistence: auto-elevate to EXPANDED when playback starts from MINI ── */
-  // FLOAT zone removed — when playback starts, go directly to EXPANDED.
-  // User can drag back to MINI manually.
+  /* ── Visual persistence: auto-elevate to EXPANDED when playback starts from MINI (mobile only) ── */
+  // On mobile: bottom sheet auto-expands when a track starts playing.
+  // On desktop: TopBar is the persistent mini player — user explicitly clicks expand.
   useEffect(() => {
-    if (state.isPlaying && zone === 'MINI') {
+    if (!isDesktop && state.isPlaying && zone === 'MINI') {
       setZone('EXPANDED');
       setDragHeight(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isPlaying]);
+  }, [state.isPlaying, isDesktop]);
 
   /* ── ln:player-collapse / ln:player-expand event wiring ── */
   // KeeperComposePage dispatches these when the textarea is focused/blurred.
@@ -170,11 +170,13 @@ function GlobalPlayerInner() {
       }
     };
     const expand = () => {
-      if (zoneBeforeCollapse.current) {
-        setZone(zoneBeforeCollapse.current);
-        setDragHeight(null);
-        zoneBeforeCollapse.current = null;
-      }
+      // Always expand to EXPANDED zone — this handles both:
+      // 1. TopBar expand button (first-time expand, zoneBeforeCollapse is null)
+      // 2. KeeperComposePage restore (restores previous zone after textarea blur)
+      const targetZone = zoneBeforeCollapse.current ?? 'EXPANDED';
+      setZone(targetZone);
+      setDragHeight(null);
+      zoneBeforeCollapse.current = null;
     };
     window.addEventListener('ln:player-collapse', collapse);
     window.addEventListener('ln:player-expand', expand);
@@ -538,6 +540,11 @@ function GlobalPlayerInner() {
   // isExpanded is true when zone is EXPANDED or drag preview is above the midpoint.
   const isExpanded = zone === "EXPANDED" || (dragHeight !== null && dragHeight > (SNAP.MINI + 200));
   const isMini = !isExpanded;
+
+  /* ── Desktop: TopBar is the persistent mini player.
+     GlobalPlayer only renders on desktop when EXPANDED (centered modal).
+     On mobile it renders in all states (bottom sheet). ── */
+  if (isDesktop && isMini) return null;
 
   /* ── Desktop expanded = centered modal (decision #3) ── */
   const desktopExpandedStyle: React.CSSProperties = isDesktop && isExpanded ? {

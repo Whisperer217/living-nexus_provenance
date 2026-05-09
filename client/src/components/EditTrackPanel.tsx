@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { overlayOpen, overlayClose } from "@/lib/overlayController";
+import { useIsMobile } from "@/hooks/useMobile";
 import { trpc } from "@/lib/trpc";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import { Button } from "@/components/ui/button";
@@ -102,6 +103,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   const isManuscript = song.contentType === "manuscript";
   const isComic = song.contentType === "comic";
   const isWritten = isManuscript || isComic; // non-music written works
+
+  // Desktop: centered modal. Mobile: right-side sheet.
+  const isMobile = useIsMobile();
 
   const [caption, setCaption] = useState(song.caption ?? "");
   const [genre, setGenre] = useState(song.genre ?? "");
@@ -626,22 +630,25 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Panel — centered modal on desktop, right-side sheet on mobile */}
       <div
         ref={panelRef}
-        className="relative ml-auto w-full max-w-md flex flex-col"
+        className={isMobile ? "relative ml-auto w-full max-w-md flex flex-col" : "relative w-full flex flex-col"}
         style={{
-          height: "100dvh",
+          height: isMobile ? "100dvh" : "min(90vh, 860px)",
+          maxWidth: isMobile ? undefined : "min(720px, 90vw)",
           background: "linear-gradient(180deg, var(--ln-coal) 0%, var(--ln-coal) 100%)",
-          borderLeft: "1px solid rgba(212,175,55,0.2)",
-          boxShadow: "-8px 0 40px rgba(0,0,0,0.6)",
+          border: isMobile ? undefined : "1px solid rgba(212,175,55,0.3)",
+          borderLeft: isMobile ? "1px solid rgba(212,175,55,0.2)" : undefined,
+          boxShadow: isMobile ? "-8px 0 40px rgba(0,0,0,0.6)" : "0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.15)",
+          borderRadius: isMobile ? 0 : "16px",
           minWidth: 0,
           overflowY: "hidden",
         }}
