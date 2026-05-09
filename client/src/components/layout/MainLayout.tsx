@@ -51,6 +51,13 @@ const CREATOR_FOCUS_ROUTES = [
   "/keeper-compose",
   "/admin",
   "/guides/upload",
+  // Transactional Focus State — conversion-critical routes
+  "/redeem",
+  "/pricing",
+  "/checkout",
+  "/stripe-connect",
+  "/payouts",
+  "/creator-payouts",
 ];
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {

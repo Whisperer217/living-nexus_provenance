@@ -41,7 +41,7 @@ function SignalIcon({ type }: { type: string }) {
   return <Zap size={12} style={style} />;
 }
 
-/** Routes where the RightRail should be suppressed (Creator Focus Mode) */
+/** Routes where the RightRail should be suppressed (Creator Focus Mode + Transactional Focus State) */
 const CREATOR_FOCUS_ROUTES = [
   "/upload",
   "/batch-upload",
@@ -51,6 +51,13 @@ const CREATOR_FOCUS_ROUTES = [
   "/keeper-compose",
   "/admin",
   "/guides/upload",
+  // Transactional Focus State — conversion-critical routes
+  "/redeem",
+  "/pricing",
+  "/checkout",
+  "/stripe-connect",
+  "/payouts",
+  "/creator-payouts",
 ];
 
 function useIsCreatorFocusMode(): boolean {

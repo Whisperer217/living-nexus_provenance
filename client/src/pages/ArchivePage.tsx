@@ -500,7 +500,46 @@ export default function ArchivePage() {
           </div>
         )}
 
-        {/* ── Loading skeleton ────────────────────────────────────────── */}
+          {/* ── Phase 148H: Draft Continuation Card ──────────────── */}
+        {activeTab === "tracks" && !songsLoading && (() => {
+          const draftSongs = displaySongs.filter((s: any) => s.status === "Draft");
+          if (draftSongs.length === 0) return null;
+          const newestDraft = draftSongs[0];
+          const draftType = newestDraft?.contentType ?? "audio";
+          const typeLabel: Record<string, string> = { audio: "Audio Manifestation", lyrics: "Lyrics Work", manuscript: "Manuscript", comic: "Comic / Novel" };
+          const daysSince = newestDraft?.createdAt
+            ? Math.floor((Date.now() - new Date(newestDraft.createdAt).getTime()) / 86400000)
+            : null;
+          const isBook = draftType === "manuscript" || draftType === "comic";
+          const resumeHref = isBook ? `/book/${newestDraft.id}/studio` : `/upload?type=${draftType}`;
+          return (
+            <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-3"
+              style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.15)" }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(212,175,55,0.10)", border: "1px solid rgba(212,175,55,0.20)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Pencil style={{ color: "rgba(212,175,55,0.55)", width: 14, height: 14 }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold truncate" style={{ color: "rgba(212,175,55,0.80)", fontFamily: "'Cinzel', serif", letterSpacing: "0.04em" }}>
+                  {draftSongs.length === 1
+                    ? `Unfinished ${typeLabel[draftType] ?? "Work"}: “${newestDraft.title || "Untitled"}”`
+                    : `${draftSongs.length} unfinished manifestations in progress`}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.32)", fontFamily: "'DM Sans', sans-serif" }}>
+                  {daysSince !== null && daysSince > 0 ? `Last touched ${daysSince} day${daysSince === 1 ? "" : "s"} ago — ` : ""}
+                  Continue shaping your work.
+                </p>
+              </div>
+              <Link href={resumeHref}>
+                <button className="text-xs px-3 py-1.5 rounded-full flex-shrink-0 transition-all"
+                  style={{ background: "rgba(212,175,55,0.12)", border: "1px solid rgba(212,175,55,0.25)", color: "#D4AF37", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em", cursor: "pointer" }}>
+                  Continue →
+                </button>
+              </Link>
+            </div>
+          );
+        })()}
+
+        {/* ── Loading skeleton ─────────────────────────────────────── */}
         {activeTab === "tracks" && songsLoading && (
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -510,26 +549,54 @@ export default function ArchivePage() {
           </div>
         )}
 
-        {/* ── Empty state ────────────────────────────────────────── */}
-        {activeTab === "tracks" && !songsLoading && displaySongs.length === 0 && (
-          <div className="text-center py-24 rounded-2xl flex flex-col items-center"
-            style={{ background: "linear-gradient(135deg, rgba(10,9,7,0.95) 0%, rgba(20,17,10,0.90) 100%)", border: "1px dashed rgba(212,175,55,0.25)", boxShadow: "inset 0 0 60px rgba(212,175,55,0.03)" }}>
-            <div className="mb-6" style={{ width: 72, height: 72, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)", border: "1px solid rgba(212,175,55,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Music style={{ color: "rgba(212,175,55,0.45)", width: 28, height: 28 }} />
+        {/* ── Empty state (Phase 148G — Intelligent CTA) ─────────── */}
+        {activeTab === "tracks" && !songsLoading && displaySongs.length === 0 && (() => {
+          // Determine intelligent upload destination based on any existing content
+          // (songs may be empty but guide drafts or other signals could exist)
+          // For now: brand-new users (no songs at all) get the type selector
+          // Future: check guide drafts via trpc.guides.myGuides when available
+          const uploadHref = "/upload";
+          const ctaLabel = "Register Your First Work";
+          const ctaSubtext = "Begin witnessing creation.";
+
+          return (
+            <div className="text-center py-24 rounded-2xl flex flex-col items-center"
+              style={{ background: "linear-gradient(135deg, rgba(10,9,7,0.95) 0%, rgba(20,17,10,0.90) 100%)", border: "1px dashed rgba(212,175,55,0.25)", boxShadow: "inset 0 0 60px rgba(212,175,55,0.03)" }}>
+              <div className="mb-6" style={{ width: 72, height: 72, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)", border: "1px solid rgba(212,175,55,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Music style={{ color: "rgba(212,175,55,0.45)", width: 28, height: 28 }} />
+              </div>
+              <p className="text-base font-semibold mb-2" style={{ color: "rgba(212,175,55,0.75)", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>
+                No manifestations archived yet.
+              </p>
+              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.38)", fontFamily: "'DM Sans', sans-serif" }}>
+                {ctaSubtext}
+              </p>
+              {/* Manifestation type selector — quick-pick before routing */}
+              <div className="flex flex-wrap gap-2 justify-center mb-8">
+                {([
+                  { type: "audio", label: "Audio", icon: "♪" },
+                  { type: "comic", label: "Comic / Novel", icon: "◈" },
+                  { type: "manuscript", label: "Manuscript", icon: "⊞" },
+                  { type: "lyrics", label: "Lyrics", icon: "≡" },
+                ] as const).map(({ type, label, icon }) => (
+                  <Link key={type} href={`${uploadHref}?type=${type}`}>
+                    <button
+                      className="px-3 py-1.5 rounded-full text-xs transition-all"
+                      style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.20)", color: "rgba(212,175,55,0.65)", fontFamily: "'DM Sans', sans-serif", cursor: "pointer" }}
+                    >
+                      <span className="mr-1.5">{icon}</span>{label}
+                    </button>
+                  </Link>
+                ))}
+              </div>
+              <Link href={uploadHref}>
+                <Button style={{ background: "linear-gradient(135deg, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.10) 100%)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.30)", fontFamily: "'Cinzel', serif", letterSpacing: "0.10em", fontSize: "11px" }}>
+                  {ctaLabel}
+                </Button>
+              </Link>
             </div>
-            <p className="text-base font-semibold mb-2" style={{ color: "rgba(212,175,55,0.75)", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>
-              No manifestations archived yet.
-            </p>
-            <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.38)", fontFamily: "'DM Sans', sans-serif" }}>
-              Begin witnessing creation.
-            </p>
-            <Link href="/upload">
-              <Button style={{ background: "linear-gradient(135deg, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.10) 100%)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.30)", fontFamily: "'Cinzel', serif", letterSpacing: "0.10em", fontSize: "11px" }}>
-                Register Your First Work
-              </Button>
-            </Link>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ── Track list ────────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (

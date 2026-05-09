@@ -24,6 +24,9 @@ const UPDATES = [
       { icon: Sparkles, text: "Keeper Compose auto-saves every generated composition silently. A Recent Drafts strip appears above the input bar — tap any draft to reload it and re-enter cinematic mode." },
       { icon: Film, text: "Cinematic mode now activates automatically after generation on desktop — no need to tap the film icon separately." },
       { icon: Zap, text: "Conductor mode is now visually elevated in the mode selector with a persistent border, STRUCTURE badge, and hover tooltip explaining its purpose." },
+      { icon: Users, text: "Guide Upload — A dedicated registration flow for canonical guide entities is now live at /guides/upload. Register a guide character with provenance sheet, derivative lineage, and full creator attribution. Guides are first-class manifestations on the registry." },
+      { icon: BookOpen, text: "Creator Studio — The manifestation editing environment at /book/:id/studio is now a full Creator Focus workspace. Comic management, guided reading configuration, chapter ordering, and immersive publishing workflows all live here. The resonance rail is suppressed so nothing competes with your work." },
+      { icon: Shield, text: "Creator Focus Mode — The resonance rail, witness feed, and activity layer now automatically collapse when you enter any editing, upload, or transactional route (/upload, /dashboard, /settings, /profile, /pricing, /redeem, /studio). The interface steps back so the manifestation becomes the center of reality." },
     ],
   },
   {
