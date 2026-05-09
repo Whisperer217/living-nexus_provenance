@@ -4487,3 +4487,14 @@
 - [x] GlobalPlayer MINI bar: READ NOW CTA for comic/manuscript, ENTER GUIDE for guide contentType
 - [x] PlayerContext Track interface: testimony field added
 - [x] 201/201 tests passing
+
+## Phase 148 — Archive Routing Fix + Contextual Right Pane Suppression
+- [ ] Fix: Register /archive/mine as alias to /archive (ArchivePage) in App.tsx
+- [ ] Fix: Register /archive/ledger as alias to /witness-registry in App.tsx
+- [ ] Fix: Register /archive?filter=witnessed as handled by ArchivePage with filter param
+- [ ] Fix: Update ContextDrawer archive section links to use correct registered routes
+- [ ] Fix: Update MobileNavDrawer archive section links to use correct registered routes
+- [ ] Improve: ArchivePage empty state — atmospheric message (No manifestations archived yet. Begin witnessing creation.)
+- [ ] Phase 148A: RightRail contextual suppression — hide on /upload, /batch-upload, /dashboard, /profile, /settings, /book/:id/studio, /keeper-compose, /admin/*
+- [ ] Phase 148A: MainLayout — remove lg:pr-[300px] on editing routes (no right rail = full-width content)
+- [ ] Phase 148B: RightRail responsive — already hidden on mobile (hidden lg:flex), verify tablet behavior

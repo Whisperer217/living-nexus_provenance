@@ -47,7 +47,6 @@ const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
 const ModerationQueuePage = lazy(() => import("./pages/admin/ModerationQueuePage"));
 const CommentModerationPage = lazy(() => import("./pages/admin/CommentModerationPage"));
 const AuditLogPage = lazy(() => import("./pages/admin/AuditLogPage"));
-const MissionControlPage = lazy(() => import("./pages/admin/MissionControlPage"));
 const SelfImprovementPage = lazy(() => import("./pages/SelfImprovementPage"));
 const PaymentIntegrityPage = lazy(() => import("./pages/PaymentIntegrityPage"));
 const TrustPage = lazy(() => import("./pages/TrustPage"));
@@ -169,6 +168,9 @@ function Router() {
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />
+                {/* Archive sub-routes — prevent 404 on ContextDrawer/MobileNavDrawer links */}
+                <Route path="/archive/mine"><Redirect to="/archive" /></Route>
+                <Route path="/archive/ledger"><Redirect to="/witness-registry" /></Route>
                 <Route path="/song/:id" component={SongDetailPage} />
                 <Route path="/book/:id" component={BookDetailPage} />
                 <Route path="/book/:id/studio" component={CreatorStudioPage} />
@@ -188,7 +190,6 @@ function Router() {
                 <Route path="/admin/audit" component={AuditLogPage} />
                 <Route path="/admin/self-improve" component={SelfImprovementPage} />
                 <Route path="/admin/payment-integrity" component={PaymentIntegrityPage} />
-                <Route path="/admin/mission-control" component={MissionControlPage} />
                 <Route path="/admin" component={AdminUsersPage} />
                 <Route path="/trust" component={TrustPage} />
                 <Route path="/redeem" component={RedeemPage} />

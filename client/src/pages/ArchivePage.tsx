@@ -512,15 +512,20 @@ export default function ArchivePage() {
 
         {/* ── Empty state ────────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length === 0 && (
-          <div className="text-center py-20 rounded-xl"
-            style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
-            <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
-            <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>
-              You have not uploaded any tracks yet.
+          <div className="text-center py-24 rounded-2xl flex flex-col items-center"
+            style={{ background: "linear-gradient(135deg, rgba(10,9,7,0.95) 0%, rgba(20,17,10,0.90) 100%)", border: "1px dashed rgba(212,175,55,0.25)", boxShadow: "inset 0 0 60px rgba(212,175,55,0.03)" }}>
+            <div className="mb-6" style={{ width: 72, height: 72, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)", border: "1px solid rgba(212,175,55,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Music style={{ color: "rgba(212,175,55,0.45)", width: 28, height: 28 }} />
+            </div>
+            <p className="text-base font-semibold mb-2" style={{ color: "rgba(212,175,55,0.75)", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>
+              No manifestations archived yet.
+            </p>
+            <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.38)", fontFamily: "'DM Sans', sans-serif" }}>
+              Begin witnessing creation.
             </p>
             <Link href="/upload">
-              <Button style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
-                Upload Your First Track
+              <Button style={{ background: "linear-gradient(135deg, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.10) 100%)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.30)", fontFamily: "'Cinzel', serif", letterSpacing: "0.10em", fontSize: "11px" }}>
+                Register Your First Work
               </Button>
             </Link>
           </div>

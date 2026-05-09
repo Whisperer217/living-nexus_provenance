@@ -155,15 +155,15 @@ const PANELS: Record<NavMode, ModePanel> = {
     sections: [
       {
         links: [
-          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/archive", description: "Public ledger of all registered works", gold: true },
-          { icon: <Archive size={14} />, label: "My Works", path: "/archive/mine", description: "Your personally registered works", authOnly: true },
+          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger of all registered works", gold: true },
+          { icon: <Archive size={14} />, label: "My Works", path: "/archive", description: "Your personally registered works", authOnly: true },
         ],
       },
       {
         heading: "Registry",
         links: [
-          { icon: <Shield size={14} />, label: "Verified Works", path: "/archive?filter=witnessed", description: "Content hash recorded at registration" },
-          { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/archive/ledger", description: "Timestamped creation record" },
+          { icon: <Shield size={14} />, label: "Verified Works", path: "/witness-registry", description: "Content hash recorded at registration" },
+          { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/witness-registry", description: "Timestamped creation record" },
         ],
       },
     ],

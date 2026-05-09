@@ -41,9 +41,25 @@ import { overlayOpen, overlayClose } from "@/lib/overlayController";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
+/** Routes where the RightRail is suppressed — must match RightRail.tsx CREATOR_FOCUS_ROUTES */
+const CREATOR_FOCUS_ROUTES = [
+  "/upload",
+  "/batch-upload",
+  "/dashboard",
+  "/settings",
+  "/profile",
+  "/keeper-compose",
+  "/admin",
+  "/guides/upload",
+];
+
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { state } = usePlayer();
+  // Creator Focus Mode: right rail is hidden, content expands to full-width
+  const isCreatorFocus = CREATOR_FOCUS_ROUTES.some(
+    (r) => location === r || location.startsWith(r + "/") || location.startsWith(r + "?")
+  ) || location.includes("/studio");
   const { user, loading: authLoading, logout } = useAuth();
 
   // ── Desktop: ContextDrawer two-state model ──────────────────────────
@@ -213,9 +229,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
 
-          {/* MainColumn -- fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail */}
+          {/* MainColumn -- fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail.
+               On creator-focus routes the RightRail is hidden so we remove the right padding. */}
           <div
-            className="flex-1 overflow-y-auto player-scroll-area lg:pr-[300px]"
+            className={`flex-1 overflow-y-auto player-scroll-area${isCreatorFocus ? "" : " lg:pr-[300px]"}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
             {children}

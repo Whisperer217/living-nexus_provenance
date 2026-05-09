@@ -78,10 +78,10 @@ const ALL_SECTIONS: NavSection[] = [
   {
     heading: "Registry",
     links: [
-      { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/archive", gold: true },
-      { icon: <Archive size={14} />, label: "My Works", path: "/archive/mine", authOnly: true },
-      { icon: <Shield size={14} />, label: "Verified Works", path: "/archive?filter=witnessed" },
-      { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/archive/ledger" },
+      { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", gold: true },
+      { icon: <Archive size={14} />, label: "My Works", path: "/archive", authOnly: true },
+      { icon: <Shield size={14} />, label: "Verified Works", path: "/witness-registry" },
+      { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/witness-registry" },
     ],
   },
 ];
