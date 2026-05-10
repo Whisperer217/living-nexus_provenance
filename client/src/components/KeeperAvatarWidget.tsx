@@ -14,7 +14,6 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import FloatingAvatar from "./FloatingAvatar";
 import { useKeeperAttrs } from "@/contexts/KeeperAttrsContext";
-import { usePlayer } from "@/contexts/PlayerContext";
 
 type PersonaMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist";
 
@@ -39,8 +38,6 @@ export default function KeeperAvatarWidget() {
   const { user } = useAuth();
   const [location] = useLocation();
   const { attrs: keeperAttrs } = useKeeperAttrs();
-  const { state: playerState } = usePlayer();
-  const [isHovered, setIsHovered] = useState(false);
   const [mode, setMode] = useState<PersonaMode>("Guide");
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [cinematic, setCinematic] = useState(false);
@@ -142,18 +139,8 @@ export default function KeeperAvatarWidget() {
     });
   };
 
-  /* Fade during playback — resolves density collision with WSP */
-  const playbackFade = playerState.isPlaying && !isHovered ? 0.35 : 1;
-
   return (
-    <div
-      style={{
-        opacity: playbackFade,
-        transition: "opacity 0.6s ease",
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div>
       <FloatingAvatar
         activeSkinId={activeSkinId}
         customImageUrl={customImageUrl}
