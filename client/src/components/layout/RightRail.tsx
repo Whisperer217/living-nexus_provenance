@@ -82,7 +82,7 @@ export default function RightRail() {
       className="hidden lg:flex flex-col overflow-y-auto"
       style={{
         position: "fixed",
-        top: 0,
+        top: 56, /* clear the 56px fixed TopBar */
         right: 0,
         bottom: 0,
         width: 300,
