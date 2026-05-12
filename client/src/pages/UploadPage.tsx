@@ -429,6 +429,21 @@ export default function UploadPage() {
       const meta = await runUploadPipeline(audioFile, "audio");
       setPipelineMeta(meta);
       const fileHash = meta.fileHash;
+      // Non-blocking duplicate check — warn if same hash exists
+      try {
+        const dupRes = await fetch(`/api/trpc/songs.checkDuplicate?input=${encodeURIComponent(JSON.stringify({ fileHash }))}`, { credentials: "include" });
+        if (dupRes.ok) {
+          const dupJson = await dupRes.json();
+          const dupCheck = dupJson?.result?.data as { duplicate: boolean; isOwnWork?: boolean; existingTitle?: string; existingWid?: string; existingCreator?: string } | undefined;
+          if (dupCheck?.duplicate) {
+            if (dupCheck.isOwnWork) {
+              toast.warning(`This file already exists in your archive as "${dupCheck.existingTitle}" (${dupCheck.existingWid?.slice(0, 20)}…). Uploading again will create a separate entry.`, { duration: 8000 });
+            } else {
+              toast.error(`Duplicate detected — this exact file is already registered by ${dupCheck.existingCreator} as "${dupCheck.existingTitle}". You may still proceed, but provenance conflict may arise.`, { duration: 10000 });
+            }
+          }
+        }
+      } catch { /* duplicate check is advisory — don't block WID generation */ }
       const wid = formatWID(fileHash, uploadMode);
       const frequencies = deriveHarmonicFrequencies(fileHash);
       const keypair = await generateECDSAKeypair();

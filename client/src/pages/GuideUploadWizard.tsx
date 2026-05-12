@@ -132,8 +132,14 @@ function Step1Upload({
   const uploadFile = async (file: File): Promise<string> => {
     const fd = new FormData();
     fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    if (!res.ok) throw new Error("Upload failed");
+    fd.append("type", "cover");
+    fd.append("filename", file.name);
+    const res = await fetch("/api/upload-file", { method: "POST", body: fd });
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => "");
+      console.error("[GuideUpload] Upload failed:", res.status, errBody);
+      throw new Error("Upload failed");
+    }
     const data = await res.json();
     return data.url as string;
   };

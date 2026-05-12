@@ -4579,3 +4579,14 @@
 - [x] TopBar search wired to /search?q= instead of /explore
 - [x] Mobile QuickRefSlider search wired to /search?q=
 - [x] /search route registered in App.tsx
+
+## Phase A Stabilization (Phase 154)
+- [x] Fix Guide upload failure — GuideUploadWizard was calling /api/upload (non-existent), changed to /api/upload-file
+- [x] Add pre-upload duplicate detection (songs.checkDuplicate tRPC procedure + fileHash lookup)
+- [x] Wire duplicate check into UploadPage (single upload) — non-blocking warning toast
+- [x] Wire duplicate check into BatchUploadPage — non-blocking warning toast per card
+- [x] Remove redundant "Repeat Across Tracks" button from BatchUploadPage
+- [x] Strip leading track-number prefix from filename-derived titles in batch upload
+- [x] Fix single upload title persistence bug — Remove button now clears title + witnessData
+- [x] Fix SearchResultsPage not auto-firing query on mount (wouter useSearch() fix)
+- [x] Add TopBar autocomplete dropdown with avatars/cover art and alphabetical sort

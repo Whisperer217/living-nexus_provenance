@@ -608,6 +608,20 @@ export default function BatchUploadPage() {
     try {
       const buffer = await file.arrayBuffer();
       const fileHash = await sha256Hex(buffer);
+      // Non-blocking duplicate check
+      try {
+        const dupRes = await fetch(`/api/trpc/songs.checkDuplicate?input=${encodeURIComponent(JSON.stringify({ fileHash }))}`, { credentials: "include" });
+        if (dupRes.ok) {
+          const dupJson = await dupRes.json();
+          const dupCheck = dupJson?.result?.data as { duplicate: boolean; isOwnWork?: boolean; existingTitle?: string; existingWid?: string; existingCreator?: string } | undefined;
+          if (dupCheck?.duplicate) {
+            const msg = dupCheck.isOwnWork
+              ? `"${file.name}" already exists in your archive as "${dupCheck.existingTitle}".`
+              : `"${file.name}" matches a file registered by ${dupCheck.existingCreator} ("${dupCheck.existingTitle}").`;
+            toast.warning(msg, { duration: 7000 });
+          }
+        }
+      } catch { /* advisory */ }
       const wid = formatWID(fileHash);
       const harmonicSignature = deriveHarmonicFrequencies(fileHash);
       const keypair = await generateECDSAKeypair();

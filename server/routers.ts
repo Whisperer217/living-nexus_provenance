@@ -710,6 +710,32 @@ export const appRouter = router({
       }),
   }),
   songs: router({
+    /** Pre-upload duplicate detection — checks if a fileHash already exists in the system. */
+    checkDuplicate: protectedProcedure
+      .input(z.object({ fileHash: z.string().length(64) }))
+      .query(async ({ ctx, input }) => {
+        const db = getDb();
+        const { songs } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const existing = await db.select({
+          id: songs.id,
+          title: songs.title,
+          witnessId: songs.witnessId,
+          userId: songs.userId,
+          createdAt: songs.createdAt,
+        }).from(songs).where(eq(songs.fileHash, input.fileHash)).limit(1);
+        if (existing.length === 0) return { duplicate: false as const };
+        const match = existing[0];
+        const owner = await getUserById(match.userId);
+        return {
+          duplicate: true as const,
+          isOwnWork: match.userId === ctx.user.id,
+          existingTitle: match.title,
+          existingWid: match.witnessId,
+          existingCreator: owner?.artistHandle ?? owner?.name ?? "Unknown",
+          existingCreatedAt: match.createdAt,
+        };
+      }),
     discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(500).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
     trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(500).optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
     newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input ?? {})),
