@@ -13,7 +13,8 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
-import { Shield, Eye, Zap, CheckCircle2, MessageSquare, Heart, DollarSign, Clock, Music2, Play } from "lucide-react";
+import { Shield, Zap, CheckCircle2, MessageSquare, Heart, DollarSign, Clock, Eye, Music2, Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRightRail } from "@/contexts/RightRailContext";
 
 function timeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -45,6 +46,7 @@ export default function RightRail() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const { addAndPlay } = usePlayer();
+  const { isOpen, toggle } = useRightRail();
   useNow(); // refresh time labels every 30s
 
   // Personal Signals — user's notification inbox (5 most recent, poll every 45s)
@@ -78,22 +80,51 @@ export default function RightRail() {
     : null;
 
   return (
-    <aside
-      className="hidden lg:flex flex-col overflow-y-auto"
-      style={{
-        position: "fixed",
-        top: 56, /* clear the 56px fixed TopBar */
-        right: 0,
-        bottom: 0,
-        width: 300,
-        background: "rgba(10,9,7,0.92)",
-        borderLeft: "1px solid rgba(212,175,55,0.08)",
-        /* z-index: 80 — below ContextDrawer (300) and LeftRail (310),
-           but above page content so it never disappears behind it */
-        zIndex: 80,
-        scrollbarWidth: "none",
-      }}
-    >
+    <>
+      {/* Collapse/expand tab — always visible on desktop, sits at left edge of rail */}
+      <button
+        onClick={toggle}
+        title={isOpen ? "Collapse right panel" : "Expand right panel"}
+        className="hidden lg:flex items-center justify-center"
+        style={{
+          position: "fixed",
+          top: "50%",
+          right: isOpen ? 300 : 0,
+          transform: "translateY(-50%)",
+          width: 20,
+          height: 48,
+          background: "rgba(10,9,7,0.92)",
+          border: "1px solid rgba(212,175,55,0.18)",
+          borderRight: isOpen ? "none" : "1px solid rgba(212,175,55,0.18)",
+          borderRadius: isOpen ? "6px 0 0 6px" : "0 6px 6px 0",
+          color: "rgba(212,175,55,0.7)",
+          cursor: "pointer",
+          zIndex: 81,
+          transition: "right 0.3s ease",
+        }}
+        onMouseEnter={e => (e.currentTarget.style.color = "#D4AF37")}
+        onMouseLeave={e => (e.currentTarget.style.color = "rgba(212,175,55,0.7)")}
+      >
+        {isOpen ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+      </button>
+
+      <aside
+        className="hidden lg:flex flex-col overflow-y-auto"
+        style={{
+          position: "fixed",
+          top: 56, /* clear the 56px fixed TopBar */
+          right: isOpen ? 0 : -300,
+          bottom: 0,
+          width: 300,
+          background: "rgba(10,9,7,0.92)",
+          borderLeft: "1px solid rgba(212,175,55,0.08)",
+          /* z-index: 80 — below ContextDrawer (300) and LeftRail (310),
+             but above page content so it never disappears behind it */
+          zIndex: 80,
+          scrollbarWidth: "none",
+          transition: "right 0.3s ease",
+        }}
+      >
       <div className="flex flex-col gap-4 p-4 pb-32">
 
         {/* ── Signals ─────────────────────────────────────────────── */}
@@ -414,5 +445,6 @@ export default function RightRail() {
 
       </div>
     </aside>
+    </>
   );
 }

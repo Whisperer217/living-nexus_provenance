@@ -4547,3 +4547,10 @@
 - [x] GlobalPlayer: ln:player-expand always expands to EXPANDED zone (not just restores previous)
 - [x] EditTrackPanel: centered modal on desktop (720px wide), right-side sheet on mobile
 - [x] EditTrackPanel: useIsMobile hook moved to top of function (hooks rules compliance)
+
+## Collapsible Right Rail
+- [x] Create RightRailContext (isOpen, toggle, open, close) persisted to localStorage
+- [x] Add RightRailProvider to main.tsx provider tree
+- [x] Add collapse/expand tab button to RightRail (gold chevron, slides with panel)
+- [x] RightRail slides off-screen (right: -300px) with 0.3s ease transition when collapsed
+- [x] MainLayout removes lg:pr-[300px] when rail is collapsed (content fills full width)

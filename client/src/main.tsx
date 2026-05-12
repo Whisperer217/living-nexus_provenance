@@ -9,6 +9,7 @@ import App from "./App";
 import { LightsModeProvider } from "./contexts/LightsModeContext";
 import { KeeperAttrsProvider } from "./contexts/KeeperAttrsContext";
 import { WSPProvider } from "./contexts/WSPContext";
+import { RightRailProvider } from "./contexts/RightRailContext";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
@@ -80,9 +81,11 @@ createRoot(document.getElementById("root")!).render(
         {/* LightsModeProvider must be inside QueryClientProvider so it can call trpc hooks */}
         <KeeperAttrsProvider>
           <WSPProvider>
-            <LightsModeProvider>
-              <App />
-            </LightsModeProvider>
+            <RightRailProvider>
+              <LightsModeProvider>
+                <App />
+              </LightsModeProvider>
+            </RightRailProvider>
           </WSPProvider>
         </KeeperAttrsProvider>
       </QueryClientProvider>

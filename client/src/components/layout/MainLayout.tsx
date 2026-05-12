@@ -25,6 +25,7 @@ import MobileNavDrawer from "@/components/layout/MobileNavDrawer";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useRightRail } from "@/contexts/RightRailContext";
 import GlobalPlayer from "@/components/player/GlobalPlayer";
 import WitnessSurfacePlayer from "@/components/player/WitnessSurfacePlayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
@@ -46,6 +47,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [, navigate] = useLocation();
   const { state } = usePlayer();
   const { user, loading: authLoading, logout } = useAuth();
+  const { isOpen: rightRailOpen } = useRightRail();
 
   // ── Desktop: ContextDrawer two-state model ──────────────────────────
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -217,7 +219,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
           {/* MainColumn -- fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail */}
           <div
-            className="flex-1 overflow-y-auto player-scroll-area lg:pr-[300px]"
+            className={`flex-1 overflow-y-auto player-scroll-area ${rightRailOpen ? "lg:pr-[300px]" : ""}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
             {children}
