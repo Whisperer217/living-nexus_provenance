@@ -5,7 +5,7 @@
    Mobile: not rendered (MainLayout handles mobile separately).
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -16,8 +16,9 @@ import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
   Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, Search, User, Settings,
   SkipBack, SkipForward, Play, Pause, Shuffle, Repeat, PictureInPicture2,
-  ChevronDown,
+  ChevronDown, Music, ShieldCheck,
 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
@@ -254,7 +255,52 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  // Debounce the query for autocomplete (300ms)
+  const [debouncedQ, setDebouncedQ] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(searchQuery.trim()), 300);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+  const { data: acData } = trpc.search.global.useQuery(
+    { q: debouncedQ },
+    { enabled: debouncedQ.length >= 2, staleTime: 15_000 }
+  );
+  // Build flat sorted autocomplete list
+  const acItems = useMemo(() => {
+    if (!acData || debouncedQ.length < 2) return [];
+    type ACItem = { key: string; label: string; sub: string; img: string | null; href: string; isWid: boolean };
+    const items: ACItem[] = [];
+    // Creators
+    for (const c of acData.creators) {
+      items.push({ key: `c-${c.id}`, label: c.name ?? c.artistHandle ?? "Creator", sub: c.artistHandle ? `@${c.artistHandle}` : "Creator", img: c.profilePhotoUrl ?? null, href: `/creator/${c.id}`, isWid: false });
+    }
+    // Songs (all content types)
+    for (const s of acData.songs) {
+      items.push({ key: `s-${s.id}`, label: s.title, sub: s.creatorHandle ? `@${s.creatorHandle}` : (s.creatorName ?? ""), img: s.coverArtUrl ?? null, href: `/song/${s.id}`, isWid: !!s.witnessId });
+    }
+    // Guides
+    for (const g of acData.guides) {
+      items.push({ key: `g-${g.id}`, label: g.canonicalName, sub: g.archetypeType ?? "Guide", img: g.artworkUrl ?? null, href: `/guides/${g.id}`, isWid: !!g.widCode });
+    }
+    // Sort alphabetically by label
+    items.sort((a, b) => a.label.localeCompare(b.label));
+    return items.slice(0, 8);
+  }, [acData, debouncedQ]);
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!showDropdown) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+          searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showDropdown]);
 
   const goTo = useCallback(
     (path: string) => { navigate(path); },
@@ -317,15 +363,83 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
               type="text"
               placeholder="Search works, creators, WIDs…"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
+              onChange={e => { setSearchQuery(e.target.value); setShowDropdown(true); }}
+              onFocus={() => { setSearchFocused(true); setShowDropdown(true); }}
               onBlur={() => setSearchFocused(false)}
+              onKeyDown={e => { if (e.key === "Escape") { setShowDropdown(false); searchRef.current?.blur(); } }}
               className="flex-1 bg-transparent outline-none text-white/80 placeholder:text-white/25"
               style={{ fontSize: "12px", fontFamily: "'Inter', sans-serif" }}
             />
           </div>
+          {/* Autocomplete dropdown */}
+          {showDropdown && acItems.length > 0 && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-[500] rounded-xl overflow-hidden"
+              style={{
+                top: "calc(100% + 4px)",
+                left: 0,
+                width: 280,
+                background: "rgba(14,12,10,0.97)",
+                border: "1px solid rgba(196,154,40,0.28)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                backdropFilter: "blur(16px)",
+              }}
+            >
+              {acItems.map(item => (
+                <button
+                  key={item.key}
+                  type="button"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors"
+                  style={{ borderBottom: "1px solid rgba(196,154,40,0.06)" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.08)"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                  onMouseDown={e => {
+                    e.preventDefault();
+                    setShowDropdown(false);
+                    setSearchQuery("");
+                    navigate(item.href);
+                  }}
+                >
+                  {/* Thumbnail */}
+                  <div
+                    className="shrink-0 rounded overflow-hidden flex items-center justify-center"
+                    style={{ width: 32, height: 32, background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.12)" }}
+                  >
+                    {item.img
+                      ? <img src={item.img} alt={item.label} className="w-full h-full object-cover" />
+                      : <Music size={12} style={{ color: "rgba(196,154,40,0.4)" }} />
+                    }
+                  </div>
+                  {/* Text */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium truncate" style={{ color: "rgba(255,255,255,0.88)" }}>{item.label}</p>
+                    <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.35)" }}>{item.sub}</p>
+                  </div>
+                  {/* WID badge */}
+                  {item.isWid && (
+                    <ShieldCheck size={10} style={{ color: "rgba(196,154,40,0.6)", flexShrink: 0 }} />
+                  )}
+                </button>
+              ))}
+              {/* "See all results" footer */}
+              <button
+                type="button"
+                className="w-full px-3 py-2 text-center text-[10px] tracking-wider transition-colors"
+                style={{ color: "var(--ln-gold)", borderTop: "1px solid rgba(196,154,40,0.12)" }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.06)"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                onMouseDown={e => {
+                  e.preventDefault();
+                  setShowDropdown(false);
+                  if (searchQuery.trim()) navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                }}
+              >
+                SEE ALL RESULTS FOR &ldquo;{debouncedQ}&rdquo;
+              </button>
+            </div>
+          )}
         </form>
-
         {/* CENTER: Inline Player */}
         <InlinePlayer />
 

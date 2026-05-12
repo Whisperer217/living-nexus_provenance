@@ -96,6 +96,16 @@ interface TrackCard {
   aiToolOtherName: string;
 }
 
+/** Strip leading track-number prefix from a filename-derived title.
+ * Handles: "14 The Pipes", "14. The Pipes", "14 - The Pipes", "14_The_Pipes" etc.
+ */
+function stripTrackPrefix(raw: string): string {
+  return raw
+    .replace(/^\d{1,3}[\s._\-]+/, "") // remove leading number + separator
+    .replace(/[_-]/g, " ")             // replace remaining underscores/hyphens
+    .trim();
+}
+
 function makeEmptyCard(overrides?: Partial<TrackCard>): TrackCard {
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -150,7 +160,7 @@ function TrackCardUI({
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const handleAudioFile = (file: File) => {
-    const title = file.name.replace(/\.[^.]+$/, "").replace(/[_-]/g, " ").trim();
+    const title = stripTrackPrefix(file.name.replace(/\.[^.]+$/, ""));
     onChange(card.id, { audioFile: file, title: card.title || title, audioStatus: "hashing" });
     onGenerateWid(card.id, file);
   };
@@ -621,7 +631,7 @@ export default function BatchUploadPage() {
     if (!audioFiles.length) { toast.error("No audio files found"); return; }
     const newCards: TrackCard[] = audioFiles.map(file => makeEmptyCard({
       audioFile: file,
-      title: file.name.replace(/\.[^.]+$/, "").replace(/[_-]/g, " ").trim(),
+      title: stripTrackPrefix(file.name.replace(/\.[^.]+$/, "")),
       audioStatus: "hashing",
     }));
     setCards(prev => {
@@ -641,7 +651,7 @@ export default function BatchUploadPage() {
     if (!audioFiles.length) { toast.error("No audio files found"); return; }
     const newCards: TrackCard[] = audioFiles.map(file => makeEmptyCard({
       audioFile: file,
-      title: file.name.replace(/\.[^.]+$/, "").replace(/[_-]/g, " ").trim(),
+      title: stripTrackPrefix(file.name.replace(/\.[^.]+$/, "")),
       audioStatus: "hashing",
     }));
     setCards(prev => {
@@ -1133,15 +1143,6 @@ export default function BatchUploadPage() {
                   )}
                 </div>
               )}
-              <Button
-                onClick={repeatDisclosureAcrossAll}
-                size="sm"
-                variant="outline"
-                className="gap-2 text-xs"
-                style={{ border: "1px solid rgba(196,154,40,0.4)", color: "var(--ln-gold)" }}
-              >
-                Repeat Across Tracks
-              </Button>
             </div>
             <Button
               onClick={applyBatchFill}

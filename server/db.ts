@@ -43,6 +43,8 @@ import {
   type InsertGuide,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
+import type { SearchResults } from "../shared/searchTypes";
+export type { SearchResults } from "../shared/searchTypes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _db: any = null;
@@ -4499,7 +4501,9 @@ export async function deleteGuide(id: number, creatorId: number): Promise<boolea
 }
 
 // ─── Global Search ────────────────────────────────────────────────────────────
-export interface SearchResults {
+// (SearchResults type imported at top of file from shared/searchTypes)
+// Discard the old local interface
+interface _SearchResultsCompat_UNUSED {
   creators: {
     id: number;
     name: string | null;

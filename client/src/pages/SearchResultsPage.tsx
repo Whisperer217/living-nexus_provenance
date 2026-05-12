@@ -5,9 +5,9 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, Link } from "wouter";
+import { useLocation, useSearch, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import type { SearchResults } from "@/../server/db";
+import type { SearchResults } from "@shared/searchTypes";
 import {
   Search, Music, BookOpen, FileText, User, Layers, Zap, ExternalLink,
   ChevronRight, AlertCircle, Loader2, ShieldCheck,
@@ -15,8 +15,8 @@ import {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function useSearchQuery(): string {
-  const [location] = useLocation();
-  const params = new URLSearchParams(location.split("?")[1] ?? "");
+  const search = useSearch(); // wouter v3 returns the raw query string e.g. "q=slimdoggy"
+  const params = new URLSearchParams(search ?? "");
   return params.get("q") ?? "";
 }
 
@@ -212,7 +212,7 @@ export default function SearchResultsPage() {
               <section>
                 <SectionHeader icon={<User size={14} />} label="Creators" count={data.creators.length} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {data.creators.map(c => (
+                  {data.creators.map((c: SearchResults["creators"][number]) => (
                     <Link key={c.id} href={`/creator/${c.id}`}>
                       <div
                         className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all hover:scale-[1.01]"
@@ -254,7 +254,7 @@ export default function SearchResultsPage() {
               <section>
                 <SectionHeader icon={<Music size={14} />} label="Audio Works" count={grouped.audio.length} />
                 <div className="space-y-1.5">
-                  {grouped.audio.map(s => (
+                  {grouped.audio.map((s: SearchResults["songs"][number]) => (
                     <Link key={s.id} href={`/song/${s.id}`}>
                       <div
                         className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all"
@@ -283,7 +283,7 @@ export default function SearchResultsPage() {
               <section>
                 <SectionHeader icon={<Layers size={14} />} label="Comics" count={grouped.comic.length} />
                 <div className="space-y-1.5">
-                  {grouped.comic.map(s => (
+                  {grouped.comic.map((s: SearchResults["songs"][number]) => (
                     <Link key={s.id} href={`/book/${s.id}`}>
                       <div
                         className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all"
@@ -312,7 +312,7 @@ export default function SearchResultsPage() {
               <section>
                 <SectionHeader icon={<BookOpen size={14} />} label="Manuscripts" count={grouped.manuscript.length} />
                 <div className="space-y-1.5">
-                  {grouped.manuscript.map(s => (
+                  {grouped.manuscript.map((s: SearchResults["songs"][number]) => (
                     <Link key={s.id} href={`/song/${s.id}`}>
                       <div
                         className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all"
@@ -341,7 +341,7 @@ export default function SearchResultsPage() {
               <section>
                 <SectionHeader icon={<FileText size={14} />} label="Lyric Works" count={grouped.lyrics.length} />
                 <div className="space-y-1.5">
-                  {grouped.lyrics.map(s => (
+                  {grouped.lyrics.map((s: SearchResults["songs"][number]) => (
                     <Link key={s.id} href={`/song/${s.id}`}>
                       <div
                         className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all"

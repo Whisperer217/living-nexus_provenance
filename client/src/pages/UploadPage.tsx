@@ -951,7 +951,7 @@ export default function UploadPage() {
                       </div>
                       <p className="font-medium text-sm" style={{ color: "var(--ln-seal-bright)" }}>{audioFile.name}</p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                      <button type="button" onClick={e => { e.stopPropagation(); setAudioFile(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
+                      <button type="button" onClick={e => { e.stopPropagation(); setAudioFile(null); setTitle(""); setWitnessData(null); }} className="text-xs hover:underline" style={{ color: "#E2E8F0" }}>Remove</button>
                     </div>
                   ) : (
                     <>
