@@ -264,7 +264,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      goTo(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+      goTo(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   }, [searchQuery, goTo]);
 

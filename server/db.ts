@@ -4497,3 +4497,193 @@ export async function deleteGuide(id: number, creatorId: number): Promise<boolea
   const [result] = await db.delete(guides).where(and(eq(guides.id, id), eq(guides.creatorId, creatorId)));
   return (result as { affectedRows: number }).affectedRows > 0;
 }
+
+// ─── Global Search ────────────────────────────────────────────────────────────
+export interface SearchResults {
+  creators: {
+    id: number;
+    name: string | null;
+    artistHandle: string | null;
+    bio: string | null;
+    profilePhotoUrl: string | null;
+    role: string;
+    publishedCount: number;
+  }[];
+  songs: {
+    id: number;
+    title: string;
+    genre: string | null;
+    contentType: string;
+    witnessId: string | null;
+    coverArtUrl: string | null;
+    creatorName: string | null;
+    creatorHandle: string | null;
+    userId: number;
+  }[];
+  guides: {
+    id: number;
+    canonicalName: string;
+    tagline: string | null;
+    widCode: string | null;
+    artworkUrl: string | null;
+    archetypeType: string | null;
+    creatorId: number;
+  }[];
+  collections: {
+    id: number;
+    name: string;
+    collectionWid: string;
+    coverArtUrl: string | null;
+    trackCount: number;
+    creatorId: number;
+  }[];
+  widMatch: {
+    type: "song" | "guide" | "collection";
+    id: number;
+    wid: string;
+    title: string;
+    url: string;
+  } | null;
+}
+
+export async function globalSearch(query: string, limit = 8): Promise<SearchResults> {
+  const db = await getDb();
+  if (!db) return { creators: [], songs: [], guides: [], collections: [], widMatch: null };
+
+  const q = query.trim();
+  if (!q) return { creators: [], songs: [], guides: [], collections: [], widMatch: null };
+
+  const pat = `%${q}%`;
+  const isWid = /^(WID-|LN-GUIDE-|WID-ALB-)/i.test(q);
+
+  // ── WID direct lookup ──────────────────────────────────────────────────────
+  let widMatch: SearchResults["widMatch"] = null;
+  if (isWid) {
+    const [songRow] = await db
+      .select({ id: songs.id, witnessId: songs.witnessId, title: songs.title })
+      .from(songs)
+      .where(and(eq(songs.witnessId, q.toUpperCase()), eq(songs.status, "Published")))
+      .limit(1);
+    if (songRow?.witnessId) {
+      widMatch = { type: "song", id: songRow.id, wid: songRow.witnessId, title: songRow.title, url: `/song/${songRow.id}` };
+    }
+    if (!widMatch) {
+      const [guideRow] = await db
+        .select({ id: guides.id, widCode: guides.widCode, canonicalName: guides.canonicalName })
+        .from(guides)
+        .where(and(eq(guides.widCode, q.toUpperCase()), eq(guides.canonicalStatus, "published")))
+        .limit(1);
+      if (guideRow?.widCode) {
+        widMatch = { type: "guide", id: guideRow.id, wid: guideRow.widCode, title: guideRow.canonicalName, url: `/guides/${guideRow.id}` };
+      }
+    }
+    if (!widMatch) {
+      const [colRow] = await db
+        .select({ id: collections.id, collectionWid: collections.collectionWid, name: collections.name })
+        .from(collections)
+        .where(eq(collections.collectionWid, q.toUpperCase()))
+        .limit(1);
+      if (colRow?.collectionWid) {
+        widMatch = { type: "collection", id: colRow.id, wid: colRow.collectionWid, title: colRow.name, url: `/verify/${colRow.collectionWid}` };
+      }
+    }
+  }
+
+  // ── Creators ───────────────────────────────────────────────────────────────
+  const creatorRows = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      bio: users.bio,
+      profilePhotoUrl: users.profilePhotoUrl,
+      role: users.role,
+      publishedCount: sql<number>`count(${songs.id})`,
+    })
+    .from(users)
+    .leftJoin(songs, and(eq(songs.userId, users.id), eq(songs.status, "Published")))
+    .where(or(
+      like(users.name, pat),
+      like(users.artistHandle, pat),
+      like(users.bio, pat),
+    ))
+    .groupBy(users.id)
+    .orderBy(desc(sql<number>`count(${songs.id})`))
+    .limit(limit);
+
+  // ── Songs / Artifacts ──────────────────────────────────────────────────────
+  // Build the where conditions array without spread to avoid Drizzle type issues
+  const songWhereConditions = [
+    eq(songs.status, "Published"),
+    or(
+      like(songs.title, pat),
+      like(songs.genre, pat),
+      like(songs.description, pat),
+    ),
+  ] as const;
+
+  const songRows = await db
+    .select({
+      id: songs.id,
+      title: songs.title,
+      genre: songs.genre,
+      contentType: songs.contentType,
+      witnessId: songs.witnessId,
+      coverArtUrl: songs.coverArtUrl,
+      userId: songs.userId,
+      creatorName: users.name,
+      creatorHandle: users.artistHandle,
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(...songWhereConditions))
+    .orderBy(desc(songs.createdAt))
+    .limit(limit * 2);
+
+  // ── Guides ─────────────────────────────────────────────────────────────────
+  const guideRows = await db
+    .select({
+      id: guides.id,
+      canonicalName: guides.canonicalName,
+      tagline: guides.tagline,
+      widCode: guides.widCode,
+      artworkUrl: guides.artworkUrl,
+      archetypeType: guides.archetypeType,
+      creatorId: guides.creatorId,
+    })
+    .from(guides)
+    .where(and(
+      eq(guides.canonicalStatus, "published"),
+      or(
+        like(guides.canonicalName, pat),
+        like(guides.tagline, pat),
+        like(guides.archetypeType, pat),
+        like(guides.loreDescription, pat),
+      ),
+    ))
+    .orderBy(desc(guides.publishedAt))
+    .limit(limit);
+
+  // ── Collections ────────────────────────────────────────────────────────────
+  const collectionRows = await db
+    .select({
+      id: collections.id,
+      name: collections.name,
+      collectionWid: collections.collectionWid,
+      coverArtUrl: collections.coverArtUrl,
+      trackCount: collections.trackCount,
+      creatorId: collections.creatorId,
+    })
+    .from(collections)
+    .where(like(collections.name, pat))
+    .orderBy(desc(collections.createdAt))
+    .limit(limit);
+
+  return {
+    creators: creatorRows as SearchResults["creators"],
+    songs: songRows as SearchResults["songs"],
+    guides: guideRows,
+    collections: collectionRows,
+    widMatch,
+  };
+}

@@ -83,6 +83,7 @@ const CreatorSurface = lazy(() => import("./pages/CreatorSurface"));
 const GuideUploadWizard = lazy(() => import("./pages/GuideUploadWizard"));
 const GuideDirectoryPage = lazy(() => import("./pages/GuideDirectoryPage"));
 const GuideDetailPage = lazy(() => import("./pages/GuideDetailPage"));
+const SearchResultsPage = lazy(() => import("./pages/SearchResultsPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -165,6 +166,7 @@ function Router() {
                 <Route path="/home" component={HomePage} />
                 <Route path="/discover"><Redirect to="/" /></Route>
                 <Route path="/explore" component={ExplorePage} />
+                <Route path="/search" component={SearchResultsPage} />
                 <Route path="/upload" component={UploadPage} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />

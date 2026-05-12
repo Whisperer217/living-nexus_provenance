@@ -4561,3 +4561,21 @@
 - [x] Add multiple attribute to per-card audio file input
 - [x] Add batchReleaseDate (Original Creation Date) to BatchFill panel
 - [x] Merge applyBatchFill + repeatDisclosureAcrossAll so HAAI/AI tools apply with one click
+
+## Search System (Phase 152)
+- [ ] Add globalSearch tRPC procedure — creator-aware, WID-aware, artifact-aware
+- [ ] Add searchGlobal DB helper (users, songs, guides, collections by title/name/handle/WID)
+- [ ] Build SearchResultsPage at /search?q= with grouped sections (Creators, Audio, Comics, Manuscripts, Guides, Collections)
+- [ ] Wire TopBar search to navigate to /search?q= and add instant WID redirect
+- [ ] Wire MobileNavDrawer search to same /search?q= route
+- [ ] Add /search route to App.tsx
+- [ ] TypeScript: 0 errors | Tests: 201/201 passing
+
+## Search System (Phase 153)
+- [x] globalSearch DB helper — creator-aware, WID-aware, artifact-aware (songs/guides/collections)
+- [x] tRPC search.global procedure (public, no auth required)
+- [x] SearchResultsPage — grouped sections: Creators, Audio, Comics, Manuscripts, Lyrics, Guides, Collections
+- [x] WID direct match → instant redirect to artifact page
+- [x] TopBar search wired to /search?q= instead of /explore
+- [x] Mobile QuickRefSlider search wired to /search?q=
+- [x] /search route registered in App.tsx

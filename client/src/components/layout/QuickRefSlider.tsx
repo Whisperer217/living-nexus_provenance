@@ -131,7 +131,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
     e.preventDefault();
     if (query.trim()) {
       onToggle();
-      navigate(`/explore?q=${encodeURIComponent(query.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 

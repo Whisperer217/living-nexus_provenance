@@ -114,6 +114,8 @@ import {
   updateGuide,
   publishGuide,
   deleteGuide,
+  globalSearch,
+  type SearchResults,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -6750,6 +6752,15 @@ If a field cannot be determined from the document, use an empty string. For symb
           throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot delete a published guide" });
         }
         return deleteGuide(input.guideId, ctx.user.id);
+      }),
+  }),
+
+  // ─── Global Search ─────────────────────────────────────────────────────────
+  search: router({
+    global: publicProcedure
+      .input(z.object({ q: z.string().min(1).max(200) }))
+      .query(async ({ input }): Promise<SearchResults> => {
+        return globalSearch(input.q);
       }),
   }),
 });
