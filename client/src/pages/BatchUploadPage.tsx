@@ -136,7 +136,7 @@ async function uploadFileToS3(file: File, type: "audio" | "cover"): Promise<{ ur
 
 // ── TrackCard component ───────────────────────────────────────────────────────
 function TrackCardUI({
-  card, index, total, onChange, onRemove, onGenerateWid,
+  card, index, total, onChange, onRemove, onGenerateWid, onAddMultiple,
 }: {
   card: TrackCard;
   index: number;
@@ -144,6 +144,7 @@ function TrackCardUI({
   onChange: (id: string, patch: Partial<TrackCard>) => void;
   onRemove: (id: string) => void;
   onGenerateWid: (id: string, file: File) => void;
+  onAddMultiple: (files: File[]) => void;
 }) {
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -279,10 +280,15 @@ function TrackCardUI({
                   ref={audioInputRef}
                   type="file"
                   accept="audio/*,.mp3,.wav,.flac,.ogg,.aac,.m4a,.webm"
+                  multiple
                   className="hidden"
                   onChange={e => {
-                    const file = e.target.files?.[0];
-                    if (file) handleAudioFile(file);
+                    const files = Array.from(e.target.files || []);
+                    if (files.length === 1) {
+                      handleAudioFile(files[0]);
+                    } else if (files.length > 1) {
+                      onAddMultiple(files);
+                    }
                     e.target.value = "";
                   }}
                 />
@@ -357,9 +363,9 @@ function TrackCardUI({
                   >
                     <SelectValue placeholder="Genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
+                  <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "#E8DFC8", maxHeight: 220, overflowY: "auto" }}>
                     {GENRES.map(g => (
-                      <SelectItem key={g} value={g} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>{g}</SelectItem>
+                      <SelectItem key={g} value={g} style={{ color: "#E8DFC8", fontSize: "12px" }}>{g}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -384,7 +390,7 @@ function TrackCardUI({
 
               {/* Release Date */}
               <div>
-                <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "var(--ln-parchment)" }}>Original Creation Date</label>
+                <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "#E8DFC8" }}>Original Creation Date</label>
                 <Input
                   type="date"
                   value={card.releaseDate}
@@ -541,6 +547,7 @@ export default function BatchUploadPage() {
   // Album-level sketch options
   const [albumArtAcrossAll, setAlbumArtAcrossAll] = useState(true);
   const [albumArtIsAi, setAlbumArtIsAi] = useState(false);
+  const [batchReleaseDate, setBatchReleaseDate] = useState("");
   const [batchAiDisclosure, setBatchAiDisclosure] = useState<TrackCard["aiDisclosure"]>("original");
   const [batchAiToolSuno, setBatchAiToolSuno] = useState(false);
   const [batchAiToolUdio, setBatchAiToolUdio] = useState(false);
@@ -607,6 +614,24 @@ export default function BatchUploadPage() {
     }
   }, []);
 
+  const handleAddMultiple = useCallback((files: File[]) => {
+    const audioFiles = files.filter(
+      f => f.type.startsWith("audio/") || /\.(mp3|wav|ogg|flac|aac|m4a|webm)$/i.test(f.name)
+    );
+    if (!audioFiles.length) { toast.error("No audio files found"); return; }
+    const newCards: TrackCard[] = audioFiles.map(file => makeEmptyCard({
+      audioFile: file,
+      title: file.name.replace(/\.[^.]+$/, "").replace(/[_-]/g, " ").trim(),
+      audioStatus: "hashing",
+    }));
+    setCards(prev => {
+      const filled = prev.filter(c => c.audioFile !== null);
+      return [...filled, ...newCards];
+    });
+    newCards.forEach(c => generateWID(c.id, c.audioFile!));
+    toast.success(`Added ${audioFiles.length} track${audioFiles.length > 1 ? "s" : ""}`);
+  }, [generateWID]);
+
   const handleGlobalDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDraggingGlobal(false);
@@ -632,6 +657,13 @@ export default function BatchUploadPage() {
       ...c,
       genre: batchGenre || c.genre,
       aiConsent: batchAiConsent,
+      releaseDate: batchReleaseDate || c.releaseDate,
+      aiDisclosure: batchAiDisclosure,
+      aiToolSuno: batchAiToolSuno,
+      aiToolUdio: batchAiToolUdio,
+      aiToolSonato: batchAiToolSonato,
+      aiToolOther: batchAiToolOther,
+      aiToolOtherName: batchAiToolOtherName,
     })));
     toast.success("Batch fill applied to all tracks");
     setBatchFillOpen(false);
@@ -1004,9 +1036,19 @@ export default function BatchUploadPage() {
             <p className="text-[10px] pt-3" style={{ color: "var(--ln-parchment)" }}>
               Set values here, then click Apply — they will be pushed to every track card. Individual cards can still be edited after.
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
-                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>Genre</p>
+                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "#E8DFC8" }}>Original Creation Date</p>
+                <Input
+                  type="date"
+                  value={batchReleaseDate}
+                  onChange={e => setBatchReleaseDate(e.target.value)}
+                  className="h-9 text-xs"
+                  style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: batchReleaseDate ? "#FFFFFF" : "var(--ln-iron)", colorScheme: "dark" }}
+                />
+              </div>
+              <div>
+                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "#E8DFC8" }}>Genre</p>
                 <Select value={batchGenre} onValueChange={setBatchGenre}>
                   <SelectTrigger
                     className="h-9 text-xs"
@@ -1018,9 +1060,9 @@ export default function BatchUploadPage() {
                   >
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
+                  <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "#E8DFC8", maxHeight: 220, overflowY: "auto" }}>
                     {GENRES.map(g => (
-                      <SelectItem key={g} value={g} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>{g}</SelectItem>
+                      <SelectItem key={g} value={g} style={{ color: "#E8DFC8", fontSize: "12px" }}>{g}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1111,7 +1153,7 @@ export default function BatchUploadPage() {
                 border: "1px solid rgba(196,154,40,0.25)",
               }}
             >
-              <Sparkles size={13} /> Apply Genre & Consent to All
+              <Sparkles size={13} /> Apply All to Tracks
             </Button>
           </div>
         )}
@@ -1146,6 +1188,7 @@ export default function BatchUploadPage() {
             onChange={updateCard}
             onRemove={removeCard}
             onGenerateWid={generateWID}
+            onAddMultiple={handleAddMultiple}
           />
         ))}
 

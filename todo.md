@@ -4554,3 +4554,10 @@
 - [x] Add collapse/expand tab button to RightRail (gold chevron, slides with panel)
 - [x] RightRail slides off-screen (right: -300px) with 0.3s ease transition when collapsed
 - [x] MainLayout removes lg:pr-[300px] when rail is collapsed (content fills full width)
+
+## Batch Upload Fixes (Slimdoggy report)
+- [x] Fix genre picker clipping — add position="popper" side="bottom" to SelectContent
+- [x] Brighten genre/date labels to #E8DFC8
+- [x] Add multiple attribute to per-card audio file input
+- [x] Add batchReleaseDate (Original Creation Date) to BatchFill panel
+- [x] Merge applyBatchFill + repeatDisclosureAcrossAll so HAAI/AI tools apply with one click
