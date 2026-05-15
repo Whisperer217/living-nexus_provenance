@@ -4620,3 +4620,9 @@
 - [x] PrivacyPage: AI Consent Revocation → Creation Consent Revocation
 - [x] LearnPage/Lexicon: Upload → Register / Witness with expanded meaning
 - [x] GuideUploadWizard: Upload Sheet → Submit Sheet, Upload your → Submit your
+
+## SEO Fixes — Homepage (Phase 155)
+- [x] Add keywords meta tag to homepage
+- [x] Add H2 headings to homepage sections (sr-only H2 after HeroCarousel)
+- [x] Set document.title to 30-60 characters (47 chars via react-helmet-async)
+- [x] Add meta description (160 chars via react-helmet-async + index.html)

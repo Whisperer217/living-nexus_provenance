@@ -11,6 +11,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TrackCard from "@/components/TrackCard";
@@ -949,12 +950,21 @@ export default function HomePage() {
   const handleTip = (track: any, rect: DOMRect) => { setTipTarget(track); setTipRect(rect); };
 
   return (
-    <div className="animate-fade-up cosmic-bg min-h-screen">
+    <>
+      <Helmet>
+        <title>Living Nexus — Audio Provenance Platform for Creators</title>
+        <meta name="description" content="Register your music, lyrics, manuscripts, and comics with cryptographic Witness IDs. Living Nexus anchors creative provenance so every work is witnessed, attributed, and protected." />
+        <meta name="keywords" content="music provenance, witness ID, audio registration, creator platform, cryptographic provenance, music attribution, digital rights, creative ownership, WID, Living Nexus" />
+      </Helmet>
+      <div className="animate-fade-up cosmic-bg min-h-screen">
 
       {/* ══════════════════════════════════════════════════════════════
           HERO CAROUSEL
       ══════════════════════════════════════════════════════════════ */}
       <HeroCarousel isAuthenticated={isAuthenticated} getLoginUrl={getLoginUrl} />
+
+      {/* SEO: visible H2 for crawlers */}
+      <h2 className="sr-only">Discover and Register Creative Works on Living Nexus</h2>
 
       {/* ══════════════════════════════════════════════════════════════
           MS STORE SHOWCASE ROWS
@@ -1631,6 +1641,7 @@ export default function HomePage() {
         );
       })()}
     </div>
+    </>
   );
 }
 
@@ -1682,4 +1693,3 @@ function ContributorsStrip() {
     </div>
   );
 }
-
